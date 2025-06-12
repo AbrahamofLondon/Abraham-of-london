@@ -1,0 +1,26 @@
+version: 1.0
+
+workflows:
+  default:
+    setup:
+      - echo "Installing dependencies"
+      - npm ci
+    build:
+      - echo "Running build"
+      - npm run build
+    test:
+      - echo "Running tests"
+      - npm run test || echo "No tests defined"
+    lint:
+      - echo "Linting code"
+      - npm run lint || echo "No linter defined"
+    deploy:
+      - echo "Triggering Netlify Deployment"
+      - curl -X POST -d '{}' https://api.netlify.com/build_hooks/YOUR_BUILD_HOOK_ID
+
+notifications:
+  on_success: true
+  on_failure: true
+
+# Replace YOUR_BUILD_HOOK_ID with your actual Netlify build hook.
+# Codex will trigger this after a successful build + optional test phase.
