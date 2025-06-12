@@ -1,0 +1,24 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Offline bundles
+*.tar.gz
+*.zip
+
+# Build and temp files
+dist/
+build/
+.cache/
+*.log
+
+# VS Code settings
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
