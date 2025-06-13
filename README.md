@@ -9,3 +9,5 @@ A high-efficiency, auto-deploying frontend project powered by Vite and hosted on
 
 ## Deployment
 This project auto-deploys via Netlify with Git integration or drag-drop.
+Set the `NETLIFY_BUILD_HOOK` environment variable to your build hook URL so the
+automation scripts can trigger a deployment.
