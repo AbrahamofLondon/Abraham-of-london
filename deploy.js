@@ -1,15 +1,20 @@
-// deploy.js
-const axios = require("axios");
+require('dotenv').config();
+const axios = require('axios');
 
-const NETLIFY_BUILD_HOOK = "https://api.netlify.com/build_hooks/684b264d93f5f750cf78db92"; // Replace with your actual hook
+const hookURL = process.env.NETLIFY_BUILD_HOOK || 'https://api.netlify.com/build_hooks/684b264d93f5f750cf78db92';
 
-console.log("🚀 Triggering Netlify deploy...");
+if (!hookURL) {
+  console.error('❌ No Netlify build hook URL provided.');
+  process.exit(1);
+}
 
-axios.post(NETLIFY_BUILD_HOOK)
+console.log('🚀 Triggering Netlify deploy...');
+
+axios.post(hookURL)
   .then(() => {
-    console.log("✅ Deployment triggered successfully.");
+    console.log('✅ Deployment triggered successfully.');
   })
   .catch(err => {
-    console.error("❌ Failed to trigger deploy:", err.message);
+    console.error('❌ Failed to trigger deploy:', err.message);
+    process.exit(1);
   });
-const hookURL = process.env.NETLIFY_BUILD_HOOK;
