@@ -41,4 +41,3 @@ exec('npm install && npm run build', (err, stdout, stderr) => {
   });
 });
 require('dotenv').config();
-const hookURL = process.env.NETLIFY_BUILD_HOOK;
