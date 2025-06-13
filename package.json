@@ -1,18 +1,12 @@
 {
   "name": "codex-setup",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "build": "node build.js",
+    "deploy": "node deploy.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "axios": "^1.9.0",
-    "chalk": "^5.4.1",
-    "dotenv": "^16.5.0",
-    "node-fetch": "^3.3.2"
+    "axios": "^1.6.7"
   }
 }
