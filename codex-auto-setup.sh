@@ -7,7 +7,7 @@
 # --- Configurable ---
 ENV_FILE=".env"
 ENV_EXAMPLE=".env.example"
-DEPLOY_HOOK_URL="https://api.netlify.com/build_hooks/YOUR-HOOK-ID" # Replace with actual hook ID
+DEPLOY_HOOK_URL="https://api.netlify.com/build_hooks/684c730862a2c482c589aa5e" # Replace with actual hook ID
 REPO_URL="https://github.com/YOUR_USERNAME/YOUR_REPO.git"          # Optional: your GitHub repo
 
 # --- Step 1: Environment Setup ---
