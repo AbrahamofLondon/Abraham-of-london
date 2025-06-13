@@ -1,13 +1,15 @@
 {
   "name": "codex-setup",
   "version": "1.0.0",
+  "description": "Automated Netlify deployment for Abraham of London",
+  "main": "deploy.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "node build.js",
     "deploy": "node deploy.js"
   },
   "dependencies": {
-    "axios": "^1.9.0",
-    "dotenv": "^16.5.0"
-  }
+    "axios": "^1.6.8",
+    "dotenv": "^16.3.1"
+  },
+  "author": "Abraham Adaramola",
+  "license": "MIT"
 }
