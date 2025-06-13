@@ -4,8 +4,9 @@ A high-efficiency, auto-deploying frontend project powered by Vite and hosted on
 
 ## Scripts
 - `npm run dev` – Start development server
-- `npm run build` – Build for production
-- `npm run deploy` – Lint and build
+- `npm run compile` – Build for production
+- `npm run build` – Trigger the automation script
+- `npm run deploy` – Trigger Netlify deploy
 
 ## Deployment
 This project auto-deploys via Netlify with Git integration or drag-drop.

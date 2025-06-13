@@ -1,15 +1,11 @@
-require('dotenv').config(); // Add this at the very top
-const { exec } = require('child_process');
-const axios = require('axios');
-const fs = require('fs');
-
+require('dotenv').config(); // Load environment variables
 const { exec } = require('child_process');
 const axios = require('axios');
 const fs = require('fs');
 
 console.log('🔧 Starting automated deployment...');
 
-exec('npm install && npm run build', (err, stdout, stderr) => {
+exec('npm install && npm run compile', (err, stdout, stderr) => {
   if (err) {
     console.error(`❌ Build failed: ${stderr}`);
     return;
@@ -40,4 +36,3 @@ exec('npm install && npm run build', (err, stdout, stderr) => {
       });
   });
 });
-require('dotenv').config();
