@@ -4,7 +4,8 @@
   "scripts": {
     "start": "node index.js",
     "build": "node build.js",
-    "deploy": "node deploy.js"
+    "deploy": "node deploy.js",
+    "check-assets": "node scripts/check-assets.js"
   },
   "dependencies": {
     "axios": "^1.6.7",

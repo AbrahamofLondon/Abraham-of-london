@@ -46,3 +46,8 @@ abraham-of-london/
 ├── .gitignore
 ├── package.json
 ├── README.md
+```
+
+## Asset Guidelines
+
+Run `npm run check-assets` from the project root to verify that all image and audio files are real and not placeholders before committing.
