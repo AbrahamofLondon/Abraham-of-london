@@ -3,7 +3,7 @@ setlocal
 
 REM ===== CONFIGURATION =====
 set "NODE_VERSION=18.18.0"
-set "BUILD_HOOK_URL=https://api.netlify.com/build_hooks/YOUR-REAL-HOOK-ID"
+set "BUILD_HOOK_URL=https://api.netlify.com/build_hooks/684c730862a2c482c589aa5e"
 set "GIT_COMMIT_MESSAGE=Automated build and deploy by Codex"
 set "GITHUB_REMOTE=https://github.com/YOUR_USERNAME/YOUR_REPO.git"
 set "LOG_FILE=codex-log.txt"
