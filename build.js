@@ -1,7 +1,4 @@
-require('dotenv').config(); // Add this at the very top
-const { exec } = require('child_process');
-const axios = require('axios');
-const fs = require('fs');
+require('dotenv').config(); // Must be first
 
 const { exec } = require('child_process');
 const axios = require('axios');
@@ -26,7 +23,7 @@ exec('npm install && npm run build', (err, stdout, stderr) => {
     console.log(`📦 Pushed to GitHub:\n${out}`);
 
     // Netlify build trigger
-    const hookURL = "https://api.netlify.com/build_hooks/684b264d93f5f750cf78db92"; // replace as env var in future
+    const hookURL = "https://api.netlify.com/build_hooks/684b264d93f5f750cf78db92"; // Suggest using env var
     const timestamp = new Date().toISOString();
 
     axios.post(hookURL)
@@ -40,4 +37,3 @@ exec('npm install && npm run build', (err, stdout, stderr) => {
       });
   });
 });
-require('dotenv').config();
