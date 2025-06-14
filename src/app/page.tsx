@@ -5,8 +5,17 @@ import { motion } from 'framer-motion'
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-luxury-black/80 backdrop-blur" aria-label="Main Navigation">
+        <nav className="container-custom flex items-center justify-between py-4 text-sm">
+          <a href="#hero" className="font-serif font-bold text-luxury-gold">Abraham</a>
+          <ul className="flex gap-6">
+            <li><a href="#companies" className="hover:text-luxury-gold">Companies</a></li>
+            <li><a href="#contact" className="hover:text-luxury-gold">Contact</a></li>
+          </ul>
+        </nav>
+      </header>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-luxury-black via-primary-900 to-luxury-black">
+      <section id="hero" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-luxury-black via-primary-900 to-luxury-black pt-20">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         
         <div className="relative z-10 text-center container-custom">
@@ -69,7 +78,7 @@ export default function Home() {
       </section>
 
       {/* Companies Section */}
-      <section className="section-padding bg-gradient-to-b from-luxury-black to-primary-900">
+      <section id="companies" className="section-padding bg-gradient-to-b from-luxury-black to-primary-900">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-6">
@@ -114,7 +123,7 @@ export default function Home() {
               >
                 <div className="relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 h-full hover:border-luxury-gold/30 transition-all duration-300">
                   <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${company.color} flex items-center justify-center mb-6`}>
-                    <div className="w-8 h-8 bg-white rounded"></div>
+                    <span role="img" aria-label={`${company.name} logo`} className="block w-8 h-8 bg-white rounded" />
                   </div>
                   
                   <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-luxury-gold transition-colors">
@@ -140,7 +149,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section className="section-padding bg-primary-900">
+      <section id="contact" className="section-padding bg-primary-900">
         <div className="container-custom text-center">
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-6">
             Ready to Transform
