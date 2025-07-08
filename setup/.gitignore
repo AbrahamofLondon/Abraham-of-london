@@ -2,6 +2,7 @@
 
 # Dependency directories
 node_modules/
+**/node_modules/ # Catches node_modules in subdirectories too
 .pnp/
 .pnp.js
 .yarn/
@@ -12,7 +13,14 @@ node_modules/
 
 # Next.js build output
 .next/
-out/
+**/.next/ # Catches .next in subdirectories too
+out/      # CRITICAL: Ignore the 'out' directory
+**/out/   # CRITICAL: Ignore 'out' in subdirectories
+
+# Generated bundles/archives
+offline-node-modules.tar
+offline-node-modules.tar.gz
+**/offline-node-modules.tar* # Catches variations and in subdirectories
 
 # Production build (sometimes a custom build directory)
 # /build # Uncomment if you explicitly build to a 'build' folder
