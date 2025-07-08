@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
-  publish = "out" # Changed from "dist"
+  base = "abraham-of-london"
+  command = "npm ci && npm run build"
+  publish = "abraham-of-london/out"
 
 [functions]
-  directory = "netlify/functions"
+  directory = "abraham-of-london/netlify/functions"
 
 [context.production.environment]
   NODE_VERSION = "18"
