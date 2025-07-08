@@ -1,0 +1,17 @@
+// pages/dynamic.js
+export async function getServerSideProps() {
+  // Fetch data from your API route
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/data`)
+  const data = await res.json()
+
+  return { props: { data } }
+}
+
+export default function DynamicPage({ data }) {
+  return (
+    <div>
+      <h1>Dynamic Content</h1>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  )
+}

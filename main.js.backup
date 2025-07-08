@@ -1,0 +1,117 @@
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initMobileMenu();
+    initAccordions();
+    initFormHandling();
+    // Add other initializers here
+});
+
+// ==================== MOBILE MENU ==================== 
+function initMobileMenu() {
+    const menuButton = document.querySelector('.mobile-menu-button');
+    const mobileMenu = document.querySelector('.mobile-menu');
+
+    if (!menuButton || !mobileMenu) {
+        console.warn('Mobile menu elements not found');
+        return;
+    }
+
+    menuButton.addEventListener('click', function() {
+        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.classList.toggle('hidden');
+        mobileMenu.classList.toggle('block');
+        document.body.style.overflow = isExpanded ? 'auto' : 'hidden';
+    });
+}
+
+// ==================== FAQ ACCORDION ====================
+function initAccordions() {
+    const accordions = document.querySelectorAll('.accordion-question');
+
+    if (!accordions.length) {
+        console.warn('No accordion questions found');
+        return;
+    }
+
+    accordions.forEach(accordion => {
+        const button = accordion.querySelector('button');
+        const panel = accordion.nextElementSibling;
+
+        if (!button || !panel) return;
+
+        button.addEventListener('click', () => {
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            
+            // Toggle accordion state
+            button.setAttribute('aria-expanded', !isExpanded);
+            panel.style.display = isExpanded ? 'none' : 'block';
+            
+            // Smooth animation
+            panel.style.overflow = 'hidden';
+            panel.style.transition = 'max-height 0.3s ease';
+            panel.style.maxHeight = isExpanded ? '0' : `${panel.scrollHeight}px`;
+        });
+    });
+}
+
+// ==================== FORM HANDLING ====================
+function initFormHandling() {
+    const contactForm = document.querySelector('form');
+
+    if (!contactForm) {
+        console.warn('No forms found on page');
+        return;
+    }
+
+    contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        
+        try {
+            // UI feedback
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+            
+            // Form data handling
+            const formData = new FormData(this);
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                this.reset();
+                showToast('Message sent successfully!');
+            } else {
+                throw new Error('Network response was not OK');
+            }
+        } catch (error) {
+            showToast('Error sending message. Please try again.', 'error');
+            console.error('Form submission error:', error);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+        }
+    });
+}
+
+// ==================== UTILITIES ====================
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-md shadow-lg ${
+        type === 'error' ? 'bg-red-500' : 'bg-green-500'
+    } text-white`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
