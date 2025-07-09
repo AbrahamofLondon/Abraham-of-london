@@ -1,0 +1,4 @@
+[build]
+  base = "abraham-of-london"
+  command = "npm install && npm run build"
+  publish = "abraham-of-london/out"
