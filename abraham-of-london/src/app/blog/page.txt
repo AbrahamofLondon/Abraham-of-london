@@ -1,0 +1,123 @@
+// src/app/blog/page.tsx
+'use client'; // This directive indicates that this is a Client Component
+
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+
+export default function BlogPage() {
+  // Define placeholder blog posts data (same as homepage for consistency)
+  const blogPosts = [
+    {
+      id: 1,
+      title: "The Silent Strength: Redefining Fatherhood",
+      excerpt: "Explore how embracing vulnerability can transform the father-child bond and build an unbreakable foundation of love and respect. This post delves into practical steps for fearless fathering.",
+      date: "July 1, 2025",
+      image: "/placeholder-blog-1.jpg",
+      link: "#" // Placeholder link to individual blog post
+    },
+    {
+      id: 2,
+      title: "Beyond Expectations: Navigating Parental Challenges",
+      excerpt: "A deep dive into overcoming unforeseen obstacles in parenting and finding resilience when the path forward seems unclear. Learn to turn challenges into opportunities for growth.",
+      date: "June 25, 2025",
+      image: "/placeholder-blog-2.jpg",
+      link: "#"
+    },
+    {
+      id: 3,
+      title: "Legacy & Leadership: Raising Visionary Children",
+      excerpt: "Discover principles for instilling strong values and leadership qualities in your children, preparing them for a future of impact. A guide to mindful and impactful parenting.",
+      date: "June 18, 2025",
+      image: "/placeholder-blog-3.jpg",
+      link: "#"
+    },
+    {
+      id: 4,
+      title: "The Unseen Battles: Spiritual Warfare in Fatherhood",
+      excerpt: "Uncover the spiritual dimensions of fatherhood and how to stand firm against unseen forces. This article provides insights and strategies for spiritual protection.",
+      date: "June 10, 2025",
+      image: "/placeholder-blog-4.jpg", // New placeholder image
+      link: "#"
+    },
+    {
+      id: 5,
+      title: "Truth and Redemption: A Father's Journey",
+      excerpt: "A reflection on the path to truth and personal redemption, drawing from real-life experiences and the power of perseverance through adversity.",
+      date: "June 3, 2025",
+      image: "/placeholder-blog-5.jpg", // New placeholder image
+      link: "#"
+    },
+    // Add more blog posts here as needed
+  ];
+
+  return (
+    <main className="min-h-screen bg-neutral-dark text-white">
+      {/* Hero Section for Blog Page */}
+      <section className="relative h-64 md:h-96 flex items-center justify-center bg-gradient-to-br from-neutral-dark via-deep-navy to-neutral-dark overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
+        <div className="relative z-10 text-center container-custom">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white leading-tight"
+          >
+            My Blog
+          </motion.h1>
+        </div>
+      </section>
+
+      {/* Blog Post List Section */}
+      <section className="section-padding bg-soft-white text-neutral-dark">
+        <div className="container-custom">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-5xl font-serif font-bold text-center mb-12 text-neutral-dark"
+          >
+            Latest Insights & Articles
+          </motion.h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogPosts.map((post) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6 }}
+                className="flex flex-col rounded-lg overflow-hidden border border-gray-200 shadow-md bg-white text-neutral-dark"
+              >
+                <div className="relative w-full h-48">
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-t-lg"
+                  />
+                </div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-serif font-bold mb-3 leading-tight">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">{post.date}</p>
+                  <p className="text-base font-sans leading-relaxed text-gray-700 flex-grow mb-6">
+                    {post.excerpt}
+                  </p>
+                  <a href={post.link} className="btn-secondary !border-neutral-dark !text-neutral-dark hover:!bg-neutral-dark hover:!text-soft-white self-start">
+                    Read More →
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Optional: Pagination or Load More button if you have many posts */}
+          {/* <div className="text-center mt-16">
+            <button className="btn-primary">Load More Posts</button>
+          </div> */}
+        </div>
+      </section>

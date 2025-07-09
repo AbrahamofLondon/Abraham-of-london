@@ -1,0 +1,51 @@
+# Dependency directories
+node_modules/
+.next/
+out/
+/coverage
+/build
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Misc
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+*.log
+*.tar
+*.gz
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# IDE
+.vscode/
+.idea/
+
+# Project files
+*.bat
+*.zip
+*.pdf
+*.docx
+*.xlsx
+*.lnk
+*.ini

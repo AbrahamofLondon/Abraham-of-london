@@ -1,0 +1,36 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Offline bundles
+*.tar.gz
+*.zip
+
+# Build and temp files
+dist/
+build/
+.cache/
+*.log
+
+# VS Code settings
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+/node_modules
+/dist
+.env
+.DS_Store
+
+#!/bin/sh
+echo "✅ Triggering Codex deployment..."
+npm run build
+
+chmod +x .git/hooks/pre-push
+
+
