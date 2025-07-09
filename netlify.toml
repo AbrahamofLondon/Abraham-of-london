@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "out" # Next.js outputs to 'out' by default
+
+[functions]
+  directory = "netlify/functions" # Adjust if your functions are elsewhere
+
+# Add your environment variables here as needed for Netlify
+[context.production.environment]
+  NODE_VERSION = "18" # Ensure consistent Node.js version
+  NODE_ENV = "production"
+  VITE_API_URL = "https://api.codexplatform.com"
+  SECRET_KEY = "your-production-secret-key"
+  API_URL = "https://api.example.com"
