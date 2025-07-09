@@ -9,3 +9,6 @@
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
+
+[context.production.environment]
+  NODE_VERSION = "18.20.2"
