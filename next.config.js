@@ -1,21 +1,10 @@
-const withMDX = require('@next/mdx')({
-  extension: /\.mdx?$/
-});
+[build]
+  base = "."
+  command = "npm install && npm run build"
+  publish = ".next/static"
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'mdx'],
-  // output: 'export', // REMOVE OR COMMENT OUT THIS LINE FOR DYNAMIC DEPLOYMENTS
-  trailingSlash: true,
-  images: {
-    unoptimized: true
-  },
-  eslint: {
-    ignoreDuringBuilds: true
-  },
-  typescript: {
-    ignoreBuildErrors: true
-  }
-};
+[context.production.environment]
+  NEXT_PUBLIC_BASE_URL = "https://abrahamoflondon.org"
 
-module.exports = withMDX(nextConfig);
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
