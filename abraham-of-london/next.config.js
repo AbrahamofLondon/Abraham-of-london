@@ -1,10 +1,18 @@
-[build]
-  base = "."
-  command = "npm install && npm run build"
-  publish = ".next/static"
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // You can add your Next.js configuration options here.
+  // For example, if you need strict mode:
+  // reactStrictMode: true,
 
-[context.production.environment]
-  NEXT_PUBLIC_BASE_URL = "https://abrahamoflondon.org"
+  // images: {
+  //   unoptimized: true
+  // },
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
+  // typescript: {
+  //   ignoreBuildErrors: true,
+  // },
+};
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+module.exports = nextConfig;

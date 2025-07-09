@@ -1,10 +1,12 @@
 [build]
-base = "abraham-of-london"
-command = "npm install && npm run build"
-publish = "abraham-of-london/.next"
+  command = "npm install && npm run build"
+  publish = ".next" # Next.js builds to .next by default
+  # base = "/" # This is the default, so you can omit it or include it for clarity
 
 [functions]
-directory = "abraham-of-london/netlify/functions"
+  # Set this to where your Netlify functions are located, relative to the root
+  directory = "netlify/functions" 
+  # Or maybe "src/netlify/functions" if they are inside src folder at the root
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
