@@ -1,0 +1,20 @@
+const blogPosts = [
+  {
+    id: 1,
+    title: "Reclaiming the Narrative: A Father’s Right to Be Heard",
+    slug: "reclaiming-the-narrative",
+    date: "2025-08-05",
+    excerpt: "In an age of weaponised family law...",
+    image: "/images/blog/placeholder-blog-1.jpg",
+    author: "Abraham of London",
+    tags: ["fatherhood", "family law"],
+    seo: {
+      title: "Reclaiming the Narrative – Fathering Without Fear",
+      description: "Challenge systemic bias in family courts.",
+      keywords: "fatherhood, fathers rights, legacy"
+    }
+  },
+  // add other posts here...
+];
+
+export default blogPosts;

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 // src/app/page.tsx
+>>>>>>> a496e215 (Initial commit)
 'use client'
 
 import { motion } from 'framer-motion'
@@ -9,7 +12,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-luxury-black via-primary-900 to-luxury-black">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+<<<<<<< HEAD
+        
+=======
 
+>>>>>>> a496e215 (Initial commit)
         <div className="relative z-10 text-center container-custom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -29,11 +36,19 @@ export default function Home() {
                 of London
               </span>
             </h1>
+<<<<<<< HEAD
+            
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Building world-class brands and transforming businesses through 
+              <span className="text-luxury-gold font-semibold"> strategic excellence</span>, 
+              <span className="text-luxury-platinum font-semibold"> innovative leadership</span>, and 
+=======
 
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
               Building world-class brands and transforming businesses through
               <span className="text-luxury-gold font-semibold"> strategic excellence</span>,
               <span className="text-luxury-platinum font-semibold"> innovative leadership</span>, and
+>>>>>>> a496e215 (Initial commit)
               <span className="text-luxury-gold font-semibold"> luxury market expertise</span>.
             </p>
 
@@ -42,7 +57,11 @@ export default function Home() {
               <button className="btn-primary">
                 Explore My Work →
               </button>
+<<<<<<< HEAD
+              
+=======
 
+>>>>>>> a496e215 (Initial commit)
               <button className="btn-secondary">
                 ⚡ Start a Project
               </button>
@@ -80,7 +99,11 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+<<<<<<< HEAD
+              Three revolutionary companies, one unified vision: transforming industries 
+=======
               Three revolutionary companies, one unified vision: transforming industries
+>>>>>>> a496e215 (Initial commit)
               through excellence, innovation, and strategic leadership.
             </p>
           </div>
@@ -117,6 +140,21 @@ export default function Home() {
                   <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${company.color} flex items-center justify-center mb-6`}>
                     <div className="w-8 h-8 bg-white rounded"></div>
                   </div>
+<<<<<<< HEAD
+                  
+                  <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-luxury-gold transition-colors">
+                    {company.name}
+                  </h3>
+                  
+                  <p className="text-gray-300 mb-4">
+                    {company.description}
+                  </p>
+                  
+                  <p className="text-sm text-gray-400 mb-6">
+                    {company.focus}
+                  </p>
+                  
+=======
 
                   <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-luxury-gold transition-colors">
                     {company.name}
@@ -130,6 +168,7 @@ export default function Home() {
                     {company.focus}
                   </p>
 
+>>>>>>> a496e215 (Initial commit)
                   <button className="text-luxury-gold hover:text-luxury-platinum transition-colors">
                     Learn More →
                   </button>
@@ -158,5 +197,9 @@ export default function Home() {
         </div>
       </section>
     </main>
+<<<<<<< HEAD
+  )
+=======
   );
+>>>>>>> a496e215 (Initial commit)
 }

@@ -1,6 +1,46 @@
 {
   "name": "abraham-of-london-website",
   "version": "1.0.0",
+<<<<<<< HEAD
+  "description": "World-class personal brand website for Abraham of London",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "deploy": "npm run build && echo 'Build complete - ready for deployment'",
+    "clean": "rm -rf .next node_modules/.cache",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@types/node": "20.10.6",
+    "@types/react": "18.2.46",
+    "@types/react-dom": "18.2.18",
+    "typescript": "5.3.3",
+    "tailwindcss": "3.4.0",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.32",
+    "framer-motion": "10.16.16",
+    "lucide-react": "0.300.0",
+    "clsx": "2.0.0",
+    "class-variance-authority": "0.7.0"
+  },
+  "devDependencies": {
+    "eslint": "8.56.0",
+    "eslint-config-next": "14.0.4",
+    "@tailwindcss/typography": "0.5.10",
+    "prettier": "3.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
+=======
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -17,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@netlify/plugin-nextjs": "^5.11.4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.0.10",
     "@types/react": "19.1.8",
@@ -32,3 +73,4 @@
     "tailwindcss": "^3.4.1"
   }
 }
+>>>>>>> a496e215 (Initial commit)

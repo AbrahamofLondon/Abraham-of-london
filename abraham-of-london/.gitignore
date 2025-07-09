@@ -1,16 +1,64 @@
-@'
-# Dependency directories
+# Dependencies
 node_modules/
-.next/
-out/
+/.pnp
+.pnp.js
 
-# Production files
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+next-env.d.ts
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 *.log
-*.tar
-*.gz
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # System files
-.DS_Store
 Thumbs.db
 
 # Project files
@@ -21,4 +69,3 @@ Thumbs.db
 *.xlsx
 *.lnk
 *.ini
-'@ | Out-File .gitignore
