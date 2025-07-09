@@ -23,6 +23,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.11.4",
+    "postcss-preset-env": "^10.2.4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.0.10",
     "@types/react": "19.1.8",
@@ -34,7 +35,6 @@
     "fs-extra": "^11.3.0",
     "postcss": "^8.5.6",
     "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-preset-env": "^10.2.4",
     "tailwindcss": "^3.4.1"
   }
 }
