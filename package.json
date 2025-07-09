@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.1.0",
+    "@next/mdx": "^15.3.5",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
+    "gray-matter": "^4.0.3",
     "next": "15.3.5",
+    "next-mdx-remote": "^5.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

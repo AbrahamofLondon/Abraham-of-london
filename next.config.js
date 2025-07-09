@@ -1,16 +1,20 @@
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // <-- REMOVE OR COMMENT OUT THIS LINE
+  pageExtensions: ['js', 'jsx', 'mdx'],
   trailingSlash: true,
   images: {
     unoptimized: true
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true
   },
   typescript: {
-    ignoreBuildErrors: true,
-  },
-}
+    ignoreBuildErrors: true
+  }
+};
 
-module.exports = nextConfig
+module.exports = withMDX(nextConfig);

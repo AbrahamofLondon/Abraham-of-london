@@ -1,17 +1,10 @@
 [build]
-  base = "abraham-of-london"
-  command = "npm install && npm run build"
-  publish = "abraham-of-london/.next"
+base = "abraham-of-london"
+command = "npm install && npm run build"
+publish = "abraham-of-london/.next"
 
 [functions]
-  directory = "abraham-of-london/netlify/functions"
+directory = "abraham-of-london/netlify/functions"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[context.production.environment]
-  NODE_VERSION = "18"
-  NODE_ENV = "production"
-  VITE_API_URL = "https://api.codexplatform.com"
-  SECRET_KEY = "your-production-secret-key"
-  API_URL = "https://api.example.com"
+package = "@netlify/plugin-nextjs"
