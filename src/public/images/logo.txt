@@ -1,0 +1,1 @@
+<Image src="/logo.png" width={120} height={60} alt="Your Logo" />

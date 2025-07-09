@@ -1,0 +1,25 @@
+
+# Node modules and log files
+node_modules/
+*.log
+*.tar
+*.tar.gz
+*.zip
+
+# Build output
+dist/
+build/
+
+# Local environment files
+.env
+.env.*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Codex project-specific
+codex-log.txt
+
+# Netlify functions (optional if not used)
+netlify/functions/
