@@ -1,7 +1,7 @@
 [build]
   command = "npm install && npm run build"
-  publish = ".next" # Next.js builds to .next by default relative to base
-  # base = "/" # This is the default, so you can omit it or include it for clarity
+  publish = ".next" # Default Next.js build output
+  # base = "/" # This is the default, so you can omit it or keep it for clarity
 
 [functions]
   # Adjust this if your functions are in a different path, e.g., "src/netlify/functions"
