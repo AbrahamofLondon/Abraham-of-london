@@ -1,12 +1,11 @@
 [build]
   command = "npm install && npm run build"
-  publish = ".next" # Next.js builds to .next by default
+  publish = ".next" # Next.js builds to .next by default relative to base
   # base = "/" # This is the default, so you can omit it or include it for clarity
 
 [functions]
-  # Set this to where your Netlify functions are located, relative to the root
+  # Adjust this if your functions are in a different path, e.g., "src/netlify/functions"
   directory = "netlify/functions" 
-  # Or maybe "src/netlify/functions" if they are inside src folder at the root
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"

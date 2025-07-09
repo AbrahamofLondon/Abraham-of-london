@@ -1,10 +1,12 @@
-[build]
-  base = "."
-  command = "npm install && npm run build"
-  publish = ".next/static"
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // You can add your Next.js configuration options here later if needed.
+  // For now, let's keep it minimal to fix the error.
+  // Example:
+  // reactStrictMode: true,
+  // images: {
+  //   unoptimized: true
+  // },
+};
 
-[context.production.environment]
-  NEXT_PUBLIC_BASE_URL = "https://abrahamoflondon.org"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+module.exports = nextConfig;
