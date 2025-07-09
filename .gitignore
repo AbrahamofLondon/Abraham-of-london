@@ -1,17 +1,45 @@
-@'
 # Dependency directories
 node_modules/
 .next/
 out/
+/coverage
+/build
 
-# Production files
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Misc
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
 *.log
 *.tar
 *.gz
 
-# System files
-.DS_Store
-Thumbs.db
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# IDE
+.vscode/
+.idea/
 
 # Project files
 *.bat
@@ -21,4 +49,3 @@ Thumbs.db
 *.xlsx
 *.lnk
 *.ini
-'@ | Out-File .gitignore

@@ -1,6 +1,7 @@
 {
   "name": "abraham-of-london-website",
   "version": "1.0.0",
+  "description": "World-class personal brand website for Abraham of London",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
