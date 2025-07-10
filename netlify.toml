@@ -1,8 +1,6 @@
 [build]
   command = "cd abraham-of-london && npm install && npm run build"
-  # Next.js builds to a .next folder by default, not 'out'.
-  # This path is relative to the *repository root*, not the 'abraham-of-london' subfolder.
-  publish = "abraham-of-london/.next"
+  publish = "abraham-of-london/.next" # Next.js builds to .next folder
   functions = "abraham-of-london/netlify/functions"
 
 [[plugins]]
