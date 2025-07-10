@@ -1,10 +1,9 @@
 [build]
-  # Change directory into the Next.js project folder before running npm commands
   command = "cd abraham-of-london && npm install && npm run build"
-  # Set publish and functions directories as absolute paths from the *repo root*
-  # to match what the Netlify UI expects and is overriding.
-  publish = "abraham-of-london/out"
-  functions = "abraham-of-london/netlify/functions" # This assumes your functions are inside this subfolder
+  # Next.js builds to a .next folder by default, not 'out'.
+  # This path is relative to the *repository root*, not the 'abraham-of-london' subfolder.
+  publish = "abraham-of-london/.next"
+  functions = "abraham-of-london/netlify/functions"
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
