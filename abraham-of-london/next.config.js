@@ -6,13 +6,27 @@ const nextConfig = {
   images: {
     domains: ['yourdomain.com'],      // Replace with your actual domain or CDN
     formats: ['image/webp'],          // Optimize image performance
-  }, // <-- THIS IS THE MISSING CLOSING BRACE!
+  }, // Corrected: Added missing closing brace for 'images'
+
   eslint: {
     ignoreDuringBuilds: false,        // Set to true only if ESLint blocks build unnecessarily
   },
   typescript: {
     ignoreBuildErrors: false,         // Set to true **only temporarily** if TS errors block deploy
   },
+  
+  // Webpack configuration to handle 'fs' module for client-side
+  webpack: (config, { isServer }) => {
+    // Only provide a polyfill/mock for 'fs' on the client-side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback, // Spread existing fallback if any
+        fs: false, // Prevents 'fs' from being bundled on the client side
+      };
+    }
+    return config;
+  },
+
   async headers() {
     return [
       {
@@ -34,8 +48,6 @@ const nextConfig = {
       },
     ];
   },
-  // If you see warnings about 'experimental.serverActions' or 'swcMinify' in Netlify logs,
-  // ensure they are NOT present in this file, or are configured correctly as objects.
 };
 
 module.exports = nextConfig;
