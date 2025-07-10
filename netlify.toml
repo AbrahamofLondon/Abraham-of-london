@@ -1,6 +1,6 @@
 [build]
   command = "cd abraham-of-london && npm install && npm run build"
-  publish = "abraham-of-london/.next" # Next.js builds to .next folder
+  publish = "abraham-of-london/.next"
   functions = "abraham-of-london/netlify/functions"
 
 [[plugins]]
