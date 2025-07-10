@@ -1,43 +1,86 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import { MDXRemote } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemote } from 'next-mdx-remote'
+import Head from 'next/head'
 
-export async function getStaticPaths() {
-  const files = fs.readdirSync(path.join('content', 'blog'));
-  const paths = files.map((filename) => ({
-    params: { slug: filename.replace('.mdx', '') }
-  }));
-  return { paths, fallback: false };
+// Define posts directory
+const postsDirectory = path.join(process.cwd(), 'data/blog')
+
+// Get all .mdx posts
+export function getAllPosts() {
+  const filenames = fs.readdirSync(postsDirectory)
+
+  return filenames
+    .filter((file) => file.endsWith('.mdx'))
+    .map((filename) => {
+      const filePath = path.join(postsDirectory, filename)
+      const fileContents = fs.readFileSync(filePath, 'utf8')
+      const { data, content } = matter(fileContents)
+      const slug = filename.replace(/\.mdx$/, '')
+
+      return {
+        slug,
+        meta: {
+          ...data,
+          slug,
+        },
+        content,
+      }
+    })
 }
 
-export async function getStaticProps({ params: { slug } }) {
-  const markdownWithMeta = fs.readFileSync(path.join('content', 'blog', slug + '.mdx'), 'utf-8');
-  const { data: frontmatter, content } = matter(markdownWithMeta);
-  const mdxSource = await serialize(content);
+// Generate paths at build time
+export async function getStaticPaths() {
+  const posts = getAllPosts()
+
+  const paths = posts.map((post) => ({
+    params: { slug: post.slug },
+  }))
+
+  return {
+    paths,
+    fallback: 'blocking', // For dynamic MDX posts
+  }
+}
+
+// Load each post by slug
+export async function getStaticProps({ params }) {
+  const posts = getAllPosts()
+  const post = posts.find((p) => p.slug === params.slug)
+
+  if (!post) return { notFound: true }
+
+  const mdxSource = await serialize(post.content)
+
   return {
     props: {
-      frontmatter,
-      mdxSource
-    }
-  };
+      source: mdxSource,
+      meta: post.meta,
+    },
+    revalidate: 60, // Incremental Static Regeneration
+  }
 }
 
-export default function BlogPost({ frontmatter, mdxSource }) {
+// The page component
+export default function BlogPost({ source, meta }) {
   return (
-    <article className="max-w-3xl mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-2">{frontmatter.title}</h1>
-      <p className="text-gray-500">{new Date(frontmatter.date).toLocaleDateString()}</p>
-      <img
-        src={frontmatter.image}
-        alt={frontmatter.title}
-        className="rounded-xl mt-4 mb-6 w-full object-cover"
-        loading="lazy"
-      />
-      <div className="prose">
-        <MDXRemote {...mdxSource} />
-      </div>
-    </article>
-  );
+    <>
+      <Head>
+        <title>{meta.seo?.title || meta.title}</title>
+        <meta name="description" content={meta.seo?.description} />
+        <meta name="keywords" content={meta.seo?.keywords} />
+        <meta property="og:title" content={meta.seo?.title || meta.title} />
+        <meta property="og:description" content={meta.seo?.description} />
+        <meta property="og:image" content={meta.image} />
+      </Head>
+
+      <article className="prose max-w-3xl mx-auto py-10">
+        <h1>{meta.title}</h1>
+        <p className="text-sm text-gray-500">{meta.date}</p>
+        <MDXRemote {...source} />
+      </article>
+    </>
+  )
 }
