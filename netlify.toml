@@ -1,7 +1,7 @@
 [build]
   command = "cd abraham-of-london && npm install && npm run build"
   publish = "abraham-of-london/.next"
-  functions = "abraham-of-london/netlify/functions"
+  functions = "abraham-of-london/netlify/functions" # This correctly points to 'netlify/functions' which is separate from Next.js 'pages/api'
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
