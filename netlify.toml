@@ -1,11 +1,10 @@
 [build]
-  command = "npm install && npm run build"
-  # No 'publish' or 'base' explicitly set here if they default to the repo root and .next
-  # The Netlify Next.js plugin will automatically handle the build output to .next
-
-[functions]
-  directory = "netlify/functions" # This assumes your Netlify functions are in a folder named 'netlify/functions' at the repo root.
-                                  # If you don't have Netlify functions, you can omit this block or comment it out.
+  # Change directory into the Next.js project folder before running npm commands
+  command = "cd abraham-of-london && npm install && npm run build"
+  # Set publish and functions directories as absolute paths from the *repo root*
+  # to match what the Netlify UI expects and is overriding.
+  publish = "abraham-of-london/out"
+  functions = "abraham-of-london/netlify/functions" # This assumes your functions are inside this subfolder
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
