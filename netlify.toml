@@ -1,14 +1,11 @@
 [build]
   command = "npm install && npm run build"
-  publish = ".next" # This is correct relative to 'base = "src"'
-  base = "src"      # Confirmed this is needed by the logs
+  # No 'publish' or 'base' explicitly set here if they default to the repo root and .next
+  # The Netlify Next.js plugin will automatically handle the build output to .next
 
 [functions]
-  directory = "netlify/functions" # This would mean your functions are at /src/netlify/functions
-  # If your functions are not in src/netlify/functions but maybe at the repo root's netlify/functions,
-  # then you'd need to adjust this (e.g., if functions are at /netlify/functions, Netlify might
-  # need a full path or a different setup, but let's stick to simple if possible).
-  # For now, let's assume if 'src' is the base, functions are relative to 'src'.
+  directory = "netlify/functions" # This assumes your Netlify functions are in a folder named 'netlify/functions' at the repo root.
+                                  # If you don't have Netlify functions, you can omit this block or comment it out.
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
