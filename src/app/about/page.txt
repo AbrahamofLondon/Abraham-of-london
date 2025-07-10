@@ -1,4 +1,3 @@
-// src/app/about/page.tsx
 'use client'; // This directive indicates that this is a Client Component
 
 import { motion } from 'framer-motion';
