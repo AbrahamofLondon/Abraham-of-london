@@ -1,13 +1,14 @@
+const withTM = require('next-transpile-modules')(['next-mdx-remote', '@mdx-js/react']);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
-  // REMOVE OR COMMENT OUT THIS LINE IF DEPLOYING TO NETLIFY/VERCEL
-  // output: 'standalone', // <-- This should likely be removed for Netlify/Vercel
+  // output: 'standalone', // Ensure this is REMOVED or commented out
   images: {
-    domains: ['abrahamoflondon.org'], // <--- UPDATE THIS TO YOUR DOMAIN(S)
+    domains: ['abrahamoflondon.org'],
     formats: ['image/webp'],
-  }, // <--- ADD THIS MISSING CLOSING BRACE!
+  },
   eslint: {
     ignoreDuringBuilds: false,
   },
@@ -19,22 +20,13 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
     ];
   },
 };
 
-module.exports = nextConfig;
+module.exports = withTM(nextConfig); // Wrap your nextConfig with withTM
