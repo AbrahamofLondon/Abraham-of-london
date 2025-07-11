@@ -1,5 +1,5 @@
 import blogPosts from '../../data/blogPosts';
-import BlogCard from '../../components/BlogCard'; // This matches the depth for BlogCard
+import BlogCard from '../../components/BlogCard';
 
 export default function BlogIndex() {
   return (
