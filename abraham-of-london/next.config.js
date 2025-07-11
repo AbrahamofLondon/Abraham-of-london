@@ -1,18 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,               // Catch potential problems
-  trailingSlash: false,               // Clean URLs: /blog/post vs /blog/post/
-  output: 'standalone',               // Required for SSR-ready deploys (e.g., Vercel, Docker)
-// ...
+  reactStrictMode: true,
+  trailingSlash: false,
+  // REMOVE OR COMMENT OUT THIS LINE IF DEPLOYING TO NETLIFY/VERCEL
+  // output: 'standalone', // <-- This should likely be removed for Netlify/Vercel
   images: {
-    domains: ['abrahamoflondon.org'], // Ensure this is correct
+    domains: ['abrahamoflondon.org'], // <--- UPDATE THIS TO YOUR DOMAIN(S)
     formats: ['image/webp'],
-  }, // <--- ADD THIS CLOSING BRACE!
+  }, // <--- ADD THIS MISSING CLOSING BRACE!
   eslint: {
-    ignoreDuringBuilds: false,        // Set to true only if ESLint blocks build unnecessarily
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: false,         // Set to true **only temporarily** if TS errors block deploy
+    ignoreBuildErrors: false,
   },
   async headers() {
     return [
