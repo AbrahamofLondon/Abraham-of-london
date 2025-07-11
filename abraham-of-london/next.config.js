@@ -3,10 +3,11 @@ const nextConfig = {
   reactStrictMode: true,               // Catch potential problems
   trailingSlash: false,               // Clean URLs: /blog/post vs /blog/post/
   output: 'standalone',               // Required for SSR-ready deploys (e.g., Vercel, Docker)
+// ...
   images: {
-    domains: ['yourdomain.com'],      // Replace with your actual domain or CDN (e.g., 'abrahamoflondon.org')
-    formats: ['image/webp'],          // Optimize image performance
-  }, // <--- THIS CLOSING BRACE IS CRITICAL
+    domains: ['abrahamoflondon.org'], // Ensure this is correct
+    formats: ['image/webp'],
+  }, // <--- ADD THIS CLOSING BRACE!
   eslint: {
     ignoreDuringBuilds: false,        // Set to true only if ESLint blocks build unnecessarily
   },
