@@ -1,32 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,               // Catch potential problems
-  trailingSlash: false,               // Clean URLs: /blog/post vs /blog/post/
-  output: 'standalone',               // Required for SSR-ready deploys (e.g., Vercel, Docker)
+  reactStrictMode: true,
+  trailingSlash: false,
+  output: 'standalone',
   images: {
-    domains: ['yourdomain.com'],      // Replace with your actual domain or CDN
-    formats: ['image/webp'],          // Optimize image performance
-  }, // Corrected: Added missing closing brace for 'images'
-
+    domains: ['yourdomain.com'], // Replace with your actual domain or CDN
+    formats: ['image/webp'],
+  }, // <--- Add this closing brace for the 'images' object
   eslint: {
-    ignoreDuringBuilds: false,        // Set to true only if ESLint blocks build unnecessarily
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: false,         // Set to true **only temporarily** if TS errors block deploy
+    ignoreBuildErrors: false,
   },
-
-  // Webpack configuration to handle 'fs' module for client-side
-  webpack: (config, { isServer }) => {
-    // Only provide a polyfill/mock for 'fs' on the client-side
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback, // Spread existing fallback if any
-        fs: false, // Prevents 'fs' from being bundled on the client side
-      };
-    }
-    return config;
-  },
-
   async headers() {
     return [
       {
