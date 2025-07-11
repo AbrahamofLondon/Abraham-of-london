@@ -8,7 +8,7 @@ import styles from "@/styles/Home.module.css";
 const geistSans = localFont({
   src: [
     {
-      path: '../public/fonts/Geist-Regular.woff2', // Adjust filename if different
+      path: '../public/fonts/geist-black.woff2', // Adjust filename if different
       weight: '400',
       style: 'normal',
     },
