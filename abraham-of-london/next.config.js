@@ -1,10 +1,10 @@
+// next.config.js
 const withTM = require('next-transpile-modules')(['next-mdx-remote', '@mdx-js/react']);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
-  // output: 'standalone', // Ensure this is REMOVED or commented out
   images: {
     domains: ['abrahamoflondon.org'],
     formats: ['image/webp'],
@@ -29,4 +29,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withTM(nextConfig); // Wrap your nextConfig with withTM
+module.exports = withTM(nextConfig);

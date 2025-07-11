@@ -1,3 +1,9 @@
+[build.environment]
+  NODE_VERSION = "20.11.1"
+
+[build]
+  command = "npm ci && npm run build"
+
 [build]
   command = "npm run build"
   publish = ".next"
