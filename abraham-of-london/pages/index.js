@@ -1,17 +1,15 @@
 import Head from "next/head";
 import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from 'next/font/geist-sans'; // Correct import for Geist Sans
+import { GeistMono } from 'next/font/geist-mono'; // Correct import for Geist Mono
 import styles from "@/styles/Home.module.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// Then, use them like this (no need for the 'Geist' or 'Geist_Mono' function calls)
+// You can directly assign them or use them in your className
+const geistSans = GeistSans;
+const geistMono = GeistMono;
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// ... rest of your component code
 
 export default function Home() {
   return (
