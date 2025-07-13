@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { MDXRemote } from 'next-mdx-remote';
 import { serialize } from 'next-mdx-remote/serialize';
+import MDXComponents from '@/components/MDXComponents'; // ✅ NEW
 
 export async function getStaticPaths() {
   const files = fs.readdirSync(path.join('content', 'blog'));
@@ -36,7 +37,9 @@ export default function BlogPost({ frontmatter, mdxSource }) {
         loading="lazy"
       />
       <div className="prose">
-        <MDXRemote {...mdxSource} />
+        <MDXComponents>
+          <MDXRemote {...mdxSource} />
+        </MDXComponents>
       </div>
     </article>
   );
