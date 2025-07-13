@@ -14,11 +14,8 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   transpilePackages: ['@mdx-js/react', 'next-mdx-remote'],
-  // --- ADD THIS NEW SECTION ---
-  compiler: {
-    reactRuntime: 'classic', // This is the crucial line for this fix
-  },
-  // -----------------------------
+  // The 'compiler' block with 'reactRuntime: 'classic'' is removed for Next.js 14.x.
+  // Next.js 14.x uses the automatic JSX runtime by default.
   async headers() {
     return [
       {
@@ -31,6 +28,9 @@ const nextConfig = {
       },
     ];
   },
+  // You might want to explicitly set distDir if Netlify config relies on it,
+  // although it usually defaults to '.next'
+  // distDir: '.next',
 };
 
 module.exports = nextConfig;
