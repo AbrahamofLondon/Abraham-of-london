@@ -13,8 +13,11 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // --- ADD/MODIFY THIS SECTION ---
   transpilePackages: ['@mdx-js/react', 'next-mdx-remote'],
+  // --- ADD THIS NEW SECTION ---
+  compiler: {
+    reactRuntime: 'classic', // This is the crucial line for this fix
+  },
   // -----------------------------
   async headers() {
     return [
