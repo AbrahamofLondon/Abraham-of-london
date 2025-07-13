@@ -1,3 +1,4 @@
+import React from 'react'; // <-- ADD THIS LINE
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'

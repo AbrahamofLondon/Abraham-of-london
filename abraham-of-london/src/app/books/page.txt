@@ -1,3 +1,4 @@
+import React from 'react'; // <-- ADD THIS LINE
 // tailwind.config.js
 module.exports = {
   // ... other configs
