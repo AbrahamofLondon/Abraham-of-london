@@ -1,3 +1,4 @@
+import React from 'react'; // <-- ADD THIS LINE
 // src/app/blog/page.tsx
 'use client'; // This directive indicates that this is a Client Component
 
