@@ -1,10 +1,12 @@
 // next.config.js
-const withTM = require('next-transpile-modules')(['next-mdx-remote', '@mdx-js/react']);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
+  // REMOVE or comment out `output: 'standalone'` and any `distDir` that points to '/out'
+  // output: 'standalone', // If this line exists, remove it
+  // distDir: 'build', // Or 'out', remove if it exists
+
   images: {
     domains: ['abrahamoflondon.org'],
     formats: ['image/webp'],
@@ -29,4 +31,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withTM(nextConfig);
+module.exports = nextConfig;
