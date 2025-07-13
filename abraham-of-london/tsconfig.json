@@ -12,10 +12,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "preserve", // Keep this
+    "jsxImportSource": "react", // <--- ADD THIS LINE if not present
     "incremental": true,
     "baseUrl": ".",
-    "rootDir": ".", // <--- Add this line
+    "rootDir": ".",
     "paths": {
       "@/*": ["./*"]
     },
