@@ -1,6 +1,8 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+
+[build]  # This is a duplicate and will cause the error
+  publish = "out"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
