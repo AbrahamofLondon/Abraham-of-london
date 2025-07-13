@@ -1,8 +1,9 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm ci && npm run build"
+  publish = ".next" # Specifies the directory Netlify should deploy from
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.11.1"
