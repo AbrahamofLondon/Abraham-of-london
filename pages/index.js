@@ -1,6 +1,6 @@
 // pages/index.js
 import Head from 'next/head';
-import Layout from '../components/Layout';
+import Layout from '../components/Layout.js';
 import Link from 'next/link'; // Make sure Link is imported for internal navigation
 import { useState } from 'react'; // Import useState hook for form management
 
