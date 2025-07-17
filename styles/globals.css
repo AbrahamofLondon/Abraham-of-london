@@ -1,6 +1,9 @@
+/* styles/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -22,10 +25,19 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* This line is CRITICAL for using the Geist font globally. */
+  /* '--font-geist-sans' is provided by the 'geist' package via _app.js. */
+  font-family: var(--font-geist-sans), 'Inter', Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Optional: Example for using Geist Mono on specific elements */
+/*
+.code-block {
+  font-family: var(--font-geist-mono);
+}
+*/
 
 * {
   box-sizing: border-box;

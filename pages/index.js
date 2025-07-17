@@ -1,43 +1,31 @@
-// Define Geist Sans local font
-const geistSans = localFont({
-  src: [
-    {
-      path: '/fonts/geist-black.woff2', // CHANGED
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '/fonts/Geist-Regular.woff2', // CHANGED
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '/fonts/Geist-SemiBold.woff2', // CHANGED
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '/fonts/Geist-Bold.woff2', // CHANGED
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: "--font-geist-sans",
-});
+// pages/index.js
 
-// Define Geist Mono local font
-const geistMono = localFont({
-  src: [
-    {
-      path: '/fonts/GeistMono-Regular.woff2', // CHANGED
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '/fonts/GeistMono-Medium.woff2', // CHANGED
-      weight: '500',
-      style: 'normal',
-    },
-  ],
-  variable: "--font-geist-mono",
-});
+import blogPosts from '../data/blogPosts'; // Correct path to your data
+import BlogCard from '../components/BlogCard';
+
+// --- ADD THESE CONSOLE.LOGS ---
+console.log('--- Debugging pages/index.js ---');
+console.log('Type of blogPosts in index.js:', typeof blogPosts);
+console.log('Is blogPosts an array in index.js?', Array.isArray(blogPosts));
+console.log('blogPosts content (first item) in index.js:', blogPosts && blogPosts.length > 0 ? blogPosts[0].title : 'No posts or malformed');
+console.log('--- End Debugging pages/index.js ---');
+
+
+export default function BlogIndex() {
+  return (
+    <section className="bg-soft-white py-12">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold mb-8 text-center">Fathering Without Fear</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Ensure this loop is UNCOMMENTED here if you want posts on the homepage */}
+          {blogPosts.map((post) => (
+            <BlogCard key={post.id} post={post} />
+          ))}
+        </div>
+        <div className="text-center mt-10">
+          <a href="/blog" className="bg-black text-white px-6 py-3 rounded-full">View All Articles</a>
+        </div>
+      </div>
+    </section>
+  );
+}
