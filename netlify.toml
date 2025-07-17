@@ -1,9 +1,18 @@
 [build]
   command = "npm ci && npm run build"
-  publish = ".next" # Specifies the directory Netlify should deploy from
+  publish = ".next" # This is where Next.js puts the optimized build output
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+[[redirects]]
+  from = "/_next/static/*"
+  to = "/_next/static/:splat"
+  status = 200
 
-[build.environment]
-  NODE_VERSION = "20.11.1"
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/*"
+  to = "/downloads/:splat"
+  status = 200
