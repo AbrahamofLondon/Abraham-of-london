@@ -1,34 +1,61 @@
-// data/blogpost.js
-
-const blogPosts = [
+export const blogPosts = [
   {
-    id: 'london-style-renaissance',
-    title: 'A Renaissance of Style: Abraham of London',
-    date: '2025-07-16',
+    title: 'Fathering Principles: A Blueprint for Men',
+    slug: 'fathering-principles',
+    date: '30-07-2025',
+    excerpt: "O.J.A-Y won't inherit fear. He'll inherit clarity, conviction, and a legacy rooted in purpose.",
+    image: '/images/blog/fathering-principles.jpg',
     author: 'Abraham Adaramola',
-    summary: 'An exploration of timeless tailoring reimagined for the modern gentleman.',
-    content: `
-      Abraham of London represents a revival of craftsmanship. Our philosophy blends traditional British tailoring with modern aesthetics, resulting in pieces that are as enduring as they are elegant.
-
-      In this post, we delve into the story behind the house, the artisans we work with, and the vision that guides each collection.
-    `,
-    tags: ['tailoring', 'craftsmanship', 'fashion', 'abraham-of-london'],
-    coverImage: '/images/blog/renaissance-style.jpg',
+    tags: ['fatherhood', 'principles', 'legacy', 'masculinity'],
   },
   {
-    id: 'bespoke-vs-made-to-measure',
-    title: 'Bespoke vs Made-to-Measure: Know the Difference',
-    date: '2025-07-01',
-    author: 'Abraham Adaramola',
-    summary: 'A gentleman must know what truly sets bespoke tailoring apart. We break it down.',
-    content: `
-      While both bespoke and made-to-measure offer custom garments, the distinction lies in process, pattern creation, and level of individual craftsmanship.
-
-      We walk you through what each entails, the experience you can expect, and when to choose one over the other.
-    `,
-    tags: ['bespoke', 'tailoring', 'guide'],
-    coverImage: '/images/blog/bespoke-vs-mtm.jpg',
+    title: 'Fathering Without Fear: Why This Movement Exists',
+    slug: 'fathering-without-fear-movement',
+    date: '15-08-2025',
+    excerpt: "This is not just a blog. It's a war cry. A call for fathers to rise—rooted in truth, forged in pain, and anchored in legacy.",
+    image: '/images/blog/fathering-without-fear.jpg',
+    author: 'Abraham of London',
+    tags: ['fatherhood', 'legacy', 'movement', 'spiritual leadership', 'masculinity'],
+    seo: {
+      title: 'Fathering Without Fear – The Story They Thought They Knew',
+      description: 'Explore the origin of the Fathering Without Fear movement—born out of injustice, rebuilt on purpose, and rooted in unshakable spiritual conviction.',
+      keywords: 'Christian fatherhood, fatherhood movement, family law reform, legacy building, Abraham of London'
+    }
   },
+  {
+    title: 'Principles for My Son',
+    slug: 'principles-for-my-son',
+    date: '17-07-2025',
+    excerpt: 'Foundational truths for O.J.A-Y to live by, from father to son.',
+    image: '/images/blog/principles-for-my-son.jpg',
+    author: 'Abraham Adaramola',
+    tags: ['fatherhood', 'son', 'legacy', 'principles']
+  },
+  {
+    title: 'Reclaiming the Narrative: Fathers in Family Court',
+    slug: 'reclaiming-the-narrative',
+    date: '08-08-2025',
+    excerpt: "It's time to push back against systemic prejudice and fight for fatherhood.",
+    image: '/images/blog/reclaiming-the-narrative.jpg',
+    author: 'Abraham Adaramola',
+    tags: ['family law', 'fatherhood rights', 'advocacy', 'justice']
+  },
+  {
+    title: 'The Brotherhood Code: Breaking Cycles of Absence',
+    slug: 'the-brotherhood-code',
+    date: '15-08-2025',
+    excerpt: "It's time to break the cycle of inherited misunderstandings about fatherhood.",
+    image: '/images/blog/the-brotherhood-code.jpg',
+    author: 'Abraham Adaramola',
+    tags: ['fatherhood', 'community', 'legacy', 'healing']
+  },
+  {
+    title: 'When the System Breaks You: Finding Purpose in Pain',
+    slug: 'when-the-system-breaks-you',
+    date: '29-08-2025',
+    excerpt: 'Finding resilience and rebuilding identity when injustice strikes fathers.',
+    image: '/images/blog/when-the-system-breaks-you.jpg',
+    author: 'Abraham Adaramola',
+    tags: ['resilience', 'faith', 'justice', 'purpose']
+  }
 ];
-
-module.exports = blogPosts;
