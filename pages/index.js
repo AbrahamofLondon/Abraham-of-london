@@ -162,14 +162,16 @@ export default function HomePage() {
           <h2 className="section-title">Creative Works</h2>
           <div className="creative-works-grid">
             <div className="work-card">
-              <img src="/assets/images/fathering-without-fear-cover.webp" alt="Fathering Without Fear Book Cover" className="work-cover" />
+              {/* Corrected path for the book cover image */}
+              <img src="/assets/images/fathering-without-fear.jpg" alt="Fathering Without Fear Book Cover" className="work-cover" />
               <h3>Fathering Without Fear</h3>
               <p>An impactful memoir offering profound insights into the challenges and triumphs of modern fatherhood.</p>
               <div className="download-links">
                 <Link href="/downloads/fathering-without-fear.epub">
                   <a className="btn">Download .epub</a>
                 </Link>
-                <Link href="/downloads/fathering-without-fear.pdf">
+                {/* Corrected path for the PDF download */}
+                <Link href="/downloads/fathering-without-fear-teaser-with-reflection.pdf">
                   <a className="btn btn-outline">Download .pdf</a>
                 </Link>
               </div>
@@ -282,7 +284,8 @@ export default function HomePage() {
             <Link href="/downloads/fathering-without-fear.epub">
               <a className="btn" download>Download .epub</a>
             </Link>
-            <Link href="/downloads/fathering-without-fear.pdf">
+            {/* Corrected path for the PDF download */}
+            <Link href="/downloads/fathering-without-fear-teaser-with-reflection.pdf">
               <a className="btn btn-outline" download>Download .pdf</a>
             </Link>
           </div>
