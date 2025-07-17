@@ -59,3 +59,5 @@ export const blogPosts = [
     tags: ['resilience', 'faith', 'justice', 'purpose']
   }
 ];
+
+export default blogPosts;
