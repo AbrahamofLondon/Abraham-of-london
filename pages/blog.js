@@ -1,15 +1,11 @@
-// pages/blog.js
-
-import blogPosts from '../data/blogPosts'; // Correct path to your data
+import { blogPosts } from '../data/blogPosts';
 import BlogCard from '../components/BlogCard';
 
-// --- ADD THESE CONSOLE.LOGS ---
 console.log('--- Debugging pages/blog.js ---');
 console.log('Type of blogPosts in blog.js:', typeof blogPosts);
 console.log('Is blogPosts an array in blog.js?', Array.isArray(blogPosts));
 console.log('blogPosts content (first item) in blog.js:', blogPosts && blogPosts.length > 0 ? blogPosts[0].title : 'No posts or malformed');
 console.log('--- End Debugging pages/blog.js ---');
-
 
 export default function BlogPage() {
   return (

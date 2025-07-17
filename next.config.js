@@ -2,16 +2,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  compiler: {
-    reactRuntime: 'automatic',
-  },
   webpack: (config, { isServer }) => {
+    // Aliases for React and ReactDOM to Preact/compat for compatibility
     config.resolve.alias = {
       ...config.resolve.alias,
       'react': 'preact/compat',
       'react-dom/test-utils': 'preact/test-utils',
       'react-dom': 'preact/compat',
-      'react-dom/client': 'preact/compat', // Add this specific alias
+      'react-dom/client': 'preact/compat', // Keep this specific alias, it's likely still needed
     };
     return config;
   },
