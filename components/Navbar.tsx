@@ -1,5 +1,5 @@
-// src/components/Navbar.tsx
-'use client'; // This component uses useState for mobile menu, so it's a Client Component
+// components/Navbar.tsx
+'use client';
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false); // State for mobile menu toggle
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -26,24 +26,24 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      // Use original Tailwind classes
       className="fixed w-full z-50 bg-neutral-dark/90 backdrop-blur-sm shadow-lg py-4"
     >
       <div className="container-custom flex justify-between items-center">
         {/* Logo/Site Title */}
         <Link href="/" className="flex items-center space-x-2 text-2xl font-bold font-serif text-deep-gold hover:text-warm-gold transition-colors duration-200">
-          {/* Optional: Add a small logo image here */}
           <Image
-              src="/logo-placeholder.png" // Placeholder for your logo
-              alt="Fathering Without Fear Logo"
-              width={40}
-              height={40}
-              className="rounded-full"
+            src="/logo-placeholder.png"
+            alt="Fathering Without Fear Logo"
+            width={40}
+            height={40}
+            className="rounded-full"
           />
           <span>Fathering Without Fear</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-8">
+        <div className="hidden md:flex space-x-8"> {/* Tailwind's responsiveness */}
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -56,7 +56,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button (Hamburger) */}
-        <div className="md:hidden">
+        <div className="md:hidden"> {/* Tailwind's responsiveness */}
           <button
             onClick={toggleMenu}
             className="text-off-white hover:text-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold transition-colors duration-200 p-2 rounded"
@@ -83,15 +83,15 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden bg-neutral-dark pt-4 pb-8 border-t border-deep-navy/50"
+            className="md:hidden bg-neutral-dark pt-4 pb-8 border-t border-deep-navy/50" // Tailwind classes
           >
             <div className="flex flex-col items-center space-y-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  onClick={toggleMenu} // Close menu on link click
-                  className="text-xl font-sans text-off-white hover:text-warm-gold transition-colors duration-200 py-2"
+                  onClick={toggleMenu}
+                  className="text-xl font-sans text-off-white hover:text-warm-gold transition-colors duration-200 py-2" // Tailwind classes
                 >
                   {link.name}
                 </Link>
