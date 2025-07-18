@@ -1,22 +1,6 @@
 /* styles/globals.css */
 
-/* Tailwind CSS Directives - These MUST be at the very top */
+/* These are the only lines that should be in this file for Tailwind to work correctly */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Any *optional* custom CSS variables if you intend to use them with arbitrary values,
-   but generally, defining colors in tailwind.config.js is preferred. */
-/*
-:root {
-  --my-custom-blue: #007bff;
-}
-*/
-
-/* Any *optional* global base styles that Tailwind's reset doesn't cover and you explicitly need,
-   and that don't conflict with Tailwind's utility classes. */
-/*
-body {
-  scroll-behavior: smooth;
-}
-*/
