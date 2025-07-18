@@ -16,3 +16,34 @@
   from = "/downloads/*"
   to = "/downloads/:splat"
   status = 200
+
+# === ADD THESE NEW RULES FOR NEXT.JS PAGES ===
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog"
+  to = "/blog"
+  status = 200
+  force = true # Ensures this specific page is rewritten
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/blog/:splat"
+  status = 200
+  force = true # Ensures dynamic blog posts are rewritten
+
+[[redirects]]
+  from = "/books/*" # Assuming you also have pages/books/[slug].js
+  to = "/books/:splat"
+  status = 200
+  force = true
+
+# Optional: If you have a 404 page, you might include this
+# [[redirects]]
+#   from = "/*"
+#   to = "/404.html" # or /404 if it's a Next.js page
+#   status = 404
