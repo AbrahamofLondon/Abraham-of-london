@@ -2,7 +2,7 @@ import BlogCard from '../components/BlogCard';
 import path from 'path';
 import fs from 'fs';
 import matter from 'gray-matter';
-import Layout from '../components/Layout'; // UNCOMMENTED
+import Layout from '../components/Layout';
 
 export async function getStaticProps() {
   const postsDirectory = path.join(process.cwd(), 'content', 'blog');
@@ -36,7 +36,11 @@ export async function getStaticProps() {
 
   blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  return { props: { blogPosts } };
+  return {
+    props: {
+      blogPosts,
+    },
+  };
 }
 
 export default function BlogPage({ blogPosts }) {
