@@ -3,10 +3,10 @@ import path from 'path';
 import matter from 'gray-matter';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote } from 'next-mdx-remote';
-import { blogPosts } from '../../data/blogPosts'; // Correctly import as a named export
+import blogPosts from '../../data/blogPosts'; // ✅ default import
 
 export async function getStaticPaths() {
-  const paths = blogPosts.map((post) => ({ // Use blogPosts directly as imported
+  const paths = blogPosts.map((post) => ({
     params: { slug: post.slug },
   }));
 
