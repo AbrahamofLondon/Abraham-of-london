@@ -9,13 +9,12 @@ export async function getStaticProps() {
   let filenames = [];
   let blogPosts = [];
 
-  try {
+try {
     filenames = fs.readdirSync(postsDirectory);
 } catch (error) {
     console.error(Error reading posts directory: ${postsDirectory}, error);
     return { props: { blogPosts: [] } };
 }
-
   blogPosts = filenames.map(filename => {
     const filePath = path.join(postsDirectory, filename);
     const fileContents = fs.readFileSync(filePath, 'utf8');
