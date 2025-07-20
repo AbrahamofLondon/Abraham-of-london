@@ -33,7 +33,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({
           <span>By {author}</span>
           <span>{readTime}</span>
         </div>
-        <a href={/blog/${slug}} className="text-blue-600 text-sm mt-2 inline-block">Read More</a>
+        <a href={`/blog/${slug`} className="text-blue-600 text-sm mt-2 inline-block">Read More</a>
       </div>
     </div>
   );
