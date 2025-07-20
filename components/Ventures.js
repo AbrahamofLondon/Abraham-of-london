@@ -1,44 +1,84 @@
-// components/Ventures.js
 import Image from 'next/image';
 
 export default function Ventures() {
   return (
-    <section className="bg-gray-50 py-12 px-4 md:px-8">
+    <section id="ventures" className="bg-gray-50 py-16 px-4 md:px-8">
       <div className="max-w-6xl mx-auto text-center">
-        <div className="flex justify-center mb-6">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
           <Image
-            src="/images/abraham-logo.jpg" // Ensure this file exists in /public/images/
+            src="/images/abraham-logo.jpg"
             alt="Abraham of London Logo"
-            width={80}
-            height={80}
-            className="rounded-full"
+            width={100}
+            height={100}
+            className="rounded-full shadow-lg"
           />
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+
+        {/* Title and Intro */}
+        <h2 className="text-4xl font-bold text-gray-800 mb-4">
           Abraham of London Ventures
         </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-12">
           From legacy-building fatherhood initiatives to community reform and digital platforms,
           Abraham of London is forging ventures that empower, inspire, and disrupt with purpose.
         </p>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 shadow rounded-2xl">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Fathering Without Fear</h3>
+
+        {/* Venture Cards */}
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Venture 1 */}
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">Fathering Without Fear</h3>
             <p className="text-gray-600 text-sm">
               A movement empowering fathers through legacy, law, and spiritual leadership.
             </p>
           </div>
-          <div className="bg-white p-6 shadow rounded-2xl">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Codex Archive</h3>
+
+          {/* Venture 2 */}
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">Codex Archive</h3>
             <p className="text-gray-600 text-sm">
               A digital memorial and manifesto chronicling resistance, injustice, and the new masculinity.
             </p>
           </div>
-          <div className="bg-white p-6 shadow rounded-2xl">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Legacy Media Studio</h3>
+
+          {/* Venture 3 */}
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">Legacy Media Studio</h3>
             <p className="text-gray-600 text-sm">
               Telling fatherhood stories through sound, image, and powerful modern publishing.
             </p>
+          </div>
+
+          {/* Additional Ventures - Optional */}
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">Alomarada Ltd</h3>
+            <p className="text-gray-600 text-sm">
+              A pioneering venture driving sustainable innovation across creative industries.
+            </p>
+            <a
+              href="https://alomarada.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block text-blue-600 hover:underline font-medium"
+            >
+              Visit Alomarada →
+            </a>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">Endureluxe</h3>
+            <p className="text-gray-600 text-sm">
+              A sustainable luxury brand redefining elegance with environmental integrity.
+            </p>
+            <a
+              href="https://endureluxe.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block text-blue-600 hover:underline font-medium"
+            >
+              Visit Endureluxe →
+            </a>
           </div>
         </div>
       </div>
