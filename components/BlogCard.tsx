@@ -1,5 +1,5 @@
 // components/BlogCard.tsx
-import React from 'react';
+import { BlogCard } from '../components/BlogCard';
 
 interface BlogCardProps {
   title: string;
