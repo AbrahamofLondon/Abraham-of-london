@@ -1,118 +1,109 @@
-// pages/index.js
-import Head from 'next/head';
-import Layout from '../components/Layout';
-import Link from 'next/link';
-import Image from 'next/image';
+// pages/index.js (or HomePage.js, depending on your actual file name for the root page)
+
+import Layout from '../components/Layout'; // Assuming you have a Layout component
+import { useState } from 'react'; // Example if you use state, adjust as needed
 
 export default function HomePage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle form submission logic here (e.g., send data to an API)
+    console.log('Form data submitted:', formData);
+    alert('Message sent successfully!');
+    setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
+  };
+
   return (
     <Layout>
-      <Head>
-        <title>Abraham of London | Visionary Entrepreneur & Creative Force</title>
-      </Head>
-
-      {/* Logo Section */}
-      <section className="py-6 text-center">
-        <Image
-          src="/images/abraham-logo.jpg"
-          alt="Abraham of London Logo"
-          width={120}
-          height={120}
-          className="mx-auto rounded-full shadow-md"
-        />
-      </section>
-
-      {/* About Section */}
-      <section className="py-12 px-4 md:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center">About Abraham of London</h2>
-          <p className="text-gray-700 mb-4">Abraham of London is a visionary entrepreneur, author, and creative force dedicated to transforming industries and inspiring lives. With a unique blend of strategic insight and innovative thinking, he has launched and nurtured ventures that address critical market needs and champion sustainable practices.</p>
-          <p className="text-gray-700 mb-4">His philosophy centers on building legacies through impactful ideas and fostering growth that benefits both individuals and society.</p>
-          <p className="text-gray-700">Driven by a passion for innovation and a commitment to excellence, Abraham continues to push boundaries, creating a significant imprint across diverse sectors.</p>
+      <section id="hero" className="hero-section section-padding">
+        <div className="container text-center">
+          <img src="/assets/images/logo/abraham-of-london-logo.svg" alt="Abraham of London Logo" className="hero-logo" />
+          <h1>Abraham of London</h1>
+          <p className="tagline">Visionary Entrepreneur, Author, and Creative Force</p>
         </div>
       </section>
 
-      {/* Ventures Section */}
-      <section className="py-12 px-4 md:px-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ventures & Impact</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <Image
-                src="/assets/images/alomarada-ltd.webp"
-                alt="Alomarada"
-                width={200}
-                height={120}
-                className="mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Alomarada</h3>
-              <p className="text-gray-600 mb-4">A pioneering venture in [brief description].</p>
-              <a href="https://alomarada.com" target="_blank" className="text-blue-600 hover:underline">Learn More</a>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <Image
-                src="/assets/images/endureluxe-ltd.webp"
-                alt="Endureluxe"
-                width={200}
-                height={120}
-                className="mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Endureluxe</h3>
-              <p className="text-gray-600 mb-4">Redefining sustainable luxury in [brief description].</p>
-              <a href="https://endureluxe.com" target="_blank" className="text-blue-600 hover:underline">Learn More</a>
-            </div>
+      <section id="about" className="about-section section-padding">
+        <div className="container">
+          <h2>About Abraham of London</h2>
+          <p>Abraham of London is a visionary entrepreneur, author, and creative force dedicated to transforming industries and inspiring lives. With a unique blend of strategic insight and innovative thinking, he has launched and nurtured ventures that address critical market needs and champion sustainable practices.</p>
+          <p>His philosophy centers on building legacies through impactful ideas and fostering growth that benefits both individuals and society. Beyond business, Abraham is a thought leader whose creative works explore themes of personal development, resilience, and purposeful living.</p>
+          <p>Driven by a passion for innovation and a commitment to excellence, Abraham of London continues to push boundaries, creating a significant imprint across diverse sectors.</p>
+        </div>
+      </section>
+
+      <section id="ventures" className="ventures-section section-padding">
+        <div className="container">
+          <h2>Ventures & Impact</h2>
+          <div className="venture-item">
+            <img src="/assets/images/logo/alomarada.svg" alt="Alomarada Logo" className="venture-logo" />
+            <h3>Alomarada</h3>
+            <p>A pioneering venture in [brief description of Alomarada's industry/focus]. Alomarada is committed to [key value proposition or mission].</p>
+            <a href="#" className="btn-outline">Learn More</a>
+          </div>
+          <div className="venture-item">
+            <img src="/assets/images/logo/endureluxe.svg" alt="Endureluxe Logo" className="venture-logo" />
+            <h3>Endureluxe</h3>
+            <p>Redefining sustainable luxury in [brief description of Endureluxe's industry/focus]. Endureluxe blends elegance with environmental responsibility.</p>
+            <a href="#" className="btn-outline">Learn More</a>
           </div>
         </div>
       </section>
 
-      {/* Creative Works Section */}
-      <section className="py-12 px-4 md:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-6">Creative Works</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="p-6 bg-gray-50 rounded-lg shadow text-center">
-              <Image
-                src="/assets/images/fathering-without-fear.jpg"
-                alt="Fathering Without Fear Book"
-                width={200}
-                height={300}
-                className="mx-auto mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Fathering Without Fear</h3>
-              <p className="text-gray-600 mb-4">A memoir exploring the challenges and triumphs of fatherhood.</p>
-              <div className="flex justify-center gap-4">
-                <Link href="/downloads/fathering-without-fear.epub">
-                  <a className="btn">Download .epub</a>
-                </Link>
-                <Link href="/downloads/fathering-without-fear-teaser-with-reflection.pdf">
-                  <a className="btn btn-outline">Download .pdf</a>
-                </Link>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gray-100 rounded-lg shadow text-center">
-              <div className="text-6xl text-yellow-400 mb-4">
-                <i className="fas fa-lightbulb"></i>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Future Projects</h3>
-              <p className="text-gray-600">Stay tuned for more ventures and compelling narratives.</p>
-            </div>
+      <section id="creative-works" className="creative-works-section section-padding">
+        <div className="container">
+          <h2>Creative Works</h2>
+          <div className="book-item">
+            {/* CORRECTED PATH FOR THE BOOK COVER IMAGE */}
+            <img src="/assets/images/fathering-without-fear.webp" alt="Fathering Without Fear Book Cover" className="book-cover" />
+            <h3>Fathering Without Fear</h3>
+            <p>An impactful memoir offering profound insights into the challenges and triumphs of modern fatherhood.</p>
+            <a href="/downloads/fathering-without-fear.epub" className="btn-outline download">Download .epub</a>
+            <a href="/downloads/fathering-without-fear-teaser-with-reflection.pdf" className="btn-outline download">Download .pdf</a>
           </div>
         </div>
       </section>
 
-      {/* Downloads Section */}
-      <section className="py-12 px-4 md:px-8 bg-gray-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Download My Memoir</h2>
-          <div className="flex justify-center gap-4">
-            <Link href="/downloads/fathering-without-fear.epub">
-              <a className="btn">Download .epub</a>
-            </Link>
-            <Link href="/downloads/fathering-without-fear-teaser-with-reflection.pdf">
-              <a className="btn btn-outline">Download .pdf</a>
-            </Link>
-          </div>
+      <section id="future-projects" className="future-projects-section section-padding">
+        <div className="container">
+          <h2>Future Projects</h2>
+          <p>Stay tuned for more innovative ventures and compelling narratives.</p>
+        </div>
+      </section>
+
+      <section id="contact" className="contact-section section-padding">
+        <div className="container">
+          <h2>Get In Touch</h2>
+          <p>Have a project in mind, a collaboration idea, or just want to connect? Send a message and Abraham of London's team will get back to you promptly.</p>
+          <form onSubmit={handleSubmit} className="contact-form">
+            <div className="form-group">
+              <label htmlFor="name">Name *</label>
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">Email *</label>
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="subject">Subject *</label>
+              <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="message">Message *</label>
+              <textarea id="message" name="message" rows="5" value={formData.message} onChange={handleChange} required></textarea>
+            </div>
+            <button type="submit" className="btn-primary">Send Message</button>
+          </form>
         </div>
       </section>
     </Layout>

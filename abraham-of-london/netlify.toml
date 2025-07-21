@@ -1,9 +1,0 @@
-# netlify.toml
-[build]
-  command = "npm ci && npm run build"
-  publish = ".next"
-
-# IF you have a plugins section, disable it like this:
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-  # enabled = false  <-- ADD THIS LINE to disable it

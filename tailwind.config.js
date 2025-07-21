@@ -1,8 +1,8 @@
 // tailwind.config.js
 module.exports = {
   content: [
-    './pages//*.{js,ts,jsx,tsx}',
-    './components//*.{js,ts,jsx,tsx}',
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -17,7 +17,8 @@ module.exports = {
       },
       fontFamily: {
         display: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        // CHANGE THIS LINE: Use 'Inter Variable' for the @fontsource-variable/inter package
+        body: ['Inter Variable', 'sans-serif'],
       },
       typography: (theme) => ({
         DEFAULT: {
