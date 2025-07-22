@@ -1,14 +1,9 @@
-import '@fontsource-variable/inter/index.css';
-import '../styles/globals.css';
-import Navbar from '../components/Navbar.tsx'; // match file extension
-
-export default function MyApp({ Component, pageProps }) {
-  return (
-    <div>
-      <Navbar />
-      <main>
-        <Component {...pageProps} />
-      </main>
-    </div>
-  );
+export default function About() {
+  return ( // <--- Crucial opening parenthesis
+    <Layout>
+      <div className="max-w-4xl mx-auto py-20">
+        {/* ... all your page content ... */}
+      </div>
+    </Layout>
+  ); // <--- Crucial closing parenthesis and semicolon
 }
