@@ -3,30 +3,38 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply font-body text-charcoal bg-warmWhite antialiased;
+/* Custom Fonts */
+@font-face {
+  font-family: 'geist-black'; /* Matches fontFamily.display in tailwind.config.js */
+  src: url('/fonts/geist-black.woff2') format('woff2');
+  font-weight: 900; /* Or whatever weight 'geist-black' is */
+  font-style: normal;
+  font-display: swap;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  @apply font-display text-primary;
+@font-face {
+  font-family: 'GeistMono-Regular'; /* Matches fontFamily.body in tailwind.config.js */
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-a {
-  @apply text-primary underline hover:text-gold transition-colors;
+/* Base styles for the entire page */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* You can apply a default font here if you want it to apply globally,
+     but it's often more flexible to apply it via className on Layout or specific elements. */
+  /* font-family: 'GeistMono-Regular', sans-serif; */
 }
 
-img {
-  @apply rounded-lg shadow-sm;
+#__next { /* Next.js root div */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.prose {
-  @apply prose-lg text-charcoal;
-}
-
-button {
-  @apply px-4 py-2 bg-primary text-cream rounded-full font-semibold hover:bg-gold transition;
-}
-
-.container {
-  @apply max-w-7xl mx-auto px-4;
-}
+/* Other global styles */
