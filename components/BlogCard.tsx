@@ -1,3 +1,4 @@
+// components/BlogCard.tsx
 import React from 'react';
 import Link from 'next/link';
 
@@ -22,10 +23,6 @@ const BlogCard: React.FC<BlogCardProps> = ({
   readTime,
   slug,
 }) => {
-  // Ensure the image source is correctly formatted for Next.js Image component (if used)
-  // For now, using a simple <img> tag with direct src as per your original code.
-  // If images are served from public folder, make sure the coverImage prop is a root-relative path (e.g., "/images/blog/my-image.jpg")
-
   return (
     <article className="border rounded-lg shadow-sm overflow-hidden bg-warmWhite transition hover:shadow-md">
       {coverImage && (
@@ -48,7 +45,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <span>{readTime}</span>
         </div>
         <Link
-          href={`/blog/${slug}`} // <<< CORRECTED LINK FOR BLOG POSTS
+          href={`/blog/${slug}`}
           className="inline-block mt-3 text-sm text-primary underline font-body hover:text-gold"
         >
           Read Post
@@ -58,4 +55,4 @@ const BlogCard: React.FC<BlogCardProps> = ({
   );
 };
 
-export default BlogCard;
+export default BlogCard; // This is the default export

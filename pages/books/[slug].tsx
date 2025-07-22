@@ -1,39 +1,114 @@
-import React from 'react';
-import { useRouter } from 'next/router';
+// pages/books/[slug].tsx
+
+import React from 'react'; // Make sure React is imported if you're using JSX
+import Layout from '../../components/Layout'; // Adjust path if needed
+import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../../components/Layout'; // Adjust path as needed (should be '../../components/Layout')
+import { GetStaticProps, GetStaticPaths } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import type { ParsedUrlQuery } from 'querystring';
 
-const books = [
-  // ... books array ...
-];
 
-export default function BookDetailPage() {
-  const router = useRouter();
-  const { slug } = router.query;
+// Define your interfaces for books, similar to blog posts
+interface BookPageProps {
+  frontmatter: {
+    title: string;
+    date: string; // Or publication_date, etc.
+    author: string;
+    excerpt?: string;
+    // Add any other frontmatter properties for your books (e.g., coverImage, isbn)
+  };
+  mdxSource: MDXRemoteSerializeResult;
+}
 
-  if (!slug) return <p>Loading...</p>;
+interface BookParams extends ParsedUrlQuery {
+  slug: string;
+}
 
-  const book = books.find((b) => b.slug === slug);
+// Define custom components for MDX if you use them in your book MDX files
+const components = {
+  // p: (props: any) => <p className="mb-4 text-gray-700" {...props} />,
+  // h1: (props: any) => <h1 className="text-3xl font-bold mb-4" {...props} />,
+};
 
-  if (!book) {
-    return (
-      <Layout> {/* <--- Add Layout wrapper here for 404/not found */}
-        <div style={{ padding: 24 }}>
-          <h1>Book not found</h1>
-          <Link href="/books"><a>← Back to books list</a></Link>
+// getStaticPaths for books
+export const getStaticPaths: GetStaticPaths<BookParams> = async () => {
+  const fs = require('fs');
+  const path = require('path');
+  const booksDirectory = path.join(process.cwd(), 'content', 'books');
+  const filenames = fs.readdirSync(booksDirectory);
+
+  const paths = filenames.map((filename: string) => ({
+    params: {
+      slug: filename.replace(/\.mdx?$/, ''),
+    },
+  }));
+
+  return {
+    paths,
+    fallback: false, // Or true, or 'blocking'
+  };
+};
+
+// getStaticProps for books
+export const getStaticProps: GetStaticProps<BookPageProps, BookParams> = async ({ params }) => {
+  const { slug } = params!;
+
+  const fs = require('fs');
+  const path = require('path');
+  const bookFilePath = path.join(process.cwd(), 'content', 'books', `${slug}.mdx`);
+  const source = fs.readFileSync(bookFilePath, 'utf8');
+
+  const { data, content } = require('gray-matter')(source);
+
+  const mdxSource = await serialize(content, {
+    scope: data,
+    mdxOptions: {
+      // Add plugins if you use them for books
+    },
+  });
+
+  return {
+    props: {
+      frontmatter: data as BookPageProps['frontmatter'],
+      mdxSource,
+    },
+  };
+};
+
+
+export default function BookPage({ frontmatter, mdxSource }: BookPageProps) {
+  return ( // <--- *** THIS OPENING PARENTHESIS IS CRUCIAL ***
+    <Layout>
+      <Head>
+        <title>{frontmatter.title} | Abraham of London Books</title>
+        <meta name="description" content={frontmatter.excerpt || `Learn more about ${frontmatter.title}`} />
+        {/* Add more meta tags specific to books */}
+      </Head>
+
+      <article className="max-w-3xl mx-auto py-8 px-4">
+        {/* Book Header */}
+        <h1 className="text-4xl md:text-5xl font-bold font-display leading-tight mb-4 text-primary">
+          {frontmatter.title}
+        </h1>
+        <p className="text-gray-600 text-sm mb-6">
+          By {frontmatter.author}
+          {frontmatter.date && ` on ${frontmatter.date}`}
+        </p>
+
+        {/* MDX Content */}
+        <div className="prose lg:prose-lg max-w-none">
+          <MDXRemote {...mdxSource} components={components} />
         </div>
-      </Layout>
-    );
-  }
 
-  return (
-    <Layout> {/* <--- Add Layout wrapper here for main content */}
-      <div style={{ padding: 24, maxWidth: 600, margin: 'auto' }}>
-        <h1>{book.title}</h1>
-        <h3>by {book.author}</h3>
-        <p style={{ whiteSpace: 'pre-wrap', marginTop: 16 }}>{book.description.trim()}</p>
-        <Link href="/books"><a style={{ display: 'inline-block', marginTop: 32 }}>← Back to books list</a></Link>
-      </div>
-    </Layout> {/* <--- Close Layout here */}
-  );
+        {/* Back to books list link */}
+        <div className="mt-10 text-center">
+          <Link href="/books">
+            <a className="text-blue-600 hover:underline text-lg">← Back to books list</a>
+          </Link>
+        </div>
+      </article>
+    </Layout>
+  ); // <--- *** THIS CLOSING PARENTHESIS AND SEMICOLON ARE CRUCIAL ***
 }

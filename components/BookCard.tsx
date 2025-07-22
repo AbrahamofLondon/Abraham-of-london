@@ -10,8 +10,7 @@ interface BookCardProps {
   excerpt: string;
 }
 
-// Add 'export' here
-export const BookCard: React.FC<BookCardProps> = ({
+const BookCard: React.FC<BookCardProps> = ({
   title,
   coverImage,
   author,
@@ -43,3 +42,5 @@ export const BookCard: React.FC<BookCardProps> = ({
     </article>
   );
 };
+
+export default BookCard; // This is the default export
