@@ -1,9 +1,13 @@
-export default function About() {
-  return ( // <--- Crucial opening parenthesis
+// pages/_app.js
+import '../styles/globals.css';
+import Layout from '../components/Layout'; // Correct path to Layout.tsx
+
+function MyApp({ Component, pageProps }) {
+  return (
     <Layout>
-      <div className="max-w-4xl mx-auto py-20">
-        {/* ... all your page content ... */}
-      </div>
+      <Component {...pageProps} />
     </Layout>
-  ); // <--- Crucial closing parenthesis and semicolon
+  );
 }
+
+export default MyApp;
