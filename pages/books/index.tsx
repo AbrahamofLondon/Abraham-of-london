@@ -1,17 +1,47 @@
 // pages/books/index.tsx
-
-import React from 'react'; // Make sure React is imported
-import Layout from '../../components/Layout'; // Adjust path if needed
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Layout from '../../components/Layout'; // Path adjusted for nested folder
+import BookCard from '../../components/BookCard'; // Path adjusted for nested folder
 
-// ... any other imports or data fetching functions you have for this page ...
+interface Book {
+  slug: string;
+  title: string;
+  coverImage: string;
+  author: string;
+  excerpt: string;
+}
 
-export default function BooksPage() { // Or whatever your component name is
-  return ( // <--- *** THIS OPENING PARENTHESIS IS CRUCIAL ***
+interface BooksPageProps {
+  books: Book[];
+}
+
+export const getStaticProps = async () => {
+  // Replace this with your actual data fetching logic (e.g., reading from content/books)
+  const books: Book[] = [
+    {
+      slug: 'fathering-without-fear',
+      title: 'Fathering Without Fear',
+      coverImage: '/assets/images/fathering-without-fear.webp',
+      author: 'Abraham of London',
+      excerpt: 'An impactful memoir and guide on navigating modern fatherhood with courage and intention.'
+    },
+    // Add more books as needed
+  ];
+
+  return {
+    props: {
+      books,
+    },
+  };
+};
+
+export default function Books({ books }: BooksPageProps) {
+  return (
     <Layout>
       <Head>
-        <title>Books by Abraham of London</title>
+        <title>Books | Abraham of London</title>
         <meta name="description" content="Explore the published works of Abraham of London, including Fathering Without Fear." />
       </Head>
 
@@ -21,31 +51,12 @@ export default function BooksPage() { // Or whatever your component name is
           Dive into profound insights and compelling narratives.
         </p>
 
-        {/* Example: Display a list of books */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* You'd map through your book data here, e.g.: */}
-          {/* {booksData.map(book => (
-            <BookCard key={book.slug} book={book} />
-          ))} */}
-          <div className="book-item text-center">
-             <Link href="/books/fathering-without-fear">
-                <a>
-                    <img src="/assets/images/fathering-without-fear.webp" alt="Fathering Without Fear Book Cover" className="book-cover mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Fathering Without Fear</h3>
-                    <p className="text-gray-700">An impactful memoir on modern fatherhood.</p>
-                </a>
-            </Link>
-            <div className="mt-4 flex justify-center space-x-4">
-                <a href="/downloads/fathering-without-fear.epub" className="btn-outline download flex items-center">
-                    <i className="fas fa-file-alt mr-2"></i> .epub
-                </a>
-                <a href="/downloads/fathering-without-fear-teaser-with-reflection.pdf" className="btn-outline download flex items-center">
-                    <i className="fas fa-file-pdf mr-2"></i> .pdf
-                </a>
-            </div>
-          </div>
+          {books.map((book) => (
+            <BookCard key={book.slug} {...book} />
+          ))}
         </div>
       </div>
     </Layout>
-  ); // <--- *** THIS CLOSING PARENTHESIS AND SEMICOLON ARE CRUCIAL ***
+  );
 }
