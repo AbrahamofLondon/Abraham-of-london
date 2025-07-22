@@ -1,8 +1,13 @@
-// components/Layout.js
+// components/Layout.tsx
 import Head from 'next/head';
 import { useEffect } from 'react';
+import React from 'react'; // Make sure React is imported for React.ReactNode
 
-export default function Layout({ children }) {
+interface LayoutProps {
+  children: React.ReactNode; // Defines that children can be any React node
+}
+
+export default function Layout({ children }: LayoutProps) { // Make sure : LayoutProps is here
   // useEffect for client-side JavaScript features
   useEffect(() => {
     // Smooth scrolling for anchor links
@@ -22,7 +27,7 @@ export default function Layout({ children }) {
     const currentYear = new Date().getFullYear();
     const yearElement = document.getElementById('current-year');
     if (yearElement) {
-      yearElement.textContent = currentYear;
+      yearElement.textContent = currentYear.toString(); // Ensure it's a string
     }
 
     // Mobile menu toggle
@@ -93,7 +98,7 @@ export default function Layout({ children }) {
         {/* Google Fonts */}
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
 
-        {/* THIS IS THE LINE THAT WAS CAUSING THE ERROR. THE VERSION BELOW IS CORRECT. */}
+        {/* Font Awesome */}
         <link 
           rel="stylesheet" 
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" 
