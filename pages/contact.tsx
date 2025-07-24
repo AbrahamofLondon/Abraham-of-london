@@ -1,3 +1,5 @@
+// pages/contact.tsx
+
 import React from 'react'; // Make sure React is imported
 import Layout from '../components/Layout'; // Adjust path if needed
 import Head from 'next/head';
@@ -41,7 +43,7 @@ export default function ContactPage() { // Or whatever your component name is
           </li>
           <li className="flex items-center justify-center">
             <i className="fab fa-linkedin-in text-blue-700 mr-3"></i>
-            <span>LinkedIn: </span><Link href="https://www.linkedin.com/in/abraham-adaramola-06630321" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">/in/abrahamoflondon</a></Link>
+            <span>LinkedIn: </span><Link href="https://www.linkedin.com/in/abraham-adaramola-06630321/" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">/in/abrahamoflondon</a></Link>
           </li>
           {/* Add more contact methods as needed */}
         </ul>
