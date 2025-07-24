@@ -2,11 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Keep experimental.legacyReact if you encountered specific React import/resolution issues
-  experimental: {
-    legacyReact: true,
-  },
-
   // Keep webpack alias configuration if you encountered React/React-DOM resolution issues
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
