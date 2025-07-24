@@ -1,4 +1,4 @@
-k/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
  // other Next.js configurations can go here
   images: {
@@ -10,4 +10,5 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
 
