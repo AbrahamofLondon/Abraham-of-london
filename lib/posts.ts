@@ -10,11 +10,17 @@ export interface PostMeta {
   title: string;
   date: string;
   excerpt: string;
-  coverImage: string;
-  category: string;
+  coverImage: string; // Corrected to coverImage based on your latest frontmatter
+  category: string; // Assuming category is part of your frontmatter
   author: string;
-  readTime: string;
+  readTime: string; // Assuming readTime is part of your frontmatter
   slug: string; // The slug is typically the filename without extension
+  // Added SEO interface for consistency, though it's optional here if only used in page
+  seo?: {
+    title: string;
+    description: string;
+    keywords: string;
+  };
 }
 
 interface Post {
@@ -24,11 +30,30 @@ interface Post {
 }
 
 export function getPostSlugs(): string[] {
-  return fs.readdirSync(postsDirectory).map(fileName => fileName.replace(/\.mdx?$/, ''));
+  return fs.readdirSync(postsDirectory)
+    // --- ADD THIS FILTER LINE ---
+    .filter(fileName => fileName.endsWith('.md') || fileName.endsWith('.mdx'))
+    // --------------------------
+    .map(fileName => fileName.replace(/\.mdx?$/, ''));
 }
 
 export function getPostBySlug(slug: string): Post {
-  const fullPath = path.join(postsDirectory, `${slug}.md`); // Assuming .md files
+  // Adjusted to handle both .md and .mdx extensions
+  const potentialPaths = [`${slug}.md`, `${slug}.mdx`];
+  let fullPath: string | undefined;
+
+  for (const p of potentialPaths) {
+    const currentPath = path.join(postsDirectory, p);
+    if (fs.existsSync(currentPath)) {
+      fullPath = currentPath;
+      break;
+    }
+  }
+
+  if (!fullPath) {
+    throw new Error(`Post with slug "${slug}" not found.`);
+  }
+
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
@@ -41,7 +66,17 @@ export function getPostBySlug(slug: string): Post {
 
 export function getAllPosts(): Post[] {
   const slugs = getPostSlugs();
-  const posts = slugs.map(slug => getPostBySlug(slug));
+  // Ensure we only try to get posts that actually exist after filtering
+  const posts = slugs
+    .map(slug => {
+      try {
+        return getPostBySlug(slug);
+      } catch (error) {
+        console.warn(`Could not load post with slug: ${slug}. It might be an invalid file.`);
+        return null; // Return null for invalid posts
+      }
+    })
+    .filter((post): post is Post => post !== null); // Filter out any nulls
 
   // Sort posts by date in descending order (newest first)
   posts.sort((a, b) => {
