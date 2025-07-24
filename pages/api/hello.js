@@ -1,5 +1,6 @@
 // pages/api/hello.js
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+
 export default function handler(req, res) {
-  // Your API logic here
-  res.status(200).json({ message: 'Hello from API!' });
+  res.status(200).json({ name: 'John Doe' });
 }

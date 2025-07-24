@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+<<<<<<< HEAD
   reactStrictMode: true,
 
   experimental: {
@@ -21,7 +22,20 @@ const nextConfig = {
     // });
 
     return config;
+=======
+ // other Next.js configurations can go here
+  images: {
+    unoptimized: true, // Often needed for 'output: export' if you use next/image without a server
+  },
+  compiler: {
+    styledComponents: true, // Keep if you use styled-components
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
   },
 };
 
 module.exports = nextConfig;
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7

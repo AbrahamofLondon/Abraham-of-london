@@ -1,4 +1,5 @@
 // pages/blog/index.tsx
+<<<<<<< HEAD
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -83,20 +84,57 @@ export const getStaticProps = async () => {
       author: 'Abraham of London',
       readTime: '12 min read'
     }
+=======
+import Head from 'next/head';
+import Link from 'next/link';
+import Layout from '../../components/Layout';
+import BlogCard from '../../components/BlogCard';
+
+interface Blog {
+  slug: string;
+  title: string;
+  coverImage: string;
+  author: string;
+  excerpt: string;
+}
+
+interface BlogPageProps {
+  blogs: Blog[];
+}
+
+export const getStaticProps = async () => {
+  const blogs: Blog[] = [
+    {
+      slug: 'example-post',
+      title: 'Example Blog Post',
+      coverImage: '/assets/images/example-post.webp',
+      author: 'Abraham of London',
+      excerpt: 'A sample blog post.',
+    },
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
   ];
 
   return {
     props: {
+<<<<<<< HEAD
       posts,
+=======
+      blogs,
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
     },
   };
 };
 
+<<<<<<< HEAD
 export default function Blog({ posts }: BlogPageProps) {
+=======
+export default function Blog({ blogs }: BlogPageProps) {
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
   return (
     <Layout>
       <Head>
         <title>Blog | Abraham of London</title>
+<<<<<<< HEAD
         <meta name="description" content="Explore insightful articles and thought leadership from Abraham of London." />
       </Head>
 
@@ -109,6 +147,20 @@ export default function Blog({ posts }: BlogPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
             <BlogCard key={post.slug} {...post} />
+=======
+        <meta name="description" content="Read the latest posts from Abraham of London." />
+      </Head>
+
+      <div className="max-w-4xl mx-auto py-20 px-4">
+        <h1 className="text-4xl font-bold mb-6 text-center">My Blog</h1>
+        <p className="text-lg text-gray-600 mb-8 text-center">
+          Explore my thoughts and insights.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {blogs.map((blog) => (
+            <BlogCard key={blog.slug} {...blog} />
+>>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
           ))}
         </div>
       </div>
