@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // postcss.config.js
 module.exports = {
   plugins: {
@@ -13,4 +12,3 @@ module.exports = {
     autoprefixer: {},
   },
 };
->>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
