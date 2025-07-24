@@ -1,15 +1,14 @@
 // components/BlogCard.tsx
-import React from 'react';
 import Link from 'next/link';
 
 interface BlogCardProps {
   title: string;
-  date: string;
+  date?: string;
   excerpt: string;
   coverImage: string;
-  category: string;
+  category?: string;
   author: string;
-  readTime: string;
+  readTime?: string;
   slug: string;
 }
 
@@ -33,16 +32,18 @@ const BlogCard: React.FC<BlogCardProps> = ({
         />
       )}
       <div className="p-4 space-y-2">
-        <p className="text-xs text-softGrey uppercase tracking-wide font-medium">
-          {category} • {date}
-        </p>
+        {category && date && (
+          <p className="text-xs text-softGrey uppercase tracking-wide font-medium">
+            {category} • {date}
+          </p>
+        )}
         <h3 className="text-xl font-display font-semibold text-primary leading-snug">
           {title}
         </h3>
         <p className="text-sm text-charcoal font-body">{excerpt}</p>
         <div className="flex justify-between items-center text-xs text-softGrey font-body pt-2 border-t border-softGrey/30">
           <span>By {author}</span>
-          <span>{readTime}</span>
+          {readTime && <span>{readTime}</span>}
         </div>
         <Link
           href={`/blog/${slug}`}
@@ -55,4 +56,4 @@ const BlogCard: React.FC<BlogCardProps> = ({
   );
 };
 
-export default BlogCard; // This is the default export
+export default BlogCard;

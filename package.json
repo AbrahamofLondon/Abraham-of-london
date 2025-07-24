@@ -7,21 +7,25 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postbuild": "npx next-sitemap --config next-sitemap.config.js"
+    "postbuild": "npx next-sitemap --config next-sitemap.config.js",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.11",
-    "framer-motion": "^12.23.6",
+    "framer-motion": "^12.3.6",
     "gray-matter": "^4.0.3",
+    "@mdx-js/react": "^2.3.0",
     "next": "15.4.2",
     "next-mdx-remote": "^5.0.0",
     "next-sitemap": "^4.2.3",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
-    "@types/node": "24.1.0",
-    "@types/react": "19.1.8",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.4.2",
@@ -32,3 +36,4 @@
     "node": ">=18.0.0"
   }
 }
+

@@ -1,24 +1,56 @@
 // components/Header.tsx
-import React from 'react';
-import Link from 'next/link'; // Import Link for Next.js navigation
+import Link from 'next/link';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  title?: string;
+  date?: string;
+  excerpt?: string;
+  coverImage?: string;
+  category?: string;
+  author?: string;
+  readTime?: string;
+  slug?: string;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  title,
+  date,
+  excerpt,
+  coverImage,
+  category,
+  author,
+  readTime,
+  slug,
+}) => {
   return (
-    <header className="bg-primary text-cream py-4">
-      <nav className="container flex justify-between items-center">
-        <Link href="/" className="text-2xl font-display font-bold">
-          Abraham of London
+    <header className="bg-warmWhite p-4">
+      <nav>
+        <Link href="/" className="text-primary hover:text-gold">
+          Home
         </Link>
-        <ul className="flex space-x-4">
-          <li><Link href="/about" className="hover:text-gold">About</Link></li>
-          <li><Link href="/blog" className="hover:text-gold">Blog</Link></li>
-          <li><Link href="/books" className="hover:text-gold">Books</Link></li>
-          <li><Link href="/brands" className="hover:text-gold">Brands</Link></li>
-          <li><Link href="/contact" className="hover:text-gold">Contact</Link></li>
-        </ul>
+        {slug && (
+          <Link href={`/blog/${slug}`} className="text-primary hover:text-gold ml-4">
+            {title || 'Blog Post'}
+          </Link>
+        )}
       </nav>
+      {title && (
+        <div>
+          <h1 className="text-2xl font-display font-semibold">{title}</h1>
+          {category && date && (
+            <p className="text-sm text-softGrey">{category} • {date}</p>
+          )}
+          {author && readTime && (
+            <p className="text-sm text-softGrey">By {author} • {readTime}</p>
+          )}
+          {coverImage && (
+            <img src={coverImage} alt={title} className="w-full h-48 object-cover" />
+          )}
+          {excerpt && <p className="text-charcoal">{excerpt}</p>}
+        </div>
+      )}
     </header>
   );
 };
 
-export default Header; // Export as default for consistency and correct import
+export default Header;
