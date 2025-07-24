@@ -1,5 +1,3 @@
-// pages/contact.tsx
-
 import React from 'react'; // Make sure React is imported
 import Layout from '../components/Layout'; // Adjust path if needed
 import Head from 'next/head';
@@ -24,7 +22,18 @@ export default function ContactPage() { // Or whatever your component name is
         <ul className="space-y-4 text-lg">
           <li className="flex items-center justify-center">
             <i className="fas fa-envelope text-blue-600 mr-3"></i>
-            <span>Email: </span><a href="mailto:contact@abrahamoflondon.org" className="text-blue-600 hover:underline ml-2">contact@abrahamoflondon.org</a>
+            <span>Email: </span>
+            <a href="mailto:info@abrahamoflondon.org" className="text-blue-600 hover:underline ml-2">info@abrahamoflondon.org</a>
+          </li>
+          <li className="flex items-center justify-center">
+            <i className="fas fa-envelope text-blue-600 mr-3"></i>
+            <span>Email: </span>
+            <a href="mailto:abraham@abrahamoflondon.org" className="text-blue-600 hover:underline ml-2">abraham@abrahamoflondon.org</a>
+          </li>
+          <li className="flex items-center justify-center">
+            <i className="fas fa-phone-alt text-green-600 mr-3"></i> {/* Changed icon to phone for clarity */}
+            <span>Phone: </span>
+            <a href="tel:+44206225909" className="text-green-600 hover:underline ml-2">+44 20 6225 909</a>
           </li>
           <li className="flex items-center justify-center">
             <i className="fab fa-twitter text-blue-400 mr-3"></i>
@@ -32,7 +41,7 @@ export default function ContactPage() { // Or whatever your component name is
           </li>
           <li className="flex items-center justify-center">
             <i className="fab fa-linkedin-in text-blue-700 mr-3"></i>
-            <span>LinkedIn: </span><Link href="https://linkedin.com/in/abrahamoflondon" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">/in/abrahamoflondon</a></Link>
+            <span>LinkedIn: </span><Link href="https://www.linkedin.com/in/abraham-adaramola-06630321" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">/in/abrahamoflondon</a></Link>
           </li>
           {/* Add more contact methods as needed */}
         </ul>
