@@ -1,36 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-
-  // Keep webpack alias configuration if you encountered React/React-DOM resolution issues
   webpack: (config, { isServer }) => {
+    // Add aliases for react/jsx-runtime and react/jsx-dev-runtime
+    // This explicitly tells Webpack where to find these modules.
     config.resolve.alias = {
-      ...config.resolve.alias,
-      react: require.resolve('react'),
-      'react-dom': require.resolve('react-dom'),
+      ...config.resolve.alias, // Keep existing aliases
+      'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+      'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
     };
 
-    // Optional: enable if you hit .mjs/ESM issues in node_modules
-    // config.module.rules.push({
-    //    test: /\.mjs$/,
-    //    include: /node_modules/,
-    //    type: 'javascript/auto',
-    // });
-
+    // Important: return the modified config
     return config;
   },
-
-  // ONLY include compiler.styledComponents if you are actively using styled-components library
-  // If you are only using Tailwind CSS, you can remove this block.
-  compiler: {
-    styledComponents: true,
-  },
-
-  // Do NOT include images.unoptimized: true unless you are doing a full static export (output: 'export')
-  // and not using Netlify's Next.js plugin for image optimization.
-  // images: {
-  //   unoptimized: true,
-  // },
+  // If you have other Next.js specific configurations (e.g., images, experimental features),
+  // make sure to include them here. If not, this can be the entire content.
 };
 
 module.exports = nextConfig;
