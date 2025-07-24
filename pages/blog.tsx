@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts'; // Adjust path if necessary
 import BlogCard from '../components/BlogCard'; // Assuming BlogCard exists
+import Layout from '../components/Layout'; // Make sure Layout is imported
 
 interface BlogProps {
   posts: PostMeta[];
@@ -10,7 +11,7 @@ interface BlogProps {
 
 const Blog: React.FC<BlogProps> = ({ posts }) => {
   return (
-    <>
+    <Layout> {/* Wrap with Layout */}
       <Head>
         <title>Blog | Abraham of London</title>
         <meta name="description" content="Explore insightful articles and thoughts from Abraham of London." />
@@ -23,7 +24,7 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
           ))}
         </div>
       </section>
-    </>
+    </Layout>
   );
 };
 
