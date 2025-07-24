@@ -1,4 +1,8 @@
 [build]
   command = "npm run build"
-  publish = ".next/out"
+  publish = ".next"  # Not .next/out
+  functions = "netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
