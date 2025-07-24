@@ -1,9 +1,8 @@
 // pages/books/index.tsx
-import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../../components/Layout'; // Path adjusted for nested folder
-import BookCard from '../../components/BookCard'; // Path adjusted for nested folder
+import Layout from '../../components/Layout';
+import BookCard from '../../components/BookCard';
 
 interface Book {
   slug: string;
@@ -18,16 +17,14 @@ interface BooksPageProps {
 }
 
 export const getStaticProps = async () => {
-  // Replace this with your actual data fetching logic (e.g., reading from content/books)
   const books: Book[] = [
     {
       slug: 'fathering-without-fear',
       title: 'Fathering Without Fear',
       coverImage: '/assets/images/fathering-without-fear.webp',
       author: 'Abraham of London',
-      excerpt: 'An impactful memoir and guide on navigating modern fatherhood with courage and intention.'
+      excerpt: 'An impactful memoir and guide on navigating modern fatherhood with courage and intention.',
     },
-    // Add more books as needed
   ];
 
   return {
