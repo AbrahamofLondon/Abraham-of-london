@@ -1,42 +1,119 @@
 // pages/contact.tsx
-
-import React from 'react'; // Make sure React is imported
-import Layout from '../components/Layout'; // Adjust path if needed
 import Head from 'next/head';
-import Link from 'next/link'; // If you use Link components
+import React, { useState } from 'react';
 
-// ... any other imports or data fetching functions you have for this page ...
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+  const [status, setStatus] = useState<string | null>(null);
 
-export default function ContactPage() { // Or whatever your component name is
-  return ( // <--- *** THIS OPENING PARENTHESIS IS CRUCIAL ***
-    <Layout>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('sending');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' }); // Clear form
+      } else {
+        setStatus(`error: ${data.message || 'Something went wrong.'}`);
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      setStatus('error: Network error or API unreachable.');
+    }
+  };
+
+  return (
+    <>
       <Head>
-        <title>Contact Abraham of London</title>
+        <title>Contact | Abraham of London</title>
         <meta name="description" content="Get in touch with Abraham of London for inquiries, collaborations, or support." />
       </Head>
+      <section className="container mx-auto py-10 px-4">
+        <h1 className="text-4xl font-display font-bold text-primary mb-8 text-center">Contact Me</h1>
+        <div className="max-w-xl mx-auto bg-warmWhite p-8 rounded-lg shadow-md">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-charcoal font-semibold mb-2">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-softGrey rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-charcoal font-semibold mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-softGrey rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="block text-charcoal font-semibold mb-2">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={5}
+                value={formData.message}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-softGrey rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              className="w-full px-6 py-3 bg-primary text-cream font-bold rounded-md hover:bg-gold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={status === 'sending'}
+            >
+              {status === 'sending' ? 'Sending...' : 'Send Message'}
+            </button>
+            {status && status !== 'sending' && (
+              <p
+                className={`text-center mt-4 ${
+                  status.startsWith('error') ? 'text-red-600' : 'text-green-600'
+                }`}
+              >
+                {status.replace('error: ', '')}
+              </p>
+            )}
+          </form>
+        </div>
+      </section>
+    </>
+  );
+};
 
-      <div className="max-w-xl mx-auto py-20 px-4 text-center">
-        <h1 className="text-4xl font-bold mb-6">Get in Touch</h1>
-        <p className="text-lg text-gray-700 mb-8">
-          I'm always open to new ideas, collaborations, and conversations. Feel free to reach out through the following channels:
-        </p>
-
-        <ul className="space-y-4 text-lg">
-          <li className="flex items-center justify-center">
-            <i className="fas fa-envelope text-blue-600 mr-3"></i>
-            <span>Email: </span><a href="mailto:contact@abrahamoflondon.org" className="text-blue-600 hover:underline ml-2">contact@abrahamoflondon.org</a>
-          </li>
-          <li className="flex items-center justify-center">
-            <i className="fab fa-twitter text-blue-400 mr-3"></i>
-            <span>Twitter: </span><Link href="https://twitter.com/abraham_london" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">@abraham_london</a></Link>
-          </li>
-          <li className="flex items-center justify-center">
-            <i className="fab fa-linkedin-in text-blue-700 mr-3"></i>
-            <span>LinkedIn: </span><Link href="https://linkedin.com/in/abrahamoflondon" passHref><a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">/in/abrahamoflondon</a></Link>
-          </li>
-          {/* Add more contact methods as needed */}
-        </ul>
-      </div>
-    </Layout>
-  ); // <--- *** THIS CLOSING PARENTHESIS AND SEMICOLON ARE CRUCIAL ***
-}
+export default Contact;
