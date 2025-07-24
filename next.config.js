@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-<<<<<<< HEAD
   reactStrictMode: true,
 
+  // Keep experimental.legacyReact if you encountered specific React import/resolution issues
   experimental: {
-    legacyReact: true, // ✅ This is what fixes Netlify import error
+    legacyReact: true,
   },
 
+  // Keep webpack alias configuration if you encountered React/React-DOM resolution issues
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -16,26 +17,25 @@ const nextConfig = {
 
     // Optional: enable if you hit .mjs/ESM issues in node_modules
     // config.module.rules.push({
-    //   test: /\.mjs$/,
-    //   include: /node_modules/,
-    //   type: 'javascript/auto',
+    //    test: /\.mjs$/,
+    //    include: /node_modules/,
+    //    type: 'javascript/auto',
     // });
 
     return config;
-=======
- // other Next.js configurations can go here
-  images: {
-    unoptimized: true, // Often needed for 'output: export' if you use next/image without a server
   },
+
+  // ONLY include compiler.styledComponents if you are actively using styled-components library
+  // If you are only using Tailwind CSS, you can remove this block.
   compiler: {
-    styledComponents: true, // Keep if you use styled-components
->>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
+    styledComponents: true,
   },
+
+  // Do NOT include images.unoptimized: true unless you are doing a full static export (output: 'export')
+  // and not using Netlify's Next.js plugin for image optimization.
+  // images: {
+  //   unoptimized: true,
+  // },
 };
 
 module.exports = nextConfig;
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 4de6a5e0bf2f09c14b0e904dd196874465326cf7
