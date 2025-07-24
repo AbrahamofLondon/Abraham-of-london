@@ -1,6 +1,6 @@
 // pages/_app.js
-import '../styles/global.css'; // Assuming your global styles are here
-import Layout from '../components/Layout'; // Import your Layout component
+import '../styles/globals.css';
+import Layout from '../components/Layout'; // This will now definitively resolve to Layout.tsx
 
 function MyApp({ Component, pageProps }) {
   return (
