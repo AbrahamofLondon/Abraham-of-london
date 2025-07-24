@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { GetStaticProps } from 'next';
 import { getAllBooks, BookMeta } from '../lib/books'; // Adjust path if necessary
 import BookCard from '../components/BookCard'; // Assuming BookCard exists
+import Layout from '../components/Layout'; // Make sure Layout is imported
 
 interface BooksProps {
   books: BookMeta[];
@@ -10,7 +11,7 @@ interface BooksProps {
 
 const Books: React.FC<BooksProps> = ({ books }) => {
   return (
-    <>
+    <Layout> {/* Wrap with Layout */}
       <Head>
         <title>Books | Abraham of London</title>
         <meta name="description" content="Discover books and publications by Abraham of London." />
@@ -23,7 +24,7 @@ const Books: React.FC<BooksProps> = ({ books }) => {
           ))}
         </div>
       </section>
-    </>
+    </Layout>
   );
 };
 
