@@ -11,7 +11,7 @@
   "dependencies": {
     "@mdx-js/react": "^2.3.0",
     "autoprefixer": "^10.4.19",
-    "framer-motion": "^12.23.9",
+    "framer-motion": "^11.0.0",
     "gray-matter": "^4.0.3",
     "next": "^15.4.4",
     "next-mdx-remote": "^4.4.1",
