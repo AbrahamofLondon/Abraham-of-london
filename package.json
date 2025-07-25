@@ -10,6 +10,7 @@
     "postinstall": "npm install autoprefixer"
   },
   "dependencies": {
+    "@netlify/next": "^1.4.9",
     "framer-motion": "^11.2.10",
     "gray-matter": "^4.0.3",
     "next": "14.2.3",
