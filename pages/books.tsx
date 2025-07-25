@@ -1,11 +1,12 @@
+// pages/books.tsx
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { getAllBooks, BookMeta } from '../lib/books'; // <--- CHANGE BookItem to BookMeta
+import { getAllBooks, BookMeta } from '../lib/books'; // Make sure BookMeta is imported here!
 import BookCard from '../components/BookCard';
 import Layout from '../components/Layout';
 
 interface BooksPageProps {
-  books: BookMeta[];
+  books: BookMeta[]; // Use BookMeta here
 }
 
 const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
@@ -28,8 +29,11 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
                   title={book.title}
                   coverImage={book.coverImage}
                   excerpt={book.excerpt}
-                  buyLink={book.buyLink}
+                  buyLink={book.buyLink} // This is now string | undefined, handled by BookCard
                   // Pass any other necessary props to BookCard based on BookMeta
+                  // For example:
+                  // author={book.author}
+                  // genre={book.genre}
                 />
               ))}
             </div>
@@ -49,6 +53,8 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
     'coverImage',
     'excerpt',
     'buyLink',
+    'author', // Make sure these are pulled if you use them in BookCard
+    'genre',
     // Include any other fields you need for the BookCard or the page
   ]);
 
