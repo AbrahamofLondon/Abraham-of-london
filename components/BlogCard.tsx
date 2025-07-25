@@ -1,31 +1,38 @@
-// components/BlogCard.tsx (Example structure if needed)
-import Image from 'next/image';
+// components/BlogCard.tsx (Example structure)
+
+// ... other imports ...
 
 interface BlogCardProps {
-  post: {
-    slug: string;
-    title: string;
-    coverImage: string; // This will hold the path from MDX
-    excerpt: string;
-    // ... other properties
-  };
+  slug: string; 
+  title: string;
+  date: string;
+  coverImage: string;
+  excerpt: string;
+  author: string; // Assuming these are also props
+  readTime: string; // Assuming these are also props
+  category: string; // Assuming these are also props
+  tags: string[]; // Assuming these are also props
+  // ... any other props your BlogCard component expects
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
+const BlogCard: React.FC<BlogCardProps> = ({
+  slug, // Make sure to destructure it here too
+  title,
+  date,
+  coverImage,
+  excerpt,
+  author,
+  readTime,
+  category,
+  tags,
+  // ...
+}) => {
+  // ... component JSX, likely using `slug` in a Next.js <Link> component
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      {post.coverImage && (
-        <Image
-          src={post.coverImage} // This uses the path from your MDX
-          alt={post.title}
-          width={400} // Adjust these
-          height={250} // Adjust these (e.g., for blog post card aspect ratio)
-          layout="responsive"
-          objectFit="cover"
-        />
-      )}
-      {/* ... rest of BlogCard content ... */}
-    </div>
+    <a href={`/posts/${slug}`} className="block"> {/* Example usage with Link */}
+      {/* ... rest of your BlogCard JSX */}
+    </a>
   );
 };
+
 export default BlogCard;
