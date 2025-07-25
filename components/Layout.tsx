@@ -1,40 +1,52 @@
 // components/Layout.tsx
-import React, { ReactNode } from 'react'; // Keep React import if using React.FC or hooks
+import React, { ReactNode } from 'react';
 import Head from 'next/head';
-import Header from './Header'; // Correctly imports Header from Header.tsx
+import Header from './Header';
 
-// Define the props interface for the Layout component
 interface LayoutProps {
-  children: ReactNode; // 'children' allows other components to be nested inside Layout
+  children: ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  // Define your site's base URL dynamically or as a constant
+  // For production, this should be your actual live domain.
+  // For local development, it will be localhost.
+  // You might want to use an environment variable for this: process.env.NEXT_PUBLIC_SITE_URL
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://abrahamoflondon.org'; // IMPORTANT: REPLACE WITH YOUR ACTUAL LIVE DOMAIN
+
   return (
     <>
       <Head>
-        {/* Common meta tags for your site */}
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="/favicon.ico" /> {/* Consider adding a favicon */}
+
+        {/* Open Graph (Facebook, LinkedIn, etc.) Meta Tags */}
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Abraham of London" /> {/* Your main site title */}
+        <meta property="og:description" content="Abraham of London - Fearless Fatherhood, Legacy, Faith, and Leadership." /> {/* Your main site description */}
+        <meta property="og:image" content={`${siteUrl}/assets/images/og-image.jpg`} /> {/* Absolute URL for OG Image */}
+        <meta property="og:image:width" content="1200" /> {/* Recommended width */}
+        <meta property="og:image:height" content="630" /> {/* Recommended height */}
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@abrahamoflondon" /> {/* Optional: Your Twitter handle */}
+        <meta name="twitter:creator" content="@abrahamoflondon" /> {/* Optional: Creator's Twitter handle */}
+        <meta name="twitter:title" content="Abraham of London" />
+        <meta name="twitter:description" content="Abraham of London - Fearless Fatherhood, Legacy, Faith, and Leadership." />
+        <meta name="twitter:image" content={`${siteUrl}/assets/images/twitter-image.webp`} /> {/* Absolute URL for Twitter Image */}
+
         {/* You can add a default favicon here if you want, e.g., <link rel="icon" href="/favicon.ico" /> */}
         {/* Other common SEO meta tags can go here */}
       </Head>
-      {/* This div wraps the entire page content.
-          - min-h-screen ensures it takes at least the full viewport height.
-          - flex flex-col makes it a flex container with items stacked vertically.
-          - font-body applies your custom 'body' font defined in tailwind.config.js
-            (which should map to 'GeistMono-Regular' as per our discussion).
-      */}
-      <div className="min-h-screen flex flex-col font-body">
-        {/* Your Header component goes at the top of every page */}
-        <Header />
 
-        {/* The main content area, which expands to fill available space.
-            'children' will be whatever content is passed into the Layout component from your pages.
-        */}
+      <div className="min-h-screen flex flex-col font-body">
+        <Header />
         <main className="flex-grow">
           {children}
         </main>
-
         {/* If you have a Footer component, you would include it here: */}
         {/* <Footer /> */}
       </div>

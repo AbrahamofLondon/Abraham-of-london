@@ -1,61 +1,69 @@
 // lib/books.ts
 import fs from 'fs';
-import path from 'path';
+import { join } from 'path';
 import matter from 'gray-matter';
 
-// Define the path to your markdown books directory
-const booksDirectory = path.join(process.cwd(), 'books'); // Assuming your books are in a 'books' directory at the root
+// This should point to 'C:\Codex-setup\Abraham-of-london\books\'
+const booksDirectory = join(process.cwd(), 'books'); 
 
 export interface BookMeta {
+  slug: string;
   title: string;
-  date?: string; // Books might not always have a date like blog posts
-  excerpt: string;
+  date?: string; // date might be optional for books
   coverImage: string;
-  category?: string;
+  excerpt: string;
   author: string;
-  readTime?: string; // Can be added if you want to track
-  slug: string;
+  genre?: string;
+  buyLink?: string;
+  seo?: {
+    title: string;
+    description: string;
+    keywords: string[];
+  };
+  [key: string]: any; // Allow for additional front matter properties
 }
 
-interface Book {
-  slug: string;
-  data: BookMeta;
-  content: string;
+export function getBookSlugs() {
+  const files = fs.readdirSync(booksDirectory);
+  return files.filter(file => file.endsWith('.mdx')).map(file => file.replace(/\.mdx$/, ''));
 }
 
-export function getBookSlugs(): string[] {
-  // Ensure the directory exists before reading
-  if (!fs.existsSync(booksDirectory)) {
-    console.warn(`Warning: Books directory not found at ${booksDirectory}. Returning empty array.`);
-    return [];
-  }
-  return fs.readdirSync(booksDirectory)
-           .filter(fileName => fileName.endsWith('.md') || fileName.endsWith('.mdx'))
-           .map(fileName => fileName.replace(/\.mdx?$/, ''));
-}
-
-export function getBookBySlug(slug: string): Book {
-  const fullPath = path.join(booksDirectory, `${slug}.md`); // Assuming .md files
+export function getBookBySlug(slug: string, fields: string[] = []): BookMeta {
+  const fullPath = join(booksDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  return {
-    slug,
-    data: data as BookMeta, // Cast data to BookMeta interface
-    content,
-  };
+  const items: BookMeta = { slug, title: '', coverImage: '', excerpt: '', author: '' };
+
+  if (data.title) items.title = data.title;
+  if (data.date) items.date = data.date;
+  if (data.coverImage) items.coverImage = data.coverImage;
+  if (data.excerpt) items.excerpt = data.excerpt;
+  if (data.author) items.author = data.author;
+
+  if (data.genre) items.genre = data.genre;
+  if (data.buyLink) items.buyLink = data.buyLink;
+  if (data.seo) items.seo = data.seo;
+
+  if (fields.includes('content')) {
+    items.content = content;
+  }
+
+  fields.forEach((field) => {
+    if (field !== 'slug' && field !== 'content' && items[field] === undefined) {
+      if (typeof data[field] !== 'undefined') {
+        items[field] = data[field];
+      }
+    }
+  });
+
+  return items;
 }
 
-export function getAllBooks(): Book[] {
+export function getAllBooks(fields: string[] = []): BookMeta[] {
   const slugs = getBookSlugs();
-  const books = slugs.map(slug => getBookBySlug(slug));
-
-  // Optional: Sort books by a property if needed (e.g., date)
-  // books.sort((a, b) => {
-  //   const dateA = new Date(a.data.date || '1970-01-01'); // Provide a default date if optional
-  //   const dateB = new Date(b.data.date || '1970-01-01');
-  //   return dateB.getTime() - dateA.getTime();
-  // });
-
+  const books = slugs
+    .map((slug) => getBookBySlug(slug, fields));
+    // Books might not need sorting by date, but if they do, add .sort here.
   return books;
 }
