@@ -1,6 +1,7 @@
+// pages/index.tsx
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image from 'next/image'; // Ensure Image is imported
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import BlogPostCard from '../components/BlogPostCard';
@@ -17,10 +18,13 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
       <Head>
         <title>Abraham of London - Fearless Fatherhood & Legacy</title>
         <meta name="description" content="Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy." />
-        {/* Add Open Graph/Twitter meta tags here as needed */}
+        {/* Open Graph / Twitter meta tags - Paths corrected based on public/assets/images */}
+        <meta property="og:image" content="/assets/images/og-image.jpg" />
+        <meta name="twitter:image" content="/assets/images/twitter-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" /> {/* Recommended for Twitter cards */}
       </Head>
 
-      {/* Hero Section */}
+      {/* Hero Section - Still using gradient as per previous code, not the banner image (abraham-of-london-banner.webp) */}
       <section className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-20 text-center">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-fadeIn">
@@ -52,7 +56,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
                   slug={post.slug}
                   title={post.title}
                   date={post.date}
-                  coverImage={post.coverImage} // This path will be handled within BlogPostCard if it uses Image component
+                  coverImage={post.coverImage} // This path needs to be correct in MDX frontmatter (e.g., /assets/images/blog/fathering-principles.jpg)
                   excerpt={post.excerpt}
                   author={post.author}
                   readTime={post.readTime}
@@ -74,7 +78,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
         </div>
       </section>
 
-      {/* About Section (Example) */}
+      {/* About Section */}
       <section className="bg-gray-100 py-16">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
           <div className="md:w-1/2 text-center md:text-left">
@@ -87,9 +91,9 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
             </Link>
           </div>
           <div className="md:w-1/2 flex justify-center">
-            {/* CORRECTED IMAGE PATH: If your images are in public/assets/images, use /assets/images/ */}
+            {/* CORRECTED IMAGE PATH for profile portrait */}
             <Image
-              src="/assets/images/profile.jpg" // CHANGED FROM /images/profile.jpg
+              src="/assets/images/profile-portrait.webp" // Corrected filename and extension
               alt="Abraham of London"
               width={400}
               height={400}
@@ -99,7 +103,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
         </div>
       </section>
 
-      {/* Books Section (Example) */}
+      {/* Books Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">My Books</h2>
