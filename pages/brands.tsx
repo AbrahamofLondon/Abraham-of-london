@@ -3,8 +3,9 @@ import React from 'react';
 import Layout from '../components/Layout';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image'; // Ensure Image is imported
 
-export default function BrandsPage() { // Ensure this is a default export
+export default function BrandsPage() {
   return (
     <Layout>
       <Head>
@@ -19,9 +20,31 @@ export default function BrandsPage() { // Ensure this is a default export
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Main Abraham of London Logo on Brands Page */}
+            {/* Path: public/assets/images/logo/abraham-of-london-logo.svg */}
+            <div className="brand-item bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 col-span-1 md:col-span-2 text-center">
+                <Image
+                    src="/assets/images/logo/abraham-of-london-logo.svg"
+                    alt="Abraham of London Logo"
+                    width={200} // Adjust width as needed for display
+                    height={100} // Adjust height as needed
+                    className="mx-auto mb-4"
+                />
+                <h3 className="text-2xl font-semibold mb-2">Abraham of London</h3>
+                <p className="text-gray-700">The core brand representing my personal work and vision.</p>
+                {/* No external link for the main brand itself usually, or add if applicable */}
+            </div>
+
             {/* Example Brand 1: Alomarada */}
             <div className="brand-item bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                <img src="/assets/images/alomarada-logo.webp" alt="Alomarada Logo" className="w-32 h-32 mx-auto mb-4" />
+                {/* Path: public/assets/images/logo/alomarada.svg */}
+                <Image
+                    src="/assets/images/logo/alomarada.svg"
+                    alt="Alomarada Logo"
+                    width={128} // Corresponds to w-32 (128px) in Tailwind
+                    height={128} // Corresponds to h-32 (128px) in Tailwind
+                    className="mx-auto mb-4"
+                />
                 <h3 className="text-2xl font-semibold mb-2 text-center">Alomarada</h3>
                 <p className="text-gray-700 text-center">Redefining luxury through sustainable practices and exquisite craftsmanship.</p>
                 <div className="mt-4 text-center">
@@ -33,7 +56,14 @@ export default function BrandsPage() { // Ensure this is a default export
 
             {/* Example Brand 2: Endureluxe */}
             <div className="brand-item bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                <img src="/assets/images/endureluxe-logo.webp" alt="Endureluxe Logo" className="w-32 h-32 mx-auto mb-4" />
+                {/* Path: public/assets/images/logo/endureluxe.svg */}
+                <Image
+                    src="/assets/images/logo/endureluxe.svg"
+                    alt="Endureluxe Logo"
+                    width={128} // Corresponds to w-32 (128px) in Tailwind
+                    height={128} // Corresponds to h-32 (128px) in Tailwind
+                    className="mx-auto mb-4"
+                />
                 <h3 className="text-2xl font-semibold mb-2 text-center">Endureluxe</h3>
                 <p className="text-gray-700 text-center">High-performance sustainable materials for a durable future.</p>
                 <div className="mt-4 text-center">
@@ -41,11 +71,3 @@ export default function BrandsPage() { // Ensure this is a default export
                         <a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Learn More →</a>
                     </Link>
                 </div>
-            </div>
-
-            {/* Add more brand items as needed */}
-        </div>
-      </div>
-    </Layout>
-  );
-}
