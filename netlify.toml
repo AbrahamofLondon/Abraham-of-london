@@ -1,7 +1,3 @@
 [build]
-  command = "npm run build" # Use "npm run build" for Next.js deployments
+  command = "npm install && npm run build" 
   publish = ".next"
-  functions = "netlify/functions" # This is important if you have Netlify Functions outside of Next.js API routes
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
