@@ -1,6 +1,6 @@
 // components/Layout.tsx
-import Header from './Header'; // Assuming your nav/header is in Header.tsx
-import Footer from './components/Footer'; // Assuming your footer is here, adjust path if needed
+import Header from './Header';
+import Footer from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,9 +9,9 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header /> {/* This is where the navigation should be rendered ONCE */}
+      <Header />
       <main className="flex-grow">
-        {children} {/* This is where the content from index.tsx (and other pages) is injected */}
+        {children}
       </main>
       <Footer />
     </div>
