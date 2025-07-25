@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GetStaticProps } from 'next'; // Corrected: Added GetStaticProps import
+import { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogCard from '../components/BlogCard';
 import { getAllPosts, PostMeta } from '../lib/posts';
@@ -51,19 +51,19 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {latestPosts.map((post) => {
                 return (
-             <BlogCard
-             key={post.slug}
-             slug={post.slug}
-             title={post.title}
-             date={post.date}
-             coverImage={post.coverImage}
-             excerpt={post.excerpt}
-             author={post.author}
-             readTime={post.readTime}
-             category={post.category}
-             tags={post.tags}
-  />
-);
+                  <BlogCard
+                    key={post.slug}
+                    slug={post.slug}
+                    title={post.title}
+                    date={post.date}
+                    coverImage={post.coverImage}
+                    excerpt={post.excerpt}
+                    author={post.author}
+                    readTime={post.readTime}
+                    category={post.category}
+                    tags={post.tags}
+                  />
+                );
               })}
             </div>
           ) : (
@@ -114,4 +114,4 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   };
 };
 
-export default Home;
+export default Home; // This is the correct and only default export for the page
