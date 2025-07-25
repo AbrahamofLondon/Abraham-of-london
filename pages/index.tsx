@@ -1,13 +1,14 @@
 // pages/index.tsx
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image'; // Ensure Image is imported
+import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import BlogPostCard from '../components/BlogPostCard';
 import Layout from '../components/Layout';
+import { motion } from 'framer-motion';
+import EmailSignup from '../components/EmailSignup';
 
-// Ensure this interface is present and correctly defined BEFORE the Home component
 interface HomeProps {
   latestPosts: PostMeta[];
 }
@@ -18,33 +19,48 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
       <Head>
         <title>Abraham of London - Fearless Fatherhood & Legacy</title>
         <meta name="description" content="Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy." />
-        {/* Open Graph / Twitter meta tags - Paths corrected based on public/assets/images */}
         <meta property="og:image" content="/assets/images/og-image.jpg" />
         <meta name="twitter:image" content="/assets/images/twitter-image.jpg" />
-        <meta name="twitter:card" content="summary_large_image" /> {/* Recommended for Twitter cards */}
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      {/* Hero Section - Still using gradient as per previous code, not the banner image (abraham-of-london-banner.webp) */}
-      <section className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-20 text-center">
-        <div className="container mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-fadeIn">
+      {/* Hero Section with Banner and Motion */}
+      <section className="relative h-[90vh] bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: "url('/assets/images/abraham-of-london-banner.webp')" }}>
+        <div className="bg-black/60 absolute inset-0 z-0" />
+        <div className="relative z-10 text-center text-white px-4 max-w-3xl">
+          <motion.h1
+            className="text-5xl md:text-6xl font-extrabold mb-4"
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
             Fearless Fatherhood & Lasting Legacy
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-0 animate-fadeIn" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+          </motion.h1>
+          <motion.p
+            className="text-xl md:text-2xl mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
             Guiding men to lead with conviction, build strong families, and impact the world.
-          </p>
-          <div className="space-x-4 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
-            <Link href="/blog" className="bg-white text-blue-700 hover:bg-gray-100 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg">
+          </motion.p>
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+          >
+            <Link href="/blog" className="bg-white text-blue-700 px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-gray-100">
               Read Blog
             </Link>
-            <Link href="/books" className="border border-white text-white hover:bg-white hover:text-blue-700 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg">
+            <Link href="/books" className="border border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-700">
               Explore Books
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Latest Blog Posts Section */}
+      {/* Latest Blog Posts */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Latest Insights</h2>
@@ -56,7 +72,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
                   slug={post.slug}
                   title={post.title}
                   date={post.date}
-                  coverImage={post.coverImage} // This path needs to be correct in MDX frontmatter (e.g., /assets/images/blog/fathering-principles.jpg)
+                  coverImage={post.coverImage}
                   excerpt={post.excerpt}
                   author={post.author}
                   readTime={post.readTime}
@@ -91,9 +107,8 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
             </Link>
           </div>
           <div className="md:w-1/2 flex justify-center">
-            {/* CORRECTED IMAGE PATH for profile portrait */}
             <Image
-              src="/assets/images/profile-portrait.webp" // Corrected filename and extension
+              src="/assets/images/profile-portrait.webp"
               alt="Abraham of London"
               width={400}
               height={400}
@@ -103,21 +118,21 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
         </div>
       </section>
 
-      {/* Books Section */}
+      {/* Books CTA */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">My Books</h2>
-          <p className="text-center text-gray-600 text-lg mb-8">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">My Books</h2>
+          <p className="text-gray-600 text-lg mb-8">
             Explore resources designed to equip you with the principles for fearless fatherhood, unshakeable faith, and a lasting impact.
           </p>
-          <div className="text-center">
-            <Link href="/books" className="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
-              View All Books
-            </Link>
-          </div>
+          <Link href="/books" className="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
+            View All Books
+          </Link>
         </div>
       </section>
 
+      {/* Email Signup */}
+      <EmailSignup />
     </Layout>
   );
 };
