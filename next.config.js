@@ -1,14 +1,9 @@
-const { withNetlify } = require('@netlify/next');
-
-module.exports = withNetlify({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
-
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'react/jsx-runtime': require.resolve('react/jsx-runtime'),
-      'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
-    };
-    return config;
+  images: {
+    domains: ['res.cloudinary.com'], // or your CDN
   },
-});
+};
+
+module.exports = nextConfig;
