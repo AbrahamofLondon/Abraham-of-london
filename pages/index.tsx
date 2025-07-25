@@ -101,4 +101,5 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
 
       {/* Books Section (Example) */}
       <section className="py-16 bg-white">
-        <div className="
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">My Books</h2>
