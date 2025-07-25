@@ -1,58 +1,63 @@
-// pages/books.tsx
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { getAllBooks, BookItem } from '../lib/books'; // <--- CHANGED BookMeta to BookItem
+import { getAllBooks, BookMeta } from '../lib/books'; // <--- CHANGE BookItem to BookMeta
 import BookCard from '../components/BookCard';
 import Layout from '../components/Layout';
 
-interface BooksProps {
-  books: BookItem[]; // <--- CHANGED BookMeta[] to BookItem[]
+interface BooksPageProps {
+  books: BookMeta[];
 }
 
-const Books: React.FC<BooksProps> = ({ books }) => {
+const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
   return (
     <Layout>
       <Head>
-        <title>Books | Abraham of London</title>
-        <meta name="description" content="Explore books by Abraham of London, covering theology, personal growth, and more." />
+        <title>Abraham of London - Books</title>
+        <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, and legacy." />
       </Head>
 
-      <section className="container mx-auto px-4 py-8">
-        <h1 className="text-5xl font-extrabold text-center text-gray-900 mb-12">Our Books</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {books.map((book) => (
-            <BookCard
-              key={book.slug}
-              slug={book.slug}
-              title={book.title}
-              coverImage={book.coverImage}
-              excerpt={book.excerpt}
-              // Pass other book properties to BookCard if it expects them
-              // e.g., author={book.author}, genre={book.genre}
-            />
-          ))}
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">My Books</h1>
+          {books && books.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {books.map((book) => (
+                <BookCard
+                  key={book.slug}
+                  slug={book.slug}
+                  title={book.title}
+                  coverImage={book.coverImage}
+                  excerpt={book.excerpt}
+                  buyLink={book.buyLink}
+                  // Pass any other necessary props to BookCard based on BookMeta
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-600">No books found yet.</p>
+          )}
         </div>
       </section>
     </Layout>
   );
 };
 
-export const getStaticProps: GetStaticProps<BooksProps> = async () => {
+export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
   const books = getAllBooks([
     'slug',
     'title',
     'coverImage',
     'excerpt',
-    // Add any other fields your BookCard needs here
-    // e.g., 'author', 'genre'
+    'buyLink',
+    // Include any other fields you need for the BookCard or the page
   ]);
 
   return {
     props: {
       books,
     },
-    revalidate: 1, // Optional: re-generate page every 1 second
+    revalidate: 1, // Optional: Use ISR if you want to regenerate the page periodically
   };
 };
 
-export default Books;
+export default BooksPage;

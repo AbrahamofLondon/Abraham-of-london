@@ -1,12 +1,8 @@
-// lib/posts.ts
 import fs from 'fs';
-import { join } from 'path';
+import path from 'path';
 import matter from 'gray-matter';
 
-// Correct path to your posts directory
-// This should point to 'C:\Codex-setup\Abraham-of-london\posts\'
-const postsDirectory = join(process.cwd(), 'posts');
-
+// Interface defining the post metadata structure
 export interface PostMeta {
   slug: string;
   title: string;
@@ -14,61 +10,125 @@ export interface PostMeta {
   coverImage: string;
   excerpt: string;
   author: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  [key: string]: any; // Allow for additional front matter properties
+  readTime: string;
+  category: string;
+  tags: string[];
+  // Add an index signature if you plan to dynamically access properties by string key
+  // [key: string]: any;
 }
 
-export function getPostSlugs() {
-  // Get all files from the posts directory
-  const files = fs.readdirSync(postsDirectory);
-  // Filter for .mdx files and extract slugs (filenames without extension)
-  return files.filter(file => file.endsWith('.mdx')).map(file => file.replace(/\.mdx$/, ''));
+// Service to handle file system operations (Dependency Inversion)
+interface FileSystem {
+  readDirSync(directory: string): string[];
+  readFileSync(filePath: string, encoding: BufferEncoding): string;
 }
 
-export function getPostBySlug(slug: string, fields: string[] = []): PostMeta {
-  const fullPath = join(postsDirectory, `${slug}.mdx`);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
-
-  const items: PostMeta = { slug, title: '', date: '', coverImage: '', excerpt: '', author: '' };
-
-  // Ensure required fields are always included and cast correctly
-  if (data.title) items.title = data.title;
-  if (data.date) items.date = data.date;
-  if (data.coverImage) items.coverImage = data.coverImage;
-  if (data.excerpt) items.excerpt = data.excerpt;
-  if (data.author) items.author = data.author;
-
-  // Add optional fields if they exist and are requested
-  if (data.readTime) items.readTime = data.readTime;
-  if (data.category) items.category = data.category;
-  if (data.tags) items.tags = data.tags;
-
-  // Ensure content is always included if requested
-  if (fields.includes('content')) {
-    items.content = content;
+class NodeFileSystem implements FileSystem {
+  readDirSync(directory: string): string[] {
+    return fs.readdirSync(directory);
   }
 
-  // Iterate over other requested fields and add them to items
-  fields.forEach((field) => {
-    if (field !== 'slug' && field !== 'content' && items[field] === undefined) {
-      if (typeof data[field] !== 'undefined') {
-        items[field] = data[field];
-      }
+  readFileSync(filePath: string, encoding: BufferEncoding): string {
+    return fs.readFileSync(filePath, encoding);
+  }
+}
+
+// Post service to encapsulate data retrieval logic
+class PostService { // <--- THIS CLASS WRAPPER IS CRUCIAL
+  private readonly fs: FileSystem;
+  private readonly postsDirectory: string;
+
+  constructor(fs: FileSystem, postsDirectory: string) {
+    this.fs = fs;
+    this.postsDirectory = postsDirectory;
+  }
+
+  // Fetch all post slugs
+  getPostSlugs(): string[] {
+    return this.fs.readDirSync(this.postsDirectory).map((fileName) => fileName.replace(/\.mdx$/, ''));
+  }
+
+  // Fetch a single post by slug
+  getPostBySlug(slug: string, fields: (keyof PostMeta)[] = []): Partial<PostMeta> {
+    const fullPath = path.join(this.postsDirectory, `${slug}.mdx`);
+    try {
+      const fileContents = this.fs.readFileSync(fullPath, 'utf8');
+      const { data } = matter(fileContents);
+
+      // Normalize tags to always be an array
+      const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags.toString()] : [];
+
+      const post: PostMeta = {
+        slug,
+        title: data.title || '',
+        date: data.date || '',
+        coverImage: data.coverImage || '',
+        excerpt: data.excerpt || '',
+        author: data.author || '',
+        readTime: data.readTime || '',
+        category: data.category || '',
+        tags,
+      };
+
+      return this.selectFields(post, fields);
+    } catch (error) {
+      console.error(`Error reading post ${slug}:`, error);
+      return {};
     }
-  });
+  }
 
-  return items;
+  // Fetch all posts
+  getAllPosts(fields: (keyof PostMeta)[] = []): PostMeta[] {
+    const fileNames = this.fs.readDirSync(this.postsDirectory);
+    return fileNames.map((fileName) => {
+      const slug = fileName.replace(/\.mdx$/, '');
+      const fullPath = path.join(this.postsDirectory, fileName);
+      try {
+        const fileContents = this.fs.readFileSync(fullPath, 'utf8');
+        const { data } = matter(fileContents);
+
+        // Normalize tags to always be an array
+        const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags.toString()] : [];
+
+        const post: PostMeta = {
+          slug,
+          title: data.title || '',
+          date: data.date || '',
+          coverImage: data.coverImage || '',
+          excerpt: data.excerpt || '',
+          author: data.author || '',
+          readTime: data.readTime || '',
+          category: data.category || '',
+          tags,
+        };
+
+        return this.selectFields(post, fields) as PostMeta;
+      } catch (error) {
+        console.error(`Error reading post ${fileName}:`, error);
+        return {} as PostMeta;
+      }
+    }).filter((post) => Object.keys(post).length > 0).sort((a, b) => (a.date < b.date ? 1 : -1));
+  }
+
+  // Helper method to select fields with type safety
+  private selectFields(post: PostMeta, fields: (keyof PostMeta)[]): Partial<PostMeta> {
+    return fields.reduce((acc, field) => {
+      // Type-safe assignment using a type guard, ensuring post is indexed correctly
+      // Since `PostMeta` should have `[key: string]: any;` (similar to BookMeta),
+      // or if not, the explicit cast below is a fallback for `strict: true`.
+      if (Object.prototype.hasOwnProperty.call(post, field)) {
+          (acc as any)[field] = (post as any)[field];
+      }
+      return acc;
+    }, {} as Partial<PostMeta>);
+  }
 }
 
+// Export a singleton instance for use
+export const postService = new PostService(new NodeFileSystem(), path.join(process.cwd(), 'posts'));
 
-export function getAllPosts(fields: string[] = []): PostMeta[] {
-  const slugs = getPostSlugs();
-  const posts = slugs
-    .map((slug) => getPostBySlug(slug, fields))
-    // sort posts by date in descending order
-    .sort((post1, post2) => (new Date(post1.date) > new Date(post2.date) ? -1 : 1));
-  return posts;
-}
+// Export functions for convenience (these call the service methods)
+export const getPostSlugs = () => postService.getPostSlugs();
+export const getPostBySlug = (slug: string, fields: (keyof PostMeta)[] = []) =>
+  postService.getPostBySlug(slug, fields);
+export const getAllPosts = (fields: (keyof PostMeta)[] = []) => postService.getAllPosts(fields);

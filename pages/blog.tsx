@@ -1,48 +1,45 @@
-// pages/blog.tsx
-import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../components/Layout';
-import BlogCard from '../components/BlogCard';
+import BlogPostCard from '../components/BlogPostCard'; // <--- CHANGE from BlogCard to BlogPostCard
 import { getAllPosts, PostMeta } from '../lib/posts';
+import { GetStaticProps } from 'next'; // Add this import if missing or implicit
 
 interface BlogPageProps {
   posts: PostMeta[];
 }
 
 const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
-  // This console.log will now appear in your browser's developer console
-  console.log('Posts prop received by BlogPage component (client-side):', posts.map(p => p.slug));
-
-  return ( // This is the ONE and ONLY return for the component's JSX
+  return (
     <Layout>
       <Head>
-        <title>Blog - Abraham of London</title>
-        <meta name="description" content="Read the latest insights and articles from Abraham of London on fatherhood, faith, legacy, and more." />
+        <title>Abraham of London - Blog</title>
+        <meta name="description" content="Read the latest blog posts from Abraham of London on various topics." />
       </Head>
 
-      <section className="container mx-auto px-4 py-12">
-        <h1 className="text-5xl font-extrabold text-center text-gray-900 mb-12">Latest Insights</h1>
-
-        {posts.length === 0 ? (
-          <p className="text-center text-gray-600 text-xl">No blog posts available yet. Check back soon!</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <BlogCard
-                key={post.slug}
-                slug={post.slug}
-                title={post.title}
-                date={post.date}
-                coverImage={post.coverImage}
-                excerpt={post.excerpt}
-                author={post.author}
-                readTime={post.readTime}
-                category={post.category}
-                tags={post.tags}
-              />
-            ))}
-          </div>
-        )}
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">All Blog Posts</h1>
+          {posts && posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {posts.map((post) => (
+                <BlogPostCard // <--- CHANGE from BlogCard to BlogPostCard here as well
+                  key={post.slug}
+                  slug={post.slug}
+                  title={post.title}
+                  date={post.date}
+                  coverImage={post.coverImage}
+                  excerpt={post.excerpt}
+                  author={post.author}
+                  readTime={post.readTime}
+                  category={post.category}
+                  tags={post.tags}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-600">No blog posts found yet.</p>
+          )}
+        </div>
       </section>
     </Layout>
   );
@@ -58,17 +55,14 @@ export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
     'author',
     'readTime',
     'category',
-    'tags'
+    'tags',
   ]);
-
-  // This console.log will appear in your terminal during build/dev server startup
-  console.log('Posts fetched by getStaticProps (server-side):', posts.map(p => p.slug));
 
   return {
     props: {
       posts,
     },
-    revalidate: 1, // Optional: Re-generate the page at most once every 1 second
+    revalidate: 1, // Optional: Use ISR if you want to regenerate the page periodically
   };
 };
 

@@ -1,8 +1,9 @@
-// pages/_app.js
 import '../styles/globals.css';
-import Layout from '../components/Layout'; // This will now definitively resolve to Layout.tsx
+import type { AppProps } from 'next/app'; // <--- Import AppProps
+import Layout from '../components/Layout';
 
-function MyApp({ Component, pageProps }) {
+// Function component for your App
+function MyApp({ Component, pageProps }: AppProps) { // <--- Add AppProps type here
   return (
     <Layout>
       <Component {...pageProps} />
