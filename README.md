@@ -1,3 +1,8 @@
+Okay, I can definitely update your `README.md` to reflect the changes we've made and the common build errors we've debugged. This will make it much more helpful for anyone else working on the project, or even for your future self\!
+
+Here is the updated `README.md` file:
+
+````markdown
 # Abraham of London - Project README
 
 ## Project Overview
@@ -28,13 +33,17 @@ This outlines the main directories and their purposes:
 * `/Abraham-of-london` (Project Root)
     * `/components` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Shared UI components (e.g., `Layout.tsx`, `BookCard`). All components are built with TypeScript (`.tsx`).
     * `/pages` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Next.js pages, defining routes (e.g., `index.js`, `about.tsx`, `blog/[slug].tsx`, `books/[slug].tsx`, `brands.tsx`, `contact.tsx`).
-    * `/public/assets` &nbsp; &nbsp; &nbsp; # Images, logos, and other static assets (e.g., `images`, `logo`).
-    * `/content` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Blog posts and book data managed in MDX/Markdown format.
+    * `/public/assets` &nbsp; &nbsp; &nbsp; # General static assets (e.g., logos, favicons).
+    * `/public/images/blog` &nbsp; # Blog post cover images and related graphics.
+    * `/posts` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Blog post content in Markdown/MDX format.
+    * `/books` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Book content in Markdown/MDX format.
+    * `/lib` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Utility functions, especially for data fetching and processing (e.g., `posts.ts`).
     * `/styles` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # TailwindCSS configuration and global CSS styles.
-    * `/utils` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Helper functions (e.g., `getAllContent` for data fetching).
+    * `/utils` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # General helper functions.
     * `package.json` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;# Project metadata, scripts, and dependency definitions.
     * `tsconfig.json` &nbsp; &nbsp; &nbsp; &nbsp; # TypeScript compiler configuration.
     * `tailwind.config.js` &nbsp; &nbsp; # Tailwind CSS configuration file.
+    * `next.config.js` &nbsp; &nbsp; &nbsp; &nbsp; # Next.js configuration file (may include Webpack aliases).
 
 ---
 
@@ -44,8 +53,8 @@ This outlines the main directories and their purposes:
 
 Before setting up the project, ensure you have the following installed:
 
-* **Node.js**: `v20.x LTS` (avoid v22+ for now to prevent potential compatibility issues).
-* **npm**: `v9+` (Node Package Manager, typically bundled with Node.js).
+* **Node.js**: `v22+ LTS` (This is the version Netlify is using successfully in builds).
+* **npm**: `v10+` (Node Package Manager, typically bundled with Node.js).
 * **Git**: Version control system.
 
 ### Setup Instructions
@@ -75,8 +84,8 @@ Follow these steps to get the project running locally:
 
 Here's a list of useful commands for development:
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
+| Command         | Description                                     |
+| :-------------- | :---------------------------------------------- |
 | `npm run dev`   | Starts the development server with hot-reloading. |
 | `npm run build` | Builds the application for production deployment. |
 | `npm run start` | Starts a production-ready server from the built output. |
@@ -92,6 +101,7 @@ This project leverages a modern web development stack:
 * **TypeScript**: A superset of JavaScript that adds static type definitions, enhancing code quality, readability, and maintainability. It's crucial for component props (e.g., `children: React.ReactNode`) and general code reliability.
 * **TailwindCSS**: A utility-first CSS framework that allows for rapid UI development directly in your markup without writing custom CSS.
 * **MDX**: Allows you to write Markdown with embedded JSX components. This is used for dynamic content like blog posts and books, enabling rich, interactive content.
+* **gray-matter**: Library for parsing front matter from Markdown files.
 
 ---
 
@@ -99,9 +109,9 @@ This project leverages a modern web development stack:
 
 Content for the website is organized as follows:
 
-* **Blogs**: Markdown/MDX files located in `/content/blog`.
-* **Books**: Markdown/MDX files located in `/content/books`.
-* **Images**: All images and logos are stored in `/public/assets/images`.
+* **Blogs**: Markdown/MDX files located directly in the `/posts` directory at the project root.
+* **Books**: Markdown/MDX files located directly in the `/books` directory at the project root.
+* **Images**: Blog post cover images are typically in `/public/images/blog`. Other general images and logos are under `/public/assets/images`.
 * **Static Files**: Downloadable assets (e.g., PDFs, EPUBs) are placed under `/public/downloads`.
 
 ---
@@ -126,25 +136,77 @@ The project is designed for seamless deployment on various platforms.
 
 If you encounter `npm run build` failures, especially after making changes to components or pages, these are common issues and their solutions:
 
-1.  **Clear the Next.js Cache:**
-    * **Symptom:** Cryptic or persistent build errors that don't seem to make sense.
-    * **Reason:** Stale build artifacts or cache files can interfere with new builds.
-    * **Solution:** Remove the `.next` build directory entirely.
-        * **Windows:** `rmdir /s /q .next`
-        * **macOS/Linux:** `rm -rf .next`
-    * Then, re-run `npm run build`.
+1.  **`Module not found: Can't resolve 'react/jsx-runtime'`**
+    * **Symptom:** Build fails with errors related to `react/jsx-runtime` or `react/jsx-dev-runtime`.
+    * **Reason:** This can be a complex Next.js internal resolution issue, sometimes related to specific versions or build environments.
+    * **Solution:** Add Webpack aliases in your `next.config.js` to explicitly guide module resolution.
+        ```javascript
+        // next.config.js
+        const path = require('path');
 
-2.  **Verify `Layout` Component Usage:**
+        module.exports = {
+          webpack: (config, { isServer }) => {
+            config.resolve.alias = {
+              ...config.resolve.alias,
+              'react/jsx-runtime.js': path.resolve(__dirname, 'node_modules/react/jsx-runtime.js'),
+              'react/jsx-dev-runtime.js': path.resolve(__dirname, 'node_modules/react/jsx-dev-runtime.js'),
+            };
+            return config;
+          },
+        };
+        ```
+    * After modifying `next.config.js`, run `npm install` again to ensure dependencies are in sync, then `npm run build`.
+
+2.  **`ENOENT: no such file or directory, scandir '/opt/build/repo/posts'` (or `/books`) on CI/CD**
+    * **Symptom:** Local build works, but CI/CD (e.g., Netlify) fails with "no such file or directory" errors for your `posts` or `books` folders.
+    * **Reason:** Git does not track empty directories by default. If your `posts` or `books` directories were empty when committed, Git ignored them, and they aren't present in the build environment.
+    * **Solution:** Add a `.gitkeep` file (or any other dummy file) inside each of these directories to force Git to track them.
+        * Navigate to your project root in the terminal.
+        * Create `.gitkeep` files:
+            ```bash
+            echo > posts/.gitkeep
+            echo > books/.gitkeep
+            ```
+            (On macOS/Linux, you might use `touch posts/.gitkeep` and `touch books/.gitkeep`)
+        * Add, commit, and push these changes to your Git repository:
+            ```bash
+            git add .
+            git commit -m "feat: Add .gitkeep files to content directories for deployment"
+            git push origin main
+            ```
+
+3.  **`ENOENT: no such file or directory, open '.../.gitkeep.md'` or Parsing Errors on `.gitkeep`**
+    * **Symptom:** After adding `.gitkeep` files, your build fails when trying to read/parse `.gitkeep` as a Markdown file, typically with "no such file or directory, open `.../.gitkeep.md`" or "malformed front matter."
+    * **Reason:** Your content-fetching logic (e.g., in `lib/posts.ts`) is trying to read *all* files in the `posts` (or `books`) directory, including the `.gitkeep` placeholder, as if they were valid Markdown posts.
+    * **Solution:** Modify your `getPostSlugs` (or equivalent) function to filter out non-Markdown files before processing them.
+        * Open `lib/posts.ts`.
+        * Locate the `getPostSlugs` function.
+        * Add a `.filter()` method to only include files ending with `.md` or `.mdx`:
+            ```typescript
+            // lib/posts.ts (excerpt)
+            import fs from 'fs';
+            import path from 'path';
+
+            const postsDirectory = path.join(process.cwd(), 'posts');
+
+            export function getPostSlugs(): string[] {
+              return fs.readdirSync(postsDirectory)
+                .filter(fileName => fileName.endsWith('.md') || fileName.endsWith('.mdx')) // ADD THIS LINE
+                .map(fileName => fileName.replace(/\.mdx?$/, ''));
+            }
+            ```
+        * Save the file, run `npm run build` locally, and then commit and push if successful.
+
+4.  **Verify `Layout` Component Usage:**
     * **Symptom 1: `Type error: Cannot find name 'Layout'.`**
-        * **Reason:** The `Layout` component isn't being correctly imported or found by TypeScript in the consuming page file.
+        * **Reason:** The `Layout` component isn't being correctly imported or found by TypeScript.
         * **Solution:**
             * Confirm `components/Layout.tsx` exists and is correctly exporting its default function: `export default function Layout(...) { ... }`.
-            * Verify the **exact relative import path** in the problematic page file. For pages directly under `/pages` (e.g., `pages/about.tsx`), use `import Layout from '../components/Layout';`. For pages nested deeper (e.g., `pages/blog/[slug].tsx`, `pages/books/index.tsx`), use `import Layout from '../../components/Layout';`.
+            * Verify the **exact relative import path** in the problematic page file. For pages directly under `/pages` (e.g., `pages/about.tsx`), use `import Layout from '../components/Layout';`. For pages nested deeper (e.g., `pages/blog/[slug].tsx`), use `import Layout from '../../components/Layout';`.
             * Ensure `components/Layout.tsx` includes `import React from 'react';` for `React.ReactNode` type.
-
     * **Symptom 2: `Type error: Property 'children' is missing in type '{}' but required in type '{ children: ReactNode; }'.`**
-        * **Reason:** The `Layout` component has a TypeScript interface (`LayoutProps`) that requires it to receive `children` (content) inside its tags, but somewhere it's being rendered without any content, like `<Layout></Layout>`.
-        * **Solution:** For *every* page that imports and uses `Layout`, ensure there is **always content nested within the `<Layout>` tags**. Even an empty `<div>` or a React Fragment (`<></>`) is sufficient to satisfy the `children` prop requirement:
+        * **Reason:** The `Layout` component requires `children` (content) inside its tags, but somewhere it's being rendered without any content, like `<Layout></Layout>`.
+        * **Solution:** For *every* page that uses `Layout`, ensure there is **always content nested within the `<Layout>` tags**. Even an empty `<div>` or a React Fragment (`<></>`) is sufficient:
             ```jsx
             // Correct usage: Content is wrapped
             <Layout>
@@ -152,15 +214,12 @@ If you encounter `npm run build` failures, especially after making changes to co
                 {/* Your page content */}
               </div>
             </Layout>
-
-            // Incorrect usage: No content inside Layout tags
-            <Layout></Layout>
             ```
         * This applies to all pages: `index.js`, `about.tsx`, `blog/index.tsx`, `blog/[slug].tsx`, `books/index.tsx`, `books/[slug].tsx`, `brands.tsx`, `contact.tsx`, and any custom error pages like `404.tsx`.
 
-3.  **Check `return` Statement Syntax in Pages:**
+5.  **Check `return` Statement Syntax in Pages:**
     * **Symptom: `Type error: ')' expected.`**
-        * **Reason:** When a React functional component returns JSX that spans multiple lines, the JSX *must* be enclosed in parentheses `()`. This error typically occurs when the opening parenthesis after `return` or the closing parenthesis before the semicolon is missing.
+        * **Reason:** When a React functional component returns JSX that spans multiple lines, the JSX *must* be enclosed in parentheses `()`.
         * **Solution:** Always structure your component's return statement like this:
             ```typescript
             export default function MyPage() {
@@ -172,10 +231,10 @@ If you encounter `npm run build` failures, especially after making changes to co
             }
             ```
 
-4.  **Confirm `.tsx` and `.js` File Extensions:**
+6.  **Confirm `.tsx` and `.js` File Extensions:**
     * Ensure all files intended to be TypeScript components or pages are named `.tsx` (or `.ts` for non-JSX files like utilities). Regular JavaScript files should remain `.js`. Mismatched extensions can cause import/resolution issues.
 
-5.  **Review Console for Specific File Paths and Line Numbers:**
+7.  **Review Console for Specific File Paths and Line Numbers:**
     * Always pay close attention to the error messages in your terminal. They provide precise file paths and line numbers, which are your best guide to locating and fixing the issue.
 
 ---
@@ -217,9 +276,10 @@ We welcome contributions to the Abraham of London website! Please follow these g
 
 ## Notes
 
-* **Node.js Version:** For consistency and to avoid potential dependency conflicts, it's recommended to use Node.js `v20.x LTS`. You can manage Node.js versions with `nvm` (Node Version Manager): `nvm use 20`.
+* **Node.js Version:** For consistency and to avoid potential dependency conflicts, it's recommended to use Node.js `v22+ LTS`. You can manage Node.js versions with `nvm` (Node Version Manager) or by updating your Node.js installation directly.
 
 ---
 
-*Version: 1.0*
-*Last Updated: July 22, 2025*
+*Version: 1.1*
+*Last Updated: July 25, 2025*
+````
