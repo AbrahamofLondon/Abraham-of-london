@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Layout from '../../components/Layout'; // Assuming your Layout component path
-import { getBookBySlug, getAllBooks } from '../../lib/books'; // These utility functions are crucial
+import { getBookBySlug, getAllBooks, BookItem } from '../../lib/books'; // Ensure BookItem is imported
 import markdownToHtml from '../../lib/markdownToHtml'; // This utility function is crucial
 
 interface BookProps {
@@ -15,6 +15,7 @@ interface BookProps {
     buyLink?: string; // Optional external buy link
     // Add other properties from your MDX frontmatter here if you want to display them
     // For example: author?: string; genre?: string[];
+    [key: string]: any; // Allow for additional properties from frontmatter
   };
 }
 
@@ -153,9 +154,16 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
 // It also runs on the server side at build time.
 export async function getStaticPaths() {
   // Get all book slugs to generate static pages for each book.
-  // Make sure your getAllBooks function is implemented to return slugs of all book MDX files.
-  const books = getAllBooks(['slug']);
+  // We're asking for just the 'slug' field, so 'books' will be an array of { slug: string } objects.
+  const books: BookItem[] = getAllBooks(['slug']); // Explicitly type 'books' for clarity
 
   return {
-    // Map slugs to the 'paths' array expected by Next.js
-    paths: books.map((book)
+    // Map the array of book objects to the 'paths' array expected by Next.js
+    paths: books.map((book) => ({
+      params: {
+        slug: book.slug, // Access the slug property from the book object
+      },
+    })),
+    fallback: false, // Set to 'blocking' or true if you want to handle new paths on demand
+  };
+}
