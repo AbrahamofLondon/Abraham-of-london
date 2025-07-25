@@ -1,4 +1,3 @@
-// pages/index.tsx
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -110,8 +109,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     props: {
       latestPosts,
     },
-    revalidate: 1,
+    // Removed revalidate: 1 temporarily to force static index.html generation
+    // If you ever re-enable ISR for the homepage, uncomment the line below:
+    // revalidate: 1,
   };
 };
 
-export default Home; // This is the correct and only default export for the page
+export default Home;
