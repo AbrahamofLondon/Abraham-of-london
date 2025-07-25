@@ -1,53 +1,53 @@
-// components/BookCard.tsx (Example structure)
-
+// components/BookCard.tsx
+import Link from 'next/link';
 import Image from 'next/image';
-import Link from 'next/link'; // Assuming you use Link for navigation
-
-// ... other imports ...
 
 interface BookCardProps {
-  slug: string; // <--- ADD THIS LINE
+  slug: string;
   title: string;
   coverImage: string;
   excerpt: string;
-  // Add other props that your BookCard component needs,
-  // such as buyLink, author, genre, etc.
+  buyLink: string; // <--- ADD THIS LINE
+  // Add any other props you pass to BookCard
 }
 
 const BookCard: React.FC<BookCardProps> = ({
-  slug, // Make sure to destructure it here too
+  slug,
   title,
   coverImage,
   excerpt,
-  // ... other destructured props
+  buyLink, // <--- Destructure buyLink here
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-      {/* Assuming your BookCard has an image */}
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
       {coverImage && (
         <Image
           src={coverImage}
-          alt={title}
-          width={400} // Adjust based on your design
-          height={600} // Adjust based on your design
-          layout="responsive" // Or 'fill', 'intrinsic' based on your needs
+          alt={`Cover image for ${title}`}
+          width={400} // Adjust based on your design needs
+          height={300} // Adjust based on your design needs
+          layout="responsive" // Make image responsive
           objectFit="cover"
         />
       )}
       <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-gray-700 text-base mb-4">{excerpt}</p>
-        <Link href={`/books/${slug}`} passHref> {/* Using Link for navigation */}
-          <span className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200 cursor-pointer">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
+        <p className="text-gray-600 text-sm mb-4">{excerpt}</p>
+        <div className="flex justify-between items-center">
+          <Link href={`/books/${slug}`} className="text-blue-600 hover:underline font-medium">
             Read More
-          </span>
-        </Link>
-        {/* You might also have a buy button here */}
-        {/* {buyLink && (
-          <a href={buyLink} target="_blank" rel="noopener noreferrer" className="ml-4 inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-200">
-            Buy Now
-          </a>
-        )} */}
+          </Link>
+          {buyLink && (
+            <a
+              href={buyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-500 text-white px-4 py-2 rounded-full text-sm hover:bg-green-600 transition duration-300"
+            >
+              Buy Now
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
