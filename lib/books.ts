@@ -1,69 +1,55 @@
-// lib/books.ts
+// lib/books.ts (Example structure)
 import fs from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
 
-// This should point to 'C:\Codex-setup\Abraham-of-london\books\'
-const booksDirectory = join(process.cwd(), 'books'); 
-
-export interface BookMeta {
-  slug: string;
-  title: string;
-  date?: string; // date might be optional for books
-  coverImage: string;
-  excerpt: string;
-  author: string;
-  genre?: string;
-  buyLink?: string;
-  seo?: {
-    title: string;
-    description: string;
-    keywords: string[];
-  };
-  [key: string]: any; // Allow for additional front matter properties
-}
+const booksDirectory = join(process.cwd(), 'books'); // Path to your 'books' folder
 
 export function getBookSlugs() {
-  const files = fs.readdirSync(booksDirectory);
-  return files.filter(file => file.endsWith('.mdx')).map(file => file.replace(/\.mdx$/, ''));
+  // Reads all file names in the 'books' directory
+  return fs.readdirSync(booksDirectory).map(filename => filename.replace(/\.mdx$/, ''));
 }
 
-export function getBookBySlug(slug: string, fields: string[] = []): BookMeta {
+interface BookItem {
+  slug: string;
+  title: string;
+  coverImage: string;
+  excerpt: string;
+  content: string;
+  buyLink?: string;
+  // Add other frontmatter types here
+  [key: string]: any; // Allow arbitrary properties
+}
+
+export function getBookBySlug(slug: string, fields: string[] = []): BookItem {
   const fullPath = join(booksDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
+  const { data, content } = matter(fileContents); // 'data' is frontmatter, 'content' is markdown body
 
-  const items: BookMeta = { slug, title: '', coverImage: '', excerpt: '', author: '' };
+  const items: BookItem = { slug } as BookItem;
 
-  if (data.title) items.title = data.title;
-  if (data.date) items.date = data.date;
-  if (data.coverImage) items.coverImage = data.coverImage;
-  if (data.excerpt) items.excerpt = data.excerpt;
-  if (data.author) items.author = data.author;
-
-  if (data.genre) items.genre = data.genre;
-  if (data.buyLink) items.buyLink = data.buyLink;
-  if (data.seo) items.seo = data.seo;
-
-  if (fields.includes('content')) {
-    items.content = content;
-  }
-
+  // Ensure only the requested fields are returned
   fields.forEach((field) => {
-    if (field !== 'slug' && field !== 'content' && items[field] === undefined) {
-      if (typeof data[field] !== 'undefined') {
-        items[field] = data[field];
-      }
+    if (field === 'slug') {
+      items[field] = slug;
+    }
+    if (field === 'content') {
+      items[field] = content;
+    }
+    if (data[field]) {
+      items[field] = data[field];
     }
   });
 
   return items;
 }
 
-export function getAllBooks(fields: string[] = []): BookMeta[] {
+export function getAllBooks(fields: string[] = []): BookItem[] {
   const slugs = getBookSlugs();
   const books = slugs
-    .map((slug) => getBookBySlug(slug, fields));
-    // Books might not need sorting by date, but if they do, add .sort here.
+    .map((slug) => getBookBySlug(slug, fields))
+    // Sort books by date in descending order (newest first)
+    // You might want to add a 'date' field to your book MDX if sorting is needed.
+    // .sort((book1, book2) => (book1.date > book2.date ? -1 : 1));
   return books;
 }
