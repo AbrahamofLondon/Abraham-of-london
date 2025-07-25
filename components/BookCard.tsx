@@ -1,59 +1,62 @@
 // components/BookCard.tsx
 import Image from 'next/image';
-import Link from 'next/link';
-import { BookMeta } from '../lib/books'; // Import BookMeta to define the type of 'book'
+import Link from 'next/link'; // Import Link for navigation
 
-// Define the properties (props) that BookCard expects
 interface BookCardProps {
-  book: BookMeta; // The BookCard expects a prop named 'book' which is of type BookMeta
+  book: {
+    slug: string;
+    title: string;
+    coverImage: string; // This will hold the path from MDX
+    excerpt: string;
+    // You might have other properties like 'author', 'genre', 'buyLink' etc.
+    // Ensure these are also defined in the interface if you plan to display them.
+  };
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book }) => {
-  // Destructure properties directly from the 'book' object
-  const { title, coverImage, excerpt, slug, author, buyLink } = book;
-
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg">
-      <Link href={`/books/${slug}`} passHref>
-        <div className="relative h-64 w-full cursor-pointer">
-          {/* Use coverImage directly as it's part of book */}
-          {coverImage && (
+    // Wrap the entire card in a Link component to make it clickable
+    <Link href={`/books/${book.slug}`} passHref>
+      {/* Use an anchor tag inside Link for proper semantics and styling */}
+      <a className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 ease-in-out cursor-pointer">
+        {book.coverImage && (
+          <div className="relative w-full" style={{ paddingBottom: '150%' }}> {/* Maintain 2:3 aspect ratio */}
             <Image
-              src={coverImage}
-              alt={title}
-              fill
-              style={{ objectFit: 'cover' }}
-              className="transition duration-300 group-hover:opacity-75"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              src={book.coverImage} // This uses the path from your MDX (e.g., /assets/images/fathering-without-fear.webp)
+              alt={book.title}
+              layout="fill" // Fill the parent div
+              objectFit="cover" // Cover the area, cropping if necessary
+              className="absolute inset-0" // Ensure image fills the div
             />
-          )}
-        </div>
-      </Link>
-      <div className="p-6">
-        <Link href={`/books/${slug}`} passHref>
-          <h2 className="text-xl font-semibold text-gray-800 hover:text-blue-600 transition duration-150 ease-in-out cursor-pointer">
-            {title}
-          </h2>
-        </Link>
-        <p className="text-gray-600 text-sm mt-2 line-clamp-3">{excerpt}</p>
-        <p className="text-gray-500 text-xs mt-2">By {author}</p>
-        {buyLink && (
-          <a
-            href={buyLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition duration-150 ease-in-out"
-          >
-            Buy Now
-          </a>
+          </div>
         )}
-        <Link href={`/books/${slug}`} passHref>
-          <button className="mt-6 ml-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-150 ease-in-out">
-            Read More
-          </button>
-        </Link>
-      </div>
-    </div>
+
+        <div className="p-4">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2 leading-tight">
+            {book.title}
+          </h3>
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3"> {/* Limit excerpt to 3 lines */}
+            {book.excerpt}
+          </p>
+          {/* You could add more book details here, e.g., author, genre, buy button */}
+          {/* Example:
+          <p className="text-gray-500 text-xs mb-2">By {book.author}</p>
+          {book.buyLink && (
+            <a
+              href={book.buyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+              onClick={(e) => e.stopPropagation()} // Prevent card link from triggering when clicking buy button
+            >
+              Buy Now
+            </a>
+          )}
+          */}
+          <span className="text-blue-600 hover:underline text-sm font-medium">Read More &rarr;</span>
+        </div>
+      </a>
+    </Link>
   );
 };
 
