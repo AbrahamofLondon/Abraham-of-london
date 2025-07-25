@@ -1,14 +1,9 @@
-import '../styles/globals.css';
-import type { AppProps } from 'next/app'; // <--- Import AppProps
-import Layout from '../components/Layout';
+// pages/_app.tsx
+import type { AppProps } from 'next/app';
+import '../styles/globals.css'; // Your global styles
 
-// Function component for your App
-function MyApp({ Component, pageProps }: AppProps) { // <--- Add AppProps type here
-  return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
-  );
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />; // Renders the specific page component
 }
 
 export default MyApp;

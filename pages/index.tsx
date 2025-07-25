@@ -52,7 +52,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
                   slug={post.slug}
                   title={post.title}
                   date={post.date}
-                  coverImage={post.coverImage}
+                  coverImage={post.coverImage} // This path will be handled within BlogPostCard if it uses Image component
                   excerpt={post.excerpt}
                   author={post.author}
                   readTime={post.readTime}
@@ -87,9 +87,9 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
             </Link>
           </div>
           <div className="md:w-1/2 flex justify-center">
-            {/* Replace with an actual image of Abraham */}
+            {/* CORRECTED IMAGE PATH: If your images are in public/assets/images, use /assets/images/ */}
             <Image
-              src="/images/profile.jpg"
+              src="/assets/images/profile.jpg" // CHANGED FROM /images/profile.jpg
               alt="Abraham of London"
               width={400}
               height={400}
@@ -101,42 +101,4 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
 
       {/* Books Section (Example) */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">My Books</h2>
-          <p className="text-center text-gray-600 text-lg mb-8">
-            Explore resources designed to equip you with the principles for fearless fatherhood, unshakeable faith, and a lasting impact.
-          </p>
-          <div className="text-center">
-            <Link href="/books" className="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
-              View All Books
-            </Link>
-          </div>
-        </div>
-      </section>
-
-    </Layout>
-  );
-};
-
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const latestPosts = getAllPosts([
-    'slug',
-    'title',
-    'date',
-    'coverImage',
-    'excerpt',
-    'author',
-    'readTime',
-    'category',
-    'tags',
-  ]).slice(0, 3);
-
-  return {
-    props: {
-      latestPosts,
-    },
-    revalidate: 1,
-  };
-};
-
-export default Home;
+        <div className="
