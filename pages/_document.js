@@ -1,25 +1,37 @@
-// pages/_document.js
-import { Html, Head, Main, NextScript } from 'next/document';
+// pages/_document.tsx
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+import { GA_TRACKING_ID } from '../lib/gtag';
 
-export default function Document() {
-  return (
-    <Html lang="en"> {/* You can customize the 'lang' attribute here */}
-      <Head>
-        {/*
-          Add any custom <meta>, <link>, or <script> tags here that you want
-          to be present in the <head> of your server-rendered HTML.
-          For example, a Google Fonts link:
-          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-        */}
-      </Head>
-      <body>
-        <Main /> {/* This is where your Next.js application will be mounted */}
-        <NextScript /> {/* This handles Next.js scripts for hydration and client-side navigation */}
-        {/*
-          Add any scripts here that you want to be at the end of the <body>,
-          e.g., for analytics or other third-party integrations.
-        */}
-      </body>
-    </Html>
-  );
+class MyDocument extends Document {
+  render() {
+    return (
+      <Html lang="en">
+        <Head>
+          {/* Global Site Tag (gtag.js) - Google Analytics */}
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_TRACKING_ID}', {
+                page_path: window.location.pathname,
+              });
+            `,
+            }}
+          />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
 }
+
+export default MyDocument;
