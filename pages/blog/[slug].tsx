@@ -7,13 +7,15 @@ declare global {
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../../components/Layout';
-import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
+// Import PostWithContent as well for accurate typing in getStaticProps
+import { getAllPosts, getPostBySlug, PostMeta, PostWithContent } from '../../lib/posts'; 
 import Link from 'next/link';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { serialize } from 'next-mdx-remote/serialize';
 import { useEffect } from 'react';
 
 interface BlogPageProps {
+  // The 'post' prop passed to the component WILL have content as MDXRemoteSerializeResult
   post: PostMeta & {
     content: MDXRemoteSerializeResult;
   };
@@ -38,7 +40,8 @@ const DisqusComments = ({ slug, title }: { slug: string; title: string }) => {
       };
       const d = document,
         s = d.createElement('script');
-      s.src = 'https://YOUR_DISQUS_SHORTNAME.disqus.com/embed.js'; // <-- IMPORTANT: Replace YOUR_DISQUS_SHORTNAME here with your actual Disqus shortname
+      // IMPORTANT: Replace 'YOUR_DISQUS_SHORTNAME' with your actual Disqus shortname
+      s.src = 'https://YOUR_DISQUS_SHORTNAME.disqus.com/embed.js'; 
       s.setAttribute('data-timestamp', Date.now().toString());
       (d.head || d.body).appendChild(s);
     }
@@ -68,7 +71,7 @@ const ShareButtons = ({ slug, title }: { slug: string; title: string }) => {
 };
 
 export default function BlogPage({ post }: BlogPageProps) {
-  const postUrl = `https://abrahamoflondon.org/blog/${post.slug}`; // Corrected postUrl for meta tags
+  const postUrl = `https://abrahamoflondon.org/blog/${post.slug}`;
 
   const components = {
     // Custom components to use within your MDX.
@@ -83,15 +86,22 @@ export default function BlogPage({ post }: BlogPageProps) {
       <Head>
         <title>{post.title} | Abraham of London</title>
         <meta name="description" content={post.description} />
+        
+        {/* Open Graph Meta Tags */}
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.description} />
         <meta property="og:url" content={postUrl} />
         <meta property="og:type" content="article" />
         {post.image && <meta property="og:image" content={post.image} />}
+        
+        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.title} />
         <meta name="twitter:description" content={post.description} />
         {post.image && <meta name="twitter:image" content={post.image} />}
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={postUrl} />
       </Head>
 
       <article className="prose lg:prose-xl mx-auto my-8 p-4">
@@ -121,15 +131,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
+  // TypeScript knows getPostBySlug can return PostMeta | PostWithContent.
+  // We need to tell it that in this specific case, it will be PostWithContent.
   const post = getPostBySlug(slug, [
     'title',
     'date',
     'slug',
     'author',
-    'content',
+    'content', // Requesting content means it WILL be a string here
     'description',
     'image',
-  ]);
+  ]) as PostWithContent; // <--- CRITICAL FIX: Assert type here
 
   const mdxSource = await serialize(post.content, {
     parseFrontmatter: true,

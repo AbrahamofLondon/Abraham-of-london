@@ -1,102 +1,89 @@
 // pages/books/index.tsx
-import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import Layout from '../../components/Layout';
-import { getAllBooks, BookMeta } from '../../lib/books';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { getAllBooks, BookMeta } from '../../lib/books'; // Import BookMeta
+import { GetStaticProps } from 'next';
+import React, { useState, useMemo } from 'react';
+import BookCard from '../../components/BookCard'; // Assuming you have a BookCard component
 
 interface BooksPageProps {
   books: BookMeta[];
 }
 
 const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
   // Extract unique tags from books
-  const allTags = Array.from(new Set(books.flatMap(book => book.tags || [])));
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    books.forEach(book => {
+      book.tags?.forEach(tag => tags.add(tag));
+    });
+    return Array.from(tags).sort();
+  }, [books]);
+
+  // Filter books based on selected tag
+  const filteredBooks = useMemo(() => {
+    if (!selectedTag) {
+      return books;
+    }
+    return books.filter(book => book.tags?.includes(selectedTag));
+  }, [books, selectedTag]);
 
   return (
     <Layout>
       <Head>
-        <title>Books by Abraham of London</title>
-        <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, justice, and legacy." />
-        <meta property="og:title" content="Books by Abraham of London" />
-        <meta property="og:description" content="Explore books by Abraham of London on fatherhood, faith, justice, and legacy." />
-        <meta property="og:image" content="/assets/images/og-books.jpg" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Books by Abraham of London" />
-        <meta name="twitter:description" content="Explore books by Abraham of London on fatherhood, faith, justice, and legacy." />
-        <meta name="twitter:image" content="/assets/images/og-books.jpg" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            'name': 'Books by Abraham of London',
-            'description': 'Explore books by Abraham of London on fatherhood, faith, justice, and legacy.',
-            'url': 'https://abrahamoflondon.org/books',
-            'publisher': {
-              '@type': 'Organization',
-              'name': 'Abraham of London',
-              'url': 'https://abrahamoflondon.org'
-            }
-          })
-        }} />
+        <title>Abraham of London - Books</title>
+        <meta name="description" content="Explore the collection of books by Abraham of London." />
       </Head>
 
-      <section className="bg-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-extrabold text-gray-800 mb-6">Books by Abraham of London</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-12">
-            Dive into transformational writings that speak to purpose, power, and paternal courage.
-          </p>
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Our Books</h1>
 
+          {/* Tag Filter Section */}
           {allTags.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Browse by Tag</h2>
-              <div className="flex flex-wrap justify-center gap-2">
-                {allTags.map(tag => (
-                  <span key={tag} className="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
-                    #{tag}
-                  </span>
-                ))}
-              </div>
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                  selectedTag === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                }`}
+              >
+                All
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                    selectedTag === tag ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           )}
 
-          {books.length > 0 ? (
-            <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {books.map((book) => (
-                <motion.div
+          {filteredBooks.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredBooks.map((book) => (
+                <BookCard
                   key={book.slug}
-                  className="border rounded-lg overflow-hidden shadow-md bg-white"
-                  whileHover={{ scale: 1.03 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Link href={`/books/${book.slug}`}> 
-                    <div className="cursor-pointer">
-                      <Image
-                        src={book.coverImage || '/assets/images/default-book.jpg'}
-                        alt={book.title}
-                        width={400}
-                        height={600}
-                        className="w-full h-80 object-cover"
-                      />
-                      <div className="p-4 text-left">
-                        <h3 className="text-2xl font-semibold text-gray-800 mb-2">{book.title}</h3>
-                        <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
-                        <p className="text-gray-700 text-base mb-4 line-clamp-3">{book.excerpt}</p>
-                        <span className="inline-block mt-2 text-blue-600 font-medium hover:underline">
-                          Learn More &rarr;
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
+                  slug={book.slug}
+                  title={book.title}
+                  coverImage={book.coverImage}
+                  excerpt={book.excerpt}
+                  author={book.author}
+                  buyLink={book.buyLink}
+                  genre={book.genre}
+                  // No 'tags' prop needed for BookCard itself unless you specifically want to display them there
+                />
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No books available yet. Please check back soon.</p>
+            <p className="text-center text-gray-600">No books found matching your criteria.</p>
           )}
         </div>
       </section>
@@ -104,20 +91,25 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
+  // Ensure 'tags' is requested when fetching all books for the index page
   const books = getAllBooks([
-    'title',
     'slug',
-    'author',
+    'title',
     'coverImage',
     'excerpt',
-    'tags'
+    'author',
+    'buyLink',
+    'genre',
+    'description',
+    'tags', // <--- IMPORTANT: Request the 'tags' field here
   ]);
 
   return {
     props: {
-      books
-    }
+      books,
+    },
+    revalidate: 1, // Optional: Use ISR if you want to regenerate the page periodically
   };
 };
 

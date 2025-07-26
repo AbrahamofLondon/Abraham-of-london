@@ -1,4 +1,3 @@
-// pages/index.tsx
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -21,16 +20,16 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
   const schemaData = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    'url': siteUrl,
-    'name': pageTitle,
-    'description': pageDescription,
-    'publisher': {
+    url: siteUrl,
+    name: pageTitle,
+    description: pageDescription,
+    publisher: {
       '@type': 'Organization',
-      'name': 'Abraham of London',
-      'url': siteUrl,
-      'logo': {
+      name: 'Abraham of London',
+      url: siteUrl,
+      logo: {
         '@type': 'ImageObject',
-        'url': `${siteUrl}/assets/images/abraham-logo.jpg`,
+        url: `${siteUrl}/assets/images/abraham-logo.jpg`,
       },
     },
   };
@@ -52,6 +51,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
+        <link rel="canonical" href={siteUrl} />
       </Head>
 
       {/* Hero Section */}
@@ -153,4 +153,39 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
       {/* Books Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center tex
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Featured Books</h2>
+          <p className="text-center text-gray-600">
+            Content for featured books coming soon.{' '}
+            <Link href="/books" className="text-blue-600 hover:underline">
+              Explore all books &rarr;
+            </Link>
+          </p>
+        </div>
+      </section>
+    </Layout>
+  );
+};
+
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+  const latestPosts = getAllPosts([
+    'slug',
+    'title',
+    'date',
+    'coverImage',
+    'excerpt',
+    'author',
+    'readTime',
+    'category',
+    'tags',
+    'description',
+  ]).slice(0, 3);
+
+  return {
+    props: {
+      latestPosts,
+    },
+    revalidate: 1,
+  };
+};
+
+export default Home;
