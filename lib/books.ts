@@ -1,44 +1,82 @@
 // lib/books.ts
 import fs from 'fs';
-import path from 'path';
+import { join } from 'path';
 import matter from 'gray-matter';
 
-const booksDirectory = path.join(process.cwd(), 'content/books');
+const booksDirectory = join(process.cwd(), '_books');
 
-// THIS INTERFACE MUST BE PRESENT AND EXPORTED
-export interface BookMeta {
+// Define the BookMeta type
+export type BookMeta = {
   slug: string;
   title: string;
-  coverImage: string; // Path to the cover image
+  coverImage?: string;
   excerpt: string;
-  author?: string; // Optional field
-  buyLink?: string; // Optional field
-  genre?: string[]; // Optional field, assuming an array of strings
-  // Add any other fields that you expect to find in your book MDX frontmatter
-  [key: string]: any; // Allow for additional arbitrary fields if they exist
+  buyLink?: string;
+  author: string;
+  genre?: string[];
+  description: string;
+  image?: string;
+  readTime?: string;
+  tags?: string[]; // <--- ADD THIS LINE: To include optional tags for books
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
+};
+
+export type BookWithContent = BookMeta & { content: string };
+
+export function getBookSlugs() {
+  return fs.readdirSync(booksDirectory);
 }
 
-export function getAllBooks(fields: string[] = []) {
-  const slugs = fs.readdirSync(booksDirectory);
+export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | BookWithContent {
+  const realSlug = slug.replace(/\.md$/, '');
+  const fullPath = join(booksDirectory, `${realSlug}.md`);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(fileContents);
 
-  return slugs
-    .filter((slug) => slug.endsWith('.mdx'))
-    .map((slug) => {
-      const fullPath = path.join(booksDirectory, slug);
-      const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const { data } = matter(fileContents);
+  const items: Partial<BookWithContent> = { slug: realSlug };
 
-      const book: { [key: string]: any } = {}; // Use a generic object initially
+  if (fields.includes('content')) {
+    items.content = content;
+  }
 
-      // Ensure 'slug' is always included, even if not in fields explicitly
-      book['slug'] = slug.replace(/\.mdx$/, '');
-
-      fields.forEach((field) => {
-        if (field !== 'slug' && data[field]) { // Avoid re-assigning slug if already handled
-          book[field] = data[field];
+  fields.forEach((field) => {
+    if (field !== 'slug' && field !== 'content' && data[field] !== undefined) {
+      if (field === 'genre' || field === 'tags') { // <--- ALSO ADD 'tags' HERE
+        items[field] = Array.isArray(data[field])
+          ? data[field].map((g: any) => String(g))
+          : [String(data[field])];
+      } else if (field === 'seo') {
+        if (typeof data[field] === 'object' && data[field] !== null) {
+          items.seo = data[field];
         }
-      });
+      } else {
+        (items as any)[field] = data[field];
+      }
+    }
+  });
 
-      return book as BookMeta; // Cast to BookMeta type
-    });
+  if (items.title === undefined) items.title = '';
+  if (items.excerpt === undefined) items.excerpt = '';
+  if (items.author === undefined) items.author = '';
+  if (items.description === undefined) items.description = '';
+  if (items.image === undefined) items.image = '';
+  if (items.coverImage === undefined) items.coverImage = '';
+
+  if (fields.includes('content')) {
+    return items as BookWithContent;
+  } else {
+    return items as BookMeta;
+  }
+}
+
+export function getAllBooks(fields: string[] = []): BookMeta[] {
+  const slugs = getBookSlugs();
+  const books = slugs
+    .map((slug) => getBookBySlug(slug, fields) as BookMeta)
+    .sort((book1, book2) => book1.title.localeCompare(book2.title));
+  return books;
 }
