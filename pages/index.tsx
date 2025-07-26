@@ -6,61 +6,87 @@ import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import BlogPostCard from '../components/BlogPostCard';
 import Layout from '../components/Layout';
-import { motion } from 'framer-motion';
-import EmailSignup from '../components/EmailSignup';
 
 interface HomeProps {
   latestPosts: PostMeta[];
 }
 
 const Home: React.FC<HomeProps> = ({ latestPosts }) => {
+  const siteUrl = 'https://abrahamoflondon.org';
+  const pageTitle = 'Abraham of London - Fearless Fatherhood & Legacy';
+  const pageDescription =
+    'Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy.';
+  const ogImage = '/assets/images/og-image.jpg';
+
+  const schemaData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    'url': siteUrl,
+    'name': pageTitle,
+    'description': pageDescription,
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'Abraham of London',
+      'url': siteUrl,
+      'logo': {
+        '@type': 'ImageObject',
+        'url': `${siteUrl}/assets/images/abraham-logo.jpg`,
+      },
+    },
+  };
+
   return (
     <Layout>
       <Head>
-        <title>Abraham of London - Fearless Fatherhood & Legacy</title>
-        <meta name="description" content="Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy." />
-        <meta property="og:image" content="/assets/images/og-image.jpg" />
-        <meta name="twitter:image" content="/assets/images/twitter-image.jpg" />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
       </Head>
 
-      {/* Hero Section with Banner and Motion */}
-      <section className="relative h-[90vh] bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: "url('/assets/images/abraham-of-london-banner.webp')" }}>
-        <div className="bg-black/60 absolute inset-0 z-0" />
-        <div className="relative z-10 text-center text-white px-4 max-w-3xl">
-          <motion.h1
-            className="text-5xl md:text-6xl font-extrabold mb-4"
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-20 text-center">
+        <div className="container mx-auto px-4">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-fadeIn">
             Fearless Fatherhood & Lasting Legacy
-          </motion.h1>
-          <motion.p
-            className="text-xl md:text-2xl mb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+          </h1>
+          <p
+            className="text-xl md:text-2xl mb-8 opacity-0 animate-fadeIn"
+            style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
           >
             Guiding men to lead with conviction, build strong families, and impact the world.
-          </motion.p>
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.8 }}
+          </p>
+          <div
+            className="space-x-4 opacity-0 animate-fadeIn"
+            style={{ animationDelay: '1s', animationFillMode: 'forwards' }}
           >
-            <Link href="/blog" className="bg-white text-blue-700 px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-gray-100">
+            <Link
+              href="/blog"
+              className="bg-white text-blue-700 hover:bg-gray-100 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
+            >
               Read Blog
             </Link>
-            <Link href="/books" className="border border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-700">
+            <Link
+              href="/books"
+              className="border border-white text-white hover:bg-white hover:text-blue-700 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
+            >
               Explore Books
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Latest Blog Posts */}
+      {/* Latest Blog Posts Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Latest Insights</h2>
@@ -86,7 +112,10 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
           )}
           {latestPosts && latestPosts.length > 0 && (
             <div className="text-center mt-12">
-              <Link href="/blog" className="text-blue-600 hover:underline text-lg font-medium">
+              <Link
+                href="/blog"
+                className="text-blue-600 hover:underline text-lg font-medium"
+              >
                 View All Posts &rarr;
               </Link>
             </div>
@@ -102,7 +131,10 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
             <p className="text-lg text-gray-700 mb-4">
               Abraham is a passionate advocate for strong families and authentic leadership. Through his writings and teachings, he empowers individuals to embrace their roles with courage and build a legacy that matters.
             </p>
-            <Link href="/about" className="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg">
+            <Link
+              href="/about"
+              className="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
+            >
               Learn More
             </Link>
           </div>
@@ -118,44 +150,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
         </div>
       </section>
 
-      {/* Books CTA */}
+      {/* Books Section */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">My Books</h2>
-          <p className="text-gray-600 text-lg mb-8">
-            Explore resources designed to equip you with the principles for fearless fatherhood, unshakeable faith, and a lasting impact.
-          </p>
-          <Link href="/books" className="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
-            View All Books
-          </Link>
-        </div>
-      </section>
-
-      {/* Email Signup */}
-      <EmailSignup />
-    </Layout>
-  );
-};
-
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const latestPosts = getAllPosts([
-    'slug',
-    'title',
-    'date',
-    'coverImage',
-    'excerpt',
-    'author',
-    'readTime',
-    'category',
-    'tags',
-  ]).slice(0, 3);
-
-  return {
-    props: {
-      latestPosts,
-    },
-    revalidate: 1,
-  };
-};
-
-export default Home;
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center tex
