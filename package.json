@@ -11,8 +11,9 @@
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
-    "@mdx-js/react": "^3.1.0",
+    "@mdx-js/react": "^2.3.0",
     "@netlify/next": "^1.4.9",
+    "date-fns": "^4.1.0",
     "framer-motion": "^11.18.2",
     "gray-matter": "^4.0.3",
     "next": "^14.2.30",
