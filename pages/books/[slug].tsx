@@ -1,134 +1,146 @@
 // pages/books/[slug].tsx
-import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import Layout from '../../components/Layout';
-// Import the new types and functions from lib/books
-import { getAllBooks, getBookBySlug, BookMeta, BookWithContent } from '../../lib/books'; 
 import Image from 'next/image';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
 import Link from 'next/link';
+import { GetStaticProps, GetStaticPaths } from 'next';
+import { serialize } from 'next-mdx-remote/serialize';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books'; // Adjust path if necessary
+import Layout from '../../components/Layout'; // Adjust path if necessary
+import MDXComponents from '../../components/MDXComponents'; // Adjust path if necessary
 
-interface BookPageProps {
-  // The 'book' prop passed to the component will have content as MDXRemoteSerializeResult
-  book: BookMeta & {
+interface BookProps {
+  book: {
+    meta: BookMeta;
     content: MDXRemoteSerializeResult;
   };
 }
 
-// Define custom MDX components if you need them
-const components = {
-  // For example:
-  // h1: (props: any) => <h1 className="text-3xl font-bold my-4" {...props} />,
-  // p: (props: any) => <p className="mb-4" {...props} />,
-  // img: (props: any) => <img className="my-4 rounded-lg shadow-md" {...props} />,
-  // a: (props: any) => <a className="text-blue-600 hover:underline" {...props} />,
-};
-
-export default function BookPage({ book }: BookPageProps) {
-  const bookUrl = `https://abrahamoflondon.org/books/${book.slug}`; // Adjust base URL if needed
+export default function Book({ book }: BookProps) {
+  const pageTitle = `${book.meta.title} | Abraham of London Books`;
+  const siteUrl = 'https://abrahamoflondon.org'; // Replace with your actual site URL
 
   return (
-    <Layout>
+    <Layout> {/* Opening Layout tag */}
       <Head>
-        <title>{book.title} | Abraham of London - Books</title>
-        <meta name="description" content={book.description} />
-        
+        <title>{pageTitle}</title>
+        <meta name="description" content={book.meta.description || book.meta.excerpt} />
         {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={book.title} />
-        <meta property="og:description" content={book.description} />
-        <meta property="og:url" content={bookUrl} />
-        <meta property="og:type" content="book" /> {/* Use 'book' type for Open Graph */}
-        {book.image && <meta property="og:image" content={book.image} />}
-        {/* Fallback to coverImage if 'image' is not explicitly set for OG */}
-        {!book.image && book.coverImage && <meta property="og:image" content={book.coverImage} />}
-        
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={book.meta.description || book.meta.excerpt} />
+        <meta property="og:image" content={`${siteUrl}${book.meta.coverImage}`} />
+        <meta property="og:type" content="book" />
+        <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
+        {book.meta.author && <meta property="book:author" content={book.meta.author} />}
+        {book.meta.genre && book.meta.genre.map((g, index) => (
+          <meta key={index} property="book:tag" content={g} />
+        ))}
+
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={book.title} />
-        <meta name="twitter:description" content={book.description} />
-        {book.image && <meta name="twitter:image" content={book.image} />}
-        {!book.image && book.coverImage && <meta name="twitter:image" content={book.coverImage} />}
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={bookUrl} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={book.meta.description || book.meta.excerpt} />
+        <meta name="twitter:image" content={`${siteUrl}${book.meta.coverImage}`} />
+
+        <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
       </Head>
 
-      <article className="prose lg:prose-xl mx-auto my-8 p-4">
-        <h1 className="text-4xl font-bold mb-4">{book.title}</h1>
-        {book.author && <p className="text-gray-600 mb-2">By {book.author}</p>}
-        {book.genre && book.genre.length > 0 && (
-          <p className="text-gray-500 text-sm mb-4">Genre: {book.genre.join(', ')}</p>
-        )}
-
-        {book.coverImage && (
-          <div className="relative w-full h-72 sm:h-96 md:h-112 my-6 mx-auto rounded-lg overflow-hidden shadow-lg">
+      <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+        {book.meta.coverImage && (
+          <div className="mb-8 md:mb-16 relative w-full h-96 rounded-lg overflow-hidden shadow-lg">
             <Image
-              src={book.coverImage}
-              alt={`Cover image for ${book.title}`}
+              src={book.meta.coverImage}
+              alt={`Cover Image for ${book.meta.title}`}
               layout="fill"
-              objectFit="contain" // Use 'contain' for book covers to show full image
-              className="bg-gray-100" // Add a background for 'contain'
+              objectFit="contain" // Use contain for book covers
+              priority
             />
           </div>
         )}
 
-        {book.buyLink && (
-          <div className="mb-8 text-center">
-            <Link href={book.buyLink} passHref>
-              <a target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
-                Buy Now
-              </a>
+        <header className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
+            {book.meta.title}
+          </h1>
+          {book.meta.author && (
+            <div className="text-lg text-gray-600 mb-4">
+              By <span className="font-semibold">{book.meta.author}</span>
+            </div>
+          )}
+          {book.meta.genre && book.meta.genre.length > 0 && (
+            <div className="mb-4">
+              {book.meta.genre.map((genre) => (
+                <span key={genre} className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
+                  {genre}
+                </span>
+              ))}
+            </div>
+          )}
+          {book.meta.buyLink && (
+            <Link
+              href={book.meta.buyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg hover:bg-blue-700"
+            >
+              Buy Now
             </Link>
-          </div>
-        )}
+          )}
+        </header>
 
-        <div className="prose max-w-none">
-          <MDXRemote {...book.content} components={components} />
+        <div className="prose prose-lg mx-auto mb-16">
+          <MDXRemote {...book.content} components={MDXComponents} />
+        </div>
+
+        <div className="text-center">
+          <Link href="/books" className="text-blue-600 hover:underline text-xl font-medium">
+            &larr; Back to Books
+          </Link>
         </div>
       </article>
-    </Layout>
+    </Layout> {/* Closing Layout tag */}
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const books = getAllBooks(['slug']);
-  const paths = books.map((book) => ({
-    params: { slug: book.slug },
-  }));
-
-  return {
-    paths,
-    fallback: false,
-  };
-};
-
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string;
-  // Assert type to BookWithContent because we are requesting 'content'
-  const book = getBookBySlug(slug, [
+  const { slug } = params as { slug: string };
+  const { content, data } = getBookBySlug(slug, [
     'title',
-    'date', // If you have a publication date for books
     'slug',
     'author',
-    'content', // Requesting content means it WILL be a string here
-    'description',
+    'content',
     'coverImage',
+    'excerpt',
     'buyLink',
     'genre',
-    'image', // Also request 'image' for SEO
-  ]) as BookWithContent;
+    'description',
+    'tags', // Added tags if you use them for books as well
+  ]);
 
-  const mdxSource = await serialize(book.content, {
-    parseFrontmatter: true,
-  });
+  const mdxSource = await serialize(content, { scope: data });
 
   return {
     props: {
       book: {
-        ...book,
+        meta: data,
         content: mdxSource,
       },
     },
+    revalidate: 1, // Re-generate page every 1 second (or adjust as needed)
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const books = getAllBooks(['slug']);
+
+  return {
+    paths: books.map((book) => {
+      return {
+        params: {
+          slug: book.slug,
+        },
+      };
+    }),
+    fallback: 'blocking', // can be 'blocking' or true or false
   };
 };

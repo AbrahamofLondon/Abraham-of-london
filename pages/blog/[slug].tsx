@@ -1,158 +1,136 @@
 // pages/blog/[slug].tsx
-declare global {
-  interface Window {
-    DISQUS?: any;
-  }
-}
-import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import Layout from '../../components/Layout';
-// Import PostWithContent as well for accurate typing in getStaticProps
-import { getAllPosts, getPostBySlug, PostMeta, PostWithContent } from '../../lib/posts'; 
+import Image from 'next/image';
 import Link from 'next/link';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
-import { useEffect } from 'react';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
+import Layout from '../../components/Layout';
+import DateFormatter from '../../components/DateFormatter';
+import MDXComponents from '../../components/MDXComponents';
 
-interface BlogPageProps {
-  // The 'post' prop passed to the component WILL have content as MDXRemoteSerializeResult
-  post: PostMeta & {
+interface PostProps {
+  post: {
+    meta: PostMeta;
     content: MDXRemoteSerializeResult;
   };
 }
 
-const DisqusComments = ({ slug, title }: { slug: string; title: string }) => {
-  useEffect(() => {
-    if (window.DISQUS) {
-      window.DISQUS.reset({
-        reload: true,
-        config: function () {
-          this.page.identifier = slug;
-          this.page.url = `https://abrahamoflondon.org/blog/${slug}`;
-          this.page.title = title;
-        },
-      });
-    } else {
-      (window as any).disqus_config = function () {
-        this.page.identifier = slug;
-        this.page.url = `https://abrahamoflondon.org/blog/${slug}`;
-        this.page.title = title;
-      };
-      const d = document,
-        s = d.createElement('script');
-      // IMPORTANT: Replace 'YOUR_DISQUS_SHORTNAME' with your actual Disqus shortname
-      s.src = 'https://YOUR_DISQUS_SHORTNAME.disqus.com/embed.js'; 
-      s.setAttribute('data-timestamp', Date.now().toString());
-      (d.head || d.body).appendChild(s);
-    }
-  }, [slug, title]);
-
-  return <div id="disqus_thread" className="mt-16"></div>;
-};
-
-const ShareButtons = ({ slug, title }: { slug: string; title: string }) => {
-  const siteUrl = 'https://abrahamoflondon.org';
-  const postUrl = encodeURIComponent(`${siteUrl}/blog/${slug}`);
-  const postTitle = encodeURIComponent(title);
+export default function Post({ post }: PostProps) {
+  const pageTitle = `${post.meta.title} | Abraham of London Blog`;
+  const siteUrl = 'https://abrahamoflondon.org'; // Replace with your actual site URL
 
   return (
-    <div className="flex space-x-4 mt-12">
-      <a
-        href={`https://twitter.com/intent/tweet?url=${postUrl}&text=${postTitle}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-500 hover:text-blue-700 font-semibold"
-      >
-        Share on Twitter
-      </a>
-      {/* Add other sharing buttons here if desired */}
-    </div>
-  );
-};
-
-export default function BlogPage({ post }: BlogPageProps) {
-  const postUrl = `https://abrahamoflondon.org/blog/${post.slug}`;
-
-  const components = {
-    // Custom components to use within your MDX.
-    // For example:
-    // h1: (props: any) => <h1 className="text-4xl font-bold my-4" {...props} />,
-    // p: (props: any) => <p className="mb-4" {...props} />,
-    // img: (props: any) => <img className="my-4 rounded-lg" {...props} />,
-  };
-
-  return (
-    <Layout>
+    <Layout> {/* Opening Layout tag */}
       <Head>
-        <title>{post.title} | Abraham of London</title>
-        <meta name="description" content={post.description} />
-        
+        <title>{pageTitle}</title>
+        <meta name="description" content={post.meta.description || post.meta.excerpt} />
         {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.description} />
-        <meta property="og:url" content={postUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={post.meta.description || post.meta.excerpt} />
+        <meta property="og:image" content={`${siteUrl}${post.meta.coverImage}`} />
         <meta property="og:type" content="article" />
-        {post.image && <meta property="og:image" content={post.image} />}
-        
+        <meta property="og:url" content={`${siteUrl}/blog/${post.meta.slug}`} />
+        <meta property="article:published_time" content={new Date(post.meta.date).toISOString()} />
+        <meta property="article:author" content={post.meta.author} />
+
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.description} />
-        {post.image && <meta name="twitter:image" content={post.image} />}
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={postUrl} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={post.meta.description || post.meta.excerpt} />
+        <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage}`} />
+
+        <link rel="canonical" href={`${siteUrl}/blog/${post.meta.slug}`} />
       </Head>
 
-      <article className="prose lg:prose-xl mx-auto my-8 p-4">
-        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        <p className="text-gray-600 mb-6">{post.date}</p>
-        <div className="prose max-w-none">
-          <MDXRemote {...post.content} components={components} />
+      <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+        {post.meta.coverImage && (
+          <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
+            <Image
+              src={post.meta.coverImage}
+              alt={`Cover Image for ${post.meta.title}`}
+              layout="fill"
+              objectFit="cover"
+              priority
+            />
+          </div>
+        )}
+
+        <header className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
+            {post.meta.title}
+          </h1>
+          <div className="text-lg text-gray-600 mb-4">
+            By <span className="font-semibold">{post.meta.author}</span> on{' '}
+            <DateFormatter dateString={post.meta.date} /> | {post.meta.readTime} read
+          </div>
+          {post.meta.category && (
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
+              {post.meta.category}
+            </span>
+          )}
+          {post.meta.tags && post.meta.tags.map((tag) => (
+            <span key={tag} className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
+              #{tag}
+            </span>
+          ))}
+        </header>
+
+        <div className="prose prose-lg mx-auto mb-16">
+          <MDXRemote {...post.content} components={MDXComponents} />
         </div>
-        <ShareButtons slug={post.slug} title={post.title} />
-        <DisqusComments slug={post.slug} title={post.title} />
+
+        <div className="text-center">
+          <Link href="/blog" className="text-blue-600 hover:underline text-xl font-medium">
+            &larr; Back to Blog
+          </Link>
+        </div>
       </article>
-    </Layout>
+    </Layout> {/* Closing Layout tag */}
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = getAllPosts(['slug']);
-  const paths = posts.map((post) => ({
-    params: { slug: post.slug },
-  }));
-
-  return {
-    paths,
-    fallback: false,
-  };
-};
-
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string;
-  // TypeScript knows getPostBySlug can return PostMeta | PostWithContent.
-  // We need to tell it that in this specific case, it will be PostWithContent.
-  const post = getPostBySlug(slug, [
+  const { slug } = params as { slug: string };
+  const { content, data } = getPostBySlug(slug, [
     'title',
     'date',
     'slug',
     'author',
-    'content', // Requesting content means it WILL be a string here
+    'content',
+    'coverImage',
+    'excerpt',
+    'readTime',
+    'category',
+    'tags',
     'description',
-    'image',
-  ]) as PostWithContent; // <--- CRITICAL FIX: Assert type here
+  ]);
 
-  const mdxSource = await serialize(post.content, {
-    parseFrontmatter: true,
-  });
+  const mdxSource = await serialize(content, { scope: data });
 
   return {
     props: {
       post: {
-        ...post,
+        meta: data,
         content: mdxSource,
       },
     },
+    revalidate: 10, // Re-generate page every 10 seconds
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = getAllPosts(['slug']);
+
+  return {
+    paths: posts.map((post) => {
+      return {
+        params: {
+          slug: post.slug,
+        },
+      };
+    }),
+    fallback: 'blocking', // can be 'blocking' or true or false
   };
 };

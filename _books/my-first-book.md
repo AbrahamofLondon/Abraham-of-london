@@ -1,10 +1,26 @@
 ---
-title: "My First Book"
-author: "Abraham"
-excerpt: "A brief summary of my amazing first book."
-buyLink: "https://example.com/buy-my-book"
-genre: ["Fiction", "Fantasy"]
-description: "A test book for the Abraham of London books page."
-tags: ["Adventure", "Epic"]
+title: "Fathering Without Fear"
+author: "Abraham of London"
+excerpt: "Fathering Without Fear is the deeply personal and spiritually rich memoir of Abraham of London—a miracle child turned misunderstood teen, turned kingdom-minded strategist and father navigating spiritual warfare, systemic injustice, and silent heartbreak."
+coverImage: "/assets/books/fathering-without-fear-cover.jpg" # Placeholder: You'll need to create this image or update the path
+buyLink: "https://example.com/buy-fathering-without-fear" # Placeholder: Replace with your actual book's buying link (Amazon, website, etc.)
+genre: ["Memoir", "Spiritual Growth", "Fatherhood", "Inspiration"]
+description: "From his miraculous birth as part of a celebrated set of triplets in 1977 Lagos, to the deep emotional losses of siblings and friends in childhood, Abraham’s life unfolds as a story of divine calling and repeated trials. His early encounter with Christ through the prophetic influence of his grandmother and his first spiritual awakening in Akure form the foundation of a life shaped by both vision and fire."
+tags: ["fatherhood", "spiritual warfare", "memoir", "christianity", "resilience", "faith", "justice", "nigeria", "uk"]
 ---
-This is the full description and content for my first book.
+
+Fathering Without Fear is the deeply personal and spiritually rich memoir of Abraham of London—a miracle child turned misunderstood teen, turned kingdom-minded strategist and father navigating spiritual warfare, systemic injustice, and silent heartbreak.
+
+From his miraculous birth as part of a celebrated set of triplets in 1977 Lagos, to the deep emotional losses of siblings and friends in childhood, Abraham’s life unfolds as a story of divine calling and repeated trials. His early encounter with Christ through the prophetic influence of his grandmother and his first spiritual awakening in Akure form the foundation of a life shaped by both vision and fire.
+
+The book follows Abraham through formative experiences: escaping harsh conditions in boarding school, championing campus politics at the University of Lagos, enduring strange and spiritual romantic entanglements, and eventually moving to the UK—only to face one of the most painful seasons of his life.
+
+After marrying a woman who would later turn a foe, Abraham found himself trapped in a legal and immigration nightmare: denied the right to work, blocked from public funds, and fighting for access to his British son.
+
+Instead of folding, he fought—with strategy and scripture. Through tears and testimonies, Fathering Without Fear weaves personal, political, legal, and spiritual narratives into a single story: a man who refused to disappear.
+
+This is a memoir for the underestimated, the faithful, and the men who keep showing up. It is at once a father’s letter, a spiritual blueprint, and a prophetic declaration.
+
+He didn’t survive by luck. He stayed by grace.
+
+And because something always happens—so does he.
