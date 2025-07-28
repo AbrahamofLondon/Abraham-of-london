@@ -14,6 +14,10 @@ const nextConfig = {
         },
       ],
     });
+    config.resolve = {
+      ...config.resolve,
+      fullySpecified: false, // Ensures proper module resolution
+    };
     return config;
   },
   reactStrictMode: true,

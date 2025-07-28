@@ -4,10 +4,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Remove or correct this line if "Netlify/functions" is not where your
-# *standalone* Netlify Functions (not Next.js API routes) are located.
-# If you don't have custom Netlify functions outside of Next.js, you can remove this.
-# If you do, make sure the path is correct.
-# [functions]
-#   directory = "Netlify/functions"
