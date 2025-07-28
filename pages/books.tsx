@@ -1,17 +1,17 @@
 // pages/books.tsx
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { getAllBooks, BookMeta } from '../lib/books'; // Make sure BookMeta is imported here!
+import { getAllBooks, BookMeta } from '../lib/books';
 import BookCard from '../components/BookCard';
-import Layout from '../components/Layout';
+// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
 
 interface BooksPageProps {
-  books: BookMeta[]; // Use BookMeta here
+  books: BookMeta[];
 }
 
 const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
   return (
-    <Layout>
+    <> {/* Replace <Layout> with a React Fragment */}
       <Head>
         <title>Abraham of London - Books</title>
         <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, and legacy." />
@@ -29,9 +29,8 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
                   title={book.title}
                   coverImage={book.coverImage}
                   excerpt={book.excerpt}
-                  buyLink={book.buyLink} // This is now string | undefined, handled by BookCard
+                  buyLink={book.buyLink}
                   // Pass any other necessary props to BookCard based on BookMeta
-                  // For example:
                   // author={book.author}
                   // genre={book.genre}
                 />
@@ -42,7 +41,7 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
           )}
         </div>
       </section>
-    </Layout>
+    </> // Replace </Layout> with a React Fragment
   );
 };
 
@@ -53,16 +52,15 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
     'coverImage',
     'excerpt',
     'buyLink',
-    'author', // Make sure these are pulled if you use them in BookCard
+    'author',
     'genre',
-    // Include any other fields you need for the BookCard or the page
   ]);
 
   return {
     props: {
       books,
     },
-    revalidate: 1, // Optional: Use ISR if you want to regenerate the page periodically
+    revalidate: 1,
   };
 };
 

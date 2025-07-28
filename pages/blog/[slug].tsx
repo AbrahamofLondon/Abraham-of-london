@@ -3,18 +3,18 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps, GetStaticPaths } from 'next';
-import { serialize } from 'next-mdx-remote/serialize'; // Use serialize for pages/ directory
-import { MDXRemote } from 'next-mdx-remote'; // Use MDXRemote for client-side rendering
-import { MDXRemoteSerializeResult } from 'next-mdx-remote'; // Type for serialized content
+import { serialize } from 'next-mdx-remote/serialize';
+import { MDXRemote } from 'next-mdx-remote';
+import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
-import Layout from '../../components/Layout';
+// Removed: import Layout from '../../components/Layout';
 import DateFormatter from '../../components/DateFormatter';
 import MDXComponents from '../../components/MDXComponents';
 
 interface PostProps {
   post: {
     meta: PostMeta;
-    content: MDXRemoteSerializeResult; // Matches the serialize output
+    content: MDXRemoteSerializeResult;
   };
 }
 
@@ -23,7 +23,7 @@ export default function Post({ post }: PostProps) {
   const siteUrl = 'https://abrahamoflondon.org';
 
   return (
-    <Layout>
+    <> {/* Replaced <Layout> with a React Fragment */}
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={post.meta.description || post.meta.excerpt || ''} />
@@ -79,7 +79,7 @@ export default function Post({ post }: PostProps) {
         </header>
 
         <div className="prose prose-lg mx-auto mb-16">
-          <MDXRemote {...post.content} components={MDXComponents} /> {/* Client-side hydration */}
+          <MDXRemote {...post.content} components={MDXComponents} />
         </div>
 
         <div className="text-center">
@@ -88,7 +88,7 @@ export default function Post({ post }: PostProps) {
           </Link>
         </div>
       </article>
-    </Layout>
+    </> // Replaced </Layout> with a React Fragment
   );
 }
 
@@ -110,15 +110,15 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
 
   const { content, ...meta } = postData as { content: string; [key: string]: any };
   const mdxSource = await serialize(content || '', {
-    parseFrontmatter: true, // Enable frontmatter parsing
-    scope: meta, // Pass meta data as scope
+    parseFrontmatter: true,
+    scope: meta,
   });
 
   return {
     props: {
       post: {
         meta: meta as PostMeta,
-        content: mdxSource, // Serialized result for MDXRemote
+        content: mdxSource,
       },
     },
     revalidate: 10,

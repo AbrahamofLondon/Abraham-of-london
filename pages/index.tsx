@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import BlogPostCard from '../components/BlogPostCard';
-import Layout from '../components/Layout';
+// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
 
 interface HomeProps {
   latestPosts: PostMeta[];
@@ -36,7 +36,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
   };
 
   return (
-    <Layout>
+    <> {/* Replace <Layout> with a React Fragment */}
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -163,7 +163,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
           </p>
         </div>
       </section>
-    </Layout>
+    </> // Replace </Layout> with a React Fragment
   );
 };
 
