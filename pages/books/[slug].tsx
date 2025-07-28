@@ -6,14 +6,14 @@ import type { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts'; // Adjust if books use a different service
-import Layout from '../../components/Layout';
+import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
+// Removed: import Layout from '../../components/Layout';
 import DateFormatter from '../../components/DateFormatter';
 import MDXComponents from '../../components/MDXComponents';
 
 interface BookProps {
   book: {
-    meta: PostMeta; // Adjust interface if book metadata differs from posts
+    meta: PostMeta;
     content: MDXRemoteSerializeResult;
   };
 }
@@ -23,7 +23,7 @@ export default function Book({ book }: BookProps) {
   const siteUrl = 'https://abrahamoflondon.org';
 
   return (
-    <Layout>
+    <> {/* Replaced <Layout> with a React Fragment */}
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={book.meta.description || book.meta.excerpt || ''} />
@@ -47,7 +47,7 @@ export default function Book({ book }: BookProps) {
             <Image
               src={book.meta.coverImage}
               alt={`Cover Image for ${book.meta.title}`}
-              layout="responsive" // Updated from 'fill' to 'responsive' for better compatibility
+              layout="responsive"
               width={700}
               height={400}
               objectFit="cover"
@@ -90,7 +90,7 @@ export default function Book({ book }: BookProps) {
           </Link>
         </div>
       </article>
-    </Layout>
+    </> {/* Replaced </Layout> with a React Fragment */}
   );
 }
 
@@ -128,7 +128,7 @@ export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const books = getAllPosts(['slug']); // Adjust if books use a different fetch method
+  const books = getAllPosts(['slug']);
 
   return {
     paths: books.map((book) => ({

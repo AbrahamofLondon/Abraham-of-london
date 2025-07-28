@@ -1,13 +1,13 @@
 // pages/brands.tsx
 import React from 'react';
-import Layout from '../components/Layout';
+// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image'; // Ensure Image is imported
+import Image from 'next/image';
 
 export default function BrandsPage() {
   return (
-    <Layout> {/* This is the opening tag */}
+    <> {/* Replace <Layout> with a React Fragment */}
       <Head>
         <title>Brands & Ventures | Abraham of London</title>
         <meta name="description" content="Explore the innovative brands and ventures founded or led by Abraham of London, including Alomarada and Endureluxe." />
@@ -23,10 +23,10 @@ export default function BrandsPage() {
             {/* Main Abraham of London Logo on Brands Page */}
             <div className="brand-item bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 col-span-1 md:col-span-2 text-center">
                 <Image
-                    src="/assets/images/logo/abraham-of-london-logo.svg" // Corrected path
+                    src="/assets/images/logo/abraham-of-london-logo.svg" // Corrected path (assuming logo is in /public/assets/images/logo/)
                     alt="Abraham of London Logo"
-                    width={200} // Adjust width as needed for display
-                    height={100} // Adjust height as needed
+                    width={200}
+                    height={100}
                     className="mx-auto mb-4"
                 />
                 <h3 className="text-2xl font-semibold mb-2">Abraham of London</h3>
@@ -38,12 +38,12 @@ export default function BrandsPage() {
                 <Image
                     src="/assets/images/logo/alomarada.svg" // Corrected path
                     alt="Alomarada Logo"
-                    width={128} // Corresponds to w-32 (128px) in Tailwind
-                    height={128} // Corresponds to h-32 (128px) in Tailwind
+                    width={128}
+                    height={128}
                     className="mx-auto mb-4"
                 />
                 <h3 className="text-2xl font-semibold mb-2 text-center">Alomarada</h3>
-                <p className="text-gray-700 text-center">Redefining luxury through sustainable practices and exquisite craftsmanship.</p>
+                <p className="text-gray-700 text-center">Redefining development through ethical exploration of markets, with a focus on human capital development.</p>
                 <div className="mt-4 text-center">
                     <Link href="https://alomarada.com" passHref>
                         <a target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Learn More →</a>
@@ -56,8 +56,8 @@ export default function BrandsPage() {
                 <Image
                     src="/assets/images/logo/endureluxe.svg" // Corrected path
                     alt="Endureluxe Logo"
-                    width={128} // Corresponds to w-32 (128px) in Tailwind
-                    height={128} // Corresponds to h-32 (128px) in Tailwind
+                    width={128}
+                    height={128}
                     className="mx-auto mb-4"
                 />
                 <h3 className="text-2xl font-semibold mb-2 text-center">Endureluxe</h3>
@@ -72,6 +72,6 @@ export default function BrandsPage() {
             {/* Add more brand items as needed */}
         </div>
       </div>
-    </Layout> // This is the closing tag that was missing or misplaced
+    </> // Replace </Layout> with a React Fragment
   );
 }

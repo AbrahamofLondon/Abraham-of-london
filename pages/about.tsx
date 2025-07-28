@@ -1,10 +1,10 @@
 // pages/about.tsx
 import React from 'react';
-import Layout from '../components/Layout'; // Correct path from pages/about.tsx
+// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
 
 export default function About() {
-  return ( // <--- THIS OPENING PARENTHESIS IS VITAL
-    <Layout>
+  return (
+    <> {/* Replace <Layout> with a React Fragment */}
       <div className="max-w-4xl mx-auto py-20">
         <h1 className="text-4xl font-bold mb-6">About Abraham of London</h1>
         <p className="text-lg text-gray-600 mb-6">
@@ -27,6 +27,6 @@ export default function About() {
           Welcome to my world — where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.
         </p>
       </div>
-    </Layout>
-  ); // <--- THIS CLOSING PARENTHESIS AND SEMICOLON IS VITAL
+    </> // Replace </Layout> with a React Fragment
+  );
 }

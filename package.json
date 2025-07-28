@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
-    "@mdx-js/react": "^3.0.1", // Updated to latest patch
+    "@mdx-js/react": "^3.0.1", 
     "@netlify/next": "^1.4.9",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.18.2",

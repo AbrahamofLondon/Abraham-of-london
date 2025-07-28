@@ -1,8 +1,9 @@
+// pages/blog.tsx
 import Head from 'next/head';
-import Layout from '../components/Layout';
-import BlogPostCard from '../components/BlogPostCard'; // <--- CHANGE from BlogCard to BlogPostCard
+// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
+import BlogPostCard from '../components/BlogPostCard';
 import { getAllPosts, PostMeta } from '../lib/posts';
-import { GetStaticProps } from 'next'; // Add this import if missing or implicit
+import { GetStaticProps } from 'next';
 
 interface BlogPageProps {
   posts: PostMeta[];
@@ -10,7 +11,7 @@ interface BlogPageProps {
 
 const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
   return (
-    <Layout>
+    <> {/* Replace <Layout> with a React Fragment */}
       <Head>
         <title>Abraham of London - Blog</title>
         <meta name="description" content="Read the latest blog posts from Abraham of London on various topics." />
@@ -22,7 +23,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
           {posts && posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
-                <BlogPostCard // <--- CHANGE from BlogCard to BlogPostCard here as well
+                <BlogPostCard
                   key={post.slug}
                   slug={post.slug}
                   title={post.title}
@@ -41,7 +42,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
           )}
         </div>
       </section>
-    </Layout>
+    </> // Replace </Layout> with a React Fragment
   );
 };
 
@@ -62,7 +63,7 @@ export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
     props: {
       posts,
     },
-    revalidate: 1, // Optional: Use ISR if you want to regenerate the page periodically
+    revalidate: 1,
   };
 };
 
