@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
-import Layout from '../../components/Layout';
-import DateFormatter from '../../components/DateFormatter';
-import MDXComponents from '../../components/MDXComponents';
+import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts'; // Adjust path if necessary
+import Layout from '../../components/Layout'; // Adjust path if necessary
+import DateFormatter from '../../components/DateFormatter'; // Adjust path if necessary
+import MDXComponents from '../../components/MDXComponents'; // Adjust path if necessary
 
 interface PostProps {
   post: {
