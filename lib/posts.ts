@@ -4,7 +4,8 @@ import { join } from 'path';
 import matter from 'gray-matter';
 
 // Define the directory where your posts are stored
-const postsDirectory = join(process.cwd(), '_posts');
+// CORRECTED: Changed '_posts' to 'posts'
+const postsDirectory = join(process.cwd(), 'posts');
 
 // Define the PostMeta type for metadata (content is handled separately when fetched)
 export type PostMeta = {
@@ -31,15 +32,17 @@ export type PostMeta = {
 // This type represents a post with its raw markdown content
 export type PostWithContent = PostMeta & { content: string };
 
-// Function to get all post slugs (filenames without .md)
+// Function to get all post slugs (filenames without .mdx)
 export function getPostSlugs() {
   return fs.readdirSync(postsDirectory);
 }
 
 // Function to get a single post by its slug, dynamically typing return based on 'content' field
 export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | PostWithContent {
-  const realSlug = slug.replace(/\.md$/, '');
-  const fullPath = join(postsDirectory, `${realSlug}.md`);
+  // CORRECTED: Replaced /\.md$/ with /\.mdx$/ for the file extension
+  const realSlug = slug.replace(/\.mdx$/, '');
+  const fullPath = join(postsDirectory, `${realSlug}.mdx`); // Using '.mdx' extension
+
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents); // 'content' from gray-matter is always a string
 
@@ -79,6 +82,7 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
   if (items.description === undefined) items.description = '';
   if (items.image === undefined) items.image = '';
 
+
   // Return type depends on whether 'content' was requested
   if (fields.includes('content')) {
     return items as PostWithContent; // Content is guaranteed to be a string here
@@ -92,7 +96,8 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
 export function getAllPosts(fields: string[] = []): PostMeta[] {
   const slugs = getPostSlugs();
   const posts = slugs
-    .map((slug) => getPostBySlug(slug, fields) as PostMeta) // Cast here as getAllPosts typically doesn't need 'content'
+    // Cast here as getAllPosts typically doesn't need 'content'
+    .map((slug) => getPostBySlug(slug, fields) as PostMeta)
     // Sort posts by date in descending order (newest first)
     .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
   return posts;
