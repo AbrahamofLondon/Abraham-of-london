@@ -3,9 +3,9 @@ import fs from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
 
-// Define the directory where your posts are stored
-// CORRECTED: Changed '_posts' to 'posts'
-const postsDirectory = join(process.cwd(), 'posts');
+// CORRECTED: Changed 'posts' to 'content/posts' for consistency with 'content/books'
+// You must ensure your actual blog post .mdx files are in a folder named 'content/posts'
+const postsDirectory = join(process.cwd(), 'content/posts');
 
 // Define the PostMeta type for metadata (content is handled separately when fetched)
 export type PostMeta = {
@@ -20,8 +20,8 @@ export type PostMeta = {
   readTime?: string;
   category?: string;
   tags?: string[];
-  genre?: string[];
-  buyLink?: string;
+  genre?: string[]; // Although posts usually don't have 'genre', keeping for type consistency if desired
+  buyLink?: string; // Although posts usually don't have 'buyLink', keeping for type consistency if desired
   seo?: {
     title?: string;
     description?: string;
@@ -34,12 +34,13 @@ export type PostWithContent = PostMeta & { content: string };
 
 // Function to get all post slugs (filenames without .mdx)
 export function getPostSlugs() {
-  return fs.readdirSync(postsDirectory);
+  // CORRECTED: Filter to only include .mdx files to prevent issues with other file types
+  return fs.readdirSync(postsDirectory).filter(filename => filename.endsWith('.mdx'));
 }
 
 // Function to get a single post by its slug, dynamically typing return based on 'content' field
 export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | PostWithContent {
-  // CORRECTED: Replaced /\.md$/ with /\.mdx$/ for the file extension
+  // The slug replacement and fullPath construction are already correct
   const realSlug = slug.replace(/\.mdx$/, '');
   const fullPath = join(postsDirectory, `${realSlug}.mdx`); // Using '.mdx' extension
 
@@ -47,7 +48,7 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
   const { data, content } = matter(fileContents); // 'content' from gray-matter is always a string
 
   // Initialize an object to build the post data
-  const items: Partial<PostWithContent> = { slug: realSlug }; // Start with all possible fields as partial
+  const items: Partial<PostWithContent> = { slug: realSlug };
 
   // If 'content' is requested, assign it directly (it's a string)
   if (fields.includes('content')) {
@@ -68,13 +69,12 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
         }
       } else {
         // Assign other fields directly
-        (items as any)[field] = data[field]; // Using 'any' here for flexibility in dynamic assignment
+        (items as any)[field] = data[field];
       }
     }
   });
 
   // Manually ensure required fields are present with default values if not found in frontmatter
-  // This helps satisfy the PostMeta type if fields are missing in some MD files
   if (items.title === undefined) items.title = '';
   if (items.date === undefined) items.date = '';
   if (items.excerpt === undefined) items.excerpt = '';
@@ -85,18 +85,17 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
 
   // Return type depends on whether 'content' was requested
   if (fields.includes('content')) {
-    return items as PostWithContent; // Content is guaranteed to be a string here
+    return items as PostWithContent;
   } else {
-    return items as PostMeta; // Only metadata, content is not guaranteed or not requested
+    return items as PostMeta;
   }
 }
 
 // Function to get all posts, optionally filtering by fields
 // This function generally fetches only PostMeta (metadata)
 export function getAllPosts(fields: string[] = []): PostMeta[] {
-  const slugs = getPostSlugs();
+  const slugs = getPostSlugs(); // Now correctly filters for .mdx files
   const posts = slugs
-    // Cast here as getAllPosts typically doesn't need 'content'
     .map((slug) => getPostBySlug(slug, fields) as PostMeta)
     // Sort posts by date in descending order (newest first)
     .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));

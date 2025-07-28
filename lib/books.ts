@@ -3,7 +3,8 @@ import fs from 'fs';
 import { join } from 'path';
 import matter from 'gray-matter';
 
-const booksDirectory = join(process.cwd(), '_books');
+// CORRECTED: Changed '_books' to 'content/books' to match typical content structure
+const booksDirectory = join(process.cwd(), 'content/books');
 
 // Define the BookMeta type
 export type BookMeta = {
@@ -17,7 +18,7 @@ export type BookMeta = {
   description: string;
   image?: string;
   readTime?: string;
-  tags?: string[]; // <--- ADD THIS LINE: To include optional tags for books
+  tags?: string[];
   seo?: {
     title?: string;
     description?: string;
@@ -28,12 +29,15 @@ export type BookMeta = {
 export type BookWithContent = BookMeta & { content: string };
 
 export function getBookSlugs() {
-  return fs.readdirSync(booksDirectory);
+  // CORRECTED: Filter to only include .mdx files
+  return fs.readdirSync(booksDirectory).filter(filename => filename.endsWith('.mdx'));
 }
 
 export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | BookWithContent {
-  const realSlug = slug.replace(/\.md$/, '');
-  const fullPath = join(booksDirectory, `${realSlug}.md`);
+  // CORRECTED: Changed /\.md$/ to /\.mdx$/ to handle .mdx slugs
+  const realSlug = slug.replace(/\.mdx$/, '');
+  // CORRECTED: Changed `.md` to `.mdx` for the full path
+  const fullPath = join(booksDirectory, `${realSlug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
@@ -45,7 +49,7 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
 
   fields.forEach((field) => {
     if (field !== 'slug' && field !== 'content' && data[field] !== undefined) {
-      if (field === 'genre' || field === 'tags') { // <--- ALSO ADD 'tags' HERE
+      if (field === 'genre' || field === 'tags') {
         items[field] = Array.isArray(data[field])
           ? data[field].map((g: any) => String(g))
           : [String(data[field])];
@@ -74,7 +78,7 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
 }
 
 export function getAllBooks(fields: string[] = []): BookMeta[] {
-  const slugs = getBookSlugs();
+  const slugs = getBookSlugs(); // Now correctly filters for .mdx files
   const books = slugs
     .map((slug) => getBookBySlug(slug, fields) as BookMeta)
     .sort((book1, book2) => book1.title.localeCompare(book2.title));
