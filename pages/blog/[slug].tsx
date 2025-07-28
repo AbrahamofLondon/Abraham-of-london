@@ -1,34 +1,74 @@
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { MDXRemote } from 'next-mdx-remote';
-import { getPostBySlug, getAllPosts } from '../../lib/api';
-import Layout from '../../components/Layout';
-import { MDXComponents } from '../../components/MDXComponents';
+// pages/blog/[slug].tsx
+import Head from 'next/head';
+import Image from 'next/image';
 import Link from 'next/link';
+import type { GetStaticProps, GetStaticPaths } from 'next';
+import { serialize } from 'next-mdx-remote/serialize'; // Use serialize for pages/ directory
+import { MDXRemote } from 'next-mdx-remote'; // Use MDXRemote for client-side rendering
+import { MDXRemoteSerializeResult } from 'next-mdx-remote'; // Type for serialized content
+import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
+import Layout from '../../components/Layout';
+import DateFormatter from '../../components/DateFormatter';
+import MDXComponents from '../../components/MDXComponents';
 
-interface PostPageProps {
+interface PostProps {
   post: {
-    meta: {
-      title: string;
-      date: string;
-      slug: string;
-      author: string;
-      coverImage: string;
-      excerpt: string;
-      tags: string[];
-    };
-    source: any;
+    meta: PostMeta;
+    content: MDXRemoteSerializeResult; // Matches the serialize output
   };
 }
 
-export default function PostPage({ post }: PostPageProps) {
+export default function Post({ post }: PostProps) {
+  const pageTitle = `${post.meta.title} | Abraham of London Blog`;
+  const siteUrl = 'https://abrahamoflondon.org';
+
   return (
     <Layout>
-      <article className="prose lg:prose-xl mx-auto px-4">
-        <header>
-          <h1 className="text-4xl font-bold">{post.meta.title}</h1>
-          <p className="text-gray-500 text-sm">{post.meta.date}</p>
-          <div className="mt-2">
-            {post.meta.tags.map((tag) => (
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={post.meta.description || post.meta.excerpt || ''} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={post.meta.description || post.meta.excerpt || ''} />
+        <meta property="og:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`${siteUrl}/blog/${post.meta.slug}`} />
+        <meta property="article:published_time" content={new Date(post.meta.date).toISOString()} />
+        <meta property="article:author" content={post.meta.author || ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={post.meta.description || post.meta.excerpt || ''} />
+        <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
+        <link rel="canonical" href={`${siteUrl}/blog/${post.meta.slug}`} />
+      </Head>
+
+      <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+        {post.meta.coverImage && (
+          <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
+            <Image
+              src={post.meta.coverImage}
+              alt={`Cover Image for ${post.meta.title}`}
+              layout="fill"
+              objectFit="cover"
+              priority
+            />
+          </div>
+        )}
+
+        <header className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
+            {post.meta.title}
+          </h1>
+          <div className="text-lg text-gray-600 mb-4">
+            By <span className="font-semibold">{post.meta.author}</span> on{' '}
+            <DateFormatter dateString={post.meta.date} /> | {post.meta.readTime} read
+          </div>
+          {post.meta.category && (
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
+              {post.meta.category}
+            </span>
+          )}
+          {post.meta.tags &&
+            post.meta.tags.map((tag) => (
               <span
                 key={tag}
                 className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
@@ -36,11 +76,10 @@ export default function PostPage({ post }: PostPageProps) {
                 #{tag}
               </span>
             ))}
-          </div>
         </header>
 
         <div className="prose prose-lg mx-auto mb-16">
-          <MDXRemote {...post.source} components={MDXComponents} />
+          <MDXRemote {...post.content} components={MDXComponents} /> {/* Client-side hydration */}
         </div>
 
         <div className="text-center">
@@ -53,9 +92,9 @@ export default function PostPage({ post }: PostPageProps) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
   const { slug } = params as { slug: string };
-  const { content, data } = getPostBySlug(slug, [
+  const postData = getPostBySlug(slug, [
     'title',
     'date',
     'slug',
@@ -63,29 +102,38 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     'content',
     'coverImage',
     'excerpt',
+    'readTime',
+    'category',
     'tags',
+    'description',
   ]);
+
+  const { content, ...meta } = postData as { content: string; [key: string]: any };
+  const mdxSource = await serialize(content || '', {
+    parseFrontmatter: true, // Enable frontmatter parsing
+    scope: meta, // Pass meta data as scope
+  });
 
   return {
     props: {
       post: {
-        meta: data,
-        source: content,
+        meta: meta as PostMeta,
+        content: mdxSource, // Serialized result for MDXRemote
       },
     },
+    revalidate: 10,
   };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getAllPosts(['slug']);
-  const paths = posts.map((post) => ({
-    params: {
-      slug: post.slug,
-    },
-  }));
 
   return {
-    paths,
-    fallback: false,
+    paths: posts.map((post) => ({
+      params: {
+        slug: post.slug,
+      },
+    })),
+    fallback: 'blocking',
   };
 };

@@ -1,20 +1,27 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your existing Next.js configurations go here
-  // For example:
-  // reactStrictMode: true,
-  // swcMinify: true,
-
-  // Add this webpack configuration
-  webpack: (config, { isServer }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      react: require.resolve('react'),
-      'react-dom': require.resolve('react-dom'),
-    };
+  transpilePackages: ['next-mdx-remote'],
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.mdx?$/,
+      use: [
+        {
+          loader: '@mdx-js/loader',
+          options: {
+            remarkPlugins: [],
+            rehypePlugins: [],
+          },
+        },
+      ],
+    });
     return config;
   },
+  reactStrictMode: true,
+  images: {
+    domains: ['abrahamoflondon.org'],
+    formats: ['image/webp', 'image/avif'],
+  },
+  swcMinify: true,
 };
 
 module.exports = nextConfig;
