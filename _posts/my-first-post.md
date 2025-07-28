@@ -1,6 +1,6 @@
 ---
 title: "My First Blog Post"
-date: "2023-01-15"
+date: "2024-10-15"
 excerpt: "This is a short excerpt for my first post."
 author: "Abraham"
 readTime: "2 min"
