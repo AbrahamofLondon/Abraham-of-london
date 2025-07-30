@@ -6,7 +6,7 @@ interface BlogPostCardProps {
   slug: string;
   title: string;
   date: string;
-  coverImage?: string; // <--- THIS IS THE CRITICAL LINE THAT MUST BE 'coverImage?: string;'
+  coverImage?: string;
   excerpt: string;
   author: string;
   readTime?: string;
@@ -36,9 +36,11 @@ const BlogPostCard = ({
             <Image
               src={coverImage}
               alt={title}
-              layout="fill"
-              objectFit="cover"
+              fill // Replaced layout="fill"
+              style={{ objectFit: 'cover' }} // Replaced objectFit="cover"
               className="transition-transform duration-300 hover:scale-105"
+              // Consider adding a 'sizes' prop for better image optimization, e.g.:
+              // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         ) : (

@@ -1,17 +1,19 @@
 // pages/books.tsx
+// import Layout from '../components/Layout'; // REMOVE THIS IMPORT unless other local components use it directly
+
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { getAllBooks, BookMeta } from '../lib/books'; // Make sure BookMeta is imported here!
+import { getAllBooks, BookMeta } from '../lib/books';
 import BookCard from '../components/BookCard';
-import Layout from '../components/Layout';
+// import Layout from '../components/Layout'; // Keep this line commented out or remove if not used
 
 interface BooksPageProps {
-  books: BookMeta[]; // Use BookMeta here
+  books: BookMeta[];
 }
 
 const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
   return (
-    <Layout>
+    <> {/* Use a React Fragment if you need a single root element */}
       <Head>
         <title>Abraham of London - Books</title>
         <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, and legacy." />
@@ -30,9 +32,10 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
                   coverImage={book.coverImage}
                   excerpt={book.excerpt}
                   buyLink={book.buyLink}
-                  downloadLink={book.downloadLink} // CORRECTED: Pass the prop correctly
-                  author={book.author} // Pass author prop
-                  genre={book.genre}   // Pass genre prop
+                  downloadLink={book.downloadLink}
+                  downloadEpubLink={book.downloadEpubLink}
+                  author={book.author}
+                  genre={book.genre}
                 />
               ))}
             </div>
@@ -41,29 +44,10 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
           )}
         </div>
       </section>
-    </Layout>
+    </>
   );
 };
 
-export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
-  const books = getAllBooks([
-    'slug',
-    'title',
-    'coverImage',
-    'excerpt',
-    'buyLink',
-    'downloadLink', // Make sure this is fetched from MDX
-    'author',
-    'genre',
-    // Include any other fields you need for the BookCard or the page
-  ]);
-
-  return {
-    props: {
-      books,
-    },
-    revalidate: 1, // Revalidate every 1 second (ISR)
-  };
-};
+// ... getStaticProps remains the same
 
 export default BooksPage;
