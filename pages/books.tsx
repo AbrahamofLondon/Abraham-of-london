@@ -1,17 +1,17 @@
 // pages/books.tsx
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
-import { getAllBooks, BookMeta } from '../lib/books';
+import { getAllBooks, BookMeta } from '../lib/books'; // Make sure BookMeta is imported here!
 import BookCard from '../components/BookCard';
-// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
+import Layout from '../components/Layout';
 
 interface BooksPageProps {
-  books: BookMeta[];
+  books: BookMeta[]; // Use BookMeta here
 }
 
 const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
   return (
-    <> {/* Replace <Layout> with a React Fragment */}
+    <Layout>
       <Head>
         <title>Abraham of London - Books</title>
         <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, and legacy." />
@@ -30,9 +30,9 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
                   coverImage={book.coverImage}
                   excerpt={book.excerpt}
                   buyLink={book.buyLink}
-                  // Pass any other necessary props to BookCard based on BookMeta
-                  // author={book.author}
-                  // genre={book.genre}
+                  downloadLink={book.downloadLink} // CORRECTED: Pass the prop correctly
+                  author={book.author} // Pass author prop
+                  genre={book.genre}   // Pass genre prop
                 />
               ))}
             </div>
@@ -41,7 +41,7 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
           )}
         </div>
       </section>
-    </> // Replace </Layout> with a React Fragment
+    </Layout>
   );
 };
 
@@ -52,15 +52,17 @@ export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
     'coverImage',
     'excerpt',
     'buyLink',
+    'downloadLink', // Make sure this is fetched from MDX
     'author',
     'genre',
+    // Include any other fields you need for the BookCard or the page
   ]);
 
   return {
     props: {
       books,
     },
-    revalidate: 1,
+    revalidate: 1, // Revalidate every 1 second (ISR)
   };
 };
 
