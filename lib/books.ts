@@ -13,6 +13,7 @@ export type BookMeta = {
   coverImage?: string;
   excerpt: string;
   buyLink?: string;
+  downloadLink?: string;
   author: string;
   genre?: string[];
   description: string;
