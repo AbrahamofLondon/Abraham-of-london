@@ -13,13 +13,14 @@ export type BookMeta = {
   coverImage?: string;
   excerpt: string;
   buyLink?: string;
-  downloadLink?: string;
   author: string;
   genre?: string[];
   description: string;
-  image?: string;
+  image?: string; // This seems to be redundant with coverImage, consider if needed.
   readTime?: string;
   tags?: string[];
+  downloadLink?: string; // Existing PDF/general download link
+  downloadEpubLink?: string; // ADDED: Field for EPUB download link
   seo?: {
     title?: string;
     description?: string;
@@ -64,12 +65,17 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
     }
   });
 
+  // Ensure all defined fields are initialized to avoid undefined errors if not in frontmatter
   if (items.title === undefined) items.title = '';
   if (items.excerpt === undefined) items.excerpt = '';
   if (items.author === undefined) items.author = '';
   if (items.description === undefined) items.description = '';
   if (items.image === undefined) items.image = '';
   if (items.coverImage === undefined) items.coverImage = '';
+  if (items.buyLink === undefined) items.buyLink = ''; // Added initialization for buyLink
+  if (items.downloadLink === undefined) items.downloadLink = ''; // Added initialization for downloadLink
+  if (items.downloadEpubLink === undefined) items.downloadEpubLink = ''; // Added initialization for downloadEpubLink
+
 
   if (fields.includes('content')) {
     return items as BookWithContent;
