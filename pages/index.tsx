@@ -1,11 +1,9 @@
-// File: pages/index.tsx
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import BlogPostCard from '../components/BlogPostCard';
-// Removed: import Layout from '../components/Layout'; // DELETE THIS LINE
 
 interface HomeProps {
   latestPosts: PostMeta[];
@@ -16,7 +14,8 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
   const pageTitle = 'Abraham of London - Fearless Fatherhood & Legacy';
   const pageDescription =
     'Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy.';
-  const ogImage = '/assets/images/og-image.jpg';
+  const ogImage = '/assets/images/og-image.jpg'; // Verify this path
+  const profileImage = '/assets/images/profile-portrait.webp'; // Verify this path
 
   const schemaData = {
     '@context': 'https://schema.org',
@@ -30,24 +29,24 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
       url: siteUrl,
       logo: {
         '@type': 'ImageObject',
-        url: `${siteUrl}/assets/images/abraham-logo.jpg`,
+        url: `${siteUrl}/assets/images/abraham-logo.jpg`, // Verify this path
       },
     },
   };
 
   return (
-    <> {/* Replace <Layout> with a React Fragment */}
+    <>
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content={ogImage} />
+        <meta property="og:image" content={`${siteUrl}${ogImage}`} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={ogImage} />
+        <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
@@ -141,11 +140,16 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <Image
-              src="/assets/images/profile-portrait.webp"
+              src={profileImage}
               alt="Abraham of London"
               width={400}
               height={400}
               className="rounded-full shadow-lg"
+              // Add fallback in case image is missing
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/assets/images/placeholder.jpg'; // Ensure placeholder exists
+              }}
             />
           </div>
         </div>
@@ -163,7 +167,7 @@ const Home: React.FC<HomeProps> = ({ latestPosts }) => {
           </p>
         </div>
       </section>
-    </> // Replace </Layout> with a React Fragment
+    </>
   );
 };
 
