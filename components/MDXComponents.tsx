@@ -59,4 +59,9 @@ const MDXComponents: MDXComponents = {
   pre: (props: HTMLAttributes<HTMLPreElement>) => (
     <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto my-6" {...props} />
   ),
-  code: (props: HTMLAttributes<HTMLElement>) =
+  code: (props: HTMLAttributes<HTMLElement>) => (
+    <code className="bg-gray-100 text-red-600 p-1 rounded" {...props} />
+  ),
+};
+
+export default MDXComponents;

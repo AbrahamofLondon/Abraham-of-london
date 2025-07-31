@@ -1,4 +1,3 @@
-// components/BookCard.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,11 +32,11 @@ const BookCard: React.FC<BookCardProps> = ({
           <Image
             src={coverImage}
             alt={title}
-            fill // Use 'fill' instead of 'layout="fill"'
-            style={{ objectFit: 'cover' }} // Use inline style for objectFit
+            fill
+            style={{ objectFit: 'cover' }}
             className="transition-transform duration-300 hover:scale-105"
-            // If you need more control over responsiveness, you might add a 'sizes' prop here.
-            // Example: sizes="(max-width: 768px) 100vw, 33vw"
+            // Optional: Add sizes prop for responsiveness
+            // sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
       ) : (
@@ -54,30 +53,38 @@ const BookCard: React.FC<BookCardProps> = ({
         <p className="text-gray-700 text-base mb-4 flex-grow">{excerpt}</p>
         <div className="mt-auto flex items-center flex-wrap">
           {buyLink && (
-            <Link href={buyLink} passHref>
-              <a target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition duration-300 mr-2 mb-2">
-                Buy Now
-              </a>
+            <Link
+              href={buyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition duration-300 mr-2 mb-2"
+            >
+              Buy Now
             </Link>
           )}
           {downloadLink && (
-            <Link href={downloadLink} passHref>
-              <a className="inline-block border border-green-600 text-green-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-green-50 transition duration-300 mr-2 mb-2" download>
-                Download PDF
-              </a>
+            <Link
+              href={downloadLink}
+              download
+              className="inline-block border border-green-600 text-green-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-green-50 transition duration-300 mr-2 mb-2"
+            >
+              Download PDF
             </Link>
           )}
           {downloadEpubLink && (
-            <Link href={downloadEpubLink} passHref>
-              <a className="inline-block border border-purple-600 text-purple-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-purple-50 transition duration-300 mr-2 mb-2" download>
-                Download EPUB
-              </a>
+            <Link
+              href={downloadEpubLink}
+              download
+              className="inline-block border border-purple-600 text-purple-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-purple-50 transition duration-300 mr-2 mb-2"
+            >
+              Download EPUB
             </Link>
           )}
-          <Link href={`/books/${slug}`} passHref>
-            <a className="inline-block border border-blue-600 text-blue-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition duration-300 mb-2">
-              Details
-            </a>
+          <Link
+            href={`/books/${slug}`}
+            className="inline-block border border-blue-600 text-blue-600 px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition duration-300 mb-2"
+          >
+            Details
           </Link>
         </div>
       </div>
