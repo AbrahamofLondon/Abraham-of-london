@@ -1,19 +1,15 @@
-// pages/books.tsx
-// import Layout from '../components/Layout'; // REMOVE THIS IMPORT unless other local components use it directly
-
-import Head from 'next/head';
 import { GetStaticProps } from 'next';
+import Head from 'next/head';
 import { getAllBooks, BookMeta } from '../lib/books';
 import BookCard from '../components/BookCard';
-// import Layout from '../components/Layout'; // Keep this line commented out or remove if not used
 
 interface BooksPageProps {
   books: BookMeta[];
 }
 
-const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
+export default function BooksPage({ books }: BooksPageProps) {
   return (
-    <> {/* Use a React Fragment if you need a single root element */}
+    <>
       <Head>
         <title>Abraham of London - Books</title>
         <meta name="description" content="Explore books by Abraham of London on fatherhood, faith, and legacy." />
@@ -25,18 +21,7 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
           {books && books.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {books.map((book) => (
-                <BookCard
-                  key={book.slug}
-                  slug={book.slug}
-                  title={book.title}
-                  coverImage={book.coverImage}
-                  excerpt={book.excerpt}
-                  buyLink={book.buyLink}
-                  downloadLink={book.downloadLink}
-                  downloadEpubLink={book.downloadEpubLink}
-                  author={book.author}
-                  genre={book.genre}
-                />
+                <BookCard key={book.slug} {...book} />
               ))}
             </div>
           ) : (
@@ -46,8 +31,21 @@ const BooksPage: React.FC<BooksPageProps> = ({ books }) => {
       </section>
     </>
   );
+}
+
+export const getStaticProps: GetStaticProps = async () => {
+  const books = getAllBooks([
+    'slug',
+    'title',
+    'coverImage',
+    'excerpt',
+    'author',
+    'genre',
+    'buyLink',
+    'downloadLink',
+    'downloadEpubLink',
+  ]);
+  return {
+    props: { books },
+  };
 };
-
-// ... getStaticProps remains the same
-
-export default BooksPage;
