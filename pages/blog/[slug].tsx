@@ -1,4 +1,3 @@
-// pages/blog/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,7 +39,6 @@ export default function Post({ post }: PostProps) {
         <link rel="canonical" href={`${siteUrl}/blog/${post.meta.slug}`} />
       </Head>
 
-      {/* This div now acts as the single root element for the main content */}
       <div className="blog-post-content">
         <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
           {post.meta.coverImage && (
@@ -48,8 +46,8 @@ export default function Post({ post }: PostProps) {
               <Image
                 src={post.meta.coverImage}
                 alt={`Cover Image for ${post.meta.title}`}
-                layout="fill"
-                objectFit="cover"
+                fill // Replaced layout="fill" with modern prop
+                style={{ objectFit: 'cover' }} // Moved objectFit to style
                 priority
               />
             </div>
@@ -108,9 +106,9 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
     'category',
     'tags',
     'description',
-  ]);
+  ]) as { content: string } & PostMeta; // Typed postData explicitly
 
-  const { content, ...meta } = postData as { content: string; [key: string]: any };
+  const { content, ...meta } = postData;
   const mdxSource = await serialize(content || '', {
     parseFrontmatter: true,
     scope: meta,

@@ -1,6 +1,6 @@
-// pages/404.tsx
 import React from 'react';
 import Head from 'next/head';
+import Link from 'next/link'; // Added for Link component
 
 export default function Custom404() {
   return (
@@ -14,9 +14,9 @@ export default function Custom404() {
         <p className="text-gray-600 mb-6">
           The page you&apos;re looking for might have been removed or relocated.
         </p>
-        <a href="/" className="text-blue-600 hover:underline">
+        <Link href="/" className="text-blue-600 hover:underline">
           ← Back to Home
-        </a>
+        </Link>
       </div>
     </>
   );

@@ -1,196 +1,144 @@
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
-import { GetStaticProps } from 'next';
-import { getAllPosts, PostMeta } from '../lib/posts';
-import BlogPostCard from '../components/BlogPostCard';
+import Link from 'next/link';
+import type { GetStaticProps, GetStaticPaths } from 'next';
+import { serialize } from 'next-mdx-remote/serialize';
+import { MDXRemote } from 'next-mdx-remote';
+import { MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
+import DateFormatter from '../../components/DateFormatter';
+import MDXComponents from '../../components/MDXComponents';
 
-interface HomeProps {
-  latestPosts: PostMeta[];
+interface BookProps {
+  book: {
+    meta: BookMeta;
+    content: MDXRemoteSerializeResult;
+  };
 }
 
-const Home: React.FC<HomeProps> = ({ latestPosts }) => {
+export default function Book({ book }: BookProps) {
+  const pageTitle = `${book.meta.title} | Abraham of London Books`;
   const siteUrl = 'https://abrahamoflondon.org';
-  const pageTitle = 'Abraham of London - Fearless Fatherhood & Legacy';
-  const pageDescription =
-    'Official website of Abraham of London, offering insights on fearless fatherhood, faith, justice, and building a lasting legacy.';
-  const ogImage = '/assets/images/og-image.jpg'; // Verify this path
-  const profileImage = '/assets/images/profile-portrait.webp'; // Verify this path
 
-  const schemaData = {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    url: siteUrl,
-    name: pageTitle,
-    description: pageDescription,
-    publisher: {
-      '@type': 'Organization',
-      name: 'Abraham of London',
-      url: siteUrl,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteUrl}/assets/images/abraham-logo.jpg`, // Verify this path
-      },
-    },
-  };
+  // Safely handle date for published_time
+  const publishedTime = book.meta.date && !isNaN(new Date(book.meta.date).getTime())
+    ? new Date(book.meta.date).toISOString()
+    : undefined; // Omit if invalid or missing
 
   return (
     <>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <meta name="description" content={book.meta.description || book.meta.excerpt || ''} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content={`${siteUrl}${ogImage}`} />
-        <meta property="og:type" content="website" />
+        <meta property="og:description" content={book.meta.description || book.meta.excerpt || ''} />
+        <meta property="og:image" content={`${siteUrl}${book.meta.coverImage || ''}`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
+        {publishedTime && <meta property="article:published_time" content={publishedTime} />} {/* Conditional rendering */}
+        <meta property="article:author" content={book.meta.author || ''} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-        />
-        <link rel="canonical" href={siteUrl} />
+        <meta name="twitter:description" content={book.meta.description || book.meta.excerpt || ''} />
+        <meta name="twitter:image" content={`${siteUrl}${book.meta.coverImage || ''}`} />
+        <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
       </Head>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-20 text-center">
-        <div className="container mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-fadeIn">
-            Fearless Fatherhood & Lasting Legacy
-          </h1>
-          <p
-            className="text-xl md:text-2xl mb-8 opacity-0 animate-fadeIn"
-            style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
-          >
-            Guiding men to lead with conviction, build strong families, and impact the world.
-          </p>
-          <div
-            className="space-x-4 opacity-0 animate-fadeIn"
-            style={{ animationDelay: '1s', animationFillMode: 'forwards' }}
-          >
-            <Link
-              href="/blog"
-              className="bg-white text-blue-700 hover:bg-gray-100 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
-            >
-              Read Blog
-            </Link>
-            <Link
-              href="/books"
-              className="border border-white text-white hover:bg-white hover:text-blue-700 px-8 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
-            >
-              Explore Books
-            </Link>
-          </div>
-        </div>
-      </section>
+      <div className="book-page-content">
+        <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+          {book.meta.coverImage && (
+            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-md">
+              <Image
+                src={book.meta.coverImage}
+                alt={`Cover Image for ${book.meta.title}`}
+                fill
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            </div>
+          )}
 
-      {/* Latest Blog Posts Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Latest Insights</h2>
-          {latestPosts && latestPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {latestPosts.map((post) => (
-                <BlogPostCard
-                  key={post.slug}
-                  slug={post.slug}
-                  title={post.title}
-                  date={post.date}
-                  coverImage={post.coverImage}
-                  excerpt={post.excerpt}
-                  author={post.author}
-                  readTime={post.readTime}
-                  category={post.category}
-                  tags={post.tags}
-                />
+          <header className="text-center mb-12">
+            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
+              {book.meta.title}
+            </h1>
+            <div className="text-lg text-gray-600 mb-4">
+              By <span className="font-semibold">{book.meta.author}</span> on{' '}
+              <DateFormatter dateString={book.meta.date || ''} /> | {book.meta.readTime} read
+            </div>
+            {book.meta.category && (
+              <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
+                {book.meta.category}
+              </span>
+            )}
+            {book.meta.tags &&
+              book.meta.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
+                >
+                  #{tag}
+                </span>
               ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-600">No blog posts found yet.</p>
-          )}
-          {latestPosts && latestPosts.length > 0 && (
-            <div className="text-center mt-12">
-              <Link
-                href="/blog"
-                className="text-blue-600 hover:underline text-lg font-medium"
-              >
-                View All Posts &rarr;
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
+          </header>
 
-      {/* About Section */}
-      <section className="bg-gray-100 py-16">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
-          <div className="md:w-1/2 text-center md:text-left">
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">About Abraham of London</h2>
-            <p className="text-lg text-gray-700 mb-4">
-              Abraham is a passionate advocate for strong families and authentic leadership. Through his writings and teachings, he empowers individuals to embrace their roles with courage and build a legacy that matters.
-            </p>
-            <Link
-              href="/about"
-              className="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold transition duration-300 shadow-lg"
-            >
-              Learn More
+          <div className="prose prose-lg mx-auto mb-16">
+            <MDXRemote {...book.content} components={MDXComponents} />
+          </div>
+
+          <div className="text-center">
+            <Link href="/books" className="text-blue-600 hover:underline text-xl font-medium">
+              &larr; Back to Books
             </Link>
           </div>
-          <div className="md:w-1/2 flex justify-center">
-            <Image
-              src={profileImage}
-              alt="Abraham of London"
-              width={400}
-              height={400}
-              className="rounded-full shadow-lg"
-              // Add fallback in case image is missing
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/assets/images/placeholder.jpg'; // Ensure placeholder exists
-              }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Books Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">Featured Books</h2>
-          <p className="text-center text-gray-600">
-            Content for featured books coming soon.{' '}
-            <Link href="/books" className="text-blue-600 hover:underline">
-              Explore all books &rarr;
-            </Link>
-          </p>
-        </div>
-      </section>
+        </article>
+      </div>
     </>
   );
-};
+}
 
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const latestPosts = getAllPosts([
-    'slug',
+export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
+  const { slug } = params as { slug: string };
+  const bookData = getBookBySlug(slug, [
     'title',
     'date',
+    'slug',
+    'author',
+    'content',
     'coverImage',
     'excerpt',
-    'author',
     'readTime',
     'category',
     'tags',
     'description',
-  ]).slice(0, 3);
+  ]) as { content: string } & Omit<BookMeta, 'content'>;
+
+  const { content, ...meta } = bookData;
+  const mdxSource = await serialize(content || '', {
+    parseFrontmatter: true,
+    scope: meta,
+  });
 
   return {
     props: {
-      latestPosts,
+      book: {
+        meta: meta as BookMeta,
+        content: mdxSource,
+      },
     },
-    revalidate: 1,
+    revalidate: 10,
   };
 };
 
-export default Home;
+export const getStaticPaths: GetStaticPaths = async () => {
+  const books = getAllBooks(['slug']);
+
+  return {
+    paths: books.map((book) => ({
+      params: {
+        slug: book.slug,
+      },
+    })),
+    fallback: 'blocking',
+  };
+};
