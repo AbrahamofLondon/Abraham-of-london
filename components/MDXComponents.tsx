@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MDXComponents } from 'mdx/types';
-import type { ReactNode, HTMLAttributes, ImgHTMLAttributes } from 'react';
+import type { HTMLAttributes, ImgHTMLAttributes } from 'react'; // Removed ReactNode
 
 const MDXComponents: MDXComponents = {
   h1: (props: HTMLAttributes<HTMLHeadingElement>) => (
@@ -21,7 +21,7 @@ const MDXComponents: MDXComponents = {
     <p className="text-lg leading-relaxed my-4 text-gray-700" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <Link href={props.href || ''}>
+    <Link href={props.href || ''} legacyBehavior> {/* Added legacyBehavior */}
       <a className="text-blue-600 hover:underline" {...props} />
     </Link>
   ),
@@ -40,10 +40,9 @@ const MDXComponents: MDXComponents = {
       <Image
         src={props.src || ''}
         alt={props.alt || ''}
-        width={700}
-        height={400}
-        layout="responsive"
-        objectFit="cover"
+        fill // Replaced layout="responsive" with fill
+        style={{ objectFit: 'cover' }} // Moved objectFit to style
+        className="w-full h-auto"
       />
     </span>
   ),

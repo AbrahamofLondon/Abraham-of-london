@@ -15,6 +15,7 @@ type BookSeo = {
 export type BookMeta = {
   slug: string;
   title: string;
+  date?: string;
   coverImage?: string;
   excerpt: string;
   buyLink?: string;
@@ -27,6 +28,7 @@ export type BookMeta = {
   downloadLink?: string;
   downloadEpubLink?: string;
   seo?: BookSeo;
+  category?: string;
 };
 
 // Extended type for MDX content
@@ -66,7 +68,7 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
     }
   });
 
-  // Defaults to avoid undefined issues
+  // Only set defaults for required fields
   if (items.title === undefined) items.title = '';
   if (items.excerpt === undefined) items.excerpt = '';
   if (items.author === undefined) items.author = '';
@@ -76,6 +78,7 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
   if (items.buyLink === undefined) items.buyLink = '';
   if (items.downloadLink === undefined) items.downloadLink = '';
   if (items.downloadEpubLink === undefined) items.downloadEpubLink = '';
+  if (items.category === undefined) items.category = '';
 
   return fields.includes('content') ? (items as BookWithContent) : (items as BookMeta);
 }
