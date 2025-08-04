@@ -30,7 +30,7 @@ export type PostMeta = {
 export type PostWithContent = PostMeta & { content: string };
 
 export function getPostSlugs(): string[] {
-  return fs.readdirSync(postsDirectory).filter((filename) => filename.endsWith('.mdx'));
+  return fs.readdirSync(postsDirectory).filter((f) => f.endsWith('.mdx'));
 }
 
 export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | PostWithContent {
@@ -39,42 +39,36 @@ export function getPostBySlug(slug: string, fields: string[] = []): PostMeta | P
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  const items: Partial<PostWithContent> = { slug: realSlug };
+  const item: Partial<PostWithContent> = { slug: realSlug };
 
-  if (fields.includes('content')) {
-    items.content = content;
-  }
+  if (fields.includes('content')) item.content = content;
 
   fields.forEach((field) => {
-    if (field !== 'slug' && field !== 'content' && data[field] !== undefined) {
-      if (field === 'tags' || field === 'genre') {
-        (items as Record<string, string[]>)[field] = Array.isArray(data[field])
-          ? data[field].map((tag: unknown) => String(tag))
-          : [String(data[field])];
-      } else if (field === 'seo') {
-        if (typeof data[field] === 'object' && data[field] !== null) {
-          items.seo = data[field] as PostSeo;
-        }
+    if (field in data) {
+      const value = data[field];
+      if (Array.isArray(value)) {
+        item[field] = value.map(String) as any;
+      } else if (typeof value === 'object') {
+        item[field] = value;
       } else {
-        (items as Record<string, string>)[field] = String(data[field]);
+        item[field] = String(value);
       }
     }
   });
 
-  // Fallback defaults
-  if (!items.title) items.title = '';
-  if (!items.date) items.date = '';
-  if (!items.excerpt) items.excerpt = '';
-  if (!items.author) items.author = '';
-  if (!items.description) items.description = '';
-  if (!items.image) items.image = '';
+  // Fallbacks
+  item.title ??= '';
+  item.date ??= '';
+  item.excerpt ??= '';
+  item.author ??= '';
+  item.description ??= '';
+  item.image ??= '';
 
-  return fields.includes('content') ? (items as PostWithContent) : (items as PostMeta);
+  return fields.includes('content') ? (item as PostWithContent) : (item as PostMeta);
 }
 
 export function getAllPosts(fields: string[] = []): PostMeta[] {
-  const slugs = getPostSlugs();
-  return slugs
+  return getPostSlugs()
     .map((slug) => getPostBySlug(slug, fields) as PostMeta)
     .sort((a, b) => (a.date > b.date ? -1 : 1));
 }

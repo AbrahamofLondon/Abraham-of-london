@@ -4,14 +4,12 @@ import matter from 'gray-matter';
 
 const booksDirectory = join(process.cwd(), 'content/books');
 
-// Type for SEO metadata
 type BookSeo = {
   title?: string;
   description?: string;
   keywords?: string;
 };
 
-// Main book metadata
 export type BookMeta = {
   slug: string;
   title: string;
@@ -31,11 +29,10 @@ export type BookMeta = {
   category?: string;
 };
 
-// Extended type for MDX content
 export type BookWithContent = BookMeta & { content: string };
 
 export function getBookSlugs(): string[] {
-  return fs.readdirSync(booksDirectory).filter((filename) => filename.endsWith('.mdx'));
+  return fs.readdirSync(booksDirectory).filter((f) => f.endsWith('.mdx'));
 }
 
 export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | BookWithContent {
@@ -44,49 +41,39 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | B
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  const items: Partial<BookWithContent> = { slug: realSlug };
+  const item: Partial<BookWithContent> = { slug: realSlug };
 
-  if (fields.includes('content')) {
-    items.content = content;
-  }
+  if (fields.includes('content')) item.content = content;
 
   fields.forEach((field) => {
-    if (field !== 'slug' && field !== 'content' && data[field] !== undefined) {
-      if (field === 'genre' || field === 'tags') {
-        if (Array.isArray(data[field])) {
-          (items as Record<string, string[]>)[field] = data[field].map((g: unknown) => String(g));
-        } else {
-          (items as Record<string, string[]>)[field] = [String(data[field])];
-        }
-      } else if (field === 'seo') {
-        if (typeof data[field] === 'object' && data[field] !== null) {
-          items.seo = data[field] as BookSeo;
-        }
+    if (field in data) {
+      const value = data[field];
+      if (Array.isArray(value)) {
+        item[field] = value.map(String) as any;
+      } else if (typeof value === 'object') {
+        item[field] = value;
       } else {
-        (items as Record<string, string | undefined>)[field] = String(data[field]);
+        item[field] = String(value);
       }
     }
   });
 
-  // Only set defaults for required fields
-  if (items.title === undefined) items.title = '';
-  if (items.excerpt === undefined) items.excerpt = '';
-  if (items.author === undefined) items.author = '';
-  if (items.description === undefined) items.description = '';
-  if (items.image === undefined) items.image = '';
-  if (items.coverImage === undefined) items.coverImage = '';
-  if (items.buyLink === undefined) items.buyLink = '';
-  if (items.downloadLink === undefined) items.downloadLink = '';
-  if (items.downloadEpubLink === undefined) items.downloadEpubLink = '';
-  if (items.category === undefined) items.category = '';
+  // Fallbacks
+  item.title ??= '';
+  item.excerpt ??= '';
+  item.author ??= '';
+  item.description ??= '';
+  item.coverImage ??= '';
+  item.buyLink ??= '';
+  item.downloadLink ??= '';
+  item.downloadEpubLink ??= '';
+  item.category ??= '';
 
-  return fields.includes('content') ? (items as BookWithContent) : (items as BookMeta);
+  return fields.includes('content') ? (item as BookWithContent) : (item as BookMeta);
 }
 
 export function getAllBooks(fields: string[] = []): BookMeta[] {
-  const slugs = getBookSlugs();
-  const books = slugs
+  return getBookSlugs()
     .map((slug) => getBookBySlug(slug, fields) as BookMeta)
-    .sort((book1, book2) => book1.title.localeCompare(book2.title));
-  return books;
+    .sort((a, b) => a.title.localeCompare(b.title));
 }

@@ -1,10 +1,11 @@
+// lib/gtag.ts
 declare global {
   interface Window {
     gtag: (...args: unknown[]) => void;
   }
 }
 
-export const GA_TRACKING_ID = 'G-XXXXXXXXXX'; // 🔁 Replace with your actual GA ID
+export const GA_TRACKING_ID = 'G-XXXXXXXXXX'; // 🔁 Replace with actual GA ID
 
 type GTagEvent = {
   action: string;
@@ -13,7 +14,6 @@ type GTagEvent = {
   value: number;
 };
 
-// ✅ Log pageviews
 export const pageview = (url: string): void => {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('config', GA_TRACKING_ID, {
@@ -22,7 +22,6 @@ export const pageview = (url: string): void => {
   }
 };
 
-// ✅ Log custom events
 export const event = ({ action, category, label, value }: GTagEvent): void => {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', action, {
