@@ -20,11 +20,11 @@
     "next-mdx-remote": "^5.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "rehype-stringify": "^9.0.3",
+    "rehype-stringify": "^9.0.4",
     "remark": "^15.0.0",
-    "remark-gfm": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
-    "remark-rehype": "^10.0.0",
+    "remark-rehype": "^10.1.0",
     "unified": "^11.0.5"
   },
   "devDependencies": {
