@@ -20,29 +20,18 @@ const nextConfig = {
     };
     return config;
   },
-  typescript: {
-    // Temporarily ignore build errors to bypass the remark-rehype type issues
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    // Temporarily ignore ESLint errors during build
-    ignoreDuringBuilds: true,
-  },
+  // REMOVED: ignoreBuildErrors: true,
+  // REMOVED: ignoreDuringBuilds: true,
   reactStrictMode: true,
   images: {
-    // NEW: Use remotePatterns for external images if you have any
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'abrahamoflondon.org', // This hostname must match the domain of your external images
+        hostname: 'abrahamoflondon.org',
         port: '',
-        pathname: '**', // Allow any path on this hostname
+        pathname: '**',
       },
     ],
-    // For local images (from /public), no configuration is typically needed here.
-    // Next.js handles them automatically.
-    // If you plan to optimize local images, the `sharp` package is recommended (as the warning mentioned).
-    // formats: ['image/webp', 'image/avif'], // This can stay if you want these formats for optimization
   },
   swcMinify: true,
 };
