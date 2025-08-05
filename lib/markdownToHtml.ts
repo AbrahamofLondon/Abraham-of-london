@@ -1,18 +1,18 @@
-// lib/markdownToHtml.ts
-import { remark } from 'remark';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 
 export default async function markdownToHtml(markdown: string): Promise<string> {
   try {
-    const processor = remark()
+    const file = await unified()
+      .use(remarkParse)
       .use(remarkGfm)
-      // Cast to any to bypass TypeScript compatibility issues
-      .use(remarkRehype as any)
-      .use(rehypeStringify);
-    
-    const file = await processor.process(markdown);
+      .use(remarkRehype)
+      .use(rehypeStringify)
+      .process(markdown);
+
     return String(file);
   } catch (error) {
     console.error('Error processing markdown:', error);
