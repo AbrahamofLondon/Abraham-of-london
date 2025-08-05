@@ -110,6 +110,17 @@ const Contact: React.FC = () => {
               </p>
             )}
           </form>
+
+          {/* Contact Details Section */}
+          <div className="mt-8 text-center text-charcoal">
+            <h2 className="text-2xl font-bold mb-4">Or Reach Me Directly</h2>
+            <p className="mb-2">
+              <strong>Email:</strong> <a href="mailto:info@abrahamoflondon.org" className="text-primary hover:underline">info@abrahamoflondon.org</a>
+            </p>
+            <p>
+              <strong>Tel:</strong> <a href="tel:+442086625909" className="text-primary hover:underline">+442086625909</a>
+            </p>
+          </div>
         </div>
       </section>
     </>
