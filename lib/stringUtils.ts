@@ -1,4 +1,3 @@
-// lib/stringUtils.ts
 export function safeSplit(str: string | undefined | null, separator: string): string[] {
   if (!str || typeof str !== 'string') {
     return [];
@@ -6,7 +5,7 @@ export function safeSplit(str: string | undefined | null, separator: string): st
   return str.split(separator);
 }
 
-export function safeString(value: any): string {
+export function safeString(value: unknown): string {
   if (value === null || value === undefined) {
     return '';
   }

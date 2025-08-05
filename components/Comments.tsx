@@ -4,7 +4,8 @@ const Comments = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    const currentRef = ref.current; // Capture ref.current in a variable
+    if (!currentRef) return;
 
     const script = document.createElement('script');
     script.src = 'https://utteranc.es/client.js';
@@ -14,13 +15,13 @@ const Comments = () => {
     script.setAttribute('issue-term', 'pathname');
     script.setAttribute('theme', 'preferred-color-scheme'); // Use dynamic theme
     
-    ref.current.appendChild(script);
+    currentRef.appendChild(script);
 
     // Cleanup function to remove the script when the component unmounts
     return () => {
-      const scriptElement = ref.current?.querySelector('script');
+      const scriptElement = currentRef.querySelector('script');
       if (scriptElement) {
-        ref.current?.removeChild(scriptElement);
+        currentRef.removeChild(scriptElement);
       }
     };
   }, []);
