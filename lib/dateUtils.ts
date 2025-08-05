@@ -1,4 +1,3 @@
-// lib/dateUtils.ts
 export function formatDate(dateInput: string | Date | undefined): string {
   if (!dateInput) {
     return new Date().toISOString();
@@ -14,7 +13,7 @@ export function formatDate(dateInput: string | Date | undefined): string {
     }
     
     return date.toISOString();
-  } catch (error) {
+  } catch {
     console.warn(`Error parsing date: ${dateInput}, using current date`);
     return new Date().toISOString();
   }
@@ -35,7 +34,7 @@ export function parseDate(dateInput: string | Date | undefined): Date {
     }
     
     return date;
-  } catch (error) {
+  } catch {
     console.warn(`Error parsing date: ${dateInput}, using current date`);
     return new Date();
   }

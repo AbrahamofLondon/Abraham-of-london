@@ -19,10 +19,9 @@ export default function Home({ latestPosts, featuredBooks }: HomeProps) {
   const pageDescription =
     'Official site of Abraham of London — philosopher, father, and builder of meaningful legacies through fearless storytelling and timeless leadership.';
 
-  // Paths for static assets from the public folder
-  const heroImage = '/assets/images/hero-banner.jpg'; // Using a dedicated banner image for clarity
+  const heroImage = '/assets/images/hero-banner.jpg';
   const profileImage = '/assets/images/profile-portrait.webp';
-  const ogImage = heroImage; // Use a high-quality, large image for social sharing
+  const ogImage = heroImage;
   const logoImage = '/assets/images/abraham-logo.jpg';
 
   const schemaData = {
@@ -58,7 +57,7 @@ export default function Home({ latestPosts, featuredBooks }: HomeProps) {
         image: book.coverImage ? `${siteUrl}${book.coverImage}` : undefined,
         url: `${siteUrl}/books/${book.slug}`,
       })),
-    ].filter(entity => entity.image), // Filter out entities with no image
+    ].filter(entity => entity.image),
   };
 
   return (
@@ -231,6 +230,8 @@ export default function Home({ latestPosts, featuredBooks }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+  // CORRECTED: This now fetches all posts by removing the .slice() method.
+  // The home page will now render all of them.
   const latestPosts = getAllPosts([
     'slug',
     'title',
@@ -242,8 +243,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'category',
     'tags',
     'description',
-  ]).slice(0, 3);
+  ]);
 
+  // This still limits to 3, as it's a "featured" section.
   const featuredBooks = getAllBooks([
     'slug',
     'title',

@@ -1,4 +1,3 @@
-// pages/books/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,7 +6,7 @@ import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
-import { formatDate, parseDate } from '../../lib/dateUtils';
+import { parseDate } from '../../lib/dateUtils';
 import { safeString } from '../../lib/stringUtils';
 import MDXComponents from '../../components/MDXComponents';
 import Layout from '../../components/Layout';
