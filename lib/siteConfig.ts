@@ -6,7 +6,7 @@ export const socialLinks = [
   { name: 'Instagram', url: 'https://instagram.com/abrahamoflondon' },
   { name: 'X (Twitter)', url: 'https://twitter.com/abrahamoflondon' },
   { name: 'LinkedIn', url: 'https://linkedin.com/in/abrahamoflondon' },
-  { name: 'YouTube', url: 'https://youtube.com/abrahamoflondon' },
+  { name: 'YouTube', url: 'https://youtube.com/@abrahamoflondon?si=DF7VTWITL0qZ-ffs' },
   // Add more social media links as needed. Make sure to replace URLs with your actual ones.
 ];
 

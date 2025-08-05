@@ -1,3 +1,4 @@
+// components/BookCard.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,14 +28,15 @@ const BookCard: React.FC<BookCardProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
-      <div className="relative w-full h-64">
+      <Link href={`/books/${slug}`} passHref className="relative w-full h-64 block overflow-hidden">
         {coverImage ? (
           <Image
             src={coverImage}
             alt={`Cover of ${title}`}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover hover:scale-105 transition-transform duration-300 ease-in-out"
+            style={{ objectFit: 'cover' }}
+            className="hover:scale-105 transition-transform duration-300 ease-in-out"
             priority
           />
         ) : (
@@ -42,19 +44,14 @@ const BookCard: React.FC<BookCardProps> = ({
             No Cover Image
           </div>
         )}
-      </div>
-
+      </Link>
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h3>
-
         {author && <p className="text-sm text-gray-600 mb-1">By {author}</p>}
-
         {genre && genre.length > 0 && (
           <p className="text-xs text-gray-500 italic mb-2">Genre: {genre.join(', ')}</p>
         )}
-
         <p className="text-gray-700 text-base mb-4 line-clamp-3">{excerpt}</p>
-
         <div className="mt-auto space-y-2">
           {buyLink && (
             <Link
@@ -66,7 +63,6 @@ const BookCard: React.FC<BookCardProps> = ({
               Buy Now
             </Link>
           )}
-
           {downloadLink && (
             <Link
               href={downloadLink}
@@ -76,7 +72,6 @@ const BookCard: React.FC<BookCardProps> = ({
               Download PDF
             </Link>
           )}
-
           {downloadEpubLink && (
             <Link
               href={downloadEpubLink}
@@ -86,7 +81,6 @@ const BookCard: React.FC<BookCardProps> = ({
               Download EPUB
             </Link>
           )}
-
           <Link
             href={`/books/${slug}`}
             className="inline-block w-full text-center border border-blue-600 text-blue-600 hover:bg-blue-50 py-2 rounded-full font-medium transition duration-300"

@@ -1,6 +1,7 @@
 // components/BlogPostCard.tsx
 import Link from 'next/link';
 import Image from 'next/image';
+import DateFormatter from './DateFormatter';
 
 interface BlogPostCardProps {
   slug: string;
@@ -27,7 +28,6 @@ const BlogPostCard = ({
   tags,
   description,
 }: BlogPostCardProps) => {
-
   return (
     <Link href={`/blog/${slug}`} passHref>
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer h-full flex flex-col">
@@ -35,12 +35,12 @@ const BlogPostCard = ({
           <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden">
             <Image
               src={coverImage}
-              alt={title}
-              fill // Replaced layout="fill"
-              style={{ objectFit: 'cover' }} // Replaced objectFit="cover"
+              alt={`Cover image for ${title}`}
+              fill
+              style={{ objectFit: 'cover' }}
               className="transition-transform duration-300 hover:scale-105"
-              // Consider adding a 'sizes' prop for better image optimization, e.g.:
-              // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
             />
           </div>
         ) : (
@@ -50,7 +50,9 @@ const BlogPostCard = ({
         )}
         <div className="p-6 flex flex-col flex-grow">
           <h2 className="text-2xl font-bold mb-2 text-gray-900">{title}</h2>
-          <p className="text-gray-600 text-sm mb-3">{date} {readTime && `• ${readTime}`}</p>
+          <p className="text-gray-600 text-sm mb-3">
+            <DateFormatter dateString={date} /> {readTime && `• ${readTime}`}
+          </p>
           <p className="text-gray-700 leading-relaxed mb-4 flex-grow">
             {description || excerpt}
           </p>

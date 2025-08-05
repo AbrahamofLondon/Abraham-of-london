@@ -1,3 +1,4 @@
+// pages/books/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,8 +7,10 @@ import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
-import DateFormatter from '../../components/DateFormatter';
+import { formatDate, parseDate } from '../../lib/dateUtils';
+import { safeString } from '../../lib/stringUtils';
 import MDXComponents from '../../components/MDXComponents';
+import Layout from '../../components/Layout';
 
 interface BookProps {
   book: {
@@ -17,37 +20,35 @@ interface BookProps {
 }
 
 export default function Book({ book }: BookProps) {
-  const pageTitle = `${book.meta.title} | Abraham of London Books`;
+  const pageTitle = `${safeString(book.meta.title)} | Abraham of London Books`;
   const siteUrl = 'https://abrahamoflondon.org';
-
-  // Safely handle date for published_time
-  const publishedTime = book.meta.date && !isNaN(new Date(book.meta.date).getTime())
-    ? new Date(book.meta.date).toISOString()
-    : undefined; // Avoid invalid date, let it be omitted if invalid
+  
+  // Safe fallbacks for meta properties
+  const description = safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
+  const coverImage = book.meta.coverImage || '/assets/default-book-cover.jpg';
+  const author = safeString(book.meta.author || 'Abraham of London');
 
   return (
-    <>
+    <Layout>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={book.meta.description || book.meta.excerpt || ''} />
+        <meta name="description" content={description} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={book.meta.description || book.meta.excerpt || ''} />
-        <meta property="og:image" content={`${siteUrl}${book.meta.coverImage || ''}`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={`${siteUrl}${coverImage}`} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
-        {publishedTime && <meta property="article:published_time" content={publishedTime} />} {/* Conditional rendering */}
-        <meta property="article:author" content={book.meta.author || ''} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={book.meta.description || book.meta.excerpt || ''} />
-        <meta name="twitter:image" content={`${siteUrl}${book.meta.coverImage || ''}`} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={`${siteUrl}${coverImage}`} />
         <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
       </Head>
 
-      <div className="book-page-content">
+      <div className="book-post-content">
         <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
           {book.meta.coverImage && (
-            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-md">
+            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
               <Image
                 src={book.meta.coverImage}
                 alt={`Cover Image for ${book.meta.title}`}
@@ -60,26 +61,16 @@ export default function Book({ book }: BookProps) {
 
           <header className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
-              {book.meta.title}
+              {safeString(book.meta.title)}
             </h1>
             <div className="text-lg text-gray-600 mb-4">
-              By <span className="font-semibold">{book.meta.author}</span> on{' '}
-              <DateFormatter dateString={book.meta.date || ''} /> | {book.meta.readTime} read
+              By <span className="font-semibold">{author}</span>
             </div>
-            {book.meta.category && (
-              <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
-                {book.meta.category}
-              </span>
+            {book.meta.date && (
+              <div className="text-sm text-gray-500">
+                Published: {parseDate(book.meta.date).toLocaleDateString()}
+              </div>
             )}
-            {book.meta.tags &&
-              book.meta.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
-                >
-                  #{tag}
-                </span>
-              ))}
           </header>
 
           <div className="prose prose-lg mx-auto mb-16">
@@ -93,52 +84,77 @@ export default function Book({ book }: BookProps) {
           </div>
         </article>
       </div>
-    </>
+    </Layout>
   );
 }
 
 export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
-  const { slug } = params as { slug: string };
-  const bookData = getBookBySlug(slug, [
-    'title',
-    'date',
-    'slug',
-    'author',
-    'content',
-    'coverImage',
-    'excerpt',
-    'readTime',
-    'category',
-    'tags',
-    'description',
-  ]) as { content: string } & Omit<BookMeta, 'content'>;
+  try {
+    const { slug } = params as { slug: string };
+    
+    const bookData = getBookBySlug(slug, [
+      'title',
+      'date',
+      'publishedAt',
+      'slug',
+      'author',
+      'content',
+      'coverImage',
+      'excerpt',
+      'readTime',
+      'category',
+      'tags',
+      'description',
+      'buyLink',
+      'downloadLink',
+      'downloadEpubLink',
+    ]) as { content: string } & Omit<BookMeta, 'content'>;
 
-  const { content, ...meta } = bookData;
-  const mdxSource = await serialize(content || '', {
-    parseFrontmatter: true,
-    scope: meta,
-  });
+    // Check if book exists
+    if (bookData.title === 'Book Not Found') {
+      return { notFound: true };
+    }
 
-  return {
-    props: {
-      book: {
-        meta: meta as BookMeta,
-        content: mdxSource,
+    const { content, ...meta } = bookData;
+    
+    // Serialize MDX content
+    const mdxSource = await serialize(content || '', {
+      parseFrontmatter: true,
+      scope: meta,
+    });
+
+    return {
+      props: {
+        book: {
+          meta: meta as BookMeta,
+          content: mdxSource,
+        },
       },
-    },
-    revalidate: 10,
-  };
+      revalidate: 10,
+    };
+  } catch (error) {
+    console.error(`Error in getStaticProps for book ${params?.slug}:`, error);
+    return { notFound: true };
+  }
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const books = getAllBooks(['slug']);
+  try {
+    const books = getAllBooks(['slug']);
 
-  return {
-    paths: books.map((book) => ({
-      params: {
-        slug: book.slug,
-      },
-    })),
-    fallback: 'blocking',
-  };
+    return {
+      paths: books.map((book) => ({
+        params: {
+          slug: book.slug,
+        },
+      })),
+      fallback: 'blocking',
+    };
+  } catch (error) {
+    console.error('Error in getStaticPaths for books:', error);
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 };

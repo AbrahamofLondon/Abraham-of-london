@@ -2,6 +2,7 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mdx-js/loader": "^3.1.0",
+    "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@netlify/next": "^1.4.9",
     "date-fns": "^4.1.0",
@@ -19,12 +20,12 @@
     "next-mdx-remote": "^5.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remark": "^13.0.0",
-    "remark-gfm": "^1.0.0",
-    "remark-html": "^13.0.2",
-    "unified": "9.2.2",
-    "vfile": "5.3.7",
-    "vfile-message": "3.0.0"
+    "rehype-stringify": "^9.0.3",
+    "remark": "^15.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^10.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.11.6",
