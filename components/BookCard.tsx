@@ -1,4 +1,3 @@
-// components/BookCard.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,7 +6,7 @@ export interface BookCardProps {
   slug: string;
   title: string;
   coverImage?: string;
-  excerpt: string;
+  excerpt?: string; // Corrected line
   buyLink?: string;
   downloadLink?: string;
   downloadEpubLink?: string;
@@ -51,7 +50,7 @@ const BookCard: React.FC<BookCardProps> = ({
         {genre && genre.length > 0 && (
           <p className="text-xs text-gray-500 italic mb-2">Genre: {genre.join(', ')}</p>
         )}
-        <p className="text-gray-700 text-base mb-4 line-clamp-3">{excerpt}</p>
+        {excerpt && <p className="text-gray-700 text-base mb-4 line-clamp-3">{excerpt}</p>}
         <div className="mt-auto space-y-2">
           {buyLink && (
             <Link
