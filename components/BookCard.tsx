@@ -1,3 +1,4 @@
+// components/BookCard.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,91 +6,129 @@ import Link from 'next/link';
 export interface BookCardProps {
   slug: string;
   title: string;
+  author: string;
+  excerpt: string;
   coverImage?: string;
-  excerpt?: string; // Corrected line
   buyLink?: string;
-  downloadLink?: string;
-  downloadEpubLink?: string;
-  author?: string;
-  genre?: string[];
+  pdfLink?: string;
+  epubLink?: string;
+  genre?: string;
 }
 
 const BookCard: React.FC<BookCardProps> = ({
   slug,
   title,
-  coverImage,
-  excerpt,
-  buyLink,
-  downloadLink,
-  downloadEpubLink,
   author,
+  excerpt,
+  coverImage,
+  buyLink,
+  pdfLink,
+  epubLink,
   genre,
 }) => {
+  const imageSrc = coverImage || '/assets/images/default-book.jpg';
+
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
-      <Link href={`/books/${slug}`} passHref className="relative w-full h-64 block overflow-hidden">
-        {coverImage ? (
+    <div className="border rounded-xl shadow-md p-4 mb-6 bg-white dark:bg-zinc-900">
+      <Link href={`/books/${slug}`} className="block">
+        <div className="relative w-full h-64 mb-4 rounded-md overflow-hidden">
           <Image
-            src={coverImage}
-            alt={`Cover of ${title}`}
+            src={imageSrc}
+            alt={title}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
             style={{ objectFit: 'cover' }}
-            className="hover:scale-105 transition-transform duration-300 ease-in-out"
+            sizes="(max-width: 768px) 100vw, 33vw"
             priority
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
-            No Cover Image
-          </div>
-        )}
-      </Link>
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h3>
-        {author && <p className="text-sm text-gray-600 mb-1">By {author}</p>}
-        {genre && genre.length > 0 && (
-          <p className="text-xs text-gray-500 italic mb-2">Genre: {genre.join(', ')}</p>
-        )}
-        {excerpt && <p className="text-gray-700 text-base mb-4 line-clamp-3">{excerpt}</p>}
-        <div className="mt-auto space-y-2">
-          {buyLink && (
-            <Link
-              href={buyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-full font-medium transition duration-300"
-            >
-              Buy Now
-            </Link>
-          )}
-          {downloadLink && (
-            <Link
-              href={downloadLink}
-              download
-              className="inline-block w-full text-center border border-green-600 text-green-700 hover:bg-green-50 py-2 rounded-full font-medium transition duration-300"
-            >
-              Download PDF
-            </Link>
-          )}
-          {downloadEpubLink && (
-            <Link
-              href={downloadEpubLink}
-              download
-              className="inline-block w-full text-center border border-purple-600 text-purple-700 hover:bg-purple-50 py-2 rounded-full font-medium transition duration-300"
-            >
-              Download EPUB
-            </Link>
-          )}
-          <Link
-            href={`/books/${slug}`}
-            className="inline-block w-full text-center border border-blue-600 text-blue-600 hover:bg-blue-50 py-2 rounded-full font-medium transition duration-300"
-          >
-            View Details
-          </Link>
         </div>
+      </Link>
+      <h2 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
+        <Link href={`/books/${slug}`}>{title}</Link>
+      </h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">{author}</p>
+      {genre && <p className="text-sm italic text-zinc-500 dark:text-zinc-400 mb-2">{genre}</p>}
+      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{excerpt}</p>
+      <div className="flex flex-wrap gap-2">
+        {buyLink && (
+          <a
+            href={buyLink}
+            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Buy
+          </a>
+        )}
+        {pdfLink && (
+          <a
+            href={pdfLink}
+            className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
+            download
+          >
+            Download PDF
+          </a>
+        )}
+        {epubLink && (
+          <a
+            href={epubLink}
+            className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
+            download
+          >
+            Download EPUB
+          </a>
+        )}
       </div>
     </div>
   );
 };
 
 export default BookCard;
+
+
+// components/BlogPostCard.tsx
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+
+interface BlogPostCardProps {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage?: string;
+  date: string;
+  author?: string;
+}
+
+const BlogPostCard: React.FC<BlogPostCardProps> = ({
+  slug,
+  title,
+  excerpt,
+  coverImage,
+  date,
+  author,
+}) => {
+  const imageSrc = coverImage || '/assets/images/default-book.jpg';
+
+  return (
+    <article className="border rounded-xl shadow-md p-4 mb-6 bg-white dark:bg-zinc-900">
+      <Link href={`/posts/${slug}`} className="block">
+        <div className="relative w-full h-64 mb-4 rounded-md overflow-hidden">
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 768px) 100vw, 33vw"
+            priority
+          />
+        </div>
+        <h3 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">{title}</h3>
+      </Link>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">{date}</p>
+      {author && <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">By {author}</p>}
+      <p className="text-sm text-zinc-600 dark:text-zinc-300">{excerpt}</p>
+    </article>
+  );
+};
+
+export default BlogPostCard;

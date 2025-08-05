@@ -1,3 +1,4 @@
+// pages/_document.tsx
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
 import { GA_TRACKING_ID } from '../lib/gtag';
 
@@ -11,8 +12,8 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* Google Analytics Script - only load if GA_TRACKING_ID is properly set */}
-          {GA_TRACKING_ID && GA_TRACKING_ID !== 'G-XXXXXXXXXX' && (
+          {/* Google Analytics Script - only loaded in production */}
+          {GA_TRACKING_ID && (
             <>
               <script
                 async
