@@ -1,73 +1,45 @@
-// components/BlogPostCard.tsx
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import DateFormatter from './DateFormatter';
 
 interface BlogPostCardProps {
   slug: string;
   title: string;
-  date: string;
-  coverImage?: string;
   excerpt: string;
-  author: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  description?: string;
+  coverImage?: string;
+  date?: string;
 }
 
-const BlogPostCard = ({
-  slug,
-  title,
-  date,
-  coverImage,
-  excerpt,
-  author,
-  readTime,
-  category,
-  tags,
-  description,
-}: BlogPostCardProps) => {
+const BlogPostCard: React.FC<BlogPostCardProps> = ({ slug, title, excerpt, coverImage, date }) => {
+  const imageSrc = coverImage || '/assets/images/default-book.jpg';
+
   return (
-    <Link href={`/blog/${slug}`} passHref>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer h-full flex flex-col">
-        {coverImage ? (
-          <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden">
-            <Image
-              src={coverImage}
-              alt={`Cover image for ${title}`}
-              fill
-              style={{ objectFit: 'cover' }}
-              className="transition-transform duration-300 hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority
-            />
-          </div>
-        ) : (
-          <div className="w-full h-48 sm:h-56 md:h-64 bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-medium">
-            No Cover Image
-          </div>
-        )}
-        <div className="p-6 flex flex-col flex-grow">
-          <h2 className="text-2xl font-bold mb-2 text-gray-900">{title}</h2>
-          <p className="text-gray-600 text-sm mb-3">
-            <DateFormatter dateString={date} /> {readTime && `• ${readTime}`}
-          </p>
-          <p className="text-gray-700 leading-relaxed mb-4 flex-grow">
-            {description || excerpt}
-          </p>
-          <div className="flex flex-wrap gap-2 text-xs mt-auto">
-            {category && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{category}</span>
-            )}
-            {tags && tags.map((tag) => (
-              <span key={tag} className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full">{tag}</span>
-            ))}
-          </div>
-          <p className="text-sm text-gray-500 mt-4">By {author}</p>
+    <div className="border rounded-lg overflow-hidden shadow-sm bg-white flex flex-col">
+      <Link href={`/blog/${slug}`} className="relative w-full h-52">
+        <Image
+          src={imageSrc}
+          alt={title}
+          fill
+          style={{ objectFit: 'cover' }}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="transition-transform duration-200 hover:scale-105"
+        />
+      </Link>
+
+      <div className="p-4 flex flex-col flex-1 justify-between">
+        <div>
+          <h3 className="text-xl font-semibold mb-2">{title}</h3>
+          {date && <p className="text-sm text-gray-500 mb-2">{new Date(date).toLocaleDateString()}</p>}
+          <p className="text-gray-700 text-sm">{excerpt}</p>
+        </div>
+
+        <div className="mt-4">
+          <Link href={`/blog/${slug}`} className="text-blue-600 hover:underline font-medium">
+            Read More
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

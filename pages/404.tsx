@@ -1,23 +1,29 @@
-import React from 'react';
-import Head from 'next/head';
+// pages/404.tsx
 import Link from 'next/link';
+import Image from 'next/image';
+import Head from 'next/head';
 
 export default function Custom404() {
   return (
     <>
       <Head>
-        <title>Page Not Found | Abraham of London</title>
+        <title>404 - Page Not Found</title>
       </Head>
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
-        <h1 className="text-6xl font-bold text-red-600">404</h1>
-        <h2 className="text-2xl mt-4 mb-2">Oops! This page doesn’t exist.</h2>
-        <p className="text-gray-600 mb-6">
-          The page you’re looking for might have been removed or relocated.
-        </p>
-        <Link href="/" className="text-blue-600 hover:underline text-lg">
-          ← Back to Homepage
+
+      <main className="flex flex-col items-center justify-center min-h-screen text-center px-4">
+        <Image
+          src="/assets/images/default-book.jpg"
+          alt="404 Not Found"
+          width={400}
+          height={300}
+          className="mb-6"
+        />
+        <h1 className="text-4xl font-bold mb-2">Page Not Found</h1>
+        <p className="text-lg mb-6">Sorry, the page you’re looking for doesn’t exist.</p>
+        <Link href="/">
+          <a className="text-blue-600 hover:underline text-lg">← Go back home</a>
         </Link>
-      </div>
+      </main>
     </>
   );
 }
