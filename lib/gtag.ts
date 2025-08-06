@@ -1,4 +1,12 @@
-// lib/gtag.ts
+declare global {
+  interface Window {
+    // gtag accepts string event name and params object
+    gtag?: (command: 'config' | 'event' | string, 
+            targetId: string, 
+            params?: Record<string, unknown>) => void;
+  }
+}
+
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
 // Track page views
@@ -11,7 +19,7 @@ export const pageview = (url: string) => {
 };
 
 // Log specific events
-type GAEvent = {
+export type GAEvent = {
   action: string;
   category: string;
   label: string;
