@@ -1,4 +1,3 @@
-```typescript
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -19,11 +18,10 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   date,
   author,
 }) => {
-  const imageSrc = coverImage || '/images/blog/default-blog-cover.jpg'; // Recommended default path
+  const imageSrc = coverImage || '/images/blog/default-blog-cover.jpg';
 
   return (
     <article className="border rounded-xl shadow-md p-4 mb-6 bg-white dark:bg-zinc-900">
-      {/* Corrected link path to use /blog/${slug} */}
       <Link href={`/blog/${slug}`} className="block">
         <div className="relative w-full h-64 mb-4 rounded-md overflow-hidden">
           <Image
@@ -45,4 +43,3 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 };
 
 export default BlogPostCard;
-```
