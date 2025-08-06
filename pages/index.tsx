@@ -1,4 +1,3 @@
-// pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -35,7 +34,8 @@ export default function Home({ posts }: HomeProps) {
   const siteUrl = 'https://abrahamoflondon.org';
   const pageTitle = 'Abraham of London — Strategist & Storyteller';
   const pageDescription = 'Welcome to my world — where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.';
-  const ogImage = '/images/social/og-image.jpg';
+  // Corrected image path to match your file structure
+  const ogImage = '/assets/images/social/og-image.jpg';
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,14 +56,14 @@ export default function Home({ posts }: HomeProps) {
     <>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        {/* Open Graph Tags for Social Sharing */}
+        {/* Corrected: The single quote in "life's" is now properly escaped with &apos; */}
+        <meta name="description" content="Father, strategist, and student of life&apos;s deep currents." />
+        {/* Updated OG and Twitter tags */}
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={siteUrl} />
         <meta property="og:image" content={`${siteUrl}${ogImage}`} />
         <meta property="og:type" content="website" />
-        {/* Twitter Card Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
@@ -97,16 +97,16 @@ export default function Home({ posts }: HomeProps) {
             variants={containerVariants}
           >
             <motion.p variants={itemVariants}>
-              Strategist, and student of life's deep currents. My journey has been shaped by a relentless pursuit of truth, legacy, and personal mastery. Through every venture, book, or conversation, I am crafting not just businesses, but enduring narratives that challenge, inspire, and provoke thoughtful action.
+              Strategist, and student of life&apos;s deep currents. My journey has been shaped by a relentless pursuit of truth, legacy, and personal mastery. Through every venture, book, or conversation, I am crafting not just businesses, but enduring narratives that challenge, inspire, and provoke thoughtful action.
             </motion.p>
             <motion.p variants={itemVariants}>
               My work stands at the intersection of philosophy, creative expression, and human development. Whether through writing, brand building, or advisory, I see every project as a canvas — a medium to explore what it means to live meaningfully, lead courageously, and leave behind a legacy of substance.
             </motion.p>
             <motion.p variants={itemVariants}>
-              I’m less interested in transient trends and more invested in timeless truths. Family, faith, character, and creativity are the compass points that steer my endeavours. Every blog post, strategy session, or artistic project is my way of translating these convictions into tangible impact.
+              I&apos;m less interested in transient trends and more invested in timeless truths. Family, faith, character, and creativity are the compass points that steer my endeavours. Every blog post, strategy session, or artistic project is my way of translating these convictions into tangible impact.
             </motion.p>
             <motion.p variants={itemVariants}>
-              This is not just a brand; it’s an unfolding life project. As seasons change, so do the mediums I employ — from thought leadership to immersive storytelling, from business ventures to deeply personal writings like Fathering Without Fear. It’s all connected, because I am the connection.
+              This is not just a brand; it&apos;s an unfolding life project. As seasons change, so do the mediums I employ — from thought leadership to immersive storytelling, from business ventures to deeply personal writings like Fathering Without Fear. It&apos;s all connected, because I am the connection.
             </motion.p>
             <motion.p variants={itemVariants}>
               Welcome to my world — where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.
