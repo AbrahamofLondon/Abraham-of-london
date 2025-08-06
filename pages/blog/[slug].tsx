@@ -7,8 +7,7 @@ import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
 import DateFormatter from '../../components/DateFormatter';
-import MDXComponents from '../../components/MDXComponents';
-
+import { MDXComponents } from '../../components/MDXComponents';
 interface PostProps {
   post: {
     meta: PostMeta;

@@ -8,7 +8,7 @@ import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
 import { parseDate } from '../../lib/dateUtils';
 import { safeString } from '../../lib/stringUtils';
-import MDXComponents from '../../components/MDXComponents';
+import { MDXComponents } from '../../components/MDXComponents';
 import Layout from '../../components/Layout';
 
 interface BookProps {
