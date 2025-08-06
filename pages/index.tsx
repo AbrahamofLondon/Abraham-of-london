@@ -1,3 +1,10 @@
+Here is the updated `pages/index.tsx` file with the comments section added and the code optimized for a better user experience.
+
+The key change is the addition of a new `<section>` that imports and renders your `Comments` component, placing the comment section at the bottom of your homepage.
+
+-----
+
+```typescript
 // pages/index.tsx
 
 import React from 'react';
@@ -10,6 +17,7 @@ import { getAllBooks, BookMeta } from '../lib/books';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
 import Layout from '../components/Layout';
+import Comments from '../components/Comments';
 
 interface HomeProps {
   latestPosts: PostMeta[];
@@ -224,6 +232,13 @@ export const Home: React.FC<HomeProps> = ({ latestPosts, featuredBooks }) => {
           </div>
         </div>
       </section>
+      
+      {/* New section for comments */}
+      <section className="container mx-auto px-4 py-8 max-w-4xl">
+        <h2 className="text-3xl font-bold mb-6 text-gray-800">Community Discussion</h2>
+        <Comments />
+      </section>
+      
     </Layout>
   );
 };
@@ -263,3 +278,4 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default Home;
+```
