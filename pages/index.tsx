@@ -1,10 +1,3 @@
-Here is the updated `pages/index.tsx` file with the comments section added and the code optimized for a better user experience.
-
-The key change is the addition of a new `<section>` that imports and renders your `Comments` component, placing the comment section at the bottom of your homepage.
-
------
-
-```typescript
 // pages/index.tsx
 
 import React from 'react';
@@ -28,7 +21,7 @@ export const Home: React.FC<HomeProps> = ({ latestPosts, featuredBooks }) => {
   const siteUrl = 'https://abrahamoflondon.org';
   const pageTitle = 'Abraham of London - Fearless Fatherhood & Legacy';
   const pageDescription =
-    'Official site of Abraham of London — philosopher, father, and builder of meaningful legacies through fearless storytelling and timeless leadership.';
+    'Official site of Abraham of London — strategist, father, and builder of meaningful legacies through fearless storytelling and timeless leadership.';
 
   // Corrected and optimized image paths
   const heroImage = '/assets/images/abraham-of-london-banner.webp';
@@ -218,7 +211,7 @@ export const Home: React.FC<HomeProps> = ({ latestPosts, featuredBooks }) => {
           <div className="lg:w-1/2">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">About Abraham of London</h2>
             <p className="text-gray-700 text-lg leading-relaxed mb-4">
-              I am Abraham of London — a storyteller, strategist, and student of life’s deep currents. My work is a reflection of timeless values: faith, family, character, and creative legacy.
+              I am Abraham of London — a strategist, father, and student of life’s deep currents. My work is a reflection of timeless values: faith, family, character, and creative legacy.
             </p>
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
               From immersive storytelling and thought leadership to advisory and authorship, I am committed to shaping lives and building enduring narratives. Every blog, book, or venture is part of this mission.
@@ -232,13 +225,12 @@ export const Home: React.FC<HomeProps> = ({ latestPosts, featuredBooks }) => {
           </div>
         </div>
       </section>
-      
-      {/* New section for comments */}
+
       <section className="container mx-auto px-4 py-8 max-w-4xl">
         <h2 className="text-3xl font-bold mb-6 text-gray-800">Community Discussion</h2>
         <Comments />
       </section>
-      
+
     </Layout>
   );
 };
@@ -278,4 +270,3 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default Home;
-```
