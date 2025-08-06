@@ -1,4 +1,3 @@
-// pages/blog.tsx
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import { getAllPosts, PostMeta } from '../lib/posts';
