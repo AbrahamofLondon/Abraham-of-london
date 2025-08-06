@@ -1,6 +1,9 @@
+// pages/index.tsx
+
+import React from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
@@ -13,13 +16,14 @@ interface HomeProps {
   featuredBooks: BookMeta[];
 }
 
-export default function Home({ latestPosts, featuredBooks }: HomeProps) {
+export const Home: React.FC<HomeProps> = ({ latestPosts, featuredBooks }) => {
   const siteUrl = 'https://abrahamoflondon.org';
   const pageTitle = 'Abraham of London - Fearless Fatherhood & Legacy';
   const pageDescription =
-    'Official site of Abraham of London — strategist, father, and builder of meaningful legacies through fearless storytelling and timeless leadership.';
+    'Official site of Abraham of London — philosopher, father, and builder of meaningful legacies through fearless storytelling and timeless leadership.';
 
-  const heroImage = '/assets/images/hero-banner.jpg';
+  // Corrected and optimized image paths
+  const heroImage = '/assets/images/abraham-of-london-banner.webp';
   const profileImage = '/assets/images/profile-portrait.webp';
   const ogImage = heroImage;
   const logoImage = '/assets/images/abraham-logo.jpg';
@@ -84,7 +88,7 @@ export default function Home({ latestPosts, featuredBooks }: HomeProps) {
       <section className="relative h-96 md:h-[600px] flex items-center justify-center text-white">
         <Image
           src={heroImage}
-          alt="Hero Banner for Abraham of London"
+          alt="Abraham of London Hero Banner"
           fill
           style={{ objectFit: 'cover', objectPosition: 'center' }}
           priority
@@ -222,7 +226,7 @@ export default function Home({ latestPosts, featuredBooks }: HomeProps) {
       </section>
     </Layout>
   );
-}
+};
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const latestPosts = getAllPosts([
@@ -257,3 +261,5 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     revalidate: 86400,
   };
 };
+
+export default Home;
