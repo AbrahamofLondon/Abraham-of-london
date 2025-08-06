@@ -20,8 +20,6 @@ const nextConfig = {
     };
     return config;
   },
-  // REMOVED: ignoreBuildErrors: true,
-  // REMOVED: ignoreDuringBuilds: true,
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -34,6 +32,19 @@ const nextConfig = {
     ],
   },
   swcMinify: true,
+  // Enable TypeScript and ESLint for better error detection
+  typescript: {
+    ignoreBuildErrors: false, // Ensure build fails on TypeScript errors
+    tsconfigPath: './tsconfig.json',
+  },
+  eslint: {
+    ignoreDuringBuilds: false, // Ensure ESLint runs during build
+  },
+  // Enable build caching
+  experimental: {
+    cacheHandler: 'filesystem', // Use filesystem for build caching
+    incrementalCacheHandlerPath: require.resolve('./cache-handler.js'), // Optional custom cache handler
+  },
 };
 
 export default nextConfig;
