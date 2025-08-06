@@ -32,20 +32,16 @@ const nextConfig = {
     ],
   },
   swcMinify: true,
-  // Enable TypeScript and ESLint for better error detection
   typescript: {
-    ignoreBuildErrors: false, // Ensure build fails on TypeScript errors
+    ignoreBuildErrors: false,
     tsconfigPath: './tsconfig.json',
   },
   eslint: {
-    ignoreDuringBuilds: false, // Ensure ESLint runs during build
+    ignoreDuringBuilds: false,
   },
-  // Enable build caching (removed require.resolve due to ESM incompatibility)
   experimental: {
-    cacheHandler: 'filesystem', // Use filesystem for build caching
-    // Note: incrementalCacheHandlerPath removed; add back with import if needed
-    // Example: import cacheHandler from './cache-handler.js' assert { type: 'json' };
+    cacheHandler: 'filesystem',
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
