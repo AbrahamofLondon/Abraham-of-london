@@ -1,25 +1,14 @@
-export function safeSplit(str: string | undefined | null, separator: string): string[] {
-  if (!str || typeof str !== 'string') {
-    return [];
-  }
-  return str.split(separator);
-}
+// lib/stringUtils.ts
 
+/** Safely converts any value to a trimmed string, or empty string if not a string */
 export function safeString(value: unknown): string {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  return String(value);
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return value.toString();
+  return '';
 }
 
-export function safeExcerpt(content: string | undefined, maxLength: number = 150): string {
-  if (!content || typeof content !== 'string') {
-    return '';
-  }
-  
-  if (content.length <= maxLength) {
-    return content;
-  }
-  
-  return content.substring(0, maxLength).trim() + '...';
+/** Safely splits a string by a delimiter into trimmed parts, or returns empty array */
+export function safeSplit(value: string, delimiter: string): string[] {
+  if (!value) return [];
+  return value.split(delimiter).map(s => s.trim()).filter(Boolean);
 }

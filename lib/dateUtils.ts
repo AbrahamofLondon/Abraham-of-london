@@ -1,41 +1,16 @@
-export function formatDate(dateInput: string | Date | undefined): string {
-  if (!dateInput) {
-    return new Date().toISOString();
-  }
+// lib/dateUtils.ts
 
-  try {
-    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date provided: ${dateInput}, using current date`);
-      return new Date().toISOString();
-    }
-    
-    return date.toISOString();
-  } catch {
-    console.warn(`Error parsing date: ${dateInput}, using current date`);
-    return new Date().toISOString();
-  }
+/** Format a date-like value (string or Date) into ISO yyyy-MM-dd string */
+export function formatDate(date?: string | Date): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
 }
 
-export function parseDate(dateInput: string | Date | undefined): Date {
-  if (!dateInput) {
-    return new Date();
-  }
-
-  try {
-    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date provided: ${dateInput}, using current date`);
-      return new Date();
-    }
-    
-    return date;
-  } catch {
-    console.warn(`Error parsing date: ${dateInput}, using current date`);
-    return new Date();
-  }
+/** Parse a date string or Date object, fallback to epoch if invalid */
+export function parseDate(date?: string | Date): Date {
+  if (!date) return new Date(0);
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return isNaN(d.getTime()) ? new Date(0) : d;
 }
