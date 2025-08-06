@@ -8,6 +8,7 @@ import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
 import DateFormatter from '../../components/DateFormatter';
 import { MDXComponents } from '../../components/MDXComponents';
+
 interface PostProps {
   post: {
     meta: PostMeta;
@@ -45,8 +46,8 @@ export default function Post({ post }: PostProps) {
               <Image
                 src={post.meta.coverImage}
                 alt={`Cover Image for ${post.meta.title}`}
-                fill // Replaced layout="fill" with modern prop
-                style={{ objectFit: 'cover' }} // Moved objectFit to style
+                fill
+                style={{ objectFit: 'cover' }}
                 priority
               />
             </div>
@@ -105,7 +106,7 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
     'category',
     'tags',
     'description',
-  ]) as { content: string } & PostMeta; // Typed postData explicitly
+  ]) as { content: string } & PostMeta;
 
   const { content, ...meta } = postData;
   const mdxSource = await serialize(content || '', {
