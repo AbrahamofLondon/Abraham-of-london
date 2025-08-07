@@ -1,9 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// The unused import is removed to resolve the build warning
-// import { MDXRemoteSerializeResult } from 'next-mdx-remote'; 
-
 export const MDXComponents = {
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     const { href = '', ...restProps } = props;

@@ -1,46 +1,28 @@
-// pages/_document.tsx
-import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
-import { GA_TRACKING_ID } from '../lib/gtag';
+import { Html, Head, Main, NextScript } from 'next/document'
 
-class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
-
-  render() {
-    return (
-      <Html lang="en">
-        <Head>
-          {/* Google Analytics Script - only loaded in production */}
-          {GA_TRACKING_ID && (
-            <>
-              <script
-                async
-                src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
-              />
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', '${GA_TRACKING_ID}', {
-                      page_path: window.location.pathname,
-                    });
-                  `,
-                }}
-              />
-            </>
-          )}
-        </Head>
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
+export default function Document() {
+  return (
+    <Html lang="en">
+      <Head>
+        {/* CORRECTED: Favicon paths matching your actual file structure in /public/favicon/ */}
+        <link rel="icon" href="/favicon/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon/icon0.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/icon1.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon.png" />
+        <link rel="manifest" href="/favicon/manifest.json" />
+        
+        {/* Additional meta tags for better browser support */}
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
+        
+        {/* Preload important assets */}
+        <link rel="preload" href="/assets/images/social/og-image.jpg" as="image" />
+      </Head>
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  )
 }
-
-export default MyDocument;

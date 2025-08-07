@@ -1,0 +1,28 @@
+{
+  "name": "Abraham of London",
+  "short_name": "Abraham",
+  "description": "Strategist & Storyteller - Welcome to my world where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon/icon1.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/icon0.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
