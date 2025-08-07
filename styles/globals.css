@@ -3,38 +3,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Fonts */
-@font-face {
-  font-family: 'geist-black'; /* Matches fontFamily.display in tailwind.config.js */
-  src: url('/fonts/geist-black.woff2') format('woff2');
-  font-weight: 900; /* Or whatever weight 'geist-black' is */
-  font-style: normal;
-  font-display: swap;
-}
+/* Replace large local fonts with Inter from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-@font-face {
-  font-family: 'GeistMono-Regular'; /* Matches fontFamily.body in tailwind.config.js */
-  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Base styles for the entire page */
 html, body {
+  font-family: 'Inter', sans-serif;
   height: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* You can apply a default font here if you want it to apply globally,
-     but it's often more flexible to apply it via className on Layout or specific elements. */
-  /* font-family: 'GeistMono-Regular', sans-serif; */
+  background-color: #fff;
+  color: #111827;
 }
 
-#__next { /* Next.js root div */
+#__next {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
-/* Other global styles */

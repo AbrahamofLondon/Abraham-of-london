@@ -1,12 +1,15 @@
 declare global {
   interface Window {
     // gtag accepts string event name and params object
-    gtag?: (command: 'config' | 'event' | string, 
-            targetId: string, 
-            params?: Record<string, unknown>) => void;
+    gtag?: (
+      command: 'config' | 'event' | string,
+      targetId: string,
+      params?: Record<string, unknown>
+    ) => void;
   }
 }
 
+// Use a valid variable name, like GA_TRACKING_ID
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
 // Track page views
