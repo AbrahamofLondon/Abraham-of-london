@@ -1,3 +1,4 @@
+// components/MDXComponents.tsx
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,7 +19,6 @@ export const MDXComponents = {
   a: ({ href = '', children, ...rest }: AnchorProps) => {
     const cls = 'text-forest underline underline-offset-2 hover:text-softGold transition';
 
-    // Internal links use Next Link
     if (href.startsWith('/')) {
       return (
         <Link href={href} className={cls} {...rest}>
@@ -27,7 +27,6 @@ export const MDXComponents = {
       );
     }
 
-    // External links use <a> with security attrs
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={cls} {...rest}>
         {children}
