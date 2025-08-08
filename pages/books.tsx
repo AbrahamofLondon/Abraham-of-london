@@ -3,7 +3,7 @@ import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../components/Layout';
 import BookCard, { BookCardProps } from '../components/BookCard';
-import { getAllBooks } from '../lib/books'; // Removed BookMeta
+import { getAllBooks } from '../lib/books';
 
 interface BooksProps {
   books: BookCardProps[];
@@ -36,34 +36,25 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
   const books = getAllBooks([
     'slug',
     'title',
-    'date',
-    'publishedAt',
     'coverImage',
     'excerpt',
     'author',
-    'description',
-    'image',
-    'readTime',
-    'category',
-    'tags',
-    'content',
-    'downloadPdf',
-    'downloadEpub',
     'buyLink',
     'genre',
+    'downloadPdf',
+    'downloadEpub',
   ]);
 
   const booksWithRequiredProps: BookCardProps[] = books.map((book) => {
-    // Explicitly cast the returned object to BookCardProps
     return {
       ...book,
-      coverImage: book.coverImage || '/assets/images/default-book.jpg', // Add fallback
-      excerpt: book.excerpt || 'No excerpt available.', // Add fallback
-      buyLink: book.buyLink || '#', // Add fallback
-      genre: book.genre || 'Uncategorized', // Add fallback
-      // Ensure optional props are handled correctly
-      downloadPdf: book.downloadPdf || undefined,
-      downloadEpub: book.downloadEpub || undefined,
+      coverImage: book.coverImage || '/assets/images/default-book.jpg',
+      excerpt: book.excerpt || 'No excerpt available.',
+      buyLink: book.buyLink || '#',
+      genre: book.genre || 'Uncategorized',
+      // The key change: explicitly set undefined values to null for serialization
+      downloadPdf: book.downloadPdf ?? null, 
+      downloadEpub: book.downloadEpub ?? null,
     } as BookCardProps;
   });
 
