@@ -76,20 +76,23 @@ export default function AboutPage() {
           </div>
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold mb-4 text-gray-800">
-              A Vision for Lasting Impact
+              A Storyteller, Strategist, and Student of Life
             </h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              My journey began with a passion for understanding how things work, leading me to a career in oil and gas, consulting, tech and social impact. I believe true success isn&apos;t just about building businesses, but about building people and communities that thrive.
+              I am Abraham of London—a storyteller, strategist, and student of life’s deep currents. My journey has been shaped by a relentless pursuit of truth, legacy, and personal mastery. Through every venture, book, or conversation, I am crafting not just businesses, but enduring narratives that challenge, inspire, and provoke thoughtful action.
+            </p>
+            <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+              My work stands at the intersection of philosophy, creative expression, and human development. Whether through writing, brand building, or advisory, I see every project as a canvas — a medium to explore what it means to live meaningfully, lead courageously, and leave behind a legacy of substance.
+            </p>
+            <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+              I’m less interested in transient trends and more invested in timeless truths. Family, faith, character, and creativity are the compass points that steer my endeavours. Every blog post, strategy session, or artistic project is my way of translating these convictions into tangible impact.
+            </p>
+            <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+              This is not just a brand; it’s an unfolding life project. As seasons change, so do the mediums I employ — from thought leadership to immersive storytelling, from business ventures to deeply personal writings like <Link href="/books/fathering-without-fear" className="text-blue-600 hover:underline">Fathering Without Fear</Link>. It’s all connected, because I am the connection.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Based in London, I advise and mentor entrepreneurs, helping them navigate the complexities of their industries to create sustainable, impactful ventures. Whether it&apos;s a new startup or an established company, my focus is always on growth, innovation, and purpose.
+              Welcome to my world — where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.
             </p>
-            <Link
-              href="/contact"
-              className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-            >
-              Get in Touch
-            </Link>
           </div>
         </motion.section>
 
