@@ -1,374 +1,539 @@
 // pages/index.tsx
+import React from 'react';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
+import BookCard, { BookCardProps } from '../components/BookCard';
+import BlogPostCard from '../components/BlogPostCard';
 import { getAllPosts, PostMeta } from '../lib/posts';
+import profilePortrait from '../public/assets/images/profile-portrait.webp';
+import defaultBookCover from '../public/assets/images/default-book.jpg';
+
+// Social preview images
+import ogImage from '../public/assets/social/og-image.jpg';
+import twitterImage from '../public/assets/social/twitter-image.webp';
+
+// Book covers
+import fatheringWithoutFear from '../public/assets/books/fathering-without-fear.jpg';
+import fatheringPrinciples from '../public/assets/images/fathering-principles.jpg';
+import fatheringWithoutFearTeaser from '../public/assets/images/fathering-without-fear-teaser.jpg';
+
+// Additional brand images
+import abrahamLogo from '../public/assets/images/abraham-logo.jpg';
+import abrahamOfLondonBanner from '../public/assets/images/abraham-of-london-banner.webp';
+import alomaradaLogo from '../public/assets/images/alomarada-ltd.webp';
+import endureluxeLogo from '../public/assets/images/endureluxe-ltd.webp';
+
+// Social media icons
+import linkedinIcon from '../public/assets/social/linkedin.svg';
+import twitterIcon from '../public/assets/social/twitter.svg';
+import instagramIcon from '../public/assets/social/instagram.svg';
 
 interface HomeProps {
   posts: PostMeta[];
 }
 
-// Function to fetch data at build time
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const allPosts = getAllPosts([
-    'slug',
-    'title',
-    'date',
-    'coverImage',
-    'excerpt',
-    'author',
-    'readTime',
-    'category',
-    'tags',
-    'description',
-  ]);
-  const limitedPosts = allPosts.slice(0, 6);
-  return {
-    props: {
-      posts: limitedPosts,
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
     },
-    revalidate: 86400,
-  };
+  },
 };
 
-export default function Home({ posts }: HomeProps) {
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+};
+
+const Home: React.FC<HomeProps> = ({ posts }) => {
+  const siteTitle = 'Abraham of London';
+  const siteDescription =
+    'Fatherhood, leadership, and life lessons — empowering men to reclaim the narrative.';
   const siteUrl = 'https://abraham-of-london.netlify.app';
-  const pageTitle = 'Abraham of London — Strategist & Storyteller';
-  const pageDescription = 'Father, strategist, and student of life. Timeless values and modern leadership insights for men who want to make their lives count.';
+  const email = 'info@abrahamoflondon.org';
+  const telephone = '+44 20 8062 25909';
 
-  const schemaData = {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Abraham of London',
-    description: pageDescription,
-    url: siteUrl,
-    sameAs: [],
-    mainEntity: posts.slice(0, 3).map(post => ({
-      '@type': 'Article',
-      headline: post.title,
-      description: post.excerpt,
-      datePublished: post.date,
-      author: { '@type': 'Person', name: post.author || 'Abraham of London' },
-      image: post.coverImage ? `${siteUrl}${post.coverImage}` : undefined,
-      url: `${siteUrl}/blog/${post.slug}`,
-    })).filter(entity => entity.image),
+  // Social media links
+  const socialLinks = {
+    linkedin: 'https://www.linkedin.com/in/abraham-adaramola-06630321/',
+    twitter: 'https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09',
+    instagram: 'https://www.instagram.com/abraham_of_london',
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+  const books: BookCardProps[] = [
+    {
+      slug: 'fathering-without-fear',
+      title: 'Fathering Without Fear',
+      coverImage: fatheringWithoutFear.src,
+      excerpt:
+        'A heartfelt guide for fathers navigating the complexities of parenthood with courage, integrity, and love.',
+      author: 'Abraham Adaramola',
+      buyLink: 'https://example.com/buy/fathering-without-fear',
+      downloadPdf: '/downloads/fathering-without-fear.pdf',
+      downloadEpub: '/downloads/fathering-without-fear.epub',
+      genre: 'Parenting & Fatherhood',
     },
-  };
+    {
+      slug: 'fathering-principles',
+      title: 'Fathering Principles',
+      coverImage: fatheringPrinciples.src,
+      excerpt:
+        'Essential principles every father should know to build strong, lasting relationships with their children.',
+      author: 'Abraham Adaramola',
+      buyLink: 'https://example.com/buy/fathering-principles',
+      downloadPdf: '/downloads/fathering-principles.pdf',
+      downloadEpub: '/downloads/fathering-principles.epub',
+      genre: 'Parenting & Fatherhood',
+    },
+  ];
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  // Get latest 3 posts for homepage
+  const latestPosts = posts.slice(0, 3);
 
   return (
     <>
       <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content={`${siteUrl}/assets/images/social/og-image.jpg`} />
-        <meta property="og:url" content={siteUrl} />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={`${siteUrl}/assets/images/social/twitter-image.webp`} />
-        <link rel="canonical" href={siteUrl} />
-        <link rel="icon" href="/favicon/favicon.ico" />
+        <title>{siteTitle}</title>
+        <meta name="description" content={siteDescription} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="Abraham Adaramola" />
+        <meta name="keywords" content="fatherhood, leadership, parenting, men, family, Abraham Adaramola" />
 
+        {/* Open Graph */}
+        <meta property="og:title" content={siteTitle} />
+        <meta property="og:description" content={siteDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:image" content={`${siteUrl}${ogImage.src}`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Abraham of London - Author and Father" />
+        <meta property="og:site_name" content={siteTitle} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={siteTitle} />
+        <meta name="twitter:description" content={siteDescription} />
+        <meta name="twitter:image" content={`${siteUrl}${twitterImage.src}`} />
+        <meta name="twitter:image:alt" content="Abraham of London - Author and Father" />
+        <meta name="twitter:creator" content="@AbrahamAda48634" />
+
+        {/* Additional SEO meta tags */}
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={siteUrl} />
+
+        {/* Favicon and app icons */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+
+        {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-        />
-
-        {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GTYPQLW1T2"></script>
-        <script
           dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-GTYPQLW1T2');
-            `,
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              "name": "AbrahamofLondon",
+              "alternateName": "Abraham of London",
+              "url": siteUrl,
+              "image": `${siteUrl}${profilePortrait.src}`,
+              "description": siteDescription,
+              "email": email,
+              "telephone": telephone,
+              "jobTitle": "Author & Father",
+              "worksFor": {
+                "@type": "Organization",
+                "name": "Abraham of London"
+              },
+              "sameAs": [
+                socialLinks.linkedin,
+                socialLinks.twitter,
+                socialLinks.instagram
+              ]
+            })
           }}
         />
+        {/* Note: Ensure all special characters in content are escaped to prevent syntax errors */}
       </Head>
 
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <motion.section
-          className="relative h-[70vh] md:h-[80vh] flex items-center justify-center text-white overflow-hidden"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <Image
-            src="/assets/images/abraham-of-london-banner.webp"
-            alt="Abraham of London - Transforming Industries, Inspiring Movements"
-            fill
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-            priority
-            className="z-0"
-            onError={(e) => {
-              console.log('Hero banner failed to load, using fallback');
-              (e.target as HTMLImageElement).src = '/assets/images/blog/leadership-begins-at-home.jpg';
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70 z-10" />
-
-          <motion.div
-            className="relative z-20 text-center px-6 max-w-5xl mx-auto"
+      <div className="min-h-screen bg-white">
+        <main className="max-w-6xl mx-auto px-4 py-12">
+          {/* Hero Section */}
+          <motion.section
+            className="text-center mb-20"
+            initial="hidden"
+            animate="visible"
             variants={containerVariants}
           >
-            <motion.div
-              className="mb-8"
-              variants={itemVariants}
-            >
-              <Image
-                src="/assets/images/logo/abraham-logo.jpg"
-                alt="Abraham of London Logo"
-                width={150}
-                height={75}
-                className="mx-auto drop-shadow-2xl"
-                onError={() => console.log('Logo failed to load')}
-              />
+            <motion.div className="flex justify-center mb-6" variants={itemVariants}>
+              <div className="relative">
+                <Image
+                  src={profilePortrait}
+                  alt="Portrait of AbrahamofLondon"
+                  width={160}
+                  height={160}
+                  className="rounded-full shadow-lg transition-transform hover:scale-105"
+                  priority
+                />
+                <div className="absolute inset-0 rounded-full ring-4 ring-blue-100 ring-opacity-50"></div>
+              </div>
             </motion.div>
             <motion.h1
-              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+              className="text-4xl md:text-6xl font-bold mb-4 text-gray-900"
               variants={itemVariants}
             >
-              Strategist & Storyteller
+              {siteTitle}
             </motion.h1>
             <motion.p
-              className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed text-gray-100"
+              className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8"
               variants={itemVariants}
             >
-              Timeless values meet modern leadership. Faith, family, character, and creative legacy.
+              {siteDescription}
             </motion.p>
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              className="flex flex-wrap justify-center gap-4"
               variants={itemVariants}
             >
               <Link
-                href="/blog"
-                className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold shadow-2xl transition-all duration-300 transform hover:scale-105"
+                href="/contact"
+                className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                Read Latest Posts
+                Get in Touch
               </Link>
               <Link
                 href="/about"
-                className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-full text-lg font-semibold shadow-2xl transition-all duration-300 transform hover:scale-105"
+                className="inline-flex items-center px-8 py-4 border-2 border-gray-600 text-gray-600 rounded-full hover:bg-gray-600 hover:text-white transition-colors"
               >
-                About Abraham
+                Learn More
               </Link>
             </motion.div>
-          </motion.div>
-        </motion.section>
+          </motion.section>
 
-        {/* Latest Posts Section */}
-        <motion.section
-          className="mt-16 mb-16"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Latest Reflections</h2>
-            {posts.length > 3 && (
-              <Link
-                href="/blog"
-                className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+          {/* Brand Showcase Section */}
+          <motion.section
+            className="mb-20"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+              Brand Partners & Ventures
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center">
+              <motion.div
+                className="transition-transform hover:scale-105"
+                whileHover={{ scale: 1.05 }}
               >
-                View All Posts →
-              </Link>
-            )}
-          </div>
+                <Image
+                  src={abrahamLogo}
+                  alt="Abraham of London Logo"
+                  width={120}
+                  height={120}
+                  className="rounded-lg shadow-sm"
+                />
+              </motion.div>
+              <motion.div
+                className="transition-transform hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Image
+                  src={alomaradaLogo}
+                  alt="Alomarada Ltd"
+                  width={120}
+                  height={120}
+                  className="rounded-lg shadow-sm"
+                />
+              </motion.div>
+              <motion.div
+                className="transition-transform hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Image
+                  src={endureluxeLogo}
+                  alt="Endureluxe Ltd"
+                  width={120}
+                  height={120}
+                  className="rounded-lg shadow-sm"
+                />
+              </motion.div>
+              <motion.div
+                className="transition-transform hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Image
+                  src={abrahamOfLondonBanner}
+                  alt="Abraham of London Banner"
+                  width={200}
+                  height={100}
+                  className="rounded-lg shadow-sm"
+                />
+              </motion.div>
+            </div>
+          </motion.section>
 
-          {posts.length > 0 ? (
-            <motion.div
-              className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-              variants={{
-                visible: {
-                  transition: {
-                    staggerChildren: 0.1,
-                  },
-                },
-              }}
-              initial="hidden"
-              animate="visible"
-            >
-              {posts.map((post, index) => (
+          {/* Featured Books Section */}
+          <motion.section
+            className="mb-20"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+              Featured Books
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
+              {books.map((book) => (
                 <motion.div
-                  key={post.slug}
-                  variants={{
-                    hidden: { opacity: 0, y: 30, scale: 0.95 },
-                    visible: { opacity: 1, y: 0, scale: 1 },
-                  }}
-                  whileHover={{ y: -5 }}
-                  transition={{ duration: 0.3 }}
+                  key={book.slug}
+                  className="transform transition-transform hover:scale-105"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Link href={`/blog/${post.slug}`} className="group block h-full">
-                    <article className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col bg-white">
-                      {post.coverImage && (
-                        <div className="relative overflow-hidden h-48">
-                          <Image
-                            src={post.coverImage}
-                            alt={post.title}
-                            width={400}
-                            height={250}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            loading={index < 3 ? 'eager' : 'lazy'}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      )}
-                      <div className="p-6 flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 mb-3 line-clamp-2">
-                          {post.title}
-                        </h3>
-                        {post.excerpt && (
-                          <p className="text-gray-600 line-clamp-3 mb-4 flex-1">{post.excerpt}</p>
-                        )}
-                        <div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
-                          <div className="flex items-center gap-4">
-                            {post.date && (
-                              <span>{new Date(post.date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })}</span>
-                            )}
-                            {post.readTime && (
-                              <span>{post.readTime} min read</span>
-                            )}
-                          </div>
-                          {post.category && (
-                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                              {post.category}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </article>
-                  </Link>
+                  <BookCard
+                    {...book}
+                    coverImage={book.coverImage || defaultBookCover.src}
+                  />
                 </motion.div>
               ))}
-            </motion.div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="mb-6">
+            </div>
+            
+            {/* Book Teaser Section */}
+            <motion.div
+              className="mt-12 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <h3 className="text-2xl font-bold mb-6 text-gray-800">Coming Soon</h3>
+              <div className="inline-block">
                 <Image
-                  src="/assets/images/blog/default-blog-cover.jpg"
-                  alt="Coming Soon"
+                  src={fatheringWithoutFearTeaser}
+                  alt="Fathering Without Fear - Coming Soon"
                   width={200}
-                  height={150}
-                  className="mx-auto rounded-lg opacity-50"
-                />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">Posts Coming Soon</h3>
-              <p className="text-gray-500">Check back soon for thoughtful insights and reflections.</p>
-            </div>
-          )}
-        </motion.section>
-
-        {/* About Section */}
-        <motion.section
-          className="mt-24 bg-gray-50 rounded-3xl p-8 md:p-12"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-        >
-          <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/3">
-              <div className="relative">
-                <Image
-                  src="/assets/images/profile-portrait.webp"
-                  alt="Abraham of London - Author and Strategist"
-                  width={300}
                   height={300}
-                  className="rounded-full shadow-2xl mx-auto"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/assets/images/profile-portrait-a.jpg';
-                  }}
+                  className="rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                 />
-                <div className="absolute inset-0 rounded-full border-4 border-blue-200 transform scale-110 opacity-30"></div>
-              </div>
-            </div>
-            <div className="lg:w-2/3 text-center lg:text-left">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Meet Abraham</h2>
-              <div className="space-y-4 text-lg text-gray-700 leading-relaxed mb-8">
-                <p>
-                  Combining strategic insight with authentic storytelling to help leaders navigate
-                  modern challenges while staying rooted in timeless principles.
-                </p>
-                <p>
-                  Through writing, speaking, and mentoring, I bridge the gap between traditional
-                  wisdom and contemporary leadership, helping men build legacies that matter.
+                <p className="mt-4 text-gray-600 font-medium">
+                  More insights on fatherhood coming your way
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            </motion.div>
+          </motion.section>
+
+          {/* Latest Posts Section */}
+          {latestPosts.length > 0 && (
+            <motion.section
+              className="mb-20"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="flex justify-between items-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+                  Latest Reflections
+                </h2>
                 <Link
-                  href="/about"
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+                  href="/blog"
+                  className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-800 rounded-full hover:bg-gray-100 transition-colors group"
                 >
-                  <span className="mr-2">My Story</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  View All
+                  <svg className="h-5 w-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </Link>
+              </div>
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={containerVariants}
+              >
+                {latestPosts.map((post) => (
+                  <motion.div key={post.slug} variants={itemVariants}>
+                    <BlogPostCard {...post} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.section>
+          )}
+
+          {/* About Section */}
+          <motion.section
+            className="mb-20 max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+              About Me
+            </h2>
+            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-8 shadow-sm">
+              <p className="text-gray-700 leading-relaxed text-lg text-center">
+                I&apos;m AbrahamofLondon — a father, author, and advocate for men&apos;s
+                voices in family narratives. My mission is to inspire fathers to
+                embrace their role with confidence and compassion, while navigating
+                life&apos;s challenges with resilience.
+              </p>
+              <div className="text-center mt-6">
                 <Link
-                  href="/contact"
-                  className="inline-flex items-center px-6 py-3 border-2 border-gray-800 text-gray-800 rounded-full hover:bg-gray-800 hover:text-white transition-all duration-300"
+                  href="/about"
+                  className="inline-flex items-center px-6 py-3 text-blue-600 hover:text-blue-800 font-medium transition-colors"
                 >
-                  Get In Touch
+                  Read My Full Story
+                  <svg className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </Link>
               </div>
             </div>
-          </div>
-        </motion.section>
+          </motion.section>
 
-        {/* Newsletter Section */}
-        <motion.section
-          className="mt-24 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl p-8 md:p-12 text-white text-center"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-        >
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the Conversation</h2>
-            <p className="text-xl mb-8 text-blue-100">
-              Receive thoughtful insights and updates on leadership, fatherhood, and building meaningful legacies.
+          {/* Contact & Social Section */}
+          <motion.section
+            className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12 px-8 rounded-xl shadow-sm max-w-4xl mx-auto text-center mb-12"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800">
+              Get in Touch
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Email</h3>
+                <a
+                  href={`mailto:${email}`}
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-lg"
+                  aria-label={`Send email to ${email}`}
+                >
+                  {email}
+                </a>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Phone</h3>
+                <a
+                  href={`tel:${telephone}`}
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-lg"
+                  aria-label={`Call ${telephone}`}
+                >
+                  {telephone}
+                </a>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-8">
+              <h3 className="text-xl font-semibold mb-6 text-gray-800">
+                Follow My Journey
+              </h3>
+              <div className="flex justify-center space-x-8">
+                <a
+                  href={socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn Profile"
+                  className="transition-transform hover:scale-110"
+                >
+                  <Image src={linkedinIcon} alt="LinkedIn" width={44} height={44} />
+                </a>
+                <a
+                  href={socialLinks.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter Profile"
+                  className="transition-transform hover:scale-110"
+                >
+                  <Image src={twitterIcon} alt="Twitter" width={44} height={44} />
+                </a>
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram Profile"
+                  className="transition-transform hover:scale-110"
+                >
+                  <Image src={instagramIcon} alt="Instagram" width={44} height={44} />
+                </a>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Newsletter Section */}
+          <motion.section
+            className="bg-blue-600 text-white py-16 px-8 rounded-2xl shadow-xl text-center mb-12"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Join My Newsletter</h2>
+            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto opacity-90">
+              Receive exclusive insights on fatherhood, leadership, and life lessons directly in your inbox.
             </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-4">
               <input
                 type="email"
-                placeholder="Enter your email address"
-                className="flex-1 px-6 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                placeholder="Enter your email"
+                className="flex-1 px-5 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-white transition-colors"
                 required
               />
               <button
                 type="submit"
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105"
+                className="px-8 py-3 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105"
               >
                 Subscribe
               </button>
             </form>
+          </motion.section>
+        </main>
+
+        <footer className="bg-gray-900 text-white text-center py-8 mt-16">
+          <div className="max-w-4xl mx-auto px-4">
+            <p className="text-lg mb-2">
+              &copy; {new Date().getFullYear()} {siteTitle}. All rights reserved.
+            </p>
+            <p className="text-sm text-gray-400">
+              Built with ❤️ using Next.js
+            </p>
           </div>
-        </motion.section>
-      </main>
+        </footer>
+      </div>
     </>
   );
-}
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  try {
+    const posts = getAllPosts(['slug', 'title', 'date', 'coverImage', 'excerpt']);
+    
+    return {
+      props: { 
+        posts: posts || [] 
+      },
+    };
+  } catch (error) {
+    console.error('Error in getStaticProps:', error);
+    return {
+      props: { 
+        posts: [] 
+      },
+    };
+  }
+};
+
+export default Home;

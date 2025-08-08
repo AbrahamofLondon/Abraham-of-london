@@ -46,10 +46,10 @@ export default function ContactPage() {
       >
         <motion.div className="max-w-4xl mx-auto text-center" variants={itemVariants}>
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4 text-gray-900">
-            Let's Connect
+            Let&apos;s Connect
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            I'm always open to new conversations. Feel free to reach out for speaking opportunities, partnerships, or just to say hello.
+            I&apos;m always open to new conversations. Feel free to reach out for speaking opportunities, partnerships, or just to say hello.
           </p>
         </motion.div>
       </motion.div>
