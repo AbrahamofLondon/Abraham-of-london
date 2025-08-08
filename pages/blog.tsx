@@ -1,69 +1,90 @@
 // pages/blog.tsx
-import { GetStaticProps } from 'next';
+import React from 'react';
 import Head from 'next/head';
+import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import { getAllPosts, PostMeta } from '../lib/posts';
 
-interface BlogProps {
+type BlogIndexProps = {
   posts: PostMeta[];
-}
+};
 
-export default function Blog({ posts }: BlogProps) {
-  return (
-    <Layout>
-      <Head>
-        <title>Blog | Abraham of London</title>
-        <meta
-          name="description"
-          content="Thoughts and reflections on business, technology, and life."
-        />
-      </Head>
-      <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-extrabold text-center mb-12">
-          Latest Reflections
-        </h1>
-        {posts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <BlogPostCard key={post.slug} {...post} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-lg text-gray-600">
-            No blog posts found.
-          </p>
-        )}
-      </main>
-    </Layout>
-  );
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-  const posts = getAllPosts([
+export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  const postsData = getAllPosts([
     'slug',
     'title',
     'date',
-    'coverImage',
+    'publishedAt',
     'excerpt',
+    'coverImage',
     'author',
     'readTime',
     'category',
+    'tags',
   ]);
 
-  // Ensure all properties are present to avoid type errors.
-  const postsWithRequiredProps = posts.map((post) => ({
-    ...post,
-    coverImage: post.coverImage || '/assets/images/default-blog-cover.jpg',
-    excerpt: post.excerpt || 'Read this post for more insights.',
-    readTime: post.readTime || '5 min read',
-    author: post.author || 'Abraham Adaramola',
-    category: post.category || 'General',
+  const posts: PostMeta[] = postsData.map((p) => ({
+    slug: p.slug || '',
+    title: p.title || 'Untitled',
+    date: p.date || p.publishedAt || '',
+    excerpt: p.excerpt || 'Read more for full details.',
+    coverImage: p.coverImage || '/assets/images/default-blog-cover.jpg',
+    author: p.author || 'Abraham of London',
+    readTime: p.readTime || '5 min read',
+    category: p.category || 'General',
+    tags: p.tags || [],
   }));
 
-  return {
-    props: {
-      posts: postsWithRequiredProps,
-    },
-  };
+  return { props: { posts }, revalidate: 60 };
 };
+
+export default function BlogIndex({ posts }: BlogIndexProps) {
+  return (
+    <Layout>
+      <Head>
+        <title>All Articles | Abraham of London</title>
+        <meta
+          name="description"
+          content="Insights on leadership, fatherhood, and legacy from Abraham of London."
+        />
+        <meta property="og:title" content="All Articles | Abraham of London" />
+        <meta
+          property="og:description"
+          content="Insights on leadership, fatherhood, and legacy from Abraham of London."
+        />
+        <meta property="og:image" content="/assets/social/og-image.jpg" />
+      </Head>
+
+      <section className="bg-warmWhite py-12">
+        <div className="container px-4">
+          <h1 className="font-serif text-3xl tracking-brand text-forest mb-8 text-center">
+            All Articles
+          </h1>
+
+          {posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {posts.map((post) => (
+                <BlogPostCard
+                  key={post.slug}
+                  slug={post.slug}
+                  title={post.title || 'Untitled'}
+                  date={post.date || ''}
+                  excerpt={post.excerpt || 'Read more for full details.'}
+                  coverImage={post.coverImage || '/assets/images/default-blog-cover.jpg'}
+                  author={post.author || 'Abraham of London'}
+                  readTime={post.readTime || '5 min read'}
+                  category={post.category || 'General'}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-deepCharcoal/70 text-lg">
+              No blog posts found. Add files to <code className="px-1">content/blog</code>.
+            </p>
+          )}
+        </div>
+      </section>
+    </Layout>
+  );
+}
