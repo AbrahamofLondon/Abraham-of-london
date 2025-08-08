@@ -1,4 +1,3 @@
-// pages/contact.tsx
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -55,7 +54,6 @@ export default function ContactPage() {
       </motion.div>
 
       <div className="max-w-4xl mx-auto py-20 px-4">
-        {/* Contact Form Section */}
         <motion.section
           className="bg-white p-8 md:p-12 rounded-2xl shadow-xl mb-16"
           initial={{ opacity: 0, y: 40 }}
@@ -116,7 +114,6 @@ export default function ContactPage() {
           </form>
         </motion.section>
 
-        {/* Other Ways to Connect */}
         <motion.section
           className="text-center"
           initial={{ opacity: 0, y: 40 }}
@@ -129,7 +126,6 @@ export default function ContactPage() {
             You can also connect with me directly or follow my work on social media.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            {/* Email link */}
             <Link
               href="mailto:info@abrahamoflondon.org"
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-800 rounded-full hover:bg-gray-100 transition-colors group"
@@ -141,7 +137,6 @@ export default function ContactPage() {
               Email
             </Link>
 
-            {/* LinkedIn link */}
             <Link
               href="https://www.linkedin.com/in/abraham-adaramola-06630321/"
               target="_blank"
@@ -154,9 +149,8 @@ export default function ContactPage() {
               LinkedIn
             </Link>
 
-            {/* Phone Number link */}
             <Link
-              href="tel:+4420806225909"
+              href="tel:+442086225909"
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-800 rounded-full hover:bg-gray-100 transition-colors group"
             >
               <svg className="w-5 h-5 mr-2 text-gray-500 group-hover:text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -165,7 +159,6 @@ export default function ContactPage() {
               Phone
             </Link>
 
-            {/* Twitter link */}
             <Link
               href="https://x.com/AbrahamofLondon48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09"
               target="_blank"
