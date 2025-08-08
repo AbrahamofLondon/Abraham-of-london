@@ -1,199 +1,95 @@
+// pages/blog/[slug].tsx
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import Link from 'next/link';
-import type { GetStaticProps, GetStaticPaths } from 'next';
-import { serialize } from 'next-mdx-remote/serialize';
-<<<<<<< Updated upstream
-import { MDXRemote } from 'next-mdx-remote';
-import { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
-=======
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getPostBySlug, getAllPosts, PostWithContent } from '../../lib/posts';
 import Layout from '../../components/Layout';
->>>>>>> Stashed changes
-import DateFormatter from '../../components/DateFormatter';
-import { MDXComponents } from '../../components/MDXComponents';
+import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
 
-interface PostProps {
-  post: {
-    meta: Omit<PostWithContent, 'content'>;
-    content: MDXRemoteSerializeResult;
-  };
+interface PostPageProps {
+  post: PostMeta;
 }
-
-export default function Post({ post }: PostProps) {
-  const pageTitle = `${post.meta.title} | Abraham of London Blog`;
-  const siteUrl = 'https://abrahamoflondon.org';
-
-  return (
-<<<<<<< Updated upstream
-    <>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={post.meta.description || post.meta.excerpt || ''} />
-=======
-    <Layout>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={post.meta.description || post.meta.excerpt} />
->>>>>>> Stashed changes
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={post.meta.description || post.meta.excerpt || ''} />
-        <meta property="og:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${siteUrl}/blog/${post.meta.slug}`} />
-        <meta property="article:published_time" content={new Date(post.meta.date).toISOString()} />
-<<<<<<< Updated upstream
-        <meta property="article:author" content={post.meta.author || ''} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={post.meta.description || post.meta.excerpt || ''} />
-        <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
-=======
-        <meta property="article:author" content={post.meta.author} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={post.meta.description || post.meta.excerpt} />
-        <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage}`} />
->>>>>>> Stashed changes
-        <link rel="canonical" href={`${siteUrl}/blog/${post.meta.slug}`} />
-      </Head>
-
-      <div className="blog-post-content">
-        <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
-          {post.meta.coverImage && (
-            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src={post.meta.coverImage}
-                alt={`Cover Image for ${post.meta.title}`}
-                fill
-                style={{ objectFit: 'cover' }}
-                priority
-              />
-            </div>
-          )}
-<<<<<<< Updated upstream
-=======
-          {post.meta.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
-            >
-              #{tag}
-            </span>
-          ))}
-        </header>
->>>>>>> Stashed changes
-
-          <header className="text-center mb-12">
-            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
-              {post.meta.title}
-            </h1>
-            <div className="text-lg text-gray-600 mb-4">
-              By <span className="font-semibold">{post.meta.author}</span> on{' '}
-              <DateFormatter dateString={post.meta.date} /> | {post.meta.readTime} read
-            </div>
-            {post.meta.category && (
-              <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">
-                {post.meta.category}
-              </span>
-            )}
-            {post.meta.tags &&
-              post.meta.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
-                >
-                  #{tag}
-                </span>
-              ))}
-          </header>
-
-<<<<<<< Updated upstream
-          <div className="prose prose-lg mx-auto mb-16">
-            <MDXRemote {...post.content} components={MDXComponents} />
-          </div>
-
-          <div className="text-center">
-            <Link href="/blog" className="text-blue-600 hover:underline text-xl font-medium">
-              &larr; Back to Blog
-            </Link>
-          </div>
-        </article>
-      </div>
-    </>
-=======
-        <div className="text-center">
-          <Link href="/blog" className="text-blue-600 hover:underline text-xl font-medium">
-            &larr; Back to Blog
-          </Link>
-        </div>
-      </article>
-    </Layout>
->>>>>>> Stashed changes
-  );
-}
-
-export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
-  const { slug } = params as { slug: string };
-<<<<<<< Updated upstream
-  const postData = getPostBySlug(slug, [
-=======
-  const post = getPostBySlug(slug, [
->>>>>>> Stashed changes
-    'title',
-    'date',
-    'slug',
-    'author',
-    'content',
-    'coverImage',
-    'excerpt',
-    'readTime',
-    'category',
-    'tags',
-    'description',
-<<<<<<< Updated upstream
-  ]) as { content: string } & PostMeta;
-
-  const { content, ...meta } = postData;
-  const mdxSource = await serialize(content || '', {
-    parseFrontmatter: true,
-    scope: meta,
-  });
-=======
-  ]) as PostWithContent;
-
-  const mdxSource = await serialize(post.content, { scope: post });
->>>>>>> Stashed changes
-
-  return {
-    props: {
-      post: {
-<<<<<<< Updated upstream
-        meta: meta as PostMeta,
-=======
-        meta: { ...post, content: undefined },
->>>>>>> Stashed changes
-        content: mdxSource,
-      },
-    },
-    revalidate: 10,
-  };
-};
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getAllPosts(['slug']);
+  const paths = posts.map((p) => ({ params: { slug: p.slug } }));
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps<PostPageProps> = async ({ params }) => {
+  const slug = String(params?.slug || '');
+  const post = getPostBySlug(slug, [
+    'slug',
+    'title',
+    'date',
+    'publishedAt',
+    'coverImage',
+    'excerpt',
+    'author',
+    'readTime',
+    'category',
+    'tags',
+    'content',
+    'seo',
+  ]);
+
   return {
-<<<<<<< Updated upstream
-    paths: posts.map((post) => ({
-      params: {
-        slug: post.slug,
-      },
-    })),
-=======
-    paths: posts.map((post) => ({ params: { slug: post.slug } })),
->>>>>>> Stashed changes
-    fallback: 'blocking',
+    props: { post },
+    revalidate: 60,
   };
 };
+
+export default function PostPage({ post }: PostPageProps) {
+  const title = post.seo?.title || post.title || 'Post';
+  const description = post.seo?.description || post.excerpt || '';
+  const ogImage = post.coverImage || '/assets/images/default-blog-cover.jpg';
+
+  return (
+    <Layout>
+      <Head>
+        <title>{title} | Abraham of London</title>
+        <meta name="description" content={description} />
+        <meta property="og:title" content={`${title} | Abraham of London`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
+
+      <article className="max-w-3xl mx-auto px-4 py-12">
+        <header className="mb-8">
+          <h1 className="text-4xl font-serif tracking-[0.05em] text-[#1B4332] mb-3">{post.title}</h1>
+          <p className="text-sm text-gray-600">
+            {post.publishedAt || post.date} · {post.author || 'Abraham of London'}
+            {post.readTime ? ` · ${post.readTime}` : null}
+          </p>
+          {post.coverImage ? (
+            <div className="relative w-full h-64 sm:h-96 mt-6">
+              <Image
+                src={post.coverImage}
+                alt={post.title || 'Cover'}
+                fill
+                className="object-cover rounded"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
+          ) : null}
+        </header>
+
+        {/* Render raw content safely; will show markdown as formatted text (no MDX execution) */}
+        <div className="prose prose-lg max-w-none">
+          <div style={{ whiteSpace: 'pre-wrap' }}>{post.content || post.excerpt}</div>
+        </div>
+
+        {post.tags && post.tags.length > 0 ? (
+          <ul className="flex flex-wrap gap-2 mt-8">
+            {post.tags.map((t) => (
+              <li key={t} className="text-xs uppercase tracking-wide text-[#1B4332] border border-[#DDD6C7] px-3 py-1">
+                {t}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </article>
+    </Layout>
+  );
+}
