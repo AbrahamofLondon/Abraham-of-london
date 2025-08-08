@@ -1,27 +1,53 @@
+// components/MDXComponents.tsx
+import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  children?: React.ReactNode;
+};
+
+type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
+
 export const MDXComponents = {
-  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-    const { href = '', ...restProps } = props;
+  a: ({ href = '', children, ...rest }: AnchorProps) => {
+    // Internal link (starts with /): use Next <Link>
     if (href.startsWith('/')) {
       return (
-        <Link href={href}>
-          <a {...restProps} className="text-blue-600 underline hover:text-blue-800" />
+        <Link
+          href={href}
+          className="text-forest underline underline-offset-2 hover:text-softGold transition"
+          {...rest}
+        >
+          {children}
         </Link>
       );
     }
-    return <a href={href} {...restProps} className="text-blue-600 underline hover:text-blue-800" />;
+    // External link: standard <a> with security attrs
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-forest underline underline-offset-2 hover:text-softGold transition"
+        {...rest}
+      >
+        {children}
+      </a>
+    );
   },
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <div className="relative w-full h-96">
+
+  img: ({ src, alt, ...rest }: ImgProps) => (
+    <div className="relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
       <Image
-        src={props.src ?? '/assets/images/default-book.jpg'}
-        alt={props.alt ?? ''}
+        src={src || '/assets/images/default-book.jpg'}
+        alt={alt || ''}
         fill
+        sizes="(max-width: 768px) 100vw, 768px"
         style={{ objectFit: 'cover' }}
+        {...rest}
       />
     </div>
   ),
-  // Add other custom components for MDX here as needed
+  // Add more MDX shortcodes here (e.g., Callout, Quote, Button, etc.)
 };
