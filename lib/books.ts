@@ -1,30 +1,22 @@
 // lib/books.ts
 import fs from 'fs';
-import { join } from 'path';
+import path from 'path';
 import matter from 'gray-matter';
-import { formatDate, parseDate } from './dateUtils';
-import { safeString, safeSplit } from './stringUtils';
-
-const booksDirectory = join(process.cwd(), 'content/books');
 
 export type BookMeta = {
   slug: string;
-  title: string;
-  date?: string;
-  publishedAt?: string;
-  coverImage?: string;
-  excerpt?: string;
+  title?: string;
   author?: string;
-  description?: string;
-  image?: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  content?: string;
-  downloadPdf?: string;
-  downloadEpub?: string;
+  excerpt?: string;
+  coverImage?: string;
   buyLink?: string;
-  genre?: string[]; // normalized to array
+  genre?: string[];       // normalized array
+  date?: string;          // optional, for sorting if provided
+  publishedAt?: string;   // alias
+  tags?: string[];
+  image?: string;
+  description?: string;
+  content?: string;       // included only when requested
   seo?: {
     title?: string;
     description?: string;
@@ -32,137 +24,106 @@ export type BookMeta = {
   };
 };
 
-function ensureBooksDir(): void {
+const booksDirectory = path.join(process.cwd(), 'content/books');
+
+function ensureDir(): void {
   try {
     if (!fs.existsSync(booksDirectory)) {
       fs.mkdirSync(booksDirectory, { recursive: true });
     }
   } catch (err) {
-    // Last-ditch: don't throw during build
     console.error('Failed to ensure books directory exists:', err);
   }
 }
 
 export function getBookSlugs(): string[] {
-  ensureBooksDir();
+  ensureDir();
   try {
     return fs
       .readdirSync(booksDirectory)
-      .filter((name) => name.endsWith('.mdx') || name.endsWith('.md'));
-  } catch (error) {
-    console.error(`Error reading books directory: ${booksDirectory}`, error);
+      .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
+  } catch (e) {
+    console.error(`Error reading books dir: ${booksDirectory}`, e);
     return [];
   }
 }
 
-export function getBookBySlug(slug: string, fields: string[] = []): BookMeta {
-  ensureBooksDir();
+export function getBookBySlug(slug: string, fields: string[] = []): Partial<BookMeta> {
+  ensureDir();
 
   const realSlug = slug.replace(/\.(mdx|md)$/, '');
-  const fullPathMdx = join(booksDirectory, `${realSlug}.mdx`);
-  const fullPathMd = join(booksDirectory, `${realSlug}.md`);
+  const mdxPath = path.join(booksDirectory, `${realSlug}.mdx`);
+  const mdPath  = path.join(booksDirectory, `${realSlug}.md`);
 
   let fileContents = '';
   try {
-    if (fs.existsSync(fullPathMdx)) {
-      fileContents = fs.readFileSync(fullPathMdx, 'utf8');
-    } else if (fs.existsSync(fullPathMd)) {
-      fileContents = fs.readFileSync(fullPathMd, 'utf8');
-    } else {
-      throw new Error(`Book file not found: ${fullPathMdx} or ${fullPathMd}`);
-    }
+    if (fs.existsSync(mdxPath)) fileContents = fs.readFileSync(mdxPath, 'utf8');
+    else if (fs.existsSync(mdPath)) fileContents = fs.readFileSync(mdPath, 'utf8');
+    else throw new Error(`Book not found: ${mdxPath} or ${mdPath}`);
   } catch (error) {
     console.error(`Error reading book ${slug}:`, error);
-    // Return a minimal, safe stub so lists don’t die
-    const now = formatDate(new Date());
-    return {
-      slug: realSlug,
-      title: 'Book Not Found',
-      date: now,
-      publishedAt: now,
-      excerpt: '',
-      author: 'Abraham of London',
-      description: '',
-      content: '',
-    };
+    return { slug: realSlug, title: 'Book Not Found', excerpt: '' };
   }
 
   const { data, content } = matter(fileContents);
 
-  // Normalize helpers
   const normalizeArray = (val: unknown): string[] | undefined => {
-    if (Array.isArray(val)) return val.map((v) => safeString(v)).filter(Boolean);
-    if (typeof val === 'string') {
-      return safeSplit(safeString(val), ',').map((t) => t.trim()).filter(Boolean);
-    }
+    if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
+    if (typeof val === 'string') return val.split(',').map((s) => s.trim()).filter(Boolean);
     return undefined;
   };
 
-  const normalizedDate = formatDate((data as any).date || (data as any).publishedAt);
+  const normalizedDate = String((data as any).date || (data as any).publishedAt || '');
 
-  const base: BookMeta = {
+  const base: Partial<BookMeta> = {
     slug: realSlug,
-    title: safeString((data as any).title) || 'Untitled',
-    date: normalizedDate,
-    publishedAt: normalizedDate,
-    coverImage: safeString((data as any).coverImage),
-    excerpt: safeString((data as any).excerpt),
-    author: safeString((data as any).author) || 'Abraham of London',
-    description: safeString((data as any).description),
-    image: safeString((data as any).image),
-    readTime: safeString((data as any).readTime),
-    category: safeString((data as any).category),
-    tags: normalizeArray((data as any).tags),
-    downloadPdf: safeString((data as any).downloadPdf),
-    downloadEpub: safeString((data as any).downloadEpub),
-    buyLink: safeString((data as any).buyLink),
+    title: (data as any).title ?? 'Untitled',
+    author: (data as any).author,
+    excerpt: (data as any).excerpt,
+    coverImage: (data as any).coverImage,
+    buyLink: (data as any).buyLink,
     genre: normalizeArray((data as any).genre),
-    seo: typeof (data as any).seo === 'object' && (data as any).seo !== null ? (data as any).seo : undefined,
+    date: normalizedDate || undefined,
+    publishedAt: normalizedDate || undefined,
+    tags: normalizeArray((data as any).tags),
+    image: (data as any).image,
+    description: (data as any).description,
+    seo:
+      typeof (data as any).seo === 'object' && (data as any).seo !== null
+        ? (data as any).seo
+        : undefined,
   };
 
-  // If specific fields requested, return a trimmed object.
   if (fields.length > 0) {
     const result: Partial<BookMeta> = {};
     for (const field of fields) {
-      if (field === 'content') {
-        (result as any).content = content || '';
-        continue;
-      }
-      if (field === 'slug') {
-        (result as any).slug = realSlug;
-        continue;
-      }
-      // Copy from base if present
+      if (field === 'slug') { result.slug = realSlug; continue; }
+      if (field === 'content') { result.content = content || ''; continue; }
       if (field in base && (base as any)[field] !== undefined) {
         (result as any)[field] = (base as any)[field];
       } else if ((data as any)[field] !== undefined) {
-        // Fallback: raw frontmatter (rare)
         (result as any)[field] = (data as any)[field];
       }
     }
-    // Ensure title + slug at minimum for sanity
-    (result as any).title ??= base.title;
-    (result as any).slug ??= base.slug;
-    return result as BookMeta;
+    result.title ??= base.title;
+    result.slug ??= realSlug;
+    return result;
   }
 
-  // Otherwise include content by default
   return { ...base, content: content || '' };
 }
 
-export function getAllBooks(fields: string[] = []): BookMeta[] {
+export function getAllBooks(fields: string[] = []): Partial<BookMeta>[] {
   const slugs = getBookSlugs();
+  const books = slugs.map((slug) => getBookBySlug(slug, fields));
 
-  const books = slugs
-    .map((slug) => getBookBySlug(slug, fields))
-    // Filter out stubs
-    .filter((b) => b.title && b.title !== 'Book Not Found')
-    // Sort by date desc; fall back safely
-    .sort((a, b) => {
-      const d1 = a.date ? parseDate(a.date) : new Date(0);
-      const d2 = b.date ? parseDate(b.date) : new Date(0);
-      return d2.getTime() - d1.getTime();
-    });
-
-  return books;
+  // Prefer date sorting if present; otherwise alpha by title
+  return books.sort((a, b) => {
+    const d1 = new Date(a.date || a.publishedAt || 0).getTime();
+    const d2 = new Date(b.date || b.publishedAt || 0).getTime();
+    if (d1 !== d2) return d2 - d1;
+    const t1 = (a.title || '').toLowerCase();
+    const t2 = (b.title || '').toLowerCase();
+    return t1.localeCompare(t2);
+  });
 }
