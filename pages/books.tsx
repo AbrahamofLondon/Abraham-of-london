@@ -1,14 +1,8 @@
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../components/Layout';
-import BookCard from '../components/BookCard';
-import { getAllBooks, BookMeta } from '../lib/books'; // Assuming you have a lib/books file
-
-// Extend BookMeta to include required BookCardProps fields
-interface BookCardProps extends BookMeta {
-  buyLink: string;
-  genre: string;
-}
+import BookCard, { BookCardProps } from '../components/BookCard';
+import { getAllBooks, BookMeta } from '../lib/books';
 
 interface BooksProps {
   books: BookCardProps[];
@@ -25,7 +19,7 @@ export default function Books({ books }: BooksProps) {
         <h1 className="text-4xl font-extrabold text-center mb-12">My Books</h1>
         {books.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {books.map((book) => (
+            {books.map((book: BookCardProps) => (
               <BookCard key={book.slug} {...book} />
             ))}
           </div>
@@ -52,19 +46,28 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
     'category',
     'tags',
     'content',
+    'downloadPdf',
+    'downloadEpub',
+    'buyLink',
+    'genre',
   ]);
 
-  // Map over the books to add the missing required properties with fallback values
-  const booksWithRequiredProps = books.map((book) => ({
-    ...book,
-    buyLink: book.buyLink || '#', // Fallback to '#' if buyLink is undefined
-    genre: book.genre || 'Uncategorized', // Fallback to 'Uncategorized' if genre is undefined
-  }));
+  const booksWithRequiredProps = books.map((book) => {
+    const extendedBook: BookCardProps = {
+      ...book,
+      buyLink: book.buyLink || '#',
+      genre: book.genre || 'Uncategorized',
+    };
+    // Only include downloadPdf and downloadEpub if they exist, otherwise omit them
+    if (book.downloadPdf !== undefined) extendedBook.downloadPdf = book.downloadPdf;
+    if (book.downloadEpub !== undefined) extendedBook.downloadEpub = book.downloadEpub;
+    return extendedBook;
+  });
 
   return {
     props: {
       books: booksWithRequiredProps,
     },
-    revalidate: 86400, // Optional: Match ISR setting if used
+    revalidate: 86400,
   };
 };

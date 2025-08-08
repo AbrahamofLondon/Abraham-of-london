@@ -1,65 +1,69 @@
+// pages/blog.tsx
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
-import { getAllPosts, PostMeta } from '../lib/posts';
+import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
+import { getAllPosts, PostMeta } from '../lib/posts';
 
 interface BlogProps {
-  posts: PostMeta[];
+  posts: PostMeta[];
 }
 
 export default function Blog({ posts }: BlogProps) {
-  const pageTitle = 'Abraham of London - Blog';
-  const pageDescription = 'Read the latest blog posts from Abraham of London on various topics related to fearless fatherhood and legacy.';
-  const siteUrl = 'https://abrahamoflondon.org';
-
-  return (
-    <>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:url" content={`${siteUrl}/blog`} />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <link rel="canonical" href={`${siteUrl}/blog`} />
-      </Head>
-
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">All Blog Posts</h1>
-          {posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <BlogPostCard key={post.slug} {...post} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-600">No blog posts found yet.</p>
-          )}
-        </div>
-      </section>
-    </>
-  );
+  return (
+    <Layout>
+      <Head>
+        <title>Blog | Abraham of London</title>
+        <meta
+          name="description"
+          content="Thoughts and reflections on business, technology, and life."
+        />
+      </Head>
+      <main className="container mx-auto px-4 py-12">
+        <h1 className="text-4xl font-extrabold text-center mb-12">
+          Latest Reflections
+        </h1>
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <BlogPostCard key={post.slug} {...post} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-lg text-gray-600">
+            No blog posts found.
+          </p>
+        )}
+      </main>
+    </Layout>
+  );
 }
 
-export const getStaticProps: GetStaticProps<BlogProps> = async () => {
-  const posts = getAllPosts([
-    'slug',
-    'title',
-    'date',
-    'coverImage',
-    'excerpt',
-    'author',
-    'readTime',
-    'category',
-    'tags',
-  ]);
+export const getStaticProps: GetStaticProps = async () => {
+  const posts = getAllPosts([
+    'slug',
+    'title',
+    'date',
+    'coverImage',
+    'excerpt',
+    'author',
+    'readTime',
+    'category',
+  ]);
 
-  return {
-    props: {
-      posts,
-    },
-    revalidate: 1,
-  };
+  // Ensure all properties are present to avoid type errors.
+  const postsWithRequiredProps = posts.map((post) => ({
+    ...post,
+    coverImage: post.coverImage || '/assets/images/default-blog-cover.jpg',
+    excerpt: post.excerpt || 'Read this post for more insights.',
+    readTime: post.readTime || '5 min read',
+    author: post.author || 'Abraham Adaramola',
+    category: post.category || 'General',
+  }));
+
+  return {
+    props: {
+      posts: postsWithRequiredProps,
+    },
+  };
 };
