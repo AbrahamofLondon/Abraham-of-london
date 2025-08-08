@@ -2,12 +2,12 @@ import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GetStaticProps } from 'next'; // Removed GetStaticPropsResult
+import { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
-import { getAllPosts } from '../lib/posts'; // Removed PostMeta
-import { getAllBooks } from '../lib/books'; // Removed BookMeta
+import { getAllPosts } from '../lib/posts';
+import { getAllBooks } from '../lib/books';
 
 interface Post {
   slug: string;
@@ -15,7 +15,6 @@ interface Post {
   date: string;
   excerpt: string;
   coverImage: string;
-  // Added these properties to match the processed data
   author: string;
   readTime: string;
   category: string;
@@ -27,7 +26,6 @@ interface Book {
   author: string;
   excerpt: string;
   coverImage: string;
-  // Added these properties to match the processed data
   buyLink: string;
   genre: string;
 }
@@ -44,7 +42,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'date',
     'excerpt',
     'coverImage',
-    'author', // Fetch author, readTime, category
+    'author',
     'readTime',
     'category',
   ]);
@@ -59,7 +57,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'genre',
   ]);
 
-  // Map over posts and books to provide fallback values for optional properties
   const processedPosts: Post[] = postsData.map(post => ({
     ...post,
     coverImage: post.coverImage || '/assets/images/default-blog-cover.jpg',
@@ -80,10 +77,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
   return {
     props: {
-      posts: processedPosts.slice(0, 3), // Show only the first 3 posts
-      books: processedBooks.slice(0, 3), // Show only the first 3 books
+      posts: processedPosts.slice(0, 3),
+      books: processedBooks.slice(0, 3),
     },
-    revalidate: 60, // Add revalidation for better performance
+    revalidate: 60,
   };
 };
 
@@ -124,22 +121,22 @@ export default function Home({ posts, books }: HomeProps) {
             </p>
             <div className="flex space-x-4">
               <Link href="mailto:info@abrahamoflondon.org" aria-label="Email">
-                <Image src="/assets/logo/email.svg" alt="Email" width={24} height={24} />
+                <Image src="/assets/images/logo/email.svg" alt="Email" width={24} height={24} />
               </Link>
               <Link href="tel:+442086225909" aria-label="Phone">
-                <Image src="/assets/logo/phone.svg" alt="Phone" width={24} height={24} />
+                <Image src="/assets/images/logo/phone.svg" alt="Phone" width={24} height={24} />
               </Link>
-              <Link href="https://www.linkedin.com/in/abrahamadaramola" target="_blank" aria-label="LinkedIn">
-                <Image src="/assets/logo/linkedin.svg" alt="LinkedIn" width={24} height={24} />
+              <Link href="https://www.linkedin.com/in/abraham-adaramola-06630321/" target="_blank" aria-label="LinkedIn">
+                <Image src="/assets/images/logo/linkedin.svg" alt="LinkedIn" width={24} height={24} />
               </Link>
-              <Link href="https://twitter.com/abrahamlondon" target="_blank" aria-label="Twitter">
-                <Image src="/assets/logo/twitter.svg" alt="Twitter" width={24} height={24} />
+              <Link href="https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09" target="_blank" aria-label="Twitter">
+                <Image src="/assets/images/logo/twitter.svg" alt="Twitter" width={24} height={24} />
               </Link>
-              <Link href="https://facebook.com/abrahamlondon" target="_blank" aria-label="Facebook">
-                <Image src="/assets/logo/facebook.svg" alt="Facebook" width={24} height={24} />
+              <Link href="https://www.facebook.com/share/1MRrKpUzMG/" target="_blank" aria-label="Facebook">
+                <Image src="/assets/images/logo/facebook.svg" alt="Facebook" width={24} height={24} />
               </Link>
-              <Link href="https://wa.me/441234567890" target="_blank" aria-label="WhatsApp">
-                <Image src="/assets/logo/whatsapp.svg" alt="WhatsApp" width={24} height={24} />
+              <Link href="https://wa.me/+447496334022" target="_blank" aria-label="WhatsApp">
+                <Image src="/assets/images/logo/whatsapp.svg" alt="WhatsApp" width={24} height={24} />
               </Link>
             </div>
           </div>
