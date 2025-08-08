@@ -54,21 +54,8 @@ export default function BrandsPage() {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <motion.div
-        className="bg-gray-50 py-20 px-4"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <motion.div className="max-w-5xl mx-auto text-center" variants={itemVariants}>
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-4 text-gray-900">
-            My Ventures & Brands
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            A portfolio of innovation, sustainability, and impact, all under the umbrella of Abraham of London.
-          </p>
-        </motion.div>
-      </motion.div>
+      {/* Remove the redundant header section that was causing the duplication */}
+      {/* The `Layout` component handles the main header, so this is no longer needed. */}
 
       <div className="max-w-5xl mx-auto py-20 px-4">
         {/* Abraham of London Brand Section */}

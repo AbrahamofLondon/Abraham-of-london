@@ -1,17 +1,17 @@
-// components/BookCard.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import { StaticImageData } from 'next/image';
 
 export interface BookCardProps {
   slug: string;
   title: string;
-  author: string;
+  coverImage?: StaticImageData | string;
   excerpt: string;
-  coverImage?: string;
-  buyLink?: string;
-  pdfLink?: string;
-  epubLink?: string;
-  genre?: string;
+  author: string;
+  buyLink: string;
+  genre: string;
+  downloadPdf?: string;
+  downloadEpub?: string;
 }
 
 const BookCard: React.FC<BookCardProps> = ({
@@ -21,8 +21,8 @@ const BookCard: React.FC<BookCardProps> = ({
   excerpt,
   coverImage,
   buyLink,
-  pdfLink,
-  epubLink,
+  downloadPdf,
+  downloadEpub,
   genre,
 }) => {
   const imageSrc = coverImage || '/assets/images/default-book.jpg';
@@ -58,18 +58,18 @@ const BookCard: React.FC<BookCardProps> = ({
             Buy
           </a>
         )}
-        {pdfLink && (
+        {downloadPdf && (
           <a
-            href={pdfLink}
+            href={downloadPdf}
             className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
             download
           >
             Download PDF
           </a>
         )}
-        {epubLink && (
+        {downloadEpub && (
           <a
-            href={epubLink}
+            href={downloadEpub}
             className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
             download
           >
@@ -81,4 +81,4 @@ const BookCard: React.FC<BookCardProps> = ({
   );
 };
 
-export default BookCard;
+export default BookCard; // Corrected: Removed ';s'

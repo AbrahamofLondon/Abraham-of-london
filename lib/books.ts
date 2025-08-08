@@ -20,6 +20,10 @@ export type BookMeta = {
   category?: string;
   tags?: string[];
   content?: string;
+  downloadPdf?: string;
+  downloadEpub?: string;
+  buyLink?: string;    // Ensure this is present
+  genre?: string;      // Ensure this is present
 };
 
 export function getBookSlugs(): string[] {
