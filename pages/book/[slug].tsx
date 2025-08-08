@@ -1,4 +1,4 @@
-// pages/books/[slug].tsx
+// pages/book/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,14 +9,10 @@ import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
 import { parseDate } from '../../lib/dateUtils';
 import { safeString } from '../../lib/stringUtils';
 import Layout from '../../components/Layout';
-// If you export default from MDXComponents, change this import accordingly
 import { MDXComponents } from '../../components/MDXComponents';
 
 type BookPageMeta = Required<
-  Pick<
-    BookMeta,
-    'slug' | 'title' | 'author' | 'excerpt' | 'coverImage'
-  >
+  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage'>
 > & {
   date: string;
   publishedAt: string;
@@ -39,8 +35,7 @@ export default function Book({ book }: BookProps) {
   const pageTitle = `${safeString(book.meta.title)} | Abraham of London Books`;
   const siteUrl = 'https://abrahamoflondon.org';
 
-  const description =
-    safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
+  const description = safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
   const coverImage = book.meta.coverImage || '/assets/images/default-book-cover.jpg';
   const author = safeString(book.meta.author || 'Abraham of London');
 
@@ -49,9 +44,9 @@ export default function Book({ book }: BookProps) {
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
+        <link rel="canonical" href={`${siteUrl}/book/${book.meta.slug}`} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
+        <meta property="og:url" content={`${siteUrl}/book/${book.meta.slug}`} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={`${siteUrl}${coverImage}`} />
@@ -156,8 +151,8 @@ export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
     'date',
     'publishedAt',
     'buyLink',
-    'downloadPdf',     // ✅ correct schema names
-    'downloadEpub',    // ✅ correct schema names
+    'downloadPdf',
+    'downloadEpub',
     'tags',
     'genre',
     'content',
@@ -167,7 +162,6 @@ export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
     return { notFound: true };
   }
 
-  // Normalize to required props for the page component
   const meta: BookPageMeta = {
     slug: raw.slug,
     title: raw.title || 'Untitled Book',
