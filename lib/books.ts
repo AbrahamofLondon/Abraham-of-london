@@ -1,4 +1,3 @@
-// lib/books.ts
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -11,37 +10,40 @@ export type BookMeta = {
   coverImage?: string;
   buyLink?: string;
   genre?: string[];       // normalized array
-  date?: string;          // optional, for sorting if provided
-  publishedAt?: string;   // alias
+  date?: string;
+  publishedAt?: string;
   tags?: string[];
   image?: string;
   description?: string;
-  content?: string;       // included only when requested
+  content?: string;       // only when requested
   seo?: {
     title?: string;
     description?: string;
     keywords?: string;
   };
+  downloadPdf?: string;
+  downloadEpub?: string;
 };
 
 const booksDirectory = path.join(process.cwd(), 'content/books');
 
 function ensureDir(): void {
-  try {
-    if (!fs.existsSync(booksDirectory)) {
-      fs.mkdirSync(booksDirectory, { recursive: true });
-    }
-  } catch (err) {
-    console.error('Failed to ensure books directory exists:', err);
+  if (!fs.existsSync(booksDirectory)) {
+    fs.mkdirSync(booksDirectory, { recursive: true });
   }
+}
+
+function normalizeArray(v: unknown): string[] | undefined {
+  if (!v) return undefined;
+  if (Array.isArray(v)) return v.map(String).map(s => s.trim()).filter(Boolean);
+  if (typeof v === 'string') return v.split(',').map(s => s.trim()).filter(Boolean);
+  return undefined;
 }
 
 export function getBookSlugs(): string[] {
   ensureDir();
   try {
-    return fs
-      .readdirSync(booksDirectory)
-      .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
+    return fs.readdirSync(booksDirectory).filter(f => f.endsWith('.mdx') || f.endsWith('.md'));
   } catch (e) {
     console.error(`Error reading books dir: ${booksDirectory}`, e);
     return [];
@@ -66,13 +68,6 @@ export function getBookBySlug(slug: string, fields: string[] = []): Partial<Book
   }
 
   const { data, content } = matter(fileContents);
-
-  const normalizeArray = (val: unknown): string[] | undefined => {
-    if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
-    if (typeof val === 'string') return val.split(',').map((s) => s.trim()).filter(Boolean);
-    return undefined;
-  };
-
   const normalizedDate = String((data as any).date || (data as any).publishedAt || '');
 
   const base: Partial<BookMeta> = {
@@ -88,10 +83,9 @@ export function getBookBySlug(slug: string, fields: string[] = []): Partial<Book
     tags: normalizeArray((data as any).tags),
     image: (data as any).image,
     description: (data as any).description,
-    seo:
-      typeof (data as any).seo === 'object' && (data as any).seo !== null
-        ? (data as any).seo
-        : undefined,
+    seo: typeof (data as any).seo === 'object' && (data as any).seo !== null ? (data as any).seo : undefined,
+    downloadPdf: (data as any).downloadPdf,
+    downloadEpub: (data as any).downloadEpub,
   };
 
   if (fields.length > 0) {
@@ -117,13 +111,11 @@ export function getAllBooks(fields: string[] = []): Partial<BookMeta>[] {
   const slugs = getBookSlugs();
   const books = slugs.map((slug) => getBookBySlug(slug, fields));
 
-  // Prefer date sorting if present; otherwise alpha by title
+  // Prefer date sort if available; else alpha by title
   return books.sort((a, b) => {
     const d1 = new Date(a.date || a.publishedAt || 0).getTime();
     const d2 = new Date(b.date || b.publishedAt || 0).getTime();
     if (d1 !== d2) return d2 - d1;
-    const t1 = (a.title || '').toLowerCase();
-    const t2 = (b.title || '').toLowerCase();
-    return t1.localeCompare(t2);
+    return (a.title || '').localeCompare(b.title || '');
   });
 }
