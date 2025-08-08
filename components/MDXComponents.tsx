@@ -1,4 +1,3 @@
-// components/MDXComponents.tsx
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,29 +6,30 @@ type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   children?: React.ReactNode;
 };
 
-type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
+type ImgProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+  src?: string;
+  alt?: string;
+  className?: string;
+  sizes?: string;
+  loading?: 'eager' | 'lazy';
+};
 
 export const MDXComponents = {
   a: ({ href = '', children, ...rest }: AnchorProps) => {
+    const cls = 'text-forest underline underline-offset-2 hover:text-softGold transition';
+
+    // Internal links use Next Link
     if (href.startsWith('/')) {
       return (
-        <Link
-          href={href}
-          className="text-forest underline underline-offset-2 hover:text-softGold transition"
-          {...rest}
-        >
+        <Link href={href} className={cls} {...rest}>
           {children}
         </Link>
       );
     }
+
+    // External links use <a> with security attrs
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-forest underline underline-offset-2 hover:text-softGold transition"
-        {...rest}
-      >
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls} {...rest}>
         {children}
       </a>
     );
@@ -44,8 +44,9 @@ export const MDXComponents = {
         sizes={sizes || '(max-width: 768px) 100vw, 768px'}
         loading={loading === 'eager' ? 'eager' : 'lazy'}
         className={className}
-        // NOTE: Do NOT spread the rest; Next/Image doesn’t accept string width/height, etc.
       />
     </div>
   ),
 };
+
+export default MDXComponents;
