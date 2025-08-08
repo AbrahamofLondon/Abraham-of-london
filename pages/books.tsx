@@ -16,16 +16,20 @@ export default function Books({ books }: BooksProps) {
         <title>Books | Abraham of London</title>
         <meta name="description" content="A list of books by Abraham of London." />
       </Head>
+
       <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-extrabold text-center mb-12">My Books</h1>
+        <h1 className="font-serif text-4xl tracking-brand text-forest text-center mb-12">
+          My Books
+        </h1>
+
         {books.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {books.map((book: BookCardProps) => (
+            {books.map((book) => (
               <BookCard key={book.slug} {...book} />
             ))}
           </div>
         ) : (
-          <p className="text-center text-lg text-gray-600">No books found.</p>
+          <p className="text-center text-lg text-deepCharcoal/70">No books found.</p>
         )}
       </main>
     </Layout>
@@ -46,22 +50,28 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
   ]);
 
   const booksWithRequiredProps: BookCardProps[] = books.map((book) => {
+    const genreText =
+      Array.isArray(book.genre) && book.genre.length > 0
+        ? book.genre.join(', ')
+        : typeof book.genre === 'string'
+        ? book.genre
+        : 'Uncategorized';
+
     return {
-      ...book,
+      slug: book.slug || '',
+      title: book.title || 'Untitled Book',
       coverImage: book.coverImage || '/assets/images/default-book.jpg',
       excerpt: book.excerpt || 'No excerpt available.',
+      author: book.author || 'Abraham of London',
       buyLink: book.buyLink || '#',
-      genre: book.genre || 'Uncategorized',
-      // The key change: explicitly set undefined values to null for serialization
-      downloadPdf: book.downloadPdf ?? null, 
+      genre: genreText,
+      downloadPdf: book.downloadPdf ?? null,
       downloadEpub: book.downloadEpub ?? null,
-    } as BookCardProps;
+    };
   });
 
   return {
-    props: {
-      books: booksWithRequiredProps,
-    },
-    revalidate: 86400,
+    props: { books: booksWithRequiredProps },
+    revalidate: 86400, // 24h ISR
   };
 };
