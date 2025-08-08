@@ -3,17 +3,42 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< Updated upstream
 /* Replace large local fonts with Inter from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+=======
+/* Custom Fonts */
+@font-face {
+  font-family: 'Geist Black'; /* Updated naming for consistency */
+  src: url('/fonts/Geist-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono'; /* Clean name */
+  src: url('/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Base styles */
+>>>>>>> Stashed changes
 html, body {
   font-family: 'Inter', sans-serif;
   height: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+<<<<<<< Updated upstream
   background-color: #fff;
   color: #111827;
+=======
+  font-family: 'Geist Mono', monospace; /* Optional: enable globally */
+>>>>>>> Stashed changes
 }
 
 #__next {
@@ -21,3 +46,8 @@ html, body {
   display: flex;
   flex-direction: column;
 }
+<<<<<<< Updated upstream
+=======
+
+/* Other global styles */
+>>>>>>> Stashed changes
