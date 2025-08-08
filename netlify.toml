@@ -1,9 +1,22 @@
 [build]
   command = "npm run build"
   publish = ".next"
-  [build.environment]
-    NODE_VERSION = "22.18.0"
+  # This is the directory that Netlify will deploy
+  # after the build is complete.
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["next"]
+
+# Example of a redirect rule
+[[redirects]]
+  from = "/blog/*"
+  to = "/blog/:splat"
+  status = 200
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    cacheNext = true
+  # Remove the 'inputs' section entirely.
+  # [plugins.inputs]
+  #   cacheNext = true  <-- This line and the one above it should be removed.
