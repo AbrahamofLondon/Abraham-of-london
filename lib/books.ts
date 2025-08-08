@@ -4,11 +4,16 @@ import matter from 'gray-matter';
 import { formatDate, parseDate } from './dateUtils';
 import { safeString, safeSplit } from './stringUtils';
 
+<<<<<<< Updated upstream
 const booksDirectory = join(process.cwd(), 'content/books');
+=======
+const booksDirectory = join(process.cwd(), 'books');
+>>>>>>> Stashed changes
 
 export type BookMeta = {
   slug: string;
   title: string;
+<<<<<<< Updated upstream
   date: string;
   publishedAt: string;
   coverImage?: string;
@@ -54,8 +59,56 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta {
       fileContents = fs.readFileSync(fallbackPath, 'utf8');
     } else {
       throw new Error(`Book file not found: ${fullPath} or ${fallbackPath}`);
+=======
+  author?: string;
+  coverImage?: string;
+  excerpt?: string;
+  description?: string;
+  genre?: string[];
+  tags?: string[];
+  buyLink?: string;
+  image?: string;
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
+};
+
+export type BookWithContent = BookMeta & { content: string };
+
+export function getBookSlugs() {
+  return fs.readdirSync(booksDirectory).filter((f) => f.endsWith('.mdx'));
+}
+
+export function getBookBySlug(slug: string, fields: string[] = []): BookMeta | BookWithContent {
+  const realSlug = slug.replace(/\.mdx$/, '');
+  const fullPath = join(booksDirectory, `${realSlug}.mdx`);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(fileContents);
+
+  const item: Partial<BookWithContent> = {};
+  item.slug = typeof data.slug === 'string' ? data.slug : realSlug;
+
+  if (fields.includes('content')) {
+    item.content = content;
+  }
+
+  fields.forEach((field) => {
+    if (field !== 'slug' && field !== 'content' && data[field] !== undefined) {
+      if (field === 'tags' || field === 'genre') {
+        item[field] = Array.isArray(data[field])
+          ? data[field].map((t: any) => String(t))
+          : [String(data[field])];
+      } else if (field === 'seo' && typeof data[field] === 'object' && data[field] !== null) {
+        item.seo = data[field];
+      } else {
+        (item as any)[field] = data[field];
+      }
+>>>>>>> Stashed changes
     }
 
+<<<<<<< Updated upstream
     const { data, content } = matter(fileContents);
 
     const book: BookMeta = {
@@ -119,11 +172,22 @@ export function getBookBySlug(slug: string, fields: string[] = []): BookMeta {
       content: '',
     };
   }
+=======
+  item.title ??= '';
+  item.excerpt ??= '';
+  item.description ??= '';
+  item.image ??= '';
+  item.author ??= '';
+  item.buyLink ??= '';
+
+  return fields.includes('content') ? (item as BookWithContent) : (item as BookMeta);
+>>>>>>> Stashed changes
 }
 
 export function getAllBooks(fields: string[] = []): BookMeta[] {
   const slugs = getBookSlugs();
   const books = slugs
+<<<<<<< Updated upstream
     .map((slug) => getBookBySlug(slug, fields))
     .filter(book => book.title !== 'Book Not Found')
     .sort((book1, book2) => {
@@ -131,5 +195,9 @@ export function getAllBooks(fields: string[] = []): BookMeta[] {
       const date2 = parseDate(book2.date);
       return date2.getTime() - date1.getTime();
     });
+=======
+    .map((slug) => getBookBySlug(slug, fields) as BookMeta)
+    .sort((a, b) => (a.title > b.title ? 1 : -1));
+>>>>>>> Stashed changes
   return books;
 }

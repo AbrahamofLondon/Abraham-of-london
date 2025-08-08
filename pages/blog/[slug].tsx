@@ -3,15 +3,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
+<<<<<<< Updated upstream
 import { MDXRemote } from 'next-mdx-remote';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getPostBySlug, getAllPosts, PostMeta } from '../../lib/posts';
+=======
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { getPostBySlug, getAllPosts, PostWithContent } from '../../lib/posts';
+import Layout from '../../components/Layout';
+>>>>>>> Stashed changes
 import DateFormatter from '../../components/DateFormatter';
 import { MDXComponents } from '../../components/MDXComponents';
 
 interface PostProps {
   post: {
-    meta: PostMeta;
+    meta: Omit<PostWithContent, 'content'>;
     content: MDXRemoteSerializeResult;
   };
 }
@@ -21,21 +27,36 @@ export default function Post({ post }: PostProps) {
   const siteUrl = 'https://abrahamoflondon.org';
 
   return (
+<<<<<<< Updated upstream
     <>
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={post.meta.description || post.meta.excerpt || ''} />
+=======
+    <Layout>
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={post.meta.description || post.meta.excerpt} />
+>>>>>>> Stashed changes
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={post.meta.description || post.meta.excerpt || ''} />
         <meta property="og:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${siteUrl}/blog/${post.meta.slug}`} />
         <meta property="article:published_time" content={new Date(post.meta.date).toISOString()} />
+<<<<<<< Updated upstream
         <meta property="article:author" content={post.meta.author || ''} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={post.meta.description || post.meta.excerpt || ''} />
         <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage || ''}`} />
+=======
+        <meta property="article:author" content={post.meta.author} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={post.meta.description || post.meta.excerpt} />
+        <meta name="twitter:image" content={`${siteUrl}${post.meta.coverImage}`} />
+>>>>>>> Stashed changes
         <link rel="canonical" href={`${siteUrl}/blog/${post.meta.slug}`} />
       </Head>
 
@@ -52,6 +73,18 @@ export default function Post({ post }: PostProps) {
               />
             </div>
           )}
+<<<<<<< Updated upstream
+=======
+          {post.meta.tags?.map((tag) => (
+            <span
+              key={tag}
+              className="inline-block bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
+            >
+              #{tag}
+            </span>
+          ))}
+        </header>
+>>>>>>> Stashed changes
 
           <header className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-4">
@@ -77,6 +110,7 @@ export default function Post({ post }: PostProps) {
               ))}
           </header>
 
+<<<<<<< Updated upstream
           <div className="prose prose-lg mx-auto mb-16">
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
@@ -89,12 +123,25 @@ export default function Post({ post }: PostProps) {
         </article>
       </div>
     </>
+=======
+        <div className="text-center">
+          <Link href="/blog" className="text-blue-600 hover:underline text-xl font-medium">
+            &larr; Back to Blog
+          </Link>
+        </div>
+      </article>
+    </Layout>
+>>>>>>> Stashed changes
   );
 }
 
 export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
   const { slug } = params as { slug: string };
+<<<<<<< Updated upstream
   const postData = getPostBySlug(slug, [
+=======
+  const post = getPostBySlug(slug, [
+>>>>>>> Stashed changes
     'title',
     'date',
     'slug',
@@ -106,6 +153,7 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
     'category',
     'tags',
     'description',
+<<<<<<< Updated upstream
   ]) as { content: string } & PostMeta;
 
   const { content, ...meta } = postData;
@@ -113,11 +161,20 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
     parseFrontmatter: true,
     scope: meta,
   });
+=======
+  ]) as PostWithContent;
+
+  const mdxSource = await serialize(post.content, { scope: post });
+>>>>>>> Stashed changes
 
   return {
     props: {
       post: {
+<<<<<<< Updated upstream
         meta: meta as PostMeta,
+=======
+        meta: { ...post, content: undefined },
+>>>>>>> Stashed changes
         content: mdxSource,
       },
     },
@@ -127,13 +184,16 @@ export const getStaticProps: GetStaticProps<PostProps> = async ({ params }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getAllPosts(['slug']);
-
   return {
+<<<<<<< Updated upstream
     paths: posts.map((post) => ({
       params: {
         slug: post.slug,
       },
     })),
+=======
+    paths: posts.map((post) => ({ params: { slug: post.slug } })),
+>>>>>>> Stashed changes
     fallback: 'blocking',
   };
 };
