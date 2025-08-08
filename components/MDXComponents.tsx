@@ -11,7 +11,6 @@ type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
 export const MDXComponents = {
   a: ({ href = '', children, ...rest }: AnchorProps) => {
-    // Internal link (starts with /): use Next <Link>
     if (href.startsWith('/')) {
       return (
         <Link
@@ -23,7 +22,6 @@ export const MDXComponents = {
         </Link>
       );
     }
-    // External link: standard <a> with security attrs
     return (
       <a
         href={href}
@@ -37,17 +35,17 @@ export const MDXComponents = {
     );
   },
 
-  img: ({ src, alt, ...rest }: ImgProps) => (
+  img: ({ src, alt, className, sizes, loading }: ImgProps) => (
     <div className="relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
       <Image
         src={src || '/assets/images/default-book.jpg'}
         alt={alt || ''}
         fill
-        sizes="(max-width: 768px) 100vw, 768px"
-        style={{ objectFit: 'cover' }}
-        {...rest}
+        sizes={sizes || '(max-width: 768px) 100vw, 768px'}
+        loading={loading === 'eager' ? 'eager' : 'lazy'}
+        className={className}
+        // NOTE: Do NOT spread the rest; Next/Image doesn’t accept string width/height, etc.
       />
     </div>
   ),
-  // Add more MDX shortcodes here (e.g., Callout, Quote, Button, etc.)
 };
