@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { StaticImageData } from 'next/image';
 
+// No need for StaticImageData if you're not using it.
 export interface BookCardProps {
   slug: string;
   title: string;
-  coverImage?: StaticImageData | string;
+  coverImage?: string; // Simplifies the type as you handle the fallback
   excerpt: string;
   author: string;
   buyLink: string;
@@ -81,4 +81,4 @@ const BookCard: React.FC<BookCardProps> = ({
   );
 };
 
-export default BookCard; // Corrected: Removed ';s'
+export default BookCard;

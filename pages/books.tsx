@@ -1,8 +1,9 @@
+// pages/books.tsx
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../components/Layout';
 import BookCard, { BookCardProps } from '../components/BookCard';
-import { getAllBooks, BookMeta } from '../lib/books';
+import { getAllBooks } from '../lib/books'; // Removed BookMeta
 
 interface BooksProps {
   books: BookCardProps[];
@@ -52,16 +53,18 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
     'genre',
   ]);
 
-  const booksWithRequiredProps = books.map((book) => {
-    const extendedBook: BookCardProps = {
+  const booksWithRequiredProps: BookCardProps[] = books.map((book) => {
+    // Explicitly cast the returned object to BookCardProps
+    return {
       ...book,
-      buyLink: book.buyLink || '#',
-      genre: book.genre || 'Uncategorized',
-    };
-    // Only include downloadPdf and downloadEpub if they exist, otherwise omit them
-    if (book.downloadPdf !== undefined) extendedBook.downloadPdf = book.downloadPdf;
-    if (book.downloadEpub !== undefined) extendedBook.downloadEpub = book.downloadEpub;
-    return extendedBook;
+      coverImage: book.coverImage || '/assets/images/default-book.jpg', // Add fallback
+      excerpt: book.excerpt || 'No excerpt available.', // Add fallback
+      buyLink: book.buyLink || '#', // Add fallback
+      genre: book.genre || 'Uncategorized', // Add fallback
+      // Ensure optional props are handled correctly
+      downloadPdf: book.downloadPdf || undefined,
+      downloadEpub: book.downloadEpub || undefined,
+    } as BookCardProps;
   });
 
   return {
