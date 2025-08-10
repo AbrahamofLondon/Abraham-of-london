@@ -1,3 +1,4 @@
+// pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -57,25 +58,35 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'genre',
   ]);
 
-  const processedPosts: Post[] = postsData.map((post) => ({
+  // Retain original image paths; only use default if missing/empty
+  const processedPosts: Post[] = postsData.map((post: any) => ({
     slug: post.slug || '',
     title: post.title || 'Untitled Post',
     date: post.date || '',
     excerpt: post.excerpt || 'Read more for full details.',
-    coverImage: post.coverImage || '/assets/images/default-blog-cover.jpg',
+    coverImage:
+      typeof post.coverImage === 'string' && post.coverImage.trim().length > 0
+        ? post.coverImage
+        : '/assets/images/default-blog-cover.jpg',
     author: post.author || 'Abraham of London',
     readTime: post.readTime || '5 min read',
     category: post.category || 'General',
   }));
 
-  const processedBooks: Book[] = booksData.map((book) => ({
+  const processedBooks: Book[] = booksData.map((book: any) => ({
     slug: book.slug || '',
     title: book.title || 'Untitled Book',
     author: book.author || 'Abraham of London',
     excerpt: book.excerpt || 'Read more for full details.',
-    coverImage: book.coverImage || '/assets/images/default-book-cover.jpg',
+    coverImage:
+      typeof book.coverImage === 'string' && book.coverImage.trim().length > 0
+        ? book.coverImage
+        : '/assets/images/default-book-cover.jpg',
     buyLink: book.buyLink || '#',
-    genre: book.genre || 'Uncategorized',
+    // Normalize string|string[] -> string (without mutating source)
+    genre: Array.isArray(book.genre)
+      ? (book.genre as string[]).filter(Boolean).join(', ')
+      : (book.genre || 'Uncategorized'),
   }));
 
   return {
@@ -106,7 +117,7 @@ export default function Home({ posts, books }: HomeProps) {
         <meta name="twitter:image" content="/assets/social/twitter-image.webp" />
       </Head>
 
-      {/* Hero: brand colors + accessible overlay */}
+      {/* Hero */}
       <header className="bg-forest text-cream">
         <div className="relative w-full h-64 sm:h-96">
           <Image
@@ -115,10 +126,10 @@ export default function Home({ posts, books }: HomeProps) {
             fill
             className="object-cover"
             priority
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <h1 className="font-serif tracking-widebrand text-3xl sm:text-5xl font-bold text-center">
+            <h1 className="font-serif tracking-brand text-3xl sm:text-5xl font-bold text-center">
               Abraham of London
             </h1>
           </div>
@@ -175,12 +186,13 @@ export default function Home({ posts, books }: HomeProps) {
               </Link>
             </div>
           </div>
+
           <div className="relative w-64 h-64 mx-auto">
             <Image
               src="/assets/images/profile-portrait.webp"
               alt="Portrait of Abraham of London"
               fill
-              className="rounded-full shadow-card"
+              className="rounded-full shadow-card object-cover"
               sizes="256px"
               priority={false}
             />
