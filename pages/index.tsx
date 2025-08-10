@@ -7,12 +7,16 @@ import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
-import SocialLinks from '../components/SocialLinks'; // New import
+import SocialLinks from '../components/SocialLinks';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
-type Post = Required<Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>>;
-type Book = Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & { genre: string };
+type Post = Required<
+  Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
+>;
+type Book = Required<
+  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
+> & { genre: string };
 
 interface HomeProps {
   posts: Post[];
@@ -47,6 +51,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || '') as string,
     excerpt: p.excerpt || 'Read more for full details.',
+    // Your blog images live in /public/images/blog
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
@@ -61,11 +66,14 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
+    // Your book art can be in /images/books or use explicit paths from MDX
     coverImage:
       typeof b.coverImage === 'string' && b.coverImage.trim()
         ? b.coverImage
         : '/assets/images/default-book.jpg',
-    buyLink: b.buyLink || '#',
+    // If empty, we’ll link to the book page (free “buy”)
+    buyLink: b.buyLink || `/books/${b.slug || ''}`,
+    // Normalize string|string[] to a readable string
     genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : (b.genre || 'Uncategorized'),
   }));
 
@@ -79,38 +87,41 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ posts, books }: HomeProps) {
-  // Generate JSON-LD for books and posts
-  const bookJsonLd = useMemo(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    itemListElement: books.map((book, index) => ({
-      '@type': 'Book',
-      position: index + 1,
-      name: book.title,
-      url: `/books/${book.slug}`,
-      image: book.coverImage,
-      author: {
-        '@type': 'Person',
-        name: book.author,
-      },
-    })),
-  }), [books]);
+  const siteUrl = 'https://abraham-of-london.netlify.app'; // change to your custom domain when ready
 
-  const postJsonLd = useMemo(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    itemListElement: posts.map((post, index) => ({
-      '@type': 'BlogPosting',
-      position: index + 1,
-      headline: post.title,
-      url: `/blog/${post.slug}`,
-      image: post.coverImage,
-      author: {
-        '@type': 'Person',
-        name: post.author,
-      },
-    })),
-  }), [posts]);
+  // JSON-LD for Books
+  const bookJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: books.map((book, index) => ({
+        '@type': 'Book',
+        position: index + 1,
+        name: book.title,
+        url: `${siteUrl}/books/${book.slug}`,
+        image: `${siteUrl}${book.coverImage.startsWith('/') ? '' : '/'}${book.coverImage}`,
+        author: { '@type': 'Person', name: book.author },
+      })),
+    }),
+    [books, siteUrl]
+  );
+
+  // JSON-LD for Posts
+  const postJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: posts.map((post, index) => ({
+        '@type': 'BlogPosting',
+        position: index + 1,
+        headline: post.title,
+        url: `${siteUrl}/blog/${post.slug}`,
+        image: `${siteUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`,
+        author: { '@type': 'Person', name: post.author },
+      })),
+    }),
+    [posts, siteUrl]
+  );
 
   return (
     <Layout>
@@ -121,21 +132,18 @@ export default function Home({ posts, books }: HomeProps) {
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
         <meta property="og:title" content="Abraham of London" />
-        <meta property="og:description" content="Official site of Abraham of London – author, strategist, and fatherhood advocate." />
+        <meta
+          property="og:description"
+          content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
+        />
         <meta property="og:image" content="/assets/social/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="/assets/social/twitter-image.webp" />
         {books.length > 0 && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }}
-          />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
         {posts.length > 0 && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }}
-          />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }} />
         )}
       </Head>
 
@@ -167,7 +175,7 @@ export default function Home({ posts, books }: HomeProps) {
               Abraham of London is an author, strategist, and fatherhood advocate passionate about
               family, leadership, and legacy.
             </p>
-            <SocialLinks /> {/* Replaced with the new component */}
+            <SocialLinks />
           </div>
 
           <div className="relative w-64 h-64 mx-auto">
@@ -185,7 +193,12 @@ export default function Home({ posts, books }: HomeProps) {
 
         {/* Books */}
         <section className="mb-16">
-          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Books</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-serif text-2xl tracking-brand text-forest">Latest Books</h2>
+            <Link href="/books" className="text-forest hover:text-softGold underline underline-offset-4">
+              Browse all
+            </Link>
+          </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {books.map((book) => (
               <BookCard key={book.slug} {...book} />
@@ -197,7 +210,12 @@ export default function Home({ posts, books }: HomeProps) {
 
         {/* Posts */}
         <section>
-          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Posts</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-serif text-2xl tracking-brand text-forest">Latest Posts</h2>
+            <Link href="/blog" className="text-forest hover:text-softGold underline underline-offset-4">
+              Read all
+            </Link>
+          </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <BlogPostCard key={post.slug} {...post} />
