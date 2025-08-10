@@ -7,16 +7,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fix:media": "node scripts/fix-frontmatter.js",
+    "fix:media:write": "node scripts/fix-frontmatter.js --write"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@netlify/next": "^1.4.9",
+    "@svgr/webpack": "^8.1.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.18.2",
     "gray-matter": "^4.0.3",
-    "next": "^14.2.30",
+    "next": "^14.2.31",
     "next-mdx-remote": "^5.0.0",
     "next-seo": "^6.8.0",
     "react": "^18.2.0",
