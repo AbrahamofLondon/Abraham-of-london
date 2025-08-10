@@ -1,13 +1,29 @@
-// pages/books.tsx
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Layout from '../components/Layout';
-import BookCard, { BookCardProps } from '../components/BookCard';
-import { getAllBooks } from '../lib/books';
+import BookCard from '../components/BookCard';
+import { getAllBooks, BookMeta } from '../lib/books';
 
-interface BooksProps {
-  books: BookCardProps[];
-}
+type BooksProps = { books: (Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & { genre: string })[] };
+
+export const getStaticProps: GetStaticProps<BooksProps> = async () => {
+  const booksRaw = getAllBooks(['slug', 'title', 'author', 'excerpt', 'coverImage', 'buyLink', 'genre']);
+
+  const books = booksRaw.map((b) => ({
+    slug: b.slug || '',
+    title: b.title || 'Untitled Book',
+    author: b.author || 'Abraham of London',
+    excerpt: b.excerpt || 'Read more for full details.',
+    coverImage:
+      typeof b.coverImage === 'string' && b.coverImage.trim()
+        ? b.coverImage
+        : '/assets/images/default-book.jpg',
+    buyLink: b.buyLink || '#',
+    genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Uncategorized',
+  }));
+
+  return { props: { books }, revalidate: 86400 };
+};
 
 export default function Books({ books }: BooksProps) {
   return (
@@ -18,60 +34,17 @@ export default function Books({ books }: BooksProps) {
       </Head>
 
       <main className="container mx-auto px-4 py-12">
-        <h1 className="font-serif text-4xl tracking-brand text-forest text-center mb-12">
-          My Books
-        </h1>
-
-        {books.length > 0 ? (
+        <h1 className="text-4xl font-extrabold text-center mb-12">My Books</h1>
+        {books.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {books.map((book) => (
               <BookCard key={book.slug} {...book} />
             ))}
           </div>
         ) : (
-          <p className="text-center text-lg text-deepCharcoal/70">No books found.</p>
+          <p className="text-center text-lg text-gray-600">No books found.</p>
         )}
       </main>
     </Layout>
   );
 }
-
-export const getStaticProps: GetStaticProps<BooksProps> = async () => {
-  const books = getAllBooks([
-    'slug',
-    'title',
-    'coverImage',
-    'excerpt',
-    'author',
-    'buyLink',
-    'genre',
-    'downloadPdf',
-    'downloadEpub',
-  ]);
-
-  const booksWithRequiredProps: BookCardProps[] = books.map((book) => {
-    const genreText =
-      Array.isArray(book.genre) && book.genre.length > 0
-        ? book.genre.join(', ')
-        : typeof book.genre === 'string'
-        ? book.genre
-        : 'Uncategorized';
-
-    return {
-      slug: book.slug || '',
-      title: book.title || 'Untitled Book',
-      coverImage: book.coverImage || '/assets/images/default-book.jpg',
-      excerpt: book.excerpt || 'No excerpt available.',
-      author: book.author || 'Abraham of London',
-      buyLink: book.buyLink || '#',
-      genre: genreText,
-      downloadPdf: book.downloadPdf ?? null,
-      downloadEpub: book.downloadEpub ?? null,
-    };
-  });
-
-  return {
-    props: { books: booksWithRequiredProps },
-    revalidate: 86400, // 24h ISR
-  };
-};
