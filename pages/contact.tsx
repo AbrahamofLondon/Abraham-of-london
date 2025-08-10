@@ -160,7 +160,7 @@ export default function ContactPage() {
             </Link>
 
             <Link
-              href="https://x.com/AbrahamofLondon48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09"
+              href="https://x.com/AbrahamAda48634?t=-gXv_lyGwxJhUmIOZ3hhaw&s=09"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-800 rounded-full hover:bg-gray-100 transition-colors group"

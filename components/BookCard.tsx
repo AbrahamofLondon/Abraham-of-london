@@ -37,7 +37,7 @@ const BookCard: React.FC<BookCardProps> = ({
             fill
             style={{ objectFit: 'cover' }}
             sizes="(max-width: 768px) 100vw, 33vw"
-            priority
+            loading="lazy" // ✅ Corrected: Added lazy loading for images below the fold
           />
         </div>
       </Link>
