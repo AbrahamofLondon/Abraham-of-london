@@ -1,235 +1,105 @@
-// pages/books/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
-import Link from 'next/link';
 import type { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
-import { parseDate } from '../../lib/dateUtils';
-import { safeString } from '../../lib/stringUtils';
 import Layout from '../../components/Layout';
 import { MDXComponents } from '../../components/MDXComponents';
+import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
 
-type BookPageMeta = Required<
-  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage'>
-> & {
+type PageMeta = {
+  slug: string;
+  title: string;
   date: string;
-  publishedAt: string;
-  description: string;
-  buyLink: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-  tags?: string[];
-  genre?: string[];
+  excerpt: string;
+  coverImage: string;
+  author: string;
+  readTime: string;
+  category: string;
 };
 
-interface BookProps {
-  book: {
-    meta: BookPageMeta;
+type Props = {
+  post: {
+    meta: PageMeta;
     content: MDXRemoteSerializeResult;
   };
-}
+};
 
-export default function Book({ book }: BookProps) {
-  const pageTitle = `${safeString(book.meta.title)} | Abraham of London Books`;
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.slug || '');
+  const raw = getPostBySlug(slug, [
+    'slug',
+    'title',
+    'date',
+    'publishedAt',
+    'excerpt',
+    'coverImage',
+    'author',
+    'readTime',
+    'category',
+    'content',
+  ]) as Partial<PostMeta> & { content?: string };
+
+  if (!raw.slug || raw.title === 'Post Not Found') return { notFound: true };
+
+  const meta: PageMeta = {
+    slug: raw.slug,
+    title: raw.title || 'Untitled',
+    date: (raw.date || raw.publishedAt || '') as string,
+    excerpt: raw.excerpt || '',
+    coverImage:
+      typeof raw.coverImage === 'string' && raw.coverImage.trim()
+        ? raw.coverImage
+        : '/images/blog/default-blog-cover.jpg',
+    author: raw.author || 'Abraham of London',
+    readTime: raw.readTime || '5 min read',
+    category: raw.category || 'General',
+  };
+
+  const mdx = await serialize(raw.content ?? '', { parseFrontmatter: false, scope: meta });
+
+  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = getAllPosts(['slug']);
+  return {
+    paths: posts.map((p) => ({ params: { slug: String(p.slug) } })),
+    fallback: 'blocking',
+  };
+};
+
+export default function BlogPost({ post }: Props) {
   const siteUrl = 'https://abrahamoflondon.org';
-  const description =
-    safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
-  const coverImage = book.meta.coverImage || '/assets/images/default-book-cover.jpg';
-  const author = safeString(book.meta.author || 'Abraham of London');
-
-  // ✅ Normalize arrays for safe rendering
-  const genres: string[] = Array.isArray(book.meta.genre) ? book.meta.genre : [];
-  const tags: string[] = Array.isArray(book.meta.tags) ? book.meta.tags : [];
-
   return (
     <Layout>
       <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={`${siteUrl}${coverImage}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={`${siteUrl}${coverImage}`} />
+        <title>{post.meta.title} | Abraham of London</title>
+        <meta name="description" content={post.meta.excerpt || 'Article by Abraham of London'} />
+        <meta property="og:image" content={`${siteUrl}${post.meta.coverImage}`} />
       </Head>
 
       <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
-        {coverImage && (
+        {post.meta.coverImage && (
           <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
             <Image
-              src={coverImage}
-              alt={`Cover image for "${book.meta.title}"`}
+              src={post.meta.coverImage}
+              alt={post.meta.title}
               fill
-              sizes="(max-width: 768px) 100vw, 768px"
               style={{ objectFit: 'cover' }}
               priority
             />
           </div>
         )}
 
-        <header className="text-center mb-8">
-          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-4">
-            {safeString(book.meta.title)}
-          </h1>
-          <div className="text-lg text-deepCharcoal mb-2">
-            By <span className="font-semibold">{author}</span>
-          </div>
-          {book.meta.date && (
-            <div className="text-sm text-deepCharcoal/70">
-              Published:{' '}
-              {(() => {
-                try {
-                  return parseDate(book.meta.date).toLocaleDateString();
-                } catch {
-                  return book.meta.date;
-                }
-              })()}
-            </div>
-          )}
-        </header>
+        <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">
+          {post.meta.title}
+        </h1>
 
-        {genres.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2 justify-center">
-            {genres.map((g) => (
-              <span
-                key={g}
-                className="inline-block text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none text-deepCharcoal mb-10">
-          <MDXRemote {...book.content} components={MDXComponents as any} />
-        </div>
-
-        {tags.length > 0 && (
-          <ul className="flex flex-wrap gap-2 justify-center mt-2 mb-10">
-            {tags.map((t) => (
-              <li
-                key={t}
-                className="text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
-          {book.meta.buyLink && book.meta.buyLink !== '#' && (
-            <a
-              href={book.meta.buyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-forest text-cream px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-softGold hover:text-forest"
-            >
-              Buy Now
-            </a>
-          )}
-          {book.meta.downloadPdf && (
-            <a
-              href={book.meta.downloadPdf}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
-              Download PDF
-            </a>
-          )}
-          {book.meta.downloadEpub && (
-            <a
-              href={book.meta.downloadEpub}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
-              Download EPUB
-            </a>
-          )}
-        </div>
-
-        <div className="text-center">
-          <Link href="/books" className="text-forest hover:text-softGold font-medium">
-            &larr; Back to Books
-          </Link>
+        <div className="prose prose-lg max-w-none text-deepCharcoal">
+          <MDXRemote {...post.content} components={MDXComponents} />
         </div>
       </article>
     </Layout>
   );
 }
-
-export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
-  const slug = String(params?.slug || '');
-
-  const raw = getBookBySlug(slug, [
-    'slug',
-    'title',
-    'author',
-    'excerpt',
-    'coverImage',
-    'description',
-    'date',
-    'publishedAt',
-    'buyLink',
-    'downloadPdf',
-    'downloadEpub',
-    'tags',
-    'genre',
-    'content',
-  ]) as Partial<BookMeta> & { content?: string };
-
-  if (!raw.slug || raw.title === 'Book Not Found') {
-    return { notFound: true };
-  }
-
-  const meta: BookPageMeta = {
-    slug: raw.slug,
-    title: raw.title || 'Untitled Book',
-    author: raw.author || 'Abraham of London',
-    excerpt: raw.excerpt || '',
-    coverImage: raw.coverImage || '/assets/images/default-book-cover.jpg',
-    date: raw.date || raw.publishedAt || '',
-    publishedAt: raw.publishedAt || raw.date || '',
-    description: raw.description || raw.excerpt || '',
-    buyLink: raw.buyLink || '#',
-    downloadPdf: raw.downloadPdf ?? null,
-    downloadEpub: raw.downloadEpub ?? null,
-    tags: Array.isArray(raw.tags) ? raw.tags : raw.tags ? [raw.tags] : [],
-    genre: Array.isArray(raw.genre) ? raw.genre : raw.genre ? [raw.genre] : [],
-  };
-
-  const mdxSource = await serialize(raw.content ?? '', {
-    parseFrontmatter: false,
-    scope: meta,
-  });
-
-  return {
-    props: {
-      book: { meta, content: mdxSource },
-    },
-    revalidate: 60,
-  };
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const books = getAllBooks(['slug']);
-  const paths =
-    books
-      .map((b) => (b.slug ? { params: { slug: String(b.slug) } } : null))
-      .filter(Boolean) as { params: { slug: string } }[];
-
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
