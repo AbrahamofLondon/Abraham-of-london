@@ -1,35 +1,63 @@
+// components/MDXComponents.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { MDXComponents as MDXComponentsType } from 'mdx/types';
 
-type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & { href?: string };
-type ImgProps = React.ImgHTMLAttributes<HTMLImageElement> & { src?: string; alt?: string };
+// ——— MDX <a> ———
+type AnchorProps = {
+  href?: string;
+  children?: React.ReactNode;
+  className?: string;
+  title?: string;
+};
 
-const A: React.FC<AnchorProps> = ({ href = '', children, ...rest }) => {
-  const classes = 'text-blue-600 underline hover:text-blue-800';
+const A: React.FC<AnchorProps> = ({ href = '', children, className, title }) => {
+  const base = 'text-forest underline underline-offset-2 hover:text-softGold transition-colors';
+  const cls = className ? `${base} ${className}` : base;
+
   if (href.startsWith('/')) {
     return (
-      <Link href={href} className={classes} {...rest}>
+      <Link href={href} className={cls} title={title}>
         {children}
       </Link>
     );
   }
   return (
-    <a href={href} className={classes} {...rest}>
+    <a href={href} className={cls} rel="noopener noreferrer" target="_blank" title={title}>
       {children}
     </a>
   );
 };
 
-const Img: React.FC<ImgProps> = ({ src, alt = '' }) => (
-  <div className="relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
-    <Image src={src || '/assets/images/default-book.jpg'} alt={alt} fill style={{ objectFit: 'cover' }} />
-  </div>
-);
+// ——— MDX <img> via next/image (safe subset of props) ———
+type ImgProps = {
+  src?: string;
+  alt?: string;
+  className?: string;
+};
 
-export const MDXComponents: Record<string, React.ComponentType<any>> = {
-  a: A,
-  img: Img,
+const Img: React.FC<ImgProps> = ({ src, alt = '', className }) => {
+  return (
+    <span className="block relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
+      <Image
+        src={src || '/assets/images/default-book.jpg'}
+        alt={alt}
+        fill
+        sizes="100vw"
+        priority={false}
+        className={className}
+        style={{ objectFit: 'cover' }}
+      />
+    </span>
+  );
+};
+
+// Type the registry with MDX’s official type.
+// Cast entries to ComponentType to satisfy the heterogeneous prop shapes.
+export const MDXComponents: MDXComponentsType = {
+  a: A as unknown as React.ComponentType,
+  img: Img as unknown as React.ComponentType,
 };
 
 export default MDXComponents;
