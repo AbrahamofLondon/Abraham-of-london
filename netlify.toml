@@ -14,5 +14,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    next_config_path = "next.config.mjs"
