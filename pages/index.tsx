@@ -1,5 +1,5 @@
 // pages/index.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
+import SocialLinks from '../components/SocialLinks'; // New import
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
@@ -78,6 +79,39 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ posts, books }: HomeProps) {
+  // Generate JSON-LD for books and posts
+  const bookJsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: books.map((book, index) => ({
+      '@type': 'Book',
+      position: index + 1,
+      name: book.title,
+      url: `/books/${book.slug}`,
+      image: book.coverImage,
+      author: {
+        '@type': 'Person',
+        name: book.author,
+      },
+    })),
+  }), [books]);
+
+  const postJsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'BlogPosting',
+      position: index + 1,
+      headline: post.title,
+      url: `/blog/${post.slug}`,
+      image: post.coverImage,
+      author: {
+        '@type': 'Person',
+        name: post.author,
+      },
+    })),
+  }), [posts]);
+
   return (
     <Layout>
       <Head>
@@ -91,6 +125,18 @@ export default function Home({ posts, books }: HomeProps) {
         <meta property="og:image" content="/assets/social/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="/assets/social/twitter-image.webp" />
+        {books.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }}
+          />
+        )}
+        {posts.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }}
+          />
+        )}
       </Head>
 
       {/* Hero */}
@@ -121,26 +167,7 @@ export default function Home({ posts, books }: HomeProps) {
               Abraham of London is an author, strategist, and fatherhood advocate passionate about
               family, leadership, and legacy.
             </p>
-            <div className="flex gap-4">
-              <Link href="mailto:info@abrahamoflondon.org" aria-label="Email">
-                <Image src="/assets/social/email.svg" alt="Email" width={24} height={24} loading="lazy" />
-              </Link>
-              <Link href="tel:+442086225909" aria-label="Phone">
-                <Image src="/assets/social/phone.svg" alt="Phone" width={24} height={24} loading="lazy" />
-              </Link>
-              <Link href="https://www.linkedin.com/in/abraham-adaramola-06630321/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <Image src="/assets/social/linkedin.svg" alt="LinkedIn" width={24} height={24} loading="lazy" />
-              </Link>
-              <Link href="https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-                <Image src="/assets/social/twitter.svg" alt="X (Twitter)" width={24} height={24} loading="lazy" />
-              </Link>
-              <Link href="https://www.facebook.com/share/1MRrKpUzMG/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <Image src="/assets/social/facebook.svg" alt="Facebook" width={24} height={24} loading="lazy" />
-              </Link>
-              <Link href="https://wa.me/+442086225909" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-                <Image src="/assets/social/whatsapp.svg" alt="WhatsApp" width={24} height={24} loading="lazy" />
-              </Link>
-            </div>
+            <SocialLinks /> {/* Replaced with the new component */}
           </div>
 
           <div className="relative w-64 h-64 mx-auto">
