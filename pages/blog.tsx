@@ -1,3 +1,4 @@
+// pages/blog.tsx
 import React from 'react';
 import Head from 'next/head';
 import type { GetStaticProps } from 'next';
@@ -57,14 +58,14 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
             All Articles
           </h1>
 
-          {posts.length ? (
+          {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
                 <BlogPostCard
-                  key={post.slug}
-                  slug={post.slug}
+                  key={post.slug || ''}
+                  slug={post.slug || ''}
                   title={post.title || 'Untitled'}
-                  date={(post.date || '') as string}
+                  date={post.date || ''}
                   excerpt={post.excerpt || 'Read more for full details.'}
                   coverImage={
                     typeof post.coverImage === 'string' && post.coverImage.trim()
