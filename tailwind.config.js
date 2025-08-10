@@ -1,5 +1,8 @@
+// tailwind.config.js  (ESM)
+import typography from '@tailwindcss/typography';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -17,7 +20,7 @@ module.exports = {
         '2xl': '4rem',
       },
       screens: {
-        '2xl': '1400px', // max width per your spec
+        '2xl': '1400px',
       },
     },
     extend: {
@@ -29,8 +32,6 @@ module.exports = {
         softGold: '#D4AF37',      // accents/hover
         midGreen: '#40916C',      // secondary UI
         lightGrey: '#DDD6C7',     // borders/dividers
-
-        // Optional semantic aliases
         brand: {
           primary: '#1B4332',
           text: '#2D3436',
@@ -52,14 +53,8 @@ module.exports = {
         header: '0 2px 8px rgba(0,0,0,0.05)',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: 0 },
-          '100%': { opacity: 1 },
-        },
-        fadeUp: {
-          '0%': { opacity: 0, transform: 'translateY(12px)' },
-          '100%': { opacity: 1, transform: 'translateY(0)' },
-        },
+        fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+        fadeUp: { '0%': { opacity: 0, transform: 'translateY(12px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
       },
       animation: {
         fadeIn: 'fadeIn .6s ease both',
@@ -86,7 +81,5 @@ module.exports = {
       }),
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [typography],
 };
