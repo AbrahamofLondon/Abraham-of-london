@@ -7,8 +7,8 @@ import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
-import { getAllPosts } from '../lib/posts';
-import { getAllBooks } from '../lib/books';
+import { getAllPosts, PostMeta } from '../lib/posts';
+import { getAllBooks, BookMeta } from '../lib/books';
 
 interface Post {
   slug: string;
@@ -28,7 +28,7 @@ interface Book {
   excerpt: string;
   coverImage: string;
   buyLink: string;
-  genre: string; // normalized to a single string
+  genre: string; // normalized
 }
 
 interface HomeProps {
@@ -58,8 +58,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'genre',
   ]);
 
-  // Retain original image paths; only use default if missing/empty
-  const processedPosts: Post[] = postsData.map((post: Partial<Post>) => ({
+  const processedPosts: Post[] = postsData.map((post: Partial<PostMeta>) => ({
     slug: post.slug || '',
     title: post.title || 'Untitled Post',
     date: post.date || '',
@@ -73,8 +72,13 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     category: post.category || 'General',
   }));
 
-  const processedBooks: Book[] = booksData.map(
-    (book: Partial<Book> & { genre?: string | string[] }) => ({
+  const processedBooks: Book[] = booksData.map((book: Partial<BookMeta>) => {
+    const normalizedGenre =
+      Array.isArray(book.genre)
+        ? book.genre.filter(Boolean).join(', ')
+        : (book.genre || 'Uncategorized');
+
+    return {
       slug: book.slug || '',
       title: book.title || 'Untitled Book',
       author: book.author || 'Abraham of London',
@@ -84,12 +88,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
           ? book.coverImage
           : '/assets/images/default-book-cover.jpg',
       buyLink: book.buyLink || '#',
-      // Normalize string|string[] -> string (without mutating source)
-      genre: Array.isArray(book.genre)
-        ? book.genre.filter(Boolean).join(', ')
-        : (book.genre || 'Uncategorized'),
-    })
-  );
+      genre: normalizedGenre,
+    };
+  });
 
   return {
     props: {
