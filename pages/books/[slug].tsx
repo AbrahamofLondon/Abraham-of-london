@@ -30,7 +30,7 @@ export default function Book({ book }: BookProps) {
         <meta property="og:type" content="book" />
         <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
         {book.meta.author && <meta property="book:author" content={book.meta.author} />}
-        {book.meta.genre?.map((g, index) => (
+        {genres.map((g, index) => (
           <meta key={index} property="book:tag" content={g} />
         ))}
         <meta name="twitter:card" content="summary_large_image" />
@@ -62,9 +62,9 @@ export default function Book({ book }: BookProps) {
               By <span className="font-semibold">{book.meta.author}</span>
             </div>
           )}
-          {book.meta.genre?.length > 0 && (
+          {genres.length > 0 && (
             <div className="mb-4">
-              {book.meta.genre.map((genre) => (
+              {genres.map((genre) => (
                 <span
                   key={genre}
                   className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2"
@@ -135,3 +135,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: 'blocking',
   };
 };
+
