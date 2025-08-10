@@ -4,19 +4,23 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
+
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
 import SocialLinks from '../components/SocialLinks';
+import FeaturedBook from '../components/FeaturedBook';
+import NewsletterForm from '../components/NewsletterForm';
+
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
-type Post = Required<
-  Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
->;
-type Book = Required<
-  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
-> & { genre: string };
+// Narrow, required shapes we actually render on the homepage
+type Post =
+  Required<Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>>;
+
+type Book =
+  Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & { genre: string };
 
 interface HomeProps {
   posts: Post[];
@@ -24,6 +28,7 @@ interface HomeProps {
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+  // Pull minimal fields needed for the homepage cards
   const postsData = getAllPosts([
     'slug',
     'title',
@@ -46,12 +51,12 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'genre',
   ]);
 
+  // POSTS — retain image paths if provided, otherwise fall back to your blog default
   const posts: Post[] = postsData.map((p) => ({
     slug: p.slug || '',
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || '') as string,
     excerpt: p.excerpt || 'Read more for full details.',
-    // Your blog images live in /public/images/blog
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
@@ -61,19 +66,18 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     category: p.category || 'General',
   }));
 
+  // BOOKS — keep original paths; default to your /assets image if missing
   const books: Book[] = booksData.map((b) => ({
     slug: b.slug || '',
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
-    // Your book art can be in /images/books or use explicit paths from MDX
     coverImage:
       typeof b.coverImage === 'string' && b.coverImage.trim()
         ? b.coverImage
         : '/assets/images/default-book.jpg',
-    // If empty, we’ll link to the book page (free “buy”)
-    buyLink: b.buyLink || `/books/${b.slug || ''}`,
-    // Normalize string|string[] to a readable string
+    buyLink: b.buyLink || `/books/${b.slug || ''}`, // free “buy”: route to the book page when missing
+    // Normalize string|string[] to a presentable string
     genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : (b.genre || 'Uncategorized'),
   }));
 
@@ -87,41 +91,38 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ posts, books }: HomeProps) {
-  const siteUrl = 'https://abraham-of-london.netlify.app'; // change to your custom domain when ready
-
-  // JSON-LD for Books
-  const bookJsonLd = useMemo(
-    () => ({
+  // JSON-LD for Books and Posts to help SEO
+  const bookJsonLd = useMemo(() => {
+    if (books.length === 0) return null;
+    return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       itemListElement: books.map((book, index) => ({
         '@type': 'Book',
         position: index + 1,
         name: book.title,
-        url: `${siteUrl}/books/${book.slug}`,
-        image: `${siteUrl}${book.coverImage.startsWith('/') ? '' : '/'}${book.coverImage}`,
+        url: `/books/${book.slug}`,
+        image: book.coverImage,
         author: { '@type': 'Person', name: book.author },
       })),
-    }),
-    [books, siteUrl]
-  );
+    };
+  }, [books]);
 
-  // JSON-LD for Posts
-  const postJsonLd = useMemo(
-    () => ({
+  const postJsonLd = useMemo(() => {
+    if (posts.length === 0) return null;
+    return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       itemListElement: posts.map((post, index) => ({
         '@type': 'BlogPosting',
         position: index + 1,
         headline: post.title,
-        url: `${siteUrl}/blog/${post.slug}`,
-        image: `${siteUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`,
+        url: `/blog/${post.slug}`,
+        image: post.coverImage,
         author: { '@type': 'Person', name: post.author },
       })),
-    }),
-    [posts, siteUrl]
-  );
+    };
+  }, [posts]);
 
   return (
     <Layout>
@@ -139,15 +140,15 @@ export default function Home({ posts, books }: HomeProps) {
         <meta property="og:image" content="/assets/social/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="/assets/social/twitter-image.webp" />
-        {books.length > 0 && (
+        {bookJsonLd && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
-        {posts.length > 0 && (
+        {postJsonLd && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }} />
         )}
       </Head>
 
-      {/* Hero */}
+      {/* HERO */}
       <header className="bg-forest text-cream">
         <div className="relative w-full h-64 sm:h-96">
           <Image
@@ -167,7 +168,7 @@ export default function Home({ posts, books }: HomeProps) {
       </header>
 
       <main className="container px-4 py-12">
-        {/* About */}
+        {/* ABOUT + SOCIAL */}
         <section className="grid md:grid-cols-2 gap-8 items-center mb-16">
           <div>
             <h2 className="font-serif text-2xl tracking-brand text-forest mb-4">About Abraham</h2>
@@ -185,20 +186,31 @@ export default function Home({ posts, books }: HomeProps) {
               fill
               className="rounded-full shadow-card object-cover"
               sizes="256px"
+              priority={false}
             />
           </div>
         </section>
 
         <hr className="my-12 border-lightGrey" />
 
-        {/* Books */}
+        {/* FEATURED BOOK (uses the first book if present) */}
+        {books.length > 0 && (
+          <section className="mb-16">
+            <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Featured Book</h2>
+            <FeaturedBook
+              slug={books[0].slug}
+              title={books[0].title}
+              author={books[0].author}
+              excerpt={books[0].excerpt}
+              coverImage={books[0].coverImage}
+              ctaHref={`/books/${books[0].slug}`}
+            />
+          </section>
+        )}
+
+        {/* BOOKS */}
         <section className="mb-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-serif text-2xl tracking-brand text-forest">Latest Books</h2>
-            <Link href="/books" className="text-forest hover:text-softGold underline underline-offset-4">
-              Browse all
-            </Link>
-          </div>
+          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Books</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {books.map((book) => (
               <BookCard key={book.slug} {...book} />
@@ -208,19 +220,21 @@ export default function Home({ posts, books }: HomeProps) {
 
         <hr className="my-12 border-lightGrey" />
 
-        {/* Posts */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-serif text-2xl tracking-brand text-forest">Latest Posts</h2>
-            <Link href="/blog" className="text-forest hover:text-softGold underline underline-offset-4">
-              Read all
-            </Link>
-          </div>
+        {/* POSTS */}
+        <section className="mb-16">
+          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Posts</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <BlogPostCard key={post.slug} {...post} />
             ))}
           </div>
+        </section>
+
+        <hr className="my-12 border-lightGrey" />
+
+        {/* NEWSLETTER (Netlify Forms) */}
+        <section className="mb-8">
+          <NewsletterForm />
         </section>
       </main>
     </Layout>
