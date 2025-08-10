@@ -1,29 +1,23 @@
-// pages/404.tsx
-import Link from 'next/link';
-import Image from 'next/image';
 import Head from 'next/head';
+import Link from 'next/link';
+import Layout from '../components/Layout';
 
-export default function Custom404() {
+export default function NotFound() {
   return (
-    <>
+    <Layout>
       <Head>
-        <title>404 - Page Not Found</title>
+        <title>Page Not Found | Abraham of London</title>
+        <meta name="robots" content="noindex" />
       </Head>
-
-      <main className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-        <Image
-          src="/assets/images/default-book.jpg"
-          alt="404 Not Found"
-          width={400}
-          height={300}
-          className="mb-6"
-        />
-        <h1 className="text-4xl font-bold mb-2">Page Not Found</h1>
-        <p className="text-lg mb-6">Sorry, the page you’re looking for doesn’t exist.</p>
-        <Link href="/">
-          <a className="text-blue-600 hover:underline text-lg">← Go back home</a>
+      <main className="container px-4 py-20 text-center">
+        <h1 className="font-serif text-4xl text-forest mb-3">Page Not Found</h1>
+        <p className="text-deepCharcoal/80 mb-6">
+          Sorry, the page you’re looking for doesn’t exist.
+        </p>
+        <Link href="/" className="text-forest underline underline-offset-4 hover:text-softGold">
+          ← Go back home
         </Link>
       </main>
-    </>
+    </Layout>
   );
 }
