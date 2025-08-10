@@ -1,13 +1,23 @@
 // pages/blog.tsx
-import React from 'react';
 import Head from 'next/head';
 import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import { getAllPosts, PostMeta } from '../lib/posts';
 
+type BlogCardData = {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  coverImage: string;
+  author: string;
+  readTime: string;
+  category: string;
+};
+
 type BlogIndexProps = {
-  posts: PostMeta[];
+  posts: BlogCardData[];
 };
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
@@ -15,7 +25,6 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     'slug',
     'title',
     'date',
-    'publishedAt',
     'excerpt',
     'coverImage',
     'author',
@@ -24,16 +33,19 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     'tags',
   ]);
 
-  const posts: PostMeta[] = postsData.map((p) => ({
+  const posts: BlogCardData[] = postsData.map((p: Partial<PostMeta>) => ({
     slug: p.slug || '',
     title: p.title || 'Untitled',
-    date: p.date || p.publishedAt || '',
+    // Only use `date` (your PostMeta does not include publishedAt)
+    date: p.date || '',
     excerpt: p.excerpt || 'Read more for full details.',
-    coverImage: p.coverImage || '/assets/images/default-blog-cover.jpg',
+    coverImage:
+      typeof p.coverImage === 'string' && p.coverImage.trim().length > 0
+        ? p.coverImage
+        : '/assets/images/default-blog-cover.jpg',
     author: p.author || 'Abraham of London',
     readTime: p.readTime || '5 min read',
     category: p.category || 'General',
-    tags: p.tags || [],
   }));
 
   return { props: { posts }, revalidate: 60 };
@@ -56,7 +68,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
         <meta property="og:image" content="/assets/social/og-image.jpg" />
       </Head>
 
-      <section className="bg-warmWhite py-12">
+      <section className="bg-warm-white py-12">
         <div className="container px-4">
           <h1 className="font-serif text-3xl tracking-brand text-forest mb-8 text-center">
             All Articles
@@ -68,13 +80,13 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                 <BlogPostCard
                   key={post.slug}
                   slug={post.slug}
-                  title={post.title || 'Untitled'}
-                  date={post.date || ''}
-                  excerpt={post.excerpt || 'Read more for full details.'}
-                  coverImage={post.coverImage || '/assets/images/default-blog-cover.jpg'}
-                  author={post.author || 'Abraham of London'}
-                  readTime={post.readTime || '5 min read'}
-                  category={post.category || 'General'}
+                  title={post.title}
+                  date={post.date}
+                  excerpt={post.excerpt}
+                  coverImage={post.coverImage}
+                  author={post.author}
+                  readTime={post.readTime}
+                  category={post.category}
                 />
               ))}
             </div>
