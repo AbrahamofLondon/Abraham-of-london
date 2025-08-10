@@ -1,4 +1,3 @@
-// pages/index.tsx
 import React, { useMemo } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -9,18 +8,24 @@ import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
 import SocialLinks from '../components/SocialLinks';
-import FeaturedBook from '../components/FeaturedBook';
-import NewsletterForm from '../components/NewsletterForm';
 
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
-// Narrow, required shapes we actually render on the homepage
-type Post =
-  Required<Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>>;
+type Post = Required<
+  Pick<
+    PostMeta,
+    'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'
+  >
+>;
 
-type Book =
-  Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & { genre: string };
+type Book = Required<
+  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
+> & {
+  genre: string;
+  downloadPdf?: string | null;
+  downloadEpub?: string | null;
+};
 
 interface HomeProps {
   posts: Post[];
@@ -28,7 +33,7 @@ interface HomeProps {
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  // Pull minimal fields needed for the homepage cards
+  // POSTS
   const postsData = getAllPosts([
     'slug',
     'title',
@@ -41,22 +46,12 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     'category',
   ]);
 
-  const booksData = getAllBooks([
-    'slug',
-    'title',
-    'author',
-    'excerpt',
-    'coverImage',
-    'buyLink',
-    'genre',
-  ]);
-
-  // POSTS — retain image paths if provided, otherwise fall back to your blog default
   const posts: Post[] = postsData.map((p) => ({
     slug: p.slug || '',
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || '') as string,
     excerpt: p.excerpt || 'Read more for full details.',
+    // Your default blog cover lives here based on your screenshots
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
@@ -66,35 +61,53 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     category: p.category || 'General',
   }));
 
-  // BOOKS — keep original paths; default to your /assets image if missing
-  const books: Book[] = booksData.map((b) => ({
-    slug: b.slug || '',
-    title: b.title || 'Untitled Book',
-    author: b.author || 'Abraham of London',
-    excerpt: b.excerpt || 'Read more for full details.',
-    coverImage:
+  // BOOKS
+  const booksData = getAllBooks([
+    'slug',
+    'title',
+    'author',
+    'excerpt',
+    'coverImage',
+    'buyLink',
+    'genre',
+    'downloadPdf',
+    'downloadEpub',
+  ]);
+
+  const books: Book[] = booksData.map((b) => {
+    // Keep your existing covers. If missing, prefer your real asset names first, else fallback.
+    const cover =
       typeof b.coverImage === 'string' && b.coverImage.trim()
         ? b.coverImage
-        : '/assets/images/default-book.jpg',
-    buyLink: b.buyLink || `/books/${b.slug || ''}`, // free “buy”: route to the book page when missing
-    // Normalize string|string[] to a presentable string
-    genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : (b.genre || 'Uncategorized'),
-  }));
+        : // If you add more books later, you can add slug-specific fallbacks here:
+          b.slug === 'fathering-without-fear'
+          ? '/assets/images/fathering-without-fear.jpg'
+          : '/assets/images/default-book.jpg';
+
+    return {
+      slug: b.slug || '',
+      title: b.title || 'Untitled Book',
+      author: b.author || 'Abraham of London',
+      excerpt: b.excerpt || 'Read more for full details.',
+      coverImage: cover,
+      // “Buy” goes to the book’s page so users can read/download (free)
+      buyLink: b.buyLink || `/books/${b.slug || ''}`,
+      genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : (b.genre || 'Uncategorized'),
+      downloadPdf: b.downloadPdf ?? null,   // e.g. /downloads/fathering-without-fear.pdf
+      downloadEpub: b.downloadEpub ?? null, // e.g. /downloads/fathering-without-fear.epub
+    };
+  });
 
   return {
-    props: {
-      posts: posts.slice(0, 3),
-      books: books.slice(0, 3),
-    },
+    props: { posts: posts.slice(0, 3), books: books.slice(0, 3) },
     revalidate: 60,
   };
 };
 
 export default function Home({ posts, books }: HomeProps) {
-  // JSON-LD for Books and Posts to help SEO
-  const bookJsonLd = useMemo(() => {
-    if (books.length === 0) return null;
-    return {
+  // JSON-LD
+  const bookJsonLd = useMemo(
+    () => ({
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       itemListElement: books.map((book, index) => ({
@@ -105,12 +118,12 @@ export default function Home({ posts, books }: HomeProps) {
         image: book.coverImage,
         author: { '@type': 'Person', name: book.author },
       })),
-    };
-  }, [books]);
+    }),
+    [books]
+  );
 
-  const postJsonLd = useMemo(() => {
-    if (posts.length === 0) return null;
-    return {
+  const postJsonLd = useMemo(
+    () => ({
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       itemListElement: posts.map((post, index) => ({
@@ -121,8 +134,11 @@ export default function Home({ posts, books }: HomeProps) {
         image: post.coverImage,
         author: { '@type': 'Person', name: post.author },
       })),
-    };
-  }, [posts]);
+    }),
+    [posts]
+  );
+
+  const featured = books[0];
 
   return (
     <Layout>
@@ -137,13 +153,15 @@ export default function Home({ posts, books }: HomeProps) {
           property="og:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        <meta property="og:image" content="/assets/social/og-image.jpg" />
+        {/* This file exists per your folder: public/assets/images/social/og-image.jpg */}
+        <meta property="og:image" content="/assets/images/social/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/assets/social/twitter-image.webp" />
-        {bookJsonLd && (
+        {/* Keep this too */}
+        <meta name="twitter:image" content="/assets/images/social/twitter-image.webp" />
+        {books.length > 0 && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
-        {postJsonLd && (
+        {posts.length > 0 && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }} />
         )}
       </Head>
@@ -186,27 +204,65 @@ export default function Home({ posts, books }: HomeProps) {
               fill
               className="rounded-full shadow-card object-cover"
               sizes="256px"
-              priority={false}
             />
           </div>
         </section>
 
-        <hr className="my-12 border-lightGrey" />
+        {/* FEATURED BOOK */}
+        {featured && (
+          <>
+            <hr className="my-12 border-lightGrey" />
+            <section className="mb-16">
+              <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Featured Book</h2>
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <Link href={`/books/${featured.slug}`} className="block relative w-full h-80 rounded-2xl overflow-hidden shadow-card hover:shadow-cardHover transition">
+                  <Image
+                    src={featured.coverImage}
+                    alt={featured.title}
+                    fill
+                    sizes="(max-width:768px) 100vw, 50vw"
+                    className="object-cover"
+                    priority
+                  />
+                </Link>
 
-        {/* FEATURED BOOK (uses the first book if present) */}
-        {books.length > 0 && (
-          <section className="mb-16">
-            <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Featured Book</h2>
-            <FeaturedBook
-              slug={books[0].slug}
-              title={books[0].title}
-              author={books[0].author}
-              excerpt={books[0].excerpt}
-              coverImage={books[0].coverImage}
-              ctaHref={`/books/${books[0].slug}`}
-            />
-          </section>
+                <div>
+                  <h3 className="text-3xl font-serif text-forest mb-2">{featured.title}</h3>
+                  <p className="text-deepCharcoal mb-4">By {featured.author}</p>
+                  <p className="text-deepCharcoal/90 mb-6">{featured.excerpt}</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href={`/books/${featured.slug}`}
+                      className="bg-forest text-cream px-5 py-2 rounded-[6px] tracking-brand hover:bg-softGold hover:text-forest transition"
+                    >
+                      Read / Buy (free)
+                    </Link>
+                    {featured.downloadPdf && (
+                      <a
+                        href={featured.downloadPdf}
+                        className="border-2 border-forest text-forest px-5 py-2 rounded-[6px] tracking-brand hover:bg-forest hover:text-cream transition"
+                        download
+                      >
+                        Download PDF
+                      </a>
+                    )}
+                    {featured.downloadEpub && (
+                      <a
+                        href={featured.downloadEpub}
+                        className="border-2 border-forest text-forest px-5 py-2 rounded-[6px] tracking-brand hover:bg-forest hover:text-cream transition"
+                        download
+                      >
+                        Download EPUB
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
         )}
+
+        <hr className="my-12 border-lightGrey" />
 
         {/* BOOKS */}
         <section className="mb-16">
@@ -230,11 +286,33 @@ export default function Home({ posts, books }: HomeProps) {
           </div>
         </section>
 
-        <hr className="my-12 border-lightGrey" />
-
         {/* NEWSLETTER (Netlify Forms) */}
-        <section className="mb-8">
-          <NewsletterForm />
+        <section className="mb-20">
+          <div className="rounded-xl border border-lightGrey p-6 md:p-8 bg-warmWhite shadow-card">
+            <h3 className="font-serif text-xl md:text-2xl text-forest mb-2">Join the newsletter</h3>
+            <p className="text-deepCharcoal/80 mb-4">Essays, book drops, and field notes—no fluff.</p>
+            <form
+              name="newsletter"
+              method="POST"
+              data-netlify="true"
+              className="flex flex-col sm:flex-row gap-3"
+            >
+              <input type="hidden" name="form-name" value="newsletter" />
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="you@example.com"
+                className="flex-1 rounded-md border border-lightGrey px-4 py-3 outline-none focus:ring-2 focus:ring-midGreen"
+              />
+              <button
+                type="submit"
+                className="bg-forest text-cream px-5 py-3 rounded-md tracking-brand hover:bg-softGold hover:text-forest transition"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
         </section>
       </main>
     </Layout>
