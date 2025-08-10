@@ -1,44 +1,77 @@
-// components/FeaturedBook.tsx
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type Props = {
-  slug: string;
   title: string;
   author: string;
-  excerpt: string;
+  slug: string;
   coverImage: string;
-  ctaHref: string; // usually /books/[slug]
+  excerpt?: string;
+  pdf?: string | null;
+  epub?: string | null;
 };
 
-const FeaturedBook: React.FC<Props> = ({ slug, title, author, excerpt, coverImage, ctaHref }) => {
+export default function FeaturedBook({
+  title,
+  author,
+  slug,
+  coverImage,
+  excerpt,
+  pdf,
+  epub,
+}: Props) {
   return (
-    <Link
-      href={ctaHref}
-      className="group block rounded-2xl overflow-hidden bg-deepCharcoal text-cream shadow-card hover:shadow-cardHover transition-shadow"
+    <section
+      aria-labelledby="featured-book"
+      className="rounded-2xl bg-warmWhite border border-lightGrey/70 shadow-card overflow-hidden mb-14"
     >
-      <div className="relative h-64 sm:h-80">
-        <Image
-          src={coverImage || '/assets/images/default-book.jpg'}
-          alt={title}
-          fill
-          sizes="100vw"
-          className="object-cover opacity-80 group-hover:opacity-90 transition-opacity"
-          priority
-        />
-      </div>
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-softGold mb-1 group-hover:translate-x-0.5 transition-transform">
-          {title}
-        </h3>
-        <p className="text-sm opacity-90 mb-2">{author}</p>
-        <p className="text-sm opacity-80">{excerpt}</p>
-        <span className="inline-block mt-4 bg-forest text-cream px-4 py-2 rounded-md">
-          Explore
-        </span>
-      </div>
-    </Link>
-  );
-};
+      <div className="grid md:grid-cols-2">
+        <div className="relative h-72 md:h-full">
+          <Image
+            src={coverImage}
+            alt={`${title} cover`}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
+        <div className="p-6 md:p-8 flex flex-col justify-center">
+          <h2 id="featured-book" className="font-serif text-3xl text-forest mb-2">
+            Featured Book
+          </h2>
+          <h3 className="text-2xl font-semibold mb-1">{title}</h3>
+          <p className="text-sm text-deepCharcoal/80 mb-4">By {author}</p>
+          {excerpt && <p className="text-deepCharcoal mb-6">{excerpt}</p>}
 
-export default FeaturedBook;
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/books/${slug}`}
+              className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-softGold hover:text-forest transition"
+            >
+              Learn more
+            </Link>
+            {pdf && (
+              <a
+                href={pdf}
+                className="border-2 border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition"
+                download
+              >
+                Download PDF
+              </a>
+            )}
+            {epub && (
+              <a
+                href={epub}
+                className="border-2 border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition"
+                download
+              >
+                Download EPUB
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -1,4 +1,5 @@
 // pages/contact.tsx
+
 import Head from 'next/head';
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
@@ -14,21 +15,23 @@ export default function Contact() {
 
     try {
       const formData = new FormData(event.currentTarget);
-      const res = await fetch('/', {
+      const data = new URLSearchParams();
+      
+      // Iterate over formData entries and append them to URLSearchParams
+      for (const [key, value] of Array.from(formData.entries())) {
+        data.append(key, value.toString());
+      }
+      
+      await fetch('/forms.html', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams(formData as any).toString(),
+        body: data.toString(),
       });
-
-      if (res.ok) {
-        setFormStatus('success');
-        event.currentTarget.reset();
-      } else {
-        setFormStatus('error');
-      }
-    } catch (error) {
+      setFormStatus('success');
+      event.currentTarget.reset();
+    } catch {
       setFormStatus('error');
     }
   };
@@ -123,7 +126,7 @@ export default function Contact() {
           <button
             type="submit"
             className="w-full px-4 py-3 bg-forest text-cream font-bold rounded-md hover:bg-deepCharcoal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={formStatus === 'idle' && false} // Disable on submit
+            disabled={formStatus === 'idle' && false}
           >
             {formStatus === 'idle'
               ? 'Send Message'
