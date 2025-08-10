@@ -28,7 +28,7 @@ interface Book {
   excerpt: string;
   coverImage: string;
   buyLink: string;
-  genre: string;
+  genre: string; // normalized to a single string
 }
 
 interface HomeProps {
@@ -59,7 +59,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   ]);
 
   // Retain original image paths; only use default if missing/empty
-  const processedPosts: Post[] = postsData.map((post: any) => ({
+  const processedPosts: Post[] = postsData.map((post: Partial<Post>) => ({
     slug: post.slug || '',
     title: post.title || 'Untitled Post',
     date: post.date || '',
@@ -73,21 +73,23 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     category: post.category || 'General',
   }));
 
-  const processedBooks: Book[] = booksData.map((book: any) => ({
-    slug: book.slug || '',
-    title: book.title || 'Untitled Book',
-    author: book.author || 'Abraham of London',
-    excerpt: book.excerpt || 'Read more for full details.',
-    coverImage:
-      typeof book.coverImage === 'string' && book.coverImage.trim().length > 0
-        ? book.coverImage
-        : '/assets/images/default-book-cover.jpg',
-    buyLink: book.buyLink || '#',
-    // Normalize string|string[] -> string (without mutating source)
-    genre: Array.isArray(book.genre)
-      ? (book.genre as string[]).filter(Boolean).join(', ')
-      : (book.genre || 'Uncategorized'),
-  }));
+  const processedBooks: Book[] = booksData.map(
+    (book: Partial<Book> & { genre?: string | string[] }) => ({
+      slug: book.slug || '',
+      title: book.title || 'Untitled Book',
+      author: book.author || 'Abraham of London',
+      excerpt: book.excerpt || 'Read more for full details.',
+      coverImage:
+        typeof book.coverImage === 'string' && book.coverImage.trim().length > 0
+          ? book.coverImage
+          : '/assets/images/default-book-cover.jpg',
+      buyLink: book.buyLink || '#',
+      // Normalize string|string[] -> string (without mutating source)
+      genre: Array.isArray(book.genre)
+        ? book.genre.filter(Boolean).join(', ')
+        : (book.genre || 'Uncategorized'),
+    })
+  );
 
   return {
     props: {
