@@ -24,56 +24,80 @@ const BookCard: React.FC<BookCardProps> = ({
   downloadEpub,
   genre,
 }) => {
-  const imageSrc = coverImage || '/assets/images/default-book.jpg';
+  // slug-aware fallback, then project default
+  const imageSrc =
+    (coverImage && coverImage.trim()) ||
+    (slug === 'fathering-without-fear'
+      ? '/assets/images/fathering-without-fear.jpg'
+      : '/assets/images/default-book.jpg');
+
+  const internalBookUrl = `/books/${slug}`;
+  const hasExternalBuy = !!buyLink && buyLink !== '#';
 
   return (
-    <div className="border rounded-xl shadow-md p-4 bg-white dark:bg-zinc-900 flex flex-col justify-between transition hover:shadow-lg">
+    <article
+      className="border rounded-xl shadow-card p-4 bg-white flex flex-col justify-between transition hover:shadow-cardHover"
+      aria-label={`${title} by ${author}`}
+    >
       {/* Cover */}
-      <Link href={`/books/${slug}`} className="block">
+      <Link href={internalBookUrl} className="block group">
         <div className="relative w-full h-64 mb-4 rounded-md overflow-hidden">
           <Image
             src={imageSrc}
-            alt={title}
+            alt={`Cover of ${title}`}
             fill
-            style={{ objectFit: 'cover' }}
             sizes="(max-width: 768px) 100vw, 33vw"
-            loading="lazy" // ✅ Corrected: Added lazy loading for images below the fold
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            loading="lazy"
           />
         </div>
       </Link>
 
       {/* Title & Meta */}
       <div className="flex-1">
-        <h2 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
-          <Link href={`/books/${slug}`} className="hover:underline">
+        <h2 className="text-xl font-semibold text-zinc-900 mb-1">
+          <Link href={internalBookUrl} className="hover:underline">
             {title}
           </Link>
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">{author}</p>
-        {genre && (
-          <p className="text-sm italic text-zinc-500 dark:text-zinc-400 mb-2">{genre}</p>
-        )}
-        <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{excerpt}</p>
+        <p className="text-sm text-zinc-600 mb-1">{author}</p>
+        {genre && <p className="text-sm italic text-zinc-500 mb-2">{genre}</p>}
+        <p className="text-sm text-zinc-700 mb-4">{excerpt}</p>
       </div>
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2 mt-auto">
-        {buyLink && buyLink !== '#' && (
+        {/* Always offer the internal book page (free read / details) */}
+        <Link
+          href={internalBookUrl}
+          className="flex-1 text-center bg-forest text-cream px-3 py-2 rounded hover:bg-softGold hover:text-forest text-sm transition"
+          aria-label={`Open ${title}`}
+        >
+          Read / Buy (free)
+        </Link>
+
+        {/* Optional: external buyLink if provided */}
+        {hasExternalBuy && (
           <a
             href={buyLink}
-            className="flex-1 text-center bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm transition"
+            className="flex-1 text-center bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 text-sm transition"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`Buy ${title} externally`}
           >
             Buy Now
           </a>
         )}
+
+        {/* Optional downloads */}
         {downloadPdf && (
           <a
             href={downloadPdf}
-            className="flex-1 text-center bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm transition"
+            className="flex-1 text-center border-2 border-forest text-forest px-3 py-2 rounded hover:bg-forest hover:text-cream text-sm transition"
             target="_blank"
             rel="noopener noreferrer"
+            download
+            aria-label={`Download ${title} as PDF`}
           >
             PDF
           </a>
@@ -81,15 +105,17 @@ const BookCard: React.FC<BookCardProps> = ({
         {downloadEpub && (
           <a
             href={downloadEpub}
-            className="flex-1 text-center bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm transition"
+            className="flex-1 text-center border-2 border-forest text-forest px-3 py-2 rounded hover:bg-forest hover:text-cream text-sm transition"
             target="_blank"
             rel="noopener noreferrer"
+            download
+            aria-label={`Download ${title} as EPUB`}
           >
             EPUB
           </a>
         )}
       </div>
-    </div>
+    </article>
   );
 };
 
