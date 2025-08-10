@@ -26,21 +26,16 @@ type BookPageMeta = Required<
 };
 
 type BookProps = {
-  book: {
-    meta: BookPageMeta;
-    content: MDXRemoteSerializeResult;
-  };
+  book: { meta: BookPageMeta; content: MDXRemoteSerializeResult };
 };
 
 export default function Book({ book }: BookProps) {
   const siteUrl = 'https://abrahamoflondon.org';
   const title = `${safeString(book.meta.title)} | Abraham of London Books`;
-  const description =
-    safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
+  const description = safeString(book.meta.description || book.meta.excerpt || 'Book by Abraham of London');
   const coverImage = book.meta.coverImage || '/assets/images/default-book-cover.jpg';
   const author = safeString(book.meta.author || 'Abraham of London');
 
-  // ✅ Normalize arrays BEFORE any JSX usage (including <Head/>)
   const genres: string[] = Array.isArray(book.meta.genre) ? book.meta.genre : [];
   const tags: string[] = Array.isArray(book.meta.tags) ? book.meta.tags : [];
 
@@ -59,20 +54,13 @@ export default function Book({ book }: BookProps) {
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={`${siteUrl}/books/${book.meta.slug}`} />
-
-        {/* Open Graph */}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={`${siteUrl}${coverImage}`} />
-
-        {/* Optional book metadata */}
         {author && <meta property="book:author" content={author} />}
-        {genres.length > 0 &&
-          genres.map((g, i) => <meta key={`genre-${i}`} property="book:tag" content={g} />)}
-
-        {/* Twitter */}
+        {genres.length > 0 && genres.map((g, i) => <meta key={`genre-${i}`} property="book:tag" content={g} />)}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
@@ -100,18 +88,13 @@ export default function Book({ book }: BookProps) {
           <div className="text-lg text-deepCharcoal mb-2">
             By <span className="font-semibold">{author}</span>
           </div>
-          {book.meta.date && (
-            <div className="text-sm text-deepCharcoal/70">Published: {renderDate(book.meta.date)}</div>
-          )}
+          {book.meta.date && <div className="text-sm text-deepCharcoal/70">Published: {renderDate(book.meta.date)}</div>}
         </header>
 
         {genres.length > 0 && (
           <div className="mb-6 flex flex-wrap gap-2 justify-center">
             {genres.map((g) => (
-              <span
-                key={g}
-                className="inline-block text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
+              <span key={g} className="inline-block text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1">
                 {g}
               </span>
             ))}
@@ -121,17 +104,14 @@ export default function Book({ book }: BookProps) {
         <div className="prose prose-lg max-w-none text-deepCharcoal mb-10">
           <MDXRemote
             {...book.content}
-            components={MDXComponents as unknown as Record<string, React.ComponentType<any>>}
+            components={MDXComponents as unknown as Record<string, React.ComponentType<Record<string, unknown>>>}
           />
         </div>
 
         {tags.length > 0 && (
           <ul className="flex flex-wrap gap-2 justify-center mt-2 mb-10">
             {tags.map((t) => (
-              <li
-                key={t}
-                className="text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
+              <li key={t} className="text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1">
                 {t}
               </li>
             ))}
@@ -140,32 +120,17 @@ export default function Book({ book }: BookProps) {
 
         <div className="flex flex-wrap gap-3 justify-center mb-12">
           {book.meta.buyLink && book.meta.buyLink !== '#' && (
-            <a
-              href={book.meta.buyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-forest text-cream px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-softGold hover:text-forest"
-            >
+            <a href={book.meta.buyLink} target="_blank" rel="noopener noreferrer" className="bg-forest text-cream px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-softGold hover:text-forest">
               Buy Now
             </a>
           )}
           {book.meta.downloadPdf && (
-            <a
-              href={book.meta.downloadPdf}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
+            <a href={book.meta.downloadPdf} target="_blank" rel="noopener noreferrer" className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream">
               Download PDF
             </a>
           )}
           {book.meta.downloadEpub && (
-            <a
-              href={book.meta.downloadEpub}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
+            <a href={book.meta.downloadEpub} target="_blank" rel="noopener noreferrer" className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream">
               Download EPUB
             </a>
           )}
@@ -208,19 +173,15 @@ export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
     genre: Array.isArray(raw.genre) ? raw.genre : raw.genre ? [raw.genre] : [],
   };
 
-  const mdxSource = await serialize(raw.content ?? '', {
-    parseFrontmatter: false,
-    scope: meta,
-  });
+  const mdxSource = await serialize(raw.content ?? '', { parseFrontmatter: false, scope: meta });
 
   return { props: { book: { meta, content: mdxSource } }, revalidate: 60 };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const books = getAllBooks(['slug']);
-  const paths =
-    books
-      .map((b) => (b.slug ? { params: { slug: String(b.slug) } } : null))
-      .filter(Boolean) as { params: { slug: string } }[];
+  const paths = books
+    .map((b) => (b.slug ? { params: { slug: String(b.slug) } } : null))
+    .filter((p): p is { params: { slug: string } } => Boolean(p));
   return { paths, fallback: 'blocking' };
 };

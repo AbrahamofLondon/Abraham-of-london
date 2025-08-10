@@ -1,51 +1,41 @@
 // components/MDXComponents.tsx
-import * as React from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  children?: React.ReactNode;
-};
+type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
-type ImgProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-  src?: string;
-  alt?: string;
-  className?: string;
-  sizes?: string;
-  loading?: 'eager' | 'lazy';
-};
+type ComponentMap = Record<string, React.ComponentType<Record<string, unknown>>>;
 
-export const MDXComponents = {
-  a: ({ href = '', children, ...rest }: AnchorProps) => {
-    const cls = 'text-forest underline underline-offset-2 hover:text-softGold transition';
-
-    if (href.startsWith('/')) {
-      return (
-        <Link href={href} className={cls} {...rest}>
-          {children}
-        </Link>
-      );
-    }
-
+const A: React.FC<AnchorProps> = ({ href = '', children, ...rest }) => {
+  if (href.startsWith('/')) {
+    // Next 13+: Link can wrap <a> or accept className directly; we’ll keep it simple and valid.
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={cls} {...rest}>
-        {children}
-      </a>
+      <Link href={href} legacyBehavior>
+        <a {...rest} className="text-blue-600 underline hover:text-blue-800">
+          {children}
+        </a>
+      </Link>
     );
-  },
-
-  img: ({ src, alt, className, sizes, loading }: ImgProps) => (
-    <div className="relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
-      <Image
-        src={src || '/assets/images/default-book.jpg'}
-        alt={alt || ''}
-        fill
-        sizes={sizes || '(max-width: 768px) 100vw, 768px'}
-        loading={loading === 'eager' ? 'eager' : 'lazy'}
-        className={className}
-      />
-    </div>
-  ),
+  }
+  return (
+    <a href={href} {...rest} className="text-blue-600 underline hover:text-blue-800">
+      {children}
+    </a>
+  );
 };
 
-export default MDXComponents;
+const Img: React.FC<ImgProps> = ({ src, alt = '', ..._rest }) => {
+  const resolved = typeof src === 'string' && src.trim() ? src : '/assets/images/default-book.jpg';
+  return (
+    <div className="relative w-full h-96 my-6 rounded-lg overflow-hidden shadow-card">
+      <Image src={resolved} alt={alt} fill style={{ objectFit: 'cover' }} />
+    </div>
+  );
+};
+
+export const MDXComponents: ComponentMap = {
+  a: A as unknown as React.ComponentType<Record<string, unknown>>,
+  img: Img as unknown as React.ComponentType<Record<string, unknown>>,
+};
