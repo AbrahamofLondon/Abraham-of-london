@@ -1,88 +1,58 @@
 // components/BlogPostCard.tsx
-import React from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 
-export interface BlogPostCardProps {
+export type BlogPostCardProps = {
   slug: string;
   title: string;
   date: string;
-  excerpt?: string; // Corrected: Made optional to fix the type error
-  coverImage?: string; // Corrected: Made optional
-  category?: string;
+  excerpt: string;
+  coverImage?: string;
+  author: string;
   readTime?: string;
-  author?: string;
-}
+  category?: string;
+};
 
-const BlogPostCard: React.FC<BlogPostCardProps> = ({
+export default function BlogPostCard({
   slug,
   title,
   date,
   excerpt,
   coverImage,
+  author,
+  readTime,
   category,
-  readTime = '5 min read',
-  author = 'Abraham Adaramola'
-}) => {
-  return (
-    <motion.article
-      className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Link href={`/blog/${slug}`}>
-        <div className="cursor-pointer">
-          {coverImage && (
-            <div className="relative h-48 w-full">
-              <Image
-                src={coverImage}
-                alt={title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-          
-          <div className="p-6">
-            {category && (
-              <div className="mb-3">
-                <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  {category}
-                </span>
-              </div>
-            )}
-            
-            <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-              {title}
-            </h3>
-            
-            {/* Added a check for 'excerpt' before rendering */}
-            {excerpt && (
-              <p className="text-gray-600 mb-4 line-clamp-3">
-                {excerpt}
-              </p>
-            )}
-            
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-4">
-                <span>{author}</span>
-                <span>•</span>
-                <span>{readTime}</span>
-              </div>
-              <time dateTime={date}>
-                {new Date(date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </time>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.article>
-  );
-};
+}: BlogPostCardProps) {
+  const src =
+    typeof coverImage === 'string' && coverImage.trim()
+      ? coverImage
+      : '/assets/images/blog/default-blog-cover.jpg';
 
-export default BlogPostCard;
+  return (
+    <article className="group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden">
+      <Link href={`/blog/${slug}`} className="block relative w-full h-56">
+        <Image src={src} alt={title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+      </Link>
+
+      <div className="p-4">
+        {category && (
+          <span className="inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1 text-deepCharcoal/80 mb-2">
+            {category}
+          </span>
+        )}
+        <h3 className="text-xl font-serif text-deepCharcoal group-hover:underline mb-2">
+          <Link href={`/blog/${slug}`}>{title}</Link>
+        </h3>
+        <p className="text-sm text-deepCharcoal/80 line-clamp-3">{excerpt}</p>
+
+        <div className="mt-4 flex items-center justify-between text-xs text-deepCharcoal/60">
+          <span>{author}</span>
+          <span>
+            {readTime ? `${readTime} · ` : ''}
+            {date}
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
