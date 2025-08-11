@@ -1,31 +1,19 @@
-// pages/books/index.tsx
-import React from 'react';
-import Link from 'next/link';
+// components/LuxuryAnimator.tsx
+'use client';
 
-// Dummy book data - you can replace with real data fetch
-const books = [
-  { slug: 'the-great-gatsby', title: 'The Great Gatsby', author: 'F. Scott Fitzgerald' },
-  { slug: 'to-kill-a-mockingbird', title: 'To Kill a Mockingbird', author: 'Harper Lee' },
-  { slug: '1984', title: '1984', author: 'George Orwell' },
-];
+import { motion } from 'framer-motion';
 
-const BookIndexPage = () => {
+export default function LuxuryAnimator() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Books List</h1>
-      <ul>
-        {books.map((book) => (
-          <li key={book.slug} style={{ marginBottom: '1rem' }}>
-            <Link href={`/book/${book.slug}`}>
-              <a style={{ fontSize: '1.2rem', color: 'blue' }}>
-                {book.title} — <i>{book.author}</i>
-              </a>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="flex items-center justify-center p-8 bg-gold-900 text-platinum rounded-xl shadow-lg"
+    >
+      <h2 className="text-3xl font-bold tracking-wide">
+        LuxuryAnimator
+      </h2>
+    </motion.div>
   );
-};
-
-export default BookIndexPage;
+}

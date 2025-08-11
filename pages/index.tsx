@@ -1,5 +1,5 @@
 // pages/index.tsx
-import React, { useMemo } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +10,20 @@ import BookCard from '../components/BookCard';
 import SocialLinks from '../components/SocialLinks';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
+
+// Centralized configuration for assets and links
+const siteConfig = {
+  social: {
+    twitter: 'https://twitter.com/abrahamoflondon',
+    linkedin: 'https://www.linkedin.com/in/abrahamoflondon',
+    instagram: 'https://www.instagram.com/abrahamoflondon',
+  },
+  assets: {
+    heroBanner: '/assets/images/abraham-of-london-banner.webp',
+    profilePortrait: '/assets/images/profile-portrait.webp',
+    ogImage: '/assets/social/og-image.jpg',
+  },
+};
 
 type Post = Required<
   Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
@@ -88,45 +102,39 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ posts, books }: HomeProps) {
-  const bookJsonLd = useMemo(
-    () => ({
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      itemListElement: books.map((book, index) => ({
-        '@type': 'Book',
-        position: index + 1,
-        name: book.title,
-        url: `/books/${book.slug}`,
-        image: book.coverImage,
-        author: {
-          '@type': 'Person',
-          name: book.author,
-        },
-      })),
-    }),
-    [books]
-  );
-
-  const postJsonLd = useMemo(
-    () => ({
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      itemListElement: posts.map((post, index) => ({
-        '@type': 'BlogPosting',
-        position: index + 1,
-        headline: post.title,
-        url: `/blog/${post.slug}`,
-        image: post.coverImage,
-        author: {
-          '@type': 'Person',
-          name: post.author,
-        },
-      })),
-    }),
-    [posts]
-  );
-
   const featured = books[0];
+
+  const bookJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: books.map((book, index) => ({
+      '@type': 'Book',
+      position: index + 1,
+      name: book.title,
+      url: `/books/${book.slug}`,
+      image: book.coverImage,
+      author: {
+        '@type': 'Person',
+        name: book.author,
+      },
+    })),
+  };
+
+  const postJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'BlogPosting',
+      position: index + 1,
+      headline: post.title,
+      url: `/blog/${post.slug}`,
+      image: post.coverImage,
+      author: {
+        '@type': 'Person',
+        name: post.author,
+      },
+    })),
+  };
 
   return (
     <Layout>
@@ -141,9 +149,9 @@ export default function Home({ posts, books }: HomeProps) {
           property="og:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        <meta property="og:image" content="/assets/social/og-image.jpg" />
+        <meta property="og:image" content={siteConfig.assets.ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/assets/social/og-image.jpg" />
+        <meta name="twitter:image" content={siteConfig.assets.ogImage} />
         {books.length > 0 && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
@@ -156,7 +164,7 @@ export default function Home({ posts, books }: HomeProps) {
       <header className="bg-forest text-cream">
         <div className="relative w-full h-64 sm:h-96">
           <Image
-            src="/assets/images/abraham-of-london-banner.webp"
+            src={siteConfig.assets.heroBanner}
             alt="Abraham of London — strategic leadership and fatherhood advocacy"
             fill
             className="object-cover"
@@ -178,12 +186,12 @@ export default function Home({ posts, books }: HomeProps) {
               Abraham of London is an author, strategist, and fatherhood advocate passionate about family, leadership,
               and legacy.
             </p>
-            <SocialLinks />
+            <SocialLinks links={siteConfig.social} />
           </div>
 
           <div className="relative w-64 h-64 mx-auto">
             <Image
-              src="/assets/images/profile-portrait.webp"
+              src={siteConfig.assets.profilePortrait}
               alt="Portrait of Abraham of London"
               fill
               className="rounded-full shadow-card object-cover"
@@ -215,16 +223,17 @@ export default function Home({ posts, books }: HomeProps) {
                   <div className="flex flex-wrap gap-3">
                     <Link
                       href={`/books/${featured.slug}`}
-                      className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-midGreen"
+                      className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-midGreen transition-colors cursor-pointer"
                     >
                       Learn more
                     </Link>
                     {featured.downloadPdf && (
                       <a
                         href={featured.downloadPdf}
-                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition-colors cursor-pointer"
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`Download PDF of ${featured.title}`}
                       >
                         Download PDF
                       </a>
@@ -232,9 +241,10 @@ export default function Home({ posts, books }: HomeProps) {
                     {featured.downloadEpub && (
                       <a
                         href={featured.downloadEpub}
-                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition-colors cursor-pointer"
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`Download EPUB of ${featured.title}`}
                       >
                         Download EPUB
                       </a>

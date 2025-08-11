@@ -1,7 +1,12 @@
-// components/Ventures.js
+// components/Ventures.tsx
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+
+// This component is not a 'use client' component if it's rendered on the server
+// only use the 'use client' directive if you need state or browser APIs
+// If Ventures is a server component, motion will still work on the client
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -18,22 +23,29 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-export default function Ventures() {
-  const brands = [
-    {
-      name: 'Alomarada',
-      description: 'Redefining development through ethical market exploration and human capital growth.',
-      logo: '/assets/images/logo/alomarada.svg',
-      url: 'https://alomarada.com',
-    },
-    {
-      name: 'Endureluxe',
-      description: 'High-performance luxury fitness equipment and interactive community.',
-      logo: '/assets/images/logo/endureluxe.svg',
-      url: 'https://endureluxe.com',
-    },
-  ];
+interface Brand {
+  name: string;
+  description: string;
+  logo: string;
+  url: string;
+}
 
+const brands: Brand[] = [
+  {
+    name: 'Alomarada',
+    description: 'Redefining development through ethical market exploration and human capital growth.',
+    logo: '/assets/images/logo/alomarada.svg',
+    url: 'https://alomarada.com',
+  },
+  {
+    name: 'Endureluxe',
+    description: 'High-performance luxury fitness equipment and interactive community.',
+    logo: '/assets/images/logo/endureluxe.svg',
+    url: 'https://endureluxe.com',
+  },
+];
+
+export default function Ventures() {
   return (
     <section id="ventures" className="py-20 px-4">
       <motion.div
