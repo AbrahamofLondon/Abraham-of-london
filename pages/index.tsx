@@ -1,4 +1,3 @@
-// pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -13,11 +12,34 @@ import { getAllBooks, BookMeta } from '../lib/books';
 
 // Centralized configuration for assets and links
 const siteConfig = {
-  social: {
-    twitter: 'https://twitter.com/abrahamoflondon',
-    linkedin: 'https://www.linkedin.com/in/abrahamoflondon',
-    instagram: 'https://www.instagram.com/abrahamoflondon',
-  },
+  socialLinks: [
+    { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/images/social/email.svg' },
+    { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/images/social/phone.svg' },
+    {
+      href: 'https://www.linkedin.com/in/abraham-adaramola-06630321/',
+      label: 'LinkedIn',
+      icon: '/assets/images/social/linkedin.svg',
+      external: true,
+    },
+    {
+      href: 'https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09',
+      label: 'X',
+      icon: '/assets/images/social/twitter.svg',
+      external: true,
+    },
+    {
+      href: 'https://www.facebook.com/share/1MRrKpUzMG/',
+      label: 'Facebook',
+      icon: '/assets/images/social/facebook.svg',
+      external: true,
+    },
+    {
+      href: 'https://wa.me/+447496334022',
+      label: 'WhatsApp',
+      icon: '/assets/images/social/whatsapp.svg',
+      external: true,
+    },
+  ],
   assets: {
     heroBanner: '/assets/images/abraham-of-london-banner.webp',
     profilePortrait: '/assets/images/profile-portrait.webp',
@@ -186,7 +208,7 @@ export default function Home({ posts, books }: HomeProps) {
               Abraham of London is an author, strategist, and fatherhood advocate passionate about family, leadership,
               and legacy.
             </p>
-            <SocialLinks links={siteConfig.social} />
+            <SocialLinks links={siteConfig.socialLinks} />
           </div>
 
           <div className="relative w-64 h-64 mx-auto">
