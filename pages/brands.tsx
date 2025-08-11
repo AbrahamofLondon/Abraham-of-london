@@ -54,45 +54,58 @@ export default function BrandsPage() {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      {/* Remove the redundant header section that was causing the duplication */}
-      {/* The `Layout` component handles the main header, so this is no longer needed. */}
-
-      <div className="max-w-5xl mx-auto py-20 px-4">
-        {/* Abraham of London Brand Section */}
-        <motion.div
-          className="bg-white p-8 md:p-12 rounded-2xl shadow-xl mb-20 flex flex-col md:flex-row items-center gap-8 md:gap-12"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          whileHover={{ scale: 1.02 }}
+      <div className="max-w-6xl mx-auto py-20 px-4">
+        {/*
+          This top section is the Parent Brand: Abraham of London.
+          It is visually larger and more prominent to establish hierarchy.
+        */}
+        <motion.section
+          id="abraham-of-london"
+          className="bg-white p-8 md:p-12 rounded-3xl shadow-2xl mb-16 relative"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <div className="relative w-[250px] h-[125px] flex-shrink-0">
-            <Image
-              src="/assets/images/logo/abraham-of-london-logo.svg"
-              alt="Abraham of London brand logo"
-              fill
-              className="object-contain"
-              priority
-            />
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            <div className="relative w-[250px] h-[125px] flex-shrink-0">
+              <Image
+                src="/assets/images/logo/abraham-of-london-logo.svg"
+                alt="Abraham of London brand logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 text-gray-800">Abraham of London</h1>
+              <p className="text-lg text-gray-700 leading-relaxed max-w-prose">
+                This is the core brand representing my personal work, vision, and philosophy. It serves as the foundation for my thought leadership, strategic advisory, and creative ventures. All other projects are branches of this central mission.
+              </p>
+            </div>
           </div>
-          <div className="text-center md:text-left">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">Abraham of London</h2>
-            <p className="text-lg text-gray-700 leading-relaxed max-w-prose">
-              This is the core brand representing my personal work, vision, and philosophy. It serves as the foundation for my thought leadership, strategic advisory, and creative ventures. All other projects are branches of this central mission.
-            </p>
-          </div>
-        </motion.div>
+        </motion.section>
 
-        {/* Sub-Ventures Section */}
-        <motion.div
+        {/*
+          This section represents the Sub-Brands.
+          The visual nesting and title hierarchy make the relationship clear.
+        */}
+        <motion.section
+          id="sub-ventures"
+          className="relative"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={containerVariants}
         >
-          <motion.h2 className="text-4xl font-bold mb-10 text-center text-gray-800" variants={itemVariants}>
-            Sub-Ventures
-          </motion.h2>
+          <div className="text-center mb-10">
+            <motion.h2 className="text-4xl font-bold text-gray-800" variants={itemVariants}>
+              Ventures & Brands
+            </motion.h2>
+            <motion.p className="text-lg text-gray-600 max-w-xl mx-auto mt-4" variants={itemVariants}>
+              Below are the ventures that are an extension of the core Abraham of London brand.
+            </motion.p>
+          </div>
+
           <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {brands.map((brand) => (
               <motion.div
@@ -128,7 +141,7 @@ export default function BrandsPage() {
               </motion.div>
             ))}
           </motion.div>
-        </motion.div>
+        </motion.section>
       </div>
     </Layout>
   );

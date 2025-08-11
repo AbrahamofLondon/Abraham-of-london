@@ -5,36 +5,44 @@ import React, { useState } from 'react';
 import Layout from '../components/Layout';
 
 export default function Contact() {
-  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>(
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>(
     'idle',
   );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormStatus('idle');
+    setFormStatus('submitting');
 
     try {
       const formData = new FormData(event.currentTarget);
       const data = new URLSearchParams();
+      
+      // Netlify requires this hidden field
+      data.append('form-name', 'contact');
       
       // Iterate over formData entries and append them to URLSearchParams
       for (const [key, value] of Array.from(formData.entries())) {
         data.append(key, value.toString());
       }
       
-      await fetch('/forms.html', {
+      // Correct submission endpoint is the page itself
+      await fetch(event.currentTarget.action, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: data.toString(),
       });
+
       setFormStatus('success');
       event.currentTarget.reset();
-    } catch {
+    } catch (error) {
+      console.error('Form submission failed:', error);
       setFormStatus('error');
     }
   };
+
+  const isSubmitting = formStatus === 'submitting';
 
   return (
     <Layout>
@@ -55,6 +63,7 @@ export default function Contact() {
           just to say hello.
         </p>
 
+        {/* Status messages */}
         {formStatus === 'success' && (
           <div className="bg-green-100 text-green-800 p-4 rounded mb-6">
             Thank you! Your message has been sent successfully.
@@ -69,10 +78,12 @@ export default function Contact() {
         <form
           className="w-full max-w-xl"
           name="contact"
-          data-netlify="true"
           method="POST"
+          data-netlify="true"
           onSubmit={handleSubmit}
+          action="/contact" // Set the form action to the current page
         >
+          {/* This input is crucial for Netlify's bot to find the form */}
           <input type="hidden" name="form-name" value="contact" />
 
           <div className="mb-6">
@@ -126,13 +137,9 @@ export default function Contact() {
           <button
             type="submit"
             className="w-full px-4 py-3 bg-forest text-cream font-bold rounded-md hover:bg-deepCharcoal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={formStatus === 'idle' && false}
+            disabled={isSubmitting}
           >
-            {formStatus === 'idle'
-              ? 'Send Message'
-              : formStatus === 'success'
-                ? 'Sent!'
-                : 'Error!'}
+            {isSubmitting ? 'Sending...' : 'Send Message'}
           </button>
         </form>
       </main>
