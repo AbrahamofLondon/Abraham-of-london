@@ -30,7 +30,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
-        : '/images/blog/default-blog-cover.jpg',
+        : '/assets/images/blog/default-blog-cover.jpg',
     author: p.author || 'Abraham of London',
     readTime: p.readTime || '5 min read',
     category: p.category || 'General',
@@ -54,23 +54,21 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
 
       <section className="bg-warmWhite py-12">
         <div className="container px-4">
-          <h1 className="font-serif text-3xl tracking-brand text-forest mb-8 text-center">
-            All Articles
-          </h1>
+          <h1 className="font-serif text-3xl tracking-brand text-forest mb-8 text-center">All Articles</h1>
 
-          {posts.length > 0 ? (
+          {posts.length ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
                 <BlogPostCard
-                  key={post.slug || ''}
-                  slug={post.slug || ''}
+                  key={post.slug}
+                  slug={post.slug}
                   title={post.title || 'Untitled'}
-                  date={post.date || ''}
+                  date={(post.date || '') as string}
                   excerpt={post.excerpt || 'Read more for full details.'}
                   coverImage={
                     typeof post.coverImage === 'string' && post.coverImage.trim()
                       ? post.coverImage
-                      : '/images/blog/default-blog-cover.jpg'
+                      : '/assets/images/blog/default-blog-cover.jpg'
                   }
                   author={post.author || 'Abraham of London'}
                   readTime={post.readTime || '5 min read'}

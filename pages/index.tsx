@@ -1,3 +1,4 @@
+// pages/index.tsx
 import React, { useMemo } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -7,7 +8,6 @@ import Layout from '../components/Layout';
 import BlogPostCard from '../components/BlogPostCard';
 import BookCard from '../components/BookCard';
 import SocialLinks from '../components/SocialLinks';
-import FeaturedBook from '../components/FeaturedBook';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
@@ -56,7 +56,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || '') as string,
     excerpt: p.excerpt || 'Read more for full details.',
-    coverImage: typeof p.coverImage === 'string' && p.coverImage.trim() ? p.coverImage : '/assets/images/blog/default-blog-cover.jpg',
+    coverImage:
+      typeof p.coverImage === 'string' && p.coverImage.trim()
+        ? p.coverImage
+        : '/assets/images/blog/default-blog-cover.jpg',
     author: p.author || 'Abraham of London',
     readTime: p.readTime || '5 min read',
     category: p.category || 'General',
@@ -67,9 +70,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
-    coverImage: typeof b.coverImage === 'string' && b.coverImage.trim() ? b.coverImage : '/assets/images/default-book.jpg',
+    coverImage:
+      typeof b.coverImage === 'string' && b.coverImage.trim() ? b.coverImage : '/assets/images/default-book.jpg',
     buyLink: b.buyLink || '#',
-    genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : (b.genre || 'Uncategorized'),
+    genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Uncategorized',
     downloadPdf: b.downloadPdf ?? null,
     downloadEpub: b.downloadEpub ?? null,
   }));
@@ -84,7 +88,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ posts, books }: HomeProps) {
-  // JSON-LD (unchanged)
   const bookJsonLd = useMemo(
     () => ({
       '@context': 'https://schema.org',
@@ -95,7 +98,10 @@ export default function Home({ posts, books }: HomeProps) {
         name: book.title,
         url: `/books/${book.slug}`,
         image: book.coverImage,
-        author: { '@type': 'Person', name: book.author },
+        author: {
+          '@type': 'Person',
+          name: book.author,
+        },
       })),
     }),
     [books]
@@ -111,13 +117,15 @@ export default function Home({ posts, books }: HomeProps) {
         headline: post.title,
         url: `/blog/${post.slug}`,
         image: post.coverImage,
-        author: { '@type': 'Person', name: post.author },
+        author: {
+          '@type': 'Person',
+          name: post.author,
+        },
       })),
     }),
     [posts]
   );
 
-  // Pick a featured book (first available)
   const featured = books[0];
 
   return (
@@ -133,10 +141,9 @@ export default function Home({ posts, books }: HomeProps) {
           property="og:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        {/* ✅ Corrected OG path */}
-        <meta property="og:image" content="/assets/images/social/og-image.jpg" />
+        <meta property="og:image" content="/assets/social/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/assets/images/social/og-image.jpg" />
+        <meta name="twitter:image" content="/assets/social/og-image.jpg" />
         {books.length > 0 && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
@@ -157,9 +164,7 @@ export default function Home({ posts, books }: HomeProps) {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <h1 className="font-serif tracking-brand text-3xl sm:text-5xl font-bold text-center">
-              Abraham of London
-            </h1>
+            <h1 className="font-serif tracking-brand text-3xl sm:text-5xl font-bold text-center">Abraham of London</h1>
           </div>
         </div>
       </header>
@@ -170,8 +175,8 @@ export default function Home({ posts, books }: HomeProps) {
           <div>
             <h2 className="font-serif text-2xl tracking-brand text-forest mb-4">About Abraham</h2>
             <p className="mb-4 text-deepCharcoal">
-              Abraham of London is an author, strategist, and fatherhood advocate passionate about
-              family, leadership, and legacy.
+              Abraham of London is an author, strategist, and fatherhood advocate passionate about family, leadership,
+              and legacy.
             </p>
             <SocialLinks />
           </div>
@@ -190,32 +195,56 @@ export default function Home({ posts, books }: HomeProps) {
 
         {/* Featured Book */}
         {featured && (
-          <FeaturedBook
-            title={featured.title}
-            author={featured.author}
-            slug={featured.slug}
-            coverImage={featured.coverImage}
-            excerpt={featured.excerpt}
-            // ✅ Points to files you showed in /public/downloads
-            pdf="/downloads/fathering-without-fear.pdf"
-            epub="/downloads/fathering-without-fear.epub"
-          />
+          <section className="mb-16">
+            <div className="rounded-2xl border border-lightGrey bg-white p-6 shadow-card">
+              <div className="grid md:grid-cols-2 gap-6 items-center">
+                <div className="relative w-full h-72 rounded-lg overflow-hidden">
+                  <Image
+                    src={featured.coverImage || '/assets/images/default-book.jpg'}
+                    alt={featured.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-serif text-2xl text-forest mb-1">Featured Book</h3>
+                  <h4 className="text-xl font-semibold text-deepCharcoal mb-1">{featured.title}</h4>
+                  <p className="text-sm text-deepCharcoal/70 mb-4">By {featured.author}</p>
+                  <p className="text-deepCharcoal mb-6">{featured.excerpt}</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href={`/books/${featured.slug}`}
+                      className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-midGreen"
+                    >
+                      Learn more
+                    </Link>
+                    {featured.downloadPdf && (
+                      <a
+                        href={featured.downloadPdf}
+                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Download PDF
+                      </a>
+                    )}
+                    {featured.downloadEpub && (
+                      <a
+                        href={featured.downloadEpub}
+                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Download EPUB
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         )}
-
-        {/* Logos / social proof (optional quick row) */}
-        <section aria-label="Brands" className="mb-10">
-          <ul className="flex flex-wrap items-center gap-6 opacity-80">
-            <li className="h-10 relative w-36">
-              <Image src="/assets/images/alomarada-ltd.webp" alt="Alomarada" fill className="object-contain" />
-            </li>
-            <li className="h-10 relative w-36">
-              <Image src="/assets/images/endureluxe-ltd.webp" alt="Endureluxe" fill className="object-contain" />
-            </li>
-            <li className="h-10 relative w-36">
-              <Image src="/assets/images/abraham-logo.jpg" alt="Abraham of London Logo" fill className="object-contain" />
-            </li>
-          </ul>
-        </section>
 
         <hr className="my-12 border-lightGrey" />
 
@@ -232,40 +261,13 @@ export default function Home({ posts, books }: HomeProps) {
         <hr className="my-12 border-lightGrey" />
 
         {/* Posts */}
-        <section className="mb-16">
+        <section>
           <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Posts</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <BlogPostCard key={post.slug} {...post} />
             ))}
           </div>
-        </section>
-
-        {/* Newsletter (Netlify Forms) */}
-        <section className="rounded-xl border border-lightGrey p-6 md:p-8">
-          <h2 className="font-serif text-2xl text-forest mb-2">Join the newsletter</h2>
-          <p className="text-deepCharcoal/80 mb-4">Essays, book drops, and field notes—no fluff.</p>
-          <form
-            name="newsletter"
-            method="POST"
-            data-netlify="true"
-            className="flex flex-col sm:flex-row gap-3"
-          >
-            <input type="hidden" name="form-name" value="newsletter" />
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="you@example.com"
-              className="flex-1 rounded-md border border-lightGrey px-4 py-2 outline-none focus:ring-2 focus:ring-midGreen"
-            />
-            <button
-              type="submit"
-              className="bg-forest text-cream px-5 py-2 rounded-md hover:bg-softGold hover:text-forest transition"
-            >
-              Subscribe
-            </button>
-          </form>
         </section>
       </main>
     </Layout>
