@@ -3,9 +3,8 @@
   publish = ".next"
 
 [functions]
-  directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["next"]
+  external_node_modules = ["@next/server"]
 
 [[redirects]]
   from = "/blog/*"
