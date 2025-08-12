@@ -11,9 +11,10 @@ import SocialLinks from '../components/SocialLinks';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
-// ---- Static image imports (safe fix for missing/typo’d paths) ----
+// ---- Static image imports ----
 import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '../public/assets/images/profile-portrait.webp';
+import ogImage from '../public/assets/social/og-image.jpg';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
@@ -67,13 +68,13 @@ const siteConfig = {
     },
   ] as SocialMetaLink[],
   assets: {
-    heroBanner,                    // Static import (reliable)
-    profilePortrait,               // Static import (fixes failing portrait)
-    ogImage: '/assets/social/og-image.jpg', // Stays as a path for OG/Twitter
+    heroBanner,
+    profilePortrait,
+    ogImage,
   } as {
     heroBanner: StaticImageData;
     profilePortrait: StaticImageData;
-    ogImage: string;
+    ogImage: StaticImageData;
   },
 };
 
@@ -221,7 +222,7 @@ export default function Home({ posts, books }: HomeProps) {
           property="og:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        <meta property="og:image" content={abs(siteConfig.assets.ogImage)} />
+        <meta property="og:image" content={imgToUrl(siteConfig.assets.ogImage)} />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -230,7 +231,7 @@ export default function Home({ posts, books }: HomeProps) {
           name="twitter:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        <meta name="twitter:image" content={abs(siteConfig.assets.ogImage)} />
+        <meta name="twitter:image" content={imgToUrl(siteConfig.assets.ogImage)} />
 
         {/* JSON-LD */}
         {bookJsonLd && (
