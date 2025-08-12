@@ -1,50 +1,82 @@
-import { GetStaticProps } from 'next';
+import type { GetStaticProps, InferGetStaticPropsType } from 'next';
+import { Fragment } from 'react';
 import Head from 'next/head';
-import Layout from '../components/Layout';
-import BookCard from '../components/BookCard';
-import { getAllBooks, BookMeta } from '../lib/books';
+import Link from 'next/link';
+import Image from 'next/image';
+import { NextSeo } from 'next-seo';
+import { getBooks, BookData } from '../lib/books';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
-type BooksProps = { books: (Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & { genre: string })[] };
-
-export const getStaticProps: GetStaticProps<BooksProps> = async () => {
-  const booksRaw = getAllBooks(['slug', 'title', 'author', 'excerpt', 'coverImage', 'buyLink', 'genre']);
-
-  const books = booksRaw.map((b) => ({
-    slug: b.slug || '',
-    title: b.title || 'Untitled Book',
-    author: b.author || 'Abraham of London',
-    excerpt: b.excerpt || 'Read more for full details.',
-    coverImage:
-      typeof b.coverImage === 'string' && b.coverImage.trim()
-        ? b.coverImage
-        : '/assets/images/default-book.jpg',
-    buyLink: b.buyLink || '#',
-    genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Uncategorized',
-  }));
-
-  return { props: { books }, revalidate: 86400 };
+type PageProps = {
+  books: BookData[];
 };
 
-export default function Books({ books }: BooksProps) {
-  return (
-    <Layout>
-      <Head>
-        <title>Books | Abraham of London</title>
-        <meta name="description" content="A list of books by Abraham of London." />
-      </Head>
+export const getStaticProps: GetStaticProps<PageProps> = async () => {
+  const books = getBooks();
+  return {
+    props: { books },
+    revalidate: 86400, // Regenerate page every 24 hours
+  };
+};
 
-      <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-extrabold text-center mb-12">My Books</h1>
-        {books.length ? (
+export default function BooksPage({ books }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const meta = {
+    title: 'Books',
+    description: "Browse the books written by Abraham of London.",
+    url: 'https://abrahamoflondon.com/books',
+    image: 'https://abrahamoflondon.com/assets/images/social-card.jpg',
+  };
+
+  return (
+    <Fragment>
+      <Head>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+      </Head>
+      <NextSeo
+        title={meta.title}
+        description={meta.description}
+        canonical={meta.url}
+        openGraph={{
+          url: meta.url,
+          title: meta.title,
+          description: meta.description,
+          images: [{ url: meta.image }],
+        }}
+      />
+      <div className="bg-white text-forest">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold mb-6">Books</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {books.map((book) => (
-              <BookCard key={book.slug} {...book} />
+              <div key={book.slug} className="bg-softGold rounded-lg overflow-hidden shadow-md">
+                <Link href={`/books/${book.slug}`}>
+                  <div className="relative h-64 w-full">
+                    <Image
+                      src={book.coverImage || '/assets/images/default-book.jpg'}
+                      alt={book.title}
+                      layout="fill"
+                      objectFit="cover"
+                      className="transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+                </Link>
+                <div className="p-6">
+                  <h2 className="text-2xl font-semibold">
+                    <Link href={`/books/${book.slug}`} className="hover:underline">
+                      {book.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-700">{book.author}</p>
+                </div>
+              </div>
             ))}
           </div>
-        ) : (
-          <p className="text-center text-lg text-gray-600">No books found.</p>
-        )}
-      </main>
-    </Layout>
+        </main>
+        <Footer />
+      </div>
+    </Fragment>
   );
 }

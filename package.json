@@ -12,8 +12,8 @@
     "fix:media:write": "node scripts/fix-frontmatter.js --write"
   },
   "dependencies": {
-    "@mdx-js/loader": "^3.0.1",
-    "@mdx-js/react": "^3.0.1",
+    "@mdx-js/loader": "^2.3.0",
+    "@mdx-js/react": "^2.3.0",
     "@svgr/webpack": "^8.1.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
