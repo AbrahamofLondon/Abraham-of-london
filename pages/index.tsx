@@ -12,7 +12,7 @@ import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
 // ---- Static image imports ----
-// Correct way to reference local images in Next.js
+// The fix: Import the images directly. Next.js will resolve these paths at build time.
 import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '../public/assets/images/profile-portrait.webp';
 import ogImage from '../public/assets/social/og-image.jpg';
@@ -69,7 +69,7 @@ const siteConfig = {
       external: true,
     },
   ] as SocialMetaLink[],
-  // Use the imported StaticImageData objects
+  // Use the imported StaticImageData objects for assets
   assets: {
     heroBanner,
     profilePortrait,
@@ -165,7 +165,6 @@ export default function Home({ posts, books }: HomeProps) {
     .filter((l) => l.external && /^https?:\/\//i.test(l.href))
     .map((l) => l.href);
 
-  // JSON-LD is now defined directly without useMemo
   const bookJsonLd = hasData(books)
     ? {
         '@context': 'https://schema.org',
