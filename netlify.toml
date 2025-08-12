@@ -1,7 +1,7 @@
 [build]
   command = "npm cache clean --force && npm install && npm run build"
   publish = ".next"
-  
+    
 [build.environment]
   NEXT_BUILD_SKIP_TYPE_CHECK = "true"
 
