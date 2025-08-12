@@ -1,71 +1,61 @@
 // pages/_app.tsx
 import type { AppProps } from 'next/app';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
-import { useEffect } from 'react';
 import '../styles/globals.css';
 
-// Declare the global gtag function type
-declare global {
-  interface Window {
-    gtag?: (
-      command: 'config' | 'event' | string,
-      targetId: string,
-      params?: Record<string, unknown>
-    ) => void;
-  }
+// Safe accessor: do NOT redeclare window.gtag globally
+function getGtag(): ((...args: unknown[]) => void) | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+  return typeof w.gtag === 'function' ? w.gtag : undefined;
 }
 
-// The Google Analytics tracking ID from your environment variables
-const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
-export const pageview = (url: string) => {
-  if (typeof window !== 'undefined' && GA_TRACKING_ID && typeof window.gtag === 'function') {
-    window.gtag('config', GA_TRACKING_ID, {
-      page_path: url,
-    });
-  }
-};
+function pageview(url: string) {
+  const gtag = getGtag();
+  if (!GA_ID || !gtag) return;
+  gtag('event', 'page_view', {
+    page_title: typeof document !== 'undefined' ? document.title : undefined,
+    page_location: typeof window !== 'undefined' ? window.location.href : undefined,
+    page_path: url,
+  });
+}
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // This hook tracks page views on every route change
-    const handleRouteChange = (url: string) => {
-      pageview(url);
-    };
-
+    // initial
+    pageview(router.asPath);
+    // SPA nav
+    const handleRouteChange = (url: string) => pageview(url);
     router.events.on('routeChangeComplete', handleRouteChange);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router.events]);
+    return () => router.events.off('routeChangeComplete', handleRouteChange);
+  }, [router.events, router.asPath]);
 
   return (
     <>
-      {/* Google Analytics Scripts */}
-      {GA_TRACKING_ID && (
+      {GA_ID && (
         <>
           <Script
             strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           />
-          <Script
-            id="google-analytics-script"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_TRACKING_ID}', {
-                  page_path: window.location.pathname,
-                });
-              `,
-            }}
-          />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              // Disable auto page_view; we'll send manually
+              gtag('config', '${GA_ID}', {
+                send_page_view: false,
+                debug_mode: ${process.env.NODE_ENV !== 'production'}
+              });
+            `}
+          </Script>
         </>
       )}
       <Component {...pageProps} />
