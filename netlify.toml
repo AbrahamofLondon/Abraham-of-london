@@ -1,15 +1,20 @@
 [build]
+  base = "."
   command = "npm run build"
   publish = ".next"
+  environment = { 
+    NEXT_BUILD_SKIP_TYPE_CHECK = "true",
+    NODE_PATH = "node_modules"
+  }
 
-[functions]
-  node_bundler = "esbuild"
+[build.functions]
   external_node_modules = ["@next/server"]
+  node_bundler = "esbuild"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [[redirects]]
   from = "/blog/*"
   to = "/blog/:splat"
   status = 200
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"

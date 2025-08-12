@@ -5,7 +5,7 @@ import type { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import Layout from '../../components/Layout';
-import { MDXComponents } from '../../components/MDXComponents';
+import MDXProviderWrapper from '../../components/MDXProviderWrapper';
 import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
 
 type PageMeta = {
@@ -57,7 +57,19 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     category: raw.category || 'General',
   };
 
-  const mdx = await serialize(raw.content ?? '', { parseFrontmatter: false, scope: meta });
+  const mdx = await serialize(raw.content ?? '', {
+    parseFrontmatter: false,
+    scope: meta,
+    mdxOptions: {
+      remarkPlugins: [
+        require('remark-gfm'),
+        require('remark-parse'),
+        require('remark-rehype'),
+        require('remark-html'),
+      ],
+      rehypePlugins: [require('rehype-stringify')],
+    },
+  });
 
   return { props: { post: { meta, content: mdx } }, revalidate: 60 };
 };
@@ -74,25 +86,43 @@ export default function BlogPost({ post }: Props) {
   const siteUrl = 'https://abrahamoflondon.org';
   return (
     <Layout>
-      <Head>
-        <title>{post.meta.title} | Abraham of London</title>
-        <meta name="description" content={post.meta.excerpt || 'Article by Abraham of London'} />
-        <meta property="og:image" content={`${siteUrl}${post.meta.coverImage}`} />
-      </Head>
+      <MDXProviderWrapper>
+        <Head>
+          <title>{post.meta.title} | Abraham of London</title>
+          <meta name="description" content={post.meta.excerpt || 'Article by Abraham of London'} />
+          <meta property="og:image" content={`${siteUrl}${post.meta.coverImage}`} />
+        </Head>
 
-      <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
-        {post.meta.coverImage && (
-          <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-            <Image src={post.meta.coverImage} alt={post.meta.title} fill className="object-cover" priority />
+        <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+          {post.meta.coverImage && (
+            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src={post.meta.coverImage}
+                alt={post.meta.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+
+          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">{post.meta.title}</h1>
+
+          <div className="text-sm text-deepCharcoal/70 mb-4">
+            <span>{post.meta.author}</span> · <span>{post.meta.date}</span>
+            {post.meta.readTime && <span> · {post.meta.readTime}</span>}
+            {post.meta.category && (
+              <span className="ml-2 inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1">
+                {post.meta.category}
+              </span>
+            )}
           </div>
-        )}
 
-        <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">{post.meta.title}</h1>
-
-        <div className="prose prose-lg max-w-none text-deepCharcoal">
-          <MDXRemote {...post.content} components={MDXComponents} />
-        </div>
-      </article>
+          <div className="prose prose-lg max-w-none text-deepCharcoal">
+            <MDXRemote {...post.content} />
+          </div>
+        </article>
+      </MDXProviderWrapper>
     </Layout>
   );
 }
