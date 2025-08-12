@@ -3,6 +3,8 @@ import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
+import { MDXProvider } from '@mdx-js/react';
+import { MDXComponents } from '../components/MDXComponents';
 import '../styles/globals.css';
 
 // Safe accessor: do NOT redeclare window.gtag globally
@@ -28,13 +30,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // initial
-    pageview(router.asPath);
-    // SPA nav
+    // Initial PV and subsequent SPA navigations
     const handleRouteChange = (url: string) => pageview(url);
     router.events.on('routeChangeComplete', handleRouteChange);
     return () => router.events.off('routeChangeComplete', handleRouteChange);
-  }, [router.events, router.asPath]);
+  }, [router.events]);
 
   return (
     <>
@@ -58,7 +58,10 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           </Script>
         </>
       )}
-      <Component {...pageProps} />
+
+      <MDXProvider components={MDXComponents}>
+        <Component {...pageProps} />
+      </MDXProvider>
     </>
   );
 }

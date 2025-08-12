@@ -27,7 +27,7 @@ const abs = (path: string) => {
 
 const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.length > 0;
 
-// Centralize asset paths (all under /public)
+// All assets live under /public — use string paths so Netlify can’t “module not found”
 const ASSETS = {
   heroBanner: '/assets/images/abraham-of-london-banner.webp',
   profilePortrait: '/assets/images/profile-portrait.webp',
@@ -71,11 +71,9 @@ const siteConfig = {
 
 // ---------- Types ----------
 type Post = Required<
-  Pick<
-    PostMeta,
-    'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'
-  >
+  Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
 >;
+
 type Book = Required<
   Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
 > & {
@@ -157,7 +155,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 export default function Home({ posts, books }: HomeProps) {
   const featured = books[0];
 
-  // JSON-LD
+  // JSON-LD blocks
   const bookJsonLd = useMemo(
     () =>
       hasData(books)
