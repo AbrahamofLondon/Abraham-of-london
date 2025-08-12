@@ -12,7 +12,6 @@ import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
 // ---- Static image imports ----
-// All local images must be imported this way for Next.js to handle them correctly.
 import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '../public/assets/images/profile-portrait.webp';
 import ogImage from '../public/assets/social/og-image.jpg';
@@ -33,7 +32,6 @@ const abs = (path: string) => {
   return SITE_URL ? new URL(path, SITE_URL).toString() : path;
 };
 
-// This helper must now handle both StaticImageData (imported files) and string paths (for external or dynamic content)
 const imgToUrl = (img: string | StaticImageData) =>
   typeof img === 'string' ? abs(img) : abs(img.src);
 
@@ -70,7 +68,6 @@ const siteConfig = {
       external: true,
     },
   ] as SocialMetaLink[],
-  // Use the imported StaticImageData objects
   assets: {
     heroBanner,
     profilePortrait,
@@ -128,7 +125,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || new Date().toISOString()) as string,
     excerpt: p.excerpt || 'Read more for full details.',
-    // Corrected to use static import
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
@@ -143,7 +139,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
-    // Corrected to use static import
     coverImage:
       typeof b.coverImage === 'string' && b.coverImage.trim()
         ? b.coverImage
@@ -274,109 +269,4 @@ export default function Home({ posts, books }: HomeProps) {
 
       <main className="container px-4 py-12">
         {/* About + Social */}
-        <section className="grid md:grid-cols-2 gap-8 items-center mb-16">
-          <div>
-            <h2 className="font-serif text-2xl tracking-brand text-forest mb-4">About Abraham</h2>
-            <p className="mb-4 text-deepCharcoal">
-              Abraham of London is an author, strategist, and fatherhood advocate passionate about family, leadership,
-              and legacy.
-            </p>
-            <SocialLinks links={siteConfig.socialLinks} />
-          </div>
-
-          <div className="relative w-64 h-64 mx-auto">
-            <Image
-              src={siteConfig.assets.profilePortrait}
-              alt="Portrait of Abraham of London"
-              fill
-              className="rounded-full shadow-card object-cover"
-              sizes="256px"
-              placeholder="blur"
-            />
-          </div>
-        </section>
-
-        <hr className="my-12 border-lightGrey" />
-
-        {/* Featured Book */}
-        {featured && (
-          <section className="mb-16">
-            <div className="rounded-2xl border border-lightGrey bg-white p-6 shadow-card">
-              <div className="grid md:grid-cols-2 gap-6 items-center">
-                <div className="relative w-full h-72 rounded-lg overflow-hidden">
-                  <Image
-                    src={featured.coverImage}
-                    alt={featured.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-serif text-2xl text-forest mb-1">Featured Book</h3>
-                  <h4 className="text-xl font-semibold text-deepCharcoal mb-1">{featured.title}</h4>
-                  <p className="text-sm text-deepCharcoal/70 mb-4">By {featured.author}</p>
-                  <p className="text-deepCharcoal mb-6">{featured.excerpt}</p>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={`/books/${featured.slug}`}
-                      className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-midGreen transition-colors cursor-pointer"
-                    >
-                      Learn more
-                    </Link>
-                    {featured.downloadPdf && (
-                      <a
-                        href={featured.downloadPdf}
-                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition-colors cursor-pointer"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Download PDF of ${featured.title}`}
-                      >
-                        Download PDF
-                      </a>
-                    )}
-                    {featured.downloadEpub && (
-                      <a
-                        href={featured.downloadEpub}
-                        className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition-colors cursor-pointer"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Download EPUB of ${featured.title}`}
-                      >
-                        Download EPUB
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <hr className="my-12 border-lightGrey" />
-
-        {/* Books */}
-        <section className="mb-16">
-          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Books</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {books.map((book, idx) => (
-              <BookCard key={`${book.slug}-${idx}`} {...book} />
-            ))}
-          </div>
-        </section>
-
-        <hr className="my-12 border-lightGrey" />
-
-        {/* Posts */}
-        <section>
-          <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Posts</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post, idx) => (
-              <BlogPostCard key={`${post.slug}-${idx}`} {...post} />
-            ))}
-          </div>
-        </section>
-      </main>
-    </Layout>
-  );
-}
+        <section className
