@@ -1,9 +1,4 @@
-# *
 User-agent: *
 Allow: /
 
-# Host
-Host: https://nimble-naiad-725b08.netlify.app
-
-# Sitemaps
-Sitemap: https://nimble-naiad-725b08.netlify.app/sitemap.xml
+Sitemap: https://abrahamoflondon.org/sitemap.xml

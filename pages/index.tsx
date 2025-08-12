@@ -1,3 +1,4 @@
+// pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -10,7 +11,24 @@ import SocialLinks from '../components/SocialLinks';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
-// Centralized configuration for assets and links
+// ---------- Config & Helpers ----------
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  ''
+).replace(/\/$/, '');
+
+const abs = (path: string) => {
+  if (!path) return path;
+  if (/^https?:\/\//i.test(path)) return path;
+  return SITE_URL ? new URL(path, SITE_URL).toString() : path;
+};
+
+const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.length > 0;
+
+type SocialMetaLink = { href: string; label: string; icon: string; external?: boolean };
+
 const siteConfig = {
   socialLinks: [
     { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/images/social/email.svg' },
@@ -34,12 +52,12 @@ const siteConfig = {
       external: true,
     },
     {
-      href: 'https://wa.me/+447496334022',
+      href: 'https://wa.me/447496334022',
       label: 'WhatsApp',
       icon: '/assets/images/social/whatsapp.svg',
       external: true,
     },
-  ],
+  ] as SocialMetaLink[],
   assets: {
     heroBanner: '/assets/images/abraham-of-london-banner.webp',
     profilePortrait: '/assets/images/profile-portrait.webp',
@@ -47,6 +65,7 @@ const siteConfig = {
   },
 };
 
+// ---------- Types ----------
 type Post = Required<
   Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
 >;
@@ -62,35 +81,22 @@ interface HomeProps {
   books: Book[];
 }
 
+// ---------- Data Fetching ----------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const postsData = getAllPosts([
-    'slug',
-    'title',
-    'date',
-    'publishedAt',
-    'excerpt',
-    'coverImage',
-    'author',
-    'readTime',
-    'category',
+    'slug', 'title', 'date', 'publishedAt', 'excerpt', 'coverImage',
+    'author', 'readTime', 'category',
   ]);
 
   const booksData = getAllBooks([
-    'slug',
-    'title',
-    'author',
-    'excerpt',
-    'coverImage',
-    'buyLink',
-    'genre',
-    'downloadPdf',
-    'downloadEpub',
+    'slug', 'title', 'author', 'excerpt', 'coverImage', 'buyLink',
+    'genre', 'downloadPdf', 'downloadEpub',
   ]);
 
-  const posts: Post[] = postsData.map((p) => ({
-    slug: p.slug || '',
+  const posts: Post[] = postsData.map((p, i) => ({
+    slug: p.slug || `post-${i}`,
     title: p.title || 'Untitled Post',
-    date: (p.date || p.publishedAt || '') as string,
+    date: (p.date || p.publishedAt || new Date().toISOString()) as string,
     excerpt: p.excerpt || 'Read more for full details.',
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
@@ -101,13 +107,15 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     category: p.category || 'General',
   }));
 
-  const books: Book[] = booksData.map((b) => ({
-    slug: b.slug || '',
+  const books: Book[] = booksData.map((b, i) => ({
+    slug: b.slug || `book-${i}`,
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
     coverImage:
-      typeof b.coverImage === 'string' && b.coverImage.trim() ? b.coverImage : '/assets/images/default-book.jpg',
+      typeof b.coverImage === 'string' && b.coverImage.trim()
+        ? b.coverImage
+        : '/assets/images/default-book.jpg',
     buyLink: b.buyLink || '#',
     genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Uncategorized',
     downloadPdf: b.downloadPdf ?? null,
@@ -123,40 +131,63 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   };
 };
 
+// ---------- Page Component ----------
 export default function Home({ posts, books }: HomeProps) {
   const featured = books[0];
 
-  const bookJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    itemListElement: books.map((book, index) => ({
-      '@type': 'Book',
-      position: index + 1,
-      name: book.title,
-      url: `/books/${book.slug}`,
-      image: book.coverImage,
-      author: {
-        '@type': 'Person',
-        name: book.author,
-      },
-    })),
-  };
+  const sameAsLinks = siteConfig.socialLinks
+    .filter((link) => Boolean(link.external) && /^https?:\/\//i.test(link.href))
+    .map((link) => link.href);
 
-  const postJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    itemListElement: posts.map((post, index) => ({
-      '@type': 'BlogPosting',
-      position: index + 1,
-      headline: post.title,
-      url: `/blog/${post.slug}`,
-      image: post.coverImage,
-      author: {
-        '@type': 'Person',
-        name: post.author,
-      },
-    })),
-  };
+  // JSON-LD
+  const bookJsonLd = hasData(books)
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: books.map((book, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: abs(`/books/${book.slug}`),
+        })),
+      }
+    : null;
+
+  const postJsonLd = hasData(posts)
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: posts.map((post, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: abs(`/blog/${post.slug}`),
+        })),
+      }
+    : null;
+
+  const websiteJsonLd = SITE_URL
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Abraham of London',
+        url: SITE_URL,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_URL}/search?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      }
+    : null;
+
+  const orgJsonLd = SITE_URL
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Abraham of London',
+        url: SITE_URL,
+        logo: abs(siteConfig.assets.profilePortrait),
+        sameAs: sameAsLinks,
+      }
+    : null;
 
   return (
     <Layout>
@@ -166,19 +197,41 @@ export default function Home({ posts, books }: HomeProps) {
           name="description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
+
+        {/* Canonical */}
+        {SITE_URL && <link rel="canonical" href={SITE_URL} />}
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        {SITE_URL && <meta property="og:url" content={SITE_URL} />}
         <meta property="og:title" content="Abraham of London" />
         <meta
           property="og:description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-        <meta property="og:image" content={siteConfig.assets.ogImage} />
+        <meta property="og:image" content={abs(siteConfig.assets.ogImage)} />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={siteConfig.assets.ogImage} />
-        {books.length > 0 && (
+        <meta name="twitter:title" content="Abraham of London" />
+        <meta
+          name="twitter:description"
+          content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
+        />
+        <meta name="twitter:image" content={abs(siteConfig.assets.ogImage)} />
+
+        {/* JSON-LD */}
+        {bookJsonLd && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }} />
         )}
-        {posts.length > 0 && (
+        {postJsonLd && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd) }} />
+        )}
+        {websiteJsonLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        )}
+        {orgJsonLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         )}
       </Head>
 
@@ -222,6 +275,8 @@ export default function Home({ posts, books }: HomeProps) {
             />
           </div>
         </section>
+
+        <hr className="my-12 border-lightGrey" />
 
         {/* Featured Book */}
         {featured && (
@@ -284,8 +339,8 @@ export default function Home({ posts, books }: HomeProps) {
         <section className="mb-16">
           <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Books</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {books.map((book) => (
-              <BookCard key={book.slug} {...book} />
+            {books.map((book, idx) => (
+              <BookCard key={`${book.slug}-${idx}`} {...book} />
             ))}
           </div>
         </section>
@@ -296,8 +351,8 @@ export default function Home({ posts, books }: HomeProps) {
         <section>
           <h2 className="font-serif text-2xl tracking-brand text-forest mb-6">Latest Posts</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <BlogPostCard key={post.slug} {...post} />
+            {posts.map((post, idx) => (
+              <BlogPostCard key={`${post.slug}-${idx}`} {...post} />
             ))}
           </div>
         </section>
