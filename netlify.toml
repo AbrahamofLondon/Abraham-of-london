@@ -2,10 +2,9 @@
   base = "."
   command = "npm run build"
   publish = ".next"
-  environment = { 
-    NEXT_BUILD_SKIP_TYPE_CHECK = "true",
+  environment =
+    NEXT_BUILD_SKIP_TYPE_CHECK = "true"
     NODE_PATH = "node_modules"
-  }
 
 [build.functions]
   external_node_modules = ["@next/server"]
