@@ -1,7 +1,7 @@
 // pages/index.tsx
 import React from 'react';
 import Head from 'next/head';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import Layout from '../components/Layout';
@@ -10,6 +10,10 @@ import BookCard from '../components/BookCard';
 import SocialLinks from '../components/SocialLinks';
 import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
+
+// ---- Static image imports (safe fix for missing/typo’d paths) ----
+import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
+import profilePortrait from '../public/assets/images/profile-portrait.webp';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
@@ -24,6 +28,10 @@ const abs = (path: string) => {
   if (/^https?:\/\//i.test(path)) return path;
   return SITE_URL ? new URL(path, SITE_URL).toString() : path;
 };
+
+// Convert StaticImageData | string to absolute URL string (for JSON-LD, meta)
+const imgToUrl = (img: string | StaticImageData) =>
+  typeof img === 'string' ? abs(img) : abs(img.src);
 
 const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.length > 0;
 
@@ -59,9 +67,13 @@ const siteConfig = {
     },
   ] as SocialMetaLink[],
   assets: {
-    heroBanner: '/assets/images/abraham-of-london-banner.webp',
-    profilePortrait: '/assets/images/profile-portrait.webp',
-    ogImage: '/assets/social/og-image.jpg',
+    heroBanner,                    // Static import (reliable)
+    profilePortrait,               // Static import (fixes failing portrait)
+    ogImage: '/assets/social/og-image.jpg', // Stays as a path for OG/Twitter
+  } as {
+    heroBanner: StaticImageData;
+    profilePortrait: StaticImageData;
+    ogImage: string;
   },
 };
 
@@ -184,7 +196,7 @@ export default function Home({ posts, books }: HomeProps) {
         '@type': 'Organization',
         name: 'Abraham of London',
         url: SITE_URL,
-        logo: abs(siteConfig.assets.profilePortrait),
+        logo: imgToUrl(siteConfig.assets.profilePortrait),
         sameAs: sameAsLinks,
       }
     : null;
@@ -244,6 +256,7 @@ export default function Home({ posts, books }: HomeProps) {
             fill
             className="object-cover"
             priority
+            placeholder="blur"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -271,6 +284,7 @@ export default function Home({ posts, books }: HomeProps) {
               fill
               className="rounded-full shadow-card object-cover"
               sizes="256px"
+              placeholder="blur"
               priority={false}
             />
           </div>
