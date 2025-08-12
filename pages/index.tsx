@@ -12,6 +12,7 @@ import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
 // ---- Static image imports ----
+// Correct way to reference local images in Next.js
 import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '../public/assets/images/profile-portrait.webp';
 import ogImage from '../public/assets/social/og-image.jpg';
@@ -40,7 +41,6 @@ const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.
 type SocialMetaLink = { href: string; label: string; icon: string; external?: boolean };
 
 const siteConfig = {
-  // Corrected paths for social icons
   socialLinks: [
     { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/social/email.svg' },
     { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/social/phone.svg' },
@@ -69,7 +69,7 @@ const siteConfig = {
       external: true,
     },
   ] as SocialMetaLink[],
-  // Using imported StaticImageData objects instead of string paths
+  // Use the imported StaticImageData objects
   assets: {
     heroBanner,
     profilePortrait,
