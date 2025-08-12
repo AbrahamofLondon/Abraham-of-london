@@ -24,6 +24,7 @@ const SITE_URL = (
   ''
 ).replace(/\/$/, '');
 
+// Turn a root-relative path into an absolute URL when SITE_URL is known
 const abs = (path: string) => {
   if (!path) return path;
   if (/^https?:\/\//i.test(path)) return path;
@@ -39,34 +40,36 @@ const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.
 type SocialMetaLink = { href: string; label: string; icon: string; external?: boolean };
 
 const siteConfig = {
+  // Corrected paths for social icons
   socialLinks: [
-    { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/images/social/email.svg' },
-    { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/images/social/phone.svg' },
+    { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/social/email.svg' },
+    { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/social/phone.svg' },
     {
       href: 'https://www.linkedin.com/in/abraham-adaramola-06630321/',
       label: 'LinkedIn',
-      icon: '/assets/images/social/linkedin.svg',
+      icon: '/assets/social/linkedin.svg',
       external: true,
     },
     {
       href: 'https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09',
       label: 'X',
-      icon: '/assets/images/social/twitter.svg',
+      icon: '/assets/social/twitter.svg',
       external: true,
     },
     {
       href: 'https://www.facebook.com/share/1MRrKpUzMG/',
       label: 'Facebook',
-      icon: '/assets/images/social/facebook.svg',
+      icon: '/assets/social/facebook.svg',
       external: true,
     },
     {
       href: 'https://wa.me/447496334022',
       label: 'WhatsApp',
-      icon: '/assets/images/social/whatsapp.svg',
+      icon: '/assets/social/whatsapp.svg',
       external: true,
     },
   ] as SocialMetaLink[],
+  // Using imported StaticImageData objects instead of string paths
   assets: {
     heroBanner,
     profilePortrait,
@@ -82,7 +85,6 @@ const siteConfig = {
 type Post = Required<
   Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
 >;
-
 type Book = Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & {
   genre: string;
   downloadPdf?: string | null;
@@ -97,13 +99,27 @@ interface HomeProps {
 // ---------- Data Fetching ----------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const postsData = getAllPosts([
-    'slug', 'title', 'date', 'publishedAt', 'excerpt', 'coverImage',
-    'author', 'readTime', 'category',
+    'slug',
+    'title',
+    'date',
+    'publishedAt',
+    'excerpt',
+    'coverImage',
+    'author',
+    'readTime',
+    'category',
   ]);
 
   const booksData = getAllBooks([
-    'slug', 'title', 'author', 'excerpt', 'coverImage', 'buyLink',
-    'genre', 'downloadPdf', 'downloadEpub',
+    'slug',
+    'title',
+    'author',
+    'excerpt',
+    'coverImage',
+    'buyLink',
+    'genre',
+    'downloadPdf',
+    'downloadEpub',
   ]);
 
   const posts: Post[] = postsData.map((p, i) => ({
@@ -136,10 +152,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   }));
 
   return {
-    props: {
-      posts: posts.slice(0, 3),
-      books: books.slice(0, 3),
-    },
+    props: { posts: posts.slice(0, 3), books: books.slice(0, 3) },
     revalidate: 60,
   };
 };
@@ -149,10 +162,10 @@ export default function Home({ posts, books }: HomeProps) {
   const featured = books[0];
 
   const sameAsLinks = siteConfig.socialLinks
-    .filter((link) => Boolean(link.external) && /^https?:\/\//i.test(link.href))
-    .map((link) => link.href);
+    .filter((l) => l.external && /^https?:\/\//i.test(l.href))
+    .map((l) => l.href);
 
-  // JSON-LD
+  // JSON-LD is now defined directly without useMemo
   const bookJsonLd = hasData(books)
     ? {
         '@context': 'https://schema.org',
@@ -210,11 +223,9 @@ export default function Home({ posts, books }: HomeProps) {
           name="description"
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
-
-        {/* Canonical */}
         {SITE_URL && <link rel="canonical" href={SITE_URL} />}
 
-        {/* Open Graph */}
+        {/* OG / Twitter */}
         <meta property="og:type" content="website" />
         {SITE_URL && <meta property="og:url" content={SITE_URL} />}
         <meta property="og:title" content="Abraham of London" />
@@ -223,14 +234,7 @@ export default function Home({ posts, books }: HomeProps) {
           content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
         />
         <meta property="og:image" content={imgToUrl(siteConfig.assets.ogImage)} />
-
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Abraham of London" />
-        <meta
-          name="twitter:description"
-          content="Official site of Abraham of London – author, strategist, and fatherhood advocate."
-        />
         <meta name="twitter:image" content={imgToUrl(siteConfig.assets.ogImage)} />
 
         {/* JSON-LD */}
@@ -286,7 +290,6 @@ export default function Home({ posts, books }: HomeProps) {
               className="rounded-full shadow-card object-cover"
               sizes="256px"
               placeholder="blur"
-              priority={false}
             />
           </div>
         </section>
