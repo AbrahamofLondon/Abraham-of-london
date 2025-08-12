@@ -12,10 +12,12 @@ import { getAllPosts, PostMeta } from '../lib/posts';
 import { getAllBooks, BookMeta } from '../lib/books';
 
 // ---- Static image imports ----
-// The fix: Import the images directly. Next.js will resolve these paths at build time.
+// All local images must be imported this way for Next.js to handle them correctly.
 import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '../public/assets/images/profile-portrait.webp';
 import ogImage from '../public/assets/social/og-image.jpg';
+import defaultBookCover from '../public/assets/images/default-book.jpg';
+import defaultBlogCover from '../public/assets/images/blog/default-blog-cover.jpg';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
@@ -25,14 +27,13 @@ const SITE_URL = (
   ''
 ).replace(/\/$/, '');
 
-// Turn a root-relative path into an absolute URL when SITE_URL is known
 const abs = (path: string) => {
   if (!path) return path;
   if (/^https?:\/\//i.test(path)) return path;
   return SITE_URL ? new URL(path, SITE_URL).toString() : path;
 };
 
-// Convert StaticImageData | string to absolute URL string (for JSON-LD, meta)
+// This helper must now handle both StaticImageData (imported files) and string paths (for external or dynamic content)
 const imgToUrl = (img: string | StaticImageData) =>
   typeof img === 'string' ? abs(img) : abs(img.src);
 
@@ -69,7 +70,7 @@ const siteConfig = {
       external: true,
     },
   ] as SocialMetaLink[],
-  // Use the imported StaticImageData objects for assets
+  // Use the imported StaticImageData objects
   assets: {
     heroBanner,
     profilePortrait,
@@ -127,10 +128,11 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: p.title || 'Untitled Post',
     date: (p.date || p.publishedAt || new Date().toISOString()) as string,
     excerpt: p.excerpt || 'Read more for full details.',
+    // Corrected to use static import
     coverImage:
       typeof p.coverImage === 'string' && p.coverImage.trim()
         ? p.coverImage
-        : '/assets/images/blog/default-blog-cover.jpg',
+        : defaultBlogCover.src,
     author: p.author || 'Abraham of London',
     readTime: p.readTime || '5 min read',
     category: p.category || 'General',
@@ -141,10 +143,11 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     title: b.title || 'Untitled Book',
     author: b.author || 'Abraham of London',
     excerpt: b.excerpt || 'Read more for full details.',
+    // Corrected to use static import
     coverImage:
       typeof b.coverImage === 'string' && b.coverImage.trim()
         ? b.coverImage
-        : '/assets/images/default-book.jpg',
+        : defaultBookCover.src,
     buyLink: b.buyLink || '#',
     genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Uncategorized',
     downloadPdf: b.downloadPdf ?? null,
@@ -302,7 +305,7 @@ export default function Home({ posts, books }: HomeProps) {
               <div className="grid md:grid-cols-2 gap-6 items-center">
                 <div className="relative w-full h-72 rounded-lg overflow-hidden">
                   <Image
-                    src={featured.coverImage || '/assets/images/default-book.jpg'}
+                    src={featured.coverImage}
                     alt={featured.title}
                     fill
                     className="object-cover"
