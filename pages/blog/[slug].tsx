@@ -6,7 +6,13 @@ import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import Layout from '../../components/Layout';
 import MDXProviderWrapper from '../../components/MDXProviderWrapper';
+import { MDXComponents } from '../../components/MDXComponents';
 import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import remarkHtml from 'remark-html';
+import rehypeStringify from 'rehype-stringify';
 
 type PageMeta = {
   slug: string;
@@ -62,12 +68,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     scope: meta,
     mdxOptions: {
       remarkPlugins: [
-        require('remark-gfm'),
-        require('remark-parse'),
-        require('remark-rehype'),
-        require('remark-html'),
+        remarkGfm,
+        remarkParse,
+        remarkRehype,
+        remarkHtml,
       ],
-      rehypePlugins: [require('rehype-stringify')],
+      rehypePlugins: [rehypeStringify],
     },
   });
 
@@ -119,7 +125,7 @@ export default function BlogPost({ post }: Props) {
           </div>
 
           <div className="prose prose-lg max-w-none text-deepCharcoal">
-            <MDXRemote {...post.content} />
+            <MDXRemote {...post.content} components={MDXComponents} />
           </div>
         </article>
       </MDXProviderWrapper>

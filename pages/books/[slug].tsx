@@ -1,147 +1,38 @@
-// pages/books/[slug].tsx
 import Head from 'next/head';
 import Image from 'next/image';
-import Link from 'next/link';
 import type { GetStaticProps, GetStaticPaths } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getBookBySlug, getAllBooks, BookMeta } from '../../lib/books';
 import Layout from '../../components/Layout';
+import MDXProviderWrapper from '../../components/MDXProviderWrapper';
 import { MDXComponents } from '../../components/MDXComponents';
+import { getAllBooks, getBookBySlug, BookMeta } from '../../lib/books';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import remarkHtml from 'remark-html';
+import rehypeStringify from 'rehype-stringify';
 
-type BookPageMeta = Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage'>> & {
-  date: string;
-  publishedAt: string;
-  description: string;
+type PageMeta = {
+  slug: string;
+  title: string;
+  author: string;
+  excerpt: string;
+  coverImage: string;
   buyLink: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-  tags?: string[];
-  genre?: string[];
+  genre: string | string[];
+  downloadPdf?: string;
+  downloadEpub?: string;
 };
 
-interface BookProps {
+type Props = {
   book: {
-    meta: BookPageMeta;
+    meta: PageMeta;
     content: MDXRemoteSerializeResult;
   };
-}
+};
 
-export default function Book({ book }: BookProps) {
-  const siteUrl = 'https://abrahamoflondon.org';
-  const coverImage = book.meta.coverImage || '/assets/images/default-book.jpg';
-  const genres = book.meta.genre ?? [];
-  const tags = book.meta.tags ?? [];
-
-  return (
-    <Layout>
-      <Head>
-        <title>{book.meta.title} | Abraham of London Books</title>
-        <meta name="description" content={book.meta.description || book.meta.excerpt || 'Book by Abraham of London'} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${siteUrl}/books/${book.meta.slug}`} />
-        <meta property="og:title" content={`${book.meta.title} | Abraham of London Books`} />
-        <meta property="og:description" content={book.meta.description || book.meta.excerpt || ''} />
-        <meta property="og:image" content={`${siteUrl}${coverImage}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={`${siteUrl}${coverImage}`} />
-      </Head>
-
-      <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
-        <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-          <Image src={coverImage} alt={book.meta.title} fill className="object-cover" priority />
-        </div>
-
-        <header className="text-center mb-8">
-          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-4">{book.meta.title}</h1>
-          <div className="text-lg text-deepCharcoal mb-2">
-            By <span className="font-semibold">{book.meta.author}</span>
-          </div>
-          {book.meta.date && <div className="text-sm text-deepCharcoal/70">Published: {book.meta.date}</div>}
-        </header>
-
-        {genres.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2 justify-center">
-            {genres.map((g) => (
-              <span
-                key={g}
-                className="inline-block text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none text-deepCharcoal mb-10">
-          <MDXRemote {...book.content} components={MDXComponents} />
-        </div>
-
-        {tags.length > 0 && (
-          <ul className="flex flex-wrap gap-2 justify-center mt-2 mb-10">
-            {tags.map((t) => (
-              <li
-                key={t}
-                className="text-xs uppercase tracking-wide text-forest border border-lightGrey px-3 py-1"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
-          <Link
-            href={`/memoir.html`}
-            target="_blank"
-            className="bg-forest text-cream px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-softGold hover:text-forest"
-          >
-            Read / Buy (free)
-          </Link>
-
-          {book.meta.buyLink && book.meta.buyLink !== '#' && (
-            <a
-              href={book.meta.buyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
-              Buy Now
-            </a>
-          )}
-          {book.meta.downloadPdf && (
-            <a
-              href={book.meta.downloadPdf}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
-              Download PDF
-            </a>
-          )}
-          {book.meta.downloadEpub && (
-            <a
-              href={book.meta.downloadEpub}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-forest text-forest px-5 py-2 rounded-[2px] tracking-brand transition hover:bg-forest hover:text-cream"
-            >
-              Download EPUB
-            </a>
-          )}
-        </div>
-
-        <div className="text-center">
-          <Link href="/books" className="text-forest hover:text-softGold font-medium">
-            &larr; Back to Books
-          </Link>
-        </div>
-      </article>
-    </Layout>
-  );
-}
-
-export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || '');
   const raw = getBookBySlug(slug, [
     'slug',
@@ -149,49 +40,125 @@ export const getStaticProps: GetStaticProps<BookProps> = async ({ params }) => {
     'author',
     'excerpt',
     'coverImage',
-    'description',
-    'date',
-    'publishedAt',
     'buyLink',
+    'genre',
     'downloadPdf',
     'downloadEpub',
-    'tags',
-    'genre',
     'content',
   ]) as Partial<BookMeta> & { content?: string };
 
   if (!raw.slug || raw.title === 'Book Not Found') return { notFound: true };
 
-  const meta: BookPageMeta = {
+  const meta: PageMeta = {
     slug: raw.slug,
-    title: raw.title || 'Untitled Book',
+    title: raw.title || 'Untitled',
     author: raw.author || 'Abraham of London',
     excerpt: raw.excerpt || '',
-    coverImage: raw.coverImage || '/assets/images/default-book.jpg',
-    date: (raw.date || raw.publishedAt || '') as string,
-    publishedAt: (raw.publishedAt || raw.date || '') as string,
-    description: raw.description || raw.excerpt || '',
+    coverImage:
+      typeof raw.coverImage === 'string' && raw.coverImage.trim()
+        ? raw.coverImage
+        : '/assets/images/default-book.jpg',
     buyLink: raw.buyLink || '#',
-    downloadPdf: raw.downloadPdf ?? null,
-    downloadEpub: raw.downloadEpub ?? null,
-    tags: Array.isArray(raw.tags) ? raw.tags : raw.tags ? [raw.tags] : [],
-    genre: Array.isArray(raw.genre) ? raw.genre : raw.genre ? [raw.genre] : [],
+    genre: raw.genre || 'Uncategorized',
+    downloadPdf: raw.downloadPdf || undefined,
+    downloadEpub: raw.downloadEpub || undefined,
   };
 
-  const mdxSource = await serialize(raw.content ?? '', { parseFrontmatter: false, scope: meta });
+  const mdx = await serialize(raw.content ?? '', {
+    parseFrontmatter: false,
+    scope: meta,
+    mdxOptions: {
+      remarkPlugins: [
+        remarkGfm,
+        remarkParse,
+        remarkRehype,
+        remarkHtml,
+      ],
+      rehypePlugins: [rehypeStringify],
+    },
+  });
 
-  return {
-    props: { book: { meta, content: mdxSource } },
-    revalidate: 60,
-  };
+  return { props: { book: { meta, content: mdx } }, revalidate: 60 };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const books = getAllBooks(['slug']);
-  const paths =
-    books.map((b) => (b.slug ? { params: { slug: String(b.slug) } } : null)).filter(Boolean) as {
-      params: { slug: string };
-    }[];
-
-  return { paths, fallback: 'blocking' };
+  return {
+    paths: books.map((b) => ({ params: { slug: String(b.slug) } })),
+    fallback: 'blocking',
+  };
 };
+
+export default function BookPage({ book }: Props) {
+  const siteUrl = 'https://abrahamoflondon.org';
+  return (
+    <Layout>
+      <MDXProviderWrapper>
+        <Head>
+          <title>{book.meta.title} | Abraham of London</title>
+          <meta name="description" content={book.meta.excerpt || 'Book by Abraham of London'} />
+          <meta property="og:image" content={`${siteUrl}${book.meta.coverImage}`} />
+        </Head>
+
+        <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+          {book.meta.coverImage && (
+            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src={book.meta.coverImage}
+                alt={book.meta.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+
+          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">{book.meta.title}</h1>
+
+          <div className="text-sm text-deepCharcoal/70 mb-4">
+            <span>{book.meta.author}</span> · <span>{Array.isArray(book.meta.genre) ? book.meta.genre.join(', ') : book.meta.genre}</span>
+            {book.meta.buyLink && (
+              <a
+                href={book.meta.buyLink}
+                className="ml-2 inline-block text-xs rounded bg-forest text-cream px-2 py-1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Buy Now
+              </a>
+            )}
+          </div>
+
+          <div className="prose prose-lg max-w-none text-deepCharcoal">
+            <MDXRemote {...book.content} components={MDXComponents} />
+          </div>
+
+          {(book.meta.downloadPdf || book.meta.downloadEpub) && (
+            <div className="mt-6 flex gap-4">
+              {book.meta.downloadPdf && (
+                <a
+                  href={book.meta.downloadPdf}
+                  className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download PDF
+                </a>
+              )}
+              {book.meta.downloadEpub && (
+                <a
+                  href={book.meta.downloadEpub}
+                  className="border border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download EPUB
+                </a>
+              )}
+            </div>
+          )}
+        </article>
+      </MDXProviderWrapper>
+    </Layout>
+  );
+}
