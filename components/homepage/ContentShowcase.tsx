@@ -1,14 +1,19 @@
 // components/homepage/ContentShowcase.tsx
+
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import BlogPostCard from '../BlogPostCard';
 import BookCard from '../BookCard';
 
+// Import the types directly from the index page.
+import { Post, Book } from '../../pages/index';
+
 interface ContentShowcaseProps {
   title: string;
   subtitle: string;
-  items: any[];
+  // Use a union type to specify that the items array can contain either post or book data
+  items: Post[] | Book[];
   type: 'post' | 'book';
   link: string;
   linkText: string;
@@ -33,8 +38,6 @@ const itemVariants = {
 const ContentShowcase: React.FC<ContentShowcaseProps> = ({ title, subtitle, items, type, link, linkText }) => {
   if (!items || items.length === 0) return null;
 
-  const CardComponent = type === 'post' ? BlogPostCard : BookCard;
-
   return (
     <section className="container mx-auto px-4 py-20">
       <div className="text-center mb-12">
@@ -51,7 +54,13 @@ const ContentShowcase: React.FC<ContentShowcaseProps> = ({ title, subtitle, item
       >
         {items.map((item, index) => (
           <motion.div key={index} variants={itemVariants}>
-            <CardComponent {...(type === 'post' ? { post: item } : { book: item })} />
+            {type === 'post' ? (
+              // The fix: Spread the post properties directly onto the component
+              <BlogPostCard {...(item as Post)} />
+            ) : (
+              // The fix: Spread the book properties directly onto the component
+              <BookCard {...(item as Book)} />
+            )}
           </motion.div>
         ))}
       </motion.div>
