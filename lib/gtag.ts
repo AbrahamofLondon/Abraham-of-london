@@ -1,40 +1,43 @@
+// lib/gtag.ts
+// Google Analytics 4 tracking utilities with TypeScript support
+
 declare global {
   interface Window {
-    // gtag accepts string event name and params object
-    gtag?: (
-      command: 'config' | 'event' | string,
+    gtag: (
+      command: "config" | "event",
       targetId: string,
       params?: Record<string, unknown>
     ) => void;
   }
 }
 
-// Use a valid variable name, like GA_TRACKING_ID
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
+export const GA_TRACKING_ID: string | undefined = process.env.NEXT_PUBLIC_GA_ID;
 
-// Track page views
-export const pageview = (url: string) => {
-  if (typeof window !== 'undefined' && GA_TRACKING_ID && typeof window.gtag === 'function') {
-    window.gtag('config', GA_TRACKING_ID, {
-      page_path: url,
-    });
-  }
+const isProduction =
+  typeof window !== "undefined" &&
+  typeof window.gtag === "function" &&
+  Boolean(GA_TRACKING_ID) &&
+  process.env.NODE_ENV === "production";
+
+export const pageview = (url: string): void => {
+  if (!isProduction) return;
+  window.gtag("config", GA_TRACKING_ID as string, {
+    page_path: url,
+  });
 };
 
-// Log specific events
-export type GAEvent = {
+export interface GTagEvent {
   action: string;
   category: string;
-  label: string;
+  label?: string;
   value?: number;
-};
+}
 
-export const event = ({ action, category, label, value }: GAEvent) => {
-  if (typeof window !== 'undefined' && GA_TRACKING_ID && typeof window.gtag === 'function') {
-    window.gtag('event', action, {
-      event_category: category,
-      event_label: label,
-      value,
-    });
-  }
+export const event = ({ action, category, label, value }: GTagEvent): void => {
+  if (!isProduction) return;
+  window.gtag("event", GA_TRACKING_ID as string, {
+    event_category: category,
+    event_label: label,
+    value,
+  });
 };
