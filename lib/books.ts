@@ -1,3 +1,4 @@
+// lib/books.ts
 import fs from "fs";
 import { join } from "path";
 import matter from "gray-matter";
@@ -15,15 +16,22 @@ export interface BookMeta {
   content?: string;
 }
 
-const booksDirectory = join(process.cwd(), "_books");
+const booksDirectory = join(process.cwd(), "content/books");
 
 export function getBookSlugs(): string[] {
-  return fs.readdirSync(booksDirectory);
+  // Corrected to remove the file extension from the slug
+  return fs.readdirSync(booksDirectory).map(file => file.replace(/\.mdx?$/, ''));
 }
 
 export function getBookBySlug(slug: string, fields: (keyof BookMeta)[]): Partial<BookMeta> {
-  const realSlug = slug.replace(/\.md$/, "");
-  const fullPath = join(booksDirectory, `${realSlug}.md`);
+  // Corrected to use the original slug directly and add the correct extension
+  // Use .mdx if your files are .mdx, otherwise use .md
+  const fullPath = join(booksDirectory, `${slug}.mdx`); 
+  
+  if (!fs.existsSync(fullPath)) {
+      throw new Error(`File not found: ${fullPath}`);
+  }
+
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
@@ -31,7 +39,7 @@ export function getBookBySlug(slug: string, fields: (keyof BookMeta)[]): Partial
 
   fields.forEach((field) => {
     if (field === "slug") {
-      items[field] = realSlug;
+      items[field] = slug; // Pass the corrected slug without the extra extension
     }
     if (field === "content") {
       items[field] = content;

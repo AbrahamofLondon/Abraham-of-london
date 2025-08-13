@@ -31,7 +31,7 @@ const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.
 const ASSETS = {
   heroBanner: '/assets/images/abraham-of-london-banner.webp',
   profilePortrait: '/assets/images/profile-portrait.webp',
-  ogImage: '/assets/social/og-image.jpg',
+  ogImage: '/assets/images/social/og-image.jpg', // Corrected path
   defaultBookCover: '/assets/images/default-book.jpg',
   defaultBlogCover: '/assets/images/blog/default-blog-cover.jpg',
 } as const;
@@ -40,30 +40,30 @@ type SocialMetaLink = { href: string; label: string; icon: string; external?: bo
 
 const siteConfig = {
   socialLinks: [
-    { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/social/email.svg' },
-    { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/social/phone.svg' },
+    { href: 'mailto:info@abrahamoflondon.org', label: 'Email', icon: '/assets/images/social/email.svg' }, // Corrected path
+    { href: 'tel:+442086225909', label: 'Phone', icon: '/assets/images/social/phone.svg' }, // Corrected path
     {
       href: 'https://www.linkedin.com/in/abraham-adaramola-06630321/',
       label: 'LinkedIn',
-      icon: '/assets/social/linkedin.svg',
+      icon: '/assets/images/social/linkedin.svg', // Corrected path
       external: true,
     },
     {
       href: 'https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09',
       label: 'X',
-      icon: '/assets/social/twitter.svg',
+      icon: '/assets/images/social/twitter.svg', // Corrected path
       external: true,
     },
     {
       href: 'https://www.facebook.com/share/1MRrKpUzMG/',
       label: 'Facebook',
-      icon: '/assets/social/facebook.svg',
+      icon: '/assets/images/social/facebook.svg', // Corrected path
       external: true,
     },
     {
       href: 'https://wa.me/447496334022',
       label: 'WhatsApp',
-      icon: '/assets/social/whatsapp.svg',
+      icon: '/assets/images/social/whatsapp.svg', // Corrected path
       external: true,
     },
   ] as SocialMetaLink[],
