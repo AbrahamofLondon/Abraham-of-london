@@ -9,10 +9,6 @@ import MDXProviderWrapper from '../../components/MDXProviderWrapper';
 import { MDXComponents } from '../../components/MDXComponents';
 import { getAllPosts, getPostBySlug, PostMeta } from '../../lib/posts';
 import remarkGfm from 'remark-gfm';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import remarkHtml from 'remark-html';
-import rehypeStringify from 'rehype-stringify';
 
 type PageMeta = {
   slug: string;
@@ -47,7 +43,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     'content',
   ]) as Partial<PostMeta> & { content?: string };
 
-  if (!raw.slug || raw.title === 'Post Not Found') return { notFound: true };
+  if (!raw.slug || raw.title === 'Post Not Found') {
+    return { notFound: true };
+  }
 
   const meta: PageMeta = {
     slug: raw.slug,
@@ -67,17 +65,20 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     parseFrontmatter: false,
     scope: meta,
     mdxOptions: {
-      remarkPlugins: [
-        remarkGfm,
-        remarkParse,
-        remarkRehype,
-        remarkHtml,
-      ],
-      rehypePlugins: [rehypeStringify],
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [],
     },
   });
 
-  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+  return {
+    props: {
+      post: {
+        meta,
+        content: mdx,
+      },
+    },
+    revalidate: 60,
+  };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -90,13 +91,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export default function BlogPost({ post }: Props) {
   const siteUrl = 'https://abrahamoflondon.org';
+
   return (
     <Layout>
       <MDXProviderWrapper>
         <Head>
           <title>{post.meta.title} | Abraham of London</title>
-          <meta name="description" content={post.meta.excerpt || 'Article by Abraham of London'} />
-          <meta property="og:image" content={`${siteUrl}${post.meta.coverImage}`} />
+          <meta
+            name="description"
+            content={post.meta.excerpt || 'Article by Abraham of London'}
+          />
+          <meta
+            property="og:image"
+            content={`${siteUrl}${post.meta.coverImage}`}
+          />
         </Head>
 
         <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
@@ -112,7 +120,9 @@ export default function BlogPost({ post }: Props) {
             </div>
           )}
 
-          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">{post.meta.title}</h1>
+          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">
+            {post.meta.title}
+          </h1>
 
           <div className="text-sm text-deepCharcoal/70 mb-4">
             <span>{post.meta.author}</span> · <span>{post.meta.date}</span>

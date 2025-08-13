@@ -20,7 +20,9 @@ const postsDir = path.join(process.cwd(), 'content', 'blog');
 
 export function getPostSlugs(): string[] {
   if (!fs.existsSync(postsDir)) return [];
-  return fs.readdirSync(postsDir).filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
+  return fs
+    .readdirSync(postsDir)
+    .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
 }
 
 export function getPostBySlug(
@@ -44,18 +46,20 @@ export function getPostBySlug(
   fields.forEach((field) => {
     if (field === 'content') {
       item.content = content;
-      return;
-    }
-    const value = (data as Record<string, unknown>)[field as string];
-    if (typeof value !== 'undefined') {
-      (item as Record<string, unknown>)[field] = value;
+    } else {
+      const value = (data as Record<string, unknown>)[field as string];
+      if (typeof value !== 'undefined') {
+        (item as Record<string, unknown>)[field] = value;
+      }
     }
   });
 
   return item;
 }
 
-export function getAllPosts(fields: (keyof PostMeta | 'content')[] = []): Partial<PostMeta>[] {
+export function getAllPosts(
+  fields: (keyof PostMeta | 'content')[] = []
+): Partial<PostMeta>[] {
   return getPostSlugs()
     .map((slug) => getPostBySlug(slug, fields))
     .sort((a, b) => {
