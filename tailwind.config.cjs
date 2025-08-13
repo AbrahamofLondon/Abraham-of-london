@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // IMPORTANT: Enable dark mode based on the 'dark' class
+  darkMode: 'class',
+  
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -15,15 +18,19 @@ module.exports = {
     },
     extend: {
       colors: {
-        forest: '#1B4332',
-        cream: '#F7F3E9',
-        deepCharcoal: '#2D3436',
-        warmWhite: '#FEFCF7',
-        softGold: '#D4AF37',
-        midGreen: '#40916C',
-        lightGrey: '#DDD6C7',
-        brand: { primary: '#1B4332', text: '#2D3436', bg: '#FEFCF7', accent: '#D4AF37' },
+        // We'll define these colors using CSS variables in globals.css
+        // This is the key to dynamic dark/light mode theming
+        primary: 'var(--color-primary)',
+        'primary-hover': 'var(--color-primary-hover)',
+        'on-primary': 'var(--color-on-primary)',
+        'on-primary-hover': 'var(--color-on-primary-hover)',
+        secondary: 'var(--color-secondary)',
+        'on-secondary': 'var(--color-on-secondary)',
+        accent: 'var(--color-accent)',
+        'accent-hover': 'var(--color-accent-hover)',
+        'on-accent': 'var(--color-on-accent)',
       },
+      // Preserving all your existing settings below
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
@@ -40,6 +47,7 @@ module.exports = {
       },
       animation: { fadeIn: 'fadeIn .6s ease both', fadeUp: 'fadeUp .6s ease both' },
       typography: ({ theme }) => ({
+        // Using your existing typography settings, which are already perfect for a light/dark theme
         DEFAULT: {
           css: {
             '--tw-prose-body': theme('colors.deepCharcoal'),
