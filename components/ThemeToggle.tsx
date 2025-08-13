@@ -1,6 +1,6 @@
 // components/ThemeToggle.tsx
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../lib/ThemeContext';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
