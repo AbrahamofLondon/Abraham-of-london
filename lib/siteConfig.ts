@@ -1,20 +1,60 @@
 // lib/siteConfig.ts
 
-// Social Media Links
-export const socialLinks = [
-  { name: 'Facebook', url: 'https://facebook.com/abrahamoflondon' },
-  { name: 'Instagram', url: 'https://instagram.com/abrahamoflondon' },
-  { name: 'X (Twitter)', url: 'https://twitter.com/abrahamoflondon' },
-  { name: 'LinkedIn', url: 'https://linkedin.com/in/abrahamoflondon' },
-  { name: 'YouTube', url: 'https://youtube.com/@abrahamoflondon?si=DF7VTWITL0qZ-ffs' },
-  // Add more social media links as needed. Make sure to replace URLs with your actual ones.
-];
-
-// Other site-wide configuration (optional, but good practice)
+// Enhanced social configuration with proper validation
 export const siteConfig = {
-  siteName: 'Abraham of London',
-  tagline: 'Fearless Fatherhood. Unwavering Faith. Lasting Legacy.',
-  author: 'Abraham of London',
-  contactEmail: 'info@abrahamoflondon.org',
-  // Add other global configuration variables here
+  title: 'Abraham of London',
+  description: 'Fatherhood, leadership, and life lessons — empowering men to reclaim the narrative.',
+  author: 'Abraham Adaramola',
+  email: 'info@abrahamoflondon.org',
+  phone: '+44 20 8062 25909',
+  whatsapp: '+44 7496 334022',
+  socialLinks: [
+    { 
+      href: 'mailto:info@abrahamoflondon.org', 
+      label: 'Email', 
+      icon: '/assets/images/social/email.svg',
+      ariaLabel: 'Send us an email'
+    },
+    { 
+      href: 'tel:+442086225909', 
+      label: 'Phone', 
+      icon: '/assets/images/social/phone.svg',
+      ariaLabel: 'Call us'
+    },
+    {
+      href: 'https://www.linkedin.com/in/abraham-adaramola-06630321/',
+      label: 'LinkedIn',
+      icon: '/assets/images/social/linkedin.svg',
+      external: true,
+      ariaLabel: 'Follow us on LinkedIn'
+    },
+    {
+      href: 'https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09',
+      label: 'X (Twitter)',
+      icon: '/assets/images/social/twitter.svg',
+      external: true,
+      ariaLabel: 'Follow us on X (Twitter)'
+    },
+    {
+      href: 'https://www.facebook.com/share/1MRrKpUzMG/',
+      label: 'Facebook',
+      icon: '/assets/images/social/facebook.svg',
+      external: true,
+      ariaLabel: 'Follow us on Facebook'
+    },
+    {
+      href: 'https://wa.me/447496334022',
+      label: 'WhatsApp',
+      icon: '/assets/images/social/whatsapp.svg',
+      external: true,
+      ariaLabel: 'Message us on WhatsApp'
+    },
+    {
+      href: 'https://www.instagram.com/abraham_of_london',
+      label: 'Instagram',
+      icon: '/assets/images/social/instagram.svg',
+      external: true,
+      ariaLabel: 'Follow us on Instagram'
+    },
+  ],
 };
