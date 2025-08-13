@@ -136,7 +136,7 @@ export default function Home({ posts, books }: HomeProps) {
         'name': siteConfig.author,
         'url': baseUrl,
         'image': abs('/assets/images/profile-portrait.webp'),
-        'sameAs': siteConfig.socialLinks.map(link => link.url),
+        'sameAs': siteConfig.socialLinks.map(link => link.href),
       },
       ...posts.map(post => ({
         '@context': 'https://schema.org',

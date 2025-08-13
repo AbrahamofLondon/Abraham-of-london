@@ -82,13 +82,14 @@ export default function SocialLinks({
 
         const iconNode =
           typeof item.icon === 'string' ? (
-            item.icon.endsWith('.svg') ? (
-              <img
+            item.icon.endsWith('.svg') || isHttp(item.icon) ? (
+              <Image
                 src={item.icon}
                 alt=""
                 aria-hidden={true}
                 width={size}
                 height={size}
+                unoptimized={isHttp(item.icon)} // unoptimized for external URLs
               />
             ) : (
               <Image
@@ -97,7 +98,6 @@ export default function SocialLinks({
                 aria-hidden={true}
                 width={size}
                 height={size}
-                unoptimized={/^https?:\/\//.test(item.icon)}
               />
             )
           ) : (
