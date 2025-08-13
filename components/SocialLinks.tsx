@@ -8,21 +8,20 @@ type IconType = string | React.ReactNode;
 export interface SocialLinkItem {
   href: string;
   label: string;
-  icon: IconType; // URL or ReactNode
-  external?: boolean; // override auto-detect
-  rel?: string; // extra rel tokens if needed
-  className?: string; // per-link override
-  id?: string; // stable key / test id
+  icon: IconType;
+  external?: boolean;
+  rel?: string;
+  className?: string;
+  id?: string;
 }
 
 interface SocialLinksProps {
   links: SocialLinkItem[];
-  size?: number; // icon size px
-  className?: string; // wrapper class
+  size?: number;
+  className?: string;
   variant?: 'ghost' | 'solid';
 }
 
-/** Minimal class joiner (avoids clsx dep) */
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
@@ -30,14 +29,15 @@ function cn(...parts: Array<string | false | null | undefined>) {
 function isHttp(href: string) {
   return /^https?:\/\//i.test(href);
 }
+
 function isMail(href: string) {
   return href.startsWith('mailto:');
 }
+
 function isTel(href: string) {
   return href.startsWith('tel:');
 }
 
-/** Safely access window.gtag without re-declaring global types */
 function getGtag(): ((...args: unknown[]) => void) | undefined {
   if (typeof window === 'undefined') return undefined;
   const w = window as unknown as { gtag?: (...args: unknown[]) => void };
@@ -61,12 +61,9 @@ export default function SocialLinks({
   className,
   variant = 'ghost',
 }: SocialLinksProps) {
-  const baseBtn =
-    'inline-flex items-center gap-2 rounded-md px-3 py-2 text-deepCharcoal transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-  const ghost =
-    'border border-lightGrey hover:bg-warmWhite focus:ring-deepCharcoal/30';
-  const solid =
-    'bg-deepCharcoal text-warmWhite hover:opacity-90 focus:ring-deepCharcoal/40';
+  const baseBtn = 'inline-flex items-center gap-2 rounded-md px-3 py-2 text-deepCharcoal transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const ghost = 'border border-lightGrey hover:bg-warmWhite focus:ring-deepCharcoal/30';
+  const solid = 'bg-deepCharcoal text-warmWhite hover:opacity-90 focus:ring-deepCharcoal/40';
 
   return (
     <div className={cn('flex flex-wrap gap-3', className)}>
@@ -82,24 +79,14 @@ export default function SocialLinks({
 
         const iconNode =
           typeof item.icon === 'string' ? (
-            item.icon.endsWith('.svg') || isHttp(item.icon) ? (
-              <Image
-                src={item.icon}
-                alt=""
-                aria-hidden={true}
-                width={size}
-                height={size}
-                unoptimized={isHttp(item.icon)} // unoptimized for external URLs
-              />
-            ) : (
-              <Image
-                src={item.icon}
-                alt=""
-                aria-hidden={true}
-                width={size}
-                height={size}
-              />
-            )
+            <Image
+              src={item.icon}
+              alt=""
+              aria-hidden={true}
+              width={size}
+              height={size}
+              unoptimized={isHttp(item.icon)}
+            />
           ) : (
             <span aria-hidden={true}>{item.icon}</span>
           );
@@ -130,8 +117,7 @@ export default function SocialLinks({
           );
         }
 
-        // internal links or mailto/tel (no forced new tab)
-        if (isHttp(item.href)) {
+        if (isHttp(item.href) || isMail(item.href) || isTel(item.href)) {
           return (
             <a
               key={key}
