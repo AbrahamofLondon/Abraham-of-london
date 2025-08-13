@@ -22,8 +22,8 @@
     "next": "^14.2.31",
     "next-mdx-remote": "^5.0.0",
     "next-seo": "^6.8.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "rehype-stringify": "^10.0.0",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.1",
@@ -34,7 +34,7 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.11.6",
+    "@netlify/plugin-nextjs": "^5.12.0",
     "@next/mdx": "^14.2.31",
     "@tailwindcss/typography": "^0.5.16",
     "@types/ms": "^2.1.0",

@@ -148,8 +148,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       },
       revalidate: 3600, // Revalidate every hour
     };
-  } catch (error) {
-    console.error('Error in getStaticProps:', error);
+  } catch (_error) {
+    console.error('Error in getStaticProps:', _error);
     return {
       props: {
         posts: [],
@@ -187,7 +187,7 @@ const NewsletterSignup: React.FC = () => {
       } else {
         throw new Error('Failed to subscribe');
       }
-    } catch (error) {
+    } catch (_error) {
       setStatus('error');
       setMessage('Something went wrong. Please try again.');
     } finally {
@@ -430,7 +430,7 @@ export default function Home({ posts, books }: HomeProps) {
                 to embrace their roles with confidence and compassion.
               </p>
               <p className="mb-6">
-                His mission is to inspire fathers to navigate life's challenges with resilience
+                His mission is to inspire fathers to navigate life&apos;s challenges with resilience
                 while building strong, lasting relationships with their children and families.
               </p>
             </div>
