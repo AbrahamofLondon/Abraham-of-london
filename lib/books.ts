@@ -1,69 +1,51 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+import fs from "fs";
+import { join } from "path";
+import matter from "gray-matter";
 
-export type BookMeta = {
+export interface BookMeta {
   slug: string;
-  title?: string;
-  author?: string;
-  genre?: string;
-  excerpt?: string;
-  coverImage?: string;
-  buyLink?: string;
-  pdfLink?: string;
-  epubLink?: string;
+  title: string;
+  author: string;
+  excerpt: string;
+  coverImage: string;
+  buyLink: string;
+  genre: string;
+  downloadPdf?: string;
+  downloadEpub?: string;
   content?: string;
-};
-
-const booksDir = path.join(process.cwd(), 'content', 'books');
-
-export function getBookSlugs(): string[] {
-  if (!fs.existsSync(booksDir)) return [];
-  return fs
-    .readdirSync(booksDir)
-    .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
 }
 
-export function getBookBySlug(
-  slug: string,
-  fields: (keyof BookMeta | 'content')[] = []
-): Partial<BookMeta> & { content?: string } {
-  const realSlug = slug.replace(/\.(mdx|md)$/, '');
-  const mdxPath = path.join(booksDir, `${realSlug}.mdx`);
-  const mdPath = path.join(booksDir, `${realSlug}.md`);
+const booksDirectory = join(process.cwd(), "_books");
 
-  const fullPath = fs.existsSync(mdxPath) ? mdxPath : mdPath;
-  if (!fs.existsSync(fullPath)) {
-    return { slug: realSlug, title: 'Book Not Found' };
-  }
+export function getBookSlugs(): string[] {
+  return fs.readdirSync(booksDirectory);
+}
 
-  const file = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(file);
+export function getBookBySlug(slug: string, fields: (keyof BookMeta)[]): Partial<BookMeta> {
+  const realSlug = slug.replace(/\.md$/, "");
+  const fullPath = join(booksDirectory, `${realSlug}.md`);
+  const fileContents = fs.readFileSync(fullPath, "utf8");
+  const { data, content } = matter(fileContents);
 
-  const item: Partial<BookMeta> & { content?: string } = { slug: realSlug };
+  const items: Partial<BookMeta> = {};
 
   fields.forEach((field) => {
-    if (field === 'content') {
-      item.content = content;
-    } else {
-      const value = (data as Record<string, unknown>)[field as string];
-      if (typeof value !== 'undefined') {
-        (item as Record<string, unknown>)[field] = value;
-      }
+    if (field === "slug") {
+      items[field] = realSlug;
+    }
+    if (field === "content") {
+      items[field] = content;
+    }
+    if (typeof data[field] !== "undefined") {
+      items[field] = data[field];
     }
   });
 
-  return item;
+  return items;
 }
 
-export function getAllBooks(
-  fields: (keyof BookMeta | 'content')[] = []
-): Partial<BookMeta>[] {
+export function getAllBooks(fields: (keyof BookMeta)[] = []): Partial<BookMeta>[] {
   return getBookSlugs()
     .map((slug) => getBookBySlug(slug, fields))
-    .sort((a, b) => {
-      const aTitle = (a.title ?? '').toString().toLowerCase();
-      const bTitle = (b.title ?? '').toString().toLowerCase();
-      return aTitle.localeCompare(bTitle);
-    });
+    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 }
