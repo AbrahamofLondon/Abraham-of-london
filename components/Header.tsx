@@ -1,24 +1,26 @@
 // components/Header.tsx
 import React from 'react';
-import Link from 'next/link'; // Import Link for Next.js navigation
+import Link from 'next/link';
+import ThemeToggle from './ThemeToggle';
 
 const Header: React.FC = () => {
-  return (
-    <header className="bg-primary text-cream py-4">
-      <nav className="container flex justify-between items-center">
-        <Link href="/" className="text-2xl font-display font-bold">
-          Abraham of London
-        </Link>
-        <ul className="flex space-x-4">
-          <li><Link href="/about" className="hover:text-gold">About</Link></li>
-          <li><Link href="/blog" className="hover:text-gold">Blog</Link></li>
-          <li><Link href="/books" className="hover:text-gold">Books</Link></li>
-          <li><Link href="/brands" className="hover:text-gold">Brands</Link></li>
-          <li><Link href="/contact" className="hover:text-gold">Contact</Link></li>
-        </ul>
-      </nav>
-    </header>
-  );
+  return (
+    <header className="site-header">
+      <nav className="container mx-auto flex justify-between items-center py-4">
+        <Link href="/" className="text-2xl font-display font-bold text-[var(--color-primary)]">
+          Abraham of London
+        </Link>
+        <ul className="flex items-center space-x-4">
+          <li><Link href="/about" className="hover:text-[var(--color-accent)]">About</Link></li>
+          <li><Link href="/blog" className="hover:text-[var(--color-accent)]">Blog</Link></li>
+          <li><Link href="/books" className="hover:text-[var(--color-accent)]">Books</Link></li>
+          <li><Link href="/brands" className="hover:text-[var(--color-accent)]">Brands</Link></li>
+          <li><Link href="/contact" className="hover:text-[var(--color-accent)]">Contact</Link></li>
+          <li><ThemeToggle /></li>
+        </ul>
+      </nav>
+    </header>
+  );
 };
 
-export default Header; // Export as default for consistency and correct import
+export default Header;
