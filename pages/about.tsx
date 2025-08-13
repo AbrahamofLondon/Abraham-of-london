@@ -66,7 +66,7 @@ export default function AboutPage() {
         >
           <div className="relative w-full md:w-1/2 h-64 md:h-96 rounded-xl overflow-hidden mb-8 md:mb-0 md:mr-12">
             <Image
-              src="/assets/images/profile/abraham-profile.jpg"
+              src="/assets/images/profile-portrait.webp"
               alt="Abraham Adaramola Profile"
               fill
               className="object-cover"
