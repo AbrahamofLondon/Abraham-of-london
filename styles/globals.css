@@ -1,36 +1,57 @@
 /* styles/globals.css */
 
-/* Tailwind layers (keep these at the top if you're using Tailwind) */
+/* Tailwind layers (keep these at the top) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Brand Variables */
+/* --- THEME VARIABLES --- */
+/* Light Theme (Default) */
 :root {
-  --forest-green: #1B4332;
-  --cream: #F7F3E9;
-  --deep-charcoal: #2D3436;
-  --warm-white: #FEFCF7;
-  --soft-gold: #D4AF37;
-  --mid-green: #40916C;
-  --light-grey: #DDD6C7;
+  --color-primary: #1B4332; /* forest-green */
+  --color-primary-hover: #123122; /* A darker forest-green for hover state */
+  --color-on-primary: #FEFCF7; /* warm-white */
+  --color-on-primary-hover: #FEFCF7;
+
+  --color-secondary: #F7F3E9; /* cream */
+  --color-on-secondary: #2D3436; /* deep-charcoal */
+
+  --color-accent: #D4AF37; /* soft-gold */
+  --color-accent-hover: #b28c2e; /* A slightly darker gold */
+  --color-on-accent: #FEFCF7; /* warm-white */
 }
 
-/* Base Typography & Background */
+/* Dark Theme */
+.dark {
+  --color-primary: #F7F3E9; /* cream */
+  --color-primary-hover: #E8E5DF; /* A slightly darker cream */
+  --color-on-primary: #2D3436; /* deep-charcoal */
+  --color-on-primary-hover: #2D3436;
+
+  --color-secondary: #2D3436; /* deep-charcoal */
+  --color-on-secondary: #F7F3E9; /* cream */
+
+  --color-accent: #D4AF37; /* soft-gold (can be kept the same or adjusted) */
+  --color-accent-hover: #b28c2e;
+  --color-on-accent: #1B4332; /* forest-green */
+}
+
+/* --- BASE STYLES USING THEME VARIABLES --- */
 html, body {
   padding: 0;
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 1.1rem;
   line-height: 1.6;
-  color: var(--deep-charcoal);
-  background-color: var(--warm-white);
+  color: var(--color-on-secondary);
+  background-color: var(--color-secondary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Headings use Playfair-esque serif if available */
 h1, h2, h3, h4, h5, h6 {
   font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
-  color: var(--forest-green);
+  color: var(--color-primary);
 }
 
 h1 { font-size: 3.5rem; letter-spacing: 0.1em; }
@@ -39,62 +60,70 @@ h3 { font-size: 1.8rem; letter-spacing: 0.05em; }
 
 /* Links */
 a {
-  color: var(--forest-green);
+  color: var(--color-primary);
   text-decoration: none;
   transition: color .25s ease;
 }
-a:hover { color: var(--soft-gold); }
+a:hover { color: var(--color-accent); }
 
-/* Header (if you use a global header outside Tailwind) */
+/* --- YOUR CUSTOM UTILITY CLASSES, UPDATED TO USE THEME VARIABLES --- */
+
+/* Header */
 .site-header {
-  background: var(--warm-white);
+  background: var(--color-secondary);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   height: 100px;
 }
 
 /* Buttons */
 .btn-primary {
-  background: var(--forest-green);
-  color: var(--cream);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   padding: 14px 36px;
   border-radius: 2px;
   letter-spacing: .05em;
   transition: background-color .25s ease, color .25s ease;
 }
 .btn-primary:hover {
-  background: var(--soft-gold);
-  color: var(--forest-green);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .btn-secondary {
   background: transparent;
-  border: 2px solid var(--forest-green);
-  color: var(--forest-green);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
   padding: 12px 32px;
   border-radius: 2px;
   transition: all .25s ease;
 }
 .btn-secondary:hover {
-  background: var(--forest-green);
-  color: var(--cream);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 /* Cards */
 .card {
-  border: 1px solid var(--light-grey);
+  border: 1px solid var(--color-primary);
   padding: 32px;
   box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
   transition: transform .25s ease, box-shadow .25s ease;
+}
+.dark .card {
+  box-shadow: 0 10px 30px rgba(255,255,255,0.05);
 }
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
 }
+.dark .card:hover {
+  box-shadow: 0 16px 42px rgba(255,255,255,0.08);
+}
 
 /* Section Header Accent */
 .section-header {
   text-align: center;
-  color: var(--forest-green);
+  color: var(--color-primary);
   position: relative;
 }
 .section-header::after {
@@ -102,23 +131,18 @@ a:hover { color: var(--soft-gold); }
   display: block;
   width: 60px;
   height: 3px;
-  background-color: var(--soft-gold);
+  background-color: var(--color-accent);
   margin: 16px auto 0 auto;
 }
 
 /* Footer */
 .site-footer {
-  background: var(--deep-charcoal);
-  color: var(--cream);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   padding: 48px 24px;
 }
-.site-footer a { color: var(--cream); }
-.site-footer a:hover { color: var(--soft-gold); }
-
-/* Utilities */
-.text-cream { color: var(--cream); }
-.bg-forest { background: var(--forest-green); }
-.bg-warm-white { background: var(--warm-white); }
+.site-footer a { color: var(--color-on-primary); }
+.site-footer a:hover { color: var(--color-accent); }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

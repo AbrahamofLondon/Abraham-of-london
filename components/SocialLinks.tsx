@@ -8,17 +8,17 @@ type IconType = string | React.ReactNode;
 export interface SocialLinkItem {
   href: string;
   label: string;
-  icon: IconType;          // URL or ReactNode
-  external?: boolean;      // override auto-detect
-  rel?: string;            // extra rel tokens if needed
-  className?: string;      // per-link override
-  id?: string;             // stable key / test id
+  icon: IconType; // URL or ReactNode
+  external?: boolean; // override auto-detect
+  rel?: string; // extra rel tokens if needed
+  className?: string; // per-link override
+  id?: string; // stable key / test id
 }
 
 interface SocialLinksProps {
   links: SocialLinkItem[];
-  size?: number;           // icon size px
-  className?: string;      // wrapper class
+  size?: number; // icon size px
+  className?: string; // wrapper class
   variant?: 'ghost' | 'solid';
 }
 
@@ -82,14 +82,24 @@ export default function SocialLinks({
 
         const iconNode =
           typeof item.icon === 'string' ? (
-            <Image
-              src={item.icon}
-              alt=""
-              aria-hidden={true}
-              width={size}
-              height={size}
-              unoptimized={/^https?:\/\//.test(item.icon)}
-            />
+            item.icon.endsWith('.svg') ? (
+              <img
+                src={item.icon}
+                alt=""
+                aria-hidden={true}
+                width={size}
+                height={size}
+              />
+            ) : (
+              <Image
+                src={item.icon}
+                alt=""
+                aria-hidden={true}
+                width={size}
+                height={size}
+                unoptimized={/^https?:\/\//.test(item.icon)}
+              />
+            )
           ) : (
             <span aria-hidden={true}>{item.icon}</span>
           );
