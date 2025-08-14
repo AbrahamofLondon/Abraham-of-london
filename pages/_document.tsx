@@ -1,25 +1,59 @@
-import { Html, Head, Main, NextScript } from 'next/document';
+// pages/_document.tsx
+import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
+import { GA_MEASUREMENT_ID, gaEnabled } from '../lib/gtag';
 
-export default function Document() {
-  return (
-    <Html lang="en">
-      <Head>
-        {/* CORRECTED: Favicon paths matching your actual file structure */}
-        <link rel="icon" href="/favicon/favicon.ico" />
-        <link rel="icon" type="image/svg+xml" href="/favicon/icon0.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/icon1.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon.png" />
-        <link rel="manifest" href="/favicon/manifest.json" />
+class MyDocument extends Document {
+  static async getInitialProps(ctx: DocumentContext) {
+    const initialProps = await Document.getInitialProps(ctx);
+    return { ...initialProps };
+  }
 
-        {/* Additional meta tags for better browser support */}
-        <meta name="theme-color" content="#000000" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
-      </Head>
-      <body>
-        <Main />
-        <NextScript />
-      </body>
-    </Html>
-  );
+  render() {
+    return (
+      <Html lang="en-GB" className="scroll-smooth">
+        <Head>
+          {/* Color scheme + basic PWA meta (safe defaults) */}
+          <meta name="color-scheme" content="dark light" />
+          <meta name="format-detection" content="telephone=no" />
+
+          {/* Preconnects (safe, low-cost) */}
+          <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
+          <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+
+          {/* GA4 script bootstrap (only if ID present) */}
+          {gaEnabled && (
+            <>
+              <script
+                async
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${GA_MEASUREMENT_ID}', {
+                      send_page_view: false
+                    });
+                  `.trim(),
+                }}
+              />
+            </>
+          )}
+
+          {/* NOTE: If you host local fonts, add preload links here.
+             Example:
+             <link rel="preload" href="/fonts/YourFont-Var.woff2" as="font" type="font/woff2" crossOrigin="" />
+          */}
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
 }
+
+export default MyDocument;

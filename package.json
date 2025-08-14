@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.12.0",
+    "@next/bundle-analyzer": "^15.4.6",
     "@next/mdx": "^14.2.31",
     "@tailwindcss/typography": "^0.5.16",
     "@types/ms": "^2.1.0",

@@ -1,16 +1,21 @@
-// lib/dateUtils.ts
+// lib/date.ts
+export function formatDate(input: string | number | Date, locale = 'en-GB'): string {
+  try {
+    const d =
+      input instanceof Date
+        ? input
+        : typeof input === 'number'
+        ? new Date(input)
+        : new Date(input);
 
-/** Format a date-like value (string or Date) into ISO yyyy-MM-dd string */
-export function formatDate(date?: string | Date): string {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  return d.toISOString().slice(0, 10);
-}
+    if (isNaN(d.getTime())) return String(input); // fallback to raw if truly invalid
 
-/** Parse a date string or Date object, fallback to epoch if invalid */
-export function parseDate(date?: string | Date): Date {
-  if (!date) return new Date(0);
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return isNaN(d.getTime()) ? new Date(0) : d;
+    return new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    }).format(d);
+  } catch {
+    return String(input);
+  }
 }
