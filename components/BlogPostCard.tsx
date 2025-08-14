@@ -1,4 +1,4 @@
-// components/BlogPostCard.tsx
+﻿// components/BlogPostCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 
@@ -87,7 +87,7 @@ export default function BlogPostCard({
         <div className="mt-4 flex items-center justify-between text-xs text-deepCharcoal/60">
           <span>{author}</span>
           <span>
-            {readTime ? `${readTime} Ã‚Â· ` : ""}
+            {readTime ? `${readTime} Ãƒâ€šÃ‚Â· ` : ""}
             {formatDate(date)}
           </span>
         </div>
@@ -95,6 +95,7 @@ export default function BlogPostCard({
     </article>
   );
 }
+
 
 
 

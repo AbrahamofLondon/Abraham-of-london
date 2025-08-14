@@ -1,4 +1,4 @@
-// components/homepage/TestimonialsSection.tsx
+﻿// components/homepage/TestimonialsSection.tsx
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -52,7 +52,7 @@ export default function TestimonialsSection() {
             </p>
             <footer className="mt-4 text-sm text-cream/80">
               <span className="font-semibold text-cream">{t.name}</span>
-              <span className="text-cream/60"> Ã¢â‚¬â€ {t.role}</span>
+              <span className="text-cream/60"> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â {t.role}</span>
             </footer>
           </motion.blockquote>
         ))}
@@ -60,6 +60,7 @@ export default function TestimonialsSection() {
     </section>
   );
 }
+
 
 
 

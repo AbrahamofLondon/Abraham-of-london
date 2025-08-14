@@ -1,4 +1,4 @@
-// pages/books.tsx
+﻿// pages/books.tsx
 import React, { useMemo, useState, useCallback, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -28,27 +28,16 @@ const hasData = <T,>(arr?: T[] | null): arr is T[] =>
   Array.isArray(arr) && arr.length > 0;
 
 const ASSETS = {
-  heroBanner: "/assets/images/books-hero-banner.webp",
-  booksCollage: "/assets/images/books-collection.webp",
-  profilePortrait: "/assets/images/profile-portrait.webp",
-  ogImage: "/assets/images/social/books-og-image.jpg",
-  twitterImage: "/assets/images/social/books-twitter.webp",
+  heroBanner: '/assets/images/abraham-of-london-banner.webp',
+  booksCollage: '/assets/images/writing-desk.webp',
+  profilePortrait: '/assets/images/profile-portrait.webp',
+  ogImage: '/assets/images/social/og-image.jpg',
+  twitterImage: '/assets/images/social/twitter-image.webp',
   defaultBookCover: "/assets/images/default-book.jpg",
-  fallbacks: {
-    hero: [
-      "/assets/images/books-hero-banner.webp",
-      "/assets/images/books-collection.webp",
-      "/assets/images/profile-portrait.webp",
-    ] as const,
-    collection: [
-      "/assets/images/books-collection.webp",
-      "/assets/images/profile-portrait.webp",
-      "/assets/images/default-book.jpg",
-    ] as const,
-  },
+  fallbacks: { hero: ['/assets/images/abraham-of-london-banner.webp','/assets/images/writing-desk.webp','/assets/images/profile-portrait.webp'], collection: ['/assets/images/writing-desk.webp','/assets/images/profile-portrait.webp','/assets/images/default-book.jpg'] },
 } as const;
 
-// ---------- Types (UI shape â€“ safe for getStaticProps) ----------
+// ---------- Types (UI shape Ã¢â‚¬â€œ safe for getStaticProps) ----------
 type Book = Required<
   Pick<
     BookMeta,
@@ -285,7 +274,7 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
       new Set(books.map((book) => book.genre).filter(Boolean)),
     ).sort();
 
-    // Pick first 3 as â€œfeaturedâ€
+    // Pick first 3 as Ã¢â‚¬Å“featuredÃ¢â‚¬Â
     const featuredBooks = books.slice(0, 3);
 
     // Final guard against accidental `undefined`
@@ -513,7 +502,7 @@ export default function BooksPage({
                   delay: i * 0.5,
                 }}
               >
-                ðŸ“š
+                Ã°Å¸â€œÅ¡
               </motion.div>
             ))}
           </div>
@@ -599,7 +588,7 @@ export default function BooksPage({
                   ease: "easeInOut",
                 }}
               >
-                ðŸ”
+                Ã°Å¸â€Â
               </motion.div>
             </motion.div>
             <motion.div
@@ -932,7 +921,7 @@ export default function BooksPage({
                       ease: "easeInOut",
                     }}
                   >
-                    â†’
+                    Ã¢â€ â€™
                   </motion.span>
                 </Link>
               </motion.div>
@@ -954,5 +943,7 @@ export default function BooksPage({
     </Layout>
   );
 }
+
+
 
 

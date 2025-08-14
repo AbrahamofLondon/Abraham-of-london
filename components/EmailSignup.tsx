@@ -1,4 +1,4 @@
-// components/EmailSignup.tsx
+﻿// components/EmailSignup.tsx
 import React, { useState } from "react";
 
 const EmailSignup: React.FC = () => {
@@ -79,6 +79,7 @@ const EmailSignup: React.FC = () => {
 };
 
 export default EmailSignup;
+
 
 
 

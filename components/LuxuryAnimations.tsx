@@ -1,4 +1,4 @@
-// components/LuxuryAnimator.tsx
+﻿// components/LuxuryAnimator.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -18,6 +18,7 @@ export default function LuxuryAnimator() {
     </motion.div>
   );
 }
+
 
 
 

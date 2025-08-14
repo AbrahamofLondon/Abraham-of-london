@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
@@ -78,6 +78,7 @@ export default function FeaturedBook({
     </section>
   );
 }
+
 
 
 

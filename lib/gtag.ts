@@ -1,4 +1,4 @@
-// lib/gtag.ts
+﻿// lib/gtag.ts
 import { siteConfig } from "./siteConfig";
 
 export const GA_MEASUREMENT_ID =
@@ -29,6 +29,7 @@ declare global {
     gtag?: (...args: any[]) => void;
   }
 }
+
 
 
 
