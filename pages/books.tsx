@@ -5,17 +5,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-<<<<<<< HEAD
+
 import Layout from '../components/Layout';
 import BookCard from '../components/BookCard';
 import { getAllBooks, BookMeta } from '../lib/books';
 import { siteConfig } from '../lib/siteConfig';
-=======
+
 import Layout from '@/components/Layout';
 import BookCard from '@/components/BookCard';
 import { getAllBooks, BookMeta } from '@/lib/books';
 import { siteConfig } from '@/lib/siteConfig';
->>>>>>> d54087d627626892f4290f80053b938be47650b8
+
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (

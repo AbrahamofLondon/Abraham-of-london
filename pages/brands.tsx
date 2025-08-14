@@ -166,7 +166,7 @@ export default function BrandsPage() {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/brands`} />
         <meta property="og:title" content="Ventures & Brands | Abraham of London" />
-        <meta property="og:description" content="Discover a portfolio of brands shaped by Abraham’s vision of legacy and leadership." />
+        <meta property="og:description" content="Discover a portfolio of brands shaped by Abraham&apos;s vision of legacy and leadership." />
         <meta property="og:url" content={`${SITE_URL}/brands`} />
         <meta property="og:image" content={abs(siteConfig.ogImage)} />
         <meta property="og:type" content="website" />
@@ -243,7 +243,7 @@ export default function BrandsPage() {
           >
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Guiding Philosophy</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              At the heart of every venture is a commitment to **legacy, innovation, and impact**. We build brands that don't just exist, but actively shape their industries and enrich the lives of their communities.
+              At the heart of every venture is a commitment to <strong>legacy, innovation, and impact</strong>. We build brands that don&apos;t just exist, but actively shape their industries and enrich the lives of their communities.
             </p>
           </motion.section>
 
