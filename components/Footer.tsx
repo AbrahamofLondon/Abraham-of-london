@@ -1,20 +1,24 @@
 ﻿// components/Footer.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 
-const Footer: React.FC = () => {
-Â  const [year, setYear] = useState(new Date().getFullYear());
+export default function Footer() {
+  const [year, setYear] = useState<number>(new Date().getFullYear());
 
-Â  useEffect(() => {
-Â  Â  setYear(new Date().getFullYear());
-Â  }, []);
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
 
-Â  return (
-Â  Â  <footer className="site-footer">
-Â  Â  Â  <div className="container mx-auto px-4">
-Â  Â  Â  Â  <p>&copy; {year} Abraham of London. All rights reserved.</p>
-Â  Â  Â  </div>
-Â  Â  </footer>
-Â  );
-};
-
-export default Footer;
+  return (
+    <footer className="mt-16 border-t border-lightGrey bg-white text-deepCharcoal">
+      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p className="text-sm">&copy; {year} Abraham of London. All rights reserved.</p>
+        <nav className="flex gap-4 text-sm">
+          <Link href="/privacy" className="hover:underline">Privacy</Link>
+          <Link href="/terms" className="hover:underline">Terms</Link>
+          <Link href="/contact" className="hover:underline">Contact</Link>
+        </nav>
+      </div>
+    </footer>
+  );
+}
