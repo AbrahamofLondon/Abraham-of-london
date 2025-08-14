@@ -1,7 +1,7 @@
 // lib/books.ts
-import fs from "fs";
-import { join } from "path";
-import matter from "gray-matter";
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
 
 export interface BookMeta {
   slug: string;
@@ -13,47 +13,79 @@ export interface BookMeta {
   genre: string;
   downloadPdf?: string;
   downloadEpub?: string;
-  content?: string;
+  content?: string; // only populated when explicitly requested
 }
 
-const booksDirectory = join(process.cwd(), "content/books");
+const booksDir = path.join(process.cwd(), 'content', 'books');
 
 export function getBookSlugs(): string[] {
-  // Corrected to remove the file extension from the slug
-  return fs.readdirSync(booksDirectory).map(file => file.replace(/\.mdx?$/, ''));
+  if (!fs.existsSync(booksDir)) return [];
+  return fs
+    .readdirSync(booksDir)
+    .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'))
+    .map((f) => f.replace(/\.mdx?$/, '')); // strip extension
 }
 
-export function getBookBySlug(slug: string, fields: (keyof BookMeta)[]): Partial<BookMeta> {
-  // Corrected to use the original slug directly and add the correct extension
-  // Use .mdx if your files are .mdx, otherwise use .md
-  const fullPath = join(booksDirectory, `${slug}.mdx`); 
-  
-  if (!fs.existsSync(fullPath)) {
-      throw new Error(`File not found: ${fullPath}`);
+function resolveBookPath(slug: string): string | null {
+  const mdx = path.join(booksDir, `${slug}.mdx`);
+  const md = path.join(booksDir, `${slug}.md`);
+  if (fs.existsSync(mdx)) return mdx;
+  if (fs.existsSync(md)) return md;
+  return null;
+}
+
+export function getBookBySlug(
+  slug: string,
+  fields: (keyof BookMeta | 'content')[] = []
+): Partial<BookMeta> & { content?: string } {
+  const realSlug = slug.replace(/\.mdx?$/, '');
+
+  const fullPath = resolveBookPath(realSlug);
+  if (!fullPath) {
+    // Graceful fallback — caller applies defaults downstream
+    return { slug: realSlug, title: 'Book Not Found' } as Partial<BookMeta>;
   }
 
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
+  const file = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(file);
+  const fm = (data || {}) as Record<string, unknown>;
 
-  const items: Partial<BookMeta> = {};
+  const item: Partial<BookMeta> & { content?: string } = { slug: realSlug };
 
-  fields.forEach((field) => {
-    if (field === "slug") {
-      items[field] = slug; // Pass the corrected slug without the extra extension
+  for (const field of fields) {
+    if (field === 'content') {
+      item.content = content;
+      continue;
     }
-    if (field === "content") {
-      items[field] = content;
-    }
-    if (typeof data[field] !== "undefined") {
-      items[field] = data[field];
-    }
-  });
 
-  return items;
+    const raw = fm[field as string];
+
+    if (typeof raw !== 'undefined') {
+      if (field === 'genre') {
+        if (Array.isArray(raw)) {
+          item.genre = (raw as unknown[]).map(String).filter(Boolean).join(', ');
+        } else {
+          item.genre = String(raw);
+        }
+      } else {
+        (item as Record<string, unknown>)[field] = raw;
+      }
+    }
+  }
+
+  return item;
 }
 
-export function getAllBooks(fields: (keyof BookMeta)[] = []): Partial<BookMeta>[] {
-  return getBookSlugs()
-    .map((slug) => getBookBySlug(slug, fields))
-    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+export function getAllBooks(fields: (keyof BookMeta | 'content')[] = []): Partial<BookMeta>[] {
+  const slugs = getBookSlugs();
+  const books = slugs.map((slug) => getBookBySlug(slug, fields));
+
+  // Sort by title (fallback to slug), case-insensitive, asc
+  books.sort((a, b) =>
+    (a.title || a.slug || '').toString().localeCompare((b.title || b.slug || '').toString(), undefined, {
+      sensitivity: 'base',
+    })
+  );
+
+  return books;
 }

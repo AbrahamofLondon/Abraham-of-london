@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { siteConfig } from '../../lib/siteConfig';
+import { siteConfig } from '@/lib/siteConfig';
 
 const heroVariants = {
   initial: { opacity: 0, y: 50 },
