@@ -2,13 +2,15 @@
   base = "."
   command = "npm run build"
   publish = ".next"
-  environment =
-    NEXT_BUILD_SKIP_TYPE_CHECK = "true"
-    NODE_PATH = "node_modules"
 
-[build.functions]
-  external_node_modules = ["@next/server"]
+[build.environment]
+  NEXT_BUILD_SKIP_TYPE_CHECK = "true"
+  NODE_VERSION = "20"            # or your preferred LTS
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@next/server"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
