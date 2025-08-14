@@ -28,8 +28,8 @@ const containerVariants = {
     scale: 1,
     transition: {
       duration: 0.7,
-      ease: "easeOut",
-      when: "beforeChildren"
+      ease: 'easeOut',
+      when: 'beforeChildren',
     },
   },
 };
@@ -41,8 +41,8 @@ const formVariants = {
     opacity: 1,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
-      staggerChildren: 0.1
+      ease: 'easeOut',
+      staggerChildren: 0.1,
     },
   },
 };
@@ -92,33 +92,31 @@ export default function ContactPage() {
   // JSON-LD Structured Data for SEO
   const structuredData = useMemo(() => {
     const contactPageSchema = {
-      "@context": "https://schema.org",
-      "@type": "ContactPage",
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": `${SITE_URL}/contact`
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `${SITE_URL}/contact`,
       },
-      "description": "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
-      "url": `${SITE_URL}/contact`,
-      "potentialAction": {
-        "@type": "CommunicateAction",
-        "target": {
-          "@type": "EntryPoint",
-          "actionPlatform": [
-            "https://schema.org/ContactPoint"
-          ],
-          "inLanguage": "en",
-          "description": "Contact form for Abraham of London"
-        }
+      description: 'Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.',
+      url: `${SITE_URL}/contact`,
+      potentialAction: {
+        '@type': 'CommunicateAction',
+        target: {
+          '@type': 'EntryPoint',
+          actionPlatform: ['https://schema.org/ContactPoint'],
+          inLanguage: 'en',
+          description: 'Contact form for Abraham of London',
+        },
       },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "Customer service",
-        "areaServed": "Global",
-        "email": siteConfig.email
-      }
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'Customer service',
+        areaServed: 'Global',
+        email: siteConfig.email,
+      },
     };
-      
+
     const breadcrumb = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
@@ -137,7 +135,7 @@ export default function ContactPage() {
         },
       ],
     };
-      
+
     return [contactPageSchema, breadcrumb];
   }, []);
 
@@ -145,11 +143,17 @@ export default function ContactPage() {
     <Layout>
       <Head>
         <title>Contact | {siteConfig.author}</title>
-        <meta name="description" content="Get in touch with Abraham of London for speaking engagements, book signings, media inquiries, and collaborations." />
+        <meta
+          name="description"
+          content="Get in touch with Abraham of London for speaking engagements, book signings, media inquiries, and collaborations."
+        />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
         <meta property="og:title" content="Contact | Abraham of London" />
-        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and media opportunities." />
+        <meta
+          property="og:description"
+          content="Reach out for collaborations, speaking engagements, and media opportunities."
+        />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
         <meta property="og:image" content={abs(siteConfig.ogImage)} />
         <meta property="og:type" content="website" />
@@ -184,8 +188,103 @@ export default function ContactPage() {
             loading="lazy"
           />
         </div>
-          
+
         <motion.section
           className="w-full max-w-3xl mx-auto px-4 z-10"
           variants={containerVariants}
           initial="hidden"
+          animate="visible"
+        >
+          <h1 className="text-4xl md:text-5xl font-serif text-forest mb-6 text-center">
+            Get in Touch
+          </h1>
+          <p className="text-lg text-deepCharcoal/80 mb-8 text-center">
+            Reach out for speaking engagements, book signings, media inquiries, or collaborations.
+          </p>
+
+          <motion.form
+            action="/contact"
+            method="POST"
+            name="contact"
+            data-netlify="true"
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+            onSubmit={handleSubmit}
+          >
+            <input type="hidden" name="form-name" value="contact" />
+            <motion.div variants={itemVariants}>
+              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[6px] focus:ring-forest focus:border-forest"
+                disabled={isSubmitting}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[6px] focus:ring-forest focus:border-forest"
+                disabled={isSubmitting}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={5}
+                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[6px] focus:ring-forest focus:border-forest"
+                disabled={isSubmitting}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants} className="text-center">
+              <button
+                type="submit"
+                className="inline-block px-6 py-3 bg-forest text-cream rounded-[6px] hover:bg-forest/80 disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Send Message'}
+              </button>
+            </motion.div>
+            {formStatus === 'success' && (
+              <motion.p
+                variants={itemVariants}
+                className="text-green-600 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                Message sent successfully!
+              </motion.p>
+            )}
+            {formStatus === 'error' && (
+              <motion.p
+                variants={itemVariants}
+                className="text-red-600 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                Failed to send message. Please try again.
+              </motion.p>
+            )}
+          </motion.form>
+        </motion.section>
+      </motion.main>
+    </Layout>
+  );
+}

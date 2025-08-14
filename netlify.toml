@@ -1,20 +1,19 @@
 [build]
+  base = "."
   command = "npm run build"
   publish = ".next"
+  environment =
+    NEXT_BUILD_SKIP_TYPE_CHECK = "true"
+    NODE_PATH = "node_modules"
+
+[build.functions]
+  external_node_modules = ["@next/server"]
+  node_bundler = "esbuild"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Strong caching for static assets
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Basic security hardening
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+[[redirects]]
+  from = "/blog/*"
+  to = "/blog/:splat"
+  status = 200

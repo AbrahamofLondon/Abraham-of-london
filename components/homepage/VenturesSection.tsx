@@ -59,7 +59,7 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
   return (
     <section
       id="ventures"
-      className="py-24 px-4 bg-gradient-to-br from-gray-900/30 to-blue-900/30 rounded-lg shadow-inner text-white"
+      className="py-24 px-4 bg-gradient-to-br from-[var(--color-lightGrey)]/20 to-[var(--color-primary)]/20 rounded-lg shadow-inner text-[var(--color-on-primary)]"
       aria-label="Abraham of London Ventures"
     >
       <motion.div
@@ -76,15 +76,14 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
           My Ventures & Brands
         </motion.h2>
         <motion.p
-          className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-16"
+          className="text-lg md:text-xl text-[var(--color-on-primary)]/80 max-w-2xl mx-auto mb-16"
           variants={itemVariants}
         >
           A portfolio of innovation, sustainability, and impact, all under the umbrella of Abraham of London.
         </motion.p>
 
-        {/* Abraham of London Brand Section */}
         <motion.div
-          className="bg-white/20 p-8 md:p-12 rounded-2xl shadow-xl mb-20 flex flex-col md:flex-row items-center gap-8 md:gap-12 backdrop-blur-sm border border-white/10"
+          className="bg-[var(--color-warmWhite)]/20 p-8 md:p-12 rounded-2xl shadow-xl mb-20 flex flex-col md:flex-row items-center gap-8 md:gap-12 backdrop-blur-sm border border-[var(--color-on-primary)]/10"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -101,14 +100,13 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
             />
           </div>
           <div className="text-center md:text-left">
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 text-gray-100">Abraham of London</h3>
-            <p className="text-lg text-gray-300 leading-relaxed max-w-prose">
+            <h3 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--color-on-primary)]">Abraham of London</h3>
+            <p className="text-lg text-[var(--color-on-primary)]/80 leading-relaxed max-w-prose">
               The cornerstone of my mission, driving thought leadership, strategic advisory, and creative ventures globally.
             </p>
           </div>
         </motion.div>
 
-        {/* Sub-Ventures Section */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-10"
           initial="hidden"
@@ -122,7 +120,7 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
               variants={itemVariants}
               whileHover={{ y: -5, scale: 1.05, boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }}
               transition={{ duration: 0.3 }}
-              className="bg-white/10 p-6 rounded-2xl shadow-md text-center flex flex-col hover:bg-white/20 backdrop-blur-sm border border-white/5"
+              className="bg-[var(--color-warmWhite)]/10 p-6 rounded-2xl shadow-md text-center flex flex-col hover:bg-[var(--color-warmWhite)]/20 backdrop-blur-sm border border-[var(--color-on-primary)]/5"
             >
               <div className="relative w-[150px] h-[150px] mx-auto mb-6">
                 <Image
@@ -133,17 +131,15 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
                   loading="lazy"
                 />
               </div>
-              <h3 className="text-2xl font-semibold mb-2 text-white">{brand.name}</h3>
-              <p className="text-gray-400 mb-4 leading-relaxed flex-1">{brand.description}</p>
-              {brand.metric && (
-                <p className="text-sm text-blue-300 mb-4">{brand.metric}</p>
-              )}
+              <h3 className="text-2xl font-semibold mb-2 text-[var(--color-on-primary)]">{brand.name}</h3>
+              <p className="text-[var(--color-on-primary)]/80 mb-4 leading-relaxed flex-1">{brand.description}</p>
+              {brand.metric && <p className="text-sm text-[var(--color-on-primary)]/70 mb-4">{brand.metric}</p>}
               <Link
                 href={brand.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="group inline-flex items-center justify-center text-[var(--color-on-primary)] hover:text-[var(--color-accent)] transition-colors text-base font-medium mt-auto"
                 aria-label={`Visit ${brand.name} website`}
-                className="inline-flex items-center justify-center text-white hover:text-blue-300 transition-colors text-base font-medium mt-auto"
               >
                 Learn More
                 <svg
@@ -163,14 +159,10 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
           ))}
         </motion.div>
 
-        {/* View All CTA */}
-        <motion.div
-          className="mt-12 text-center"
-          variants={itemVariants}
-        >
+        <motion.div className="mt-12 text-center" variants={itemVariants}>
           <Link
             href="/ventures"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="group inline-flex items-center px-6 py-3 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-full font-medium hover:bg-[var(--color-primary-hover)] hover:text-[var(--color-on-primary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl"
             aria-label="View all ventures"
           >
             View All Ventures

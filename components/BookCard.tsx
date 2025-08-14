@@ -1,20 +1,10 @@
 // components/BookCard.tsx
-import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
+import Image, { type StaticImageData } from 'next/image';
+import { motion } from 'framer-motion';
+import { Book } from '@/types';
 
-export type BookCardProps = {
-  slug: string;
-  title: string;
-  author: string;
-  excerpt: string;
-  coverImage?: string | StaticImageData;
-  buyLink: string;
-  genre?: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-};
-
-const DEFAULT_BOOK = '/assets/images/default-book.jpg';
+const DEFAULT_COVER = '/assets/images/default-book.jpg';
 
 export default function BookCard({
   slug,
@@ -26,101 +16,70 @@ export default function BookCard({
   genre,
   downloadPdf,
   downloadEpub,
-}: BookCardProps) {
+}: Book) {
   const initialSrc: string | StaticImageData =
     typeof coverImage === 'object'
       ? coverImage
-      : (typeof coverImage === 'string' && coverImage.trim()) ? coverImage : DEFAULT_BOOK;
+      : (typeof coverImage === 'string' && coverImage.trim())
+      ? coverImage
+      : DEFAULT_COVER;
 
-  const titleId = `book-${slug}-title`;
-
+  let currentSrc: string | StaticImageData = initialSrc;
   const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.target as HTMLImageElement;
-    if (!img.src.includes(DEFAULT_BOOK)) img.src = DEFAULT_BOOK;
+    if (img.src.includes(DEFAULT_COVER)) return;
+    img.src = DEFAULT_COVER;
   };
 
   return (
-    <article
-      className="group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden focus-within:ring-2 focus-within:ring-forest"
-      itemScope
-      itemType="https://schema.org/Book"
-      aria-labelledby={titleId}
-    >
-      <Link href={`/books/${slug}`} className="block relative w-full h-64 outline-none" prefetch={false}>
-        {typeof initialSrc === 'object' ? (
-          <Image
-            src={initialSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            placeholder="blur"
-          />
-        ) : (
-          <Image
-            src={initialSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            onError={handleImgError}
-          />
-        )}
-        <meta itemProp="image" content={typeof initialSrc === 'object' ? initialSrc.src : initialSrc} />
+    <article className="group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden">
+      <Link href={`/books/${slug}`}>
+        <motion.div
+          className="relative w-full h-64"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+        >
+          {typeof currentSrc === 'object' ? (
+            <Image
+              src={currentSrc}
+              alt={title}
+              fill
+              className="object-cover rounded"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              placeholder="blur"
+              priority={false}
+            />
+          ) : (
+            <Image
+              src={currentSrc}
+              alt={title}
+              fill
+              className="object-cover rounded"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              onError={handleImgError}
+              priority={false}
+            />
+          )}
+        </motion.div>
       </Link>
-
       <div className="p-4">
-        {genre && (
-          <span className="inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1 text-deepCharcoal/80 mb-2">
-            {genre}
-          </span>
-        )}
-
-        <h3 id={titleId} className="text-xl font-serif text-deepCharcoal group-hover:underline mb-2" itemProp="name">
-          <Link href={`/books/${slug}`} className="outline-none focus-visible:ring-2 focus-visible:ring-forest">
-            {title}
-          </Link>
-        </h3>
-
-        <p className="text-sm text-deepCharcoal/80 line-clamp-3" itemProp="description">
-          {excerpt}
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-          <span className="text-deepCharcoal/70" itemProp="author">{author}</span>
-          <span className="mx-1 text-deepCharcoal/30">•</span>
-          <Link href={buyLink || '#'} className="text-forest hover:underline" aria-label={`Buy ${title}`}>
-            Buy
-          </Link>
-          {downloadPdf && (
-            <>
-              <span className="mx-1 text-deepCharcoal/30">•</span>
-              <a
-                href={downloadPdf}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-forest hover:underline"
-                aria-label={`Download PDF of ${title}`}
-              >
+        <h3 className="text-xl font-serif text-deepCharcoal group-hover:underline mb-2">{title}</h3>
+        <p className="text-sm text-deepCharcoal/80 line-clamp-3">{excerpt}</p>
+        <p className="text-xs text-deepCharcoal/60 mt-2">{author} • {genre}</p>
+        {(downloadPdf || downloadEpub) && (
+          <div className="mt-4 flex gap-2">
+            {downloadPdf && (
+              <a href={downloadPdf} className="text-forest underline" target="_blank" rel="noopener noreferrer">
                 PDF
               </a>
-            </>
-          )}
-          {downloadEpub && (
-            <>
-              <span className="mx-1 text-deepCharcoal/30">•</span>
-              <a
-                href={downloadEpub}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-forest hover:underline"
-                aria-label={`Download EPUB of ${title}`}
-              >
+            )}
+            {downloadEpub && (
+              <a href={downloadEpub} className="text-forest underline" target="_blank" rel="noopener noreferrer">
                 EPUB
               </a>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );

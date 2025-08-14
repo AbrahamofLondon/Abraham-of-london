@@ -1,10 +1,10 @@
-﻿export function formatDate(input: string | number | Date, locale = "en-GB"): string {
-  try {
-    const d = input instanceof Date ? input : (typeof input === "number" ? new Date(input) : new Date(input));
-    if (isNaN(d.getTime())) return String(input);
-    return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "2-digit" }).format(d);
-  } catch {
-    return String(input);
-  }
+﻿// lib/date.ts
+export function formatDate(date: string | Date, locale: string = 'en-GB'): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return 'Invalid Date';
+  return d.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
-export default formatDate;

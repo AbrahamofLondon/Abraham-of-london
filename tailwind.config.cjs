@@ -1,13 +1,10 @@
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // IMPORTANT: Enable dark mode based on the 'dark' class
   darkMode: 'class',
-  
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
     './content/**/*.{md,mdx}',
   ],
   theme: {
@@ -18,8 +15,6 @@ module.exports = {
     },
     extend: {
       colors: {
-        // We'll define these colors using CSS variables in globals.css
-        // This is the key to dynamic dark/light mode theming
         primary: 'var(--color-primary)',
         'primary-hover': 'var(--color-primary-hover)',
         'on-primary': 'var(--color-on-primary)',
@@ -29,8 +24,17 @@ module.exports = {
         accent: 'var(--color-accent)',
         'accent-hover': 'var(--color-accent-hover)',
         'on-accent': 'var(--color-on-accent)',
+        forest: '#0b2e1f',
+        cream: '#f5f5f0',
+        deepCharcoal: '#333333',
+        lightGrey: '#e5e5e5',
+        warmWhite: '#fafaf5',
+        midGreen: '#4b8b6b',
+        softGold: '#d4af37',
+        emerald: {
+          700: '#047857',
+        },
       },
-      // Preserving all your existing settings below
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
@@ -47,7 +51,6 @@ module.exports = {
       },
       animation: { fadeIn: 'fadeIn .6s ease both', fadeUp: 'fadeUp .6s ease both' },
       typography: ({ theme }) => ({
-        // Using your existing typography settings, which are already perfect for a light/dark theme
         DEFAULT: {
           css: {
             '--tw-prose-body': theme('colors.deepCharcoal'),
@@ -63,6 +66,8 @@ module.exports = {
             '--tw-prose-body': theme('colors.cream'),
             '--tw-prose-headings': theme('colors.cream'),
             '--tw-prose-links': theme('colors.softGold'),
+            '--tw-prose-bullets': theme('colors.midGreen'),
+            hr: { borderColor: theme('colors.lightGrey') },
           },
         },
       }),
