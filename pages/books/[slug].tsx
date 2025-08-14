@@ -1,4 +1,4 @@
-﻿import { GetStaticProps, GetStaticPaths } from "next";
+import { GetStaticProps, GetStaticPaths } from "next";
 import { getBookBySlug, getBookSlugs, BookMeta } from "@/lib/books";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";

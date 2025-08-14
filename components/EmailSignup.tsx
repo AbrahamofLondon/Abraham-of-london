@@ -1,4 +1,4 @@
-﻿// components/EmailSignup.tsx
+// components/EmailSignup.tsx
 import React, { useState } from "react";
 
 const EmailSignup: React.FC = () => {

@@ -1,4 +1,4 @@
-﻿// components/homepage/TestimonialsSection.tsx
+// components/homepage/TestimonialsSection.tsx
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 

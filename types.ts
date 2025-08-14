@@ -1,4 +1,4 @@
-﻿// types.ts
+// types.ts
 export type Post = {
   slug: string;
   title: string;

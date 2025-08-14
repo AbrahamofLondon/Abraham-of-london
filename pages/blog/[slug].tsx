@@ -1,4 +1,4 @@
-﻿// pages/blog/[slug].tsx
+// pages/blog/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticProps, GetStaticPaths } from "next";

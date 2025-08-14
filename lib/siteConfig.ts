@@ -1,4 +1,4 @@
-﻿// lib/siteConfig.ts
+// lib/siteConfig.ts
 export type SocialLink = {
   href: string;          // "https://...", "mailto:..", "tel:..", or internal "/path"
   label: string;         // e.g., "LinkedIn"
