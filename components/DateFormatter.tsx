@@ -1,4 +1,4 @@
-﻿// components/DateFormatter.tsx
+// components/DateFormatter.tsx
 import React from "react";
 import { format, parseISO } from "date-fns";
 

@@ -1,4 +1,4 @@
-﻿// components/Header.tsx
+// components/Header.tsx
 import React from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
