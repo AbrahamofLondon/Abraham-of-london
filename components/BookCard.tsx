@@ -1,4 +1,4 @@
-// components/BookCard.tsx
+﻿// components/BookCard.tsx
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion } from "framer-motion";
@@ -131,6 +131,7 @@ export default function BookCard({
     </article>
   );
 }
+
 
 
 

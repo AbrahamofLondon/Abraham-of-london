@@ -1,4 +1,4 @@
-// components/SeoMeta.tsx
+﻿// components/SeoMeta.tsx
 import Head from "next/head";
 
 interface SeoMetaProps {
@@ -34,6 +34,7 @@ export default function SeoMeta({
     </Head>
   );
 }
+
 
 
 

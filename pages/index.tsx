@@ -1,4 +1,4 @@
-// pages/index.tsx
+﻿// pages/index.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -35,7 +35,7 @@ const ContentShowcase = dynamic(
   { ssr: true },
 );
 
-// Animation-heavy Ã¢â€ â€™ defer to client
+// Animation-heavy ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬â„¢ defer to client
 const NewsletterSection = dynamic(
   () => import("@/components/homepage/NewsletterSection"),
   { ssr: false },
@@ -62,13 +62,13 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const ASSETS = {
-  heroBanner: "/assets/images/abraham-of-london-banner.webp",
-  profilePortrait: "/assets/images/profile-portrait.webp",
-  ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.webp",
+  heroBanner: '/assets/images/abraham-of-london-banner.webp',
+  profilePortrait: '/assets/images/profile-portrait.webp',
+  ogImage: '/assets/images/social/og-image.jpg',
+  twitterImage: '/assets/images/social/twitter-image.webp',
   defaultBookCover: "/assets/images/default-book.jpg",
   defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
-  logo: "/assets/images/logo/abraham-of-london-logo.svg",
+  logo: '/assets/images/logo/abraham-of-london-logo.svg',
 } as const;
 
 // ---------- Types ----------
@@ -411,7 +411,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
     <Layout>
       <Head>
         <title>
-          {siteConfig.title} Ã¢â‚¬â€ Empowering Global Leaders in Fatherhood &
+          {siteConfig.title} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Empowering Global Leaders in Fatherhood &
           Strategy
         </title>
         <meta
@@ -489,7 +489,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           >
             <Image
               src={ASSETS.heroBanner}
-              alt="Abraham of London Ã¢â‚¬â€ Empowering Leadership and Fatherhood Advocacy"
+              alt="Abraham of London ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Empowering Leadership and Fatherhood Advocacy"
               fill
               priority
               fetchPriority="high"
@@ -515,7 +515,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <main id="main-content" className="relative">
           {/* ABOUT (SSR) */}
           <AboutSection
-            bio="IÃ¢â‚¬â„¢m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+            bio="IÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
             achievements={achievements}
             portraitSrc={ASSETS.profilePortrait}
           />
@@ -571,12 +571,13 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition"
             aria-label="Contact Abraham of London"
           >
-            LetÃ¢â‚¬â„¢s Build Something Enduring
+            LetÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s Build Something Enduring
           </Link>
         </section>
       </div>
     </Layout>
   );
 }
+
 
 

@@ -1,4 +1,4 @@
-// components/homepage/AboutSection.tsx
+﻿// components/homepage/AboutSection.tsx
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -64,6 +64,7 @@ export default function AboutSection({
     </section>
   );
 }
+
 
 
 

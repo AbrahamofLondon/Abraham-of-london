@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+﻿/* eslint-disable @next/next/no-img-element */
 // components/SocialLinks.tsx
 import Link from "next/link";
 import * as React from "react";
@@ -130,7 +130,7 @@ export default function SocialLinks({
           ? cn("noopener", "noreferrer", "external", item.rel)
           : item.rel;
         const aria = openNewTab
-          ? `${item.label} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â opens in new tab`
+          ? `${item.label} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â opens in new tab`
           : item.label;
         const classes = cn(
           baseBtn,
@@ -212,6 +212,7 @@ export default function SocialLinks({
     </nav>
   );
 }
+
 
 
 

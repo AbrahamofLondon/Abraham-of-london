@@ -1,4 +1,4 @@
-// lib/siteConfig.ts
+﻿// lib/siteConfig.ts
 export type SocialLink = {
   href: string; // "https://...", "mailto:..", "tel:..", or internal "/path"
   label: string; // e.g., "LinkedIn"
@@ -27,7 +27,7 @@ const RAW: Omit<SiteConfig, "siteUrl" | "socialLinks"> & {
   title: "Abraham of London",
   author: "Abraham of London",
   description:
-    "Official site of Abraham of London Ã¢â‚¬â€œ author, strategist, and fatherhood advocate.",
+    "Official site of Abraham of London ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ author, strategist, and fatherhood advocate.",
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.URL ||
@@ -136,6 +136,7 @@ export const CONFIG: SiteConfig = Object.freeze({
 });
 
 export const siteConfig = CONFIG; // for compatibility with existing imports
+
 
 
 

@@ -1,4 +1,4 @@
-// components/NewsletterForm.tsx
+﻿// components/NewsletterForm.tsx
 import React from "react";
 
 const NewsletterForm: React.FC = () => {
@@ -15,7 +15,7 @@ const NewsletterForm: React.FC = () => {
         Join the newsletter
       </h3>
       <p className="text-deepCharcoal/80 mb-4">
-        Essays, book drops, and field notesÃ¢â‚¬â€no fluff.
+        Essays, book drops, and field notesÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âno fluff.
       </p>
       <div className="flex gap-2">
         <input
@@ -38,6 +38,7 @@ const NewsletterForm: React.FC = () => {
 };
 
 export default NewsletterForm;
+
 
 
 
