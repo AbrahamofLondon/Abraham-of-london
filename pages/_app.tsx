@@ -1,4 +1,4 @@
-// pages/_app.tsx
+﻿// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -42,5 +42,8 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
     ),
   });
 }
+
+
+
 
 

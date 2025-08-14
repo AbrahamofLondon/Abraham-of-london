@@ -1,4 +1,4 @@
-// types.ts
+﻿// types.ts
 export type Post = {
   slug: string;
   title: string;
@@ -21,4 +21,7 @@ export type Book = {
   downloadPdf?: string | null;
   downloadEpub?: string | null;
 };
+
+
+
 

@@ -1,4 +1,4 @@
-// pages/api/newsletter.ts
+﻿// pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -15,6 +15,9 @@ export default async function handler(
   }
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+
+
 
 
 

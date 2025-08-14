@@ -1,4 +1,4 @@
-// components/homepage/NewsletterSection.tsx
+﻿// components/homepage/NewsletterSection.tsx
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,7 +32,7 @@ const NewsletterSection: React.FC<Props> = ({
       });
       if (!res.ok) throw new Error("Subscribe failed");
       setStatus("success");
-      setMessage("Welcome to the family! ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â°");
+      setMessage("Welcome to the family! ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â°");
       setEmail("");
     } catch {
       setStatus("error");
@@ -163,6 +163,9 @@ const NewsletterSection: React.FC<Props> = ({
 };
 
 export default NewsletterSection;
+
+
+
 
 
 

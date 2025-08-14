@@ -1,4 +1,4 @@
-// components/MDXComponents.tsx
+﻿// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -33,7 +33,7 @@ const A: MDXComponentsType["a"] = ({
       title={title}
       aria-label={
         typeof children === "string"
-          ? `${children}${isHttp ? " ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â opens in new tab" : ""}`
+          ? `${children}${isHttp ? " ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â opens in new tab" : ""}`
           : undefined
       }
     >
@@ -117,6 +117,9 @@ export const MDXComponents: MDXComponentsType = {
 };
 
 export default MDXComponents;
+
+
+
 
 
 

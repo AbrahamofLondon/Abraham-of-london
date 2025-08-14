@@ -1,4 +1,4 @@
-// lib/date.ts
+﻿// lib/date.ts
 export function formatDate(
   date: string | Date,
   locale: string = "en-GB",
@@ -11,6 +11,9 @@ export function formatDate(
     day: "numeric",
   });
 }
+
+
+
 
 
 

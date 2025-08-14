@@ -1,4 +1,4 @@
-declare module "gray-matter" {
+﻿declare module "gray-matter" {
   export interface GrayMatterFile<T extends Record<string, unknown> = Record<string, unknown>> {
     data: T;
     content: string;
@@ -8,4 +8,7 @@ declare module "gray-matter" {
   function matter(input: string | Buffer, options?: Record<string, unknown>): GrayMatterFile;
   export default matter;
 }
+
+
+
 
