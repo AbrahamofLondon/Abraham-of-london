@@ -1,6 +1,12 @@
-{
-  "extends": [
-    "next/core-web-vitals",
-    "next/typescript"
-  ]
+﻿{
+  "root": true,
+  "extends": ["next", "next/core-web-vitals"],
+  "rules": {
+    "no-irregular-whitespace": ["error", { "skipStrings": false, "skipComments": false }],
+    "unicode-bom": ["error", "never"]
+  },
+  "overrides": [
+    { "files": ["**/*.{md,mdx}"], "rules": { "no-irregular-whitespace": "off" } }
+  ],
+  "ignorePatterns": ["node_modules/", ".next/", "public/"]
 }
