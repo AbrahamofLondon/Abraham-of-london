@@ -1,6 +1,12 @@
 // pages/_document.tsx
-import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
-import { GA_MEASUREMENT_ID, gaEnabled } from '@/lib/gtag';
+import Document, {
+  Html,
+  Head,
+  Main,
+  NextScript,
+  DocumentContext,
+} from "next/document";
+import { GA_MEASUREMENT_ID, gaEnabled } from "@/lib/gtag";
 
 const THEME_BOOTSTRAP = `
 (function(){
@@ -30,14 +36,30 @@ class MyDocument extends Document {
           <meta name="format-detection" content="telephone=no" />
 
           {/* Theme color (per scheme) */}
-          <meta name="theme-color" content="#0b1a2b" media="(prefers-color-scheme: dark)" />
-          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+          <meta
+            name="theme-color"
+            content="#0b1a2b"
+            media="(prefers-color-scheme: dark)"
+          />
+          <meta
+            name="theme-color"
+            content="#ffffff"
+            media="(prefers-color-scheme: light)"
+          />
 
           {/* DNS Prefetch + Preconnect for GA */}
           <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
           <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-          <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
+          <link
+            rel="preconnect"
+            href="https://www.googletagmanager.com"
+            crossOrigin="anonymous"
+          />
+          <link
+            rel="preconnect"
+            href="https://www.google-analytics.com"
+            crossOrigin="anonymous"
+          />
 
           {/* GA4 bootstrap (only if ID present) */}
           {gaEnabled && (
@@ -79,3 +101,5 @@ class MyDocument extends Document {
 }
 
 export default MyDocument;
+
+

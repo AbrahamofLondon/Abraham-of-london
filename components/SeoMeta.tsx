@@ -1,5 +1,5 @@
 // components/SeoMeta.tsx
-import Head from 'next/head';
+import Head from "next/head";
 
 interface SeoMetaProps {
   title: string;
@@ -8,7 +8,12 @@ interface SeoMetaProps {
   url: string;
 }
 
-export default function SeoMeta({ title, description, coverImage, url }: SeoMetaProps) {
+export default function SeoMeta({
+  title,
+  description,
+  coverImage,
+  url,
+}: SeoMetaProps) {
   return (
     <Head>
       <title>{title}</title>
@@ -29,3 +34,6 @@ export default function SeoMeta({ title, description, coverImage, url }: SeoMeta
     </Head>
   );
 }
+
+
+

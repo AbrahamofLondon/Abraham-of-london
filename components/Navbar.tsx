@@ -1,10 +1,10 @@
 // components/Navbar.tsx
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import Link from "next/link";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,11 +14,11 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Books', href: '/books' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Contact', href: '/contact' },
+    { name: "Home", href: "/" },
+    { name: "About", href: "/about" },
+    { name: "Books", href: "/books" },
+    { name: "Blog", href: "/blog" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -31,7 +31,10 @@ export default function Navbar() {
     >
       <div className="container-custom flex justify-between items-center">
         {/* Logo/Site Title */}
-        <Link href="/" className="flex items-center space-x-2 text-2xl font-bold font-serif text-deep-gold hover:text-warm-gold transition-colors duration-200">
+        <Link
+          href="/"
+          className="flex items-center space-x-2 text-2xl font-bold font-serif text-deep-gold hover:text-warm-gold transition-colors duration-200"
+        >
           <Image
             src="/logo-placeholder.png"
             alt="Fathering Without Fear Logo"
@@ -43,7 +46,9 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-8"> {/* Tailwind's responsiveness */}
+        <div className="hidden md:flex space-x-8">
+          {" "}
+          {/* Tailwind's responsiveness */}
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -56,19 +61,43 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button (Hamburger) */}
-        <div className="md:hidden"> {/* Tailwind's responsiveness */}
+        <div className="md:hidden">
+          {" "}
+          {/* Tailwind's responsiveness */}
           <button
             onClick={toggleMenu}
             className="text-off-white hover:text-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold transition-colors duration-200 p-2 rounded"
             aria-label="Toggle navigation"
           >
             {isOpen ? (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
               </svg>
             ) : (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16m-7 6h7"
+                ></path>
               </svg>
             )}
           </button>
@@ -80,7 +109,7 @@ export default function Navbar() {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
             className="md:hidden bg-neutral-dark pt-4 pb-8 border-t border-deep-navy/50" // Tailwind classes
@@ -103,3 +132,6 @@ export default function Navbar() {
     </motion.nav>
   );
 }
+
+
+

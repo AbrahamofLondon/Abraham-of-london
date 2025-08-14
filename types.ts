@@ -21,3 +21,4 @@ export type Book = {
   downloadPdf?: string | null;
   downloadEpub?: string | null;
 };
+

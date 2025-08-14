@@ -1,6 +1,6 @@
 // components/BlogPostCard.tsx
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 
 export type BlogPostCardProps = {
   slug: string;
@@ -20,7 +20,11 @@ function formatDate(d: string) {
   const dt = new Date(d);
   return Number.isNaN(dt.getTime())
     ? d
-    : dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    : dt.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
 }
 
 export default function BlogPostCard({
@@ -33,22 +37,25 @@ export default function BlogPostCard({
   readTime,
   category,
   isFeatured = false,
-  className = '',
+  className = "",
 }: BlogPostCardProps) {
   const src =
-    typeof coverImage === 'string' && coverImage.trim()
+    typeof coverImage === "string" && coverImage.trim()
       ? coverImage
-      : '/assets/images/blog/default-blog-cover.jpg';
+      : "/assets/images/blog/default-blog-cover.jpg";
 
   return (
     <article
       className={[
-        'group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden',
-        isFeatured ? 'ring-2 ring-forest/20' : '',
+        "group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden",
+        isFeatured ? "ring-2 ring-forest/20" : "",
         className,
-      ].join(' ')}
+      ].join(" ")}
     >
-      <Link href={`/blog/${slug}`} className="block relative w-full h-56 md:h-64">
+      <Link
+        href={`/blog/${slug}`}
+        className="block relative w-full h-56 md:h-64"
+      >
         <Image
           src={src}
           alt={title}
@@ -80,7 +87,7 @@ export default function BlogPostCard({
         <div className="mt-4 flex items-center justify-between text-xs text-deepCharcoal/60">
           <span>{author}</span>
           <span>
-            {readTime ? `${readTime} · ` : ''}
+            {readTime ? `${readTime} Ã‚Â· ` : ""}
             {formatDate(date)}
           </span>
         </div>
@@ -88,3 +95,6 @@ export default function BlogPostCard({
     </article>
   );
 }
+
+
+

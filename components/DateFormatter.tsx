@@ -1,7 +1,7 @@
 // components/DateFormatter.tsx
-import React from 'react';
-import { format } from 'date-fns';
-import { parseISO } from 'date-fns/parseISO';
+import React from "react";
+import { format } from "date-fns";
+import { parseISO } from "date-fns/parseISO";
 
 interface DateFormatterProps {
   dateString: string;
@@ -12,7 +12,7 @@ interface DateFormatterProps {
 export default function DateFormatter({
   dateString,
   className,
-  pattern = 'PPP',
+  pattern = "PPP",
 }: DateFormatterProps) {
   let date: Date;
 
@@ -24,7 +24,9 @@ export default function DateFormatter({
     date = Number.isNaN(ts) ? new Date(NaN) : new Date(ts);
   }
 
-  const output = Number.isNaN(date.getTime()) ? dateString : format(date, pattern);
+  const output = Number.isNaN(date.getTime())
+    ? dateString
+    : format(date, pattern);
 
   return (
     <time dateTime={dateString} className={className}>
@@ -32,3 +34,6 @@ export default function DateFormatter({
     </time>
   );
 }
+
+
+

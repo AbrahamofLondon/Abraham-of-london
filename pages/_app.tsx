@@ -1,11 +1,11 @@
 // pages/_app.tsx
-import type { AppProps, NextWebVitalsMetric } from 'next/app';
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { pageview, gaEnabled, gaEvent } from '@/lib/gtag';
-import { ThemeProvider } from '@/lib/ThemeContext';
-import { sans, serif } from '@/lib/fonts';
-import '@/styles/globals.css';
+import type { AppProps, NextWebVitalsMetric } from "next/app";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { pageview, gaEnabled, gaEvent } from "@/lib/gtag";
+import { ThemeProvider } from "@/lib/ThemeContext";
+import { sans, serif } from "@/lib/fonts";
+import "@/styles/globals.css";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -14,11 +14,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     if (!gaEnabled) return;
     const handleRouteChange = (url: string) => pageview(url);
     pageview(router.asPath);
-    router.events.on('routeChangeComplete', handleRouteChange);
-    router.events.on('hashChangeComplete', handleRouteChange);
+    router.events.on("routeChangeComplete", handleRouteChange);
+    router.events.on("hashChangeComplete", handleRouteChange);
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-      router.events.off('hashChangeComplete', handleRouteChange);
+      router.events.off("routeChangeComplete", handleRouteChange);
+      router.events.off("hashChangeComplete", handleRouteChange);
     };
   }, [router]);
 
@@ -33,10 +33,14 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled) return;
-  gaEvent('web-vital', {
+  gaEvent("web-vital", {
     id: metric.id,
     name: metric.name,
     label: metric.label,
-    value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+    value: Math.round(
+      metric.name === "CLS" ? metric.value * 1000 : metric.value,
+    ),
   });
 }
+
+

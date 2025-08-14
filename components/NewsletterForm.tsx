@@ -1,5 +1,5 @@
 // components/NewsletterForm.tsx
-import React from 'react';
+import React from "react";
 
 const NewsletterForm: React.FC = () => {
   return (
@@ -11,8 +11,12 @@ const NewsletterForm: React.FC = () => {
     >
       {/* Netlify form requirement */}
       <input type="hidden" name="form-name" value="newsletter" />
-      <h3 className="font-serif text-xl text-forest mb-2">Join the newsletter</h3>
-      <p className="text-deepCharcoal/80 mb-4">Essays, book drops, and field notes—no fluff.</p>
+      <h3 className="font-serif text-xl text-forest mb-2">
+        Join the newsletter
+      </h3>
+      <p className="text-deepCharcoal/80 mb-4">
+        Essays, book drops, and field notesÃ¢â‚¬â€no fluff.
+      </p>
       <div className="flex gap-2">
         <input
           type="email"
@@ -34,3 +38,6 @@ const NewsletterForm: React.FC = () => {
 };
 
 export default NewsletterForm;
+
+
+

@@ -1,9 +1,9 @@
 // pages/blog.tsx
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { GetStaticProps } from 'next';
+import React, { useMemo, useState, useCallback, useEffect } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import type { GetStaticProps } from "next";
 import {
   motion,
   useScroll,
@@ -11,48 +11,49 @@ import {
   useSpring,
   AnimatePresence,
   type Variants,
-} from 'framer-motion';
+} from "framer-motion";
 
-import Layout from '@/components/Layout';
-import BlogPostCard from '@/components/BlogPostCard';
-import { getAllPosts, type PostMeta } from '@/lib/posts';
-import { siteConfig } from '@/lib/siteConfig';
-import ScrollProgress from '@/components/ScrollProgress';
+import Layout from "@/components/Layout";
+import BlogPostCard from "@/components/BlogPostCard";
+import { getAllPosts, type PostMeta } from "@/lib/posts";
+import { siteConfig } from "@/lib/siteConfig";
+import ScrollProgress from "@/components/ScrollProgress";
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
   process.env.DEPLOY_PRIME_URL ||
-  'https://abraham-of-london.netlify.app'
-).replace(/\/$/, '');
+  "https://abraham-of-london.netlify.app"
+).replace(/\/$/, "");
 
 const abs = (path: string): string => {
-  if (!path) return '';
+  if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
   return new URL(path, SITE_URL).toString();
 };
 
-const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.length > 0;
+const hasData = <T,>(arr?: T[] | null): arr is T[] =>
+  Array.isArray(arr) && arr.length > 0;
 
 // Assets known to exist locally (adjust if needed)
 const ASSETS = {
-  heroBanner: '/assets/images/blog-hero-banner.webp',
-  writingDesk: '/assets/images/writing-desk.webp',
-  profilePortrait: '/assets/images/profile-portrait.webp',
-  ogImage: '/assets/images/og-image.jpg',
-  twitterImage: '/assets/images/twitter-image.webp',
-  defaultBlogCover: '/assets/images/blog/default-blog-cover.jpg',
+  heroBanner: "/assets/images/blog-hero-banner.webp",
+  writingDesk: "/assets/images/writing-desk.webp",
+  profilePortrait: "/assets/images/profile-portrait.webp",
+  ogImage: "/assets/images/og-image.jpg",
+  twitterImage: "/assets/images/twitter-image.webp",
+  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
   fallbacks: {
     hero: [
-      '/assets/images/blog-hero-banner.webp',
-      '/assets/images/writing-desk.webp',
-      '/assets/images/profile-portrait.webp',
+      "/assets/images/blog-hero-banner.webp",
+      "/assets/images/writing-desk.webp",
+      "/assets/images/profile-portrait.webp",
     ] as const,
     writing: [
-      '/assets/images/writing-desk.webp',
-      '/assets/images/profile-portrait.webp',
-      '/assets/images/blog/default-blog-cover.jpg',
+      "/assets/images/writing-desk.webp",
+      "/assets/images/profile-portrait.webp",
+      "/assets/images/blog/default-blog-cover.jpg",
     ] as const,
   },
 } as const;
@@ -61,7 +62,14 @@ const ASSETS = {
 type Post = Required<
   Pick<
     PostMeta,
-    'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'
+    | "slug"
+    | "title"
+    | "date"
+    | "excerpt"
+    | "coverImage"
+    | "author"
+    | "readTime"
+    | "category"
   >
 > & {
   publishedAt?: string;
@@ -104,14 +112,14 @@ const staggerItem: Variants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 100, damping: 15 },
+    transition: { type: "spring", stiffness: 100, damping: 15 },
   },
 };
 
 const useParallax = () => {
   const { scrollYProgress } = useScroll();
   const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const yHero = useTransform(smooth, [0, 1], ['0%', '40%']);
+  const yHero = useTransform(smooth, [0, 1], ["0%", "40%"]);
   const opacity = useTransform(smooth, [0, 0.3], [1, 0]);
   return { yHero, opacity };
 };
@@ -148,7 +156,9 @@ const EnhancedImage: React.FC<{
   }, [i, fallbacks, onError]);
 
   return failed && fallbacks.length === 0 ? (
-    <div className={`bg-lightGrey/20 flex items-center justify-center ${className}`}>
+    <div
+      className={`bg-lightGrey/20 flex items-center justify-center ${className}`}
+    >
       <span className="text-deepCharcoal/50 text-sm">Image not available</span>
     </div>
   ) : (
@@ -156,14 +166,14 @@ const EnhancedImage: React.FC<{
       {loading && (
         <motion.div
           className={`absolute inset-0 bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 ${className}`}
-          animate={{ backgroundPosition: ['-200% 0', '200% 0'] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          animate={{ backgroundPosition: ["-200% 0", "200% 0"] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
         />
       )}
       <Image
         src={currentSrc}
         alt={alt}
-        className={`transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${className}`}
+        className={`transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"} ${className}`}
         onError={handleError}
         onLoad={() => setLoading(false)}
         {...props}
@@ -179,7 +189,13 @@ const PostFilter: React.FC<{
   onCategoryChange: (category: string) => void;
   sortBy: string;
   onSortChange: (sort: string) => void;
-}> = ({ categories, selectedCategory, onCategoryChange, sortBy, onSortChange }) => (
+}> = ({
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  sortBy,
+  onSortChange,
+}) => (
   <motion.div
     className="space-y-6 mb-12"
     variants={staggerContainer}
@@ -188,16 +204,17 @@ const PostFilter: React.FC<{
     viewport={{ once: true }}
   >
     <div className="flex flex-wrap gap-3 justify-center">
-      {['All', ...categories].map((category) => (
+      {["All", ...categories].map((category) => (
         <motion.button
           key={category}
-          onClick={() => onCategoryChange(category === 'All' ? '' : category)}
+          onClick={() => onCategoryChange(category === "All" ? "" : category)}
           className={`px-5 py-2 rounded-full font-medium text-sm transition-all duration-300 ${
-            (category === 'All' && selectedCategory === '') || selectedCategory === category
-              ? 'bg-forest text-cream shadow-md scale-105'
-              : 'bg-lightGrey/30 text-deepCharcoal hover:bg-lightGrey/50 hover:scale-105'
+            (category === "All" && selectedCategory === "") ||
+            selectedCategory === category
+              ? "bg-forest text-cream shadow-md scale-105"
+              : "bg-lightGrey/30 text-deepCharcoal hover:bg-lightGrey/50 hover:scale-105"
           }`}
-          whileHover={{ scale: 1.1, backgroundColor: 'rgba(26,95,63,.1)' }}
+          whileHover={{ scale: 1.1, backgroundColor: "rgba(26,95,63,.1)" }}
           whileTap={{ scale: 0.95 }}
         >
           <AnimatePresence mode="wait">
@@ -234,35 +251,37 @@ const PostFilter: React.FC<{
 export const getStaticProps: GetStaticProps<BlogProps> = async () => {
   try {
     const postsData = getAllPosts([
-      'slug',
-      'title',
-      'date',
-      'publishedAt',
-      'excerpt',
-      'coverImage',
-      'author',
-      'readTime',
-      'category',
-      'tags',
-      'featured',
-      'wordCount',
-      'views',
+      "slug",
+      "title",
+      "date",
+      "publishedAt",
+      "excerpt",
+      "coverImage",
+      "author",
+      "readTime",
+      "category",
+      "tags",
+      "featured",
+      "wordCount",
+      "views",
     ]);
 
     const posts: Post[] = postsData
       .filter((p) => p && p.slug)
       .map((p, i) => ({
         slug: p.slug || `post-${i}`,
-        title: p.title || 'Untitled Post',
+        title: p.title || "Untitled Post",
         date: (p.date || p.publishedAt || new Date().toISOString()) as string,
-        excerpt: p.excerpt || 'Discover powerful insights and wisdom in this compelling read.',
+        excerpt:
+          p.excerpt ||
+          "Discover powerful insights and wisdom in this compelling read.",
         coverImage:
-          typeof p.coverImage === 'string' && p.coverImage.trim()
+          typeof p.coverImage === "string" && p.coverImage.trim()
             ? p.coverImage
             : ASSETS.defaultBlogCover,
         author: p.author || siteConfig.author,
-        readTime: p.readTime || '5 min read',
-        category: p.category || 'Insights',
+        readTime: p.readTime || "5 min read",
+        category: p.category || "Insights",
         publishedAt: p.publishedAt || p.date,
         tags: Array.isArray(p.tags) ? p.tags : p.tags ? [p.tags] : [],
         featured: p.featured || false,
@@ -271,7 +290,9 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
       }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    const categories = Array.from(new Set(posts.map((post) => post.category).filter(Boolean))).sort();
+    const categories = Array.from(
+      new Set(posts.map((post) => post.category).filter(Boolean)),
+    ).sort();
 
     const featuredPosts = posts.filter((p) => p.featured);
     if (featuredPosts.length < 2) {
@@ -281,7 +302,10 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
       }
     }
 
-    const totalWords = posts.reduce((sum, post) => sum + (post.wordCount || 0), 0);
+    const totalWords = posts.reduce(
+      (sum, post) => sum + (post.wordCount || 0),
+      0,
+    );
     const avgReadTime = totalWords > 0 ? Math.round(totalWords / 200) : 0;
 
     return {
@@ -296,7 +320,7 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
       revalidate: 3600,
     };
   } catch (_error) {
-    console.error('Error in getStaticProps:', _error);
+    console.error("Error in getStaticProps:", _error);
     return {
       props: {
         posts: [],
@@ -321,9 +345,9 @@ export default function BlogPage({
   avgReadTime,
 }: BlogProps) {
   const [mounted, setMounted] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date");
   const { yHero, opacity } = useParallax();
 
   useEffect(() => setMounted(true), []);
@@ -349,19 +373,19 @@ export default function BlogPage({
     }
 
     switch (sortBy) {
-      case 'date-asc':
+      case "date-asc":
         return [...filtered].sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
-      case 'title':
+      case "title":
         return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
-      case 'readTime':
+      case "readTime":
         return [...filtered].sort((a, b) => {
-          const aT = parseInt(a.readTime.replace(/\D/g, ''), 10) || 0;
-          const bT = parseInt(b.readTime.replace(/\D/g, ''), 10) || 0;
+          const aT = parseInt(a.readTime.replace(/\D/g, ""), 10) || 0;
+          const bT = parseInt(b.readTime.replace(/\D/g, ""), 10) || 0;
           return aT - bT;
         });
-      case 'date':
+      case "date":
       default:
         return [...filtered].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -376,38 +400,38 @@ export default function BlogPage({
 
     return [
       {
-        '@context': 'https://schema.org',
-        '@type': 'Blog',
-        '@id': `${blogUrl}#blog`,
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "@id": `${blogUrl}#blog`,
         url: blogUrl,
         name: `${siteConfig.author} - Insights & Wisdom Blog`,
         description: `Discover ${totalPosts} powerful insights on fatherhood, leadership, and personal development from ${siteConfig.author}.`,
-        inLanguage: 'en-GB',
-        author: { '@type': 'Person', name: siteConfig.author, url: baseUrl },
-        publisher: { '@type': 'Person', name: siteConfig.author, url: baseUrl },
-        mainEntityOfPage: { '@type': 'WebPage', '@id': `${blogUrl}#webpage` },
+        inLanguage: "en-GB",
+        author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
+        publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
+        mainEntityOfPage: { "@type": "WebPage", "@id": `${blogUrl}#webpage` },
         blogPost: posts.slice(0, 10).map((post) => ({
-          '@type': 'BlogPosting',
-          '@id': `${baseUrl}/blog/${post.slug}#article`,
+          "@type": "BlogPosting",
+          "@id": `${baseUrl}/blog/${post.slug}#article`,
           headline: post.title,
           description: post.excerpt,
           url: `${baseUrl}/blog/${post.slug}`,
           datePublished: post.date,
           dateModified: post.publishedAt || post.date,
-          author: { '@type': 'Person', name: post.author },
+          author: { "@type": "Person", name: post.author },
           image: abs(post.coverImage),
           articleSection: post.category,
           wordCount: post.wordCount,
           timeRequired: post.readTime,
-          keywords: post.tags?.join(', '),
+          keywords: post.tags?.join(", "),
         })),
       },
       {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
-          { '@type': 'ListItem', position: 2, name: 'Blog', item: blogUrl },
+          { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+          { "@type": "ListItem", position: 2, name: "Blog", item: blogUrl },
         ],
       },
     ];
@@ -437,7 +461,7 @@ export default function BlogPage({
         <meta name="author" content={siteConfig.author} />
         <meta
           name="keywords"
-          content={`Abraham Adaramola blog, fatherhood articles, leadership insights, personal growth, ${categories.join(', ')}`}
+          content={`Abraham Adaramola blog, fatherhood articles, leadership insights, personal growth, ${categories.join(", ")}`}
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/blog`} />
@@ -488,7 +512,10 @@ export default function BlogPage({
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <motion.div className="relative w-full h-80 sm:h-96 lg:h-[28rem]" style={{ y: yHero }}>
+        <motion.div
+          className="relative w-full h-80 sm:h-96 lg:h-[28rem]"
+          style={{ y: yHero }}
+        >
           <EnhancedImage
             src={ASSETS.heroBanner}
             fallbacks={[...ASSETS.fallbacks.hero]}
@@ -511,11 +538,20 @@ export default function BlogPage({
                   top: `${20 + (i % 3) * 20}%`,
                   fontSize: `${20 + (i % 3) * 10}px`,
                 }}
-                animate={{ y: [-20, 20, -20], rotate: [-10, 10, -10], opacity: [0.1, 0.3, 0.1] }}
-                transition={{ duration: 4 + i, repeat: Infinity, ease: 'easeInOut', delay: i * 0.5 }}
+                animate={{
+                  y: [-20, 20, -20],
+                  rotate: [-10, 10, -10],
+                  opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                  duration: 4 + i,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.5,
+                }}
                 aria-hidden="true"
               >
-                •
+                â€¢
               </motion.div>
             ))}
           </div>
@@ -542,7 +578,8 @@ export default function BlogPage({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7 }}
               >
-                Explore my thoughts on fatherhood, leadership, and personal growth.
+                Explore my thoughts on fatherhood, leadership, and personal
+                growth.
               </motion.p>
               <motion.div
                 className="flex flex-wrap gap-4 justify-center text-cream/90 text-sm font-medium"
@@ -554,7 +591,10 @@ export default function BlogPage({
                   <motion.span
                     key={category}
                     className="bg-cream/20 backdrop-blur-sm px-4 py-2 rounded-full"
-                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                    whileHover={{
+                      scale: 1.1,
+                      backgroundColor: "rgba(255,255,255,0.3)",
+                    }}
                     transition={{ delay: idx * 0.1 }}
                   >
                     {category}
@@ -607,25 +647,59 @@ export default function BlogPage({
           transition={{ duration: 0.8 }}
         >
           <div className="grid sm:grid-cols-3 gap-8 text-center">
-            <motion.div className="space-y-2" whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-              <motion.div className="text-4xl font-bold text-forest" initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}>
+            <motion.div
+              className="space-y-2"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                className="text-4xl font-bold text-forest"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
                 {totalPosts}
               </motion.div>
-              <div className="text-deepCharcoal font-medium">Posts Published</div>
+              <div className="text-deepCharcoal font-medium">
+                Posts Published
+              </div>
             </motion.div>
 
-            <motion.div className="space-y-2" whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-              <motion.div className="text-4xl font-bold text-forest" initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}>
+            <motion.div
+              className="space-y-2"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                className="text-4xl font-bold text-forest"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              >
                 {categories.length}
               </motion.div>
               <div className="text-deepCharcoal font-medium">Categories</div>
             </motion.div>
 
-            <motion.div className="space-y-2" whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-              <motion.div className="text-4xl font-bold text-forest" initial={{ opacity: 0, scale: 0 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}>
+            <motion.div
+              className="space-y-2"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                className="text-4xl font-bold text-forest"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+              >
                 {avgReadTime}
               </motion.div>
-              <div className="text-deepCharcoal font-medium">Avg. Read Time (mins)</div>
+              <div className="text-deepCharcoal font-medium">
+                Avg. Read Time (mins)
+              </div>
             </motion.div>
           </div>
         </motion.section>
@@ -644,7 +718,10 @@ export default function BlogPage({
 
           {/* Search + Filter */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
-            <motion.div className="relative w-full max-w-sm" variants={staggerItem}>
+            <motion.div
+              className="relative w-full max-w-sm"
+              variants={staggerItem}
+            >
               <input
                 type="text"
                 placeholder="Search posts..."
@@ -652,10 +729,33 @@ export default function BlogPage({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-5 py-3 pl-12 rounded-full border border-lightGrey focus:outline-none focus:ring-2 focus:ring-forest shadow-sm transition-all duration-300"
               />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-deepCharcoal/60" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-70">
-                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                  <line x1="16.65" y1="16.65" x2="21" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <div
+                className="absolute inset-y-0 left-0 flex items-center pl-4 text-deepCharcoal/60"
+                aria-hidden="true"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="opacity-70"
+                >
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="16.65"
+                    y1="16.65"
+                    x2="21"
+                    y2="21"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
             </motion.div>
@@ -689,7 +789,9 @@ export default function BlogPage({
                 animate={{ opacity: 1, y: 0 }}
               >
                 <p className="text-xl font-medium">No posts found.</p>
-                <p className="text-md mt-2">Try adjusting your filters or search terms.</p>
+                <p className="text-md mt-2">
+                  Try adjusting your filters or search terms.
+                </p>
               </motion.div>
             )}
           </motion.div>
@@ -698,3 +800,5 @@ export default function BlogPage({
     </Layout>
   );
 }
+
+

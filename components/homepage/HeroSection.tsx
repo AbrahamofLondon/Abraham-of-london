@@ -1,9 +1,9 @@
 // components/homepage/HeroSection.tsx
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { siteConfig, absUrl } from '@/lib/siteConfig';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const heroVariants = {
   initial: { opacity: 0, y: 50 },
@@ -12,7 +12,7 @@ const heroVariants = {
     y: 0,
     transition: {
       duration: 1,
-      ease: 'easeOut',
+      ease: "easeOut",
       staggerChildren: 0.2,
       delayChildren: 0.3,
     },
@@ -21,18 +21,22 @@ const heroVariants = {
 
 const textVariants = {
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 const logoVariants = {
   initial: { opacity: 0, rotate: -180 },
-  animate: { opacity: 1, rotate: 0, transition: { duration: 1, ease: 'easeOut' } },
+  animate: {
+    opacity: 1,
+    rotate: 0,
+    transition: { duration: 1, ease: "easeOut" },
+  },
 };
 
 const ASSETS = {
-  heroBanner: '/assets/images/abraham-of-london-banner.webp',
-  logo: '/assets/images/abraham-of-london-logo.svg',
-  heroVideo: '/assets/videos/hero-background.mp4',
+  heroBanner: "/assets/images/abraham-of-london-banner.webp",
+  logo: "/assets/images/abraham-of-london-logo.svg",
+  heroVideo: "/assets/videos/hero-background.mp4",
 };
 
 interface HeroSectionProps {
@@ -43,7 +47,13 @@ interface HeroSectionProps {
   communityCount: number;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ title, subtitle, ctaText, ctaLink, communityCount }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({
+  title,
+  subtitle,
+  ctaText,
+  ctaLink,
+  communityCount,
+}) => {
   return (
     <section
       className="relative min-h-screen flex items-center justify-center text-center overflow-hidden p-4"
@@ -91,10 +101,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ title, subtitle, ctaText, cta
           className="text-xl sm:text-2xl font-light leading-relaxed max-w-3xl mx-auto mb-8"
           variants={textVariants}
         >
-          {subtitle} <span className="font-medium">Join {communityCount.toLocaleString()} global leaders.</span>
+          {subtitle}{" "}
+          <span className="font-medium">
+            Join {communityCount.toLocaleString()} global leaders.
+          </span>
         </motion.p>
 
-        <motion.div className="flex flex-col sm:flex-row gap-4 justify-center" variants={textVariants}>
+        <motion.div
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+          variants={textVariants}
+        >
           <Link href={ctaLink} passHref>
             <motion.a
               className="px-8 py-4 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-full font-semibold hover:bg-[var(--color-primary-hover)] hover:text-[var(--color-on-primary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -120,3 +136,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ title, subtitle, ctaText, cta
 };
 
 export default HeroSection;
+
+
+

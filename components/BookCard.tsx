@@ -1,7 +1,8 @@
 // components/BookCard.tsx
-import Link from 'next/link';
-import Image, { type StaticImageData } from 'next/image';
-import { motion } from 'framer-motion';
+import Link from "next/link";
+import Image, { type StaticImageData } from "next/image";
+import { motion } from "framer-motion";
+
 
 export type BookCardProps = {
   slug: string;
@@ -13,11 +14,11 @@ export type BookCardProps = {
   genre: string;
   downloadPdf?: string | null;
   downloadEpub?: string | null;
-  featured?: boolean;      // <-- new
-  className?: string;      // <-- optional styling hook
+  featured?: boolean; // <-- new
+  className?: string; // <-- optional styling hook
 };
 
-const DEFAULT_COVER = '/assets/images/default-book.jpg';
+const DEFAULT_COVER = "/assets/images/default-book.jpg";
 
 export default function BookCard({
   slug,
@@ -30,14 +31,14 @@ export default function BookCard({
   downloadPdf,
   downloadEpub,
   featured = false,
-  className = '',
+  className = "",
 }: BookCardProps) {
   const src: string | StaticImageData =
-    typeof coverImage === 'object'
+    typeof coverImage === "object"
       ? coverImage
-      : typeof coverImage === 'string' && coverImage.trim()
-      ? coverImage
-      : DEFAULT_COVER;
+      : typeof coverImage === "string" && coverImage.trim()
+        ? coverImage
+        : DEFAULT_COVER;
 
   const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
     const img = e.currentTarget as HTMLImageElement & { src: string };
@@ -47,16 +48,16 @@ export default function BookCard({
   return (
     <article
       className={[
-        'group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden',
-        featured ? 'ring-2 ring-forest/20' : '',
+        "group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden",
+        featured ? "ring-2 ring-forest/20" : "",
         className,
-      ].join(' ')}
+      ].join(" ")}
     >
       <Link href={`/books/${slug}`} className="block">
         <motion.div
           className="relative w-full h-64"
           whileHover={{ scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          transition={{ type: "spring", stiffness: 200, damping: 18 }}
         >
           <Image
             src={src}
@@ -64,7 +65,7 @@ export default function BookCard({
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover"
-            onError={typeof src === 'string' ? handleImgError : undefined}
+            onError={typeof src === "string" ? handleImgError : undefined}
             priority={featured}
           />
           {featured && (
@@ -81,7 +82,9 @@ export default function BookCard({
         </h3>
         <p className="text-xs text-deepCharcoal/70 mb-2">By {author}</p>
         <p className="text-sm text-deepCharcoal/85 line-clamp-3">{excerpt}</p>
-        <p className="text-xs text-deepCharcoal/60 mt-2">{genre || 'Uncategorized'}</p>
+        <p className="text-xs text-deepCharcoal/60 mt-2">
+          {genre || "Uncategorized"}
+        </p>
 
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
@@ -91,7 +94,7 @@ export default function BookCard({
             Learn more
           </Link>
 
-          {buyLink && buyLink !== '#' && (
+          {buyLink && buyLink !== "#" && (
             <a
               href={buyLink}
               target="_blank"
@@ -128,3 +131,6 @@ export default function BookCard({
     </article>
   );
 }
+
+
+

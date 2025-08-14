@@ -89,3 +89,4 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   return { props: { book: { meta, content: mdx } }, revalidate: 60 };
 };
+

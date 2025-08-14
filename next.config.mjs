@@ -1,14 +1,13 @@
-﻿/** @type {import('next').NextConfig} */
-import withMDX from '@next/mdx';
+﻿// next.config.mjs
+import createMDX from '@next/mdx';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import remarkGfm from 'remark-gfm';
-import rehypeStringify from 'rehype-stringify';
 
-const mdxConfig = withMDX({
+const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeStringify],
+    // No rehypeStringify — MDX outputs JSX
     providerImportSource: '@mdx-js/react',
   },
 });
@@ -19,16 +18,21 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
   swcMinify: true,
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Either domains OR remotePatterns is fine — keep this if you load from Netlify
     domains: ['abraham-of-london.netlify.app'],
+    // remotePatterns: [{ protocol: 'https', hostname: 'abraham-of-london.netlify.app' }],
   },
-  experimental: {
-    optimizePackageImports: ['framer-motion'],
+  modularizeImports: {
+    'framer-motion': { transform: 'framer-motion/{{member}}' },
   },
+  // Optional: only if you want to skip checks in CI
+  typescript: { ignoreBuildErrors: process.env.NEXT_IGNORE_TYPES === 'true' },
+  eslint: { ignoreDuringBuilds: process.env.NEXT_IGNORE_ESLINT === 'true' },
 };
 
-export default withBundleAnalyzer(mdxConfig(nextConfig));
+export default withBundleAnalyzer(withMDX(nextConfig));

@@ -1,8 +1,8 @@
 // components/homepage/VenturesSection.tsx
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,25 +29,28 @@ interface Brand {
 
 const brands: Brand[] = [
   {
-    name: 'Alomarada',
-    description: 'Redefining development through ethical market exploration and human capital growth.',
-    logo: '/assets/images/logo/alomarada.svg',
-    url: 'https://alomarada.com',
-    metric: '10K+ Jobs Created',
+    name: "Alomarada",
+    description:
+      "Redefining development through ethical market exploration and human capital growth.",
+    logo: "/assets/images/logo/alomarada.svg",
+    url: "https://alomarada.com",
+    metric: "10K+ Jobs Created",
   },
   {
-    name: 'Endureluxe',
-    description: 'High-performance luxury fitness equipment and interactive community.',
-    logo: '/assets/images/logo/endureluxe.svg',
-    url: 'https://endureluxe.com',
-    metric: '5M+ Users',
+    name: "Endureluxe",
+    description:
+      "High-performance luxury fitness equipment and interactive community.",
+    logo: "/assets/images/logo/endureluxe.svg",
+    url: "https://endureluxe.com",
+    metric: "5M+ Users",
   },
   {
-    name: 'InnovateHub',
-    description: 'A platform for tech startups to scale with sustainable solutions.',
-    logo: '/assets/images/logo/innovatehub.svg',
-    url: 'https://innovatehub.com',
-    metric: '20+ Startups Supported',
+    name: "InnovateHub",
+    description:
+      "A platform for tech startups to scale with sustainable solutions.",
+    logo: "/assets/images/logo/innovatehub.svg",
+    url: "https://innovatehub.com",
+    metric: "20+ Startups Supported",
   },
 ];
 
@@ -55,7 +58,9 @@ interface VenturesProps {
   brandsData?: Brand[];
 }
 
-export default function VenturesSection({ brandsData = brands }: VenturesProps) {
+export default function VenturesSection({
+  brandsData = brands,
+}: VenturesProps) {
   return (
     <section
       id="ventures"
@@ -79,7 +84,8 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
           className="text-lg md:text-xl text-[var(--color-on-primary)]/80 max-w-2xl mx-auto mb-16"
           variants={itemVariants}
         >
-          A portfolio of innovation, sustainability, and impact, all under the umbrella of Abraham of London.
+          A portfolio of innovation, sustainability, and impact, all under the
+          umbrella of Abraham of London.
         </motion.p>
 
         <motion.div
@@ -88,7 +94,10 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5 }}
-          whileHover={{ scale: 1.02, boxShadow: '0 10px 20px rgba(0, 112, 244, 0.3)' }}
+          whileHover={{
+            scale: 1.02,
+            boxShadow: "0 10px 20px rgba(0, 112, 244, 0.3)",
+          }}
         >
           <div className="relative w-[250px] h-[125px] flex-shrink-0">
             <Image
@@ -100,9 +109,12 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
             />
           </div>
           <div className="text-center md:text-left">
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--color-on-primary)]">Abraham of London</h3>
+            <h3 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--color-on-primary)]">
+              Abraham of London
+            </h3>
             <p className="text-lg text-[var(--color-on-primary)]/80 leading-relaxed max-w-prose">
-              The cornerstone of my mission, driving thought leadership, strategic advisory, and creative ventures globally.
+              The cornerstone of my mission, driving thought leadership,
+              strategic advisory, and creative ventures globally.
             </p>
           </div>
         </motion.div>
@@ -118,7 +130,11 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
             <motion.div
               key={brand.name}
               variants={itemVariants}
-              whileHover={{ y: -5, scale: 1.05, boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }}
+              whileHover={{
+                y: -5,
+                scale: 1.05,
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+              }}
               transition={{ duration: 0.3 }}
               className="bg-[var(--color-warmWhite)]/10 p-6 rounded-2xl shadow-md text-center flex flex-col hover:bg-[var(--color-warmWhite)]/20 backdrop-blur-sm border border-[var(--color-on-primary)]/5"
             >
@@ -131,9 +147,17 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
                   loading="lazy"
                 />
               </div>
-              <h3 className="text-2xl font-semibold mb-2 text-[var(--color-on-primary)]">{brand.name}</h3>
-              <p className="text-[var(--color-on-primary)]/80 mb-4 leading-relaxed flex-1">{brand.description}</p>
-              {brand.metric && <p className="text-sm text-[var(--color-on-primary)]/70 mb-4">{brand.metric}</p>}
+              <h3 className="text-2xl font-semibold mb-2 text-[var(--color-on-primary)]">
+                {brand.name}
+              </h3>
+              <p className="text-[var(--color-on-primary)]/80 mb-4 leading-relaxed flex-1">
+                {brand.description}
+              </p>
+              {brand.metric && (
+                <p className="text-sm text-[var(--color-on-primary)]/70 mb-4">
+                  {brand.metric}
+                </p>
+              )}
               <Link
                 href={brand.url}
                 target="_blank"
@@ -184,3 +208,6 @@ export default function VenturesSection({ brandsData = brands }: VenturesProps) 
     </section>
   );
 }
+
+
+

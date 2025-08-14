@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   title: string;
@@ -37,7 +37,10 @@ export default function FeaturedBook({
           />
         </div>
         <div className="p-6 md:p-8 flex flex-col justify-center">
-          <h2 id="featured-book" className="font-serif text-3xl text-forest mb-2">
+          <h2
+            id="featured-book"
+            className="font-serif text-3xl text-forest mb-2"
+          >
             Featured Book
           </h2>
           <h3 className="text-2xl font-semibold mb-1">{title}</h3>
@@ -75,3 +78,6 @@ export default function FeaturedBook({
     </section>
   );
 }
+
+
+
