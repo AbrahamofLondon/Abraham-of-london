@@ -1,14 +1,20 @@
 [build]
-  command = "npm install --no-cache && npm run build"
+  command = "npm run build"
   publish = ".next"
-      
-[build.environment]
-  NEXT_BUILD_SKIP_TYPE_CHECK = "true"
-
-[[redirects]]
-  from = "/blog/*"
-  to = "/blog/:splat"
-  status = 200
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Strong caching for static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Basic security hardening
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"

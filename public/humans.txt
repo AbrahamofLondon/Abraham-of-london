@@ -1,0 +1,3 @@
+Team: Abraham of London
+Site: abraham-of-london.netlify.app
+Standards: HTML5, CSS3, ESNext
