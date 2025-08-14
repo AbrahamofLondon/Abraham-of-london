@@ -1,0 +1,18 @@
+﻿import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+/** @type {import("next").NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: { formats: ["image/avif", "image/webp"] },
+  experimental: {
+    // remove if your Next version complains
+    optimizePackageImports: ["framer-motion"],
+  },
+};
+
+export default withBundleAnalyzer(nextConfig);

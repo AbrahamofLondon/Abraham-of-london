@@ -1,14 +1,21 @@
-// pages/books.tsx
+﻿// pages/books.tsx
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
+<<<<<<< HEAD
 import Layout from '../components/Layout';
 import BookCard from '../components/BookCard';
 import { getAllBooks, BookMeta } from '../lib/books';
 import { siteConfig } from '../lib/siteConfig';
+=======
+import Layout from '@/components/Layout';
+import BookCard from '@/components/BookCard';
+import { getAllBooks, BookMeta } from '@/lib/books';
+import { siteConfig } from '@/lib/siteConfig';
+>>>>>>> d54087d627626892f4290f80053b938be47650b8
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
@@ -620,7 +627,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                   delay: i * 0.5,
                 }}
               >
-                📚
+                ðŸ“š
               </motion.div>
             ))}
           </div>
@@ -762,7 +769,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                     ease: "easeInOut" 
                   }}
                 >
-                  📚
+                  ðŸ“š
                 </motion.div>
                 <h3 className="text-2xl font-bold mb-4">No books found</h3>
                 <p className="text-lg mb-6 max-w-md mx-auto">
@@ -922,7 +929,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                     animate={{ x: [0, 3, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    →
+                    â†’
                   </motion.span>
                 </Link>
               </motion.div>
@@ -956,7 +963,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                🔍
+                ðŸ”
               </motion.div>
             </motion.div>
           </motion.div>
