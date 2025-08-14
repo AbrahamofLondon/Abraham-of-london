@@ -157,7 +157,7 @@ const useParallax = () => {
 // ---------- Enhanced Image Component ----------
 const EnhancedImage: React.FC<{
   src: string;
-  fallbacks?: string[];
+  fallbacks?: ReadonlyArray<string>;
   alt: string;
   className?: string;
   fill?: boolean;
@@ -601,7 +601,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                   delay: i * 0.5,
                 }}
               >
-                📚
+                ðŸ“š
               </motion.div>
             ))}
           </div>
@@ -678,7 +678,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                🔍
+                ðŸ”
               </motion.div>
             </motion.div>
             <motion.div
@@ -830,7 +830,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                     ease: 'easeInOut',
                   }}
                 >
-                  📚
+                  ðŸ“š
                 </motion.div>
                 <h3 className="text-2xl font-bold mb-4">No books found</h3>
                 <p className="text-lg mb-6 max-w-md mx-auto">
@@ -985,7 +985,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                     animate={{ x: [0, 3, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    →
+                    â†’
                   </motion.span>
                 </Link>
               </motion.div>

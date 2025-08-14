@@ -11,9 +11,20 @@ export interface BookMeta {
   coverImage: string;
   buyLink: string;
   genre: string;
+
+  // Optional extras used by pages/books.tsx
+  publishedDate?: string;
+  isbn?: string;
+  pages?: number;
+  rating?: number;
+  language?: string;
+  publisher?: string;
+  tags?: string[];         // <-- add this
+
   downloadPdf?: string;
   downloadEpub?: string;
-  content?: string; // only populated when explicitly requested
+
+  content?: string;
 }
 
 const booksDir = path.join(process.cwd(), 'content', 'books');
@@ -23,14 +34,14 @@ export function getBookSlugs(): string[] {
   return fs
     .readdirSync(booksDir)
     .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'))
-    .map((f) => f.replace(/\.mdx?$/, '')); // strip extension
+    .map((f) => f.replace(/\.mdx?$/, ''));
 }
 
 function resolveBookPath(slug: string): string | null {
   const mdx = path.join(booksDir, `${slug}.mdx`);
-  const md = path.join(booksDir, `${slug}.md`);
+  const md  = path.join(booksDir, `${slug}.md`);
   if (fs.existsSync(mdx)) return mdx;
-  if (fs.existsSync(md)) return md;
+  if (fs.existsSync(md))  return md;
   return null;
 }
 
@@ -39,10 +50,9 @@ export function getBookBySlug(
   fields: (keyof BookMeta | 'content')[] = []
 ): Partial<BookMeta> & { content?: string } {
   const realSlug = slug.replace(/\.mdx?$/, '');
-
   const fullPath = resolveBookPath(realSlug);
+
   if (!fullPath) {
-    // Graceful fallback — caller applies defaults downstream
     return { slug: realSlug, title: 'Book Not Found' } as Partial<BookMeta>;
   }
 
@@ -59,32 +69,43 @@ export function getBookBySlug(
     }
 
     const raw = fm[field as string];
+    if (typeof raw === 'undefined') continue;
 
-    if (typeof raw !== 'undefined') {
-      if (field === 'genre') {
-        if (Array.isArray(raw)) {
-          item.genre = (raw as unknown[]).map(String).filter(Boolean).join(', ');
-        } else {
-          item.genre = String(raw);
-        }
-      } else {
-        (item as Record<string, unknown>)[field] = raw;
-      }
+    if (field === 'genre') {
+      // normalize genre to a single string
+      item.genre = Array.isArray(raw)
+        ? (raw as unknown[]).map(String).filter(Boolean).join(', ')
+        : String(raw);
+      continue;
     }
+
+    if (field === 'tags') {
+      // normalize tags to string[]
+      if (Array.isArray(raw)) {
+        item.tags = (raw as unknown[]).map(String).map(s => s.trim()).filter(Boolean);
+      } else if (typeof raw === 'string') {
+        item.tags = raw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      continue;
+    }
+
+    (item as Record<string, unknown>)[field] = raw;
   }
 
   return item;
 }
 
-export function getAllBooks(fields: (keyof BookMeta | 'content')[] = []): Partial<BookMeta>[] {
-  const slugs = getBookSlugs();
-  const books = slugs.map((slug) => getBookBySlug(slug, fields));
+export function getAllBooks(
+  fields: (keyof BookMeta | 'content')[] = []
+): Partial<BookMeta>[] {
+  const books = getBookSlugs().map((slug) => getBookBySlug(slug, fields));
 
-  // Sort by title (fallback to slug), case-insensitive, asc
   books.sort((a, b) =>
-    (a.title || a.slug || '').toString().localeCompare((b.title || b.slug || '').toString(), undefined, {
-      sensitivity: 'base',
-    })
+    (a.title || a.slug || '').toString().localeCompare(
+      (b.title || b.slug || '').toString(),
+      undefined,
+      { sensitivity: 'base' }
+    )
   );
 
   return books;
