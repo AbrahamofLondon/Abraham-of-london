@@ -1,44 +1,61 @@
 // netlify/functions/send-contact.ts
-import { render } from '@react-email/render';
-import { sendEmail } from '@netlify/emails';
-import type { Handler } from '@netlify/functions';
-import ContactEmail from '../../emails/ContactEmail';
 
-export const handler: Handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+type HeadersMap = Record<string, string>;
+type NetlifyResult = { statusCode: number; headers?: HeadersMap; body: string };
 
-  let payload: { name?: string; email?: string; message?: string } = {};
-  try {
-    payload = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, body: 'Invalid JSON' };
-  }
-
-  const name = (payload.name || '').trim();
-  const email = (payload.email || '').trim();
-  const message = (payload.message || '').trim();
-
-  if (!name || !email || !message) {
-    return { statusCode: 422, body: 'name, email, and message are required' };
-  }
-
-  // Render the HTML from the React Email template
-  const html = render(<ContactEmail name={name} email={email} message={message} />);
-
-  // Send using the provider you configured in Netlify (Resend)
-  await sendEmail({
-    from: 'Abraham of London <hello@abrahamoflondon.org>',
-    to: 'info@abrahamoflondon.org',
-    replyTo: email,
-    subject: New enquiry from ${name},
-    html,
-  });
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ ok: true }),
-    headers: { 'content-type': 'application/json' },
-  };
+// Minimal event shape we actually use
+type EventLike = {
+  httpMethod: string;
+  headers: Record<string, string | undefined>;
+  body?: string | null;
 };
+
+const json = (obj: unknown) => JSON.stringify(obj);
+
+export const handler = async (event: EventLike): Promise<NetlifyResult> => {
+  // CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': event.headers.origin ?? '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400',
+      },
+      body: '',
+    };
+  }
+
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: { 'Allow': 'POST' },
+      body: 'Method Not Allowed',
+    };
+  }
+
+  const cors: HeadersMap = {
+    'Access-Control-Allow-Origin': event.headers.origin ?? '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    const { name = '', email = '', subject = '', message = '' } = JSON.parse(event.body ?? '{}');
+
+    if (!email || !message) {
+      return { statusCode: 400, headers: cors, body: json({ error: 'Required: email, message' }) };
+    }
+
+    // TODO: send email via your provider (SendGrid/Mailgun/Nodemailer)
+    // console.log({ name, email, subject, messageLength: String(message).length });
+
+    return { statusCode: 200, headers: cors, body: json({ ok: true }) };
+  } catch {
+    return { statusCode: 500, headers: cors, body: json({ error: 'Internal Server Error' }) };
+  }
+};
+
+export default handler;
