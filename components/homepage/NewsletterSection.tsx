@@ -1,4 +1,4 @@
-﻿// components/homepage/NewsletterSection.tsx
+// components/homepage/NewsletterSection.tsx
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 

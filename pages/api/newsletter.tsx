@@ -1,4 +1,4 @@
-﻿// pages/api/newsletter.ts
+// pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(

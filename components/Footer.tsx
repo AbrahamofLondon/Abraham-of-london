@@ -1,4 +1,4 @@
-﻿// components/Footer.tsx
+// components/Footer.tsx
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 

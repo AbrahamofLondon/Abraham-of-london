@@ -1,4 +1,4 @@
-﻿// components/MDXComponents.tsx
+// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";

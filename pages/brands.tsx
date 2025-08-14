@@ -164,7 +164,7 @@ export default function BrandsPage() {
         />
         <meta
           property="og:description"
-          content="Discover a portfolio of brands shaped by Abrahamâ€™s vision of legacy and leadership."
+          content="Discover a portfolio of brands shaped by AbrahamÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢s vision of legacy and leadership."
         />
         <meta property="og:url" content={`${SITE_URL}/brands`} />
         <meta property="og:image" content={abs(siteConfig.ogImage)} />
@@ -211,7 +211,7 @@ export default function BrandsPage() {
                 }}
               >
                 <Image
-                  src="/assets/images/abraham-of-london-logo.svg"
+                  src="/assets/images/logo/abraham-of-london-logo.svg"
                   alt="Abraham of London brand logo"
                   fill
                   className="object-contain"
@@ -250,7 +250,7 @@ export default function BrandsPage() {
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               At the heart of every venture is a commitment to{" "}
               <strong>legacy, innovation, and impact</strong>. We build brands
-              that donâ€™t just exist, but actively work to shape their industries
+              that donÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢t just exist, but actively work to shape their industries
               and enrich the lives of their communities.
             </p>
           </motion.section>
@@ -321,7 +321,7 @@ export default function BrandsPage() {
                         whileHover={{ x: 5 }}
                         transition={{ duration: 0.3 }}
                       >
-                        â†’
+                        ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢
                       </motion.span>
                     </a>
                   </div>

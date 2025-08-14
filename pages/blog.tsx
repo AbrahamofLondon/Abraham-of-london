@@ -38,15 +38,15 @@ const hasData = <T,>(arr?: T[] | null): arr is T[] =>
 
 // Assets known to exist locally (adjust if needed)
 const ASSETS = {
-  heroBanner: "/assets/images/blog-hero-banner.webp",
+  heroBanner: "/assets/images/abraham-of-london-banner.webp",
   writingDesk: "/assets/images/writing-desk.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
-  ogImage: "/assets/images/og-image.jpg",
-  twitterImage: "/assets/images/twitter-image.webp",
+  ogImage: "/assets/images/social/og-image.jpg",
+  twitterImage: "/assets/images/social/twitter-image.webp",
   defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
   fallbacks: {
     hero: [
-      "/assets/images/blog-hero-banner.webp",
+      "/assets/images/abraham-of-london-banner.webp",
       "/assets/images/writing-desk.webp",
       "/assets/images/profile-portrait.webp",
     ] as const,
@@ -551,7 +551,7 @@ export default function BlogPage({
                 }}
                 aria-hidden="true"
               >
-                â€¢
+                ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢
               </motion.div>
             ))}
           </div>

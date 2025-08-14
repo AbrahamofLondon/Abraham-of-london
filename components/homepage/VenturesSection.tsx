@@ -1,4 +1,4 @@
-﻿// components/homepage/VenturesSection.tsx
+// components/homepage/VenturesSection.tsx
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,7 +48,7 @@ const brands: Brand[] = [
     name: "InnovateHub",
     description:
       "A platform for tech startups to scale with sustainable solutions.",
-    logo: "/assets/images/logo/innovatehub.svg",
+    logo: "/assets/images/innovatehub.svg",
     url: "https://innovatehub.com",
     metric: "20+ Startups Supported",
   },

@@ -1,4 +1,4 @@
-﻿// components/homepage/HeroSection.tsx
+// components/homepage/HeroSection.tsx
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,7 +35,7 @@ const logoVariants = {
 
 const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
-  logo: "/assets/images/abraham-of-london-logo.svg",
+  logo: "/assets/images/logo/abraham-of-london-logo.svg",
   heroVideo: "/assets/videos/hero-background.mp4",
 };
 

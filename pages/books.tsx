@@ -1,4 +1,4 @@
-﻿// pages/books.tsx
+// pages/books.tsx
 import React, { useMemo, useState, useCallback, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -33,11 +33,22 @@ const ASSETS = {
   profilePortrait: '/assets/images/profile-portrait.webp',
   ogImage: '/assets/images/social/og-image.jpg',
   twitterImage: '/assets/images/social/twitter-image.webp',
-  defaultBookCover: "/assets/images/default-book.jpg",
-  fallbacks: { hero: ['/assets/images/abraham-of-london-banner.webp','/assets/images/writing-desk.webp','/assets/images/profile-portrait.webp'], collection: ['/assets/images/writing-desk.webp','/assets/images/profile-portrait.webp','/assets/images/default-book.jpg'] },
+  defaultBookCover: '/assets/images/default-book.jpg',
+  fallbacks: {
+    hero: [
+      '/assets/images/abraham-of-london-banner.webp',
+      '/assets/images/writing-desk.webp',
+      '/assets/images/profile-portrait.webp',
+    ],
+    collection: [
+      '/assets/images/writing-desk.webp',
+      '/assets/images/profile-portrait.webp',
+      '/assets/images/default-book.jpg',
+    ],
+  },
 } as const;
 
-// ---------- Types (UI shape Ã¢â‚¬â€œ safe for getStaticProps) ----------
+// ---------- Types (UI shape ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ safe for getStaticProps) ----------
 type Book = Required<
   Pick<
     BookMeta,
@@ -274,7 +285,7 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
       new Set(books.map((book) => book.genre).filter(Boolean)),
     ).sort();
 
-    // Pick first 3 as Ã¢â‚¬Å“featuredÃ¢â‚¬Â
+    // Pick first 3 as ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“featuredÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â
     const featuredBooks = books.slice(0, 3);
 
     // Final guard against accidental `undefined`
@@ -502,7 +513,7 @@ export default function BooksPage({
                   delay: i * 0.5,
                 }}
               >
-                Ã°Å¸â€œÅ¡
+                ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã‚Â¡
               </motion.div>
             ))}
           </div>
@@ -588,7 +599,7 @@ export default function BooksPage({
                   ease: "easeInOut",
                 }}
               >
-                Ã°Å¸â€Â
+                ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒâ€šÃ‚Â
               </motion.div>
             </motion.div>
             <motion.div
@@ -921,7 +932,7 @@ export default function BooksPage({
                       ease: "easeInOut",
                     }}
                   >
-                    Ã¢â€ â€™
+                    ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
                   </motion.span>
                 </Link>
               </motion.div>

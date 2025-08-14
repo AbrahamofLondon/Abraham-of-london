@@ -1,4 +1,4 @@
-﻿// components/NewsletterForm.tsx
+// components/NewsletterForm.tsx
 import React from "react";
 
 const NewsletterForm: React.FC = () => {
