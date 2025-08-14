@@ -1,9 +1,9 @@
-// pages/_app.tsx
+﻿// pages/_app.tsx
 import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { pageview, gaEnabled } from '../lib/gtag';
-import '../styles/globals.css'; // keep if you have it
+import { pageview, gaEnabled } from '@/lib/gtag';
+import '@/styles/globals.css'; // keep if you have it
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -26,3 +26,5 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
   return <Component {...pageProps} />;
 }
+
+

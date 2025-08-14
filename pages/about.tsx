@@ -1,9 +1,9 @@
-// pages/about.tsx
+﻿// pages/about.tsx
 import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import Layout from '../components/Layout';
+import Layout from '@/components/Layout';
 import Link from 'next/link';
 import ScrollProgress from '../components/ScrollProgress';
 
@@ -80,19 +80,19 @@ export default function AboutPage() {
               A Storyteller, Strategist, and Student of Life
             </h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I am Abraham of London—a storyteller, strategist, and student of life’s deep currents. My journey has been shaped by a relentless pursuit of truth, legacy, and personal mastery. Through every venture, book, or conversation, I am crafting not just businesses, but enduring narratives that challenge, inspire, and provoke thoughtful action.
+              I am Abraham of Londonâ€”a storyteller, strategist, and student of lifeâ€™s deep currents. My journey has been shaped by a relentless pursuit of truth, legacy, and personal mastery. Through every venture, book, or conversation, I am crafting not just businesses, but enduring narratives that challenge, inspire, and provoke thoughtful action.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              My work stands at the intersection of philosophy, creative expression, and human development. Whether through writing, brand building, or advisory, I see every project as a canvas — a medium to explore what it means to live meaningfully, lead courageously, and leave behind a legacy of substance.
+              My work stands at the intersection of philosophy, creative expression, and human development. Whether through writing, brand building, or advisory, I see every project as a canvas â€” a medium to explore what it means to live meaningfully, lead courageously, and leave behind a legacy of substance.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I’m less interested in transient trends and more invested in timeless truths. Family, faith, character, and creativity are the compass points that steer my endeavours. Every blog post, strategy session, or artistic project is my way of translating these convictions into tangible impact.
+              Iâ€™m less interested in transient trends and more invested in timeless truths. Family, faith, character, and creativity are the compass points that steer my endeavours. Every blog post, strategy session, or artistic project is my way of translating these convictions into tangible impact.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              This is not just a brand; it’s an unfolding life project. As seasons change, so do the mediums I employ — from thought leadership to immersive storytelling, from business ventures to deeply personal writings like <Link href="/books/fathering-without-fear" className="text-blue-600 hover:underline">Fathering Without Fear</Link>. It’s all connected, because I am the connection.
+              This is not just a brand; itâ€™s an unfolding life project. As seasons change, so do the mediums I employ â€” from thought leadership to immersive storytelling, from business ventures to deeply personal writings like <Link href="/books/fathering-without-fear" className="text-blue-600 hover:underline">Fathering Without Fear</Link>. Itâ€™s all connected, because I am the connection.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Welcome to my world — where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.
+              Welcome to my world â€” where ideas are sharpened, values are lived, and every expression is an invitation to grow, reflect, and build a life of consequence.
             </p>
           </div>
         </motion.section>

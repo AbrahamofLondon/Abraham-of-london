@@ -1,4 +1,4 @@
-// pages/index.tsx
+﻿// pages/index.tsx
 import React, { useMemo, useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image, { type StaticImageData } from 'next/image';
@@ -7,10 +7,10 @@ import type { GetStaticProps } from 'next';
 import dynamic from 'next/dynamic';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
-import Layout from '../components/Layout';
-import { getAllPosts, PostMeta } from '../lib/posts';
-import { getAllBooks, BookMeta } from '../lib/books';
-import { siteConfig } from '../lib/siteConfig';
+import Layout from '@/components/Layout';
+import { getAllPosts, PostMeta } from '@/lib/posts';
+import { getAllBooks, BookMeta } from '@/lib/books';
+import { siteConfig } from '@/lib/siteConfig';
 
 // Keep core-above-the-fold SSR; defer heavier/animated sections:
 const HeroSection = dynamic(() => import('../components/homepage/HeroSection'), { ssr: true });
@@ -18,15 +18,15 @@ const AboutSection = dynamic(() => import('../components/homepage/AboutSection')
 const VenturesSection = dynamic(() => import('../components/homepage/VenturesSection'), { ssr: true });
 const ContentShowcase = dynamic(() => import('../components/homepage/ContentShowcase'), { ssr: true });
 
-// Non-critical; animation-heavy → defer client-side:
+// Non-critical; animation-heavy â†’ defer client-side:
 const NewsletterSection = dynamic(() => import('../components/homepage/NewsletterSection'), { ssr: false });
 const TestimonialsSection = dynamic(() => import('../components/homepage/TestimonialsSection'), { ssr: false });
 const MilestonesTimeline = dynamic(() => import('../components/homepage/MilestonesTimeline'), { ssr: false });
 const EventsSection = dynamic(() => import('../components/homepage/EventsSection'), { ssr: false });
 
 // ---- Static image imports for LCP (auto blur, correct MIME, no 404s) ----
-import heroBanner from '../public/assets/images/abraham-of-london-banner.webp';
-import profilePortrait from '../public/assets/images/profile-portrait.webp';
+import heroBanner from '@/public/assets/images/abraham-of-london-banner.webp';
+import profilePortrait from '@/public/assets/images/profile-portrait.webp';
 
 // ---------- Constants ----------
 const SITE_URL = (
@@ -293,7 +293,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   return (
     <Layout>
       <Head>
-        <title>{siteConfig.title} — Empowering Global Leaders in Fatherhood & Strategy</title>
+        <title>{siteConfig.title} â€” Empowering Global Leaders in Fatherhood & Strategy</title>
         <meta
           name="description"
           content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`}
@@ -329,7 +329,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           <motion.div style={{ y: yHero }} className="absolute inset-0 -z-10">
             <Image
               src={ASSETS.heroBanner}
-              alt="Abraham of London — strategic leadership and fatherhood advocacy"
+              alt="Abraham of London â€” strategic leadership and fatherhood advocacy"
               fill
               priority
               fetchPriority="high"
@@ -353,7 +353,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
         {/* ABOUT (SSR) */}
         <AboutSection
-          bio="I’m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+          bio="Iâ€™m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
           achievements={achievements}
           portraitSrc={(ASSETS.profilePortrait as StaticImageData).src}
         />
@@ -402,10 +402,11 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         {/* Footer CTA */}
         <section className="py-12 text-center">
           <Link href="/contact" className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition">
-            Let’s Build Something Enduring
+            Letâ€™s Build Something Enduring
           </Link>
         </section>
       </div>
     </Layout>
   );
 }
+
