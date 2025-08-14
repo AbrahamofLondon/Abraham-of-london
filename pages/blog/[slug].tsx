@@ -1,4 +1,4 @@
-// pages/blog/[slug].tsx
+﻿// pages/blog/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticProps, GetStaticPaths } from "next";
@@ -140,8 +140,8 @@ export default function BlogPost({ post }: Props) {
           </h1>
 
           <div className="text-sm text-deepCharcoal/70 mb-4">
-            <span>{post.meta.author}</span> Â· <span>{post.meta.date}</span>
-            {post.meta.readTime && <span> Â· {post.meta.readTime}</span>}
+            <span>{post.meta.author}</span> Ãƒâ€šÃ‚Â· <span>{post.meta.date}</span>
+            {post.meta.readTime && <span> Ãƒâ€šÃ‚Â· {post.meta.readTime}</span>}
             {post.meta.category && (
               <span className="ml-2 inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1">
                 {post.meta.category}
@@ -157,4 +157,7 @@ export default function BlogPost({ post }: Props) {
     </Layout>
   );
 }
+
+
+
 

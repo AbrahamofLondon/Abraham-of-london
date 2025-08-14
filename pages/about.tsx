@@ -1,4 +1,4 @@
-// pages/about.tsx
+﻿// pages/about.tsx
 import React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -93,8 +93,8 @@ export default function AboutPage() {
               A Storyteller, Strategist, and Student of Life
             </h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I am Abraham of LondonÃ¢â‚¬â€a storyteller, strategist, and student of
-              lifeÃ¢â‚¬â„¢s deep currents. My journey has been shaped by a
+              I am Abraham of LondonÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âa storyteller, strategist, and student of
+              lifeÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s deep currents. My journey has been shaped by a
               relentless pursuit of truth, legacy, and personal mastery. Through
               every venture, book, or conversation, I am crafting not just
               businesses, but enduring narratives that challenge, inspire, and
@@ -103,20 +103,20 @@ export default function AboutPage() {
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
               My work stands at the intersection of philosophy, creative
               expression, and human development. Whether through writing, brand
-              building, or advisory, I see every project as a canvas Ã¢â‚¬â€ a
+              building, or advisory, I see every project as a canvas ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â a
               medium to explore what it means to live meaningfully, lead
               courageously, and leave behind a legacy of substance.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              IÃ¢â‚¬â„¢m less interested in transient trends and more invested in
+              IÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢m less interested in transient trends and more invested in
               timeless truths. Family, faith, character, and creativity are the
               compass points that steer my endeavours. Every blog post, strategy
               session, or artistic project is my way of translating these
               convictions into tangible impact.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              This is not just a brand; itÃ¢â‚¬â„¢s an unfolding life project. As
-              seasons change, so do the mediums I employ Ã¢â‚¬â€ from thought
+              This is not just a brand; itÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s an unfolding life project. As
+              seasons change, so do the mediums I employ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â from thought
               leadership to immersive storytelling, from business ventures to
               deeply personal writings like{" "}
               <Link
@@ -125,10 +125,10 @@ export default function AboutPage() {
               >
                 Fathering Without Fear
               </Link>
-              . ItÃ¢â‚¬â„¢s all connected, because I am the connection.
+              . ItÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s all connected, because I am the connection.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Welcome to my world Ã¢â‚¬â€ where ideas are sharpened, values are
+              Welcome to my world ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â where ideas are sharpened, values are
               lived, and every expression is an invitation to grow, reflect, and
               build a life of consequence.
             </p>
@@ -179,5 +179,8 @@ export default function AboutPage() {
     </Layout>
   );
 }
+
+
+
 
 

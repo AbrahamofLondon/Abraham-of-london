@@ -1,10 +1,24 @@
-// components/BlogPostCard.tsx
-import Image, { type StaticImageData } from 'next/image';
-import Link from 'next/link';
-import { formatDate } from '@/lib/date';
-import { Post } from '@/types';
+﻿// components/BlogPostCard.tsx
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import clsx from "clsx";
+import DateFormatter from "@/components/DateFormatter";
 
-const DEFAULT_COVER = '/assets/images/blog/default-blog-cover.jpg';
+export type BlogPostCardProps = {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  coverImage: string;
+  author: string;
+  readTime?: string;
+  category?: string;
+  /** When true, use the featured/hero styling (optional) */
+  isFeatured?: boolean;
+  className?: string;
+};
 
 export default function BlogPostCard({
   slug,
@@ -15,96 +29,82 @@ export default function BlogPostCard({
   author,
   readTime,
   category,
-}: Post) {
-  const initialSrc: string | StaticImageData =
-    typeof coverImage === 'object' && coverImage !== null
-      ? coverImage
-      : (typeof coverImage === 'string' && coverImage.trim())
-      ? coverImage
-      : DEFAULT_COVER;
-
-  const titleId = `post-${slug}-title`;
-  const iso = new Date(date).toString() === 'Invalid Date' ? undefined : new Date(date).toISOString();
-  const displayDate = formatDate(date, 'en-GB');
-
-  let currentSrc: string | StaticImageData = initialSrc;
-  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.target as HTMLImageElement;
-    if (img.src.includes(DEFAULT_COVER)) return;
-    img.src = DEFAULT_COVER;
-    currentSrc = DEFAULT_COVER;
-  };
-
-  const metaImageContent: string = typeof currentSrc === 'string' ? currentSrc : (currentSrc as StaticImageData).src;
+  isFeatured = false,
+  className,
+}: BlogPostCardProps) {
+  const cardClass = clsx(
+    "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur",
+    "shadow-card transition-transform",
+    isFeatured
+      ? "md:col-span-2 lg:col-span-2"
+      : "hover:scale-[1.01]",
+    className,
+  );
 
   return (
-    <article
-      className="group rounded-xl border border-[var(--color-lightGrey)] bg-[var(--color-warmWhite)] shadow-card hover:shadow-cardHover transition overflow-hidden focus-within:ring-2 focus-within:ring-[var(--color-primary)]"
-      itemScope
-      itemType="https://schema.org/BlogPosting"
-      aria-labelledby={titleId}
+    <motion.article
+      className={cardClass}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.45 }}
     >
-      <Link href={`/blog/${slug}`} className="block relative w-full h-56 outline-none" prefetch={false}>
-        {typeof currentSrc === 'string' ? (
+      <Link href={`/blog/${slug}`} className="block focus:outline-none">
+        {/* Image */}
+        <div className={clsx(
+          "relative w-full overflow-hidden",
+          isFeatured ? "aspect-[16/9]" : "aspect-[4/3]"
+        )}>
           <Image
-            src={currentSrc}
+            src={coverImage}
             alt={title}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            onError={handleImgError}
-            priority={false}
+            priority={isFeatured}
+            sizes={isFeatured ? "(min-width: 1024px) 800px, 100vw" : "(min-width: 768px) 400px, 100vw"}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-        ) : (
-          <Image
-            src={currentSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            placeholder="blur"
-            priority={false}
-          />
-        )}
-        <meta itemProp="image" content={metaImageContent} />
-      </Link>
-
-      <div className="p-4">
-        {category && (
-          <span className="inline-block text-xs rounded bg-[var(--color-warmWhite)] border border-[var(--color-lightGrey)] px-2 py-1 text-[var(--color-on-secondary)]/80 mb-2">
-            {category}
-          </span>
-        )}
-
-        <h3
-          id={titleId}
-          className="text-xl font-serif text-[var(--color-on-secondary)] group-hover:underline mb-2"
-          itemProp="headline"
-        >
-          <Link
-            href={`/blog/${slug}`}
-            className="outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-          >
-            {title}
-          </Link>
-        </h3>
-
-        <p className="text-sm text-[var(--color-on-secondary)]/80 line-clamp-3" itemProp="description">
-          {excerpt}
-        </p>
-
-        <div className="mt-4 flex items-center justify-between text-xs text-[var(--color-on-secondary)]/60">
-          <span itemProp="author" itemScope itemType="https://schema.org/Person">
-            <span itemProp="name">{author}</span>
-          </span>
-          <span>
-            {readTime ? `${readTime} · ` : ''}
-            <time dateTime={iso} itemProp="datePublished">
-              {displayDate}
-            </time>
-          </span>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          {category && (
+            <span className="absolute left-3 top-3 rounded-full bg-black/50 px-3 py-1 text-xs text-cream">
+              {category}
+            </span>
+          )}
         </div>
-      </div>
-    </article>
+
+        {/* Content */}
+        <div className={clsx(
+          "p-5 text-cream",
+          isFeatured && "md:p-6 lg:p-8"
+        )}>
+          <h3 className={clsx(
+            "font-semibold leading-tight line-clamp-2",
+            isFeatured ? "text-xl md:text-2xl" : "text-lg"
+          )}>
+            {title}
+          </h3>
+
+          <p className={clsx(
+            "mt-2 text-cream/80 line-clamp-3",
+            isFeatured ? "md:mt-3" : ""
+          )}>
+            {excerpt}
+          </p>
+
+          {/* Meta */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-cream/70">
+            <DateFormatter dateString={date} pattern="d MMM yyyy" />
+            <span aria-hidden>â€¢</span>
+            <span>by {author}</span>
+            {readTime && (
+              <>
+                <span aria-hidden>â€¢</span>
+                <span>{readTime}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </Link>
+    </motion.article>
   );
 }
+

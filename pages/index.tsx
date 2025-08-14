@@ -1,4 +1,4 @@
-// pages/index.tsx
+﻿// pages/index.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -35,7 +35,7 @@ const ContentShowcase = dynamic(
   { ssr: true },
 );
 
-// Animation-heavy ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬â„¢ defer to client
+// Animation-heavy sections (defer to client)
 const NewsletterSection = dynamic(
   () => import("@/components/homepage/NewsletterSection"),
   { ssr: false },
@@ -62,34 +62,25 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const ASSETS = {
-  heroBanner: '/assets/images/abraham-of-london-banner.webp',
-  profilePortrait: '/assets/images/profile-portrait.webp',
-  ogImage: '/assets/images/social/og-image.jpg',
-  twitterImage: '/assets/images/social/twitter-image.webp',
-  defaultBookCover: '/assets/images/default-book.jpg',
-  defaultBlogCover: '/assets/images/blog/default-blog-cover.jpg',
-  logo: '/assets/images/logo/abraham-of-london-logo.svg',
+  heroBanner: "/assets/images/abraham-of-london-banner.webp",
+  profilePortrait: "/assets/images/profile-portrait.webp",
+  ogImage: "/assets/images/social/og-image.jpg",
+  twitterImage: "/assets/images/social/twitter-image.webp",
+  defaultBookCover: "/assets/images/default-book.jpg",
+  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
+  logo: "/assets/images/logo/abraham-of-london-logo.svg",
 } as const;
 
 // ---------- Types ----------
 export type Post = Required<
   Pick<
     PostMeta,
-    | "slug"
-    | "title"
-    | "date"
-    | "excerpt"
-    | "coverImage"
-    | "author"
-    | "readTime"
-    | "category"
+    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
   >
 >;
+
 export type Book = Required<
-  Pick<
-    BookMeta,
-    "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink"
-  >
+  Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink">
 > & {
   genre: string;
   downloadPdf?: string | null;
@@ -101,12 +92,14 @@ interface Achievement {
   description: string;
   year: number;
 }
+
 interface HomeProps {
   posts: Post[];
   books: Book[];
   achievements: Achievement[];
 }
 
+// ---------- Hooks ----------
 const useParallax = () => {
   const { scrollYProgress } = useScroll();
   const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
@@ -198,7 +191,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         buyLink: b.buyLink || "#",
         genre: Array.isArray(b.genre)
           ? b.genre.filter(Boolean).join(", ")
-          : b.genre || "Personal Development",
+          : (b.genre as string) || "Personal Development",
         downloadPdf: b.downloadPdf ?? null,
         downloadEpub: b.downloadEpub ?? null,
       }));
@@ -225,6 +218,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         year: 2025,
       },
     ];
+
     return { props: { posts, books, achievements }, revalidate: 3600 };
   } catch (error) {
     console.error("Error in getStaticProps:", error);
@@ -338,7 +332,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         name: siteConfig.title,
         logo: {
           "@type": "ImageObject",
-          url: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
+          url: absUrl(ASSETS.logo),
         },
       },
       description: p.excerpt,
@@ -411,8 +405,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
     <Layout>
       <Head>
         <title>
-          {siteConfig.title} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Empowering Global Leaders in Fatherhood &
-          Strategy
+          {siteConfig.title} â€” Empowering Leaders in Fatherhood & Strategy
         </title>
         <meta
           name="description"
@@ -489,7 +482,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           >
             <Image
               src={ASSETS.heroBanner}
-              alt="Abraham of London ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Empowering Leadership and Fatherhood Advocacy"
+              alt="Abraham of London â€” Empowering Leadership and Fatherhood Advocacy"
               fill
               priority
               fetchPriority="high"
@@ -515,7 +508,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <main id="main-content" className="relative">
           {/* ABOUT (SSR) */}
           <AboutSection
-            bio="IÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+            bio="I'm Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
             achievements={achievements}
             portraitSrc={ASSETS.profilePortrait}
           />
@@ -571,13 +564,11 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition"
             aria-label="Contact Abraham of London"
           >
-            LetÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s Build Something Enduring
+            Letâ€™s Build Something Enduring
           </Link>
         </section>
       </div>
     </Layout>
   );
 }
-
-
 

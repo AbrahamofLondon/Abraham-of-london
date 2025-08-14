@@ -1,4 +1,4 @@
-// netlify/functions/send-contact.ts
+﻿// netlify/functions/send-contact.ts
 
 type HeadersMap = Record<string, string>;
 type NetlifyResult = { statusCode: number; headers?: HeadersMap; body: string };
@@ -59,6 +59,9 @@ export const handler = async (event: EventLike): Promise<NetlifyResult> => {
 };
 
 export default handler;
+
+
+
 
 
 

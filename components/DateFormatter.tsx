@@ -1,12 +1,12 @@
-// components/DateFormatter.tsx
+﻿// components/DateFormatter.tsx
 import React from "react";
-import { format } from "date-fns";
-import { parseISO } from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 
 interface DateFormatterProps {
   dateString: string;
   className?: string;
-  pattern?: string; // date-fns format string; default is 'PPP'
+  /** date-fns format string (default 'PPP') */
+  pattern?: string;
 }
 
 export default function DateFormatter({
@@ -17,7 +17,7 @@ export default function DateFormatter({
   let date: Date;
 
   try {
-    // ISO-8601 strings (e.g. "2024-06-01", "2024-06-01T12:34:56Z")
+    // ISO-8601 strings like "2024-06-01" or "2024-06-01T12:34:56Z"
     date = parseISO(dateString);
   } catch {
     const ts = Date.parse(dateString);
@@ -34,7 +34,3 @@ export default function DateFormatter({
     </time>
   );
 }
-
-
-
-

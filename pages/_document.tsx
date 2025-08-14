@@ -1,4 +1,4 @@
-// pages/_document.tsx
+﻿// pages/_document.tsx
 import Document, { Html, Head, Main, NextScript, DocumentContext } from "next/document";
 import { GA_MEASUREMENT_ID, gaEnabled } from "@/lib/gtag";
 
@@ -66,3 +66,6 @@ class MyDocument extends Document {
 }
 
 export default MyDocument;
+
+
+

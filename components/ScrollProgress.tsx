@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import clsx from "clsx";
 
@@ -37,6 +37,9 @@ const ScrollProgress: React.FC<ScrollProgressProps> = ({
 };
 
 export default ScrollProgress;
+
+
+
 
 
 
