@@ -1,6 +1,6 @@
-import Head from 'next/head';
+﻿import Head from 'next/head';
 import Link from 'next/link';
-import Layout from '../components/Layout';
+import Layout from '@/components/Layout';
 
 export default function NotFound() {
   return (
@@ -19,7 +19,7 @@ export default function NotFound() {
           Page Not Found
         </h1>
         <p className="text-deepCharcoal/80 mb-8">
-          Sorry, the page you’re looking for doesn’t exist.
+          Sorry, the page youâ€™re looking for doesnâ€™t exist.
         </p>
 
         <div className="flex items-center justify-center gap-4">
@@ -27,7 +27,7 @@ export default function NotFound() {
             href="/"
             className="bg-forest text-cream px-5 py-2 rounded-md hover:bg-softGold hover:text-forest transition"
           >
-            ← Go back home
+            â† Go back home
           </Link>
 
           <a
@@ -41,3 +41,4 @@ export default function NotFound() {
     </Layout>
   );
 }
+

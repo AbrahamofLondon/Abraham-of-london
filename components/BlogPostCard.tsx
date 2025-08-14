@@ -1,7 +1,7 @@
-// components/BlogPostCard.tsx
+﻿// components/BlogPostCard.tsx
 import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
-import { formatDate } from '../lib/date';
+import { formatDate } from '@/lib/date';
 
 export type BlogPostCardProps = {
   slug: string;
@@ -99,7 +99,7 @@ export default function BlogPostCard({
             <span itemProp="name">{author}</span>
           </span>
           <span>
-            {readTime ? `${readTime} · ` : ''}
+            {readTime ? `${readTime} Â· ` : ''}
             <time dateTime={iso} itemProp="datePublished">
               {displayDate}
             </time>
@@ -109,3 +109,4 @@ export default function BlogPostCard({
     </article>
   );
 }
+
