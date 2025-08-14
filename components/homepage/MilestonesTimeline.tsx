@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 type Milestone = { year: number; title: string; detail: string };

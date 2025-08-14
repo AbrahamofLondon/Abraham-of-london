@@ -184,7 +184,7 @@ export default function ContactPage() {
         </div>
         <div className="absolute top-10 right-10 w-48 h-48 md:w-64 md:h-64 opacity-50 z-0">
           <Image
-            src="/assets/images/contact-element.svg"
+            src="/assets/images/contact\.element.svg"
             alt=""
             fill
             className="object-contain"

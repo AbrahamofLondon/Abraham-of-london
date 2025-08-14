@@ -1,4 +1,4 @@
-﻿// pages/index.tsx
+// pages/index.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -66,8 +66,8 @@ const ASSETS = {
   profilePortrait: '/assets/images/profile-portrait.webp',
   ogImage: '/assets/images/social/og-image.jpg',
   twitterImage: '/assets/images/social/twitter-image.webp',
-  defaultBookCover: "/assets/images/default-book.jpg",
-  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
+  defaultBookCover: '/assets/images/default-book.jpg',
+  defaultBlogCover: '/assets/images/blog/default-blog-cover.jpg',
   logo: '/assets/images/logo/abraham-of-london-logo.svg',
 } as const;
 

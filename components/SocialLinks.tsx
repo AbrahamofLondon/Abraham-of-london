@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 // components/SocialLinks.tsx
 import Link from "next/link";
 import * as React from "react";

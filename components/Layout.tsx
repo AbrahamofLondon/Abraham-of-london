@@ -1,4 +1,4 @@
-﻿// components/Layout.tsx
+// components/Layout.tsx
 import React, { ReactNode } from "react";
 import Head from "next/head";
 import Header from "./Header";
