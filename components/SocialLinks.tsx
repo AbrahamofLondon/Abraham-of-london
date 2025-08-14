@@ -1,14 +1,13 @@
 // components/SocialLinks.tsx
 import Link from 'next/link';
-import Image from 'next/image';
-import React from 'react';
+import * as React from 'react';
 
 type IconType = string | React.ReactNode;
 
 export interface SocialLinkItem {
   href: string;
   label: string;
-  icon: IconType;
+  icon: IconType;         // string path to SVG in /public or a ReactNode
   external?: boolean;
   rel?: string;
   className?: string;
@@ -20,6 +19,10 @@ interface SocialLinksProps {
   size?: number;
   className?: string;
   variant?: 'ghost' | 'solid';
+  enrichExternalWithUtm?: boolean;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 }
 
 function cn(...parts: Array<string | false | null | undefined>) {
@@ -38,9 +41,31 @@ function isTel(href: string) {
   return href.startsWith('tel:');
 }
 
-function getGtag(): ((...args: unknown[]) => void) | undefined {
+function ensureHttps(u: string) {
+  try {
+    if (isMail(u) || isTel(u) || u.startsWith('#')) return u;
+    if (/^https?:\/\//i.test(u)) return u;
+    return `https://${u.replace(/^\/+/, '')}`;
+  } catch {
+    return u;
+  }
+}
+
+function withUtm(u: string, source = 'abraham-site', medium = 'social', campaign = 'global') {
+  try {
+    const url = new URL(u);
+    url.searchParams.set('utm_source', source);
+    url.searchParams.set('utm_medium', medium);
+    url.searchParams.set('utm_campaign', campaign);
+    return url.toString();
+  } catch {
+    return u;
+  }
+}
+
+function getGtag(): ((...args: any[]) => void) | undefined {
   if (typeof window === 'undefined') return undefined;
-  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+  const w = window as any;
   return typeof w.gtag === 'function' ? w.gtag : undefined;
 }
 
@@ -60,35 +85,58 @@ export default function SocialLinks({
   size = 18,
   className,
   variant = 'ghost',
+  enrichExternalWithUtm = false,
+  utmSource = 'abraham-site',
+  utmMedium = 'social',
+  utmCampaign = 'global',
 }: SocialLinksProps) {
-  const baseBtn = 'inline-flex items-center gap-2 rounded-md px-3 py-2 text-deepCharcoal transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseBtn =
+    'inline-flex items-center gap-2 rounded-md px-3 py-2 text-deepCharcoal transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   const ghost = 'border border-lightGrey hover:bg-warmWhite focus:ring-deepCharcoal/30';
   const solid = 'bg-deepCharcoal text-warmWhite hover:opacity-90 focus:ring-deepCharcoal/40';
 
+  if (!Array.isArray(links) || links.length === 0) return null;
+
   return (
-    <div className={cn('flex flex-wrap gap-3', className)}>
+    <nav aria-label="Social links" className={cn('flex flex-wrap gap-3', className)}>
       {links.map((item) => {
-        const externalAuto = isHttp(item.href);
-        const mail = isMail(item.href);
-        const tel = isTel(item.href);
+        // Normalize href and external flags
+        let href = item.href.trim();
+        const externalAuto = isHttp(href);
+        const mail = isMail(href);
+        const tel = isTel(href);
         const isExternal = item.external ?? externalAuto;
         const openNewTab = isExternal && !mail && !tel;
 
-        const rel = openNewTab ? cn('noopener', 'noreferrer', item.rel) : item.rel;
-        const aria = openNewTab ? `${item.label} (opens in new tab)` : item.label;
+        if (isExternal && isHttp(href)) {
+          href = ensureHttps(href);
+          if (enrichExternalWithUtm) {
+            href = withUtm(href, utmSource, utmMedium, utmCampaign);
+          }
+        }
 
+        const rel = openNewTab ? cn('noopener', 'noreferrer', 'external', item.rel) : item.rel;
+        const aria = openNewTab ? `${item.label} — opens in new tab` : item.label;
+        const classes = cn(
+          baseBtn,
+          variant === 'ghost' ? ghost : solid,
+          item.className
+        );
+        const key = item.id ?? `${item.href}-${item.label}`;
+
+        // Icon handling: use <img> for string SVGs; ReactNode otherwise
         const iconNode =
           typeof item.icon === 'string' ? (
-            <Image
+            <img
               src={item.icon}
               alt=""
-              aria-hidden={true}
               width={size}
               height={size}
-              unoptimized={isHttp(item.icon)}
+              aria-hidden="true"
+              loading="lazy"
             />
           ) : (
-            <span aria-hidden={true}>{item.icon}</span>
+            <span aria-hidden="true">{item.icon}</span>
           );
 
         const content = (
@@ -98,52 +146,54 @@ export default function SocialLinks({
           </>
         );
 
-        const classes = cn(baseBtn, variant === 'ghost' ? ghost : solid, item.className);
-        const key = item.id ?? `${item.href}-${item.label}`;
-
+        // External HTTP(S)
         if (openNewTab) {
           return (
             <a
               key={key}
-              href={item.href}
+              href={href}
               target="_blank"
-              rel={rel || 'noopener noreferrer'}
+              rel={rel || 'noopener noreferrer external'}
               aria-label={aria}
               className={classes}
-              onClick={() => trackSocialClick(item.label, item.href)}
+              referrerPolicy="no-referrer-when-downgrade"
+              onClick={() => trackSocialClick(item.label, href)}
             >
               {content}
             </a>
           );
         }
 
-        if (isHttp(item.href) || isMail(item.href) || isTel(item.href)) {
+        // mailto/tel/inline http without new tab
+        if (isHttp(href) || mail || tel) {
           return (
             <a
               key={key}
-              href={item.href}
+              href={href}
               rel={rel || undefined}
               aria-label={aria}
               className={classes}
-              onClick={() => trackSocialClick(item.label, item.href)}
+              onClick={() => trackSocialClick(item.label, href)}
             >
               {content}
             </a>
           );
         }
 
+        // Internal link
         return (
           <Link
             key={key}
-            href={item.href}
+            href={href}
+            prefetch={false}
             aria-label={aria}
             className={classes}
-            onClick={() => trackSocialClick(item.label, item.href)}
+            onClick={() => trackSocialClick(item.label, href)}
           >
             {content}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }
