@@ -1,4 +1,4 @@
-﻿import Head from 'next/head';
+import Head from 'next/head';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 
@@ -19,7 +19,7 @@ export default function NotFound() {
           Page Not Found
         </h1>
         <p className="text-deepCharcoal/80 mb-8">
-          Sorry, the page youâ€™re looking for doesnâ€™t exist.
+          Sorry, the page you're looking for doesn't exist.
         </p>
 
         <div className="flex items-center justify-center gap-4">
