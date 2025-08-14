@@ -1,0 +1,18 @@
+// components/homepage/MilestonesTimeline.tsx
+import { motion } from 'framer-motion';
+
+export default function MilestonesTimeline() {
+  return (
+    <section className="container mx-auto max-w-6xl px-4 py-16">
+      <motion.h2
+        className="text-3xl font-bold text-[var(--color-primary)] mb-8 text-center"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+      >
+        Milestones
+      </motion.h2>
+      <p className="text-center text-[var(--color-on-primary)]">Coming soon...</p>
+    </section>
+  );
+}

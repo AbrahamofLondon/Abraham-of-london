@@ -7,12 +7,12 @@ type Achievement = { title: string; description: string; year: number };
 interface Props {
   bio: string;
   achievements: Achievement[];
-  portraitSrc?: string; // NEW (optional)
+  portraitSrc: string;
 }
 
 export default function AboutSection({ bio, achievements, portraitSrc }: Props) {
   return (
-    <section className="container px-4 py-16 text-deepCharcoal">
+    <section className="container mx-auto max-w-6xl px-4 py-16 text-deepCharcoal">
       <div className="grid md:grid-cols-2 gap-10 items-center">
         <div>
           <h2 className="font-serif text-3xl text-forest mb-4">About Abraham</h2>
@@ -24,7 +24,9 @@ export default function AboutSection({ bio, achievements, portraitSrc }: Props) 
                 <li key={`${a.title}-${i}`} className="flex items-start gap-3">
                   <span className="mt-1 inline-block h-2 w-2 rounded-full bg-forest" />
                   <div>
-                    <p className="font-semibold">{a.title} <span className="text-sm text-forest/70">({a.year})</span></p>
+                    <p className="font-semibold">
+                      {a.title} <span className="text-sm text-forest/70">({a.year})</span>
+                    </p>
                     <p className="text-sm text-deepCharcoal/80">{a.description}</p>
                   </div>
                 </li>
@@ -34,12 +36,14 @@ export default function AboutSection({ bio, achievements, portraitSrc }: Props) 
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           className="relative w-72 h-72 md:w-80 md:h-80 mx-auto rounded-full overflow-hidden shadow-card"
         >
           <Image
-            src={portraitSrc || '/assets/images/profile-portrait.webp'}
+            src={portraitSrc}
             alt="Portrait of Abraham of London"
             fill
             sizes="(max-width: 768px) 18rem, 20rem"

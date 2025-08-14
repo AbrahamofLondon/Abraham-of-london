@@ -1,6 +1,4 @@
 /* styles/globals.css */
-
-/* Tailwind layers (keep these at the top) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,32 +6,40 @@
 /* --- THEME VARIABLES --- */
 /* Light Theme (Default) */
 :root {
-  --color-primary: #1B4332; /* forest-green */
-  --color-primary-hover: #123122; /* A darker forest-green for hover state */
-  --color-on-primary: #FEFCF7; /* warm-white */
-  --color-on-primary-hover: #FEFCF7;
+  --color-primary: #0b2e1f; /* Matches forest */
+  --color-primary-hover: #047857; /* Matches emerald-700 */
+  --color-on-primary: #f5f5f0; /* Matches cream */
+  --color-on-primary-hover: #ffffff;
 
-  --color-secondary: #F7F3E9; /* cream */
-  --color-on-secondary: #2D3436; /* deep-charcoal */
+  --color-secondary: #f5f5f0; /* Matches cream */
+  --color-on-secondary: #333333; /* Matches deepCharcoal */
 
-  --color-accent: #D4AF37; /* soft-gold */
-  --color-accent-hover: #b28c2e; /* A slightly darker gold */
-  --color-on-accent: #FEFCF7; /* warm-white */
+  --color-accent: #d4af37; /* Matches softGold */
+  --color-accent-hover: #b89b2f;
+  --color-on-accent: #333333;
+
+  --color-lightGrey: #e5e5e5; /* Matches lightGrey */
+  --color-warmWhite: #fafaf5; /* Matches warmWhite */
+  --color-midGreen: #4b8b6b; /* Matches midGreen */
 }
 
 /* Dark Theme */
 .dark {
-  --color-primary: #F7F3E9; /* cream */
-  --color-primary-hover: #E8E5DF; /* A slightly darker cream */
-  --color-on-primary: #2D3436; /* deep-charcoal */
-  --color-on-primary-hover: #2D3436;
+  --color-primary: #047857; /* emerald-700 */
+  --color-primary-hover: #059669; /* Slightly lighter emerald */
+  --color-on-primary: #ffffff;
+  --color-on-primary-hover: #f5f5f0;
 
-  --color-secondary: #2D3436; /* deep-charcoal */
-  --color-on-secondary: #F7F3E9; /* cream */
+  --color-secondary: #333333; /* deepCharcoal */
+  --color-on-secondary: #f5f5f0; /* cream */
 
-  --color-accent: #D4AF37; /* soft-gold (can be kept the same or adjusted) */
-  --color-accent-hover: #b28c2e;
-  --color-on-accent: #1B4332; /* forest-green */
+  --color-accent: #d4af37; /* softGold */
+  --color-accent-hover: #b89b2f;
+  --color-on-accent: #0b2e1f; /* forest */
+
+  --color-lightGrey: #4b4b4b;
+  --color-warmWhite: #333333;
+  --color-midGreen: #6bb694;
 }
 
 /* --- BASE STYLES USING THEME VARIABLES --- */
@@ -48,7 +54,6 @@ html, body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Headings use Playfair-esque serif if available */
 h1, h2, h3, h4, h5, h6 {
   font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
   color: var(--color-primary);
@@ -58,7 +63,6 @@ h1 { font-size: 3.5rem; letter-spacing: 0.1em; }
 h2 { font-size: 2.5rem; letter-spacing: 0.08em; }
 h3 { font-size: 1.8rem; letter-spacing: 0.05em; }
 
-/* Links */
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -66,16 +70,13 @@ a {
 }
 a:hover { color: var(--color-accent); }
 
-/* --- YOUR CUSTOM UTILITY CLASSES, UPDATED TO USE THEME VARIABLES --- */
-
-/* Header */
+/* --- CUSTOM UTILITY CLASSES --- */
 .site-header {
   background: var(--color-secondary);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   height: 100px;
 }
 
-/* Buttons */
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
@@ -102,25 +103,23 @@ a:hover { color: var(--color-accent); }
   color: var(--color-on-primary);
 }
 
-/* Cards */
 .card {
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-lightGrey);
   padding: 32px;
   box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
   transition: transform .25s ease, box-shadow .25s ease;
 }
 .dark .card {
-  box-shadow: 0 10px 30px rgba(255,255,255,0.05);
+  box-shadow: 0 10px 30px rgba(255,255,255,0.1);
 }
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
 }
 .dark .card:hover {
-  box-shadow: 0 16px 42px rgba(255,255,255,0.08);
+  box-shadow: 0 16px 42px rgba(255,255,255,0.15);
 }
 
-/* Section Header Accent */
 .section-header {
   text-align: center;
   color: var(--color-primary);
@@ -135,7 +134,6 @@ a:hover { color: var(--color-accent); }
   margin: 16px auto 0 auto;
 }
 
-/* Footer */
 .site-footer {
   background: var(--color-primary);
   color: var(--color-on-primary);
@@ -144,7 +142,6 @@ a:hover { color: var(--color-accent); }
 .site-footer a { color: var(--color-on-primary); }
 .site-footer a:hover { color: var(--color-accent); }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   h1 { font-size: 2.5rem; letter-spacing: .08em; }
   h2 { font-size: 2rem; letter-spacing: .06em; }

@@ -10,19 +10,19 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import Layout from '@/components/Layout';
 import { getAllPosts, PostMeta } from '@/lib/posts';
 import { getAllBooks, BookMeta } from '@/lib/books';
-import { siteConfig } from '@/lib/siteConfig';
+import { siteConfig, absUrl } from '@/lib/siteConfig';
 
 // Keep core-above-the-fold SSR; defer heavier/animated sections:
-const HeroSection = dynamic(() => import('../components/homepage/HeroSection'), { ssr: true });
-const AboutSection = dynamic(() => import('../components/homepage/AboutSection'), { ssr: true });
-const VenturesSection = dynamic(() => import('../components/homepage/VenturesSection'), { ssr: true });
-const ContentShowcase = dynamic(() => import('../components/homepage/ContentShowcase'), { ssr: true });
+const HeroSection = dynamic(() => import('@/components/homepage/HeroSection'), { ssr: true });
+const AboutSection = dynamic(() => import('@/components/homepage/AboutSection'), { ssr: true });
+const VenturesSection = dynamic(() => import('@/components/homepage/VenturesSection'), { ssr: true });
+const ContentShowcase = dynamic(() => import('@/components/homepage/ContentShowcase'), { ssr: true });
 
-// Non-critical; animation-heavy â†’ defer client-side:
-const NewsletterSection = dynamic(() => import('../components/homepage/NewsletterSection'), { ssr: false });
-const TestimonialsSection = dynamic(() => import('../components/homepage/TestimonialsSection'), { ssr: false });
-const MilestonesTimeline = dynamic(() => import('../components/homepage/MilestonesTimeline'), { ssr: false });
-const EventsSection = dynamic(() => import('../components/homepage/EventsSection'), { ssr: false });
+// Non-critical; animation-heavy → defer client-side:
+const NewsletterSection = dynamic(() => import('@/components/homepage/NewsletterSection'), { ssr: false });
+const TestimonialsSection = dynamic(() => import('@/components/homepage/TestimonialsSection'), { ssr: false });
+const MilestonesTimeline = dynamic(() => import('@/components/homepage/MilestonesTimeline'), { ssr: false });
+const EventsSection = dynamic(() => import('@/components/homepage/EventsSection'), { ssr: false });
 
 // ---- Static image imports for LCP (auto blur, correct MIME, no 404s) ----
 import heroBanner from '@/public/assets/images/abraham-of-london-banner.webp';
@@ -35,14 +35,6 @@ const SITE_URL = (
   process.env.DEPLOY_PRIME_URL ||
   'https://abraham-of-london.netlify.app'
 ).replace(/\/$/, '');
-
-const abs = (path: string): string => {
-  if (!path) return '';
-  if (/^https?:\/\//i.test(path)) return path;
-  // Ensure leading slash so URL() resolves properly
-  const normalized = path.startsWith('/') ? path : `/${path}`;
-  return SITE_URL ? new URL(normalized, SITE_URL).toString() : normalized;
-};
 
 const ASSETS = {
   heroBanner, // StaticImageData
@@ -109,7 +101,15 @@ const ScrollProgress: React.FC = () => {
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
-      'slug', 'title', 'date', 'publishedAt', 'excerpt', 'coverImage', 'author', 'readTime', 'category',
+      'slug',
+      'title',
+      'date',
+      'publishedAt',
+      'excerpt',
+      'coverImage',
+      'author',
+      'readTime',
+      'category',
     ]);
 
     // Sort newest first (ISO date or fallback)
@@ -120,7 +120,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     });
 
     const posts: Post[] = sortedPosts
-      .filter(p => p && p.slug)
+      .filter((p) => p && p.slug)
       .slice(0, 3)
       .map((p, i) => ({
         slug: p.slug || `post-${i}`,
@@ -137,11 +137,19 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       }));
 
     const booksData = getAllBooks([
-      'slug', 'title', 'author', 'excerpt', 'coverImage', 'buyLink', 'genre', 'downloadPdf', 'downloadEpub',
+      'slug',
+      'title',
+      'author',
+      'excerpt',
+      'coverImage',
+      'buyLink',
+      'genre',
+      'downloadPdf',
+      'downloadEpub',
     ]);
 
     const books: Book[] = booksData
-      .filter(b => b && b.slug)
+      .filter((b) => b && b.slug)
       .slice(0, 4)
       .map((b, i) => ({
         slug: b.slug || `book-${i}`,
@@ -180,18 +188,18 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   useEffect(() => {
     setCommunityCount(120_000);
     const id = setInterval(() => {
-      setCommunityCount(prev => Math.min(prev + Math.floor(Math.random() * 9) + 1, 150_000));
+      setCommunityCount((prev) => Math.min(prev + Math.floor(Math.random() * 9) + 1, 150_000));
     }, 5000);
     return () => clearInterval(id);
   }, []);
 
   const sameAsLinks = useMemo(
-    () => siteConfig.socialLinks.filter(l => l.external && /^https?:\/\//i.test(l.href)).map(l => l.href),
-    []
+    () => siteConfig.socialLinks.filter((l) => l.external && /^https?:\/\//i.test(l.href)).map((l) => l.href),
+    [],
   );
 
   const structuredData = useMemo(() => {
-    const baseUrl = SITE_URL || 'https://abraham-of-london.netlify.app';
+    const baseUrl = SITE_URL;
     const currentYear = new Date().getFullYear();
 
     const website = {
@@ -217,7 +225,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       '@id': `${baseUrl}#organization`,
       name: siteConfig.title,
       url: baseUrl,
-      logo: { '@type': 'ImageObject', url: abs(ASSETS.logo), width: 512, height: 512 },
+      logo: { '@type': 'ImageObject', url: absUrl(ASSETS.logo), width: 512, height: 512 },
       image: { '@type': 'ImageObject', url: (ASSETS.profilePortrait as StaticImageData).src, width: 400, height: 400 },
       sameAs: sameAsLinks,
       address: { '@type': 'PostalAddress', addressLocality: 'London', addressCountry: 'GB' },
@@ -234,30 +242,30 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       worksFor: { '@type': 'Organization', name: siteConfig.title },
     };
 
-    const postSchemas = posts.map(p => ({
+    const postSchemas = posts.map((p) => ({
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: p.title,
-      image: abs(p.coverImage),
+      image: absUrl(p.coverImage),
       datePublished: p.date,
       dateModified: p.date,
       author: { '@type': 'Person', name: p.author },
-      publisher: { '@type': 'Organization', name: siteConfig.title, logo: { '@type': 'ImageObject', url: abs('/assets/images/abraham-of-london-logo.svg') } },
+      publisher: { '@type': 'Organization', name: siteConfig.title, logo: { '@type': 'ImageObject', url: absUrl('/assets/images/abraham-of-london-logo.svg') } },
       description: p.excerpt,
-      mainEntityOfPage: { '@type': 'WebPage', '@id': abs(`/blog/${p.slug}`) },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': absUrl(`/blog/${p.slug}`) },
     }));
 
-    const bookSchemas = books.map(b => ({
+    const bookSchemas = books.map((b) => ({
       '@context': 'https://schema.org',
       '@type': 'Book',
       name: b.title,
       author: { '@type': 'Person', name: b.author },
       bookFormat: 'https://schema.org/EBook',
-      image: abs(b.coverImage),
+      image: absUrl(b.coverImage),
       publisher: siteConfig.title,
       description: b.excerpt,
       inLanguage: 'en-GB',
-      url: abs(`/books/${b.slug}`),
+      url: absUrl(`/books/${b.slug}`),
       offers: { '@type': 'Offer', url: b.buyLink },
     }));
 
@@ -293,7 +301,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   return (
     <Layout>
       <Head>
-        <title>{siteConfig.title} â€” Empowering Global Leaders in Fatherhood & Strategy</title>
+        <title>{siteConfig.title} — Empowering Global Leaders in Fatherhood & Strategy</title>
         <meta
           name="description"
           content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`}
@@ -307,11 +315,13 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta property="og:description" content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders.`} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={abs(ASSETS.ogImage)} />
+        <meta property="og:image" content={absUrl(ASSETS.ogImage)} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteConfig.title} />
         <meta name="twitter:description" content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders.`} />
-        <meta name="twitter:image" content={abs(ASSETS.twitterImage)} />
+        <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
         {/* JSON-LD */}
@@ -329,7 +339,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           <motion.div style={{ y: yHero }} className="absolute inset-0 -z-10">
             <Image
               src={ASSETS.heroBanner}
-              alt="Abraham of London â€” strategic leadership and fatherhood advocacy"
+              alt="Abraham of London — Empowering Leadership and Fatherhood Advocacy"
               fill
               priority
               fetchPriority="high"
@@ -353,7 +363,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
         {/* ABOUT (SSR) */}
         <AboutSection
-          bio="Iâ€™m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+          bio="I’m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
           achievements={achievements}
           portraitSrc={(ASSETS.profilePortrait as StaticImageData).src}
         />
@@ -401,12 +411,14 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
         {/* Footer CTA */}
         <section className="py-12 text-center">
-          <Link href="/contact" className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition">
-            Letâ€™s Build Something Enduring
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition"
+          >
+            Let’s Build Something Enduring
           </Link>
         </section>
       </div>
     </Layout>
   );
 }
-

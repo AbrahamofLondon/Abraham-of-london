@@ -36,9 +36,9 @@ const NewsletterSection: React.FC = () => {
   };
 
   return (
-    <section className="container mx-auto px-4 py-16">
+    <section className="container mx-auto max-w-6xl px-4 py-16">
       <motion.div
-        className="relative bg-[var(--color-primary)] text-[var(--color-on-primary)] py-16 px-8 rounded-2xl shadow-lg mb-12 overflow-hidden"
+        className="relative bg-forest text-cream py-16 px-8 rounded-2xl shadow-lg mb-12 overflow-hidden"
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
@@ -46,7 +46,7 @@ const NewsletterSection: React.FC = () => {
       >
         <div className="relative text-center max-w-2xl mx-auto">
           <motion.h2
-            className="font-serif text-3xl md:text-4xl font-bold mb-4 tracking-brand text-[var(--color-on-primary)]"
+            className="font-serif text-3xl md:text-4xl font-bold mb-4 tracking-brand"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -55,7 +55,7 @@ const NewsletterSection: React.FC = () => {
             Join the Journey
           </motion.h2>
           <motion.p
-            className="text-lg mb-8 opacity-90 text-[var(--color-on-primary)]"
+            className="text-lg mb-8 opacity-90"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -63,7 +63,7 @@ const NewsletterSection: React.FC = () => {
           >
             Get exclusive insights on fatherhood, leadership, and building lasting legacies.
           </motion.p>
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto" aria-label="Newsletter subscription form">
             <motion.div
               className="flex flex-col sm:flex-row gap-4"
               initial={{ opacity: 0, y: 20 }}
@@ -76,19 +76,21 @@ const NewsletterSection: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email address"
-                className="flex-1 px-5 py-3 rounded-full text-[var(--color-on-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-on-primary)] transition-all duration-300"
+                className="flex-1 px-5 py-3 rounded-full text-deepCharcoal focus:outline-none focus:ring-2 focus:ring-cream transition-all duration-300"
                 required
                 disabled={status === 'loading'}
                 whileFocus={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                aria-label="Enter your email address"
               />
               <motion.button
                 type="submit"
                 disabled={status === 'loading' || !email.trim()}
-                className="px-8 py-3 bg-[var(--color-secondary)] text-[var(--color-on-secondary)] font-bold rounded-full shadow-lg hover:bg-[var(--color-primary-hover)] hover:text-[var(--color-on-primary-hover)] hover:shadow-xl transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden"
+                className="px-8 py-3 bg-cream text-forest font-bold rounded-full shadow-lg hover:bg-white hover:text-emerald-700 hover:shadow-xl transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                aria-label="Subscribe to newsletter"
               >
                 <AnimatePresence mode="wait">
                   {status === 'loading' ? (
@@ -100,19 +102,14 @@ const NewsletterSection: React.FC = () => {
                       className="flex items-center gap-2"
                     >
                       <motion.div
-                        className="w-4 h-4 border-2 border-[var(--color-on-secondary)] border-t-transparent rounded-full"
+                        className="w-4 h-4 border-2 border-forest border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                       />
                       Joining...
                     </motion.span>
                   ) : (
-                    <motion.span
-                      key="idle"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
+                    <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                       Join Now
                     </motion.span>
                   )}
@@ -125,10 +122,8 @@ const NewsletterSection: React.FC = () => {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className={`mt-4 text-sm font-medium ${
-                    status === 'success' ? 'text-[var(--color-on-primary)]' : 'text-[var(--color-accent)]'
-                  }`}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className={`mt-4 text-sm font-medium ${status === 'success' ? 'text-cream' : 'text-red-400'}`}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 >
                   {message}
                 </motion.p>
