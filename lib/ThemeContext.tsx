@@ -1,15 +1,23 @@
 import * as React from "react";
 
 type Theme = "light" | "dark";
-type ThemeContextValue = { theme: Theme; setThemePref: (t: Theme) => void; toggle: () => void; };
+type ThemeContextValue = {
+  theme: Theme;
+  setThemePref: (t: Theme) => void;
+  toggle: () => void;
+};
 
-const ThemeContext = React.createContext<ThemeContextValue | undefined>(undefined);
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined,
+);
 
 function applyTheme(t: Theme) {
   const root = document.documentElement;
   root.classList.toggle("dark", t === "dark");
   root.setAttribute("data-theme", t);
-  try { localStorage.setItem("theme", t); } catch {}
+  try {
+    localStorage.setItem("theme", t);
+  } catch {}
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -20,7 +28,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
     try {
       const stored = (localStorage.getItem("theme") as Theme | null) ?? null;
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+      const prefersDark =
+        window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
       const initial: Theme = stored ?? (prefersDark ? "dark" : "light");
       setThemeState(initial);
       applyTheme(initial);
@@ -36,18 +45,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggle = React.useCallback(() => {
-    setThemeState(prev => {
+    setThemeState((prev) => {
       const next: Theme = prev === "dark" ? "light" : "dark";
       applyTheme(next);
       return next;
     });
   }, []);
 
-  const value = React.useMemo(() => ({ theme, setThemePref, toggle }), [theme, setThemePref, toggle]);
+  const value = React.useMemo(
+    () => ({ theme, setThemePref, toggle }),
+    [theme, setThemePref, toggle],
+  );
 
   if (!mounted) return <>{children}</>;
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {
@@ -55,3 +69,6 @@ export function useTheme() {
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;
 }
+
+
+

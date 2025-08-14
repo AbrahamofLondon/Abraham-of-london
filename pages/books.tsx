@@ -1,51 +1,63 @@
 // pages/books.tsx
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { GetStaticProps } from 'next';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import Layout from '@/components/Layout';
-import BookCard from '@/components/BookCard';
-import { getAllBooks, BookMeta } from '@/lib/books';
-import { siteConfig, absUrl } from '@/lib/siteConfig';
+import React, { useMemo, useState, useCallback, useEffect } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import type { GetStaticProps } from "next";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  AnimatePresence,
+} from "framer-motion";
+import Layout from "@/components/Layout";
+import BookCard from "@/components/BookCard";
+import { getAllBooks, type BookMeta } from "@/lib/books";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
   process.env.DEPLOY_PRIME_URL ||
-  'https://abraham-of-london.netlify.app'
-).replace(/\/$/, '');
+  "https://abraham-of-london.netlify.app"
+).replace(/\/$/, "");
 
-const hasData = <T,>(arr?: T[] | null): arr is T[] => Array.isArray(arr) && arr.length > 0;
+const hasData = <T,>(arr?: T[] | null): arr is T[] =>
+  Array.isArray(arr) && arr.length > 0;
 
-// Enhanced asset validation with multiple fallbacks
 const ASSETS = {
-  heroBanner: '/assets/images/books-hero-banner.webp',
-  booksCollage: '/assets/images/books-collection.webp',
-  profilePortrait: '/assets/images/profile-portrait.webp',
-  ogImage: '/assets/images/social/books-og-image.jpg',
-  twitterImage: '/assets/images/social/books-twitter.webp',
-  defaultBookCover: '/assets/images/default-book.jpg',
+  heroBanner: "/assets/images/books-hero-banner.webp",
+  booksCollage: "/assets/images/books-collection.webp",
+  profilePortrait: "/assets/images/profile-portrait.webp",
+  ogImage: "/assets/images/social/books-og-image.jpg",
+  twitterImage: "/assets/images/social/books-twitter.webp",
+  defaultBookCover: "/assets/images/default-book.jpg",
   fallbacks: {
-    hero: ['/assets/images/books-hero-banner.webp', '/assets/images/books-collection.webp', '/assets/images/profile-portrait.webp'],
-    collection: ['/assets/images/books-collection.webp', '/assets/images/profile-portrait.webp', '/assets/images/default-book.jpg'],
+    hero: [
+      "/assets/images/books-hero-banner.webp",
+      "/assets/images/books-collection.webp",
+      "/assets/images/profile-portrait.webp",
+    ] as const,
+    collection: [
+      "/assets/images/books-collection.webp",
+      "/assets/images/profile-portrait.webp",
+      "/assets/images/default-book.jpg",
+    ] as const,
   },
 } as const;
 
-// ---------- Types ----------
+// ---------- Types (UI shape â€“ safe for getStaticProps) ----------
 type Book = Required<
-  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
+  Pick<
+    BookMeta,
+    "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink"
+  >
 > & {
   genre: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-  publishedDate?: string;
-  isbn?: string;
-  pages?: number;
-  rating?: number;
-  tags?: string[];
+  downloadPdf: string | null;
+  downloadEpub: string | null;
 };
 
 interface BooksProps {
@@ -54,51 +66,13 @@ interface BooksProps {
   categories: string[];
 }
 
-// Enhanced Animation Variants with Micro-interactions
+// ---------- Animations ----------
 const microAnimations = {
-  bookShelf: {
-    initial: { rotateX: -10, y: 20, opacity: 0 },
-    animate: {
-      rotateX: 0,
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-  },
-  floatingBook: {
-    animate: {
-      y: [-5, 5, -5],
-      rotateY: [-2, 2, -2],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  },
-  pageTurn: {
-    whileHover: {
-      rotateY: [0, 5, -2, 0],
-      scale: 1.05,
-      transition: {
-        rotateY: { duration: 0.8, ease: 'easeInOut' },
-        scale: { type: 'spring', stiffness: 300, damping: 20 },
-      },
-    },
-  },
   shimmer: {
-    initial: { backgroundPosition: '200% 0' },
+    initial: { backgroundPosition: "200% 0" },
     animate: {
-      backgroundPosition: ['-200% 0', '200% 0'],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: 'linear',
-      },
+      backgroundPosition: ["-200% 0", "200% 0"],
+      transition: { duration: 2, repeat: Infinity, ease: "linear" },
     },
   },
   categoryTag: {
@@ -106,58 +80,60 @@ const microAnimations = {
       scale: 1.1,
       rotateZ: [0, -1, 1, 0],
       transition: {
-        rotateZ: { duration: 0.5, ease: 'easeInOut' },
-        scale: { type: 'spring', stiffness: 400, damping: 17 },
+        rotateZ: { duration: 0.5, ease: "easeInOut" },
+        scale: { type: "spring", stiffness: 400, damping: 17 },
       },
     },
   },
-};
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] },
+  bookShelf: {
+    initial: { rotateX: -10, y: 20, opacity: 0 },
+    animate: {
+      rotateX: 0,
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  },
+  floatingBook: {
+    animate: {
+      y: [-5, 5, -5],
+      rotateY: [-2, 2, -2],
+      transition: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+    },
+  },
 };
 
 const staggerContainer = {
   initial: { opacity: 0 },
   animate: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 30, scale: 0.95 },
   animate: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 100,
-      damping: 15,
-    },
+    transition: { type: "spring", stiffness: 100, damping: 15 },
   },
 };
 
-// Enhanced parallax animation
+// Parallax
 const useParallax = () => {
   const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const yHero = useTransform(smoothProgress, [0, 1], ['0%', '30%']);
-  const yBackground = useTransform(smoothProgress, [0, 1], ['0%', '50%']);
-  const opacity = useTransform(smoothProgress, [0, 0.3], [1, 0]);
+  const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const yHero = useTransform(smooth, [0, 1], ["0%", "30%"]);
+  const yBackground = useTransform(smooth, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(smooth, [0, 0.3], [1, 0]);
   return { yHero, yBackground, opacity };
 };
 
-// ---------- Enhanced Image Component ----------
+// ---------- Enhanced Image with fallbacks ----------
 const EnhancedImage: React.FC<{
   src: string;
-  fallbacks?: ReadonlyArray<string>;
+  fallbacks?: readonly string[];
   alt: string;
   className?: string;
   fill?: boolean;
@@ -175,9 +151,9 @@ const EnhancedImage: React.FC<{
 
   const handleError = useCallback(() => {
     if (fallbackIndex + 1 < fallbacks.length) {
-      const nextIndex = fallbackIndex + 1;
-      setFallbackIndex(nextIndex);
-      setCurrentSrc(fallbacks[nextIndex]);
+      const next = fallbackIndex + 1;
+      setFallbackIndex(next);
+      setCurrentSrc(fallbacks[next]);
       setHasError(false);
     } else {
       setHasError(true);
@@ -185,14 +161,16 @@ const EnhancedImage: React.FC<{
     }
   }, [fallbackIndex, fallbacks, onError]);
 
-  const handleLoad = useCallback(() => {
-    setIsLoading(false);
-  }, []);
+  const handleLoad = useCallback(() => setIsLoading(false), []);
 
   if (hasError && fallbacks.length === 0) {
     return (
-      <div className={`bg-lightGrey/20 flex items-center justify-center ${className}`}>
-        <span className="text-deepCharcoal/50 text-sm">Image not available</span>
+      <div
+        className={`bg-lightGrey/20 flex items-center justify-center ${className || ""}`}
+      >
+        <span className="text-deepCharcoal/50 text-sm">
+          Image not available
+        </span>
       </div>
     );
   }
@@ -201,7 +179,7 @@ const EnhancedImage: React.FC<{
     <div className="relative">
       {isLoading && (
         <motion.div
-          className={`absolute inset-0 bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 ${className}`}
+          className={`absolute inset-0 bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 ${className || ""}`}
           variants={microAnimations.shimmer}
           initial="initial"
           animate="animate"
@@ -210,7 +188,7 @@ const EnhancedImage: React.FC<{
       <Image
         src={currentSrc}
         alt={alt}
-        className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
+        className={`transition-opacity duration-500 ${isLoading ? "opacity-0" : "opacity-100"} ${className || ""}`}
         onError={handleError}
         onLoad={handleLoad}
         {...props}
@@ -224,106 +202,106 @@ const BookFilter: React.FC<{
   categories: string[];
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
-}> = ({ categories, selectedCategory, onCategoryChange }) => {
-  return (
-    <motion.div
-      className="flex flex-wrap gap-3 justify-center mb-12"
-      variants={staggerContainer}
-      initial="initial"
-      whileInView="animate"
-      viewport={{ once: true }}
-    >
-      {['All', ...categories].map((category) => (
-        <motion.button
-          key={category}
-          onClick={() => onCategoryChange(category === 'All' ? '' : category)}
-          className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-            (category === 'All' && selectedCategory === '') || selectedCategory === category
-              ? 'bg-forest text-cream shadow-lg scale-105'
-              : 'bg-lightGrey/30 text-deepCharcoal hover:bg-lightGrey/50 hover:scale-105'
-          }`}
-          variants={microAnimations.categoryTag}
-          whileHover="whileHover"
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={`${category}-${selectedCategory}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {category}
-            </motion.span>
-          </AnimatePresence>
-        </motion.button>
-      ))}
-    </motion.div>
-  );
-};
+}> = ({ categories, selectedCategory, onCategoryChange }) => (
+  <motion.div
+    className="flex flex-wrap gap-3 justify-center mb-12"
+    variants={staggerContainer}
+    initial="initial"
+    whileInView="animate"
+    viewport={{ once: true }}
+  >
+    {["All", ...categories].map((category) => (
+      <motion.button
+        key={category}
+        onClick={() => onCategoryChange(category === "All" ? "" : category)}
+        className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+          (category === "All" && selectedCategory === "") ||
+          selectedCategory === category
+            ? "bg-forest text-cream shadow-lg scale-105"
+            : "bg-lightGrey/30 text-deepCharcoal hover:bg-lightGrey/50 hover:scale-105"
+        }`}
+        variants={microAnimations.categoryTag}
+        whileHover="whileHover"
+        whileTap={{ scale: 0.95 }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={`${category}-${selectedCategory}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {category}
+          </motion.span>
+        </AnimatePresence>
+      </motion.button>
+    ))}
+  </motion.div>
+);
 
 // ---------- Data Fetching ----------
 export const getStaticProps: GetStaticProps<BooksProps> = async () => {
   try {
+    // Only request fields that exist in lib/books.ts -> BookMeta
     const booksData = getAllBooks([
-      'slug',
-      'title',
-      'author',
-      'excerpt',
-      'coverImage',
-      'buyLink',
-      'genre',
-      'downloadPdf',
-      'downloadEpub',
-      'publishedDate',
-      'isbn',
-      'pages',
-      'rating',
-      'tags',
+      "slug",
+      "title",
+      "author",
+      "excerpt",
+      "coverImage",
+      "buyLink",
+      "genre",
+      "downloadPdf",
+      "downloadEpub",
     ]);
 
+    // Map to UI-safe shape with no `undefined`
     const books: Book[] = booksData
-      .filter((b) => b && b.slug)
+      .filter((b): b is Partial<BookMeta> & { slug: string } =>
+        Boolean(b && b.slug),
+      )
       .map((b, i) => ({
         slug: b.slug || `book-${i}`,
-        title: b.title || 'Untitled Book',
+        title: b.title || "Untitled Book",
         author: b.author || siteConfig.author,
-        excerpt: b.excerpt || 'A compelling read that will transform your perspective.',
+        excerpt:
+          b.excerpt ||
+          "A compelling read that will transform your perspective.",
         coverImage:
-          typeof b.coverImage === 'string' && b.coverImage.trim()
+          typeof b.coverImage === "string" && b.coverImage.trim()
             ? b.coverImage
             : ASSETS.defaultBookCover,
-        buyLink: b.buyLink || '#',
+        buyLink: b.buyLink || "#",
         genre: Array.isArray(b.genre)
-          ? b.genre.filter(Boolean).join(', ')
-          : b.genre || 'Personal Development',
+          ? b.genre.filter(Boolean).join(", ")
+          : b.genre || "Personal Development",
         downloadPdf: b.downloadPdf ?? null,
         downloadEpub: b.downloadEpub ?? null,
-        publishedDate: b.publishedDate || new Date().toISOString().split('T')[0],
-        isbn: b.isbn || undefined,
-        pages: b.pages || undefined,
-        rating: b.rating || undefined,
-        tags: Array.isArray(b.tags) ? b.tags : b.tags ? [b.tags] : [],
       }))
-      .sort((a, b) => new Date(b.publishedDate || 0).getTime() - new Date(a.publishedDate || 0).getTime());
+      .sort((a, b) => a.title.localeCompare(b.title));
 
-    // Extract unique categories
-    const categories = Array.from(new Set(books.map((book) => book.genre).filter(Boolean))).sort();
+    const categories = Array.from(
+      new Set(books.map((book) => book.genre).filter(Boolean)),
+    ).sort();
 
-    // Featured books (latest 3)
+    // Pick first 3 as â€œfeaturedâ€
     const featuredBooks = books.slice(0, 3);
 
+    // Final guard against accidental `undefined`
+    const sanitize = <T,>(obj: T): T =>
+      JSON.parse(JSON.stringify(obj, (_k, v) => (v === undefined ? null : v)));
+
     return {
-      props: {
+      props: sanitize({
         books,
         featuredBooks,
         categories,
-      },
+      }),
       revalidate: 3600,
     };
   } catch (error) {
-    console.error('Error in getStaticProps:', error);
+    console.error("Error in getStaticProps:", error);
     return {
       props: {
         books: [],
@@ -335,11 +313,14 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
   }
 };
 
-// ---------- Scroll Progress Indicator ----------
+// ---------- Scroll Progress ----------
 const ScrollProgress: React.FC = () => {
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
   return (
     <motion.div
       className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-forest to-midGreen origin-left z-50"
@@ -348,160 +329,86 @@ const ScrollProgress: React.FC = () => {
   );
 };
 
-// ---------- Page Component ----------
-export default function BooksPage({ books, featuredBooks, categories }: BooksProps) {
+// ---------- Page ----------
+export default function BooksPage({
+  books,
+  featuredBooks,
+  categories,
+}: BooksProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const { yHero, yBackground, opacity } = useParallax();
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const { yHero, opacity } = useParallax();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
-  // Filter books based on category and search
   const filteredBooks = useMemo(() => {
     let filtered = books;
-
     if (selectedCategory) {
-      filtered = filtered.filter((book) => book.genre.toLowerCase().includes(selectedCategory.toLowerCase()));
-    }
-
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (book) =>
-          book.title.toLowerCase().includes(searchLower) ||
-          book.excerpt.toLowerCase().includes(searchLower) ||
-          book.genre.toLowerCase().includes(searchLower) ||
-          book.tags?.some((tag) => tag.toLowerCase().includes(searchLower)),
+      filtered = filtered.filter((book) =>
+        book.genre.toLowerCase().includes(selectedCategory.toLowerCase()),
       );
     }
-
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (book) =>
+          book.title.toLowerCase().includes(q) ||
+          book.excerpt.toLowerCase().includes(q) ||
+          book.genre.toLowerCase().includes(q),
+      );
+    }
     return filtered;
   }, [books, selectedCategory, searchTerm]);
 
-  // Comprehensive JSON-LD with enhanced SEO
   const structuredData = useMemo(() => {
     const baseUrl = SITE_URL;
     const booksUrl = `${baseUrl}/books`;
-
     return [
-      // Books Collection Page Schema
       {
-        '@context': 'https://schema.org',
-        '@type': 'CollectionPage',
-        '@id': `${booksUrl}#webpage`,
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "@id": `${booksUrl}#webpage`,
         url: booksUrl,
         name: `${siteConfig.author} - Books Collection`,
-        description: `Explore all books by ${siteConfig.author}, covering fatherhood, leadership, and personal development. Transform your life through powerful storytelling and practical wisdom.`,
-        inLanguage: 'en-GB',
-        isPartOf: {
-          '@type': 'WebSite',
-          name: siteConfig.title,
-          url: baseUrl,
-        },
-        about: {
-          '@type': 'Person',
-          name: siteConfig.author,
-        },
+        description: `Explore all books by ${siteConfig.author}, covering fatherhood, leadership, and personal development.`,
+        inLanguage: "en-GB",
+        isPartOf: { "@type": "WebSite", name: siteConfig.title, url: baseUrl },
         mainEntity: {
-          '@type': 'ItemList',
+          "@type": "ItemList",
           numberOfItems: books.length,
           itemListElement: books.map((book, index) => ({
-            '@type': 'ListItem',
+            "@type": "ListItem",
             position: index + 1,
             item: {
-              '@type': 'Book',
-              '@id': `${baseUrl}/books/${book.slug}#book`,
+              "@type": "Book",
+              "@id": `${baseUrl}/books/${book.slug}#book`,
               name: book.title,
-              author: {
-                '@type': 'Person',
-                name: book.author,
-              },
+              author: { "@type": "Person", name: book.author },
               description: book.excerpt,
               url: `${baseUrl}/books/${book.slug}`,
               image: absUrl(book.coverImage),
               genre: book.genre,
-              bookFormat: 'EBook',
-              isbn: book.isbn,
-              numberOfPages: book.pages,
-              aggregateRating: book.rating
-                ? {
-                    '@type': 'AggregateRating',
-                    ratingValue: book.rating,
-                    bestRating: 5,
-                    ratingCount: Math.floor(Math.random() * 100) + 50, // Placeholder
-                  }
-                : undefined,
+              bookFormat: "EBook",
             },
           })),
         },
       },
-      // Breadcrumb Schema
       {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
         itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: baseUrl,
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Books',
-            item: booksUrl,
-          },
-        ],
-      },
-      // FAQ Schema for Books
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: `How many books has ${siteConfig.author} written?`,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: `${siteConfig.author} has written ${books.length} books focusing on fatherhood, leadership, and personal development. Each book offers practical wisdom and authentic insights for modern fathers and leaders.`,
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'What genres does Abraham write in?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: `Abraham writes primarily in ${categories.join(', ')}, with a focus on empowering men to become better fathers and leaders through authentic storytelling and practical guidance.`,
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Are the books available in digital format?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: "Yes, many of Abraham's books are available in both PDF and EPUB formats for download, in addition to being available for purchase through various retailers.",
-            },
-          },
+          { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+          { "@type": "ListItem", position: 2, name: "Books", item: booksUrl },
         ],
       },
     ];
-  }, [books, categories]);
+  }, [books]);
 
   const handleImageError = useCallback((src: string) => {
     setImageErrors((prev) => new Set(prev).add(src));
   }, []);
-
-  const getImageSrc = useCallback(
-    (src: string, fallback: string) => {
-      return imageErrors.has(src) ? fallback : src;
-    },
-    [imageErrors],
-  );
 
   if (!mounted) {
     return (
@@ -517,15 +424,13 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
         <title>{`${siteConfig.author} - Books Collection | Fatherhood, Leadership & Personal Development`}</title>
         <meta
           name="description"
-          content={`Explore ${books.length} transformative books by ${siteConfig.author}. Discover practical wisdom on fatherhood, leadership, and personal growth. Available in digital and print formats.`}
+          content={`Explore ${books.length} transformative books by ${siteConfig.author}. Practical wisdom on fatherhood, leadership, and personal growth.`}
         />
         <meta name="author" content={siteConfig.author} />
         <meta
-          name="keywords"
-          content={`Abraham Adaramola books, fatherhood books, leadership books, parenting guide, personal development, ${categories.join(', ')}, digital downloads, PDF books, EPUB books`}
+          name="robots"
+          content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
         />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <meta name="googlebot" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/books`} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={siteConfig.title} />
@@ -536,22 +441,25 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
         />
         <meta
           property="og:description"
-          content={`Discover ${books.length} powerful books on fatherhood and leadership. Practical wisdom for modern fathers.`}
+          content={`Discover ${books.length} powerful books on fatherhood and leadership.`}
         />
         <meta property="og:image" content={absUrl(ASSETS.ogImage)} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={`${siteConfig.author} Books Collection`} />
         <meta property="og:locale" content="en_GB" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@AbrahamAda48634" />
-        <meta name="twitter:creator" content="@AbrahamAda48634" />
-        <meta name="twitter:title" content={`${siteConfig.author} - Books Collection`} />
-        <meta name="twitter:description" content="Transform your fatherhood journey with practical wisdom and authentic insights." />
+        <meta
+          name="twitter:title"
+          content={`${siteConfig.author} - Books Collection`}
+        />
+        <meta
+          name="twitter:description"
+          content="Transform your fatherhood journey with practical wisdom and authentic insights."
+        />
         <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
-        {structuredData.map((schema, index) => (
+        {structuredData.map((schema, i) => (
           <script
-            key={index}
+            key={i}
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
           />
@@ -560,14 +468,17 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
 
       <ScrollProgress />
 
-      {/* Hero Section */}
+      {/* Hero */}
       <motion.header
         className="bg-gradient-to-br from-forest to-midGreen text-cream relative overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <motion.div className="relative w-full h-80 sm:h-96 lg:h-[28rem]" style={{ y: yHero }}>
+        <motion.div
+          className="relative w-full h-80 sm:h-96 lg:h-[28rem]"
+          style={{ y: yHero }}
+        >
           <EnhancedImage
             src={ASSETS.heroBanner}
             fallbacks={ASSETS.fallbacks.hero}
@@ -579,6 +490,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
             quality={85}
             onError={() => handleImageError(ASSETS.heroBanner)}
           />
+          {/* Subtle floating glyphs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(8)].map((_, i) => (
               <motion.div
@@ -597,7 +509,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                 transition={{
                   duration: 4 + i,
                   repeat: Infinity,
-                  ease: 'easeInOut',
+                  ease: "easeInOut",
                   delay: i * 0.5,
                 }}
               >
@@ -605,6 +517,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               </motion.div>
             ))}
           </div>
+
           <motion.div
             className="absolute inset-0 flex items-center justify-center text-center px-4 z-10"
             style={{ opacity }}
@@ -627,7 +540,8 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7 }}
               >
-                Discover {books.length} transformative books that will reshape your approach to fatherhood, leadership, and personal growth
+                Discover {books.length} transformative books that will reshape
+                your approach to fatherhood, leadership, and personal growth
               </motion.p>
               <motion.div
                 className="flex flex-wrap gap-4 justify-center text-cream/90 text-sm font-medium"
@@ -639,7 +553,10 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                   <motion.span
                     key={category}
                     className="bg-cream/20 backdrop-blur-sm px-4 py-2 rounded-full"
-                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
+                    whileHover={{
+                      scale: 1.1,
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    }}
                     transition={{ delay: index * 0.1 }}
                   >
                     {category}
@@ -652,7 +569,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
       </motion.header>
 
       <main className="container px-4 py-12 max-w-6xl mx-auto">
-        {/* Search and Filter Section */}
+        {/* Search + Count */}
         <motion.section
           className="mb-16"
           variants={staggerContainer}
@@ -664,7 +581,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
             <motion.div
               className="relative"
               whileFocus={{ scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <input
                 type="text"
@@ -676,7 +593,11 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               <motion.div
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-deepCharcoal/50"
                 animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 ðŸ”
               </motion.div>
@@ -696,7 +617,8 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                   exit={{ opacity: 0, y: -10 }}
                   className="bg-lightGrey/30 px-4 py-2 rounded-full"
                 >
-                  {filteredBooks.length} {filteredBooks.length === 1 ? 'Book' : 'Books'}
+                  {filteredBooks.length}{" "}
+                  {filteredBooks.length === 1 ? "Book" : "Books"}
                 </motion.span>
               </AnimatePresence>
             </motion.div>
@@ -709,7 +631,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
           />
         </motion.section>
 
-        {/* Featured Books Section */}
+        {/* Featured */}
         {hasData(featuredBooks) && (
           <>
             <motion.section
@@ -725,22 +647,31 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               >
                 <span className="relative z-10">Featured Reads</span>
                 <motion.div
-                  className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-forest to-midGreen rounded-full"
+                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-forest to-midGreen rounded-full"
                   initial={{ width: 0 }}
-                  whileInView={{ width: '8rem' }}
+                  whileInView={{ width: "8rem" }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.5 }}
                 />
               </motion.h2>
-              <motion.div className="grid md:grid-cols-3 gap-8" variants={staggerContainer}>
+
+              <motion.div
+                className="grid md:grid-cols-3 gap-8"
+                variants={staggerContainer}
+              >
                 {featuredBooks.map((book, idx) => (
                   <motion.div
                     key={`featured-${book.slug}`}
                     variants={microAnimations.bookShelf}
                     whileHover={{ y: -10, rotateY: 2 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <BookCard {...book} featured />
+                    <div className="relative">
+                      <BookCard {...book} />
+                      <span className="absolute top-3 left-3 bg-forest text-cream text-xs px-2 py-1 rounded-full shadow">
+                        Featured
+                      </span>
+                    </div>
                   </motion.div>
                 ))}
               </motion.div>
@@ -749,7 +680,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
           </>
         )}
 
-        {/* All Books Section */}
+        {/* All Books */}
         <motion.section
           className="mb-20"
           variants={staggerContainer}
@@ -757,17 +688,24 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
           whileInView="animate"
           viewport={{ once: true, amount: 0.2 }}
         >
-          <motion.div className="flex justify-between items-center mb-12" variants={staggerItem}>
+          <motion.div
+            className="flex justify-between items-center mb-12"
+            variants={staggerItem}
+          >
             <motion.h2
               className="font-serif text-3xl md:text-5xl tracking-brand text-forest relative"
               variants={microAnimations.floatingBook}
               animate="animate"
             >
-              <span className="relative z-10">{searchTerm || selectedCategory ? 'Search Results' : 'All Books'}</span>
+              <span className="relative z-10">
+                {searchTerm || selectedCategory
+                  ? "Search Results"
+                  : "All Books"}
+              </span>
               <motion.div
-                className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-forest to-midGreen rounded-full"
+                className="absolute -bottom-2 left:0 w-24 h-1 bg-gradient-to-r from-forest to-midGreen rounded-full"
                 initial={{ width: 0 }}
-                whileInView={{ width: '6rem' }}
+                whileInView={{ width: "6rem" }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.5 }}
               />
@@ -796,14 +734,14 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                       rotateX: 2,
                     }}
                     transition={{
-                      type: 'spring',
+                      type: "spring",
                       stiffness: 300,
                       damping: 30,
-                      layout: { duration: 0.6, ease: 'easeInOut' },
+                      layout: { duration: 0.6, ease: "easeInOut" },
                     }}
-                    style={{ perspective: '1000px' }}
+                    style={{ perspective: "1000px" }}
                   >
-                    <div style={{ transformStyle: 'preserve-3d' }}>
+                    <div style={{ transformStyle: "preserve-3d" }}>
                       <BookCard {...book} />
                     </div>
                   </motion.div>
@@ -820,29 +758,24 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               >
                 <motion.div
                   className="inline-block text-8xl mb-6"
-                  animate={{
-                    rotate: [0, -10, 10, 0],
-                    scale: [1, 1.1, 1],
-                  }}
+                  animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
                   transition={{
                     duration: 3,
                     repeat: Infinity,
-                    ease: 'easeInOut',
+                    ease: "easeInOut",
                   }}
-                >
-                  ðŸ“š
-                </motion.div>
+                ></motion.div>
                 <h3 className="text-2xl font-bold mb-4">No books found</h3>
                 <p className="text-lg mb-6 max-w-md mx-auto">
                   {searchTerm || selectedCategory
-                    ? 'Try adjusting your search terms or filters to discover more books.'
-                    : 'New books are being added regularly. Check back soon for exciting new releases!'}
+                    ? "Try adjusting your search terms or filters to discover more books."
+                    : "New books are being added regularly. Check back soon for exciting new releases!"}
                 </p>
                 {(searchTerm || selectedCategory) && (
                   <motion.button
                     onClick={() => {
-                      setSearchTerm('');
-                      setSelectedCategory('');
+                      setSearchTerm("");
+                      setSelectedCategory("");
                     }}
                     className="bg-forest text-cream px-6 py-3 rounded-full font-semibold hover:bg-midGreen transition-all duration-300 shadow-lg hover:shadow-xl"
                     whileHover={{ scale: 1.05 }}
@@ -856,7 +789,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
           </AnimatePresence>
         </motion.section>
 
-        {/* Stats Section */}
+        {/* Stats */}
         <motion.section
           className="bg-gradient-to-r from-lightGrey/20 to-transparent rounded-3xl p-8 mb-16"
           initial={{ opacity: 0, y: 30 }}
@@ -868,55 +801,61 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
             <motion.div
               className="space-y-2"
               whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <motion.div
                 className="text-4xl font-bold text-forest"
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               >
                 {books.length}
               </motion.div>
-              <div className="text-deepCharcoal font-medium">Books Published</div>
+              <div className="text-deepCharcoal font-medium">
+                Books Published
+              </div>
             </motion.div>
+
             <motion.div
               className="space-y-2"
               whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <motion.div
                 className="text-4xl font-bold text-forest"
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
               >
                 {categories.length}
               </motion.div>
               <div className="text-deepCharcoal font-medium">Categories</div>
             </motion.div>
+
             <motion.div
               className="space-y-2"
               whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <motion.div
                 className="text-4xl font-bold text-forest"
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
               >
                 {books.filter((b) => b.downloadPdf || b.downloadEpub).length}
               </motion.div>
-              <div className="text-deepCharcoal font-medium">Digital Downloads</div>
+              <div className="text-deepCharcoal font-medium">
+                Digital Downloads
+              </div>
             </motion.div>
           </div>
         </motion.section>
 
-        {/* Call-to-Action Section */}
+        {/* CTA */}
         <motion.section
           className="text-center py-16 px-8 bg-gradient-to-br from-forest to-midGreen text-cream rounded-3xl relative overflow-hidden"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -941,7 +880,7 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                 transition={{
                   duration: 8 + i * 2,
                   repeat: Infinity,
-                  ease: 'easeInOut',
+                  ease: "easeInOut",
                   delay: i * 0.5,
                 }}
               />
@@ -964,8 +903,9 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
             >
-              Join thousands of fathers and leaders who have transformed their lives through these powerful books. Your
-              journey to better fatherhood and authentic leadership starts with a single page.
+              Join thousands of fathers and leaders who have transformed their
+              lives through these powerful books. Your journey to better
+              fatherhood and authentic leadership starts with a single page.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
@@ -974,7 +914,10 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
               viewport={{ once: true }}
               transition={{ delay: 0.6 }}
             >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Link
                   href="/contact"
                   className="bg-cream text-forest px-8 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl hover:bg-white transition-all duration-300 flex items-center gap-2 group"
@@ -983,13 +926,20 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
                   <motion.span
                     className="transform group-hover:translate-x-1 transition-transform"
                     animate={{ x: [0, 3, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
                   >
                     â†’
                   </motion.span>
                 </Link>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Link
                   href="/blog"
                   className="border-2 border-cream text-cream px-8 py-4 rounded-xl font-bold hover:bg-cream hover:text-forest transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/10"
@@ -1004,3 +954,5 @@ export default function BooksPage({ books, featuredBooks, categories }: BooksPro
     </Layout>
   );
 }
+
+

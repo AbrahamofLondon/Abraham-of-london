@@ -1,6 +1,6 @@
-import Head from 'next/head';
-import Link from 'next/link';
-import Layout from '@/components/Layout';
+import Head from "next/head";
+import Link from "next/link";
+import Layout from "@/components/Layout";
 
 export default function NotFound() {
   return (
@@ -15,7 +15,10 @@ export default function NotFound() {
         role="main"
         aria-labelledby="notfound-title"
       >
-        <h1 id="notfound-title" className="font-serif text-4xl text-forest mb-3">
+        <h1
+          id="notfound-title"
+          className="font-serif text-4xl text-forest mb-3"
+        >
           Page Not Found
         </h1>
 
@@ -43,3 +46,5 @@ export default function NotFound() {
     </Layout>
   );
 }
+
+

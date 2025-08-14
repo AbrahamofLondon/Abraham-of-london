@@ -1,1 +1,9 @@
-export { getAllPosts, getPostBySlug, getPostSlugs, type PostMeta } from "./posts";
+export {
+  getAllPosts,
+  getPostBySlug,
+  getPostSlugs,
+  type PostMeta,
+} from "./posts";
+
+
+

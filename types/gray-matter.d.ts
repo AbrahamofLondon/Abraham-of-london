@@ -8,3 +8,4 @@ declare module "gray-matter" {
   function matter(input: string | Buffer, options?: Record<string, unknown>): GrayMatterFile;
   export default matter;
 }
+

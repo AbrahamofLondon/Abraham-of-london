@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function MobileMenu() {
         </svg>
       </button>
 
-      <div className={`mobile-menu ${isMenuOpen ? '' : 'hidden'}`}>
+      <div className={`mobile-menu ${isMenuOpen ? "" : "hidden"}`}>
         {/* Your menu items here */}
         <a href="#" className="block py-2 px-4 text-sm hover:bg-gray-200">
           Home
@@ -38,3 +38,6 @@ export default function MobileMenu() {
     </>
   );
 }
+
+
+

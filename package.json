@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
+    "@mdx-js/mdx": "^3.1.0",
     "@mdx-js/react": "^3.0.1",
     "@netlify/emails": "^1.1.0",
     "@next/mdx": "^14.2.31",
@@ -23,14 +24,17 @@
     "framer-motion": "^10.12.16",
     "gray-matter": "^4.0.3",
     "next": "14.2.31",
+    "next-mdx-remote": "^5.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-email": "^4.2.8",
-    "rehype-stringify": "^10.0.0",
-    "remark-gfm": "^4.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.0"
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.31",
@@ -39,6 +43,7 @@
     "@types/node": "^18.16.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.21",
     "balanced-match": "^2.0.0",
     "brace-expansion": "^2.0.1",
     "eslint": "^8.57.0",
@@ -48,7 +53,8 @@
     "lru-cache": "^10.4.3",
     "minimatch": "^9.0.3",
     "path-scurry": "^1.11.1",
-    "tailwindcss": "^3.4.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.0.4"
   }
 }

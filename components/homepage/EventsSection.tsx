@@ -10,8 +10,18 @@ type EventItem = {
 };
 
 const events: EventItem[] = [
-  { date: "2025-09-12", title: "Leadership Workshop", location: "London, UK", href: "/events/leadership-workshop" },
-  { date: "2025-10-03", title: "Fathers & Futures Panel", location: "Online", href: "/events/fathers-and-futures" },
+  {
+    date: "2025-09-12",
+    title: "Leadership Workshop",
+    location: "London, UK",
+    href: "/events/leadership-workshop",
+  },
+  {
+    date: "2025-10-03",
+    title: "Fathers & Futures Panel",
+    location: "Online",
+    href: "/events/fathers-and-futures",
+  },
 ];
 
 export default function EventsSection() {
@@ -37,7 +47,13 @@ export default function EventsSection() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.45, delay: i * 0.08 }}
           >
-            <div className="text-sm text-cream/80">{new Date(ev.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</div>
+            <div className="text-sm text-cream/80">
+              {new Date(ev.date).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </div>
             <h3 className="text-xl font-semibold mt-1">{ev.title}</h3>
             <p className="text-cream/80 mt-1">{ev.location}</p>
             {ev.href && (
@@ -54,3 +70,6 @@ export default function EventsSection() {
     </section>
   );
 }
+
+
+

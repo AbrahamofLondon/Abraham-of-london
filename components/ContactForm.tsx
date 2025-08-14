@@ -1,8 +1,8 @@
 // components/ContactForm.tsx
-import { useState, useMemo } from 'react';
-import Head from 'next/head';
-import { motion } from 'framer-motion';
-import { siteConfig, absUrl } from '@/lib/siteConfig';
+import { useState, useMemo } from "react";
+import Head from "next/head";
+import { motion } from "framer-motion";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const SITE_URL = siteConfig.siteUrl;
 
@@ -11,7 +11,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.7, ease: 'easeOut', when: 'beforeChildren' },
+    transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" },
   },
 };
 
@@ -20,7 +20,7 @@ const formVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.6, ease: 'easeOut', staggerChildren: 0.1 },
+    transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 },
   },
 };
 
@@ -30,79 +30,81 @@ const itemVariants = {
 };
 
 export default function ContactForm() {
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [formStatus, setFormStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormStatus('submitting');
+    setFormStatus("submitting");
 
     try {
       const formData = new FormData(event.currentTarget);
       const data = new URLSearchParams();
-      data.append('form-name', 'contact-form');
+      data.append("form-name", "contact-form");
 
       for (const [key, value] of Array.from(formData.entries())) {
         data.append(key, value.toString());
       }
 
       await fetch(event.currentTarget.action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: data.toString(),
       });
 
-      setFormStatus('success');
-      setTimeout(() => setFormStatus('idle'), 5000);
+      setFormStatus("success");
+      setTimeout(() => setFormStatus("idle"), 5000);
       event.currentTarget.reset();
     } catch (error) {
-      console.error('Form submission failed:', error);
-      setFormStatus('error');
+      console.error("Form submission failed:", error);
+      setFormStatus("error");
     }
   };
 
-  const isSubmitting = formStatus === 'submitting';
+  const isSubmitting = formStatus === "submitting";
 
   const structuredData = useMemo(() => {
     const contactSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'ContactPage',
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
       mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${SITE_URL}/contact`,
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/contact`,
       },
-      description: 'Contact form for Abraham of London inquiries.',
+      description: "Contact form for Abraham of London inquiries.",
       url: `${SITE_URL}/contact`,
       potentialAction: {
-        '@type': 'CommunicateAction',
+        "@type": "CommunicateAction",
         target: {
-          '@type': 'EntryPoint',
-          actionPlatform: ['https://schema.org/ContactPoint'],
-          inLanguage: 'en',
-          description: 'Contact form for inquiries',
+          "@type": "EntryPoint",
+          actionPlatform: ["https://schema.org/ContactPoint"],
+          inLanguage: "en",
+          description: "Contact form for inquiries",
         },
       },
       contactPoint: {
-        '@type': 'ContactPoint',
-        contactType: 'Customer service',
-        areaServed: 'Global',
+        "@type": "ContactPoint",
+        contactType: "Customer service",
+        areaServed: "Global",
         email: siteConfig.email,
       },
     };
 
     const breadcrumb = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
       itemListElement: [
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 1,
-          name: 'Home',
+          name: "Home",
           item: SITE_URL,
         },
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 2,
-          name: 'Contact',
+          name: "Contact",
           item: `${SITE_URL}/contact`,
         },
       ],
@@ -164,7 +166,10 @@ export default function ContactForm() {
         >
           <input type="hidden" name="form-name" value="contact-form" />
           <motion.div variants={itemVariants}>
-            <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-deepCharcoal"
+            >
               Name
             </label>
             <input
@@ -177,7 +182,10 @@ export default function ContactForm() {
             />
           </motion.div>
           <motion.div variants={itemVariants}>
-            <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-deepCharcoal"
+            >
               Email
             </label>
             <input
@@ -190,7 +198,10 @@ export default function ContactForm() {
             />
           </motion.div>
           <motion.div variants={itemVariants}>
-            <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
+            <label
+              htmlFor="message"
+              className="block text-sm font-medium text-deepCharcoal"
+            >
               Message
             </label>
             <textarea
@@ -208,10 +219,10 @@ export default function ContactForm() {
               className="inline-block px-6 py-3 bg-forest text-cream rounded-[6px] hover:bg-forest/80 disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Send Message'}
+              {isSubmitting ? "Submitting..." : "Send Message"}
             </button>
           </motion.div>
-          {formStatus === 'success' && (
+          {formStatus === "success" && (
             <motion.p
               variants={itemVariants}
               className="text-green-600 text-center"
@@ -221,7 +232,7 @@ export default function ContactForm() {
               Message sent successfully!
             </motion.p>
           )}
-          {formStatus === 'error' && (
+          {formStatus === "error" && (
             <motion.p
               variants={itemVariants}
               className="text-red-600 text-center"
@@ -236,3 +247,6 @@ export default function ContactForm() {
     </>
   );
 }
+
+
+
