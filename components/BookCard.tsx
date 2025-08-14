@@ -1,98 +1,127 @@
 // components/BookCard.tsx
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 
-export interface BookCardProps {
+export type BookCardProps = {
   slug: string;
   title: string;
-  coverImage?: string;
-  excerpt: string;
   author: string;
-  buyLink?: string;
+  excerpt: string;
+  coverImage?: string | StaticImageData;
+  buyLink: string;
   genre?: string;
   downloadPdf?: string | null;
   downloadEpub?: string | null;
-}
+};
 
-const BookCard: React.FC<BookCardProps> = ({
+const DEFAULT_BOOK = '/assets/images/default-book.jpg';
+
+export default function BookCard({
   slug,
   title,
   author,
   excerpt,
   coverImage,
   buyLink,
+  genre,
   downloadPdf,
   downloadEpub,
-  genre,
-}) => {
-  const imageSrc = coverImage && coverImage.trim().length > 0 ? coverImage : '/assets/images/default-book.jpg';
+}: BookCardProps) {
+  const initialSrc: string | StaticImageData =
+    typeof coverImage === 'object'
+      ? coverImage
+      : (typeof coverImage === 'string' && coverImage.trim()) ? coverImage : DEFAULT_BOOK;
+
+  const titleId = `book-${slug}-title`;
+
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.target as HTMLImageElement;
+    if (!img.src.includes(DEFAULT_BOOK)) img.src = DEFAULT_BOOK;
+  };
 
   return (
-    <div className="border rounded-xl shadow-md p-4 bg-white flex flex-col justify-between transition hover:shadow-lg">
-      <Link href={`/books/${slug}`} className="block">
-        <div className="relative w-full h-64 mb-4 rounded-md overflow-hidden">
+    <article
+      className="group rounded-xl border border-lightGrey bg-white shadow-card hover:shadow-cardHover transition overflow-hidden focus-within:ring-2 focus-within:ring-forest"
+      itemScope
+      itemType="https://schema.org/Book"
+      aria-labelledby={titleId}
+    >
+      <Link href={`/books/${slug}`} className="block relative w-full h-64 outline-none" prefetch={false}>
+        {typeof initialSrc === 'object' ? (
           <Image
-            src={imageSrc}
+            src={initialSrc}
             alt={title}
             fill
-            style={{ objectFit: 'cover' }}
             sizes="(max-width: 768px) 100vw, 33vw"
-            loading="lazy"
+            className="object-cover"
+            placeholder="blur"
           />
-        </div>
+        ) : (
+          <Image
+            src={initialSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+            onError={handleImgError}
+          />
+        )}
+        <meta itemProp="image" content={typeof initialSrc === 'object' ? initialSrc.src : initialSrc} />
       </Link>
 
-      <div className="flex-1">
-        <h2 className="text-xl font-semibold text-deepCharcoal mb-1">
-          <Link href={`/books/${slug}`} className="hover:underline">
+      <div className="p-4">
+        {genre && (
+          <span className="inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1 text-deepCharcoal/80 mb-2">
+            {genre}
+          </span>
+        )}
+
+        <h3 id={titleId} className="text-xl font-serif text-deepCharcoal group-hover:underline mb-2" itemProp="name">
+          <Link href={`/books/${slug}`} className="outline-none focus-visible:ring-2 focus-visible:ring-forest">
             {title}
           </Link>
-        </h2>
-        <p className="text-sm text-deepCharcoal/70 mb-1">{author}</p>
-        {genre && <p className="text-sm italic text-deepCharcoal/60 mb-2">{genre}</p>}
-        <p className="text-sm text-deepCharcoal/80 mb-4">{excerpt}</p>
-      </div>
+        </h3>
 
-      <div className="flex flex-wrap gap-2 mt-auto">
-        <Link
-          href={`/books/${slug}`}
-          className="flex-1 text-center bg-forest text-cream px-3 py-2 rounded hover:bg-midGreen text-sm transition"
-        >
-          Read / Buy (free)
-        </Link>
-        {buyLink && buyLink !== '#' && (
-          <a
-            href={buyLink}
-            className="flex-1 text-center bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 text-sm transition"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Buy Now
-          </a>
-        )}
-        {downloadPdf && (
-          <a
-            href={downloadPdf}
-            className="flex-1 text-center border border-forest text-forest px-3 py-2 rounded hover:bg-forest hover:text-cream text-sm transition"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            PDF
-          </a>
-        )}
-        {downloadEpub && (
-          <a
-            href={downloadEpub}
-            className="flex-1 text-center border border-forest text-forest px-3 py-2 rounded hover:bg-forest hover:text-cream text-sm transition"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            EPUB
-          </a>
-        )}
+        <p className="text-sm text-deepCharcoal/80 line-clamp-3" itemProp="description">
+          {excerpt}
+        </p>
+
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          <span className="text-deepCharcoal/70" itemProp="author">{author}</span>
+          <span className="mx-1 text-deepCharcoal/30">•</span>
+          <Link href={buyLink || '#'} className="text-forest hover:underline" aria-label={`Buy ${title}`}>
+            Buy
+          </Link>
+          {downloadPdf && (
+            <>
+              <span className="mx-1 text-deepCharcoal/30">•</span>
+              <a
+                href={downloadPdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-forest hover:underline"
+                aria-label={`Download PDF of ${title}`}
+              >
+                PDF
+              </a>
+            </>
+          )}
+          {downloadEpub && (
+            <>
+              <span className="mx-1 text-deepCharcoal/30">•</span>
+              <a
+                href={downloadEpub}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-forest hover:underline"
+                aria-label={`Download EPUB of ${title}`}
+              >
+                EPUB
+              </a>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
-};
-
-export default BookCard;
+}

@@ -1,34 +1,33 @@
 // lib/gtag.ts
+import { siteConfig } from './siteConfig';
 
-// The gtag function can accept various commands, so we use a tuple type
-// to represent the different argument signatures. This is more specific than 'any'.
-type GtagArgs = 
-  | ['config', string, { page_path: string }]
-  | ['event', string, Record<string, unknown>]
-  | [string, ...unknown[]]; // A fallback for other possible gtag commands
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+  siteConfig.gaMeasurementId ||
+  '';
 
-// Declare the gtag type on the Window object
-declare global {
-  interface Window {
-    gtag: (...args: GtagArgs) => void;
-  }
-}
+export const gaEnabled = Boolean(GA_MEASUREMENT_ID);
 
-export const GA_TRACKING_ID: string = process.env.NEXT_PUBLIC_GA_ID ?? "";
-
-// Track a pageview
-export const pageview = (url: string): void => {
-  if (!GA_TRACKING_ID || typeof window === "undefined" || !window.gtag) return;
-  window.gtag("config", GA_TRACKING_ID, {
+// GA4 pageview
+export const pageview = (url: string) => {
+  if (!gaEnabled || typeof window === 'undefined') return;
+  // @ts-ignore
+  window.gtag?.('config', GA_MEASUREMENT_ID, {
     page_path: url,
   });
 };
 
-// Log specific events
-export const event = (
-  action: string,
-  params: Record<string, unknown> // Changed 'any' to 'unknown'
-): void => {
-  if (!GA_TRACKING_ID || typeof window === "undefined" || !window.gtag) return;
-  window.gtag("event", action, params);
+// GA4 custom event
+export const gaEvent = (action: string, params: Record<string, any> = {}) => {
+  if (!gaEnabled || typeof window === 'undefined') return;
+  // @ts-ignore
+  window.gtag?.('event', action, params);
 };
+
+// Types for global (optional)
+declare global {
+  interface Window {
+    dataLayer?: any[];
+    gtag?: (...args: any[]) => void;
+  }
+}
