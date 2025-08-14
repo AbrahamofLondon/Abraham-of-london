@@ -1,2 +1,3 @@
-﻿export * from "./date";
-export { default } from "./date";
+export * from "./date";
+import * as DateUtils from "./date";
+export default DateUtils;

@@ -1,4 +1,4 @@
-﻿// pages/contact.tsx
+// pages/contact.tsx
 import React, { useState, useMemo } from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';

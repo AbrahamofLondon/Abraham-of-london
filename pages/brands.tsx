@@ -1,4 +1,4 @@
-﻿// pages/brands.tsx
+// pages/brands.tsx
 import React, { useMemo, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';

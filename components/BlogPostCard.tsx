@@ -1,4 +1,4 @@
-﻿// components/BlogPostCard.tsx
+// components/BlogPostCard.tsx
 import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { formatDate } from '@/lib/date';
@@ -16,7 +16,6 @@ export default function BlogPostCard({
   readTime,
   category,
 }: Post) {
-  // Normalize image source
   const initialSrc: string | StaticImageData =
     typeof coverImage === 'object' && coverImage !== null
       ? coverImage
@@ -28,17 +27,15 @@ export default function BlogPostCard({
   const iso = new Date(date).toString() === 'Invalid Date' ? undefined : new Date(date).toISOString();
   const displayDate = formatDate(date, 'en-GB');
 
-  // Track currentSrc for error handling
   let currentSrc: string | StaticImageData = initialSrc;
   const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.target as HTMLImageElement;
     if (img.src.includes(DEFAULT_COVER)) return;
     img.src = DEFAULT_COVER;
-    currentSrc = DEFAULT_COVER; // Update currentSrc to reflect fallback
+    currentSrc = DEFAULT_COVER;
   };
 
-  // Ensure meta content is always a string
-  const metaImageContent = typeof currentSrc === 'string' ? currentSrc : currentSrc.src;
+  const metaImageContent: string = typeof currentSrc === 'string' ? currentSrc : (currentSrc as StaticImageData).src;
 
   return (
     <article

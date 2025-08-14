@@ -1,4 +1,4 @@
-﻿// pages/index.tsx
+// pages/index.tsx
 import React, { useMemo, useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image, { type StaticImageData } from 'next/image';

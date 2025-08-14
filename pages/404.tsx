@@ -18,16 +18,18 @@ export default function NotFound() {
         <h1 id="notfound-title" className="font-serif text-4xl text-forest mb-3">
           Page Not Found
         </h1>
+
         <p className="text-deepCharcoal/80 mb-8">
-          Sorry, the page you're looking for doesn't exist.
+          Sorry, the page you&rsquo;re looking for doesn&rsquo;t exist.
         </p>
 
         <div className="flex items-center justify-center gap-4">
           <Link
             href="/"
             className="bg-forest text-cream px-5 py-2 rounded-md hover:bg-softGold hover:text-forest transition"
+            aria-label="Go back home"
           >
-            â† Go back home
+            &larr; Go back home
           </Link>
 
           <a
@@ -41,4 +43,3 @@ export default function NotFound() {
     </Layout>
   );
 }
-

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 // components/SocialLinks.tsx
 import Link from 'next/link';
 import * as React from 'react';
@@ -116,7 +117,7 @@ export default function SocialLinks({
         }
 
         const rel = openNewTab ? cn('noopener', 'noreferrer', 'external', item.rel) : item.rel;
-        const aria = openNewTab ? `${item.label} — opens in new tab` : item.label;
+        const aria = openNewTab ? `${item.label} â€” opens in new tab` : item.label;
         const classes = cn(
           baseBtn,
           variant === 'ghost' ? ghost : solid,
