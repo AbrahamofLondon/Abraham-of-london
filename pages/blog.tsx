@@ -5,10 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import Layout from '../../components/Layout';
-import BlogPostCard from '../../components/BlogPostCard';
-import { getAllPosts, PostMeta } from '../../lib/posts';
-import { siteConfig } from '../../lib/siteConfig';
+import Layout from '../components/Layout';
+import BlogPostCard from '../components/BlogPostCard';
+import { getAllPosts, PostMeta } from '../lib/posts';
+import { siteConfig } from '../lib/siteConfig';
+import ScrollProgress from '../components/ScrollProgress';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (

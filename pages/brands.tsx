@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import Layout from '../components/Layout';
 import { siteConfig } from '../lib/siteConfig';
+import ScrollProgress from '../components/ScrollProgress';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
