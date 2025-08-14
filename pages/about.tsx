@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
 import Link from 'next/link';
+import ScrollProgress from '../components/ScrollProgress';
 
 // Animation variants
 const containerVariants = {

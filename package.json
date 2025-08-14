@@ -14,6 +14,9 @@
   "dependencies": {
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^3.1.0",
+    "@netlify/emails": "^1.1.0",
+    "@react-email/components": "^0.5.0",
+    "@react-email/render": "^1.2.0",
     "@svgr/webpack": "^8.1.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -24,6 +27,7 @@
     "next-seo": "^6.8.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-email": "^4.2.8",
     "react-icons": "^5.5.0",
     "rehype-stringify": "^10.0.0",
     "remark": "^15.0.0",

@@ -5,10 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import Layout from '../../components/Layout';
-import BookCard from '../../components/BookCard';
-import { getAllBooks, BookMeta } from '../../lib/books';
-import { siteConfig } from '../../lib/siteConfig';
+import Layout from '../components/Layout';
+import BookCard from '../components/BookCard';
+import { getAllBooks, BookMeta } from '../lib/books';
+import { siteConfig } from '../lib/siteConfig';
 
 // ---------- Config & Helpers ----------
 const SITE_URL = (
