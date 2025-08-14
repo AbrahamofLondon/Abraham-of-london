@@ -5,26 +5,26 @@ import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import type { GetStaticProps } from 'next';
 import dynamic from 'next/dynamic';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'framer-motion';
 
 import Layout from '@/components/Layout';
 import { getAllPosts, PostMeta } from '@/lib/posts';
 import { getAllBooks, BookMeta } from '@/lib/books';
 import { siteConfig, absUrl } from '@/lib/siteConfig';
 
-// Keep core-above-the-fold SSR; defer heavier/animated sections:
+// Above-the-fold SSR sections
 const HeroSection = dynamic(() => import('@/components/homepage/HeroSection'), { ssr: true });
 const AboutSection = dynamic(() => import('@/components/homepage/AboutSection'), { ssr: true });
 const VenturesSection = dynamic(() => import('@/components/homepage/VenturesSection'), { ssr: true });
 const ContentShowcase = dynamic(() => import('@/components/homepage/ContentShowcase'), { ssr: true });
 
-// Non-critical; animation-heavy → defer client-side:
+// Animation-heavy → defer to client
 const NewsletterSection = dynamic(() => import('@/components/homepage/NewsletterSection'), { ssr: false });
 const TestimonialsSection = dynamic(() => import('@/components/homepage/TestimonialsSection'), { ssr: false });
 const MilestonesTimeline = dynamic(() => import('@/components/homepage/MilestonesTimeline'), { ssr: false });
 const EventsSection = dynamic(() => import('@/components/homepage/EventsSection'), { ssr: false });
 
-// ---- Static image imports for LCP (auto blur, correct MIME, no 404s) ----
+// LCP images (static imports = blur + correct MIME + no 404s)
 import heroBanner from '@/public/assets/images/abraham-of-london-banner.webp';
 import profilePortrait from '@/public/assets/images/profile-portrait.webp';
 
@@ -50,26 +50,14 @@ const ASSETS = {
 export type Post = Required<
   Pick<PostMeta, 'slug' | 'title' | 'date' | 'excerpt' | 'coverImage' | 'author' | 'readTime' | 'category'>
 >;
-
-export type Book = Required<
-  Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>
-> & {
+export type Book = Required<Pick<BookMeta, 'slug' | 'title' | 'author' | 'excerpt' | 'coverImage' | 'buyLink'>> & {
   genre: string;
   downloadPdf?: string | null;
   downloadEpub?: string | null;
 };
 
-interface Achievement {
-  title: string;
-  description: string;
-  year: number;
-}
-
-interface HomeProps {
-  posts: Post[];
-  books: Book[];
-  achievements: Achievement[];
-}
+interface Achievement { title: string; description: string; year: number; }
+interface HomeProps { posts: Post[]; books: Book[]; achievements: Achievement[]; }
 
 // ---------- Micro Interactions ----------
 const micro = {
@@ -86,9 +74,8 @@ const useParallax = () => {
   const { scrollYProgress } = useScroll();
   const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
   const yHero = useTransform(smooth, [0, 1], ['0%', '50%']);
-  const yParallax = useTransform(smooth, [0, 1], ['0%', '30%']);
   const opacity = useTransform(smooth, [0, 0.3], [1, 0]);
-  return { yHero, yParallax, opacity };
+  return { yHero, opacity };
 };
 
 const ScrollProgress: React.FC = () => {
@@ -101,18 +88,9 @@ const ScrollProgress: React.FC = () => {
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
-      'slug',
-      'title',
-      'date',
-      'publishedAt',
-      'excerpt',
-      'coverImage',
-      'author',
-      'readTime',
-      'category',
+      'slug','title','date','publishedAt','excerpt','coverImage','author','readTime','category',
     ]);
 
-    // Sort newest first (ISO date or fallback)
     const sortedPosts = [...postsData].sort((a, b) => {
       const da = new Date((a.date || a.publishedAt || 0) as string).getTime();
       const db = new Date((b.date || b.publishedAt || 0) as string).getTime();
@@ -127,25 +105,14 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         title: p.title || 'Untitled Post',
         date: (p.date || p.publishedAt || new Date().toISOString()) as string,
         excerpt: p.excerpt || 'Discover insights and wisdom in this compelling read.',
-        coverImage:
-          typeof p.coverImage === 'string' && p.coverImage.trim()
-            ? p.coverImage
-            : ASSETS.defaultBlogCover,
+        coverImage: typeof p.coverImage === 'string' && p.coverImage.trim() ? p.coverImage : ASSETS.defaultBlogCover,
         author: p.author || siteConfig.author,
         readTime: p.readTime || '5 min read',
         category: p.category || 'Insights',
       }));
 
     const booksData = getAllBooks([
-      'slug',
-      'title',
-      'author',
-      'excerpt',
-      'coverImage',
-      'buyLink',
-      'genre',
-      'downloadPdf',
-      'downloadEpub',
+      'slug','title','author','excerpt','coverImage','buyLink','genre','downloadPdf','downloadEpub',
     ]);
 
     const books: Book[] = booksData
@@ -156,10 +123,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         title: b.title || 'Untitled Book',
         author: b.author || siteConfig.author,
         excerpt: b.excerpt || 'A compelling read that will transform your perspective.',
-        coverImage:
-          typeof b.coverImage === 'string' && b.coverImage.trim()
-            ? b.coverImage
-            : ASSETS.defaultBookCover,
+        coverImage: typeof b.coverImage === 'string' && b.coverImage.trim() ? b.coverImage : ASSETS.defaultBookCover,
         buyLink: b.buyLink || '#',
         genre: Array.isArray(b.genre) ? b.genre.filter(Boolean).join(', ') : b.genre || 'Personal Development',
         downloadPdf: b.downloadPdf ?? null,
@@ -182,9 +146,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 // ---------- Page ----------
 export default function Home({ posts, books, achievements }: HomeProps) {
   const [communityCount, setCommunityCount] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
   const { yHero } = useParallax();
 
-  // Gentle telemetry-esque counter to avoid hydration mismatch
   useEffect(() => {
     setCommunityCount(120_000);
     const id = setInterval(() => {
@@ -250,7 +214,11 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       datePublished: p.date,
       dateModified: p.date,
       author: { '@type': 'Person', name: p.author },
-      publisher: { '@type': 'Organization', name: siteConfig.title, logo: { '@type': 'ImageObject', url: absUrl('/assets/images/abraham-of-london-logo.svg') } },
+      publisher: {
+        '@type': 'Organization',
+        name: siteConfig.title,
+        logo: { '@type': 'ImageObject', url: absUrl('/assets/images/abraham-of-london-logo.svg') },
+      },
       description: p.excerpt,
       mainEntityOfPage: { '@type': 'WebPage', '@id': absUrl(`/blog/${p.slug}`) },
     }));
@@ -308,9 +276,11 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         />
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
-        {/* LCP preloads */}
+
+        {/* LCP preload */}
         <link rel="preload" as="image" href={(ASSETS.heroBanner as StaticImageData).src} imagesizes="100vw" />
-        {/* OG/Twitter */}
+
+        {/* Social */}
         <meta property="og:title" content={siteConfig.title} />
         <meta property="og:description" content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders.`} />
         <meta property="og:type" content="website" />
@@ -324,19 +294,31 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
+
         {/* JSON-LD */}
         {structuredData.map((data, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
         ))}
       </Head>
 
+      {/* Skip link for keyboard users */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card">
+        Skip to content
+      </a>
+
       <ScrollProgress />
 
       <div className="relative min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 text-white">
+        {/* Decorative accents (very light) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute bottom-0 left-[-10%] h-72 w-72 rounded-full bg-emerald-700/10 blur-3xl" />
+        </div>
+
         {/* HERO (SSR, LCP-optimized) */}
         <section className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden">
-          {/* Parallax banner */}
-          <motion.div style={{ y: yHero }} className="absolute inset-0 -z-10">
+          {/* Parallax banner (disable for reduced motion users) */}
+          <motion.div style={prefersReducedMotion ? undefined : { y: yHero }} className="absolute inset-0 -z-10">
             <Image
               src={ASSETS.heroBanner}
               alt="Abraham of London — Empowering Leadership and Fatherhood Advocacy"
@@ -361,59 +343,64 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </div>
         </section>
 
-        {/* ABOUT (SSR) */}
-        <AboutSection
-          bio="I’m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
-          achievements={achievements}
-          portraitSrc={(ASSETS.profilePortrait as StaticImageData).src}
-        />
-
-        {/* VENTURES (SSR) */}
-        <VenturesSection />
-
-        {/* POSTS & BOOKS (SSR for SEO) */}
-        {hasPosts && (
-          <ContentShowcase
-            title="Thought Leadership"
-            subtitle="Insights shaping the future of leadership."
-            items={posts}
-            type="post"
-            link="/blog"
-            linkText="Discover More Insights"
-            className="bg-white/5 backdrop-blur-md"
+        {/* Main content landmark */}
+        <main id="main-content" className="relative">
+          {/* ABOUT (SSR) */}
+          <AboutSection
+            bio="I’m Abraham of London, a globally recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+            achievements={achievements}
+            portraitSrc={(ASSETS.profilePortrait as StaticImageData).src}
           />
-        )}
 
-        {hasBooks && (
-          <ContentShowcase
-            title="Legacy Library"
-            subtitle="Transformative works for global leaders."
-            items={books}
-            type="book"
-            link="/books"
-            linkText="Explore the Collection"
-            className="bg-white/5 backdrop-blur-md"
-          />
-        )}
+          {/* VENTURES (SSR) */}
+          <VenturesSection />
 
-        {/* SOCIAL PROOF & ENGAGEMENT (deferred) */}
-        <TestimonialsSection />
-        <MilestonesTimeline />
-        <EventsSection />
+          {/* POSTS & BOOKS (SSR for SEO) */}
+          {hasPosts && (
+            <ContentShowcase
+              title="Thought Leadership"
+              subtitle="Insights shaping the future of leadership."
+              items={posts}
+              type="post"
+              link="/blog"
+              linkText="Discover More Insights"
+              className="bg-white/5 backdrop-blur-md"
+            />
+          )}
 
-        {/* NEWSLETTER (deferred) */}
-        <div id="newsletter">
-          <NewsletterSection
-            title="Join the Global Community"
-            subtitle={`Be part of ${communityCount.toLocaleString()} leaders receiving exclusive insights.`}
-          />
-        </div>
+          {hasBooks && (
+            <ContentShowcase
+              title="Legacy Library"
+              subtitle="Transformative works for global leaders."
+              items={books}
+              type="book"
+              link="/books"
+              linkText="Explore the Collection"
+              className="bg-white/5 backdrop-blur-md"
+            />
+          )}
+
+          {/* SOCIAL PROOF & ENGAGEMENT (deferred) */}
+          <TestimonialsSection />
+          <MilestonesTimeline />
+          <EventsSection />
+
+          {/* NEWSLETTER (deferred) */}
+          <section id="newsletter" aria-labelledby="newsletter-title" className="scroll-mt-24">
+            <h2 id="newsletter-title" className="sr-only">Newsletter</h2>
+            <NewsletterSection
+              title="Join the Global Community"
+              subtitle={`Be part of ${communityCount.toLocaleString()} leaders receiving exclusive insights.`}
+            />
+          </section>
+        </main>
 
         {/* Footer CTA */}
         <section className="py-12 text-center">
           <Link
             href="/contact"
             className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition"
+            aria-label="Contact Abraham of London"
           >
             Let’s Build Something Enduring
           </Link>
