@@ -1,4 +1,4 @@
-﻿// pages/blog.tsx
+// pages/blog.tsx
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';

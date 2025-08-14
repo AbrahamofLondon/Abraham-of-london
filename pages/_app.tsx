@@ -1,21 +1,19 @@
-﻿// pages/_app.tsx
-import type { AppProps } from 'next/app';
+// pages/_app.tsx
+import type { AppProps, NextWebVitalsMetric } from 'next/app';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { pageview, gaEnabled } from '@/lib/gtag';
-import '@/styles/globals.css'; // keep if you have it
+import { pageview, gaEnabled, gaEvent } from '@/lib/gtag';
+import { ThemeProvider } from '@/lib/ThemeContext';
+import { sans, serif } from '@/lib/fonts';
+import '@/styles/globals.css';
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   useEffect(() => {
     if (!gaEnabled) return;
-
     const handleRouteChange = (url: string) => pageview(url);
-
-    // Fire on first load too
     pageview(router.asPath);
-
     router.events.on('routeChangeComplete', handleRouteChange);
     router.events.on('hashChangeComplete', handleRouteChange);
     return () => {
@@ -24,7 +22,21 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     };
   }, [router]);
 
-  return <Component {...pageProps} />;
+  return (
+    <div className={`${sans.variable} ${serif.variable}`}>
+      <ThemeProvider>
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </div>
+  );
 }
 
-
+export function reportWebVitals(metric: NextWebVitalsMetric) {
+  if (!gaEnabled) return;
+  gaEvent('web-vital', {
+    id: metric.id,
+    name: metric.name,
+    label: metric.label,
+    value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+  });
+}

@@ -1,5 +1,4 @@
 // lib/siteConfig.ts
-
 export type SocialLink = {
   href: string;          // "https://...", "mailto:..", "tel:..", or internal "/path"
   label: string;         // e.g., "LinkedIn"
@@ -14,6 +13,9 @@ export type SiteConfig = {
   siteUrl: string;       // normalized, no trailing slash
   socialLinks: SocialLink[];
   gaMeasurementId?: string | null;
+  email: string;
+  ogImage: string;
+  twitterImage: string;
 };
 
 const RAW: Omit<SiteConfig, 'siteUrl' | 'socialLinks'> & {
@@ -37,8 +39,10 @@ const RAW: Omit<SiteConfig, 'siteUrl' | 'socialLinks'> & {
     { href: 'https://www.facebook.com/share/1MRrKpUzMG/', label: 'Facebook', icon: '/assets/images/social/facebook.svg', external: true },
     { href: 'https://wa.me/447496334022', label: 'WhatsApp', icon: '/assets/images/social/whatsapp.svg', external: true },
   ],
-  // You provided GA4: G-R2Y3YMY8F8 — pull from env by default
   gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R2Y3YMY8F8',
+  email: 'info@abrahamoflondon.org',
+  ogImage: '/assets/images/social/og-image.jpg',
+  twitterImage: '/assets/images/social/twitter-image.webp',
 };
 
 // -------------------- Normalizers --------------------
@@ -98,6 +102,9 @@ export const CONFIG: SiteConfig = Object.freeze({
   siteUrl: normalizeSiteUrl(RAW.siteUrl),
   socialLinks: normalizeLinks(RAW.socialLinks as any),
   gaMeasurementId: RAW.gaMeasurementId || null,
+  email: RAW.email,
+  ogImage: RAW.ogImage,
+  twitterImage: RAW.twitterImage,
 });
 
 export const siteConfig = CONFIG; // for compatibility with existing imports

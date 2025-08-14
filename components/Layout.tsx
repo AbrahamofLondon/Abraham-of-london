@@ -1,4 +1,4 @@
-﻿// components/Layout.tsx
+// components/Layout.tsx
 import React, { ReactNode } from 'react';
 import Head from 'next/head';
 import Header from './Header';
@@ -17,9 +17,6 @@ const Layout: React.FC<LayoutProps> = ({ children, pageTitle }) => {
       <Head>
         <title>{title}</title>
         {/* Add the font link to ensure Playfair Display is available */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </Head>
       <div className="flex flex-col min-h-screen">
         <Header />

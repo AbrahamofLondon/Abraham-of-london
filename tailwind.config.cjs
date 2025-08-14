@@ -6,6 +6,7 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './content/**/*.{md,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx}', // include fonts/theme helpers, etc.
   ],
   theme: {
     container: {
@@ -31,13 +32,12 @@ module.exports = {
         warmWhite: '#fafaf5',
         midGreen: '#4b8b6b',
         softGold: '#d4af37',
-        emerald: {
-          700: '#047857',
-        },
+        emerald: { 700: '#047857' },
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        // Mapped to next/font vars from lib/fonts.ts
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
       },
       letterSpacing: { brand: '0.05em', widebrand: '0.1em' },
       boxShadow: {
@@ -47,7 +47,10 @@ module.exports = {
       },
       keyframes: {
         fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
-        fadeUp: { '0%': { opacity: 0, transform: 'translateY(12px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+        fadeUp: {
+          '0%': { opacity: 0, transform: 'translateY(12px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
       },
       animation: { fadeIn: 'fadeIn .6s ease both', fadeUp: 'fadeUp .6s ease both' },
       typography: ({ theme }) => ({

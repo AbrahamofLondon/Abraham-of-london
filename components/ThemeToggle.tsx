@@ -1,4 +1,4 @@
-﻿// components/ThemeToggle.tsx
+// components/ThemeToggle.tsx
 import * as React from 'react';
 
 interface ThemeToggleProps {
