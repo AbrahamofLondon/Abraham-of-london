@@ -2,7 +2,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import type { GetStaticProps } from "next";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -12,6 +11,7 @@ import { getAllPosts, PostMeta } from "@/lib/posts";
 import { getAllBooks, BookMeta } from "@/lib/books";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
+import { generatedCover } from "@/lib/og";
 
 // Above-the-fold SSR sections
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), {
@@ -53,7 +53,6 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const ASSETS = {
-  heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.webp",
@@ -90,7 +89,7 @@ interface HomeProps {
   achievements: Achievement[];
 }
 
-// ---------- Small shared “Surface” wrapper for high contrast ----------
+// ---------- Surface wrapper ----------
 const SectionSurface: React.FC<
   React.PropsWithChildren<{ className?: string }>
 > = ({ className = "", children }) => (
@@ -117,7 +116,7 @@ const ScrollProgress: React.FC = () => {
   );
 };
 
-// ---------- Data Fetching ----------
+// ---------- Data ----------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
@@ -149,7 +148,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof p.coverImage === "string" && p.coverImage.trim()
             ? p.coverImage
-            : ASSETS.defaultBlogCover,
+            : generatedCover(p.slug || `post-${i}`), // ← your request
         author: p.author || siteConfig.author,
         readTime: p.readTime || "5 min read",
         category: p.category || "Insights",
@@ -225,7 +224,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
   const structuredData = useMemo(() => {
     const baseUrl = SITE_URL;
-    const currentYear = new Date().getFullYear();
 
     const website = {
       "@context": "https://schema.org",
@@ -235,21 +233,8 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       description: siteConfig.description,
       url: baseUrl,
       inLanguage: "en-GB",
-      copyrightYear: currentYear,
       author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
       publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-      potentialAction: [
-        {
-          "@type": "SearchAction",
-          target: `${baseUrl}/search?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
-        {
-          "@type": "SubscribeAction",
-          target: `${baseUrl}/#email-signup`,
-          object: { "@type": "Service", name: "Newsletter Subscription" },
-        },
-      ],
     };
 
     const org = {
@@ -258,31 +243,10 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       "@id": `${baseUrl}#organization`,
       name: siteConfig.title,
       url: baseUrl,
-      logo: {
-        "@type": "ImageObject",
-        url: absUrl(ASSETS.logo),
-        width: 512,
-        height: 512,
-      },
-      image: {
-        "@type": "ImageObject",
-        url: ASSETS.profilePortrait,
-        width: 400,
-        height: 400,
-      },
+      logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo), width: 512, height: 512 },
+      image: { "@type": "ImageObject", url: ASSETS.profilePortrait, width: 400, height: 400 },
       sameAs: sameAsLinks,
       address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
-    };
-
-    const person = {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      name: siteConfig.author,
-      url: baseUrl,
-      image: ASSETS.profilePortrait,
-      jobTitle: "Author & Strategist",
-      sameAs: sameAsLinks,
-      worksFor: { "@type": "Organization", name: siteConfig.title },
     };
 
     const postSchemas = posts.map((p) => ({
@@ -293,11 +257,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       datePublished: p.date,
       dateModified: p.date,
       author: { "@type": "Person", name: p.author },
-      publisher: {
-        "@type": "Organization",
-        name: siteConfig.title,
-        logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo) },
-      },
+      publisher: { "@type": "Organization", name: siteConfig.title },
       description: p.excerpt,
       mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${p.slug}`) },
     }));
@@ -316,36 +276,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       offers: { "@type": "Offer", url: b.buyLink },
     }));
 
-    const breadcrumb = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: baseUrl }],
-    };
-
-    const faq = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "Who is Abraham of London?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `${siteConfig.author} is an author, strategist, and fatherhood advocate focused on family, leadership, and legacy.`,
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What books has Abraham written?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `Books on fatherhood, leadership, and personal development to help men build durable legacies.`,
-          },
-        },
-      ],
-    };
-
-    return [website, org, person, ...postSchemas, ...bookSchemas, breadcrumb, faq];
+    return [website, org, ...postSchemas, ...bookSchemas];
   }, [books, posts, sameAsLinks]);
 
   const hasPosts = posts.length > 0;
@@ -359,32 +290,24 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           name="description"
           content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`}
         />
-        <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
-
-        {/* Social */}
         <meta property="og:title" content={siteConfig.title} />
-        <meta
-          property="og:description"
-          content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders.`}
-        />
+        <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={absUrl(ASSETS.ogImage)} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:image" content={absUrl("/assets/images/social/og-image.jpg")} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteConfig.title} />
-        <meta
-          name="twitter:description"
-          content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders.`}
-        />
-        <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
+        <meta name="twitter:description" content={siteConfig.description} />
+        <meta name="twitter:image" content={absUrl("/assets/images/social/twitter-image.webp")} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
+        {structuredData.map((data, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+        ))}
       </Head>
 
-      {/* Skip link for keyboard users */}
+      {/* Skip link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card"
@@ -394,44 +317,19 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
       <ScrollProgress />
 
-      {/* Page background switched to cream for legibility */}
+      {/* Page background */}
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO (with background image + scrim overlay) */}
-        <section
-          className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
-          aria-labelledby="hero-title"
-        >
-          {/* Background image */}
-          <div className="absolute inset-0 -z-10">
-            <Image
-              src={ASSETS.heroBanner}
-              alt="Abraham of London — Empowering leadership and fatherhood"
-              fill
-              priority
-              fetchPriority="high"
-              quality={90}
-              sizes="100vw"
-              className="object-cover"
-            />
-            {/* Scrim overlay to improve legibility and avoid heavy text-shadows */}
-            <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
-          </div>
+        {/* HERO */}
+        <HeroSection
+          title={siteConfig.title}
+          subtitle="Global Strategist, Author, and Visionary Leader"
+          ctaText="Join the Movement"
+          ctaLink="/join"
+          communityCount={communityCount}
+        />
 
-          {/* Foreground content */}
-          <div className="relative z-10 text-white">
-            <HeroSection
-              title={siteConfig.title}
-              subtitle="Global Strategist, Author, and Visionary Leader"
-              ctaText="Join the Movement"
-              ctaLink="/join"
-              communityCount={communityCount}
-            />
-          </div>
-        </section>
-
-        {/* Main content landmark */}
+        {/* Main content */}
         <main id="main-content" className="relative space-y-12 sm:space-y-16 pb-12">
-          {/* ABOUT — high-contrast surface */}
           <SectionSurface>
             <AboutSection
               bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
@@ -440,12 +338,10 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             />
           </SectionSurface>
 
-          {/* VENTURES */}
           <SectionSurface>
             <VenturesSection />
           </SectionSurface>
 
-          {/* POSTS & BOOKS */}
           {hasPosts && (
             <SectionSurface>
               <ContentShowcase
@@ -472,7 +368,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             </SectionSurface>
           )}
 
-          {/* SOCIAL PROOF & ENGAGEMENT (deferred) */}
           <SectionSurface className="bg-white/90">
             <TestimonialsSection />
           </SectionSurface>
@@ -485,7 +380,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             <EventsSection />
           </SectionSurface>
 
-          {/* EMAIL SIGNUP */}
           <section id="email-signup" aria-labelledby="email-signup-title" className="scroll-mt-24">
             <h2 id="email-signup-title" className="sr-only">
               Email signup
@@ -503,7 +397,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-forest/90 transition"
             aria-label="Contact Abraham of London"
           >
-            Let's Build Something Enduring
+            {"Let's Build Something Enduring"}
           </Link>
         </section>
       </div>
