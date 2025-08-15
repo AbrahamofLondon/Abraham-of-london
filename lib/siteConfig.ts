@@ -25,7 +25,7 @@ const RAW: Omit<SiteConfig, 'siteUrl' | 'socialLinks'> & {
   title: 'Abraham of London',
   author: 'Abraham of London',
   description:
-    'Official site of Abraham of London Ã¢â‚¬â€œ author, strategist, and fatherhood advocate.',
+    'Official site of Abraham of London ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ author, strategist, and fatherhood advocate.',
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.URL ||
@@ -79,7 +79,7 @@ function normalizeLinks(arr: SiteConfig['socialLinks']): SiteConfig['socialLinks
       return {
         href: external && isHttp(href) ? ensureHttps(href) : href,
         label: l.label?.trim() || 'Link',
-        icon: l.icon?.trim() || '/assets/images/social/link.svg',
+        icon: l.icon?.trim() || '/assets/images/social/linkedin.svg',
         external,
       };
     });

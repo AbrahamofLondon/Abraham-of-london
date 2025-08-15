@@ -69,7 +69,7 @@ This project is configured for continuous deployment with Netlify. Pushes to the
 
   * **Live Site:** [Your Netlify URL here, e.g., https://abraham-of-london.netlify.app](https://abraham-of-london.netlify.app)
 
-### Deployment Checklist ✅
+### Deployment Checklist Ã¢Å“â€¦
 
 Before you deploy to a production domain, ensure the following steps are completed to avoid common issues:
 
@@ -101,20 +101,20 @@ Before you deploy to a production domain, ensure the following steps are complet
 
 ```
 .
-├── public/                # Static assets (images, downloads, etc.)
-├── components/            # Reusable React components
-├── lib/                   # Utility functions (e.g., markdown processing, data fetching)
-├── pages/                 # Next.js pages (routes)
-│   ├── api/               # API routes
-│   ├── blog/              # Blog index and dynamic blog post pages
-│   └── books/             # Books index and dynamic book detail pages
-├── posts/                 # Markdown/MDX content for blog posts
-├── books/                 # Markdown/MDX content for books
-├── styles/                # Global CSS and Tailwind directives
-├── next.config.js         # Next.js configuration
-├── tailwind.config.js     # Tailwind CSS configuration
-├── postcss.config.js      # PostCSS configuration
-├── package.json           # Project dependencies and scripts
-├── tsconfig.json          # TypeScript configuration
-└── README.md              # This file
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ public/                # Static assets (images, downloads, etc.)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ components/            # Reusable React components
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ lib/                   # Utility functions (e.g., markdown processing, data fetching)
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ pages/                 # Next.js pages (routes)
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ api/               # API routes
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ blog/              # Blog index and dynamic blog post pages
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ books/             # Books index and dynamic book detail pages
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ posts/                 # Markdown/MDX content for blog posts
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ books/                 # Markdown/MDX content for books
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ styles/                # Global CSS and Tailwind directives
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ next.config.js         # Next.js configuration
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ tailwind.config.js     # Tailwind CSS configuration
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ postcss.config.js      # PostCSS configuration
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ package.json           # Project dependencies and scripts
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ tsconfig.json          # TypeScript configuration
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ README.md              # This file
 ```

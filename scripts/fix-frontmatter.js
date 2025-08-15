@@ -124,14 +124,14 @@ function processDir(dir, type) {
 
     const after = JSON.stringify(data);
     if (before !== after) {
-      console.log(`• ${type}:${fname} -> normalized`);
+      console.log(`â€¢ ${type}:${fname} -> normalized`);
       if (WRITE) {
         fs.writeFileSync(`${full}.bak`, raw, 'utf8');
         const out = matter.stringify(parsed.content, data);
         fs.writeFileSync(full, out, 'utf8');
       }
     } else {
-      console.log(`• ${type}:${fname} -> ok`);
+      console.log(`â€¢ ${type}:${fname} -> ok`);
     }
   });
 }
