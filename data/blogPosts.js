@@ -8,7 +8,7 @@ const blogPosts = [
     author: 'Abraham Adaramola',
     tags: ['fatherhood', 'principles', 'legacy', 'masculinity'],
     seo: {
-      title: 'Fathering Principles Ã¢â‚¬â€œ A Legacy Blueprint',
+      title: 'Fathering Principles ‚¬ A Legacy Blueprint',
       description: 'Explore core principles for intentional fatherhood rooted in clarity and purpose.',
       keywords: 'fatherhood blueprint, legacy for sons, Abraham Adaramola, masculinity',
     },
@@ -22,7 +22,7 @@ const blogPosts = [
     author: 'Abraham Adaramola',
     tags: ['resilience', 'faith', 'justice', 'purpose'],
     seo: {
-      title: 'System Broken, Spirit Not: A FatherÃ¢â‚¬â„¢s Road to Restoration',
+      title: 'System Broken, Spirit Not: A Father‚¬„s Road to Restoration',
       description: 'What happens when institutions crush you? You rise. You rebuild. You reclaim your purpose.',
       keywords: 'systemic injustice, fatherhood, resilience, identity, Abraham Adaramola',
     },
@@ -36,7 +36,7 @@ const blogPosts = [
     author: 'Abraham of London',
     tags: ['fatherhood', 'legacy', 'movement', 'spiritual leadership', 'masculinity'],
     seo: {
-      title: 'Fathering Without Fear Ã¢â‚¬â€œ The Story They Thought They Knew',
+      title: 'Fathering Without Fear ‚¬ The Story They Thought They Knew',
       description: 'Explore the origin of the Fathering Without Fear movement...',
       keywords: 'Christian fatherhood, fatherhood movement, family law reform, legacy building, Abraham of London',
     },
