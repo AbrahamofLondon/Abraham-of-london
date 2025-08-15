@@ -1,11 +1,11 @@
 ﻿/** @type {import('next').NextConfig} */
-import withMDX from '@next/mdx';
-import bundleAnalyzer from '@next/bundle-analyzer';
-import remarkGfm from 'remark-gfm';
-import rehypeStringify from 'rehype-stringify';
+import withMDX from "@next/mdx";
+import bundleAnalyzer from "@next/bundle-analyzer";
+import remarkGfm from "remark-gfm";
+import rehypeStringify from "rehype-stringify";
 
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === "true",
 });
 
 const withMdx = withMDX({
@@ -13,28 +13,24 @@ const withMdx = withMDX({
   options: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeStringify],
-    providerImportSource: '@mdx-js/react',
+    providerImportSource: "@mdx-js/react",
   },
 });
 
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+  pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    formats: ['image/avif', 'image/webp'],
-    domains: ['abraham-of-london.netlify.app'],
+    formats: ["image/avif", "image/webp"],
+    domains: ["abraham-of-london.netlify.app"],
   },
   experimental: {
-    optimizePackageImports: ['framer-motion'],
+    optimizePackageImports: ["framer-motion"],
   },
-  // Skip lint/type errors during CI builds (Netlify)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // keep CI happy while we finish content clean-up
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 export default withBundleAnalyzer(withMdx(nextConfig));
