@@ -62,13 +62,13 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const ASSETS = {
-  heroBanner: "/assets/images/abraham-of-london-banner.webp",
-  profilePortrait: "/assets/images/profile-portrait.webp",
-  ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.webp",
+  heroBanner: '/assets/images/abraham-of-london-banner.webp',
+  profilePortrait: '/assets/images/profile-portrait.webp',
+  ogImage: '/assets/images/social/og-image.jpg',
+  twitterImage: '/assets/images/social/twitter-image.webp',
   defaultBookCover: "/assets/images/default-book.jpg",
   defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
-  logo: "/assets/images/logo/abraham-of-london-logo.svg",
+  logo: '/assets/images/logo/abraham-of-london-logo.svg',
 } as const;
 
 // ---------- Types ----------
@@ -405,7 +405,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
     <Layout>
       <Head>
         <title>
-          {siteConfig.title} â€” Empowering Leaders in Fatherhood & Strategy
+          {siteConfig.title} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Empowering Leaders in Fatherhood & Strategy
         </title>
         <meta
           name="description"
@@ -482,7 +482,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           >
             <Image
               src={ASSETS.heroBanner}
-              alt="Abraham of London â€” Empowering Leadership and Fatherhood Advocacy"
+              alt="Abraham of London ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Empowering Leadership and Fatherhood Advocacy"
               fill
               priority
               fetchPriority="high"
@@ -564,7 +564,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-emerald-700 transition"
             aria-label="Contact Abraham of London"
           >
-            Letâ€™s Build Something Enduring
+            LetÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s Build Something Enduring
           </Link>
         </section>
       </div>

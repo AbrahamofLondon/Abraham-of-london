@@ -93,11 +93,11 @@ export default function BlogPostCard({
           {/* Meta */}
           <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-cream/70">
             <DateFormatter dateString={date} pattern="d MMM yyyy" />
-            <span aria-hidden>â€¢</span>
+            <span aria-hidden>ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
             <span>by {author}</span>
             {readTime && (
               <>
-                <span aria-hidden>â€¢</span>
+                <span aria-hidden>ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
                 <span>{readTime}</span>
               </>
             )}

@@ -93,8 +93,8 @@ export default function AboutPage() {
               A Storyteller, Strategist, and Student of Life
             </h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I am Abraham of LondonÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âa storyteller, strategist, and student of
-              lifeÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s deep currents. My journey has been shaped by a
+              I am Abraham of LondonÃ¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½,Ã¯Â¿Â½Ã…Â¡Ã¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Âa storyteller, strategist, and student of
+              lifeÃ¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¾Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢s deep currents. My journey has been shaped by a
               relentless pursuit of truth, legacy, and personal mastery. Through
               every venture, book, or conversation, I am crafting not just
               businesses, but enduring narratives that challenge, inspire, and
@@ -103,20 +103,20 @@ export default function AboutPage() {
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
               My work stands at the intersection of philosophy, creative
               expression, and human development. Whether through writing, brand
-              building, or advisory, I see every project as a canvas ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â a
+              building, or advisory, I see every project as a canvas Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½,Ã¯Â¿Â½Ã…Â¡Ã¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â a
               medium to explore what it means to live meaningfully, lead
               courageously, and leave behind a legacy of substance.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              IÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢m less interested in transient trends and more invested in
+              IÃ¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¾Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢m less interested in transient trends and more invested in
               timeless truths. Family, faith, character, and creativity are the
               compass points that steer my endeavours. Every blog post, strategy
               session, or artistic project is my way of translating these
               convictions into tangible impact.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              This is not just a brand; itÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s an unfolding life project. As
-              seasons change, so do the mediums I employ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â from thought
+              This is not just a brand; itÃ¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¾Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢s an unfolding life project. As
+              seasons change, so do the mediums I employ Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½,Ã¯Â¿Â½Ã…Â¡Ã¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â from thought
               leadership to immersive storytelling, from business ventures to
               deeply personal writings like{" "}
               <Link
@@ -125,10 +125,10 @@ export default function AboutPage() {
               >
                 Fathering Without Fear
               </Link>
-              . ItÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s all connected, because I am the connection.
+              . ItÃ¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¾Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢s all connected, because I am the connection.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Welcome to my world ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â where ideas are sharpened, values are
+              Welcome to my world Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½?Ã¯Â¿Â½?TÃ¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½?sÃ‚Â¬Ã¯Â¿Â½.Ã‚Â¡Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½'Ã¯Â¿Â½,Ã‚Â¢Ã¯Â¿Â½fÃ‚Â¢ÃƒÂ¢Ã¯Â¿Â½,Ã¯Â¿Â½Ã…Â¡Ã¯Â¿Â½,Ã‚Â¬Ã¯Â¿Â½fÃ¯Â¿Â½?sÃ¯Â¿Â½,Ã‚Â where ideas are sharpened, values are
               lived, and every expression is an invitation to grow, reflect, and
               build a life of consequence.
             </p>
