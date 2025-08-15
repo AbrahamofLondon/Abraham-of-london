@@ -9,8 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "prebuild": "node scripts/sanitize-source.js",
-    "fix:whitespace": "node scripts/sanitize-source.js"
+    "prebuild": "node scripts/sanitize-source.js && node scripts/generate-covers.mjs",
+    "fix:whitespace": "node scripts/sanitize-source.js",
+    "gen:covers": "node scripts/generate-covers.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
@@ -35,7 +36,8 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.0"
+    "remark-rehype": "^11.1.0",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.31",

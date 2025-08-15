@@ -45,7 +45,7 @@ const replacements = [
 // Common patterns from double-decoded UTF-8 for quotes/dashes:
 const mojibakeFixes = [
   // weird apostrophe clusters → '
-  [/(?:Ã|Â|¢|â|€|™|œ|ž|||||||){1,}/g, ""]
+  [/(?:||||||||||||||){1,}/g, ""]
 ];
 
 function sanitizeContents(input) {

@@ -20,6 +20,8 @@ interface Props {
   posts: Post[];
 }
 
+const generatedCover = (slug: string) => `/assets/images/blog/${slug}.jpg`;
+
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const raw = getAllPosts([
     "slug",
@@ -48,7 +50,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       coverImage:
         typeof p.coverImage === "string" && p.coverImage.trim()
           ? p.coverImage
-          : "/assets/images/blog/default-blog-cover.jpg",
+          : generatedCover(p.slug || `post-${i}`),
       author: p.author || "Abraham of London",
       readTime: p.readTime || "5 min read",
       category: p.category || "Insights",
@@ -89,6 +91,7 @@ export default function BlogPage({ posts }: Props) {
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
+                      quality={90}
                       priority={false}
                     />
                   </div>
