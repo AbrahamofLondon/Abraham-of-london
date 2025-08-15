@@ -1,4 +1,3 @@
-// components/homepage/ContentShowcase.tsx
 import React from "react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -9,14 +8,10 @@ import BookCard from "@/components/BookCard";
 type ContentShowcaseProps = {
   title: string;
   subtitle?: string;
-  /** items = posts or books depending on `type` */
-  items: any[];
-  /** which card to render */
+  items: any[];              // posts or books
   type: "post" | "book";
-  /** "See all" link */
-  link: string;
+  link: string;              // see-all link
   linkText?: string;
-  /** allow extra styling from parent */
   className?: string;
 };
 
@@ -31,40 +26,40 @@ export default function ContentShowcase({
 }: ContentShowcaseProps) {
   return (
     <section
-      className={clsx("container mx-auto px-4 py-12 rounded-2xl", className)}
+      className={clsx("py-12 px-4", className)}
       aria-label={title}
     >
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-          {subtitle && (
-            <p className="mt-2 text-base text-deepCharcoal/80">{subtitle}</p>
-          )}
-        </div>
-        <Link
-          href={link}
-          className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-emerald-700 transition"
-        >
-          {linkText}
-        </Link>
-      </div>
+      <div className="container mx-auto max-w-6xl">
+        {/* White surface for accessibility over dark bg */}
+        <div className="bg-white text-deepCharcoal rounded-3xl shadow-2xl ring-1 ring-black/5 p-6 md:p-10">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
+                {title}
+              </h2>
+              {subtitle && (
+                <p className="mt-2 text-base text-deepCharcoal/80">{subtitle}</p>
+              )}
+            </div>
+            <Link
+              href={link}
+              className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-forest/90 transition"
+            >
+              {linkText}
+            </Link>
+          </div>
 
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item: any) => {
-          if (type === "post") {
-            return <BlogPostCard key={item.slug} {...item} />;
-          }
-          // type === 'book'
-          return <BookCard key={item.slug} {...item} />;
-        })}
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item: any) =>
+              type === "post" ? (
+                <BlogPostCard key={item.slug} {...item} />
+              ) : (
+                <BookCard key={item.slug} {...item} />
+              ),
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
-
-
-
-
-
-
-

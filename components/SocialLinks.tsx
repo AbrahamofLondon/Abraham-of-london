@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-// components/SocialLinks.tsx
 import Link from "next/link";
 import * as React from "react";
 
@@ -29,18 +28,9 @@ interface SocialLinksProps {
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
-
-function isHttp(href: string) {
-  return /^https?:\/\//i.test(href);
-}
-
-function isMail(href: string) {
-  return href.startsWith("mailto:");
-}
-
-function isTel(href: string) {
-  return href.startsWith("tel:");
-}
+const isHttp = (href: string) => /^https?:\/\//i.test(href);
+const isMail = (href: string) => href.startsWith("mailto:");
+const isTel  = (href: string) => href.startsWith("tel:");
 
 function ensureHttps(u: string) {
   try {
@@ -52,12 +42,7 @@ function ensureHttps(u: string) {
   }
 }
 
-function withUtm(
-  u: string,
-  source = "abraham-site",
-  medium = "social",
-  campaign = "global",
-) {
+function withUtm(u: string, source = "abraham-site", medium = "social", campaign = "global") {
   try {
     const url = new URL(u);
     url.searchParams.set("utm_source", source);
@@ -74,7 +59,6 @@ function getGtag(): ((...args: any[]) => void) | undefined {
   const w = window as any;
   return typeof w.gtag === "function" ? w.gtag : undefined;
 }
-
 function trackSocialClick(label: string, href: string) {
   const gtag = getGtag();
   if (gtag) {
@@ -96,22 +80,24 @@ export default function SocialLinks({
   utmMedium = "social",
   utmCampaign = "global",
 }: SocialLinksProps) {
-  const baseBtn =
-    "inline-flex items-center gap-2 rounded-md px-3 py-2 text-deepCharcoal transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
-  const ghost =
-    "border border-lightGrey hover:bg-warmWhite focus:ring-deepCharcoal/30";
-  const solid =
-    "bg-deepCharcoal text-warmWhite hover:opacity-90 focus:ring-deepCharcoal/40";
-
   if (!Array.isArray(links) || links.length === 0) return null;
 
+  const baseBtn =
+    "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent";
+  const ghost =
+    // Light + dark-friendly surface
+    "border text-deepCharcoal border-lightGrey/70 bg-white/70 hover:bg-white " +
+    "dark:text-cream dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20 " +
+    "focus:ring-forest/40 dark:focus:ring-cream/30";
+  const solid =
+    // High-contrast pill
+    "bg-forest text-cream hover:bg-emerald-700 " +
+    "dark:bg-cream dark:text-deepCharcoal dark:hover:bg-cream/90 " +
+    "focus:ring-deepCharcoal/40 dark:focus:ring-forest/40";
+
   return (
-    <nav
-      aria-label="Social links"
-      className={cn("flex flex-wrap gap-3", className)}
-    >
+    <nav aria-label="Social links" className={cn("flex flex-wrap gap-3", className)}>
       {links.map((item) => {
-        // Normalize href and external flags
         let href = item.href.trim();
         const externalAuto = isHttp(href);
         const mail = isMail(href);
@@ -126,20 +112,11 @@ export default function SocialLinks({
           }
         }
 
-        const rel = openNewTab
-          ? cn("noopener", "noreferrer", "external", item.rel)
-          : item.rel;
-        const aria = openNewTab
-          ? `${item.label} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â opens in new tab`
-          : item.label;
-        const classes = cn(
-          baseBtn,
-          variant === "ghost" ? ghost : solid,
-          item.className,
-        );
+        const rel = openNewTab ? cn("noopener", "noreferrer", "external", item.rel) : item.rel;
+        const aria = openNewTab ? `${item.label} (opens in a new tab)` : item.label; // <-- fixed mojibake
+        const classes = cn(baseBtn, variant === "ghost" ? ghost : solid, item.className);
         const key = item.id ?? `${item.href}-${item.label}`;
 
-        // Icon handling: use <img> for string SVGs; ReactNode otherwise
         const iconNode =
           typeof item.icon === "string" ? (
             <img
@@ -161,7 +138,6 @@ export default function SocialLinks({
           </>
         );
 
-        // External HTTP(S)
         if (openNewTab) {
           return (
             <a
@@ -179,7 +155,6 @@ export default function SocialLinks({
           );
         }
 
-        // mailto/tel/inline http without new tab
         if (isHttp(href) || mail || tel) {
           return (
             <a
@@ -195,7 +170,6 @@ export default function SocialLinks({
           );
         }
 
-        // Internal link
         return (
           <Link
             key={key}
@@ -212,10 +186,3 @@ export default function SocialLinks({
     </nav>
   );
 }
-
-
-
-
-
-
-

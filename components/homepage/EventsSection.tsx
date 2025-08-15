@@ -11,13 +11,13 @@ type EventItem = {
 
 const events: EventItem[] = [
   {
-    date: "2025-09-12",
+    date: "2026-09-12",
     title: "Leadership Workshop",
     location: "London, UK",
     href: "/events/leadership-workshop",
   },
   {
-    date: "2025-10-03",
+    date: "2026-11-11",
     title: "Fathers & Futures Panel",
     location: "Online",
     href: "/events/fathers-and-futures",

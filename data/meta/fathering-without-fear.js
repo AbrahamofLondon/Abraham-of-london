@@ -7,7 +7,7 @@
   "author": "Abraham of London",
   "tags": ["fatherhood", "legacy", "movement", "spiritual leadership", "masculinity"],
   "seo": {
-    "title": "Fathering Without Fear â€“ The Story They Thought They Knew",
+    "title": "Fathering Without Fear Ã¢â‚¬â€œ The Story They Thought They Knew",
     "description": "Explore the origin of the Fathering Without Fear movement...",
     "keywords": "Christian fatherhood, fatherhood movement, family law reform, legacy building, Abraham of London"
   }

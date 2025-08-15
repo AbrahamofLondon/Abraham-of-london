@@ -1,4 +1,3 @@
-// components/ThemeToggle.tsx
 import * as React from "react";
 
 interface ThemeToggleProps {
@@ -42,15 +41,19 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
     applyTheme(next);
   };
 
+  const base =
+    "inline-flex h-9 w-9 items-center justify-center rounded-md transition " +
+    "focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const styles =
+    "border border-lightGrey bg-white/90 text-deepCharcoal hover:bg-white " +
+    "dark:border-white/20 dark:bg-deepCharcoal/70 dark:text-cream dark:hover:bg-deepCharcoal";
+
   if (!mounted) {
     return (
       <button
         type="button"
         aria-label="Toggle theme"
-        className={cn(
-          "inline-flex h-9 w-9 items-center justify-center rounded-md border border-lightGrey bg-white/80 text-deepCharcoal",
-          className,
-        )}
+        className={cn(base, styles, className)}
         disabled
       />
     );
@@ -59,47 +62,23 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
   return (
     <button
       type="button"
-      aria-label={
-        theme === "dark" ? "Activate light theme" : "Activate dark theme"
-      }
+      aria-label={theme === "dark" ? "Activate light theme" : "Activate dark theme"}
       aria-pressed={theme === "dark"}
       onClick={toggle}
-      className={cn(
-        "inline-flex h-9 w-9 items-center justify-center rounded-md border border-lightGrey bg-white/80 text-deepCharcoal hover:bg-white hover:shadow-cardHover transition",
-        className,
-      )}
+      className={cn(base, styles, className)}
     >
       {theme === "dark" ? (
         /* Sun icon */
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
           <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
         </svg>
       ) : (
         /* Moon icon */
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z" />
         </svg>
       )}
     </button>
   );
 }
-
-
-
-
-
-
-

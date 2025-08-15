@@ -69,7 +69,7 @@ This project is configured for continuous deployment with Netlify. Pushes to the
 
   * **Live Site:** [Your Netlify URL here, e.g., https://abraham-of-london.netlify.app](https://abraham-of-london.netlify.app)
 
-### Deployment Checklist Ã¢Å“â€¦
+### Deployment Checklist ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦
 
 Before you deploy to a production domain, ensure the following steps are completed to avoid common issues:
 
@@ -101,20 +101,20 @@ Before you deploy to a production domain, ensure the following steps are complet
 
 ```
 .
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ public/                # Static assets (images, downloads, etc.)
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ components/            # Reusable React components
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ lib/                   # Utility functions (e.g., markdown processing, data fetching)
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ pages/                 # Next.js pages (routes)
-Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ api/               # API routes
-Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ blog/              # Blog index and dynamic blog post pages
-Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ books/             # Books index and dynamic book detail pages
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ posts/                 # Markdown/MDX content for blog posts
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ books/                 # Markdown/MDX content for books
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ styles/                # Global CSS and Tailwind directives
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ next.config.js         # Next.js configuration
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ tailwind.config.js     # Tailwind CSS configuration
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ postcss.config.js      # PostCSS configuration
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ package.json           # Project dependencies and scripts
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ tsconfig.json          # TypeScript configuration
-Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ README.md              # This file
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ public/                # Static assets (images, downloads, etc.)
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ components/            # Reusable React components
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ lib/                   # Utility functions (e.g., markdown processing, data fetching)
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ pages/                 # Next.js pages (routes)
+ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬Å¡   ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ api/               # API routes
+ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬Å¡   ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ blog/              # Blog index and dynamic blog post pages
+ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬Å¡   ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬ÂÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ books/             # Books index and dynamic book detail pages
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ posts/                 # Markdown/MDX content for blog posts
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ books/                 # Markdown/MDX content for books
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ styles/                # Global CSS and Tailwind directives
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ next.config.js         # Next.js configuration
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ tailwind.config.js     # Tailwind CSS configuration
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ postcss.config.js      # PostCSS configuration
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ package.json           # Project dependencies and scripts
+ÃƒÂ¢Ã¢â‚¬ÂÃ…â€œÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ tsconfig.json          # TypeScript configuration
+ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬ÂÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ README.md              # This file
 ```
