@@ -3,34 +3,24 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const heroVariants = {
   initial: { opacity: 0, y: 50 },
   animate: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 1,
-      ease: "easeOut",
-      staggerChildren: 0.2,
-      delayChildren: 0.3,
-    },
+    transition: { duration: 0.9, ease: "easeOut", staggerChildren: 0.15 },
   },
 };
 
 const textVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const logoVariants = {
   initial: { opacity: 0, rotate: -180 },
-  animate: {
-    opacity: 1,
-    rotate: 0,
-    transition: { duration: 1, ease: "easeOut" },
-  },
+  animate: { opacity: 1, rotate: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 const ASSETS = {
@@ -56,11 +46,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   return (
     <section
-      className="relative min-h-screen flex items-center justify-center text-center overflow-hidden p-4"
+      className="relative min-h-[70vh] sm:min-h-[85vh] flex items-center justify-center text-center overflow-hidden"
       role="banner"
       aria-label="Welcome to Abraham of London"
     >
-      <div className="absolute inset-0 z-0">
+      {/* Background video (falls back to poster) */}
+      <div className="absolute inset-0 -z-10">
         <video
           autoPlay
           muted
@@ -70,13 +61,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           poster={ASSETS.heroBanner}
         >
           <source src={ASSETS.heroVideo} type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-primary)]/70 to-transparent backdrop-blur-sm animate-pulse-slow" />
+        {/* Strong, neutral overlay for guaranteed contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/55 to-black/30" />
       </div>
 
       <motion.div
-        className="relative z-10 max-w-5xl text-[var(--color-on-primary)]"
+        className="relative z-10 max-w-5xl px-4 text-white"
         variants={heroVariants}
         initial="initial"
         animate="animate"
@@ -84,21 +75,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <motion.div className="mb-6" variants={logoVariants}>
           <Image
             src={ASSETS.logo}
-            alt={`${siteConfig.title} Logo`}
-            width={150}
-            height={150}
+            alt="Abraham of London logo"
+            width={140}
+            height={140}
             className="mx-auto"
+            priority
           />
         </motion.div>
 
         <motion.h1
-          className="font-serif text-6xl sm:text-8xl font-extrabold mb-6 tracking-brand text-shadow-lg"
+          className="font-serif text-4xl sm:text-6xl md:text-7xl font-extrabold mb-4 tracking-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
           variants={textVariants}
         >
           {title}
         </motion.h1>
+
         <motion.p
-          className="text-xl sm:text-2xl font-light leading-relaxed max-w-3xl mx-auto mb-8"
+          className="text-lg sm:text-2xl font-light leading-relaxed max-w-3xl mx-auto mb-8 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]"
           variants={textVariants}
         >
           {subtitle}{" "}
@@ -111,24 +104,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           className="flex flex-col sm:flex-row gap-4 justify-center"
           variants={textVariants}
         >
-          <Link href={ctaLink} passHref>
-            <motion.a
-              className="px-8 py-4 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-full font-semibold hover:bg-[var(--color-primary-hover)] hover:text-[var(--color-on-primary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl"
-              whileHover={{ scale: 1.05 }}
+          {/* Primary CTA */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href={ctaLink}
+              className="inline-flex px-8 py-4 rounded-full bg-forest text-cream font-semibold shadow-lg hover:bg-emerald-700 transition-colors"
               aria-label={`Join the ${title} movement`}
             >
               {ctaText}
-            </motion.a>
-          </Link>
-          <Link href="/shop" passHref>
-            <motion.a
-              className="px-8 py-4 border-2 border-[var(--color-on-primary)] text-[var(--color-on-primary)] rounded-full font-semibold hover:bg-[var(--color-on-primary)]/10 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              aria-label="Explore Abraham of London shop"
+            </Link>
+          </motion.div>
+
+          {/* Secondary CTA */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href="/shop"
+              className="inline-flex px-8 py-4 rounded-full border-2 border-white text-white font-semibold hover:bg-white/10 transition-colors"
+              aria-label="Explore the shop"
             >
               Shop Now
-            </motion.a>
-          </Link>
+            </Link>
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>
@@ -136,10 +132,3 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 };
 
 export default HeroSection;
-
-
-
-
-
-
-

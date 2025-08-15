@@ -1,10 +1,16 @@
-// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
 
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
+
+function toNumber(v?: number | string) {
+  if (v == null) return undefined;
+  if (typeof v === "number") return v;
+  const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? n : undefined;
+}
 
 const A: MDXComponentsType["a"] = ({
   href = "",
@@ -13,7 +19,9 @@ const A: MDXComponentsType["a"] = ({
   title,
 }) => {
   const base =
-    "text-forest underline underline-offset-2 hover:text-softGold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-forest";
+    "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " +
+    "dark:text-softGold dark:hover:text-cream dark:focus-visible:ring-softGold";
   const cls = className ? `${base} ${className}` : base;
 
   if (isInternal(href)) {
@@ -23,20 +31,21 @@ const A: MDXComponentsType["a"] = ({
       </Link>
     );
   }
+
   const isHttp = /^https?:\/\//i.test(href);
-  return (
-    <a
-      href={href}
-      className={cls}
-      rel={isHttp ? "noopener noreferrer" : undefined}
-      target={isHttp ? "_blank" : undefined}
-      title={title}
-      aria-label={
-        typeof children === "string"
-          ? `${children}${isHttp ? " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â opens in new tab" : ""}`
-          : undefined
+  const externalProps = isHttp
+    ? {
+        target: "_blank",
+        rel: "noopener noreferrer",
+        "aria-label":
+          typeof children === "string"
+            ? `${children} (opens in new tab)`
+            : "Opens in new tab",
       }
-    >
+    : {};
+
+  return (
+    <a href={href} className={cls} title={title} {...externalProps}>
       {children}
     </a>
   );
@@ -47,8 +56,6 @@ type ImgProps = React.ComponentProps<"img"> & {
   height?: number | string;
 };
 
-// If width/height are provided, render intrinsic to avoid CLS.
-// Otherwise render a responsive slot (fill) at a sensible height.
 const Img: MDXComponentsType["img"] = ({
   src,
   alt = "",
@@ -59,11 +66,16 @@ const Img: MDXComponentsType["img"] = ({
   ...rest
 }: ImgProps) => {
   const safeSrc = src || "/assets/images/default-book.jpg";
-  const hasDim = Number(width) > 0 && Number(height) > 0;
+  const w = toNumber(width);
+  const h = toNumber(height);
+  const hasDim = !!(w && h);
+
+  const [loaded, setLoaded] = React.useState(false);
 
   // Optional skeleton while loading (for fill mode)
   const skeleton =
-    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
+    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 " +
+    "animate-[shimmer_1.8s_linear_infinite]";
 
   return (
     <figure className="my-6">
@@ -71,10 +83,13 @@ const Img: MDXComponentsType["img"] = ({
         <Image
           src={safeSrc}
           alt={alt || (title ? String(title) : "Embedded image")}
-          width={Number(width)}
-          height={Number(height)}
+          width={w}
+          height={h}
           sizes="(max-width: 768px) 100vw, 800px"
           className={className || "rounded-lg shadow-card object-cover"}
+          loading="lazy"
+          decoding="async"
+          onLoadingComplete={() => setLoaded(true)}
           {...rest}
         />
       ) : (
@@ -88,22 +103,28 @@ const Img: MDXComponentsType["img"] = ({
             sizes="100vw"
             priority={false}
             className="object-cover"
+            onLoadingComplete={() => setLoaded(true)}
           />
-          <style jsx>{`
-            @keyframes shimmer {
-              0% {
-                background-position: -200% 0;
-              }
-              100% {
-                background-position: 200% 0;
-              }
-            }
-          `}</style>
-          <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
+          {/* skeleton only while not loaded */}
+          {!loaded && (
+            <>
+              <style jsx>{`
+                @keyframes shimmer {
+                  0% {
+                    background-position: -200% 0;
+                  }
+                  100% {
+                    background-position: 200% 0;
+                  }
+                }
+              `}</style>
+              <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
+            </>
+          )}
         </span>
       )}
       {title && (
-        <figcaption className="mt-2 text-sm text-deepCharcoal/70">
+        <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
           {title}
         </figcaption>
       )}
@@ -117,10 +138,3 @@ export const MDXComponents: MDXComponentsType = {
 };
 
 export default MDXComponents;
-
-
-
-
-
-
-

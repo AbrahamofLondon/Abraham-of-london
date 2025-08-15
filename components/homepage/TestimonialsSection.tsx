@@ -26,44 +26,41 @@ export default function TestimonialsSection() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section className="container px-4 py-16">
-      <motion.h2
-        className="text-3xl md:text-4xl font-bold text-cream text-center mb-8"
-        initial={prefersReducedMotion ? undefined : { opacity: 0, y: 12 }}
-        whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-      >
-        What readers say
-      </motion.h2>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        {items.map((t) => (
-          <motion.blockquote
-            key={`${t.name}-${t.role}`}
-            className="rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-6 text-cream shadow-card"
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
+    <section className="py-16 px-4" aria-label="Testimonials">
+      <div className="container mx-auto max-w-6xl">
+        {/* High-contrast white surface for readability */}
+        <div className="bg-white text-deepCharcoal rounded-3xl shadow-2xl ring-1 ring-black/5 p-8 md:p-12">
+          <motion.h2
+            className="text-3xl md:text-4xl font-serif font-bold text-center mb-10"
+            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 12 }}
             whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
           >
-            <p className="text-base leading-relaxed">
-              &ldquo;{t.quote}&rdquo;
-            </p>
-            <footer className="mt-4 text-sm text-cream/80">
-              <span className="font-semibold text-cream">{t.name}</span>
-              <span className="text-cream/60"> ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {t.role}</span>
-            </footer>
-          </motion.blockquote>
-        ))}
+            What readers say
+          </motion.h2>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {items.map((t, i) => (
+              <motion.blockquote
+                key={`${t.name}-${t.role}-${i}`}
+                className="rounded-2xl bg-white ring-1 ring-black/10 shadow-md p-6"
+                initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
+                whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.45 }}
+              >
+                <p className="text-base leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
+                <footer className="mt-4 text-sm text-deepCharcoal/70">
+                  <span className="font-semibold text-deepCharcoal">{t.name}</span>
+                  <span className="px-2" aria-hidden="true">·</span>
+                  <span>{t.role}</span>
+                </footer>
+              </motion.blockquote>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
-
-
-
-
-
-
-
