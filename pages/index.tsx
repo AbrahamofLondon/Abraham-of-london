@@ -2,6 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import type { GetStaticProps } from "next";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -52,6 +53,7 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const ASSETS = {
+  heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.webp",
@@ -206,7 +208,9 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   useEffect(() => {
     setCommunityCount(120_000);
     const id = setInterval(() => {
-      setCommunityCount((prev) => Math.min(prev + Math.floor(Math.random() * 9) + 1, 150_000));
+      setCommunityCount((prev) =>
+        Math.min(prev + Math.floor(Math.random() * 9) + 1, 150_000)
+      );
     }, 5000);
     return () => clearInterval(id);
   }, []);
@@ -242,7 +246,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         },
         {
           "@type": "SubscribeAction",
-          target: `${baseUrl}/#email-signup`, // updated anchor
+          target: `${baseUrl}/#email-signup`,
           object: { "@type": "Service", name: "Newsletter Subscription" },
         },
       ],
@@ -378,11 +382,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
-
-        {/* JSON-LD */}
-        {structuredData.map((data, i) => (
-          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
-        ))}
       </Head>
 
       {/* Skip link for keyboard users */}
@@ -397,15 +396,37 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
       {/* Page background switched to cream for legibility */}
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO (self-contained) */}
-        <section>
-          <HeroSection
-            title={siteConfig.title}
-            subtitle="Global Strategist, Author, and Visionary Leader"
-            ctaText="Join the Movement"
-            ctaLink="/join"
-            communityCount={communityCount}
-          />
+        {/* HERO (with background image + scrim overlay) */}
+        <section
+          className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
+          aria-labelledby="hero-title"
+        >
+          {/* Background image */}
+          <div className="absolute inset-0 -z-10">
+            <Image
+              src={ASSETS.heroBanner}
+              alt="Abraham of London — Empowering leadership and fatherhood"
+              fill
+              priority
+              fetchPriority="high"
+              quality={90}
+              sizes="100vw"
+              className="object-cover"
+            />
+            {/* Scrim overlay to improve legibility and avoid heavy text-shadows */}
+            <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
+          </div>
+
+          {/* Foreground content */}
+          <div className="relative z-10 text-white">
+            <HeroSection
+              title={siteConfig.title}
+              subtitle="Global Strategist, Author, and Visionary Leader"
+              ctaText="Join the Movement"
+              ctaLink="/join"
+              communityCount={communityCount}
+            />
+          </div>
         </section>
 
         {/* Main content landmark */}
