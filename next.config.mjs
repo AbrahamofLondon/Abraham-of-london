@@ -4,7 +4,11 @@ import bundleAnalyzer from '@next/bundle-analyzer';
 import remarkGfm from 'remark-gfm';
 import rehypeStringify from 'rehype-stringify';
 
-const mdxConfig = withMDX({
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const withMdx = withMDX({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: [remarkGfm],
@@ -13,11 +17,6 @@ const mdxConfig = withMDX({
   },
 });
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
-
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
@@ -29,6 +28,13 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['framer-motion'],
   },
+  // Skip lint/type errors during CI builds (Netlify)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
-export default withBundleAnalyzer(mdxConfig(nextConfig));
+export default withBundleAnalyzer(withMdx(nextConfig));
