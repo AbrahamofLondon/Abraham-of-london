@@ -32,7 +32,7 @@ const brands: Brand[] = [
     name: "Alomarada",
     description:
       "Redefining development through ethical market exploration and human capital growth.",
-    logo: "/assets/images/logo/alomarada.svg",
+    logo: "/assets/images/alomarada-ltd.webp",
     url: "https://alomarada.com",
     metric: "10K+ Jobs Created",
   },
@@ -40,7 +40,7 @@ const brands: Brand[] = [
     name: "Endureluxe",
     description:
       "High-performance luxury fitness equipment and interactive community.",
-    logo: "/assets/images/logo/endureluxe.svg",
+    logo: "/assets/images/endureluxe-ltd.webp",
     url: "https://endureluxe.com",
     metric: "5M+ Users",
   },
