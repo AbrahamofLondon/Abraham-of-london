@@ -1,4 +1,3 @@
-// pages/brands.tsx
 import React, { useMemo, useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -95,7 +94,7 @@ export default function BrandsPage() {
       url: SITE_URL,
       logo: abs("/assets/images/logo/abraham-of-london-logo.svg"),
       description:
-        "A portfolio of ventures and a foundation for thought leadership, strategic advisory, and creative projects by Abraham.",
+        "The core brand representing my personal work, vision, and philosophy. It serves as the foundation for my thought leadership, strategic advisory, and creative ventures.",
       sameAs,
       brand: brands.map((b) => ({
         "@type": "Brand",
@@ -155,7 +154,7 @@ export default function BrandsPage() {
         />
         <meta
           property="og:description"
-          content="Discover a portfolio of brands shaped by Abraham's vision of legacy and leadership."
+          content="Discover a portfolio of brands shaped by Abraham&apos;s vision of legacy and leadership."
         />
         <meta property="og:url" content={`${SITE_URL}/brands`} />
         <meta
@@ -252,7 +251,7 @@ export default function BrandsPage() {
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               At the heart of every venture is a commitment to{" "}
               <strong>legacy, innovation, and impact</strong>. We build brands
-              that don't just exist, but that resonate and drive meaningful
+              that don&apos;t just exist, but that resonate and drive meaningful
               change.
             </p>
           </motion.section>
@@ -326,8 +325,8 @@ export default function BrandsPage() {
               Ready to build a legacy?
             </h2>
             <p className="text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
-              If you're an entrepreneur or leader looking to create a brand
-              with lasting impact, let's connect.
+              If you&apos;re an entrepreneur or leader looking to create a brand
+              with lasting impact, let&apos;s connect.
             </p>
             <Link
               href="/contact"
