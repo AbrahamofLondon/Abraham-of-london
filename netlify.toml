@@ -16,15 +16,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    # Disable full static export, rely on ISR
-    export = false
-    # Enable remote image optimization if using external images
-    [plugins.inputs.images]
-      remoteImages = { enabled = true }
-    # Optional: Adjust ISR settings
-    [plugins.inputs.server]
-      cacheOnDemandPages = true
+  # Removed invalid inputs: export, images, server
 
 # (Optional) Basic caching + security headers
 [[headers]]

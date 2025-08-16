@@ -24,7 +24,7 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     domains: ["abraham-of-london.netlify.app"],
-    // Removed unoptimized: true since ISR handles images
+    // Removed unoptimized: true
   },
   experimental: {
     optimizePackageImports: ["framer-motion"],
