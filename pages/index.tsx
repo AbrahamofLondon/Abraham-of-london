@@ -173,9 +173,11 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
     return { props: { posts, books, achievements: sanitizedAchievements }, revalidate: 3600 };
   } catch (error) {
+    // Type guard to safely handle the 'unknown' error type
+    const errorObj = error instanceof Error ? error : new Error("Unknown error occurred");
     console.error("getStaticProps error:", {
-      message: error.message,
-      stack: error.stack,
+      message: errorObj.message,
+      stack: errorObj.stack,
       timestamp: new Date().toISOString(),
     });
     return { props: { posts: [], books: [], achievements: [] }, revalidate: 300 };
