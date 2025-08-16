@@ -1,5 +1,5 @@
 {
-  "name": "codex-setup",
+  "name": "abraham-of-london",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "prebuild": "node scripts/sanitize-source.js || true",
-    "fix:whitespace": "node scripts/sanitize-source.js || true"
+    "prebuild": "node scripts/sanitize-source.js",
+    "fix:whitespace": "node scripts/sanitize-source.js"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
