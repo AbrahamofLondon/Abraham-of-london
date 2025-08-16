@@ -7,33 +7,6 @@
   NEXT_TELEMETRY_DISABLED = "1"
   # Set this in the Netlify UI to your production URL (with https)
   NEXT_PUBLIC_SITE_URL = "https://abraham-of-london.netlify.app" # Replace with your actual domain
-  # Optional: Enable debug logging
-  NODE_OPTIONS = "--inspect"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = []
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-  # Removed invalid inputs: export, images, server
-
-# (Optional) Basic caching + security headers
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"[build]
-  command = "npm run build"
-  publish = ".next"
-
-[build.environment]
-  NODE_VERSION = "18"
-  NEXT_TELEMETRY_DISABLED = "1"
-  # Set this in the Netlify UI to your production URL (with https)
-  NEXT_PUBLIC_SITE_URL = "https://abraham-of-london.netlify.app" # Replace with your actual domain
-  # Removed NODE_OPTIONS = "--inspect" due to port conflict
 
 [functions]
   node_bundler = "esbuild"
