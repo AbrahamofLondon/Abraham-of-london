@@ -2,7 +2,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import type { GetStaticProps } from "next";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -12,14 +11,12 @@ import { getAllPosts, PostMeta } from "@/lib/posts";
 import { getAllBooks, BookMeta } from "@/lib/books";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
-import { generatedCover } from "@/lib/og";
 
 // Sections
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: true });
 const AboutSection = dynamic(() => import("@/components/homepage/AboutSection"), { ssr: true });
 const VenturesSection = dynamic(() => import("@/components/homepage/VenturesSection"), { ssr: true });
 const ContentShowcase = dynamic(() => import("@/components/homepage/ContentShowcase"), { ssr: true });
-
 const TestimonialsSection = dynamic(() => import("@/components/homepage/TestimonialsSection"), { ssr: false });
 const MilestonesTimeline = dynamic(() => import("@/components/homepage/MilestonesTimeline"), { ssr: false });
 const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
@@ -32,22 +29,42 @@ const SITE_URL = (
   "https://abraham-of-london.netlify.app"
 ).replace(/\/$/, "");
 
+// These paths match your screenshots in /public/assets/images
 const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
+  // social previews
   ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.webp",
+  twitterImage: "/assets/images/social/twitter-image.jpg",
+  // defaults
+  defaultBookCover: "/assets/images/default-book.jpg",
+  // if you don't have a dedicated default blog cover,
+  // use writing-desk.webp (present in your folder) as a tasteful fallback:
   defaultBlogCover: "/assets/images/writing-desk.webp",
-  logo: "/assets/images/icon1.png",
+  // branding
+  logo: "/assets/images/abraham-logo.jpg",
+  // app icons that live at /public (not under /assets)
+  icons: {
+    favicon: "/favicon.ico",
+    app192: "/web-app-manifest-192x192.png",
+    app512: "/web-app-manifest-512x512.png",
+  },
+  // social svg icons (optional)
+  socialSvgs: {
+    instagram: "/assets/images/social/instagram.svg",
+    twitter: "/assets/images/social/twitter.svg",
+    linkedin: "/assets/images/social/linkedin.svg",
+    whatsapp: "/assets/images/social/whatsapp.svg",
+    email: "/assets/images/social/email.svg",
+    phone: "/assets/images/social/phone.svg",
+  },
 } as const;
 
 // ---------- Types ----------
 export type Post = Required<
-  Pick<
-    PostMeta,
-    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
-  >
+  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
 >;
+
 export type Book = Required<
   Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink">
 > & {
@@ -55,11 +72,24 @@ export type Book = Required<
   downloadPdf?: string | null;
   downloadEpub?: string | null;
 };
-interface Achievement { title: string; description: string; year: number; }
-interface HomeProps { posts: Post[]; books: Book[]; achievements: Achievement[]; }
 
-// ---------- Surface wrapper ----------
-const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
+interface Achievement {
+  title: string;
+  description: string;
+  year: number;
+}
+
+interface HomeProps {
+  posts: Post[];
+  books: Book[];
+  achievements: Achievement[];
+}
+
+// ---------- Shared surface ----------
+const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
+  className = "",
+  children,
+}) => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -82,7 +112,15 @@ const ScrollProgress: React.FC = () => {
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
-      "slug", "title", "date", "publishedAt", "excerpt", "coverImage", "author", "readTime", "category",
+      "slug",
+      "title",
+      "date",
+      "publishedAt",
+      "excerpt",
+      "coverImage",
+      "author",
+      "readTime",
+      "category",
     ]);
 
     const sortedPosts = [...postsData].sort((a, b) => {
@@ -102,15 +140,22 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof p.coverImage === "string" && p.coverImage.trim()
             ? p.coverImage
-            : generatedCover(p.slug || `post-${i}`),
+            : ASSETS.defaultBlogCover,
         author: p.author || siteConfig.author,
         readTime: p.readTime || "5 min read",
         category: p.category || "Insights",
       }));
 
     const booksData = getAllBooks([
-      "slug", "title", "author", "excerpt", "coverImage", "buyLink",
-      "genre", "downloadPdf", "downloadEpub",
+      "slug",
+      "title",
+      "author",
+      "excerpt",
+      "coverImage",
+      "buyLink",
+      "genre",
+      "downloadPdf",
+      "downloadEpub",
     ]);
 
     const books: Book[] = booksData
@@ -124,7 +169,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof b.coverImage === "string" && b.coverImage.trim()
             ? b.coverImage
-            : "/assets/images/default-book.jpg",
+            : ASSETS.defaultBookCover,
         buyLink: b.buyLink || "#",
         genre: Array.isArray(b.genre)
           ? (b.genre as string[]).filter(Boolean).join(", ")
@@ -135,9 +180,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
     const achievements: Achievement[] = [
       { title: "Self-advocate & Thought Leader", description: "Legal matters & civic engagement", year: 2010 },
-      { title: "Featured", description: "Lonely Heroes initiative", year: 2025 },
-      { title: "Best-Selling Author", description: "Wide international readership", year: 2025 },
-      { title: "Global Leadership Award", description: "Recognized for innovative leadership", year: 2025 },
+      { title: "Featured", description: "Lonely Heroes", year: 2025 },
+      { title: "Best-Selling Author", description: "Wide international readership", year: 2026 },
+      { title: "Global Leadership Award", description: "Recognized for innovative leadership", year: 2027 },
     ];
 
     return { props: { posts, books, achievements }, revalidate: 3600 };
@@ -160,12 +205,17 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   }, []);
 
   const sameAsLinks = useMemo(
-    () => siteConfig.socialLinks.filter((l) => l.external && /^https?:\/\//i.test(l.href)).map((l) => l.href),
-    []
+    () =>
+      siteConfig.socialLinks
+        .filter((l) => l.external && /^https?:\/\//i.test(l.href))
+        .map((l) => l.href),
+    [],
   );
 
   const structuredData = useMemo(() => {
     const baseUrl = SITE_URL;
+    const currentYear = new Date().getFullYear();
+
     const website = {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -174,11 +224,20 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       description: siteConfig.description,
       url: baseUrl,
       inLanguage: "en-GB",
+      copyrightYear: currentYear,
       author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
       publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
       potentialAction: [
-        { "@type": "SearchAction", target: `${baseUrl}/search?q={search_term_string}`, "query-input": "required name=search_term_string" },
-        { "@type": "SubscribeAction", target: `${baseUrl}/#email-signup`, object: { "@type": "Service", name: "Newsletter Subscription" } },
+        {
+          "@type": "SearchAction",
+          target: `${baseUrl}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+        {
+          "@type": "SubscribeAction",
+          target: `${baseUrl}/#email-signup`,
+          object: { "@type": "Service", name: "Newsletter Subscription" },
+        },
       ],
     };
 
@@ -189,7 +248,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       name: siteConfig.title,
       url: baseUrl,
       logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo), width: 512, height: 512 },
-      image: { "@type": "ImageObject", url: ASSETS.profilePortrait, width: 400, height: 400 },
+      image: { "@type": "ImageObject", url: absUrl(ASSETS.profilePortrait), width: 400, height: 400 },
       sameAs: sameAsLinks,
       address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
     };
@@ -199,7 +258,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       "@type": "Person",
       name: siteConfig.author,
       url: baseUrl,
-      image: ASSETS.profilePortrait,
+      image: absUrl(ASSETS.profilePortrait),
       jobTitle: "Author & Strategist",
       sameAs: sameAsLinks,
       worksFor: { "@type": "Organization", name: siteConfig.title },
@@ -242,9 +301,22 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: [
-        { "@type": "Question", name: "Who is Abraham of London?", acceptedAnswer: { "@type": "Answer", text: `${siteConfig.author} is an author, strategist, and fatherhood advocate focused on family, leadership, and legacy.` } },
-        { "@type": "Question", name: "What books has Abraham written?", acceptedAnswer: { "@type": "Answer", text: "Books on fatherhood, leadership, and personal development to help men build durable legacies." } },
-        { "@type": "Question", name: "How can I join the community?", acceptedAnswer: { "@type": "Answer", text: "Subscribe to the newsletter or contact us to become part of the global movement." } },
+        {
+          "@type": "Question",
+          name: "Who is Abraham of London?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${siteConfig.author} is an author, strategist, and fatherhood advocate focused on family, leadership, and legacy.`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: "What books has Abraham written?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `Books on fatherhood, leadership, and personal development to help men build durable legacies.`,
+          },
+        },
       ],
     };
 
@@ -258,10 +330,14 @@ export default function Home({ posts, books, achievements }: HomeProps) {
     <Layout>
       <Head>
         <title>{siteConfig.title} — Empowering Leaders in Fatherhood & Strategy</title>
-        <meta name="description" content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`} />
+        <meta
+          name="description"
+          content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`}
+        />
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
 
+        {/* Social */}
         <meta property="og:title" content={siteConfig.title} />
         <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
@@ -276,54 +352,39 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
 
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        {/* JSON-LD */}
+        {structuredData.map((data, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+        ))}
       </Head>
 
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card">
+      {/* Skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card"
+      >
         Skip to content
       </a>
 
       <ScrollProgress />
 
+      {/* Page background */}
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO with background + overlay */}
-        <section className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden" aria-labelledby="hero-title">
-          {/* NOTE: z-0 (not -z-10). This keeps the image above the section background. */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={ASSETS.heroBanner}
-              alt="Abraham of London — Empowering leadership and fatherhood"
-              fill
-              priority
-              fetchPriority="high"
-              quality={95}
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-            <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="relative z-10 text-white"
-          >
-            <HeroSection
-              title={siteConfig.title}
-              subtitle="Global Strategist, Author, and Visionary Leader"
-              ctaText="Join the Movement"
-              ctaLink="/join"
-              communityCount={communityCount}
-            />
-          </motion.div>
-        </section>
+        {/* HERO */}
+        <HeroSection
+          title={siteConfig.title}
+          subtitle="Global Strategist, Author, and Visionary Leader"
+          ctaText="Join the Movement"
+          ctaLink="/join"
+          communityCount={communityCount}
+          bannerSrc={ASSETS.heroBanner}
+        />
 
         {/* Main content */}
         <main id="main-content" className="relative space-y-12 sm:space-y-16 pb-12">
           <SectionSurface>
             <AboutSection
-              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I am hoping to empower millions to build legacies of impact."
               achievements={achievements}
               portraitSrc={ASSETS.profilePortrait}
             />
@@ -372,17 +433,20 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </SectionSurface>
 
           <section id="email-signup" aria-labelledby="email-signup-title" className="scroll-mt-24">
-            <h2 id="email-signup-title" className="sr-only">Email signup</h2>
+            <h2 id="email-signup-title" className="sr-only">
+              Email signup
+            </h2>
             <SectionSurface className="bg-white/95">
               <EmailSignup />
             </SectionSurface>
           </section>
         </main>
 
+        {/* Footer CTA */}
         <section className="py-12 text-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full transition hover:bg-forest/90 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2"
+            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-forest/90 transition"
             aria-label="Contact Abraham of London"
           >
             {"Let's Build Something Enduring"}
