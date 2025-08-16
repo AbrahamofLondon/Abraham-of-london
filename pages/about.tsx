@@ -56,7 +56,7 @@ export default function AboutPage() {
       sameAs,
       jobTitle: "Founder & Strategic Advisor",
       description:
-        "Founder and strategic advisor from London focused on innovation, community, and legacy.",
+        "Founder and strategic advisor from London focused on leadership, innovation, and legacy.",
     };
 
     const breadcrumb = {
@@ -64,12 +64,7 @@ export default function AboutPage() {
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "About",
-          item: `${SITE_URL}/about`,
-        },
+        { "@type": "ListItem", position: 2, name: "About", item: `${SITE_URL}/about` },
       ],
     };
 
@@ -82,15 +77,18 @@ export default function AboutPage() {
         <title>About | {siteConfig.title}</title>
         <meta
           name="description"
-          content="Learn about Abraham of London — a founder and strategic advisor focused on innovation, community, and legacy."
+          content="About Abraham of London — a founder and strategic advisor from London helping leaders build enduring brands, teams, and legacies."
         />
         <meta name="author" content={siteConfig.author} />
         <meta property="og:title" content={`About | ${siteConfig.title}`} />
         <meta
           property="og:description"
-          content="Abraham is a founder and strategic advisor from London."
+          content="Abraham of London is a founder and strategic advisor from London focused on leadership, innovation, and legacy."
         />
-        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
+        <meta
+          property="og:image"
+          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
+        />
         <meta property="og:url" content={`${SITE_URL}/about`} />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href={`${SITE_URL}/about`} />
@@ -105,6 +103,7 @@ export default function AboutPage() {
 
       <ScrollProgress />
 
+      {/* Hero */}
       <motion.div
         className="bg-gradient-to-b from-forest to-midGreen/20 py-20 px-4 text-center"
         initial="hidden"
@@ -122,15 +121,16 @@ export default function AboutPage() {
             className="text-lg md:text-xl text-cream/90 max-w-2xl mx-auto"
             variants={itemVariants}
           >
-            I’m a founder and strategic advisor from London with a passion for
-            building, empowering, and leaving a lasting legacy.
+            I’m a founder and strategic advisor from London. I help leaders build
+            enduring brands, resilient teams, and legacies that last.
           </motion.p>
         </div>
       </motion.div>
 
-      <div className="max-w-4xl mx-auto py-20 px-4">
+      {/* Intro section */}
+      <div className="max-w-5xl mx-auto py-20 px-4">
         <motion.section
-          className="bg-white p-8 md:p-12 rounded-2xl flex flex-col md:flex-row items-center mb-16 shadow-xl"
+          className="bg-white p-8 md:p-12 rounded-2xl flex flex-col md:flex-row items-center mb-16 shadow-xl ring-1 ring-black/5"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -139,7 +139,7 @@ export default function AboutPage() {
           <div className="relative w-full md:w-1/2 h-64 md:h-96 rounded-xl overflow-hidden mb-8 md:mb-0 md:mr-12">
             <Image
               src="/assets/images/profile-portrait.webp"
-              alt="Portrait of Abraham Adaramola"
+              alt="Portrait of Abraham of London wearing a suit"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px"
@@ -149,43 +149,34 @@ export default function AboutPage() {
 
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold mb-4 text-gray-900">
-              Storyteller, Strategist, Student of Life
+              Strategist, Writer, Builder
             </h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              My journey has been shaped by a relentless pursuit of truth,
-              legacy, and personal mastery. Through every venture, book, or
-              conversation, I aim to craft not just businesses but enduring
-              narratives that challenge, inspire, and provoke thoughtful action.
+              My work sits at the intersection of leadership, brand strategy, and
+              human development. Whether advising founders, writing, or building
+              ventures, I focus on clarity, durability, and meaningful impact.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              My work sits at the intersection of philosophy, creative
-              expression, and human development. Whether through writing, brand
-              building, or advisory, every project becomes a canvas to explore
-              what it means to live meaningfully, lead courageously, and leave a
-              legacy of substance.
-            </p>
-            <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I’m less interested in transient trends and more invested in
-              timeless truths. Family, faith, character, and creativity are the
-              compass points that guide my efforts. Every blog post, strategy
-              session, or artistic project is a translation of those convictions
-              into tangible impact.
+              I care less about trends and more about timeless principles—family,
+              character, stewardship, and creativity. Those values guide every
+              plan, partnership, and page I publish.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              This isn’t just a brand — it’s an unfolding life project. From
-              thought leadership to immersive storytelling, from business
-              ventures to deeply personal writings like{" "}
+              This isn’t just a brand—it’s an ongoing body of work. From thought
+              leadership to personal writing like{" "}
               <Link
                 href="/books/fathering-without-fear"
                 className="text-forest underline decoration-forest/40 hover:decoration-forest"
               >
                 Fathering Without Fear
               </Link>
-              , it’s all connected — because I am the connection.
+              , each project serves the same aim: to help people build lives and
+              legacies that matter.
             </p>
           </div>
         </motion.section>
 
+        {/* Focus areas */}
         <motion.section
           className="text-center"
           initial={{ opacity: 0, y: 40 }}
@@ -194,34 +185,29 @@ export default function AboutPage() {
           transition={{ delay: 0.1, duration: 0.5 }}
         >
           <h2 className="text-3xl font-bold mb-4 text-gray-900">
-            A Journey of Growth and Purpose
+            Focus Areas
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-            Explore some of the key areas of my work and experience, including
-            public speaking and writing.
+            A selection of the domains where I spend most of my time and energy.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-md">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            <div className="bg-white p-6 rounded-xl shadow-md ring-1 ring-black/5">
               <h3 className="text-xl font-bold mb-2">Corporate Strategy</h3>
               <p className="text-gray-700">
-                Growth, partnerships, and transformation across public and
-                private sectors.
+                Growth, partnerships, and transformation across public and private sectors.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="bg-white p-6 rounded-xl shadow-md ring-1 ring-black/5">
               <h3 className="text-xl font-bold mb-2">Writing & Speaking</h3>
               <p className="text-gray-700">
-                Insights on leadership, business, and legacy through articles
-                and public engagements.
+                Insights on leadership, business, and legacy through essays and talks.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h3 className="text-xl font-bold mb-2">
-                Infrastructure & Digital
-              </h3>
+            <div className="bg-white p-6 rounded-xl shadow-md ring-1 ring-black/5">
+              <h3 className="text-xl font-bold mb-2">Infrastructure & Digital</h3>
               <p className="text-gray-700">
-                Specialising in cloud and digital strategies for resilient,
-                sustainable infrastructure.
+                Cloud and digital strategies for resilient, sustainable infrastructure.
               </p>
             </div>
           </div>
@@ -229,7 +215,8 @@ export default function AboutPage() {
           <div className="mt-12">
             <Link
               href="/contact"
-              className="inline-block bg-forest text-cream font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-forest/90"
+              aria-label="Contact Abraham of London"
+              className="inline-block bg-forest text-cream font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2"
             >
               Let’s Connect
             </Link>

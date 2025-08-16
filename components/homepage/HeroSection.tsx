@@ -22,7 +22,11 @@ export default function HeroSection({
   backgroundSrc = "/assets/images/abraham-of-london-banner.webp",
 }: Props) {
   return (
-    <section className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden" aria-labelledby="hero-title">
+    <section
+      className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
+      aria-labelledby="hero-title"
+    >
+      {/* Background image + scrim */}
       <div className="absolute inset-0 z-0">
         <Image
           src={backgroundSrc}
@@ -37,6 +41,7 @@ export default function HeroSection({
         <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
       </div>
 
+      {/* Foreground content */}
       <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -44,12 +49,23 @@ export default function HeroSection({
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-3xl text-white"
         >
-          <h1 id="hero-title" className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+          <h1
+            id="hero-title"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
+          >
             {title}
           </h1>
 
+          {/* Grammar + rhythm fix */}
           <p className="mt-4 text-lg sm:text-xl text-white/90">
-            {subtitle} Join <strong className="font-semibold">{communityCount.toLocaleString()}</strong> global leaders.
+            {subtitle}{" "}
+            <span aria-hidden>—</span>
+            <span className="sr-only">— </span>
+            join{" "}
+            <strong className="font-semibold">
+              {communityCount.toLocaleString()}
+            </strong>{" "}
+            global leaders.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">

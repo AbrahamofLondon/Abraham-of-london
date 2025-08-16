@@ -26,12 +26,7 @@ const MilestonesTimeline = dynamic(() => import("@/components/homepage/Milestone
 const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
 
 // Constants and Types
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.URL ||
-  process.env.DEPLOY_PRIME_URL ||
-  "https://abraham-of-london.netlify.app"
-).replace(/\/$/, "");
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://abraham-of-london.netlify.app"; // Use env variable
 
 const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
@@ -260,7 +255,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             {typeof window !== "undefined" && (
               <HeroSection
                 title={siteConfig.title}
-                subtitle="Global Strategist, Author, and Visionary Leader (Empowering a Movement)" // Updated with connector
+                subtitle="Global Strategist, Author, and Visionary Leader (Empowering a Movement)" // Restored full subtitle
                 ctaText="Join the Movement"
                 ctaLink="/join"
                 communityCount={communityCount}
