@@ -1,10 +1,13 @@
 // lib/og.ts
-// Minimal, safe fallback that never 404s.
-// If you later generate per-post covers, implement lookup here.
-export const DEFAULT_BLOG_COVER = "/assets/images/blog/default-blog-cover.jpg";
 
-export function generatedCover(slug?: string) {
-  // Keep it deterministic in case you add real generated covers later.
-  // For now always return the guaranteed default asset.
-  return DEFAULT_BLOG_COVER;
+// Point to the API route that will generate the image.
+// This is a much more powerful and flexible approach.
+export function generatedCover(slug?: string, title?: string) {
+  if (title && slug) {
+    // Return an absolute URL to the API route that generates the image.
+    // The query parameters can be used to customize the image.
+    return `/api/og?title=${encodeURIComponent(title)}&slug=${encodeURIComponent(slug)}`;
+  }
+  // Fallback to the default image if title or slug is missing.
+  return "/assets/images/blog/default-blog-cover.jpg";
 }

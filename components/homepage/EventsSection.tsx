@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import clsx from "clsx";
 
 type EventItem = {
   date: string; // ISO or readable
@@ -9,6 +10,7 @@ type EventItem = {
   href?: string;
 };
 
+// Hardcoded events for demonstration. In a real app, this would be fetched.
 const events: EventItem[] = [
   {
     date: "2026-09-12",
@@ -25,6 +27,25 @@ const events: EventItem[] = [
 ];
 
 export default function EventsSection() {
+  const hasEvents = events.length > 0;
+
+  if (!hasEvents) {
+    return (
+      <section className="container px-4 py-16">
+        <motion.h2
+          className="text-3xl md:text-4xl font-bold text-cream text-center mb-8"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          Upcoming Events
+        </motion.h2>
+        <p className="text-center text-cream/70">No upcoming events scheduled at this time. Please check back later!</p>
+      </section>
+    );
+  }
+
   return (
     <section className="container px-4 py-16">
       <motion.h2
@@ -34,7 +55,7 @@ export default function EventsSection() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        Upcoming events
+        Upcoming Events
       </motion.h2>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -70,10 +91,3 @@ export default function EventsSection() {
     </section>
   );
 }
-
-
-
-
-
-
-

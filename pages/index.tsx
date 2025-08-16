@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// pages/index.tsx
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,8 +14,7 @@ import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 import { generatedCover } from "@/lib/og";
 import { achievements } from "@/data/achievements";
-import SocialFollowStrip from "@/components/SocialFollowStrip";
-import Footer from "@/components/Footer"; // New import
+// NOTE: SocialFollowStrip is no longer imported here as it's in the Layout.
 
 // Dynamic imports with SSR control
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
@@ -26,23 +26,24 @@ const MilestonesTimeline = dynamic(() => import("@/components/homepage/Milestone
 const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
 
 // Constants and Types
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://abraham-of-london.netlify.app"; // Use env variable
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://abraham-of-london.netlify.app"
+).replace(/\/$/, "");
 
 const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
   ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.webp",
+  // Use JPG for maximum social-scraper compatibility
+  twitterImage: "/assets/images/social/twitter-image.jpg",
   defaultBookCover: "/assets/images/default-book.jpg",
   defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
   logo: "/assets/images/logo/abraham-of-london-logo.svg",
 } as const;
 
 export type Post = Required<
-  Pick<
-    PostMeta,
-    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
-  >
+  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
 >;
 
 export type Book = Required<
@@ -65,12 +66,7 @@ interface HomeProps {
   achievements: Achievement[];
 }
 
-/**
- * Reusable section wrapper with animation and high contrast styling.
- * @param {Object} props - Component props
- * @param {string} [props.className] - Optional additional CSS classes
- * @param {React.ReactNode} props.children - Section content
- */
+/** Reusable surface */
 const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
   className = "",
   children,
@@ -86,10 +82,7 @@ const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> 
   </motion.section>
 );
 
-/**
- * Fetches static props for the homepage including posts, books, and achievements.
- * @returns {Promise<{ props: HomeProps, revalidate: number }>} Static props and revalidation time
- */
+/** Data */
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
@@ -114,9 +107,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       .filter((p) => p && p.slug)
       .slice(0, 3)
       .map((p, i) => {
-        const coverImage = typeof p.coverImage === "string" && p.coverImage.trim()
-          ? absUrl(p.coverImage)
-          : generatedCover(p.slug || `post-${i}`);
+        const coverImage =
+          typeof p.coverImage === "string" && p.coverImage.trim()
+            ? absUrl(p.coverImage)
+            : generatedCover(p.slug || `post-${i}`);
         return {
           slug: p.slug || `post-${i}`,
           title: p.title || "Untitled Post",
@@ -145,9 +139,10 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       .filter((b) => b && b.slug)
       .slice(0, 4)
       .map((b, i) => {
-        const coverImage = typeof b.coverImage === "string" && b.coverImage.trim()
-          ? absUrl(b.coverImage)
-          : absUrl(ASSETS.defaultBookCover);
+        const coverImage =
+          typeof b.coverImage === "string" && b.coverImage.trim()
+            ? absUrl(b.coverImage)
+            : absUrl(ASSETS.defaultBookCover);
         return {
           slug: b.slug || `book-${i}`,
           title: b.title || "Untitled Book",
@@ -163,15 +158,16 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         };
       });
 
-    // Validate and sanitize achievements
     const sanitizedAchievements = Array.isArray(achievements)
-      ? achievements.filter((a): a is Achievement => a && typeof a.title === "string" && typeof a.description === "string" && typeof a.year === "number")
+      ? achievements.filter(
+          (a): a is Achievement =>
+            a && typeof a.title === "string" && typeof a.description === "string" && typeof a.year === "number",
+        )
       : [];
 
     return { props: { posts, books, achievements: sanitizedAchievements }, revalidate: 3600 };
-  } catch (error) {
-    // Type guard to safely handle the 'unknown' error type
-    const errorObj = error instanceof Error ? error : new Error("Unknown error occurred");
+  } catch (err) {
+    const errorObj = err instanceof Error ? err : new Error("Unknown error");
     console.error("getStaticProps error:", {
       message: errorObj.message,
       stack: errorObj.stack,
@@ -186,20 +182,19 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
   const structuredData = [
     { "@context": "https://schema.org", "@type": "WebSite", name: siteConfig.title, url: SITE_URL },
-    // Simplified for export; expand with helpers if needed
   ];
 
   const hasPosts = posts.length > 0;
   const hasBooks = books.length > 0;
 
-  // Server-side fallback for HeroSection during export
+  // Server-side fallback for HeroSection during static export
   const HeroFallback = () => (
     <section
       className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden bg-gray-200"
       aria-labelledby="hero-title"
     >
       <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <span className="text-2xl text-gray-600">Loading Hero Content...</span>
+        <span className="text-2xl text-gray-600">Loading hero…</span>
       </div>
     </section>
   );
@@ -214,6 +209,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         />
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
+        {/* Social */}
         <meta property="og:title" content={siteConfig.title} />
         <meta
           property="og:description"
@@ -233,21 +229,13 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </Head>
 
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-cream focus:text-forest focus:px-4 focus:py-2 focus:rounded-md focus:shadow-card"
-      >
-        Skip to content
-      </a>
+      {/* Layout already provides the Skip link and Footer, so we don't need them here. */}
 
       <div className="relative min-h-screen bg-cream text-deepCharcoal flex flex-col">
-        {/* Use fallback during export, switch to HeroSection on client */}
+        {/* Fallback on server; real hero on client */}
         {process.env.NODE_ENV === "production" && typeof window === "undefined" ? (
           <HeroFallback />
         ) : (
@@ -255,7 +243,8 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             {typeof window !== "undefined" && (
               <HeroSection
                 title={siteConfig.title}
-                subtitle="Global Strategist, Author, and Visionary Leader (Empowering a Movement)" // Restored full subtitle
+                // Clean, grammatical subtitle (the component appends “Join X global leaders.”)
+                subtitle="Global strategist, author, and visionary leader."
                 ctaText="Join the Movement"
                 ctaLink="/join"
                 communityCount={communityCount}
@@ -267,9 +256,9 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <main id="main-content" className="relative space-y-16 pb-16 flex-1">
           <SectionSurface>
             <AboutSection
-              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I work to empower millions to build legacies of impact."
+              bio="I’m Abraham of London, a strategist and author dedicated to redefining leadership and fatherhood. With experience across industries, I work to empower millions to build legacies of impact."
+              portraitSrc={ASSETS.profilePortrait}
               achievements={achievements}
-              portraitSrc={ASSETS.profilePortrait || "/assets/images/default-portrait.webp"}
             />
           </SectionSurface>
 
@@ -334,9 +323,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             {"Let's Build Something Enduring"}
           </Link>
         </section>
-
-        <SocialFollowStrip />
-        <Footer /> {/* Added Footer with external links */}
+        {/* NOTE: SocialFollowStrip and Footer are now rendered exclusively in Layout */}
       </div>
     </Layout>
   );
