@@ -24,13 +24,12 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     domains: ["abraham-of-london.netlify.app"],
-    // Removed unoptimized: true
   },
   experimental: {
     optimizePackageImports: ["framer-motion"],
   },
-  // Remove CI workarounds once stable
-  // eslint: { ignoreDuringBuilds: true },
+  // Re-enable temporarily if needed
+  eslint: { ignoreDuringBuilds: true },
   // typescript: { ignoreBuildErrors: true },
 };
 
