@@ -6,7 +6,9 @@
   NODE_VERSION = "18"
   NEXT_TELEMETRY_DISABLED = "1"
   # Set this in the Netlify UI to your production URL (with https)
-  # NEXT_PUBLIC_SITE_URL = "https://your-domain.com"
+  NEXT_PUBLIC_SITE_URL = "https://abraham-of-london.netlify.app" # Replace with your actual domain
+  # Optional: Enable debug logging
+  NODE_OPTIONS = "--inspect"
 
 [functions]
   node_bundler = "esbuild"
@@ -14,6 +16,15 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    # Disable full static export, rely on ISR
+    export = false
+    # Enable remote image optimization if using external images
+    [plugins.inputs.images]
+      remoteImages = { enabled = true }
+    # Optional: Adjust ISR settings
+    [plugins.inputs.server]
+      cacheOnDemandPages = true
 
 # (Optional) Basic caching + security headers
 [[headers]]

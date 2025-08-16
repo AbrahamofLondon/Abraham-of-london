@@ -24,13 +24,14 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     domains: ["abraham-of-london.netlify.app"],
+    // Removed unoptimized: true since ISR handles images
   },
   experimental: {
     optimizePackageImports: ["framer-motion"],
   },
-  // keep CI happy while we finish content clean-up
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  // Remove CI workarounds once stable
+  // eslint: { ignoreDuringBuilds: true },
+  // typescript: { ignoreBuildErrors: true },
 };
 
 export default withBundleAnalyzer(withMdx(nextConfig));

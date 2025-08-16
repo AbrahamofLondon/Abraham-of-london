@@ -12,10 +12,10 @@ import { getAllBooks, BookMeta } from "@/lib/books";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 import { generatedCover } from "@/lib/og";
-import achievementsData from "@/data/achievements";
+import { achievements } from "@/data/achievements";
 
-// Dynamic imports
-const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: true });
+// Dynamic imports with SSR control
+const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
 const AboutSection = dynamic(() => import("@/components/homepage/AboutSection"), { ssr: true });
 const VenturesSection = dynamic(() => import("@/components/homepage/VenturesSection"), { ssr: true });
 const ContentShowcase = dynamic(() => import("@/components/homepage/ContentShowcase"), { ssr: true });
@@ -23,7 +23,7 @@ const TestimonialsSection = dynamic(() => import("@/components/homepage/Testimon
 const MilestonesTimeline = dynamic(() => import("@/components/homepage/MilestonesTimeline"), { ssr: false });
 const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
 
-// Constants
+// Constants and Types
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
@@ -41,7 +41,6 @@ const ASSETS = {
   logo: "/assets/images/logo/abraham-of-london-logo.svg",
 } as const;
 
-// Types
 export type Post = Required<
   Pick<
     PostMeta,
@@ -57,11 +56,11 @@ export type Book = Required<
   downloadEpub?: string | null;
 };
 
-interface Achievement {
+export type Achievement = {
   title: string;
   description: string;
   year: number;
-}
+};
 
 interface HomeProps {
   posts: Post[];
@@ -90,7 +89,6 @@ const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> 
   </motion.section>
 );
 
-// Data Fetching
 /**
  * Fetches static props for the homepage including posts, books, and achievements.
  * @returns {Promise<{ props: HomeProps, revalidate: number }>} Static props and revalidation time
@@ -118,19 +116,21 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     const posts: Post[] = sortedPosts
       .filter((p) => p && p.slug)
       .slice(0, 3)
-      .map((p, i) => ({
-        slug: p.slug || `post-${i}`,
-        title: p.title || "Untitled Post",
-        date: (p.date || (p as any).publishedAt || new Date().toISOString()) as string,
-        excerpt: p.excerpt || "Discover insights and wisdom in this compelling read.",
-        coverImage:
-          typeof p.coverImage === "string" && p.coverImage.trim()
-            ? absUrl(p.coverImage)
-            : generatedCover(p.slug || `post-${i}`),
-        author: p.author || siteConfig.author,
-        readTime: p.readTime || "5 min read",
-        category: p.category || "Insights",
-      }));
+      .map((p, i) => {
+        const coverImage = typeof p.coverImage === "string" && p.coverImage.trim()
+          ? absUrl(p.coverImage)
+          : generatedCover(p.slug || `post-${i}`);
+        return {
+          slug: p.slug || `post-${i}`,
+          title: p.title || "Untitled Post",
+          date: (p.date || (p as any).publishedAt || new Date().toISOString()) as string,
+          excerpt: p.excerpt || "Discover insights and wisdom in this compelling read.",
+          coverImage,
+          author: p.author || siteConfig.author,
+          readTime: p.readTime || "5 min read",
+          category: p.category || "Insights",
+        };
+      });
 
     const booksData = getAllBooks([
       "slug",
@@ -147,51 +147,63 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     const books: Book[] = booksData
       .filter((b) => b && b.slug)
       .slice(0, 4)
-      .map((b, i) => ({
-        slug: b.slug || `book-${i}`,
-        title: b.title || "Untitled Book",
-        author: b.author || siteConfig.author,
-        excerpt: b.excerpt || "A compelling read that will transform your perspective.",
-        coverImage:
-          typeof b.coverImage === "string" && b.coverImage.trim()
-            ? absUrl(b.coverImage)
-            : absUrl(ASSETS.defaultBookCover),
-        buyLink: b.buyLink || "#",
-        genre: Array.isArray(b.genre)
-          ? (b.genre as string[]).filter(Boolean).join(", ")
-          : (b.genre as string) || "Personal Development",
-        downloadPdf: b.downloadPdf ?? null,
-        downloadEpub: b.downloadEpub ?? null,
-      }));
+      .map((b, i) => {
+        const coverImage = typeof b.coverImage === "string" && b.coverImage.trim()
+          ? absUrl(b.coverImage)
+          : absUrl(ASSETS.defaultBookCover);
+        return {
+          slug: b.slug || `book-${i}`,
+          title: b.title || "Untitled Book",
+          author: b.author || siteConfig.author,
+          excerpt: b.excerpt || "A compelling read that will transform your perspective.",
+          coverImage,
+          buyLink: b.buyLink || "#",
+          genre: Array.isArray(b.genre)
+            ? (b.genre as string[]).filter(Boolean).join(", ")
+            : (b.genre as string) || "Personal Development",
+          downloadPdf: b.downloadPdf ?? null,
+          downloadEpub: b.downloadEpub ?? null,
+        };
+      });
 
-    const achievements = achievementsData;
+    // Validate and sanitize achievements
+    const sanitizedAchievements = Array.isArray(achievements)
+      ? achievements.filter((a): a is Achievement => a && typeof a.title === "string" && typeof a.description === "string" && typeof a.year === "number")
+      : [];
 
-    return { props: { posts, books, achievements }, revalidate: 3600 };
+    return { props: { posts, books, achievements: sanitizedAchievements }, revalidate: 3600 };
   } catch (error) {
-    console.error("Error in getStaticProps:", error);
+    console.error("getStaticProps error:", {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+    });
     return { props: { posts: [], books: [], achievements: [] }, revalidate: 300 };
   }
 };
 
-// Page Component
 export default function Home({ posts, books, achievements }: HomeProps) {
-  const [communityCount] = useState(120_000); // Static initial value, CSS animation suggested
+  const [communityCount] = useState(120_000);
 
-  const structuredData = useMemo(() => {
-    const baseUrl = SITE_URL;
-    return [
-      createWebsiteSchema(baseUrl),
-      createOrganizationSchema(baseUrl),
-      createPersonSchema(baseUrl),
-      ...posts.map(createPostSchema),
-      ...books.map(createBookSchema),
-      createBreadcrumbSchema(baseUrl),
-      createFaqSchema(),
-    ];
-  }, [posts, books]);
+  const structuredData = [
+    { "@context": "https://schema.org", "@type": "WebSite", name: siteConfig.title, url: SITE_URL },
+    // Simplified for export; expand with helpers if needed
+  ];
 
   const hasPosts = posts.length > 0;
   const hasBooks = books.length > 0;
+
+  // Server-side fallback for HeroSection during export
+  const HeroFallback = () => (
+    <section
+      className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden bg-gray-200"
+      aria-labelledby="hero-title"
+    >
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
+        <span className="text-2xl text-gray-600">Loading Hero Content...</span>
+      </div>
+    </section>
+  );
 
   return (
     <Layout>
@@ -203,8 +215,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         />
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
-
-        {/* Social with static description */}
         <meta property="og:title" content={siteConfig.title} />
         <meta
           property="og:description"
@@ -224,7 +234,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
-
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -239,45 +248,29 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       </a>
 
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        <section
-          className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
-          aria-labelledby="hero-title"
-        >
-          <div className="absolute inset-0 -z-10">
-            <Image
-              src={ASSETS.heroBanner || "/assets/images/default-banner.webp"} // Fallback for missing asset
-              alt="Abraham of London — Empowering leadership and fatherhood"
-              fill
-              priority
-              fetchPriority="high"
-              quality={95}
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30" />
+        {/* Use fallback during export, switch to HeroSection on client */}
+        {process.env.NODE_ENV === "production" && typeof window === "undefined" ? (
+          <HeroFallback />
+        ) : (
+          <div suppressHydrationWarning>
+            {typeof window !== "undefined" && (
+              <HeroSection
+                title={siteConfig.title}
+                subtitle="Global Strategist, Author, and Visionary Leader"
+                ctaText="Join the Movement"
+                ctaLink="/join"
+                communityCount={communityCount}
+              />
+            )}
           </div>
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="relative z-10 text-white"
-          >
-            <HeroSection
-              title={siteConfig.title}
-              subtitle="Global Strategist, Author, and Visionary Leader"
-              ctaText="Join the Movement"
-              ctaLink="/join"
-              communityCount={communityCount}
-            />
-          </motion.div>
-        </section>
+        )}
 
         <main id="main-content" className="relative space-y-16 pb-16">
           <SectionSurface>
             <AboutSection
               bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
               achievements={achievements}
-              portraitSrc={ASSETS.profilePortrait || "/assets/images/default-portrait.webp"} // Fallback for missing asset
+              portraitSrc={ASSETS.profilePortrait || "/assets/images/default-portrait.webp"}
             />
           </SectionSurface>
 
@@ -346,116 +339,3 @@ export default function Home({ posts, books, achievements }: HomeProps) {
     </Layout>
   );
 }
-
-// Structured Data Helper Functions
-const createWebsiteSchema = (baseUrl: string) => ({
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: siteConfig.title,
-  alternateName: `${siteConfig.author} - Official Website`,
-  description: siteConfig.description,
-  url: baseUrl,
-  inLanguage: "en-GB",
-  copyrightYear: new Date().getFullYear(),
-  author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-  publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-  potentialAction: [
-    {
-      "@type": "SearchAction",
-      target: `${baseUrl}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-    {
-      "@type": "SubscribeAction",
-      target: `${baseUrl}/#email-signup`,
-      object: { "@type": "Service", name: "Newsletter Subscription" },
-    },
-  ],
-});
-
-const createOrganizationSchema = (baseUrl: string) => ({
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": `${baseUrl}#organization`,
-  name: siteConfig.title,
-  url: baseUrl,
-  logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo), width: 512, height: 512 },
-  image: { "@type": "ImageObject", url: ASSETS.profilePortrait, width: 400, height: 400 },
-  sameAs: siteConfig.socialLinks.filter((l) => l.external && /^https?:\/\//i.test(l.href)).map((l) => l.href),
-  address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
-});
-
-const createPersonSchema = (baseUrl: string) => ({
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: siteConfig.author,
-  url: baseUrl,
-  image: ASSETS.profilePortrait,
-  jobTitle: "Author & Strategist",
-  sameAs: siteConfig.socialLinks.filter((l) => l.external && /^https?:\/\//i.test(l.href)).map((l) => l.href),
-  worksFor: { "@type": "Organization", name: siteConfig.title },
-});
-
-const createPostSchema = (post: Post) => ({
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  headline: post.title,
-  image: absUrl(post.coverImage),
-  datePublished: post.date,
-  dateModified: post.date,
-  author: { "@type": "Person", name: post.author },
-  publisher: { "@type": "Organization", name: siteConfig.title, logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo) } },
-  description: post.excerpt,
-  mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${post.slug}`) },
-});
-
-const createBookSchema = (book: Book) => ({
-  "@context": "https://schema.org",
-  "@type": "Book",
-  name: book.title,
-  author: { "@type": "Person", name: book.author },
-  bookFormat: "https://schema.org/EBook",
-  image: absUrl(book.coverImage),
-  publisher: siteConfig.title,
-  description: book.excerpt,
-  inLanguage: "en-GB",
-  url: absUrl(`/books/${book.slug}`),
-  offers: { "@type": "Offer", url: book.buyLink },
-});
-
-const createBreadcrumbSchema = (baseUrl: string) => ({
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: baseUrl }],
-});
-
-const createFaqSchema = () => ({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Who is Abraham of London?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: `${siteConfig.author} is an author, strategist, and fatherhood advocate focused on family, leadership, and legacy.`,
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What books has Abraham written?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: `Books on fatherhood, leadership, and personal development to help men build durable legacies.`,
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How can I join the community?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Subscribe to the newsletter or contact us through the website to become part of our global movement.",
-      },
-    },
-  ],
-});
