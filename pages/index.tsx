@@ -1,10 +1,9 @@
-// pages/index.tsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import type { GetStaticProps } from "next";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
 import { getAllPosts, PostMeta } from "@/lib/posts";
@@ -12,39 +11,18 @@ import { getAllBooks, BookMeta } from "@/lib/books";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 import { generatedCover } from "@/lib/og";
+import { buildHomeStructuredData } from "@/lib/seo";
+import { achievements as achievementsData, Achievement } from "@/data/achievements";
 
-// Above-the-fold SSR sections
-const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), {
-  ssr: true,
-});
-const AboutSection = dynamic(
-  () => import("@/components/homepage/AboutSection"),
-  { ssr: true },
-);
-const VenturesSection = dynamic(
-  () => import("@/components/homepage/VenturesSection"),
-  { ssr: true },
-);
-const ContentShowcase = dynamic(
-  () => import("@/components/homepage/ContentShowcase"),
-  { ssr: true },
-);
+// Sections
+const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: true });
+const AboutSection = dynamic(() => import("@/components/homepage/AboutSection"), { ssr: true });
+const VenturesSection = dynamic(() => import("@/components/homepage/VenturesSection"), { ssr: true });
+const ContentShowcase = dynamic(() => import("@/components/homepage/ContentShowcase"), { ssr: true });
+const TestimonialsSection = dynamic(() => import("@/components/homepage/TestimonialsSection"), { ssr: false });
+const MilestonesTimeline = dynamic(() => import("@/components/homepage/MilestonesTimeline"), { ssr: false });
+const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
 
-// Animation-heavy sections (defer to client)
-const TestimonialsSection = dynamic(
-  () => import("@/components/homepage/TestimonialsSection"),
-  { ssr: false },
-);
-const MilestonesTimeline = dynamic(
-  () => import("@/components/homepage/MilestonesTimeline"),
-  { ssr: false },
-);
-const EventsSection = dynamic(
-  () => import("@/components/homepage/EventsSection"),
-  { ssr: false },
-);
-
-// ---------- Constants ----------
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
@@ -57,16 +35,11 @@ const ASSETS = {
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.webp",
   defaultBookCover: "/assets/images/default-book.jpg",
-  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
   logo: "/assets/images/logo/abraham-of-london-logo.svg",
 } as const;
 
-// ---------- Types ----------
 export type Post = Required<
-  Pick<
-    PostMeta,
-    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
-  >
+  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
 >;
 
 export type Book = Required<
@@ -77,46 +50,29 @@ export type Book = Required<
   downloadEpub?: string | null;
 };
 
-interface Achievement {
-  title: string;
-  description: string;
-  year: number;
-}
-
 interface HomeProps {
   posts: Post[];
   books: Book[];
   achievements: Achievement[];
 }
 
-// ---------- Surface wrapper ----------
-const SectionSurface: React.FC<
-  React.PropsWithChildren<{ className?: string }>
-> = ({ className = "", children }) => (
-  <section
+/** Animated “surface” wrapper for high-contrast cards/sections */
+const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
+  className = "",
+  children,
+}) => (
+  <motion.section
+    initial={{ opacity: 0, y: 18 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.12 }}
+    transition={{ duration: 0.55, ease: "easeOut" }}
     className={`mx-auto max-w-6xl px-4 sm:px-6 md:px-8 py-10 sm:py-12 bg-white text-deepCharcoal rounded-2xl shadow-2xl shadow-black/5 ring-1 ring-black/5 ${className}`}
   >
     {children}
-  </section>
+  </motion.section>
 );
 
-// ---------- Scroll progress ----------
-const ScrollProgress: React.FC = () => {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
-  return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-forest origin-left z-50"
-      style={{ scaleX }}
-    />
-  );
-};
-
-// ---------- Data ----------
+/** getStaticProps: gather posts/books, normalize fields, provide achievements */
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
@@ -148,7 +104,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof p.coverImage === "string" && p.coverImage.trim()
             ? p.coverImage
-            : generatedCover(p.slug || `post-${i}`), // ← your request
+            : generatedCover(p.slug || `post-${i}`),
         author: p.author || siteConfig.author,
         readTime: p.readTime || "5 min read",
         category: p.category || "Insights",
@@ -186,12 +142,8 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         downloadEpub: b.downloadEpub ?? null,
       }));
 
-    const achievements: Achievement[] = [
-      { title: "Self-advocate & Thought Leader", description: "Legal matters & civic engagement", year: 2010 },
-      { title: "Global Leadership Award", description: "Recognized for innovative leadership", year: 2027 },
-      { title: "Best-Selling Author", description: "Wide international readership", year: 2026 },
-      { title: "Featured", description: "Lonely Heroes initiative", year: 2025 },
-    ];
+    // Pull achievements from data file (easier to manage than inlined)
+    const achievements = achievementsData;
 
     return { props: { posts, books, achievements }, revalidate: 3600 };
   } catch (error) {
@@ -200,84 +152,27 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   }
 };
 
-// ---------- Page ----------
 export default function Home({ posts, books, achievements }: HomeProps) {
-  const [communityCount, setCommunityCount] = useState(0);
-
-  useEffect(() => {
-    setCommunityCount(120_000);
-    const id = setInterval(() => {
-      setCommunityCount((prev) =>
-        Math.min(prev + Math.floor(Math.random() * 9) + 1, 150_000)
-      );
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
+  // Static, crisp count—no flicker. If you later have an API, fetch there.
+  const communityCount = 120000;
 
   const sameAsLinks = useMemo(
-    () =>
-      siteConfig.socialLinks
-        .filter((l) => l.external && /^https?:\/\//i.test(l.href))
-        .map((l) => l.href),
-    [],
+    () => siteConfig.socialLinks.filter((l) => l.external && /^https?:\/\//i.test(l.href)).map((l) => l.href),
+    []
   );
 
-  const structuredData = useMemo(() => {
-    const baseUrl = SITE_URL;
-
-    const website = {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: siteConfig.title,
-      alternateName: `${siteConfig.author} - Official Website`,
-      description: siteConfig.description,
-      url: baseUrl,
-      inLanguage: "en-GB",
-      author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-      publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-    };
-
-    const org = {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "@id": `${baseUrl}#organization`,
-      name: siteConfig.title,
-      url: baseUrl,
-      logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo), width: 512, height: 512 },
-      image: { "@type": "ImageObject", url: ASSETS.profilePortrait, width: 400, height: 400 },
-      sameAs: sameAsLinks,
-      address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
-    };
-
-    const postSchemas = posts.map((p) => ({
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      headline: p.title,
-      image: absUrl(p.coverImage),
-      datePublished: p.date,
-      dateModified: p.date,
-      author: { "@type": "Person", name: p.author },
-      publisher: { "@type": "Organization", name: siteConfig.title },
-      description: p.excerpt,
-      mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${p.slug}`) },
-    }));
-
-    const bookSchemas = books.map((b) => ({
-      "@context": "https://schema.org",
-      "@type": "Book",
-      name: b.title,
-      author: { "@type": "Person", name: b.author },
-      bookFormat: "https://schema.org/EBook",
-      image: absUrl(b.coverImage),
-      publisher: siteConfig.title,
-      description: b.excerpt,
-      inLanguage: "en-GB",
-      url: absUrl(`/books/${b.slug}`),
-      offers: { "@type": "Offer", url: b.buyLink },
-    }));
-
-    return [website, org, ...postSchemas, ...bookSchemas];
-  }, [books, posts, sameAsLinks]);
+  const structuredData = useMemo(
+    () =>
+      buildHomeStructuredData({
+        siteConfig,
+        posts,
+        books,
+        sameAsLinks,
+        baseUrl: SITE_URL,
+        assets: { logo: ASSETS.logo, portrait: ASSETS.profilePortrait },
+      }),
+    [posts, books, sameAsLinks]
+  );
 
   const hasPosts = posts.length > 0;
   const hasBooks = books.length > 0;
@@ -288,18 +183,20 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <title>{siteConfig.title} — Empowering Leaders in Fatherhood & Strategy</title>
         <meta
           name="description"
-          content={`${siteConfig.description} Join a global movement of over ${communityCount.toLocaleString()} leaders transforming fatherhood and leadership.`}
+          content={siteConfig.description}
         />
         <link rel="canonical" href={SITE_URL} />
+
+        {/* Static social descriptions for stable caching */}
         <meta property="og:title" content={siteConfig.title} />
         <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={absUrl("/assets/images/social/og-image.jpg")} />
+        <meta property="og:image" content={absUrl(ASSETS.ogImage)} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteConfig.title} />
         <meta name="twitter:description" content={siteConfig.description} />
-        <meta name="twitter:image" content={absUrl("/assets/images/social/twitter-image.webp")} />
+        <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
         {structuredData.map((data, i) => (
@@ -307,7 +204,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         ))}
       </Head>
 
-      {/* Skip link */}
+      {/* Skip link for keyboard users */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card"
@@ -315,11 +212,8 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         Skip to content
       </a>
 
-      <ScrollProgress />
-
-      {/* Page background */}
-      <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO */}
+      {/* Background kept simple; Hero handles its own banner + scrim */}
+      <div className="relative min-h-screen">
         <HeroSection
           title={siteConfig.title}
           subtitle="Global Strategist, Author, and Visionary Leader"
@@ -328,7 +222,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           communityCount={communityCount}
         />
 
-        {/* Main content */}
         <main id="main-content" className="relative space-y-12 sm:space-y-16 pb-12">
           <SectionSurface>
             <AboutSection
@@ -351,6 +244,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
                 type="post"
                 link="/blog"
                 linkText="Discover More Insights"
+                /* Ideally add aria-label inside ContentShowcase for the link element */
               />
             </SectionSurface>
           )}
@@ -390,7 +284,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </section>
         </main>
 
-        {/* Footer CTA */}
         <section className="py-12 text-center">
           <Link
             href="/contact"

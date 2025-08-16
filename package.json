@@ -5,13 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/sanitize-source.js && node scripts/generate-og.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "fix:whitespace": "node scripts/sanitize-source.js",
-    "build:og": "node scripts/generate-og.mjs"
+    "prebuild": "node scripts/sanitize-source.js",
+    "fix:whitespace": "node scripts/sanitize-source.js"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
@@ -20,12 +19,10 @@
     "@react-email/components": "^0.5.0",
     "@react-email/render": "^1.2.0",
     "@react-email/tailwind": "^1.2.2",
-    "@resvg/resvg-js": "^2.6.1",
     "@tailwindcss/typography": "^0.5.10",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^10.12.16",
-    "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
     "next": "14.2.31",
     "next-mdx-remote": "^5.0.0",
@@ -38,9 +35,7 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.0",
-    "satori": "^0.10.13",
-    "sharp": "^0.33.4"
+    "remark-rehype": "^11.1.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.31",
@@ -53,6 +48,7 @@
     "brace-expansion": "^2.0.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.31",
+    "glob": "^10.0.0",
     "jackspeak": "^3.1.2",
     "lru-cache": "^10.4.3",
     "minimatch": "^9.0.3",
