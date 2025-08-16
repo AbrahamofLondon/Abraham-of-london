@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import type { GetStaticProps } from "next";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -34,7 +35,7 @@ const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
   ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.jpg", // use JPG for scrapers
+  twitterImage: "/assets/images/social/twitter-image.webp",
   defaultBookCover: "/assets/images/default-book.jpg",
   defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
   logo: "/assets/images/logo/abraham-of-london-logo.svg",
@@ -42,8 +43,12 @@ const ASSETS = {
 
 // Types
 export type Post = Required<
-  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
+  Pick<
+    PostMeta,
+    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
+  >
 >;
+
 export type Book = Required<
   Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink">
 > & {
@@ -51,10 +56,25 @@ export type Book = Required<
   downloadPdf?: string | null;
   downloadEpub?: string | null;
 };
-interface Achievement { title: string; description: string; year: number; }
-interface HomeProps { posts: Post[]; books: Book[]; achievements: Achievement[]; }
 
-/** Shared surface */
+interface Achievement {
+  title: string;
+  description: string;
+  year: number;
+}
+
+interface HomeProps {
+  posts: Post[];
+  books: Book[];
+  achievements: Achievement[];
+}
+
+/**
+ * Reusable section wrapper with animation and high contrast styling.
+ * @param {Object} props - Component props
+ * @param {string} [props.className] - Optional additional CSS classes
+ * @param {React.ReactNode} props.children - Section content
+ */
 const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
   className = "",
   children,
@@ -71,6 +91,10 @@ const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> 
 );
 
 // Data Fetching
+/**
+ * Fetches static props for the homepage including posts, books, and achievements.
+ * @returns {Promise<{ props: HomeProps, revalidate: number }>} Static props and revalidation time
+ */
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
@@ -102,7 +126,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof p.coverImage === "string" && p.coverImage.trim()
             ? absUrl(p.coverImage)
-            : generatedCover(p.slug || `post-${i}`), // must return a URL string
+            : generatedCover(p.slug || `post-${i}`),
         author: p.author || siteConfig.author,
         readTime: p.readTime || "5 min read",
         category: p.category || "Insights",
@@ -149,9 +173,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   }
 };
 
-// Page
+// Page Component
 export default function Home({ posts, books, achievements }: HomeProps) {
-  const [communityCount] = useState(120_000);
+  const [communityCount] = useState(120_000); // Static initial value, CSS animation suggested
 
   const structuredData = useMemo(() => {
     const baseUrl = SITE_URL;
@@ -180,7 +204,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
 
-        {/* Social */}
+        {/* Social with static description */}
         <meta property="og:title" content={siteConfig.title} />
         <meta
           property="og:description"
@@ -207,7 +231,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         />
       </Head>
 
-      {/* Skip link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-cream focus:text-forest focus:px-4 focus:py-2 focus:rounded-md focus:shadow-card"
@@ -215,25 +238,46 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         Skip to content
       </a>
 
-      {/* Page */}
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO — HeroSection now owns the banner */}
-        <HeroSection
-          title={siteConfig.title}
-          subtitle="Global Strategist, Author, and Visionary Leader"
-          ctaText="Join the Movement"
-          ctaLink="/join"
-          communityCount={communityCount}
-          backgroundSrc={ASSETS.heroBanner}
-        />
+        <section
+          className="relative w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
+          aria-labelledby="hero-title"
+        >
+          <div className="absolute inset-0 -z-10">
+            <Image
+              src={ASSETS.heroBanner || "/assets/images/default-banner.webp"} // Fallback for missing asset
+              alt="Abraham of London — Empowering leadership and fatherhood"
+              fill
+              priority
+              fetchPriority="high"
+              quality={95}
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30" />
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="relative z-10 text-white"
+          >
+            <HeroSection
+              title={siteConfig.title}
+              subtitle="Global Strategist, Author, and Visionary Leader"
+              ctaText="Join the Movement"
+              ctaLink="/join"
+              communityCount={communityCount}
+            />
+          </motion.div>
+        </section>
 
-        {/* MAIN */}
         <main id="main-content" className="relative space-y-16 pb-16">
           <SectionSurface>
             <AboutSection
-              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I am working to empower millions to build legacies of impact."
+              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
               achievements={achievements}
-              portraitSrc={ASSETS.profilePortrait}
+              portraitSrc={ASSETS.profilePortrait || "/assets/images/default-portrait.webp"} // Fallback for missing asset
             />
           </SectionSurface>
 
@@ -303,7 +347,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
   );
 }
 
-/* ---------- Structured Data helpers ---------- */
+// Structured Data Helper Functions
 const createWebsiteSchema = (baseUrl: string) => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -316,8 +360,16 @@ const createWebsiteSchema = (baseUrl: string) => ({
   author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
   publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
   potentialAction: [
-    { "@type": "SearchAction", target: `${baseUrl}/search?q={search_term_string}`, "query-input": "required name=search_term_string" },
-    { "@type": "SubscribeAction", target: `${baseUrl}/#email-signup`, object: { "@type": "Service", name: "Newsletter Subscription" } },
+    {
+      "@type": "SearchAction",
+      target: `${baseUrl}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+    {
+      "@type": "SubscribeAction",
+      target: `${baseUrl}/#email-signup`,
+      object: { "@type": "Service", name: "Newsletter Subscription" },
+    },
   ],
 });
 
