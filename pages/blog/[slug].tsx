@@ -1,25 +1,22 @@
-// pages/blog/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticProps, GetStaticPaths } from "next";
 import dynamic from "next/dynamic";
-
+import { format } from "date-fns";
+import { absUrl } from "@/lib/siteConfig";
+import { getAllPosts, getPostBySlug, type PostMeta } from "@/lib/posts";
+import { generatedCover } from "@/lib/og";
 import Layout from "@/components/Layout";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import { MDXComponents } from "@/components/MDXComponents";
-import { getAllPosts, getPostBySlug, type PostMeta } from "@/lib/posts";
-
-// Type-only import to avoid bundler pulling in the whole lib at build time
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-// Load the MDX renderer lazily (safe on Next 13/14, SSR allowed)
-const MDXRemote = dynamic(
-  () => import("next-mdx-remote").then((m) => m.MDXRemote),
-  {
-    ssr: true,
-  },
-);
+// Dynamic imports
+const MDXRemote = dynamic(() => import("next-mdx-remote").then((m) => m.MDXRemote), {
+  ssr: true,
+});
 
+// Types
 type PageMeta = {
   slug: string;
   title: string;
@@ -38,15 +35,12 @@ type Props = {
   };
 };
 
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.URL ||
-  process.env.DEPLOY_PRIME_URL ||
-  "https://abraham-of-london.netlify.app"
-).replace(/\/$/, "");
-
-const abs = (p: string) => (/^https?:\/\//i.test(p) ? p : `${SITE_URL}${p}`);
-
+// Data Fetching
+/**
+ * Fetches the post content and metadata for a given slug.
+ * @param {object} context - The context object from Next.js.
+ * @returns {Promise<GetStaticPropsResult<Props>>} The props for the page.
+ */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
   const raw = getPostBySlug(slug, [
@@ -66,18 +60,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
+  // Refined meta object with robust fallbacks
   const meta: PageMeta = {
     slug: raw.slug,
     title: raw.title || "Untitled",
     date: (raw.date || raw.publishedAt || "") as string,
-    excerpt: raw.excerpt || "",
-    coverImage:
-      typeof raw.coverImage === "string" && raw.coverImage.trim()
-        ? raw.coverImage
-        : "/assets/images/blog/default-blog-cover.jpg",
+    excerpt: raw.excerpt || "Discover insights and wisdom in this compelling read.",
+    // Use the centralized generatedCover function for a consistent fallback strategy
+    coverImage: raw.coverImage ? raw.coverImage : generatedCover(raw.slug, raw.title),
     author: raw.author || "Abraham of London",
     readTime: raw.readTime || "5 min read",
-    category: raw.category || "General",
+    category: raw.category || "Insights",
   };
 
   // ESM-safe dynamic imports for the serializer + plugins
@@ -101,6 +94,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 };
 
+/**
+ * Specifies the static paths for all blog posts.
+ * @returns {Promise<GetStaticPathsResult>} The paths object.
+ */
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getAllPosts(["slug"]);
   return {
@@ -109,25 +106,63 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
+// Component
 export default function BlogPost({ post }: Props) {
+  // Extract meta data for cleaner JSX
+  const { slug, title, date, excerpt, coverImage, author, readTime, category } = post.meta;
+  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
+
+  // Structured Data (JSON-LD) for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    image: [absUrl(coverImage)],
+    datePublished: date,
+    dateModified: date,
+    author: { "@type": "Person", name: author },
+    publisher: {
+      "@type": "Organization",
+      name: "Abraham of London",
+      logo: { "@type": "ImageObject", url: absUrl("/assets/images/logo/abraham-of-london-logo.svg") },
+    },
+    description: excerpt,
+    mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${slug}`) },
+  };
+
   return (
     <Layout>
-      <MDXProviderWrapper>
-        <Head>
-          <title>{post.meta.title} | Abraham of London</title>
-          <meta
-            name="description"
-            content={post.meta.excerpt || "Article by Abraham of London"}
-          />
-          <meta property="og:image" content={abs(post.meta.coverImage)} />
-        </Head>
+      <Head>
+        {/* Basic SEO */}
+        <title>{title} | Abraham of London</title>
+        <meta name="description" content={excerpt} />
+        <link rel="canonical" href={absUrl(`/blog/${slug}`)} />
 
+        {/* Open Graph & Twitter for social sharing */}
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={excerpt} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={absUrl(`/blog/${slug}`)} />
+        <meta property="og:image" content={absUrl(coverImage)} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={excerpt} />
+        <meta name="twitter:image" content={absUrl(coverImage)} />
+
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </Head>
+
+      <MDXProviderWrapper>
         <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
-          {post.meta.coverImage && (
+          {coverImage && (
             <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
               <Image
-                src={post.meta.coverImage}
-                alt={post.meta.title}
+                src={absUrl(coverImage)}
+                alt={title}
                 fill
                 className="object-cover"
                 priority
@@ -136,15 +171,15 @@ export default function BlogPost({ post }: Props) {
           )}
 
           <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">
-            {post.meta.title}
+            {title}
           </h1>
 
           <div className="text-sm text-deepCharcoal/70 mb-4">
-            <span>{post.meta.author}</span> ƒÆ’†ƒ ‚¬„ƒÆ’‚ƒ‚¬Å¡‚¬ƒ¦‚¡ƒÆ’†ƒš¬…¡ƒÆ’‚¬Å¡ƒš‚· <span>{post.meta.date}</span>
-            {post.meta.readTime && <span> ƒÆ’†ƒ ‚¬„ƒÆ’‚ƒ‚¬Å¡‚¬ƒ¦‚¡ƒÆ’†ƒš¬…¡ƒÆ’‚¬Å¡ƒš‚· {post.meta.readTime}</span>}
-            {post.meta.category && (
+            <span>By {author}</span> &middot; <span>{formattedDate}</span>
+            {readTime && <span> &middot; {readTime}</span>}
+            {category && (
               <span className="ml-2 inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1">
-                {post.meta.category}
+                {category}
               </span>
             )}
           </div>
@@ -157,7 +192,3 @@ export default function BlogPost({ post }: Props) {
     </Layout>
   );
 }
-
-
-
-

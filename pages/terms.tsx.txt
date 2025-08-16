@@ -1,36 +1,70 @@
 // pages/terms.tsx
 import React from "react";
+import Head from "next/head";
+import Layout from "@/components/Layout";
 
-const TermsOfService: React.FC = () => {
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  "https://abrahamoflondon.org";
+
+export default function TermsOfService() {
   return (
-    <div className="container mx-auto px-4 py-16 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-      <p className="mb-4">Last updated: August 16, 2025</p>
-      <p className="mb-4">
-        Welcome to Abraham of London. By accessing or using our website, you agree to be bound by these Terms of Service. If you do not agree, please do not use our site.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-2">Use of Our Services</h2>
-      <p className="mb-4">
-        You may use our site for personal, non-commercial purposes. You must not misuse our services, including by introducing viruses or engaging in illegal activities.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-2">Intellectual Property</h2>
-      <p className="mb-4">
-        All content on this site, including text, images, and logos, is owned by Abraham of London or its licensors and is protected by copyright law.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-2">Limitation of Liability</h2>
-      <p className="mb-4">
-        We are not liable for any indirect, incidental, or consequential damages arising from your use of our site.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-2">Governing Law</h2>
-      <p className="mb-4">
-        These Terms are governed by the laws of the United Kingdom. Any disputes will be resolved in the courts of London.
-      </p>
-      <h2 className="text-2xl font-semibold mt-6 mb-2">Changes to Terms</h2>
-      <p className="mb-4">
-        We may modify these Terms at any time. Continued use of the site after changes constitutes acceptance of the new Terms.
-      </p>
-    </div>
-  );
-};
+    <Layout>
+      <Head>
+        <title>Terms of Service | Abraham of London</title>
+        <meta
+          name="description"
+          content="The terms and conditions for using Abraham of London's website and services."
+        />
+        <link rel="canonical" href={`${SITE_URL.replace(/\/$/, "")}/terms`} />
+        <meta property="og:title" content="Terms of Service | Abraham of London" />
+        <meta property="og:description" content="The terms and conditions for using this site." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL.replace(/\/$/, "")}/terms`} />
+      </Head>
 
-export default TermsOfService;
+      <div className="container mx-auto px-4 py-16 max-w-3xl">
+        <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
+        <p className="mb-4">Last updated: August 16, 2025</p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Introduction</h2>
+        <p className="mb-4">
+          Welcome to Abraham of London. By accessing or using our website, you agree to these Terms of Service.
+          If you do not agree, please do not use the site.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Use of Our Services</h2>
+        <p className="mb-4">
+          You may use our site for personal, non-commercial purposes. Do not misuse our services, attempt to gain
+          unauthorized access, or introduce malware or harmful content.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Intellectual Property</h2>
+        <p className="mb-4">
+          All content on this site, including text, images, and logos, is owned by Abraham of London or its
+          licensors and is protected by applicable laws.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Limitation of Liability</h2>
+        <p className="mb-4">
+          We are not liable for any indirect, incidental, special, consequential, or punitive damages arising from
+          your use of the site.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Governing Law</h2>
+        <p className="mb-4">
+          These Terms are governed by the laws of the United Kingdom. Any disputes will be resolved by the courts
+          of London.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-2">Changes to These Terms</h2>
+        <p className="mb-4">
+          We may modify these Terms at any time. Continued use of the site after changes constitutes acceptance of
+          the updated Terms.
+        </p>
+      </div>
+    </Layout>
+  );
+}

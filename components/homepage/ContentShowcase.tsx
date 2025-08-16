@@ -8,11 +8,11 @@ import BookCard from "@/components/BookCard";
 type ContentShowcaseProps = {
   title: string;
   subtitle?: string;
-  items: any[];              // posts or books (consider typing more precisely if possible)
+  items: any[];
   type: "post" | "book";
-  link: string;              // see-all link
+  link: string;
   linkText?: string;
-  linkAriaLabel?: string;    // Added for accessibility
+  linkAriaLabel?: string;
   className?: string;
 };
 
@@ -23,16 +23,20 @@ export default function ContentShowcase({
   type,
   link,
   linkText = "View all",
-  linkAriaLabel = "View all items", // Default value for accessibility
+  linkAriaLabel = "View all items",
   className,
 }: ContentShowcaseProps) {
+  // Only render if there are items to display
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className={clsx("py-12 px-4", className)}
       aria-label={title}
     >
       <div className="container mx-auto max-w-6xl">
-        {/* White surface for accessibility over dark bg */}
         <div className="bg-white text-deepCharcoal rounded-3xl shadow-2xl ring-1 ring-black/5 p-6 md:p-10">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
@@ -46,7 +50,7 @@ export default function ContentShowcase({
             <Link
               href={link}
               className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-forest/90 transition"
-              aria-label={linkAriaLabel} // Use linkAriaLabel for accessibility
+              aria-label={linkAriaLabel}
             >
               {linkText}
             </Link>
