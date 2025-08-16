@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-{
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,8 +11,7 @@
     "analyze": "ANALYZE=true next build",
     "prebuild": "node scripts/sanitize-source.js",
     "fix:whitespace": "node scripts/sanitize-source.js"
-  }
-}
+  },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.1.0",
