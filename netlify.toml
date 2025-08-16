@@ -11,6 +11,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = []
+  directory = "netlify/functions" # Explicitly define functions directory
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -22,3 +23,5 @@
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Note: @netlify/plugin-emails is active via Netlify UI but not defined here

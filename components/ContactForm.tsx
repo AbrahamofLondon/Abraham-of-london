@@ -1,8 +1,8 @@
 // components/ContactForm.tsx
-import { useState, useMemo } from 'react';
-import Head from 'next/head';
-import { motion } from 'framer-motion';
-import { siteConfig, absUrl } from '@/lib/siteConfig';
+import { useState, useMemo } from "react";
+import Head from "next/head";
+import { motion } from "framer-motion";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const SITE_URL = siteConfig.siteUrl;
 
@@ -11,7 +11,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.7, ease: 'easeOut', when: 'beforeChildren' },
+    transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" },
   },
 };
 
@@ -20,7 +20,7 @@ const formVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.6, ease: 'easeOut', staggerChildren: 0.1 },
+    transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 },
   },
 };
 
@@ -30,61 +30,63 @@ const itemVariants = {
 };
 
 export default function ContactForm() {
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormStatus('submitting');
+    setFormStatus("submitting");
 
     try {
       const formData = new FormData(event.currentTarget);
       const data = new URLSearchParams();
-      data.append('form-name', 'contact-form');
-
       for (const [key, value] of Array.from(formData.entries())) {
         data.append(key, value.toString());
       }
 
-      await fetch(event.currentTarget.action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      const response = await fetch(event.currentTarget.action, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: data.toString(),
       });
 
-      setFormStatus('success');
-      setTimeout(() => setFormStatus('idle'), 5000);
-      event.currentTarget.reset();
+      if (response.ok) {
+        setFormStatus("success");
+        setTimeout(() => setFormStatus("idle"), 5000);
+        event.currentTarget.reset();
+      } else {
+        throw new Error("Form submission failed");
+      }
     } catch (error) {
-      console.error('Form submission failed:', error);
-      setFormStatus('error');
+      console.error("Form submission failed:", error);
+      setFormStatus("error");
     }
   };
 
-  const isSubmitting = formStatus === 'submitting';
+  const isSubmitting = formStatus === "submitting";
 
   const structuredData = useMemo(() => {
     const contactSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'ContactPage',
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
       mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${SITE_URL}/contact`,
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/contact`,
       },
-      description: 'Contact form for Abraham of London inquiries.',
+      description: "Contact form for Abraham of London inquiries.",
       url: `${SITE_URL}/contact`,
       potentialAction: {
-        '@type': 'CommunicateAction',
+        "@type": "CommunicateAction",
         target: {
-          '@type': 'EntryPoint',
-          actionPlatform: ['https://schema.org/ContactPoint'],
-          inLanguage: 'en',
-          description: 'Contact form for inquiries',
+          "@type": "EntryPoint",
+          actionPlatform: ["https://schema.org/ContactPoint"],
+          inLanguage: "en",
+          description: "Contact form for inquiries",
         },
       },
       contactPoint: {
-        '@type': 'ContactPoint',
-        contactType: 'Customer service',
-        areaServed: 'Global',
+        "@type": "ContactPoint",
+        contactType: "Customer service",
+        areaServed: "Global",
         email: siteConfig.email,
       },
     };
@@ -133,10 +135,11 @@ export default function ContactForm() {
           Reach out for inquiries, collaborations, or support.
         </p>
         <motion.form
-          action="/contact"
+          action="/contact" // Netlify form endpoint
           method="POST"
           name="contact-form"
           data-netlify="true"
+          netlify-honeypot="bot-field" // Added honeypot for spam protection
           variants={formVariants}
           initial="hidden"
           animate="visible"
@@ -144,6 +147,7 @@ export default function ContactForm() {
           onSubmit={handleSubmit}
         >
           <input type="hidden" name="form-name" value="contact-form" />
+          <input type="hidden" name="bot-field" /> {/* Honeypot field */}
           <motion.div variants={itemVariants}>
             <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-primary)]">
               Name
@@ -189,10 +193,10 @@ export default function ContactForm() {
               className="inline-block px-6 py-3 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-[6px] hover:bg-[var(--color-primary)]/80 disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Send Message'}
+              {isSubmitting ? "Submitting..." : "Send Message"}
             </button>
           </motion.div>
-          {formStatus === 'success' && (
+          {formStatus === "success" && (
             <motion.p
               variants={itemVariants}
               className="text-green-600 text-center"
@@ -202,7 +206,7 @@ export default function ContactForm() {
               Message sent successfully!
             </motion.p>
           )}
-          {formStatus === 'error' && (
+          {formStatus === "error" && (
             <motion.p
               variants={itemVariants}
               className="text-red-600 text-center"
@@ -217,5 +221,3 @@ export default function ContactForm() {
     </>
   );
 }
-
-

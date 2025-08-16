@@ -1,25 +1,34 @@
+// components/Footer.tsx
 import React from "react";
 import Link from "next/link";
 
-export default function Footer() {
-  const year = new Date().getFullYear();
-
+const Footer: React.FC = () => {
   return (
-    <footer className="mt-16 border-t border-lightGrey bg-white text-deepCharcoal dark:bg-deepCharcoal dark:text-cream dark:border-white/10">
-      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-sm">&copy; {year} Abraham of London. All rights reserved.</p>
-        <nav className="flex gap-4 text-sm" aria-label="Footer">
-          <Link href="/privacy" className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-deepCharcoal/40 rounded-sm">
-            Privacy
+    <footer className="bg-gray-100 py-8">
+      <div className="container mx-auto px-4 max-w-7xl text-center">
+        <nav className="flex flex-wrap justify-center gap-6 text-deepCharcoal">
+          <Link href="/privacy" className="hover:text-forest transition">
+            Privacy Policy
           </Link>
-          <Link href="/terms" className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-deepCharcoal/40 rounded-sm">
-            Terms
+          <Link href="/terms" className="hover:text-forest transition">
+            Terms of Service
           </Link>
-          <Link href="/contact" className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-deepCharcoal/40 rounded-sm">
-            Contact
+          <Link href="mailto:hello@abrahamoflondon.org" className="hover:text-forest transition">
+            Email
+          </Link>
+          <Link href="/contact" className="hover:text-forest transition">
+            Contact Us
+          </Link>
+          <Link href="https://innovatehub.com" className="hover:text-forest transition">
+            InnovateHub
           </Link>
         </nav>
+        <p className="mt-4 text-sm text-deepCharcoal/60">
+          &copy; {new Date().getFullYear()} Abraham of London. All rights reserved.
+        </p>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
