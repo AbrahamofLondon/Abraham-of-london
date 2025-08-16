@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
           <Link href="/terms" className="hover:text-forest transition">
             Terms of Service
           </Link>
-          <Link href="mailto:hello@abrahamoflondon.org" className="hover:text-forest transition">
+          <Link href="mailto:info@abrahamoflondon.org" className="hover:text-forest transition">
             Email
           </Link>
           <Link href="/contact" className="hover:text-forest transition">
