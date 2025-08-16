@@ -10,7 +10,7 @@ type Props = {
   ctaText: string;
   ctaLink: string;
   communityCount: number;
-  /** Background image (public path). Defaults to site banner. */
+  /** optional: override banner path */
   backgroundSrc?: string;
 };
 
@@ -24,31 +24,31 @@ export default function HeroSection({
 }: Props) {
   return (
     <section
-      className="relative w-full min-h-[85vh] overflow-hidden"
+      className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
       aria-labelledby="hero-title"
     >
-      {/* Background image + scrim */}
-      <div className="absolute inset-0 -z-10">
+      {/* Background (no negative z-index) */}
+      <div className="absolute inset-0 z-0">
         <Image
           src={backgroundSrc}
-          alt=""
-          role="presentation"
+          alt="Abraham of London — Empowering leadership and fatherhood"
           fill
           priority
           fetchPriority="high"
-          sizes="100vw"
           quality={95}
+          sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30" />
+        {/* scrim to ensure text legibility */}
+        <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
       </div>
 
-      {/* Foreground */}
+      {/* Content */}
       <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-3xl text-white"
         >
           <h1
@@ -60,9 +60,7 @@ export default function HeroSection({
 
           <p className="mt-4 text-lg sm:text-xl text-white/90">
             {subtitle} Join{" "}
-            <strong className="font-semibold">
-              {communityCount.toLocaleString()}
-            </strong>{" "}
+            <strong className="font-semibold">{communityCount.toLocaleString()}</strong>{" "}
             global leaders.
           </p>
 
