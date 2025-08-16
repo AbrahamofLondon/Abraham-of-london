@@ -13,7 +13,8 @@ import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 import { generatedCover } from "@/lib/og";
 import { achievements } from "@/data/achievements";
-import SocialFollowStrip from "@/components/SocialFollowStrip"; // New import
+import SocialFollowStrip from "@/components/SocialFollowStrip";
+import Footer from "@/components/Footer"; // New import
 
 // Dynamic imports with SSR control
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
@@ -250,7 +251,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         Skip to content
       </a>
 
-      <div className="relative min-h-screen bg-cream text-deepCharcoal">
+      <div className="relative min-h-screen bg-cream text-deepCharcoal flex flex-col">
         {/* Use fallback during export, switch to HeroSection on client */}
         {process.env.NODE_ENV === "production" && typeof window === "undefined" ? (
           <HeroFallback />
@@ -259,7 +260,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             {typeof window !== "undefined" && (
               <HeroSection
                 title={siteConfig.title}
-                subtitle="Global Strategist, Author, and Visionary Leader"
+                subtitle="Global Strategist, Author, and Visionary Leader (Empowering a Movement)" // Updated with connector
                 ctaText="Join the Movement"
                 ctaLink="/join"
                 communityCount={communityCount}
@@ -268,10 +269,10 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </div>
         )}
 
-        <main id="main-content" className="relative space-y-16 pb-16">
+        <main id="main-content" className="relative space-y-16 pb-16 flex-1">
           <SectionSurface>
             <AboutSection
-              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I empower millions to build legacies of impact."
+              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I work to empower millions to build legacies of impact."
               achievements={achievements}
               portraitSrc={ASSETS.profilePortrait || "/assets/images/default-portrait.webp"}
             />
@@ -339,8 +340,8 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </Link>
         </section>
 
-        {/* Add SocialFollowStrip */}
         <SocialFollowStrip />
+        <Footer /> {/* Added Footer with external links */}
       </div>
     </Layout>
   );

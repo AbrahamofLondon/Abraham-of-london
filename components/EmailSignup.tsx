@@ -20,14 +20,8 @@ const EmailSignup: React.FC = () => {
         body: JSON.stringify({ email: email.trim() }),
       });
 
-      if (!res.ok) {
-        let serverMsg = "Subscription failed. Please try again.";
-        try {
-          const data = await res.json();
-          if (data?.message) serverMsg = data.message;
-        } catch {}
-        throw new Error(serverMsg);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Subscription failed");
 
       setStatus("success");
       setMessage("Thank you for subscribing!");

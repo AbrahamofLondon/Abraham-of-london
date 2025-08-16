@@ -1,0 +1,36 @@
+// pages/terms.tsx
+import React from "react";
+
+const TermsOfService: React.FC = () => {
+  return (
+    <div className="container mx-auto px-4 py-16 max-w-3xl">
+      <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
+      <p className="mb-4">Last updated: August 16, 2025</p>
+      <p className="mb-4">
+        Welcome to Abraham of London. By accessing or using our website, you agree to be bound by these Terms of Service. If you do not agree, please do not use our site.
+      </p>
+      <h2 className="text-2xl font-semibold mt-6 mb-2">Use of Our Services</h2>
+      <p className="mb-4">
+        You may use our site for personal, non-commercial purposes. You must not misuse our services, including by introducing viruses or engaging in illegal activities.
+      </p>
+      <h2 className="text-2xl font-semibold mt-6 mb-2">Intellectual Property</h2>
+      <p className="mb-4">
+        All content on this site, including text, images, and logos, is owned by Abraham of London or its licensors and is protected by copyright law.
+      </p>
+      <h2 className="text-2xl font-semibold mt-6 mb-2">Limitation of Liability</h2>
+      <p className="mb-4">
+        We are not liable for any indirect, incidental, or consequential damages arising from your use of our site.
+      </p>
+      <h2 className="text-2xl font-semibold mt-6 mb-2">Governing Law</h2>
+      <p className="mb-4">
+        These Terms are governed by the laws of the United Kingdom. Any disputes will be resolved in the courts of London.
+      </p>
+      <h2 className="text-2xl font-semibold mt-6 mb-2">Changes to Terms</h2>
+      <p className="mb-4">
+        We may modify these Terms at any time. Continued use of the site after changes constitutes acceptance of the new Terms.
+      </p>
+    </div>
+  );
+};
+
+export default TermsOfService;
