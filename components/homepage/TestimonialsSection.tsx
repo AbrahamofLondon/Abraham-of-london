@@ -13,12 +13,12 @@ const items: Testimonial[] = [
   {
     quote: "A rare voice on fatherhood that is both thoughtful and actionable.",
     name: "Maya L.",
-    role: "Editor",
+    role: "Manager",
   },
   {
     quote: "Clear frameworks that helped our team align on goals and execution.",
     name: "Lanre",
-    role: "Mother",
+    role: "Consultant",
   },
 ];
 

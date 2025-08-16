@@ -1,4 +1,3 @@
-// pages/index.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -12,7 +11,6 @@ import { getAllBooks, BookMeta } from "@/lib/books";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 
-// Sections
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: true });
 const AboutSection = dynamic(() => import("@/components/homepage/AboutSection"), { ssr: true });
 const VenturesSection = dynamic(() => import("@/components/homepage/VenturesSection"), { ssr: true });
@@ -29,67 +27,40 @@ const SITE_URL = (
   "https://abraham-of-london.netlify.app"
 ).replace(/\/$/, "");
 
-// These paths match your screenshots in /public/assets/images
+// These match what’s actually in /public based on your screenshots
 const ASSETS = {
   heroBanner: "/assets/images/abraham-of-london-banner.webp",
   profilePortrait: "/assets/images/profile-portrait.webp",
-  // social previews
+  // Social share
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.jpg",
-  // defaults
+  // Content fallbacks
   defaultBookCover: "/assets/images/default-book.jpg",
-  // if you don't have a dedicated default blog cover,
-  // use writing-desk.webp (present in your folder) as a tasteful fallback:
-  defaultBlogCover: "/assets/images/writing-desk.webp",
-  // branding
+  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg", // if missing, we’ll fallback again below
+  fallbackBlog: "/assets/images/writing-desk.webp",
+  // Branding / icons
   logo: "/assets/images/abraham-logo.jpg",
-  // app icons that live at /public (not under /assets)
-  icons: {
-    favicon: "/favicon.ico",
-    app192: "/web-app-manifest-192x192.png",
-    app512: "/web-app-manifest-512x512.png",
-  },
-  // social svg icons (optional)
-  socialSvgs: {
-    instagram: "/assets/images/social/instagram.svg",
-    twitter: "/assets/images/social/twitter.svg",
-    linkedin: "/assets/images/social/linkedin.svg",
-    whatsapp: "/assets/images/social/whatsapp.svg",
-    email: "/assets/images/social/email.svg",
-    phone: "/assets/images/social/phone.svg",
-  },
+  favicon: "/assets/icons/favicon.ico",
+  appIcon192: "/assets/icons/web-app-manifest-192x192.png",
+  appIcon512: "/assets/icons/web-app-manifest-512x512.png",
 } as const;
 
 // ---------- Types ----------
 export type Post = Required<
-  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
+  Pick<
+    PostMeta,
+    "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category"
+  >
 >;
-
 export type Book = Required<
   Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink">
-> & {
-  genre: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-};
+> & { genre: string; downloadPdf?: string | null; downloadEpub?: string | null; };
 
-interface Achievement {
-  title: string;
-  description: string;
-  year: number;
-}
-
-interface HomeProps {
-  posts: Post[];
-  books: Book[];
-  achievements: Achievement[];
-}
+interface Achievement { title: string; description: string; year: number; }
+interface HomeProps { posts: Post[]; books: Book[]; achievements: Achievement[]; }
 
 // ---------- Shared surface ----------
-const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
-  className = "",
-  children,
-}) => (
+const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -108,19 +79,11 @@ const ScrollProgress: React.FC = () => {
   return <motion.div className="fixed top-0 left-0 right-0 h-1 bg-forest origin-left z-50" style={{ scaleX }} />;
 };
 
-// ---------- Data Fetching ----------
+// ---------- Data ----------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
     const postsData = getAllPosts([
-      "slug",
-      "title",
-      "date",
-      "publishedAt",
-      "excerpt",
-      "coverImage",
-      "author",
-      "readTime",
-      "category",
+      "slug", "title", "date", "publishedAt", "excerpt", "coverImage", "author", "readTime", "category",
     ]);
 
     const sortedPosts = [...postsData].sort((a, b) => {
@@ -140,22 +103,14 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         coverImage:
           typeof p.coverImage === "string" && p.coverImage.trim()
             ? p.coverImage
-            : ASSETS.defaultBlogCover,
+            : (ASSETS.defaultBlogCover || ASSETS.fallbackBlog),
         author: p.author || siteConfig.author,
         readTime: p.readTime || "5 min read",
         category: p.category || "Insights",
       }));
 
     const booksData = getAllBooks([
-      "slug",
-      "title",
-      "author",
-      "excerpt",
-      "coverImage",
-      "buyLink",
-      "genre",
-      "downloadPdf",
-      "downloadEpub",
+      "slug", "title", "author", "excerpt", "coverImage", "buyLink", "genre", "downloadPdf", "downloadEpub",
     ]);
 
     const books: Book[] = booksData
@@ -214,8 +169,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
   const structuredData = useMemo(() => {
     const baseUrl = SITE_URL;
-    const currentYear = new Date().getFullYear();
-
     const website = {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -224,7 +177,6 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       description: siteConfig.description,
       url: baseUrl,
       inLanguage: "en-GB",
-      copyrightYear: currentYear,
       author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
       publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
       potentialAction: [
@@ -248,7 +200,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       name: siteConfig.title,
       url: baseUrl,
       logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo), width: 512, height: 512 },
-      image: { "@type": "ImageObject", url: absUrl(ASSETS.profilePortrait), width: 400, height: 400 },
+      image: { "@type": "ImageObject", url: ASSETS.profilePortrait, width: 400, height: 400 },
       sameAs: sameAsLinks,
       address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
     };
@@ -258,7 +210,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       "@type": "Person",
       name: siteConfig.author,
       url: baseUrl,
-      image: absUrl(ASSETS.profilePortrait),
+      image: ASSETS.profilePortrait,
       jobTitle: "Author & Strategist",
       sameAs: sameAsLinks,
       worksFor: { "@type": "Organization", name: siteConfig.title },
@@ -272,7 +224,11 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       datePublished: p.date,
       dateModified: p.date,
       author: { "@type": "Person", name: p.author },
-      publisher: { "@type": "Organization", name: siteConfig.title, logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo) } },
+      publisher: {
+        "@type": "Organization",
+        name: siteConfig.title,
+        logo: { "@type": "ImageObject", url: absUrl(ASSETS.logo) },
+      },
       description: p.excerpt,
       mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${p.slug}`) },
     }));
@@ -297,30 +253,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
       itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: baseUrl }],
     };
 
-    const faq = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "Who is Abraham of London?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `${siteConfig.author} is an author, strategist, and fatherhood advocate focused on family, leadership, and legacy.`,
-          },
-        },
-        {
-          "@type": "Question",
-          name: "What books has Abraham written?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `Books on fatherhood, leadership, and personal development to help men build durable legacies.`,
-          },
-        },
-      ],
-    };
-
-    return [website, org, person, ...postSchemas, ...bookSchemas, breadcrumb, faq];
+    return [website, org, person, ...postSchemas, ...bookSchemas, breadcrumb];
   }, [books, posts, sameAsLinks]);
 
   const hasPosts = posts.length > 0;
@@ -337,7 +270,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href={SITE_URL} />
 
-        {/* Social */}
+        {/* Social meta (static text for cache stability) */}
         <meta property="og:title" content={siteConfig.title} />
         <meta property="og:description" content={siteConfig.description} />
         <meta property="og:type" content="website" />
@@ -352,16 +285,19 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <meta name="theme-color" content="#0b2e1f" />
         <meta name="color-scheme" content="dark light" />
 
+        {/* Icons / PWA */}
+        <link rel="icon" href={ASSETS.favicon} />
+        <link rel="apple-touch-icon" sizes="192x192" href={ASSETS.appIcon192} />
+        <link rel="apple-touch-icon" sizes="512x512" href={ASSETS.appIcon512} />
+
         {/* JSON-LD */}
-        {structuredData.map((data, i) => (
-          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
-        ))}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </Head>
 
       {/* Skip link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] bg-cream text-forest px-4 py-2 rounded-md shadow-card"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-cream focus:text-forest focus:px-4 focus:py-2 focus:rounded-md focus:shadow-card"
       >
         Skip to content
       </a>
@@ -370,21 +306,21 @@ export default function Home({ posts, books, achievements }: HomeProps) {
 
       {/* Page background */}
       <div className="relative min-h-screen bg-cream text-deepCharcoal">
-        {/* HERO */}
+        {/* HERO (component now owns the background) */}
         <HeroSection
           title={siteConfig.title}
           subtitle="Global Strategist, Author, and Visionary Leader"
           ctaText="Join the Movement"
           ctaLink="/join"
           communityCount={communityCount}
-          bannerSrc={ASSETS.heroBanner}
+          backgroundSrc={ASSETS.heroBanner}
         />
 
-        {/* Main content */}
+        {/* Main */}
         <main id="main-content" className="relative space-y-12 sm:space-y-16 pb-12">
           <SectionSurface>
             <AboutSection
-              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I am hoping to empower millions to build legacies of impact."
+              bio="I'm Abraham of London, a recognized strategist and author dedicated to redefining leadership and fatherhood. With decades of experience across industries, I am working to empower millions to build legacies of impact."
               achievements={achievements}
               portraitSrc={ASSETS.profilePortrait}
             />
@@ -433,9 +369,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
           </SectionSurface>
 
           <section id="email-signup" aria-labelledby="email-signup-title" className="scroll-mt-24">
-            <h2 id="email-signup-title" className="sr-only">
-              Email signup
-            </h2>
+            <h2 id="email-signup-title" className="sr-only">Email signup</h2>
             <SectionSurface className="bg-white/95">
               <EmailSignup />
             </SectionSurface>
@@ -446,7 +380,7 @@ export default function Home({ posts, books, achievements }: HomeProps) {
         <section className="py-12 text-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full hover:bg-forest/90 transition"
+            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full transition hover:bg-forest/90 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2"
             aria-label="Contact Abraham of London"
           >
             {"Let's Build Something Enduring"}
