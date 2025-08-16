@@ -1,4 +1,3 @@
-// components/homepage/VenturesSection.tsx
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,10 +6,14 @@ import { motion } from "framer-motion";
 type Brand = {
   name: string;
   description: string;
-  logo: string;   // /public relative path
+  logo: string;   // path under /public
   url: string;    // external site
   metric?: string;
 };
+
+const INNOVATE_HUB_URL =
+  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
+  "https://innovatehub.abrahamoflondon.org";
 
 const defaultBrands: Brand[] = [
   {
@@ -34,7 +37,7 @@ const defaultBrands: Brand[] = [
     description:
       "A platform for tech startups to scale with sustainable solutions.",
     logo: "/assets/images/innovatehub.svg",
-    url: "https://innovatehub.com",
+    url: INNOVATE_HUB_URL, // uses env var, falls back to subdomain
     metric: "20+ Startups Supported",
   },
 ];
@@ -114,7 +117,6 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
   return (
     <section id="ventures" className="py-16 px-4" aria-labelledby="ventures-title">
       <div className="container mx-auto max-w-6xl">
-        {/* White surface for readability on darker pages */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -131,7 +133,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </p>
           </motion.header>
 
-          {/* Parent brand card */}
+          {/* Parent brand */}
           <motion.div
             variants={item}
             className="bg-white p-6 md:p-8 rounded-2xl shadow-xl ring-1 ring-black/10 mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-10"

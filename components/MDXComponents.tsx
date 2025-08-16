@@ -12,12 +12,7 @@ function toNumber(v?: number | string) {
   return Number.isFinite(n) ? n : undefined;
 }
 
-const A: MDXComponentsType["a"] = ({
-  href = "",
-  children,
-  className,
-  title,
-}) => {
+const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) => {
   const base =
     "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " +
@@ -72,7 +67,6 @@ const Img: MDXComponentsType["img"] = ({
 
   const [loaded, setLoaded] = React.useState(false);
 
-  // Optional skeleton while loading (for fill mode)
   const skeleton =
     "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 " +
     "animate-[shimmer_1.8s_linear_infinite]";
@@ -90,7 +84,7 @@ const Img: MDXComponentsType["img"] = ({
           loading="lazy"
           decoding="async"
           onLoadingComplete={() => setLoaded(true)}
-          {...rest}
+          {...(rest as any)}
         />
       ) : (
         <span
@@ -105,7 +99,6 @@ const Img: MDXComponentsType["img"] = ({
             className="object-cover"
             onLoadingComplete={() => setLoaded(true)}
           />
-          {/* skeleton only while not loaded */}
           {!loaded && (
             <>
               <style jsx>{`
