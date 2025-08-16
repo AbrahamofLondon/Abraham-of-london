@@ -11,8 +11,8 @@ const items: Testimonial[] = [
     role: "SAP Consultant",
   },
   {
-    quote: "A rare voice on fatherhood that is both thoughtful and actionable.",
-    name: "Maya L.",
+    quote: "A sensible voice on fatherhood that is both thoughtful and actionable.",
+    name: "Emilia I.",
     role: "Manager",
   },
   {
