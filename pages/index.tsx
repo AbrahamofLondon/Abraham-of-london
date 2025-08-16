@@ -13,6 +13,7 @@ import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
 import { generatedCover } from "@/lib/og";
 import { achievements } from "@/data/achievements";
+import SocialFollowStrip from "@/components/SocialFollowStrip"; // New import
 
 // Dynamic imports with SSR control
 const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
@@ -337,6 +338,9 @@ export default function Home({ posts, books, achievements }: HomeProps) {
             {"Let's Build Something Enduring"}
           </Link>
         </section>
+
+        {/* Add SocialFollowStrip */}
+        <SocialFollowStrip />
       </div>
     </Layout>
   );
