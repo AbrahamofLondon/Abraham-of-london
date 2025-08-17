@@ -1,94 +1,62 @@
 // lib/seo.ts
-import { absUrl } from "./siteConfig";
-+ import type { PostMeta as Post } from "./posts";
-+ import type { BookMeta as Book } from "./books";
 
-type BuildArgs = {
-  siteConfig: {
-    title: string;
-    author: string;
-    description: string;
-  };
-  posts: Post[];
-  books: Book[];
-  sameAsLinks: string[];
-  baseUrl: string;
-  assets: { logo: string; portrait: string };
+type PostLike = {
+  slug?: string;
+  title?: string;
+  author?: string;
+  coverImage?: string;
+  date?: string;
+  publishedAt?: string;
 };
 
-export function buildWebsiteSchema(args: BuildArgs) {
-  const { siteConfig, baseUrl } = args;
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: siteConfig.title,
-    alternateName: `${siteConfig.author} - Official Website`,
-    description: siteConfig.description,
-    url: baseUrl,
-    inLanguage: "en-GB",
-    author: { "@type": "Person", name: siteConfig.author, url: baseUrl },
-    publisher: { "@type": "Person", name: siteConfig.author, url: baseUrl },
+type BookLike = {
+  slug?: string;
+  title?: string;
+  author?: string;
+  coverImage?: string;
+};
+
+type BuildArgs = {
+  siteUrl?: string;
+  posts?: PostLike[];
+  books?: BookLike[];
+};
+
+export function buildJsonLd({ siteUrl = "", posts = [], books = [] }: BuildArgs) {
+  const base = (siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+
+  const toAbs = (p?: string) => {
+    const v = (p || "").trim();
+    if (!v) return "";
+    return /^https?:\/\//i.test(v) ? v : `${base}${v.startsWith("/") ? "" : "/"}${v}`;
   };
-}
 
-export function buildOrganizationSchema(args: BuildArgs) {
-  const { siteConfig, baseUrl, assets, sameAsLinks } = args;
-  return {
+  const postList = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${baseUrl}#organization`,
-    name: siteConfig.title,
-    url: baseUrl,
-    logo: { "@type": "ImageObject", url: absUrl(assets.logo), width: 512, height: 512 },
-    image: { "@type": "ImageObject", url: assets.portrait, width: 400, height: 400 },
-    sameAs: sameAsLinks,
-    address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
+    "@type": "ItemList",
+    itemListElement: posts.map((p, i) => ({
+      "@type": "BlogPosting",
+      position: i + 1,
+      headline: p.title || "",
+      url: toAbs(`/blog/${p.slug}`),
+      image: toAbs(p.coverImage || "/assets/images/blog/default-blog-cover.jpg"),
+      author: { "@type": "Person", name: p.author || "Abraham of London" },
+      datePublished: p.date || p.publishedAt || undefined,
+    })),
   };
-}
 
-export function buildPostSchemas(args: BuildArgs) {
-  const { posts, siteConfig, assets } = args;
-  return posts.map((p) => ({
+  const bookList = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: p.title,
-    image: absUrl(p.coverImage),
-    datePublished: p.date,
-    dateModified: p.date,
-    author: { "@type": "Person", name: p.author },
-    publisher: {
-      "@type": "Organization",
-      name: siteConfig.title,
-      logo: { "@type": "ImageObject", url: absUrl(assets.logo) },
-    },
-    description: p.excerpt,
-    mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${p.slug}`) },
-  }));
-}
+    "@type": "ItemList",
+    itemListElement: books.map((b, i) => ({
+      "@type": "Book",
+      position: i + 1,
+      name: b.title || "",
+      url: toAbs(`/books/${b.slug}`),
+      image: toAbs(b.coverImage || "/assets/images/default-book.jpg"),
+      author: { "@type": "Person", name: b.author || "Abraham of London" },
+    })),
+  };
 
-export function buildBookSchemas(args: BuildArgs) {
-  const { books, siteConfig } = args;
-  return books.map((b) => ({
-    "@context": "https://schema.org",
-    "@type": "Book",
-    name: b.title,
-    author: { "@type": "Person", name: b.author },
-    bookFormat: "https://schema.org/EBook",
-    image: absUrl(b.coverImage),
-    publisher: siteConfig.title,
-    description: b.excerpt,
-    inLanguage: "en-GB",
-    url: absUrl(`/books/${b.slug}`),
-    offers: { "@type": "Offer", url: b.buyLink },
-  }));
-}
-
-/** Returns an array of JSON-LD blocks for the home page. */
-export function buildHomeStructuredData(args: BuildArgs) {
-  return [
-    buildWebsiteSchema(args),
-    buildOrganizationSchema(args),
-    ...buildPostSchemas(args),
-    ...buildBookSchemas(args),
-  ];
+  return { postList, bookList };
 }
