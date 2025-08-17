@@ -23,10 +23,10 @@ export default function HeroSection({
 }: Props) {
   return (
     <section
-      className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden"
+      className="relative isolate w-full min-h-[75vh] sm:min-h-[90vh] overflow-hidden"
       aria-labelledby="hero-title"
     >
-      {/* Background image + scrim */}
+      {/* Background image + overlay */}
       <div className="absolute inset-0 z-0">
         <Image
           src={backgroundSrc}
@@ -38,46 +38,47 @@ export default function HeroSection({
           sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-black/55 sm:bg-black/45 md:bg-black/40 lg:bg-black/35" />
+        {/* Overlay stronger on small screens */}
+        <div className="absolute inset-0 bg-black/70 sm:bg-black/60 md:bg-black/50" />
       </div>
 
       {/* Foreground content */}
-      <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
+      <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-3xl text-white"
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="max-w-2xl text-white"
         >
           <h1
             id="hero-title"
-            className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight drop-shadow-lg"
           >
             {title}
           </h1>
 
-          {/* Grammar + rhythm fix */}
-          <p className="mt-4 text-lg sm:text-xl text-white/90">
+          <p className="mt-4 text-lg sm:text-xl md:text-2xl text-white/95 leading-relaxed drop-shadow">
             {subtitle}{" "}
             <span aria-hidden>—</span>
             <span className="sr-only">— </span>
             join{" "}
-            <strong className="font-semibold">
+            <strong className="font-semibold text-cream">
               {communityCount.toLocaleString()}
             </strong>{" "}
             global leaders.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          {/* CTA buttons */}
+          <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href={ctaLink}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-6 py-3 font-semibold hover:bg-forest/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-forest/60"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-7 py-3 text-lg font-semibold shadow-lg hover:bg-forest/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-forest/70"
             >
               {ctaText}
             </Link>
             <Link
               href="/books"
-              className="inline-flex items-center justify-center rounded-full border border-white/60 bg-white/10 text-white px-6 py-3 font-semibold backdrop-blur hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60"
+              className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/15 text-white px-7 py-3 text-lg font-semibold backdrop-blur-md shadow-md hover:bg-white/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/70"
             >
               Shop Now
             </Link>
