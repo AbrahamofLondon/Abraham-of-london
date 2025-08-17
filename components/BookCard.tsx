@@ -130,3 +130,9 @@ export default function BookCard({
     </motion.article>
   );
 }
+
+
+
+
+
+

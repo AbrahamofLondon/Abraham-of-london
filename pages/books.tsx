@@ -379,3 +379,9 @@ export const getStaticProps: GetStaticProps<BooksProps> = async () => {
     };
   }
 };
+
+
+
+
+
+

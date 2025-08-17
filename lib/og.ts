@@ -11,3 +11,9 @@ export function generatedCover(slug?: string, title?: string) {
   // Fallback to the default image if title or slug is missing.
   return "/assets/images/blog/default-blog-cover.jpg";
 }
+
+
+
+
+
+
