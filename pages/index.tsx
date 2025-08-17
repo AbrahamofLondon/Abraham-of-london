@@ -19,15 +19,19 @@ import abrahamLogo from "@/public/assets/images/abraham-logo.jpg";
 import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-banner.webp";
 import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
+
+// social images from the public/assets/social directory
 import ogImage from "/assets/social/og-image.jpg";
 import twitterImage from "/assets/social/twitter-image.webp";
 import linkedinIcon from "/assets/social/linkedin.svg";
 import twitterIcon from "/assets/social/twitter.svg";
-import instagramIcon from "/assets/social/instagram.svg";;
-import fatheringWithoutFear from "@/public/assets/books/fathering-without-fear.jpg";
-import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
-import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
-import defaultBookCover from "@/public/assets/images/default-book.jpg";
+import instagramIcon from "/assets/social/instagram.svg";
+
+// book and other images from the public/assets/images and public/assets/books directories
+import fatheringWithoutFear from "/assets/books/fathering-without-fear.jpg";
+import fatheringPrinciples from "/assets/images/fathering-principles.jpg";
+import fatheringWithoutFearTeaser from "/assets/images/fathering-without-fear-teaser.jpg";
+import defaultBookCover from "/assets/images/default-book.jpg";
 
 // ---------------- Animations ----------------
 const container = {
