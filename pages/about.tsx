@@ -1,34 +1,35 @@
 // pages/about.tsx
+import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import React, { useMemo } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
-import ScrollProgress from "@/components/ScrollProgress";
 import { siteConfig } from "@/lib/siteConfig";
 
-// ---------- Config & Helpers ----------
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.URL ||
-  process.env.DEPLOY_PRIME_URL ||
-  "https://abraham-of-london.netlify.app"
-).replace(/\/$/, "");
+// --- build-time props (avoids client env usage) ---
+type Props = { origin: string };
 
-const abs = (path: string): string => {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-  return new URL(path, SITE_URL).toString();
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const origin = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.URL ||
+    process.env.DEPLOY_PRIME_URL ||
+    "https://abraham-of-london.netlify.app"
+  ).replace(/\/$/, "");
+
+  return { props: { origin }, revalidate: 86400 };
 };
 
-// ---------- Animations ----------
+// --- helpers ---
+const abs = (origin: string) => (path: string) =>
+  !path ? "" : /^https?:\/\//i.test(path) ? path : `${origin}${path.startsWith("/") ? "" : "/"}${path}`;
+
+// --- animations ---
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
 const itemVariants = {
@@ -36,12 +37,13 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-export default function AboutPage() {
+export default function AboutPage({ origin }: InferGetStaticPropsType<typeof getStaticProps>) {
+  const makeAbs = useMemo(() => abs(origin), [origin]);
+
   const sameAs = useMemo(
-    () =>
-      (siteConfig.socialLinks || [])
-        .filter((l) => l.external && /^https?:\/\//i.test(l.href))
-        .map((l) => l.href),
+    () => (siteConfig.socialLinks || [])
+      .filter((l) => l.external && /^https?:\/\//i.test(l.href))
+      .map((l) => l.href),
     []
   );
 
@@ -49,10 +51,10 @@ export default function AboutPage() {
     const person = {
       "@context": "https://schema.org",
       "@type": "Person",
-      "@id": `${SITE_URL}/#person`,
+      "@id": `${origin}/#person`,
       name: siteConfig.author,
-      url: SITE_URL,
-      image: abs("/assets/images/profile-portrait.webp"),
+      url: origin,
+      image: makeAbs("/assets/images/profile-portrait.webp"),
       sameAs,
       jobTitle: "Founder & Strategic Advisor",
       description:
@@ -63,18 +65,18 @@ export default function AboutPage() {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-        { "@type": "ListItem", position: 2, name: "About", item: `${SITE_URL}/about` },
+        { "@type": "ListItem", position: 1, name: "Home", item: origin },
+        { "@type": "ListItem", position: 2, name: "About", item: `${origin}/about` },
       ],
     };
 
     return [person, breadcrumb];
-  }, [sameAs]);
+  }, [origin, makeAbs, sameAs]);
 
   return (
-    <Layout>
+    <Layout pageTitle="About">
       <Head>
-        <title>About | {siteConfig.title}</title>
+        {/* keep meta, Layout provides the <title> */}
         <meta
           name="description"
           content="About Abraham of London — a founder and strategic advisor from London helping leaders build enduring brands, teams, and legacies."
@@ -85,23 +87,14 @@ export default function AboutPage() {
           property="og:description"
           content="Abraham of London is a founder and strategic advisor from London focused on leadership, innovation, and legacy."
         />
-        <meta
-          property="og:image"
-          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
-        />
-        <meta property="og:url" content={`${SITE_URL}/about`} />
+        <meta property="og:image" content={makeAbs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
+        <meta property="og:url" content={`${origin}/about`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href={`${SITE_URL}/about`} />
+        <link rel="canonical" href={`${origin}/about`} />
         {structuredData.map((schema, i) => (
-          <script
-            key={i}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
         ))}
       </Head>
-
-      <ScrollProgress />
 
       {/* Hero */}
       <motion.div
@@ -139,7 +132,7 @@ export default function AboutPage() {
           <div className="relative w-full md:w-1/2 h-64 md:h-96 rounded-xl overflow-hidden mb-8 md:mb-0 md:mr-12">
             <Image
               src="/assets/images/profile-portrait.webp"
-              alt="Portrait of Abraham of London wearing a suit"
+              alt="Portrait of Abraham of London"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px"
@@ -148,30 +141,26 @@ export default function AboutPage() {
           </div>
 
           <div className="md:w-1/2">
-            <h2 className="text-3xl font-bold mb-4 text-gray-900">
-              Strategist, Writer, Builder
-            </h2>
+            <h2 className="text-3xl font-bold mb-4 text-gray-900">Strategist, Writer, Builder</h2>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              My work sits at the intersection of leadership, brand strategy, and
-              human development. Whether advising founders, writing, or building
-              ventures, I focus on clarity, durability, and meaningful impact.
+              My work sits at the intersection of leadership, brand strategy, and human development.
+              Whether advising founders, writing, or building ventures, I focus on clarity, durability, and
+              meaningful impact.
             </p>
             <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-              I care less about trends and more about timeless principles—family,
-              character, stewardship, and creativity. Those values guide every
-              plan, partnership, and page I publish.
+              I care less about trends and more about timeless principles—family, character, stewardship,
+              and creativity. Those values guide every plan, partnership, and page I publish.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              This isn’t just a brand—it’s an ongoing body of work. From thought
-              leadership to personal writing like{" "}
+              This isn’t just a brand—it’s an ongoing body of work. From thought leadership to personal
+              writing like{" "}
               <Link
                 href="/books/fathering-without-fear"
                 className="text-forest underline decoration-forest/40 hover:decoration-forest"
               >
                 Fathering Without Fear
               </Link>
-              , each project serves the same aim: to help people build lives and
-              legacies that matter.
+              , each project serves the same aim: to help people build lives and legacies that matter.
             </p>
           </div>
         </motion.section>
@@ -184,9 +173,7 @@ export default function AboutPage() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ delay: 0.1, duration: 0.5 }}
         >
-          <h2 className="text-3xl font-bold mb-4 text-gray-900">
-            Focus Areas
-          </h2>
+          <h2 className="text-3xl font-bold mb-4 text-gray-900">Focus Areas</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
             A selection of the domains where I spend most of my time and energy.
           </p>
