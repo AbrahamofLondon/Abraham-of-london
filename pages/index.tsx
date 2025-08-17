@@ -231,37 +231,35 @@ export default function Home({ posts }: HomeProps) {
       </Section>
 
       {/* ---------------- Latest posts ---------------- */}
-      <div>
-  {latestPosts.map((post) => (
-    <motion.div key={post.slug} variants={fadeInUp}>
-      {/* Pass a default value for 'title' if it's undefined */}
-      <BlogPostCard {...post} title={post.title ?? 'Untitled Post'} />
-    </motion.div>
-  ))}
-</div>
-
-          <div className="mt-10 text-center">
-            <Link
-              href="/blog"
-              className="inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-gray-800 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+      <Section title="Latest Posts">
+        <div>
+          {latestPosts.map((post) => (
+            <motion.div key={post.slug} variants={item}>
+              <BlogPostCard {...post} title={post.title ?? "Untitled Post"} />
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <Link
+            href="/blog"
+            className="inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-gray-800 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+          >
+            View All
+            <svg
+              className="ml-2 h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
             >
-              View All
-              <svg
-                className="ml-2 h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </Link>
-          </div>
-        </Section>
-      )}
+              <path
+                fillRule="evenodd"
+                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        </div>
+      </Section>
 
       {/* ---------------- About ---------------- */}
       <Section title="About Me" withContainer>

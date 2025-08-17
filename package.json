@@ -39,7 +39,7 @@
     "brace-expansion": "^2.0.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.31",
-    "glob": "^10.0.0",
+    "glob": "^10.4.5",
     "jackspeak": "^3.1.2",
     "lru-cache": "^10.4.3",
     "minimatch": "^9.0.3",
