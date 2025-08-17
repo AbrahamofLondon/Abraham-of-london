@@ -41,6 +41,21 @@ const SITE_URL = (
   "https://abrahamoflondon.org"
 ).replace(/\/$/, "");
 
+// ---------- Export types that may be needed by other modules ----------
+export type Post = PostMeta; // Export Post type for compatibility with seo.ts
+
+export interface Book {
+  slug: string;
+  title: string;
+  coverImage: string;
+  excerpt: string;
+  author: string;
+  buyLink: string;
+  downloadPdf?: string;
+  downloadEpub?: string;
+  genre: string;
+}
+
 // ---------- Page props ----------
 interface HomeProps {
   posts: PostMeta[];
@@ -343,7 +358,7 @@ const Home: React.FC<HomeProps> = ({ posts }) => {
           </h2>
           <div className="mt-6 rounded-2xl bg-gradient-to-r from-cream to-white p-8 shadow-lg ring-1 ring-black/5">
             <p className="mx-auto max-w-3xl text-center text-lg text-gray-800">
-              I’m a London-based strategist and author. My work lives where leadership,
+              I'm a London-based strategist and author. My work lives where leadership,
               fatherhood, and craft meet—helping people build work and families that
               endure. Less trend, more principle.
             </p>
@@ -436,7 +451,7 @@ const Home: React.FC<HomeProps> = ({ posts }) => {
           <h2 className="text-3xl md:text-4xl font-serif font-bold">Join the Newsletter</h2>
           <p className="mx-auto mt-2 max-w-2xl text-cream/90">
             Essays on leadership, fatherhood, and building durable work—delivered occasionally,
-            when there’s something worth saying.
+            when there's something worth saying.
           </p>
 
           {/* Use your existing component; if you prefer a simple form, replace with inputs */}
