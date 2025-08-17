@@ -1,3 +1,4 @@
+// components/homepage/VenturesSection.tsx
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +8,7 @@ type Brand = {
   name: string;
   description: string;
   logo: string;   // path under /public
-  url: string;    // external site
+  url: string;    // external site (or internal path)
   metric?: string;
 };
 
@@ -19,26 +20,26 @@ const defaultBrands: Brand[] = [
   {
     name: "Alomarada",
     description:
-      "Redefining development through ethical market exploration and human capital growth.",
+      "Business advisory guiding investors and mentoring African-diaspora entrepreneurs to develop African markets through ethical exploration of market gaps—with a practical commitment to unlocking the continent’s staggering human capital.",
     logo: "/assets/images/alomarada-ltd.webp",
     url: "https://alomarada.com",
-    metric: "10K+ Jobs Created",
+    metric: "Investor & founder mentorship",
   },
   {
     name: "Endureluxe",
     description:
-      "High-performance luxury fitness equipment and interactive community.",
+      "Premium, sustainable fitness partnerships that promote wellbeing—powered by community and thoughtful technology, with writing that advances state-of-the-art knowledge and practical life wisdom.",
     logo: "/assets/images/endureluxe-ltd.webp",
     url: "https://endureluxe.com",
-    metric: "5M+ Users",
+    metric: "Performance & wellbeing",
   },
   {
     name: "InnovateHub",
     description:
-      "A platform for tech startups to scale with sustainable solutions.",
+      "Strategy, playbooks, and hands-on product support to ship durable products—rooted in ethics, clarity, and excellent craft.",
     logo: "/assets/images/innovatehub.svg",
-    url: INNOVATE_HUB_URL, // uses env var, falls back to subdomain
-    metric: "20+ Startups Supported",
+    url: INNOVATE_HUB_URL, // env first; falls back to subdomain
+    metric: "Early access open",
   },
 ];
 
@@ -49,12 +50,12 @@ type VenturesProps = {
 const container = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
+} as const;
 
 const item = {
   hidden: { y: 18, opacity: 0 },
   visible: { y: 0, opacity: 1 },
-};
+} as const;
 
 function BrandCard({ brand }: { brand: Brand }) {
   return (
@@ -64,7 +65,7 @@ function BrandCard({ brand }: { brand: Brand }) {
     >
       <div className="relative w-[140px] h-[140px] mx-auto mb-5">
         <Image
-          src={brand.logo}
+          src={brand.logo || "/assets/images/default-brand.svg"}
           alt={`${brand.name} logo`}
           fill
           sizes="(max-width: 768px) 140px, 140px"
@@ -74,13 +75,12 @@ function BrandCard({ brand }: { brand: Brand }) {
       </div>
 
       <h3 className="text-2xl font-semibold mb-1">{brand.name}</h3>
-
       <p className="text-deepCharcoal/80 mb-3 flex-1">{brand.description}</p>
 
       {brand.metric && (
         <p
           className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-deepCharcoal/80 border border-black/10 px-3 py-1 text-xs"
-          aria-label={`Key impact metric for ${brand.name}: ${brand.metric}`}
+          aria-label={`Key note for ${brand.name}: ${brand.metric}`}
         >
           {brand.metric}
         </p>
@@ -117,6 +117,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
   return (
     <section id="ventures" className="py-16 px-4" aria-labelledby="ventures-title">
       <div className="container mx-auto max-w-6xl">
+        {/* White surface for readability on darker pages */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -129,7 +130,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
               Ventures & Brands
             </h2>
             <p className="text-lg md:text-xl text-deepCharcoal/80 max-w-2xl">
-              A portfolio at the intersection of innovation, sustainability, and impact.
+              A portfolio at the intersection of strategy, sustainability, and impact.
             </p>
           </motion.header>
 
@@ -152,8 +153,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             <div className="text-center md:text-left">
               <h3 className="text-3xl md:text-4xl font-bold mb-2">Abraham of London</h3>
               <p className="text-deepCharcoal/80">
-                The cornerstone of my mission—driving thought leadership, strategic advisory,
-                and creative ventures globally.
+                Strategic stewardship, thought leadership, and the standards that hold the family together.
               </p>
               <div className="mt-4">
                 <Link
