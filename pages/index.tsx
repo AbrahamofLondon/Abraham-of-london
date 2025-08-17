@@ -10,7 +10,7 @@ export type { BookMeta as Book } from "@/lib/books";
 import Layout from "@/components/Layout";
 import EmailSignup from "@/components/EmailSignup";
 import { BlogPostCard } from "@/components/BlogPostCard";
-import { BookCard, BookCardProps } from "@/components/BookCard";
+import BlogPostCard from "@/components/BlogPostCard";
 import { getAllPosts, PostMeta } from "@/lib/posts";
 import { siteConfig } from "@/lib/siteConfig";
 
