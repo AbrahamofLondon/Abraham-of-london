@@ -10,19 +10,41 @@ type Brand = {
   logo: string;   // path under /public
   url: string;    // external site (or internal path)
   metric?: string;
+  secondaryHref?: string;
+  secondaryText?: string;
 };
 
-const INNOVATE_HUB_URL =
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
-  "https://innovatehub.abrahamoflondon.org";
+// ---------- URLs (env-first, robust fallbacks) ----------
+const pickUrl = (...candidates: (string | undefined)[]) =>
+  candidates.find((u) => typeof u === "string" && u.trim().length > 0) || "#";
 
+const INNOVATE_HUB_BASE = pickUrl(
+  process.env.NEXT_PUBLIC_INNOVATEHUB_URL,                 // e.g. https://innovatehub.abrahamoflondon.org
+  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,             // e.g. https://innovatehub-abrahamoflondon.netlify.app
+  "https://innovatehub.netlify.app"
+);
+
+// Absolute early-access URL that works on whichever InnovateHub host is active
+const INNOVATE_HUB_EARLY_ACCESS = new URL("/forms/early-access.html", INNOVATE_HUB_BASE).toString();
+
+const ALOMARADA_URL = pickUrl(
+  process.env.NEXT_PUBLIC_ALOMARADA_URL,
+  "https://alomarada.com"
+);
+
+const ENDURELUXE_URL = pickUrl(
+  process.env.NEXT_PUBLIC_ENDURELUXE_URL,
+  "https://endureluxe.com"
+);
+
+// ---------- Content ----------
 const defaultBrands: Brand[] = [
   {
     name: "Alomarada",
     description:
       "Business advisory guiding investors and mentoring African-diaspora entrepreneurs to develop African markets through ethical exploration of market gaps—with a practical commitment to unlocking the continent’s staggering human capital.",
     logo: "/assets/images/alomarada-ltd.webp",
-    url: "https://alomarada.com",
+    url: ALOMARADA_URL,
     metric: "Investor & founder mentorship",
   },
   {
@@ -30,7 +52,7 @@ const defaultBrands: Brand[] = [
     description:
       "Premium, sustainable fitness partnerships that promote wellbeing—powered by community and thoughtful technology, with writing that advances state-of-the-art knowledge and practical life wisdom.",
     logo: "/assets/images/endureluxe-ltd.webp",
-    url: "https://endureluxe.com",
+    url: ENDURELUXE_URL,
     metric: "Performance & wellbeing",
   },
   {
@@ -38,7 +60,9 @@ const defaultBrands: Brand[] = [
     description:
       "Strategy, playbooks, and hands-on product support to ship durable products—rooted in ethics, clarity, and excellent craft.",
     logo: "/assets/images/innovatehub.svg",
-    url: INNOVATE_HUB_URL, // env first; falls back to subdomain
+    url: INNOVATE_HUB_BASE,                // visit site
+    secondaryHref: INNOVATE_HUB_EARLY_ACCESS, // direct early-access
+    secondaryText: "Early Access",
     metric: "Early access open",
   },
 ];
@@ -86,29 +110,44 @@ function BrandCard({ brand }: { brand: Brand }) {
         </p>
       )}
 
-      <Link
-        href={brand.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        prefetch={false}
-        className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full"
-        aria-label={`Visit ${brand.name} website (opens in a new tab)`}
-      >
-        Learn More
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 ml-2"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        <Link
+          href={brand.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          prefetch={false}
+          className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full"
+          aria-label={`Visit ${brand.name} website (opens in a new tab)`}
         >
-          <path
-            fillRule="evenodd"
-            d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </Link>
+          Learn More
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 ml-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </Link>
+
+        {brand.secondaryHref && brand.secondaryText && (
+          <Link
+            href={brand.secondaryHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            prefetch={false}
+            className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+            aria-label={`${brand.secondaryText} for ${brand.name} (opens in a new tab)`}
+          >
+            {brand.secondaryText}
+          </Link>
+        )}
+      </div>
     </motion.article>
   );
 }
