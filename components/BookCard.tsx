@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion } from "framer-motion";
+import clsx from "clsx"; // Added import for clsx
 
 export type BookCardProps = {
   slug: string;
