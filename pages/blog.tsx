@@ -11,7 +11,8 @@ interface BlogPost {
   title: string;
   date: string;
   excerpt: string;
-  coverImage?: string;
+  coverImage: string; // Remove the optional operator since we'll always provide a fallback
+  author?: string; // Add author field for SEO compatibility
 }
 
 interface BlogProps {
@@ -30,15 +31,13 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {posts.map((post) => (
             <div key={post.slug} className="border rounded-2xl shadow-md overflow-hidden bg-white">
-              {post.coverImage && (
-                <Image
-                  src={post.coverImage}
-                  alt={post.title}
-                  width={800}
-                  height={500}
-                  className="w-full h-56 object-cover"
-                />
-              )}
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                width={800}
+                height={500}
+                className="w-full h-56 object-cover"
+              />
               <div className="p-6">
                 <h2 className="text-2xl font-semibold mb-2">
                   <Link href={`/blog/${post.slug}`} className="hover:underline">
@@ -70,6 +69,7 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
     "publishedAt",
     "excerpt",
     "coverImage",
+    "author",
   ]);
 
   // Clean and filter posts safely
@@ -80,7 +80,8 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
       title: p.title?.trim() || "Untitled",
       date: p.date || p.publishedAt || "",
       excerpt: p.excerpt?.trim() || "Read more for full details.",
-      coverImage: p.coverImage || "/assets/images/og-image.jpg",
+      coverImage: p.coverImage || "/assets/images/og-image.jpg", // Always provide a fallback
+      author: p.author || "Abraham Adaramola", // Add author with fallback
     }));
 
   return {

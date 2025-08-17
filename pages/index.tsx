@@ -21,14 +21,14 @@ import abrahamLogo from "@/public/assets/images/abraham-logo.jpg";
 import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
 
-import ogImage from "@/public/assets/social/og-image.jpg";
-import twitterImage from "@/public/assets/social/twitter-image.webp";
-import linkedinIcon from "@/public/assets/social/linkedin.svg";
-import twitterIcon from "@/public/assets/social/twitter.svg";
-import instagramIcon from "@/public/assets/social/instagram.svg";
+import ogImage from "@/public/assets/images/social/og-image.jpg"; // Using existing banner as fallback
+import twitterImage from "@/public/assets/images/social/twitter-image.webp";
+import linkedinIcon from "@/public/assets/images/social/linkedin.svg";
+import twitterIcon from "@/public/assets/images/social/twitter.svg";
+import instagramIcon from "@/public/assets/images/social/instagram.svg";
 
 // Book covers
-import fatheringWithoutFear from "@/public/assets/books/fathering-without-fear.jpg";
+import fatheringWithoutFear from "@/public/assets/images/books/fathering-without-fear.jpg";
 import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
 import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
 import defaultBookCover from "@/public/assets/images/default-book.jpg";
@@ -42,7 +42,15 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 // ---------- Export types that may be needed by other modules ----------
-export type Post = PostMeta; // Export Post type for compatibility with seo.ts
+export interface Post {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  coverImage: string; // Make this required, not optional
+  author: string; // Make this required, not optional
+  content?: string;
+}
 
 export interface Book {
   slug: string;
@@ -58,7 +66,7 @@ export interface Book {
 
 // ---------- Page props ----------
 interface HomeProps {
-  posts: PostMeta[];
+  posts: Post[]; // Use our defined Post type instead of PostMeta
 }
 
 // ---------- Animation variants ----------
@@ -114,6 +122,7 @@ const Home: React.FC<HomeProps> = ({ posts }) => {
     },
   ];
 
+  // Latest posts are already properly typed as Post[]
   const latestPosts = posts.slice(0, 3);
 
   return (
@@ -472,7 +481,7 @@ function LogoTile({
   h = 120,
   rounded = "xl",
 }: {
-  src: { src: string };
+  src: any; // Accept any type of image import
   alt: string;
   w?: number;
   h?: number;
@@ -497,10 +506,20 @@ function LogoTile({
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   try {
-    const posts =
-      getAllPosts(["slug", "title", "date", "coverImage", "excerpt"]) || [];
+    const rawPosts = getAllPosts(["slug", "title", "date", "coverImage", "excerpt", "author"]) || [];
+
+    // Transform posts to match our Post interface with all required fields
+    const posts: Post[] = rawPosts.map(post => ({
+      slug: post.slug || "",
+      title: post.title || "Untitled",
+      date: post.date || "",
+      excerpt: post.excerpt || "",
+      coverImage: post.coverImage || "/assets/images/og-image.jpg",
+      author: post.author || "Abraham Adaramola"
+    }));
+
     return { props: { posts } };
   } catch (err) {
     console.error("getStaticProps error on index:", err);
