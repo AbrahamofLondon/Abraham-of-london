@@ -25,7 +25,7 @@ const RAW: Omit<SiteConfig, 'siteUrl' | 'socialLinks'> & {
   title: 'Abraham of London',
   author: 'Abraham of London',
   description:
-    'Official site of Abraham of London ƒÆ’� ƒš‚ƒÆ’‚ƒš¬…¡ƒš‚¬ƒÆ’‚ƒ‚¬Å¡‚¬ƒ¦‚¬Å“ author, strategist, and fatherhood advocate.',
+    'Official site of Abraham of London ƒÆ’� ƒš‚ƒÆ’‚ƒš¬…¡ƒš‚¬ƒÆ’‚ƒ‚¬Å¡‚¬ƒ¦‚¬Å“ author, strategist, and fatherhood advocate.',
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.URL ||
