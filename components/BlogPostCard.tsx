@@ -1,28 +1,10 @@
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import clsx from "clsx";
-import DateFormatter from "@/components/DateFormatter";
+// components/BlogPostCard.tsx
+import Image, { type StaticImageData } from 'next/image';
+import Link from 'next/link';
+import { formatDate } from '@/lib/date';
+import { Post } from '@/types';
 
-export type BlogPostCardProps = {
-  slug: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  coverImage: string;
-  author: string;
-  readTime?: string;
-  category?: string;
-  isFeatured?: boolean;
-  className?: string;
-};
-
-// Small, neutral blur placeholder
-const BLUR_DATA_URL =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PSc5JyBmaWxsPSdub25lJz48cmVjdCB3aWR0aD0nMTYnIGhlaWdodD0nOScgZmlsbD0nI2U1ZTdlYicvPjwvc3ZnPg==";
-
-const FALLBACK_COVER = "/assets/images/blog/default-blog-cover.jpg";
+const DEFAULT_COVER = '/assets/images/blog/default-blog-cover.jpg';
 
 export default function BlogPostCard({
   slug,
@@ -33,84 +15,96 @@ export default function BlogPostCard({
   author,
   readTime,
   category,
-  isFeatured = false,
-  className,
-}: BlogPostCardProps) {
-  const cardClass = clsx(
-    "group relative overflow-hidden rounded-2xl bg-white shadow-2xl border border-gray-200 hover:shadow-blue-200 transition-all duration-300",
-    isFeatured && "md:col-span-2 lg:col-span-2",
-    className,
-  );
+}: Post) {
+  const initialSrc: string | StaticImageData =
+    typeof coverImage === 'object' && coverImage !== null
+      ? coverImage
+      : (typeof coverImage === 'string' && coverImage.trim())
+      ? coverImage
+      : DEFAULT_COVER;
 
-  const sizes = isFeatured
-    ? "(min-width: 1280px) 800px, (min-width: 768px) 70vw, 100vw"
-    : "(min-width: 1024px) 400px, (min-width: 768px) 50vw, 100vw";
+  const titleId = `post-${slug}-title`;
+  const iso = new Date(date).toString() === 'Invalid Date' ? undefined : new Date(date).toISOString();
+  const displayDate = formatDate(date, 'en-GB');
 
-  const img = coverImage?.trim() || FALLBACK_COVER;
+  let currentSrc: string | StaticImageData = initialSrc;
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.target as HTMLImageElement;
+    if (img.src.includes(DEFAULT_COVER)) return;
+    img.src = DEFAULT_COVER;
+    currentSrc = DEFAULT_COVER;
+  };
+
+  const metaImageContent: string = typeof currentSrc === 'string' ? currentSrc : (currentSrc as StaticImageData).src;
 
   return (
-    <motion.article
-      className={cardClass}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-      whileHover={{ scale: 1.05 }}
+    <article
+      className="group rounded-xl border border-[var(--color-lightGrey)] bg-[var(--color-warmWhite)] shadow-card hover:shadow-cardHover transition overflow-hidden focus-within:ring-2 focus-within:ring-[var(--color-primary)]"
+      itemScope
+      itemType="https://schema.org/BlogPosting"
+      aria-labelledby={titleId}
     >
-      <Link
-        href={`/blog/${slug}`}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-2xl"
-        aria-label={`Read blog post: ${title}`}
-      >
-        {/* Cover Image */}
-        <div className={clsx("relative w-full", isFeatured ? "aspect-[16/9]" : "aspect-[4/3]")}>
+      <Link href={`/blog/${slug}`} className="block relative w-full h-56 outline-none" prefetch={false}>
+        {typeof currentSrc === 'string' ? (
           <Image
-            src={img}
+            src={currentSrc}
             alt={title}
             fill
-            priority={isFeatured}
-            loading={isFeatured ? "eager" : "lazy"}
-            sizes={sizes}
-            quality={90}
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+            onError={handleImgError}
+            priority={false}
           />
-          {category && (
-            <span className="absolute left-4 top-4 rounded-full bg-blue-600 text-white px-3 py-1 text-sm font-semibold shadow-md">
-              {category}
-            </span>
-          )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent" />
-        </div>
-
-        {/* Content */}
-        <div className={clsx("p-6", isFeatured && "md:p-8")}>
-          <h3 className={clsx("font-serif font-bold leading-tight text-2xl md:text-3xl text-gray-900 group-hover:text-blue-600 transition-colors", isFeatured && "md:text-4xl")}>
-            {title}
-          </h3>
-          <p className={clsx("mt-3 text-gray-600 line-clamp-3", isFeatured && "md:mt-4")}>
-            {excerpt}
-          </p>
-
-          {/* Meta */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
-            <DateFormatter dateString={date} pattern="d MMM yyyy" />
-            <span className="mx-1 select-none" aria-hidden="true">
-              {"\u00B7"}
-            </span>
-            <span>by {author}</span>
-            {readTime && (
-              <>
-                <span className="mx-1 select-none" aria-hidden="true">
-                  {"\u00B7"}
-                </span>
-                <span>{readTime}</span>
-              </>
-            )}
-          </div>
-        </div>
+        ) : (
+          <Image
+            src={currentSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+            placeholder="blur"
+            priority={false}
+          />
+        )}
+        <meta itemProp="image" content={metaImageContent} />
       </Link>
-    </motion.article>
+
+      <div className="p-4">
+        {category && (
+          <span className="inline-block text-xs rounded bg-[var(--color-warmWhite)] border border-[var(--color-lightGrey)] px-2 py-1 text-[var(--color-on-secondary)]/80 mb-2">
+            {category}
+          </span>
+        )}
+
+        <h3
+          id={titleId}
+          className="text-xl font-serif text-[var(--color-on-secondary)] group-hover:underline mb-2"
+          itemProp="headline"
+        >
+          <Link
+            href={`/blog/${slug}`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            {title}
+          </Link>
+        </h3>
+
+        <p className="text-sm text-[var(--color-on-secondary)]/80 line-clamp-3" itemProp="description">
+          {excerpt}
+        </p>
+
+        <div className="mt-4 flex items-center justify-between text-xs text-[var(--color-on-secondary)]/60">
+          <span itemProp="author" itemScope itemType="https://schema.org/Person">
+            <span itemProp="name">{author}</span>
+          </span>
+          <span>
+            {readTime ? `${readTime} · ` : ''}
+            <time dateTime={iso} itemProp="datePublished">
+              {displayDate}
+            </time>
+          </span>
+        </div>
+      </div>
+    </article>
   );
 }
