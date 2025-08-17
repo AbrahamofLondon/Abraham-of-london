@@ -1,338 +1,410 @@
-// pages/index.tsx
-import React, { useState } from "react";
+import React from "react";
 import Head from "next/head";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import type { GetStaticProps } from "next";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
-import { getAllPosts, PostMeta } from "@/lib/posts";
-import { getAllBooks, BookMeta } from "@/lib/books";
-import { siteConfig, absUrl } from "@/lib/siteConfig";
 import EmailSignup from "@/components/EmailSignup";
-import { generatedCover } from "@/lib/og";
-import { achievements } from "@/data/achievements";
-import LogoTile from "@/components/LogoTile"; // Added to resolve build error
+import { BlogPostCard } from "@/components/BlogPostCard";
+import { BookCard, BookCardProps } from "@/components/BookCard";
+import { getAllPosts, PostMeta } from "@/lib/posts";
+import { siteConfig } from "@/lib/siteConfig";
 
-// NOTE: SocialFollowStrip is no longer imported here as it's in the Layout.
+// images
+import profilePortrait from "@/public/assets/images/profile-portrait.webp";
+import abrahamLogo from "@/public/assets/images/abraham-logo.jpg";
+import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-banner.webp";
+import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
+import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
 
-// Dynamic imports with SSR control
-const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
-const AboutSection = dynamic(() => import("@/components/homepage/AboutSection"), { ssr: true });
-const VenturesSection = dynamic(() => import("@/components/homepage/VenturesSection"), { ssr: true });
-const ContentShowcase = dynamic(() => import("@/components/homepage/ContentShowcase"), { ssr: true });
-const TestimonialsSection = dynamic(() => import("@/components/homepage/TestimonialsSection"), { ssr: false });
-const MilestonesTimeline = dynamic(() => import("@/components/homepage/MilestonesTimeline"), { ssr: false });
-const EventsSection = dynamic(() => import("@/components/homepage/EventsSection"), { ssr: false });
+import ogImage from "@/public/assets/social/og-image.jpg";
+import twitterImage from "@/public/assets/social/twitter-image.webp";
 
-// Constants and Types
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://abraham-of-london.netlify.app"
-).replace(/\/$/, "");
+import linkedinIcon from "@/public/assets/social/linkedin.svg";
+import twitterIcon from "@/public/assets/social/twitter.svg";
+import instagramIcon from "@/public/assets/social/instagram.svg";
 
-const ASSETS = {
-  heroBanner: "/assets/images/abraham-of-london-banner.webp",
-  profilePortrait: "/assets/images/profile-portrait.webp",
-  ogImage: "/assets/images/social/og-image.jpg",
-  twitterImage: "/assets/images/social/twitter-image.jpg",
-  defaultBookCover: "/assets/images/default-book.jpg",
-  defaultBlogCover: "/assets/images/blog/default-blog-cover.jpg",
-  logo: "/assets/images/logo/abraham-of-london-logo.svg",
-} as const;
+import fatheringWithoutFear from "@/public/assets/books/fathering-without-fear.jpg";
+import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
+import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
+import defaultBookCover from "@/public/assets/images/default-book.jpg";
 
-export type Post = Required<
-  Pick<PostMeta, "slug" | "title" | "date" | "excerpt" | "coverImage" | "author" | "readTime" | "category">
->;
-
-export type Book = Required<
-  Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "coverImage" | "buyLink">
-> & {
-  genre: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
+// ---------------- Animations ----------------
+const container = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
+const item = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
-export type Achievement = {
-  title: string;
-  description: string;
-  year: number;
-};
-
+// ---------------- Page ----------------
 interface HomeProps {
-  posts: Post[];
-  books: Book[];
-  achievements: Achievement[];
+  posts: PostMeta[];
 }
 
-/** Reusable surface */
-const SectionSurface: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
-  className = "",
-  children,
-}) => (
-  <motion.section
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.1 }}
-    transition={{ duration: 0.6, ease: "easeOut" }}
-    className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-white text-deepCharcoal rounded-2xl shadow-xl shadow-black/10 ring-1 ring-black/10 ${className}`}
-  >
-    {children}
-  </motion.section>
-);
+export default function Home({ posts }: HomeProps) {
+  const siteTitle = siteConfig?.title || "Abraham of London";
+  const siteDescription =
+    "Global strategist, author, and visionary leader. Principled strategy, fatherhood, and craftsmanship for a life and legacy that endure.";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://abraham-of-london.netlify.app";
 
-/** Data */
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  try {
-    const postsData = getAllPosts([
-      "slug",
-      "title",
-      "date",
-      "publishedAt",
-      "excerpt",
-      "coverImage",
-      "author",
-      "readTime",
-      "category",
-    ]);
+  const email = "info@abrahamoflondon.org";
+  const telephone = "+44 20 8062 25909";
 
-    const sortedPosts = [...postsData].sort((a, b) => {
-      const da = new Date((a.date || a.publishedAt || 0) as string).getTime();
-      const db = new Date((b.date || b.publishedAt || 0) as string).getTime();
-      return db - da;
-    });
+  const socialLinks = {
+    linkedin: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+    twitter: "https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09",
+    instagram: "https://www.instagram.com/abraham_of_london",
+  };
 
-    const posts: Post[] = sortedPosts
-      .filter((p) => p && p.slug)
-      .slice(0, 3)
-      .map((p, i) => {
-        const coverImage =
-          typeof p.coverImage === "string" && p.coverImage.trim()
-            ? absUrl(p.coverImage)
-            : generatedCover(p.slug || `post-${i}`);
-        return {
-          slug: p.slug || `post-${i}`,
-          title: p.title || "Untitled Post",
-          date: (p.date || (p as any).publishedAt || new Date().toISOString()) as string,
-          excerpt: p.excerpt || "Discover insights and wisdom in this compelling read.",
-          coverImage,
-          author: p.author || siteConfig.author,
-          readTime: p.readTime || "5 min read",
-          category: p.category || "Insights",
-        };
-      });
-
-    const booksData = getAllBooks([
-      "slug",
-      "title",
-      "author",
-      "excerpt",
-      "coverImage",
-      "buyLink",
-      "genre",
-      "downloadPdf",
-      "downloadEpub",
-    ]);
-
-    const books: Book[] = booksData
-      .filter((b) => b && b.slug)
-      .slice(0, 4)
-      .map((b, i) => {
-        const coverImage =
-          typeof b.coverImage === "string" && b.coverImage.trim()
-            ? absUrl(b.coverImage)
-            : absUrl(ASSETS.defaultBookCover);
-        return {
-          slug: b.slug || `book-${i}`,
-          title: b.title || "Untitled Book",
-          author: b.author || siteConfig.author,
-          excerpt: b.excerpt || "A compelling read that will transform your perspective.",
-          coverImage,
-          buyLink: b.buyLink || "#",
-          genre: Array.isArray(b.genre)
-            ? (b.genre as string[]).filter(Boolean).join(", ")
-            : (b.genre as string) || "Personal Development",
-          downloadPdf: b.downloadPdf ?? null,
-          downloadEpub: b.downloadEpub ?? null,
-        };
-      });
-
-    const sanitizedAchievements = Array.isArray(achievements)
-      ? achievements.filter(
-          (a): a is Achievement =>
-            a && typeof a.title === "string" && typeof a.description === "string" && typeof a.year === "number",
-        )
-      : [];
-
-    return { props: { posts, books, achievements: sanitizedAchievements }, revalidate: 3600 };
-  } catch (err) {
-    const errorObj = err instanceof Error ? err : new Error("Unknown error");
-    console.error("getStaticProps error:", {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      timestamp: new Date().toISOString(),
-    });
-    return { props: { posts: [], books: [], achievements: [] }, revalidate: 300 };
-  }
-};
-
-export default function Home({ posts, books, achievements }: HomeProps) {
-  const [communityCount] = useState(120_000);
-
-  const structuredData = [
-    { "@context": "https://schema.org", "@type": "WebSite", name: siteConfig.title, url: SITE_URL },
+  const books: BookCardProps[] = [
+    {
+      slug: "fathering-without-fear",
+      title: "Fathering Without Fear",
+      coverImage: fatheringWithoutFear.src,
+      excerpt:
+        "A heartfelt guide for fathers navigating the complexities of parenthood with courage, integrity, and love.",
+      author: "Abraham Adaramola",
+      buyLink: "https://example.com/buy/fathering-without-fear",
+      downloadPdf: "/downloads/fathering-without-fear.pdf",
+      downloadEpub: "/downloads/fathering-without-fear.epub",
+      genre: "Parenting & Fatherhood",
+    },
+    {
+      slug: "fathering-principles",
+      title: "Fathering Principles",
+      coverImage: fatheringPrinciples.src,
+      excerpt:
+        "Essential principles every father should know to build strong, lasting relationships with their children.",
+      author: "Abraham Adaramola",
+      buyLink: "https://example.com/buy/fathering-principles",
+      downloadPdf: "/downloads/fathering-principles.pdf",
+      downloadEpub: "/downloads/fathering-principles.epub",
+      genre: "Parenting & Fatherhood",
+    },
   ];
 
-  const hasPosts = posts.length > 0;
-  const hasBooks = books.length > 0;
-
-  // Server-side fallback for HeroSection during static export
-  const HeroFallback = () => (
-    <section
-      className="relative isolate w-full min-h-[70vh] sm:min-h-[85vh] overflow-hidden bg-gray-200"
-      aria-labelledby="hero-title"
-    >
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <span className="text-2xl text-gray-600">Loading hero…</span>
-      </div>
-    </section>
-  );
+  const latestPosts = posts.slice(0, 3);
 
   return (
     <Layout>
       <Head>
-        <title>{siteConfig.title} — Empowering Leaders in Fatherhood & Strategy</title>
-        <meta
-          name="description"
-          content={`${siteConfig.description} Join a global movement of over 120,000 leaders transforming fatherhood and leadership.`}
-        />
-        <meta name="robots" content="index,follow" />
-        <link rel="canonical" href={SITE_URL} />
-        {/* Social */}
-        <meta property="og:title" content={siteConfig.title} />
-        <meta
-          property="og:description"
-          content={`${siteConfig.description} Join a global movement transforming fatherhood and leadership.`}
-        />
+        <title>{siteTitle}</title>
+        <meta name="description" content={siteDescription} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={siteTitle} />
+        <meta property="og:description" content={siteDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={absUrl(ASSETS.ogImage)} />
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:image" content={`${siteUrl}${ogImage.src}`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Abraham of London — social banner" />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={siteConfig.title} />
-        <meta
-          name="twitter:description"
-          content={`${siteConfig.description} Join a global movement transforming fatherhood and leadership.`}
-        />
-        <meta name="twitter:image" content={absUrl(ASSETS.twitterImage)} />
-        <meta name="theme-color" content="#0b2e1f" />
-        <meta name="color-scheme" content="dark light" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <meta name="twitter:title" content={siteTitle} />
+        <meta name="twitter:description" content={siteDescription} />
+        <meta name="twitter:image" content={`${siteUrl}${twitterImage.src}`} />
+        <meta name="twitter:creator" content="@AbrahamAda48634" />
+
+        <link rel="canonical" href={siteUrl} />
       </Head>
 
-      <div className="relative min-h-screen bg-cream text-deepCharcoal flex flex-col">
-        {/* Fallback on server; real hero on client */}
-        {process.env.NODE_ENV === "production" && typeof window === "undefined" ? (
-          <HeroFallback />
-        ) : (
-          <div suppressHydrationWarning>
-            {typeof window !== "undefined" && (
-              <HeroSection
-                title={siteConfig.title}
-                subtitle="Global strategist, author, and visionary leader."
-                ctaText="Join the Movement"
-                ctaLink="/join"
-                communityCount={communityCount}
-              />
-            )}
-          </div>
-        )}
+      {/* ---------------- Hero (crisp & legible) ---------------- */}
+      <section className="relative isolate">
+        {/* Background image */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <Image
+            src={abrahamOfLondonBanner}
+            alt=""
+            priority
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+          {/* Multi-stop scrim + subtle blur for readability */}
+          <div className="absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.65),rgba(0,0,0,.35)_40%,rgba(0,0,0,.6))] backdrop-blur-[1.5px]" />
+        </div>
 
-        <main id="main-content" className="relative space-y-16 pb-16 flex-1">
-          <SectionSurface>
-            <AboutSection
-              bio="I’m Abraham of London, a strategist and author dedicated to redefining leadership and fatherhood. With experience across industries, I work to empower millions to build legacies of impact."
-              portraitSrc={ASSETS.profilePortrait}
-              achievements={achievements}
-            />
-          </SectionSurface>
-
-          {/* Logo Showcase Section */}
-          <SectionSurface>
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 text-center mb-8">Our Brands</h2>
-            <div className="mt-8 grid grid-cols-2 items-center justify-items-center gap-4 md:grid-cols-4">
-              <LogoTile src={ASSETS.logo} alt="Abraham of London" />
-              <LogoTile src="/assets/images/alomarada-ltd.webp" alt="Alomarada" />
-              <LogoTile src="/assets/images/endureluxe-ltd.webp" alt="EndureLuxe" />
-              <LogoTile src={ASSETS.heroBanner} alt="AØL Banner" width={280} height={140} />
-            </div>
-          </SectionSurface>
-
-          <SectionSurface>
-            <VenturesSection />
-          </SectionSurface>
-
-          {hasPosts && (
-            <SectionSurface>
-              <ContentShowcase
-                title="Thought Leadership"
-                subtitle="Insights shaping the future of leadership."
-                items={posts}
-                type="post"
-                link="/blog"
-                linkText="Discover More Insights"
-                linkAriaLabel="Explore the full blog collection"
-              />
-            </SectionSurface>
-          )}
-
-          {hasBooks && (
-            <SectionSurface>
-              <ContentShowcase
-                title="Legacy Library"
-                subtitle="Transformative works for global leaders."
-                items={books}
-                type="book"
-                link="/books"
-                linkText="Explore the Collection"
-                linkAriaLabel="Explore the full book collection"
-              />
-            </SectionSurface>
-          )}
-
-          <SectionSurface className="bg-white/90">
-            <TestimonialsSection />
-          </SectionSurface>
-
-          <SectionSurface className="bg-white/90">
-            <MilestonesTimeline />
-          </SectionSurface>
-
-          <SectionSurface className="bg-white/90">
-            <EventsSection />
-          </SectionSurface>
-
-          <section id="email-signup" aria-labelledby="email-signup-title" className="scroll-mt-24">
-            <h2 id="email-signup-title" className="sr-only">Email signup</h2>
-            <SectionSurface className="bg-white/95">
-              <EmailSignup />
-            </SectionSurface>
-          </section>
-        </main>
-
-        <section className="py-16 text-center">
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 bg-forest text-cream px-6 py-3 rounded-full transition hover:bg-forest/90 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2"
-            aria-label="Contact Abraham of London"
+        {/* Content */}
+        <div className="mx-auto max-w-6xl px-4 py-24 md:py-32">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={container}
+            className="max-w-2xl text-left"
           >
-            {"Let's Build Something Enduring"}
-          </Link>
-        </section>
-      </div>
+            <motion.h1
+              variants={item}
+              className="font-serif text-4xl md:text-6xl font-extrabold leading-tight text-cream drop-shadow-[0_2px_10px_rgba(0,0,0,.35)]"
+            >
+              Abraham of London
+            </motion.h1>
+
+            <motion.p
+              variants={item}
+              className="mt-4 text-lg md:text-2xl text-cream/90 leading-relaxed"
+            >
+              Global strategist, author, and visionary leader. —{" "}
+              <span className="font-semibold">join 120,000</span> global leaders.
+            </motion.p>
+
+            <motion.div
+              variants={item}
+              className="mt-8 flex flex-wrap gap-4"
+              aria-label="Primary actions"
+            >
+              <Link
+                href="/contact"
+                className="inline-flex items-center rounded-full bg-forest px-6 py-3 text-cream font-semibold shadow-lg shadow-black/30 hover:bg-forest/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/60"
+              >
+                Join the Movement
+              </Link>
+              <Link
+                href="/books"
+                className="inline-flex items-center rounded-full border border-white/70 bg-white/10 px-6 py-3 text-cream backdrop-blur hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/60"
+              >
+                Shop Now
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ---------------- Brand row ---------------- */}
+      <section className="mx-auto max-w-6xl px-4 py-14">
+        <h2 className="sr-only">Ventures & Brands</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 items-center justify-items-center gap-8">
+          <LogoTile src={abrahamLogo} alt="Abraham of London" />
+          <LogoTile src={alomaradaLogo} alt="Alomarada Ltd" />
+          <LogoTile src={endureluxeLogo} alt="Endureluxe Ltd" />
+          <div className="hidden md:block">
+            <Image
+              src={profilePortrait}
+              alt="Portrait of Abraham"
+              width={100}
+              height={100}
+              className="rounded-full shadow"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- Featured books ---------------- */}
+      <Section title="Featured Books">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
+          {books.map((b) => (
+            <motion.div key={b.slug} variants={item}>
+              <BookCard {...b} coverImage={b.coverImage || defaultBookCover.src} />
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <Image
+            src={fatheringWithoutFearTeaser}
+            alt="Fathering Without Fear — Coming soon"
+            width={220}
+            height={320}
+            className="mx-auto rounded-lg shadow-lg"
+          />
+          <p className="mt-3 text-gray-600">More insights on fatherhood coming your way.</p>
+        </div>
+      </Section>
+
+      {/* ---------------- Latest posts ---------------- */}
+      {latestPosts.length > 0 && (
+        <Section title="Latest Reflections" withContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {latestPosts.map((post) => (
+              <motion.div key={post.slug} variants={item}>
+                <BlogPostCard {...post} />
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/blog"
+              className="inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-gray-800 hover:bg-gray-100"
+            >
+              View All
+              <svg className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Link>
+          </div>
+        </Section>
+      )}
+
+      {/* ---------------- About ---------------- */}
+      <Section title="About Me" withContainer>
+        <div className="rounded-xl bg-gradient-to-r from-gray-50 to-emerald-50 p-8 shadow-sm">
+          <p className="mx-auto max-w-3xl text-center text-lg text-gray-700">
+            I’m Abraham of London — strategist, writer, and builder. My work sits at the
+            intersection of principled strategy, fatherhood & legacy, and craft. I help
+            leaders build with clarity, discipline, and standards that endure.
+          </p>
+          <div className="mt-6 text-center">
+            <Link
+              href="/about"
+              className="inline-flex items-center text-forest underline decoration-forest/40 underline-offset-2 hover:decoration-forest"
+            >
+              Read My Full Story
+              <svg className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </Section>
+
+      {/* ---------------- Contact / Social ---------------- */}
+      <section className="mx-auto my-16 max-w-4xl rounded-xl bg-gradient-to-r from-emerald-50 to-forest/10 px-8 py-12 shadow">
+        <h2 className="text-center text-3xl font-bold text-gray-900">Get in Touch</h2>
+        <div className="mt-8 grid grid-cols-1 gap-8 text-center md:grid-cols-2">
+          <div>
+            <h3 className="mb-2 font-semibold text-gray-700">Email</h3>
+            <a
+              href={`mailto:${email}`}
+              className="text-forest underline decoration-forest/40 underline-offset-2"
+            >
+              {email}
+            </a>
+          </div>
+          <div>
+            <h3 className="mb-2 font-semibold text-gray-700">Phone</h3>
+            <a
+              href={`tel:${telephone}`}
+              className="text-forest underline decoration-forest/40 underline-offset-2"
+            >
+              {telephone}
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h3 className="mb-6 text-xl font-semibold text-gray-800">Follow My Journey</h3>
+          <div className="flex justify-center gap-8">
+            <SocialIcon href={socialLinks.linkedin} src={linkedinIcon} alt="LinkedIn" />
+            <SocialIcon href={socialLinks.twitter} src={twitterIcon} alt="Twitter / X" />
+            <SocialIcon href={socialLinks.instagram} src={instagramIcon} alt="Instagram" />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- Newsletter (keeps your EmailSignup if you prefer) ---------------- */}
+      <section className="mx-auto mb-20 max-w-4xl rounded-2xl bg-forest px-8 py-14 text-center text-cream shadow-xl">
+        <h2 className="text-3xl md:text-4xl font-bold">Join My Newsletter</h2>
+        <p className="mx-auto mt-3 max-w-2xl opacity-90">
+          Receive exclusive insights on fatherhood, leadership, and strategy directly in your inbox.
+        </p>
+        <div className="mx-auto mt-8 max-w-md">
+          {/* If you prefer your existing component, just swap <EmailSignup /> in here */}
+          <EmailSignup />
+        </div>
+      </section>
     </Layout>
   );
 }
+
+/* ---------------- helpers & small components ---------------- */
+
+function LogoTile({
+  src,
+  alt,
+}: {
+  src: { src: string };
+  alt: string;
+}) {
+  return (
+    <motion.div className="transition-transform" whileHover={{ scale: 1.05 }}>
+      <Image
+        src={src}
+        alt={alt}
+        width={120}
+        height={120}
+        className="rounded-lg shadow-sm"
+      />
+    </motion.div>
+  );
+}
+
+function Section({
+  title,
+  children,
+  withContainer = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  withContainer?: boolean;
+}) {
+  return (
+    <motion.section
+      className={withContainer ? "mx-auto max-w-6xl px-4 py-14" : "px-4 py-14"}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="mb-8 text-center text-3xl md:text-4xl font-bold text-gray-800">
+        {title}
+      </h2>
+      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={container}>
+        {children}
+      </motion.div>
+    </motion.section>
+  );
+}
+
+function SocialIcon({
+  href,
+  src,
+  alt,
+}: {
+  href: string;
+  src: { src: string };
+  alt: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="transition-transform hover:scale-110"
+      aria-label={alt}
+    >
+      <Image src={src} alt={alt} width={44} height={44} />
+    </a>
+  );
+}
+
+/* ---------------- data ---------------- */
+
+export const getStaticProps: GetStaticProps = async () => {
+  try {
+    const posts = getAllPosts([
+      "slug",
+      "title",
+      "date",
+      "coverImage",
+      "excerpt",
+    ]);
+    return { props: { posts: posts || [] } };
+  } catch {
+    return { props: { posts: [] } };
+  }
+};
