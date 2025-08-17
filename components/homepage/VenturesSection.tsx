@@ -7,37 +7,37 @@ import { motion } from "framer-motion";
 type Brand = {
   name: string;
   description: string;
-  logo: string;   // path under /public
-  url: string;    // external site (or internal path)
+  logo: string;
+  url: string;
   metric?: string;
   secondaryHref?: string;
   secondaryText?: string;
 };
 
-// ---------- URLs (env-first, robust fallbacks) ----------
 const pickUrl = (...candidates: (string | undefined)[]) =>
-  candidates.find((u) => typeof u === "string" && u.trim().length > 0) || "#";
+  candidates.find((u) => typeof u === "string" && u.trim().length) || "#";
 
+/* ---------- Correct InnovateHub hosts (env-first) ---------- */
 const INNOVATE_HUB_BASE = pickUrl(
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL,                 // e.g. https://innovatehub.abrahamoflondon.org
-  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,             // e.g. https://innovatehub-abrahamoflondon.netlify.app
-  "https://innovatehub.netlify.app"
+  process.env.NEXT_PUBLIC_INNOVATEHUB_URL,               // e.g. https://innovatehub.abrahamoflondon.org
+  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,           // e.g. https://innovatehub-abrahamoflondon.netlify.app
+  "https://innovatehub-abrahamoflondon.netlify.app"      // ← good fallback you actually own
 );
+const INNOVATE_HUB_EARLY_ACCESS = new URL(
+  "/forms/early-access.html",
+  INNOVATE_HUB_BASE
+).toString();
 
-// Absolute early-access URL that works on whichever InnovateHub host is active
-const INNOVATE_HUB_EARLY_ACCESS = new URL("/forms/early-access.html", INNOVATE_HUB_BASE).toString();
-
+/* ---------- Other brands ---------- */
 const ALOMARADA_URL = pickUrl(
   process.env.NEXT_PUBLIC_ALOMARADA_URL,
   "https://alomarada.com"
 );
-
 const ENDURELUXE_URL = pickUrl(
   process.env.NEXT_PUBLIC_ENDURELUXE_URL,
   "https://endureluxe.com"
 );
 
-// ---------- Content ----------
 const defaultBrands: Brand[] = [
   {
     name: "Alomarada",
@@ -60,26 +60,20 @@ const defaultBrands: Brand[] = [
     description:
       "Strategy, playbooks, and hands-on product support to ship durable products—rooted in ethics, clarity, and excellent craft.",
     logo: "/assets/images/innovatehub.svg",
-    url: INNOVATE_HUB_BASE,                // visit site
-    secondaryHref: INNOVATE_HUB_EARLY_ACCESS, // direct early-access
+    url: INNOVATE_HUB_BASE,
+    secondaryHref: INNOVATE_HUB_EARLY_ACCESS,
     secondaryText: "Early Access",
     metric: "Early access open",
   },
 ];
 
-type VenturesProps = {
-  brandsData?: Brand[];
-};
+type VenturesProps = { brandsData?: Brand[] };
 
 const container = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 } as const;
-
-const item = {
-  hidden: { y: 18, opacity: 0 },
-  visible: { y: 0, opacity: 1 },
-} as const;
+const item = { hidden: { y: 18, opacity: 0 }, visible: { y: 0, opacity: 1 } } as const;
 
 function BrandCard({ brand }: { brand: Brand }) {
   return (
@@ -102,10 +96,7 @@ function BrandCard({ brand }: { brand: Brand }) {
       <p className="text-deepCharcoal/80 mb-3 flex-1">{brand.description}</p>
 
       {brand.metric && (
-        <p
-          className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-deepCharcoal/80 border border-black/10 px-3 py-1 text-xs"
-          aria-label={`Key note for ${brand.name}: ${brand.metric}`}
-        >
+        <p className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-deepCharcoal/80 border border-black/10 px-3 py-1 text-xs">
           {brand.metric}
         </p>
       )}
@@ -120,19 +111,7 @@ function BrandCard({ brand }: { brand: Brand }) {
           aria-label={`Visit ${brand.name} website (opens in a new tab)`}
         >
           Learn More
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 ml-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z" clipRule="evenodd"/></svg>
         </Link>
 
         {brand.secondaryHref && brand.secondaryText && (
@@ -142,7 +121,6 @@ function BrandCard({ brand }: { brand: Brand }) {
             rel="noopener noreferrer"
             prefetch={false}
             className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
-            aria-label={`${brand.secondaryText} for ${brand.name} (opens in a new tab)`}
           >
             {brand.secondaryText}
           </Link>
@@ -156,7 +134,6 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
   return (
     <section id="ventures" className="py-16 px-4" aria-labelledby="ventures-title">
       <div className="container mx-auto max-w-6xl">
-        {/* White surface for readability on darker pages */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -173,7 +150,6 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </p>
           </motion.header>
 
-          {/* Parent brand */}
           <motion.div
             variants={item}
             className="bg-white p-6 md:p-8 rounded-2xl shadow-xl ring-1 ring-black/10 mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-10"
@@ -198,7 +174,6 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
                 <Link
                   href="/about"
                   className="inline-flex items-center px-4 py-2 rounded-full bg-forest text-cream text-sm font-medium hover:bg-forest/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
-                  aria-label="Learn more about Abraham of London"
                 >
                   Learn more
                 </Link>
@@ -206,7 +181,6 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </div>
           </motion.div>
 
-          {/* Brands grid */}
           <motion.div variants={container} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {brandsData.map((brand) => (
               <BrandCard key={brand.name} brand={brand} />
@@ -217,22 +191,8 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             <Link
               href="/ventures"
               className="inline-flex items-center px-6 py-3 bg-forest text-cream rounded-full font-medium hover:bg-forest/90 transition-colors shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-forest/30"
-              aria-label="View all ventures"
             >
               View All Ventures
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 ml-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
-                  clipRule="evenodd"
-                />
-              </svg>
             </Link>
           </motion.div>
         </motion.div>
