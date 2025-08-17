@@ -231,15 +231,14 @@ export default function Home({ posts }: HomeProps) {
       </Section>
 
       {/* ---------------- Latest posts ---------------- */}
-      {latestPosts.length > 0 && (
-        <Section title="Latest Reflections" withContainer>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post) => (
-              <motion.div key={post.slug} variants={item}>
-                <BlogPostCard {...post} />
-              </motion.div>
-            ))}
-          </div>
+      <div>
+  {latestPosts.map((post) => (
+    <motion.div key={post.slug} variants={fadeInUp}>
+      {/* Pass a default value for 'title' if it's undefined */}
+      <BlogPostCard {...post} title={post.title ?? 'Untitled Post'} />
+    </motion.div>
+  ))}
+</div>
 
           <div className="mt-10 text-center">
             <Link
@@ -448,9 +447,3 @@ export const getStaticProps: GetStaticProps = async () => {
     return { props: { posts: [] } };
   }
 };
-
-
-
-
-
-
