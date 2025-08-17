@@ -1,108 +1,99 @@
 // pages/terms.tsx
-import type { GetStaticProps, InferGetStaticPropsType } from "next";
+import React from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
-type Props = {
-  origin: string;   // canonical origin computed at build-time
-  updated: string;  // last updated date
-};
+const ORIGIN =
+  (process.env.NEXT_PUBLIC_SITE_URL as string) ||
+  (process.env.URL as string) ||
+  (process.env.DEPLOY_PRIME_URL as string) ||
+  "https://www.abrahamoflondon.org"; // prefer www for a stable cert
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const origin = (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.URL ||
-    process.env.DEPLOY_PRIME_URL ||
-    "https://abrahamoflondon.org"
-  ).replace(/\/+$/, "");
+export default function TermsOfService() {
+  const canonical = `${ORIGIN.replace(/\/$/, "")}/terms`;
 
-  return {
-    props: {
-      origin,
-      updated: "August 16, 2025",
-    },
-    // revalidate daily; adjust if you prefer purely static
-    revalidate: 86400,
-  };
-};
-
-export default function TermsOfService({
-  origin,
-  updated,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout pageTitle="Terms of Service">
+    <Layout>
       <Head>
+        <title>Terms of Service | Abraham of London</title>
         <meta
           name="description"
-          content="Terms and conditions for using Abraham of London's website and services."
+          content="The terms and conditions for using Abraham of London's website and services."
         />
-        <link rel="canonical" href={`${origin}/terms`} />
+        <link rel="canonical" href={canonical} />
         <meta property="og:title" content="Terms of Service | Abraham of London" />
-        <meta property="og:description" content="Terms and conditions for using this site." />
+        <meta property="og:description" content="The terms and conditions for using this site." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${origin}/terms`} />
+        <meta property="og:url" content={canonical} />
+        <meta name="robots" content="index,follow" />
+        <script
+          type="application/ld+json"
+          // Basic WebPage schema for the Terms page
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "Terms of Service | Abraham of London",
+              url: canonical,
+              description:
+                "The terms and conditions for using Abraham of London's website and services.",
+            }),
+          }}
+        />
       </Head>
 
-      <main className="container mx-auto px-4 py-16 max-w-3xl">
+      <div className="container mx-auto px-4 py-16 max-w-3xl">
         <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-        <p className="mb-4 text-deepCharcoal/70">Last updated: {updated}</p>
+        <p className="mb-4 text-sm opacity-80">Last updated: August 16, 2025</p>
 
-        <section aria-labelledby="intro">
-          <h2 id="intro" className="text-2xl font-semibold mt-8 mb-2">Introduction</h2>
-          <p className="mb-4">
-            Welcome to Abraham of London. By accessing or using our website, you agree to these Terms of Service.
-            If you do not agree, please do not use the site.
+        <section className="prose prose-neutral max-w-none">
+          <h2>Introduction</h2>
+          <p>
+            Welcome to Abraham of London. By accessing or using our website, you agree to these
+            Terms of Service. If you do not agree, please do not use the site.
           </p>
-        </section>
 
-        <section aria-labelledby="use">
-          <h2 id="use" className="text-2xl font-semibold mt-8 mb-2">Use of Our Services</h2>
-          <p className="mb-4">
-            You may use our site for personal, non-commercial purposes. You agree not to misuse our services,
-            attempt to gain unauthorised access, or introduce malware or other harmful content.
+          <h2>Use of Our Services</h2>
+          <p>
+            You may use our site for personal, non-commercial purposes. Do not misuse our
+            services, attempt to gain unauthorized access, or introduce malware or harmful content.
           </p>
-        </section>
 
-        <section aria-labelledby="ip">
-          <h2 id="ip" className="text-2xl font-semibold mt-8 mb-2">Intellectual Property</h2>
-          <p className="mb-4">
-            All content on this site—including text, images, graphics, and logos—is owned by Abraham of London
-            or its licensors and protected by applicable intellectual property laws. You may not reproduce,
-            distribute, or create derivative works without prior written consent.
+          <h2>Intellectual Property</h2>
+          <p>
+            All content on this site, including text, images, and logos, is owned by Abraham of
+            London or its licensors and is protected by applicable laws.
           </p>
-        </section>
 
-        <section aria-labelledby="liability">
-          <h2 id="liability" className="text-2xl font-semibold mt-8 mb-2">Limitation of Liability</h2>
-          <p className="mb-4">
-            To the maximum extent permitted by law, we are not liable for any indirect, incidental, special,
-            consequential, or punitive damages arising from your use of the site.
+          <h2>Limitation of Liability</h2>
+          <p>
+            To the maximum extent permitted by law, we are not liable for any indirect,
+            incidental, special, consequential, or punitive damages arising from your use of the
+            site.
           </p>
-        </section>
 
-        <section aria-labelledby="law">
-          <h2 id="law" className="text-2xl font-semibold mt-8 mb-2">Governing Law</h2>
-          <p className="mb-4">
-            These Terms are governed by the laws of the United Kingdom. Any disputes will be resolved by the courts of London.
+          <h2>Governing Law</h2>
+          <p>
+            These Terms are governed by the laws of the United Kingdom. Any disputes will be
+            resolved by the courts of London.
           </p>
-        </section>
 
-        <section aria-labelledby="changes">
-          <h2 id="changes" className="text-2xl font-semibold mt-8 mb-2">Changes to These Terms</h2>
-          <p className="mb-4">
-            We may modify these Terms from time to time. Continued use of the site after changes are posted
+          <h2>Changes to These Terms</h2>
+          <p>
+            We may modify these Terms at any time. Continued use of the site after changes
             constitutes acceptance of the updated Terms.
           </p>
-        </section>
 
-        <p className="mt-10 text-sm text-deepCharcoal/70">
-          For information about how we handle personal data, please see our{" "}
-          <a href="/privacy" className="text-forest underline underline-offset-2 hover:opacity-80">
-            Privacy Policy
-          </a>.
-        </p>
-      </main>
+          <h2>Contact</h2>
+          <p>
+            Questions about these Terms? Please{" "}
+            <a className="text-forest underline" href="/contact">
+              contact us
+            </a>
+            .
+          </p>
+        </section>
+      </div>
     </Layout>
   );
 }
