@@ -1,4 +1,3 @@
-// pages/terms.tsx
 import React from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
@@ -13,7 +12,7 @@ export default function TermsOfService() {
   const canonical = `${ORIGIN.replace(/\/$/, "")}/terms`;
 
   return (
-    <Layout>
+    <Layout pageTitle="Terms of Service">
       <Head>
         <title>Terms of Service | Abraham of London</title>
         <meta
@@ -28,7 +27,7 @@ export default function TermsOfService() {
         <meta name="robots" content="index,follow" />
         <script
           type="application/ld+json"
-          // Basic WebPage schema for the Terms page
+          // Enhanced WebPage schema with breadcrumb and organization
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -37,16 +36,32 @@ export default function TermsOfService() {
               url: canonical,
               description:
                 "The terms and conditions for using Abraham of London's website and services.",
+              publisher: {
+                "@type": "Organization",
+                name: "Abraham of London",
+                url: ORIGIN,
+                logo: {
+                  "@type": "ImageObject",
+                  url: `${ORIGIN}/assets/logo/Abraham-of-London-logo.svg`,
+                },
+              },
+              breadcrumb: {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Home", item: ORIGIN },
+                  { "@type": "ListItem", position: 2, name: "Terms of Service", item: canonical },
+                ],
+              },
             }),
           }}
         />
       </Head>
 
-      <div className="container mx-auto px-4 py-16 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-        <p className="mb-4 text-sm opacity-80">Last updated: August 16, 2025</p>
+      <div className="container mx-auto px-4 py-16 max-w-3xl bg-white shadow-2xl rounded-lg">
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Terms of Service</h1>
+        <p className="mb-4 text-sm opacity-80 text-gray-600">Last updated: August 16, 2025</p>
 
-        <section className="prose prose-neutral max-w-none">
+        <section className="prose prose-neutral max-w-none text-gray-800">
           <h2>Introduction</h2>
           <p>
             Welcome to Abraham of London. By accessing or using our website, you agree to these
@@ -87,12 +102,26 @@ export default function TermsOfService() {
           <h2>Contact</h2>
           <p>
             Questions about these Terms? Please{" "}
-            <a className="text-forest underline" href="/contact">
+            <Link
+              href="/contact"
+              className="text-forest underline hover:text-emerald-700 transition-colors"
+              aria-label="Contact Abraham of London"
+            >
               contact us
-            </a>
+            </Link>
             .
           </p>
         </section>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center px-4 py-2 text-forest underline hover:text-emerald-700 transition-colors"
+            aria-label="Back to Homepage"
+          >
+            Back to Homepage
+          </Link>
+        </div>
       </div>
     </Layout>
   );
