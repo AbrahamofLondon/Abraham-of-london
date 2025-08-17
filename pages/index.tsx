@@ -3,7 +3,9 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import type { GetStaticProps } from "next";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"
+export type { PostMeta as Post } from "@/lib/posts";
+export type { BookMeta as Book } from "@/lib/books";
 
 import Layout from "@/components/Layout";
 import EmailSignup from "@/components/EmailSignup";
