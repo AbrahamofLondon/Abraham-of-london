@@ -47,7 +47,7 @@ const defaultBrands: Brand[] = [
     metric: "Investor & founder mentorship",
   },
   {
-    name: "Endureluxe",
+    name: "EndureLuxe",
     description:
       "Premium, sustainable fitness partnerships that promote wellbeing—powered by community and thoughtful technology, with writing that advances state-of-the-art knowledge and practical life wisdom.",
     logo: "/assets/images/endureluxe-ltd.webp",
@@ -105,23 +105,7 @@ function BrandCard({ brand }: { brand: Brand }) {
       )}
 
       <div className="flex items-center justify-center gap-2 flex-wrap">
-<<<<<<< HEAD
-        <Link
-          href={brand.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
-          className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full"
-          aria-label={`Visit ${brand.name} website (opens in a new tab)`}
-        >
-          Learn More
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z" clipRule="evenodd"/></svg>
-        </Link>
-
-        {brand.secondaryHref && brand.secondaryText && (
-=======
         {isInternal ? (
->>>>>>> 82c8062c9546313736490d73e0627b1d042539b7
           <Link
             href={brand.url}
             prefetch={false}
@@ -149,12 +133,8 @@ function BrandCard({ brand }: { brand: Brand }) {
             target="_blank"
             rel="noopener noreferrer"
             prefetch={false}
-<<<<<<< HEAD
-            className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
-=======
             className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full px-4 py-2"
             aria-label={`Visit ${brand.name} website (opens in a new tab)`}
->>>>>>> 82c8062c9546313736490d73e0627b1d042539b7
           >
             Learn More
             <svg
