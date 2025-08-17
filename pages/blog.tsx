@@ -90,3 +90,9 @@ export const getStaticProps: GetStaticProps<BlogProps> = async () => {
 };
 
 export default Blog;
+
+
+
+
+
+

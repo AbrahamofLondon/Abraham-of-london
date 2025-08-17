@@ -340,3 +340,9 @@ export default function BrandsPage() {
     </Layout>
   );
 }
+
+
+
+
+
+
