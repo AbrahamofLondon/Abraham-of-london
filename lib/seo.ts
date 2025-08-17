@@ -1,7 +1,5 @@
 // lib/seo.ts
 import { absUrl } from "./siteConfig";
-- import type { Post } from "@/pages/index";
-- import type { Book } from "@/pages/index";
 + import type { PostMeta as Post } from "./posts";
 + import type { BookMeta as Book } from "./books";
 
