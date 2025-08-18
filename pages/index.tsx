@@ -13,22 +13,20 @@ import BookCard, { type BookCardProps } from "@/components/BookCard";
 import { getAllPosts, type PostMeta } from "@/lib/posts";
 import { siteConfig } from "@/lib/siteConfig";
 
-// images
+// images (local static imports for performance)
 import profilePortrait from "@/public/assets/images/profile-portrait.webp";
 import abrahamLogo from "@/public/assets/images/abraham-logo.jpg";
 import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-banner.webp";
 import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
-
-// ✅ use public paths for crawlers (no imports here)
-const OG_IMAGE = "/assets/images/social/og-image.jpg";
-const TW_IMAGE = "/assets/images/social/twitter-image.webp";
-
-// books & other images
 import fatheringWithoutFear from "@/public/assets/images/fathering-without-fear.jpg";
 import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
 import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
 import defaultBookCover from "@/public/assets/images/default-book.jpg";
+
+// ✅ use public-path strings for crawlers/social bots (don’t import these)
+const OG_IMAGE = "/assets/images/social/og-image.jpg";
+const TW_IMAGE = "/assets/images/social/twitter-image.webp";
 
 // ---------------- Animations ----------------
 const container = {
@@ -94,6 +92,7 @@ export default function Home({ posts }: HomeProps) {
       <Head>
         <title>{siteTitle}</title>
         <meta name="description" content={siteDescription} />
+
         {/* Open Graph – use absolute, public paths */}
         <meta property="og:title" content={siteTitle} />
         <meta property="og:description" content={siteDescription} />
@@ -103,18 +102,21 @@ export default function Home({ posts }: HomeProps) {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Abraham of London — social banner" />
+
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteTitle} />
         <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={`${siteUrl}${TW_IMAGE}`} />
         <meta name="twitter:creator" content="@AbrahamAda48634" />
+
         <link rel="canonical" href={siteUrl} />
       </Head>
 
-      {/* ---------------- Hero ---------------- */}
+      {/* ---------------- Hero (crisp, legible, and click-through safe) ---------------- */}
       <section className="relative isolate">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
+        {/* Background image / scrim (decorative) */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
           <Image
             src={abrahamOfLondonBanner}
             alt=""
@@ -123,10 +125,10 @@ export default function Home({ posts }: HomeProps) {
             className="object-cover"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.7),rgba(0,0,0,.45)_40%,rgba(0,0,0,.7))] backdrop-blur-[1.5px]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.7),rgba(0,0,0,.45)_40%,rgba(0,0,0,.7))] backdrop-blur-[1.5px]" />
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 py-24 md:py-32">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-24 md:py-32">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -171,14 +173,16 @@ export default function Home({ posts }: HomeProps) {
         </div>
       </section>
 
-      {/* ---------------- Brand row (now includes InnovateHub) ---------------- */}
+      {/* ---------------- Brand row (includes InnovateHub) ---------------- */}
       <Section title="Ventures & Brands">
         <div className="grid grid-cols-2 items-center justify-items-center gap-8 md:grid-cols-4">
           <LogoTile src={abrahamLogo} alt="Abraham of London" />
           <LogoTile src={alomaradaLogo} alt="Alomarada Ltd" />
           <LogoTile src={endureluxeLogo} alt="Endureluxe Ltd" />
-          {/* ✅ InnovateHub */}
-          <LogoTile src={"/assets/images/innovatehub.svg"} alt="InnovateHub" />
+          {/* InnovateHub links to /ventures */}
+          <Link href="/ventures" aria-label="View InnovateHub on the Ventures page" className="contents">
+            <LogoTile src={"/assets/images/innovatehub.svg"} alt="InnovateHub" />
+          </Link>
         </div>
       </Section>
 
@@ -312,7 +316,7 @@ function LogoTile({
   src,
   alt,
 }: {
-  // ✅ allow string (public path) or StaticImageData
+  // allow string (public path) or StaticImageData
   src: StaticImageData | string;
   alt: string;
 }) {
