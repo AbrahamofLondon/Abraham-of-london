@@ -15,17 +15,19 @@
 
 # Vanity subdomains → brand canonicals
 [[redirects]]
-  from = "https://alomarada.abrahamoflondon.org/*"
-  to   = "https://alomarada.com/:splat"
+  from = "/*"
+  to = "https://abrahamoflondon.org/ventures#endureluxe"
   status = 301
-  force  = true
+  force = true
+  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
 [[redirects]]
-  from = "https://endureluxe.abrahamoflondon.org/*"
-  to   = "https://endureluxe.com/:splat"
+  from = "/*"
+  to = "https://abrahamoflondon.org/ventures#alomarada"
   status = 301
-  force  = true
-
+  force = true
+  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+  
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
