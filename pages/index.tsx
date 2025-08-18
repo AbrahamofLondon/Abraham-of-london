@@ -21,11 +21,11 @@ import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
 
 // social images from the public/assets/social directory
-import ogImage from "/assets/images/social/og-image.jpg";
-import twitterImage from "/assets/images/social/twitter-image.webp";
-import linkedinIcon from "/assets/images/social/linkedin.svg";
-import twitterIcon from "/assets/images/social/twitter.svg";
-import instagramIcon from "/assets/images/social/instagram.svg";
+import ogImage from "public//assets/images/social/og-image.jpg";
+import twitterImage from "public//assets/images/social/twitter-image.webp";
+import linkedinIcon from "public//assets/images/social/linkedin.svg";
+import twitterIcon from "public//assets/images/social/twitter.svg";
+import instagramIcon from "public//assets/images/social/instagram.svg";
 
 // book and other images from the public/assets/images and public/assets/books directories
 import fatheringWithoutFear from "/assets/books/fathering-without-fear.jpg";
