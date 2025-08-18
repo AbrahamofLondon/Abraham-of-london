@@ -20,14 +20,11 @@ import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-bann
 import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
 
-// Corrected social images imports
-import ogImage from "@/public/assets/images/social/og-image.jpg";
-import twitterImage from "@/public/assets/images/social/twitter-image.webp";
-import linkedinIcon from "@/public/assets/images/social/linkedin.svg";
-import twitterIcon from "@/public/assets/images/social/twitter.svg";
-import instagramIcon from "@/public/assets/images/social/instagram.svg";
+// ✅ use public paths for crawlers (no imports here)
+const OG_IMAGE = "/assets/images/social/og-image.jpg";
+const TW_IMAGE = "/assets/images/social/twitter-image.webp";
 
-// Corrected book and other images imports
+// books & other images
 import fatheringWithoutFear from "@/public/assets/images/fathering-without-fear.jpg";
 import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
 import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
@@ -39,10 +36,7 @@ const container = {
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 } as const;
 
-const item = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1 },
-} as const;
+const item = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } } as const;
 
 // ---------------- Page ----------------
 interface HomeProps {
@@ -58,7 +52,7 @@ export default function Home({ posts }: HomeProps) {
 
   const email = "info@abrahamoflondon.org";
   const telephone = "+44 20 8062 25909";
-  const telHref = telephone.replace(/\s+/g, ""); // for a valid tel: link
+  const telHref = telephone.replace(/\s+/g, "");
 
   const socialLinks = {
     linkedin: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
@@ -100,47 +94,38 @@ export default function Home({ posts }: HomeProps) {
       <Head>
         <title>{siteTitle}</title>
         <meta name="description" content={siteDescription} />
-
-        {/* Open Graph */}
+        {/* Open Graph – use absolute, public paths */}
         <meta property="og:title" content={siteTitle} />
         <meta property="og:description" content={siteDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={siteUrl} />
-        <meta property="og:image" content={`${siteUrl}${ogImage.src}`} />
+        <meta property="og:image" content={`${siteUrl}${OG_IMAGE}`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta
-          property="og:image:alt"
-          content="Abraham of London — social banner"
-        />
-
+        <meta property="og:image:alt" content="Abraham of London — social banner" />
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteTitle} />
         <meta name="twitter:description" content={siteDescription} />
-        <meta name="twitter:image" content={`${siteUrl}${twitterImage.src}`} />
+        <meta name="twitter:image" content={`${siteUrl}${TW_IMAGE}`} />
         <meta name="twitter:creator" content="@AbrahamAda48634" />
-
         <link rel="canonical" href={siteUrl} />
       </Head>
 
-      {/* ---------------- Hero (crisp & legible) ---------------- */}
+      {/* ---------------- Hero ---------------- */}
       <section className="relative isolate">
-        {/* Background image (decorative) */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <Image
             src={abrahamOfLondonBanner}
-            alt="" // decorative
+            alt=""
             priority
             fill
             className="object-cover"
             sizes="100vw"
           />
-          {/* Scrim for contrast + slight blur for readability */}
           <div className="absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.7),rgba(0,0,0,.45)_40%,rgba(0,0,0,.7))] backdrop-blur-[1.5px]" />
         </div>
 
-        {/* Content */}
         <div className="mx-auto max-w-6xl px-4 py-24 md:py-32">
           <motion.div
             initial="hidden"
@@ -161,8 +146,7 @@ export default function Home({ posts }: HomeProps) {
               className="mt-4 text-lg md:text-2xl text-cream/90 leading-relaxed"
             >
               Global strategist, author, and visionary leader.{" "}
-              <span className="font-semibold">Join 120,000</span> global
-              leaders.
+              <span className="font-semibold">Join 120,000</span> global leaders.
             </motion.p>
 
             <motion.div
@@ -187,22 +171,14 @@ export default function Home({ posts }: HomeProps) {
         </div>
       </section>
 
-      {/* ---------------- Brand row ---------------- */}
+      {/* ---------------- Brand row (now includes InnovateHub) ---------------- */}
       <Section title="Ventures & Brands">
         <div className="grid grid-cols-2 items-center justify-items-center gap-8 md:grid-cols-4">
           <LogoTile src={abrahamLogo} alt="Abraham of London" />
           <LogoTile src={alomaradaLogo} alt="Alomarada Ltd" />
           <LogoTile src={endureluxeLogo} alt="Endureluxe Ltd" />
-          <div className="hidden md:block">
-            <Image
-              src={profilePortrait}
-              alt="Portrait of Abraham"
-              width={100}
-              height={100}
-              className="rounded-full shadow"
-              sizes="100px"
-            />
-          </div>
+          {/* ✅ InnovateHub */}
+          <LogoTile src={"/assets/images/innovatehub.svg"} alt="InnovateHub" />
         </div>
       </Section>
 
@@ -211,10 +187,7 @@ export default function Home({ posts }: HomeProps) {
         <div className="grid grid-cols-1 justify-items-center gap-8 md:grid-cols-2">
           {books.map((b) => (
             <motion.div key={b.slug} variants={item}>
-              <BookCard
-                {...b}
-                coverImage={b.coverImage || defaultBookCover.src}
-              />
+              <BookCard {...b} coverImage={b.coverImage || defaultBookCover.src} />
             </motion.div>
           ))}
         </div>
@@ -228,9 +201,7 @@ export default function Home({ posts }: HomeProps) {
             className="mx-auto rounded-lg shadow-lg"
             sizes="220px"
           />
-          <p className="mt-3 text-gray-600">
-            More insights on fatherhood coming your way.
-          </p>
+          <p className="mt-3 text-gray-600">More insights on fatherhood coming your way.</p>
         </div>
       </Section>
 
@@ -243,18 +214,14 @@ export default function Home({ posts }: HomeProps) {
             </motion.div>
           ))}
         </div>
+
         <div className="mt-10 text-center">
           <Link
             href="/blog"
             className="inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-gray-800 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
           >
             View All
-            <svg
-              className="ml-2 h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
+            <svg className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path
                 fillRule="evenodd"
                 d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
@@ -269,10 +236,9 @@ export default function Home({ posts }: HomeProps) {
       <Section title="About Me" withContainer>
         <div className="rounded-xl bg-gradient-to-r from-gray-50 to-emerald-50 p-8 shadow-sm">
           <p className="mx-auto max-w-3xl text-center text-lg text-gray-700">
-            I’m Abraham of London — strategist, writer, and builder. My work
-            sits at the intersection of principled strategy, fatherhood &
-            legacy, and craft. I help leaders build with clarity, discipline,
-            and standards that endure.
+            I’m Abraham of London — strategist, writer, and builder. My work sits at the
+            intersection of principled strategy, fatherhood & legacy, and craft. I help
+            leaders build with clarity, discipline, and standards that endure.
           </p>
           <div className="mt-6 text-center">
             <Link
@@ -280,12 +246,7 @@ export default function Home({ posts }: HomeProps) {
               className="inline-flex items-center text-forest underline decoration-forest/40 underline-offset-2 hover:decoration-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/30 rounded"
             >
               Read My Full Story
-              <svg
-                className="ml-2 h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
+              <svg className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                   fillRule="evenodd"
                   d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
@@ -299,9 +260,7 @@ export default function Home({ posts }: HomeProps) {
 
       {/* ---------------- Contact / Social ---------------- */}
       <section className="mx-auto my-16 max-w-4xl rounded-xl bg-gradient-to-r from-emerald-50 to-forest/10 px-8 py-12 shadow">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Get in Touch
-        </h2>
+        <h2 className="text-center text-3xl font-bold text-gray-900">Get in Touch</h2>
         <div className="mt-8 grid grid-cols-1 gap-8 text-center md:grid-cols-2">
           <div>
             <h3 className="mb-2 font-semibold text-gray-700">Email</h3>
@@ -324,25 +283,11 @@ export default function Home({ posts }: HomeProps) {
         </div>
 
         <div className="mt-8 border-t border-gray-200 pt-8">
-          <h3 className="mb-6 text-xl font-semibold text-gray-800">
-            Follow My Journey
-          </h3>
+          <h3 className="mb-6 text-xl font-semibold text-gray-800">Follow My Journey</h3>
           <div className="flex justify-center gap-8">
-            <SocialIcon
-              href={socialLinks.linkedin}
-              src={linkedinIcon}
-              alt="LinkedIn"
-            />
-            <SocialIcon
-              href={socialLinks.twitter}
-              src={twitterIcon}
-              alt="Twitter / X"
-            />
-            <SocialIcon
-              href={socialLinks.instagram}
-              src={instagramIcon}
-              alt="Instagram"
-            />
+            <SocialIcon href={socialLinks.linkedin} src={"/assets/images/social/linkedin.svg"} alt="LinkedIn" />
+            <SocialIcon href={socialLinks.twitter} src={"/assets/images/social/twitter.svg"} alt="Twitter / X" />
+            <SocialIcon href={socialLinks.instagram} src={"/assets/images/social/instagram.svg"} alt="Instagram" />
           </div>
         </div>
       </section>
@@ -351,8 +296,7 @@ export default function Home({ posts }: HomeProps) {
       <section className="mx-auto mb-20 max-w-4xl rounded-2xl bg-forest px-8 py-14 text-center text-cream shadow-xl">
         <h2 className="text-3xl md:text-4xl font-bold">Join My Newsletter</h2>
         <p className="mx-auto mt-3 max-w-2xl opacity-90">
-          Receive exclusive insights on fatherhood, leadership, and strategy
-          directly in your inbox.
+          Receive exclusive insights on fatherhood, leadership, and strategy directly in your inbox.
         </p>
         <div className="mx-auto mt-8 max-w-md">
           <EmailSignup />
@@ -368,19 +312,13 @@ function LogoTile({
   src,
   alt,
 }: {
-  src: StaticImageData;
+  // ✅ allow string (public path) or StaticImageData
+  src: StaticImageData | string;
   alt: string;
 }) {
   return (
     <motion.div className="transition-transform" whileHover={{ scale: 1.05 }}>
-      <Image
-        src={src}
-        alt={alt}
-        width={120}
-        height={120}
-        className="rounded-lg shadow-sm"
-        sizes="120px"
-      />
+      <Image src={src} alt={alt} width={120} height={120} className="rounded-lg shadow-sm" sizes="120px" />
     </motion.div>
   );
 }
@@ -402,15 +340,8 @@ function Section({
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.5 }}
     >
-      <h2 className="mb-8 text-center text-3xl font-bold text-gray-800 md:text-4xl">
-        {title}
-      </h2>
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={container}
-      >
+      <h2 className="mb-8 text-center text-3xl font-bold text-gray-800 md:text-4xl">{title}</h2>
+      <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={container}>
         {children}
       </motion.div>
     </motion.section>
@@ -423,7 +354,7 @@ function SocialIcon({
   alt,
 }: {
   href: string;
-  src: StaticImageData;
+  src: StaticImageData | string;
   alt: string;
 }) {
   return (
@@ -440,7 +371,6 @@ function SocialIcon({
 }
 
 /* ---------------- data ---------------- */
-
 export const getStaticProps: GetStaticProps = async () => {
   try {
     const posts = getAllPosts(["slug", "title", "date", "coverImage", "excerpt"]);
