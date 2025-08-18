@@ -1,3 +1,4 @@
+# netlify.toml
 [build]
   command = "npm run build"
   publish = ".next"
@@ -5,23 +6,43 @@
 [build.environment]
   NODE_VERSION = "18"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Set this in the Netlify UI to your production URL (with https)
-  NEXT_PUBLIC_SITE_URL = "https://abraham-of-london.netlify.app" # Replace with your actual domain
+  # Use your canonical production URL (no netlify.app here)
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@netlify/functions", "@netlify/emails"] # Explicitly include these modules
-  directory = "netlify/functions" # Explicitly define functions directory
+  external_node_modules = ["@netlify/functions", "@netlify/emails"]
+  directory = "netlify/functions"
 
+# --- Canonicalize apex to www (optional but recommended) ---
+[[redirects]]
+  from = "https://abrahamoflondon.org/*"
+  to   = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force  = true
+
+# --- Vanity subdomains → brand canonical domains (per-host redirects) ---
+[[redirects]]
+  from = "https://alomarada.abrahamoflondon.org/*"
+  to   = "https://alomarada.com/:splat"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from = "https://endureluxe.abrahamoflondon.org/*"
+  to   = "https://endureluxe.com/:splat"
+  status = 301
+  force  = true
+
+# Netlify Next.js plugin
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# (Optional) Basic caching + security headers
+# Basic security headers
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Note: @netlify/plugin-emails is active via Netlify UI but not defined here
+s
