@@ -5,6 +5,11 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import type { GetStaticProps } from "next";
 import { motion } from "framer-motion";
+import MilestonesTimeline from "@/components/homepage/MilestonesTimeline";
+import TestimonialsSection from "@/components/homepage/TestimonialsSection";
+import EventsSection from "@/components/homepage/EventsSection";
+import AboutSection from "@/components/homepage/AboutSection";
+
 
 import Layout from "@/components/Layout";
 import EmailSignup from "@/components/EmailSignup";
@@ -186,6 +191,26 @@ export default function Home({ posts }: HomeProps) {
         </div>
       </Section>
 
+<TestimonialsSection />
+
+{/* keep your Featured Books and Latest Posts sections where they are */}
+
+{/* replace your simple "About Me" section with the richer AboutSection */}
+<AboutSection
+  bio="I’m Abraham of London — strategist, writer, and builder. My work sits at the intersection of principled strategy, fatherhood & legacy, and craft. I help leaders build with clarity, discipline, and standards that endure."
+  achievements={[
+    { title: "DADx Talk", year: 2022, description: "Shared ideas on fatherhood and legacy." },
+    { title: "Best-selling Book", year: 2026, description: "Broad international readership established." },
+    { title: "Leadership Award", year: 2027, description: "Recognized for strategic impact." },
+  ]}
+  portraitSrc={profilePortrait.src}
+/>
+
+{/* Milestones timeline */}
+<MilestonesTimeline />
+
+{/* Events – use light variant so it’s readable on a white page */}
+<EventsSection variant="light" />
       {/* ---------------- Featured books ---------------- */}
       <Section title="Featured Books">
         <div className="grid grid-cols-1 justify-items-center gap-8 md:grid-cols-2">
