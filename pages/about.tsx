@@ -1,35 +1,46 @@
-import React from 'react';
-import Head from 'next/head';
+// pages/about.tsx
+import Head from "next/head";
+import Image from "next/image";
+import Layout from "@/components/Layout";
 
-interface LayoutProps {
-  children: React.ReactNode;
-  pageTitle?: string; // Optional prop for page title
-}
-
-export default function Layout({ children, pageTitle }: LayoutProps) {
-  const defaultTitle = 'Abraham of London';
-  const title = pageTitle ? `${pageTitle} | ${defaultTitle}` : defaultTitle;
-
+export default function About() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <Layout pageTitle="About">
       <Head>
-        <title>{title}</title>
-        {/* Add other meta tags or global styles here if needed */}
+        <meta name="robots" content="index,follow" />
       </Head>
-      <header className="bg-gray-900 text-white p-4">
-        {/* Header content (e.g., navigation) */}
-      </header>
-      <main className="flex-grow">{children}</main>
-      <footer className="bg-gray-900 text-white p-4 text-center">
-        {/* Footer content */}
-        &copy; {new Date().getFullYear()} {defaultTitle}. All rights reserved.
-      </footer>
-    </div>
+
+      <section className="mx-auto max-w-5xl px-4 py-14">
+        <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-start">
+          <div>
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">About Abraham of London</h1>
+            <p className="mb-4 text-gray-700">
+              I’m Abraham — strategist, writer, and builder. My work sits at the intersection of principled
+              strategy, fatherhood & legacy, and craft. I help leaders build with clarity, discipline,
+              and standards that endure.
+            </p>
+            <p className="mb-4 text-gray-700">
+              Here you’ll find essays, books, and ventures focused on stewardship, family,
+              and high standards in leadership.
+            </p>
+            <p className="text-gray-700">
+              For speaking, partnerships, or consulting, visit the{" "}
+              <a href="/contact" className="text-forest underline underline-offset-2">contact page</a>.
+            </p>
+          </div>
+
+          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow">
+            <Image
+              src="/assets/images/profile-portrait.webp"
+              alt="Abraham of London Portrait"
+              width={640}
+              height={800}
+              className="h-auto w-full object-cover"
+              priority={false}
+            />
+          </div>
+        </div>
+      </section>
+    </Layout>
   );
 }
-
-
-
-
-
-
