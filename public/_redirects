@@ -1,4 +1,0 @@
-# Force HTTPS and apex canonical
-http://abrahamoflondon.org/*   https://abrahamoflondon.org/:splat 301!
-http://www.abrahamoflondon.org/* https://abrahamoflondon.org/:splat 301!
-https://www.abrahamoflondon.org/* https://abrahamoflondon.org/:splat 301!

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
-  <title>InnovateHub — Monogram</title>
-  <desc>Minimal IH monogram: strong geometric H with a red innovation spine (I) centered.</desc>
-  <rect x="64"  y="56" width="24" height="144" rx="8" fill="#10386F"/>
-  <rect x="168" y="56" width="24" height="144" rx="8" fill="#10386F"/>
-  <rect x="64"  y="120" width="128" height="16" rx="8" fill="#10386F"/>
-  <rect x="120" y="56" width="16" height="144" rx="8" fill="#E13A4C"/>
-</svg>
