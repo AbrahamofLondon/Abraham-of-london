@@ -28,8 +28,8 @@ import twitterIcon from "@/public/assets/images/social/twitter.svg";
 import instagramIcon from "@/public/assets/images/social/instagram.svg";
 
 // Corrected book and other images imports
-import fatheringWithoutFear from "@/public/assets/images/books/fathering-without-fear.jpg";
-import fatheringPrinciples from "@/public/assets/images/books/fathering-principles.jpg";
+import fatheringWithoutFear from "@/public/assets/images/fathering-without-fear.jpg";
+import fatheringPrinciples from "@/public/assets/images/fathering-principles.jpg";
 import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
 import defaultBookCover from "@/public/assets/images/default-book.jpg";
 
