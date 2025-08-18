@@ -20,18 +20,18 @@ import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-bann
 import alomaradaLogo from "@/public/assets/images/alomarada-ltd.webp";
 import endureluxeLogo from "@/public/assets/images/endureluxe-ltd.webp";
 
-// social images from the public/assets/social directory
-import ogImage from "public//assets/images/social/og-image.jpg";
-import twitterImage from "public//assets/images/social/twitter-image.webp";
-import linkedinIcon from "public//assets/images/social/linkedin.svg";
-import twitterIcon from "public//assets/images/social/twitter.svg";
-import instagramIcon from "public//assets/images/social/instagram.svg";
+// Corrected social images imports
+import ogImage from "@/public/assets/images/social/og-image.jpg";
+import twitterImage from "@/public/assets/images/social/twitter-image.webp";
+import linkedinIcon from "@/public/assets/images/social/linkedin.svg";
+import twitterIcon from "@/public/assets/images/social/twitter.svg";
+import instagramIcon from "@/public/assets/images/social/instagram.svg";
 
-// book and other images from the public/assets/images and public/assets/books directories
-import fatheringWithoutFear from "/assets/books/fathering-without-fear.jpg";
-import fatheringPrinciples from "/assets/images/fathering-principles.jpg";
-import fatheringWithoutFearTeaser from "/assets/images/fathering-without-fear-teaser.jpg";
-import defaultBookCover from "/assets/images/default-book.jpg";
+// Corrected book and other images imports
+import fatheringWithoutFear from "@/public/assets/images/books/fathering-without-fear.jpg";
+import fatheringPrinciples from "@/public/assets/images/books/fathering-principles.jpg";
+import fatheringWithoutFearTeaser from "@/public/assets/images/fathering-without-fear-teaser.jpg";
+import defaultBookCover from "@/public/assets/images/default-book.jpg";
 
 // ---------------- Animations ----------------
 const container = {
