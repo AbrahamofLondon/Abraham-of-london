@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://abraham-of-london.netlify.app/sitemap.xml

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title>Abraham of London — Contact Element</title>
+  <desc>Minimal geometric A-monogram with a flowing ribbon accent.</desc>
+  <!-- Ribbon accent -->
+  <path fill="#E13A4C" d="M38 208c26-22 53-38 81-48c28-10 50-10 73 2l7 4v26c-23-15-47-19-73-11c-24 7-53 20-81 31z"/>
+  <!-- Geometric A -->
+  <path fill="#10386F" d="M44 208L112 48h32l68 160h-40l-22-56h-44l-22 56H44zM136 112l-14-36-14 36h28z"/>
+</svg>
