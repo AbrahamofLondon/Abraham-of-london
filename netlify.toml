@@ -6,7 +6,6 @@
 [build.environment]
   NODE_VERSION = "18"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Use your canonical production URL (no netlify.app here)
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
@@ -14,14 +13,7 @@
   external_node_modules = ["@netlify/functions", "@netlify/emails"]
   directory = "netlify/functions"
 
-# --- Canonicalize apex to www (optional but recommended) ---
-[[redirects]]
-  from = "https://abrahamoflondon.org/*"
-  to   = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  force  = true
-
-# --- Vanity subdomains → brand canonical domains (per-host redirects) ---
+# Vanity subdomains → brand canonicals
 [[redirects]]
   from = "https://alomarada.abrahamoflondon.org/*"
   to   = "https://alomarada.com/:splat"
@@ -34,11 +26,9 @@
   status = 301
   force  = true
 
-# Netlify Next.js plugin
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Basic security headers
 [[headers]]
   for = "/*"
   [headers.values]
