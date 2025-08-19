@@ -1,8 +1,8 @@
 // components/LogoTile.tsx
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 
 type LogoTileProps = {
-  src: string | StaticImageData;
+  src: string;
   alt: string;
   width?: number;
   height?: number;
