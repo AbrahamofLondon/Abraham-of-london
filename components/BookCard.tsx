@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
-import { motion } from "framer-motion";
-import clsx from "clsx"; // Added import for clsx
+import { motion, type MotionProps } from "framer-motion";
+import clsx from "clsx";
 
 export type BookCardProps = {
   slug: string;
@@ -15,6 +15,7 @@ export type BookCardProps = {
   downloadEpub?: string | null;
   featured?: boolean;
   className?: string;
+  motionProps?: MotionProps; // ✨ NEW
 };
 
 const DEFAULT_COVER = "/assets/images/default-book.jpg";
@@ -31,6 +32,7 @@ export default function BookCard({
   downloadEpub,
   featured = false,
   className = "",
+  motionProps = {}, // ✨ default empty
 }: BookCardProps) {
   const src: string | StaticImageData =
     typeof coverImage === "object"
@@ -46,23 +48,15 @@ export default function BookCard({
 
   return (
     <motion.article
+      {...motionProps} // ✨ parent controls animation
       className={clsx(
         "group rounded-2xl bg-white shadow-2xl border border-gray-200 hover:shadow-blue-200 transition-all duration-300 overflow-hidden",
         featured && "ring-2 ring-blue-600/20",
         className,
       )}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-      whileHover={{ scale: 1.05 }}
     >
       <Link href={`/books/${slug}`} className="block">
-        <motion.div
-          className="relative w-full h-80"
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 200, damping: 18 }}
-        >
+        <div className="relative w-full h-80">
           <Image
             src={src}
             alt={title}
@@ -77,7 +71,7 @@ export default function BookCard({
               Featured
             </span>
           )}
-        </motion.div>
+        </div>
       </Link>
 
       <div className="p-6">
@@ -130,9 +124,3 @@ export default function BookCard({
     </motion.article>
   );
 }
-
-
-
-
-
-

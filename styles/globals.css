@@ -1,148 +1,59 @@
-/* styles/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* --- PREMIUM ANIMATIONS & EFFECTS --- */
 
-/* --- THEME VARIABLES --- */
-/* Light Theme (Default) */
-:root {
-  --color-primary: #0b2e1f; /* Matches forest */
-  --color-primary-hover: #047857; /* Matches emerald-700 */
-  --color-on-primary: #f5f5f0; /* Matches cream */
-  --color-on-primary-hover: #ffffff;
-
-  --color-secondary: #f5f5f0; /* Matches cream */
-  --color-on-secondary: #333333; /* Matches deepCharcoal */
-
-  --color-accent: #d4af37; /* Matches softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #333333;
-
-  --color-lightGrey: #e5e5e5; /* Matches lightGrey */
-  --color-warmWhite: #fafaf5; /* Matches warmWhite */
-  --color-midGreen: #4b8b6b; /* Matches midGreen */
+/* Shimmer effect for hero headline */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-/* Dark Theme */
-.dark {
-  --color-primary: #047857; /* emerald-700 */
-  --color-primary-hover: #059669; /* Slightly lighter emerald */
-  --color-on-primary: #ffffff;
-  --color-on-primary-hover: #f5f5f0;
-
-  --color-secondary: #333333; /* deepCharcoal */
-  --color-on-secondary: #f5f5f0; /* cream */
-
-  --color-accent: #d4af37; /* softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #0b2e1f; /* forest */
-
-  --color-lightGrey: #4b4b4b;
-  --color-warmWhite: #333333;
-  --color-midGreen: #6bb694;
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    #fff8dc 25%,
+    var(--color-accent) 50%,
+    #fff8dc 75%,
+    var(--color-accent) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+  display: inline-block;
 }
 
-/* --- BASE STYLES USING THEME VARIABLES --- */
-html, body {
-  padding: 0;
-  margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--color-on-secondary);
-  background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* Subtle fade-up on cards and sections */
+.fade-up {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp 0.8s ease forwards;
+}
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
-  color: var(--color-primary);
-}
-
-h1 { font-size: 3.5rem; letter-spacing: 0.1em; }
-h2 { font-size: 2.5rem; letter-spacing: 0.08em; }
-h3 { font-size: 1.8rem; letter-spacing: 0.05em; }
-
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color .25s ease;
-}
-a:hover { color: var(--color-accent); }
-
-/* --- CUSTOM UTILITY CLASSES --- */
-.site-header {
-  background: var(--color-secondary);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  height: 100px;
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  padding: 14px 36px;
-  border-radius: 2px;
-  letter-spacing: .05em;
-  transition: background-color .25s ease, color .25s ease;
-}
-.btn-primary:hover {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 2px solid var(--color-primary);
-  color: var(--color-primary);
-  padding: 12px 32px;
-  border-radius: 2px;
-  transition: all .25s ease;
-}
-.btn-secondary:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
-  transition: transform .25s ease, box-shadow .25s ease;
-}
-.dark .card {
-  box-shadow: 0 10px 30px rgba(255,255,255,0.1);
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
-}
-.dark .card:hover {
-  box-shadow: 0 16px 42px rgba(255,255,255,0.15);
-}
-
-.section-header {
-  text-align: center;
-  color: var(--color-primary);
+/* Luxury gold underline for links */
+a.luxury-link {
   position: relative;
+  color: var(--color-primary);
 }
-.section-header::after {
+a.luxury-link::after {
   content: "";
-  display: block;
-  width: 60px;
-  height: 3px;
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 2px;
   background-color: var(--color-accent);
-  margin: 16px auto 0 auto;
+  transition: width 0.3s ease;
 }
-
-.site-footer {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  padding: 48px 24px;
-}
-.site-footer a { color: var(--color-on-primary); }
-.site-footer a:hover { color: var(--color-accent); }
-
-@media (max-width: 768px) {
-  h1 { font-size: 2.5rem; letter-spacing: .08em; }
-  h2 { font-size: 2rem; letter-spacing: .06em; }
+a.luxury-link:hover::after {
+  width: 100%;
 }
