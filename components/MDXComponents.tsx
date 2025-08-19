@@ -1,5 +1,4 @@
 // components/MDXComponents.tsx
-import Image, { ImageProps } from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
@@ -7,12 +6,8 @@ import * as React from "react";
 /* ---------------- utils ---------------- */
 
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
-
-function toNumber(v?: number | string) {
-  if (v == null) return undefined;
-  if (typeof v === "number") return v;
-  const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
-  return Number.isFinite(n) ? n : undefined;
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
 /* ---------------- MDX <a> ---------------- */
@@ -51,63 +46,64 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
   );
 };
 
-/* ---------------- MDX <img> ---------------- */
+/* ---------------- MDX <img> (native img, MDX-safe) ---------------- */
 
-type ImgProps = Omit<ImageProps, "src" | "alt"> & {
-  src?: string;
-  alt?: string;
-  width?: number | string;
-  height?: number | string;
-};
+const Img: MDXComponentsType["img"] = (props) => {
+  const {
+    src = "/assets/images/default-book.jpg",
+    alt = "",
+    title,
+    className,
+    width,
+    height,
+    loading,
+    ...rest
+  } = props as React.ImgHTMLAttributes<HTMLImageElement>;
 
-const Img: MDXComponentsType["img"] = ({
-  src,
-  alt = "",
-  className,
-  title,
-  width,
-  height,
-  ...rest
-}: ImgProps) => {
-  const safeSrc = src || "/assets/images/default-book.jpg";
-  const w = toNumber(width);
-  const h = toNumber(height);
   const [loaded, setLoaded] = React.useState(false);
-
-  const skeleton =
-    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 " +
-    "animate-[shimmer_1.8s_linear_infinite]";
-
-  const altText = alt || (title ? String(title) : "Embedded image");
+  const hasDim = typeof width !== "undefined" && typeof height !== "undefined";
 
   return (
     <figure className="my-6">
-      <div className="relative w-full">
-        <Image
-          src={safeSrc}
-          alt={altText}
-          width={w}
-          height={h}
-          fill={!w || !h}
-          sizes={w && h ? "(max-width: 768px) 100vw, 800px" : "100vw"}
-          className={className || "rounded-lg shadow-card object-cover"}
-          loading="lazy"
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
+
+      {hasDim ? (
+        <img
+          src={String(src)}
+          alt={alt || (title ? String(title) : "Embedded image")}
+          width={width}
+          height={height}
+          loading={loading ?? "lazy"}
           decoding="async"
-          onLoadingComplete={() => setLoaded(true)}
+          className={cn("rounded-lg shadow-card object-cover", className)}
+          onLoad={() => setLoaded(true)}
           {...rest}
         />
-        {!loaded && (
-          <>
-            <style jsx>{`
-              @keyframes shimmer {
-                0% { background-position: -200% 0; }
-                100% { background-position: 200% 0; }
-              }
-            `}</style>
-            <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
-          </>
-        )}
-      </div>
+      ) : (
+        <div className={cn("relative h-96 w-full overflow-hidden rounded-lg shadow-card", className)}>
+          {!loaded && (
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]"
+              aria-hidden="true"
+            />
+          )}
+          <img
+            src={String(src)}
+            alt={alt || (title ? String(title) : "Embedded image")}
+            loading={loading ?? "lazy"}
+            decoding="async"
+            className={cn("h-full w-full object-cover", loaded ? "" : "opacity-0")}
+            onLoad={() => setLoaded(true)}
+            {...rest}
+          />
+        </div>
+      )}
+
       {title && (
         <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
           {title}
@@ -129,23 +125,16 @@ type YouTubeProps = {
 
 function parseYouTubeId(urlOrId?: string): string | null {
   if (!urlOrId) return null;
-  // If it's already an 11-char ID, pass through
   if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
-
   try {
     const u = new URL(urlOrId);
-    if (u.hostname.includes("youtu.be")) {
-      return u.pathname.replace("/", "") || null;
-    }
+    if (u.hostname.includes("youtu.be")) return u.pathname.replace("/", "") || null;
     if (u.hostname.includes("youtube.com")) {
-      // watch?v=, embed/, shorts/
       if (u.searchParams.get("v")) return u.searchParams.get("v");
       const m = u.pathname.match(/\/(embed|shorts)\/([a-zA-Z0-9_-]{11})/);
       if (m) return m[2];
     }
-  } catch {
-    // not a URL
-  }
+  } catch {}
   return null;
 }
 
@@ -157,8 +146,10 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-         style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={cn("relative w-full overflow-hidden rounded-lg shadow-card", className)}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src.toString()}
         title={title || "YouTube video"}
@@ -188,11 +179,10 @@ const ALLOWED_IFRAME_HOSTS = [
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try { url = new URL(src); } catch { /* ignore */ }
+  try { url = new URL(src); } catch {}
 
-  const allowed = !!url && ALLOWED_IFRAME_HOSTS.some(h => url!.hostname.endsWith(h));
+  const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
-    // Fail closed: render a neutral note instead of embedding untrusted origins.
     return (
       <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">
         Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.
@@ -200,18 +190,16 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
     );
   }
 
-  // YouTube → prefer nocookie domain
   if (url!.hostname.includes("youtube.com") || url!.hostname.includes("youtu.be")) {
     const id = parseYouTubeId(src);
-    if (id) {
-      return <YouTube id={id} title={title} className={className} />;
-    }
+    if (id) return <YouTube id={id} title={title} className={className} />;
   }
 
-  // Generic responsive wrapper for other allowed providers
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-         style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={cn("relative w-full overflow-hidden rounded-lg shadow-card", className)}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src}
         title={title}
@@ -232,9 +220,8 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
 export const MDXComponents: MDXComponentsType = {
   a: A,
   img: Img,
-  // Let authors use either:
-  YouTube,          // <YouTube id="..." /> or <YouTube url="..." />
-  iframe: Iframe,   // <iframe src="..."></iframe> (allowed providers only)
+  YouTube,
+  iframe: Iframe,
 };
 
 export default MDXComponents;
