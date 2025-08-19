@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/lib/ThemeContext";
 import { sans, serif } from "@/lib/fonts";
 import "@/styles/globals.css";
 
+import ScrollProgress from "@/components/ScrollProgress"; // 👈 import the bar
+
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
@@ -25,6 +27,12 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <div className={`${sans.variable} ${serif.variable}`}>
       <ThemeProvider>
+        {/* 👇 Always visible scroll progress bar */}
+        <ScrollProgress
+          zIndexClass="z-50"
+          colorClass="bg-emerald-600"
+          heightClass="h-1"
+        />
         <Component {...pageProps} />
       </ThemeProvider>
     </div>
@@ -38,18 +46,7 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
     name: metric.name,
     label: metric.label,
     value: Math.round(
-      metric.name === "CLS" ? metric.value * 1000 : metric.value,
+      metric.name === "CLS" ? metric.value * 1000 : metric.value
     ),
   });
 }
-
-
-
-
-
-
-
-
-
-
-
