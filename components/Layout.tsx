@@ -8,6 +8,37 @@ type LayoutProps = {
   pageTitle?: string;
 };
 
+const ORIGIN =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.URL ??
+  process.env.DEPLOY_PRIME_URL ??
+  "https://abrahamoflondon.org";
+
+const ORG_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Abraham of London",
+  url: ORIGIN.replace(/\/$/, ""),
+  logo: `${ORIGIN.replace(/\/$/, "")}/assets/images/logo/abraham-of-london-logo.svg`,
+  sameAs: [
+    "https://twitter.com/AbrahamAda48634",
+    "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+    "https://www.instagram.com/abraham_of_london",
+    // Add public Facebook page if applicable:
+    "https://www.facebook.com/share/p/156tQWm2mZ/",
+  ],
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      contactType: "Customer Support",
+      email: "info@abrahamoflondon.org",
+      telephone: "+44 20 7946 0958",
+      areaServed: "GB",
+      availableLanguage: ["en"],
+    },
+  ],
+};
+
 export default function Layout({ children, pageTitle }: LayoutProps) {
   const title = pageTitle ? `${pageTitle} | Abraham of London` : "Abraham of London";
 
@@ -16,14 +47,22 @@ export default function Layout({ children, pageTitle }: LayoutProps) {
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* Organization schema site-wide */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
+        />
       </Head>
 
-      {/* Social strip site-wide */}
+      {/* Site-wide social strip */}
       <SocialFollowStrip />
 
+      {/* Page content */}
       <main className="min-h-screen bg-gray-50">{children}</main>
 
-      {/* Minimal Footer (with Privacy & Terms links) */}
+      {/* Footer with legal links */}
       <footer className="border-t border-gray-200 bg-gray-50 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-center md:flex-row md:text-left">
           <p className="text-sm text-gray-600">
