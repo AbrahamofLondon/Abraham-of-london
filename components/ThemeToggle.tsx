@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 interface ThemeToggleProps {
@@ -14,12 +16,11 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
 
   React.useEffect(() => {
     setMounted(true);
-    const stored =
-      (typeof window !== "undefined"
-        ? (localStorage.getItem("theme") as "light" | "dark" | null)
-        : null) || null;
+
+    if (typeof window === "undefined") return;
+
+    const stored = localStorage.getItem("theme") as "light" | "dark" | null;
     const systemDark =
-      typeof window !== "undefined" &&
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
 
@@ -62,29 +63,36 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
   return (
     <button
       type="button"
-      aria-label={theme === "dark" ? "Activate light theme" : "Activate dark theme"}
+      aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
       aria-pressed={theme === "dark"}
       onClick={toggle}
-      className={cn(base, styles, className)}
+      className={cn(base, styles, className, "transition-transform duration-300")}
     >
       {theme === "dark" ? (
-        /* Sun icon */
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        // Sun
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+          className="animate-pulse"
+        >
           <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
           <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
         </svg>
       ) : (
-        /* Moon icon */
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        // Moon
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
           <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z" />
         </svg>
       )}
     </button>
   );
 }
-
-
-
-
-
-

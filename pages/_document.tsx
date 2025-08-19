@@ -9,6 +9,7 @@ const THEME_BOOTSTRAP = `
     var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = stored ? stored : (prefersDark ? 'dark' : 'light');
     var root = document.documentElement;
+    root.classList.remove('dark');
     if (theme === 'dark') root.classList.add('dark');
     root.setAttribute('data-theme', theme);
   } catch (e) {}
@@ -29,19 +30,27 @@ class MyDocument extends Document {
           <meta name="color-scheme" content="dark light" />
           <meta name="format-detection" content="telephone=no" />
 
+          {/* Theme colors for light & dark */}
           <meta name="theme-color" content="#0b1a2b" media="(prefers-color-scheme: dark)" />
-          <meta name="theme-color" content="#ffffff"  media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
+          {/* Performance: DNS + preconnect */}
           <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
           <link rel="dns-prefetch" href="https://www.google-analytics.com" />
           <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
 
+          {/* Bootstrap theme before hydration */}
           <script id="theme-bootstrap" dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
 
+          {/* Google Analytics (GA4) */}
           {gaEnabled && (
             <>
-              <script async id="ga4-src" src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
+              <script
+                async
+                id="ga4-src"
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              />
               <script
                 id="ga4-init"
                 dangerouslySetInnerHTML={{
@@ -66,12 +75,3 @@ class MyDocument extends Document {
 }
 
 export default MyDocument;
-
-
-
-
-
-
-
-
-

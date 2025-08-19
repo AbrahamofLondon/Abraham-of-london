@@ -1,16 +1,23 @@
 // components/LogoTile.tsx
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 type LogoTileProps = {
-  src: string;
+  src: string | StaticImageData;
   alt: string;
   width?: number;
   height?: number;
+  className?: string;
 };
 
-export default function LogoTile({ src, alt, width = 140, height = 140 }: LogoTileProps) {
+export default function LogoTile({
+  src,
+  alt,
+  width = 140,
+  height = 140,
+  className = "",
+}: LogoTileProps) {
   return (
-    <div className="relative w-[140px] h-[140px] mx-auto">
+    <div className={`relative w-[140px] h-[140px] mx-auto ${className}`}>
       <Image
         src={src}
         alt={alt}
@@ -23,8 +30,3 @@ export default function LogoTile({ src, alt, width = 140, height = 140 }: LogoTi
     </div>
   );
 }
-
-
-
-
-

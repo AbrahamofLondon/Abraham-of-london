@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import { motion, useScroll, useSpring } from "framer-motion";
 import clsx from "clsx";
 
@@ -9,18 +10,19 @@ type ScrollProgressProps = {
   zIndexClass?: string;
 };
 
-const ScrollProgress: React.FC<ScrollProgressProps> = ({
+export default function ScrollProgress({
   className,
   heightClass = "h-1",
-  colorClass = "bg-forest",
-  zIndexClass = "z-50",
-}) => {
+  colorClass = "bg-warm-gold", // default color
+  zIndexClass = "z-[60]", // slightly above Navbar’s z-50
+}: ScrollProgressProps) {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
+
   return (
     <motion.div
       className={clsx(
@@ -34,19 +36,4 @@ const ScrollProgress: React.FC<ScrollProgressProps> = ({
       aria-hidden="true"
     />
   );
-};
-
-export default ScrollProgress;
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
