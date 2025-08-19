@@ -12,6 +12,8 @@ import LogoTile from "@/components/LogoTile";
 import NewsletterForm from "@/components/NewsletterForm";
 import { getAllPosts } from "@/lib/mdx";
 import { PostMeta } from "@/types/post";
+import Section from "@/components/Section";
+
 
 import abrahamOfLondonBanner from "@/public/assets/images/abraham-of-london-banner.webp";
 import profilePortrait from "@/public/assets/images/profile-portrait.webp";
