@@ -2,9 +2,10 @@
 import Head from "next/head";
 import Link from "next/link";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
+import type { ReactNode } from "react";
 
 type LayoutProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   pageTitle?: string;
 };
 
@@ -14,17 +15,18 @@ const ORIGIN =
   process.env.DEPLOY_PRIME_URL ??
   "https://abrahamoflondon.org";
 
+const originNoSlash = ORIGIN.replace(/\/$/, "");
+
 const ORG_JSONLD = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Abraham of London",
-  url: ORIGIN.replace(/\/$/, ""),
-  logo: `${ORIGIN.replace(/\/$/, "")}/assets/images/logo/abraham-of-london-logo.svg`,
+  url: originNoSlash,
+  logo: `${originNoSlash}/assets/images/logo/abraham-of-london-logo.svg`,
   sameAs: [
     "https://twitter.com/AbrahamAda48634",
     "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     "https://www.instagram.com/abraham_of_london",
-    // Add public Facebook page if applicable:
     "https://www.facebook.com/share/p/156tQWm2mZ/",
   ],
   contactPoint: [
@@ -32,7 +34,7 @@ const ORG_JSONLD = {
       "@type": "ContactPoint",
       contactType: "Customer Support",
       email: "info@abrahamoflondon.org",
-      telephone: "+44 20 7946 0958",
+      telephone: "+44 20 8 622 5909",
       areaServed: "GB",
       availableLanguage: ["en"],
     },
@@ -47,7 +49,6 @@ export default function Layout({ children, pageTitle }: LayoutProps) {
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
         {/* Organization schema site-wide */}
         <script
           type="application/ld+json"
