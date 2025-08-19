@@ -21,19 +21,20 @@ import alomaradaLogo from "@/public/assets/images/logo/alomarada.svg";
 import endureluxeLogo from "@/public/assets/images/logo/endureluxe.svg";
 import innovatehubLogo from "@/public/assets/images/logo/innovatehub.svg";
 
-// 🔑 Section is now dynamically imported with a fallback
+// Dynamic import for Section with fallback
 const Section = dynamic(
   () =>
     import("@/components/Section").catch(() => {
-      // fallback dummy component to prevent build crash
-      return () => <section className="px-4 py-14">⚠️ Section missing</section>;
+      return function MissingSection() {
+        return <section className="px-4 py-14">⚠️ Section missing</section>;
+      };
     }),
   { ssr: true }
 );
 
 type HomeProps = { posts: PostMeta[] };
 
-export default function Home({ posts }: HomeProps) {
+function Home({ posts }: HomeProps) {
   const siteUrl = "https://abrahamoflondon.org";
   const siteName = "Abraham of London";
   const telephone = "+44 20 8622 5909";
@@ -66,15 +67,26 @@ export default function Home({ posts }: HomeProps) {
       {/* Hero */}
       <header className="relative isolate">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <Image src={abrahamOfLondonBanner} alt="" priority fill className="object-cover" sizes="100vw" />
+          <Image
+            src={abrahamOfLondonBanner}
+            alt=""
+            priority
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.7),rgba(0,0,0,.45)_40%,rgba(0,0,0,.7))] backdrop-blur-[1.5px]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_60%_at_30%_20%,rgba(0,0,0,.75),rgba(0,0,0,.55)_40%,rgba(0,0,0,.75))] backdrop-blur-[1.5px]"
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto max-w-6xl px-4 py-24 md:py-32">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">Abraham of London</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-200">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-24 md:py-32 text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+            <span className="relative inline-block bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent animate-[shimmer_3s_infinite]">
+              Abraham of London
+            </span>
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-lg leading-8 text-gray-200">
             Strategist, writer, and builder. Dedicated to legacy, fatherhood, and principled work.
           </p>
         </div>
@@ -111,7 +123,10 @@ export default function Home({ posts }: HomeProps) {
       <Section title="Featured Books">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
-            <div key={book.title} className="rounded-lg border p-6 shadow-sm">
+            <div
+              key={book.title}
+              className="rounded-lg border p-6 shadow-sm hover:shadow-lg hover:border-amber-400 transition-all duration-300"
+            >
               <h3 className="text-lg font-semibold">{book.title}</h3>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{book.desc}</p>
             </div>
@@ -123,7 +138,11 @@ export default function Home({ posts }: HomeProps) {
       <Section title="Latest Posts">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {posts.slice(0, 3).map((post) => (
-            <Link key={post.slug} href={`/posts/${post.slug}`} className="block rounded-lg border p-4 hover:shadow-md">
+            <Link
+              key={post.slug}
+              href={`/posts/${post.slug}`}
+              className="block rounded-lg border p-4 hover:shadow-md hover:border-amber-400 transition-all duration-300"
+            >
               <h3 className="text-lg font-semibold">{post.title}</h3>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{post.excerpt}</p>
             </Link>
@@ -135,7 +154,10 @@ export default function Home({ posts }: HomeProps) {
       <Section title="Contact">
         <div className="text-center">
           <p className="mb-4 text-lg">Let’s build something enduring together.</p>
-          <a href={`tel:${telHref}`} className="text-blue-600 hover:underline">
+          <a
+            href={`tel:${telHref}`}
+            className="inline-block rounded-md border border-amber-500 px-6 py-3 font-medium text-amber-600 hover:bg-amber-50 hover:shadow-lg transition-all"
+          >
             {telephone}
           </a>
         </div>
@@ -148,16 +170,17 @@ export default function Home({ posts }: HomeProps) {
 
       {/* Signature */}
       <footer className="mt-12 text-center text-sm text-gray-500">
-        Built by <span className="font-[cursive] text-lg text-gray-700">Abraham</span>
+        Built by{" "}
+        <span className="font-[cursive] text-lg text-gray-700">Abraham</span>
       </footer>
     </Layout>
   );
 }
 
-// ✅ Fix ESLint: give Home a display name
 Home.displayName = "Home";
+export default Home;
 
 export async function getStaticProps() {
-  const posts = getAllPosts().map((post) => post.meta);
+  const posts = getAllPosts();
   return { props: { posts } };
 }
