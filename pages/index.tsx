@@ -52,19 +52,14 @@ import endureluxeLogo from "@/public/assets/images/logo/endureluxe.svg";
 import innovatehubLogo from "@/public/assets/images/logo/innovatehub.svg";
 
 // Fallback wrapper for missing Section (prevents build crash if the file is renamed/missing)
-const Section = dynamic(
-  () =>
-    import("@/components/Section").catch(() => {
-      const MissingSection = () => (
-        <section className="px-4 py-14 text-center text-sm text-amber-600">
-          ⚠️ Section component missing
-        </section>
-      );
-      MissingSection.displayName = "MissingSection";
-      return MissingSection;
-    }),
-  { ssr: true }
-);
+const Section = dynamic(() => import("@/components/Section"), {
+  ssr: true,
+  loading: () => (
+    <section className="px-4 py-14 text-center text-sm text-amber-600">
+      Loading section…
+    </section>
+  ),
+});
 
 type HomeProps = { posts: PostMeta[] };
 
