@@ -1,4 +1,5 @@
 // components/MDXComponents.tsx
+import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
@@ -6,8 +7,12 @@ import * as React from "react";
 /* ---------------- utils ---------------- */
 
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
+
+function toNumber(v?: number | string) {
+  if (v == null) return undefined;
+  if (typeof v === "number") return v;
+  const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 /* ---------------- MDX <a> ---------------- */
@@ -29,14 +34,7 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 
   const isHttp = /^https?:\/\//i.test(href);
   const externalProps = isHttp
-    ? {
-        target: "_blank",
-        rel: "noopener noreferrer",
-        "aria-label":
-          typeof children === "string"
-            ? `${children} (opens in new tab)`
-            : "Opens in new tab",
-      }
+    ? { target: "_blank", rel: "noopener noreferrer", "aria-label": "Opens in new tab" }
     : {};
 
   return (
@@ -46,64 +44,71 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
   );
 };
 
-/* ---------------- MDX <img> (native img, MDX-safe) ---------------- */
+/* ---------------- MDX <img> -> next/image ---------------- */
 
-const Img: MDXComponentsType["img"] = (props) => {
-  const {
-    src = "/assets/images/default-book.jpg",
-    alt = "",
-    title,
-    className,
-    width,
-    height,
-    loading,
-    ...rest
-  } = props as React.ImgHTMLAttributes<HTMLImageElement>;
+type MDXImgProps = React.DetailedHTMLProps<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  HTMLImageElement
+>;
 
+const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
+  const safeSrc = src || "/assets/images/default-book.jpg";
+  const w = toNumber(width);
+  const h = toNumber(height);
   const [loaded, setLoaded] = React.useState(false);
-  const hasDim = typeof width !== "undefined" && typeof height !== "undefined";
+
+  const skeleton =
+    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 " +
+    "animate-[shimmer_1.8s_linear_infinite]";
+  const altText = alt || (title ? String(title) : "Embedded image");
 
   return (
     <figure className="my-6">
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
-
-      {hasDim ? (
-        <img
-          src={String(src)}
-          alt={alt || (title ? String(title) : "Embedded image")}
-          width={width}
-          height={height}
-          loading={loading ?? "lazy"}
+      {w && h ? (
+        <Image
+          src={safeSrc}
+          alt={altText}
+          width={w}
+          height={h}
+          sizes="(max-width: 768px) 100vw, 800px"
+          className={className || "rounded-lg shadow-card object-cover"}
+          loading="lazy"
           decoding="async"
-          className={cn("rounded-lg shadow-card object-cover", className)}
-          onLoad={() => setLoaded(true)}
-          {...rest}
+          onLoadingComplete={() => setLoaded(true)}
         />
       ) : (
-        <div className={cn("relative h-96 w-full overflow-hidden rounded-lg shadow-card", className)}>
-          {!loaded && (
-            <div
-              className="absolute inset-0 bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]"
-              aria-hidden="true"
-            />
-          )}
-          <img
-            src={String(src)}
-            alt={alt || (title ? String(title) : "Embedded image")}
-            loading={loading ?? "lazy"}
+        <span
+          className={`block relative w-full h-96 rounded-lg overflow-hidden shadow-card ${
+            className || ""
+          }`}
+        >
+          <Image
+            src={safeSrc}
+            alt={altText}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            loading="lazy"
             decoding="async"
-            className={cn("h-full w-full object-cover", loaded ? "" : "opacity-0")}
-            onLoad={() => setLoaded(true)}
-            {...rest}
+            onLoadingComplete={() => setLoaded(true)}
           />
-        </div>
+          {!loaded && (
+            <>
+              <style jsx>{`
+                @keyframes shimmer {
+                  0% {
+                    background-position: -200% 0;
+                  }
+                  100% {
+                    background-position: 200% 0;
+                  }
+                }
+              `}</style>
+              <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
+            </>
+          )}
+        </span>
       )}
-
       {title && (
         <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
           {title}
@@ -113,15 +118,9 @@ const Img: MDXComponentsType["img"] = (props) => {
   );
 };
 
-/* ---------------- YouTube (MDX component) ---------------- */
+/* ---------------- YouTube ---------------- */
 
-type YouTubeProps = {
-  id?: string;
-  url?: string;
-  title?: string;
-  className?: string;
-  start?: number; // seconds
-};
+type YouTubeProps = { id?: string; url?: string; title?: string; className?: string; start?: number };
 
 function parseYouTubeId(urlOrId?: string): string | null {
   if (!urlOrId) return null;
@@ -141,13 +140,12 @@ function parseYouTubeId(urlOrId?: string): string | null {
 export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, start }) => {
   const videoId = id || parseYouTubeId(url || "");
   if (!videoId) return null;
-
   const src = new URL(`https://www.youtube-nocookie.com/embed/${videoId}`);
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
 
   return (
     <div
-      className={cn("relative w-full overflow-hidden rounded-lg shadow-card", className)}
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
       style={{ aspectRatio: "16 / 9" }}
     >
       <iframe
@@ -164,7 +162,7 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   );
 };
 
-/* ---------------- Safe <iframe> mapper for MDX ---------------- */
+/* ---------------- Safe iframe mapper ---------------- */
 
 type IframeProps = React.ComponentProps<"iframe"> & { className?: string };
 
@@ -179,8 +177,9 @@ const ALLOWED_IFRAME_HOSTS = [
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try { url = new URL(src); } catch {}
-
+  try {
+    url = new URL(src);
+  } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
@@ -189,15 +188,13 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
       </div>
     );
   }
-
   if (url!.hostname.includes("youtube.com") || url!.hostname.includes("youtu.be")) {
     const id = parseYouTubeId(src);
     if (id) return <YouTube id={id} title={title} className={className} />;
   }
-
   return (
     <div
-      className={cn("relative w-full overflow-hidden rounded-lg shadow-card", className)}
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
       style={{ aspectRatio: "16 / 9" }}
     >
       <iframe
@@ -219,7 +216,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
 
 export const MDXComponents: MDXComponentsType = {
   a: A,
-  img: Img,
+  img: (props) => <Img {...(props as MDXImgProps)} />, // safe cast to match MDX typing
   YouTube,
   iframe: Iframe,
 };

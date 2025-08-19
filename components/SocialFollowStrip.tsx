@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,10 +5,10 @@ type Item = { href: string; src: string; alt: string; label: string };
 
 const items: Item[] = [
   { href: "https://twitter.com/abrahamoflondon",  src: "/assets/images/social/twitter.svg",   alt: "Twitter logo",   label: "Twitter" },
+  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook.svg", alt: "Facebook logo", label: "Facebook" },
   { href: "https://www.linkedin.com/in/abrahamoflondon", src: "/assets/images/social/linkedin.svg",  alt: "LinkedIn logo",  label: "LinkedIn" },
   { href: "https://instagram.com/abrahamoflondon", src: "/assets/images/social/instagram.svg", alt: "Instagram logo", label: "Instagram" },
-  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook.svg", alt: "Facebook logo", label: "Facebook" },
-  { href: "mailto:hello@abrahamoflondon.org",      src: "/assets/images/social/email.svg",     alt: "Email icon",     label: "Email" },
+  { href: "mailto:info@abrahamoflondon.org",      src: "/assets/images/social/email.svg",     alt: "Email icon",     label: "Email" },
   { href: "tel:+442086225909",                     src: "/assets/images/social/phone.svg",     alt: "Phone icon",     label: "Call" },
 ];
 
@@ -36,6 +35,7 @@ export default function SocialFollowStrip() {
                     fill
                     sizes="24px"
                     className="object-contain"
+                    priority={false}
                   />
                 </span>
               );
