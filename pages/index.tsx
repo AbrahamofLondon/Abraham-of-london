@@ -22,10 +22,14 @@ import endureluxeLogo from "@/public/assets/images/logo/endureluxe.svg";
 import innovatehubLogo from "@/public/assets/images/logo/innovatehub.svg";
 
 // 🔑 Section is now dynamically imported with a fallback
-const Section = dynamic(() => import("@/components/Section").catch(() => {
-  // fallback dummy component to prevent build crash
-  return () => <section className="px-4 py-14">⚠️ Section missing</section>;
-}), { ssr: true });
+const Section = dynamic(
+  () =>
+    import("@/components/Section").catch(() => {
+      // fallback dummy component to prevent build crash
+      return () => <section className="px-4 py-14">⚠️ Section missing</section>;
+    }),
+  { ssr: true }
+);
 
 type HomeProps = { posts: PostMeta[] };
 
@@ -141,9 +145,17 @@ export default function Home({ posts }: HomeProps) {
       <Section title="Stay Updated">
         <NewsletterForm />
       </Section>
+
+      {/* Signature */}
+      <footer className="mt-12 text-center text-sm text-gray-500">
+        Built by <span className="font-[cursive] text-lg text-gray-700">Abraham</span>
+      </footer>
     </Layout>
   );
 }
+
+// ✅ Fix ESLint: give Home a display name
+Home.displayName = "Home";
 
 export async function getStaticProps() {
   const posts = getAllPosts().map((post) => post.meta);

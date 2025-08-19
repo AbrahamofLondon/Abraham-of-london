@@ -38,6 +38,7 @@ module.exports = {
         // Mapped to next/font vars from lib/fonts.ts
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        cursive: ['var(--font-cursive)', 'cursive'], // 👈 added elegant cursive
       },
       letterSpacing: { brand: '0.05em', widebrand: '0.1em' },
       boxShadow: {

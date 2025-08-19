@@ -34,3 +34,5 @@ export default function Section({
     </motion.section>
   );
 }
+
+Section.displayName = "Section";
