@@ -60,13 +60,13 @@ export async function getStaticProps() {
   const posts = getAllPosts();
   const safe = posts.map((p) => ({
     ...p,
-    excerpt: p.excerpt ?? null,
-    date: p.date ?? null,
-    coverImage: p.coverImage ?? null,
-    readTime: p.readTime ?? null,
-    category: p.category ?? null,
-    author: p.author ?? null,
-    tags: p.tags ?? null,
+    excerpt: p.excerpt ?? undefined,
+    date: p.date ?? undefined,
+    coverImage: p.coverImage ?? undefined,
+    readTime: p.readTime ?? undefined,
+    category: p.category ?? undefined,
+    author: p.author ?? undefined,
+    tags: p.tags ?? undefined,
   }));
   return { props: { posts: safe } };
 }

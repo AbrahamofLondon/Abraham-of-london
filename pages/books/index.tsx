@@ -18,7 +18,6 @@ export default function BooksIndex({ books }: Props) {
     return ["All", ...Array.from(set)];
   }, [books]);
 
-  // init from URL
   const initialQ = typeof router.query.q === "string" ? router.query.q : "";
   const initialGenre =
     typeof router.query.genre === "string" && genres.includes(router.query.genre)
@@ -28,28 +27,36 @@ export default function BooksIndex({ books }: Props) {
   const [q, setQ] = React.useState(initialQ);
   const [genre, setGenre] = React.useState(initialGenre);
 
-  // keep URL in sync
+  const hasFilters = q !== "" || genre !== "All";
+
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (genre && genre !== "All") params.set("genre", genre);
-    const search = params.toString();
-    const href = search ? `/books?${search}` : "/books";
-    router.replace(href, undefined, { shallow: true });
+    router.replace(params.toString() ? `/books?${params}` : "/books", undefined, {
+      shallow: true,
+    });
   }, [q, genre]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filtered = React.useMemo(() => {
-    return books.filter((b) => {
-      const matchesGenre = genre === "All" || b.genre === genre;
-      const needle = q.trim().toLowerCase();
-      const matchesQ =
-        !needle ||
-        (b.title ?? "").toLowerCase().includes(needle) ||
-        (b.excerpt ?? "").toLowerCase().includes(needle) ||
-        (b.author ?? "").toLowerCase().includes(needle);
-      return matchesGenre && matchesQ;
-    });
-  }, [books, q, genre]);
+  const filtered = React.useMemo(
+    () =>
+      books.filter((b) => {
+        const matchesGenre = genre === "All" || b.genre === genre;
+        const needle = q.trim().toLowerCase();
+        const matchesQ =
+          !needle ||
+          (b.title ?? "").toLowerCase().includes(needle) ||
+          (b.excerpt ?? "").toLowerCase().includes(needle) ||
+          (b.author ?? "").toLowerCase().includes(needle);
+        return matchesGenre && matchesQ;
+      }),
+    [books, q, genre],
+  );
+
+  const resetFilters = () => {
+    setQ("");
+    setGenre("All");
+  };
 
   return (
     <Layout pageTitle="Books">
@@ -62,11 +69,11 @@ export default function BooksIndex({ books }: Props) {
 
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12">
-          {/* Page header bar with breadcrumb & count */}
+          {/* Page header bar */}
           <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <Breadcrumb items={[{ href: "/", label: "Home" }, { label: "Books" }]} />
             <p className="text-xs text-deepCharcoal/60">
-              {filtered.length} {filtered.length === 1 ? "book" : "books"}
+              {books.length} {books.length === 1 ? "book" : "books"}
             </p>
           </div>
 
@@ -78,25 +85,44 @@ export default function BooksIndex({ books }: Props) {
           </header>
 
           {/* Controls */}
-          <div className="mb-8 grid gap-3 md:grid-cols-3">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search books…"
-              className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
-            />
-            <select
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-              className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
-            >
-              {genres.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-            <div className="hidden md:block" />
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="grid w-full gap-3 sm:w-auto sm:grid-cols-3">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search books…"
+                className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
+              />
+              <select
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
+              >
+                {genres.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+              <div className="hidden sm:block" />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-deepCharcoal/60">
+                Showing {filtered.length} of {books.length}
+              </span>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-deepCharcoal/80 hover:bg-warmWhite"
+                  aria-label="Clear filters"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Grid */}
@@ -148,7 +174,6 @@ export async function getStaticProps() {
     "downloadEpub",
   ]);
 
-  // JSON-serializable + optional-friendly
   const safe = books.map((b) => ({
     ...b,
     excerpt: b.excerpt ?? undefined,
