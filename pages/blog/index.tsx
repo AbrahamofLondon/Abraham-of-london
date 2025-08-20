@@ -141,16 +141,16 @@ export default function BlogIndex({ posts }: Props) {
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize null → undefined for optional props (fixes potential type error)
+  // Normalize undefined to null for JSON serialization
   const safe = posts.map((p) => ({
     ...p,
-    excerpt: p.excerpt ?? undefined,
-    date: p.date ?? undefined,
-    coverImage: p.coverImage ?? undefined,
-    readTime: p.readTime ?? undefined,
-    category: p.category ?? undefined,
-    author: p.author ?? undefined,
-    tags: p.tags ?? undefined,
+    excerpt: p.excerpt ?? null,
+    date: p.date ?? null,
+    coverImage: p.coverImage ?? null,
+    readTime: p.readTime ?? null,
+    category: p.category ?? null,
+    author: p.author ?? null,
+    tags: p.tags ?? null,
   }));
 
   return { props: { posts: safe }, revalidate: 60 };
