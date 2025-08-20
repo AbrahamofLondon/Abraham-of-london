@@ -8,6 +8,8 @@ import BlogPostCard from "@/components/BlogPostCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import type { PostMeta } from "@/types/post";
+import type { BookMeta } from "@/types/book";
+import type { BookCardProps } from "@/components/BookCard"; // ADDED
 import { motion } from "framer-motion";
 
 // Hero media
@@ -22,7 +24,7 @@ const HERO = {
 type HomeProps = {
   posts: PostMeta[];
   booksCount: number;
-  featuredBooks: BookCardProps[]; // Explicitly type as BookCardProps array
+  featuredBooks: BookCardProps[];
 };
 
 function Home({ posts, booksCount, featuredBooks }: HomeProps) {
@@ -195,7 +197,7 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
           </header>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredBooks.map((post) => (
+            {featuredPosts.map((post) => (
               <BlogPostCard key={post.slug} {...post} />
             ))}
           </div>
