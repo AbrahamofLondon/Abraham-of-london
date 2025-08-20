@@ -1,11 +1,10 @@
-// components/StickyCTA.tsx
 "use client";
 
 import React from "react";
 import clsx from "clsx";
 
 type Props = {
-  showAfter?: number;         // px scrolled before showing
+  showAfter?: number;
   phoneHref?: string;
   phoneLabel?: string;
   primaryHref?: string;
@@ -28,7 +27,6 @@ export default function StickyCTA({
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    // SSR-safe
     const onScroll = () => {
       const y = typeof window !== "undefined" ? window.scrollY : 0;
       setVisible(y > showAfter);
@@ -43,8 +41,7 @@ export default function StickyCTA({
   return (
     <aside
       className={clsx(
-        "fixed bottom-4 right-4 z-[70] pointer-events-auto",
-        "max-w-[92vw] sm:max-w-sm",
+        "fixed bottom-4 right-4 z-[70] max-w-[92vw] sm:max-w-sm",
         className,
       )}
       role="complementary"
@@ -52,13 +49,11 @@ export default function StickyCTA({
     >
       <div
         className={clsx(
-          "rounded-2xl border border-forest/15 bg-white/95 shadow-card backdrop-blur",
+          "rounded-2xl border border-forest/15 bg-white/95 shadow-card backdrop-blur px-4 py-3 sm:px-5 sm:py-4",
           "dark:bg-deepCharcoal/95 dark:border-white/10",
-          "px-4 py-3 sm:px-5 sm:py-4",
         )}
       >
         <div className="flex items-center gap-3 sm:gap-4">
-          {/* PHONE BUTTON (explicit size so it never explodes) */}
           <a
             href={phoneHref}
             className={clsx(
@@ -72,7 +67,6 @@ export default function StickyCTA({
             <PhoneIcon />
           </a>
 
-          {/* TEXT + ACTIONS */}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-forest dark:text-cream">
               Let’s build something enduring.
@@ -105,18 +99,12 @@ export default function StickyCTA({
   );
 }
 
-/** Solid, small, explicitly-sized phone icon (24x24) */
 function PhoneIcon() {
   return (
     <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-      role="img"
-      className="block"
-      fill="currentColor"
+      width="20" height="20" viewBox="0 0 24 24"
+      aria-hidden="true" focusable="false" role="img"
+      className="block" fill="currentColor"
     >
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.62 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.14a2 2 0 0 1 2.11-.45c.83.29 1.7.5 2.6.62A2 2 0 0 1 22 16.92z" />
     </svg>
