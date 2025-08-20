@@ -1,3 +1,6 @@
+# netlify.toml
+
+# ── Build settings ────────────────────────────────
 [build]
   command = "npm run build"
   publish = ".next"
@@ -5,18 +8,19 @@
 [build.environment]
   NODE_VERSION = "18"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Always set to your canonical custom domain (not the netlify.app subdomain)
-  NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
+  # This should be your primary domain.
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@netlify/functions", "@netlify/emails"]
   directory = "netlify/functions"
 
+# ── Plugins ───────────────────────────────────────
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ── Security headers ───────────────────────────────
+# ── Security headers ──────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
@@ -24,19 +28,37 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# ── Brand domain redirects (host-scoped) ──────────
-# EndureLuxe → Ventures landing
+# ── Primary domain redirect (apex to www) ─────────
+# This ensures all traffic is served from www.abrahamoflondon.org
 [[redirects]]
-  from = "/*"
-  to = "https://abrahamoflondon.org/ventures?brand=endureluxe"
+  from = "https://abrahamoflondon.org/*"
+  to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
-  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
-# Alomarada → Ventures landing
+# ── Brand domain redirects (host-scoped) ──────────
+# EndureLuxe.com redirects to a specific page on the main site.
 [[redirects]]
-  from = "/*"
-  to = "https://abrahamoflondon.org/ventures?brand=alomarada"
+  from = "https://endureluxe.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
   force = true
-  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+
+[[redirects]]
+  from = "https://www.endureluxe.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+  force = true
+
+# Alomarada.com redirects to a specific page on the main site.
+[[redirects]]
+  from = "https://alomarada.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.alomarada.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force = true
