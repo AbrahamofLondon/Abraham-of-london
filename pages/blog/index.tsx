@@ -1,4 +1,3 @@
-// pages/blog/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -142,7 +141,7 @@ export default function BlogIndex({ posts }: Props) {
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // IMPORTANT: normalize null → undefined for optional props (fixes your type error)
+  // Normalize null → undefined for optional props (fixes potential type error)
   const safe = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? undefined,

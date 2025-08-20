@@ -1,4 +1,3 @@
-// lib/mdx.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -46,12 +45,12 @@ export function getAllPosts(): PostMeta[] {
       slug,
       title,
       excerpt,
-      date: typeof data.date === "string" ? data.date : null,
-      coverImage: typeof data.coverImage === "string" ? data.coverImage : null,
-      readTime: typeof data.readTime === "string" ? data.readTime : null,
-      category: typeof data.category === "string" ? data.category : null,
-      author: typeof data.author === "string" ? data.author : null,
-      tags: Array.isArray(data.tags) ? (data.tags as string[]) : null,
+      date: typeof data.date === "string" ? data.date : undefined,
+      coverImage: typeof data.coverImage === "string" ? data.coverImage : undefined,
+      readTime: typeof data.readTime === "string" ? data.readTime : undefined,
+      category: typeof data.category === "string" ? data.category : undefined,
+      author: typeof data.author === "string" ? data.author : undefined,
+      tags: Array.isArray(data.tags) ? (data.tags as string[]) : undefined,
     };
   });
 
