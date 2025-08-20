@@ -1,4 +1,3 @@
-// pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -350,16 +349,16 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Defensive: normalize optional fields for JSON serialization
+  // Defensive: normalize optional fields for JSON serialization to "undefined"
   const safePosts = posts.map((p) => ({
     ...p,
-    excerpt: p.excerpt ?? null,
-    date: p.date ?? null,
-    coverImage: p.coverImage ?? null,
-    readTime: p.readTime ?? null,
-    category: p.category ?? null,
-    author: p.author ?? null,
-    tags: p.tags ?? null,
+    excerpt: p.excerpt ?? undefined,
+    date: p.date ?? undefined,
+    coverImage: p.coverImage ?? undefined,
+    readTime: p.readTime ?? undefined,
+    category: p.category ?? undefined,
+    author: p.author ?? undefined,
+    tags: p.tags ?? undefined,
   }));
 
   // Count books for the header bar
