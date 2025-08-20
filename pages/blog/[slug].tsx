@@ -1,31 +1,29 @@
+// pages/blog/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticProps, GetStaticPaths } from "next";
-import dynamic from "next/dynamic";
 import { format } from "date-fns";
+
+import Layout from "@/components/Layout";
+import MDXComponents from "@/components/MDXComponents";
+import MDXProviderWrapper from "@/components/MDXProviderWrapper";
+
 import { absUrl } from "@/lib/siteConfig";
 import { getAllPosts, getPostBySlug, type PostMeta } from "@/lib/posts";
-import { generatedCover } from "@/lib/og";
-import Layout from "@/components/Layout";
-import MDXProviderWrapper from "@/components/MDXProviderWrapper";
-import { MDXComponents } from "@/components/MDXComponents";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-// Dynamic imports
-const MDXRemote = dynamic(() => import("next-mdx-remote").then((m) => m.MDXRemote), {
-  ssr: true,
-});
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
 
-// Types
 type PageMeta = {
   slug: string;
   title: string;
-  date: string;
-  excerpt: string;
-  coverImage: string;
-  author: string;
-  readTime: string;
-  category: string;
+  date: string | null;
+  excerpt: string | null;
+  coverImage: string | null;
+  author: string | null;
+  readTime: string | null;
+  category: string | null;
 };
 
 type Props = {
@@ -35,14 +33,9 @@ type Props = {
   };
 };
 
-// Data Fetching
-/**
- * Fetches the post content and metadata for a given slug.
- * @param {object} context - The context object from Next.js.
- * @returns {Promise<GetStaticPropsResult<Props>>} The props for the page.
- */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
+
   const raw = getPostBySlug(slug, [
     "slug",
     "title",
@@ -60,22 +53,16 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
-  // Refined meta object with robust fallbacks
   const meta: PageMeta = {
-    slug: raw.slug,
+    slug: raw.slug!,
     title: raw.title || "Untitled",
-    date: (raw.date || raw.publishedAt || "") as string,
-    excerpt: raw.excerpt || "Discover insights and wisdom in this compelling read.",
-    // Use the centralized generatedCover function for a consistent fallback strategy
-    coverImage: raw.coverImage ? raw.coverImage : generatedCover(raw.slug, raw.title),
-    author: raw.author || "Abraham of London",
-    readTime: raw.readTime || "5 min read",
-    category: raw.category || "Insights",
+    date: (raw.date || raw.publishedAt || null) as string | null,
+    excerpt: raw.excerpt ?? null,
+    coverImage: (raw.coverImage as string | undefined) ?? null,
+    author: raw.author ?? "Abraham of London",
+    readTime: raw.readTime ?? null,
+    category: raw.category ?? null,
   };
-
-  // ESM-safe dynamic imports for the serializer + plugins
-  const { serialize } = await import("next-mdx-remote/serialize");
-  const remarkGfm = (await import("remark-gfm")).default;
 
   const mdx = await serialize(raw.content ?? "", {
     parseFrontmatter: false,
@@ -94,10 +81,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 };
 
-/**
- * Specifies the static paths for all blog posts.
- * @returns {Promise<GetStaticPathsResult>} The paths object.
- */
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = getAllPosts(["slug"]);
   return {
@@ -106,79 +89,79 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-// Component
 export default function BlogPost({ post }: Props) {
-  // Extract meta data for cleaner JSX
-  const { slug, title, date, excerpt, coverImage, author, readTime, category } = post.meta;
+  const { slug, title, date, excerpt, coverImage, author, readTime, category } =
+    post.meta;
+
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
 
-  // Structured Data (JSON-LD) for SEO
+  // Open Graph/JSON-LD
+  const cover = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
+  const canonical = absUrl(`/blog/${slug}`);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
-    image: [absUrl(coverImage)],
-    datePublished: date,
-    dateModified: date,
-    author: { "@type": "Person", name: author },
+    image: [cover],
+    datePublished: date || undefined,
+    dateModified: date || undefined,
+    author: { "@type": "Person", name: author || "Abraham of London" },
     publisher: {
       "@type": "Organization",
       name: "Abraham of London",
-      logo: { "@type": "ImageObject", url: absUrl("/assets/images/logo/abraham-of-london-logo.svg") },
+      logo: {
+        "@type": "ImageObject",
+        url: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
+      },
     },
-    description: excerpt,
-    mainEntityOfPage: { "@type": "WebPage", "@id": absUrl(`/blog/${slug}`) },
+    description: excerpt || "",
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
   };
 
   return (
-    <Layout>
+    <Layout pageTitle={title}>
       <Head>
-        {/* Basic SEO */}
         <title>{title} | Abraham of London</title>
-        <meta name="description" content={excerpt} />
-        <link rel="canonical" href={absUrl(`/blog/${slug}`)} />
+        {excerpt && <meta name="description" content={excerpt} />}
+        <link rel="canonical" href={canonical} />
 
-        {/* Open Graph & Twitter for social sharing */}
         <meta property="og:title" content={title} />
-        <meta property="og:description" content={excerpt} />
+        {excerpt && <meta property="og:description" content={excerpt} />}
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={absUrl(`/blog/${slug}`)} />
-        <meta property="og:image" content={absUrl(coverImage)} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={cover} />
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={excerpt} />
-        <meta name="twitter:image" content={absUrl(coverImage)} />
+        {excerpt && <meta name="twitter:description" content={excerpt} />}
+        <meta name="twitter:image" content={cover} />
 
-        {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </Head>
 
       <MDXProviderWrapper>
-        <article className="max-w-3xl mx-auto px-4 py-8 md:py-16">
+        <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
           {coverImage && (
-            <div className="mb-8 md:mb-16 relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src={absUrl(coverImage)}
-                alt={title}
-                fill
-                className="object-cover"
-                priority
-              />
+            <div className="relative mb-10 h-72 w-full overflow-hidden rounded-lg shadow-lg md:h-96">
+              <Image src={cover} alt={title} fill className="object-cover" priority />
             </div>
           )}
 
-          <h1 className="font-serif text-5xl md:text-6xl tracking-brand text-forest mb-6">
+          <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">
             {title}
           </h1>
 
-          <div className="text-sm text-deepCharcoal/70 mb-4">
-            <span>By {author}</span> &middot; <span>{formattedDate}</span>
-            {readTime && <span> &middot; {readTime}</span>}
+          <div className="mb-6 text-sm text-deepCharcoal/70">
+            <span>By {author || "Abraham of London"}</span>
+            {formattedDate && <> · <time dateTime={date!}>{formattedDate}</time></>}
+            {readTime && <> · {readTime}</>}
             {category && (
-              <span className="ml-2 inline-block text-xs rounded bg-warmWhite border border-lightGrey px-2 py-1">
+              <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
                 {category}
               </span>
             )}

@@ -15,7 +15,7 @@ export type BookCardProps = {
   downloadEpub?: string | null;
   featured?: boolean;
   className?: string;
-  motionProps?: MotionProps; // ✨ NEW
+  motionProps?: MotionProps;
 };
 
 const DEFAULT_COVER = "/assets/images/default-book.jpg";
@@ -32,7 +32,7 @@ export default function BookCard({
   downloadEpub,
   featured = false,
   className = "",
-  motionProps = {}, // ✨ default empty
+  motionProps = {},
 }: BookCardProps) {
   const src: string | StaticImageData =
     typeof coverImage === "object"
@@ -48,26 +48,27 @@ export default function BookCard({
 
   return (
     <motion.article
-      {...motionProps} // ✨ parent controls animation
+      {...motionProps}
       className={clsx(
-        "group rounded-2xl bg-white shadow-2xl border border-gray-200 hover:shadow-blue-200 transition-all duration-300 overflow-hidden",
-        featured && "ring-2 ring-blue-600/20",
-        className,
+        // calm, premium surface
+        "group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all duration-300 hover:shadow-cardHover",
+        className
       )}
     >
-      <Link href={`/books/${slug}`} className="block">
-        <div className="relative w-full h-80">
+      <Link href={`/books/${slug}`} aria-label={`Open book: ${title}`} className="block">
+        <div className="relative h-80 w-full">
           <Image
             src={src}
             alt={title}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover rounded-t-2xl"
+            className="rounded-t-2xl object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             onError={typeof src === "string" ? handleImgError : undefined}
             priority={featured}
           />
+          <span className="pointer-events-none absolute inset-0 rounded-t-2xl bg-gradient-to-t from-black/10 to-transparent" />
           {featured && (
-            <span className="absolute top-4 left-4 rounded-full bg-blue-600 text-white text-sm font-semibold px-4 py-1 shadow-lg">
+            <span className="absolute left-4 top-4 rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-deepCharcoal shadow">
               Featured
             </span>
           )}
@@ -75,46 +76,56 @@ export default function BookCard({
       </Link>
 
       <div className="p-6">
-        <h3 className="text-2xl font-serif font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
+        <h3 className="mb-1 font-serif text-2xl font-semibold leading-snug text-deepCharcoal transition-colors group-hover:text-forest">
           <Link href={`/books/${slug}`}>{title}</Link>
         </h3>
-        <p className="text-sm text-gray-600 mb-2">By {author}</p>
-        <p className="text-gray-700 text-base line-clamp-3 mb-4">{excerpt}</p>
-        <p className="text-sm text-gray-500 mb-4">{genre || "Uncategorized"}</p>
+        <p className="mb-2 text-sm text-deepCharcoal/70">By {author}</p>
+
+        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-deepCharcoal/90">
+          {excerpt}
+        </p>
+
+        <p className="mb-5 text-xs uppercase tracking-[0.14em] text-deepCharcoal/60">
+          {genre || "Uncategorized"}
+        </p>
 
         <div className="flex flex-wrap gap-3">
           <Link
             href={`/books/${slug}`}
-            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300"
+            className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/30"
+            aria-label={`Learn more about ${title}`}
           >
-            Learn More
+            Details
           </Link>
+
           {buyLink && buyLink !== "#" && (
             <a
               href={buyLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300"
+              className="inline-flex items-center rounded-full border border-deepCharcoal px-4 py-2 text-sm font-semibold text-deepCharcoal transition hover:bg-deepCharcoal hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20"
             >
-              Buy Now
+              Buy
             </a>
           )}
+
           {downloadPdf && (
             <a
               href={downloadPdf}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline underline-offset-4 hover:text-blue-800 transition-colors"
+              className="text-sm text-forest underline underline-offset-4 hover:text-primary-hover"
             >
               PDF
             </a>
           )}
+
           {downloadEpub && (
             <a
               href={downloadEpub}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline underline-offset-4 hover:text-blue-800 transition-colors"
+              className="text-sm text-forest underline underline-offset-4 hover:text-primary-hover"
             >
               EPUB
             </a>
