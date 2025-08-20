@@ -2,47 +2,40 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
 import { getAllPosts } from "@/lib/mdx";
+import { getAllBooks } from "@/lib/books";
 import type { PostMeta } from "@/types/post";
 import { motion } from "framer-motion";
 
-// Media for hero (switch to a short silent MP4 later if you like)
+// Hero media
 const HERO = {
   poster: "/assets/images/abraham-of-london-banner.webp",
-  video: "", // e.g. "/assets/video/brand-reel.mp4"
+  // Drop a short, silent, loopable video into /public/assets/video
+  // (keep it ~8–12s). WebM is optional but great when available.
+  videoMp4: "/assets/video/brand-reel.mp4",
+  videoWebm: "/assets/video/brand-reel.webm",
 };
 
-// Curated featured books — replace covers/links when ready
-const FEATURED_BOOKS = [
-  {
-    slug: "fathering-without-fear",
-    title: "Fathering Without Fear",
-    author: "Abraham of London",
-    excerpt:
-      "A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure.",
-    genre: "Memoir",
-    featured: true,
-    coverImage: "/assets/images/books/fathering-without-fear.jpg",
-  },
-  {
-    slug: "the-fiction-adaptation",
-    title: "The Fiction Adaptation",
-    author: "Abraham of London",
-    excerpt:
-      "A dramatized reimagining of lived conviction—raw, luminous, and cinematic.",
-    genre: "Drama",
-    featured: false,
-    coverImage: "/assets/images/books/fiction-adaptation.jpg",
-  },
-];
+type HomeProps = {
+  posts: PostMeta[];
+  booksCount: number;
+};
 
-type HomeProps = { posts: PostMeta[] };
+function Home({ posts, booksCount }: HomeProps) {
+  const router = useRouter();
 
-function Home({ posts }: HomeProps) {
+  // Forward ?q=… if someone lands on / with a search param
+  const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
+  const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
+  const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
+  const booksHref = `/books${qSuffix}`;
+
   const featuredPosts = posts.slice(0, 3);
+  const postsCount = posts.length;
 
   return (
     <Layout pageTitle="Home">
@@ -56,7 +49,7 @@ function Home({ posts }: HomeProps) {
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-white">
         <div className="absolute inset-0 -z-10">
-          {HERO.video ? (
+          {(HERO.videoMp4 || HERO.videoWebm) ? (
             <video
               className="h-full w-full object-cover"
               autoPlay
@@ -65,7 +58,8 @@ function Home({ posts }: HomeProps) {
               loop
               poster={HERO.poster}
             >
-              <source src={HERO.video} type="video/mp4" />
+              {HERO.videoWebm ? <source src={HERO.videoWebm} type="video/webm" /> : null}
+              {HERO.videoMp4 ? <source src={HERO.videoMp4} type="video/mp4" /> : null}
             </video>
           ) : (
             <Image
@@ -108,18 +102,56 @@ function Home({ posts }: HomeProps) {
               transition={{ duration: 0.8, delay: 0.3 }}
             >
               <Link
-                href="/books"
+                href={booksHref}
                 className="rounded-full bg-forest px-6 py-3 text-white shadow-sm transition hover:bg-primary-hover"
               >
                 Explore Books
               </Link>
               <Link
-                href="/blog"
+                href={blogHref}
                 className="rounded-full border border-white/80 px-6 py-3 text-white transition hover:bg-white/10"
               >
                 Featured Insights
               </Link>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Page header bar: breadcrumb + counts + query crumb */}
+      <section className="border-b border-lightGrey/70 bg-warmWhite/60">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+          <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
+            <ol className="flex items-center gap-2">
+              <li>
+                <Link href="/" className="hover:text-deepCharcoal">Home</Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-deepCharcoal/80">Overview</li>
+              {incomingQ ? (
+                <>
+                  <li aria-hidden="true">/</li>
+                  <li className="text-deepCharcoal/60">“{incomingQ}”</li>
+                </>
+              ) : null}
+            </ol>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href={booksHref}
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
+              aria-label={`View books (${booksCount})`}
+            >
+              Books <span className="ml-1 text-deepCharcoal/60">({booksCount})</span>
+            </Link>
+            <Link
+              href={blogHref}
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
+              aria-label={`View insights (${postsCount})`}
+            >
+              Insights <span className="ml-1 text-deepCharcoal/60">({postsCount})</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -132,7 +164,7 @@ function Home({ posts }: HomeProps) {
               Featured Books
             </h2>
             <Link
-              href="/books"
+              href={booksHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
             >
               View all
@@ -155,7 +187,7 @@ function Home({ posts }: HomeProps) {
               Featured Insights
             </h2>
             <Link
-              href="/blog"
+              href={blogHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
             >
               Read the blog
@@ -188,9 +220,7 @@ function Home({ posts }: HomeProps) {
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">
-                  Alomarada
-                </p>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
                   Explore →
                 </span>
@@ -206,9 +236,7 @@ function Home({ posts }: HomeProps) {
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">
-                  Endureluxe
-                </p>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
                   Explore →
                 </span>
@@ -224,9 +252,7 @@ function Home({ posts }: HomeProps) {
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">
-                  Abraham of London
-                </p>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
                   Explore →
                 </span>
@@ -286,7 +312,6 @@ function Home({ posts }: HomeProps) {
       {/* Closing CTA */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal">
         <div className="absolute inset-0 -z-10">
-          {/* Optional background image; remove if not present */}
           <Image
             src="/assets/images/cta/cta-bg.jpg"
             alt=""
@@ -324,8 +349,9 @@ export default Home;
 // SSG
 export async function getStaticProps() {
   const posts = getAllPosts();
-  // Ensure JSON-serializable fields (defensive)
-  const safe = posts.map((p) => ({
+
+  // Defensive: normalize optional fields for JSON serialization
+  const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
     date: p.date ?? null,
@@ -335,5 +361,9 @@ export async function getStaticProps() {
     author: p.author ?? null,
     tags: p.tags ?? null,
   }));
-  return { props: { posts: safe } };
+
+  // Count books for the header bar
+  const booksCount = getAllBooks(["slug"]).length;
+
+  return { props: { posts: safePosts, booksCount } };
 }
