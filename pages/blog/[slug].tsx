@@ -14,15 +14,16 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
+// CORRECTED: Allow null for serialization
 type PageMeta = {
   slug: string;
   title: string;
-  date?: string; // Changed from string | null to string | undefined
-  excerpt?: string; // Changed from string | null to string | undefined
-  coverImage?: string; // Changed from string | null to string | undefined
-  author?: string; // Changed from string | null to string | undefined
-  readTime?: string; // Changed from string | null to string | undefined
-  category?: string; // Changed from string | null to string | undefined
+  date?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  author?: string | null;
+  readTime?: string | null;
+  category?: string | null;
 };
 
 type Props = {
@@ -55,12 +56,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const meta: PageMeta = {
     slug: raw.slug!,
     title: raw.title || "Untitled",
-    date: (raw.date || raw.publishedAt) ?? undefined, // Changed from null to undefined
-    excerpt: raw.excerpt ?? undefined, // Changed from null to undefined
-    coverImage: (raw.coverImage as string | undefined) ?? undefined, // Changed from null to undefined
-    author: raw.author ?? "Abraham of London", // No change needed, already handles undefined
-    readTime: raw.readTime ?? undefined, // Changed from null to undefined
-    category: raw.category ?? undefined, // Changed from null to undefined
+    date: (raw.date || raw.publishedAt) ?? null,
+    excerpt: raw.excerpt ?? null,
+    coverImage: (raw.coverImage as string | null) ?? null,
+    author: raw.author ?? "Abraham of London",
+    readTime: raw.readTime ?? null,
+    category: raw.category ?? null,
   };
 
   const mdx = await serialize(raw.content ?? "", {
@@ -103,8 +104,8 @@ export default function BlogPost({ post }: Props) {
     "@type": "Article",
     headline: title,
     image: [cover],
-    datePublished: date || undefined,
-    dateModified: date || undefined,
+    datePublished: date || null,
+    dateModified: date || null,
     author: { "@type": "Person", name: author || "Abraham of London" },
     publisher: {
       "@type": "Organization",
@@ -114,7 +115,7 @@ export default function BlogPost({ post }: Props) {
         url: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
       },
     },
-    description: excerpt || "",
+    description: excerpt || null,
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
   };
 

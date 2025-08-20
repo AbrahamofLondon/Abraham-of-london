@@ -8,8 +8,8 @@ import BlogPostCard from "@/components/BlogPostCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import type { PostMeta } from "@/types/post";
-import type { BookMeta } from "@/types/book";
-import type { BookCardProps } from "@/components/BookCard"; // ADDED
+import type { BookMeta } from "@/types/book"; // Corrected import
+import type { BookCardProps } from "@/components/BookCard";
 import { motion } from "framer-motion";
 
 // Hero media
@@ -352,16 +352,16 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Defensive: normalize optional fields for JSON serialization to "undefined"
+  // Defensive: normalize optional fields for JSON serialization to "null"
   const safePosts = posts.map((p) => ({
     ...p,
-    excerpt: p.excerpt ?? undefined,
-    date: p.date ?? undefined,
-    coverImage: p.coverImage ?? undefined,
-    readTime: p.readTime ?? undefined,
-    category: p.category ?? undefined,
-    author: p.author ?? undefined,
-    tags: p.tags ?? undefined,
+    excerpt: p.excerpt ?? null,
+    date: p.date ?? null,
+    coverImage: p.coverImage ?? null,
+    readTime: p.readTime ?? null,
+    category: p.category ?? null,
+    author: p.author ?? null,
+    tags: p.tags ?? null,
   }));
 
   // Count books for the header bar and fetch featured books, ensuring compatibility with BookCardProps
@@ -377,11 +377,11 @@ export async function getStaticProps() {
     "downloadEpub",
   ]);
   const featuredBooks = allBooks
-    .filter((b): b is Required<Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "genre">> & Partial<BookMeta> => 
-      b.slug !== undefined && b.slug !== null && 
-      b.title !== undefined && b.title !== null && 
-      b.author !== undefined && b.author !== null && 
-      b.excerpt !== undefined && b.excerpt !== null && 
+    .filter((b): b is Required<Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "genre">> & Partial<BookMeta> =>
+      b.slug !== undefined && b.slug !== null &&
+      b.title !== undefined && b.title !== null &&
+      b.author !== undefined && b.author !== null &&
+      b.excerpt !== undefined && b.excerpt !== null &&
       b.genre !== undefined && b.genre !== null
     )
     .map((b) => ({
