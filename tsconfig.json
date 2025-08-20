@@ -21,6 +21,7 @@
       "@/components/*": ["components/*"],
       "@/styles/*": ["styles/*"],
       "@/public/*": ["public/*"],
+      "@/config/*": ["config/*"],           // 👈 add this
       "@netlify/functions": ["node_modules/@netlify/functions"],
       "@netlify/emails": ["node_modules/@netlify/emails"]
     }
