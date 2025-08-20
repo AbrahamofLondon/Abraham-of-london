@@ -1,98 +1,72 @@
-// pages/blog.tsx
-import React from "react";
-import { GetStaticProps } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import Image from "next/image";
-import { getAllPosts } from "@/lib/posts";
+import Layout from "@/components/Layout";
+import BlogPostCard from "@/components/BlogPostCard";
+import { getAllPosts } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import type { ReactElement } from "react";
 
-interface BlogPost {
-  slug: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  coverImage: string; // Remove the optional operator since we'll always provide a fallback
-  author?: string; // Add author field for SEO compatibility
-}
+type BlogProps = { posts: PostMeta[] };
 
-interface BlogProps {
-  posts: BlogPost[];
-}
-
-const Blog: React.FC<BlogProps> = ({ posts }) => {
+export default function BlogPage({ posts }: BlogProps): ReactElement {
   return (
-    <>
+    <Layout pageTitle="Blog">
       <Head>
-        <title>Blog | Abraham of London</title>
-        <meta name="description" content="Insights, reflections, and writings from Abraham of London." />
+        <meta
+          name="description"
+          content="Featured insights from Abraham of London — principled strategy, fatherhood, and cultural commentary."
+        />
       </Head>
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {posts.map((post) => (
-            <div key={post.slug} className="border rounded-2xl shadow-md overflow-hidden bg-white">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                width={800}
-                height={500}
-                className="w-full h-56 object-cover"
-              />
-              <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-2">
-                  <Link href={`/blog/${post.slug}`} className="hover:underline">
-                    {post.title}
-                  </Link>
-                </h2>
-                <p className="text-sm text-gray-500 mb-4">{post.date}</p>
-                <p className="text-gray-700 mb-4">{post.excerpt}</p>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Read more →
-                </Link>
-              </div>
-            </div>
-          ))}
+
+      <section className="bg-warmWhite px-4 py-20">
+        <div className="mx-auto max-w-7xl">
+          {/* Header */}
+          <header className="mb-10 text-center">
+            <h1 className="font-serif text-4xl font-bold text-deepCharcoal sm:text-5xl">
+              Featured Insights
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-deepCharcoal/70">
+              Essays, reflections, and commentary — crafted with clarity and
+              standards that endure.
+            </p>
+            <div className="mx-auto mt-5 h-0.5 w-20 bg-softGold/60" />
+          </header>
+
+          {/* Filter bar (non-functional placeholder) */}
+          <div className="mb-12 flex justify-center gap-4 text-sm">
+            {["All", "Strategy", "Fatherhood", "Society"].map((cat) => (
+              <button
+                key={cat}
+                className="rounded-full border border-lightGrey px-4 py-2 text-deepCharcoal transition hover:bg-white"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Blog posts grid */}
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <BlogPostCard key={post.slug} {...post} />
+            ))}
+          </div>
         </div>
-      </main>
-    </>
+      </section>
+    </Layout>
   );
-};
+}
 
-export const getStaticProps: GetStaticProps<BlogProps> = async () => {
-  const rawPosts = getAllPosts([
-    "slug",
-    "title",
-    "date",
-    "publishedAt",
-    "excerpt",
-    "coverImage",
-    "author",
-  ]);
-
-  // Clean and filter posts safely
-  const posts: BlogPost[] = rawPosts
-    .filter((p) => typeof p.slug === "string" && p.slug.trim() !== "")
-    .map((p) => ({
-      slug: (p.slug ?? "").trim(),
-      title: p.title?.trim() || "Untitled",
-      date: p.date || p.publishedAt || "",
-      excerpt: p.excerpt?.trim() || "Read more for full details.",
-      coverImage: p.coverImage || "/assets/images/og-image.jpg", // Always provide a fallback
-      author: p.author || "Abraham Adaramola", // Add author with fallback
-    }));
-
-  return {
-    props: { posts },
-  };
-};
-
-export default Blog;
-
-
-
-
-
-
+// SSG
+export async function getStaticProps() {
+  const posts = getAllPosts();
+  const safe = posts.map((p) => ({
+    ...p,
+    excerpt: p.excerpt ?? null,
+    date: p.date ?? null,
+    coverImage: p.coverImage ?? null,
+    readTime: p.readTime ?? null,
+    category: p.category ?? null,
+    author: p.author ?? null,
+    tags: p.tags ?? null,
+  }));
+  return { props: { posts: safe } };
+}
