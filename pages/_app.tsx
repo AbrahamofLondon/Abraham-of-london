@@ -1,4 +1,3 @@
-// pages/_app.tsx
 "use client";
 
 import type { AppProps, NextWebVitalsMetric } from "next/app";
@@ -18,9 +17,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (!gaEnabled) return;
     const handleRouteChange = (url: string) => pageview(url);
-    // fire for the first load
-    pageview(router.asPath);
-
+    pageview(router.asPath); // first load
     router.events.on("routeChangeComplete", handleRouteChange);
     router.events.on("hashChangeComplete", handleRouteChange);
     return () => {

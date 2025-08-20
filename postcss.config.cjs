@@ -1,4 +1,4 @@
-﻿// CommonJS so Next can require() it even with "type": "module"
+﻿// postcss.config.js
 module.exports = {
   plugins: {
     tailwindcss: {},

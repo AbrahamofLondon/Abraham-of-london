@@ -1,4 +1,3 @@
-// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -6,7 +5,7 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './content/**/*.{md,mdx}',
-    './lib/**/*.{js,ts,jsx,tsx}', // include fonts/theme helpers, etc.
+    './lib/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     container: {
@@ -35,10 +34,9 @@ module.exports = {
         emerald: { 700: '#047857' },
       },
       fontFamily: {
-        // Mapped to next/font vars from lib/fonts.ts
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
-        cursive: ['var(--font-cursive)', 'cursive'], // 👈 added elegant cursive
+        cursive: ['var(--font-cursive)', 'cursive'],
       },
       letterSpacing: { brand: '0.05em', widebrand: '0.1em' },
       boxShadow: {
@@ -52,8 +50,16 @@ module.exports = {
           '0%': { opacity: 0, transform: 'translateY(12px)' },
           '100%': { opacity: 1, transform: 'translateY(0)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
-      animation: { fadeIn: 'fadeIn .6s ease both', fadeUp: 'fadeUp .6s ease both' },
+      animation: {
+        fadeIn: 'fadeIn .6s ease both',
+        fadeUp: 'fadeUp .6s ease both',
+        shimmer: 'shimmer 3s linear infinite',
+      },
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
