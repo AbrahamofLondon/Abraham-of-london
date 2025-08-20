@@ -1,4 +1,3 @@
-// pages/books/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -7,7 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import BookCard from "@/components/BookCard";
 import { getAllBooks, type BookMeta } from "@/lib/books";
 
-type Props = { books: Partial<BookMeta>[] };
+type Props = { books: BookMeta[] }; // Changed from Partial<BookMeta>[] to BookMeta[]
 
 export default function BooksIndex({ books }: Props) {
   const router = useRouter();

@@ -1,12 +1,12 @@
-// types/post.ts
+// @/types/post.ts
 export type PostMeta = {
   slug: string;
   title: string;
-  excerpt: string;          // always a string (computed fallback)
-  date: string | null;
-  coverImage: string | null;
-  readTime: string | null;
-  category: string | null;
-  author: string | null;
-  tags: string[] | null;
+  excerpt?: string;
+  date?: string;
+  coverImage?: string;
+  readTime?: string;
+  category?: string;
+  author?: string;
+  tags?: string[];
 };

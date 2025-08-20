@@ -1,4 +1,3 @@
-// pages/books/[slug].tsx
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -93,8 +92,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         : "/assets/images/default-book.jpg",
     buyLink: raw.buyLink || "#",
     genre: raw.genre || "Uncategorized",
-    downloadPdf: raw.downloadPdf ?? null,
-    downloadEpub: raw.downloadEpub ?? null,
+    downloadPdf: raw.downloadPdf ?? undefined, // Changed from null to undefined
+    downloadEpub: raw.downloadEpub ?? undefined, // Changed from null to undefined
   };
 
   const mdx = await serialize(raw.content ?? "", {

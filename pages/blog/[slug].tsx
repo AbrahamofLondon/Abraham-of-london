@@ -1,4 +1,3 @@
-// pages/blog/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticProps, GetStaticPaths } from "next";
@@ -18,12 +17,12 @@ import remarkGfm from "remark-gfm";
 type PageMeta = {
   slug: string;
   title: string;
-  date: string | null;
-  excerpt: string | null;
-  coverImage: string | null;
-  author: string | null;
-  readTime: string | null;
-  category: string | null;
+  date?: string; // Changed from string | null to string | undefined
+  excerpt?: string; // Changed from string | null to string | undefined
+  coverImage?: string; // Changed from string | null to string | undefined
+  author?: string; // Changed from string | null to string | undefined
+  readTime?: string; // Changed from string | null to string | undefined
+  category?: string; // Changed from string | null to string | undefined
 };
 
 type Props = {
@@ -56,12 +55,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const meta: PageMeta = {
     slug: raw.slug!,
     title: raw.title || "Untitled",
-    date: (raw.date || raw.publishedAt || null) as string | null,
-    excerpt: raw.excerpt ?? null,
-    coverImage: (raw.coverImage as string | undefined) ?? null,
-    author: raw.author ?? "Abraham of London",
-    readTime: raw.readTime ?? null,
-    category: raw.category ?? null,
+    date: (raw.date || raw.publishedAt) ?? undefined, // Changed from null to undefined
+    excerpt: raw.excerpt ?? undefined, // Changed from null to undefined
+    coverImage: (raw.coverImage as string | undefined) ?? undefined, // Changed from null to undefined
+    author: raw.author ?? "Abraham of London", // No change needed, already handles undefined
+    readTime: raw.readTime ?? undefined, // Changed from null to undefined
+    category: raw.category ?? undefined, // Changed from null to undefined
   };
 
   const mdx = await serialize(raw.content ?? "", {

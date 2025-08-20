@@ -22,9 +22,10 @@ const HERO = {
 type HomeProps = {
   posts: PostMeta[];
   booksCount: number;
+  featuredBooks: BookCardProps[]; // Explicitly type as BookCardProps array
 };
 
-function Home({ posts, booksCount }: HomeProps) {
+function Home({ posts, booksCount, featuredBooks }: HomeProps) {
   const router = useRouter();
 
   // Forward ?q=… if someone lands on / with a search param
@@ -171,7 +172,7 @@ function Home({ posts, booksCount }: HomeProps) {
           </header>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURED_BOOKS.map((b) => (
+            {featuredBooks.map((b) => (
               <BookCard key={b.slug} {...b} />
             ))}
           </div>
@@ -194,7 +195,7 @@ function Home({ posts, booksCount }: HomeProps) {
           </header>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredPosts.map((post) => (
+            {featuredBooks.map((post) => (
               <BlogPostCard key={post.slug} {...post} />
             ))}
           </div>
@@ -361,8 +362,39 @@ export async function getStaticProps() {
     tags: p.tags ?? undefined,
   }));
 
-  // Count books for the header bar
-  const booksCount = getAllBooks(["slug"]).length;
+  // Count books for the header bar and fetch featured books, ensuring compatibility with BookCardProps
+  const allBooks = getAllBooks([
+    "slug",
+    "title",
+    "author",
+    "excerpt",
+    "coverImage",
+    "buyLink",
+    "genre",
+    "downloadPdf",
+    "downloadEpub",
+  ]);
+  const featuredBooks = allBooks
+    .filter((b): b is Required<Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "genre">> & Partial<BookMeta> => 
+      b.slug !== undefined && b.slug !== null && 
+      b.title !== undefined && b.title !== null && 
+      b.author !== undefined && b.author !== null && 
+      b.excerpt !== undefined && b.excerpt !== null && 
+      b.genre !== undefined && b.genre !== null
+    )
+    .map((b) => ({
+      slug: b.slug!,
+      title: b.title!,
+      author: b.author!,
+      excerpt: b.excerpt!,
+      genre: b.genre!,
+      coverImage: b.coverImage,
+      buyLink: b.buyLink,
+      downloadPdf: b.downloadPdf,
+      downloadEpub: b.downloadEpub,
+    } as BookCardProps))
+    .slice(0, 3); // Take first 3 valid books as featured
+  const booksCount = allBooks.length;
 
-  return { props: { posts: safePosts, booksCount } };
+  return { props: { posts: safePosts, booksCount, featuredBooks } };
 }
