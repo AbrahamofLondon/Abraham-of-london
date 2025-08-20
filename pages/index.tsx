@@ -3,6 +3,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { getAllPosts } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
+import siteConfig from "../config/site";
 
 type HomeProps = { posts: PostMeta[] };
 
