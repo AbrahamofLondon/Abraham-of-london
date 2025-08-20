@@ -1,3 +1,4 @@
+// components/BlogPostCard.tsx
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -38,9 +39,9 @@ export default function BlogPostCard({
   return (
     <motion.article
       {...motionProps}
-      className="group h-full overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all duration-300 hover:shadow-cardHover"
+      className="group h-full overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all hover:shadow-cardHover"
     >
-      <Link href={`/blog/${slug}`} aria-label={`Open post: ${title}`} className="block">
+      <Link href={`/blog/${slug}`} aria-label={`Open post: ${title}`}>
         <div className="relative aspect-[16/9] w-full overflow-hidden">
           <Image
             src={cover}
@@ -49,14 +50,14 @@ export default function BlogPostCard({
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
-          <span className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         </div>
       </Link>
 
       <div className="flex h-full flex-col p-5">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-deepCharcoal/70">
           {category && (
-            <span className="rounded-full border border-lightGrey bg-warmWhite px-2 py-0.5 text-[11px] uppercase tracking-[0.12em] text-deepCharcoal/75">
+            <span className="rounded-full border border-lightGrey px-2 py-0.5 text-deepCharcoal/80">
               {category}
             </span>
           )}
@@ -65,13 +66,18 @@ export default function BlogPostCard({
               {formatDate(date)}
             </time>
           )}
-          {readTime && <span className="text-deepCharcoal/60">· {readTime}</span>}
+          {readTime && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="text-deepCharcoal/60">{readTime}</span>
+            </>
+          )}
         </div>
 
-        <h3 className="font-serif text-xl font-semibold leading-snug text-deepCharcoal transition-colors group-hover:text-forest">
+        <h3 className="text-lg font-semibold leading-snug text-deepCharcoal">
           <Link
             href={`/blog/${slug}`}
-            className="outline-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-forest/30"
+            className="underline decoration-softGold/0 underline-offset-[6px] transition hover:decoration-softGold/70"
           >
             {title}
           </Link>
@@ -84,13 +90,13 @@ export default function BlogPostCard({
         )}
 
         <div className="mt-4 flex items-center gap-2 text-xs text-deepCharcoal/70">
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-forest/90">{author}</span>
+          <span className="rounded-full bg-warmWhite px-2 py-0.5">{author}</span>
         </div>
 
         <div className="mt-5">
           <Link
             href={`/blog/${slug}`}
-            className="inline-flex items-center rounded-full border border-deepCharcoal px-3 py-1.5 text-sm font-medium text-deepCharcoal transition-colors hover:bg-deepCharcoal hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20"
+            className="inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-xs font-semibold text-forest transition-colors hover:bg-forest hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/30"
             aria-label={`Read more: ${title}`}
           >
             Read more
