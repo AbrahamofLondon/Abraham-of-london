@@ -1,10 +1,11 @@
-// components/Layout.tsx
+// components/NavConfig.ts
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
+import { NAV } from "@/components/NavConfig";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -45,14 +46,6 @@ const ORG_JSONLD = {
   ],
 };
 
-const NAV = [
-  { href: "/books", label: "Books" },
-  { href: "/blog", label: "Insights" },
-  { href: "/ventures", label: "Ventures" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
-
 export default function Layout({
   children,
   pageTitle,
@@ -63,7 +56,6 @@ export default function Layout({
   const title = pageTitle ? `${pageTitle} | Abraham of London` : "Abraham of London";
   const [open, setOpen] = React.useState(false);
 
-  // Lock body scroll when mobile nav open
   React.useEffect(() => {
     if (open) document.documentElement.style.overflow = "hidden";
     else document.documentElement.style.overflow = "";
@@ -86,7 +78,6 @@ export default function Layout({
         />
       </Head>
 
-      {/* Skip link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
@@ -147,7 +138,7 @@ export default function Layout({
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -205,7 +196,7 @@ export default function Layout({
         </div>
       </header>
 
-      {/* Social Strip */}
+      {/* Social strip */}
       {!hideSocialStrip && (
         <div className="border-b border-gray-100 bg-white dark:bg-black/40">
           <div className="mx-auto max-w-7xl px-4 py-2">
@@ -215,9 +206,7 @@ export default function Layout({
       )}
 
       {/* Main */}
-      <main id="main-content" className="min-h-screen bg-white dark:bg-black">
-        {children}
-      </main>
+      <main id="main-content" className="min-h-screen bg-white dark:bg-black">{children}</main>
 
       {/* Sticky CTA */}
       <StickyCTA showAfter={420} />
