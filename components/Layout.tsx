@@ -1,4 +1,3 @@
-// components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -11,6 +10,7 @@ type LayoutProps = {
   children: React.ReactNode;
   pageTitle?: string;
   hideSocialStrip?: boolean;
+  footerVariant?: "light" | "dark"; // ← NEW
 };
 
 const ORIGIN =
@@ -26,7 +26,6 @@ const ORG_JSONLD = {
   "@type": "Organization",
   name: "Abraham of London",
   url: SITE_URL,
-  // Keep a file URL here for crawlers; the on-page logo is inline SVG for pixel-perfect rendering.
   logo: `${SITE_URL}/assets/images/logo/abraham-of-london-logo.svg`,
   sameAs: [
     "https://twitter.com/AbrahamAda48634",
@@ -48,43 +47,50 @@ const ORG_JSONLD = {
 
 const NAV = [
   { href: "/books", label: "Books" },
-  { href: "/blog", label: "Insights" }, // “Featured Insights” vibe
+  { href: "/blog", label: "Insights" },
   { href: "/ventures", label: "Ventures" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
-export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutProps) {
+export default function Layout({
+  children,
+  pageTitle,
+  hideSocialStrip,
+  footerVariant = "light",
+}: LayoutProps) {
   const router = useRouter();
   const title = pageTitle ? `${pageTitle} | Abraham of London` : "Abraham of London";
   const [open, setOpen] = React.useState(false);
 
-  // Lock body scroll when mobile menu is open (client-only)
   React.useEffect(() => {
-    if (open) document.documentElement.style.overflow = "hidden";
-    else document.documentElement.style.overflow = "";
+    document.documentElement.style.overflow = open ? "hidden" : "";
     return () => {
       document.documentElement.style.overflow = "";
     };
   }, [open]);
 
-  const isActive = (href: string) =>
-    router.pathname === href || router.asPath === href;
+  const isActive = (href: string) => router.pathname === href || router.asPath === href;
+
+  // Footer theme tokens
+  const isDark = footerVariant === "dark";
+  const footerWrap = isDark ? "border-t border-white/10 bg-deepCharcoal" : "border-t border-gray-200 bg-white";
+  const footerText = isDark ? "text-cream" : "text-gray-900";
+  const footerMuted = isDark ? "text-cream/70" : "text-gray-600";
+  const linkBase = isDark ? "text-cream/80 hover:text-cream" : "text-gray-600 hover:text-gray-900";
+  const divider = isDark ? "border-white/10" : "border-gray-200";
 
   return (
     <>
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Organization JSON-LD */}
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
         />
       </Head>
 
-      {/* Skip to content: accessibility */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
@@ -92,10 +98,8 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
         Skip to content
       </a>
 
-      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-200/70 bg-white/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
-          {/* Brand (inline SVG logo lockup) */}
           <Link href="/" className="group inline-flex items-center gap-3" aria-label="Abraham of London — Home">
             <span className="text-deepCharcoal group-hover:text-gray-900 transition-colors">
               <LogoFull />
@@ -105,7 +109,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:block" aria-label="Primary">
             <ul className="flex items-center gap-8">
               {NAV.map((item) => (
@@ -118,7 +121,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
                     ].join(" ")}
                   >
                     {item.label}
-                    {/* understated active underline */}
                     <span
                       className={[
                         "pointer-events-none absolute -bottom-1 left-0 h-[2px] transition-all",
@@ -132,7 +134,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </ul>
           </nav>
 
-          {/* Desktop CTA (updated palette) */}
           <div className="hidden md:block">
             <Link
               href="/contact"
@@ -142,7 +143,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -163,7 +163,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
           </button>
         </div>
 
-        {/* Mobile Drawer */}
         <div
           id="mobile-nav"
           className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white`}
@@ -200,7 +199,6 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
         </div>
       </header>
 
-      {/* Social strip (top) — optional */}
       {!hideSocialStrip && (
         <div className="border-b border-gray-100 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-2">
@@ -209,35 +207,29 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
         </div>
       )}
 
-      {/* Main */}
       <main id="main-content" className="min-h-screen bg-white">{children}</main>
 
-      {/* Sticky mini-CTA (appears gently after scroll) */}
       <StickyCTA showAfter={420} />
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white">
+      {/* Footer (themeable) */}
+      <footer className={footerWrap}>
         <div className="mx-auto max-w-7xl px-4 py-12">
-          <div className="grid gap-10 md:grid-cols-3">
+          <div className={`grid gap-10 md:grid-cols-3 ${footerText}`}>
             <div>
-              {/* Footer brand — smaller inline SVG logo for cohesion */}
-              <div className="mb-3 text-deepCharcoal">
+              <div className={`mb-3 ${isDark ? "text-cream" : "text-deepCharcoal"}`}>
                 <LogoFull />
               </div>
-              <p className="text-sm leading-relaxed text-gray-600">
+              <p className={`text-sm leading-relaxed ${footerMuted}`}>
                 Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-900">Navigate</p>
+              <p className={`text-sm font-semibold ${footerText}`}>Navigate</p>
               <ul className="mt-3 grid gap-2 text-sm">
                 {NAV.map((item) => (
                   <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-gray-600 transition hover:text-gray-900"
-                    >
+                    <Link href={item.href} className={`${linkBase} transition`}>
                       {item.label}
                     </Link>
                   </li>
@@ -246,23 +238,20 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-900">Contact & Legal</p>
+              <p className={`text-sm font-semibold ${footerText}`}>Contact & Legal</p>
               <ul className="mt-3 grid gap-2 text-sm">
                 <li>
-                  <a
-                    href="mailto:info@abrahamoflondon.org"
-                    className="text-gray-600 transition hover:text-gray-900"
-                  >
+                  <a href="mailto:info@abrahamoflondon.org" className={`${linkBase} transition`}>
                     info@abrahamoflondon.org
                   </a>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-gray-600 transition hover:text-gray-900">
+                  <Link href="/privacy" className={`${linkBase} transition`}>
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-gray-600 transition hover:text-gray-900">
+                  <Link href="/terms" className={`${linkBase} transition`}>
                     Terms of Service
                   </Link>
                 </li>
@@ -270,7 +259,7 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </div>
           </div>
 
-          <div className="mt-10 border-t border-gray-200 pt-6 text-center text-xs text-gray-500">
+          <div className={`mt-10 border-t ${divider} pt-6 text-center text-xs ${isDark ? "text-cream/60" : "text-gray-500"}`}>
             © {new Date().getFullYear()} Abraham of London. All rights reserved.
           </div>
         </div>
