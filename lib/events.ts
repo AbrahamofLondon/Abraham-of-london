@@ -1,4 +1,3 @@
-// lib/events.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -9,7 +8,7 @@ export type EventItem = {
   date: string;        // ISO yyyy-mm-dd
   location: string;
   description?: string | null;
-  coverImage?: string | null;
+  heroImage?: string | null; // Changed from coverImage to heroImage
   tags?: string[] | null;
   content?: string;
 };
@@ -75,6 +74,7 @@ export function getEventBySlug(
   if (!fields.includes("date") && typeof fm.date === "string") item.date = fm.date;
   if (!fields.includes("location") && typeof fm.location === "string") item.location = fm.location;
   if (!fields.includes("description") && typeof fm.description === "string") item.description = fm.description;
+  if (!fields.includes("heroImage") && typeof fm.heroImage === "string") item.heroImage = fm.heroImage; // Updated to heroImage
 
   return item;
 }
