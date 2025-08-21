@@ -1,86 +1,90 @@
+// components/SocialFollowStrip.tsx
 import Image from "next/image";
 import Link from "next/link";
+import clsx from "clsx";
+import { siteConfig } from "@/lib/siteConfig";
 
-type Item = { href: string; src: string; alt: string; label: string };
+type Props = {
+  variant?: "light" | "dark";
+  className?: string;
+};
 
-const items: Item[] = [
-  { href: "https://twitter.com/abrahamoflondon", src: "/assets/images/social/twitter-solid.svg", alt: "Twitter logo", label: "Twitter" },
-  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook-solid.svg", alt: "Facebook logo", label: "Facebook" },
-  { href: "https://www.linkedin.com/in/abrahamoflondon", src: "/assets/images/social/linkedin-solid.svg", alt: "LinkedIn logo", label: "LinkedIn" },
-  { href: "https://instagram.com/abrahamoflondon", src: "/assets/images/social/instagram-solid.svg", alt: "Instagram logo", label: "Instagram" },
-  { href: "mailto:info@abrahamoflondon.org", src: "/assets/images/social/email-solid.svg", alt: "Email icon", label: "Email" },
-  { href: "tel:+442086225909", src: "/assets/images/social/phone-solid.svg", alt: "Phone icon", label: "Call" },
-];
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
-const isExternal = (href: string) =>
-  href.startsWith("http://") || href.startsWith("https://");
+export default function SocialFollowStrip({ variant = "light", className }: Props) {
+  const shell = clsx(
+    "rounded-2xl backdrop-blur-md ring-1 shadow-2xl",
+    variant === "dark"
+      ? "from-white/5 to-white/10 bg-gradient-to-br ring-white/10"
+      : "from-white/90 to-warmWhite/90 bg-gradient-to-br ring-deepCharcoal/10",
+    className,
+  );
 
-export default function SocialFollowStrip({ variant = "light" }: { variant?: "light" | "dark" }) {
-  const isDark = variant === "dark";
-
-  const bg = isDark
-    ? "bg-gradient-to-br from-deepCharcoal/95 to-black/95 ring-white/10"
-    : "bg-gradient-to-br from-white/90 to-warmWhite/90 ring-deepCharcoal/10";
-
-  const text = isDark ? "text-cream" : "text-deepCharcoal";
-  const accent = isDark ? "hover:text-softGold" : "hover:text-forest";
+  const pill = clsx(
+    "inline-flex items-center gap-3 rounded-full px-3 py-1.5 transition",
+    variant === "dark"
+      ? "bg-cream text-deepCharcoal hover:bg-softGold"
+      : "bg-deepCharcoal text-cream hover:bg-softGold hover:text-deepCharcoal",
+  );
 
   return (
     <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
-      <div
-        className={`rounded-2xl ${bg} backdrop-blur-md ring-2 shadow-2xl`}
-      >
+      <div className={shell}>
         <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p className={`text-base sm:text-lg font-serif leading-relaxed ${text}/80`}>
+          <p
+            className={clsx(
+              "font-serif leading-relaxed",
+              variant === "dark" ? "text-cream/90" : "text-deepCharcoal/85",
+              "text-base sm:text-lg",
+            )}
+          >
             Join the conversation — follow{" "}
-            <span className={`font-semibold ${text}`}>Abraham of London</span>
+            <span className={clsx(variant === "dark" ? "text-cream" : "text-deepCharcoal", "font-semibold")}>
+              {siteConfig.title}
+            </span>
           </p>
 
-          <nav aria-label="Social links" className="flex items-center gap-5 sm:gap-7">
-            {items.map((it) => {
-              const icon = (
-                <span className="relative inline-block h-7 w-7 sm:h-8 sm:w-8 transition-transform group-hover:scale-110">
+          <nav aria-label="Social links" className="flex items-center gap-3 sm:gap-4">
+            {siteConfig.socialLinks.map((it) => {
+              const iconEl = (
+                <span className="relative inline-block h-4 w-4 sm:h-5 sm:w-5">
                   <Image
-                    src={it.src}
-                    alt={it.alt}
+                    src={it.icon}
+                    alt={`${it.label} icon`}
                     fill
-                    sizes="32px"
+                    sizes="20px"
                     className="object-contain"
                   />
                 </span>
               );
-              const label = (
-                <span className={`hidden text-sm sm:inline font-serif ${text}`}>
-                  {it.label}
+
+              const content = (
+                <span className="inline-flex items-center gap-2">
+                  {iconEl}
+                  <span className="hidden sm:inline text-sm">{it.label}</span>
                 </span>
               );
 
-              if (isExternal(it.href) || it.href.startsWith("mailto:") || it.href.startsWith("tel:")) {
+              const className = pill;
+
+              if (it.href.startsWith("mailto:") || it.href.startsWith("tel:") || it.external || isExternal(it.href)) {
                 return (
                   <a
                     key={it.href}
                     href={it.href}
-                    aria-label={it.label}
-                    className={`group inline-flex items-center gap-3 ${text} ${accent} transition-all duration-300`}
                     target={isExternal(it.href) ? "_blank" : undefined}
                     rel={isExternal(it.href) ? "noopener noreferrer" : undefined}
+                    className={className}
+                    aria-label={it.label}
                   >
-                    {icon}
-                    {label}
+                    {content}
                   </a>
                 );
               }
 
               return (
-                <Link
-                  key={it.href}
-                  href={it.href}
-                  aria-label={it.label}
-                  className={`group inline-flex items-center gap-3 ${text} ${accent} transition-all duration-300`}
-                  prefetch={false}
-                >
-                  {icon}
-                  {label}
+                <Link key={it.href} href={it.href} className={className} aria-label={it.label} prefetch={false}>
+                  {content}
                 </Link>
               );
             })}
