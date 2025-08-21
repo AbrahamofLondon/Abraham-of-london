@@ -1,204 +1,99 @@
-/* eslint-disable @next/next/no-img-element */
-"use client";
-
 import Link from "next/link";
-import * as React from "react";
 
-type IconType = string | React.ReactNode;
+type Item = { href: string; src: string; alt: string; label: string };
 
-export interface SocialLinkItem {
-  href: string;
-  label: string;
-  icon: IconType;            // string path to /public asset or a ReactNode
-  external?: boolean;
-  rel?: string;
-  className?: string;
-  id?: string;
-}
+const items: Item[] = [
+  { href: "https://twitter.com/abrahamoflondon", src: "/assets/images/social/twitter.svg", alt: "Twitter logo", label: "Twitter" },
+  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook.svg", alt: "Facebook logo", label: "Facebook" },
+  { href: "https://www.linkedin.com/in/abrahamoflondon", src: "/assets/images/social/linkedin.svg", alt: "LinkedIn logo", label: "LinkedIn" },
+  { href: "https://instagram.com/abrahamoflondon", src: "/assets/images/social/instagram.svg", alt: "Instagram logo", label: "Instagram" },
+  { href: "mailto:info@abrahamoflondon.org", src: "/assets/images/social/email.svg", alt: "Email icon", label: "Email" },
+  { href: "tel:+442086225909", src: "/assets/images/social/phone.svg", alt: "Phone icon", label: "Call" },
+];
 
-interface SocialLinksProps {
-  links: SocialLinkItem[];
-  size?: number;
-  className?: string;
-  variant?: "ghost" | "solid";
-  enrichExternalWithUtm?: boolean;
-  utmSource?: string;
-  utmMedium?: string;
-  utmCampaign?: string;
-}
+const isExternal = (href: string) => href.startsWith("http://") || href.startsWith("https://");
 
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
-
-const isHttp  = (href: string) => /^https?:\/\//i.test(href);
-const isProto = (href: string) => /^\/\//.test(href);
-const isMail  = (href: string) => href.startsWith("mailto:");
-const isTel   = (href: string) => href.startsWith("tel:");
-const isHash  = (href: string) => href.startsWith("#");
-
-function ensureHttps(u: string) {
-  try {
-    if (isMail(u) || isTel(u) || isHash(u)) return u;
-    if (isHttp(u)) return u;
-    if (isProto(u)) return `https:${u}`;
-    // treat bare domains as https
-    return `https://${u.replace(/^\/+/, "")}`;
-  } catch {
-    return u;
-  }
-}
-
-function withUtm(u: string, source = "abraham-site", medium = "social", campaign = "global") {
-  try {
-    const url = new URL(u);
-    url.searchParams.set("utm_source", source);
-    url.searchParams.set("utm_medium", medium);
-    url.searchParams.set("utm_campaign", campaign);
-    return url.toString();
-  } catch {
-    return u;
-  }
-}
-
-function getGtag(): ((...args: any[]) => void) | undefined {
-  if (typeof window === "undefined") return undefined;
-  const w = window as any;
-  return typeof w.gtag === "function" ? w.gtag : undefined;
-}
-
-function trackSocialClick(label: string, href: string) {
-  const gtag = getGtag();
-  if (!gtag) return;
-  try {
-    gtag("event", "select_content", {
-      content_type: "social_link",
-      item_id: label,
-      destination: href,
-    });
-  } catch { /* no-op */ }
-}
-
-export default function SocialLinks({
-  links,
-  size = 18,
-  className,
-  variant = "ghost",
-  enrichExternalWithUtm = false,
-  utmSource = "abraham-site",
-  utmMedium = "social",
-  utmCampaign = "global",
-}: SocialLinksProps) {
-  if (!Array.isArray(links) || links.length === 0) return null;
-
-  const baseBtn =
-    "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors " +
-    "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent";
-  const ghost =
-    "border text-deepCharcoal border-lightGrey/70 bg-white/70 hover:bg-white " +
-    "dark:text-cream dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20 " +
-    "focus:ring-forest/40 dark:focus:ring-cream/30";
-  const solid =
-    "bg-forest text-cream hover:bg-emerald-700 " +
-    "dark:bg-cream dark:text-deepCharcoal dark:hover:bg-cream/90 " +
-    "focus:ring-deepCharcoal/40 dark:focus:ring-forest/40";
-
+// Re-usable solid icon using CSS mask so it’s always a single, premium color.
+function SolidIcon({ src, alt }: { src: string; alt: string }) {
   return (
-    <nav aria-label="Social links" className={cn("flex flex-wrap gap-3", className)}>
-      {links.map((item) => {
-        let href = item.href.trim();
-        const mail = isMail(href);
-        const tel  = isTel(href);
-        const externalAuto = isHttp(href) || isProto(href);
-        const isExternal = item.external ?? externalAuto;
-        const openNewTab = isExternal && !mail && !tel && !isHash(href);
+    <span
+      role="img"
+      aria-label={alt}
+      className="inline-block h-6 w-6 sm:h-7 sm:w-7"
+      style={{
+        WebkitMaskImage: `url(${src})`,
+        maskImage: `url(${src})`,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        backgroundColor: "currentColor",
+        display: "inline-block",
+      }}
+    />
+  );
+}
 
-        if (isExternal && (isHttp(href) || isProto(href))) {
-          href = ensureHttps(href);
-          if (enrichExternalWithUtm) {
-            href = withUtm(href, utmSource, utmMedium, utmCampaign);
-          }
-        }
+export default function SocialFollowStrip() {
+  return (
+    <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
+      <div className="rounded-2xl bg-gradient-to-br from-white/90 to-warmWhite/90 backdrop-blur-md ring-2 ring-deepCharcoal/10 shadow-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
+          <p className="text-base text-deepCharcoal/80 sm:text-lg font-serif leading-relaxed">
+            Join the conversation — follow{" "}
+            <span className="font-semibold text-deepCharcoal">Abraham of London</span>
+          </p>
 
-        const rel = openNewTab
-          ? cn("noopener", "noreferrer", "external", item.rel)
-          : item.rel;
+          <nav aria-label="Social links" className="flex items-center gap-5 sm:gap-7">
+            {items.map((it) => {
+              const Button = ({ children }: { children: React.ReactNode }) => (
+                <span
+                  className="
+                    inline-flex items-center gap-3 rounded-full px-3 py-2
+                    bg-softGold text-deepCharcoal shadow-lg ring-1 ring-deepCharcoal/20
+                    transition-all duration-300
+                    hover:bg-forest hover:text-cream hover:scale-105
+                  "
+                >
+                  {children}
+                </span>
+              );
 
-        const aria =
-          openNewTab ? `${item.label} (opens in a new tab)` : item.label;
+              const Label = <span className="hidden text-sm sm:inline font-serif">{it.label}</span>;
+              const Icon = <SolidIcon src={it.src} alt={it.alt} />;
 
-        const classes = cn(baseBtn, variant === "ghost" ? ghost : solid, item.className);
-        const key = item.id ?? `${item.href}-${item.label}`;
+              if (isExternal(it.href) || it.href.startsWith("mailto:") || it.href.startsWith("tel:")) {
+                return (
+                  <a
+                    key={it.href}
+                    href={it.href}
+                    aria-label={it.label}
+                    className="group inline-flex items-center"
+                    target={isExternal(it.href) ? "_blank" : undefined}
+                    rel={isExternal(it.href) ? "noopener noreferrer" : undefined}
+                  >
+                    <Button>
+                      {Icon}
+                      {Label}
+                    </Button>
+                  </a>
+                );
+              }
 
-        const iconNode =
-          typeof item.icon === "string" ? (
-            <img
-              src={item.icon}
-              alt=""
-              width={size}
-              height={size}
-              aria-hidden="true"
-              loading="lazy"
-            />
-          ) : (
-            <span aria-hidden="true">{item.icon}</span>
-          );
-
-        const content = (
-          <>
-            {iconNode}
-            <span>{item.label}</span>
-          </>
-        );
-
-        // External (new tab)
-        if (openNewTab) {
-          return (
-            <a
-              key={key}
-              href={href}
-              target="_blank"
-              rel={rel || "noopener noreferrer external"}
-              aria-label={aria}
-              className={classes}
-              referrerPolicy="no-referrer-when-downgrade"
-              onClick={() => trackSocialClick(item.label, href)}
-            >
-              {content}
-            </a>
-          );
-        }
-
-        // Same-tab anchors, mailto, tel, or same-origin http
-        if (isHttp(href) || mail || tel || isHash(href)) {
-          return (
-            <a
-              key={key}
-              href={href}
-              rel={rel || undefined}
-              aria-label={aria}
-              className={classes}
-              onClick={() => trackSocialClick(item.label, href)}
-            >
-              {content}
-            </a>
-          );
-        }
-
-        // Internal routes → Next Link
-        return (
-          <Link
-            key={key}
-            href={href}
-            prefetch={false}
-            aria-label={aria}
-            className={classes}
-            onClick={() => trackSocialClick(item.label, href)}
-          >
-            {content}
-          </Link>
-        );
-      })}
-    </nav>
+              return (
+                <Link key={it.href} href={it.href} aria-label={it.label} className="group inline-flex items-center" prefetch={false}>
+                  <Button>
+                    {Icon}
+                    {Label}
+                  </Button>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+    </section>
   );
 }

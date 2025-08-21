@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
+import { LogoFull } from "@/components/icons/BrandLogo";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const ORG_JSONLD = {
   "@type": "Organization",
   name: "Abraham of London",
   url: SITE_URL,
+  // Keep a file URL here for crawlers; the on-page logo is inline SVG for pixel-perfect rendering.
   logo: `${SITE_URL}/assets/images/logo/abraham-of-london-logo.svg`,
   sameAs: [
     "https://twitter.com/AbrahamAda48634",
@@ -93,10 +95,10 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-200/70 bg-white/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
-          {/* Brand */}
-          <Link href="/" className="group inline-flex items-baseline gap-2">
-            <span className="font-serif text-xl font-semibold tracking-wide text-gray-900 md:text-2xl">
-              Abraham of London
+          {/* Brand (inline SVG logo lockup) */}
+          <Link href="/" className="group inline-flex items-center gap-3" aria-label="Abraham of London — Home">
+            <span className="text-deepCharcoal group-hover:text-gray-900 transition-colors">
+              <LogoFull />
             </span>
             <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block">
               EST. MMXXIV
@@ -111,7 +113,7 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
                   <Link
                     href={item.href}
                     className={[
-                      "relative text-sm font-medium transition-colors",
+                      "group relative text-sm font-medium transition-colors",
                       isActive(item.href) ? "text-gray-900" : "text-gray-700 hover:text-gray-900",
                     ].join(" ")}
                   >
@@ -130,11 +132,11 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
             </ul>
           </nav>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA (updated palette) */}
           <div className="hidden md:block">
             <Link
               href="/contact"
-              className="rounded-full border border-gray-900 px-5 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30"
+              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
             >
               Enquire
             </Link>
@@ -188,7 +190,7 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
                 <Link
                   href="/contact"
                   onClick={() => setOpen(false)}
-                  className="block rounded-full border border-gray-900 px-5 py-2 text-center text-sm font-medium text-gray-900 transition hover:bg-gray-900 hover:text-white"
+                  className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
                 >
                   Enquire
                 </Link>
@@ -218,8 +220,11 @@ export default function Layout({ children, pageTitle, hideSocialStrip }: LayoutP
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="grid gap-10 md:grid-cols-3">
             <div>
-              <p className="font-serif text-lg font-semibold text-gray-900">Abraham of London</p>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+              {/* Footer brand — smaller inline SVG logo for cohesion */}
+              <div className="mb-3 text-deepCharcoal">
+                <LogoFull />
+              </div>
+              <p className="text-sm leading-relaxed text-gray-600">
                 Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
               </p>
             </div>

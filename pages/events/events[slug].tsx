@@ -1,60 +1,82 @@
+import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import type { PostMeta } from "@/types/post";
+import Layout from "@/components/Layout";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import { getAllEvents, getEventBySlug, getEventSlugs } from "@/lib/events";
+import type { EventMeta } from "@/types/event";
+import MDXRenderer from "@/components/MDXRenderer"; // <- use your blog MDX renderer
 
-export type BlogPostCardProps = PostMeta;
+type Props = { event: EventMeta & { content?: string } };
 
-export default function BlogPostCard({
-  slug,
-  title,
-  excerpt,
-  date,
-  coverImage,
-  readTime,
-  category,
-  author,
-  tags,
-}: BlogPostCardProps) {
+export default function EventPage({ event }: Props) {
+  const { title, date, location, summary, heroImage, ctaHref, ctaLabel, content } = event;
+
+  const pretty = date
+    ? new Date(date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    : "";
+
   return (
-    <Link href={`/blog/${slug}`} className="block">
-      <article className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg">
-        {coverImage && (
-          <div className="mb-4 h-48 w-full rounded overflow-hidden">
-            <Image
-              src={coverImage}
-              alt={title}
-              width={400} // Adjust based on your design
-              height={192} // Maintain aspect ratio (e.g., 2:1)
-              className="object-cover"
-              priority={false}
-            />
+    <Layout pageTitle={title}>
+      <Head>
+        <meta name="description" content={summary || title} />
+      </Head>
+
+      {heroImage ? (
+        <div className="relative h-[40vh] min-h-[320px] w-full">
+          <Image src={heroImage} alt={title} fill priority sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-black/35" />
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-5xl p-6 text-cream">
+            <h1 className="font-serif text-4xl font-semibold">{title}</h1>
+            <p className="mt-2 text-cream/90 text-sm">
+              {pretty} • {location}
+            </p>
           </div>
-        )}
-        <h2 className="text-xl font-bold text-deepCharcoal">{title}</h2>
-        {category && (
-          <span className="mt-2 inline-block rounded bg-softGold/20 px-2 py-1 text-sm text-deepCharcoal">
-            {category}
-          </span>
-        )}
-        <p className="mt-3 text-deepCharcoal/70">{excerpt}</p>
-        <div className="mt-4 flex items-center justify-between text-sm text-deepCharcoal/60">
-          {date && <span>{new Date(date).toLocaleDateString()}</span>}
-          {readTime && <span>{readTime}</span>}
         </div>
-        {author && <p className="mt-2 text-sm text-deepCharcoal">By {author}</p>}
-        {tags && tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-lightGrey/30 px-3 py-1 text-xs text-deepCharcoal"
-              >
-                {tag}
-              </span>
-            ))}
+      ) : (
+        <header className="mx-auto max-w-5xl px-4 py-10">
+          <h1 className="font-serif text-4xl font-semibold">{title}</h1>
+          <p className="mt-2 text-deepCharcoal/70 text-sm">
+            {pretty} • {location}
+          </p>
+        </header>
+      )}
+
+      <section className="mx-auto max-w-5xl px-4 py-10 prose prose-lg prose-slate">
+        {content ? <MDXRenderer source={content} /> : null}
+
+        {ctaHref && (
+          <div className="mt-10">
+            <Link href={ctaHref} className="rounded-full bg-forest px-6 py-3 text-cream font-semibold hover:bg-forest/90">
+              {ctaLabel || "Register Interest"}
+            </Link>
           </div>
         )}
-      </article>
-    </Link>
+      </section>
+    </Layout>
   );
 }
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = getEventSlugs().map((slug) => ({ params: { slug } }));
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.slug || "");
+  const event = getEventBySlug(slug, [
+    "slug",
+    "title",
+    "date",
+    "location",
+    "summary",
+    "heroImage",
+    "ctaHref",
+    "ctaLabel",
+    "content",
+    "tags",
+  ]);
+
+  if (!event?.slug) return { notFound: true };
+  return { props: { event: event as Props["event"] } };
+};
