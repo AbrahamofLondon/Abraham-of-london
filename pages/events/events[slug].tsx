@@ -1,155 +1,60 @@
-import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from "next";
-import Layout from "@/components/Layout";
-import { getAllEvents, getEventBySlug, type EventItem } from "@/lib/events";
+import type { PostMeta } from "@/types/post";
 
-type Props = { event: EventItem };
+export type BlogPostCardProps = PostMeta;
 
-export default function EventPage({ event }: Props) {
-  const { slug, title, date, location, description, heroImage } = event;
-
-  const ORIGIN =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.URL ??
-    process.env.DEPLOY_PRIME_URL ??
-    "https://abrahamoflondon.org";
-
-  const isoDate = new Date(date).toISOString();
-  const prettyDate = new Date(date).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-  const canonical = `${ORIGIN.replace(/\/$/, "")}/events/${slug}`;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: title,
-    startDate: isoDate,
-    eventAttendanceMode: "https://schema.org/MixedEventAttendanceMode",
-    eventStatus: "https://schema.org/EventScheduled",
-    location: {
-      "@type": "Place",
-      name: location,
-      address: location,
-    },
-    image: heroImage ? [`${ORIGIN.replace(/\/$/, "")}${heroImage}`] : undefined,
-    description:
-      description ||
-      "An event hosted by Abraham of London focused on leadership, culture, and enduring standards.",
-    organizer: {
-      "@type": "Organization",
-      name: "Abraham of London",
-      url: ORIGIN.replace(/\/$/, ""),
-    },
-    url: canonical,
-  };
-
+export default function BlogPostCard({
+  slug,
+  title,
+  excerpt,
+  date,
+  coverImage,
+  readTime,
+  category,
+  author,
+  tags,
+}: BlogPostCardProps) {
   return (
-    <Layout pageTitle={title}>
-      <Head>
-        <meta name="description" content={description || `${title} — ${location} on ${prettyDate}`} />
-        <link rel="canonical" href={canonical} />
-        <meta property="og:type" content="event" />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description || `${title} — ${location} on ${prettyDate}`} />
-        {heroImage && <meta property="og:image" content={`${ORIGIN.replace(/\/$/, "")}${heroImage}`} />}
-        <meta property="og:url" content={canonical} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      </Head>
-
-      {/* Page header bar */}
-      <section className="border-b border-lightGrey/70 bg-warmWhite/60">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-          <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
-            <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-deepCharcoal">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li>
-                <Link href="/events" className="hover:text-deepCharcoal">
-                  Events
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="text-deepCharcoal/80">{title}</li>
-            </ol>
-          </nav>
-        </div>
-      </section>
-
-      {/* Hero */}
-      <section className="relative bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-10 md:py-14">
-          {heroImage && (
-            <div className="relative mb-8 h-64 w-full overflow-hidden rounded-2xl shadow-lg md:h-96">
-              <Image
-                src={heroImage}
-                alt={title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 1024px"
-                priority
-              />
-            </div>
-          )}
-
-          <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-brand text-forest">{title}</h1>
-
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-deepCharcoal/70">
-            <time dateTime={isoDate} className="rounded-full bg-warmWhite px-2 py-1">
-              {prettyDate}
-            </time>
-            <span aria-hidden="true">·</span>
-            <span className="rounded-full bg-warmWhite px-2 py-1">{location}</span>
+    <Link href={`/blog/${slug}`} className="block">
+      <article className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg">
+        {coverImage && (
+          <div className="mb-4 h-48 w-full rounded overflow-hidden">
+            <Image
+              src={coverImage}
+              alt={title}
+              width={400} // Adjust based on your design
+              height={192} // Maintain aspect ratio (e.g., 2:1)
+              className="object-cover"
+              priority={false}
+            />
           </div>
-
-          {description && (
-            <p className="prose prose-lg mt-6 max-w-none text-deepCharcoal">
-              {description}
-            </p>
-          )}
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            {/* If you later add a registration URL, place it here */}
-            <Link
-              href="/contact"
-              className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90"
-            >
-              Enquire
-            </Link>
-            <Link
-              href="/events"
-              className="rounded-full border border-forest/20 px-5 py-2 text-sm font-semibold text-forest transition hover:bg-forest hover:text-cream"
-            >
-              All Events
-            </Link>
-          </div>
+        )}
+        <h2 className="text-xl font-bold text-deepCharcoal">{title}</h2>
+        {category && (
+          <span className="mt-2 inline-block rounded bg-softGold/20 px-2 py-1 text-sm text-deepCharcoal">
+            {category}
+          </span>
+        )}
+        <p className="mt-3 text-deepCharcoal/70">{excerpt}</p>
+        <div className="mt-4 flex items-center justify-between text-sm text-deepCharcoal/60">
+          {date && <span>{new Date(date).toLocaleDateString()}</span>}
+          {readTime && <span>{readTime}</span>}
         </div>
-      </section>
-    </Layout>
+        {author && <p className="mt-2 text-sm text-deepCharcoal">By {author}</p>}
+        {tags && tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-lightGrey/30 px-3 py-1 text-xs text-deepCharcoal"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </article>
+    </Link>
   );
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const events = getAllEvents();
-  return {
-    paths: events.map((e) => ({ params: { slug: e.slug } })),
-    fallback: false, // change to 'blocking' if you’ll add events dynamically at runtime
-  };
-};
-
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const event = getEventBySlug(slug);
-
-  if (!event) return { notFound: true };
-  return { props: { event }, revalidate: 60 };
-};
