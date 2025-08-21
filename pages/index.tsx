@@ -9,8 +9,9 @@ import BlogPostCard from "@/components/BlogPostCard";
 import EventCard from "@/components/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
-import { getAllEvents, type EventItem } from "@/lib/events";
+import { getAllEvents } from "@/lib/events";
 import type { PostMeta } from "@/types/post";
+import type { EventMeta } from "@/types/events"; // Already exists
 import { motion } from "framer-motion";
 import { parseISO, isValid, format } from "date-fns";
 
@@ -22,7 +23,7 @@ const HERO = {
 };
 
 type EventsTeaser = Array<
-  Pick<EventItem, "slug" | "title" | "date" | "location" | "description">
+  Pick<EventMeta, "slug" | "title" | "date" | "location"> & { description?: string | null }
 >;
 
 type HomeProps = {
@@ -199,6 +200,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 author={post.author ?? undefined}
                 readTime={post.readTime ?? undefined}
                 category={post.category ?? undefined}
+                tags={post.tags ?? undefined}
               />
             ))}
           </div>
@@ -436,9 +438,9 @@ export async function getStaticProps() {
   const booksCount = getAllBooks(["slug"]).length;
 
   // Build events teaser (typed) – only upcoming, limit 3
-  const rawEvents = getAllEvents(["slug", "title", "date", "location", "description"]);
+  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary"]);
   const eventsTeaser = rawEvents
-    .filter((e): e is Required<Pick<EventItem, "slug" | "title" | "date" | "location">> & Partial<EventItem> =>
+    .filter((e): e is Required<Pick<EventMeta, "slug" | "title" | "date" | "location">> & Partial<EventMeta> =>
       Boolean(e.slug && e.title && e.date && e.location) && isUpcoming(String(e.date)),
     )
     .slice(0, 3)
@@ -447,7 +449,7 @@ export async function getStaticProps() {
       title: String(e.title),
       date: String(e.date),
       location: String(e.location),
-      description: e.description ?? null,
+      description: e.summary ?? null,
     }));
 
   return { props: { posts: safePosts, booksCount, eventsTeaser } };

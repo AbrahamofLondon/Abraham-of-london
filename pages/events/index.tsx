@@ -1,12 +1,12 @@
-// pages/events/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { getAllEvents, type EventItem } from "@/lib/events";
+import { getAllEvents } from "@/lib/events"; // Removed 'type EventItem'
+import type { EventMeta } from "@/types/events";
 
-type Props = { events: EventItem[] };
+type Props = { events: EventMeta[] };
 
 // ---- Helpers ---------------------------------------------------
 function toISO(d: string) {
@@ -60,7 +60,7 @@ export default function EventsIndex({ events }: Props) {
     if (q.trim()) {
       const n = normalize(q);
       list = list.filter((e) =>
-        [e.title, e.description || "", e.location].some((f) => normalize(f).includes(n)),
+        [e.title, e.summary || "", e.location].some((f) => normalize(f).includes(n)),
       );
     }
 
@@ -239,9 +239,9 @@ export default function EventsIndex({ events }: Props) {
                         </Link>
                       </h3>
 
-                      {ev.description && (
+                      {ev.summary && (
                         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700">
-                          {ev.description}
+                          {ev.summary}
                         </p>
                       )}
 
