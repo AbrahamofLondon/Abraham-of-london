@@ -1,3 +1,4 @@
+// pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,32 +6,43 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
+import EventCard from "@/components/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
+import { getAllEvents, type EventItem } from "@/lib/events";
 import type { PostMeta } from "@/types/post";
-import type { BookMeta } from "@/types/book"; // Corrected import
-import type { BookCardProps } from "@/components/BookCard";
 import { motion } from "framer-motion";
+import { parseISO, isValid, format } from "date-fns";
 
 // Hero media
 const HERO = {
   poster: "/assets/images/abraham-of-london-banner.webp",
-  // Drop a short, silent, loopable video into /public/assets/video
-  // (keep it ~8–12s). WebM is optional but great when available.
   videoMp4: "/assets/video/brand-reel.mp4",
   videoWebm: "/assets/video/brand-reel.webm",
 };
 
+type EventsTeaser = Array<
+  Pick<EventItem, "slug" | "title" | "date" | "location" | "description">
+>;
+
 type HomeProps = {
   posts: PostMeta[];
   booksCount: number;
-  featuredBooks: BookCardProps[];
+  eventsTeaser: EventsTeaser;
 };
 
-function Home({ posts, booksCount, featuredBooks }: HomeProps) {
+function isUpcoming(isoish: string) {
+  const d = parseISO(isoish);
+  if (!isValid(d)) return false;
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return d >= start;
+}
+
+function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
 
-  // Forward ?q=… if someone lands on / with a search param
+  // Keep query shareable
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
   const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
   const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
@@ -44,16 +56,26 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
       <Head>
         <meta
           name="description"
-          content="Principled strategy for a legacy that endures. Books, insights, and ventures by Abraham of London."
+          content="Principled strategy for a legacy that endures. Books, insights, events, and ventures by Abraham of London."
         />
+        {/* Preload the hero poster for faster LCP */}
+        <link rel="preload" as="image" href={HERO.poster} />
       </Head>
 
-      {/* Hero */}
+      {/* Hero (Next Image poster + video overlay) */}
       <section className="relative isolate overflow-hidden bg-white">
         <div className="absolute inset-0 -z-10">
-          {(HERO.videoMp4 || HERO.videoWebm) ? (
+          <Image
+            src={HERO.poster}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          {(HERO.videoMp4 || HERO.videoWebm) && (
             <video
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
               autoPlay
               playsInline
               muted
@@ -63,15 +85,6 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
               {HERO.videoWebm ? <source src={HERO.videoWebm} type="video/webm" /> : null}
               {HERO.videoMp4 ? <source src={HERO.videoMp4} type="video/mp4" /> : null}
             </video>
-          ) : (
-            <Image
-              src={HERO.poster}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
           )}
           <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
         </div>
@@ -120,7 +133,7 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
         </div>
       </section>
 
-      {/* Page header bar: breadcrumb + counts + query crumb */}
+      {/* Page header bar: breadcrumb + counts + optional query crumb */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
@@ -158,30 +171,7 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
         </div>
       </section>
 
-      {/* Featured Books */}
-      <section className="bg-white px-4 py-16">
-        <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Featured Books
-            </h2>
-            <Link
-              href={booksHref}
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-            >
-              View all
-            </Link>
-          </header>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredBooks.map((b) => (
-              <BookCard key={b.slug} {...b} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Insights (Blog) */}
+      {/* Featured Insights */}
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
@@ -198,9 +188,88 @@ function Home({ posts, booksCount, featuredBooks }: HomeProps) {
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {featuredPosts.map((post) => (
-              <BlogPostCard key={post.slug} {...post} />
+              <BlogPostCard
+                key={post.slug}
+                // Coerce nullable fields to undefined to satisfy BlogPostCardProps
+                slug={post.slug}
+                title={post.title}
+                date={post.date ?? undefined}
+                excerpt={post.excerpt ?? undefined}
+                coverImage={post.coverImage ?? undefined}
+                author={post.author ?? undefined}
+                readTime={post.readTime ?? undefined}
+                category={post.category ?? undefined}
+              />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Featured Books (curate from your content as needed) */}
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-8 flex items-end justify-between">
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Featured Books
+            </h2>
+            <Link
+              href={booksHref}
+              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+            >
+              View all
+            </Link>
+          </header>
+
+          {/* If you have a curated list, render it here. Otherwise sample from your content. */}
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Example placeholders – replace with your curated `FEATURED_BOOKS` or data-driven picks */}
+            <BookCard
+              slug="fathering-without-fear"
+              title="Fathering Without Fear"
+              author="Abraham of London"
+              excerpt="A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure."
+              genre="Memoir"
+              featured
+              coverImage="/assets/images/books/fathering-without-fear.jpg"
+            />
+            <BookCard
+              slug="the-fiction-adaptation"
+              title="The Fiction Adaptation"
+              author="Abraham of London"
+              excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
+              genre="Drama"
+              coverImage="/assets/images/books/fiction-adaptation.jpg"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Events */}
+      <section className="bg-white px-4 pb-4 pt-2">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-8 flex items-end justify-between">
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Upcoming Events
+            </h2>
+            <Link
+              href="/events"
+              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+            >
+              View all
+            </Link>
+          </header>
+
+          {eventsTeaser.length === 0 ? (
+            <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
+          ) : (
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {eventsTeaser.map((ev) => (
+                <li key={ev.slug}>
+                  <EventCard {...ev} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
@@ -352,7 +421,7 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Defensive: normalize optional fields for JSON serialization to "null"
+  // Normalize optionals to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -364,39 +433,22 @@ export async function getStaticProps() {
     tags: p.tags ?? null,
   }));
 
-  // Count books for the header bar and fetch featured books, ensuring compatibility with BookCardProps
-  const allBooks = getAllBooks([
-    "slug",
-    "title",
-    "author",
-    "excerpt",
-    "coverImage",
-    "buyLink",
-    "genre",
-    "downloadPdf",
-    "downloadEpub",
-  ]);
-  const featuredBooks = allBooks
-    .filter((b): b is Required<Pick<BookMeta, "slug" | "title" | "author" | "excerpt" | "genre">> & Partial<BookMeta> =>
-      b.slug !== undefined && b.slug !== null &&
-      b.title !== undefined && b.title !== null &&
-      b.author !== undefined && b.author !== null &&
-      b.excerpt !== undefined && b.excerpt !== null &&
-      b.genre !== undefined && b.genre !== null
-    )
-    .map((b) => ({
-      slug: b.slug!,
-      title: b.title!,
-      author: b.author!,
-      excerpt: b.excerpt!,
-      genre: b.genre!,
-      coverImage: b.coverImage,
-      buyLink: b.buyLink,
-      downloadPdf: b.downloadPdf,
-      downloadEpub: b.downloadEpub,
-    } as BookCardProps))
-    .slice(0, 3); // Take first 3 valid books as featured
-  const booksCount = allBooks.length;
+  const booksCount = getAllBooks(["slug"]).length;
 
-  return { props: { posts: safePosts, booksCount, featuredBooks } };
+  // Build events teaser (typed) – only upcoming, limit 3
+  const rawEvents = getAllEvents(["slug", "title", "date", "location", "description"]);
+  const eventsTeaser = rawEvents
+    .filter((e): e is Required<Pick<EventItem, "slug" | "title" | "date" | "location">> & Partial<EventItem> =>
+      Boolean(e.slug && e.title && e.date && e.location) && isUpcoming(String(e.date)),
+    )
+    .slice(0, 3)
+    .map((e) => ({
+      slug: String(e.slug),
+      title: String(e.title),
+      date: String(e.date),
+      location: String(e.location),
+      description: e.description ?? null,
+    }));
+
+  return { props: { posts: safePosts, booksCount, eventsTeaser } };
 }
