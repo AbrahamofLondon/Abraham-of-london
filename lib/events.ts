@@ -8,7 +8,7 @@ export type EventItem = {
   date: string;        // ISO yyyy-mm-dd
   location: string;
   description?: string | null;
-  heroImage?: string | null; // Changed from coverImage to heroImage
+  heroImage?: string | null;
   tags?: string[] | null;
   content?: string;
 };
@@ -35,19 +35,19 @@ function resolveEventPath(slug: string): string | null {
 export function getEventBySlug(
   slug: string,
   fields: (keyof EventItem | "content")[] = [],
-): Partial<EventItem> & { content?: string } {
+): EventItem & { content?: string } {
   const realSlug = slug.replace(/\.mdx?$/, "");
   const fullPath = resolveEventPath(realSlug);
 
   if (!fullPath) {
-    return { slug: realSlug, title: "Event Not Found" } as Partial<EventItem>;
+    throw new Error(`Event not found for slug: ${realSlug}`);
   }
 
   const file = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(file);
   const fm = (data || {}) as Record<string, unknown>;
 
-  const item: Partial<EventItem> & { content?: string } = { slug: realSlug };
+  const item: EventItem & { content?: string } = { slug: realSlug, title: "Untitled Event", date: "", location: "Unknown" };
 
   for (const field of fields) {
     if (field === "content") {
@@ -69,19 +69,19 @@ export function getEventBySlug(
     (item as Record<string, unknown>)[field] = raw;
   }
 
-  // Normalize a few common fields if they weren't explicitly requested
-  if (!fields.includes("title") && typeof fm.title === "string") item.title = fm.title;
-  if (!fields.includes("date") && typeof fm.date === "string") item.date = fm.date;
-  if (!fields.includes("location") && typeof fm.location === "string") item.location = fm.location;
-  if (!fields.includes("description") && typeof fm.description === "string") item.description = fm.description;
-  if (!fields.includes("heroImage") && typeof fm.heroImage === "string") item.heroImage = fm.heroImage; // Updated to heroImage
+  // Ensure required fields are always set
+  if (!item.title && typeof fm.title === "string") item.title = fm.title;
+  if (!item.date && typeof fm.date === "string") item.date = fm.date;
+  if (!item.location && typeof fm.location === "string") item.location = fm.location;
+  if (typeof fm.description === "string") item.description = fm.description;
+  if (typeof fm.heroImage === "string") item.heroImage = fm.heroImage;
 
   return item;
 }
 
 export function getAllEvents(
   fields: (keyof EventItem | "content")[] = [],
-): Partial<EventItem>[] {
+): EventItem[] {
   const slugs = getEventSlugs();
   const events = slugs.map((slug) => getEventBySlug(slug, fields));
 

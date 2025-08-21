@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from "next";
 import Layout from "@/components/Layout";
 import { getAllEvents, getEventBySlug, type EventItem } from "@/lib/events";
 
