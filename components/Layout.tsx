@@ -1,16 +1,16 @@
+// components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
-import { LogoFull } from "@/components/icons/BrandLogo";
 
 type LayoutProps = {
   children: React.ReactNode;
   pageTitle?: string;
   hideSocialStrip?: boolean;
-  footerVariant?: "light" | "dark"; // ← NEW
+  footerVariant?: "light" | "dark";
 };
 
 const ORIGIN =
@@ -63,22 +63,17 @@ export default function Layout({
   const title = pageTitle ? `${pageTitle} | Abraham of London` : "Abraham of London";
   const [open, setOpen] = React.useState(false);
 
+  // Lock body scroll when mobile menu is open (client-only)
   React.useEffect(() => {
-    document.documentElement.style.overflow = open ? "hidden" : "";
+    if (open) document.documentElement.style.overflow = "hidden";
+    else document.documentElement.style.overflow = "";
     return () => {
       document.documentElement.style.overflow = "";
     };
   }, [open]);
 
-  const isActive = (href: string) => router.pathname === href || router.asPath === href;
-
-  // Footer theme tokens
-  const isDark = footerVariant === "dark";
-  const footerWrap = isDark ? "border-t border-white/10 bg-deepCharcoal" : "border-t border-gray-200 bg-white";
-  const footerText = isDark ? "text-cream" : "text-gray-900";
-  const footerMuted = isDark ? "text-cream/70" : "text-gray-600";
-  const linkBase = isDark ? "text-cream/80 hover:text-cream" : "text-gray-600 hover:text-gray-900";
-  const divider = isDark ? "border-white/10" : "border-gray-200";
+  const isActive = (href: string) =>
+    router.pathname === href || router.asPath === href;
 
   return (
     <>
@@ -91,6 +86,7 @@ export default function Layout({
         />
       </Head>
 
+      {/* Skip to content */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
@@ -98,17 +94,19 @@ export default function Layout({
         Skip to content
       </a>
 
+      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-200/70 bg-white/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
-          <Link href="/" className="group inline-flex items-center gap-3" aria-label="Abraham of London — Home">
-            <span className="text-deepCharcoal group-hover:text-gray-900 transition-colors">
-              <LogoFull />
+          <Link href="/" className="group inline-flex items-baseline gap-2">
+            <span className="font-serif text-xl font-semibold tracking-wide text-gray-900 md:text-2xl">
+              Abraham of London
             </span>
             <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block">
               EST. MMXXIV
             </span>
           </Link>
 
+          {/* Desktop Nav */}
           <nav className="hidden md:block" aria-label="Primary">
             <ul className="flex items-center gap-8">
               {NAV.map((item) => (
@@ -116,7 +114,7 @@ export default function Layout({
                   <Link
                     href={item.href}
                     className={[
-                      "group relative text-sm font-medium transition-colors",
+                      "relative text-sm font-medium transition-colors",
                       isActive(item.href) ? "text-gray-900" : "text-gray-700 hover:text-gray-900",
                     ].join(" ")}
                   >
@@ -134,15 +132,17 @@ export default function Layout({
             </ul>
           </nav>
 
+          {/* Desktop CTA */}
           <div className="hidden md:block">
             <Link
               href="/contact"
-              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
+              className="rounded-full border border-gray-900 px-5 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30"
             >
               Enquire
             </Link>
           </div>
 
+          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -163,6 +163,7 @@ export default function Layout({
           </button>
         </div>
 
+        {/* Mobile Drawer */}
         <div
           id="mobile-nav"
           className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white`}
@@ -189,7 +190,7 @@ export default function Layout({
                 <Link
                   href="/contact"
                   onClick={() => setOpen(false)}
-                  className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
+                  className="block rounded-full border border-gray-900 px-5 py-2 text-center text-sm font-medium text-gray-900 transition hover:bg-gray-900 hover:text-white"
                 >
                   Enquire
                 </Link>
@@ -199,37 +200,44 @@ export default function Layout({
         </div>
       </header>
 
+      {/* Social strip */}
       {!hideSocialStrip && (
         <div className="border-b border-gray-100 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-2">
-            <SocialFollowStrip />
+            <SocialFollowStrip variant={footerVariant} />
           </div>
         </div>
       )}
 
+      {/* Main */}
       <main id="main-content" className="min-h-screen bg-white">{children}</main>
 
+      {/* Sticky CTA */}
       <StickyCTA showAfter={420} />
 
-      {/* Footer (themeable) */}
-      <footer className={footerWrap}>
+      {/* Footer */}
+      <footer
+        className={`border-t ${
+          footerVariant === "dark"
+            ? "bg-deepCharcoal text-cream border-white/10"
+            : "bg-white text-gray-700 border-gray-200"
+        }`}
+      >
         <div className="mx-auto max-w-7xl px-4 py-12">
-          <div className={`grid gap-10 md:grid-cols-3 ${footerText}`}>
+          <div className="grid gap-10 md:grid-cols-3">
             <div>
-              <div className={`mb-3 ${isDark ? "text-cream" : "text-deepCharcoal"}`}>
-                <LogoFull />
-              </div>
-              <p className={`text-sm leading-relaxed ${footerMuted}`}>
+              <p className="font-serif text-lg font-semibold">Abraham of London</p>
+              <p className="mt-2 text-sm leading-relaxed">
                 Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
               </p>
             </div>
 
             <div>
-              <p className={`text-sm font-semibold ${footerText}`}>Navigate</p>
+              <p className="text-sm font-semibold">Navigate</p>
               <ul className="mt-3 grid gap-2 text-sm">
                 {NAV.map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className={`${linkBase} transition`}>
+                    <Link href={item.href} className="transition hover:text-softGold">
                       {item.label}
                     </Link>
                   </li>
@@ -238,20 +246,20 @@ export default function Layout({
             </div>
 
             <div>
-              <p className={`text-sm font-semibold ${footerText}`}>Contact & Legal</p>
+              <p className="text-sm font-semibold">Contact & Legal</p>
               <ul className="mt-3 grid gap-2 text-sm">
                 <li>
-                  <a href="mailto:info@abrahamoflondon.org" className={`${linkBase} transition`}>
+                  <a href="mailto:info@abrahamoflondon.org" className="transition hover:text-softGold">
                     info@abrahamoflondon.org
                   </a>
                 </li>
                 <li>
-                  <Link href="/privacy" className={`${linkBase} transition`}>
+                  <Link href="/privacy" className="transition hover:text-softGold">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className={`${linkBase} transition`}>
+                  <Link href="/terms" className="transition hover:text-softGold">
                     Terms of Service
                   </Link>
                 </li>
@@ -259,7 +267,7 @@ export default function Layout({
             </div>
           </div>
 
-          <div className={`mt-10 border-t ${divider} pt-6 text-center text-xs ${isDark ? "text-cream/60" : "text-gray-500"}`}>
+          <div className="mt-10 border-t border-gray-200 pt-6 text-center text-xs">
             © {new Date().getFullYear()} Abraham of London. All rights reserved.
           </div>
         </div>
