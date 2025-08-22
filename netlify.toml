@@ -15,33 +15,39 @@
   package = "@netlify/plugin-nextjs"
 
 [[headers]]
-for = "/*"
+  for = "/*"
   [headers.values]
-  X-Frame-Options = "SAMEORIGIN"
-  X-Content-Type-Options = "nosniff"
-  Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Brand shortcuts (ok to keep)
 [[redirects]]
   from = "https://endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://abrahamoflondon.org/*"
+  to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
