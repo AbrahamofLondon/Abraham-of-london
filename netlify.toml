@@ -27,3 +27,6 @@
   to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
+  
+  [[plugins]]
+  package = "@netlify/plugin-nextjs"
