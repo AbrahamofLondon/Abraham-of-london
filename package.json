@@ -20,8 +20,7 @@
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^11.0.0"
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^11.0.0",
     "gray-matter": "^4.0.3",
     "next": "^15.5.0",
     "next-mdx-remote": "^5.0.0",
