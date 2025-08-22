@@ -21,7 +21,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     domains: ['abraham-of-london.netlify.app'],
