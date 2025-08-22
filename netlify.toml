@@ -1,10 +1,29 @@
-# Redirect from root domain to www for abrahamoflondon.org
-https://abrahamoflondon.org/* https://www.abrahamoflondon.org/:splat 301!
+[[redirects]]
+  from = "https://abrahamoflondon.org/*"
+  to = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force = true
 
-# Redirect from endureluxe.com to the correct page on the primary domain
-https://endureluxe.com/* https://www.abrahamoflondon.org/ventures?brand=endureluxe 301!
-https://www.endureluxe.com/* https://www.abrahamoflondon.org/ventures?brand=endureluxe 301!
+[[redirects]]
+  from = "https://endureluxe.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+  force = true
 
-# Redirect from alomarada.com to the correct page on the primary domain
-https://alomarada.com/* https://www.abrahamoflondon.org/ventures?brand=alomarada 301!
-https://www.alomarada.com/* https://www.abrahamoflondon.org/ventures?brand=alomarada 301!
+[[redirects]]
+  from = "https://www.endureluxe.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://alomarada.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.alomarada.com/*"
+  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force = true
