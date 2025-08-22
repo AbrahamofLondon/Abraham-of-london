@@ -2,7 +2,7 @@
   command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "24" # Updated from "18" to match local v24.6.0
+  NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
@@ -14,42 +14,34 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Security headers (fine to keep)
 [[headers]]
-  for = "/*"
+for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+  X-Frame-Options = "SAMEORIGIN"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Primary domain redirect (optional)
-[[redirects]]
-  from = "https://abrahamoflondon.org/*"
-  to = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  force = true
-
-# Brand redirects (optional)
+# Brand shortcuts (ok to keep)
 [[redirects]]
   from = "https://endureluxe.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.endureluxe.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://alomarada.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.alomarada.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
