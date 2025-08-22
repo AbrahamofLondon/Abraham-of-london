@@ -1,11 +1,15 @@
-# Main site redirect from root to www
+# Main site redirect from root to www (This rule should be removed)
+# [[redirects]]
+#   from = "https://www.abrahamoflondon.org/*"
+#   to = "https://www.abrahamoflondon.org/:splat"
+#   status = 200
+
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
-# Redirects for your other domains
 [[redirects]]
   from = "https://endureluxe.com/*"
   to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -29,6 +33,3 @@
   to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
-
-# The default `_redirects` file for Next.js is usually managed automatically.
-# You don't need a rule for your main site because Netlify handles it.
