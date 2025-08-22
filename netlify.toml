@@ -1,10 +1,4 @@
 [[redirects]]
-  from = "https://abrahamoflondon.org/*"
-  to = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "https://endureluxe.com/*"
   to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
@@ -27,6 +21,3 @@
   to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
   force = true
-  
-  [[plugins]]
-  package = "@netlify/plugin-nextjs"
