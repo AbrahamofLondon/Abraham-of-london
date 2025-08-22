@@ -95,6 +95,32 @@ Before you deploy to a production domain, ensure the following steps are complet
       * Addressed `pages/books/[slug].tsx` build error by correctly structuring `paths` in `getStaticPaths`.
       * Ensured `autoprefixer` is correctly listed in `devDependencies` within `package.json` to prevent Netlify build failures related to CSS processing.
 
+# Abraham of London Website
+
+This is the Next.js and TypeScript-powered website for Abraham of London, optimized for performance, SEO, and maintainability.
+
+## Project Status
+
+- **Current State**: All major technical issues have been resolved. The project is locally functional, type-safe, and ready for deployment. The focus is now on confirming all assets and configurations for a successful live release.
+- **Last Updated**: August 22, 2025
+
+## Key Features
+
+- **Static Site Generation (SSG)**: Utilizes Next.js `getStaticProps` for optimized performance and SEO.
+- **Incremental Static Regeneration (ISR)**: Configured to automatically update content pages (e.g., `/blog`, `/books`) without a full site redeploy.
+- **Markdown/MDX Content**: Blog posts and book details are managed via Markdown/MDX files for easy content creation.
+- **TypeScript**: Ensures type safety and improves code maintainability.
+- **Tailwind CSS**: For rapid and consistent UI development.
+- **Responsive Design**: Optimized for various screen sizes.
+- **Next.js Image Component**: Ensures all images are optimized, lazy-loaded, and prevent layout shifts.
+- **Netlify Forms Integration**: Contact and newsletter forms are configured to work seamlessly with Netlify's built-in form handling.
+- **Redirect Management**: Configured to canonicalize `https://abrahamoflondon.org` to `https://www.abrahamoflondon.org` with a redirect loop fix.
+
+## Local Development
+
+To get started with local development:
+
+1. **Clone the repository**:
 -----
 
 ## Project Structure
