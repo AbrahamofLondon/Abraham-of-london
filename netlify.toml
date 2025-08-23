@@ -10,7 +10,62 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@netlify/functions", "@netlify/emails"][build]
+  command = "npm run build"
+  # Netlify Next.js Runtime will publish from .next automatically
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+  # Must match your chosen primary domain (WWW)
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+
+[functions]
+  node_bundler = "esbuild"
   external_node_modules = ["@netlify/functions", "@netlify/emails"]
+  directory = "netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# --- Security headers ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# --- Performance caching (safe for Next.js static assets) ---
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Optional: cache your own public assets if you’re not fingerprinting filenames.
+# If assets might change without renaming, keep this conservative (e.g., 7 days).
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# --- Third-party domain redirects ONLY (host-conditional) ---
+# Ensure these domains are added as domain aliases to this site.
+[[redirects]]
+  from = "/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+  force  = true
+  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
+
+[[redirects]]
+  from = "/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  force  = true
+  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+
   directory = "netlify/functions"
 
 [[plugins]]

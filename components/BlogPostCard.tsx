@@ -6,21 +6,21 @@ import { siteConfig } from "@/lib/siteConfig";
 type BlogPostCardProps = {
   slug: string;
   title: string;
-  date?: string;
+  date?: string;            // ISO preferred (e.g., "2025-08-23")
   excerpt?: string;
-  coverImage?: string;
+  coverImage?: string;      // must be under /public
   author?: string | { name?: string; image?: string };
   readTime?: string;
   category?: string;
   tags?: string[];
 };
 
-// ensure we only accept local (/public) assets
+// Only allow local (/public) assets
 const toLocal = (src?: string) => (src && src.startsWith("/") ? src : undefined);
 
-// final fallback (must exist in /public)
+// Fallback avatar (MUST exist)
 const FALLBACK_AVATAR =
-  siteConfig.authorImage || "/assets/images/profile/abraham-of-london.jpg";
+  siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
 export default function BlogPostCard({
   slug,
@@ -29,25 +29,44 @@ export default function BlogPostCard({
   date,
   coverImage,
   author,
+  readTime,
+  category,
 }: BlogPostCardProps) {
   const authorName =
     typeof author === "string" ? author : author?.name || siteConfig.author;
 
-  // preferred: author.image if it's a local path; else site fallback
+  // preferred: local author image; else global fallback
   const preferredAvatar =
     (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
-
-  // swap to fallback on load error
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
+
+  const coverSrc = toLocal(coverImage);
+
+  // date formatting (only if valid)
+  const dt = date ? new Date(date) : null;
+  const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
+  const dateLabel =
+    dt && !Number.isNaN(+dt)
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(dt)
+      : undefined;
 
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link href={`/blog/${slug}`} className="block" prefetch={false}>
-        {toLocal(coverImage) && (
+      <Link
+        href={`/blog/${slug}`}
+        className="block"
+        prefetch={false}
+        aria-label={`Read: ${title}`}
+      >
+        {coverSrc && (
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
             <Image
-              src={coverImage as string}
-              alt=""
+              src={coverSrc}
+              alt=""                 // decorative in card context
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover"
@@ -57,14 +76,28 @@ export default function BlogPostCard({
         )}
 
         <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
+          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
+            {title}
+          </h3>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-deepCharcoal/70">
+            {dateTime && (
+              <time dateTime={dateTime}>{dateLabel}</time>
+            )}
+            {readTime && <span aria-label="Estimated reading time">{readTime}</span>}
+            {category && (
+              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">
+                {category}
+              </span>
+            )}
+          </div>
+
           {excerpt && (
-            <p className="mt-2 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>
+            <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>
           )}
 
           {/* Author row */}
           <div className="mt-4 flex items-center gap-3">
-            {/* Next/Image supports onError; we fallback if it 404s */}
             <Image
               src={avatarSrc}
               alt={authorName}
@@ -75,7 +108,6 @@ export default function BlogPostCard({
             />
             <div className="text-xs text-deepCharcoal/70">
               <p className="font-medium">{authorName}</p>
-              {date ? <p>{date}</p> : null}
             </div>
           </div>
         </div>

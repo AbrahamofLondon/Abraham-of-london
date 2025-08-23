@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
-import { NAV } from "@/config/nav";                 // 👈 single source for nav items
-import { siteConfig, absUrl } from "@/lib/siteConfig"; // 👈 single source for site/meta/social
+import { NAV } from "@/config/nav";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,17 +24,25 @@ export default function Layout({
   const router = useRouter();
   const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
   const [open, setOpen] = React.useState(false);
+  const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null); // ✱
 
   // Lock body scroll when mobile nav open
   React.useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
+    if (open) firstMobileLinkRef.current?.focus(); // ✱ focus into drawer
     return () => { document.documentElement.style.overflow = ""; };
   }, [open]);
 
-  const isActive = (href: string) =>
-    router.pathname === href || router.asPath === href;
+  // ✱ Close drawer on route change
+  React.useEffect(() => {
+    const handleRoute = () => setOpen(false);
+    router.events.on("routeChangeStart", handleRoute);
+    return () => router.events.off("routeChangeStart", handleRoute);
+  }, [router.events]);
 
-  // JSON-LD from config
+  const isActive = (href: string) =>
+    router.pathname === href || router.asPath.split("#")[0] === href; // ✱ ignore hash
+
   const ORG_JSONLD = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -42,8 +50,8 @@ export default function Layout({
     url: siteConfig.siteUrl,
     logo: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
     sameAs: siteConfig.socialLinks
-      .filter(s => s.external && /^https?:\/\//i.test(s.href))
-      .map(s => s.href),
+      .filter((s) => s.external && /^https?:\/\//i.test(s.href))
+      .map((s) => s.href),
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -55,15 +63,21 @@ export default function Layout({
     ],
   };
 
+  // ✱ Site navigation JSON-LD
+  const NAV_JSONLD = {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    name: NAV.map((n) => n.label),
+    url: NAV.map((n) => absUrl(n.href)),
+  };
+
   return (
     <>
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(NAV_JSONLD) }} />
       </Head>
 
       {/* Skip link */}
@@ -75,7 +89,7 @@ export default function Layout({
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-deepCharcoal/10 bg-white/85 backdrop-blur dark:bg-black/50">
+      <header className="sticky top-0 z-40 border-b border-deepCharcoal/10 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-black/50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
           {/* Brand */}
           <Link href="/" className="group inline-flex items-baseline gap-2">
@@ -90,30 +104,32 @@ export default function Layout({
           {/* Desktop Nav */}
           <nav className="hidden md:block" aria-label="Primary">
             <ul className="flex items-center gap-8">
-              {NAV.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={[
-                      "relative text-sm font-medium transition-colors",
-                      isActive(item.href)
-                        ? "text-deepCharcoal dark:text-cream"
-                        : "text-gray-700 hover:text-deepCharcoal dark:text-gray-300 dark:hover:text-cream",
-                    ].join(" ")}
-                  >
-                    {item.label}
-                    <span
+              {NAV.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined} // ✱
                       className={[
-                        "pointer-events-none absolute -bottom-1 left-0 h-[2px] transition-all",
-                        isActive(item.href)
-                          ? "w-full bg-softGold"
-                          : "w-0 bg-transparent group-hover:w-full",
+                        "relative text-sm font-medium transition-colors",
+                        active
+                          ? "text-deepCharcoal dark:text-cream"
+                          : "text-gray-700 hover:text-deepCharcoal dark:text-gray-300 dark:hover:text-cream",
                       ].join(" ")}
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </li>
-              ))}
+                    >
+                      {item.label}
+                      <span
+                        className={[
+                          "pointer-events-none absolute -bottom-1 left-0 h-[2px] transition-all",
+                          active ? "w-full bg-softGold" : "w-0 bg-transparent group-hover:w-full",
+                        ].join(" ")}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -130,7 +146,7 @@ export default function Layout({
           {/* Mobile Menu Button */}
           <button
             type="button"
-            onClick={() => setOpen(v => !v)}
+            onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-nav"
             className="inline-flex items-center justify-center rounded-md border border-gray-300 p-2 text-gray-700 dark:text-gray-200 md:hidden"
@@ -155,22 +171,27 @@ export default function Layout({
         >
           <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile">
             <ul className="grid gap-2">
-              {NAV.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={[
-                      "block rounded-md px-2 py-2 text-base font-medium",
-                      isActive(item.href)
-                        ? "bg-gray-100 text-deepCharcoal dark:bg-gray-800 dark:text-cream"
-                        : "text-gray-800 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700",
-                    ].join(" ")}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {NAV.map((item, idx) => {
+                const active = isActive(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      ref={idx === 0 ? firstMobileLinkRef : undefined} // ✱
+                      onClick={() => setOpen(false)}
+                      aria-current={active ? "page" : undefined} // ✱
+                      className={[
+                        "block rounded-md px-2 py-2 text-base font-medium",
+                        active
+                          ? "bg-gray-100 text-deepCharcoal dark:bg-gray-800 dark:text-cream"
+                          : "text-gray-800 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
               <li className="pt-2">
                 <Link
                   href="/contact"

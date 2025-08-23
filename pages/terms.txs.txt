@@ -1,20 +1,63 @@
 // pages/terms.tsx
 import Head from "next/head";
+import Link from "next/link";
+import Layout from "@/components/Layout";
+import { absUrl, siteConfig } from "@/lib/siteConfig";
 
 export default function Terms() {
   const updated = "August 23, 2025";
+  const CANONICAL = absUrl("/terms");
+  const BREADCRUMBS = [
+    { "@type": "ListItem", position: 1, name: "Home", item: absUrl("/") },
+    { "@type": "ListItem", position: 2, name: "Terms of Use", item: CANONICAL },
+  ];
 
   return (
-    <>
+    <Layout pageTitle="Terms of Use">
       <Head>
-        <title>Terms of Use | Abraham of London</title>
         <meta name="description" content="Terms of Use for abrahamoflondon.org" />
-        <link rel="canonical" href="/terms" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={CANONICAL} />
+
+        {/* Open Graph / Twitter */}
+        <meta property="og:title" content="Terms of Use | Abraham of London" />
+        <meta property="og:description" content="Terms of Use for abrahamoflondon.org" />
+        <meta property="og:url" content={CANONICAL} />
+        <meta property="og:image" content={absUrl(siteConfig.ogImage)} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={absUrl(siteConfig.twitterImage)} />
+
+        {/* JSON-LD: Breadcrumbs */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: BREADCRUMBS,
+            }),
+          }}
+        />
+        {/* JSON-LD: WebPage */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "Terms of Use",
+              url: CANONICAL,
+              dateModified: updated,
+            }),
+          }}
+        />
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-16 prose prose-slate">
+      <main className="mx-auto max-w-3xl px-4 py-16 prose prose-slate dark:prose-invert">
         <h1>Terms of Use</h1>
-        <p className="text-sm">Last updated: {updated}</p>
+        <p className="text-sm">
+          Last updated: <time dateTime="2025-08-23">{updated}</time>
+        </p>
 
         <h2>1. Acceptance of Terms</h2>
         <p>
@@ -67,8 +110,10 @@ export default function Terms() {
         <p>
           Questions? Email{" "}
           <a href="mailto:info@abrahamoflondon.org">info@abrahamoflondon.org</a>.
+          {" "}See also our{" "}
+          <Link href="/privacy">Privacy Policy</Link>.
         </p>
       </main>
-    </>
+    </Layout>
   );
 }
