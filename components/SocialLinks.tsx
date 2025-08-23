@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type Item = { href: string; src: string; alt: string; label: string };
 
@@ -11,30 +12,8 @@ const items: Item[] = [
   { href: "tel:+442086225909", src: "/assets/images/social/phone.svg", alt: "Phone icon", label: "Call" },
 ];
 
-const isExternal = (href: string) => href.startsWith("http://") || href.startsWith("https://");
-
-// Re-usable solid icon using CSS mask so it’s always a single, premium color.
-function SolidIcon({ src, alt }: { src: string; alt: string }) {
-  return (
-    <span
-      role="img"
-      aria-label={alt}
-      className="inline-block h-6 w-6 sm:h-7 sm:w-7"
-      style={{
-        WebkitMaskImage: `url(${src})`,
-        maskImage: `url(${src})`,
-        WebkitMaskRepeat: "no-repeat",
-        maskRepeat: "no-repeat",
-        WebkitMaskPosition: "center",
-        maskPosition: "center",
-        WebkitMaskSize: "contain",
-        maskSize: "contain",
-        backgroundColor: "currentColor",
-        display: "inline-block",
-      }}
-    />
-  );
-}
+const isExternal = (href: string) =>
+  href.startsWith("http://") || href.startsWith("https://");
 
 export default function SocialFollowStrip() {
   return (
@@ -62,7 +41,15 @@ export default function SocialFollowStrip() {
               );
 
               const Label = <span className="hidden text-sm sm:inline font-serif">{it.label}</span>;
-              const Icon = <SolidIcon src={it.src} alt={it.alt} />;
+              const Icon = (
+                <Image
+                  src={it.src}
+                  alt={it.alt}
+                  width={24}
+                  height={24}
+                  className="inline-block"
+                />
+              );
 
               if (isExternal(it.href) || it.href.startsWith("mailto:") || it.href.startsWith("tel:")) {
                 return (
@@ -83,7 +70,13 @@ export default function SocialFollowStrip() {
               }
 
               return (
-                <Link key={it.href} href={it.href} aria-label={it.label} className="group inline-flex items-center" prefetch={false}>
+                <Link
+                  key={it.href}
+                  href={it.href}
+                  aria-label={it.label}
+                  className="group inline-flex items-center"
+                  prefetch={false}
+                >
                   <Button>
                     {Icon}
                     {Label}
