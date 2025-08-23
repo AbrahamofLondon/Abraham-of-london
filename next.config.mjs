@@ -10,21 +10,21 @@ const withBundleAnalyzer = bundleAnalyzer({
 const baseConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
+  poweredByHeader: false,              // optional
+  productionBrowserSourceMaps: false,  // optional
+  // eslint: { ignoreDuringBuilds: true }, // temporary escape hatch, if needed
+
   images: {
     formats: ['image/avif', 'image/webp'],
-    // Only list remote hosts you actually load images from.
-    // Remove this whole block if all images live in /public.
     remotePatterns: [
+      // Only keep hosts you actually use; remove if all images are local.
       { protocol: 'https', hostname: 'abraham-of-london.netlify.app' },
-      // Examples — add only if you use them:
-      // { protocol: 'https', hostname: 'images.unsplash.com' },
-      // { protocol: 'https', hostname: 'pbs.twimg.com' },
     ],
   },
+
   experimental: {
     optimizePackageImports: ['framer-motion'],
   },
-  // IMPORTANT: no redirects() or middleware that rewrites hosts.
 };
 
 export default withBundleAnalyzer(
@@ -32,7 +32,6 @@ export default withBundleAnalyzer(
     extension: /\.mdx?$/,
     options: {
       remarkPlugins: [remarkGfm],
-      // Do not add rehypeStringify here; Next/MDX handles rehype -> React.
       providerImportSource: '@mdx-js/react',
     },
   })(baseConfig)
