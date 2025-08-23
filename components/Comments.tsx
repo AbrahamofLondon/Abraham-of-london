@@ -4,22 +4,12 @@
 import * as React from "react";
 
 type Props = {
-  /** GitHub repo with Issues enabled and Utterances app installed */
-  repo?: string; // e.g. "abrahamadaramola/abrahamoflondon-comments"
-  /** How to match threads: "pathname" | "url" | "title" | "og:title" | ... */
-  issueTerm?: string;
-  /** Optional GitHub issue label to tag new threads */
+  repo?: string;            // e.g. "abrahamadaramola/abrahamoflondon-comments"
+  issueTerm?: string;       // "pathname" | "url" | "title" | "og:title" | ...
   label?: string;
-  /**
-   * If your site toggles dark mode by adding/removing a "dark" class on <html>,
-   * leave this true to keep the iframe theme in sync automatically.
-   */
   useClassDarkMode?: boolean;
-  /** Start loading the widget before it's visible */
   rootMargin?: string;
-  /** Intersection threshold for lazy mount */
   threshold?: number;
-  /** Extra class for the wrapper */
   className?: string;
 };
 
@@ -40,84 +30,83 @@ export default function Comments({
   const [error, setError] = React.useState<string | null>(null);
   const [readyToMount, setReadyToMount] = React.useState(false);
 
-  // Compute the initial theme for the script tag
   const computeInitialTheme = React.useCallback((): string => {
     if (typeof document === "undefined") return "preferred-color-scheme";
     if (useClassDarkMode) {
       const isDark = document.documentElement.classList.contains("dark");
       return isDark ? "github-dark" : "github-light";
     }
-    // Let the iframe follow OS preference by default
     return "preferred-color-scheme";
   }, [useClassDarkMode]);
 
-  // Post a theme change to the mounted iframe
   const postThemeToIframe = React.useCallback((theme: string) => {
     try {
-      const frame = containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
+      const frame =
+        containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
       frame?.contentWindow?.postMessage({ type: "set-theme", theme }, UTTERANCES_ORIGIN);
     } catch {
       /* no-op */
     }
   }, []);
 
-  // Mount Utterances script idempotently
-  const mountUtterances = React.useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return () => {};
+  // Accept the host element to avoid touching ref in cleanup.
+  const mountUtterances = React.useCallback(
+    (host: HTMLDivElement | null | undefined) => {
+      const el = host;
+      if (!el) return () => {};
 
-    // Clear any prior nodes (iframe/script) for hot re-mounts
-    while (el.firstChild) el.removeChild(el.firstChild);
+      // Clear old nodes
+      while (el.firstChild) el.removeChild(el.firstChild);
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    const script = document.createElement("script");
-    script.src = `${UTTERANCES_ORIGIN}/client.js`;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.setAttribute("repo", repo);
-    script.setAttribute("issue-term", issueTerm);
-    script.setAttribute("label", label);
-    script.setAttribute("theme", computeInitialTheme());
-    el.appendChild(script);
+      const script = document.createElement("script");
+      script.src = `${UTTERANCES_ORIGIN}/client.js`;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.setAttribute("repo", repo);
+      script.setAttribute("issue-term", issueTerm);
+      script.setAttribute("label", label);
+      script.setAttribute("theme", computeInitialTheme());
+      el.appendChild(script);
 
-    // Poll for the iframe to mark as loaded
-    const poll = window.setInterval(() => {
-      const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
-      if (hasFrame) {
+      const poll = window.setInterval(() => {
+        const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
+        if (hasFrame) {
+          window.clearInterval(poll);
+          setLoading(false);
+        }
+      }, 250);
+
+      const timeout = window.setTimeout(() => {
+        const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
+        if (!hasFrame) {
+          setError(
+            "Comments failed to load. Ensure the repo exists, Issues are enabled, and the Utterances app is installed."
+          );
+          setLoading(false);
+        }
+      }, 10000);
+
+      // Cleanup uses the captured host `el`, not the ref.
+      return () => {
         window.clearInterval(poll);
-        setLoading(false);
-      }
-    }, 250);
+        window.clearTimeout(timeout);
+      };
+    },
+    [repo, issueTerm, label, computeInitialTheme]
+  );
 
-    // Safety timeout: show friendly error if blocked/misconfigured
-    const timeout = window.setTimeout(() => {
-      const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
-      if (!hasFrame) {
-        setError(
-          "Comments failed to load. Ensure the repo exists, Issues are enabled, and the Utterances app is installed."
-        );
-        setLoading(false);
-      }
-    }, 10000);
-
-    return () => {
-      window.clearInterval(poll);
-      window.clearTimeout(timeout);
-    };
-  }, [repo, issueTerm, label, computeInitialTheme]);
-
-  // Lazy mount when scrolled near the section
+  // Lazy trigger for mounting
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     if (readyToMount) return;
 
-    const el = containerRef.current;
-    if (!el) return;
+    const host = containerRef.current;
+    if (!host) return;
 
-    // If it's already on-screen, mount immediately
-    const rect = el.getBoundingClientRect();
+    const rect = host.getBoundingClientRect();
     const inView = rect.top < window.innerHeight && rect.bottom >= 0;
     if (inView) {
       setReadyToMount(true);
@@ -133,28 +122,27 @@ export default function Comments({
       },
       { root: null, rootMargin, threshold }
     );
-    io.observe(el);
-
+    io.observe(host);
     return () => io.disconnect();
   }, [readyToMount, rootMargin, threshold]);
 
-  // Perform the actual mount once
+  // Actual mount once visible
   React.useEffect(() => {
     if (!readyToMount) return;
-    const cleanup = mountUtterances();
+    const host = containerRef.current; // capture once
+    const cleanupTimers = mountUtterances(host);
+
     return () => {
-      cleanup?.();
-      // Remove iframe/script when unmounting
-      const el = containerRef.current;
-      if (el) while (el.firstChild) el.removeChild(el.firstChild);
+      cleanupTimers?.();
+      if (host) while (host.firstChild) host.removeChild(host.firstChild);
     };
   }, [readyToMount, mountUtterances]);
 
-  // Keep iframe theme synced with your site's dark-mode class
+  // Keep iframe theme synced
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    let mqListenerCleanup: (() => void) | null = null;
+    let mqCleanup: (() => void) | null = null;
     let classObserver: MutationObserver | null = null;
 
     if (useClassDarkMode) {
@@ -168,14 +156,15 @@ export default function Comments({
       });
     } else if (window.matchMedia) {
       const mql = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () => postThemeToIframe(mql.matches ? "github-dark" : "github-light");
+      const onChange = () =>
+        postThemeToIframe(mql.matches ? "github-dark" : "github-light");
       mql.addEventListener?.("change", onChange);
-      mqListenerCleanup = () => mql.removeEventListener?.("change", onChange);
+      mqCleanup = () => mql.removeEventListener?.("change", onChange);
     }
 
     return () => {
       classObserver?.disconnect();
-      mqListenerCleanup?.();
+      mqCleanup?.();
     };
   }, [useClassDarkMode, postThemeToIframe]);
 
@@ -188,10 +177,8 @@ export default function Comments({
         Comments
       </h2>
 
-      {/* Mount target */}
       <div ref={containerRef} className="min-h-[120px]" />
 
-      {/* Status line (accessible) */}
       {(loading || error) && (
         <p role="status" aria-live="polite" className="mt-4 text-sm">
           {loading && !error && (
@@ -201,7 +188,6 @@ export default function Comments({
         </p>
       )}
 
-      {/* Noscript fallback */}
       <noscript>
         <p className="mt-4 text-sm text-deepCharcoal/70">
           Comments require JavaScript. Please enable it to view and post.

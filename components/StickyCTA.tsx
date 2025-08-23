@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import clsx from "clsx";
 
 type Props = {
@@ -13,6 +14,9 @@ type Props = {
   secondaryLabel?: string;
   className?: string;
 };
+
+const isInternal = (href = "") =>
+  href.startsWith("/") || href.startsWith("#");
 
 export default function StickyCTA({
   showAfter = 480,
@@ -27,11 +31,23 @@ export default function StickyCTA({
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
       const y = typeof window !== "undefined" ? window.scrollY : 0;
       setVisible(y > showAfter);
     };
-    onScroll();
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    // set initial state and attach listener
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [showAfter]);
@@ -54,6 +70,7 @@ export default function StickyCTA({
         )}
       >
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* Phone is always external (tel:) */}
           <a
             href={phoneHref}
             className={clsx(
@@ -72,25 +89,63 @@ export default function StickyCTA({
               Let’s build something enduring.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <a
-                href={primaryHref}
-                className={clsx(
-                  "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
-                  "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
-                )}
-              >
-                {primaryLabel}
-              </a>
-              <a
-                href={secondaryHref}
-                className={clsx(
-                  "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                  "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                  "dark:text-cream dark:border-white/20 dark:hover:bg-white/10",
-                )}
-              >
-                {secondaryLabel}
-              </a>
+              {/* Primary CTA: internal or external */}
+              {isInternal(primaryHref) ? (
+                <Link
+                  href={primaryHref}
+                  prefetch={false}
+                  className={clsx(
+                    "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
+                    "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
+                  )}
+                  aria-label={primaryLabel}
+                >
+                  {primaryLabel}
+                </Link>
+              ) : (
+                <a
+                  href={primaryHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={clsx(
+                    "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
+                    "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
+                  )}
+                  aria-label={primaryLabel}
+                >
+                  {primaryLabel}
+                </a>
+              )}
+
+              {/* Secondary CTA: internal or external */}
+              {isInternal(secondaryHref) ? (
+                <Link
+                  href={secondaryHref}
+                  prefetch={false}
+                  className={clsx(
+                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10",
+                  )}
+                  aria-label={secondaryLabel}
+                >
+                  {secondaryLabel}
+                </Link>
+              ) : (
+                <a
+                  href={secondaryHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={clsx(
+                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10",
+                  )}
+                  aria-label={secondaryLabel}
+                >
+                  {secondaryLabel}
+                </a>
+              )}
             </div>
           </div>
         </div>

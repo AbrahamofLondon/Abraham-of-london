@@ -3,6 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
 import { NAV } from "@/config/nav";
@@ -22,18 +23,23 @@ export default function Layout({
   footerVariant = "light",
 }: LayoutProps) {
   const router = useRouter();
-  const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
   const [open, setOpen] = React.useState(false);
-  const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null); // ✱
+  const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null);
 
-  // Lock body scroll when mobile nav open
+  const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
+
+  // Lock body scroll when mobile nav open + focus first item
   React.useEffect(() => {
-    document.documentElement.style.overflow = open ? "hidden" : "";
-    if (open) firstMobileLinkRef.current?.focus(); // ✱ focus into drawer
-    return () => { document.documentElement.style.overflow = ""; };
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = open ? "hidden" : prev;
+    if (open) firstMobileLinkRef.current?.focus();
+    return () => {
+      root.style.overflow = prev;
+    };
   }, [open]);
 
-  // ✱ Close drawer on route change
+  // Close drawer on route changes
   React.useEffect(() => {
     const handleRoute = () => setOpen(false);
     router.events.on("routeChangeStart", handleRoute);
@@ -41,8 +47,9 @@ export default function Layout({
   }, [router.events]);
 
   const isActive = (href: string) =>
-    router.pathname === href || router.asPath.split("#")[0] === href; // ✱ ignore hash
+    router.pathname === href || router.asPath.split("#")[0] === href;
 
+  // Organization JSON-LD
   const ORG_JSONLD = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -63,7 +70,7 @@ export default function Layout({
     ],
   };
 
-  // ✱ Site navigation JSON-LD
+  // Site navigation JSON-LD
   const NAV_JSONLD = {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
@@ -110,7 +117,7 @@ export default function Layout({
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      aria-current={active ? "page" : undefined} // ✱
+                      aria-current={active ? "page" : undefined}
                       className={[
                         "relative text-sm font-medium transition-colors",
                         active
@@ -177,9 +184,9 @@ export default function Layout({
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      ref={idx === 0 ? firstMobileLinkRef : undefined} // ✱
+                      ref={idx === 0 ? firstMobileLinkRef : undefined}
                       onClick={() => setOpen(false)}
-                      aria-current={active ? "page" : undefined} // ✱
+                      aria-current={active ? "page" : undefined}
                       className={[
                         "block rounded-md px-2 py-2 text-base font-medium",
                         active
@@ -210,7 +217,7 @@ export default function Layout({
       {!hideSocialStrip && (
         <div className="border-b border-gray-100 bg-white dark:bg-black/40">
           <div className="mx-auto max-w-7xl px-4 py-2">
-            <SocialFollowStrip variant={footerVariant} />
+            <SocialFollowStrip />
           </div>
         </div>
       )}

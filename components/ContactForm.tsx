@@ -32,11 +32,14 @@ export default function ContactForm() {
       const formEl = event.currentTarget;
       const formData = new FormData(formEl);
 
+      // Ensure Netlify sees the form name
       if (!formData.get("form-name")) formData.append("form-name", FORM_NAME);
 
+      // Build x-www-form-urlencoded body WITHOUT using iterable entries()
       const body = new URLSearchParams();
-      for (const [k, v] of formData.entries()) body.append(k, String(v));
+      formData.forEach((value, key) => body.append(key, String(value)));
 
+      // Post to "/" so Netlify captures on any route
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -69,7 +72,12 @@ export default function ContactForm() {
         "@type": "CommunicateAction",
         target: { "@type": "EntryPoint", actionPlatform: ["https://schema.org/ContactPoint"], inLanguage: "en" },
       },
-      contactPoint: { "@type": "ContactPoint", contactType: "Customer service", areaServed: "Global", email: siteConfig.email },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "Customer service",
+        areaServed: "Global",
+        email: siteConfig.email,
+      },
     };
     return [contactSchema];
   }, []);
@@ -106,33 +114,34 @@ export default function ContactForm() {
         </p>
 
         <motion.form
-          action="/"                 // Netlify capture endpoint
+          action="/"                  // Netlify capture endpoint
           method="POST"
           name={FORM_NAME}
           acceptCharset="UTF-8"
-          data-netlify="true"
-          data-netlify-honeypot="bot-field"
+          // Netlify attributes (cast to any to satisfy TS)
+          {...({ "data-netlify": "true", "netlify-honeypot": "bot-field" } as any)}
           variants={formVariants}
           initial="hidden"
           animate="visible"
           className="space-y-6"
           onSubmit={handleSubmit}
+          noValidate
         >
-          {/* Netlify needs these fields in the HTML at build time */}
+          {/* Netlify needs these fields present at build time */}
           <input type="hidden" name="form-name" value={FORM_NAME} />
           <input type="hidden" name="subject" value="New contact form submission" />
 
-          {/* Honeypot (visually hidden, still in DOM) */}
-          <div className="sr-only" aria-hidden="true">
-            <label htmlFor="bot-field">Do not fill this out</label>
-            <input
-              id="bot-field"
-              name="bot-field"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-            />
-          </div>
+          {/* Honeypot field — visually hidden but present in DOM */}
+          <label htmlFor="bot-field" className="sr-only">Leave this field empty</label>
+          <input
+            id="bot-field"
+            name="bot-field"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="sr-only"
+          />
 
           <motion.div variants={itemVariants}>
             <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-primary)]">
@@ -184,7 +193,8 @@ export default function ContactForm() {
             />
           </motion.div>
 
-          {/* <div data-netlify-recaptcha="true" />  // optional */}
+          {/* Optional reCAPTCHA v2:
+          <div data-netlify-recaptcha="true" /> */}
 
           <motion.div variants={itemVariants} className="text-center">
             <button

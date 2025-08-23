@@ -1,5 +1,5 @@
 // pages/_document.tsx
-import Document, { Html, Head, Main, NextScript, DocumentContext } from "next/document";
+import { Html, Head, Main, NextScript } from "next/document";
 import { GA_MEASUREMENT_ID, gaEnabled } from "@/lib/gtag";
 
 const THEME_BOOTSTRAP = `
@@ -9,69 +9,59 @@ const THEME_BOOTSTRAP = `
     var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = stored ? stored : (prefersDark ? 'dark' : 'light');
     var root = document.documentElement;
-    root.classList.remove('dark');
-    if (theme === 'dark') root.classList.add('dark');
+    root.classList.toggle('dark', theme === 'dark');
     root.setAttribute('data-theme', theme);
   } catch (e) {}
 })();
 `;
 
-class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
+export default function Document() {
+  return (
+    <Html lang="en-GB" className="scroll-smooth" suppressHydrationWarning>
+      <Head>
+        <meta charSet="utf-8" />
+        <meta name="color-scheme" content="dark light" />
+        <meta name="format-detection" content="telephone=no" />
 
-  render() {
-    return (
-      <Html lang="en-GB" className="scroll-smooth" suppressHydrationWarning>
-        <Head>
-          <meta charSet="utf-8" />
-          <meta name="color-scheme" content="dark light" />
-          <meta name="format-detection" content="telephone=no" />
+        {/* Theme colors for light & dark */}
+        <meta name="theme-color" content="#0b1a2b" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
-          {/* Theme colors for light & dark */}
-          <meta name="theme-color" content="#0b1a2b" media="(prefers-color-scheme: dark)" />
-          <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        {/* Performance: DNS + preconnect */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
 
-          {/* Performance: DNS + preconnect */}
-          <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-          <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-          <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-          <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
+        {/* Bootstrap theme before hydration */}
+        <script id="theme-bootstrap" dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
 
-          {/* Bootstrap theme before hydration */}
-          <script id="theme-bootstrap" dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
-
-          {/* Google Analytics (GA4) */}
-          {gaEnabled && (
-            <>
-              <script
-                async
-                id="ga4-src"
-                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-              />
-              <script
-                id="ga4-init"
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
-                  `.trim(),
-                }}
-              />
-            </>
-          )}
-        </Head>
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
+        {/* Google Analytics (GA4) */}
+        {gaEnabled && (
+          <>
+            <script
+              async
+              id="ga4-src"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            />
+            <script
+              id="ga4-init"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
+                `.trim(),
+              }}
+            />
+          </>
+        )}
+      </Head>
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
 }
-
-export default MyDocument;

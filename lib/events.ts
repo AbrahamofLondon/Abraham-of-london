@@ -6,10 +6,10 @@ import matter from "gray-matter";
 export interface EventMeta {
   slug: string;
   title: string;
-  date: string;
+  date: string;          // ISO preferred
   location?: string;
   excerpt?: string;
-  summary?: string;      // NEW: match pages/events/[slug].tsx usage
+  summary?: string;      // used in pages/events/[slug].tsx
   heroImage?: string;
   ctaHref?: string;
   ctaLabel?: string;
@@ -18,33 +18,59 @@ export interface EventMeta {
 }
 
 const eventsDir = path.join(process.cwd(), "content", "events");
+const exts = [".mdx", ".md"] as const;
+
+function normalizeDate(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  // allow "YYYY-MM-DD" or full ISO
+  const d = new Date(value);
+  if (!Number.isNaN(d.getTime())) return d.toISOString();
+  // try common no-time format
+  const ts = Date.parse(value);
+  return Number.isNaN(ts) ? undefined : new Date(ts).toISOString();
+}
+
+function normalizeTags(value: unknown): string[] | undefined {
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof value === "string")
+    return value.split(",").map((s) => s.trim()).filter(Boolean);
+  return undefined;
+}
 
 export function getEventSlugs(): string[] {
   if (!fs.existsSync(eventsDir)) return [];
   return fs
     .readdirSync(eventsDir)
-    .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"))
-    .map((f) => f.replace(/\.mdx?$/, ""));
+    .filter((f) => exts.some((e) => f.endsWith(e)))
+    .map((f) => f.replace(/\.mdx?$/i, ""));
 }
 
 function resolveEventPath(slug: string): string | null {
-  const mdx = path.join(eventsDir, `${slug}.mdx`);
-  const md = path.join(eventsDir, `${slug}.md`);
-  if (fs.existsSync(mdx)) return mdx;
-  if (fs.existsSync(md)) return md;
+  for (const ext of exts) {
+    const p = path.join(eventsDir, `${slug}${ext}`);
+    if (fs.existsSync(p)) return p;
+  }
   return null;
 }
 
+type FieldKey = keyof EventMeta | "content";
+
 export function getEventBySlug(
   slug: string,
-  fields: (keyof EventMeta | "content")[] = [],
+  fields: FieldKey[] = [],
 ): Partial<EventMeta> & { content?: string } {
-  const realSlug = slug.replace(/\.mdx?$/, "");
+  const realSlug = slug.replace(/\.mdx?$/i, "");
   const fullPath = resolveEventPath(realSlug);
 
   if (!fullPath) {
     // minimal object if file not found
-    return { slug: realSlug, title: "Event Not Found", date: new Date().toISOString() };
+    const fallback: Partial<EventMeta> = {
+      slug: realSlug,
+      title: "Event Not Found",
+      date: new Date().toISOString(),
+    };
+    if (fields.includes("content")) (fallback as any).content = "";
+    return fallback as Partial<EventMeta> & { content?: string };
   }
 
   const file = fs.readFileSync(fullPath, "utf8");
@@ -58,20 +84,23 @@ export function getEventBySlug(
       item.content = content;
       continue;
     }
-    const raw = fm[field as string];
 
-    // normalize common fields
+    let raw = fm[field as string];
+
+    if (field === "date") {
+      const iso = normalizeDate(raw);
+      if (iso) item.date = iso;
+      continue;
+    }
+
     if (field === "tags") {
-      if (Array.isArray(raw)) {
-        item.tags = (raw as unknown[]).map(String).map((s) => s.trim()).filter(Boolean);
-      } else if (typeof raw === "string") {
-        item.tags = raw.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      const tags = normalizeTags(raw);
+      if (tags) item.tags = tags;
       continue;
     }
 
     if (typeof raw !== "undefined") {
-      (item as Record<string, unknown>)[field] = raw;
+      (item as any)[field] = raw;
     }
   }
 
@@ -82,9 +111,7 @@ export function getEventBySlug(
   return item;
 }
 
-export function getAllEvents(
-  fields: (keyof EventMeta | "content")[] = [],
-): Partial<EventMeta>[] {
+export function getAllEvents(fields: FieldKey[] = []): Partial<EventMeta>[] {
   const slugs = getEventSlugs();
   const events = slugs.map((slug) => getEventBySlug(slug, fields));
 
@@ -98,12 +125,15 @@ export function getAllEvents(
   return events;
 }
 
-// Small helpers (optional)
+// Helpers
 export function isUpcoming(dateStr?: string): boolean {
   if (!dateStr) return false;
-  const t = Date.parse(dateStr);
-  if (Number.isNaN(t)) return false;
-  return t >= Date.now();
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return false;
+  // Compare from start of today
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return d >= start;
 }
 
 export function prettyDate(dateStr?: string, locale = "en-GB"): string {
@@ -111,4 +141,25 @@ export function prettyDate(dateStr?: string, locale = "en-GB"): string {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return String(dateStr);
   return d.toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" });
+}
+
+/**
+ * Upcoming events only, newest first, limited.
+ * @example getUpcomingEvents(3, ["slug","title","date","location","summary"])
+ */
+export function getUpcomingEvents(limit = 3, fields: FieldKey[] = []): Partial<EventMeta>[] {
+  return getAllEvents(fields).filter((e) => isUpcoming(String(e.date))).slice(0, limit);
+}
+
+/**
+ * Convenience for homepage teaser (shape matches your Home page).
+ */
+export function getEventsTeaser(limit = 3) {
+  return getUpcomingEvents(limit, ["slug", "title", "date", "location", "summary"]).map((e) => ({
+    slug: String(e.slug),
+    title: String(e.title),
+    date: String(e.date),
+    location: String(e.location || ""),
+    description: (e as any).summary ?? null,
+  }));
 }

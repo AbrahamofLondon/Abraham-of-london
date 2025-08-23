@@ -1,89 +1,106 @@
-import Link from "next/link";
+// components/SocialFollowStrip.tsx
+import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { siteConfig } from "@/lib/siteConfig";
 
-type Item = { href: string; src: string; alt: string; label: string };
+type SocialItem = {
+  href: string;
+  icon: string;  // local /public path preferred
+  label: string;
+  external?: boolean;
+};
 
-const items: Item[] = [
-  { href: "https://twitter.com/abrahamoflondon", src: "/assets/images/social/twitter.svg", alt: "Twitter logo", label: "Twitter" },
-  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook.svg", alt: "Facebook logo", label: "Facebook" },
-  { href: "https://www.linkedin.com/in/abrahamoflondon", src: "/assets/images/social/linkedin.svg", alt: "LinkedIn logo", label: "LinkedIn" },
-  { href: "https://instagram.com/abrahamoflondon", src: "/assets/images/social/instagram.svg", alt: "Instagram logo", label: "Instagram" },
-  { href: "mailto:info@abrahamoflondon.org", src: "/assets/images/social/email.svg", alt: "Email icon", label: "Email" },
-  { href: "tel:+442086225909", src: "/assets/images/social/phone.svg", alt: "Phone icon", label: "Call" },
-];
+type Props = {
+  /** Light (default) = warm card; Dark = subtle glass on dark sections */
+  variant?: "light" | "dark";
+  className?: string;
+  /** Optionally override/extend items (e.g., add Instagram) */
+  itemsOverride?: SocialItem[];
+};
 
-const isExternal = (href: string) =>
-  href.startsWith("http://") || href.startsWith("https://");
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
-export default function SocialFollowStrip() {
+export default function SocialFollowStrip({
+  variant = "light",
+  className = "",
+  itemsOverride,
+}: Props) {
+  const items: SocialItem[] = (itemsOverride ?? siteConfig.socialLinks) as SocialItem[];
+
+  const containerBg =
+    variant === "dark"
+      ? "from-black/60 to-deepCharcoal/60 ring-white/10"
+      : "from-white/90 to-warmWhite/90 ring-deepCharcoal/10";
+
+  const textColor = variant === "dark" ? "text-cream" : "text-deepCharcoal/80";
+  const chipBase =
+    variant === "dark"
+      ? "bg-white/10 text-cream ring-white/15 hover:bg-white/15"
+      : "bg-softGold text-deepCharcoal ring-deepCharcoal/20 hover:bg-forest hover:text-cream";
+
   return (
-    <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
-      <div className="rounded-2xl bg-gradient-to-br from-white/90 to-warmWhite/90 backdrop-blur-md ring-2 ring-deepCharcoal/10 shadow-2xl">
+    <section className={`mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12 ${className}`}>
+      <div className={`rounded-2xl bg-gradient-to-br ${containerBg} backdrop-blur-md ring-2 shadow-2xl`}>
         <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p className="text-base text-deepCharcoal/80 sm:text-lg font-serif leading-relaxed">
+          <p className={`text-base sm:text-lg font-serif leading-relaxed ${textColor}`}>
             Join the conversation — follow{" "}
-            <span className="font-semibold text-deepCharcoal">Abraham of London</span>
+            <span className="font-semibold">{siteConfig.title}</span>
           </p>
 
-          <nav aria-label="Social links" className="flex items-center gap-5 sm:gap-7">
-            {items.map((it) => {
-              const Button = ({ children }: { children: React.ReactNode }) => (
-                <span
-                  className="
-                    inline-flex items-center gap-3 rounded-full px-3 py-2
-                    bg-softGold text-deepCharcoal shadow-lg ring-1 ring-deepCharcoal/20
-                    transition-all duration-300
-                    hover:bg-forest hover:text-cream hover:scale-105
-                  "
-                >
-                  {children}
-                </span>
-              );
+          <nav aria-label="Social links">
+            <ul className="flex items-center gap-4 sm:gap-6">
+              {items.map((it) => {
+                const label = it.label || "Social";
+                const href = it.href;
+                const icon = it.icon || "/assets/images/social/link.svg";
+                const external = it.external ?? isExternal(href);
 
-              const Label = <span className="hidden text-sm sm:inline font-serif">{it.label}</span>;
-              const Icon = (
-                <Image
-                  src={it.src}
-                  alt={it.alt}
-                  width={24}
-                  height={24}
-                  className="inline-block"
-                />
-              );
-
-              if (isExternal(it.href) || it.href.startsWith("mailto:") || it.href.startsWith("tel:")) {
-                return (
-                  <a
-                    key={it.href}
-                    href={it.href}
-                    aria-label={it.label}
-                    className="group inline-flex items-center"
-                    target={isExternal(it.href) ? "_blank" : undefined}
-                    rel={isExternal(it.href) ? "noopener noreferrer" : undefined}
+                const Chip = (
+                  <span
+                    className={`inline-flex items-center gap-2 sm:gap-3 rounded-full px-3 py-2 ring-1 transition-all duration-200 ${chipBase}`}
                   >
-                    <Button>
-                      {Icon}
-                      {Label}
-                    </Button>
-                  </a>
+                    <Image
+                      src={icon}
+                      alt={`${label} icon`}
+                      width={22}
+                      height={22}
+                      className="inline-block"
+                      loading="lazy"
+                    />
+                    <span className="hidden sm:inline text-sm font-serif">{label}</span>
+                    <span className="sr-only sm:not-sr-only sm:hidden">{label}</span>
+                  </span>
                 );
-              }
 
-              return (
-                <Link
-                  key={it.href}
-                  href={it.href}
-                  aria-label={it.label}
-                  className="group inline-flex items-center"
-                  prefetch={false}
-                >
-                  <Button>
-                    {Icon}
-                    {Label}
-                  </Button>
-                </Link>
-              );
-            })}
+                const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
+
+                return (
+                  <li key={`${label}-${href}`}>
+                    {external || isUtility ? (
+                      <a
+                        href={href}
+                        aria-label={label}
+                        className="group inline-flex items-center"
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener noreferrer" : undefined}
+                      >
+                        {Chip}
+                      </a>
+                    ) : (
+                      <Link
+                        href={href}
+                        aria-label={label}
+                        prefetch={false}
+                        className="group inline-flex items-center"
+                      >
+                        {Chip}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
         </div>
       </div>
