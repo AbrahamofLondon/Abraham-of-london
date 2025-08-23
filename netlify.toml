@@ -1,10 +1,11 @@
 [build]
   command = "npm run build"
+  # Netlify Next.js Runtime will publish from .next automatically
 
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Keep canonical URL matching your Primary domain (you chose WWW)
+  # Must match your chosen primary domain (WWW)
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
@@ -14,10 +15,6 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# (Optional) you can also add the Netlify Emails plugin here if you prefer code-based config:
-# [[plugins]]
-#   package = "@netlify/plugin-emails"
 
 # --- Security headers ---
 [[headers]]
@@ -39,28 +36,27 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-
-# --- Redirects for other domains ---
+# --- Third-party domain redirects ONLY (leave apex/www alone) ---
 [[redirects]]
   from = "https://endureluxe.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
-  force = true
+  force  = true
 
 [[redirects]]
   from = "https://www.endureluxe.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
-  force = true
+  force  = true
 
 [[redirects]]
   from = "https://alomarada.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
-  force = true
+  force  = true
 
 [[redirects]]
   from = "https://www.alomarada.com/*"
-  to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
-  force = true
+  force  = true
