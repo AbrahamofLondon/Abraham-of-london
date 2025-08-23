@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
+import { NAV } from "@/config/nav";                 // 👈 single source for nav items
+import { siteConfig, absUrl } from "@/lib/siteConfig"; // 👈 single source for site/meta/social
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -13,46 +15,6 @@ type LayoutProps = {
   footerVariant?: "light" | "dark";
 };
 
-const ORIGIN =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  process.env.URL ??
-  process.env.DEPLOY_PRIME_URL ??
-  "https://abrahamoflondon.org";
-
-const SITE_URL = ORIGIN.replace(/\/$/, "");
-
-const ORG_JSONLD = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Abraham of London",
-  url: SITE_URL,
-  logo: `${SITE_URL}/assets/images/logo/abraham-of-london-logo.svg`,
-  sameAs: [
-    "https://twitter.com/abrahamoflondon",
-    "https://www.linkedin.com/in/abrahamoflondon",
-    "https://www.instagram.com/abrahamoflondon",
-    "https://www.facebook.com/share/p/156tQWm2mZ/",
-  ],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      contactType: "Customer Support",
-      email: "info@abrahamoflondon.org",
-      telephone: "+44 20 7946 0958",
-      areaServed: "GB",
-      availableLanguage: ["en"],
-    },
-  ],
-};
-
-const NAV = [
-  { href: "/books", label: "Books" },
-  { href: "/blog", label: "Insights" },
-  { href: "/ventures", label: "Ventures" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
-
 export default function Layout({
   children,
   pageTitle,
@@ -60,20 +22,38 @@ export default function Layout({
   footerVariant = "light",
 }: LayoutProps) {
   const router = useRouter();
-  const title = pageTitle ? `${pageTitle} | Abraham of London` : "Abraham of London";
+  const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
   const [open, setOpen] = React.useState(false);
 
   // Lock body scroll when mobile nav open
   React.useEffect(() => {
-    if (open) document.documentElement.style.overflow = "hidden";
-    else document.documentElement.style.overflow = "";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
+    document.documentElement.style.overflow = open ? "hidden" : "";
+    return () => { document.documentElement.style.overflow = ""; };
   }, [open]);
 
   const isActive = (href: string) =>
     router.pathname === href || router.asPath === href;
+
+  // JSON-LD from config
+  const ORG_JSONLD = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteConfig.title,
+    url: siteConfig.siteUrl,
+    logo: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
+    sameAs: siteConfig.socialLinks
+      .filter(s => s.external && /^https?:\/\//i.test(s.href))
+      .map(s => s.href),
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "Customer Support",
+        email: siteConfig.email,
+        areaServed: "GB",
+        availableLanguage: ["en"],
+      },
+    ],
+  };
 
   return (
     <>
@@ -100,7 +80,7 @@ export default function Layout({
           {/* Brand */}
           <Link href="/" className="group inline-flex items-baseline gap-2">
             <span className="font-serif text-xl font-semibold tracking-wide text-deepCharcoal md:text-2xl dark:text-cream">
-              Abraham of London
+              {siteConfig.title}
             </span>
             <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block">
               EST. MMXXIV
@@ -150,7 +130,7 @@ export default function Layout({
           {/* Mobile Menu Button */}
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen(v => !v)}
             aria-expanded={open}
             aria-controls="mobile-nav"
             className="inline-flex items-center justify-center rounded-md border border-gray-300 p-2 text-gray-700 dark:text-gray-200 md:hidden"
@@ -233,7 +213,7 @@ export default function Layout({
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="grid gap-10 md:grid-cols-3">
             <div>
-              <p className="font-serif text-lg font-semibold">Abraham of London</p>
+              <p className="font-serif text-lg font-semibold">{siteConfig.title}</p>
               <p className="mt-2 text-sm leading-relaxed">
                 Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
               </p>
@@ -256,8 +236,8 @@ export default function Layout({
               <p className="text-sm font-semibold">Contact & Legal</p>
               <ul className="mt-3 grid gap-2 text-sm">
                 <li>
-                  <a href="mailto:info@abrahamoflondon.org" className="transition hover:text-softGold">
-                    info@abrahamoflondon.org
+                  <a href={`mailto:${siteConfig.email}`} className="transition hover:text-softGold">
+                    {siteConfig.email}
                   </a>
                 </li>
                 <li>
@@ -275,7 +255,7 @@ export default function Layout({
           </div>
 
           <div className="mt-10 border-t border-gray-200 pt-6 text-center text-xs">
-            © {new Date().getFullYear()} Abraham of London. All rights reserved.
+            © {new Date().getFullYear()} {siteConfig.title}. All rights reserved.
           </div>
         </div>
       </footer>

@@ -1,90 +1,58 @@
 // components/SocialFollowStrip.tsx
-import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx";
-import { siteConfig } from "@/lib/siteConfig";
 
-type Props = {
-  variant?: "light" | "dark";
-  className?: string;
-};
+type Item = { href: string; src: string; alt: string; label: string };
+const items: Item[] = [
+  { href: "https://twitter.com/abrahamoflondon", src: "/assets/images/social/twitter.svg",  alt: "Twitter logo",  label: "Twitter" },
+  { href: "https://www.facebook.com/share/p/156tQWm2mZ/", src: "/assets/images/social/facebook.svg", alt: "Facebook logo", label: "Facebook" },
+  { href: "https://www.linkedin.com/in/abrahamoflondon", src: "/assets/images/social/linkedin.svg", alt: "LinkedIn logo", label: "LinkedIn" },
+  { href: "https://instagram.com/abrahamoflondon", src: "/assets/images/social/instagram.svg", alt: "Instagram logo", label: "Instagram" },
+  { href: "mailto:info@abrahamoflondon.org", src: "/assets/images/social/email.svg", alt: "Email icon", label: "Email" },
+  { href: "tel:+442086225909", src: "/assets/images/social/phone.svg", alt: "Phone icon", label: "Call" },
+];
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
-export default function SocialFollowStrip({ variant = "light", className }: Props) {
-  const shell = clsx(
-    "rounded-2xl backdrop-blur-md ring-1 shadow-2xl",
-    variant === "dark"
-      ? "from-white/5 to-white/10 bg-gradient-to-br ring-white/10"
-      : "from-white/90 to-warmWhite/90 bg-gradient-to-br ring-deepCharcoal/10",
-    className,
-  );
-
-  const pill = clsx(
-    "inline-flex items-center gap-3 rounded-full px-3 py-1.5 transition",
-    variant === "dark"
-      ? "bg-cream text-deepCharcoal hover:bg-softGold"
-      : "bg-deepCharcoal text-cream hover:bg-softGold hover:text-deepCharcoal",
-  );
-
+export default function SocialFollowStrip({ variant = "light" as "light" | "dark" }) {
   return (
     <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
-      <div className={shell}>
+      <div className="rounded-2xl bg-gradient-to-br from-white/90 to-warmWhite/90 backdrop-blur-md ring-2 ring-deepCharcoal/10 shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p
-            className={clsx(
-              "font-serif leading-relaxed",
-              variant === "dark" ? "text-cream/90" : "text-deepCharcoal/85",
-              "text-base sm:text-lg",
-            )}
-          >
-            Join the conversation — follow{" "}
-            <span className={clsx(variant === "dark" ? "text-cream" : "text-deepCharcoal", "font-semibold")}>
-              {siteConfig.title}
-            </span>
+          <p className="text-base text-deepCharcoal/80 sm:text-lg font-serif leading-relaxed">
+            Join the conversation — follow <span className="font-semibold text-deepCharcoal">Abraham of London</span>
           </p>
 
-          <nav aria-label="Social links" className="flex items-center gap-3 sm:gap-4">
-            {siteConfig.socialLinks.map((it) => {
-              const iconEl = (
-                <span className="relative inline-block h-4 w-4 sm:h-5 sm:w-5">
-                  <Image
-                    src={it.icon}
-                    alt={`${it.label} icon`}
-                    fill
-                    sizes="20px"
-                    className="object-contain"
-                  />
-                </span>
+          <nav aria-label="Social links" className="flex items-center gap-5 sm:gap-7">
+            {items.map((it) => {
+              const label = <span className="hidden text-sm sm:inline font-serif">{it.label}</span>;
+              const icon = (
+                <img
+                  src={it.src}
+                  alt={it.alt}
+                  className="h-7 w-7 sm:h-8 sm:w-8"
+                  loading="lazy"
+                  decoding="async"
+                />
               );
 
-              const content = (
-                <span className="inline-flex items-center gap-2">
-                  {iconEl}
-                  <span className="hidden sm:inline text-sm">{it.label}</span>
-                </span>
-              );
+              const classes =
+                "group inline-flex items-center gap-3 text-deepCharcoal hover:text-forest transition-all duration-300";
 
-              const className = pill;
-
-              if (it.href.startsWith("mailto:") || it.href.startsWith("tel:") || it.external || isExternal(it.href)) {
+              if (isExternal(it.href) || it.href.startsWith("mailto:") || it.href.startsWith("tel:")) {
                 return (
-                  <a
-                    key={it.href}
-                    href={it.href}
-                    target={isExternal(it.href) ? "_blank" : undefined}
-                    rel={isExternal(it.href) ? "noopener noreferrer" : undefined}
-                    className={className}
-                    aria-label={it.label}
-                  >
-                    {content}
+                  <a key={it.href} href={it.href} aria-label={it.label} className={classes}
+                     target={isExternal(it.href) ? "_blank" : undefined}
+                     rel={isExternal(it.href) ? "noopener noreferrer" : undefined}>
+                    {icon}
+                    {label}
                   </a>
                 );
               }
 
               return (
-                <Link key={it.href} href={it.href} className={className} aria-label={it.label} prefetch={false}>
-                  {content}
+                <Link key={it.href} href={it.href} aria-label={it.label} className={classes} prefetch={false}>
+                  {icon}
+                  {label}
                 </Link>
               );
             })}
