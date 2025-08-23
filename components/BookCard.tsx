@@ -3,9 +3,10 @@ import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
+import * as React from "react";
 
 export type BookCardProps = {
-  slug: string;
+  slug: string; // accepts "my-book" or "/books/my-book"
   title: string;
   author: string;
   excerpt: string;
@@ -35,17 +36,15 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  const src: string | StaticImageData =
+  // allow either "slug" or a full path
+  const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
+
+  const initialSrc: string | StaticImageData =
     typeof coverImage === "object"
       ? coverImage
-      : coverImage && coverImage.trim()
-      ? coverImage
-      : DEFAULT_COVER;
+      : (coverImage && coverImage.trim()) || DEFAULT_COVER;
 
-  const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
-    const img = e.currentTarget as HTMLImageElement & { src: string };
-    if (!img.src.endsWith(DEFAULT_COVER)) img.src = DEFAULT_COVER;
-  };
+  const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(initialSrc);
 
   return (
     <motion.article
@@ -57,19 +56,22 @@ export default function BookCard({
         className
       )}
     >
-      <Link href={`/books/${slug}`} className="block relative w-full h-80">
-        <Image
-          src={src}
-          alt=""
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          onError={typeof src === "string" ? handleImgError : undefined}
-          priority={featured}
-        />
+      <Link href={detailHref} className="block relative w-full">
+        {/* 2:3 book-cover ratio */}
+        <div className="relative w-full aspect-[2/3]">
+          <Image
+            src={imgSrc}
+            alt={`${title} book cover`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            onError={() => typeof imgSrc === "string" && imgSrc !== DEFAULT_COVER && setImgSrc(DEFAULT_COVER)}
+            priority={featured}
+          />
+        </div>
         {featured && (
           <span className="absolute top-4 left-4 rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-deepCharcoal shadow">
-            Featured
+            Featured<span className="sr-only"> book</span>
           </span>
         )}
       </Link>
@@ -77,16 +79,14 @@ export default function BookCard({
       <div className="p-6">
         <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
           <Link
-            href={`/books/${slug}`}
+            href={detailHref}
             className="underline decoration-softGold/0 underline-offset-[6px] transition hover:decoration-softGold/70"
           >
             {title}
           </Link>
         </h3>
         <p className="mt-1 text-sm text-deepCharcoal/70">By {author}</p>
-        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-deepCharcoal/90">
-          {excerpt}
-        </p>
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-deepCharcoal/90">{excerpt}</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-deepCharcoal/70">
@@ -94,8 +94,8 @@ export default function BookCard({
           </span>
 
           <Link
-            href={`/books/${slug}`}
-            className="ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-primary-hover"
+            href={detailHref}
+            className="ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-forest/90"
           >
             Learn more
           </Link>
@@ -106,6 +106,7 @@ export default function BookCard({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-full border border-forest/25 px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream"
+              aria-label={`Buy ${title} (opens in new tab)`}
             >
               Buy
             </a>
@@ -115,22 +116,12 @@ export default function BookCard({
         {(downloadPdf || downloadEpub) && (
           <div className="mt-3 flex flex-wrap gap-4 text-xs">
             {downloadPdf && (
-              <a
-                href={downloadPdf}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="luxury-link"
-              >
+              <a href={downloadPdf} target="_blank" rel="noopener noreferrer" className="luxury-link">
                 PDF
               </a>
             )}
             {downloadEpub && (
-              <a
-                href={downloadEpub}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="luxury-link"
-              >
+              <a href={downloadEpub} target="_blank" rel="noopener noreferrer" className="luxury-link">
                 EPUB
               </a>
             )}
