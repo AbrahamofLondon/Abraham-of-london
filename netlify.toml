@@ -1,11 +1,9 @@
 [build]
   command = "npm run build"
-  # Next.js Runtime will publish from .next automatically
 
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Must match your primary site domain
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
@@ -25,20 +23,18 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
-# --- Performance caching (safe for Next.js static assets) ---
+# --- Performance caching ---
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Optional: cache your own public assets if you fingerprint or accept short caching
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
 # --- Host-conditional redirects for brand domains ---
-# Add these domains as aliases in Netlify first.
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
