@@ -1,21 +1,16 @@
 // lib/siteConfig.ts
-export type SocialLink = {
-  href: string;       // "https://...", "mailto:..", "tel:..", or internal "/path"
-  label: string;      // e.g., "LinkedIn"
-  icon: string;       // path in /public, e.g. "/assets/images/social/linkedin.svg"
-  external?: boolean; // force external if needed
-};
-
 export type SiteConfig = {
   title: string;
   author: string;
   description: string;
-  siteUrl: string;    // normalized, no trailing slash
+  siteUrl: string;
   socialLinks: SocialLink[];
   gaMeasurementId?: string | null;
   email: string;
   ogImage: string;
   twitterImage: string;
+  /** NEW: site-wide fallback avatar (MUST be a local /public path) */
+  authorImage: string;
 };
 
 const RAW = {
@@ -40,59 +35,11 @@ const RAW = {
   email: "info@abrahamoflondon.org",
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.webp",
-} satisfies Omit<SiteConfig, "siteUrl" | "socialLinks"> & {
+  /** NEW: make sure this file exists under /public */
+  authorImage: "/assets/images/profile/abraham-of-london.jpg",
+} satisfies Omit<SiteConfig,
+  "siteUrl" | "socialLinks"
+> & {
   siteUrl?: string;
   socialLinks: SocialLink[];
 };
-
-// ---------- helpers ----------
-function stripTrailingSlash(u: string) {
-  return u.replace(/\/+$/, "");
-}
-function ensureHttps(u: string) {
-  if (/^(mailto:|tel:|#)/i.test(u)) return u;
-  if (/^https?:\/\//i.test(u)) return u;
-  return `https://${u.replace(/^\/+/, "")}`;
-}
-function isHttp(u: string) {
-  return /^https?:\/\//i.test(u);
-}
-function normalizeSiteUrl(u?: string): string {
-  if (!u) return "";
-  return stripTrailingSlash(ensureHttps(u));
-}
-function normalizeLinks(arr: SocialLink[]): SocialLink[] {
-  return (arr || []).map((l) => {
-    const href = (l.href || "").trim();
-    const external = typeof l.external === "boolean" ? l.external : isHttp(href);
-    return {
-      href: external && isHttp(href) ? ensureHttps(href) : href,
-      label: l.label?.trim() || "Link",
-      icon: l.icon?.trim() || "/assets/images/social/linkedin.svg",
-      external,
-    };
-  });
-}
-
-// Absolute URL helper for meta tags / JSON-LD
-export function absUrl(path: string, siteUrl = CONFIG.siteUrl): string {
-  if (!path) return siteUrl;
-  if (/^https?:\/\//i.test(path)) return path;
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  return siteUrl ? new URL(normalized, siteUrl).toString() : normalized;
-}
-
-// ---------- final config ----------
-export const CONFIG: SiteConfig = Object.freeze({
-  title: RAW.title,
-  author: RAW.author,
-  description: RAW.description,
-  siteUrl: normalizeSiteUrl(RAW.siteUrl),
-  socialLinks: normalizeLinks(RAW.socialLinks),
-  gaMeasurementId: RAW.gaMeasurementId,
-  email: RAW.email,
-  ogImage: RAW.ogImage,
-  twitterImage: RAW.twitterImage,
-});
-
-export const siteConfig = CONFIG; // convenience alias
