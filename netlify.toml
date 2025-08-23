@@ -4,6 +4,7 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
+  # Keep canonical URL matching your Primary domain (you chose WWW)
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
@@ -13,3 +14,29 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# (Optional) you can also add the Netlify Emails plugin here if you prefer code-based config:
+# [[plugins]]
+#   package = "@netlify/plugin-emails"
+
+# --- Security headers ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000"
+
+# --- Performance caching (safe for Next.js static assets) ---
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# (Intentionally NO redirects for www <-> apex; Netlify handles this via Primary Domain)
