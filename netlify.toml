@@ -1,23 +1,11 @@
 [build]
   command = "npm run build"
-  # Netlify Next.js Runtime will publish from .next automatically
+  # Next.js Runtime will publish from .next automatically
 
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Must match your chosen primary domain (WWW)
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-
-[functions]
-  node_bundler = "esbuild"
-  external_node_modules = ["@netlify/functions", "@netlify/emails"][build]
-  command = "npm run build"
-  # Netlify Next.js Runtime will publish from .next automatically
-
-[build.environment]
-  NODE_VERSION = "20"
-  NEXT_TELEMETRY_DISABLED = "1"
-  # Must match your chosen primary domain (WWW)
+  # Must match your primary site domain
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
@@ -43,15 +31,14 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Optional: cache your own public assets if you’re not fingerprinting filenames.
-# If assets might change without renaming, keep this conservative (e.g., 7 days).
+# Optional: cache your own public assets if you fingerprint or accept short caching
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# --- Third-party domain redirects ONLY (host-conditional) ---
-# Ensure these domains are added as domain aliases to this site.
+# --- Host-conditional redirects for brand domains ---
+# Add these domains as aliases in Netlify first.
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -65,53 +52,3 @@
   status = 301
   force  = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
-
-  directory = "netlify/functions"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# --- Security headers ---
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=31536000"
-
-# --- Performance caching (safe for Next.js static assets) ---
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Third-party domain redirects ONLY (leave apex/www alone) ---
-[[redirects]]
-  from = "https://endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-  force  = true
-
-[[redirects]]
-  from = "https://www.endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-  force  = true
-
-[[redirects]]
-  from = "https://alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
-  force  = true
-
-[[redirects]]
-  from = "https://www.alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
-  force  = true
