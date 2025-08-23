@@ -17,17 +17,18 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Keep if you reference assets from the Netlify subdomain
     domains: ['abraham-of-london.netlify.app'],
   },
   experimental: {
     optimizePackageImports: ['framer-motion'],
   },
+  // IMPORTANT: no redirects() or middleware that rewrites hosts.
 };
 
 export default withBundleAnalyzer(mdxConfig(nextConfig));
