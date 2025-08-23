@@ -1,4 +1,13 @@
 // lib/siteConfig.ts
+
+// Define the SocialLink type here
+export type SocialLink = {
+  href: string;
+  label: string;
+  icon: string;
+  external?: boolean;
+};
+
 export type SiteConfig = {
   title: string;
   author: string;
@@ -43,3 +52,10 @@ export const siteConfig = {
   siteUrl?: string;
   socialLinks: SocialLink[];
 };
+
+/**
+ * Returns a full URL for the given path.
+ * @param path The path of the URL (e.g., '/about', '/blog/my-post')
+ */
+export const absUrl = (path: string) =>
+  `${siteConfig.siteUrl}${path.startsWith("/") ? "" : "/"}${path}`;
