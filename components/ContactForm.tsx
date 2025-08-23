@@ -32,14 +32,11 @@ export default function ContactForm() {
       const formEl = event.currentTarget;
       const formData = new FormData(formEl);
 
-      // Ensure Netlify receives the form name
       if (!formData.get("form-name")) formData.append("form-name", FORM_NAME);
 
-      // Build x-www-form-urlencoded body
       const body = new URLSearchParams();
       for (const [k, v] of formData.entries()) body.append(k, String(v));
 
-      // Post to "/" for reliable Netlify capture regardless of route
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -49,7 +46,6 @@ export default function ContactForm() {
       if (response.ok) {
         setFormStatus("success");
         formEl.reset();
-        // Auto-clear after a bit
         setTimeout(() => setFormStatus("idle"), 5000);
       } else {
         throw new Error(`HTTP ${response.status}`);
@@ -115,8 +111,7 @@ export default function ContactForm() {
           name={FORM_NAME}
           acceptCharset="UTF-8"
           data-netlify="true"
-          data-netlify-honeypot="bot-field"  // correct attribute
-          // data-netlify-recaptcha="true"    // ← optional: enable if you add the widget below
+          data-netlify-honeypot="bot-field"
           variants={formVariants}
           initial="hidden"
           animate="visible"
@@ -126,7 +121,18 @@ export default function ContactForm() {
           {/* Netlify needs these fields in the HTML at build time */}
           <input type="hidden" name="form-name" value={FORM_NAME} />
           <input type="hidden" name="subject" value="New contact form submission" />
-          <input type="hidden" name="bot-field" /> {/* honeypot */}
+
+          {/* Honeypot (visually hidden, still in DOM) */}
+          <div className="sr-only" aria-hidden="true">
+            <label htmlFor="bot-field">Do not fill this out</label>
+            <input
+              id="bot-field"
+              name="bot-field"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
           <motion.div variants={itemVariants}>
             <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-primary)]">
@@ -178,8 +184,7 @@ export default function ContactForm() {
             />
           </motion.div>
 
-          {/* Uncomment to enable Netlify reCAPTCHA v2 */}
-          {/* <div data-netlify-recaptcha="true" /> */}
+          {/* <div data-netlify-recaptcha="true" />  // optional */}
 
           <motion.div variants={itemVariants} className="text-center">
             <button
@@ -191,7 +196,6 @@ export default function ContactForm() {
             </button>
           </motion.div>
 
-          {/* ARIA live region for status updates */}
           <motion.p
             variants={itemVariants}
             role="status"
@@ -204,7 +208,6 @@ export default function ContactForm() {
             {formStatus === "error" && <span className="text-red-600">Failed to send message. Please try again.</span>}
           </motion.p>
 
-          {/* No-JS fallback hint */}
           <noscript>
             <p className="text-center text-sm text-[var(--color-on-primary)]/70">
               JavaScript is disabled. Submitting will use the standard form submission.
