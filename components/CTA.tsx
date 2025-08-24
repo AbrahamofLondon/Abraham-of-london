@@ -23,7 +23,7 @@ export default function CTA({ floatingOnMobile = true }: Props) {
   const Pill = (
     <div className="flex items-center gap-3">
       <a
-        href="tel:+442096225909"
+        href="tel:+442086225909"
         aria-label="Call"
         className="grid h-12 w-12 place-items-center rounded-full border border-black/10 bg-white text-emerald-700 shadow ring-1 ring-black/5"
       >
