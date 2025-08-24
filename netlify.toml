@@ -4,7 +4,29 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+
+  # Canonical base — use apex (you asked to avoid www)
+  NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
+
+  # --- Netlify Secrets Scanning: keep ON, tune false positives ---
+  # Leave scanning enabled. Only disable as a last resort.
+  SECRETS_SCAN_ENABLED = "true"
+
+  # Omit by *key name* — public IDs that are not secrets
+  SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL"
+
+  # Omit by *paths* — static assets / well-known / email templates
+  # (Add more only if they’re known-safe)
+  SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**"
+
+  # Safelist specific literal values that Smart Detection keeps flagging
+  # Your GA4 Measurement ID is public by design.
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
+
+  # Optional: if Smart Detection is still noisy, you can disable just that heuristic.
+  # SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+  # Absolute last resort (temporary only):
+  # SECRETS_SCAN_ENABLED = "false"
 
 [functions]
   node_bundler = "esbuild"
