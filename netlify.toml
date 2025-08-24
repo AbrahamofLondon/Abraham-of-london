@@ -6,18 +6,21 @@
   # Keep scanning ON; we silence only legit noise.
   SECRETS_SCAN_ENABLED = "true"
 
-  # Ignore these *key names* appearing in code/bundles
+  # Ignore these *key names* wherever they appear in code/bundles.
+  # (They’re env vars, not repo literals.)
   SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
 
-  # Ignore packaged Functions where env names may surface in code
-  # (and where a bundler/plugin might inline stubs)
+  # Ignore packaged Functions (and internal handler) where scanners
+  # often see env names or bundler stubs and misfire.
   SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**"
 
-  # Safelist known public literals (add more only if truly public)
+  # Safelist *public* literals only (don’t put real secrets here).
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
 
-  # Optional: if heuristics still cry wolf, disable just smart detection
+  # If heuristics still complain (rare), disable only the heuristic layer:
   # SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+  # Absolute last resort (temporary only):
+  # SECRETS_SCAN_ENABLED = "false"
 
 [functions]
   node_bundler = "esbuild"
@@ -61,3 +64,8 @@
   status = 301
   force  = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+
+[[redirects]]
+  from = "/api/subscribe"
+  to   = "/.netlify/functions/subscribe"
+  status = 200
