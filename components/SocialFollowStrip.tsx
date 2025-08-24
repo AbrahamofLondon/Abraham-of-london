@@ -27,10 +27,12 @@ export default function SocialFollowStrip({ variant = "light" }: Props) {
       : "from-white/90 to-warmWhite/90 ring-deepCharcoal/10";
   const text = variant === "dark" ? "text-cream/85" : "text-deepCharcoal/80";
   const brand = variant === "dark" ? "text-cream" : "text-deepCharcoal";
+
+  // Removed gold; use solid brand fills.
   const btn =
     variant === "dark"
       ? "bg-white/10 text-cream ring-white/20 hover:bg-white/20"
-      : "bg-softGold text-deepCharcoal ring-deepCharcoal/20 hover:bg-forest hover:text-cream";
+      : "bg-deepCharcoal text-cream ring-deepCharcoal/20 hover:bg-forest hover:text-cream";
 
   return (
     <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
@@ -47,7 +49,6 @@ export default function SocialFollowStrip({ variant = "light" }: Props) {
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-3 py-2 shadow-lg ring-1 transition-all duration-300 ${btn}`}
                 >
-                  {/* SVG inherits currentColor so it works in light/dark */}
                   <Icon width={20} height={20} aria-hidden="true" />
                   <span className="text-sm font-serif">{label}</span>
                 </span>
