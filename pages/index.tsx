@@ -238,7 +238,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               author="Abraham of London"
               excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
               genre="Drama"
-              coverImage="/assets/images/books/fiction-adaptation.jpg"
+              coverImage="/assets/images/books/fathering-with-fear.jpg"
             />
           </div>
         </div>
