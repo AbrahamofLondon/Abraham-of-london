@@ -1,42 +1,37 @@
+# netlify.toml — cleaned & validated
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
 
-  # Keep scanning ON; we silence only legit noise.
+  # Secrets scanning: keep ON; silence legit noise only
   SECRETS_SCAN_ENABLED = "true"
-
-  # Ignore these *key names* wherever they appear in code/bundles.
-  # (They’re env vars, not repo literals.)
   SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
-
-  # Ignore packaged Functions (and internal handler) where scanners
-  # often see env names or bundler stubs and misfire.
   SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**"
-
-  # Safelist *public* literals only (don’t put real secrets here).
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
 
-  CI_LAX = "1" # lets CI ignore lint/type FAILS; local dev remains strict
-
-  # If heuristics still complain (rare), disable only the heuristic layer:
-  # SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
-  # Absolute last resort (temporary only):
-  # SECRETS_SCAN_ENABLED = "false"
+  # CI-only relaxation for lint/type errors (local stays strict)
+  CI_LAX = "1"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@netlify/functions", "@netlify/emails"]
   directory = "netlify/functions"
-  
-  node_bundler = "esbuild"
-  external_node_modules = ["@netlify/functions", "@netlify/emails", "resend"]
-  directory = "netlify/functions"
+  external_node_modules = [
+    "@netlify/functions",
+    "@netlify/emails",
+    "resend",
+    "@react-email/render"
+  ]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# --- Security headers ---
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -45,7 +40,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
-# --- Performance caching ---
+# Static asset caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -56,7 +51,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# --- Host-conditional redirects for brand domains ---
+# API rewrite
+[[redirects]]
+  from = "/api/subscribe"
+  to   = "/.netlify/functions/subscribe"
+  status = 200
+
+# Host-conditional brand redirects
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -70,8 +71,3 @@
   status = 301
   force  = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
-
-[[redirects]]
-  from = "/api/subscribe"
-  to   = "/.netlify/functions/subscribe"
-  status = 200
