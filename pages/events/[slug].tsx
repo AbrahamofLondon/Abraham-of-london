@@ -1,8 +1,10 @@
 // pages/events/[slug].tsx
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { getEventBySlug, getEventSlugs } from "@/lib/events";
-import type { EventMeta } from "@/types/events";
+// Correct the import path for server-side functions
+import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
+// Use the client-side file for types if needed, or import from the server file
+import type { EventMeta } from "@/lib/events"; // Or "@/lib/server/events-data"
 
 // A typical event page component
 // Now accepts 'contentSource' as a separate prop

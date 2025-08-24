@@ -9,7 +9,7 @@ import BlogPostCard from "@/components/BlogPostCard";
 import EventCard from "@/components/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
-import { getAllEvents } from "@/lib/events";
+import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events"; // Already exists
 import { motion } from "framer-motion";
