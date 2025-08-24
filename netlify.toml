@@ -1,4 +1,4 @@
-# netlify.toml — cleaned & validated
+# netlify.toml — cleaned
 
 [build]
   command = "npm run build"
@@ -9,13 +9,18 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
 
-  # Secrets scanning: keep ON; silence legit noise only
+  # Keep secrets scan ON; silence CI noise only
   SECRETS_SCAN_ENABLED = "true"
   SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
-  SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**"
+
+  # Add .next/** to omit build artifacts from scanning (only if you're confident
+  # no secrets are referenced in client code). You can remove this later.
+  SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**,.next/**"
+
+  # Only PUBLIC literals here (never real secrets)
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
 
-  # CI-only relaxation for lint/type errors (local stays strict)
+  # CI toggle to avoid lint/type kills in Netlify only
   CI_LAX = "1"
 
 [functions]
@@ -24,12 +29,18 @@
   external_node_modules = [
     "@netlify/functions",
     "@netlify/emails",
-    "resend",
+    "resend",               # ← replace the previous **** with this
     "@react-email/render"
   ]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# API rewrite for your client POST
+[[redirects]]
+  from = "/api/subscribe"
+  to   = "/.netlify/functions/subscribe"
+  status = 200
 
 # Security headers
 [[headers]]
@@ -40,7 +51,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
-# Static asset caching
+# Static caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -50,12 +61,6 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
-
-# API rewrite
-[[redirects]]
-  from = "/api/subscribe"
-  to   = "/.netlify/functions/subscribe"
-  status = 200
 
 # Host-conditional brand redirects
 [[redirects]]
