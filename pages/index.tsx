@@ -11,7 +11,7 @@ import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
-import type { EventMeta } from "@/types/events"; // Already exists
+import type { EventMeta } from "@/types/events";
 import { motion } from "framer-motion";
 import { parseISO, isValid, format } from "date-fns";
 
@@ -233,14 +233,14 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               coverImage="/assets/images/books/fathering-without-fear.jpg"
             />
             <BookCard
-            slug="the-fiction-adaptation"
-            title="The Fiction Adaptation"
-            author="Abraham of London"
-            excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
-            genre="Drama"
-            // Correct the image path here
-            coverImage="/assets/images/books/fathering-with-fear.jpg" 
-            />  
+              slug="the-fiction-adaptation"
+              title="The Fiction Adaptation"
+              author="Abraham of London"
+              excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
+              genre="Drama"
+              coverImage="/assets/images/books/fathering-with-fear.jpg"
+            />
+          </div>
         </div>
       </section>
 
