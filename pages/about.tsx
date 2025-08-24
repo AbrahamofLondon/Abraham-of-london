@@ -17,12 +17,12 @@ export default function AboutPage() {
     {
       title: "Founded Abraham of London",
       description: "A practice for principled strategy, writing, and stewardship.",
-      year: 2024,
+      year: 2020,
     },
     {
       title: "Launched Alomarada",
       description: "Advisory for investors & entrepreneurs developing African markets.",
-      year: 2025,
+      year: 2018,
     },
   ];
 
