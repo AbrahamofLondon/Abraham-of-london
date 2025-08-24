@@ -224,13 +224,12 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <BookCard
-              slug="fathering-without-fear"
-              title="Fathering Without Fear"
-              author="Abraham of London"
-              excerpt="A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure."
-              genre="Memoir"
-              featured
-              coverImage="/assets/images/books/fathering-without-fear.jpg"
+             slug="the-fiction-adaptation"
+             title="The Fiction Adaptation"
+             author="Abraham of London"
+             excerpt="A dramatised reimagining of lived experience, conviction—raw, luminous, and cinematic."
+             genre="Drama"
+             coverImage="/assets/images/books/the-fiction-adaptation.jpg"
             />
             <BookCard
               slug="the-fiction-adaptation"
