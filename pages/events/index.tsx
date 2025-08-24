@@ -1,14 +1,15 @@
 // pages/events/index.tsx
-import * as React from "react";
 import Head from "next/head";
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { getAllEvents, isUpcoming } from "@/lib/events";
-import type { EventMeta } from "@/lib/events";
+import { getAllEvents } from "@/lib/server/events-data";
+import type { EventMeta } from "@/lib/events"; 
 import { formatDate } from "@/lib/date";
 import clsx from "clsx";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 type Props = { events: EventMeta[] };
 
@@ -40,7 +41,6 @@ const Chip = ({ label, active, onClick }: { label: string; active?: boolean; onC
 export default function EventsIndex({ events }: Props) {
   const router = useRouter();
 
-  // URL state
   const { q = "", when = "upcoming", sort = "soonest", loc = "" } = router.query as {
     q?: string;
     when?: "all" | "upcoming" | "past";
@@ -48,28 +48,17 @@ export default function EventsIndex({ events }: Props) {
     loc?: string;
   };
 
-  const [search, setSearch] = React.useState(q);
-  const [locationQuery, setLocationQuery] = React.useState(loc);
-
-  React.useEffect(() => {
-    setSearch(q);
-    setLocationQuery(loc);
-  }, [q, loc]);
-
   const filteredEvents = React.useMemo(() => {
     let list = events.slice();
 
-    // When filter
     if (when === "upcoming") list = list.filter((e) => isUpcoming(e.date));
     else if (when === "past") list = list.filter((e) => !isUpcoming(e.date));
 
-    // Location filter
     if (loc.trim()) {
       const needle = normalize(loc);
       list = list.filter((e) => normalize(e.location || "").includes(needle));
     }
 
-    // Search filter
     if (q.trim()) {
       const needle = normalize(q);
       list = list.filter((e) =>
@@ -77,7 +66,6 @@ export default function EventsIndex({ events }: Props) {
       );
     }
 
-    // Sort
     list.sort((a, b) => {
       const dateA = new Date(a.date).valueOf();
       const dateB = new Date(b.date).valueOf();
@@ -97,12 +85,19 @@ export default function EventsIndex({ events }: Props) {
     else next.delete(key);
     router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, { shallow: true });
   };
-
-  const handleSearch = () => setParam("q", search.trim() || undefined);
-  const handleLocationFilter = () => setParam("loc", locationQuery.trim() || undefined);
+  
+  // This is the missing declaration
   const handleReset = () => router.replace("/events", undefined, { shallow: true });
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setParam("q", e.target.value.trim() || undefined);
+  };
+  
+  const debouncedSearchChange = useDebounce(handleSearchChange, 300);
+
+  // This is the missing declaration
   const title = "Events | Abraham of London";
+
 
   return (
     <Layout pageTitle="Events">
@@ -124,12 +119,11 @@ export default function EventsIndex({ events }: Props) {
               {q ? (
                 <>
                   <li aria-hidden="true">/</li>
-                <li className="text-deepCharcoal/60">“{q}”</li>
+                  <li className="text-deepCharcoal/60">“{q}”</li>
                 </>
               ) : null}
             </ol>
           </nav>
-
           <div className="flex items-center gap-2">
             <Chip label={`All (${totalCount})`} active={when === "all"} onClick={() => setParam("when", "all")} />
             <Chip label={`Upcoming (${upcomingCount})`} active={when === "upcoming"} onClick={() => setParam("when", "upcoming")} />
@@ -145,26 +139,17 @@ export default function EventsIndex({ events }: Props) {
               <input
                 aria-label="Search events"
                 placeholder="Search title, description, location…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onChange={debouncedSearchChange}
+                defaultValue={q}
                 className="w-full md:w-80 rounded-lg border border-lightGrey px-3 py-2 text-sm"
               />
-              <button
-                onClick={handleSearch}
-                className="rounded-lg border border-forest/20 bg-forest px-3 py-2 text-sm font-semibold text-cream hover:bg-forest/90"
-              >
-                Search
-              </button>
             </div>
-
             <div className="flex gap-2">
               <input
                 aria-label="Filter by location"
                 placeholder="Filter by location"
-                value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLocationFilter()}
+                onChange={(e) => setParam("loc", e.target.value.trim() || undefined)}
+                defaultValue={loc}
                 className="w-full md:w-56 rounded-lg border border-lightGrey px-3 py-2 text-sm"
               />
               <select
@@ -200,7 +185,6 @@ export default function EventsIndex({ events }: Props) {
               {filteredEvents.map((ev) => (
                 <li key={ev.slug}>
                   <article className="group h-full overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/10 transition hover:shadow-lg">
-                    {/* optional hero image */}
                     {ev.heroImage ? (
                       <div className="relative aspect-[16/9] w-full">
                         <Image
@@ -212,7 +196,6 @@ export default function EventsIndex({ events }: Props) {
                         />
                       </div>
                     ) : null}
-
                     <div className="p-5">
                       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
                         <time
@@ -230,7 +213,6 @@ export default function EventsIndex({ events }: Props) {
                           </>
                         ) : null}
                       </div>
-
                       <h3 className="text-lg font-semibold leading-snug text-gray-900">
                         <Link
                           href={`/events/${ev.slug}`}
@@ -239,13 +221,11 @@ export default function EventsIndex({ events }: Props) {
                           {ev.title}
                         </Link>
                       </h3>
-
                       {ev.summary && (
                         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700">
                           {ev.summary}
                         </p>
                       )}
-
                       <div className="mt-4">
                         <Link
                           href={`/events/${ev.slug}`}
@@ -276,7 +256,6 @@ export default function EventsIndex({ events }: Props) {
 
 // SSG
 export async function getStaticProps() {
-  // Ask for the fields we render
   const events = getAllEvents([
     "slug",
     "title",

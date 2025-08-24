@@ -1,5 +1,4 @@
-// pages/_app.js
-
+// pages/_app.tsx
 "use client";
 
 import type { AppProps, NextWebVitalsMetric } from "next/app";
@@ -11,8 +10,14 @@ import { pageview, gaEnabled, gaEvent } from "@/lib/gtag";
 import { sans, serif, cursive } from "@/lib/fonts";
 import "@/styles/globals.css";
 
-// Separate component to handle theme-dependent logic
-const ThemeWrapper = ({ Component, pageProps }: AppProps) => {
+// The corrected type for ThemeWrapper. 
+// It should not be AppProps because it doesn't receive the router.
+type ThemeWrapperProps = {
+  Component: AppProps["Component"];
+  pageProps: AppProps["pageProps"];
+};
+
+const ThemeWrapper = ({ Component, pageProps }: ThemeWrapperProps) => {
   const router = useRouter();
   const { theme, toggle } = useTheme();
 
@@ -20,9 +25,7 @@ const ThemeWrapper = ({ Component, pageProps }: AppProps) => {
     if (!gaEnabled || process.env.NODE_ENV !== "production") return;
 
     const handleRouteChange = (url: string) => pageview(url);
-
     pageview(router.asPath);
-
     router.events.on("routeChangeComplete", handleRouteChange);
     router.events.on("hashChangeComplete", handleRouteChange);
 
@@ -30,7 +33,7 @@ const ThemeWrapper = ({ Component, pageProps }: AppProps) => {
       router.events.off("routeChangeComplete", handleRouteChange);
       router.events.off("hashChangeComplete", handleRouteChange);
     };
-  }, [router, router.events]);
+  }, [router]);
 
   return (
     <>
@@ -45,7 +48,6 @@ const ThemeWrapper = ({ Component, pageProps }: AppProps) => {
   );
 };
 
-// Avoid SSR for this UI-only component
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), {
   ssr: false,
 });
@@ -64,10 +66,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
 
-  const value =
-    metric.name === "CLS"
-      ? Math.round(metric.value * 1000)
-      : Math.round(metric.value);
+  const value = metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
 
   try {
     gaEvent("web-vital", {
