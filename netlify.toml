@@ -1,4 +1,4 @@
-# netlify.toml — cleaned
+# netlify.toml — cleaned and consolidated
 
 [build]
   command = "npm run build"
@@ -7,22 +7,13 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
+  # Keep canonical URL matching your Primary domain (you chose WWW)
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
-[build.environment]
+  # Secrets scan settings
   SECRETS_SCAN_ENABLED = "true"
   SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
   SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**,.next/**,**/*.env.example,.github/**"
-
-  # Keep secrets scan ON; silence CI noise only
-  SECRETS_SCAN_ENABLED = "true"
-  SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
-
-  # Add .next/** to omit build artifacts from scanning (only if you're confident
-  # no secrets are referenced in client code). You can remove this later.
-  SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**,.next/**"
-
-  # Only PUBLIC literals here (never real secrets)
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
 
   # CI toggle to avoid lint/type kills in Netlify only
@@ -30,7 +21,6 @@
 
 [functions]
   node_bundler = "esbuild"
- node_bundler = "esbuild"
   directory = "netlify/functions"
   external_node_modules = [
     "@netlify/functions",
