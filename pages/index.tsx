@@ -224,12 +224,13 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <BookCard
-             slug="the-fiction-adaptation"
-             title="The Fiction Adaptation"
-             author="Abraham of London"
-             excerpt="A dramatised reimagining of lived experience, conviction—raw, luminous, and cinematic."
-             genre="Drama"
-             coverImage="/assets/images/books/the-fiction-adaptation.jpg"
+              slug="fathering-without-fear"
+              title="Fathering Without Fear"
+              author="Abraham of London"
+              excerpt="A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure."
+              genre="Memoir"
+              featured
+              coverImage="/assets/images/fathering-without-fear.jpg" // Corrected path
             />
             <BookCard
               slug="the-fiction-adaptation"
@@ -237,7 +238,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               author="Abraham of London"
               excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
               genre="Drama"
-              coverImage="/assets/images/books/fathering-with-fear.jpg"
+              coverImage="/assets/images/the-fiction-adaptation.jpg" // Corrected path
             />
           </div>
         </div>
