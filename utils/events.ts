@@ -15,10 +15,10 @@ function normTitle(s: string): string {
 
 /**
  * Dedupe by (normalized title + same calendar day in London).
- * Preference order inside a group:
+ * Preference order:
  *   1) Non-midnight wins over midnight.
- *   2) If both non-midnight, the earlier time wins.
- *   3) If both midnight, keep the first one.
+ *   2) If both non-midnight, the earlier local time wins.
+ *   3) If both midnight, keep the first.
  */
 export function dedupeEventsByTitleAndDay<T extends EventLite>(
   items: T[],
@@ -29,40 +29,36 @@ export function dedupeEventsByTitleAndDay<T extends EventLite>(
   for (const ev of items) {
     if (!ev?.title || !ev?.date) continue;
     const key = `${normTitle(ev.title)}|${dayKey(ev.date, tz)}`;
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, ev);
-      continue;
-    }
+    if (!key.endsWith("|")) {
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, ev);
+      } else {
+        const aMid = isMidnightLocal(existing.date, tz);
+        const bMid = isMidnightLocal(ev.date, tz);
 
-    const aMid = isMidnightLocal(existing.date, tz);
-    const bMid = isMidnightLocal(ev.date, tz);
-
-    if (aMid && !bMid) {
-      map.set(key, ev);
-      continue;
+        if (aMid && !bMid) {
+          map.set(key, ev);
+        } else if (!aMid && !bMid) {
+          // both non-midnight → earlier time wins
+          const aMin = localMinutes(existing.date, tz);
+          const bMin = localMinutes(ev.date, tz);
+          if (bMin < aMin) map.set(key, ev);
+        }
+        // else keep existing
+      }
     }
-    if (!aMid && bMid) {
-      continue; // keep existing (better)
-    }
-
-    // both non-midnight → pick earlier local time
-    if (!aMid && !bMid) {
-      const aMin = localMinutes(existing.date, tz);
-      const bMin = localMinutes(ev.date, tz);
-      if (bMin < aMin) map.set(key, ev);
-      continue;
-    }
-    // both midnight → keep first (no-op)
   }
 
-  // Also remove exact slug duplicates across different days (safety)
+  // Also remove exact slug duplicates across different groups
   const seenSlugs = new Set<string>();
   const out: T[] = [];
-  for (const ev of map.values()) {
-    if (seenSlugs.has(ev.slug)) continue;
+  // ✅ Avoid downlevel iteration issue
+  Array.from(map.values()).forEach((ev) => {
+    if (seenSlugs.has(ev.slug)) return;
     seenSlugs.add(ev.slug);
     out.push(ev);
-  }
+  });
+
   return out;
 }
