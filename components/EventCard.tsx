@@ -10,43 +10,72 @@ type Props = {
   description?: string | null;
   className?: string;
   prefetch?: boolean;
-  timeZone?: string;         // for date-times (defaults to 'UTC')
+  timeZone?: string;         // for date-times (defaults to 'Europe/London')
 };
 
-function formatNiceDate(date: string, tz = "UTC") {
-  // If it's date-only (YYYY-MM-DD), show it as that day in UTC to avoid TZ drift.
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-  if (m) {
-    const [_, y, mo, d] = m;
-    const dt = new Date(Date.UTC(+y, +mo - 1, +d));
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      timeZone: "UTC",
-    }).format(dt);
-  }
-
-  // Otherwise, try to format the full ISO string in a chosen TZ.
-  const dt = new Date(date);
-  if (!isNaN(dt.valueOf())) {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: tz || "UTC",
-    }).format(dt);
-  }
-
-  // Fallback to the raw string if parsing fails
-  return date;
+// ---- Helpers ----
+function isDateOnly(isoish: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(isoish);
 }
 
-function toMachineDate(date: string) {
-  // Ensure <time dateTime> is valid ISO—append midnight Z for date-only.
-  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${date}T00:00:00Z` : date;
+function isValidDate(d: Date) {
+  return !Number.isNaN(d.valueOf());
+}
+
+function getLocalHM(dt: Date, tz: string): { hh: number; mm: number } {
+  const hh = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt)
+  );
+  const mm = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt)
+  );
+  return { hh, mm };
+}
+
+function formatNiceDate(iso: string, tz = "Europe/London") {
+  // If it's date-only (YYYY-MM-DD), render the calendar day only
+  if (isDateOnly(iso)) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d)); // stable UTC so no drift
+    if (!isValidDate(dt)) return iso;
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(dt);
+  }
+
+  // Otherwise, treat as full ISO and format in target TZ
+  const dt = new Date(iso);
+  if (!isValidDate(dt)) return iso;
+
+  const dateStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(dt);
+
+  const { hh, mm } = getLocalHM(dt, tz);
+
+  // Suppress midnight times (00:00 local)
+  if (hh === 0 && mm === 0) return dateStr;
+
+  const timeStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(dt);
+
+  return `${dateStr}, ${timeStr}`;
+}
+
+function toMachineDate(iso: string) {
+  // For <time dateTime>, both "YYYY-MM-DD" and full ISO are valid.
+  // Keep date-only as-is (cleaner microdata), otherwise return original.
+  return isDateOnly(iso) ? iso : iso;
 }
 
 export default function EventCard({
@@ -57,12 +86,11 @@ export default function EventCard({
   description,
   className,
   prefetch = false,
-  timeZone = "UTC",
+  timeZone = "Europe/London",
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
-  const iso = toMachineDate(date);
+  const machine = toMachineDate(date);
   const hasLocation = Boolean(location && location.trim());
-
   const titleId = React.useId();
 
   return (
@@ -77,7 +105,7 @@ export default function EventCard({
     >
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
         <time
-          dateTime={iso}
+          dateTime={machine}
           className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
           itemProp="startDate"
         >
@@ -123,7 +151,7 @@ export default function EventCard({
         </Link>
       </div>
 
-      {/* Optional hidden canonical URL if you have one */}
+      {/* Optional canonical URL for microdata */}
       <meta itemProp="url" content={`/events/${slug}`} />
     </article>
   );

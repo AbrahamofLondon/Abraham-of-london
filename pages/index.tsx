@@ -13,7 +13,8 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events";
 import { motion } from "framer-motion";
-import { parseISO, isValid, format } from "date-fns";
+import { parseISO, isValid } from "date-fns";
+import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 // Hero media (play only first 5s via media fragment; lighter parse with preload="metadata")
 const HERO = {
@@ -165,9 +166,9 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href={blogHref}
               className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
-              aria-label={`View insights (${postsCount})`}
+              aria-label={`View insights (${posts.length})`}
             >
-              Insights <span className="ml-1 text-deepCharcoal/60">({postsCount})</span>
+              Insights <span className="ml-1 text-deepCharcoal/60">({posts.length})</span>
             </Link>
           </div>
         </div>
@@ -189,7 +190,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </header>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredPosts.map((post) => (
+            {posts.slice(0, 3).map((post) => (
               <BlogPostCard
                 key={post.slug}
                 slug={post.slug}
@@ -435,20 +436,35 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Build events teaser (typed) – only upcoming, limit 3
+  // Build events teaser (typed) – upcoming only, **deduped**, **sorted**, then limit 3
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary"]);
-  const eventsTeaser = rawEvents
-    .filter((e): e is Required<Pick<EventMeta, "slug" | "title" | "date" | "location">> & Partial<EventMeta> =>
-      Boolean(e.slug && e.title && e.date && e.location) && isUpcoming(String(e.date)),
-    )
-    .slice(0, 3)
-    .map((e) => ({
-      slug: String(e.slug),
-      title: String(e.title),
-      date: String(e.date),
-      location: String(e.location),
-      description: e.summary ?? null,
-    }));
+
+  const deduped = dedupeEventsByTitleAndDay(
+    rawEvents
+      .filter((e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
+        Boolean(e?.slug && e?.title && e?.date)
+      )
+      // keep location/summary nullable but present
+      .map((e) => ({
+        slug: String(e.slug),
+        title: String(e.title),
+        date: String(e.date),
+        location: e.location ?? null,
+        summary: e.summary ?? null,
+      }))
+  );
+
+  const upcomingSorted = deduped
+    .filter((e) => isUpcoming(e.date))
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
+
+  const eventsTeaser = upcomingSorted.slice(0, 3).map((e) => ({
+    slug: e.slug,
+    title: e.title,
+    date: e.date,
+    location: e.location ?? null,
+    description: e.summary ?? null,
+  }));
 
   return { props: { posts: safePosts, booksCount, eventsTeaser } };
 }
