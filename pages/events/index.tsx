@@ -1,34 +1,24 @@
+// pages/events/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { getAllEvents } from "@/lib/events";
-import type { EventMeta } from "@/types/events";
+import { getAllEvents, isUpcoming } from "@/lib/events";
+import type { EventMeta } from "@/lib/events";
+import { formatDate } from "@/lib/date";
 import clsx from "clsx";
 
 type Props = { events: EventMeta[] };
 
 // ---- Helpers ---------------------------------------------------
-function isUpcoming(d: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize today's date
-  const date = new Date(d);
-  return date >= today;
-}
-
-const formatPretty = (d: string) => {
-  const date = new Date(d);
-  return Number.isNaN(date.valueOf())
-    ? d
-    : date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-};
-
 const normalize = (s: string = "") => s.toLowerCase();
+const formatPretty = (d: string) =>
+  formatDate(d, {
+    timeZone: "Europe/London",
+    format: { day: "2-digit", month: "short", year: "numeric" },
+  });
 
 // ---- Components ------------------------------------------------
 const Chip = ({ label, active, onClick }: { label: string; active?: boolean; onClick: () => void }) => (
@@ -70,23 +60,20 @@ export default function EventsIndex({ events }: Props) {
     let list = events.slice();
 
     // When filter
-    if (when === "upcoming") {
-      list = list.filter((e) => isUpcoming(e.date));
-    } else if (when === "past") {
-      list = list.filter((e) => !isUpcoming(e.date));
-    }
+    if (when === "upcoming") list = list.filter((e) => isUpcoming(e.date));
+    else if (when === "past") list = list.filter((e) => !isUpcoming(e.date));
 
     // Location filter
     if (loc.trim()) {
       const needle = normalize(loc);
-      list = list.filter((e) => normalize(e.location).includes(needle));
+      list = list.filter((e) => normalize(e.location || "").includes(needle));
     }
 
     // Search filter
     if (q.trim()) {
       const needle = normalize(q);
       list = list.filter((e) =>
-        [e.title, e.summary || "", e.location].some((field) => normalize(field).includes(needle)),
+        [e.title, e.summary || "", e.location || ""].some((field) => normalize(field).includes(needle)),
       );
     }
 
@@ -106,14 +93,9 @@ export default function EventsIndex({ events }: Props) {
 
   const setParam = (key: string, value?: string) => {
     const next = new URLSearchParams(router.query as Record<string, string>);
-    if (value && value.length) {
-      next.set(key, value);
-    } else {
-      next.delete(key);
-    }
-    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
-      shallow: true,
-    });
+    if (value && value.length) next.set(key, value);
+    else next.delete(key);
+    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, { shallow: true });
   };
 
   const handleSearch = () => setParam("q", search.trim() || undefined);
@@ -135,16 +117,14 @@ export default function EventsIndex({ events }: Props) {
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="hover:text-deepCharcoal">
-                  Home
-                </Link>
+                <Link href="/" className="hover:text-deepCharcoal">Home</Link>
               </li>
               <li aria-hidden="true">/</li>
               <li className="text-deepCharcoal/80">Events</li>
               {q ? (
                 <>
                   <li aria-hidden="true">/</li>
-                  <li className="text-deepCharcoal/60">“{q}”</li>
+                <li className="text-deepCharcoal/60">“{q}”</li>
                 </>
               ) : null}
             </ol>
@@ -152,11 +132,7 @@ export default function EventsIndex({ events }: Props) {
 
           <div className="flex items-center gap-2">
             <Chip label={`All (${totalCount})`} active={when === "all"} onClick={() => setParam("when", "all")} />
-            <Chip
-              label={`Upcoming (${upcomingCount})`}
-              active={when === "upcoming"}
-              onClick={() => setParam("when", "upcoming")}
-            />
+            <Chip label={`Upcoming (${upcomingCount})`} active={when === "upcoming"} onClick={() => setParam("when", "upcoming")} />
             <Chip label={`Past (${pastCount})`} active={when === "past"} onClick={() => setParam("when", "past")} />
           </div>
         </div>
@@ -224,6 +200,19 @@ export default function EventsIndex({ events }: Props) {
               {filteredEvents.map((ev) => (
                 <li key={ev.slug}>
                   <article className="group h-full overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/10 transition hover:shadow-lg">
+                    {/* optional hero image */}
+                    {ev.heroImage ? (
+                      <div className="relative aspect-[16/9] w-full">
+                        <Image
+                          src={String(ev.heroImage)}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      </div>
+                    ) : null}
+
                     <div className="p-5">
                       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
                         <time
@@ -232,10 +221,14 @@ export default function EventsIndex({ events }: Props) {
                         >
                           {formatPretty(ev.date)}
                         </time>
-                        <span aria-hidden="true">·</span>
-                        <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80">
-                          {ev.location}
-                        </span>
+                        {ev.location ? (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80">
+                              {ev.location}
+                            </span>
+                          </>
+                        ) : null}
                       </div>
 
                       <h3 className="text-lg font-semibold leading-snug text-gray-900">
@@ -260,12 +253,7 @@ export default function EventsIndex({ events }: Props) {
                           aria-label={`Event details: ${ev.title}`}
                         >
                           Details
-                          <svg
-                            className="ml-2 h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                          >
+                          <svg className="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path
                               fillRule="evenodd"
                               d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
@@ -288,6 +276,18 @@ export default function EventsIndex({ events }: Props) {
 
 // SSG
 export async function getStaticProps() {
-  const events = getAllEvents();
+  // Ask for the fields we render
+  const events = getAllEvents([
+    "slug",
+    "title",
+    "date",
+    "location",
+    "summary",
+    "heroImage",
+    "ctaHref",
+    "ctaLabel",
+    "tags",
+  ]) as EventMeta[];
+
   return { props: { events }, revalidate: 60 };
 }

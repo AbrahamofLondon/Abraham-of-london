@@ -9,8 +9,8 @@ export interface EventMeta {
   date: string;          // ISO preferred
   location?: string;
   excerpt?: string;
-  summary?: string;      // used in pages/events/[slug].tsx
-  heroImage?: string;
+  summary?: string;
+  heroImage?: string;    // preferred image key
   ctaHref?: string;
   ctaLabel?: string;
   tags?: string[];
@@ -25,15 +25,13 @@ function normalizeDate(value: unknown): string | undefined {
   // allow "YYYY-MM-DD" or full ISO
   const d = new Date(value);
   if (!Number.isNaN(d.getTime())) return d.toISOString();
-  // try common no-time format
   const ts = Date.parse(value);
   return Number.isNaN(ts) ? undefined : new Date(ts).toISOString();
 }
 
 function normalizeTags(value: unknown): string[] | undefined {
   if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
-  if (typeof value === "string")
-    return value.split(",").map((s) => s.trim()).filter(Boolean);
+  if (typeof value === "string") return value.split(",").map((s) => s.trim()).filter(Boolean);
   return undefined;
 }
 
@@ -55,6 +53,19 @@ function resolveEventPath(slug: string): string | null {
 
 type FieldKey = keyof EventMeta | "content";
 
+// default fields you usually want
+const DEFAULT_FIELDS: FieldKey[] = [
+  "slug",
+  "title",
+  "date",
+  "location",
+  "summary",
+  "heroImage",
+  "ctaHref",
+  "ctaLabel",
+  "tags",
+];
+
 export function getEventBySlug(
   slug: string,
   fields: FieldKey[] = [],
@@ -63,7 +74,6 @@ export function getEventBySlug(
   const fullPath = resolveEventPath(realSlug);
 
   if (!fullPath) {
-    // minimal object if file not found
     const fallback: Partial<EventMeta> = {
       slug: realSlug,
       title: "Event Not Found",
@@ -77,9 +87,16 @@ export function getEventBySlug(
   const { data, content } = matter(file);
   const fm = (data || {}) as Record<string, unknown>;
 
+  // ---- alias coverImage → heroImage (so either key works) ----
+  if (typeof fm.coverImage === "string" && !fm.heroImage) {
+    fm.heroImage = fm.coverImage;
+  }
+
   const item: Partial<EventMeta> & { content?: string } = { slug: realSlug };
 
-  for (const field of fields) {
+  const wanted = fields.length ? fields : DEFAULT_FIELDS;
+
+  for (const field of wanted) {
     if (field === "content") {
       item.content = content;
       continue;
@@ -105,17 +122,23 @@ export function getEventBySlug(
   }
 
   // Ensure minimally required fields if selected
-  if (fields.includes("title") && !item.title) item.title = realSlug;
-  if (fields.includes("date") && !item.date) item.date = new Date().toISOString();
+  if (wanted.includes("title") && !item.title) item.title = realSlug;
+  if (wanted.includes("date") && !item.date) item.date = new Date().toISOString();
+
+  // light trim to avoid stray spaces
+  ["title","location","summary","heroImage","ctaHref","ctaLabel"].forEach((k) => {
+    const v = (item as any)[k];
+    if (typeof v === "string") (item as any)[k] = v.trim();
+  });
 
   return item;
 }
 
-export function getAllEvents(fields: FieldKey[] = []): Partial<EventMeta>[] {
+export function getAllEvents(fields: FieldKey[] = DEFAULT_FIELDS): Partial<EventMeta>[] {
   const slugs = getEventSlugs();
   const events = slugs.map((slug) => getEventBySlug(slug, fields));
 
-  // sort by date descending (newest first)
+  // sort by date DESC (newest first)
   events.sort((a, b) => {
     const da = a.date ? Date.parse(String(a.date)) : 0;
     const db = b.date ? Date.parse(String(b.date)) : 0;
@@ -130,7 +153,6 @@ export function isUpcoming(dateStr?: string): boolean {
   if (!dateStr) return false;
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return false;
-  // Compare from start of today
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   return d >= start;
@@ -143,17 +165,10 @@ export function prettyDate(dateStr?: string, locale = "en-GB"): string {
   return d.toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" });
 }
 
-/**
- * Upcoming events only, newest first, limited.
- * @example getUpcomingEvents(3, ["slug","title","date","location","summary"])
- */
-export function getUpcomingEvents(limit = 3, fields: FieldKey[] = []): Partial<EventMeta>[] {
+export function getUpcomingEvents(limit = 3, fields: FieldKey[] = DEFAULT_FIELDS): Partial<EventMeta>[] {
   return getAllEvents(fields).filter((e) => isUpcoming(String(e.date))).slice(0, limit);
 }
 
-/**
- * Convenience for homepage teaser (shape matches your Home page).
- */
 export function getEventsTeaser(limit = 3) {
   return getUpcomingEvents(limit, ["slug", "title", "date", "location", "summary"]).map((e) => ({
     slug: String(e.slug),
