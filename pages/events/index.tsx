@@ -3,98 +3,122 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { getAllEvents } from "@/lib/events"; // Removed 'type EventItem'
+import { getAllEvents } from "@/lib/events";
 import type { EventMeta } from "@/types/events";
+import clsx from "clsx";
 
 type Props = { events: EventMeta[] };
 
 // ---- Helpers ---------------------------------------------------
-function toISO(d: string) {
+function isUpcoming(d: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize today's date
   const date = new Date(d);
-  return Number.isNaN(date.valueOf()) ? "" : date.toISOString();
+  return date >= today;
 }
-function formatPretty(d: string) {
+
+const formatPretty = (d: string) => {
   const date = new Date(d);
   return Number.isNaN(date.valueOf())
     ? d
-    : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-}
-function normalize(s?: string) {
-  return (s || "").toLowerCase();
-}
-function isUpcoming(d: string) {
-  const today = new Date();
-  const date = new Date(d);
-  // treat today as upcoming
-  return date >= new Date(today.getFullYear(), today.getMonth(), today.getDate());
-}
+    : date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+};
 
-type SortKey = "soonest" | "latest";
-type WhenKey = "all" | "upcoming" | "past";
+const normalize = (s: string = "") => s.toLowerCase();
+
+// ---- Components ------------------------------------------------
+const Chip = ({ label, active, onClick }: { label: string; active?: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={clsx(
+      "rounded-full px-3 py-1 text-sm transition",
+      active
+        ? "bg-forest text-cream border border-forest"
+        : "bg-white text-deepCharcoal/80 border border-lightGrey hover:text-deepCharcoal",
+    )}
+  >
+    {label}
+  </button>
+);
 
 // ---- Page ------------------------------------------------------
 export default function EventsIndex({ events }: Props) {
   const router = useRouter();
 
   // URL state
-  const q = typeof router.query.q === "string" ? router.query.q : "";
-  const when = (router.query.when as WhenKey) || "upcoming"; // default to "upcoming"
-  const sort = (router.query.sort as SortKey) || "soonest";
-  const loc = typeof router.query.loc === "string" ? router.query.loc : "";
+  const { q = "", when = "upcoming", sort = "soonest", loc = "" } = router.query as {
+    q?: string;
+    when?: "all" | "upcoming" | "past";
+    sort?: "soonest" | "latest";
+    loc?: string;
+  };
 
-  // Derived
-  const filtered = React.useMemo(() => {
+  const [search, setSearch] = React.useState(q);
+  const [locationQuery, setLocationQuery] = React.useState(loc);
+
+  React.useEffect(() => {
+    setSearch(q);
+    setLocationQuery(loc);
+  }, [q, loc]);
+
+  const filteredEvents = React.useMemo(() => {
     let list = events.slice();
 
-    // when filter
-    if (when === "upcoming") list = list.filter((e) => isUpcoming(e.date));
-    else if (when === "past") list = list.filter((e) => !isUpcoming(e.date));
+    // When filter
+    if (when === "upcoming") {
+      list = list.filter((e) => isUpcoming(e.date));
+    } else if (when === "past") {
+      list = list.filter((e) => !isUpcoming(e.date));
+    }
 
-    // location filter (contains)
+    // Location filter
     if (loc.trim()) {
       const needle = normalize(loc);
       list = list.filter((e) => normalize(e.location).includes(needle));
     }
 
-    // free-text search across title + description + location
+    // Search filter
     if (q.trim()) {
-      const n = normalize(q);
+      const needle = normalize(q);
       list = list.filter((e) =>
-        [e.title, e.summary || "", e.location].some((f) => normalize(f).includes(n)),
+        [e.title, e.summary || "", e.location].some((field) => normalize(field).includes(needle)),
       );
     }
 
-    // sort
+    // Sort
     list.sort((a, b) => {
-      const da = new Date(a.date).valueOf();
-      const db = new Date(b.date).valueOf();
-      return sort === "soonest" ? da - db : db - da;
+      const dateA = new Date(a.date).valueOf();
+      const dateB = new Date(b.date).valueOf();
+      return sort === "soonest" ? dateA - dateB : dateB - dateA;
     });
 
     return list;
   }, [events, q, when, sort, loc]);
 
-  // counts for the header chips (computed from *all* events)
   const totalCount = events.length;
   const upcomingCount = events.filter((e) => isUpcoming(e.date)).length;
   const pastCount = totalCount - upcomingCount;
 
-  // Handlers -> update URL (shareable)
-  function setParam(key: string, value?: string) {
+  const setParam = (key: string, value?: string) => {
     const next = new URLSearchParams(router.query as Record<string, string>);
-    if (value && value.length) next.set(key, value);
-    else next.delete(key);
+    if (value && value.length) {
+      next.set(key, value);
+    } else {
+      next.delete(key);
+    }
     router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
       shallow: true,
     });
-  }
+  };
 
-  // controlled inputs backed by URL
-  const [search, setSearch] = React.useState(q);
-  const [locationQuery, setLocationQuery] = React.useState(loc);
-
-  React.useEffect(() => setSearch(q), [q]);
-  React.useEffect(() => setLocationQuery(loc), [loc]);
+  const handleSearch = () => setParam("q", search.trim() || undefined);
+  const handleLocationFilter = () => setParam("loc", locationQuery.trim() || undefined);
+  const handleReset = () => router.replace("/events", undefined, { shallow: true });
 
   const title = "Events | Abraham of London";
 
@@ -102,14 +126,10 @@ export default function EventsIndex({ events }: Props) {
     <Layout pageTitle="Events">
       <Head>
         <title>{title}</title>
-        <meta
-          name="description"
-          content="Talks, panels, workshops, and appearances from Abraham of London."
-        />
+        <meta name="description" content="Talks, panels, workshops, and appearances from Abraham of London." />
         <link rel="canonical" href="/events" />
       </Head>
 
-      {/* Page-header bar: breadcrumb + count */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
@@ -131,26 +151,17 @@ export default function EventsIndex({ events }: Props) {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Chip
-              label={`All (${totalCount})`}
-              active={when === "all"}
-              onClick={() => setParam("when", "all")}
-            />
+            <Chip label={`All (${totalCount})`} active={when === "all"} onClick={() => setParam("when", "all")} />
             <Chip
               label={`Upcoming (${upcomingCount})`}
               active={when === "upcoming"}
               onClick={() => setParam("when", "upcoming")}
             />
-            <Chip
-              label={`Past (${pastCount})`}
-              active={when === "past"}
-              onClick={() => setParam("when", "past")}
-            />
+            <Chip label={`Past (${pastCount})`} active={when === "past"} onClick={() => setParam("when", "past")} />
           </div>
         </div>
       </section>
 
-      {/* Controls */}
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -160,11 +171,11 @@ export default function EventsIndex({ events }: Props) {
                 placeholder="Search title, description, location…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && setParam("q", search.trim() || undefined)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="w-full md:w-80 rounded-lg border border-lightGrey px-3 py-2 text-sm"
               />
               <button
-                onClick={() => setParam("q", search.trim() || undefined)}
+                onClick={handleSearch}
                 className="rounded-lg border border-forest/20 bg-forest px-3 py-2 text-sm font-semibold text-cream hover:bg-forest/90"
               >
                 Search
@@ -177,9 +188,7 @@ export default function EventsIndex({ events }: Props) {
                 placeholder="Filter by location"
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && setParam("loc", locationQuery.trim() || undefined)
-                }
+                onKeyDown={(e) => e.key === "Enter" && handleLocationFilter()}
                 className="w-full md:w-56 rounded-lg border border-lightGrey px-3 py-2 text-sm"
               />
               <select
@@ -193,7 +202,7 @@ export default function EventsIndex({ events }: Props) {
               </select>
               {(q || loc || when !== "upcoming" || sort !== "soonest") && (
                 <button
-                  onClick={() => router.replace("/events", undefined, { shallow: true })}
+                  onClick={handleReset}
                   className="rounded-lg border border-lightGrey px-3 py-2 text-sm hover:bg-warmWhite"
                 >
                   Reset
@@ -204,22 +213,21 @@ export default function EventsIndex({ events }: Props) {
         </div>
       </section>
 
-      {/* Results */}
-      <section className="bg-white pb-16 pt-2">
+      <section className="bg-white pb-16 pt-2" aria-live="polite">
         <div className="mx-auto max-w-7xl px-4">
-          {filtered.length === 0 ? (
+          {filteredEvents.length === 0 ? (
             <div className="rounded-2xl border border-lightGrey bg-warmWhite px-4 py-10 text-center text-deepCharcoal/70">
               No events match your filters.
             </div>
           ) : (
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((ev) => (
+              {filteredEvents.map((ev) => (
                 <li key={ev.slug}>
                   <article className="group h-full overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/10 transition hover:shadow-lg">
                     <div className="p-5">
                       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
                         <time
-                          dateTime={toISO(ev.date)}
+                          dateTime={new Date(ev.date).toISOString()}
                           className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
                         >
                           {formatPretty(ev.date)}
@@ -275,32 +283,6 @@ export default function EventsIndex({ events }: Props) {
         </div>
       </section>
     </Layout>
-  );
-}
-
-// Small presentational chip
-function Chip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "rounded-full px-3 py-1 text-sm transition",
-        active
-          ? "bg-forest text-cream border border-forest"
-          : "bg-white text-deepCharcoal/80 border border-lightGrey hover:text-deepCharcoal",
-      ].join(" ")}
-    >
-      {label}
-    </button>
   );
 }
 
