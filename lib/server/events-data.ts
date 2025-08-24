@@ -1,6 +1,5 @@
 // lib/server/events-data.ts
 
-// Add the EventMeta interface here
 export interface EventMeta {
   slug: string;
   title: string;
@@ -44,7 +43,7 @@ function dayKey(iso: string, tz = LONDON_TZ): string {
 
 function isMidnightLocal(iso: string, tz = LONDON_TZ): boolean {
   if (!iso) return false;
-  if (isDateOnly(iso)) return true; // treat date-only as midnight (display suppressed elsewhere)
+  if (isDateOnly(iso)) return true; // treat date-only as midnight
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return false;
   const hh = Number(
@@ -162,7 +161,7 @@ export function getEventBySlug(
       continue;
     }
 
-    let raw = fm[field as string];
+    const raw = fm[field as string];
 
     if (field === "date") {
       const iso = normalizeDate(raw);
@@ -234,7 +233,8 @@ function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz 
   // Also guard against exact slug duplicates
   const seenSlugs = new Set<string>();
   const out: T[] = [];
-  for (const ev of map.values()) {
+  // ✅ Fix: iterate over an array copy to satisfy older TS targets
+  for (const ev of Array.from(map.values())) {
     const s = ev.slug || "";
     if (s && seenSlugs.has(s)) continue;
     if (s) seenSlugs.add(s);
