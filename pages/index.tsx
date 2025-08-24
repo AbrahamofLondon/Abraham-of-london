@@ -233,14 +233,14 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               coverImage="/assets/images/books/fathering-without-fear.jpg"
             />
             <BookCard
-              slug="the-fiction-adaptation"
-              title="The Fiction Adaptation"
-              author="Abraham of London"
-              excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
-              genre="Drama"
-              coverImage="/assets/images/books/fathering-with-fear.jpg"
-            />
-          </div>
+            slug="the-fiction-adaptation"
+            title="The Fiction Adaptation"
+            author="Abraham of London"
+            excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
+            genre="Drama"
+            // Correct the image path here
+            coverImage="/assets/images/books/fathering-with-fear.jpg" 
+            />  
         </div>
       </section>
 
