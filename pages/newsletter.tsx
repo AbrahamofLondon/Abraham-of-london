@@ -5,7 +5,7 @@ import Layout from "@/components/Layout";
 
 export default function NewsletterPage() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle"|"loading"|"ok"|"err">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const [msg, setMsg] = useState("");
 
   const submit = async (e: React.FormEvent) => {
@@ -37,7 +37,10 @@ export default function NewsletterPage() {
     <Layout pageTitle="Newsletter">
       <Head>
         <meta name="description" content="Subscribe to Abraham of London’s newsletter." />
-        <link rel="canonical" href={${process.env.NEXT_PUBLIC_SITE_URL || ""}/newsletter} />
+        <link
+          rel="canonical"
+          href={`${process.env.NEXT_PUBLIC_SITE_URL || ""}/newsletter`}
+        />
       </Head>
 
       <main className="container mx-auto max-w-xl px-4 py-16">
@@ -71,7 +74,8 @@ export default function NewsletterPage() {
         {msg && (
           <p
             role="status"
-            className={mt-4 text-sm ${status === "ok" ? "text-emerald-700" : "text-red-600"}}
+            aria-live="polite"
+            className={`mt-4 text-sm ${status === "ok" ? "text-emerald-700" : "text-red-600"}`}
           >
             {msg}
           </p>

@@ -34,18 +34,18 @@ export default function SocialFollowStrip({ variant = "light" }: Props) {
 
   return (
     <section className="mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12">
-      <div className={rounded-2xl bg-gradient-to-br ${surface} backdrop-blur-md ring-2 shadow-2xl}>
+      <div className={`rounded-2xl bg-gradient-to-br ${surface} backdrop-blur-md ring-2 shadow-2xl`}>
         <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p className={text-base sm:text-lg font-serif leading-relaxed ${text}}>
+          <p className={`text-base sm:text-lg font-serif leading-relaxed ${text}`}>
             Join the conversation — follow{" "}
-            <span className={font-semibold ${brand}}>Abraham of London</span>
+            <span className={`font-semibold ${brand}`}>Abraham of London</span>
           </p>
 
           <nav aria-label="Social links" className="flex flex-wrap items-center gap-3 sm:gap-4">
             {items.map(({ href, label, external, Icon }) => {
               const content = (
                 <span
-                  className={inline-flex items-center gap-2 rounded-full px-3 py-2 shadow-lg ring-1 transition-all duration-300 ${btn}}
+                  className={`inline-flex items-center gap-2 rounded-full px-3 py-2 shadow-lg ring-1 transition-all duration-300 ${btn}`}
                 >
                   {/* SVG inherits currentColor so it works in light/dark */}
                   <Icon width={20} height={20} aria-hidden="true" />
@@ -69,7 +69,13 @@ export default function SocialFollowStrip({ variant = "light" }: Props) {
                 );
               }
               return (
-                <Link key={href} href={href} aria-label={label} className="group inline-flex items-center" prefetch={false}>
+                <Link
+                  key={href}
+                  href={href}
+                  aria-label={label}
+                  className="group inline-flex items-center"
+                  prefetch={false}
+                >
                   {content}
                 </Link>
               );
