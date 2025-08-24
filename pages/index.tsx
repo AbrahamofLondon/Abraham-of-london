@@ -230,7 +230,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               excerpt="A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure."
               genre="Memoir"
               featured
-              coverImage="/assets/images/fathering-without-fear.jpg" // Corrected path
+              coverImage="/assets/images/fathering-without-fear-teaser.jpg"
             />
             <BookCard
               slug="the-fiction-adaptation"
@@ -238,7 +238,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               author="Abraham of London"
               excerpt="A dramatized reimagining of lived conviction—raw, luminous, and cinematic."
               genre="Drama"
-              coverImage="/assets/images/the-fiction-adaptation.jpg" // Corrected path
+              coverImage="/assets/images/fathering-without-fear.jpg"
             />
           </div>
         </div>
