@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
+import { siteConfig } from "@/lib/siteConfig";
 
 type HeaderProps = {
   /** Keep visual in sync with pages that run a darker shell */
@@ -24,7 +25,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
   React.useEffect(() => {
     // lock scroll when mobile menu is open
     document.documentElement.style.overflow = open ? "hidden" : "";
-    return () => { document.documentElement.style.overflow = ""; };
+    return () => {
+      document.documentElement.style.overflow = "";
+    };
   }, [open]);
 
   const isActive = (href: string) =>
@@ -40,8 +43,10 @@ export default function Header({ variant = "light" }: HeaderProps) {
       ? "text-cream/80 hover:text-cream"
       : "text-deepCharcoal/80 hover:text-deepCharcoal";
 
-  const underlineActive =
-    variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
+  const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
+
+  const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
+  const PHONE = (siteConfig as any)?.phone || ""; // render Call only if provided
 
   return (
     <motion.header
@@ -59,6 +64,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
           className={`text-2xl md:text-3xl font-serif font-bold ${
             variant === "dark" ? "text-cream" : "text-deepCharcoal"
           }`}
+          aria-label="Home"
         >
           Abraham of London
         </Link>
@@ -71,6 +77,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 <Link
                   href={item.href}
                   className={`text-sm font-medium transition-colors ${linkBase}`}
+                  aria-current={isActive(item.href) ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
@@ -85,11 +92,28 @@ export default function Header({ variant = "light" }: HeaderProps) {
             ))}
           </ul>
 
-          {/* CTA + Theme */}
+          {/* Actions: Email / Call / CTA / Theme */}
           <div className="flex items-center gap-3">
+            <a
+              href={`mailto:${EMAIL}`}
+              className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+              aria-label="Email Abraham"
+            >
+              Email
+            </a>
+            {PHONE && (
+              <a
+                href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+                aria-label="Call Abraham"
+              >
+                Call
+              </a>
+            )}
             <Link
               href="/contact"
               className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
+              aria-label="Go to contact form"
             >
               Enquire
             </Link>
@@ -148,11 +172,36 @@ export default function Header({ variant = "light" }: HeaderProps) {
                         ? "text-cream/80 hover:bg-white/10 hover:text-cream"
                         : "text-deepCharcoal/80 hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
+                  aria-current={isActive(item.href) ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
               </li>
             ))}
+            <li className="flex items-center gap-4 px-3 pt-3">
+              <a
+                href={`mailto:${EMAIL}`}
+                onClick={() => setOpen(false)}
+                className={`text-base underline-offset-4 hover:underline ${
+                  variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                }`}
+                aria-label="Email Abraham"
+              >
+                Email
+              </a>
+              {PHONE && (
+                <a
+                  href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                  onClick={() => setOpen(false)}
+                  className={`text-base underline-offset-4 hover:underline ${
+                    variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                  }`}
+                  aria-label="Call Abraham"
+                >
+                  Call
+                </a>
+              )}
+            </li>
             <li className="pt-2">
               <Link
                 href="/contact"

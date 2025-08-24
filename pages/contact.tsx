@@ -1,4 +1,3 @@
-// pages/contact.tsx
 import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -20,7 +19,7 @@ const abs = (path: string): string => {
   return SITE_URL ? new URL(path, SITE_URL).toString() : path;
 };
 
-// ---------- Animations ----------
+// London-first date/animation variants unchanged
 const containerVariants = {
   hidden: { opacity: 0, scale: 0.98 },
   visible: {
@@ -44,7 +43,6 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-// ---------- Page ----------
 export default function ContactPage() {
   const [formStatus, setFormStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -90,29 +88,38 @@ export default function ContactPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormStatus("submitting");
-
     try {
-      const formData = new FormData(event.currentTarget);
-      const data = new URLSearchParams();
-      data.append("form-name", "contact");
-      // Honeypot must be included in the payload too
-      if (formData.get("bot-field")) data.append("bot-field", String(formData.get("bot-field")));
+      const form = event.currentTarget;
+      const formData = new FormData(form);
 
-      for (const [key, value] of Array.from(formData.entries())) {
-        if (key !== "bot-field") data.append(key, String(value));
+      // Honeypot: if filled, quietly succeed
+      const honeypot = String(formData.get("bot-field") || "").trim();
+      if (honeypot) {
+        setFormStatus("success");
+        form.reset();
+        return;
       }
 
-      await fetch(event.currentTarget.action, {
+      const payload = {
+        name: String(formData.get("name") || ""),
+        email: String(formData.get("email") || ""),
+        subject: "Website contact",
+        message: String(formData.get("message") || ""),
+        "bot-field": "",
+      };
+
+      const r = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: data.toString(),
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
       });
 
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setFormStatus("success");
       setTimeout(() => setFormStatus("idle"), 5000);
-      event.currentTarget.reset();
-    } catch (error) {
-      console.error("Form submission failed:", error);
+      form.reset();
+    } catch (err) {
+      console.error("Form submission failed:", err);
       setFormStatus("error");
     }
   };
@@ -135,10 +142,16 @@ export default function ContactPage() {
           content="Reach out for collaborations, speaking engagements, and media opportunities."
         />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
-        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
+        <meta
+          property="og:image"
+          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
+        />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")} />
+        <meta
+          name="twitter:image"
+          content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")}
+        />
         {structuredData.map((schema, index) => (
           <script
             key={index}
@@ -158,6 +171,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 z-0 opacity-10">
           <div className="pattern-bg" />
         </div>
+
         {/* Decorative element (fixed path) */}
         <div className="absolute top-10 right-10 w-40 h-40 md:w-64 md:h-64 opacity-40 z-0">
           <Image
@@ -179,19 +193,14 @@ export default function ContactPage() {
           </p>
 
           <motion.form
-            action="/contact"
-            method="POST"
-            name="contact"
-            data-netlify="true"
-            data-netlify-honeypot="bot-field"
+            onSubmit={handleSubmit}
             variants={formVariants}
             initial="hidden"
             animate="visible"
             className="space-y-6 bg-white p-6 md:p-8 rounded-2xl shadow-xl"
-            onSubmit={handleSubmit}
+            aria-describedby="form-status"
+            noValidate
           >
-            {/* Required for Netlify forms */}
-            <input type="hidden" name="form-name" value="contact" />
             {/* Honeypot */}
             <p className="hidden">
               <label>
@@ -254,37 +263,30 @@ export default function ContactPage() {
               </button>
             </motion.div>
 
-            {formStatus === "success" && (
-              <motion.p
-                variants={itemVariants}
-                className="text-green-700 text-center font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                role="status"
-              >
-                Message sent successfully!
-              </motion.p>
-            )}
-            {formStatus === "error" && (
-              <motion.p
-                variants={itemVariants}
-                className="text-red-700 text-center font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                role="alert"
-              >
-                Failed to send message. Please try again.
-              </motion.p>
-            )}
+            <motion.p
+              id="form-status"
+              aria-live="polite"
+              variants={itemVariants}
+              className={`text-center font-medium ${
+                formStatus === "success"
+                  ? "text-green-700"
+                  : formStatus === "error"
+                  ? "text-red-700"
+                  : "text-transparent"
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
+              role={formStatus === "error" ? "alert" : "status"}
+            >
+              {formStatus === "success"
+                ? "Message sent successfully!"
+                : formStatus === "error"
+                ? "Failed to send message. Please try again."
+                : " "}
+            </motion.p>
           </motion.form>
         </section>
       </motion.main>
     </Layout>
   );
 }
-
-
-
-
-
-

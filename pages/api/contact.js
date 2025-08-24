@@ -1,5 +1,3 @@
-// pages/api/contact.js
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -7,7 +5,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = (req.body ?? {});
+    // Accept JSON or urlencoded
+    const body = req.body ?? {};
     const name = String(body.name || "").trim().slice(0, 100);
     const email = String(body.email || "").trim().toLowerCase();
     const subject = String(body.subject || "Website contact").trim().slice(0, 120);
@@ -61,7 +60,6 @@ export default async function handler(req, res) {
           <pre style="white-space:pre-wrap">${escapeHtml(message)}</pre>
         </div>`.trim();
 
-      // Build headers without ever logging them
       const headers = new Headers({ "Content-Type": "application/json" });
       headers.set("Authorization", `Bearer ${apiKey}`);
 
@@ -73,13 +71,11 @@ export default async function handler(req, res) {
           to,
           subject: `New contact: ${name || "Anonymous"}`,
           html,
-          // Resend supports reply_to (array or string). Use array to include name.
           reply_to: [{ email, name: name || email }],
         }),
       });
 
       if (!r.ok) {
-        // Don’t echo secrets; keep the message generic
         console.error("[contact] Resend send failed with status:", r.status);
         return res.status(502).json({ message: "Email provider error" });
       }
@@ -94,11 +90,13 @@ export default async function handler(req, res) {
 
 // Basic HTML escaping for email body
 function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[m]));
+  return String(str).replace(/[&<>"']/g, (m) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[m])
+  );
 }
