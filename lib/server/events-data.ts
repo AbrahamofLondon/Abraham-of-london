@@ -18,17 +18,67 @@ export interface EventMeta {
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { remark } from 'remark';
-import html from 'remark-html';
 
 const eventsDir = path.join(process.cwd(), "content", "events");
 const exts = [".mdx", ".md"] as const;
 
+const LONDON_TZ = "Europe/London";
+
+// ---------- helpers: dates / tz ----------
+function isDateOnly(s: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s);
+}
+
+function dayKey(iso: string, tz = LONDON_TZ): string {
+  if (!iso) return "";
+  if (isDateOnly(iso)) return iso; // already YYYY-MM-DD
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d); // YYYY-MM-DD
+}
+
+function isMidnightLocal(iso: string, tz = LONDON_TZ): boolean {
+  if (!iso) return false;
+  if (isDateOnly(iso)) return true; // treat date-only as midnight (display suppressed elsewhere)
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return false;
+  const hh = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(d)
+  );
+  const mm = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(d)
+  );
+  return hh === 0 && mm === 0;
+}
+
+function localMinutes(iso: string, tz = LONDON_TZ): number {
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return Number.POSITIVE_INFINITY;
+  const hh = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(d)
+  );
+  const mm = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(d)
+  );
+  return hh * 60 + mm;
+}
+
+// ---------- helpers: normalization ----------
 function normalizeDate(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const d = new Date(value);
+  const s = value.trim();
+  // Preserve date-only strings to avoid implicit midnight TZ churn
+  if (isDateOnly(s)) return s;
+
+  const d = new Date(s);
   if (!Number.isNaN(d.getTime())) return d.toISOString();
-  const ts = Date.parse(value);
+
+  const ts = Date.parse(s);
   return Number.isNaN(ts) ? undefined : new Date(ts).toISOString();
 }
 
@@ -38,6 +88,14 @@ function normalizeTags(value: unknown): string[] | undefined {
   return undefined;
 }
 
+function normTitle(s: unknown): string {
+  return String(s ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+// ---------- fs helpers ----------
 export function getEventSlugs(): string[] {
   if (!fs.existsSync(eventsDir)) return [];
   return fs
@@ -68,6 +126,7 @@ const DEFAULT_FIELDS: FieldKey[] = [
   "tags",
 ];
 
+// ---------- loader ----------
 export function getEventBySlug(
   slug: string,
   fields: FieldKey[] = [],
@@ -89,6 +148,7 @@ export function getEventBySlug(
   const { data, content } = matter(file);
   const fm = (data || {}) as Record<string, unknown>;
 
+  // Back-compat: coverImage -> heroImage
   if (typeof fm.coverImage === "string" && !fm.heroImage) {
     fm.heroImage = fm.coverImage;
   }
@@ -132,13 +192,71 @@ export function getEventBySlug(
   return item;
 }
 
+// ---------- dedupe logic (server-side hardening) ----------
+function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz = LONDON_TZ): T[] {
+  const map = new Map<string, T>();
+
+  for (const ev of items) {
+    const title = normTitle(ev?.title);
+    const date = ev?.date || "";
+    const dk = dayKey(date, tz);
+    if (!title || !dk) continue;
+
+    const key = `${title}|${dk}`;
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, ev);
+      continue;
+    }
+
+    // Prefer non-midnight over midnight
+    const aMid = isMidnightLocal(existing.date || "", tz);
+    const bMid = isMidnightLocal(date, tz);
+
+    if (aMid && !bMid) {
+      map.set(key, ev);
+      continue;
+    }
+    if (!aMid && bMid) {
+      continue; // keep existing
+    }
+
+    // If both non-midnight, keep the earlier local time
+    if (!aMid && !bMid) {
+      const aMin = localMinutes(existing.date || "", tz);
+      const bMin = localMinutes(date, tz);
+      if (bMin < aMin) map.set(key, ev);
+      continue;
+    }
+    // Both midnight → keep first
+  }
+
+  // Also guard against exact slug duplicates
+  const seenSlugs = new Set<string>();
+  const out: T[] = [];
+  for (const ev of map.values()) {
+    const s = ev.slug || "";
+    if (s && seenSlugs.has(s)) continue;
+    if (s) seenSlugs.add(s);
+    out.push(ev);
+  }
+  return out;
+}
+
+// ---------- list ----------
 export function getAllEvents(fields: FieldKey[] = DEFAULT_FIELDS): Partial<EventMeta>[] {
   const slugs = getEventSlugs();
   const events = slugs.map((slug) => getEventBySlug(slug, fields));
-  events.sort((a, b) => {
+
+  // Server-side dedupe so ALL consumers (homepage, /events, anywhere) are protected
+  const deduped = dedupeEventsByTitleAndDay(events);
+
+  // Sort newest first (keep existing behavior)
+  deduped.sort((a, b) => {
     const da = a.date ? Date.parse(String(a.date)) : 0;
     const db = b.date ? Date.parse(String(b.date)) : 0;
     return db - da;
   });
-  return events;
+
+  return deduped;
 }
