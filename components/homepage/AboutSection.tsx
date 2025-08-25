@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -9,6 +10,7 @@ export type Achievement = {
   title: string;
   description?: string;
   year: number;
+  href?: string; // ✅ optional deep link
 };
 
 type Props = {
@@ -98,7 +100,17 @@ export default function AboutSection({
                   />
                   <div>
                     <p className="font-semibold">
-                      {a.title}{" "}
+                      {a.href ? (
+                        <Link
+                          href={a.href}
+                          prefetch={false}
+                          className="underline decoration-softGold/40 underline-offset-4 hover:decoration-softGold"
+                        >
+                          {a.title}
+                        </Link>
+                      ) : (
+                        a.title
+                      )}{" "}
                       <time
                         className="text-sm text-forest/70"
                         dateTime={String(a.year)}
