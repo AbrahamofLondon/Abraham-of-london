@@ -28,7 +28,7 @@ export default function AboutPage() {
   ];
 
   // Normalize, strip tracking, and keep only http(s) for sameAs
-  const sameAsRaw = (siteConfig.socialLinks || []);
+  const sameAsRaw = siteConfig.socialLinks || [];
   const sameAsSanitized = sanitizeSocialLinks(sameAsRaw)
     .map((l) => l.href)
     .filter((href) => /^https?:\/\//i.test(href));
@@ -44,7 +44,7 @@ export default function AboutPage() {
 
   const pageTitle = `About | ${siteConfig.author}`;
   const pageDesc =
-    "About Abraham of London — strategy, fatherhood, and craftsmanship.";
+    "About Abraham of London — strategy, fatherhood, craftsmanship, and discreet counsel for leaders who prioritise signal over noise.";
 
   // JSON-LD
   const webPageSchema = {
@@ -118,10 +118,28 @@ export default function AboutPage() {
         priority
       />
 
+      {/* House standards — soft, discreet signal (no explicit naming) */}
+      <section className="container mx-auto max-w-6xl px-4">
+        <aside
+          className="mt-8 rounded-2xl border border-lightGrey bg-warmWhite p-5 text-sm text-deepCharcoal/80 shadow-card"
+          aria-label="House standards"
+        >
+          <h2 className="mb-2 font-serif text-lg font-semibold text-deepCharcoal">House Standards</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Use insights freely; attribution by permission.</li>
+            <li>Devices silent. No photos. No recordings.</li>
+            <li>Names and affiliations kept private.</li>
+          </ul>
+          <p className="mt-3 text-xs text-deepCharcoal/60">
+            Private rooms available for sensitive work.
+          </p>
+        </aside>
+      </section>
+
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Link
           href="/contact"
-          className="inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95"
+          className="mt-8 inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95"
           prefetch={false}
         >
           Work with me
