@@ -26,7 +26,7 @@ export default function AboutPage() {
       href: innovateHubUrl,
     },
     {
-      title: "Founded Endureluxe",
+      title: "Launched Endureluxe",
       description: "Essential goods and refined experiences—engineered to last, designed to serve.",
       year: 2024,
       href: "/ventures?brand=endureluxe",
