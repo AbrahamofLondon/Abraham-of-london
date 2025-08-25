@@ -1,9 +1,9 @@
 ﻿// next.config.mjs
 import createMDX from "@next/mdx";
-import withBundleAnalyzer from "@next/bundle-analyzer";
 import remarkGfm from "remark-gfm";
 
 const relax = process.env.CI_LAX === "1";
+const isAnalyze = process.env.ANALYZE === "true";
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
@@ -25,10 +25,18 @@ const baseConfig = {
       { protocol: "https", hostname: "www.abrahamoflondon.org" },
     ],
   },
-  // ❌ remove optimizePackageImports (it rewrites to unsupported deep imports)
-  // experimental: { optimizePackageImports: ["framer-motion"] },
+  // experimental: { optimizePackageImports: ["framer-motion"] }, // keep disabled
 };
 
-export default withBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
-  withMDX(baseConfig)
-);
+// Conditionally load analyzer only if requested
+let withAnalyzer = (cfg) => cfg;
+if (isAnalyze) {
+  try {
+    const mod = await import("@next/bundle-analyzer");
+    withAnalyzer = mod.default({ enabled: true });
+  } catch {
+    // Analyzer not installed – skip without failing CI
+  }
+}
+
+export default withAnalyzer(withMDX(baseConfig));
