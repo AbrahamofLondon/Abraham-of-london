@@ -36,7 +36,6 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  // allow either "slug" or a full path
   const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
 
   const initialSrc: string | StaticImageData =
@@ -56,7 +55,7 @@ export default function BookCard({
         className
       )}
     >
-      <Link href={detailHref} className="block relative w-full">
+      <Link href={detailHref} className="block relative w-full" prefetch={false}>
         {/* 2:3 book-cover ratio */}
         <div className="relative w-full aspect-[2/3]">
           <Image
@@ -80,6 +79,7 @@ export default function BookCard({
         <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
           <Link
             href={detailHref}
+            prefetch={false}
             className="underline decoration-softGold/0 underline-offset-[6px] transition hover:decoration-softGold/70"
           >
             {title}
@@ -95,6 +95,7 @@ export default function BookCard({
 
           <Link
             href={detailHref}
+            prefetch={false}
             className="ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-forest/90"
           >
             Learn more
