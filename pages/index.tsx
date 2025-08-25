@@ -72,11 +72,10 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <Head>
         <meta
           name="description"
-          content="Principled strategy for a legacy that endures. Books, insights, events, and ventures by Abraham of London."
+          content="Chatham rooms, principled strategy, and writing that prioritises signal over noise. By Abraham of London."
         />
         {/* Preload the hero poster for faster LCP */}
         <link rel="preload" as="image" href={HERO.poster} />
-        {/* Optional: social preview (kept minimal since Layout may add site-wide tags) */}
         <meta property="og:type" content="website" />
       </Head>
 
@@ -117,7 +116,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              Principled Strategy for a Legacy That Endures
+              Chatham Rooms. No Noise. Only Signal.
             </motion.h1>
 
             <motion.p
@@ -126,8 +125,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.15 }}
             >
-              I help leaders build with clarity, discipline, and standards that
-              endure—across family, enterprise, and society.
+              Private, off-the-record working sessions and principled strategy for leaders who build beyond the quarter—and beyond their lifetime.
             </motion.p>
 
             <motion.div
@@ -273,7 +271,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Upcoming Events
+              Upcoming Rooms
             </h2>
             <Link
               href="/events"
@@ -285,7 +283,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </header>
 
           {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
+            <p className="text-sm text-deepCharcoal/70">No upcoming rooms at the moment.</p>
           ) : (
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
@@ -323,8 +321,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
-                Strategy & capital—focused on durable businesses with moral
-                clarity and operational discipline.
+                Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
               </p>
             </Link>
 
@@ -340,8 +337,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
-                Essential goods and refined experiences—engineered to last,
-                designed to serve.
+                Essential goods and refined experiences—engineered to last, designed to serve.
               </p>
             </Link>
 
@@ -357,8 +353,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
-                Writing, counsel, and cultural work at the intersection of
-                family, enterprise, and society.
+                Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
               </p>
             </Link>
           </div>
@@ -376,32 +371,13 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              {
-                quote:
-                  "Clear thinking. Strong standards. Abraham brings both to the table.",
-                name: "E. K., Founder",
-              },
-              {
-                quote:
-                  "He positions problems with moral clarity—and then solves them.",
-                name: "M. A., Director",
-              },
-              {
-                quote:
-                  "No noise. Just the signal you need to make enduring decisions.",
-                name: "R. T., Investor",
-              },
+              { quote: "Clear thinking. Strong standards. Abraham brings both to the table.", name: "E. K., Founder" },
+              { quote: "He positions problems with moral clarity—and then solves them.", name: "M. A., Director" },
+              { quote: "No noise. Just the signal you need to make enduring decisions.", name: "R. T., Investor" },
             ].map((t) => (
-              <figure
-                key={t.name}
-                className="rounded-2xl border border-lightGrey bg-white p-6 shadow-card"
-              >
-                <blockquote className="text-sm leading-relaxed text-deepCharcoal/90">
-                  “{t.quote}”
-                </blockquote>
-                <figcaption className="mt-4 text-xs font-medium text-deepCharcoal/70">
-                  — {t.name}
-                </figcaption>
+              <figure key={t.name} className="rounded-2xl border border-lightGrey bg-white p-6 shadow-card">
+                <blockquote className="text-sm leading-relaxed text-deepCharcoal/90">“{t.quote}”</blockquote>
+                <figcaption className="mt-4 text-xs font-medium text-deepCharcoal/70">— {t.name}</figcaption>
               </figure>
             ))}
           </div>
@@ -426,8 +402,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             Build with Clarity. Lead with Standards. Leave a Legacy.
           </h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-cream/85">
-            Start a conversation that moves your family, your venture, and your
-            community forward.
+            Start a conversation that moves your family, your venture, and your community forward.
           </p>
           <div className="mt-8">
             <Link
@@ -470,8 +445,9 @@ export async function getStaticProps() {
 
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
-      .filter((e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
-        Boolean(e?.slug && e?.title && e?.date)
+      .filter(
+        (e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
+          Boolean(e?.slug && e?.title && e?.date)
       )
       .map((e) => ({
         slug: String(e.slug),
@@ -496,6 +472,6 @@ export async function getStaticProps() {
 
   return {
     props: { posts: safePosts, booksCount, eventsTeaser },
-    revalidate: 3600, // ✅ hourly ISR so events roll forward without redeploy
+    revalidate: 3600, // hourly ISR so events roll forward without redeploy
   };
 }

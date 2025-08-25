@@ -1,5 +1,3 @@
-# netlify.toml — focused & aggressive
-
 [build]
   command = "npm run build"
   publish = ".next"
@@ -30,6 +28,13 @@
   to   = "/.netlify/functions/subscribe"
   status = 200
 
+# Canonical host: redirect netlify.app to the main domain
+[[redirects]]
+  from = "https://abraham-of-london.netlify.app/*"
+  to   = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force = true
+
 # Brand domains → deep link (hard 301)
 [[redirects]]
   from = "https://endureluxe.com/*"
@@ -51,7 +56,7 @@
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
 
-# Security headers (align with next.config)
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]

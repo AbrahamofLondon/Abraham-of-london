@@ -1,4 +1,3 @@
-﻿// next.config.mjs
 import createMDX from "@next/mdx";
 import remarkGfm from "remark-gfm";
 
@@ -28,14 +27,14 @@ const baseConfig = {
   // experimental: { optimizePackageImports: ["framer-motion"] }, // keep disabled
 };
 
-// Conditionally load analyzer only if requested
+// Conditionally load analyzer only if requested (no hard crash if missing)
 let withAnalyzer = (cfg) => cfg;
 if (isAnalyze) {
   try {
-    const mod = await import("@next/bundle-analyzer");
-    withAnalyzer = mod.default({ enabled: true });
+    const { default: analyzer } = await import("@next/bundle-analyzer");
+    withAnalyzer = analyzer({ enabled: true });
   } catch {
-    // Analyzer not installed – skip without failing CI
+    // Analyzer not installed — skip without failing CI
   }
 }
 
