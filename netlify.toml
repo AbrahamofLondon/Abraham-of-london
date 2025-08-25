@@ -1,4 +1,4 @@
-# netlify.toml — cleaned and consolidated
+# netlify.toml — focused & aggressive
 
 [build]
   command = "npm run build"
@@ -6,17 +6,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NODE_ENV = "production"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Keep canonical URL matching your Primary domain (you chose WWW)
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-
-  # Secrets scan settings
-  SECRETS_SCAN_ENABLED = "true"
-  SECRETS_SCAN_OMIT_KEYS = "GA_TRACKING_ID,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,RESEND_WEBHOOK_SECRET,EMAIL_PROVIDER,CONTACT_PROVIDER"
-  SECRETS_SCAN_OMIT_PATHS = "public/assets/images/**,public/assets/icons/**,public/.well-known/**,emails/**,.netlify/functions/**,.netlify/functions-internal/**,netlify/functions/**,.next/**,**/*.env.example,.github/**"
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "G-R2Y3YMY8F8"
-
-  # CI toggle to avoid lint/type kills in Netlify only
   CI_LAX = "1"
 
 [functions]
@@ -28,24 +20,46 @@
     "resend",
     "@react-email/render"
   ]
-  
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# API rewrite for your client POST
+# API proxy
 [[redirects]]
   from = "/api/subscribe"
   to   = "/.netlify/functions/subscribe"
   status = 200
 
-# Security headers
+# Brand domains → deep link (hard 301)
+[[redirects]]
+  from = "https://endureluxe.com/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+
+[[redirects]]
+  from = "https://www.endureluxe.com/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+
+[[redirects]]
+  from = "https://alomarada.com/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+
+[[redirects]]
+  from = "https://www.alomarada.com/*"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+
+# Security headers (align with next.config)
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
 # Static caching
 [[headers]]
@@ -57,18 +71,3 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
-
-# Host-conditional brand redirects
-[[redirects]]
-  from = "/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-  force  = true
-  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
-
-[[redirects]]
-  from = "/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
-  force  = true
-  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
