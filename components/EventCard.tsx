@@ -5,12 +5,16 @@ import React from "react";
 type Props = {
   slug: string;
   title: string;
-  date: string;              // ISO. Prefer "YYYY-MM-DD" for all-day events.
+  date: string;              // ISO. "YYYY-MM-DD" allowed for all-day events.
   location?: string;
   description?: string | null;
+  /** Optional tags from front matter (e.g., ["leadership","chatham"]) */
+  tags?: string[] | null;
+  /** Force the badge without tags (fallback switch) */
+  chatham?: boolean;
   className?: string;
   prefetch?: boolean;
-  timeZone?: string;         // for date-times (defaults to 'Europe/London')
+  timeZone?: string;         // defaults to 'Europe/London'
 };
 
 // ---- Helpers ----
@@ -74,8 +78,7 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
 
 function toMachineDate(iso: string) {
   // For <time dateTime>, both "YYYY-MM-DD" and full ISO are valid.
-  // Keep date-only as-is (cleaner microdata), otherwise return original.
-  return isDateOnly(iso) ? iso : iso;
+  return iso;
 }
 
 export default function EventCard({
@@ -84,6 +87,8 @@ export default function EventCard({
   date,
   location,
   description,
+  tags = null,
+  chatham,
   className,
   prefetch = false,
   timeZone = "Europe/London",
@@ -93,16 +98,31 @@ export default function EventCard({
   const hasLocation = Boolean(location && location.trim());
   const titleId = React.useId();
 
+  const isChatham =
+    Boolean(chatham) ||
+    (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
+
   return (
     <article
       className={clsx(
-        "rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover",
+        "relative rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover",
         className
       )}
       aria-labelledby={titleId}
       itemScope
       itemType="https://schema.org/Event"
     >
+      {/* Subtle badge (only when tagged) */}
+      {isChatham && (
+        <span
+          className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+          title="Chatham Room (off the record)"
+          aria-label="Chatham Room (off the record)"
+        >
+          Chatham
+        </span>
+      )}
+
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
         <time
           dateTime={machine}

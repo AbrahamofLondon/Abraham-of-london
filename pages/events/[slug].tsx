@@ -39,7 +39,11 @@ function formatPretty(isoish: string, tz = "Europe/London") {
 }
 
 type EventPageProps = {
-  event: EventMeta & { coverImage?: string; slug: string };
+  event: EventMeta & {
+    coverImage?: string;
+    slug: string;
+    tags?: string[] | null;
+  };
   contentSource: any;
 };
 
@@ -50,6 +54,9 @@ function EventPage({ event, contentSource }: EventPageProps) {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/events/${event.slug}`;
   const absImage = event.coverImage ? new URL(event.coverImage, site).toString() : undefined;
+
+  const isChatham =
+    Array.isArray(event.tags) && event.tags.some((t) => String(t).toLowerCase() === "chatham");
 
   const jsonLd: Record<string, any> = {
     "@context": "https://schema.org",
@@ -80,12 +87,30 @@ function EventPage({ event, contentSource }: EventPageProps) {
         <meta name="description" content={event.summary || ""} />
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
 
       <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{event.title}</h1>
-      <p className="text-sm text-neutral-600 mb-1">
+
+      {/* Subtle badge + note when Chatham */}
+      {isChatham && (
+        <>
+          <span
+            className="inline-block rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+            title="Chatham Room (off the record)"
+            aria-label="Chatham Room (off the record)"
+          >
+            Chatham
+          </span>
+          <p className="mt-2 text-xs text-neutral-600">
+            Off the record. No recordings. No press.
+          </p>
+        </>
+      )}
+
+      <p className="mt-3 text-sm text-neutral-600 mb-1">
         <span className="font-medium">Date:</span> {prettyDate}
       </p>
       {event.location && (
@@ -115,6 +140,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
     "location",
     "summary",
     "coverImage",
+    "tags",      // ✅ pull tags for the Chatham badge
     "content",
   ]);
 
