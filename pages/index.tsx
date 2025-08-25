@@ -1,4 +1,3 @@
-// pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,9 +21,16 @@ const HERO = {
   videoWebm: "/assets/video/brand-reel.webm#t=0,5",
 };
 
-type EventsTeaser = Array<
-  Pick<EventMeta, "slug" | "title" | "date" | "location"> & { description?: string | null }
->;
+// Teaser entries we render on home (explicit to avoid typing clashes)
+type EventsTeaserItem = {
+  slug: string;
+  title: string;
+  date: string; // "YYYY-MM-DD" or ISO datetime
+  location: string | null;
+  description?: string | null;
+  tags?: string[] | null; // used for the subtle "Chatham" chip
+};
+type EventsTeaser = Array<EventsTeaserItem>;
 
 type HomeProps = {
   posts: PostMeta[];
@@ -72,7 +78,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <Head>
         <meta
           name="description"
-          content="Chatham rooms, principled strategy, and writing that prioritises signal over noise. By Abraham of London."
+          content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
         />
         {/* Preload the hero poster for faster LCP */}
         <link rel="preload" as="image" href={HERO.poster} />
@@ -116,7 +122,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              Chatham Rooms. No Noise. Only Signal.
+              Principled Strategy for a Legacy That Endures
             </motion.h1>
 
             <motion.p
@@ -125,7 +131,17 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.15 }}
             >
-              Private, off-the-record working sessions and principled strategy for leaders who build beyond the quarter—and beyond their lifetime.
+              I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and society.
+            </motion.p>
+
+            {/* Soft brand signal: Chatham Rooms as a footnote */}
+            <motion.p
+              className="mt-3 text-xs tracking-wide text-white/70"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              Chatham Rooms available — off the record
             </motion.p>
 
             <motion.div
@@ -269,9 +285,9 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Upcoming Events */}
       <section className="bg-white px-4 pb-4 pt-2">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items-end justify-between">
+          <header className="mb-2 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Upcoming Rooms
+              Upcoming Events
             </h2>
             <Link
               href="/events"
@@ -281,13 +297,18 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               View all
             </Link>
           </header>
+          {/* sub-footnote: soft signal */}
+          <p className="mb-6 text-xs text-deepCharcoal/60">
+            Select sessions run as Chatham Rooms (off the record).
+          </p>
 
           {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-deepCharcoal/70">No upcoming rooms at the moment.</p>
+            <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
           ) : (
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
                 <li key={ev.slug}>
+                  {/* tags included so EventCard can show the subtle "Chatham" badge */}
                   <EventCard {...ev} />
                 </li>
               ))}
@@ -441,7 +462,7 @@ export async function getStaticProps() {
   const booksCount = getAllBooks(["slug"]).length;
 
   // Pull events (server already dedupes), then local London-aware upcoming filter & sort asc
-  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary"]);
+  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
 
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
@@ -449,12 +470,13 @@ export async function getStaticProps() {
         (e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
           Boolean(e?.slug && e?.title && e?.date)
       )
-      .map((e) => ({
+      .map((e: any) => ({
         slug: String(e.slug),
         title: String(e.title),
         date: String(e.date),
         location: e.location ?? null,
         summary: e.summary ?? null,
+        tags: Array.isArray(e.tags) ? e.tags : null,
       }))
   );
 
@@ -462,12 +484,13 @@ export async function getStaticProps() {
     .filter((e) => isUpcomingLondon(e.date))
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
-  const eventsTeaser = upcomingSorted.slice(0, 3).map((e) => ({
+  const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => ({
     slug: e.slug,
     title: e.title,
     date: e.date,
     location: e.location ?? null,
     description: e.summary ?? null,
+    tags: Array.isArray(e.tags) ? e.tags : null,
   }));
 
   return {
