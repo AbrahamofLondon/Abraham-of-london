@@ -12,20 +12,19 @@ import { useMemo } from "react";
 type Book = {
   slug: string;
   title: string;
-  author: string | null;
-  excerpt: string | null;
-  genre: string | null;
-  coverImage: string | null;
+  author: string;              // required by BookCard
+  excerpt?: string | null;
+  genre?: string | null;
+  coverImage?: string | null;
 };
 
 type BooksProps = { books: Book[] };
 
-// Hardcoded fallback (used only if getAllBooks fails)
 const FALLBACK: Book[] = [
   {
     slug: "fathering-without-fear",
     title: "Fathering Without Fear",
-    author: "Abraham of London",
+    author: siteConfig.author,
     excerpt:
       "A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure.",
     genre: "Memoir",
@@ -34,7 +33,7 @@ const FALLBACK: Book[] = [
   {
     slug: "the-fiction-adaptation",
     title: "The Fiction Adaptation",
-    author: "Abraham of London",
+    author: siteConfig.author,
     excerpt:
       "A dramatized reimagining of lived conviction—raw, luminous, and cinematic.",
     genre: "Drama",
@@ -43,6 +42,7 @@ const FALLBACK: Book[] = [
 ];
 
 const norm = (v?: string | null) => (v ?? "").toLowerCase();
+const toStr = (v?: string | null) => (typeof v === "string" ? v : "");
 
 export default function BooksPage({ books }: BooksProps): ReactElement {
   const router = useRouter();
@@ -50,14 +50,12 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
   const genre = typeof router.query.genre === "string" ? router.query.genre.trim() : "All";
   const sort = typeof router.query.sort === "string" ? router.query.sort.trim() : "title";
 
-  // derive genres
   const genres = useMemo(() => {
     const set = new Set<string>();
     books.forEach((b) => b.genre && set.add(b.genre));
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [books]);
 
-  // filter + search + sort
   const filtered = useMemo(() => {
     let out = books.filter((b) => {
       const passQ =
@@ -70,25 +68,20 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
     });
 
     if (sort === "newest" || sort === "oldest") {
-      // if you later add a date, wire it here; for now fallback to title
       out = out.sort((a, b) => a.title.localeCompare(b.title));
       if (sort === "oldest") out.reverse();
     } else {
-      // title (default)
       out = out.sort((a, b) => a.title.localeCompare(b.title));
     }
     return out;
   }, [books, q, genre, sort]);
 
-  // helpers
   const buildHref = (overrides: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (genre && genre !== "All") params.set("genre", genre);
     if (sort && sort !== "title") params.set("sort", sort);
-    if (overrides.q !== undefined) {
-      overrides.q ? params.set("q", overrides.q) : params.delete("q");
-    }
+    if (overrides.q !== undefined) overrides.q ? params.set("q", overrides.q) : params.delete("q");
     if (overrides.genre !== undefined) {
       overrides.genre && overrides.genre !== "All"
         ? params.set("genre", overrides.genre)
@@ -103,7 +96,6 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
     return qs ? `/books?${qs}` : `/books`;
   };
 
-  // SEO
   const CANONICAL = absUrl("/books");
   const pageTitle = `Books | ${siteConfig.author}`;
   const pageDesc =
@@ -115,7 +107,6 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
     ? absUrl(siteConfig.twitterImage)
     : siteConfig.twitterImage;
 
-  // JSON-LD
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -134,7 +125,6 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
         "@type": "Book",
         name: b.title,
         author: b.author ? { "@type": "Person", name: b.author } : undefined,
-        bookFormat: "https://schema.org/Book",
         image: b.coverImage
           ? b.coverImage.startsWith("/")
             ? absUrl(b.coverImage)
@@ -172,7 +162,6 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
 
       <section className="bg-white px-4 py-20">
         <div className="mx-auto max-w-7xl">
-          {/* Header */}
           <header className="mb-10 text-center">
             <h1 className="font-serif text-4xl font-bold text-deepCharcoal sm:text-5xl">Books</h1>
             <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-deepCharcoal/70">
@@ -181,9 +170,7 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
             <div className="mx-auto mt-5 h-0.5 w-20 bg-softGold/60" />
           </header>
 
-          {/* Controls */}
           <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            {/* Search */}
             <form action="/books" method="get" className="flex w-full max-w-md items-center gap-2">
               <input
                 name="q"
@@ -192,13 +179,11 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
                 className="w-full rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm"
                 aria-label="Search books"
               />
-              {/* preserve current genre & sort on submit */}
               {genre && genre !== "All" ? <input type="hidden" name="genre" value={genre} /> : null}
               {sort && sort !== "title" ? <input type="hidden" name="sort" value={sort} /> : null}
               <button className="rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream">Search</button>
             </form>
 
-            {/* Genre chips */}
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-deepCharcoal/70">Genre:</span>
               {genres.map((g) => (
@@ -216,7 +201,6 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
               ))}
             </div>
 
-            {/* Sort */}
             <div className="flex items-center gap-2 text-sm">
               <span className="text-deepCharcoal/70">Sort:</span>
               {[
@@ -239,13 +223,22 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
             </div>
           </div>
 
-          {/* Grid */}
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((b) => (
-              <BookCard key={b.slug} {...b} />
+              <BookCard
+                key={b.slug}
+                slug={b.slug}
+                title={b.title}
+                author={b.author}
+                excerpt={toStr(b.excerpt)}
+                genre={toStr(b.genre)}
+                coverImage={toStr(b.coverImage)}
+              />
             ))}
             {filtered.length === 0 && (
-              <p className="col-span-full text-center text-deepCharcoal/70">No books match your criteria.</p>
+              <p className="col-span-full text-center text-deepCharcoal/70">
+                No books match your criteria.
+              </p>
             )}
           </div>
         </div>
@@ -258,28 +251,21 @@ export default function BooksPage({ books }: BooksProps): ReactElement {
 export async function getStaticProps() {
   let books: Book[] = FALLBACK;
   try {
-    const all = getAllBooks([
-      "slug",
-      "title",
-      "author",
-      "excerpt",
-      "genre",
-      "coverImage",
-    ]);
+    const all = getAllBooks(["slug", "title", "author", "excerpt", "genre", "coverImage"]);
     books = all.map((b: any) => ({
       slug: String(b.slug),
       title: String(b.title),
-      author: b.author ? String(b.author) : null,
-      excerpt: b.excerpt ? String(b.excerpt) : null,
-      genre: b.genre ? String(b.genre) : null,
-      coverImage: b.coverImage ? String(b.coverImage) : null,
+      author: String(b.author ?? siteConfig.author),
+      excerpt: b.excerpt ? String(b.excerpt) : "",
+      genre: b.genre ? String(b.genre) : "",
+      coverImage: b.coverImage ? String(b.coverImage) : "",
     }));
   } catch {
-    // fall back silently to the in-file list
+    // silent fallback
   }
 
   return {
     props: { books },
-    revalidate: 3600, // hourly refresh
+    revalidate: 3600,
   };
 }
