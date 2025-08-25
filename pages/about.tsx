@@ -3,12 +3,13 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import AboutSection, { Achievement } from "@/components/homepage/AboutSection";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
+import { sanitizeSocialLinks } from "@/lib/social";
 
 export default function AboutPage() {
   const CANONICAL = absUrl("/about");
 
-  const portrait = siteConfig.authorImage; // ✅ already absolute-from-root
-  const portraitAbs = `${siteConfig.siteUrl}${portrait}`;
+  const portrait = siteConfig.authorImage;              // local path
+  const portraitAbs = absUrl(portrait);                 // absolute URL
 
   const bio =
     "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help founders and leaders build durable brands and products with clear thinking, principled execution, and a long-term view.";
@@ -26,60 +27,86 @@ export default function AboutPage() {
     },
   ];
 
-  const sameAs = (siteConfig.socialLinks || [])
-    .filter((l) => l.external && /^https?:\/\//i.test(l.href))
-    .map((l) => l.href);
+  // Normalize, strip tracking, and keep only http(s) for sameAs
+  const sameAsRaw = (siteConfig.socialLinks || []);
+  const sameAsSanitized = sanitizeSocialLinks(sameAsRaw)
+    .map((l) => l.href)
+    .filter((href) => /^https?:\/\//i.test(href));
+  const sameAs = Array.from(new Set(sameAsSanitized)); // dedupe
+
+  const ogImageAbs = siteConfig.ogImage?.startsWith("/")
+    ? absUrl(siteConfig.ogImage)
+    : siteConfig.ogImage;
+
+  const twitterImageAbs = siteConfig.twitterImage?.startsWith("/")
+    ? absUrl(siteConfig.twitterImage)
+    : siteConfig.twitterImage;
+
+  const pageTitle = `About | ${siteConfig.author}`;
+  const pageDesc =
+    "About Abraham of London — strategy, fatherhood, and craftsmanship.";
+
+  // JSON-LD
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "About",
+    url: CANONICAL,
+    inLanguage: "en-GB",
+    description: pageDesc,
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.siteUrl },
+        { "@type": "ListItem", position: 2, name: "About", item: CANONICAL },
+      ],
+    },
+  };
+
+  const personSchema: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.author,
+    url: siteConfig.siteUrl,
+    image: portraitAbs,
+  };
+  if (sameAs.length > 0) personSchema.sameAs = sameAs;
 
   return (
     <Layout pageTitle="About">
       <Head>
-        <meta
-          name="description"
-          content="About Abraham of London — strategy, fatherhood, and craftsmanship."
-        />
+        {/* Title + canonical */}
+        <title>{pageTitle}</title>
         <link rel="canonical" href={CANONICAL} />
-        <meta property="og:title" content="About | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Strategy, fatherhood, and craftsmanship—brought together for enduring impact."
-        />
+
+        {/* Meta */}
+        <meta name="description" content={pageDesc} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content={CANONICAL} />
-        <meta
-          property="og:image"
-          content={
-            siteConfig.ogImage.startsWith("/")
-              ? `${siteConfig.siteUrl}${siteConfig.ogImage}`
-              : siteConfig.ogImage
-          }
-        />
+        <meta property="og:site_name" content={siteConfig.title} />
+        {ogImageAbs ? (
+          <>
+            <meta property="og:image" content={ogImageAbs} />
+            <meta property="og:image:alt" content="Abraham of London — official site image" />
+          </>
+        ) : null}
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDesc} />
+        {twitterImageAbs ? <meta name="twitter:image" content={twitterImageAbs} /> : null}
+
+        {/* LCP hint */}
+        <link rel="preload" as="image" href={portrait} />
 
         {/* JSON-LD */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebPage",
-              name: "About",
-              url: CANONICAL,
-              description:
-                "About Abraham of London — strategy, fatherhood, and craftsmanship.",
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              name: siteConfig.author,
-              url: siteConfig.siteUrl,
-              image: portraitAbs,
-              sameAs,
-            }),
-          }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       </Head>
 
       <AboutSection
@@ -88,13 +115,14 @@ export default function AboutPage() {
         achievements={achievements}
         portraitSrc={portrait}
         portraitAlt="Abraham of London portrait"
-        priority                                // ✅ now supported
+        priority
       />
 
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Link
           href="/contact"
           className="inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95"
+          prefetch={false}
         >
           Work with me
         </Link>

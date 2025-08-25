@@ -13,7 +13,6 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events";
 import { motion } from "framer-motion";
-import { parseISO, isValid } from "date-fns";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 // Hero media (play only first 5s via media fragment; lighter parse with preload="metadata")
@@ -33,12 +32,28 @@ type HomeProps = {
   eventsTeaser: EventsTeaser;
 };
 
-function isUpcoming(isoish: string) {
-  const d = parseISO(isoish);
-  if (!isValid(d)) return false;
-  const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  return d >= start;
+// ---- Time helpers: Europe/London aware ----
+const LONDON_TZ = "Europe/London";
+const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
+/** YYYY-MM-DD for a given Date in Europe/London */
+function londonDayKey(d: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: LONDON_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+/** Is the event on or after today's day (Europe/London)? */
+function isUpcomingLondon(isoish: string) {
+  if (!isoish) return false;
+  const todayKey = londonDayKey(new Date());
+  if (isDateOnly(isoish)) return isoish >= todayKey;
+  const d = new Date(isoish);
+  if (Number.isNaN(d.valueOf())) return false;
+  return londonDayKey(d) >= todayKey;
 }
 
 function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
@@ -50,7 +65,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
   const booksHref = `/books${qSuffix}`;
 
-  const featuredPosts = posts.slice(0, 3);
   const postsCount = posts.length;
 
   return (
@@ -62,6 +76,8 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         />
         {/* Preload the hero poster for faster LCP */}
         <link rel="preload" as="image" href={HERO.poster} />
+        {/* Optional: social preview (kept minimal since Layout may add site-wide tags) */}
+        <meta property="og:type" content="website" />
       </Head>
 
       {/* Hero (Next Image poster + video overlay) */}
@@ -84,6 +100,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               loop
               poster={HERO.poster}
               preload="metadata"
+              aria-hidden="true"
             >
               {HERO.videoWebm ? <source src={HERO.videoWebm} type="video/webm" /> : null}
               {HERO.videoMp4 ? <source src={HERO.videoMp4} type="video/mp4" /> : null}
@@ -122,12 +139,14 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               <Link
                 href={booksHref}
                 className="rounded-full bg-forest px-6 py-3 text-white shadow-sm transition hover:bg-primary-hover"
+                prefetch={false}
               >
                 Explore Books
               </Link>
               <Link
                 href={blogHref}
                 className="rounded-full border border-white/80 px-6 py-3 text-white transition hover:bg-white/10"
+                prefetch={false}
               >
                 Featured Insights
               </Link>
@@ -142,7 +161,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="hover:text-deepCharcoal">Home</Link>
+                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>Home</Link>
               </li>
               <li aria-hidden="true">/</li>
               <li className="text-deepCharcoal/80">Overview</li>
@@ -160,15 +179,17 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               href={booksHref}
               className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
+              prefetch={false}
             >
               Books <span className="ml-1 text-deepCharcoal/60">({booksCount})</span>
             </Link>
             <Link
               href={blogHref}
               className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
-              aria-label={`View insights (${posts.length})`}
+              aria-label={`View insights (${postsCount})`}
+              prefetch={false}
             >
-              Insights <span className="ml-1 text-deepCharcoal/60">({posts.length})</span>
+              Insights <span className="ml-1 text-deepCharcoal/60">({postsCount})</span>
             </Link>
           </div>
         </div>
@@ -184,6 +205,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href={blogHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
             >
               Read the blog
             </Link>
@@ -218,6 +240,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href={booksHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
             >
               View all
             </Link>
@@ -255,6 +278,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href="/events"
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
             >
               View all
             </Link>
@@ -290,6 +314,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href="/ventures?brand=alomarada"
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
@@ -306,6 +331,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href="/ventures?brand=endureluxe"
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
@@ -322,6 +348,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href="/about"
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
@@ -390,6 +417,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             fill
             sizes="100vw"
             className="object-cover opacity-20"
+            priority={false}
           />
         </div>
 
@@ -405,6 +433,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <Link
               href="/contact"
               className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
+              prefetch={false}
             >
               Connect with a Strategist
             </Link>
@@ -418,7 +447,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 export default Home;
 
-// SSG
+// SSG + ISR
 export async function getStaticProps() {
   const posts = getAllPosts();
 
@@ -436,7 +465,7 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Build events teaser (typed) – upcoming only, **deduped**, **sorted**, then limit 3
+  // Pull events (server already dedupes), then local London-aware upcoming filter & sort asc
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary"]);
 
   const deduped = dedupeEventsByTitleAndDay(
@@ -444,7 +473,6 @@ export async function getStaticProps() {
       .filter((e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
         Boolean(e?.slug && e?.title && e?.date)
       )
-      // keep location/summary nullable but present
       .map((e) => ({
         slug: String(e.slug),
         title: String(e.title),
@@ -455,7 +483,7 @@ export async function getStaticProps() {
   );
 
   const upcomingSorted = deduped
-    .filter((e) => isUpcoming(e.date))
+    .filter((e) => isUpcomingLondon(e.date))
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser = upcomingSorted.slice(0, 3).map((e) => ({
@@ -466,5 +494,8 @@ export async function getStaticProps() {
     description: e.summary ?? null,
   }));
 
-  return { props: { posts: safePosts, booksCount, eventsTeaser } };
+  return {
+    props: { posts: safePosts, booksCount, eventsTeaser },
+    revalidate: 3600, // ✅ hourly ISR so events roll forward without redeploy
+  };
 }
