@@ -27,7 +27,7 @@ export default function AboutPage() {
     },
     {
       title: "Launched Endureluxe",
-      description: "Essential goods and refined experiences—engineered to last, designed to serve.",
+      description: "Premiun fitness equipments and curated community experiences—engineered to last, designed to build.",
       year: 2024,
       href: "/ventures?brand=endureluxe",
     },
