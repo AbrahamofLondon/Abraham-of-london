@@ -2,12 +2,15 @@
   command = "npm run build"
   publish = ".next"
 
-[build.environment]
+  [build.environment]
   NODE_VERSION = "20"
-  NODE_ENV = "production"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   CI_LAX = "1"
+
+[context.production.environment]
+  NODE_ENV = "production"   # ✅ only on real builds
+
 
 [functions]
   node_bundler = "esbuild"
