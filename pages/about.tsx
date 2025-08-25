@@ -14,16 +14,34 @@ export default function AboutPage() {
   const bio =
     "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help founders and leaders build durable brands and products with clear thinking, principled execution, and a long-term view.";
 
+  // Prefer an environment-provided URL for InnovateHub; fall back to the site route
+  const innovateHubUrl =
+    process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "/ventures?brand=innovatehub";
+
   const achievements: Achievement[] = [
+    {
+      title: "Launched InnovateHub",
+      description: "Innovation studio for prototypes, research, and venture experiments.",
+      year: 2025,
+      href: innovateHubUrl,
+    },
+    {
+      title: "Founded Endureluxe",
+      description: "Essential goods and refined experiences—engineered to last, designed to serve.",
+      year: 2024,
+      href: "/ventures?brand=endureluxe",
+    },
     {
       title: "Founded Abraham of London",
       description: "A practice for principled strategy, writing, and stewardship.",
       year: 2020,
+      // no href (already on-site)
     },
     {
       title: "Launched Alomarada",
       description: "Advisory for investors & entrepreneurs developing African markets.",
       year: 2018,
+      href: "/ventures?brand=alomarada",
     },
   ];
 
