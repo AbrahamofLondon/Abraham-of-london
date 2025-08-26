@@ -1,40 +1,44 @@
 "use client";
 
-import clsx from "clsx";
-import { motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
+import * as React from "react";
 
-type ScrollProgressProps = {
-  className?: string;
-  heightClass?: string;
-  colorClass?: string;
-  zIndexClass?: string;
-  position?: "top" | "bottom";
+type Props = {
+  heightClass?: string;   // e.g., "h-1"
+  colorClass?: string;    // e.g., "bg-emerald-600"
+  zIndexClass?: string;   // e.g., "z-50"
 };
 
 export default function ScrollProgress({
-  className,
   heightClass = "h-1",
-  colorClass = "bg-softGold",
-  zIndexClass = "z-[60]",
-  position = "top",
-}: ScrollProgressProps) {
-  const { scrollYProgress } = useScroll();
-  const prefersReducedMotion = useReducedMotion();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-  const scaleStyle = prefersReducedMotion ? 0 : scaleX;
+  colorClass = "bg-emerald-600",
+  zIndexClass = "z-50",
+}: Props) {
+  const [progress, setProgress] = React.useState(0);
+
+  React.useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement;
+      const scrollTop = el.scrollTop || document.body.scrollTop;
+      const scrollHeight = (el.scrollHeight || document.body.scrollHeight) - el.clientHeight;
+      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      setProgress(Math.max(0, Math.min(100, pct)));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   return (
-    <motion.div
-      aria-hidden="true"
-      className={clsx(
-        "fixed left-0 right-0 origin-left",
-        position === "top" ? "top-0" : "bottom-0",
-        heightClass,
-        colorClass,
-        zIndexClass,
-        className
-      )}
-      style={{ scaleX: scaleStyle }}
-    />
+    <div className={`fixed left-0 top-0 w-full ${zIndexClass}`}>
+      <div
+        className={`${heightClass} ${colorClass}`}
+        style={{ width: `${progress}%`, transition: "width 120ms linear" }}
+        aria-hidden="true"
+      />
+    </div>
   );
 }
