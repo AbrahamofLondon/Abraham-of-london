@@ -3,22 +3,17 @@
 import * as React from "react";
 import { useRouter } from "next/router";
 
-type IssueTerm =
-  | "pathname"
-  | "url"
-  | "title"
-  | "og:title"
-  | (string & {}); // custom selectors if needed
+type IssueTerm = "pathname" | "url" | "title" | "og:title" | (string & {});
 
 type Props = {
-  repo?: string;              // "owner/repo" (utterances config repo)
-  issueTerm?: IssueTerm;      // default: "pathname"
-  label?: string;             // optional GitHub Issues label
-  useClassDarkMode?: boolean; // sync with <html class="dark">
-  rootMargin?: string;        // lazy-mount margin
-  threshold?: number;         // lazy-mount threshold
+  /** "owner/repo" for the Utterances repo */
+  repo?: string;
+  issueTerm?: IssueTerm;        // default: "pathname"
+  label?: string;               // optional GitHub Issues label
+  useClassDarkMode?: boolean;   // sync with <html class="dark">
+  rootMargin?: string;          // lazy-mount margin
+  threshold?: number;           // lazy-mount threshold
   className?: string;
-
   /** How long to wait before declaring load failure (ms). Default 10000. */
   timeoutMs?: number;
   /** How often to poll for iframe presence (ms). Default 250. */
@@ -28,10 +23,15 @@ type Props = {
 const UTTERANCES_ORIGIN = "https://utteranc.es";
 const IFRAME_SELECTOR = "iframe.utterances-frame";
 
+// Allow override via env; falls back to the correct owner/repo
+const DEFAULT_REPO =
+  (process.env.NEXT_PUBLIC_UTTERANCES_REPO as string | undefined) ??
+  "AbrahamofLondon/abrahamoflondon-comments";
+
 export default function Comments({
-  repo = "abrahamadaramola/abrahamoflondon-comments",
+  repo = DEFAULT_REPO,          // ✅ correct owner by default
   issueTerm = "pathname",
-  label = "comments",
+  label,                        // ✅ no default -> optional
   useClassDarkMode = true,
   rootMargin = "200px",
   threshold = 0.1,
@@ -69,9 +69,8 @@ export default function Comments({
   const mountUtterances = React.useCallback(
     (host: HTMLDivElement | null | undefined) => {
       if (!host) return () => {};
-
       if (!isRepoValid) {
-        setError('Invalid "repo" format. Use "owner/repo", e.g. "owner/my-comments".');
+        setError('Invalid "repo" format. Use "owner/repo", e.g. "AbrahamofLondon/abrahamoflondon-comments".');
         setLoading(false);
         return () => {};
       }
@@ -90,9 +89,10 @@ export default function Comments({
       script.setAttribute("issue-term", issueTerm);
       if (label?.trim()) script.setAttribute("label", label.trim());
       script.setAttribute("theme", computeInitialTheme());
+
       const onError = () => {
         setError(
-          "Comments failed to load. Confirm the repo exists, Issues are enabled, and the Utterances app is installed."
+          "Comments failed to load. Ensure the repo exists (public), Issues are enabled, and the Utterances app has access."
         );
         setLoading(false);
       };
@@ -154,7 +154,6 @@ export default function Comments({
     if (!readyToMount) return;
     const host = containerRef.current;
     const cleanup = mountUtterances(host);
-
     return () => {
       cleanup?.();
       if (host) while (host.firstChild) host.removeChild(host.firstChild);
@@ -185,7 +184,6 @@ export default function Comments({
         attributes: true,
         attributeFilter: ["class"],
       });
-      // ensure initial sync
       schedule(document.documentElement.classList.contains("dark"));
     } else if (window.matchMedia) {
       const mql = window.matchMedia("(prefers-color-scheme: dark)");
@@ -210,26 +208,16 @@ export default function Comments({
   }, [useClassDarkMode, postThemeToIframe]);
 
   return (
-    <section
-      aria-labelledby="comments-title"
-      className={["mt-16", className || ""].join(" ").trim()}
-    >
-      <h2 id="comments-title" className="sr-only">
-        Comments
-      </h2>
-
+    <section aria-labelledby="comments-title" className={["mt-16", className || ""].join(" ").trim()}>
+      <h2 id="comments-title" className="sr-only">Comments</h2>
       {/* Key by route to guarantee remount on SPA navigations */}
       <div key={router.asPath} ref={containerRef} className="min-h-[120px]" />
-
       {(loading || error) && (
         <p role="status" aria-live="polite" className="mt-4 text-sm">
-          {loading && !error && (
-            <span className="text-deepCharcoal/70">Loading comments…</span>
-          )}
+          {loading && !error && <span className="text-deepCharcoal/70">Loading comments…</span>}
           {error && <span className="text-red-600">{error}</span>}
         </p>
       )}
-
       <noscript>
         <p className="mt-4 text-sm text-deepCharcoal/70">
           Comments require JavaScript. Please enable it to view and post.
