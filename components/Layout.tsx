@@ -230,7 +230,8 @@ export default function Layout({
       {/* Main — padding-bottom reserved via --sticky-cta-h */}
       <main
         id="main-content"
-        className="min-h-screen bg-white dark:bg-black container mx-auto px-4"
+        // ⬇️ USE max-w-7xl to match StickyCTA CONTENT_PX=1280 (not Tailwind "container")
+        className="min-h-screen bg-white dark:bg-black mx-auto max-w-7xl px-4"
         style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}
       >
         {children}

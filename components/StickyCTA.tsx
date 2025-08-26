@@ -18,19 +18,15 @@ type Props = {
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 
-// Align with Layout/container
-const CONTENT_PX = 1280;   // max-w-7xl
-const GUTTER_PX  = 16;
+// Align with Layout/content wrapper
+const CONTENT_PX = 1280; // max-w-7xl
+const GUTTER_PX = 16;
 
 // Panel sizing
-const MIN_PANEL  = 300;
-const MAX_PANEL  = 360;
+const MIN_PANEL = 300;
+const MAX_PANEL = 360;
 
-// FAB sizing
-const FAB_SIZE   = 56;
-const FAB_PAD    = 10;
-
-type Mode = "dock" | "bar" | "fab";
+type Mode = "dock" | "bar";
 
 export default function StickyCTA({
   showAfter = 480,
@@ -54,20 +50,21 @@ export default function StickyCTA({
     right: GUTTER_PX,
   });
 
-  // read persisted dismissal
+  // restore dismissal
   React.useEffect(() => {
-    try { setDismissed(localStorage.getItem(STORAGE_KEY) === "1"); } catch {}
+    try {
+      setDismissed(localStorage.getItem(STORAGE_KEY) === "1");
+    } catch {}
   }, []);
 
   // publish height → CSS var so <main> reserves space
   const publishHeight = React.useCallback(() => {
     if (!ref.current) return;
-    const h = Math.ceil(ref.current.getBoundingClientRect().height) + (mode === "fab" ? FAB_PAD * 2 : 16);
-    console.log(`Mode: ${mode}, Setting --sticky-cta-h to ${h}px, PanelW: ${panelW}px`);
+    const h = Math.ceil(ref.current.getBoundingClientRect().height) + 16; // breathing room
     document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
-  }, [mode, panelW]);
+  }, []);
 
-  // keep height up-to-date on any size change
+  // keep height up-to-date
   React.useEffect(() => {
     if (!ref.current) return;
     const ro = new ResizeObserver(() => publishHeight());
@@ -78,46 +75,51 @@ export default function StickyCTA({
   // compute adaptive mode/position/width
   const computePosition = React.useCallback(() => {
     const vw = typeof window !== "undefined" ? window.innerWidth : 0;
-    console.log(`Viewport: ${vw}px`);
 
-    // Mobile/tablet → full-width bar
+    // Mobile/tablet → centered bar
     if (vw < 768) {
       const w = Math.max(MIN_PANEL, Math.min(vw - 2 * GUTTER_PX, MAX_PANEL));
+      const left = Math.max(GUTTER_PX, Math.floor((vw - w) / 2));
       setMode("bar");
       setPanelW(w);
-      setPos({ left: GUTTER_PX, right: GUTTER_PX });
-      console.log(`Mode: bar, Width: ${w}px, Pos: left ${GUTTER_PX}px, right ${GUTTER_PX}px`);
+      setPos({ left, right: "auto" });
       return;
     }
 
-    // Desktop: available gutter width outside the content
-    const rawSide = Math.max(0, (vw - CONTENT_PX) / 2);
-    const usableGutter = Math.max(0, rawSide - GUTTER_PX); // keep a 16px inner pad
-    console.log(`Raw Side: ${rawSide}px, Usable Gutter: ${usableGutter}px`);
+    // Desktop: only dock if BOTH side gutters can accommodate a full panel outside content
+    const totalLeftover = Math.max(0, vw - CONTENT_PX);
+    const need = 2 * (MAX_PANEL + GUTTER_PX);
+    if (totalLeftover < need) {
+      // not enough → centered bar above content
+      const w = Math.min(MAX_PANEL, Math.max(MIN_PANEL, vw - 2 * GUTTER_PX));
+      const left = Math.max(GUTTER_PX, Math.floor((vw - w) / 2));
+      setMode("bar");
+      setPanelW(w);
+      setPos({ left, right: "auto" });
+      return;
+    }
 
-    // Enough to dock the full panel?
+    // wide → dock in right gutter, inside a 16px pad
+    const usableGutter = Math.max(0, totalLeftover / 2 - GUTTER_PX);
     if (usableGutter >= MAX_PANEL) {
       setMode("dock");
       setPanelW(MAX_PANEL);
       setPos({ left: "auto", right: GUTTER_PX });
-      console.log(`Mode: dock, Width: ${MAX_PANEL}px, Right: ${GUTTER_PX}px`);
       return;
     }
-
-    // Enough for a reduced panel?
     if (usableGutter >= MIN_PANEL) {
       setMode("dock");
       setPanelW(Math.floor(usableGutter));
       setPos({ left: "auto", right: GUTTER_PX });
-      console.log(`Mode: dock, Width: ${Math.floor(usableGutter)}px, Right: ${GUTTER_PX}px`);
       return;
     }
 
-    // Not enough gutter → use a tiny FAB so it never covers cards
-    setMode("fab");
-    setPanelW(FAB_SIZE + FAB_PAD * 2);
-    setPos({ left: "auto", right: GUTTER_PX });
-    console.log(`Mode: fab, Width: ${FAB_SIZE + FAB_PAD * 2}px, Right: ${GUTTER_PX}px`);
+    // fallback to centered bar
+    const w = Math.min(MAX_PANEL, Math.max(MIN_PANEL, vw - 2 * GUTTER_PX));
+    const left = Math.max(GUTTER_PX, Math.floor((vw - w) / 2));
+    setMode("bar");
+    setPanelW(w);
+    setPos({ left, right: "auto" });
   }, []);
 
   // show/hide + shrink on scroll
@@ -149,7 +151,7 @@ export default function StickyCTA({
     };
   }, [showAfter, computePosition]);
 
-  // keep reserved height in sync
+  // sync reserved height
   React.useEffect(() => {
     if (!visible) {
       document.documentElement.style.setProperty("--sticky-cta-h", "0px");
@@ -158,7 +160,7 @@ export default function StickyCTA({
     publishHeight();
   }, [visible, collapsed, panelW, mode, publishHeight]);
 
-  // extra pass post-mount (fonts/layout settle)
+  // extra pass post-mount
   React.useEffect(() => {
     const id = requestAnimationFrame(() => {
       computePosition();
@@ -168,72 +170,22 @@ export default function StickyCTA({
   }, [computePosition, publishHeight]);
 
   // cleanup css var on unmount
-  React.useEffect(() => () => {
-    document.documentElement.style.setProperty("--sticky-cta-h", "0px");
+  React.useEffect(() => {
+    return () => {
+      document.documentElement.style.setProperty("--sticky-cta-h", "0px");
+    };
   }, []);
 
   const onDismiss = () => {
-    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {}
     setDismissed(true);
     document.documentElement.style.setProperty("--sticky-cta-h", "0px");
   };
 
   if (dismissed || !visible) return null;
 
-  // --- FAB mode (tiny) ---
-  if (mode === "fab") {
-    return (
-      <aside
-        role="complementary"
-        aria-label="Quick contact"
-        className={clsx("fixed bottom-4 z-[70] transition-opacity", className)}
-        style={{
-          width: panelW,
-          right: typeof pos.right === "number" ? pos.right : undefined,
-          left: typeof pos.left === "number" ? pos.left : undefined,
-        }}
-      >
-        <div
-          ref={ref}
-          className="relative rounded-full bg-white/95 shadow-card backdrop-blur dark:bg-deepCharcoal/95"
-          style={{ padding: FAB_PAD }}
-        >
-          <button
-            type="button"
-            onClick={onDismiss}
-            aria-label="Dismiss"
-            className="absolute -right-2 -top-2 rounded-full bg-black/70 px-1 text-[11px] leading-none text-white hover:bg-black/80"
-            title="Dismiss"
-          >
-            ×
-          </button>
-
-          <Link
-            href={isInternal(primaryHref) ? primaryHref : "#"}
-            onClick={(e) => {
-              if (!isInternal(primaryHref)) {
-                e.preventDefault();
-                window.open(primaryHref, "_blank", "noopener,noreferrer");
-              }
-            }}
-            prefetch={false}
-            aria-label={primaryLabel}
-            title={primaryLabel}
-            className={clsx(
-              "flex h-[56px] w-[56px] items-center justify-center rounded-full bg-emerald-600 text-white",
-              "shadow transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40"
-            )}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden fill="currentColor">
-              <path d="M3 12a7 7 0 0 1 7-7h4a7 7 0 1 1 0 14H9l-4 4v-4a7 7 0 0 1-2-7z" />
-            </svg>
-          </Link>
-        </div>
-      </aside>
-    );
-  }
-
-  // --- Docked / Mobile bar ---
   return (
     <aside
       role="complementary"
@@ -253,6 +205,7 @@ export default function StickyCTA({
           collapsed && "px-3 py-2 sm:px-3 sm:py-2"
         )}
       >
+        {/* Dismiss */}
         <button
           type="button"
           onClick={onDismiss}
@@ -267,6 +220,7 @@ export default function StickyCTA({
         </button>
 
         <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
+          {/* Phone */}
           <a
             href={phoneHref}
             className={clsx(
@@ -357,9 +311,14 @@ export default function StickyCTA({
 function PhoneIcon() {
   return (
     <svg
-      width="20" height="20" viewBox="0 0 24 24"
-      aria-hidden="true" focusable="false" role="img"
-      className="block" fill="currentColor"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      role="img"
+      className="block"
+      fill="currentColor"
     >
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.62 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.14a2 2 0 0 1 2.11-.45c.83.29 1.7.5 2.6.62A2 2 0 0 1 22 16.92z" />
     </svg>
