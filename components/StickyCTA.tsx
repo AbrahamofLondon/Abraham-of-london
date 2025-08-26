@@ -17,7 +17,12 @@ type Props = {
 
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
-const MAX_CONTENT_PX = 1280;      // Tailwind max-w-7xl (80rem)
+
+// Tailwind max-w-7xl (80rem → 1280px)
+const CONTENT_MAX = 1280;
+// Visual paddings
+const EDGE = 16;
+const CONTENT_PADDING = 16;
 
 export default function StickyCTA({
   showAfter = 480,
@@ -33,10 +38,10 @@ export default function StickyCTA({
   const [visible, setVisible] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
-  const [pos, setPos] = React.useState<{ left: number | "auto"; right: number | "auto" }>({
-    left: 16,
-    right: 16,
-  });
+
+  // where to dock: "gutter" (right) or "center" (bottom center)
+  const [dock, setDock] = React.useState<"gutter" | "center">("center");
+  const [gutterRight, setGutterRight] = React.useState<number>(EDGE);
 
   // read persisted dismissal
   React.useEffect(() => {
@@ -49,20 +54,27 @@ export default function StickyCTA({
   const publishHeight = React.useCallback(() => {
     if (!ref.current) return;
     const h = ref.current.getBoundingClientRect().height;
-    // add 16px breathing room
-    document.documentElement.style.setProperty("--sticky-cta-h", `${h + 16}px`);
+    document.documentElement.style.setProperty("--sticky-cta-h", `${h + EDGE}px`);
   }, []);
 
-  // compute desktop gutter position (keeps it out of the grid)
-  const computePosition = React.useCallback(() => {
+  // compute best docking position
+  const computeDock = React.useCallback(() => {
     const w = typeof window !== "undefined" ? window.innerWidth : 0;
-    if (w < 768) {
-      // mobile: full-width-ish
-      setPos({ left: 16, right: 16 });
+
+    // Current panel width (fallback to 360)
+    const ctaW = ref.current?.getBoundingClientRect().width || 360;
+
+    // available “outside” gutter on each side if content is centered
+    const outerGutter = Math.max(EDGE, (w - CONTENT_MAX) / 2);
+
+    // If the outer gutter minus a small padding fits the CTA, dock to the right gutter,
+    // otherwise center it at the bottom.
+    if (outerGutter - CONTENT_PADDING >= ctaW) {
+      setDock("gutter");
+      setGutterRight(Math.floor(outerGutter - ctaW)); // right offset to sit fully outside content
     } else {
-      // desktop: right gutter: max(16px, (vw - content)/2 + 16px)
-      const gutter = Math.max(16, (w - MAX_CONTENT_PX) / 2 + 16);
-      setPos({ left: "auto", right: Math.floor(gutter) });
+      setDock("center");
+      setGutterRight(EDGE);
     }
   }, []);
 
@@ -76,7 +88,6 @@ export default function StickyCTA({
       if (!ticking) {
         window.requestAnimationFrame(() => {
           setVisible(y > showAfter);
-          // collapse when scrolling down, expand when scrolling up
           setCollapsed(y > showAfter && y - lastY > 6);
           lastY = y;
           ticking = false;
@@ -85,26 +96,25 @@ export default function StickyCTA({
       }
     };
 
-    // init states
-    computePosition();
+    // init & listeners
+    computeDock();
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", computePosition);
-    window.addEventListener("orientationchange", computePosition);
+    window.addEventListener("resize", computeDock);
+    window.addEventListener("orientationchange", computeDock);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", computePosition);
-      window.removeEventListener("orientationchange", computePosition);
+      window.removeEventListener("resize", computeDock);
+      window.removeEventListener("orientationchange", computeDock);
     };
-  }, [showAfter, computePosition]);
+  }, [showAfter, computeDock]);
 
-  // update css var on (un)collapse/resize
+  // keep CSS var in sync
   React.useEffect(() => {
     publishHeight();
-  }, [collapsed, visible, publishHeight]);
+  }, [collapsed, visible, dock, publishHeight]);
 
-  // cleanup css var on unmount
   React.useEffect(() => {
     return () => {
       document.documentElement.style.setProperty("--sticky-cta-h", "0px");
@@ -116,7 +126,6 @@ export default function StickyCTA({
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {}
     setDismissed(true);
-    // remove reserved space immediately
     document.documentElement.style.setProperty("--sticky-cta-h", "0px");
   };
 
@@ -128,11 +137,14 @@ export default function StickyCTA({
       aria-label="Quick contact"
       className={clsx(
         "fixed bottom-4 z-[70] max-w-[92vw] sm:max-w-sm",
-        // smooth shrink/expand
         "transition-[transform,opacity] duration-200",
         className
       )}
-      style={{ right: pos.right as number | undefined, left: pos.left as number | undefined }}
+      style={
+        dock === "gutter"
+          ? { right: gutterRight, left: "auto" }
+          : { left: "50%", transform: "translateX(-50%)" }
+      }
     >
       <div
         ref={ref}
@@ -156,7 +168,6 @@ export default function StickyCTA({
         </button>
 
         <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
-          {/* phone */}
           <a
             href={phoneHref}
             className={clsx(
@@ -169,7 +180,6 @@ export default function StickyCTA({
             <PhoneIcon />
           </a>
 
-          {/* text + buttons (hide tagline when collapsed) */}
           <div className="min-w-0 flex-1">
             {!collapsed && (
               <p className="truncate text-sm font-medium text-forest dark:text-cream">
@@ -178,7 +188,6 @@ export default function StickyCTA({
             )}
 
             <div className={clsx("mt-2 flex flex-wrap gap-2", collapsed && "mt-0")}>
-              {/* Primary */}
               {isInternal(primaryHref) ? (
                 <Link
                   href={primaryHref}
@@ -208,35 +217,35 @@ export default function StickyCTA({
                 </a>
               )}
 
-              {/* Secondary — hide label when collapsed (keeps a tidy pill) */}
-              {!collapsed && (isInternal(secondaryHref) ? (
-                <Link
-                  href={secondaryHref}
-                  prefetch={false}
-                  className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                  )}
-                  aria-label={secondaryLabel}
-                >
-                  {secondaryLabel}
-                </Link>
-              ) : (
-                <a
-                  href={secondaryHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                  )}
-                  aria-label={secondaryLabel}
-                >
-                  {secondaryLabel}
-                </a>
-              ))}
+              {!collapsed &&
+                (isInternal(secondaryHref) ? (
+                  <Link
+                    href={secondaryHref}
+                    prefetch={false}
+                    className={clsx(
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
+                    )}
+                    aria-label={secondaryLabel}
+                  >
+                    {secondaryLabel}
+                  </Link>
+                ) : (
+                  <a
+                    href={secondaryHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
+                    )}
+                    aria-label={secondaryLabel}
+                  >
+                    {secondaryLabel}
+                  </a>
+                ))}
             </div>
           </div>
         </div>
@@ -247,16 +256,7 @@ export default function StickyCTA({
 
 function PhoneIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-      role="img"
-      className="block"
-      fill="currentColor"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="img" className="block" fill="currentColor">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.62 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.14a2 2 0 0 1 2.11-.45c.83.29 1.7.5 2.6.62A2 2 0 0 1 22 16.92z" />
     </svg>
   );
