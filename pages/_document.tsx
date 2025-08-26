@@ -1,19 +1,20 @@
-// pages/_document.tsx
 import { Html, Head, Main, NextScript } from "next/document";
-import { GA_MEASUREMENT_ID, gaEnabled } from "@/lib/gtag";
 
 const THEME_BOOTSTRAP = `
-(function(){
+(function () {
   try {
-    var stored = localStorage.getItem('theme');
-    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var theme = stored ? stored : (prefersDark ? 'dark' : 'light');
-    var root = document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
-    root.setAttribute('data-theme', theme);
+    var d = document.documentElement;
+    var stored = localStorage.getItem('theme'); // "light"|"dark"|"system"|null
+    var m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var sysDark = !!(m && m.matches);
+    var pref = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'system';
+    var resolved = (pref === 'dark') ? 'dark' : (pref === 'light') ? 'light' : (sysDark ? 'dark' : 'light');
+    if (resolved === 'dark') d.classList.add('dark'); else d.classList.remove('dark');
+    d.setAttribute('data-theme', resolved);
+    d.setAttribute('data-user-theme', pref);
   } catch (e) {}
 })();
-`;
+`.trim();
 
 export default function Document() {
   return (
@@ -21,42 +22,7 @@ export default function Document() {
       <Head>
         <meta charSet="utf-8" />
         <meta name="color-scheme" content="dark light" />
-        <meta name="format-detection" content="telephone=no" />
-
-        {/* Theme colors for light & dark */}
-        <meta name="theme-color" content="#0b1a2b" media="(prefers-color-scheme: dark)" />
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-
-        {/* Performance: DNS + preconnect */}
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
-
-        {/* Bootstrap theme before hydration */}
         <script id="theme-bootstrap" dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
-
-        {/* Google Analytics (GA4) */}
-        {gaEnabled && (
-          <>
-            <script
-              async
-              id="ga4-src"
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            />
-            <script
-              id="ga4-init"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
-                `.trim(),
-              }}
-            />
-          </>
-        )}
       </Head>
       <body>
         <Main />

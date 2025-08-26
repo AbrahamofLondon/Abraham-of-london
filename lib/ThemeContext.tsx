@@ -1,116 +1,97 @@
+"use client";
+
 import * as React from "react";
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark" | "system";
 
-type ThemeContextValue = {
-  theme: Theme;
+type Ctx = {
+  theme: Theme;                     // user pref
+  resolvedTheme: "light" | "dark";  // actual in-use theme
   setThemePref: (t: Theme) => void;
   toggle: () => void;
+  mounted: boolean;
 };
 
-const ThemeContext = React.createContext<ThemeContextValue | undefined>(undefined);
+const ThemeContext = React.createContext<Ctx | null>(null);
 
-// SSR-safe: only touch DOM when available
-function applyTheme(t: Theme) {
+const STORAGE_KEY = "theme";
+const DARK_QUERY  = "(prefers-color-scheme: dark)";
+
+function applyThemeToDom(resolved: "light" | "dark", pref: Theme | null) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.classList.toggle("dark", t === "dark");
-  root.setAttribute("data-theme", t);
+  root.classList.toggle("dark", resolved === "dark");
+  root.setAttribute("data-theme", resolved);
+  if (pref) root.setAttribute("data-user-theme", pref);
+  else root.removeAttribute("data-user-theme");
+}
+
+function getInitialPref(): Theme {
+  if (typeof document === "undefined") return "system";
   try {
-    localStorage.setItem("theme", t);
+    const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? null;
+    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    const hinted = document.documentElement.getAttribute("data-user-theme") as Theme | null;
+    if (hinted === "light" || hinted === "dark" || hinted === "system") return hinted;
   } catch {}
-}
-
-function getSystemPrefersDark(): boolean {
-  if (typeof window === "undefined") return false;
-  return !!window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-}
-
-/**
- * Determine an initial theme without causing a flash:
- * 1) Respect localStorage if present
- * 2) Respect <html data-theme="..."> set by your _document bootstrap
- * 3) Fall back to system preference
- */
-function getInitialTheme(): Theme {
-  if (typeof document !== "undefined") {
-    try {
-      const stored = (localStorage.getItem("theme") as Theme | null) ?? null;
-      if (stored === "light" || stored === "dark") return stored;
-      const htmlAttr = document.documentElement.getAttribute("data-theme");
-      if (htmlAttr === "light" || htmlAttr === "dark") return htmlAttr;
-      return getSystemPrefersDark() ? "dark" : "light";
-    } catch {
-      // ignore
-    }
-  }
-  // SSR fallback (the _document bootstrap will set the class before hydration)
-  return "light";
+  return "system";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with a best guess to minimize hydration mismatch; we’ll sync in effect
-  const [theme, setTheme] = React.useState<Theme>(getInitialTheme);
-  const [userLocked, setUserLocked] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+  const [mounted, setMounted] = React.useState(false);
+  const [theme, setTheme] = React.useState<Theme>(getInitialPref);
+  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">("light");
+
+  React.useEffect(() => {
+    setMounted(true);
     try {
-      const stored = localStorage.getItem("theme");
-      return stored === "light" || stored === "dark";
-    } catch {
-      return false;
-    }
-  });
+      const mql = window.matchMedia ? window.matchMedia(DARK_QUERY) : null;
+      const sysDark = !!mql?.matches;
+      const initialResolved: "light" | "dark" =
+        theme === "dark" ? "dark" : theme === "light" ? "light" : sysDark ? "dark" : "light";
+      setResolvedTheme(initialResolved);
+      applyThemeToDom(initialResolved, theme);
 
-  // Apply theme to DOM on mount and whenever it changes
-  React.useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  // If the user hasn't explicitly chosen a theme, follow system changes live
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (userLocked) return;
-
-    const mql = window.matchMedia?.("(prefers-color-scheme: dark)");
-    if (!mql) return;
-
-    const handler = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? "dark" : "light");
-    };
-
-    // Older Safari uses addListener
-    if (typeof mql.addEventListener === "function") {
-      mql.addEventListener("change", handler);
-      return () => mql.removeEventListener("change", handler);
-    } else {
-      // @ts-ignore legacy
-      mql.addListener?.(handler);
-      // @ts-ignore legacy
-      return () => mql.removeListener?.(handler);
-    }
-  }, [userLocked]);
-
-  const setThemePref = React.useCallback((t: Theme) => {
-    setUserLocked(true);
-    setTheme(t);
+      if (theme === "system" && mql) {
+        const handler = (e: MediaQueryListEvent) => {
+          const next = e.matches ? "dark" : "light";
+          setResolvedTheme(next);
+          applyThemeToDom(next, "system");
+        };
+        mql.addEventListener?.("change", handler);
+        // @ts-expect-error legacy
+        mql.addListener?.(handler);
+        return () => {
+          mql.removeEventListener?.("change", handler);
+          // @ts-expect-error legacy
+          mql.removeListener?.(handler);
+        };
+      }
+    } catch { /* no-op */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  React.useEffect(() => {
+    if (!mounted) return;
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
+    const sysDark = typeof window !== "undefined" && window.matchMedia?.(DARK_QUERY).matches;
+    const nextResolved: "light" | "dark" =
+      theme === "dark" ? "dark" : theme === "light" ? "light" : sysDark ? "dark" : "light";
+    setResolvedTheme(nextResolved);
+    applyThemeToDom(nextResolved, theme);
+  }, [theme, mounted]);
+
+  const setThemePref = React.useCallback((t: Theme) => setTheme(t), []);
   const toggle = React.useCallback(() => {
-    setUserLocked(true);
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }, []);
+    setTheme((prev) => (prev === "dark" ? "light" : prev === "light" ? "dark" : (resolvedTheme === "dark" ? "light" : "dark")));
+  }, [resolvedTheme]);
 
-  const value = React.useMemo(
-    () => ({ theme, setThemePref, toggle }),
-    [theme, setThemePref, toggle],
-  );
-
-  // Always render the provider (don’t render children outside the provider)
+  const value: Ctx = { theme, resolvedTheme, setThemePref, toggle, mounted };
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme() {
+export function useTheme(): Ctx {
   const ctx = React.useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  if (!ctx) throw new Error("useTheme must be used within <ThemeProvider>");
   return ctx;
 }

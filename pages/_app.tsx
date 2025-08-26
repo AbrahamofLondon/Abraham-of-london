@@ -1,63 +1,44 @@
-// pages/_app.tsx
 "use client";
 
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-import { ThemeProvider, useTheme } from "@/lib/ThemeContext";
+import { ThemeProvider } from "@/lib/ThemeContext";     // <-- named import
 import { pageview, gaEnabled, gaEvent } from "@/lib/gtag";
 import { sans, serif, cursive } from "@/lib/fonts";
 import "@/styles/globals.css";
 
-// The corrected type for ThemeWrapper. 
-// It should not be AppProps because it doesn't receive the router.
-type ThemeWrapperProps = {
-  Component: AppProps["Component"];
-  pageProps: AppProps["pageProps"];
-};
+// Both components must default-export (see above)
+const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
+const ThemeToggle    = dynamic(() => import("@/components/ThemeToggle"),    { ssr: false });
 
-const ThemeWrapper = ({ Component, pageProps }: ThemeWrapperProps) => {
+function AnalyticsRouterTracker() {
   const router = useRouter();
-  const { theme, toggle } = useTheme();
-
   useEffect(() => {
     if (!gaEnabled || process.env.NODE_ENV !== "production") return;
-
-    const handleRouteChange = (url: string) => pageview(url);
+    const handle = (url: string) => pageview(url);
     pageview(router.asPath);
-    router.events.on("routeChangeComplete", handleRouteChange);
-    router.events.on("hashChangeComplete", handleRouteChange);
-
+    router.events.on("routeChangeComplete", handle);
+    router.events.on("hashChangeComplete", handle);
     return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-      router.events.off("hashChangeComplete", handleRouteChange);
+      router.events.off("routeChangeComplete", handle);
+      router.events.off("hashChangeComplete", handle);
     };
   }, [router]);
-
-  return (
-    <>
-      <button
-        onClick={toggle}
-        className="p-2 bg-gray-200 dark:bg-gray-800 text-black dark:text-white rounded"
-      >
-        Toggle {theme === "dark" ? "Light" : "Dark"} Mode
-      </button>
-      <Component {...pageProps} />
-    </>
-  );
-};
-
-const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), {
-  ssr: false,
-});
+  return null;
+}
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <div className={`${sans.variable} ${serif.variable} ${cursive.variable}`}>
       <ThemeProvider>
+        <AnalyticsRouterTracker />
         <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
-        <ThemeWrapper Component={Component} pageProps={pageProps} />
+        <div className="fixed right-4 top-4 z-50">
+          <ThemeToggle />
+        </div>
+        <Component {...pageProps} />
       </ThemeProvider>
     </div>
   );
@@ -65,17 +46,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
-
   const value = metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
-
   try {
-    gaEvent("web-vital", {
-      id: metric.id,
-      name: metric.name,
-      label: metric.label,
-      value,
-    });
-  } catch {
-    // no-op
-  }
+    gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
+  } catch {}
 }

@@ -2,19 +2,29 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/router";
+
+type IssueTerm =
+  | "pathname"
+  | "url"
+  | "title"
+  | "og:title"
+  | (string & {}); // allow custom selectors if needed
 
 type Props = {
-  repo?: string;            // e.g. "abrahamadaramola/abrahamoflondon-comments"
-  issueTerm?: string;       // "pathname" | "url" | "title" | "og:title" | ...
-  label?: string;
-  useClassDarkMode?: boolean;
-  rootMargin?: string;
-  threshold?: number;
+  repo?: string;              // e.g. "abrahamadaramola/abrahamoflondon-comments"
+  issueTerm?: IssueTerm;      // default: "pathname"
+  label?: string;             // GitHub Issues label
+  useClassDarkMode?: boolean; // sync with <html class="dark">
+  rootMargin?: string;        // lazy-mount margin
+  threshold?: number;         // lazy-mount threshold
   className?: string;
 };
 
 const UTTERANCES_ORIGIN = "https://utteranc.es";
 const IFRAME_SELECTOR = "iframe.utterances-frame";
+const LOAD_TIMEOUT_MS = 10000;
+const POLL_INTERVAL_MS = 250;
 
 export default function Comments({
   repo = "abrahamadaramola/abrahamoflondon-comments",
@@ -25,6 +35,7 @@ export default function Comments({
   threshold = 0.1,
   className,
 }: Props) {
+  const router = useRouter();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -41,22 +52,23 @@ export default function Comments({
 
   const postThemeToIframe = React.useCallback((theme: string) => {
     try {
-      const frame =
-        containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
+      const frame = containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
       frame?.contentWindow?.postMessage({ type: "set-theme", theme }, UTTERANCES_ORIGIN);
     } catch {
       /* no-op */
     }
   }, []);
 
-  // Accept the host element to avoid touching ref in cleanup.
+  /**
+   * Mount utterances script into the provided host element.
+   * Returns a cleanup function for timers.
+   */
   const mountUtterances = React.useCallback(
     (host: HTMLDivElement | null | undefined) => {
-      const el = host;
-      if (!el) return () => {};
+      if (!host) return () => {};
 
       // Clear old nodes
-      while (el.firstChild) el.removeChild(el.firstChild);
+      while (host.firstChild) host.removeChild(host.firstChild);
 
       setLoading(true);
       setError(null);
@@ -69,28 +81,35 @@ export default function Comments({
       script.setAttribute("issue-term", issueTerm);
       script.setAttribute("label", label);
       script.setAttribute("theme", computeInitialTheme());
-      el.appendChild(script);
+
+      const onError = () => {
+        setError(
+          "Comments failed to load. Confirm the repo exists, Issues are enabled, and the Utterances app is installed."
+        );
+        setLoading(false);
+      };
+      script.addEventListener("error", onError);
+
+      host.appendChild(script);
 
       const poll = window.setInterval(() => {
-        const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
+        const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
         if (hasFrame) {
           window.clearInterval(poll);
           setLoading(false);
         }
-      }, 250);
+      }, POLL_INTERVAL_MS);
 
       const timeout = window.setTimeout(() => {
-        const hasFrame = !!el.querySelector(IFRAME_SELECTOR);
+        const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
         if (!hasFrame) {
-          setError(
-            "Comments failed to load. Ensure the repo exists, Issues are enabled, and the Utterances app is installed."
-          );
-          setLoading(false);
+          onError();
         }
-      }, 10000);
+      }, LOAD_TIMEOUT_MS);
 
-      // Cleanup uses the captured host `el`, not the ref.
+      // Cleanup uses captured host & listeners
       return () => {
+        script.removeEventListener("error", onError);
         window.clearInterval(poll);
         window.clearTimeout(timeout);
       };
@@ -98,10 +117,9 @@ export default function Comments({
     [repo, issueTerm, label, computeInitialTheme]
   );
 
-  // Lazy trigger for mounting
+  // Lazy trigger for mounting when visible
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (readyToMount) return;
+    if (typeof window === "undefined" || readyToMount) return;
 
     const host = containerRef.current;
     if (!host) return;
@@ -126,19 +144,20 @@ export default function Comments({
     return () => io.disconnect();
   }, [readyToMount, rootMargin, threshold]);
 
-  // Actual mount once visible
+  // Actual mount once visible, and re-mount on SPA route changes
   React.useEffect(() => {
     if (!readyToMount) return;
-    const host = containerRef.current; // capture once
-    const cleanupTimers = mountUtterances(host);
+    const host = containerRef.current;
+    const cleanup = mountUtterances(host);
 
     return () => {
-      cleanupTimers?.();
+      cleanup?.();
       if (host) while (host.firstChild) host.removeChild(host.firstChild);
     };
-  }, [readyToMount, mountUtterances]);
+    // Re-run when route changes so utterances binds to the new page's issue
+  }, [readyToMount, mountUtterances, router.asPath]);
 
-  // Keep iframe theme synced
+  // Keep iframe theme synced with <html class="dark"> OR system preference
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -156,10 +175,16 @@ export default function Comments({
       });
     } else if (window.matchMedia) {
       const mql = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () =>
-        postThemeToIframe(mql.matches ? "github-dark" : "github-light");
+      const onChange = () => postThemeToIframe(mql.matches ? "github-dark" : "github-light");
       mql.addEventListener?.("change", onChange);
-      mqCleanup = () => mql.removeEventListener?.("change", onChange);
+      // Safari legacy fallback
+      // @ts-expect-error
+      mql.addListener?.(onChange);
+      mqCleanup = () => {
+        mql.removeEventListener?.("change", onChange);
+        // @ts-expect-error
+        mql.removeListener?.(onChange);
+      };
     }
 
     return () => {
@@ -177,7 +202,8 @@ export default function Comments({
         Comments
       </h2>
 
-      <div ref={containerRef} className="min-h-[120px]" />
+      {/* Key by route to guarantee remount on SPA navigations */}
+      <div key={router.asPath} ref={containerRef} className="min-h-[120px]" />
 
       {(loading || error) && (
         <p role="status" aria-live="polite" className="mt-4 text-sm">

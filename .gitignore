@@ -48,3 +48,5 @@ Thumbs.db
 *.xlsx
 *.lnk
 *.ini
+# Local Netlify folder
+.netlify
