@@ -1,4 +1,3 @@
-// components/Comments.tsx
 "use client";
 
 import * as React from "react";
@@ -9,20 +8,20 @@ type IssueTerm =
   | "url"
   | "title"
   | "og:title"
-  | (string & {}); // allow custom selectors if needed
+  | (string & {}); // custom selectors if needed
 
 type Props = {
-  repo?: string;              // e.g. "abrahamadaramola/abrahamoflondon-comments"
+  repo?: string;              // "owner/repo" (utterances config repo)
   issueTerm?: IssueTerm;      // default: "pathname"
-  label?: string;             // GitHub Issues label
+  label?: string;             // optional GitHub Issues label
   useClassDarkMode?: boolean; // sync with <html class="dark">
   rootMargin?: string;        // lazy-mount margin
   threshold?: number;         // lazy-mount threshold
   className?: string;
 
-  /** Optional: how long to wait before declaring load failure (ms). Default 10000. */
+  /** How long to wait before declaring load failure (ms). Default 10000. */
   timeoutMs?: number;
-  /** Optional: how often to poll for the iframe (ms). Default 250. */
+  /** How often to poll for iframe presence (ms). Default 250. */
   pollMs?: number;
 };
 
@@ -46,10 +45,7 @@ export default function Comments({
   const [error, setError] = React.useState<string | null>(null);
   const [readyToMount, setReadyToMount] = React.useState(false);
 
-  const isRepoValid = React.useMemo(
-    () => /^[^/]+\/[^/]+$/.test(repo),
-    [repo]
-  );
+  const isRepoValid = React.useMemo(() => /^[^/]+\/[^/]+$/.test(repo), [repo]);
 
   const computeInitialTheme = React.useCallback((): string => {
     if (typeof document === "undefined") return "preferred-color-scheme";
@@ -62,23 +58,18 @@ export default function Comments({
 
   const postThemeToIframe = React.useCallback((theme: string) => {
     try {
-      const frame =
-        containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
+      const frame = containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
       frame?.contentWindow?.postMessage({ type: "set-theme", theme }, UTTERANCES_ORIGIN);
     } catch {
       /* no-op */
     }
   }, []);
 
-  /**
-   * Mount utterances script into the provided host element.
-   * Returns a cleanup function for timers.
-   */
+  /** Mount utterances script into the provided host element. */
   const mountUtterances = React.useCallback(
     (host: HTMLDivElement | null | undefined) => {
       if (!host) return () => {};
 
-      // Validate repo early
       if (!isRepoValid) {
         setError('Invalid "repo" format. Use "owner/repo", e.g. "owner/my-comments".');
         setLoading(false);
@@ -97,9 +88,8 @@ export default function Comments({
       script.crossOrigin = "anonymous";
       script.setAttribute("repo", repo);
       script.setAttribute("issue-term", issueTerm);
-      script.setAttribute("label", label);
+      if (label?.trim()) script.setAttribute("label", label.trim());
       script.setAttribute("theme", computeInitialTheme());
-
       const onError = () => {
         setError(
           "Comments failed to load. Confirm the repo exists, Issues are enabled, and the Utterances app is installed."
@@ -107,7 +97,6 @@ export default function Comments({
         setLoading(false);
       };
       script.addEventListener("error", onError);
-
       host.appendChild(script);
 
       const poll = window.setInterval(() => {
@@ -123,7 +112,7 @@ export default function Comments({
         if (!hasFrame) onError();
       }, Math.max(1000, timeoutMs));
 
-      // Cleanup uses captured host & listeners
+      // Cleanup
       return () => {
         script.removeEventListener("error", onError);
         window.clearInterval(poll);
@@ -170,10 +159,9 @@ export default function Comments({
       cleanup?.();
       if (host) while (host.firstChild) host.removeChild(host.firstChild);
     };
-    // Re-run when route changes so utterances binds to the new page's issue
-  }, [readyToMount, mountUtterances, router.asPath]);
+  }, [readyToMount, mountUtterances, router.asPath]); // re-run on route change
 
-  // Keep iframe theme synced with <html class="dark"> OR system preference (debounced via rAF)
+  // Keep iframe theme synced (debounced via rAF)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -197,13 +185,13 @@ export default function Comments({
         attributes: true,
         attributeFilter: ["class"],
       });
-      // Fire once to ensure initial sync if mount happened pre-observe
+      // ensure initial sync
       schedule(document.documentElement.classList.contains("dark"));
     } else if (window.matchMedia) {
       const mql = window.matchMedia("(prefers-color-scheme: dark)");
       const onChange = () => schedule(mql.matches);
       mql.addEventListener?.("change", onChange);
-      // Safari legacy fallback
+      // Safari legacy
       // @ts-expect-error
       mql.addListener?.(onChange);
       mqCleanup = () => {
@@ -211,7 +199,6 @@ export default function Comments({
         // @ts-expect-error
         mql.removeListener?.(onChange);
       };
-      // Also a one-shot to apply current system state
       schedule(mql.matches);
     }
 
