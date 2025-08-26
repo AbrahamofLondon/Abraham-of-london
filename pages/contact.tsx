@@ -127,7 +127,7 @@ export default function ContactPage() {
       </Head>
 
       <motion.main
-        className="relative min-h-screen py-20 bg-gray-50 flex items-center justify-center overflow-hidden"
+        className="relative min-h-screen overflow-hidden bg-gray-50 py-20"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -138,13 +138,13 @@ export default function ContactPage() {
         </div>
 
         {/* Decorative element (served from /public) */}
-        <div className="absolute top-10 right-10 w-40 h-40 md:w-64 md:h-64 opacity-40 z-0">
+        <div className="absolute right-10 top-10 z-0 h-40 w-40 opacity-40 md:h-64 md:w-64">
           <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" loading="lazy" />
         </div>
 
-        <section className="w-full max-w-3xl mx-auto px-4 z-10">
-          <h1 className="text-4xl md:text-5xl font-serif text-forest mb-6 text-center">Get in Touch</h1>
-          <p className="text-lg text-deepCharcoal/80 mb-8 text-center">
+        <section className="z-10 mx-auto w-full max-w-3xl px-4">
+          <h1 className="mb-6 text-center font-serif text-4xl text-forest md:text-5xl">Get in Touch</h1>
+          <p className="mb-8 text-center text-lg text-deepCharcoal/80">
             Reach out for speaking engagements, book signings, media inquiries, or collaborations.
           </p>
 
@@ -153,7 +153,7 @@ export default function ContactPage() {
             variants={formVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6 bg-white p-6 md:p-8 rounded-2xl shadow-xl"
+            className="space-y-6 rounded-2xl bg-white p-6 shadow-xl md:p-8"
             aria-describedby="form-status"
             noValidate
           >
@@ -165,64 +165,28 @@ export default function ContactPage() {
             </p>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                disabled={isSubmitting}
-                autoComplete="name"
-                /* --- only change: explicit light/dark colors --- */
-                className="mt-1 w-full rounded-[10px] border border-lightGrey
-                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
-                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
-                           dark:border-white/20"
-              />
+              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
+                Name
+              </label>
+              <input id="name" name="name" type="text" required autoComplete="name" disabled={isSubmitting} className="aol-input" />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                disabled={isSubmitting}
-                autoComplete="email"
-                /* --- only change: explicit light/dark colors --- */
-                className="mt-1 w-full rounded-[10px] border border-lightGrey
-                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
-                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
-                           dark:border-white/20"
-              />
+              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
+                Email
+              </label>
+              <input id="email" name="email" type="email" required autoComplete="email" disabled={isSubmitting} className="aol-input" />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">Message</label>
-              <textarea
-                id="message"
-                name="message"
-                required
-                rows={5}
-                disabled={isSubmitting}
-                /* --- only change: explicit light/dark colors --- */
-                className="mt-1 w-full rounded-[10px] border border-lightGrey
-                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
-                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
-                           dark:border-white/20"
-              />
+              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
+                Message
+              </label>
+              <textarea id="message" name="message" required rows={5} disabled={isSubmitting} className="aol-textarea" />
             </motion.div>
 
             <motion.div variants={itemVariants} className="text-center">
-              <button
-                type="submit"
-                className="inline-block px-6 py-3 bg-forest text-cream rounded-full hover:bg-forest/90 disabled:opacity-50"
-                disabled={isSubmitting}
-              >
+              <button type="submit" className="aol-btn" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Send Message"}
               </button>
             </motion.div>
@@ -232,11 +196,7 @@ export default function ContactPage() {
               aria-live="polite"
               variants={itemVariants}
               className={`text-center font-medium ${
-                formStatus === "success"
-                  ? "text-green-700"
-                  : formStatus === "error"
-                  ? "text-red-700"
-                  : "text-transparent"
+                formStatus === "success" ? "text-green-700" : formStatus === "error" ? "text-red-700" : "text-transparent"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
