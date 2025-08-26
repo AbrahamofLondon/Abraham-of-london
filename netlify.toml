@@ -25,11 +25,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# API proxy
-[[redirects]]
-  from = "/api/subscribe"
-  to   = "/.netlify/functions/subscribe"
-  status = 200
 
 # Canonical host: redirect netlify.app to the main domain
 [[redirects]]

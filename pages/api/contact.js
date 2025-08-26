@@ -1,71 +1,69 @@
-export default async function handler(req, res) {
+import type { NextApiRequest, NextApiResponse } from "next";
+
+type Ok = { ok: true; message: string };
+type Err = { ok: false; error: string };
+
+function isEmail(s: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
+function esc(s: string) {
+  return String(s).replace(/[&<>"']/g, (m) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]!)
+  );
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Err>) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ message: "Method Not Allowed" });
+    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
   }
 
   try {
-    // Accept JSON or urlencoded
-    const body = req.body ?? {};
+    // Next’s body parser handles JSON & urlencoded by default
+    const body = (req.body ?? {}) as Record<string, unknown>;
     const name = String(body.name || "").trim().slice(0, 100);
     const email = String(body.email || "").trim().toLowerCase();
     const subject = String(body.subject || "Website contact").trim().slice(0, 120);
     const message = String(body.message || "").trim();
-    const honeypot = String(body["bot-field"] || body.botField || "").trim();
+    const honeypot = String((body as any)["bot-field"] || (body as any).botField || "").trim();
 
-    // Honeypot: quietly succeed if a bot fills it
-    if (honeypot) {
-      return res.status(200).json({ ok: true, message: "Message sent successfully!" });
-    }
+    // Honeypot: silently succeed if bots fill it
+    if (honeypot) return res.status(200).json({ ok: true, message: "Message received." });
 
-    // Basic validation
-    if (!email || !message) {
-      return res.status(400).json({ message: "Required: email, message" });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
-    if (message.length < 5) {
-      return res.status(400).json({ message: "Message is too short" });
-    }
+    // Validation
+    if (!email || !message) return res.status(400).json({ ok: false, error: "Required: email and message." });
+    if (!isEmail(email))   return res.status(400).json({ ok: false, error: "Invalid email format." });
+    if (message.length < 10) return res.status(400).json({ ok: false, error: "Message too short." });
 
-    // Minimal masked dev log (never log secrets)
     if (process.env.NODE_ENV !== "production") {
-      const maskedEmail = email.replace(/^(.).+(@.*)$/, "$1***$2");
-      console.log("[contact] submission:", {
-        name: name || "—",
-        email: maskedEmail,
-        subject,
-        messageLength: message.length,
-      });
+      const masked = email.replace(/^(.).+(@.*)$/, "$1***$2");
+      console.log("[contact] name=%s email=%s len=%d", name || "—", masked, message.length);
     }
 
-    // Optional: send via Resend if configured
+    // Optional provider: Resend
     if ((process.env.CONTACT_PROVIDER || "").toLowerCase() === "resend") {
-      const apiKey = process.env.RESEND_API_KEY;
+      const apiKey = process.env.RESEND_API_KEY || "";
       const to = process.env.MAIL_TO || "info@abrahamoflondon.org";
       const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
-
-      if (!apiKey) {
-        return res.status(500).json({ message: "Email provider not configured" });
-      }
+      if (!apiKey) return res.status(500).json({ ok: false, error: "Email provider not configured." });
 
       const html = `
         <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.5;color:#111">
           <h2>New website inquiry</h2>
-          <p><strong>Name:</strong> ${escapeHtml(name || "—")}</p>
-          <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-          <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+          <p><strong>Name:</strong> ${esc(name || "—")}</p>
+          <p><strong>Email:</strong> ${esc(email)}</p>
+          <p><strong>Subject:</strong> ${esc(subject)}</p>
           <p><strong>Message:</strong></p>
-          <pre style="white-space:pre-wrap">${escapeHtml(message)}</pre>
-        </div>`.trim();
-
-      const headers = new Headers({ "Content-Type": "application/json" });
-      headers.set("Authorization", `Bearer ${apiKey}`);
+          <pre style="white-space:pre-wrap">${esc(message)}</pre>
+        </div>
+      `.trim();
 
       const r = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers,
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           from,
           to,
@@ -75,28 +73,18 @@ export default async function handler(req, res) {
         }),
       });
 
+      // Resend returns JSON with error details on 4xx/5xx
       if (!r.ok) {
-        console.error("[contact] Resend send failed with status:", r.status);
-        return res.status(502).json({ message: "Email provider error" });
+        let detail = "";
+        try { detail = (await r.json())?.error?.message || ""; } catch {}
+        console.error("[contact] Resend failed %s %s", r.status, detail);
+        return res.status(502).json({ ok: false, error: "Email provider error." });
       }
     }
 
     return res.status(200).json({ ok: true, message: "Message sent successfully!" });
-  } catch {
-    // Never include request/secret details in errors
-    return res.status(500).json({ message: "Internal Server Error" });
+  } catch (e) {
+    console.error("[contact] unexpected error", e);
+    return res.status(500).json({ ok: false, error: "Internal Server Error." });
   }
-}
-
-// Basic HTML escaping for email body
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[m])
-  );
 }
