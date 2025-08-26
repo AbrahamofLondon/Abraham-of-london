@@ -16,85 +16,56 @@ const SITE_URL = (
 const abs = (path: string): string => {
   if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
-  return SITE_URL ? new URL(path, SITE_URL).toString() : path;
+  return new URL(path, SITE_URL).toString();
 };
 
-// London-first date/animation variants unchanged
+// Animations
 const containerVariants = {
   hidden: { opacity: 0, scale: 0.98 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" },
-  },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" } },
 };
-
 const formVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 },
-  },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 } },
 };
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1 },
-};
+const itemVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
 export default function ContactPage() {
-  const [formStatus, setFormStatus] = useState<
-    "idle" | "submitting" | "success" | "error"
-  >("idle");
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formError, setFormError] = useState<string>("");
 
   const structuredData = useMemo(() => {
     const contactPageSchema = {
       "@context": "https://schema.org",
       "@type": "ContactPage",
       mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/contact` },
-      description:
-        "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
+      description: "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
       url: `${SITE_URL}/contact`,
-      potentialAction: {
-        "@type": "CommunicateAction",
-        target: { "@type": "EntryPoint", inLanguage: "en" },
-      },
-      contactPoint: {
-        "@type": "ContactPoint",
-        contactType: "Customer service",
-        areaServed: "Global",
-        email: siteConfig.email,
-      },
+      potentialAction: { "@type": "CommunicateAction", target: { "@type": "EntryPoint", inLanguage: "en" } },
+      contactPoint: { "@type": "ContactPoint", contactType: "Customer service", areaServed: "Global", email: siteConfig.email },
     };
-
     const breadcrumb = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Contact",
-          item: `${SITE_URL}/contact`,
-        },
+        { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
       ],
     };
-
     return [contactPageSchema, breadcrumb];
   }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setFormError("");
     setFormStatus("submitting");
+
     try {
       const form = event.currentTarget;
       const formData = new FormData(form);
 
-      // Honeypot: if filled, quietly succeed
-      const honeypot = String(formData.get("bot-field") || "").trim();
-      if (honeypot) {
+      // Honeypot
+      if (String(formData.get("bot-field") || "").trim()) {
         setFormStatus("success");
         form.reset();
         return;
@@ -114,12 +85,16 @@ export default function ContactPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const json = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+
+      if (!r.ok || !json?.ok) throw new Error(json?.error || `HTTP ${r.status}`);
+
       setFormStatus("success");
-      setTimeout(() => setFormStatus("idle"), 5000);
       form.reset();
-    } catch (err) {
-      console.error("Form submission failed:", err);
+      setTimeout(() => setFormStatus("idle"), 5000);
+    } catch (err: any) {
+      console.error("Form submission failed:", err?.message || err);
+      setFormError(err?.message || "Failed to send message. Please try again.");
       setFormStatus("error");
     }
   };
@@ -136,28 +111,18 @@ export default function ContactPage() {
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
+
         <meta property="og:title" content="Contact | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Reach out for collaborations, speaking engagements, and media opportunities."
-        />
+        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and media opportunities." />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
-        <meta
-          property="og:image"
-          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
-        />
+        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
         <meta property="og:type" content="website" />
+
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:image"
-          content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")}
-        />
-        {structuredData.map((schema, index) => (
-          <script
-            key={index}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
+        <meta name="twitter:image" content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")} />
+
+        {structuredData.map((schema, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
         ))}
       </Head>
 
@@ -172,24 +137,15 @@ export default function ContactPage() {
           <div className="pattern-bg" />
         </div>
 
-        {/* Decorative element (fixed path) */}
+        {/* Decorative element (served from /public) */}
         <div className="absolute top-10 right-10 w-40 h-40 md:w-64 md:h-64 opacity-40 z-0">
-          <Image
-            src="/assets/images/contact-element.svg"
-            alt=""
-            fill
-            className="object-contain"
-            loading="lazy"
-          />
+          <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" loading="lazy" />
         </div>
 
         <section className="w-full max-w-3xl mx-auto px-4 z-10">
-          <h1 className="text-4xl md:text-5xl font-serif text-forest mb-6 text-center">
-            Get in Touch
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-serif text-forest mb-6 text-center">Get in Touch</h1>
           <p className="text-lg text-deepCharcoal/80 mb-8 text-center">
-            Reach out for speaking engagements, book signings, media inquiries,
-            or collaborations.
+            Reach out for speaking engagements, book signings, media inquiries, or collaborations.
           </p>
 
           <motion.form
@@ -204,15 +160,12 @@ export default function ContactPage() {
             {/* Honeypot */}
             <p className="hidden">
               <label>
-                Don’t fill this out if you’re human:{" "}
-                <input name="bot-field" />
+                Don’t fill this out if you’re human: <input name="bot-field" />
               </label>
             </p>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
-                Name
-              </label>
+              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">Name</label>
               <input
                 type="text"
                 id="name"
@@ -225,9 +178,7 @@ export default function ContactPage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">Email</label>
               <input
                 type="email"
                 id="email"
@@ -240,9 +191,7 @@ export default function ContactPage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
-                Message
-              </label>
+              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">Message</label>
               <textarea
                 id="message"
                 name="message"
@@ -268,11 +217,9 @@ export default function ContactPage() {
               aria-live="polite"
               variants={itemVariants}
               className={`text-center font-medium ${
-                formStatus === "success"
-                  ? "text-green-700"
-                  : formStatus === "error"
-                  ? "text-red-700"
-                  : "text-transparent"
+                formStatus === "success" ? "text-green-700"
+                : formStatus === "error" ? "text-red-700"
+                : "text-transparent"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
@@ -281,7 +228,7 @@ export default function ContactPage() {
               {formStatus === "success"
                 ? "Message sent successfully!"
                 : formStatus === "error"
-                ? "Failed to send message. Please try again."
+                ? (formError || "Failed to send message. Please try again.")
                 : " "}
             </motion.p>
           </motion.form>
