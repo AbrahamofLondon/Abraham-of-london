@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/siteConfig";
 
-// ---------- Config & Helpers ----------
+/* ---------- Config & Helpers ---------- */
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
   process.env.DEPLOY_PRIME_URL ||
-  "https://abraham-of-london.netlify.app"
+  "https://www.abrahamoflondon.org"
 ).replace(/\/$/, "");
 
 const abs = (path: string): string => {
@@ -19,7 +19,7 @@ const abs = (path: string): string => {
   return new URL(path, SITE_URL).toString();
 };
 
-// Animations
+/* ---------- Animations ---------- */
 const containerVariants = {
   hidden: { opacity: 0, scale: 0.98 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" } },
@@ -42,7 +42,12 @@ export default function ContactPage() {
       description: "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
       url: `${SITE_URL}/contact`,
       potentialAction: { "@type": "CommunicateAction", target: { "@type": "EntryPoint", inLanguage: "en" } },
-      contactPoint: { "@type": "ContactPoint", contactType: "Customer service", areaServed: "Global", email: siteConfig.email },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "Customer service",
+        areaServed: "Global",
+        email: siteConfig.email,
+      },
     };
     const breadcrumb = {
       "@context": "https://schema.org",
@@ -102,7 +107,7 @@ export default function ContactPage() {
   const isSubmitting = formStatus === "submitting";
 
   return (
-    <Layout>
+    <Layout pageTitle="Contact" hideCTA>
       <Head>
         <title>Contact | {siteConfig.author}</title>
         <meta
@@ -126,20 +131,23 @@ export default function ContactPage() {
         ))}
       </Head>
 
-      <motion.main
+      {/* NOTE: do NOT nest another <main>; Layout already renders the main element */}
+      <motion.div
         className="relative min-h-screen overflow-hidden bg-gray-50 py-20"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         {/* Background pattern */}
-        <div className="absolute inset-0 z-0 opacity-10">
+        <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
           <div className="pattern-bg" />
         </div>
 
         {/* Decorative element (served from /public) */}
-        <div className="absolute right-10 top-10 z-0 h-40 w-40 opacity-40 md:h-64 md:w-64">
-          <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" loading="lazy" />
+        <div className="absolute right-10 top-10 z-0 pointer-events-none">
+          <div className="relative h-40 w-40 opacity-40 md:h-64 md:w-64">
+            <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" priority={false} />
+          </div>
         </div>
 
         <section className="z-10 mx-auto w-full max-w-3xl px-4">
@@ -210,7 +218,7 @@ export default function ContactPage() {
             </motion.p>
           </motion.form>
         </section>
-      </motion.main>
+      </motion.div>
     </Layout>
   );
 }
