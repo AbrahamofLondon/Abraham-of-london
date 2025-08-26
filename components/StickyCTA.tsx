@@ -17,8 +17,12 @@ type Props = {
 
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
-const MAX_CONTENT_PX = 1280;      // Tailwind max-w-7xl (80rem)
-const CTA_WIDTH = 360;            // Approximate panel width
+
+// Layout constraints (align with Layout max-w-7xl)
+const CONTENT_PX = 1280;     // 80rem * 16
+const GUTTER_PX  = 16;       // min visual padding
+const MIN_PANEL  = 300;      // smallest useful width when docked/centered
+const MAX_PANEL  = 380;      // cap so it never feels bulky
 
 export default function StickyCTA({
   showAfter = 480,
@@ -31,43 +35,57 @@ export default function StickyCTA({
   className,
 }: Props) {
   const ref = React.useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible]     = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
-  const [pos, setPos] = React.useState<{ left: number | "auto"; right: number | "auto"; width: string; transform?: string }>({
+
+  const [panelW, setPanelW] = React.useState<number>(MIN_PANEL);
+  const [pos, setPos] = React.useState<{ left: number | "auto"; right: number | "auto" }>({
     left: "auto",
-    right: 16,
-    width: `${CTA_WIDTH}px`,
+    right: GUTTER_PX,
   });
 
   // read persisted dismissal
   React.useEffect(() => {
-    try {
-      setDismissed(localStorage.getItem(STORAGE_KEY) === "1");
-    } catch {}
+    try { setDismissed(localStorage.getItem(STORAGE_KEY) === "1"); } catch {}
   }, []);
 
   // publish height → CSS var so <main> reserves space
   const publishHeight = React.useCallback(() => {
     if (!ref.current) return;
-    const h = ref.current.getBoundingClientRect().height;
-    document.documentElement.style.setProperty("--sticky-cta-h", `${h + 16}px`);
+    const h = Math.ceil(ref.current.getBoundingClientRect().height) + 16; // +breathing room
+    document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
   }, []);
 
-  // compute adaptive position and width
+  // compute adaptive position + width
   const computePosition = React.useCallback(() => {
-    const w = typeof window !== "undefined" ? window.innerWidth : 0;
-    const gutter = Math.max(16, (w - MAX_CONTENT_PX) / 2 + 16);
-    if (w < 768) {
-      // mobile: center with full width
-      setPos({ left: 16, right: 16, width: "92vw" });
-    } else if (gutter >= CTA_WIDTH) {
-      // desktop: dock to right if gutter is wide enough
-      setPos({ left: "auto", right: Math.floor(gutter), width: `${CTA_WIDTH}px` });
+    const vw = typeof window !== "undefined" ? window.innerWidth : 0;
+
+    // Mobile/tablet → centered, edge-aware
+    if (vw < 768) {
+      const w = Math.max(MIN_PANEL, Math.min(vw - 2 * GUTTER_PX, MAX_PANEL));
+      setPanelW(w);
+      setPos({ left: GUTTER_PX, right: GUTTER_PX });
+      return;
+    }
+
+    // Desktop: side gutter outside CONTENT_PX
+    const sideGutter = Math.max(0, (vw - CONTENT_PX) / 2);
+
+    // How much space do we really have if we dock (leave a small pad)?
+    const dockable = Math.floor(sideGutter - GUTTER_PX);
+
+    if (dockable >= MIN_PANEL) {
+      // Dock to right gutter and fit to available space (but cap)
+      const w = Math.min(MAX_PANEL, dockable);
+      setPanelW(w);
+      setPos({ left: "auto", right: dockable });
     } else {
-      // desktop: center with reduced width
-      const centeredWidth = Math.min(CTA_WIDTH, w - 32); // 16px padding on each side
-      setPos({ left: "50%", right: "auto", width: `${centeredWidth}px`, transform: "translateX(-50%)" });
+      // Not enough gutter → center above content, capped width
+      const w = Math.min(MAX_PANEL, Math.max(MIN_PANEL, vw - 2 * GUTTER_PX));
+      const left = Math.max(GUTTER_PX, Math.floor((vw - w) / 2));
+      setPanelW(w);
+      setPos({ left, right: "auto" });
     }
   }, []);
 
@@ -78,15 +96,14 @@ export default function StickyCTA({
 
     const onScroll = () => {
       const y = window.scrollY || 0;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setVisible(y > showAfter);
-          setCollapsed(y > showAfter && y - lastY > 6);
-          lastY = y;
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setVisible(y > showAfter);
+        setCollapsed(y > showAfter && y - lastY > 6); // collapse when scrolling down
+        lastY = y;
+        ticking = false;
+      });
     };
 
     computePosition();
@@ -102,22 +119,31 @@ export default function StickyCTA({
     };
   }, [showAfter, computePosition]);
 
-  // update css var on (un)collapse/resize
+  // keep reserved height in sync
   React.useEffect(() => {
+    if (!visible) {
+      document.documentElement.style.setProperty("--sticky-cta-h", "0px");
+      return;
+    }
     publishHeight();
-  }, [collapsed, visible, publishHeight]);
+  }, [visible, collapsed, panelW, publishHeight]);
+
+  // one more pass post-mount (fonts/layout settle)
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      computePosition();
+      publishHeight();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [computePosition, publishHeight]);
 
   // cleanup css var on unmount
   React.useEffect(() => {
-    return () => {
-      document.documentElement.style.setProperty("--sticky-cta-h", "0px");
-    };
+    return () => { document.documentElement.style.setProperty("--sticky-cta-h", "0px"); };
   }, []);
 
   const onDismiss = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {}
+    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
     setDismissed(true);
     document.documentElement.style.setProperty("--sticky-cta-h", "0px");
   };
@@ -133,7 +159,11 @@ export default function StickyCTA({
         "transition-[transform,opacity] duration-200",
         className
       )}
-      style={{ ...pos }}
+      style={{
+        width: `${panelW}px`,
+        right: typeof pos.right === "number" ? pos.right : undefined,
+        left:  typeof pos.left  === "number" ? pos.left  : undefined,
+      }}
     >
       <div
         ref={ref}
@@ -143,6 +173,7 @@ export default function StickyCTA({
           collapsed && "px-3 py-2 sm:px-3 sm:py-2"
         )}
       >
+        {/* Dismiss */}
         <button
           type="button"
           onClick={onDismiss}
@@ -156,6 +187,7 @@ export default function StickyCTA({
         </button>
 
         <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
+          {/* Phone */}
           <a
             href={phoneHref}
             className={clsx(
@@ -205,34 +237,35 @@ export default function StickyCTA({
                 </a>
               )}
 
-              {!collapsed && (isInternal(secondaryHref) ? (
-                <Link
-                  href={secondaryHref}
-                  prefetch={false}
-                  className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                  )}
-                  aria-label={secondaryLabel}
-                >
-                  {secondaryLabel}
-                </Link>
-              ) : (
-                <a
-                  href={secondaryHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                    "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                  )}
-                  aria-label={secondaryLabel}
-                >
-                  {secondaryLabel}
-                </a>
-              ))}
+              {!collapsed &&
+                (isInternal(secondaryHref) ? (
+                  <Link
+                    href={secondaryHref}
+                    prefetch={false}
+                    className={clsx(
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
+                    )}
+                    aria-label={secondaryLabel}
+                  >
+                    {secondaryLabel}
+                  </Link>
+                ) : (
+                  <a
+                    href={secondaryHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={clsx(
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
+                    )}
+                    aria-label={secondaryLabel}
+                  >
+                    {secondaryLabel}
+                  </a>
+                ))}
             </div>
           </div>
         </div>
