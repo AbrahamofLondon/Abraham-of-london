@@ -14,6 +14,8 @@ type LayoutProps = {
   pageTitle?: string;
   hideSocialStrip?: boolean;
   footerVariant?: "light" | "dark";
+  /** Hide the sticky CTA on specific pages (e.g., /contact, /newsletter) */
+  hideCTA?: boolean;
 };
 
 export default function Layout({
@@ -21,6 +23,7 @@ export default function Layout({
   pageTitle,
   hideSocialStrip,
   footerVariant = "light",
+  hideCTA = false,
 }: LayoutProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -28,18 +31,19 @@ export default function Layout({
 
   const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
 
-  // Lock body scroll when mobile nav open + focus first item
+  // Lock body scroll when mobile nav is open + focus first item
   React.useEffect(() => {
     const root = document.documentElement;
-    const prev = root.style.overflow;
-    root.style.overflow = open ? "hidden" : prev;
+    const prev = root.style.overflow || "";
+    if (open) root.style.overflow = "hidden";
+    else root.style.overflow = prev;
     if (open) firstMobileLinkRef.current?.focus();
     return () => {
       root.style.overflow = prev;
     };
   }, [open]);
 
-  // Close drawer on route changes
+  // Close drawer on route change
   React.useEffect(() => {
     const handleRoute = () => setOpen(false);
     router.events.on("routeChangeStart", handleRoute);
@@ -99,11 +103,11 @@ export default function Layout({
       <header className="sticky top-0 z-40 border-b border-deepCharcoal/10 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-black/50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
           {/* Brand */}
-          <Link href="/" className="group inline-flex items-baseline gap-2">
+          <Link href="/" className="group inline-flex items-baseline gap-2" prefetch={false}>
             <span className="font-serif text-xl font-semibold tracking-wide text-deepCharcoal md:text-2xl dark:text-cream">
               {siteConfig.title}
             </span>
-            <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block">
+            <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block" aria-hidden="true">
               EST. MMXXIV
             </span>
           </Link>
@@ -124,6 +128,7 @@ export default function Layout({
                           ? "text-deepCharcoal dark:text-cream"
                           : "text-gray-700 hover:text-deepCharcoal dark:text-gray-300 dark:hover:text-cream",
                       ].join(" ")}
+                      prefetch={false}
                     >
                       {item.label}
                       <span
@@ -145,6 +150,7 @@ export default function Layout({
             <Link
               href="/contact"
               className="rounded-full bg-softGold px-5 py-2 text-sm font-medium text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
+              prefetch={false}
             >
               Enquire
             </Link>
@@ -172,10 +178,7 @@ export default function Layout({
         </div>
 
         {/* Mobile Drawer */}
-        <div
-          id="mobile-nav"
-          className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg-black`}
-        >
+        <div id="mobile-nav" className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg-black`}>
           <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile">
             <ul className="grid gap-2">
               {NAV.map((item, idx) => {
@@ -193,6 +196,7 @@ export default function Layout({
                           ? "bg-gray-100 text-deepCharcoal dark:bg-gray-800 dark:text-cream"
                           : "text-gray-800 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700",
                       ].join(" ")}
+                      prefetch={false}
                     >
                       {item.label}
                     </Link>
@@ -204,6 +208,7 @@ export default function Layout({
                   href="/contact"
                   onClick={() => setOpen(false)}
                   className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-medium text-deepCharcoal transition hover:brightness-95"
+                  prefetch={false}
                 >
                   Enquire
                 </Link>
@@ -222,13 +227,13 @@ export default function Layout({
         </div>
       )}
 
-      {/* Main */}
+      {/* Main — padding-bottom reserved in globals.css via --sticky-cta-h */}
       <main id="main-content" className="min-h-screen bg-white dark:bg-black">
         {children}
       </main>
 
-      {/* Sticky CTA */}
-      <StickyCTA showAfter={420} />
+      {/* Sticky CTA — mount ONCE here */}
+      {!hideCTA && <StickyCTA showAfter={420} />}
 
       {/* Footer */}
       <footer
@@ -252,7 +257,7 @@ export default function Layout({
               <ul className="mt-3 grid gap-2 text-sm">
                 {NAV.map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className="transition hover:text-softGold">
+                    <Link href={item.href} className="transition hover:text-softGold" prefetch={false}>
                       {item.label}
                     </Link>
                   </li>
@@ -269,12 +274,12 @@ export default function Layout({
                   </a>
                 </li>
                 <li>
-                  <Link href="/privacy" className="transition hover:text-softGold">
+                  <Link href="/privacy" className="transition hover:text-softGold" prefetch={false}>
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="transition hover:text-softGold">
+                  <Link href="/terms" className="transition hover:text-softGold" prefetch={false}>
                     Terms of Service
                   </Link>
                 </li>
