@@ -1,70 +1,76 @@
+// components/SocialFollowStrip.tsx
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import clsx from "clsx";
 
-// --- Types ---
+/* ---------- Types ---------- */
 type Variant = "light" | "dark";
 type Props = {
   variant?: Variant;
   className?: string;
-  /** Optional override — if present, uses these instead of siteConfig/social defaults */
   itemsOverride?: SocialItem[];
 };
 
-/** Minimal item shape your siteConfig can provide */
 export type SocialItem = {
   href: string;
-  label: string;                  // e.g., "X", "Instagram", "LinkedIn"
+  label: string;
   kind?: "x" | "instagram" | "facebook" | "linkedin" | "youtube" | "mail" | "phone" | "whatsapp";
 };
 
-// --- Canonicalized defaults (from the links you sent) ---
+/* ---------- Links (defaults) ---------- */
 const DEFAULT_ITEMS: SocialItem[] = [
   { href: "https://x.com/AbrahamAda48634", label: "X",           kind: "x" },
   { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram",  kind: "instagram" },
   { href: "https://www.facebook.com/share/16tvsnTgRG/", label: "Facebook",   kind: "facebook" },
-  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", label: "LinkedIn",   kind: "linkedin" },
+  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", label: "LinkedIn", kind: "linkedin" },
   { href: "https://www.youtube.com/@abrahamoflondon", label: "YouTube",    kind: "youtube" },
   { href: "mailto:info@abrahamoflondon.org",          label: "Email",      kind: "mail" },
   { href: "tel:+442086225909",                        label: "Call",       kind: "phone" },
-  // WhatsApp is often only in siteConfig; include here if desired:
   // { href: "https://wa.me/447496334022",               label: "WhatsApp",   kind: "whatsapp" },
 ];
+
+/* ---------- Brand colors (solid) ---------- */
+/* Picked for recognizability + contrast on white */
+const BRAND_HEX: Record<NonNullable<SocialItem["kind"]>, string> = {
+  x: "#000000",
+  instagram: "#E4405F", // solid alternative to gradient
+  facebook: "#1877F2",
+  linkedin: "#0A66C2",
+  youtube: "#FF0000",
+  mail: "#EA4335",      // Gmail red; generic mail color
+  phone: "#16A34A",     // Tailwind green-600
+  whatsapp: "#25D366",
+};
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) => href.startsWith("mailto:") || href.startsWith("tel:");
 
 export default function SocialFollowStrip({ variant = "light", className = "", itemsOverride }: Props) {
-  const items = (itemsOverride && itemsOverride.length ? itemsOverride : DEFAULT_ITEMS).filter(Boolean);
-
-  const surface = variant === "dark"
-    ? "from-black/40 to-black/20 ring-white/10"
-    : "from-white/90 to-warmWhite/90 ring-deepCharcoal/10";
-
-  const text = variant === "dark" ? "text-cream/85" : "text-deepCharcoal/80";
-  const brand = variant === "dark" ? "text-cream" : "text-deepCharcoal";
-
-  const btn = variant === "dark"
-    ? "bg-white/10 text-cream ring-white/20 hover:bg-white/20"
-    : "bg-deepCharcoal text-cream ring-deepCharcoal/20 hover:bg-forest hover:text-cream";
+  const items = (itemsOverride?.length ? itemsOverride : DEFAULT_ITEMS).filter(Boolean);
 
   return (
     <section className={clsx("mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12", className)}>
-      <div className={clsx("rounded-2xl bg-gradient-to-br", surface, "backdrop-blur-md ring-2 shadow-2xl")}>
+      {/* Solid white surface as requested */}
+      <div className="rounded-2xl bg-white ring-1 ring-lightGrey shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p className={clsx("text-base sm:text-lg font-serif leading-relaxed", text)}>
+          <p className={clsx("text-base sm:text-lg font-serif leading-relaxed", "text-deepCharcoal/80")}>
             Join the conversation — follow{" "}
-            <span className={clsx("font-semibold", brand)}>Abraham of London</span>
+            <span className="font-semibold text-deepCharcoal">Abraham of London</span>
           </p>
 
           <nav aria-label="Social links" className="flex flex-wrap items-center gap-3 sm:gap-4">
             {items.map(({ href, label, kind }) => {
-              const content = (
+              const bg = (kind && BRAND_HEX[kind]) || "#1F2937"; // fallback: gray-800
+              const pill = (
                 <span
                   className={clsx(
-                    "inline-flex items-center gap-2 rounded-full px-3 py-2 shadow-lg ring-1 transition-all duration-300",
-                    btn
+                    "inline-flex items-center gap-2 rounded-full px-3 py-2",
+                    "text-white shadow-lg ring-1 ring-black/5",
+                    "transition-all duration-200 hover:brightness-90"
                   )}
+                  style={{ backgroundColor: bg }}
                 >
                   <Icon kind={kind} aria-hidden="true" />
                   <span className="text-sm font-serif">{label}</span>
@@ -82,11 +88,10 @@ export default function SocialFollowStrip({ variant = "light", className = "", i
                     target={ext ? "_blank" : undefined}
                     rel={ext ? "noopener noreferrer" : undefined}
                   >
-                    {content}
+                    {pill}
                   </a>
                 );
               }
-
               return (
                 <Link
                   key={`${label}-${href}`}
@@ -95,7 +100,7 @@ export default function SocialFollowStrip({ variant = "light", className = "", i
                   className="group inline-flex items-center"
                   prefetch={false}
                 >
-                  {content}
+                  {pill}
                 </Link>
               );
             })}
@@ -106,7 +111,7 @@ export default function SocialFollowStrip({ variant = "light", className = "", i
   );
 }
 
-/* ---------------- Icons (inline SVG; no /public assets needed) ---------------- */
+/* ---------------- Icons (inherit currentColor -> white) ---------------- */
 
 function Icon({ kind, ...props }: { kind?: SocialItem["kind"] } & React.SVGProps<SVGSVGElement>) {
   switch (kind) {
@@ -123,7 +128,6 @@ function Icon({ kind, ...props }: { kind?: SocialItem["kind"] } & React.SVGProps
 }
 
 function XIcon(props: React.SVGProps<SVGSVGElement>) {
-  // Simple "X" glyph; uses currentColor
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke="currentColor" strokeWidth="2" {...props}>
       <path d="M4 4l16 16M20 4L4 20" />
@@ -140,7 +144,7 @@ function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
 function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} fill="currentColor" {...props}>
-    <path d="M13.5 22v-8h2.7l.4-3h-3.1V8.4c0-.9.3-1.5 1.6-1.5h1.6V4.1C16.4 4 15.5 4 14.5 4c-2.5 0-4.2 1.5-4.2 4.1V11H7.5v3h2.8v8h3.2z"/>
+      <path d="M13.5 22v-8h2.7l.4-3h-3.1V8.4c0-.9.3-1.5 1.6-1.5h1.6V4.1C16.4 4 15.5 4 14.5 4c-2.5 0-4.2 1.5-4.2 4.1V11H7.5v3h2.8v8h3.2z"/>
     </svg>
   );
 }
@@ -175,7 +179,6 @@ function PhoneIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 function WhatsAppIcon(props: React.SVGProps<SVGSVGElement>) {
-  // Simple WA glyph; uses currentColor
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} fill="currentColor" {...props}>
       <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15.1L2 22l5.1-1.5A9.9 9.9 0 1 0 12.04 2zm0 2a7.9 7.9 0 0 1 0 15.8c-1.3 0-2.5-.3-3.6-.8l-.3-.1-3 .9.9-3.1-.1-.3A7.9 7.9 0 0 1 12.04 4zm-3.1 3.6c-.2 0-.5.1-.6.4-.2.3-.6 1-.6 1.8 0 .8.5 1.6.6 1.8.1.2 1.2 1.9 3 2.6 1.8.7 2.1.6 2.4.6.3 0 1.1-.5 1.2-1 .1-.5.1-.9 0-1-.1-.1-.2-.2-.5-.4-.3-.2-1.1-.6-1.3-.6-.2 0-.3 0-.5.3-.2.3-.6.9-.7 1-.1.1-.2.2-.4.1-.2-.1-.9-.3-1.7-1.1-.6-.6-1-1.3-1.1-1.5-.1-.2 0-.3.1-.4.1-.1.3-.3.4-.5.1-.2.2-.3.2-.5 0-.2-.5-1.3-.7-1.7-.2-.4-.4-.4-.6-.4z"/>
