@@ -1,3 +1,4 @@
+// components/SocialFollowStrip.tsx
 "use client";
 
 import * as React from "react";
@@ -36,13 +37,13 @@ const ICON_SRC: Record<NonNullable<SocialItem["kind"]>, string> = {
   instagram: "/assets/images/social/instagram.svg",
   facebook:  "/assets/images/social/facebook.svg",
   linkedin:  "/assets/images/social/linkedin.svg",
-  youtube:   "/assets/images/social/youtube.svg",   // add this file (see below)
+  youtube:   "/assets/images/social/youtube.svg",   // ensure this file exists
   mail:      "/assets/images/social/mail.svg",
   phone:     "/assets/images/social/phone.svg",
   whatsapp:  "/assets/images/social/whatsapp.svg",
 };
 
-/* ---------- Simple, flat brand colours for inline fallback ---------- */
+/* ---------- Flat brand colours for inline fallback ---------- */
 const BRAND_HEX: Record<NonNullable<SocialItem["kind"]>, string> = {
   x: "#000000",
   instagram: "#E4405F",
@@ -90,7 +91,6 @@ export default function SocialFollowStrip({ className = "", itemsOverride }: Pro
                   <a
                     key={`${label}-${href}`}
                     href={href}
-                    aria-label={label}
                     className="group inline-flex items-center"
                     target={ext ? "_blank" : undefined}
                     rel={ext ? "noopener noreferrer" : undefined}
@@ -103,7 +103,6 @@ export default function SocialFollowStrip({ className = "", itemsOverride }: Pro
                 <Link
                   key={`${label}-${href}`}
                   href={href}
-                  aria-label={label}
                   className="group inline-flex items-center"
                   prefetch={false}
                 >
@@ -133,16 +132,15 @@ function SolidIcon({
   const [broken, setBroken] = React.useState(false);
 
   if (!src || broken) {
-    // Inline fallback: a solid glyph in brand colour on transparent bg
     return <InlineGlyph kind={kind} size={size} title={label} />;
   }
 
-  // Use native <img> so we can gracefully fall back if missing
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
-      alt={label}
+      alt=""               // decorative (text label is present)
+      aria-hidden="true"   // avoid double announcement
       width={size}
       height={size}
       onError={() => setBroken(true)}
@@ -191,7 +189,7 @@ function InlineGlyph({
     case "youtube":
       return (
         <svg {...common} viewBox="0 0 24 24" fill={color}>
-          <path d="M23 12c0-2.1-.2-3.5-.5-4.4-.3-.8-.9-1.5-1.7-1.7C19.9 5.5 12 5.5 12 5.5s-7.9 0-8.8.4c-.8.2-1.4.9-1.7 1.7C1.2 8.5 1 9.9 1 12s.2 3.5.5 4.4c.3.8.9 1.5 1.7 1.7.9.4 8.8.4 8.8.4s7.9 0 8.8-.4c.8-.2 1.4-.9 1.7-1.7.3-.9.5-2.3.5-4.4z"/>
+          <path d="M23 12c0-2.1-.2-3.5-.5-4.4-.3-.8-.9-1.5-1.7-1.7C19.9 5.5 12 5.5 12 5.5s-7.9 0-8.8.4c-.8.2-1.4.9-1.7 1.7.3-.9.5-2.3.5-4.4z"/>
           <path d="M10 15l5.2-3L10 9v6z" fill="#fff"/>
         </svg>
       );
