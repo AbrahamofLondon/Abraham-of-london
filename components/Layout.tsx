@@ -228,7 +228,7 @@ export default function Layout({
       )}
 
       {/* Main — padding-bottom reserved in globals.css via --sticky-cta-h */}
-      <main id="main-content" className="min-h-screen bg-white dark:bg-black">
+      <main id="main-content" className="min-h-screen bg-white dark:bg-black container mx-auto px-4">
         {children}
       </main>
 
