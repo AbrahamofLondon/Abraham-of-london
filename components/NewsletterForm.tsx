@@ -1,20 +1,35 @@
-// components/NewsletterForm.tsx
 "use client";
 import * as React from "react";
-import { subscribe } from "@/lib/subscribe";
+import { subscribe as subscribeApi } from "@/lib/subscribe";
 
 export default function NewsletterForm() {
   const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<"idle"|"loading"|"ok"|"err">("idle");
+  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">("idle");
   const [msg, setMsg] = React.useState("");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    const value = email.trim();
+    if (!value) return;
+
     setStatus("loading");
     setMsg("");
+
     try {
-      const res = await subscribe(email);
+      const res =
+        typeof subscribeApi === "function"
+          ? await subscribeApi(value)
+          : await (async () => {
+              const r = await fetch("/api/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify({ email: value }),
+              });
+              const json = await r.json().catch(() => null);
+              if (!r.ok) throw new Error(json?.message || `HTTP ${r.status}`);
+              return { message: json?.message || "You’re subscribed. Welcome!" };
+            })();
+
       setStatus("ok");
       setMsg(res.message || "You’re subscribed. Welcome!");
       setEmail("");
@@ -25,29 +40,33 @@ export default function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex gap-2">
+    <form onSubmit={onSubmit} className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row" noValidate>
+      <label htmlFor="newsletter-email" className="sr-only">
+        Email address
+      </label>
       <input
+        id="newsletter-email"
         type="email"
         name="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
-        className="w-full rounded-md border px-3 py-2"
+        className="aol-input h-12 flex-1"
         aria-label="Email address"
+        autoComplete="email"
       />
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="rounded-md bg-forest px-4 py-2 text-cream disabled:opacity-60"
-      >
+      <button type="submit" disabled={status === "loading"} className="aol-btn h-12 shrink-0">
         {status === "loading" ? "Subscribing…" : "Subscribe"}
       </button>
-      {status !== "idle" && (
-        <p role="status" className={`ml-3 text-sm ${status === "err" ? "text-red-600" : "text-emerald-700"}`}>
-          {msg}
-        </p>
-      )}
+
+      <p
+        role="status"
+        aria-live="polite"
+        className={`text-sm ${status === "err" ? "text-red-600" : status === "ok" ? "text-emerald-700" : "text-transparent"}`}
+      >
+        {msg || " "}
+      </p>
     </form>
   );
 }

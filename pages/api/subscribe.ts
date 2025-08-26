@@ -5,22 +5,18 @@ import crypto from "crypto";
 type Json = { ok: boolean; message: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const asBool = (v?: string, def = true) =>
-  v == null ? def : /^true$/i.test(v.trim());
+const asBool = (v?: string, def = true) => (v == null ? def : /^true$/i.test(v.trim()));
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Json>,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Json>) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, message: "Method not allowed" });
   }
 
   try {
-    // Next.js parses JSON/x-www-form-urlencoded by default, but handle string just in case
+    // Next parses JSON/urlencoded by default; also tolerate raw string
     const rawBody = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
-    const email = String(rawBody?.email ?? "").trim().toLowerCase();
+    const email = String((rawBody as any)?.email ?? "").trim().toLowerCase();
 
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ ok: false, message: "Valid email is required" });
@@ -39,30 +35,24 @@ export default async function handler(
         return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
       }
 
-      const dc = key.split("-").pop()!; // data center suffix (e.g. "us6")
-      const subscriberHash = crypto
-        .createHash("md5")
-        .update(email.toLowerCase())
-        .digest("hex");
-
+      const dc = key.split("-").pop()!; // e.g. "us6"
+      const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
       const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
       const payload = {
         email_address: email,
         status_if_new: doubleOpt ? "pending" : "subscribed",
       };
 
-      const r = await fetch(url, {
+      const r = await fetchWithTimeout(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          // Never log this; Mailchimp uses Basic auth with an arbitrary username
           Authorization: "Basic " + Buffer.from(`anystring:${key}`).toString("base64"),
         },
         body: JSON.stringify(payload),
       });
 
       const resp: any = await safeJson(r);
-
       if (r.ok) {
         return res.status(200).json({
           ok: true,
@@ -72,9 +62,9 @@ export default async function handler(
         });
       }
 
-      // Treat "Member Exists" as success
+      // Normalize “already exists” responses
       const detail = String(resp?.title || resp?.detail || "");
-      if (/exists/i.test(detail)) {
+      if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
 
@@ -90,36 +80,39 @@ export default async function handler(
         return res.status(500).json({ ok: false, message: "Buttondown not configured" });
       }
 
-      const r = await fetch("https://api.buttondown.email/v1/subscribers", {
+      const r = await fetchWithTimeout("https://api.buttondown.email/v1/subscribers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Keep token only in env
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify({ email }),
       });
 
       const resp: any = await safeJson(r);
-
       if (r.ok || r.status === 201) {
         return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
       }
 
-      const msg = String(resp?.detail || resp?.message || "");
-      if (/already/i.test(msg)) {
+      // Normalize “already subscribed”
+      const txt = JSON.stringify(resp || {}).toLowerCase();
+      if (r.status === 400 && (txt.includes("already") || txt.includes("exists"))) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
 
-      return res.status(r.status || 500).json({ ok: false, message: msg || "Buttondown error" });
+      const msg =
+        resp?.detail ||
+        resp?.message ||
+        firstErrorString(resp) ||
+        "Buttondown error";
+      return res.status(r.status || 500).json({ ok: false, message: msg });
     }
 
-    // Unknown / unset provider
+    // Unknown provider
     return res
       .status(500)
       .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
   } catch {
-    // Never expose internals
     return res.status(500).json({ ok: false, message: "Unexpected server error" });
   }
 }
@@ -139,5 +132,24 @@ async function safeJson(r: Response) {
     return await r.json();
   } catch {
     return {};
+  }
+}
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeoutMs?: number } = {}) {
+  const { timeoutMs = 10_000, ...rest } = init;
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...rest, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function firstErrorString(obj: any): string | undefined {
+  if (!obj || typeof obj !== "object") return;
+  for (const v of Object.values(obj)) {
+    if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
+    if (typeof v === "string") return v;
   }
 }

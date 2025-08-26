@@ -1,11 +1,10 @@
-// lib/subscribe.ts
-export async function subscribe(email: string) {
+export async function subscribe(email: string): Promise<{ message: string }> {
   const r = await fetch("/api/subscribe", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ email }),
   });
-  const data = await r.json();
-  if (!r.ok) throw new Error(data?.message || "Subscribe failed");
-  return data as { ok: true; message: string };
+  const json = (await r.json().catch(() => null)) as { message?: string } | null;
+  if (!r.ok) throw new Error(json?.message || `Subscription failed (HTTP ${r.status})`);
+  return { message: json?.message || "You’re subscribed. Welcome!" };
 }

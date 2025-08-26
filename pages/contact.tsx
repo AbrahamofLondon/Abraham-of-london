@@ -171,9 +171,14 @@ export default function ContactPage() {
                 id="name"
                 name="name"
                 required
-                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px] focus:ring-forest focus:border-forest"
                 disabled={isSubmitting}
                 autoComplete="name"
+                /* --- only change: explicit light/dark colors --- */
+                className="mt-1 w-full rounded-[10px] border border-lightGrey
+                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
+                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
+                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
+                           dark:border-white/20"
               />
             </motion.div>
 
@@ -184,9 +189,14 @@ export default function ContactPage() {
                 id="email"
                 name="email"
                 required
-                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px] focus:ring-forest focus:border-forest"
                 disabled={isSubmitting}
                 autoComplete="email"
+                /* --- only change: explicit light/dark colors --- */
+                className="mt-1 w-full rounded-[10px] border border-lightGrey
+                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
+                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
+                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
+                           dark:border-white/20"
               />
             </motion.div>
 
@@ -197,8 +207,13 @@ export default function ContactPage() {
                 name="message"
                 required
                 rows={5}
-                className="mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px] focus:ring-forest focus:border-forest"
                 disabled={isSubmitting}
+                /* --- only change: explicit light/dark colors --- */
+                className="mt-1 w-full rounded-[10px] border border-lightGrey
+                           bg-white text-deepCharcoal placeholder:text-deepCharcoal/60
+                           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
+                           dark:bg-deepCharcoal dark:text-cream dark:placeholder:text-cream/70
+                           dark:border-white/20"
               />
             </motion.div>
 
@@ -217,9 +232,11 @@ export default function ContactPage() {
               aria-live="polite"
               variants={itemVariants}
               className={`text-center font-medium ${
-                formStatus === "success" ? "text-green-700"
-                : formStatus === "error" ? "text-red-700"
-                : "text-transparent"
+                formStatus === "success"
+                  ? "text-green-700"
+                  : formStatus === "error"
+                  ? "text-red-700"
+                  : "text-transparent"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
