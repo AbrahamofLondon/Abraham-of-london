@@ -5,7 +5,8 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
-import EventCard from "@/components/EventCard";
+// ⬇️ use the events version so location/tags can be null-safe when spreading
+import EventCard from "@/components/events/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";

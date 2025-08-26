@@ -29,9 +29,9 @@ const DEFAULT_REPO =
   "AbrahamofLondon/abrahamoflondon-comments";
 
 export default function Comments({
-  repo = DEFAULT_REPO,          // ✅ correct owner by default
+  repo = DEFAULT_REPO,
   issueTerm = "pathname",
-  label,                        // ✅ no default -> optional
+  label,
   useClassDarkMode = true,
   rootMargin = "200px",
   threshold = 0.1,
@@ -99,15 +99,15 @@ export default function Comments({
       script.addEventListener("error", onError);
       host.appendChild(script);
 
-      const poll = window.setInterval(() => {
+      const pollId = window.setInterval(() => {
         const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
         if (hasFrame) {
-          window.clearInterval(poll);
+          window.clearInterval(pollId);
           setLoading(false);
         }
       }, Math.max(50, pollMs));
 
-      const timeout = window.setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
         const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
         if (!hasFrame) onError();
       }, Math.max(1000, timeoutMs));
@@ -115,8 +115,8 @@ export default function Comments({
       // Cleanup
       return () => {
         script.removeEventListener("error", onError);
-        window.clearInterval(poll);
-        window.clearTimeout(timeout);
+        window.clearInterval(pollId);
+        window.clearTimeout(timeoutId);
       };
     },
     [repo, issueTerm, label, computeInitialTheme, isRepoValid, pollMs, timeoutMs]
@@ -160,7 +160,7 @@ export default function Comments({
     };
   }, [readyToMount, mountUtterances, router.asPath]); // re-run on route change
 
-  // Keep iframe theme synced (debounced via rAF)
+  // Keep iframe theme synced (debounced via rAF) — no @ts-expect-error needed
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -188,15 +188,22 @@ export default function Comments({
     } else if (window.matchMedia) {
       const mql = window.matchMedia("(prefers-color-scheme: dark)");
       const onChange = () => schedule(mql.matches);
+
+      // Modern
       mql.addEventListener?.("change", onChange);
+
       // Safari legacy
-      // @ts-expect-error
-      mql.addListener?.(onChange);
+      if ("addListener" in mql && typeof (mql as any).addListener === "function") {
+        (mql as any).addListener(onChange);
+      }
+
       mqCleanup = () => {
         mql.removeEventListener?.("change", onChange);
-        // @ts-expect-error
-        mql.removeListener?.(onChange);
+        if ("removeListener" in mql && typeof (mql as any).removeListener === "function") {
+          (mql as any).removeListener(onChange);
+        }
       };
+
       schedule(mql.matches);
     }
 
