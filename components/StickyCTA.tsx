@@ -62,10 +62,10 @@ export default function StickyCTA({
   // publish height → CSS var so <main> reserves space
   const publishHeight = React.useCallback(() => {
     if (!ref.current) return;
-    const h = Math.ceil(ref.current.getBoundingClientRect().height) + 16;
-    console.log(`Setting --sticky-cta-h to ${h}px for mode ${mode}`);
+    const h = Math.ceil(ref.current.getBoundingClientRect().height) + (mode === "fab" ? FAB_PAD * 2 : 16);
+    console.log(`Mode: ${mode}, Setting --sticky-cta-h to ${h}px, PanelW: ${panelW}px`);
     document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
-  }, [mode]);
+  }, [mode, panelW]);
 
   // keep height up-to-date on any size change
   React.useEffect(() => {
@@ -99,7 +99,6 @@ export default function StickyCTA({
     if (usableGutter >= MAX_PANEL) {
       setMode("dock");
       setPanelW(MAX_PANEL);
-      // place inside the gutter, hugging the viewport edge with 16px pad
       setPos({ left: "auto", right: GUTTER_PX });
       console.log(`Mode: dock, Width: ${MAX_PANEL}px, Right: ${GUTTER_PX}px`);
       return;
