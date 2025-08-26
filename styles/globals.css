@@ -19,6 +19,9 @@
   --color-lightGrey: #e5e5e5;
   --color-warmWhite: #fafaf5;
   --color-midGreen: #4b8b6b;
+
+  /* Sticky CTA: height published by component */
+  --sticky-cta-h: 0px;
 }
 
 .dark {
@@ -51,6 +54,11 @@ body {
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Reserve space for the Sticky CTA so it never covers content */
+main {
+  padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px)));
 }
 
 h1,
