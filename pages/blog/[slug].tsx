@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { format } from "date-fns";
 
@@ -13,6 +14,9 @@ import { getAllPosts, getPostBySlug, type PostMeta } from "@/lib/posts";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
+
+// Client-only comments widget
+const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
 // CORRECTED: Allow null for serialization
 type PageMeta = {
@@ -67,16 +71,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const mdx = await serialize(raw.content ?? "", {
     parseFrontmatter: false,
     scope: meta,
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [],
-    },
+    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
   });
 
   return {
-    props: {
-      post: { meta, content: mdx },
-    },
+    props: { post: { meta, content: mdx } },
     revalidate: 60,
   };
 };
@@ -90,12 +89,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export default function BlogPost({ post }: Props) {
-  const { slug, title, date, excerpt, coverImage, author, readTime, category } =
-    post.meta;
-
+  const { slug, title, date, excerpt, coverImage, author, readTime, category } = post.meta;
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
 
-  // Open Graph/JSON-LD
   const cover = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
   const canonical = absUrl(`/blog/${slug}`);
 
@@ -139,7 +135,6 @@ export default function BlogPost({ post }: Props) {
 
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </Head>
@@ -152,13 +147,16 @@ export default function BlogPost({ post }: Props) {
             </div>
           )}
 
-          <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">
-            {title}
-          </h1>
+          <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">{title}</h1>
 
           <div className="mb-6 text-sm text-deepCharcoal/70">
             <span>By {author || "Abraham of London"}</span>
-            {formattedDate && <> · <time dateTime={date!}>{formattedDate}</time></>}
+            {formattedDate && (
+              <>
+                {" "}
+                · <time dateTime={date!}>{formattedDate}</time>
+              </>
+            )}
             {readTime && <> · {readTime}</>}
             {category && (
               <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
@@ -170,6 +168,24 @@ export default function BlogPost({ post }: Props) {
           <div className="prose prose-lg max-w-none text-deepCharcoal">
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
+
+          {/* CTA: jump to comments */}
+          <div className="mt-12">
+            <a href="#comments" className="luxury-link text-sm">
+              Join the discussion ↓
+            </a>
+          </div>
+
+          {/* Comments: client-only, lazy-mounted in component */}
+          <section id="comments" className="mt-16">
+            <Comments
+              repo="abrahamadaramola/abrahamoflondon-comments"
+              issueTerm="pathname"
+              label="comments"           // remove if you didn't create this label
+              useClassDarkMode={true}
+              // pollMs={400} timeoutMs={15000} // optional tuning
+            />
+          </section>
         </article>
       </MDXProviderWrapper>
     </Layout>
