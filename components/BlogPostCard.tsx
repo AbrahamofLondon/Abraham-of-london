@@ -6,9 +6,9 @@ import { siteConfig } from "@/lib/siteConfig";
 type BlogPostCardProps = {
   slug: string;
   title: string;
-  date?: string;            // ISO preferred (e.g., "2025-08-23")
+  date?: string;
   excerpt?: string;
-  coverImage?: string;      // must be under /public
+  coverImage?: string;
   author?: string | { name?: string; image?: string };
   readTime?: string;
   category?: string;
@@ -19,8 +19,7 @@ type BlogPostCardProps = {
 const toLocal = (src?: string) => (src && src.startsWith("/") ? src : undefined);
 
 // Fallback avatar (MUST exist)
-const FALLBACK_AVATAR =
-  siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
 export default function BlogPostCard({
   slug,
@@ -32,41 +31,29 @@ export default function BlogPostCard({
   readTime,
   category,
 }: BlogPostCardProps) {
-  const authorName =
-    typeof author === "string" ? author : author?.name || siteConfig.author;
+  const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
 
-  // preferred: local author image; else global fallback
   const preferredAvatar =
     (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
   const coverSrc = toLocal(coverImage);
 
-  // date formatting (only if valid)
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
   const dateLabel =
     dt && !Number.isNaN(+dt)
-      ? new Intl.DateTimeFormat("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }).format(dt)
+      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt)
       : undefined;
 
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link
-        href={`/blog/${slug}`}
-        className="block"
-        prefetch={false}
-        aria-label={`Read: ${title}`}
-      >
+      <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
         {coverSrc && (
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
             <Image
               src={coverSrc}
-              alt=""                 // decorative in card context
+              alt=""                 /* decorative in card context */
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className="object-cover"
@@ -76,25 +63,28 @@ export default function BlogPostCard({
         )}
 
         <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
-            {title}
-          </h3>
+          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-deepCharcoal/70">
-            {dateTime && (
-              <time dateTime={dateTime}>{dateLabel}</time>
-            )}
+            {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
             {readTime && <span aria-label="Estimated reading time">{readTime}</span>}
             {category && (
               <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">
                 {category}
               </span>
             )}
+            {/* Deep link to comments */}
+            <Link
+              href={`/blog/${slug}#comments`}
+              className="luxury-link"
+              prefetch={false}
+              aria-label={`Discuss: ${title}`}
+            >
+              Discuss
+            </Link>
           </div>
 
-          {excerpt && (
-            <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>
-          )}
+          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
 
           {/* Author row */}
           <div className="mt-4 flex items-center gap-3">
