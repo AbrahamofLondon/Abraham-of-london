@@ -1,14 +1,11 @@
-// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
+import EventJsonLd from "@/components/seo/EventJsonLd"; // ⬅️ add this
 
 /* ---------------- utils ---------------- */
-
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
-
-// local helper (kept here; do NOT import another with same name)
 function toNumber(v?: number | string) {
   if (v == null) return undefined;
   if (typeof v === "number") return v;
@@ -17,7 +14,6 @@ function toNumber(v?: number | string) {
 }
 
 /* ---------------- MDX <a> ---------------- */
-
 const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) => {
   const base =
     "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
@@ -46,12 +42,10 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 };
 
 /* ---------------- MDX <img> -> next/image ---------------- */
-
 type MDXImgProps = React.DetailedHTMLProps<
   React.ImgHTMLAttributes<HTMLImageElement>,
   HTMLImageElement
 >;
-
 const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
   const safeSrc = src || "/assets/images/default-book.jpg";
   const w = toNumber(width);
@@ -59,8 +53,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
   const [loaded, setLoaded] = React.useState(false);
 
   const skeleton =
-    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 " +
-    "animate-[shimmer_1.8s_linear_infinite]";
+    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
   const altText = alt || (title ? String(title) : "Embedded image");
 
   return (
@@ -78,9 +71,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
           onLoadingComplete={() => setLoaded(true)}
         />
       ) : (
-        <span
-          className={`block relative w-full h-96 rounded-lg overflow-hidden shadow-card ${className || ""}`}
-        >
+        <span className={`block relative w-full h-96 rounded-lg overflow-hidden shadow-card ${className || ""}`}>
           <Image
             src={safeSrc}
             alt={altText}
@@ -95,12 +86,8 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
             <>
               <style jsx>{`
                 @keyframes shimmer {
-                  0% {
-                    background-position: -200% 0;
-                  }
-                  100% {
-                    background-position: 200% 0;
-                  }
+                  0% { background-position: -200% 0; }
+                  100% { background-position: 200% 0; }
                 }
               `}</style>
               <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
@@ -118,9 +105,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
 };
 
 /* ---------------- YouTube ---------------- */
-
 type YouTubeProps = { id?: string; url?: string; title?: string; className?: string; start?: number };
-
 function parseYouTubeId(urlOrId?: string): string | null {
   if (!urlOrId) return null;
   if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
@@ -135,18 +120,13 @@ function parseYouTubeId(urlOrId?: string): string | null {
   } catch {}
   return null;
 }
-
 export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, start }) => {
   const videoId = id || parseYouTubeId(url || "");
   if (!videoId) return null;
   const src = new URL(`https://www.youtube-nocookie.com/embed/${videoId}`);
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
-
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-      style={{ aspectRatio: "16 / 9" }}
-    >
+    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
       <iframe
         src={src.toString()}
         title={title || "YouTube video"}
@@ -162,23 +142,12 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
 };
 
 /* ---------------- Safe iframe mapper ---------------- */
-
 type IframeProps = React.ComponentProps<"iframe"> & { className?: string };
-
-const ALLOWED_IFRAME_HOSTS = [
-  "www.youtube-nocookie.com",
-  "www.youtube.com",
-  "youtube.com",
-  "youtu.be",
-  "player.vimeo.com",
-  "open.spotify.com",
-];
+const ALLOWED_IFRAME_HOSTS = ["www.youtube-nocookie.com","www.youtube.com","youtube.com","youtu.be","player.vimeo.com","open.spotify.com"];
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try {
-    url = new URL(src);
-  } catch {}
+  try { url = new URL(src); } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
@@ -192,10 +161,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
     if (id) return <YouTube id={id} title={title} className={className} />;
   }
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-      style={{ aspectRatio: "16 / 9" }}
-    >
+    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
       <iframe
         src={src}
         title={title}
@@ -212,12 +178,12 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
 };
 
 /* ---------------- export to MDX ---------------- */
-
 export const MDXComponents: MDXComponentsType = {
   a: A,
   img: (props) => <Img {...(props as MDXImgProps)} />,
   YouTube,
   iframe: Iframe,
+  EventJsonLd, // ⬅️ expose the component used in your events MDX
 };
 
 export default MDXComponents;
