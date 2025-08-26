@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
-import EventJsonLd from "@/components/seo/EventJsonLd"; // ⬅️ add this
+import EventJsonLd from "@/components/seo/EventJsonLd";
 
 /* ---------------- utils ---------------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
@@ -42,10 +42,8 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 };
 
 /* ---------------- MDX <img> -> next/image ---------------- */
-type MDXImgProps = React.DetailedHTMLProps<
-  React.ImgHTMLAttributes<HTMLImageElement>,
-  HTMLImageElement
->;
+type MDXImgProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+
 const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
   const safeSrc = src || "/assets/images/default-book.jpg";
   const w = toNumber(width);
@@ -71,7 +69,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
           onLoadingComplete={() => setLoaded(true)}
         />
       ) : (
-        <span className={`block relative w-full h-96 rounded-lg overflow-hidden shadow-card ${className || ""}`}>
+        <span className={`relative block h-96 w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}>
           <Image
             src={safeSrc}
             alt={altText}
@@ -95,17 +93,14 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
           )}
         </span>
       )}
-      {title && (
-        <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
-          {title}
-        </figcaption>
-      )}
+      {title && <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">{title}</figcaption>}
     </figure>
   );
 };
 
-/* ---------------- YouTube ---------------- */
+/* ---------------- YouTube + safe iframe ---------------- */
 type YouTubeProps = { id?: string; url?: string; title?: string; className?: string; start?: number };
+
 function parseYouTubeId(urlOrId?: string): string | null {
   if (!urlOrId) return null;
   if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
@@ -120,11 +115,13 @@ function parseYouTubeId(urlOrId?: string): string | null {
   } catch {}
   return null;
 }
+
 export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, start }) => {
   const videoId = id || parseYouTubeId(url || "");
   if (!videoId) return null;
   const src = new URL(`https://www.youtube-nocookie.com/embed/${videoId}`);
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
+
   return (
     <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
       <iframe
@@ -141,20 +138,15 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   );
 };
 
-/* ---------------- Safe iframe mapper ---------------- */
 type IframeProps = React.ComponentProps<"iframe"> & { className?: string };
-const ALLOWED_IFRAME_HOSTS = ["www.youtube-nocookie.com","www.youtube.com","youtube.com","youtu.be","player.vimeo.com","open.spotify.com"];
+const ALLOWED_IFRAME_HOSTS = ["www.youtube-nocookie.com", "www.youtube.com", "youtube.com", "youtu.be", "player.vimeo.com", "open.spotify.com"];
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
   try { url = new URL(src); } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
-    return (
-      <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">
-        Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.
-      </div>
-    );
+    return <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.</div>;
   }
   if (url!.hostname.includes("youtube.com") || url!.hostname.includes("youtu.be")) {
     const id = parseYouTubeId(src);
@@ -180,10 +172,10 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
 /* ---------------- export to MDX ---------------- */
 export const MDXComponents: MDXComponentsType = {
   a: A,
-  img: (props) => <Img {...(props as MDXImgProps)} />,
+  img: (props) => <Img {...(props as any)} />,
   YouTube,
   iframe: Iframe,
-  EventJsonLd, // ⬅️ expose the component used in your events MDX
+  EventJsonLd, // <-- make available to MDX so <EventJsonLd /> works during SSG
 };
 
 export default MDXComponents;

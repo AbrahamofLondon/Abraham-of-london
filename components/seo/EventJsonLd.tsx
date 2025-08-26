@@ -1,53 +1,40 @@
-import * as React from "react";
+import React from "react";
 
-type EventJsonLdProps = {
+export type EventJsonLdProps = {
   name: string;
-  startDate: string;       // ISO string
-  endDate?: string;
-  description?: string;
-  url?: string;
-  images?: string[];
+  startDate: string;         // ISO
+  endDate?: string;          // ISO
+  eventStatus?: string;      // e.g., "https://schema.org/EventScheduled"
+  eventAttendanceMode?: string; // e.g., "https://schema.org/OfflineEventAttendanceMode"
+  location: {
+    "@type": "Place";
+    name: string;
+    address?: string | {
+      "@type": "PostalAddress";
+      streetAddress?: string;
+      addressLocality?: string;
+      addressRegion?: string;
+      postalCode?: string;
+      addressCountry?: string;
+    };
+  };
   image?: string | string[];
-  eventStatus?: string;          // e.g. "https://schema.org/EventScheduled"
-  eventAttendanceMode?: string;  // e.g. "https://schema.org/OfflineEventAttendanceMode"
-  location?: unknown;            // pass your object from MDX (Place/VirtualLocation)
-  organizer?: unknown;           // Organization/Person
-  offers?: unknown;              // Offer | Offer[]
-  performer?: unknown;           // Person | Organization | (array)
+  description?: string;
+  organizer?: { "@type": "Organization" | "Person"; name: string; url?: string };
+  offers?: any[];
+  url?: string;
 };
 
 export default function EventJsonLd(props: EventJsonLdProps) {
-  const data: Record<string, unknown> = {
+  const data = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: props.name,
-    startDate: props.startDate,
+    ...props,
   };
-
-  const set = (k: string, v: unknown) => {
-    if (v == null) return;
-    if (Array.isArray(v) && v.length === 0) return;
-    (data as any)[k] = v;
-  };
-
-  const imgs =
-    props.images ??
-    (Array.isArray(props.image) ? props.image : props.image ? [props.image] : undefined);
-
-  set("endDate", props.endDate);
-  set("description", props.description);
-  set("url", props.url);
-  set("image", imgs);
-  set("eventStatus", props.eventStatus);
-  set("eventAttendanceMode", props.eventAttendanceMode);
-  set("location", props.location);
-  set("organizer", props.organizer);
-  set("offers", props.offers);
-  set("performer", props.performer);
-
   return (
     <script
       type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
