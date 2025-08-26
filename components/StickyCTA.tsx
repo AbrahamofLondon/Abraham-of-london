@@ -63,8 +63,9 @@ export default function StickyCTA({
   const publishHeight = React.useCallback(() => {
     if (!ref.current) return;
     const h = Math.ceil(ref.current.getBoundingClientRect().height) + 16;
+    console.log(`Setting --sticky-cta-h to ${h}px for mode ${mode}`);
     document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
-  }, []);
+  }, [mode]);
 
   // keep height up-to-date on any size change
   React.useEffect(() => {
@@ -77,6 +78,7 @@ export default function StickyCTA({
   // compute adaptive mode/position/width
   const computePosition = React.useCallback(() => {
     const vw = typeof window !== "undefined" ? window.innerWidth : 0;
+    console.log(`Viewport: ${vw}px`);
 
     // Mobile/tablet → full-width bar
     if (vw < 768) {
@@ -84,12 +86,14 @@ export default function StickyCTA({
       setMode("bar");
       setPanelW(w);
       setPos({ left: GUTTER_PX, right: GUTTER_PX });
+      console.log(`Mode: bar, Width: ${w}px, Pos: left ${GUTTER_PX}px, right ${GUTTER_PX}px`);
       return;
     }
 
     // Desktop: available gutter width outside the content
     const rawSide = Math.max(0, (vw - CONTENT_PX) / 2);
     const usableGutter = Math.max(0, rawSide - GUTTER_PX); // keep a 16px inner pad
+    console.log(`Raw Side: ${rawSide}px, Usable Gutter: ${usableGutter}px`);
 
     // Enough to dock the full panel?
     if (usableGutter >= MAX_PANEL) {
@@ -97,6 +101,7 @@ export default function StickyCTA({
       setPanelW(MAX_PANEL);
       // place inside the gutter, hugging the viewport edge with 16px pad
       setPos({ left: "auto", right: GUTTER_PX });
+      console.log(`Mode: dock, Width: ${MAX_PANEL}px, Right: ${GUTTER_PX}px`);
       return;
     }
 
@@ -105,6 +110,7 @@ export default function StickyCTA({
       setMode("dock");
       setPanelW(Math.floor(usableGutter));
       setPos({ left: "auto", right: GUTTER_PX });
+      console.log(`Mode: dock, Width: ${Math.floor(usableGutter)}px, Right: ${GUTTER_PX}px`);
       return;
     }
 
@@ -112,6 +118,7 @@ export default function StickyCTA({
     setMode("fab");
     setPanelW(FAB_SIZE + FAB_PAD * 2);
     setPos({ left: "auto", right: GUTTER_PX });
+    console.log(`Mode: fab, Width: ${FAB_SIZE + FAB_PAD * 2}px, Right: ${GUTTER_PX}px`);
   }, []);
 
   // show/hide + shrink on scroll
@@ -236,7 +243,7 @@ export default function StickyCTA({
       style={{
         width: `${panelW}px`,
         right: typeof pos.right === "number" ? pos.right : undefined,
-        left:  typeof pos.left  === "number" ? pos.left  : undefined,
+        left: typeof pos.left === "number" ? pos.left : undefined,
       }}
     >
       <div
@@ -311,7 +318,6 @@ export default function StickyCTA({
                 </a>
               )}
 
-              {/* FIX: isInternal (typo) */}
               {!collapsed &&
                 (isInternal(secondaryHref) ? (
                   <Link
