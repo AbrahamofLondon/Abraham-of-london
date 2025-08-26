@@ -1,178 +1,239 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+import React, { useState, useMemo } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import Layout from "@/components/Layout";
+import { siteConfig } from "@/lib/siteConfig";
 
-/* --- THEME VARIABLES --- */
-:root {
-  --color-primary: #0b2e1f;          /* forest */
-  --color-primary-hover: #047857;    /* emerald-700 */
-  --color-on-primary: #f5f5f0;       /* cream */
-  --color-on-primary-hover: #ffffff;
+// ---------- Config & Helpers ----------
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  "https://abraham-of-london.netlify.app"
+).replace(/\/$/, "");
 
-  --color-secondary: #f5f5f0;        /* cream (bg) */
-  --color-on-secondary: #333333;     /* deepCharcoal (text) */
+const abs = (path: string): string => {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  return new URL(path, SITE_URL).toString();
+};
 
-  --color-accent: #d4af37;           /* softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;        /* for contrast */
+// Animations
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" } },
+};
+const formVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 } },
+};
+const itemVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
-  --color-lightGrey: #e5e5e5;
-  --color-warmWhite: #fafaf5;
-  --color-midGreen: #4b8b6b;
-}
+export default function ContactPage() {
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formError, setFormError] = useState<string>("");
 
-.dark {
-  --color-primary: #047857;          /* emerald-700 */
-  --color-primary-hover: #059669;
-  --color-on-primary: #ffffff;
-  --color-on-primary-hover: #f5f5f0;
+  const structuredData = useMemo(() => {
+    const contactPageSchema = {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/contact` },
+      description: "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
+      url: `${SITE_URL}/contact`,
+      potentialAction: { "@type": "CommunicateAction", target: { "@type": "EntryPoint", inLanguage: "en" } },
+      contactPoint: { "@type": "ContactPoint", contactType: "Customer service", areaServed: "Global", email: siteConfig.email },
+    };
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
+      ],
+    };
+    return [contactPageSchema, breadcrumb];
+  }, []);
 
-  --color-secondary: #333333;        /* deepCharcoal (bg) */
-  --color-on-secondary: #f5f5f0;     /* cream (text) */
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormError("");
+    setFormStatus("submitting");
 
-  --color-accent: #d4af37;
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
+    try {
+      const form = event.currentTarget;
+      const formData = new FormData(form);
 
-  --color-lightGrey: #4b4b4b;
-  --color-warmWhite: #333333;
-  --color-midGreen: #6bb694;
-}
+      // Honeypot
+      if (String(formData.get("bot-field") || "").trim()) {
+        setFormStatus("success");
+        form.reset();
+        return;
+      }
 
-/* --- BASE --- */
-/* Apply Next Font variables from _app.tsx wrapper:
-   className={`${sans.variable} ${serif.variable} ${cursive.variable}`} */
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--color-on-secondary);
-  background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+      const payload = {
+        name: String(formData.get("name") || ""),
+        email: String(formData.get("email") || ""),
+        subject: "Website contact",
+        message: String(formData.get("message") || ""),
+        "bot-field": "",
+      };
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
-  color: var(--color-primary);
-}
+      const r = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-/* Helper when you want the cursive font explicitly */
-.font-cursive {
-  font-family: var(--font-cursive), "Segoe Script", "Brush Script MT", cursive;
-}
+      const json = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
 
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-a:hover {
-  color: var(--color-accent);
-}
+      if (!r.ok || !json?.ok) throw new Error(json?.error || `HTTP ${r.status}`);
 
-/* Cards / Buttons */
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
-}
+      setFormStatus("success");
+      form.reset();
+      setTimeout(() => setFormStatus("idle"), 5000);
+    } catch (err: any) {
+      console.error("Form submission failed:", err?.message || err);
+      setFormError(err?.message || "Failed to send message. Please try again.");
+      setFormStatus("error");
+    }
+  };
 
-/* Premium effects */
-.shimmer-text {
-  background: linear-gradient(
-    90deg,
-    var(--color-accent) 0%,
-    #fff8dc 25%,
-    var(--color-accent) 50%,
-    #fff8dc 75%,
-    var(--color-accent) 100%
+  const isSubmitting = formStatus === "submitting";
+
+  return (
+    <Layout>
+      <Head>
+        <title>Contact | {siteConfig.author}</title>
+        <meta
+          name="description"
+          content="Get in touch with Abraham of London for speaking engagements, book signings, media inquiries, and collaborations."
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_URL}/contact`} />
+
+        <meta property="og:title" content="Contact | Abraham of London" />
+        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and media opportunities." />
+        <meta property="og:url" content={`${SITE_URL}/contact`} />
+        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
+        <meta property="og:type" content="website" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")} />
+
+        {structuredData.map((schema, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        ))}
+      </Head>
+
+      <motion.main
+        className="relative min-h-screen py-20 bg-gray-50 flex items-center justify-center overflow-hidden"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {/* Background pattern */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div className="pattern-bg" />
+        </div>
+
+        {/* Decorative element (served from /public) */}
+        <div className="absolute top-10 right-10 w-40 h-40 md:w-64 md:h-64 opacity-40 z-0">
+          <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" loading="lazy" />
+        </div>
+
+        <section className="z-10 mx-auto w-full max-w-3xl px-4">
+          <h1 className="mb-6 text-center font-serif text-4xl text-forest md:text-5xl">Get in Touch</h1>
+          <p className="mb-8 text-center text-lg text-deepCharcoal/80">
+            Reach out for speaking engagements, book signings, media inquiries, or collaborations.
+          </p>
+
+          <motion.form
+            onSubmit={handleSubmit}
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6 rounded-2xl bg-white p-6 shadow-xl md:p-8"
+            aria-describedby="form-status"
+            noValidate
+          >
+            {/* Honeypot */}
+            <p className="hidden">
+              <label>
+                Don’t fill this out if you’re human: <input name="bot-field" />
+              </label>
+            </p>
+
+            <motion.div variants={itemVariants}>
+              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
+                Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                autoComplete="name"
+                disabled={isSubmitting}
+                className="aol-input"
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                disabled={isSubmitting}
+                className="aol-input"
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={5}
+                disabled={isSubmitting}
+                className="aol-textarea"
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="text-center">
+              <button type="submit" className="aol-btn" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Send Message"}
+              </button>
+            </motion.div>
+
+            <motion.p
+              id="form-status"
+              aria-live="polite"
+              variants={itemVariants}
+              className={`text-center font-medium ${
+                formStatus === "success" ? "text-green-700" : formStatus === "error" ? "text-red-700" : "text-transparent"
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
+              role={formStatus === "error" ? "alert" : "status"}
+            >
+              {formStatus === "success"
+                ? "Message sent successfully!"
+                : formStatus === "error"
+                ? (formError || "Failed to send message. Please try again.")
+                : " "}
+            </motion.p>
+          </motion.form>
+        </section>
+      </motion.main>
+    </Layout>
   );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-  display: inline-block;
-}
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.fade-up {
-  opacity: 0;
-  transform: translateY(12px);
-  animation: fadeUp 0.8s ease forwards;
-}
-@keyframes fadeUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Luxury underline link */
-a.luxury-link {
-  position: relative;
-  color: var(--color-primary);
-}
-a.luxury-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 0;
-  height: 2px;
-  background-color: var(--color-accent);
-  transition: width 0.3s ease;
-}
-a.luxury-link:hover::after {
-  width: 100%;
-}
-
-/* SVG safety */
-svg:not([width]):not([height]) {
-  width: 1em;
-  height: 1em;
-}
-.icon-sm {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-.icon-md {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-.icon-lg {
-  width: 2rem;
-  height: 2rem;
-}
-
-/* Responsive type */
-@media (max-width: 768px) {
-  h1 {
-    font-size: 2.5rem;
-    letter-spacing: 0.06em;
-  }
-  h2 {
-    font-size: 2rem;
-    letter-spacing: 0.05em;
-  }
 }
