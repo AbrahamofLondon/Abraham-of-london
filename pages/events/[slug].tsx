@@ -40,9 +40,9 @@ function formatPretty(isoish: string, tz = "Europe/London") {
 
 type EventPageProps = {
   event: EventMeta & {
-    coverImage?: string;
     slug: string;
     tags?: string[] | null;
+    // EventMeta already supports coverImage?/heroImage?, so no need to add here
   };
   contentSource: any;
 };
@@ -51,12 +51,17 @@ function EventPage({ event, contentSource }: EventPageProps) {
   if (!event) return <div>Event not found.</div>;
 
   const prettyDate = formatPretty(event.date);
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const site =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/events/${event.slug}`;
-  const absImage = event.coverImage ? new URL(event.coverImage, site).toString() : undefined;
+
+  // Support either field name from content
+  const relImage = event.coverImage ?? event.heroImage;
+  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
 
   const isChatham =
-    Array.isArray(event.tags) && event.tags.some((t) => String(t).toLowerCase() === "chatham");
+    Array.isArray(event.tags) &&
+    event.tags.some((t) => String(t).toLowerCase() === "chatham");
 
   const jsonLd: Record<string, any> = {
     "@context": "https://schema.org",
@@ -85,6 +90,7 @@ function EventPage({ event, contentSource }: EventPageProps) {
       <Head>
         <title>{event.title} | Abraham of London</title>
         <meta name="description" content={event.summary || ""} />
+        {absImage && <meta property="og:image" content={absImage} />}
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
@@ -92,7 +98,9 @@ function EventPage({ event, contentSource }: EventPageProps) {
         />
       </Head>
 
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{event.title}</h1>
+      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">
+        {event.title}
+      </h1>
 
       {/* Subtle badge + note when Chatham */}
       {isChatham && (
@@ -133,14 +141,15 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
+  // IMPORTANT: request "heroImage" (what your loader supports), not "coverImage"
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
     "date",
     "location",
     "summary",
-    "coverImage",
-    "tags",      // ✅ pull tags for the Chatham badge
+    "heroImage", // <-- was "coverImage"
+    "tags",
     "content",
   ]);
 
