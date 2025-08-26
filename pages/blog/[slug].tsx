@@ -18,7 +18,7 @@ import remarkGfm from "remark-gfm";
 // Client-only comments widget
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-// CORRECTED: Allow null for serialization
+// CORRECT: allow nulls
 type PageMeta = {
   slug: string;
   title: string;
@@ -39,7 +39,6 @@ type Props = {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
-
   const raw = getPostBySlug(slug, [
     "slug",
     "title",
@@ -74,10 +73,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
   });
 
-  return {
-    props: { post: { meta, content: mdx } },
-    revalidate: 60,
-  };
+  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -92,24 +88,23 @@ export default function BlogPost({ post }: Props) {
   const { slug, title, date, excerpt, coverImage, author, readTime, category } = post.meta;
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
 
-  const cover = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
+  // Use absolute URL for meta tags, but a local path for <Image />
+  const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
+  const coverForImage = coverImage || "/assets/images/social/og-image.jpg";
   const canonical = absUrl(`/blog/${slug}`);
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
-    image: [cover],
+    image: [coverForMeta],
     datePublished: date || null,
     dateModified: date || null,
     author: { "@type": "Person", name: author || "Abraham of London" },
     publisher: {
       "@type": "Organization",
       name: "Abraham of London",
-      logo: {
-        "@type": "ImageObject",
-        url: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
-      },
+      logo: { "@type": "ImageObject", url: absUrl("/assets/images/logo/abraham-of-london-logo.svg") },
     },
     description: excerpt || null,
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
@@ -126,24 +121,21 @@ export default function BlogPost({ post }: Props) {
         {excerpt && <meta property="og:description" content={excerpt} />}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={cover} />
+        <meta property="og:image" content={coverForMeta} />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         {excerpt && <meta name="twitter:description" content={excerpt} />}
-        <meta name="twitter:image" content={cover} />
+        <meta name="twitter:image" content={coverForMeta} />
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </Head>
 
       <MDXProviderWrapper>
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-          {coverImage && (
+          {coverForImage && (
             <div className="relative mb-10 h-72 w-full overflow-hidden rounded-lg shadow-lg md:h-96">
-              <Image src={cover} alt={title} fill className="object-cover" priority />
+              <Image src={coverForImage} alt={title} fill className="object-cover" priority />
             </div>
           )}
 
@@ -153,8 +145,7 @@ export default function BlogPost({ post }: Props) {
             <span>By {author || "Abraham of London"}</span>
             {formattedDate && (
               <>
-                {" "}
-                · <time dateTime={date!}>{formattedDate}</time>
+                {" "}· <time dateTime={date!}>{formattedDate}</time>
               </>
             )}
             {readTime && <> · {readTime}</>}
@@ -171,19 +162,16 @@ export default function BlogPost({ post }: Props) {
 
           {/* CTA: jump to comments */}
           <div className="mt-12">
-            <a href="#comments" className="luxury-link text-sm">
-              Join the discussion ↓
-            </a>
+            <a href="#comments" className="luxury-link text-sm">Join the discussion ↓</a>
           </div>
 
           {/* Comments: client-only, lazy-mounted in component */}
           <section id="comments" className="mt-16">
             <Comments
-              repo="abrahamadaramola/abrahamoflondon-comments"
+              repo="AbrahamofLondon/abrahamoflondon-comments"  // ✅ correct owner/repo
               issueTerm="pathname"
-              label="comments"           // remove if you didn't create this label
-              useClassDarkMode={true}
-              // pollMs={400} timeoutMs={15000} // optional tuning
+              // label="comments"  // keep only if you actually created this label
+              useClassDarkMode
             />
           </section>
         </article>

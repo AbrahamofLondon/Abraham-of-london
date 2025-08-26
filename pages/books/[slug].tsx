@@ -1,4 +1,6 @@
 import type { GetStaticProps, GetStaticPaths } from "next";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -6,6 +8,12 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
 import { getBookBySlug, getBookSlugs, type BookMeta } from "@/lib/books";
+
+// Client-only comments widget (optional; keep if you want comments on books)
+const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
+
+// ✅ Use an image that exists in your repo (per your screenshot)
+const DEFAULT_BOOK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
 
 type PageMeta = Pick<
   BookMeta,
@@ -30,15 +38,35 @@ interface Props {
 export default function BookPage({ book }: Props) {
   const { meta, content } = book;
 
+  // local-only path for Next <Image />
+  const coverSrc =
+    typeof meta.coverImage === "string" && meta.coverImage.trim()
+      ? meta.coverImage
+      : DEFAULT_BOOK_COVER;
+
   return (
     <Layout pageTitle={meta.title}>
       <article className="prose prose-lg max-w-3xl px-4 py-10 md:py-16 mx-auto">
-        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-4">
+        {/* Cover */}
+        <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg shadow">
+          <Image
+            src={coverSrc}
+            alt={meta.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 768px"
+            priority={false}
+          />
+        </div>
+
+        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-2">
           {meta.title}
         </h1>
+
         {meta.author && (
           <p className="text-sm text-deepCharcoal/70 mb-6">By {meta.author}</p>
         )}
+
         {meta.excerpt && (
           <p className="text-base text-deepCharcoal/85 mb-8">{meta.excerpt}</p>
         )}
@@ -46,6 +74,19 @@ export default function BookPage({ book }: Props) {
         <div className="mt-8">
           <MDXRemote {...content} components={MDXComponents} />
         </div>
+
+        {/* Optional: comments on book pages */}
+        <div className="mt-12">
+          <a href="#comments" className="luxury-link text-sm">Join the discussion ↓</a>
+        </div>
+        <section id="comments" className="mt-16">
+          <Comments
+            repo="AbrahamofLondon/abrahamoflondon-comments"
+            issueTerm="pathname"
+            // label="comments" // only if you created this label
+            useClassDarkMode
+          />
+        </section>
       </article>
     </Layout>
   );
@@ -89,11 +130,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     coverImage:
       typeof raw.coverImage === "string" && raw.coverImage.trim()
         ? raw.coverImage
-        : "/assets/images/default-book.jpg",
+        : DEFAULT_BOOK_COVER, // ✅ correct fallback
     buyLink: raw.buyLink || "#",
-    genre: raw.genre || "Uncategorized",
-    downloadPdf: raw.downloadPdf ?? undefined, // Changed from null to undefined
-    downloadEpub: raw.downloadEpub ?? undefined, // Changed from null to undefined
+    genre: raw.genre || "Memoir",
+    downloadPdf: raw.downloadPdf ?? undefined,
+    downloadEpub: raw.downloadEpub ?? undefined,
   };
 
   const mdx = await serialize(raw.content ?? "", {
@@ -105,9 +146,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   });
 
   return {
-    props: {
-      book: { meta, content: mdx },
-    },
+    props: { book: { meta, content: mdx } },
     revalidate: 60,
   };
 };
