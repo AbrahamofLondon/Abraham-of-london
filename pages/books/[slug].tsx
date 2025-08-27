@@ -7,30 +7,30 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
-import { getBookBySlug, getBookSlugs, type BookMeta } from "@/lib/books";
+import { getBookBySlug, getBookSlugs } from "@/lib/books";
 
-// Client-only comments widget (optional; keep if you want comments on books)
+// Client-only comments widget (optional)
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-// ✅ Use an image that exists in your repo (per your screenshot)
+// ✅ Exists in your repo
 const DEFAULT_BOOK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
 
-type PageMeta = Pick<
-  BookMeta,
-  | "slug"
-  | "title"
-  | "author"
-  | "excerpt"
-  | "coverImage"
-  | "buyLink"
-  | "genre"
-  | "downloadPdf"
-  | "downloadEpub"
->;
+/** JSON-serializable meta (no `undefined`) */
+type PageMetaSafe = {
+  slug: string;
+  title: string;
+  author: string | null;
+  excerpt: string | null;
+  coverImage: string;         // always a string (falls back to DEFAULT_BOOK_COVER)
+  buyLink: string | null;
+  genre: string | null;
+  downloadPdf: string | null;
+  downloadEpub: string | null;
+};
 
 interface Props {
   book: {
-    meta: PageMeta;
+    meta: PageMetaSafe;
     content: MDXRemoteSerializeResult;
   };
 }
@@ -38,19 +38,13 @@ interface Props {
 export default function BookPage({ book }: Props) {
   const { meta, content } = book;
 
-  // local-only path for Next <Image />
-  const coverSrc =
-    typeof meta.coverImage === "string" && meta.coverImage.trim()
-      ? meta.coverImage
-      : DEFAULT_BOOK_COVER;
-
   return (
     <Layout pageTitle={meta.title}>
-      <article className="prose prose-lg max-w-3xl px-4 py-10 md:py-16 mx-auto">
+      <article className="prose prose-lg mx-auto max-w-3xl px-4 py-10 md:py-16">
         {/* Cover */}
         <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg shadow">
           <Image
-            src={coverSrc}
+            src={meta.coverImage}
             alt={meta.title}
             fill
             className="object-cover"
@@ -59,23 +53,51 @@ export default function BookPage({ book }: Props) {
           />
         </div>
 
-        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-2">
-          {meta.title}
-        </h1>
+        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-2">{meta.title}</h1>
 
         {meta.author && (
-          <p className="text-sm text-deepCharcoal/70 mb-6">By {meta.author}</p>
+          <p className="mb-6 text-sm text-deepCharcoal/70">By {meta.author}</p>
         )}
 
         {meta.excerpt && (
-          <p className="text-base text-deepCharcoal/85 mb-8">{meta.excerpt}</p>
+          <p className="mb-8 text-base text-deepCharcoal/85">{meta.excerpt}</p>
         )}
 
         <div className="mt-8">
           <MDXRemote {...content} components={MDXComponents} />
         </div>
 
-        {/* Optional: comments on book pages */}
+        {/* Optional: actions */}
+        <div className="mt-8 flex flex-wrap gap-3">
+          {meta.buyLink && (
+            <a
+              href={meta.buyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-forest px-5 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+            >
+              Buy the book
+            </a>
+          )}
+          {meta.downloadPdf && (
+            <a
+              href={meta.downloadPdf}
+              className="rounded-full border border-lightGrey px-5 py-2 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
+            >
+              Download PDF
+            </a>
+          )}
+          {meta.downloadEpub && (
+            <a
+              href={meta.downloadEpub}
+              className="rounded-full border border-lightGrey px-5 py-2 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
+            >
+              Download EPUB
+            </a>
+          )}
+        </div>
+
+        {/* Optional: comments */}
         <div className="mt-12">
           <a href="#comments" className="luxury-link text-sm">Join the discussion ↓</a>
         </div>
@@ -83,7 +105,7 @@ export default function BookPage({ book }: Props) {
           <Comments
             repo="AbrahamofLondon/abrahamoflondon-comments"
             issueTerm="pathname"
-            // label="comments" // only if you created this label
+            // label="comments"
             useClassDarkMode
           />
         </section>
@@ -105,6 +127,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "");
 
+  // Pull everything we need (content + meta), tolerate missing fields
   const raw = getBookBySlug(slug, [
     "slug",
     "title",
@@ -116,33 +139,42 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     "downloadPdf",
     "downloadEpub",
     "content",
-  ]) as Partial<BookMeta> & { content?: string };
+  ]) as Partial<{
+    slug: string;
+    title: string;
+    author: string;
+    excerpt: string;
+    coverImage: string;
+    buyLink: string;
+    genre: string;
+    downloadPdf: string;
+    downloadEpub: string;
+    content: string;
+  }>;
 
-  if (!raw.slug || raw.title === "Book Not Found") {
+  if (!raw?.slug || raw.title === "Book Not Found") {
     return { notFound: true };
   }
 
-  const meta: PageMeta = {
-    slug: raw.slug,
-    title: raw.title || "Untitled",
-    author: raw.author || "Abraham of London",
-    excerpt: raw.excerpt || "",
+  // ✅ Normalize to JSON-safe values (no `undefined`)
+  const meta: PageMetaSafe = {
+    slug: String(raw.slug),
+    title: raw.title ?? "Untitled",
+    author: raw.author ?? null,
+    excerpt: raw.excerpt ?? null,
     coverImage:
       typeof raw.coverImage === "string" && raw.coverImage.trim()
         ? raw.coverImage
-        : DEFAULT_BOOK_COVER, // ✅ correct fallback
-    buyLink: raw.buyLink || "#",
-    genre: raw.genre || "Memoir",
-    downloadPdf: raw.downloadPdf ?? undefined,
-    downloadEpub: raw.downloadEpub ?? undefined,
+        : DEFAULT_BOOK_COVER,
+    buyLink: raw.buyLink ?? null,
+    genre: raw.genre ?? null,
+    downloadPdf: raw.downloadPdf ?? null,
+    downloadEpub: raw.downloadEpub ?? null,
   };
 
   const mdx = await serialize(raw.content ?? "", {
     scope: meta,
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [],
-    },
+    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
   });
 
   return {

@@ -4,9 +4,22 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookCard from "@/components/BookCard";
-import { getAllBooks, type BookMeta } from "@/lib/books";
+import { getAllBooks } from "@/lib/books";
 
-type Props = { books: BookMeta[] }; // Changed from Partial<BookMeta>[] to BookMeta[]
+type BookMetaSafe = {
+  slug: string;
+  title: string | null;
+  author: string | null;
+  excerpt: string | null;
+  coverImage: string | null;
+  buyLink: string | null;
+  genre: string | null;
+  downloadPdf: string | null;
+  downloadEpub: string | null;
+  date?: string | null;
+};
+
+type Props = { books: BookMetaSafe[] };
 
 export default function BooksIndex({ books }: Props) {
   const router = useRouter();
@@ -32,10 +45,9 @@ export default function BooksIndex({ books }: Props) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (genre && genre !== "All") params.set("genre", genre);
-    router.replace(params.toString() ? `/books?${params}` : "/books", undefined, {
-      shallow: true,
-    });
-  }, [q, genre]); // eslint-disable-line react-hooks/exhaustive-deps
+    router.replace(params.toString() ? `/books?${params}` : "/books", undefined, { shallow: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, genre]);
 
   const filtered = React.useMemo(
     () =>
@@ -49,7 +61,7 @@ export default function BooksIndex({ books }: Props) {
           (b.author ?? "").toLowerCase().includes(needle);
         return matchesGenre && matchesQ;
       }),
-    [books, q, genre],
+    [books, q, genre]
   );
 
   const resetFilters = () => {
@@ -60,10 +72,7 @@ export default function BooksIndex({ books }: Props) {
   return (
     <Layout pageTitle="Books">
       <Head>
-        <meta
-          name="description"
-          content="Books by Abraham of London — clarity, conviction, endurance."
-        />
+        <meta name="description" content="Books by Abraham of London — clarity, conviction, endurance." />
       </Head>
 
       <section className="bg-white">
@@ -78,9 +87,7 @@ export default function BooksIndex({ books }: Props) {
 
           <header className="mb-8">
             <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">Books</h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
-              Works of memoir and conviction. Written to endure.
-            </p>
+            <p className="mt-2 text-sm text-deepCharcoal/70">Works of memoir and conviction. Written to endure.</p>
           </header>
 
           {/* Controls */}
@@ -128,14 +135,14 @@ export default function BooksIndex({ books }: Props) {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((b, i) => (
               <BookCard
-                key={b.slug!}
-                slug={b.slug!}
+                key={b.slug}
+                slug={b.slug}
                 title={b.title ?? "Untitled"}
                 author={b.author ?? "Abraham of London"}
                 excerpt={b.excerpt ?? ""}
                 coverImage={b.coverImage ?? undefined}
                 buyLink={b.buyLink ?? undefined}
-                genre={b.genre ?? "Uncategorized"}
+                genre={b.genre ?? undefined}
                 downloadPdf={b.downloadPdf ?? undefined}
                 downloadEpub={b.downloadEpub ?? undefined}
                 featured={false}
@@ -150,9 +157,7 @@ export default function BooksIndex({ books }: Props) {
           </div>
 
           {filtered.length === 0 && (
-            <p className="mt-10 text-center text-sm text-deepCharcoal/70">
-              No books match your filters yet.
-            </p>
+            <p className="mt-10 text-center text-sm text-deepCharcoal/70">No books match your filters yet.</p>
           )}
         </div>
       </section>
@@ -171,17 +176,21 @@ export async function getStaticProps() {
     "genre",
     "downloadPdf",
     "downloadEpub",
+    "date",
   ]);
 
-  const safe = books.map((b) => ({
-    ...b,
-    excerpt: b.excerpt ?? undefined,
-    author: b.author ?? undefined,
-    coverImage: b.coverImage ?? undefined,
-    buyLink: b.buyLink ?? undefined,
-    genre: b.genre ?? undefined,
-    downloadPdf: b.downloadPdf ?? undefined,
-    downloadEpub: b.downloadEpub ?? undefined,
+  // ⬇️ Normalize ALL optionals to null so Next.js can serialize
+  const safe = books.map((b: any) => ({
+    slug: String(b.slug),
+    title: b.title ?? null,
+    author: b.author ?? null,
+    excerpt: b.excerpt ?? null,
+    coverImage: b.coverImage ?? null,
+    buyLink: b.buyLink ?? null,
+    genre: b.genre ?? null,
+    downloadPdf: b.downloadPdf ?? null,
+    downloadEpub: b.downloadEpub ?? null,
+    date: b.date ?? null,
   }));
 
   return { props: { books: safe }, revalidate: 60 };
