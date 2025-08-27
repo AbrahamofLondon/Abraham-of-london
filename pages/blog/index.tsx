@@ -66,7 +66,8 @@ export default function BlogIndex({ posts }: Props) {
   }, [posts, q, cat, sort]);
 
   return (
-    <Layout pageTitle="Blog">
+    {/* ⬇️ Hide the floating StickyCTA on the blog list */}
+    <Layout pageTitle="Blog" hideCTA>
       <Head>
         <meta
           name="description"
