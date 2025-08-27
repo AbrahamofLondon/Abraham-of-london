@@ -18,11 +18,10 @@ type Props = {
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 
-// Match Layout’s max content width (max-w-7xl = 1280px)
-const CONTENT_PX = 1280;
-const PAD = 16;            // safe viewport edge padding
-const FAB_SIZE = 56;       // tiny floating action button
-const FAB_PAD  = 10;       // visual padding around FAB
+// layout constants
+const CONTENT_PX = 1280; // matches max-w-7xl
+const PAD = 16;          // safe edge padding for viewport/container
+const CARD_W = 360;      // desired docked width
 
 export default function StickyCTA({
   showAfter = 480,
@@ -35,17 +34,11 @@ export default function StickyCTA({
   className,
 }: Props) {
   const shellRef = React.useRef<HTMLDivElement | null>(null);
-  const cardRef  = React.useRef<HTMLDivElement | null>(null);
 
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible]   = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
-
-  // Mode is derived from actual width:
-  // - isFab:      card width < 120px
-  // - isCompact:  120px ≤ width < 280px
-  const [isFab, setIsFab] = React.useState(false);
-  const [isCompact, setIsCompact] = React.useState(false);
+  const [mode, setMode] = React.useState<"dock" | "bar">("dock");
 
   // read persisted dismissal
   React.useEffect(() => {
@@ -55,11 +48,11 @@ export default function StickyCTA({
   // publish height → CSS var so <main> reserves space
   const publishHeight = React.useCallback(() => {
     if (!shellRef.current) return;
-    const h = Math.ceil(shellRef.current.getBoundingClientRect().height) + 16;
+    const h = Math.ceil(shellRef.current.getBoundingClientRect().height) + 16; // little breathing room
     document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
   }, []);
 
-  // keep height up to date
+  // keep height updated on resize
   React.useEffect(() => {
     if (!shellRef.current) return;
     const ro = new ResizeObserver(() => publishHeight());
@@ -67,16 +60,17 @@ export default function StickyCTA({
     return () => ro.disconnect();
   }, [publishHeight]);
 
-  // detect width → pick visual mode (fab / compact / full)
-  React.useEffect(() => {
-    if (!cardRef.current) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const w = entry?.contentRect?.width || 0;
-      setIsFab(w < 120);
-      setIsCompact(w >= 120 && w < 280);
-    });
-    ro.observe(cardRef.current);
-    return () => ro.disconnect();
+  // choose mode based on available gutter
+  const recomputeMode = React.useCallback(() => {
+    const vw = typeof window !== "undefined" ? window.innerWidth : 0;
+
+    // width outside the centered content
+    const sideGutter = Math.max(0, (vw - CONTENT_PX) / 2);
+    const available = Math.max(0, sideGutter - PAD);
+
+    // tablets & narrow gutters → centered bar
+    if (vw < 768 || available < CARD_W) setMode("bar");
+    else setMode("dock");
   }, []);
 
   // show/hide + collapse on scroll
@@ -90,26 +84,32 @@ export default function StickyCTA({
       ticking = true;
       requestAnimationFrame(() => {
         setVisible(y > showAfter);
-        setCollapsed(y > showAfter && y - lastY > 6);
+        setCollapsed(y > showAfter && y - lastY > 6); // collapse when scrolling down
         lastY = y;
         ticking = false;
       });
     };
 
-    // init
+    recomputeMode();
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [showAfter]);
+    window.addEventListener("resize", recomputeMode);
+    window.addEventListener("orientationchange", recomputeMode);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", recomputeMode);
+      window.removeEventListener("orientationchange", recomputeMode);
+    };
+  }, [showAfter, recomputeMode]);
 
-  // keep reserved height synced
+  // keep reserved height synced with mode changes
   React.useEffect(() => {
     if (!visible) {
       document.documentElement.style.setProperty("--sticky-cta-h", "0px");
       return;
     }
     publishHeight();
-  }, [visible, collapsed, isFab, isCompact, publishHeight]);
+  }, [visible, collapsed, mode, publishHeight]);
 
   // cleanup var on unmount
   React.useEffect(() => () => {
@@ -124,176 +124,136 @@ export default function StickyCTA({
 
   if (dismissed || !visible) return null;
 
-  // Pure CSS positioning & sizing:
-  // width: clamp(FAB, available gutter, 360px)
-  const style: React.CSSProperties = {
+  // styles for each mode
+  const dockStyle: React.CSSProperties = {
     right: PAD,
     left: "auto",
-    width: `clamp(${FAB_SIZE + FAB_PAD * 2}px, calc(((100vw - ${CONTENT_PX}px) / 2) - ${PAD}px), 360px)`,
-    transition: "transform 200ms, opacity 200ms",
+    width: CARD_W,
+  };
+  const barStyle: React.CSSProperties = {
+    left: "50%",
+    right: "auto",
+    transform: "translateX(-50%)",
+    width: `min(${CONTENT_PX}px, calc(100vw - ${PAD * 2}px))`,
   };
 
   return (
     <aside
       role="complementary"
       aria-label="Quick contact"
-      className={clsx("fixed bottom-4 z-[70]", className)}
-      style={style}
+      className={clsx("fixed bottom-4 z-[70] transition-[transform,opacity] duration-200", className)}
+      style={mode === "dock" ? dockStyle : barStyle}
       ref={shellRef}
     >
-      {/* FAB MODE -------------------------------------------------------- */}
-      {isFab ? (
-        <div
-          ref={cardRef}
-          className="relative rounded-full bg-white/95 shadow-card backdrop-blur dark:bg-deepCharcoal/95"
-          style={{ padding: FAB_PAD }}
-        >
-          <button
-            type="button"
-            onClick={onDismiss}
-            aria-label="Dismiss"
-            className="absolute -right-2 -top-2 rounded-full bg-black/70 px-1 text-[11px] leading-none text-white hover:bg-black/80 dark:bg-white/20 dark:hover:bg-white/30"
-            title="Dismiss"
-          >
-            ×
-          </button>
-
-          {isInternal(primaryHref) ? (
-            <Link
-              href={primaryHref}
-              prefetch={false}
-              aria-label={primaryLabel}
-              title={primaryLabel}
-              className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-emerald-600 text-white shadow transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40"
-            >
-              <PhoneIcon />
-            </Link>
-          ) : (
-            <a
-              href={primaryHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={primaryLabel}
-              title={primaryLabel}
-              className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-emerald-600 text-white shadow transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40"
-            >
-              <PhoneIcon />
-            </a>
-          )}
-        </div>
-      ) : (
-        /* DOCKED / COMPACT CARD ---------------------------------------- */
-        <div
-          ref={cardRef}
+      <div
+        className={clsx(
+          "relative overflow-hidden rounded-2xl border border-forest/15 bg-white/95 shadow-card backdrop-blur",
+          "px-4 py-3 sm:px-5 sm:py-4 dark:bg-deepCharcoal/95 dark:border-white/10",
+          collapsed && "px-3 py-2 sm:px-3 sm:py-2"
+        )}
+      >
+        {/* Dismiss */}
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          title="Dismiss"
           className={clsx(
-            "relative overflow-hidden rounded-2xl border border-forest/15 bg-white/95 shadow-card backdrop-blur",
-            "px-4 py-3 sm:px-5 sm:py-4 dark:bg-deepCharcoal/95 dark:border-white/10",
-            collapsed && "px-3 py-2 sm:px-3 sm:py-2"
+            "absolute right-2 top-2 rounded-md p-1 text-deepCharcoal/60 hover:bg-black/5",
+            "dark:text-cream/70 dark:hover:bg-white/10"
           )}
         >
-          {/* Dismiss */}
-          <button
-            type="button"
-            onClick={onDismiss}
-            aria-label="Dismiss"
+          <span aria-hidden>×</span>
+        </button>
+
+        <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
+          {/* phone button */}
+          <a
+            href={phoneHref}
             className={clsx(
-              "absolute right-2 top-2 rounded-md p-1 text-deepCharcoal/60 hover:bg-black/5",
-              "dark:text-cream/70 dark:hover:bg-white/10"
+              "inline-flex shrink-0 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-2",
+              "hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
+              "dark:bg-emerald-900/30 dark:border-emerald-400/30 dark:hover:bg-emerald-900/50"
             )}
-            title="Dismiss"
+            aria-label={phoneLabel}
+            title={phoneLabel}
           >
-            <span aria-hidden>×</span>
-          </button>
+            <PhoneIcon />
+          </a>
 
-          <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
-            {/* Phone button */}
-            <a
-              href={phoneHref}
-              className={clsx(
-                "inline-flex shrink-0 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-2",
-                "hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
-                "dark:bg-emerald-900/30 dark:border-emerald-400/30 dark:hover:bg-emerald-900/50"
+          <div className="min-w-0 flex-1">
+            {/* Hide the tagline when collapsed to save space */}
+            {!collapsed && (
+              <p className="truncate text-sm font-medium text-forest dark:text-cream">
+                Let’s build something enduring.
+              </p>
+            )}
+
+            <div className={clsx("mt-2 flex flex-wrap gap-2", collapsed && "mt-0")}>
+              {/* Primary */}
+              {isInternal(primaryHref) ? (
+                <Link
+                  href={primaryHref}
+                  prefetch={false}
+                  className={clsx(
+                    "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
+                    "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
+                    collapsed && "px-3 py-1 text-[13px]"
+                  )}
+                  aria-label={primaryLabel}
+                >
+                  {primaryLabel}
+                </Link>
+              ) : (
+                <a
+                  href={primaryHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={clsx(
+                    "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
+                    "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
+                    collapsed && "px-3 py-1 text-[13px]"
+                  )}
+                  aria-label={primaryLabel}
+                >
+                  {primaryLabel}
+                </a>
               )}
-              aria-label={phoneLabel}
-              title={phoneLabel}
-            >
-              <PhoneIcon />
-            </a>
 
-            <div className="min-w-0 flex-1">
-              {/* hide tagline in compact mode to save space */}
-              {!collapsed && !isCompact && (
-                <p className="truncate text-sm font-medium text-forest dark:text-cream">
-                  Let’s build something enduring.
-                </p>
-              )}
-
-              <div className={clsx("mt-2 flex flex-wrap gap-2", (collapsed || isCompact) && "mt-0")}>
-                {/* Primary */}
-                {isInternal(primaryHref) ? (
+              {/* Secondary CTA */}
+              {!collapsed &&
+                (isInternal(secondaryHref) ? (
                   <Link
-                    href={primaryHref}
+                    href={secondaryHref}
                     prefetch={false}
                     className={clsx(
-                      "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
-                      "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
-                      (collapsed || isCompact) && "px-3 py-1 text-[13px]"
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
                     )}
-                    aria-label={primaryLabel}
+                    aria-label={secondaryLabel}
                   >
-                    {primaryLabel}
+                    {secondaryLabel}
                   </Link>
                 ) : (
                   <a
-                    href={primaryHref}
+                    href={secondaryHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={clsx(
-                      "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white",
-                      "shadow-sm transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40",
-                      (collapsed || isCompact) && "px-3 py-1 text-[13px]"
+                      "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
+                      "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                      "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
                     )}
-                    aria-label={primaryLabel}
+                    aria-label={secondaryLabel}
                   >
-                    {primaryLabel}
+                    {secondaryLabel}
                   </a>
-                )}
-
-                {/* Secondary is hidden in compact mode */}
-                {!collapsed && !isCompact &&
-                  (isInternal(secondaryHref) ? (
-                    <Link
-                      href={secondaryHref}
-                      prefetch={false}
-                      className={clsx(
-                        "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                        "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                        "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                      )}
-                      aria-label={secondaryLabel}
-                    >
-                      {secondaryLabel}
-                    </Link>
-                  ) : (
-                    <a
-                      href={secondaryHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={clsx(
-                        "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                        "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
-                        "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
-                      )}
-                      aria-label={secondaryLabel}
-                    >
-                      {secondaryLabel}
-                    </a>
-                  ))}
-              </div>
+                ))}
             </div>
           </div>
         </div>
-      )}
+      </div>
     </aside>
   );
 }

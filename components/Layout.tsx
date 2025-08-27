@@ -236,62 +236,73 @@ export default function Layout({
       {!hideCTA && <StickyCTA showAfter={420} />}
 
       {/* Footer */}
-      <footer
-        className={`border-t ${
-          footerVariant === "dark"
-            ? "bg-deepCharcoal text-cream border-white/10"
-            : "bg-white text-gray-700 border-gray-200"
-        }`}
-      >
-        <div className="mx-auto max-w-7xl px-4 py-12">
-          <div className="grid gap-10 md:grid-cols-3">
-            <div>
-              <p className="font-serif text-lg font-semibold">{siteConfig.title}</p>
-              <p className="mt-2 text-sm leading-relaxed">
-                Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
-              </p>
-            </div>
+<footer
+  className={`border-t ${
+    footerVariant === "dark"
+      ? "bg-deepCharcoal text-cream border-white/10"
+      : "bg-white text-gray-700 border-gray-200"
+  }`}
+>
+  <div className="mx-auto max-w-7xl px-4 py-12">
+    <div className="grid gap-10 md:grid-cols-3">
+      <div>
+        <p className="font-serif text-lg font-semibold">{siteConfig.title}</p>
+        <p className="mt-2 text-sm leading-relaxed">
+          Principled strategy, writing, and ventures — grounded in legacy and fatherhood.
+        </p>
+      </div>
 
-            <div>
-              <p className="text-sm font-semibold">Navigate</p>
-              <ul className="mt-3 grid gap-2 text-sm">
-                {NAV.map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href} className="transition hover:text-softGold" prefetch={false}>
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <div>
+        <p className="text-sm font-semibold">Navigate</p>
+        <ul className="mt-3 grid gap-2 text-sm">
+          {NAV.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="transition hover:text-softGold" prefetch={false}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-            <div>
-              <p className="text-sm font-semibold">Contact & Legal</p>
-              <ul className="mt-3 grid gap-2 text-sm">
-                <li>
-                  <a href={`mailto:${siteConfig.email}`} className="transition hover:text-softGold">
-                    {siteConfig.email}
-                  </a>
-                </li>
-                <li>
-                  <Link href="/privacy" className="transition hover:text-softGold" prefetch={false}>
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="transition hover:text-softGold" prefetch={false}>
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
+      {/* ⬇️ Updated column with the two missing links */}
+      <div>
+        <p className="text-sm font-semibold">Contact &amp; Legal</p>
+        <ul className="mt-3 grid gap-2 text-sm">
+          <li>
+            <a href={`mailto:${siteConfig.email}`} className="transition hover:text-softGold">
+              {siteConfig.email}
+            </a>
+          </li>
+          <li>
+            <Link href="/contact" className="transition hover:text-softGold" prefetch={false}>
+              Work With Me
+            </Link>
+          </li>
+          <li>
+            <Link href="/newsletter" className="transition hover:text-softGold" prefetch={false}>
+              Subscribe
+            </Link>
+          </li>
+          <li>
+            <Link href="/privacy" className="transition hover:text-softGold" prefetch={false}>
+              Privacy Policy
+            </Link>
+          </li>
+          <li>
+            <Link href="/terms" className="transition hover:text-softGold" prefetch={false}>
+              Terms of Service
+            </Link>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-          <div className="mt-10 border-t border-gray-200 pt-6 text-center text-xs">
-            © {new Date().getFullYear()} {siteConfig.title}. All rights reserved.
-          </div>
-        </div>
-      </footer>
+    <div className="mt-10 border-t border-gray-200 pt-6 text-center text-xs">
+      © {new Date().getFullYear()} {siteConfig.title}. All rights reserved.
+    </div>
+  </div>
+</footer>
     </>
   );
 }
