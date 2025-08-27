@@ -1,4 +1,3 @@
-// components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,9 +37,7 @@ export default function Layout({
     if (open) root.style.overflow = "hidden";
     else root.style.overflow = prev;
     if (open) firstMobileLinkRef.current?.focus();
-    return () => {
-      root.style.overflow = prev;
-    };
+    return () => { root.style.overflow = prev; };
   }, [open]);
 
   // Close drawer on route change
@@ -53,7 +50,7 @@ export default function Layout({
   const isActive = (href: string) =>
     router.pathname === href || router.asPath.split("#")[0] === href;
 
-  // Organization JSON-LD
+  // JSON-LD
   const ORG_JSONLD = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -74,7 +71,6 @@ export default function Layout({
     ],
   };
 
-  // Site navigation JSON-LD
   const NAV_JSONLD = {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
@@ -230,8 +226,7 @@ export default function Layout({
       {/* Main — padding-bottom reserved via --sticky-cta-h */}
       <main
         id="main-content"
-        // ⬇️ USE max-w-7xl to match StickyCTA CONTENT_PX=1280 (not Tailwind "container")
-        className="min-h-screen bg-white dark:bg-black mx-auto max-w-7xl px-4"
+        className="min-h-screen bg-white dark:bg-black container mx-auto px-4"
         style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}
       >
         {children}
