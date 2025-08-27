@@ -18,16 +18,16 @@ type Props = {
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 
-// Layout numbers (match your site)
-const CONTENT_PX = 1280;   // max-w-7xl
-const PAD = 16;            // safe edge padding
+// Match your layout container (max-w-7xl = 1280px) and a safe edge pad
+const CONTENT_PX = 1280;
+const PAD = 16;
 
-// Docked card
+// Docked card target width
 const CARD_W = 360;
 
-// FAB
+// FAB dimensions
 const FAB_SIZE = 56;
-const FAB_PAD  = 10;
+const FAB_PAD = 10;
 
 export default function StickyCTA({
   showAfter = 480,
@@ -40,7 +40,6 @@ export default function StickyCTA({
   className,
 }: Props) {
   const shellRef = React.useRef<HTMLDivElement | null>(null);
-  const cardRef  = React.useRef<HTMLDivElement | null>(null);
 
   const [visible, setVisible] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
@@ -49,27 +48,30 @@ export default function StickyCTA({
 
   // read persisted dismissal
   React.useEffect(() => {
-    try { setDismissed(localStorage.getItem(STORAGE_KEY) === "1"); } catch {}
+    try {
+      setDismissed(localStorage.getItem(STORAGE_KEY) === "1");
+    } catch {}
   }, []);
 
-  // publish height → CSS var so <main> can reserve space (ONLY for docked)
+  // Reserve space for the docked card only (so it never overlays content)
   const publishHeight = React.useCallback(() => {
     if (!shellRef.current) return;
     const h = Math.ceil(shellRef.current.getBoundingClientRect().height) + 16;
     document.documentElement.style.setProperty("--sticky-cta-h", `${h}px`);
   }, []);
 
-  // detect if the right gutter can fit the 360px card; if not → FAB
+  // Dock if the right gutter can fit 360px; else use tiny FAB
   const recomputeMode = React.useCallback(() => {
     const vw = typeof window !== "undefined" ? window.innerWidth : 0;
     const sideGutter = Math.max(0, (vw - CONTENT_PX) / 2);
-    const available  = Math.max(0, sideGutter - PAD);
+    const available = Math.max(0, sideGutter - PAD);
     setMode(available >= CARD_W ? "dock" : "fab");
   }, []);
 
   // show/hide + collapse on scroll
   React.useEffect(() => {
-    let lastY = 0, ticking = false;
+    let lastY = 0,
+      ticking = false;
     const onScroll = () => {
       const y = window.scrollY || 0;
       if (ticking) return;
@@ -93,7 +95,7 @@ export default function StickyCTA({
     };
   }, [showAfter, recomputeMode]);
 
-  // keep reserved space synced (only for DOCKED; FAB shouldn’t add padding)
+  // Keep the reserved space synced (only for docked mode)
   React.useEffect(() => {
     if (!visible || mode !== "dock") {
       document.documentElement.style.setProperty("--sticky-cta-h", "0px");
@@ -102,47 +104,45 @@ export default function StickyCTA({
     publishHeight();
   }, [visible, collapsed, mode, publishHeight]);
 
-  // cleanup var on unmount
-  React.useEffect(() => () => {
-    document.documentElement.style.setProperty("--sticky-cta-h", "0px");
-  }, []);
+  // Cleanup var on unmount
+  React.useEffect(
+    () => () => {
+      document.documentElement.style.setProperty("--sticky-cta-h", "0px");
+    },
+    []
+  );
 
   const onDismiss = () => {
-    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {}
     setDismissed(true);
     document.documentElement.style.setProperty("--sticky-cta-h", "0px");
   };
 
   if (dismissed || !visible) return null;
 
-  // ——— DOCKED: fixed in right gutter (never covering content column)
-  if (mode === "dock") {
-    return (
-      <aside
-        role="complementary"
-        aria-label="Quick contact"
-        className={clsx("fixed bottom-4 z-[70] transition-[transform,opacity] duration-200", className)}
-        style={{ right: PAD, left: "auto", width: CARD_W }}
-        ref={shellRef}
-        data-mode="dock"
-      >
-        <DockedCard
-          ref={cardRef}
-          collapsed={collapsed}
-          phoneHref={phoneHref}
-          phoneLabel={phoneLabel}
-          primaryHref={primaryHref}
-          primaryLabel={primaryLabel}
-          secondaryHref={secondaryHref}
-          secondaryLabel={secondaryLabel}
-          onDismiss={onDismiss}
-        />
-      </aside>
-    );
-  }
-
-  // ——— FAB: tiny button (56px). Minimal footprint; won’t obscure cards.
-  return (
+  return mode === "dock" ? (
+    <aside
+      role="complementary"
+      aria-label="Quick contact"
+      className={clsx("fixed bottom-4 z-[70] transition-[transform,opacity] duration-200", className)}
+      style={{ right: PAD, left: "auto", width: CARD_W }}
+      ref={shellRef}
+      data-mode="dock"
+    >
+      <DockedCard
+        collapsed={collapsed}
+        phoneHref={phoneHref}
+        phoneLabel={phoneLabel}
+        primaryHref={primaryHref}
+        primaryLabel={primaryLabel}
+        secondaryHref={secondaryHref}
+        secondaryLabel={secondaryLabel}
+        onDismiss={onDismiss}
+      />
+    </aside>
+  ) : (
     <aside
       role="complementary"
       aria-label="Quick contact"
@@ -152,7 +152,6 @@ export default function StickyCTA({
       style={{ right: PAD }}
     >
       <div
-        ref={cardRef}
         className="relative rounded-full bg-white/95 shadow-card backdrop-blur dark:bg-deepCharcoal/95"
         style={{ padding: FAB_PAD }}
       >
@@ -204,17 +203,9 @@ type DockedProps = {
   secondaryLabel: string;
   onDismiss: () => void;
 };
+
 const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function DockedCard(
-  {
-    collapsed,
-    phoneHref,
-    phoneLabel,
-    primaryHref,
-    primaryLabel,
-    secondaryHref,
-    secondaryLabel,
-    onDismiss,
-  },
+  { collapsed, phoneHref, phoneLabel, primaryHref, primaryLabel, secondaryHref, secondaryLabel, onDismiss },
   ref
 ) {
   return (
@@ -231,10 +222,7 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
         onClick={onDismiss}
         aria-label="Dismiss"
         title="Dismiss"
-        className={clsx(
-          "absolute right-2 top-2 rounded-md p-1 text-deepCharcoal/60 hover:bg-black/5",
-          "dark:text-cream/70 dark:hover:bg-white/10"
-        )}
+        className={clsx("absolute right-2 top-2 rounded-md p-1 text-deepCharcoal/60 hover:bg-black/5", "dark:text-cream/70 dark:hover:bg-white/10")}
       >
         <span aria-hidden>×</span>
       </button>
@@ -254,11 +242,7 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
         </a>
 
         <div className="min-w-0 flex-1">
-          {!collapsed && (
-            <p className="truncate text-sm font-medium text-forest dark:text-cream">
-              Let’s build something enduring.
-            </p>
-          )}
+          {!collapsed && <p className="truncate text-sm font-medium text-forest dark:text-cream">Let’s build something enduring.</p>}
 
           <div className={clsx("mt-2 flex flex-wrap gap-2", collapsed && "mt-0")}>
             {isInternal(primaryHref) ? (

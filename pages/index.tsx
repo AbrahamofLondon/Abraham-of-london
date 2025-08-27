@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
-// ⬇️ use the events version so location/tags can be null-safe when spreading
+// ⬇️ events version so location/tags can be null-safe when spreading
 import EventCard from "@/components/events/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -75,7 +75,8 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const postsCount = posts.length;
 
   return (
-    <Layout pageTitle="Home">
+    // ⬇️ Hide StickyCTA on Home to eliminate any chance of overlap here
+    <Layout pageTitle="Home" hideCTA>
       <Head>
         <meta
           name="description"
