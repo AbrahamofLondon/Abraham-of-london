@@ -5,7 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 
 type Props = {
-  showAfter?: number;
+  showAfter?: number;             // px scrolled before it appears
   phoneHref?: string;
   phoneLabel?: string;
   primaryHref?: string;
@@ -18,9 +18,9 @@ type Props = {
 const STORAGE_KEY = "cta:dismissed";
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 
-// matches Layout’s max content width (max-w-7xl = 1280px)
+// Match Layout’s max content width (max-w-7xl = 1280px)
 const CONTENT_PX = 1280;
-const PAD = 16;            // safe edge padding
+const PAD = 16;            // safe viewport edge padding
 const FAB_SIZE = 56;       // tiny floating action button
 const FAB_PAD  = 10;       // visual padding around FAB
 
@@ -42,9 +42,8 @@ export default function StickyCTA({
   const [dismissed, setDismissed] = React.useState(false);
 
   // Mode is derived from actual width:
-  // - FAB when card width < 120px
-  // - Compact when 120–279px
-  // - Full otherwise
+  // - isFab:      card width < 120px
+  // - isCompact:  120px ≤ width < 280px
   const [isFab, setIsFab] = React.useState(false);
   const [isCompact, setIsCompact] = React.useState(false);
 
@@ -68,7 +67,7 @@ export default function StickyCTA({
     return () => ro.disconnect();
   }, [publishHeight]);
 
-  // detect width → pick visual mode
+  // detect width → pick visual mode (fab / compact / full)
   React.useEffect(() => {
     if (!cardRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
@@ -103,7 +102,7 @@ export default function StickyCTA({
     return () => window.removeEventListener("scroll", onScroll);
   }, [showAfter]);
 
-  // keep reserved height synced with mode changes
+  // keep reserved height synced
   React.useEffect(() => {
     if (!visible) {
       document.documentElement.style.setProperty("--sticky-cta-h", "0px");
@@ -125,22 +124,24 @@ export default function StickyCTA({
 
   if (dismissed || !visible) return null;
 
+  // Pure CSS positioning & sizing:
+  // width: clamp(FAB, available gutter, 360px)
+  const style: React.CSSProperties = {
+    right: PAD,
+    left: "auto",
+    width: `clamp(${FAB_SIZE + FAB_PAD * 2}px, calc(((100vw - ${CONTENT_PX}px) / 2) - ${PAD}px), 360px)`,
+    transition: "transform 200ms, opacity 200ms",
+  };
+
   return (
     <aside
       role="complementary"
       aria-label="Quick contact"
       className={clsx("fixed bottom-4 z-[70]", className)}
-      // Pure CSS width so it auto-fits the gutter:
-      // width = clamp(FAB, gutter, 360px)
-      style={{
-        right: PAD,
-        left: "auto",
-        width: `clamp(${FAB_SIZE + FAB_PAD * 2}px, calc(((100vw - ${CONTENT_PX}px) / 2) - ${PAD}px), 360px)`,
-        transition: "transform 200ms, opacity 200ms",
-      }}
+      style={style}
       ref={shellRef}
     >
-      {/* FAB MODE ------------------------------------------------------------ */}
+      {/* FAB MODE -------------------------------------------------------- */}
       {isFab ? (
         <div
           ref={cardRef}
@@ -165,7 +166,7 @@ export default function StickyCTA({
               title={primaryLabel}
               className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-emerald-600 text-white shadow transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40"
             >
-              <PhoneArrowIcon />
+              <PhoneIcon />
             </Link>
           ) : (
             <a
@@ -176,12 +177,12 @@ export default function StickyCTA({
               title={primaryLabel}
               className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-emerald-600 text-white shadow transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/40"
             >
-              <PhoneArrowIcon />
+              <PhoneIcon />
             </a>
           )}
         </div>
       ) : (
-        /* DOCKED / COMPACT CARD -------------------------------------------- */
+        /* DOCKED / COMPACT CARD ---------------------------------------- */
         <div
           ref={cardRef}
           className={clsx(
@@ -205,7 +206,7 @@ export default function StickyCTA({
           </button>
 
           <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
-            {/* Phone */}
+            {/* Phone button */}
             <a
               href={phoneHref}
               className={clsx(
@@ -220,6 +221,7 @@ export default function StickyCTA({
             </a>
 
             <div className="min-w-0 flex-1">
+              {/* hide tagline in compact mode to save space */}
               {!collapsed && !isCompact && (
                 <p className="truncate text-sm font-medium text-forest dark:text-cream">
                   Let’s build something enduring.
@@ -257,7 +259,7 @@ export default function StickyCTA({
                   </a>
                 )}
 
-                {/* Secondary (hidden when compact) */}
+                {/* Secondary is hidden in compact mode */}
                 {!collapsed && !isCompact &&
                   (isInternal(secondaryHref) ? (
                     <Link
@@ -304,14 +306,6 @@ function PhoneIcon() {
       className="block" fill="currentColor"
     >
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.62 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.14a2 2 0 0 1 2.11-.45c.83.29 1.7.5 2.6.62A2 2 0 0 1 22 16.92z" />
-    </svg>
-  );
-}
-
-function PhoneArrowIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M3 12a7 7 0 0 1 7-7h4a7 7 0 1 1 0 14H9l-4 4v-4a7 7 0 0 1-2-7z" />
     </svg>
   );
 }

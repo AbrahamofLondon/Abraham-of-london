@@ -43,7 +43,8 @@ export default function BlogIndex({ posts }: Props) {
     const search = params.toString();
     const href = search ? `/blog?${search}` : "/blog";
     router.replace(href, undefined, { shallow: true });
-  }, [q, cat, sort]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, cat, sort]);
 
   const filtered = React.useMemo(() => {
     let list = posts.filter((p) => {
@@ -66,7 +67,6 @@ export default function BlogIndex({ posts }: Props) {
   }, [posts, q, cat, sort]);
 
   return (
-    {/* ⬇️ Hide the floating StickyCTA on the blog list */}
     <Layout pageTitle="Blog" hideCTA>
       <Head>
         <meta
@@ -142,7 +142,7 @@ export default function BlogIndex({ posts }: Props) {
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize undefined to null for JSON serialization
+  // Normalize undefined → null for JSON serialization
   const safe = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
