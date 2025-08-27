@@ -1,3 +1,4 @@
+import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,31 +6,28 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
-// ⬇️ events version so location/tags can be null-safe when spreading
 import EventCard from "@/components/events/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // remove if unused
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-// Hero media (play only first 5s via media fragment; lighter parse with preload="metadata")
 const HERO = {
   poster: "/assets/images/abraham-of-london-banner.webp",
   videoMp4: "/assets/video/brand-reel.mp4#t=0,5",
   videoWebm: "/assets/video/brand-reel.webm#t=0,5",
 };
 
-// Teaser entries we render on home (explicit to avoid typing clashes)
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string; // "YYYY-MM-DD" or ISO datetime
+  date: string;              // "YYYY-MM-DD" or ISO datetime
   location: string | null;
   description?: string | null;
-  tags?: string[] | null; // used for the subtle "Chatham" chip
+  tags?: string[] | null;    // for the subtle "Chatham" chip
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -43,7 +41,6 @@ type HomeProps = {
 const LONDON_TZ = "Europe/London";
 const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
-/** YYYY-MM-DD for a given Date in Europe/London */
 function londonDayKey(d: Date) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: LONDON_TZ,
@@ -53,7 +50,6 @@ function londonDayKey(d: Date) {
   }).format(d);
 }
 
-/** Is the event on or after today's day (Europe/London)? */
 function isUpcomingLondon(isoish: string) {
   if (!isoish) return false;
   const todayKey = londonDayKey(new Date());
@@ -66,38 +62,27 @@ function isUpcomingLondon(isoish: string) {
 function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
 
-  // Keep query shareable
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
   const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
   const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
   const booksHref = `/books${qSuffix}`;
-
   const postsCount = posts.length;
 
   return (
-    // ⬇️ Hide StickyCTA on Home to eliminate any chance of overlap here
     <Layout pageTitle="Home" hideCTA>
       <Head>
         <meta
           name="description"
           content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
         />
-        {/* Preload the hero poster for faster LCP */}
         <link rel="preload" as="image" href={HERO.poster} />
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero (Next Image poster + video overlay) */}
+      {/* Hero */}
       <section className="relative isolate overflow-hidden bg-white">
         <div className="absolute inset-0 -z-10">
-          <Image
-            src={HERO.poster}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
+          <Image src={HERO.poster} alt="" fill priority sizes="100vw" className="object-cover" />
           {(HERO.videoMp4 || HERO.videoWebm) && (
             <video
               className="absolute inset-0 h-full w-full object-cover"
@@ -136,7 +121,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and society.
             </motion.p>
 
-            {/* Soft brand signal: Chatham Rooms as a footnote */}
             <motion.p
               className="mt-3 text-xs tracking-wide text-white/70"
               initial={{ opacity: 0 }}
@@ -171,7 +155,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Page header bar: breadcrumb + counts + optional query crumb */}
+      {/* Page header crumb & counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
@@ -215,9 +199,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Featured Insights
-            </h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
             <Link
               href={blogHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -228,18 +210,18 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </header>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.slice(0, 3).map((post) => (
+            {posts.slice(0, 3).map((p) => (
               <BlogPostCard
-                key={post.slug}
-                slug={post.slug}
-                title={post.title}
-                date={post.date ?? undefined}
-                excerpt={post.excerpt ?? undefined}
-                coverImage={post.coverImage ?? undefined}
-                author={post.author ?? undefined}
-                readTime={post.readTime ?? undefined}
-                category={post.category ?? undefined}
-                tags={post.tags ?? undefined}
+                key={p.slug}
+                slug={p.slug}
+                title={p.title}
+                date={p.date ?? undefined}
+                excerpt={p.excerpt ?? undefined}
+                coverImage={p.coverImage ?? undefined}
+                author={p.author ?? undefined}
+                readTime={p.readTime ?? undefined}
+                category={p.category ?? undefined}
+                tags={p.tags ?? undefined}
               />
             ))}
           </div>
@@ -250,9 +232,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Featured Books
-            </h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Books</h2>
             <Link
               href={booksHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -288,9 +268,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <section className="bg-white px-4 pb-4 pt-2">
         <div className="mx-auto max-w-7xl">
           <header className="mb-2 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Upcoming Events
-            </h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Upcoming Events</h2>
             <Link
               href="/events"
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -299,7 +277,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               View all
             </Link>
           </header>
-          {/* sub-footnote: soft signal */}
           <p className="mb-6 text-xs text-deepCharcoal/60">
             Select sessions run as Chatham Rooms (off the record).
           </p>
@@ -310,7 +287,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
                 <li key={ev.slug}>
-                  {/* tags included so EventCard can show the subtle "Chatham" badge */}
                   <EventCard {...ev} />
                 </li>
               ))}
@@ -323,9 +299,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              Ventures
-            </h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
             <p className="mt-2 text-sm text-deepCharcoal/70">
               A portfolio built on craftsmanship, stewardship, and endurance.
             </p>
@@ -339,9 +313,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
-                  Explore →
-                </span>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
                 Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
@@ -355,9 +327,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
-                  Explore →
-                </span>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
                 Essential goods and refined experiences—engineered to last, designed to serve.
@@ -371,9 +341,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
-                  Explore →
-                </span>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
                 Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
@@ -387,9 +355,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
-              What Leaders Say
-            </h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">What Leaders Say</h2>
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -463,9 +429,8 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Pull events (server already dedupes), then local London-aware upcoming filter & sort asc
+  // Events
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
-
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
       .filter(
@@ -483,7 +448,26 @@ export async function getStaticProps() {
   );
 
   const upcomingSorted = deduped
-    .filter((e) => isUpcomingLondon(e.date))
+    .filter((e) => {
+      // Europe/London aware
+      const todayKey = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/London",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
+      const only = /^\d{4}-\d{2}-\d{2}$/.test(e.date);
+      if (only) return e.date >= todayKey;
+      const d = new Date(e.date);
+      if (Number.isNaN(d.valueOf())) return false;
+      const key = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/London",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(d);
+      return key >= todayKey;
+    })
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => ({
@@ -497,6 +481,6 @@ export async function getStaticProps() {
 
   return {
     props: { posts: safePosts, booksCount, eventsTeaser },
-    revalidate: 3600, // hourly ISR so events roll forward without redeploy
+    revalidate: 3600,
   };
 }
