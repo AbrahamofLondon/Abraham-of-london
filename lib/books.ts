@@ -11,6 +11,7 @@ export interface BookMeta {
   coverImage: string;
   buyLink: string;
   genre: string;
+  date?: string; 
 
   // Optional extras used by pages/books.tsx
   publishedDate?: string; // stored as ISO or original string

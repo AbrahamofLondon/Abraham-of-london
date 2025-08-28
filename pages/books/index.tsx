@@ -17,7 +17,7 @@ type BookMetaSafe = {
   genre: string | null;
   downloadPdf: string | null;
   downloadEpub: string | null;
-  date?: string | null;
+  // date intentionally omitted to match current BookMeta shape
 };
 
 type Props = { books: BookMetaSafe[] };
@@ -142,13 +142,13 @@ export default function BooksIndex({ books }: Props) {
                 author={b.author ?? "Abraham of London"}
                 excerpt={b.excerpt ?? ""}
 
-                /* optional props: null→undefined */
+                /* optionals: null→undefined for the component */
                 coverImage={b.coverImage ?? undefined}
                 buyLink={b.buyLink ?? undefined}
                 downloadPdf={b.downloadPdf ?? undefined}
                 downloadEpub={b.downloadEpub ?? undefined}
 
-                /* REQUIRED string in BookCard */
+                /* BookCard expects a string */
                 genre={b.genre ?? "Uncategorized"}
 
                 featured={false}
@@ -182,7 +182,7 @@ export async function getStaticProps() {
     "genre",
     "downloadPdf",
     "downloadEpub",
-    "date",
+    // "date", // ⬅️ removed to match current BookMeta keys
   ]);
 
   // JSON-safe: NEVER return undefined
@@ -196,7 +196,6 @@ export async function getStaticProps() {
     genre: b.genre ?? null,
     downloadPdf: b.downloadPdf ?? null,
     downloadEpub: b.downloadEpub ?? null,
-    date: b.date ?? null,
   }));
 
   return { props: { books: safe }, revalidate: 60 };
