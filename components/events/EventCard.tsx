@@ -1,43 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
-import * as React from "react";
+import React from "react";
 
 type Props = {
   slug: string;
   title: string;
-  date: string;              // ISO. "YYYY-MM-DD" allowed for all-day events.
-  location?: string;
+  date: string;                 // ISO or YYYY-MM-DD
+  location?: string | null;
   description?: string | null;
-  /** Optional tags from front matter (e.g., ["leadership","chatham"]) */
   tags?: string[] | null;
-  /** Force the badge without tags (fallback switch) */
   chatham?: boolean;
-  /** Optional explicit hero path under /public (e.g. /assets/images/events/founders-salon.jpg) */
-  heroImage?: string;
   className?: string;
   prefetch?: boolean;
-  timeZone?: string;         // defaults to 'Europe/London'
+  timeZone?: string;            // default Europe/London
+  /** NEW: show an image if provided (local /public path only) */
+  heroImage?: string | null;
+  /** Also accept coverImage for flexibility */
+  coverImage?: string | null;
 };
 
-// ---- helpers ----
-const DEFAULT_EVENT_HERO = "/assets/images/events/default.jpg";
-
-function isDateOnly(isoish: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(isoish);
-}
-
-function isValidDate(d: Date) {
-  return !Number.isNaN(d.valueOf());
-}
+const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+const isValidDate = (d: Date) => !Number.isNaN(d.valueOf());
+const FALLBACK_EVENT = "/assets/images/events/default.jpg";
 
 function getLocalHM(dt: Date, tz: string): { hh: number; mm: number } {
-  const hh = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt)
-  );
-  const mm = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt)
-  );
+  const hh = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt));
+  const mm = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt));
   return { hh, mm };
 }
 
@@ -46,51 +35,18 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
     if (!isValidDate(dt)) return iso;
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: "UTC",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(dt);
+    return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }).format(dt);
   }
-
   const dt = new Date(iso);
   if (!isValidDate(dt)) return iso;
-
-  const dateStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(dt);
-
+  const dateStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(dt);
   const { hh, mm } = getLocalHM(dt, tz);
   if (hh === 0 && mm === 0) return dateStr;
-
-  const timeStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(dt);
-
+  const timeStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(dt);
   return `${dateStr}, ${timeStr}`;
 }
 
-function toMachineDate(iso: string) {
-  return iso;
-}
-
-/**
- * If heroImage not supplied, we try to guess it:
- * - Strip any en/em-dash and everything after (your Founders’ slug includes an em-dash).
- * - Build /assets/images/events/<base>.jpg
- */
-function guessEventHeroFromSlug(slug: string): string {
-  const trimmed = String(slug).trim().replace(/^\/+|\/+$/g, "");
-  const base = trimmed.replace(/[–—].*$/, ""); // strip after en/em dash
-  return `/assets/images/events/${base}.jpg`;
-}
+const toLocal = (src?: string | null) => (src && src.startsWith("/") ? src : undefined);
 
 export default function EventCard({
   slug,
@@ -100,77 +56,63 @@ export default function EventCard({
   description,
   tags = null,
   chatham,
-  heroImage,
   className,
   prefetch = false,
   timeZone = "Europe/London",
+  heroImage,
+  coverImage,
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
-  const machine = toMachineDate(date);
   const hasLocation = Boolean(location && location.trim());
-  const titleId = React.useId();
+  const isChatham = Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
 
-  const isChatham =
-    Boolean(chatham) ||
-    (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
+  const src = toLocal(heroImage) || toLocal(coverImage) || FALLBACK_EVENT;
+  const [imgSrc, setImgSrc] = React.useState(src);
 
-  // hero image resolution with robust fallback
-  const initialHero = heroImage || guessEventHeroFromSlug(slug);
-  const [heroSrc, setHeroSrc] = React.useState<string>(initialHero);
+  // stable, SSR/CSR-safe id (no useId to avoid tree differences)
+  const titleId = React.useMemo(() => `event-${slug.replace(/[^a-z0-9_-]+/gi, "-")}`, [slug]);
 
   return (
     <article
-      className={clsx(
-        "relative rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
-        className
-      )}
+      className={clsx("relative rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover", className)}
       aria-labelledby={titleId}
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Hero */}
-      <div className="relative w-full overflow-hidden rounded-t-2xl bg-warmWhite aspect-[21/9] sm:aspect-[16/9]">
-        <Image
-          src={heroSrc}
-          alt=""
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover"
-          onError={() => {
-            if (heroSrc !== DEFAULT_EVENT_HERO) setHeroSrc(DEFAULT_EVENT_HERO);
-          }}
-          priority={false}
-        />
+      {/* Top image */}
+      <Link href={`/events/${slug}`} prefetch={prefetch} className="block rounded-t-2xl overflow-hidden">
+        <div className="relative aspect-[16/9] w-full">
+          <Image
+            src={imgSrc!}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
+            onError={() => setImgSrc(FALLBACK_EVENT)}
+            priority={false}
+          />
+        </div>
+      </Link>
 
-        {/* Subtle badge */}
-        {isChatham && (
-          <span
-            className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-            title="Chatham Room (off the record)"
-            aria-label="Chatham Room (off the record)"
-          >
-            Chatham
-          </span>
-        )}
-      </div>
+      {isChatham && (
+        <span
+          className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+          title="Chatham Room (off the record)"
+          aria-label="Chatham Room (off the record)"
+        >
+          Chatham
+        </span>
+      )}
 
-      {/* Body */}
       <div className="p-6">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <time
-            dateTime={machine}
-            className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
-            itemProp="startDate"
-          >
+          <time dateTime={date} className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="startDate">
             {nice}
           </time>
           {hasLocation && (
             <>
               <span aria-hidden="true">·</span>
-              <span
-                className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
-                itemProp="location"
-              >
+              <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="location">
                 {location}
               </span>
             </>
