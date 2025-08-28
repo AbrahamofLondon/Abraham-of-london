@@ -25,6 +25,13 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Apex → WWW (hard 301)
+[[redirects]]
+  from = "/*"
+  to   = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force  = true
+  conditions = { Host = ["abrahamoflondon.org"] }
 
 # Canonical host: redirect netlify.app to the main domain
 [[redirects]]
