@@ -14,7 +14,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    // Next parses JSON/urlencoded by default; also tolerate raw string
     const rawBody = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
     const email = String((rawBody as any)?.email ?? "").trim().toLowerCase();
 
@@ -22,7 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(400).json({ ok: false, message: "Valid email is required" });
     }
 
-    const provider = String(process.env.EMAIL_PROVIDER || "").toLowerCase();
+    // ---- choose provider (env or auto-detect by available keys) ----
+    let provider =
+      (process.env.EMAIL_PROVIDER ||
+        process.env.NEXT_PUBLIC_EMAIL_PROVIDER ||
+        "").trim().toLowerCase();
+
+    if (!provider) {
+      if (process.env.BUTTONDOWN_API_KEY) provider = "buttondown";
+      else if (process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_LIST_ID) provider = "mailchimp";
+    }
 
     // --- Mailchimp ---
     if (provider === "mailchimp") {
@@ -30,7 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       const listId = process.env.MAILCHIMP_LIST_ID || "";
       const doubleOpt = asBool(process.env.MAILCHIMP_DOUBLE_OPT_IN, true);
 
-      // Mailchimp keys end with "-usX"
       if (!key || !listId || !/-[a-z0-9]{2,}$/i.test(key)) {
         return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
       }
@@ -62,15 +69,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       }
 
-      // Normalize “already exists” responses
       const detail = String(resp?.title || resp?.detail || "");
       if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
-
-      return res
-        .status(r.status || 500)
-        .json({ ok: false, message: detail || "Mailchimp error" });
+      return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
     }
 
     // --- Buttondown ---
@@ -94,17 +97,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
       }
 
-      // Normalize “already subscribed”
       const txt = JSON.stringify(resp || {}).toLowerCase();
       if (r.status === 400 && (txt.includes("already") || txt.includes("exists"))) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
 
-      const msg =
-        resp?.detail ||
-        resp?.message ||
-        firstErrorString(resp) ||
-        "Buttondown error";
+      const msg = resp?.detail || resp?.message || firstErrorString(resp) || "Buttondown error";
       return res.status(r.status || 500).json({ ok: false, message: msg });
     }
 
@@ -118,7 +116,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 }
 
 /* ---------------- helpers ---------------- */
-
 function safeParse(s: string): unknown {
   try {
     return JSON.parse(s);
@@ -126,7 +123,6 @@ function safeParse(s: string): unknown {
     return {};
   }
 }
-
 async function safeJson(r: Response) {
   try {
     return await r.json();
@@ -134,8 +130,10 @@ async function safeJson(r: Response) {
     return {};
   }
 }
-
-async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { timeoutMs?: number } = {}) {
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit & { timeoutMs?: number } = {}
+) {
   const { timeoutMs = 10_000, ...rest } = init;
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
@@ -145,7 +143,6 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit & { 
     clearTimeout(t);
   }
 }
-
 function firstErrorString(obj: any): string | undefined {
   if (!obj || typeof obj !== "object") return;
   for (const v of Object.values(obj)) {
