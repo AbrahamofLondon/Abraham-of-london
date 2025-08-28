@@ -1,5 +1,6 @@
 // components/NewsletterForm.tsx
 "use client";
+
 import * as React from "react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,14 +14,13 @@ export default function NewsletterForm() {
   const statusRef = React.useRef<HTMLParagraphElement | null>(null);
 
   React.useEffect(() => {
-    // Move SR focus to status when it changes
     if (status !== "idle" && statusRef.current) statusRef.current.focus();
   }, [status, msg]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (status === "loading") return;
 
-    if (status === "loading") return; // guard against double click
     const value = email.trim().toLowerCase();
 
     if (!EMAIL_RE.test(value)) {
@@ -28,8 +28,9 @@ export default function NewsletterForm() {
       setMsg("Please enter a valid email address.");
       return;
     }
+
+    // If the honeypot is filled, act like success to mislead bots.
     if (hp) {
-      // Bot detected; pretend success to avoid probing
       setStatus("ok");
       setMsg("You’re subscribed. Welcome!");
       setEmail("");
@@ -44,13 +45,14 @@ export default function NewsletterForm() {
     abortRef.current = controller;
 
     try {
+      // HOT-FIX: send both shapes so either backend contract is satisfied
       const r = await fetch("/api/newsletter", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ email: value }),
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          email: value,
+          payload: { email_address: value, email: value },
+        }),
         cache: "no-store",
         signal: controller.signal,
       });
@@ -87,7 +89,7 @@ export default function NewsletterForm() {
       className="mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
       noValidate
     >
-      {/* Honeypot (hidden from humans) */}
+      {/* Honeypot (hidden) */}
       <label className="sr-only" htmlFor="newsletter-company">Company</label>
       <input
         id="newsletter-company"
@@ -102,7 +104,6 @@ export default function NewsletterForm() {
       <label htmlFor="newsletter-email" className="sr-only">
         Email address
       </label>
-
       <input
         id="newsletter-email"
         type="email"
