@@ -24,11 +24,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string;              // "YYYY-MM-DD" or ISO
+  date: string;              // "YYYY-MM-DD" or ISO datetime
   location: string | null;
   description?: string | null;
-  tags?: string[] | null;
-  heroImage?: string | null;
+  tags?: string[] | null;    // for the subtle "Chatham" chip
+  heroImage?: string;        // path under /public
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -37,6 +37,19 @@ type HomeProps = {
   booksCount: number;
   eventsTeaser: EventsTeaser;
 };
+
+// ---- Time helpers: Europe/London aware ----
+const LONDON_TZ = "Europe/London";
+const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
+function londonDayKey(d: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: LONDON_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
 
 function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
@@ -398,10 +411,11 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 export default Home;
 
-/* --------- SSG + ISR --------- */
+// SSG + ISR
 export async function getStaticProps() {
   const posts = getAllPosts();
 
+  // Normalize optionals to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -415,9 +429,8 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Include heroImage for events
-  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "heroImage"]);
-
+  // Events
+  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
       .filter(
@@ -431,7 +444,6 @@ export async function getStaticProps() {
         location: e.location ?? null,
         summary: e.summary ?? null,
         tags: Array.isArray(e.tags) ? e.tags : null,
-        heroImage: e.heroImage ?? null,
       }))
   );
 
@@ -457,15 +469,19 @@ export async function getStaticProps() {
     })
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
-  const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => ({
-    slug: e.slug,
-    title: e.title,
-    date: e.date,
-    location: e.location ?? null,
-    description: e.summary ?? null,
-    tags: Array.isArray(e.tags) ? e.tags : null,
-    heroImage: e.heroImage ?? null,
-  }));
+  const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
+    const baseForImage = String(e.slug).replace(/[–—].*$/, ""); // strip after en/em dash
+    const heroImage = `/assets/images/events/${baseForImage}.jpg`;
+    return {
+      slug: e.slug,
+      title: e.title,
+      date: e.date,
+      location: e.location ?? null,
+      description: e.summary ?? null,
+      tags: Array.isArray(e.tags) ? e.tags : null,
+      heroImage,
+    };
+  });
 
   return {
     props: { posts: safePosts, booksCount, eventsTeaser },

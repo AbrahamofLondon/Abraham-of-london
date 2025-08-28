@@ -1,42 +1,51 @@
-import React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import clsx from "clsx";
+import * as React from "react";
 
-export type EventCardProps = {
+type Props = {
   slug: string;
   title: string;
-  /** ISO string; "YYYY-MM-DD" is OK for all-day */
-  date: string;
-  location?: string | null;
+  date: string;              // ISO. "YYYY-MM-DD" allowed for all-day events.
+  location?: string;
   description?: string | null;
-  /** front-matter tags, e.g. ["leadership","chatham"] */
+  /** Optional tags from front matter (e.g., ["leadership","chatham"]) */
   tags?: string[] | null;
-  /** optional explicit hero image (local path under /public) */
-  heroImage?: string;
-  /** force Chatham badge if tags not present */
+  /** Force the badge without tags (fallback switch) */
   chatham?: boolean;
+  /** Optional explicit hero path under /public (e.g. /assets/images/events/founders-salon.jpg) */
+  heroImage?: string;
   className?: string;
   prefetch?: boolean;
-  /** display timezone for date strings (render only) */
-  timeZone?: string;
+  timeZone?: string;         // defaults to 'Europe/London'
 };
 
-const FALLBACK_EVENT_IMAGE = "/assets/images/events/default.jpg";
+// ---- helpers ----
+const DEFAULT_EVENT_HERO = "/assets/images/events/default.jpg";
 
-function isDateOnly(v: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(v);
+function isDateOnly(isoish: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(isoish);
 }
 
 function isValidDate(d: Date) {
   return !Number.isNaN(d.valueOf());
 }
 
-function formatDateNice(isoish: string, tz = "Europe/London") {
-  if (!isoish) return "";
-  if (isDateOnly(isoish)) {
-    const [y, m, d] = isoish.split("-").map(Number);
+function getLocalHM(dt: Date, tz: string): { hh: number; mm: number } {
+  const hh = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt)
+  );
+  const mm = Number(
+    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt)
+  );
+  return { hh, mm };
+}
+
+function formatNiceDate(iso: string, tz = "Europe/London") {
+  if (isDateOnly(iso)) {
+    const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
+    if (!isValidDate(dt)) return iso;
     return new Intl.DateTimeFormat("en-GB", {
       timeZone: "UTC",
       day: "2-digit",
@@ -44,8 +53,9 @@ function formatDateNice(isoish: string, tz = "Europe/London") {
       year: "numeric",
     }).format(dt);
   }
-  const dt = new Date(isoish);
-  if (!isValidDate(dt)) return isoish;
+
+  const dt = new Date(iso);
+  if (!isValidDate(dt)) return iso;
 
   const dateStr = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
@@ -54,6 +64,9 @@ function formatDateNice(isoish: string, tz = "Europe/London") {
     year: "numeric",
   }).format(dt);
 
+  const { hh, mm } = getLocalHM(dt, tz);
+  if (hh === 0 && mm === 0) return dateStr;
+
   const timeStr = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     hour: "2-digit",
@@ -61,9 +74,22 @@ function formatDateNice(isoish: string, tz = "Europe/London") {
     hour12: false,
   }).format(dt);
 
-  // hide midnight times
-  if (timeStr.startsWith("00:")) return dateStr;
   return `${dateStr}, ${timeStr}`;
+}
+
+function toMachineDate(iso: string) {
+  return iso;
+}
+
+/**
+ * If heroImage not supplied, we try to guess it:
+ * - Strip any en/em-dash and everything after (your Founders’ slug includes an em-dash).
+ * - Build /assets/images/events/<base>.jpg
+ */
+function guessEventHeroFromSlug(slug: string): string {
+  const trimmed = String(slug).trim().replace(/^\/+|\/+$/g, "");
+  const base = trimmed.replace(/[–—].*$/, ""); // strip after en/em dash
+  return `/assets/images/events/${base}.jpg`;
 }
 
 export default function EventCard({
@@ -78,65 +104,73 @@ export default function EventCard({
   className,
   prefetch = false,
   timeZone = "Europe/London",
-}: EventCardProps) {
+}: Props) {
+  const nice = formatNiceDate(date, timeZone);
+  const machine = toMachineDate(date);
+  const hasLocation = Boolean(location && location.trim());
   const titleId = React.useId();
-  const nice = formatDateNice(date, timeZone);
-  const hasLocation = !!(location && location.trim());
 
   const isChatham =
     Boolean(chatham) ||
     (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
 
-  // Prefer an explicit hero image if provided; else derive from slug
-  const initialHero =
-    (heroImage && heroImage.startsWith("/") ? heroImage : null) ||
-    `/assets/images/events/${slug}.jpg`;
-
+  // hero image resolution with robust fallback
+  const initialHero = heroImage || guessEventHeroFromSlug(slug);
   const [heroSrc, setHeroSrc] = React.useState<string>(initialHero);
 
   return (
     <article
       className={clsx(
-        "relative overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
+        "relative rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
         className
       )}
       aria-labelledby={titleId}
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* HERO IMAGE — use object-contain to avoid cropping text artwork */}
-      <div className="relative aspect-[16/9] w-full bg-black/80">
+      {/* Hero */}
+      <div className="relative w-full overflow-hidden rounded-t-2xl bg-warmWhite aspect-[21/9] sm:aspect-[16/9]">
         <Image
           src={heroSrc}
           alt=""
           fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-contain"
-          priority={false}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover"
           onError={() => {
-            if (heroSrc !== FALLBACK_EVENT_IMAGE) setHeroSrc(FALLBACK_EVENT_IMAGE);
+            if (heroSrc !== DEFAULT_EVENT_HERO) setHeroSrc(DEFAULT_EVENT_HERO);
           }}
+          priority={false}
         />
+
+        {/* Subtle badge */}
         {isChatham && (
           <span
             className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
             title="Chatham Room (off the record)"
             aria-label="Chatham Room (off the record)"
           >
-            CHATHAM
+            Chatham
           </span>
         )}
       </div>
 
+      {/* Body */}
       <div className="p-6">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <time dateTime={date} className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="startDate">
+          <time
+            dateTime={machine}
+            className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
+            itemProp="startDate"
+          >
             {nice}
           </time>
           {hasLocation && (
             <>
               <span aria-hidden="true">·</span>
-              <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="location">
+              <span
+                className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
+                itemProp="location"
+              >
                 {location}
               </span>
             </>
@@ -169,9 +203,9 @@ export default function EventCard({
             Details
           </Link>
         </div>
-      </div>
 
-      <meta itemProp="url" content={`/events/${slug}`} />
+        <meta itemProp="url" content={`/events/${slug}`} />
+      </div>
     </article>
   );
 }
