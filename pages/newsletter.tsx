@@ -1,133 +1,159 @@
-import * as React from "react";
-import Head from "next/head";
-import Layout from "@/components/Layout";
+// pages/api/newsletter.tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+import crypto from "crypto";
 
-type Status =
-  | { state: "idle" }
-  | { state: "loading" }
-  | { state: "success"; message: string }
-  | { state: "error"; message: string };
+type Json = { ok: boolean; message: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const asBool = (v?: string, def = true) => (v == null ? def : /^true$/i.test(v.trim()));
 
-export default function NewsletterPage() {
-  const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<Status>({ state: "idle" });
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    const trimmed = email.trim().toLowerCase();
-    if (!EMAIL_RE.test(trimmed)) {
-      setStatus({ state: "error", message: "Please enter a valid email address." });
-      return;
-    }
-
-    setStatus({ state: "loading" });
-    try {
-      const r = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed }),
-      });
-
-      let data: any = null;
-      try {
-        data = await r.json();
-      } catch {
-        // ignore parse errors; craft a clean message below
-      }
-
-      // Always coerce to a string to avoid rendering objects
-      const msg =
-        (typeof data?.message === "string" && data.message) ||
-        (typeof data?.detail === "string" && data.detail) ||
-        (typeof data === "string" && data) ||
-        (r.ok ? "You’re subscribed. Welcome!" : "Something went wrong. Please try again.");
-
-      if (r.ok) {
-        setStatus({ state: "success", message: msg });
-        setEmail("");
-      } else {
-        setStatus({ state: "error", message: msg });
-      }
-    } catch {
-      setStatus({
-        state: "error",
-        message: "Network error. Please check your connection and try again.",
-      });
-    }
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Json>) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ ok: false, message: "Method not allowed" });
   }
 
-  // Helper to render a safe, plain string
-  const message =
-    status.state === "success" || status.state === "error" ? String(status.message) : "";
+  try {
+    // Body may arrive as a string (raw) or as an object depending on host
+    const raw = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
+    const email = String((raw as any)?.email ?? "").trim().toLowerCase();
 
-  return (
-    <Layout pageTitle="Newsletter" hideCTA>
-      <Head>
-        <meta name="description" content="Subscribe to Abraham of London updates and essays." />
-        {/* Remove any manual font preloads here; Next handles fonts automatically. */}
-      </Head>
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ ok: false, message: "Valid email is required" });
+    }
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-16">
-          <header className="mb-6 text-center">
-            <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">
-              Join the Newsletter
-            </h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
-              Essays, event invitations, and project updates. No spam — ever.
-            </p>
-          </header>
+    // Decide provider from env; fall back to auto-detect by available keys
+    let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
+      .trim()
+      .toLowerCase();
 
-          <form
-            onSubmit={onSubmit}
-            className="mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
-            noValidate
-          >
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-deepCharcoal/50 focus:border-deepCharcoal focus:outline-none"
-              aria-describedby="newsletter-status"
-            />
-            <button
-              type="submit"
-              disabled={status.state === "loading"}
-              className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {status.state === "loading" ? "Subscribing…" : "Subscribe"}
-            </button>
-          </form>
+    if (!provider) {
+      if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
+      else if (
+        (process.env.MAILCHIMP_API_KEY || "").trim() &&
+        (process.env.MAILCHIMP_LIST_ID || "").trim()
+      )
+        provider = "mailchimp";
+    }
 
-          {/* Accessible status line. Always render only strings. */}
-          {(status.state === "success" || status.state === "error") && (
-            <p
-              id="newsletter-status"
-              role="status"
-              aria-live="polite"
-              className={
-                status.state === "success"
-                  ? "mt-3 text-sm text-forest"
-                  : "mt-3 text-sm text-red-600"
-              }
-            >
-              {message}
-            </p>
-          )}
-        </div>
-      </section>
-    </Layout>
-  );
+    /* ---------------- Mailchimp ---------------- */
+    if (provider === "mailchimp") {
+      const key = (process.env.MAILCHIMP_API_KEY || "").trim();
+      const listId = (process.env.MAILCHIMP_LIST_ID || "").trim();
+      const doubleOpt = asBool(process.env.MAILCHIMP_DOUBLE_OPT_IN, true);
+
+      // Mailchimp API key must include -usX data center suffix
+      if (!key || !listId || !/-[a-z0-9]{2,}$/i.test(key)) {
+        return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
+      }
+
+      const dc = key.split("-").pop()!; // e.g. "us6"
+      const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
+      const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
+
+      const r = await fetchWithTimeout(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Basic " + Buffer.from(`anystring:${key}`).toString("base64"),
+        },
+        body: JSON.stringify({
+          email_address: email,
+          status_if_new: doubleOpt ? "pending" : "subscribed",
+        }),
+      });
+
+      const resp: any = await safeJson(r);
+
+      if (r.ok) {
+        return res.status(200).json({
+          ok: true,
+          message: doubleOpt
+            ? "Check your email to confirm your subscription."
+            : "You’re subscribed. Welcome!",
+        });
+      }
+
+      const detail = String(resp?.title || resp?.detail || "");
+      if (/exists|already/i.test(detail)) {
+        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+      }
+
+      return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
+    }
+
+    /* ---------------- Buttondown ---------------- */
+    if (provider === "buttondown") {
+      const token = (process.env.BUTTONDOWN_API_KEY || "").trim();
+      if (!token) {
+        return res.status(500).json({ ok: false, message: "Buttondown not configured" });
+      }
+
+      const r = await fetchWithTimeout("https://api.buttondown.email/v1/subscribers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const resp: any = await safeJson(r);
+
+      if (r.ok || r.status === 201) {
+        return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
+      }
+
+      const txt = JSON.stringify(resp || {}).toLowerCase();
+      if (r.status === 400 && (txt.includes("already") || txt.includes("exists"))) {
+        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+      }
+
+      const msg = resp?.detail || resp?.message || firstErrorString(resp) || "Buttondown error";
+      return res.status(r.status || 500).json({ ok: false, message: msg });
+    }
+
+    // Unknown/missing provider
+    return res
+      .status(500)
+      .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
+  } catch {
+    return res.status(500).json({ ok: false, message: "Unexpected server error" });
+  }
+}
+
+/* -------------- helpers -------------- */
+function safeParse(s: string): unknown {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return {};
+  }
+}
+async function safeJson(r: Response) {
+  try {
+    return await r.json();
+  } catch {
+    return {};
+  }
+}
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit & { timeoutMs?: number } = {}
+) {
+  const { timeoutMs = 10_000, ...rest } = init;
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...rest, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+function firstErrorString(obj: any): string | undefined {
+  if (!obj || typeof obj !== "object") return;
+  for (const v of Object.values(obj)) {
+    if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
+    if (typeof v === "string") return v;
+  }
 }

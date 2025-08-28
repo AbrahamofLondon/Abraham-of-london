@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import { subscribe as subscribeApi } from "@/lib/subscribe";
 
 export default function NewsletterForm() {
   const [email, setEmail] = React.useState("");
