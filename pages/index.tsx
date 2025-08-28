@@ -1,3 +1,4 @@
+// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -12,7 +13,7 @@ import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events";
-import { motion } from "framer-motion"; // remove if unused
+import { motion } from "framer-motion";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 const HERO = {
@@ -24,10 +25,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string;              // "YYYY-MM-DD" or ISO datetime
+  date: string;               // "YYYY-MM-DD" or ISO datetime
   location: string | null;
   description?: string | null;
-  tags?: string[] | null;    // for the subtle "Chatham" chip
+  tags?: string[] | null;     // “Chatham” chip, etc
+  heroImage?: string | null;  // <— ensure we pass an image to EventCard
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -415,7 +417,6 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -429,8 +430,9 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Events
-  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
+  // Events – include heroImage and pass through
+  const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "heroImage"]);
+
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
       .filter(
@@ -444,31 +446,28 @@ export async function getStaticProps() {
         location: e.location ?? null,
         summary: e.summary ?? null,
         tags: Array.isArray(e.tags) ? e.tags : null,
+        heroImage: typeof e.heroImage === "string" ? e.heroImage : null,
       }))
   );
 
+  const londonFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const todayKey = londonFmt.format(new Date());
+
   const upcomingSorted = deduped
-    .filter((e) => {
-      // Europe/London aware
-      const todayKey = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Europe/London",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date());
+    .filter((e: any) => {
       const only = /^\d{4}-\d{2}-\d{2}$/.test(e.date);
       if (only) return e.date >= todayKey;
       const d = new Date(e.date);
       if (Number.isNaN(d.valueOf())) return false;
-      const key = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Europe/London",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(d);
+      const key = londonFmt.format(d);
       return key >= todayKey;
     })
-    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
+    .sort((a: any, b: any) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => ({
     slug: e.slug,
@@ -477,6 +476,7 @@ export async function getStaticProps() {
     location: e.location ?? null,
     description: e.summary ?? null,
     tags: Array.isArray(e.tags) ? e.tags : null,
+    heroImage: e.heroImage ?? null,
   }));
 
   return {
