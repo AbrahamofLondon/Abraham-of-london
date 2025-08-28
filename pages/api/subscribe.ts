@@ -8,6 +8,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const asBool = (v?: string, def = true) => (v == null ? def : /^true$/i.test(v.trim()));
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Json>) {
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, message: "Method not allowed" });
@@ -21,7 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(400).json({ ok: false, message: "Valid email is required" });
     }
 
-    // ---- choose provider (env or auto-detect by available keys) ----
     let provider =
       (process.env.EMAIL_PROVIDER ||
         process.env.NEXT_PUBLIC_EMAIL_PROVIDER ||
@@ -32,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       else if (process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_LIST_ID) provider = "mailchimp";
     }
 
-    // --- Mailchimp ---
+    // Mailchimp
     if (provider === "mailchimp") {
       const key = process.env.MAILCHIMP_API_KEY || "";
       const listId = process.env.MAILCHIMP_LIST_ID || "";
@@ -42,13 +43,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
       }
 
-      const dc = key.split("-").pop()!; // e.g. "us6"
+      const dc = key.split("-").pop()!;
       const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
       const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
-      const payload = {
-        email_address: email,
-        status_if_new: doubleOpt ? "pending" : "subscribed",
-      };
 
       const r = await fetchWithTimeout(url, {
         method: "PUT",
@@ -56,7 +53,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           "Content-Type": "application/json",
           Authorization: "Basic " + Buffer.from(`anystring:${key}`).toString("base64"),
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          email_address: email,
+          status_if_new: doubleOpt ? "pending" : "subscribed",
+        }),
       });
 
       const resp: any = await safeJson(r);
@@ -68,7 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             : "You’re subscribed. Welcome!",
         });
       }
-
       const detail = String(resp?.title || resp?.detail || "");
       if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
@@ -76,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
     }
 
-    // --- Buttondown ---
+    // Buttondown
     if (provider === "buttondown") {
       const token = process.env.BUTTONDOWN_API_KEY || "";
       if (!token) {
@@ -106,7 +105,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(r.status || 500).json({ ok: false, message: msg });
     }
 
-    // Unknown provider
     return res
       .status(500)
       .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
@@ -115,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 }
 
-/* ---------------- helpers ---------------- */
+/* helpers */
 function safeParse(s: string): unknown {
   try {
     return JSON.parse(s);

@@ -19,10 +19,14 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+
+  // CI-only relax (keeps local strict)
   eslint: { ignoreDuringBuilds: relax },
   typescript: { ignoreBuildErrors: relax },
+
   images: {
     formats: ["image/avif", "image/webp"],
+    dangerouslyAllowSVG: true, // allow SVG via <Image> when needed
     remotePatterns: [
       { protocol: "https", hostname: "abraham-of-london.netlify.app" },
       { protocol: "https", hostname: "abrahamoflondon.org" },
@@ -30,15 +34,18 @@ const nextConfig = {
       // add more CDNs/domains here if you load covers remotely
     ],
   },
-  // experimental: { optimizePackageImports: ["framer-motion"] }, // keep disabled if you prefer
+
+  experimental: {
+    optimizePackageImports: ["framer-motion"], // trims bundle for FM
+  },
 };
 
 // Optional bundle analyzer (only when ANALYZE=true and package is present)
 let withAnalyzer = (cfg) => cfg;
 if (isAnalyze) {
   try {
-    const analyzer = require("@next/bundle-analyzer").default
-      ?? require("@next/bundle-analyzer");
+    const analyzer =
+      require("@next/bundle-analyzer").default ?? require("@next/bundle-analyzer");
     withAnalyzer = analyzer({ enabled: true });
   } catch {
     // analyzer not installed — skip silently

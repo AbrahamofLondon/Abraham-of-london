@@ -1,86 +1,133 @@
-// pages/newsletter.tsx
+import * as React from "react";
 import Head from "next/head";
-import { useState } from "react";
 import Layout from "@/components/Layout";
 
-export default function NewsletterPage() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
-  const [msg, setMsg] = useState("");
+type Status =
+  | { state: "idle" }
+  | { state: "loading" }
+  | { state: "success"; message: string }
+  | { state: "error"; message: string };
 
-  const submit = async (e: React.FormEvent) => {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function NewsletterPage() {
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<Status>({ state: "idle" });
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("loading");
-    setMsg("");
+
+    const trimmed = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(trimmed)) {
+      setStatus({ state: "error", message: "Please enter a valid email address." });
+      return;
+    }
+
+    setStatus({ state: "loading" });
     try {
       const r = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: trimmed }),
       });
-      const data = await r.json();
-      if (r.ok && data?.ok) {
-        setStatus("ok");
-        setMsg(data.message || "You’re subscribed. Welcome!");
+
+      let data: any = null;
+      try {
+        data = await r.json();
+      } catch {
+        // ignore parse errors; craft a clean message below
+      }
+
+      // Always coerce to a string to avoid rendering objects
+      const msg =
+        (typeof data?.message === "string" && data.message) ||
+        (typeof data?.detail === "string" && data.detail) ||
+        (typeof data === "string" && data) ||
+        (r.ok ? "You’re subscribed. Welcome!" : "Something went wrong. Please try again.");
+
+      if (r.ok) {
+        setStatus({ state: "success", message: msg });
         setEmail("");
       } else {
-        setStatus("err");
-        setMsg(data?.message || "Subscription failed.");
+        setStatus({ state: "error", message: msg });
       }
     } catch {
-      setStatus("err");
-      setMsg("Network error. Please try again.");
+      setStatus({
+        state: "error",
+        message: "Network error. Please check your connection and try again.",
+      });
     }
-  };
+  }
+
+  // Helper to render a safe, plain string
+  const message =
+    status.state === "success" || status.state === "error" ? String(status.message) : "";
 
   return (
-    <Layout pageTitle="Newsletter">
+    <Layout pageTitle="Newsletter" hideCTA>
       <Head>
-        <meta name="description" content="Subscribe to Abraham of London’s newsletter." />
-        <link
-          rel="canonical"
-          href={`${process.env.NEXT_PUBLIC_SITE_URL || ""}/newsletter`}
-        />
+        <meta name="description" content="Subscribe to Abraham of London updates and essays." />
+        {/* Remove any manual font preloads here; Next handles fonts automatically. */}
       </Head>
 
-      <main className="container mx-auto max-w-xl px-4 py-16">
-        <h1 className="font-serif text-4xl text-forest mb-4">Newsletter</h1>
-        <p className="text-deepCharcoal/80 mb-6">
-          Pragmatic notes on legacy, standards, and building things that last.
-        </p>
+      <section className="bg-white">
+        <div className="mx-auto max-w-3xl px-4 py-16">
+          <header className="mb-6 text-center">
+            <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">
+              Join the Newsletter
+            </h1>
+            <p className="mt-2 text-sm text-deepCharcoal/70">
+              Essays, event invitations, and project updates. No spam — ever.
+            </p>
+          </header>
 
-        <form onSubmit={submit} className="space-y-4">
-          <label className="block">
-            <span className="block text-sm font-medium">Email address</span>
+          <form
+            onSubmit={onSubmit}
+            className="mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
+            noValidate
+          >
+            <label htmlFor="email" className="sr-only">
+              Email address
+            </label>
             <input
+              id="email"
+              name="email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
               required
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border border-lightGrey px-4 py-2"
-              placeholder="you@example.com"
-              autoComplete="email"
+              className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-deepCharcoal/50 focus:border-deepCharcoal focus:outline-none"
+              aria-describedby="newsletter-status"
             />
-          </label>
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="rounded-full bg-forest px-5 py-2 text-white hover:bg-primary-hover disabled:opacity-60"
-          >
-            {status === "loading" ? "Subscribing…" : "Subscribe"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={status.state === "loading"}
+              className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status.state === "loading" ? "Subscribing…" : "Subscribe"}
+            </button>
+          </form>
 
-        {msg && (
-          <p
-            role="status"
-            aria-live="polite"
-            className={`mt-4 text-sm ${status === "ok" ? "text-emerald-700" : "text-red-600"}`}
-          >
-            {msg}
-          </p>
-        )}
-      </main>
+          {/* Accessible status line. Always render only strings. */}
+          {(status.state === "success" || status.state === "error") && (
+            <p
+              id="newsletter-status"
+              role="status"
+              aria-live="polite"
+              className={
+                status.state === "success"
+                  ? "mt-3 text-sm text-forest"
+                  : "mt-3 text-sm text-red-600"
+              }
+            >
+              {message}
+            </p>
+          )}
+        </div>
+      </section>
     </Layout>
   );
 }

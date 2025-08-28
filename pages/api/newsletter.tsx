@@ -1,115 +1,130 @@
-// pages/api/newsletter.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+import * as React from "react";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+import Link from "next/link";
 
-type Ok = { ok: true; message: string };
-type Err = { ok: false; error: string };
-type Res = Ok | Err;
+type State =
+  | { status: "idle"; message: "" }
+  | { status: "loading"; message: "Subscribing…" }
+  | { status: "success"; message: string }
+  | { status: "error"; message: string };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export default function NewsletterPage() {
+  const [email, setEmail] = React.useState("");
+  const [state, setState] = React.useState<State>({ status: "idle", message: "" });
 
-export const config = {
-  api: { bodyParser: true },
-};
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Res>) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
-  }
-
-  try {
-    // Next already parses JSON when content-type is application/json
-    const body = typeof req.body === "string" ? safeJson(req.body) : (req.body ?? {});
-    const email = String((body as any).email ?? "").trim().toLowerCase();
-    const honeypot = String((body as any).hp ?? (body as any)["bot-field"] ?? "");
-
-    // Honeypot: pretend success if bot filled it
-    if (honeypot) return res.status(200).json({ ok: true, message: "Subscribed successfully" });
-
-    if (!EMAIL_RE.test(email)) {
-      return res.status(400).json({ ok: false, error: "Invalid email" });
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setState({ status: "error", message: "Please enter a valid email address." });
+      return;
     }
 
-    const provider = String(process.env.EMAIL_PROVIDER ?? "buttondown").toLowerCase();
+    setState({ status: "loading", message: "Subscribing…" });
 
-    if (provider === "buttondown") {
-      const apiKey = process.env.BUTTONDOWN_API_KEY;
-      if (!apiKey) {
-        console.warn("[newsletter] Missing BUTTONDOWN_API_KEY");
-        return res.status(500).json({ ok: false, error: "Email provider not configured" });
-      }
+    try {
+      const r = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
 
-      // Short timeout so the API doesn’t hang
-      const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 10_000);
-
-      let resp: Response;
-      try {
-        resp = await fetch("https://api.buttondown.email/v1/subscribers", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${apiKey}`,
-          },
-          body: JSON.stringify({ email }),
-          signal: controller.signal,
+      const data = (await r.json()) as { ok?: boolean; message?: string };
+      if (r.ok && data?.ok) {
+        setState({ status: "success", message: data.message || "You’re subscribed. Welcome!" });
+        setEmail("");
+      } else {
+        setState({
+          status: "error",
+          message: data?.message || "Sorry, something went wrong. Please try again.",
         });
-      } finally {
-        clearTimeout(t);
       }
-
-      // Buttondown often responds with JSON error details
-      const data: any = await resp
-        .json()
-        .catch(() => ({}));
-
-      if (resp.ok) {
-        return res.status(200).json({ ok: true, message: "Subscribed successfully" });
-      }
-
-      // Normalize common “already subscribed” cases to success
-      const txt = JSON.stringify(data).toLowerCase();
-      if (
-        resp.status === 400 &&
-        (txt.includes("already") || txt.includes("exists"))
-      ) {
-        return res.status(200).json({ ok: true, message: "You’re already subscribed" });
-      }
-
-      const msg =
-        data?.detail ||
-        data?.message ||
-        firstErrorString(data) ||
-        "Subscription failed";
-      return res.status(resp.status).json({ ok: false, error: msg });
+    } catch {
+      setState({
+        status: "error",
+        message: "Network error. Please check your connection and try again.",
+      });
     }
-
-    // Fallback: mock “subscribe”
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[newsletter] mock subscribe:", email.replace(/^(.).+(@.*)$/, "$1***$2"));
-    }
-    return res.status(200).json({ ok: true, message: "Subscribed successfully" });
-  } catch (err: any) {
-    console.error("[newsletter] API error:", err?.message || err);
-    return res.status(500).json({ ok: false, error: "Internal Server Error" });
   }
-}
 
-/* ---------------- helpers ---------------- */
+  const disabled = state.status === "loading";
 
-function safeJson(s: string) {
-  try {
-    return JSON.parse(s);
-  } catch {
-    return {};
-  }
-}
+  return (
+    <Layout pageTitle="Newsletter">
+      <Head>
+        <meta
+          name="description"
+          content="Join the Abraham of London newsletter — clarity, standards, and strategy that endure."
+        />
+      </Head>
 
-function firstErrorString(obj: any): string | undefined {
-  // Buttondown may return shape like { email: ["..."], non_field_errors: ["..."] }
-  if (!obj || typeof obj !== "object") return;
-  for (const v of Object.values(obj)) {
-    if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
-    if (typeof v === "string") return v;
-  }
+      <section className="bg-white">
+        <div className="mx-auto max-w-2xl px-4 py-16">
+          <header className="mb-6 text-center">
+            <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">Newsletter</h1>
+            <p className="mt-2 text-sm text-deepCharcoal/70">
+              Practical signal. No noise. Occasional notes on standards, stewardship, and strategy.
+            </p>
+          </header>
+
+          <form
+            onSubmit={onSubmit}
+            className="rounded-2xl border border-lightGrey bg-warmWhite/40 p-4 sm:p-6"
+            noValidate
+          >
+            <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal/80">
+              Email address
+            </label>
+            <div className="mt-2 flex gap-2">
+              <input
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-lightGrey px-3 py-2 text-sm text-deepCharcoal focus:border-deepCharcoal focus:outline-none"
+                placeholder="you@example.com"
+                aria-describedby="form-message"
+              />
+              <button
+                type="submit"
+                disabled={disabled}
+                className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {state.status === "loading" ? "Subscribing…" : "Subscribe"}
+              </button>
+            </div>
+
+            {state.message && (
+              <p
+                id="form-message"
+                className={
+                  state.status === "error"
+                    ? "mt-3 text-sm text-red-600"
+                    : state.status === "success"
+                    ? "mt-3 text-sm text-forest"
+                    : "sr-only"
+                }
+                role={state.status === "error" ? "alert" : undefined}
+              >
+                {state.message}
+              </p>
+            )}
+
+            <p className="mt-4 text-xs text-deepCharcoal/60">
+              By subscribing, you consent to receive emails from Abraham of London. You can
+              unsubscribe anytime. See our{" "}
+              <Link href="/privacy" className="underline decoration-softGold/60 underline-offset-4">
+                privacy policy
+              </Link>
+              .
+            </p>
+          </form>
+        </div>
+      </section>
+    </Layout>
+  );
 }
