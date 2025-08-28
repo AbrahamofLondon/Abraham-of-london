@@ -1,4 +1,3 @@
-// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -25,11 +24,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string;               // "YYYY-MM-DD" or ISO datetime
+  date: string;              // "YYYY-MM-DD" or ISO
   location: string | null;
   description?: string | null;
-  tags?: string[] | null;     // “Chatham” chip, etc
-  heroImage?: string | null;  // <— ensure we pass an image to EventCard
+  tags?: string[] | null;
+  heroImage?: string | null;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -38,28 +37,6 @@ type HomeProps = {
   booksCount: number;
   eventsTeaser: EventsTeaser;
 };
-
-// ---- Time helpers: Europe/London aware ----
-const LONDON_TZ = "Europe/London";
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-function londonDayKey(d: Date) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: LONDON_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
-}
-
-function isUpcomingLondon(isoish: string) {
-  if (!isoish) return false;
-  const todayKey = londonDayKey(new Date());
-  if (isDateOnly(isoish)) return isoish >= todayKey;
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return false;
-  return londonDayKey(d) >= todayKey;
-}
 
 function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
@@ -289,7 +266,15 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
                 <li key={ev.slug}>
-                  <EventCard {...ev} />
+                  <EventCard
+                    slug={ev.slug}
+                    title={ev.title}
+                    date={ev.date}
+                    location={ev.location ?? undefined}
+                    description={ev.description ?? undefined}
+                    tags={ev.tags ?? undefined}
+                    heroImage={ev.heroImage ?? undefined}
+                  />
                 </li>
               ))}
             </ul>
@@ -413,7 +398,7 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 export default Home;
 
-// SSG + ISR
+/* --------- SSG + ISR --------- */
 export async function getStaticProps() {
   const posts = getAllPosts();
 
@@ -430,7 +415,7 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Events – include heroImage and pass through
+  // Include heroImage for events
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "heroImage"]);
 
   const deduped = dedupeEventsByTitleAndDay(
@@ -446,28 +431,31 @@ export async function getStaticProps() {
         location: e.location ?? null,
         summary: e.summary ?? null,
         tags: Array.isArray(e.tags) ? e.tags : null,
-        heroImage: typeof e.heroImage === "string" ? e.heroImage : null,
+        heroImage: e.heroImage ?? null,
       }))
   );
 
-  const londonFmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/London",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const todayKey = londonFmt.format(new Date());
-
   const upcomingSorted = deduped
-    .filter((e: any) => {
+    .filter((e) => {
+      const todayKey = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/London",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
       const only = /^\d{4}-\d{2}-\d{2}$/.test(e.date);
       if (only) return e.date >= todayKey;
       const d = new Date(e.date);
       if (Number.isNaN(d.valueOf())) return false;
-      const key = londonFmt.format(d);
+      const key = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/London",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(d);
       return key >= todayKey;
     })
-    .sort((a: any, b: any) => +new Date(a.date) - +new Date(b.date));
+    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => ({
     slug: e.slug,

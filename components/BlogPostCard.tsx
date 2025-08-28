@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import * as React from "react";
+import React from "react";
 import { siteConfig } from "@/lib/siteConfig";
 
 type BlogPostCardProps = {
@@ -8,20 +8,44 @@ type BlogPostCardProps = {
   title: string;
   date?: string;
   excerpt?: string;
-  coverImage?: string | null;
-  author?: string | { name?: string; image?: string | null };
-  readTime?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
+  coverImage?: string;
+  author?: string | { name?: string; image?: string };
+  readTime?: string;
+  category?: string;
+  tags?: string[];
 };
 
-const DEFAULT_BLOG_IMG = "/assets/images/blog/default-blog.jpg"; // ensure this file exists
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
-function normalizeLocal(src?: string | null) {
-  if (!src) return DEFAULT_BLOG_IMG;
-  const s = String(src).replace(/\\/g, "/");
-  return s.startsWith("/") ? s : `/${s}`;
+/** Normalize to a local /public path and try slug-based fallbacks */
+function useBlogCover(slug: string, coverImage?: string) {
+  const normalizeLocal = (src?: string) => {
+    if (!src) return undefined;
+    if (/^https?:\/\//i.test(src)) return undefined; // local only
+    return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+  };
+
+  const candidates = React.useMemo(() => {
+    const list = [
+      normalizeLocal(coverImage),
+      `/assets/images/blog/${slug}.webp`,
+      `/assets/images/blog/${slug}.jpg`,
+      `/assets/images/blog/${slug}.jpeg`,
+      `/assets/images/blog/${slug}.png`,
+      `/assets/images/blog/default-blog.jpg`,
+      `/assets/images/default-blog.jpg`,
+    ].filter(Boolean) as string[];
+    return Array.from(new Set(list));
+  }, [slug, coverImage]);
+
+  const [idx, setIdx] = React.useState(0);
+  const src = candidates[idx];
+
+  const onError = React.useCallback(() => {
+    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i));
+  }, [candidates.length]);
+
+  return { src, hasAny: candidates.length > 0, onError };
 }
 
 export default function BlogPostCard({
@@ -36,11 +60,17 @@ export default function BlogPostCard({
 }: BlogPostCardProps) {
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
 
+  const normalizeLocal = (src?: string) =>
+    !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+
   const preferredAvatar =
-    (typeof author !== "string" && normalizeLocal(author?.image || FALLBACK_AVATAR)) || FALLBACK_AVATAR;
+    (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const coverSrc = normalizeLocal(coverImage);
+  const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(
+    slug,
+    coverImage
+  );
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
@@ -52,22 +82,19 @@ export default function BlogPostCard({
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {/* Cover image (always render with safe fallback for consistent layout) */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
-          <Image
-            src={coverSrc}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            onError={(e) => {
-              try {
-                (e.currentTarget as HTMLImageElement).src = DEFAULT_BLOG_IMG;
-              } catch {}
-            }}
-            priority={false}
-          />
-        </div>
+        {showCover && coverSrc && (
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
+            <Image
+              src={coverSrc}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover"
+              priority={false}
+              onError={onCoverError}
+            />
+          </div>
+        )}
 
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
