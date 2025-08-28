@@ -1,3 +1,4 @@
+// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -24,11 +25,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string;              // "YYYY-MM-DD" or ISO datetime
+  date: string; // "YYYY-MM-DD" or ISO datetime
   location: string | null;
   description?: string | null;
-  tags?: string[] | null;    // for the subtle "Chatham" chip
-  heroImage?: string;        // path under /public
+  tags?: string[] | null; // for the subtle "Chatham" chip
+  heroImage?: string; // path under /public
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -110,7 +111,8 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.15 }}
             >
-              I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and society.
+              I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and
+              society.
             </motion.p>
 
             <motion.p
@@ -153,7 +155,9 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>Home</Link>
+                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>
+                  Home
+                </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li className="text-deepCharcoal/80">Overview</li>
