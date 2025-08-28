@@ -6,29 +6,20 @@ import React from "react";
 type Props = {
   slug: string;
   title: string;
-  date: string;                 // ISO or YYYY-MM-DD
-  location?: string | null;
+  date: string;
+  location?: string;
   description?: string | null;
   tags?: string[] | null;
   chatham?: boolean;
+  heroImage?: string | null; // allow explicit override from front matter
   className?: string;
   prefetch?: boolean;
-  timeZone?: string;            // default Europe/London
-  /** NEW: show an image if provided (local /public path only) */
-  heroImage?: string | null;
-  /** Also accept coverImage for flexibility */
-  coverImage?: string | null;
+  timeZone?: string;
 };
 
+/* ---------- date helpers ---------- */
 const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 const isValidDate = (d: Date) => !Number.isNaN(d.valueOf());
-const FALLBACK_EVENT = "/assets/images/events/default.jpg";
-
-function getLocalHM(dt: Date, tz: string): { hh: number; mm: number } {
-  const hh = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt));
-  const mm = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt));
-  return { hh, mm };
-}
 
 function formatNiceDate(iso: string, tz = "Europe/London") {
   if (isDateOnly(iso)) {
@@ -40,14 +31,44 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
   const dt = new Date(iso);
   if (!isValidDate(dt)) return iso;
   const dateStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(dt);
-  const { hh, mm } = getLocalHM(dt, tz);
-  if (hh === 0 && mm === 0) return dateStr;
   const timeStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(dt);
-  return `${dateStr}, ${timeStr}`;
+  return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
 }
 
-const toLocal = (src?: string | null) => (src && src.startsWith("/") ? src : undefined);
+/* ---------- image helpers ---------- */
+const ensureLocal = (p?: string | null) => (p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined);
 
+/** Try: exact slug, normalized slug, shortened slug (first 2–3 tokens), then default */
+function useEventImageCandidates(slug: string, heroImage?: string | null) {
+  const { candidates } = React.useMemo(() => {
+    const explicit = ensureLocal(heroImage);
+
+    const base = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const short2 = base.split("-").slice(0, 2).join("-");
+    const short3 = base.split("-").slice(0, 3).join("-");
+
+    const exts = ["webp", "jpg", "jpeg", "png"];
+    const from = (name: string) => exts.map((e) => `/assets/images/events/${name}.${e}`);
+
+    const list = [
+      explicit,
+      ...from(base),
+      ...from(short3),
+      ...from(short2),
+      "/assets/images/events/default.jpg",
+    ].filter(Boolean) as string[];
+
+    return { candidates: Array.from(new Set(list)) };
+  }, [slug, heroImage]);
+
+  const [idx, setIdx] = React.useState(0);
+  const src = candidates[idx];
+  const onError = React.useCallback(() => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)), [candidates.length]);
+
+  return { src, hasAny: candidates.length > 0, onError };
+}
+
+/* ---------- component ---------- */
 export default function EventCard({
   slug,
   title,
@@ -59,49 +80,46 @@ export default function EventCard({
   className,
   prefetch = false,
   timeZone = "Europe/London",
-  heroImage,
-  coverImage,
+  heroImage = null,
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
-  const hasLocation = Boolean(location && location.trim());
-  const isChatham = Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
+  const titleId = React.useId();
+  const isChatham =
+    Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
 
-  const src = toLocal(heroImage) || toLocal(coverImage) || FALLBACK_EVENT;
-  const [imgSrc, setImgSrc] = React.useState(src);
-
-  // stable, SSR/CSR-safe id (no useId to avoid tree differences)
-  const titleId = React.useMemo(() => `event-${slug.replace(/[^a-z0-9_-]+/gi, "-")}`, [slug]);
+  const { src, hasAny, onError } = useEventImageCandidates(slug, heroImage);
 
   return (
     <article
-      className={clsx("relative rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover", className)}
+      className={clsx(
+        "relative overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
+        className
+      )}
       aria-labelledby={titleId}
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Top image */}
-      <Link href={`/events/${slug}`} prefetch={prefetch} className="block rounded-t-2xl overflow-hidden">
+      {hasAny && src && (
         <div className="relative aspect-[16/9] w-full">
           <Image
-            src={imgSrc!}
+            src={src}
             alt=""
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover"
-            onError={() => setImgSrc(FALLBACK_EVENT)}
+            onError={onError}
             priority={false}
           />
+          {isChatham && (
+            <span
+              className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+              title="Chatham Room (off the record)"
+              aria-label="Chatham Room (off the record)"
+            >
+              Chatham
+            </span>
+          )}
         </div>
-      </Link>
-
-      {isChatham && (
-        <span
-          className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-          title="Chatham Room (off the record)"
-          aria-label="Chatham Room (off the record)"
-        >
-          Chatham
-        </span>
       )}
 
       <div className="p-6">
@@ -109,7 +127,7 @@ export default function EventCard({
           <time dateTime={date} className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="startDate">
             {nice}
           </time>
-          {hasLocation && (
+          {location?.trim() && (
             <>
               <span aria-hidden="true">·</span>
               <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80" itemProp="location">
