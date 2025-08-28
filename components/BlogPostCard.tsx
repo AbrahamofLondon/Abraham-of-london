@@ -1,28 +1,32 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 import { siteConfig } from "@/lib/siteConfig";
 
-type BlogPostCardProps = {
+export type BlogPostCardProps = {
   slug: string;
   title: string;
-  date?: string | null;
-  excerpt?: string | null;
-  coverImage?: string | null;   // local path under /public
-  author?: string | { name?: string; image?: string | null } | null;
-  readTime?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
+  date?: string;
+  excerpt?: string;
+  coverImage?: string; // may be "/..." or "assets/..." or "http(s)://..."
+  author?: string | { name?: string; image?: string };
+  readTime?: string;
+  category?: string;
+  tags?: string[];
 };
 
-// Only allow local (/public) assets
-const toLocal = (src?: string | null) => (src && src.startsWith("/") ? src : undefined);
+/** Accepts "/path", "path/without/leading/slash", or absolute http(s) */
+function normalizeSrc(src?: string): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  // ensure single leading slash
+  return `/${src.replace(/^\/+/, "")}`;
+}
 
-// Fallback avatar (MUST exist)
+// A local, guaranteed asset you already have (social/og). 1200×630 works fine for a card.
+const FALLBACK_COVER = normalizeSrc(siteConfig.ogImage) || "/assets/images/social/og-image.jpg";
+// Your portrait already exists; use it for author fallback.
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
-
-// Optional blog cover fallback if you want a default card art
-const DEFAULT_BLOG_COVER = "/assets/images/blog/default-blog.jpg"; // add this file if you want a default
 
 export default function BlogPostCard({
   slug,
@@ -35,61 +39,43 @@ export default function BlogPostCard({
   category,
 }: BlogPostCardProps) {
   const authorName =
-    typeof author === "string"
-      ? author
-      : author?.name || siteConfig.author;
+    typeof author === "string" ? author : author?.name || siteConfig.author;
 
-  // Author avatar self-heal
-  const preferredAvatar = (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
+  const initialCover = normalizeSrc(coverImage) || FALLBACK_COVER;
+  const [coverSrc, setCoverSrc] = React.useState(initialCover);
+
+  const preferredAvatar =
+    (typeof author !== "string" && normalizeSrc(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  // Cover self-heal (local only)
-  const provided = toLocal(coverImage);
-  const first = provided || `/assets/images/blog/${slug}.webp`;
-  const candidates = React.useMemo(
-    () =>
-      [
-        first,
-        `/assets/images/blog/${slug}.jpg`,
-        `/assets/images/blog/${slug}.jpeg`,
-        `/assets/images/blog/${slug}.png`,
-        // last resort (comment this out if you don’t want a generic cover)
-        DEFAULT_BLOG_COVER,
-      ].filter(Boolean) as string[],
-    [first, slug]
-  );
-
-  const [idx, setIdx] = React.useState(0);
-  const imgSrc = candidates[idx];
-
-  const advanceCover = React.useCallback(() => {
-    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i + 1));
-  }, [candidates.length]);
-
   const dt = date ? new Date(date) : null;
-  const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
-  const dateLabel =
-    dt && !Number.isNaN(+dt)
-      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt)
-      : undefined;
+  const validDate = dt && !Number.isNaN(+dt);
+  const dateTime = validDate ? dt!.toISOString().slice(0, 10) : undefined;
+  const dateLabel = validDate
+    ? new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(dt!)
+    : undefined;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
+    <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {imgSrc ? (
-          <div className="relative aspect-[16/9] w-full">
-            <Image
-              src={imgSrc}
-              alt={`${title} cover`}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover"
-              onError={advanceCover}
-              priority={false}
-            />
-          </div>
-        ) : null}
+        {/* Cover */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
+          <Image
+            src={coverSrc}
+            alt="" /* decorative in card context */
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+            onError={() => setCoverSrc(FALLBACK_COVER)}
+            priority={false}
+          />
+        </div>
 
+        {/* Body */}
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
 
@@ -111,7 +97,9 @@ export default function BlogPostCard({
             </Link>
           </div>
 
-          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
+          {excerpt && (
+            <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>
+          )}
 
           {/* Author row */}
           <div className="mt-4 flex items-center gap-3">

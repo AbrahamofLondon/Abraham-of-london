@@ -1,42 +1,39 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import clsx from "clsx";
 import React from "react";
+
+/** Accepts "/path", "path/without/leading/slash", or absolute http(s) */
+function normalizeSrc(src?: string): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  return `/${src.replace(/^\/+/, "")}`;
+}
 
 type Props = {
   slug: string;
   title: string;
-  date: string;              // ISO. "YYYY-MM-DD" allowed for all-day events.
+  date: string;                 // ISO or "YYYY-MM-DD"
   location?: string | null;
   description?: string | null;
-  /** Optional tags from front matter (e.g., ["leadership","chatham"]) */
-  tags?: string[] | null;
-  /** Force the badge without tags (fallback switch) */
-  chatham?: boolean;
+  tags?: string[] | null;       // e.g. ["leadership","chatham"]
+  chatham?: boolean;            // force the badge
+  image?: string | null;        // explicit image (alias)
+  heroImage?: string | null;    // explicit image (legacy alias used on index.tsx)
   className?: string;
   prefetch?: boolean;
-  timeZone?: string;         // defaults to 'Europe/London'
-  /** Optional explicit image path (under /public). If omitted we derive from slug. */
-  image?: string;
-  imageAlt?: string;
+  timeZone?: string;            // defaults to Europe/London
 };
 
 // ---- Helpers ----
-function isDateOnly(isoish: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(isoish);
-}
-
-function isValidDate(d: Date) {
-  return !Number.isNaN(d.valueOf());
-}
+const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+const isValidDate = (d: Date) => !Number.isNaN(d.valueOf());
 
 function getLocalHM(dt: Date, tz: string): { hh: number; mm: number } {
   const hh = Number(
     new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(dt)
   );
-  const mm = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt)
-  );
+  const mm = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(dt));
   return { hh, mm };
 }
 
@@ -76,13 +73,12 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
   return `${dateStr}, ${timeStr}`;
 }
 
-function toMachineDate(iso: string) {
-  return iso;
+function slugToDefaultImage(slug: string): string {
+  const last = slug.split("/").filter(Boolean).pop() || slug;
+  return `/assets/images/events/${last}.jpg`;
 }
 
-function toLocal(src?: string) {
-  return src && src.startsWith("/") ? src : undefined;
-}
+const FALLBACK_EVENT_IMAGE = "/assets/images/events/default.jpg";
 
 export default function EventCard({
   slug,
@@ -92,39 +88,24 @@ export default function EventCard({
   description,
   tags = null,
   chatham,
+  image = null,
+  heroImage = null,            // <- support legacy prop
   className,
   prefetch = false,
   timeZone = "Europe/London",
-  image,
-  imageAlt,
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
-  const machine = toMachineDate(date);
-  const hasLocation = Boolean(location && location.trim());
+  const hasLocation = Boolean(location && String(location).trim());
   const titleId = React.useId();
 
   const isChatham =
     Boolean(chatham) ||
-    (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
+    (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase().trim() === "chatham"));
 
-  // --- self-healing image loader (local only) ---
-  const initial = toLocal(image) || `/assets/images/events/${slug}.webp`;
-  const candidates = React.useMemo(
-    () => [
-      initial,
-      `/assets/images/events/${slug}.jpg`,
-      `/assets/images/events/${slug}.jpeg`,
-      `/assets/images/events/${slug}.png`,
-    ].filter(Boolean) as string[],
-    [initial, slug]
-  );
-
-  const [idx, setIdx] = React.useState(0);
-  const imgSrc = candidates[idx]; // undefined => no image rendered
-
-  const advanceFallback = React.useCallback(() => {
-    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i + 1)); // on final failure we’ll hide the media block
-  }, [candidates.length]);
+  // Robust cover source: heroImage -> image -> slug-derived -> fallback
+  const explicit = normalizeSrc(heroImage || image || undefined);
+  const initialCover = explicit || slugToDefaultImage(slug);
+  const [coverSrc, setCoverSrc] = React.useState(initialCover);
 
   return (
     <article
@@ -136,31 +117,18 @@ export default function EventCard({
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Media */}
-      {imgSrc && idx < candidates.length ? (
-        <div className="relative aspect-[16/9] w-full">
-          <Image
-            src={imgSrc}
-            alt={imageAlt || `${title} image`}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
-            onError={advanceFallback}
-            priority={false}
-          />
-          {isChatham && (
-            <span
-              className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-              title="Chatham Room (off the record)"
-              aria-label="Chatham Room (off the record)"
-            >
-              Chatham
-            </span>
-          )}
-        </div>
-      ) : (
-        // no image — still keep the badge if applicable
-        isChatham && (
+      {/* Cover (always visible with fallback) */}
+      <div className="relative aspect-[16/9] w-full">
+        <Image
+          src={coverSrc}
+          alt="" /* decorative */
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover"
+          onError={() => setCoverSrc(FALLBACK_EVENT_IMAGE)}
+          priority={false}
+        />
+        {isChatham && (
           <span
             className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
             title="Chatham Room (off the record)"
@@ -168,13 +136,13 @@ export default function EventCard({
           >
             Chatham
           </span>
-        )
-      )}
+        )}
+      </div>
 
       <div className="p-6">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
           <time
-            dateTime={machine}
+            dateTime={date}
             className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
             itemProp="startDate"
           >
@@ -219,9 +187,9 @@ export default function EventCard({
             Details
           </Link>
         </div>
-      </div>
 
-      <meta itemProp="url" content={`/events/${slug}`} />
+        <meta itemProp="url" content={`/events/${slug}`} />
+      </div>
     </article>
   );
 }
