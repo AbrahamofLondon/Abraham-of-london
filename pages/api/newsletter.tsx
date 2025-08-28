@@ -1,4 +1,4 @@
-// pages/api/newsletter.tsx
+// pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 
@@ -8,29 +8,29 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const asBool = (v?: string, def = true) => (v == null ? def : /^true$/i.test(v.trim()));
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Json>) {
+  // --- Debug probe: GET /api/newsletter?debug=1 shows provider and works for health checks
+  if (req.method === "GET" && req.query.debug === "1") {
+    const provider = resolveProvider();
+    return res.status(200).json({ ok: true, message: `newsletter endpoint OK (provider=${provider || "unset"})` });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, message: "Method not allowed" });
   }
 
   try {
-    const raw = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
-    const email = String((raw as any)?.email ?? "").trim().toLowerCase();
+    // Accept *either* { email } or { payload: { email_address } } from callers (backward-compatible)
+    const body = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
+    const topEmail = String((body as any)?.email ?? "").trim().toLowerCase();
+    const payloadEmail = String((body as any)?.payload?.email_address ?? "").trim().toLowerCase();
+    const email = topEmail || payloadEmail;
 
     if (!EMAIL_RE.test(email)) {
-      return res.status(400).json({ ok: false, message: "Valid email is required" });
+      return res.status(422).json({ ok: false, message: "Valid email is required" });
     }
 
-    // Decide provider from env; fall back to auto-detect
-    let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
-      .trim()
-      .toLowerCase();
-
-    if (!provider) {
-      if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
-      else if ((process.env.MAILCHIMP_API_KEY || "").trim() && (process.env.MAILCHIMP_LIST_ID || "").trim())
-        provider = "mailchimp";
-    }
+    const provider = resolveProvider();
 
     /* ---------------- Buttondown ---------------- */
     if (provider === "buttondown") {
@@ -39,50 +39,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(500).json({ ok: false, message: "Buttondown not configured" });
       }
 
-      // Attempt #1 — classic shape
-      let r = await fetch("https://api.buttondown.email/v1/subscribers", {
+      const r = await fetch("https://api.buttondown.email/v1/subscribers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Token ${token}`,
         },
-        body: JSON.stringify({ email, email_address: email }),
+        // Buttondown (your account) expects: { payload: { email_address } }
+        body: JSON.stringify({ payload: { email_address: email } }),
       });
 
-      let resp: any = await safeJson(r);
-
-      // If the API complains about "payload.email_address", retry with that shape
-      if (
-        r.status === 422 &&
-        /payload(\.|.*)email_address/i.test(JSON.stringify(resp?.detail || resp || ""))
-      ) {
-        r = await fetch("https://api.buttondown.email/v1/subscribers", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify({ payload: { email_address: email } }),
-        });
-        resp = await safeJson(r);
-      }
+      const text = await r.text();
+      const resp = asJson(text);
+      const msg = extractMessage(resp);
 
       if (r.ok || r.status === 201) {
         return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
       }
 
-      const msg =
-        stringifyDetail(resp?.detail) ||
-        resp?.message ||
-        firstErrorString(resp) ||
-        `Buttondown error (HTTP ${r.status})`;
-
-      // Treat "already subscribed" as success
-      if (/already|exist/i.test(msg)) {
+      // Consider “already exists” a success UX-wise
+      if ((r.status === 400 || r.status === 422) && /already|exist/i.test(msg || "")) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
 
-      return res.status(r.status || 500).json({ ok: false, message: msg });
+      return res.status(r.status || 500).json({
+        ok: false,
+        message: msg || `Buttondown error (HTTP ${r.status})`,
+      });
     }
 
     /* ---------------- Mailchimp ---------------- */
@@ -111,7 +95,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         }),
       });
 
-      const resp: any = await safeJson(r);
+      const text = await r.text();
+      const resp = asJson(text);
+      const detail = String((resp as any)?.title || (resp as any)?.detail || "");
 
       if (r.ok) {
         return res.status(200).json({
@@ -122,25 +108,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       }
 
-      const detail = String(resp?.title || resp?.detail || "");
       if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
+
       return res.status(r.status || 500).json({
         ok: false,
         message: detail || `Mailchimp error (HTTP ${r.status})`,
       });
     }
 
-    return res
-      .status(500)
-      .json({ ok: false, message: "EMAIL_PROVIDER must be 'buttondown' or 'mailchimp'" });
+    return res.status(500).json({
+      ok: false,
+      message: "EMAIL_PROVIDER must be 'buttondown' or 'mailchimp'",
+    });
   } catch {
     return res.status(500).json({ ok: false, message: "Unexpected server error" });
   }
 }
 
 /* ---------------- helpers ---------------- */
+function resolveProvider(): string | undefined {
+  let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
+    .trim()
+    .toLowerCase();
+
+  if (!provider) {
+    if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
+    else if ((process.env.MAILCHIMP_API_KEY || "").trim() && (process.env.MAILCHIMP_LIST_ID || "").trim())
+      provider = "mailchimp";
+  }
+  return provider || undefined;
+}
+
 function safeParse(s: string): unknown {
   try {
     return JSON.parse(s);
@@ -148,25 +148,24 @@ function safeParse(s: string): unknown {
     return {};
   }
 }
-async function safeJson(r: Response) {
+function asJson(text: string) {
   try {
-    return await r.json();
+    return JSON.parse(text);
   } catch {
-    return {};
+    return { raw: text };
   }
 }
-function stringifyDetail(detail: any): string | undefined {
-  if (Array.isArray(detail)) {
-    const msgs = detail.map((d) => (typeof d?.msg === "string" ? d.msg : undefined)).filter(Boolean);
-    if (msgs.length) return msgs.join("; ");
+function extractMessage(resp: any): string | undefined {
+  // FastAPI/Pydantic typical shape
+  if (resp?.detail) {
+    if (Array.isArray(resp.detail)) {
+      const msgs = resp.detail
+        .map((d: any) => (typeof d?.msg === "string" ? d.msg : undefined))
+        .filter(Boolean);
+      if (msgs.length) return msgs.join("; ");
+    }
+    if (typeof resp.detail === "string") return resp.detail;
   }
-  if (typeof detail === "string") return detail;
+  if (typeof resp?.message === "string") return resp.message;
   return undefined;
-}
-function firstErrorString(obj: any): string | undefined {
-  if (!obj || typeof obj !== "object") return;
-  for (const v of Object.values(obj)) {
-    if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
-    if (typeof v === "string") return v;
-  }
 }
