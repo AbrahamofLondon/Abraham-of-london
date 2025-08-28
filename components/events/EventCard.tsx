@@ -6,25 +6,24 @@ import React from "react";
 type Props = {
   slug: string;
   title: string;
-  date: string;                // ISO or "YYYY-MM-DD"
-  location?: string;
+  date: string;              // ISO. "YYYY-MM-DD" allowed for all-day events.
+  location?: string | null;
   description?: string | null;
   /** Optional tags from front matter (e.g., ["leadership","chatham"]) */
   tags?: string[] | null;
-  /** Force the badge even without tags */
+  /** Force the badge without tags (fallback switch) */
   chatham?: boolean;
-  /** Optional hero image path (prefer local /public path) */
-  heroImage?: string | null;
   className?: string;
   prefetch?: boolean;
-  /** Format times in this TZ (for full ISO). */
-  timeZone?: string;           // defaults to 'Europe/London'
+  timeZone?: string;         // defaults to 'Europe/London'
+  /** Optional explicit image path (under /public). If omitted we derive from slug. */
+  image?: string;
+  imageAlt?: string;
 };
 
-/* ---------------- helpers ---------------- */
-
-function isDateOnly(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
+// ---- Helpers ----
+function isDateOnly(isoish: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(isoish);
 }
 
 function isValidDate(d: Date) {
@@ -65,7 +64,7 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
   }).format(dt);
 
   const { hh, mm } = getLocalHM(dt, tz);
-  if (hh === 0 && mm === 0) return dateStr; // hide midnight
+  if (hh === 0 && mm === 0) return dateStr;
 
   const timeStr = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
@@ -77,37 +76,13 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
   return `${dateStr}, ${timeStr}`;
 }
 
-function ensureLocal(p?: string | null) {
-  if (!p) return undefined;
-  if (/^https?:\/\//i.test(p)) return undefined;     // keep local only
-  return p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`;
+function toMachineDate(iso: string) {
+  return iso;
 }
 
-/** Build a list of likely image paths and auto-fallback onError */
-function useEventImageCandidates(slug: string, heroImage?: string | null) {
-  const candidates = React.useMemo(() => {
-    const list = [
-      ensureLocal(heroImage),
-      `/assets/images/events/${slug}.webp`,
-      `/assets/images/events/${slug}.jpg`,
-      `/assets/images/events/${slug}.jpeg`,
-      `/assets/images/events/${slug}.png`,
-    ].filter(Boolean) as string[];
-    // de-dup
-    return Array.from(new Set(list));
-  }, [slug, heroImage]);
-
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-
-  const onError = React.useCallback(() => {
-    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i));
-  }, [candidates.length]);
-
-  return { src, hasAny: candidates.length > 0, onError };
+function toLocal(src?: string) {
+  return src && src.startsWith("/") ? src : undefined;
 }
-
-/* ---------------- component ---------------- */
 
 export default function EventCard({
   slug,
@@ -120,15 +95,36 @@ export default function EventCard({
   className,
   prefetch = false,
   timeZone = "Europe/London",
-  heroImage = null,
+  image,
+  imageAlt,
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
+  const machine = toMachineDate(date);
+  const hasLocation = Boolean(location && location.trim());
   const titleId = React.useId();
+
   const isChatham =
     Boolean(chatham) ||
     (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
 
-  const { src, hasAny, onError } = useEventImageCandidates(slug, heroImage);
+  // --- self-healing image loader (local only) ---
+  const initial = toLocal(image) || `/assets/images/events/${slug}.webp`;
+  const candidates = React.useMemo(
+    () => [
+      initial,
+      `/assets/images/events/${slug}.jpg`,
+      `/assets/images/events/${slug}.jpeg`,
+      `/assets/images/events/${slug}.png`,
+    ].filter(Boolean) as string[],
+    [initial, slug]
+  );
+
+  const [idx, setIdx] = React.useState(0);
+  const imgSrc = candidates[idx]; // undefined => no image rendered
+
+  const advanceFallback = React.useCallback(() => {
+    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i + 1)); // on final failure we’ll hide the media block
+  }, [candidates.length]);
 
   return (
     <article
@@ -140,16 +136,16 @@ export default function EventCard({
       itemScope
       itemType="https://schema.org/Event"
     >
-      {/* Top media */}
-      {hasAny && src && (
+      {/* Media */}
+      {imgSrc && idx < candidates.length ? (
         <div className="relative aspect-[16/9] w-full">
           <Image
-            src={src}
-            alt={`${title} image`}
+            src={imgSrc}
+            alt={imageAlt || `${title} image`}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
-            onError={onError}
+            onError={advanceFallback}
             priority={false}
           />
           {isChatham && (
@@ -162,18 +158,29 @@ export default function EventCard({
             </span>
           )}
         </div>
+      ) : (
+        // no image — still keep the badge if applicable
+        isChatham && (
+          <span
+            className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+            title="Chatham Room (off the record)"
+            aria-label="Chatham Room (off the record)"
+          >
+            Chatham
+          </span>
+        )
       )}
 
       <div className="p-6">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
           <time
-            dateTime={date}
+            dateTime={machine}
             className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
             itemProp="startDate"
           >
             {nice}
           </time>
-          {location && location.trim() && (
+          {hasLocation && (
             <>
               <span aria-hidden="true">·</span>
               <span
@@ -212,10 +219,9 @@ export default function EventCard({
             Details
           </Link>
         </div>
-
-        {/* Optional canonical URL for microdata */}
-        <meta itemProp="url" content={`/events/${slug}`} />
       </div>
+
+      <meta itemProp="url" content={`/events/${slug}`} />
     </article>
   );
 }

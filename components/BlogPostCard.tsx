@@ -6,47 +6,23 @@ import { siteConfig } from "@/lib/siteConfig";
 type BlogPostCardProps = {
   slug: string;
   title: string;
-  date?: string;
-  excerpt?: string;
-  coverImage?: string;
-  author?: string | { name?: string; image?: string };
-  readTime?: string;
-  category?: string;
-  tags?: string[];
+  date?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;   // local path under /public
+  author?: string | { name?: string; image?: string | null } | null;
+  readTime?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
 };
 
+// Only allow local (/public) assets
+const toLocal = (src?: string | null) => (src && src.startsWith("/") ? src : undefined);
+
+// Fallback avatar (MUST exist)
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
-/** Normalize to a local /public path and try slug-based fallbacks */
-function useBlogCover(slug: string, coverImage?: string) {
-  const normalizeLocal = (src?: string) => {
-    if (!src) return undefined;
-    if (/^https?:\/\//i.test(src)) return undefined; // local only
-    return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-  };
-
-  const candidates = React.useMemo(() => {
-    const list = [
-      normalizeLocal(coverImage),
-      `/assets/images/blog/${slug}.webp`,
-      `/assets/images/blog/${slug}.jpg`,
-      `/assets/images/blog/${slug}.jpeg`,
-      `/assets/images/blog/${slug}.png`,
-      `/assets/images/blog/default-blog.jpg`,
-      `/assets/images/default-blog.jpg`,
-    ].filter(Boolean) as string[];
-    return Array.from(new Set(list));
-  }, [slug, coverImage]);
-
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-
-  const onError = React.useCallback(() => {
-    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i));
-  }, [candidates.length]);
-
-  return { src, hasAny: candidates.length > 0, onError };
-}
+// Optional blog cover fallback if you want a default card art
+const DEFAULT_BLOG_COVER = "/assets/images/blog/default-blog.jpg"; // add this file if you want a default
 
 export default function BlogPostCard({
   slug,
@@ -58,19 +34,37 @@ export default function BlogPostCard({
   readTime,
   category,
 }: BlogPostCardProps) {
-  const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
+  const authorName =
+    typeof author === "string"
+      ? author
+      : author?.name || siteConfig.author;
 
-  const normalizeLocal = (src?: string) =>
-    !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-
-  const preferredAvatar =
-    (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
+  // Author avatar self-heal
+  const preferredAvatar = (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(
-    slug,
-    coverImage
+  // Cover self-heal (local only)
+  const provided = toLocal(coverImage);
+  const first = provided || `/assets/images/blog/${slug}.webp`;
+  const candidates = React.useMemo(
+    () =>
+      [
+        first,
+        `/assets/images/blog/${slug}.jpg`,
+        `/assets/images/blog/${slug}.jpeg`,
+        `/assets/images/blog/${slug}.png`,
+        // last resort (comment this out if you don’t want a generic cover)
+        DEFAULT_BLOG_COVER,
+      ].filter(Boolean) as string[],
+    [first, slug]
   );
+
+  const [idx, setIdx] = React.useState(0);
+  const imgSrc = candidates[idx];
+
+  const advanceCover = React.useCallback(() => {
+    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i + 1));
+  }, [candidates.length]);
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
@@ -80,21 +74,21 @@ export default function BlogPostCard({
       : undefined;
 
   return (
-    <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
+    <article className="overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {showCover && coverSrc && (
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
+        {imgSrc ? (
+          <div className="relative aspect-[16/9] w-full">
             <Image
-              src={coverSrc}
-              alt=""
+              src={imgSrc}
+              alt={`${title} cover`}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover"
+              onError={advanceCover}
               priority={false}
-              onError={onCoverError}
             />
           </div>
-        )}
+        ) : null}
 
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
@@ -119,6 +113,7 @@ export default function BlogPostCard({
 
           {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
 
+          {/* Author row */}
           <div className="mt-4 flex items-center gap-3">
             <Image
               src={avatarSrc}
