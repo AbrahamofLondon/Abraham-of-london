@@ -16,14 +16,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const raw = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
     const email = String((raw as any)?.email ?? "").trim().toLowerCase();
+
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ ok: false, message: "Valid email is required" });
     }
 
-    // Decide provider (explicit or auto-detect)
+    // Pick provider (env first, then auto-detect by available keys)
     let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
       .trim()
       .toLowerCase();
+
     if (!provider) {
       if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
       else if (
@@ -33,7 +35,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         provider = "mailchimp";
     }
 
-    /* -------- Mailchimp -------- */
+    /* ---------------- Buttondown ---------------- */
+    if (provider === "buttondown") {
+      const token = (process.env.BUTTONDOWN_API_KEY || "").trim();
+      if (!token) {
+        return res.status(500).json({ ok: false, message: "Buttondown not configured" });
+      }
+
+      // Send BOTH keys to satisfy older/newer API models.
+      const body = JSON.stringify({ email, email_address: email });
+
+      const r = await fetch("https://api.buttondown.email/v1/subscribers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body,
+      });
+
+      const resp: any = await safeJson(r);
+
+      if (r.ok || r.status === 201) {
+        return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
+      }
+
+      // Buttondown often returns FastAPI-style errors:
+      // { detail: [ { loc: [...], msg: "...", type: "..." } ] }
+      const msg =
+        stringifyDetail(resp?.detail) ||
+        resp?.message ||
+        firstErrorString(resp) ||
+        `Buttondown error (HTTP ${r.status})`;
+
+      // Treat "already subscribed" as success
+      if (/already|exists?/i.test(msg)) {
+        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+      }
+
+      return res.status(r.status || 500).json({ ok: false, message: msg });
+    }
+
+    /* ---------------- Mailchimp ---------------- */
     if (provider === "mailchimp") {
       const key = (process.env.MAILCHIMP_API_KEY || "").trim();
       const listId = (process.env.MAILCHIMP_LIST_ID || "").trim();
@@ -43,11 +86,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
       }
 
-      const dc = key.split("-").pop()!;
+      const dc = key.split("-").pop()!; // e.g. "us6"
       const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
       const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
 
-      const r = await fetchWithTimeout(url, {
+      const r = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -60,6 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
       const resp: any = await safeJson(r);
+
       if (r.ok) {
         return res.status(200).json({
           ok: true,
@@ -73,37 +117,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
-      return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
-    }
-
-    /* -------- Buttondown -------- */
-    if (provider === "buttondown") {
-      const token = (process.env.BUTTONDOWN_API_KEY || "").trim();
-      if (!token) {
-        return res.status(500).json({ ok: false, message: "Buttondown not configured" });
-      }
-
-      const r = await fetchWithTimeout("https://api.buttondown.email/v1/subscribers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify({ email }),
+      return res.status(r.status || 500).json({
+        ok: false,
+        message: detail || `Mailchimp error (HTTP ${r.status})`,
       });
-
-      const resp: any = await safeJson(r);
-      if (r.ok || r.status === 201) {
-        return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
-      }
-
-      const txt = JSON.stringify(resp || {}).toLowerCase();
-      if (r.status === 400 && (txt.includes("already") || txt.includes("exists"))) {
-        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
-      }
-
-      const msg = resp?.detail || resp?.message || firstErrorString(resp) || "Buttondown error";
-      return res.status(r.status || 500).json({ ok: false, message: msg });
     }
 
     return res
@@ -114,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 }
 
-/* ---- helpers ---- */
+/* ---------------- helpers ---------------- */
 function safeParse(s: string): unknown {
   try {
     return JSON.parse(s);
@@ -122,6 +139,7 @@ function safeParse(s: string): unknown {
     return {};
   }
 }
+
 async function safeJson(r: Response) {
   try {
     return await r.json();
@@ -129,23 +147,24 @@ async function safeJson(r: Response) {
     return {};
   }
 }
-async function fetchWithTimeout(
-  input: RequestInfo | URL,
-  init: RequestInit & { timeoutMs?: number } = {}
-) {
-  const { timeoutMs = 10_000, ...rest } = init;
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(input, { ...rest, signal: controller.signal });
-  } finally {
-    clearTimeout(t);
+
+function stringifyDetail(detail: any): string | undefined {
+  // FastAPI/Pydantic: detail = [{ loc: [...], msg: "text", type: "..." }, ...]
+  if (Array.isArray(detail)) {
+    const msgs = detail
+      .map((d) => (typeof d?.msg === "string" ? d.msg : undefined))
+      .filter(Boolean);
+    if (msgs.length) return msgs.join("; ");
   }
+  if (typeof detail === "string") return detail;
+  return undefined;
 }
+
 function firstErrorString(obj: any): string | undefined {
   if (!obj || typeof obj !== "object") return;
   for (const v of Object.values(obj)) {
     if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
     if (typeof v === "string") return v;
   }
+  return undefined;
 }
