@@ -1,55 +1,93 @@
-// netlify/functions/subscribe.ts
 import type { Handler } from "@netlify/functions";
-import { Resend } from "resend";
 
-const isEmail = (v: unknown): v is string =>
-  typeof v === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+type Json = Record<string, unknown>;
+const json = (status: number, body: Json) => ({
+  statusCode: status,
+  headers: { "content-type": "application/json; charset=utf-8" },
+  body: JSON.stringify(body),
+});
 
-const json = { "Content-Type": "application/json" };
+const ok = (message: string, extra: Json = {}) => json(200, { ok: true, message, ...extra });
+const bad = (message: string, extra: Json = {}) => json(400, { ok: false, message, ...extra });
+const oops = (message = "Unexpected error") => json(500, { ok: false, message });
 
-export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: json, body: JSON.stringify({ ok: false, message: "Method Not Allowed" }) };
+const emailRx =
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+export const handler: Handler = async (evt) => {
+  if (evt.httpMethod !== "POST") {
+    return json(405, { ok: false, message: "Method not allowed" });
   }
 
   try {
-    const { email, hp } = JSON.parse(event.body || "{}") as { email?: string; hp?: string };
-    if (hp) return { statusCode: 204, headers: json, body: "" }; // honeypot
-    if (!isEmail(email)) {
-      return { statusCode: 422, headers: json, body: JSON.stringify({ ok: false, message: "Valid email is required" }) };
+    const { email } = JSON.parse(evt.body || "{}");
+    if (typeof email !== "string" || !emailRx.test(email.trim())) {
+      return bad("Please enter a valid email address.");
     }
 
-    const provider = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
-    if (provider === "resend") {
-      const key = process.env.RESEND_API_KEY;
-      if (!key) {
-        return { statusCode: 500, headers: json, body: JSON.stringify({ ok: false, message: "Email service not configured" }) };
+    const provider = String(process.env.EMAIL_PROVIDER || "buttondown").toLowerCase();
+
+    if (provider === "buttondown") {
+      const apiKey = process.env.BUTTONDOWN_API_KEY || "";
+      if (!apiKey) return oops("Missing BUTTONDOWN_API_KEY");
+
+      const payload: Record<string, unknown> = { email, referrer_url: evt.headers?.referer || "" };
+      const tags = (process.env.BUTTONDOWN_TAGS || "").trim();
+      if (tags) payload.tags = tags.split(",").map((t) => t.trim()).filter(Boolean);
+
+      const res = await fetch("https://api.buttondown.email/v1/subscribers", {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) return ok("Thanks—check your inbox to confirm.");
+      const text = await res.text();
+      // Common Buttondown duplicate error: treat as success-ish
+      if (res.status === 400 && /already.*subscribed/i.test(text)) {
+        return ok("You’re already subscribed. 🎉");
+      }
+      return oops(`Buttondown error (${res.status}): ${text}`);
+    }
+
+    if (provider === "mailchimp") {
+      const key = process.env.MAILCHIMP_API_KEY || "";
+      const list = process.env.MAILCHIMP_AUDIENCE_ID || "";
+      const region = process.env.MAILCHIMP_SERVER_PREFIX || "";
+      if (!key || !list || !region) {
+        return oops("Missing Mailchimp env: MAILCHIMP_API_KEY, MAILCHIMP_AUDIENCE_ID, MAILCHIMP_SERVER_PREFIX");
       }
 
-      const resend = new Resend(key);
-      const from = process.env.EMAIL_FROM || process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
-      const adminTo = process.env.ADMIN_NOTIFY_TO || "info@abrahamoflondon.org";
-
-      await resend.emails.send({
-        from,
-        to: [email],
-        subject: "You’re in — Abraham of London Newsletter",
-        text: "Thanks for subscribing. You’ll hear from me soon.",
+      const url = `https://${region}.api.mailchimp.com/3.0/lists/${list}/members`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `apikey ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email_address: email,
+          status: "pending", // double opt-in; use "subscribed" if you’ve disabled it
+        }),
       });
 
-      await resend.emails.send({
-        from,
-        to: [adminTo],
-        subject: "New newsletter subscriber",
-        text: `Subscriber: ${email}`,
-      });
-    } else {
-      console.log("[subscribe] provider:", provider, "email:", email);
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) return ok("Thanks—check your inbox to confirm.");
+      // Already subscribed: Mailchimp returns 400 with title 'Member Exists'
+      if (res.status === 400 && String((body as any)?.title).toLowerCase().includes("member exists")) {
+        return ok("You’re already subscribed. 🎉");
+      }
+      return oops(`Mailchimp error (${res.status}): ${(body as any)?.detail || "unknown"}`);
     }
 
-    return { statusCode: 200, headers: json, body: JSON.stringify({ ok: true, message: "You’re subscribed. Welcome!" }) };
+    // Safety fallback
+    return bad("EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'.");
   } catch (err: any) {
-    console.error("[subscribe] error:", err?.message || err);
-    return { statusCode: 500, headers: json, body: JSON.stringify({ ok: false, message: "Subscription failed." }) };
+    return oops(err?.message || "Failed to subscribe");
   }
 };
+
+export default { handler };

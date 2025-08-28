@@ -19,7 +19,7 @@ export default function Newsletter() {
             type="email"
             name="email"
             required
-            placeholder="you@example.com"
+            placeholder="info@abrahamoflondon.org"
             className="min-w-0 flex-1 rounded-lg border px-3 py-2"
           />
           <button className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">

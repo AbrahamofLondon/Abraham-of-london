@@ -1,3 +1,4 @@
+// pages/books/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -140,11 +141,16 @@ export default function BooksIndex({ books }: Props) {
                 title={b.title ?? "Untitled"}
                 author={b.author ?? "Abraham of London"}
                 excerpt={b.excerpt ?? ""}
+
+                /* optional props: null→undefined */
                 coverImage={b.coverImage ?? undefined}
                 buyLink={b.buyLink ?? undefined}
-                genre={b.genre ?? undefined}
                 downloadPdf={b.downloadPdf ?? undefined}
                 downloadEpub={b.downloadEpub ?? undefined}
+
+                /* REQUIRED string in BookCard */
+                genre={b.genre ?? "Uncategorized"}
+
                 featured={false}
                 motionProps={{
                   initial: { opacity: 0, y: 14 },
@@ -179,7 +185,7 @@ export async function getStaticProps() {
     "date",
   ]);
 
-  // ⬇️ Normalize ALL optionals to null so Next.js can serialize
+  // JSON-safe: NEVER return undefined
   const safe = books.map((b: any) => ({
     slug: String(b.slug),
     title: b.title ?? null,
