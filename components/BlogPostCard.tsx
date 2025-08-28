@@ -1,42 +1,42 @@
-import React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import * as React from "react";
 import { siteConfig } from "@/lib/siteConfig";
 
-export type BlogPostCardProps = {
+type BlogPostCardProps = {
   slug: string;
   title: string;
-  date?: string | null;
-  excerpt?: string | null;
-  coverImage?: string | null; // local path under /public recommended
-  author?: string | { name?: string; image?: string | null } | null;
-  readTime?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
+  date?: string;
+  excerpt?: string;
+  coverImage?: string; // path under /public
+  author?: string | { name?: string; image?: string };
+  readTime?: string;
+  category?: string;
+  tags?: string[];
 };
 
-const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
-const FALLBACK_BLOG_COVER = "/assets/images/blog/default-blog.jpg";
+// Only allow local (/public) assets
+const toLocal = (src?: string) => (src && src.startsWith("/") ? src : undefined);
 
-const toLocal = (src?: string | null) => (src && src.startsWith("/") ? src : undefined);
+const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+const FALLBACK_COVER = "/assets/images/blog/default.jpg";
 
 export default function BlogPostCard({
   slug,
   title,
-  date,
   excerpt,
+  date,
   coverImage,
   author,
   readTime,
   category,
 }: BlogPostCardProps) {
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
-
   const preferredAvatar =
-    (typeof author !== "string" && toLocal(author?.image ?? undefined)) || FALLBACK_AVATAR;
+    (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const initialCover = toLocal(coverImage) || FALLBACK_BLOG_COVER;
+  const initialCover = toLocal(coverImage) || FALLBACK_COVER;
   const [coverSrc, setCoverSrc] = React.useState(initialCover);
 
   const dt = date ? new Date(date) : null;
@@ -47,18 +47,18 @@ export default function BlogPostCard({
       : undefined;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
+    <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {/* object-contain prevents “hiding” of text-based artwork */}
-        <div className="relative aspect-[16/9] w-full bg-white">
+        {/* Make the image always fill the header area on all screens */}
+        <div className="relative w-full overflow-hidden rounded-t-2xl bg-warmWhite aspect-[16/9] sm:aspect-[4/3]">
           <Image
             src={coverSrc}
             alt=""
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-contain"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
             onError={() => {
-              if (coverSrc !== FALLBACK_BLOG_COVER) setCoverSrc(FALLBACK_BLOG_COVER);
+              if (coverSrc !== FALLBACK_COVER) setCoverSrc(FALLBACK_COVER);
             }}
             priority={false}
           />
@@ -71,7 +71,9 @@ export default function BlogPostCard({
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
             {readTime && <span aria-label="Estimated reading time">{readTime}</span>}
             {category && (
-              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>
+              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">
+                {category}
+              </span>
             )}
             <Link
               href={`/blog/${slug}#comments`}
@@ -85,6 +87,7 @@ export default function BlogPostCard({
 
           {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
 
+          {/* Author row */}
           <div className="mt-4 flex items-center gap-3">
             <Image
               src={avatarSrc}
