@@ -1,130 +1,159 @@
-import * as React from "react";
-import Head from "next/head";
-import Layout from "@/components/Layout";
-import Link from "next/link";
+// pages/api/newsletter.tsx
+import type { NextApiRequest, NextApiResponse } from "next";
+import crypto from "crypto";
 
-type State =
-  | { status: "idle"; message: "" }
-  | { status: "loading"; message: "Subscribing…" }
-  | { status: "success"; message: string }
-  | { status: "error"; message: string };
+type Json = { ok: boolean; message: string };
 
-export default function NewsletterPage() {
-  const [email, setEmail] = React.useState("");
-  const [state, setState] = React.useState<State>({ status: "idle", message: "" });
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const asBool = (v?: string, def = true) => (v == null ? def : /^true$/i.test(v.trim()));
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setState({ status: "error", message: "Please enter a valid email address." });
-      return;
-    }
-
-    setState({ status: "loading", message: "Subscribing…" });
-
-    try {
-      const r = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed }),
-      });
-
-      const data = (await r.json()) as { ok?: boolean; message?: string };
-      if (r.ok && data?.ok) {
-        setState({ status: "success", message: data.message || "You’re subscribed. Welcome!" });
-        setEmail("");
-      } else {
-        setState({
-          status: "error",
-          message: data?.message || "Sorry, something went wrong. Please try again.",
-        });
-      }
-    } catch {
-      setState({
-        status: "error",
-        message: "Network error. Please check your connection and try again.",
-      });
-    }
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Json>) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ ok: false, message: "Method not allowed" });
   }
 
-  const disabled = state.status === "loading";
+  try {
+    // Body may arrive as a string (raw) or as an object depending on host
+    const raw = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
+    const email = String((raw as any)?.email ?? "").trim().toLowerCase();
 
-  return (
-    <Layout pageTitle="Newsletter">
-      <Head>
-        <meta
-          name="description"
-          content="Join the Abraham of London newsletter — clarity, standards, and strategy that endure."
-        />
-      </Head>
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ ok: false, message: "Valid email is required" });
+    }
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-16">
-          <header className="mb-6 text-center">
-            <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">Newsletter</h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
-              Practical signal. No noise. Occasional notes on standards, stewardship, and strategy.
-            </p>
-          </header>
+    // Decide provider from env; fall back to auto-detect by available keys
+    let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
+      .trim()
+      .toLowerCase();
 
-          <form
-            onSubmit={onSubmit}
-            className="rounded-2xl border border-lightGrey bg-warmWhite/40 p-4 sm:p-6"
-            noValidate
-          >
-            <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal/80">
-              Email address
-            </label>
-            <div className="mt-2 flex gap-2">
-              <input
-                id="email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-lightGrey px-3 py-2 text-sm text-deepCharcoal focus:border-deepCharcoal focus:outline-none"
-                placeholder="you@example.com"
-                aria-describedby="form-message"
-              />
-              <button
-                type="submit"
-                disabled={disabled}
-                className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {state.status === "loading" ? "Subscribing…" : "Subscribe"}
-              </button>
-            </div>
+    if (!provider) {
+      if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
+      else if (
+        (process.env.MAILCHIMP_API_KEY || "").trim() &&
+        (process.env.MAILCHIMP_LIST_ID || "").trim()
+      )
+        provider = "mailchimp";
+    }
 
-            {state.message && (
-              <p
-                id="form-message"
-                className={
-                  state.status === "error"
-                    ? "mt-3 text-sm text-red-600"
-                    : state.status === "success"
-                    ? "mt-3 text-sm text-forest"
-                    : "sr-only"
-                }
-                role={state.status === "error" ? "alert" : undefined}
-              >
-                {state.message}
-              </p>
-            )}
+    /* ---------------- Mailchimp ---------------- */
+    if (provider === "mailchimp") {
+      const key = (process.env.MAILCHIMP_API_KEY || "").trim();
+      const listId = (process.env.MAILCHIMP_LIST_ID || "").trim();
+      const doubleOpt = asBool(process.env.MAILCHIMP_DOUBLE_OPT_IN, true);
 
-            <p className="mt-4 text-xs text-deepCharcoal/60">
-              By subscribing, you consent to receive emails from Abraham of London. You can
-              unsubscribe anytime. See our{" "}
-              <Link href="/privacy" className="underline decoration-softGold/60 underline-offset-4">
-                privacy policy
-              </Link>
-              .
-            </p>
-          </form>
-        </div>
-      </section>
-    </Layout>
-  );
+      // Mailchimp API key must include -usX data center suffix
+      if (!key || !listId || !/-[a-z0-9]{2,}$/i.test(key)) {
+        return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
+      }
+
+      const dc = key.split("-").pop()!; // e.g. "us6"
+      const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
+      const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
+
+      const r = await fetchWithTimeout(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Basic " + Buffer.from(`anystring:${key}`).toString("base64"),
+        },
+        body: JSON.stringify({
+          email_address: email,
+          status_if_new: doubleOpt ? "pending" : "subscribed",
+        }),
+      });
+
+      const resp: any = await safeJson(r);
+
+      if (r.ok) {
+        return res.status(200).json({
+          ok: true,
+          message: doubleOpt
+            ? "Check your email to confirm your subscription."
+            : "You’re subscribed. Welcome!",
+        });
+      }
+
+      const detail = String(resp?.title || resp?.detail || "");
+      if (/exists|already/i.test(detail)) {
+        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+      }
+
+      return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
+    }
+
+    /* ---------------- Buttondown ---------------- */
+    if (provider === "buttondown") {
+      const token = (process.env.BUTTONDOWN_API_KEY || "").trim();
+      if (!token) {
+        return res.status(500).json({ ok: false, message: "Buttondown not configured" });
+      }
+
+      const r = await fetchWithTimeout("https://api.buttondown.email/v1/subscribers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const resp: any = await safeJson(r);
+
+      if (r.ok || r.status === 201) {
+        return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
+      }
+
+      const txt = JSON.stringify(resp || {}).toLowerCase();
+      if (r.status === 400 && (txt.includes("already") || txt.includes("exists"))) {
+        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+      }
+
+      const msg = resp?.detail || resp?.message || firstErrorString(resp) || "Buttondown error";
+      return res.status(r.status || 500).json({ ok: false, message: msg });
+    }
+
+    // Unknown/missing provider
+    return res
+      .status(500)
+      .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
+  } catch {
+    return res.status(500).json({ ok: false, message: "Unexpected server error" });
+  }
+}
+
+/* -------------- helpers -------------- */
+function safeParse(s: string): unknown {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return {};
+  }
+}
+async function safeJson(r: Response) {
+  try {
+    return await r.json();
+  } catch {
+    return {};
+  }
+}
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit & { timeoutMs?: number } = {}
+) {
+  const { timeoutMs = 10_000, ...rest } = init;
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...rest, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+function firstErrorString(obj: any): string | undefined {
+  if (!obj || typeof obj !== "object") return;
+  for (const v of Object.values(obj)) {
+    if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
+    if (typeof v === "string") return v;
+  }
 }
