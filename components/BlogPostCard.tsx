@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import * as React from "react";
 import { siteConfig } from "@/lib/siteConfig";
 
 type BlogPostCardProps = {
@@ -8,18 +8,21 @@ type BlogPostCardProps = {
   title: string;
   date?: string;
   excerpt?: string;
-  coverImage?: string;
-  author?: string | { name?: string; image?: string };
-  readTime?: string;
-  category?: string;
-  tags?: string[];
+  coverImage?: string | null;
+  author?: string | { name?: string; image?: string | null };
+  readTime?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
 };
 
-// Only allow local (/public) assets
-const toLocal = (src?: string) => (src && src.startsWith("/") ? src : undefined);
-
-// Fallback avatar (MUST exist)
+const DEFAULT_BLOG_IMG = "/assets/images/blog/default-blog.jpg"; // ensure this file exists
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+
+function normalizeLocal(src?: string | null) {
+  if (!src) return DEFAULT_BLOG_IMG;
+  const s = String(src).replace(/\\/g, "/");
+  return s.startsWith("/") ? s : `/${s}`;
+}
 
 export default function BlogPostCard({
   slug,
@@ -34,10 +37,10 @@ export default function BlogPostCard({
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
 
   const preferredAvatar =
-    (typeof author !== "string" && toLocal(author?.image)) || FALLBACK_AVATAR;
+    (typeof author !== "string" && normalizeLocal(author?.image || FALLBACK_AVATAR)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const coverSrc = toLocal(coverImage);
+  const coverSrc = normalizeLocal(coverImage);
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
@@ -49,18 +52,22 @@ export default function BlogPostCard({
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {coverSrc && (
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
-            <Image
-              src={coverSrc}
-              alt=""                 /* decorative in card context */
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover"
-              priority={false}
-            />
-          </div>
-        )}
+        {/* Cover image (always render with safe fallback for consistent layout) */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-2xl">
+          <Image
+            src={coverSrc}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+            onError={(e) => {
+              try {
+                (e.currentTarget as HTMLImageElement).src = DEFAULT_BLOG_IMG;
+              } catch {}
+            }}
+            priority={false}
+          />
+        </div>
 
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
@@ -73,7 +80,6 @@ export default function BlogPostCard({
                 {category}
               </span>
             )}
-            {/* Deep link to comments */}
             <Link
               href={`/blog/${slug}#comments`}
               className="luxury-link"
@@ -86,7 +92,6 @@ export default function BlogPostCard({
 
           {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
 
-          {/* Author row */}
           <div className="mt-4 flex items-center gap-3">
             <Image
               src={avatarSrc}
