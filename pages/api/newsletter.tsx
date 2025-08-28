@@ -1,4 +1,4 @@
-// pages/api/newsletter.tsx
+// pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 
@@ -14,19 +14,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    // Body may arrive as a string (raw) or as an object depending on host
     const raw = typeof req.body === "string" ? safeParse(req.body) : (req.body ?? {});
     const email = String((raw as any)?.email ?? "").trim().toLowerCase();
-
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ ok: false, message: "Valid email is required" });
     }
 
-    // Decide provider from env; fall back to auto-detect by available keys
+    // Decide provider (explicit or auto-detect)
     let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
       .trim()
       .toLowerCase();
-
     if (!provider) {
       if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
       else if (
@@ -36,18 +33,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         provider = "mailchimp";
     }
 
-    /* ---------------- Mailchimp ---------------- */
+    /* -------- Mailchimp -------- */
     if (provider === "mailchimp") {
       const key = (process.env.MAILCHIMP_API_KEY || "").trim();
       const listId = (process.env.MAILCHIMP_LIST_ID || "").trim();
       const doubleOpt = asBool(process.env.MAILCHIMP_DOUBLE_OPT_IN, true);
 
-      // Mailchimp API key must include -usX data center suffix
       if (!key || !listId || !/-[a-z0-9]{2,}$/i.test(key)) {
         return res.status(500).json({ ok: false, message: "Mailchimp not configured" });
       }
 
-      const dc = key.split("-").pop()!; // e.g. "us6"
+      const dc = key.split("-").pop()!;
       const subscriberHash = crypto.createHash("md5").update(email).digest("hex");
       const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${subscriberHash}`;
 
@@ -64,7 +60,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
       const resp: any = await safeJson(r);
-
       if (r.ok) {
         return res.status(200).json({
           ok: true,
@@ -78,11 +73,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       if (/exists|already/i.test(detail)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
-
       return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
     }
 
-    /* ---------------- Buttondown ---------------- */
+    /* -------- Buttondown -------- */
     if (provider === "buttondown") {
       const token = (process.env.BUTTONDOWN_API_KEY || "").trim();
       if (!token) {
@@ -99,7 +93,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
       const resp: any = await safeJson(r);
-
       if (r.ok || r.status === 201) {
         return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
       }
@@ -113,7 +106,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(r.status || 500).json({ ok: false, message: msg });
     }
 
-    // Unknown/missing provider
     return res
       .status(500)
       .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
@@ -122,7 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 }
 
-/* -------------- helpers -------------- */
+/* ---- helpers ---- */
 function safeParse(s: string): unknown {
   try {
     return JSON.parse(s);
