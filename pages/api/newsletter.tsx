@@ -1,4 +1,4 @@
-// pages/api/newsletter.ts
+// pages/api/newsletter.tsx
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 
@@ -21,17 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(400).json({ ok: false, message: "Valid email is required" });
     }
 
-    // Pick provider (env first, then auto-detect by available keys)
+    // Decide provider from env; fall back to auto-detect
     let provider = (process.env.EMAIL_PROVIDER || process.env.NEXT_PUBLIC_EMAIL_PROVIDER || "")
       .trim()
       .toLowerCase();
 
     if (!provider) {
       if ((process.env.BUTTONDOWN_API_KEY || "").trim()) provider = "buttondown";
-      else if (
-        (process.env.MAILCHIMP_API_KEY || "").trim() &&
-        (process.env.MAILCHIMP_LIST_ID || "").trim()
-      )
+      else if ((process.env.MAILCHIMP_API_KEY || "").trim() && (process.env.MAILCHIMP_LIST_ID || "").trim())
         provider = "mailchimp";
     }
 
@@ -42,26 +39,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(500).json({ ok: false, message: "Buttondown not configured" });
       }
 
-      // Send BOTH keys to satisfy older/newer API models.
-      const body = JSON.stringify({ email, email_address: email });
-
-      const r = await fetch("https://api.buttondown.email/v1/subscribers", {
+      // Attempt #1 — classic shape
+      let r = await fetch("https://api.buttondown.email/v1/subscribers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-        body,
+        body: JSON.stringify({ email, email_address: email }),
       });
 
-      const resp: any = await safeJson(r);
+      let resp: any = await safeJson(r);
+
+      // If the API complains about "payload.email_address", retry with that shape
+      if (
+        r.status === 422 &&
+        /payload(\.|.*)email_address/i.test(JSON.stringify(resp?.detail || resp || ""))
+      ) {
+        r = await fetch("https://api.buttondown.email/v1/subscribers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ payload: { email_address: email } }),
+        });
+        resp = await safeJson(r);
+      }
 
       if (r.ok || r.status === 201) {
         return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
       }
 
-      // Buttondown often returns FastAPI-style errors:
-      // { detail: [ { loc: [...], msg: "...", type: "..." } ] }
       const msg =
         stringifyDetail(resp?.detail) ||
         resp?.message ||
@@ -69,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         `Buttondown error (HTTP ${r.status})`;
 
       // Treat "already subscribed" as success
-      if (/already|exists?/i.test(msg)) {
+      if (/already|exist/i.test(msg)) {
         return res.status(200).json({ ok: true, message: "You’re already subscribed." });
       }
 
@@ -125,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     return res
       .status(500)
-      .json({ ok: false, message: "EMAIL_PROVIDER must be 'mailchimp' or 'buttondown'" });
+      .json({ ok: false, message: "EMAIL_PROVIDER must be 'buttondown' or 'mailchimp'" });
   } catch {
     return res.status(500).json({ ok: false, message: "Unexpected server error" });
   }
@@ -139,7 +148,6 @@ function safeParse(s: string): unknown {
     return {};
   }
 }
-
 async function safeJson(r: Response) {
   try {
     return await r.json();
@@ -147,24 +155,18 @@ async function safeJson(r: Response) {
     return {};
   }
 }
-
 function stringifyDetail(detail: any): string | undefined {
-  // FastAPI/Pydantic: detail = [{ loc: [...], msg: "text", type: "..." }, ...]
   if (Array.isArray(detail)) {
-    const msgs = detail
-      .map((d) => (typeof d?.msg === "string" ? d.msg : undefined))
-      .filter(Boolean);
+    const msgs = detail.map((d) => (typeof d?.msg === "string" ? d.msg : undefined)).filter(Boolean);
     if (msgs.length) return msgs.join("; ");
   }
   if (typeof detail === "string") return detail;
   return undefined;
 }
-
 function firstErrorString(obj: any): string | undefined {
   if (!obj || typeof obj !== "object") return;
   for (const v of Object.values(obj)) {
     if (Array.isArray(v) && v.length && typeof v[0] === "string") return v[0];
     if (typeof v === "string") return v;
   }
-  return undefined;
 }
