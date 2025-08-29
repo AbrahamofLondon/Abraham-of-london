@@ -12,14 +12,12 @@ type Props = { posts: PostMeta[] };
 export default function BlogIndex({ posts }: Props) {
   const router = useRouter();
 
-  // derive facets
   const categories = React.useMemo(() => {
     const set = new Set<string>();
     posts.forEach((p) => p.category && set.add(p.category));
     return ["All", ...Array.from(set)];
   }, [posts]);
 
-  // init from URL
   const initialQ = typeof router.query.q === "string" ? router.query.q : "";
   const initialCat =
     typeof router.query.cat === "string" && categories.includes(router.query.cat)
@@ -34,17 +32,14 @@ export default function BlogIndex({ posts }: Props) {
   const [cat, setCat] = React.useState(initialCat);
   const [sort, setSort] = React.useState<"newest" | "oldest">(initialSort);
 
-  // keep URL in sync (shallow)
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (cat && cat !== "All") params.set("cat", cat);
     if (sort !== "newest") params.set("sort", sort);
-    const search = params.toString();
-    const href = search ? `/blog?${search}` : "/blog";
+    const href = params.toString() ? `/blog?${params.toString()}` : "/blog";
     router.replace(href, undefined, { shallow: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, cat, sort]);
+  }, [q, cat, sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = React.useMemo(() => {
     let list = posts.filter((p) => {
@@ -56,28 +51,22 @@ export default function BlogIndex({ posts }: Props) {
         (p.excerpt ?? "").toLowerCase().includes(needle);
       return matchesCat && matchesQ;
     });
-
     list = list.sort((a, b) => {
       const at = a.date ? Date.parse(a.date) : 0;
       const bt = b.date ? Date.parse(b.date) : 0;
       return sort === "newest" ? bt - at : at - bt;
     });
-
     return list;
   }, [posts, q, cat, sort]);
 
   return (
     <Layout pageTitle="Blog" hideCTA>
       <Head>
-        <meta
-          name="description"
-          content="Featured insights by Abraham of London — fatherhood, enterprise, society."
-        />
+        <meta name="description" content="Featured insights by Abraham of London — fatherhood, enterprise, society." />
       </Head>
 
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12">
-          {/* header bar */}
           <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <Breadcrumb items={[{ href: "/", label: "Home" }, { label: "Blog" }]} />
             <p className="text-xs text-deepCharcoal/60">
@@ -92,7 +81,6 @@ export default function BlogIndex({ posts }: Props) {
             </p>
           </header>
 
-          {/* Controls */}
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             <input
               value={q}
@@ -106,9 +94,7 @@ export default function BlogIndex({ posts }: Props) {
               className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
             >
               {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
             <select
@@ -121,7 +107,6 @@ export default function BlogIndex({ posts }: Props) {
             </select>
           </div>
 
-          {/* Grid */}
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
               <BlogPostCard
@@ -135,6 +120,10 @@ export default function BlogIndex({ posts }: Props) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
+                // NEW framing props to fix crops
+                coverAspect={(p.coverAspect as any) ?? "book"}
+                coverFit={(p.coverFit as any) ?? (p.coverAspect === "book" ? "contain" : "cover")}
+                coverPosition={(p.coverPosition as any) ?? "center"}
               />
             ))}
           </div>
@@ -152,10 +141,8 @@ export default function BlogIndex({ posts }: Props) {
 
 export async function getStaticProps() {
   const posts = getAllPosts();
-
-  // Normalize undefined → null for JSON serialization
-  const safe = posts.map((p) => ({
-    ...p,
+  // normalize undefined → null for JSON serialization
+  const safe = posts.map((p) => ({ ...p,
     excerpt: p.excerpt ?? null,
     date: p.date ?? null,
     coverImage: p.coverImage ?? null,
@@ -163,7 +150,9 @@ export async function getStaticProps() {
     category: p.category ?? null,
     author: p.author ?? null,
     tags: p.tags ?? null,
+    coverAspect: p.coverAspect ?? null,
+    coverFit: p.coverFit ?? null,
+    coverPosition: p.coverPosition ?? null,
   }));
-
   return { props: { posts: safe }, revalidate: 60 };
 }

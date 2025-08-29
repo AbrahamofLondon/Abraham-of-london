@@ -11,10 +11,15 @@ type Props = {
   description?: string | null;
   tags?: string[] | null;
   chatham?: boolean;
-  heroImage?: string | null; // allow explicit override from front matter
+  heroImage?: string | null;        // explicit override from front matter
   className?: string;
   prefetch?: boolean;
   timeZone?: string;
+
+  /** Optional presentation tuning (per-event overrides) */
+  heroFit?: "cover" | "contain";    // default "cover"
+  heroAspect?: "16/9" | "21/9" | "3/1"; // default "16/9"
+  heroPosition?: "center" | "top" | "left" | "right"; // default "center"
 };
 
 /* ---------- date helpers ---------- */
@@ -26,24 +31,44 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
     if (!isValidDate(dt)) return iso;
-    return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }).format(dt);
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(dt);
   }
   const dt = new Date(iso);
   if (!isValidDate(dt)) return iso;
-  const dateStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(dt);
-  const timeStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(dt);
+  const dateStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(dt);
+  const timeStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(dt);
   return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
 }
 
 /* ---------- image helpers ---------- */
-const ensureLocal = (p?: string | null) => (p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined);
+const ensureLocal = (p?: string | null) =>
+  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
 
-/** Try: exact slug, normalized slug, shortened slug (first 2–3 tokens), then default */
+/** Try: explicit, exact slug, normalized slug, shortened slug, then default */
 function useEventImageCandidates(slug: string, heroImage?: string | null) {
   const { candidates } = React.useMemo(() => {
     const explicit = ensureLocal(heroImage);
 
-    const base = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const base = slug
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
     const short2 = base.split("-").slice(0, 2).join("-");
     const short3 = base.split("-").slice(0, 3).join("-");
 
@@ -63,7 +88,10 @@ function useEventImageCandidates(slug: string, heroImage?: string | null) {
 
   const [idx, setIdx] = React.useState(0);
   const src = candidates[idx];
-  const onError = React.useCallback(() => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)), [candidates.length]);
+  const onError = React.useCallback(
+    () => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)),
+    [candidates.length]
+  );
 
   return { src, hasAny: candidates.length > 0, onError };
 }
@@ -81,6 +109,9 @@ export default function EventCard({
   prefetch = false,
   timeZone = "Europe/London",
   heroImage = null,
+  heroFit = "cover",
+  heroAspect = "16/9",
+  heroPosition = "center",
 }: Props) {
   const nice = formatNiceDate(date, timeZone);
   const titleId = React.useId();
@@ -88,6 +119,19 @@ export default function EventCard({
     Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
 
   const { src, hasAny, onError } = useEventImageCandidates(slug, heroImage);
+
+  const aspectClass =
+    heroAspect === "21/9" ? "aspect-[21/9]" : heroAspect === "3/1" ? "aspect-[3/1]" : "aspect-[16/9]";
+
+  const fitClass = heroFit === "contain" ? "object-contain bg-warmWhite" : "object-cover";
+  const posClass =
+    heroPosition === "top"
+      ? "object-top"
+      : heroPosition === "left"
+      ? "object-left"
+      : heroPosition === "right"
+      ? "object-right"
+      : "object-center";
 
   return (
     <article
@@ -100,13 +144,13 @@ export default function EventCard({
       itemType="https://schema.org/Event"
     >
       {hasAny && src && (
-        <div className="relative aspect-[16/9] w-full">
+        <div className={clsx("relative w-full", aspectClass)}>
           <Image
             src={src}
-            alt=""
+            alt={`${title} image`}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
+            className={clsx(fitClass, posClass)}
             onError={onError}
             priority={false}
           />
