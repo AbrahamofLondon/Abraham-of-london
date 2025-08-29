@@ -1,16 +1,17 @@
+// components/homepage/AboutSection.tsx
 "use client";
 
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, type Variants, type Transition } from "framer-motion";
 import { siteConfig } from "@/lib/siteConfig";
 
 export type Achievement = {
   title: string;
   description?: string;
   year: number;
-  href?: string; // ✅ optional deep link
+  href?: string; // optional deep link
 };
 
 type Props = {
@@ -25,19 +26,33 @@ type Props = {
   id?: string;
 };
 
-const container = {
+/** Use a cubic-bezier so TS is happy about Transition["ease"] */
+const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
+
+const container: Variants = {
   hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: EASE },
+  },
 };
 
-const list = {
+const list: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { delay: 0.1, staggerChildren: 0.08 } },
+  visible: {
+    opacity: 1,
+    transition: { delay: 0.1, staggerChildren: 0.08 },
+  },
 };
 
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: EASE },
+  },
 };
 
 export default function AboutSection({

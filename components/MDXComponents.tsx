@@ -1,3 +1,4 @@
+// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -31,7 +32,7 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 
   const isHttp = /^https?:\/\//i.test(href);
   const externalProps = isHttp
-    ? { target: "_blank", rel: "noopener noreferrer", "aria-label": "Opens in new tab" }
+    ? { target: "_blank", rel: "noopener noreferrer", "aria-label": "Opens in new tab" as const }
     : {};
 
   return (
@@ -42,10 +43,17 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 };
 
 /* ---------------- MDX <img> -> next/image ---------------- */
-type MDXImgProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+/** Narrow the img src to string to satisfy Next/Image */
+type MDXImgProps = Omit<
+  React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
+  "src"
+> & { src?: string };
 
 const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
-  const safeSrc = src || "/assets/images/default-book.jpg";
+  // Force a string src (fallback to a safe local asset)
+  const srcStr = typeof src === "string" ? src : undefined;
+  const safeSrc: string = srcStr || "/assets/images/default-blog.jpg";
+
   const w = toNumber(width);
   const h = toNumber(height);
   const [loaded, setLoaded] = React.useState(false);
@@ -93,7 +101,11 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
           )}
         </span>
       )}
-      {title && <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">{title}</figcaption>}
+      {title && (
+        <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
+          {title}
+        </figcaption>
+      )}
     </figure>
   );
 };
@@ -123,7 +135,10 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src.toString()}
         title={title || "YouTube video"}
@@ -139,21 +154,37 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
 };
 
 type IframeProps = React.ComponentProps<"iframe"> & { className?: string };
-const ALLOWED_IFRAME_HOSTS = ["www.youtube-nocookie.com", "www.youtube.com", "youtube.com", "youtu.be", "player.vimeo.com", "open.spotify.com"];
+const ALLOWED_IFRAME_HOSTS = [
+  "www.youtube-nocookie.com",
+  "www.youtube.com",
+  "youtube.com",
+  "youtu.be",
+  "player.vimeo.com",
+  "open.spotify.com",
+];
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try { url = new URL(src); } catch {}
+  try {
+    url = new URL(src);
+  } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
-    return <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.</div>;
+    return (
+      <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">
+        Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.
+      </div>
+    );
   }
   if (url!.hostname.includes("youtube.com") || url!.hostname.includes("youtu.be")) {
     const id = parseYouTubeId(src);
     if (id) return <YouTube id={id} title={title} className={className} />;
   }
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src}
         title={title}
@@ -175,7 +206,7 @@ export const MDXComponents: MDXComponentsType = {
   img: (props) => <Img {...(props as any)} />,
   YouTube,
   iframe: Iframe,
-  EventJsonLd, // <-- make available to MDX so <EventJsonLd /> works during SSG
+  EventJsonLd,
 };
 
 export default MDXComponents;
