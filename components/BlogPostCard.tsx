@@ -1,9 +1,8 @@
+// components/BlogPostCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { siteConfig } from "@/lib/siteConfig";
-
-type CoverAspect = "portrait" | "wide" | "square";
 
 type BlogPostCardProps = {
   slug: string;
@@ -15,11 +14,14 @@ type BlogPostCardProps = {
   readTime?: string;
   category?: string;
   tags?: string[];
-  /** Optional: override card aspect ("portrait" | "wide" | "square"). */
-  coverAspect?: CoverAspect;
+  /** NEW: control how the cover is framed */
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
+  coverPosition?: "center" | "left" | "right";
 };
 
-const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+const FALLBACK_AVATAR =
+  siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
 /** Normalize to a local /public path and try slug-based fallbacks */
 function useBlogCover(slug: string, coverImage?: string) {
@@ -52,15 +54,6 @@ function useBlogCover(slug: string, coverImage?: string) {
   return { src, hasAny: candidates.length > 0, onError };
 }
 
-/** Guess aspect from filename if not provided in front-matter */
-function guessAspect(slug: string, coverImage?: string): CoverAspect {
-  const s = `${slug} ${coverImage || ""}`.toLowerCase();
-  if (/-wide|-banner|-hero/.test(s)) return "wide";
-  if (/-sq|-square/.test(s)) return "square";
-  // default: book-like portrait
-  return "portrait";
-}
-
 export default function BlogPostCard({
   slug,
   title,
@@ -70,44 +63,71 @@ export default function BlogPostCard({
   author,
   readTime,
   category,
-  coverAspect, // <-- new
+  coverAspect = "book",
+  coverFit = "cover",
+  coverPosition = "center",
 }: BlogPostCardProps) {
-  const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
+  const authorName =
+    typeof author === "string" ? author : author?.name || siteConfig.author;
 
   const normalizeLocal = (src?: string) =>
-    !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+    !src || /^https?:\/\//i.test(src)
+      ? undefined
+      : src.startsWith("/")
+      ? src
+      : `/${src.replace(/^\/+/, "")}`;
 
   const preferredAvatar =
-    (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
+    (typeof author !== "string" && normalizeLocal(author?.image)) ||
+    FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(
-    slug,
-    coverImage
-  );
-
-  const aspect: CoverAspect = coverAspect || guessAspect(slug, coverImage);
-  const ratioClass =
-    aspect === "wide" ? "aspect-[16/9]" : aspect === "square" ? "aspect-square" : "aspect-[3/4]";
+  const { src: coverSrc, hasAny: showCover, onError: onCoverError } =
+    useBlogCover(slug, coverImage);
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
   const dateLabel =
     dt && !Number.isNaN(+dt)
-      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt)
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(dt)
       : undefined;
+
+  // aspect frame
+  const aspectClass =
+    coverAspect === "square"
+      ? "aspect-[1/1]"
+      : coverAspect === "wide"
+      ? "aspect-[16/9]"
+      : "aspect-[3/4]"; // book (default)
+
+  // fit + position
+  const fitClass = coverFit === "contain" ? "object-contain" : "object-cover";
+  const posClass =
+    coverPosition === "left"
+      ? "object-left"
+      : coverPosition === "right"
+      ? "object-right"
+      : "object-center";
+
+  // Add a subtle solid behind contain images so letterboxing looks intentional
+  const frameBg =
+    coverFit === "contain" ? "bg-[rgb(10,37,30)]/90" : "bg-transparent";
 
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
         {showCover && coverSrc && (
-          <div className={`relative w-full overflow-hidden rounded-t-2xl ${ratioClass}`}>
+          <div className={`relative w-full overflow-hidden rounded-t-2xl ${aspectClass} ${frameBg}`}>
             <Image
               src={coverSrc}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover"
+              className={`${fitClass} ${posClass}`}
               priority={false}
               onError={onCoverError}
             />
@@ -115,7 +135,9 @@ export default function BlogPostCard({
         )}
 
         <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
+          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
+            {title}
+          </h3>
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-deepCharcoal/70">
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
@@ -128,7 +150,9 @@ export default function BlogPostCard({
             <span className="luxury-link">Discuss</span>
           </div>
 
-          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
+          {excerpt && (
+            <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>
+          )}
 
           <div className="mt-4 flex items-center gap-3">
             <Image

@@ -39,19 +39,6 @@ type HomeProps = {
   eventsTeaser: EventsTeaser;
 };
 
-// ---- Time helpers: Europe/London aware ----
-const LONDON_TZ = "Europe/London";
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-function londonDayKey(d: Date) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: LONDON_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
-}
-
 function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
 
@@ -218,6 +205,10 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
+                // >>> Frame correctly in the grid
+                coverAspect={(p.coverAspect as any) ?? "book"}
+                coverFit={(p.coverFit as any) ?? (p.coverAspect === "book" ? "contain" : "cover")}
+                coverPosition={(p.coverPosition as any) ?? "center"}
               />
             ))}
           </div>
@@ -419,7 +410,7 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals to null for JSON serialization
+  // Normalize optionals (including new cover-framing hints) to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -429,6 +420,9 @@ export async function getStaticProps() {
     category: p.category ?? null,
     author: p.author ?? null,
     tags: p.tags ?? null,
+    coverAspect: p.coverAspect ?? null,
+    coverFit: p.coverFit ?? null,
+    coverPosition: p.coverPosition ?? null,
   }));
 
   const booksCount = getAllBooks(["slug"]).length;
