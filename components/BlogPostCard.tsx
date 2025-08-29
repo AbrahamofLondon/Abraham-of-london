@@ -1,3 +1,4 @@
+// components/BlogPostCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -8,7 +9,7 @@ type BlogPostCardProps = {
   title: string;
   date?: string;
   excerpt?: string;
-  coverImage?: string;
+  coverImage?: string; // optional front-matter path (prefer local /public)
   author?: string | { name?: string; image?: string };
   readTime?: string;
   category?: string;
@@ -17,37 +18,41 @@ type BlogPostCardProps = {
 
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
-/** Normalize to a local /public path and try slug-based fallbacks */
+/** Normalize to a local /public path (ignore remote for cards) */
+const normalizeLocal = (src?: string) =>
+  !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+
+/** Prefer a card-specific crop when present, then normal cover, then slug fallbacks */
 function useBlogCover(slug: string, coverImage?: string) {
-  const normalizeLocal = (src?: string) => {
-    if (!src) return undefined;
-    if (/^https?:\/\//i.test(src)) return undefined; // local only
-    return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-  };
-
-  const base = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  const short = base.split("-").slice(0, 3).join("-"); // helps when filenames are shorter than slugs
-
   const candidates = React.useMemo(() => {
+    const name = slug.replace(/\.[a-z]+$/i, "");
     const list = [
-      normalizeLocal(coverImage),
-      `/assets/images/blog/${base}.webp`,
-      `/assets/images/blog/${base}.jpg`,
-      `/assets/images/blog/${base}.jpeg`,
-      `/assets/images/blog/${base}.png`,
-      `/assets/images/blog/${short}.webp`,
-      `/assets/images/blog/${short}.jpg`,
-      `/assets/images/blog/${short}.jpeg`,
-      `/assets/images/blog/${short}.png`,
-      `/assets/images/blog/default-blog-cover.jpg`, // <-- your actual file name
-      `/assets/images/default-blog-cover.jpg`,
+      normalizeLocal(coverImage && coverImage.replace(/(\.\w+)$/, "-card$1")), // if front-matter provided, try -card next to it
+      `/assets/images/blog/${name}-card.webp`,  // 👈 explicit card crop
+      `/assets/images/blog/${name}-card.jpg`,
+      `/assets/images/blog/${name}-card.jpeg`,
+      `/assets/images/blog/${name}-card.png`,
+
+      normalizeLocal(coverImage),               // then the regular cover
+      `/assets/images/blog/${name}.webp`,
+      `/assets/images/blog/${name}.jpg`,
+      `/assets/images/blog/${name}.jpeg`,
+      `/assets/images/blog/${name}.png`,
+
+      `/assets/images/blog/default-blog.jpg`,
+      `/assets/images/default-blog.jpg`,
     ].filter(Boolean) as string[];
+
+    // de-dup while preserving order
     return Array.from(new Set(list));
   }, [slug, coverImage]);
 
   const [idx, setIdx] = React.useState(0);
   const src = candidates[idx];
-  const onError = React.useCallback(() => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)), [candidates.length]);
+
+  const onError = React.useCallback(() => {
+    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i));
+  }, [candidates.length]);
 
   return { src, hasAny: candidates.length > 0, onError };
 }
@@ -63,15 +68,14 @@ export default function BlogPostCard({
   category,
 }: BlogPostCardProps) {
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
-
-  const normalizeLocal = (src?: string) =>
-    !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-
   const preferredAvatar =
     (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
   const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(slug, coverImage);
+
+  // Orientation-aware wrapper: default portrait (4/5), switch to 16/9 if the image is landscape
+  const [isLandscape, setIsLandscape] = React.useState(false);
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
@@ -84,16 +88,25 @@ export default function BlogPostCard({
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
         {showCover && coverSrc && (
-          // Portrait friendly: no chopped titles
-          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl bg-warmWhite">
+          <div
+            className={
+              // Portrait-first look (bookish); swap to 16/9 if we detect a landscape source
+              (isLandscape ? "aspect-[16/9]" : "aspect-[4/5]") +
+              " relative w-full overflow-hidden rounded-t-2xl"
+            }
+          >
             <Image
               src={coverSrc}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover [object-position:50%_15%]" /* bias a bit upward for title bands */
+              className="object-cover"
               priority={false}
               onError={onCoverError}
+              onLoadingComplete={(img) => {
+                // If the natural width is >= height, use landscape wrapper next paint
+                if (img.naturalWidth >= img.naturalHeight) setIsLandscape(true);
+              }}
             />
           </div>
         )}
@@ -109,7 +122,17 @@ export default function BlogPostCard({
                 {category}
               </span>
             )}
-            <span className="inline-flex items-center">Discuss</span>
+            <span aria-hidden="true" className="sr-only">
+              —
+            </span>
+            <Link
+              href={`/blog/${slug}#comments`}
+              className="luxury-link"
+              prefetch={false}
+              aria-label={`Discuss: ${title}`}
+            >
+              Discuss
+            </Link>
           </div>
 
           {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
