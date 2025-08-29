@@ -1,3 +1,4 @@
+// pages/blog/[slug].tsx
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import type { GetStaticProps, GetStaticPaths } from "next";
@@ -18,7 +19,12 @@ import remarkGfm from "remark-gfm";
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-type PageMeta = Omit<PostMeta, "tags"> & { slug: string };
+type PageMeta = Omit<PostMeta, "tags"> & {
+  slug: string;
+  coverAspect?: "book" | "wide" | "square" | null;
+  coverFit?: "cover" | "contain" | null;
+  coverPosition?: "left" | "center" | "right" | null;
+};
 
 type Props = {
   post: {
@@ -42,9 +48,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     author: (raw.author as any) ?? "Abraham of London",
     readTime: (raw.readTime as string) ?? null,
     category: (raw.category as string) ?? null,
-    coverAspect: (raw.coverAspect as any) ?? null,
-    coverFit: (raw.coverFit as any) ?? null,
-    coverPosition: (raw.coverPosition as any) ?? null,
+    coverAspect: (raw as any).coverAspect ?? null,
+    coverFit: (raw as any).coverFit ?? null,
+    coverPosition: (raw as any).coverPosition ?? null,
   };
 
   const mdx = await serialize(raw.content ?? "", {
@@ -58,16 +64,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getPostSlugs();
-  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
+  return { paths: slugs.map((s) => ({ params: { slug: s } })), fallback: "blocking" };
 };
 
 export default function BlogPost({ post }: Props) {
-  const { slug, title, date, excerpt, coverImage, author, readTime, category,
-          coverAspect, coverFit, coverPosition } = post.meta;
+  const { slug, title, date, excerpt, coverImage, author, readTime, category, coverAspect, coverFit, coverPosition } =
+    post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
   const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
   const canonical = absUrl(`/blog/${slug}`);
+  const authorName = typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -76,7 +83,7 @@ export default function BlogPost({ post }: Props) {
     image: [coverForMeta],
     datePublished: date || null,
     dateModified: date || null,
-    author: { "@type": "Person", name: (typeof author === "string" ? author : author?.name) || "Abraham of London" },
+    author: { "@type": "Person", name: authorName },
     publisher: {
       "@type": "Organization",
       name: "Abraham of London",
@@ -85,8 +92,6 @@ export default function BlogPost({ post }: Props) {
     description: excerpt || null,
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
   };
-
-  const authorName = typeof author === "string" ? author : author?.name || "Abraham of London";
 
   return (
     <Layout pageTitle={title}>
@@ -111,9 +116,9 @@ export default function BlogPost({ post }: Props) {
           <PostHero
             title={title}
             coverImage={coverImage ?? undefined}
-            coverAspect={coverAspect as any}
-            coverFit={coverFit as any}
-            coverPosition={coverPosition as any}
+            coverAspect={coverAspect ?? undefined}
+            coverFit={coverFit ?? undefined}
+            coverPosition={coverPosition ?? undefined}
           />
 
           <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">{title}</h1>

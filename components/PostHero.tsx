@@ -1,53 +1,52 @@
+// components/PostHero.tsx
 import Image from "next/image";
 import React from "react";
 
 type Props = {
   title: string;
   coverImage?: string | null;
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
-  coverPosition?: "center" | "left" | "right";
+  /** Optional framing controls (read from MDX front-matter) */
+  coverAspect?: "book" | "wide" | "square" | null;
+  coverFit?: "cover" | "contain" | null;
+  coverPosition?: "left" | "center" | "right" | null;
 };
 
-const normalize = (src?: string | null) =>
-  !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+const ensureLocal = (p?: string | null) =>
+  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
 
 export default function PostHero({
   title,
   coverImage,
-  coverAspect = "book",
-  coverFit,
+  coverAspect = "wide",
+  coverFit = "contain",
   coverPosition = "center",
 }: Props) {
-  const src = normalize(coverImage);
+  const [src, setSrc] = React.useState<string | undefined>(ensureLocal(coverImage) || "/assets/images/social/og-image.jpg");
+
+  // frame ratio
+  const aspectClass =
+    coverAspect === "square" ? "aspect-[1/1]" : coverAspect === "book" ? "aspect-[3/4]" : "aspect-[16/9]";
+
+  // fit & position
+  const fitClass = coverFit === "cover" ? "object-cover" : "object-contain";
+  const posClass =
+    coverPosition === "left" ? "object-left" : coverPosition === "right" ? "object-right" : "object-center";
+
+  // background for letterboxing when using contain
+  const frameBg = coverFit === "contain" ? "bg-[rgb(10,37,30)]/92" : "bg-transparent";
+
   if (!src) return null;
 
-  const aspect =
-    coverAspect === "wide" ? "aspect-[16/9]" :
-    coverAspect === "square" ? "aspect-[1/1]" :
-    "aspect-[3/4]"; // book default
-
-  const fit =
-    (coverFit ?? (coverAspect === "book" ? "contain" : "cover")) === "contain"
-      ? "object-contain"
-      : "object-cover";
-
-  const pos =
-    coverPosition === "left" ? "object-left" :
-    coverPosition === "right" ? "object-right" :
-    "object-center";
-
-  const bg = fit === "object-contain" ? "bg-[rgb(10,37,30)]/90" : "bg-transparent";
-
   return (
-    <div className={`mx-auto mb-10 w-full max-w-5xl overflow-hidden rounded-2xl ${aspect} ${bg}`}>
+    <div className={`relative mb-10 w-full overflow-hidden rounded-lg shadow-lg ${aspectClass} ${frameBg}`}>
       <Image
         src={src}
         alt={title}
         fill
-        sizes="(max-width: 1280px) 100vw, 1200px"
-        className={`${fit} ${pos}`}
+        sizes="(max-width: 768px) 100vw, 768px"
+        className={`${fitClass} ${posClass}`}
         priority
+        onError={() => setSrc("/assets/images/social/og-image.jpg")}
       />
     </div>
   );
