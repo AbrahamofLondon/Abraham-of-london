@@ -3,24 +3,59 @@
 
 import { useState, useMemo } from "react";
 import Head from "next/head";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  type Variants,
+  type Transition,
+} from "framer-motion";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const SITE_URL = siteConfig.siteUrl;
 const FORM_NAME = "contact-form";
 
-const containerVariants = {
+/** Use a cubic-bezier so TS is happy about Transition["ease"] */
+const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
+
+const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.7,
+      ease: EASE,
+      when: "beforeChildren",
+    },
+  },
 };
-const formVariants = {
+
+const formVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 } },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: EASE,
+      staggerChildren: 0.1,
+    },
+  },
 };
-const itemVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.3, ease: EASE },
+  },
+};
 
 export default function ContactForm() {
-  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formStatus, setFormStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const prefersReducedMotion = useReducedMotion();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +70,7 @@ export default function ContactForm() {
       // Ensure Netlify sees the form name
       if (!formData.get("form-name")) formData.append("form-name", FORM_NAME);
 
-      // Build x-www-form-urlencoded body WITHOUT using iterable entries()
+      // Build x-www-form-urlencoded body (no iterator assumptions)
       const body = new URLSearchParams();
       formData.forEach((value, key) => body.append(key, String(value)));
 
@@ -70,7 +105,11 @@ export default function ContactForm() {
       url: `${SITE_URL}/contact`,
       potentialAction: {
         "@type": "CommunicateAction",
-        target: { "@type": "EntryPoint", actionPlatform: ["https://schema.org/ContactPoint"], inLanguage: "en" },
+        target: {
+          "@type": "EntryPoint",
+          actionPlatform: ["https://schema.org/ContactPoint"],
+          inLanguage: "en",
+        },
       },
       contactPoint: {
         "@type": "ContactPoint",
@@ -86,18 +125,28 @@ export default function ContactForm() {
     <>
       <Head>
         <title>Contact | {siteConfig.author}</title>
-        <meta name="description" content="Get in touch with Abraham of London for inquiries and collaborations." />
+        <meta
+          name="description"
+          content="Get in touch with Abraham of London for inquiries and collaborations."
+        />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
         <meta property="og:title" content="Contact | Abraham of London" />
-        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and inquiries." />
+        <meta
+          property="og:description"
+          content="Reach out for collaborations, speaking engagements, and inquiries."
+        />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
         <meta property="og:image" content={absUrl(siteConfig.ogImage)} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content={absUrl(siteConfig.twitterImage)} />
         {structuredData.map((schema, i) => (
-          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+          <script
+            key={i}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
         ))}
       </Head>
 
@@ -108,18 +157,23 @@ export default function ContactForm() {
         animate="visible"
         transition={prefersReducedMotion ? { duration: 0 } : undefined}
       >
-        <h2 className="text-4xl font-serif text-[var(--color-primary)] mb-6 text-center">Contact Us</h2>
-        <p className="text-lg text-[var(--color-on-primary)]/80 mb-8 text-center">
+        <h2 className="mb-6 text-center font-serif text-4xl text-[var(--color-primary)]">
+          Contact Us
+        </h2>
+        <p className="mb-8 text-center text-lg text-[var(--color-on-primary)]/80">
           Reach out for inquiries, collaborations, or support.
         </p>
 
         <motion.form
-          action="/"                  // Netlify capture endpoint
+          action="/" // Netlify capture endpoint
           method="POST"
           name={FORM_NAME}
           acceptCharset="UTF-8"
           // Netlify attributes (cast to any to satisfy TS)
-          {...({ "data-netlify": "true", "netlify-honeypot": "bot-field" } as any)}
+          {...({
+            "data-netlify": "true",
+            "netlify-honeypot": "bot-field",
+          } as any)}
           variants={formVariants}
           initial="hidden"
           animate="visible"
@@ -132,7 +186,9 @@ export default function ContactForm() {
           <input type="hidden" name="subject" value="New contact form submission" />
 
           {/* Honeypot field — visually hidden but present in DOM */}
-          <label htmlFor="bot-field" className="sr-only">Leave this field empty</label>
+          <label htmlFor="bot-field" className="sr-only">
+            Leave this field empty
+          </label>
           <input
             id="bot-field"
             name="bot-field"
@@ -144,7 +200,10 @@ export default function ContactForm() {
           />
 
           <motion.div variants={itemVariants}>
-            <label htmlFor="name" className="block text-sm font-medium text-[var(--color-on-primary)]">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-[var(--color-on-primary)]"
+            >
               Name
             </label>
             <input
@@ -155,13 +214,16 @@ export default function ContactForm() {
               required
               minLength={2}
               maxLength={120}
-              className="mt-1 w-full px-4 py-2 border border-[var(--color-lightGrey)] rounded-[6px] focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              className="mt-1 w-full rounded-[6px] border border-[var(--color-lightGrey)] px-4 py-2 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               disabled={isSubmitting}
             />
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <label htmlFor="email" className="block text-sm font-medium text-[var(--color-on-primary)]">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-[var(--color-on-primary)]"
+            >
               Email
             </label>
             <input
@@ -172,13 +234,16 @@ export default function ContactForm() {
               inputMode="email"
               required
               maxLength={254}
-              className="mt-1 w-full px-4 py-2 border border-[var(--color-lightGrey)] rounded-[6px] focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              className="mt-1 w-full rounded-[6px] border border-[var(--color-lightGrey)] px-4 py-2 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               disabled={isSubmitting}
             />
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <label htmlFor="message" className="block text-sm font-medium text-[var(--color-on-primary)]">
+            <label
+              htmlFor="message"
+              className="block text-sm font-medium text-[var(--color-on-primary)]"
+            >
               Message
             </label>
             <textarea
@@ -188,7 +253,7 @@ export default function ContactForm() {
               rows={5}
               minLength={10}
               maxLength={4000}
-              className="mt-1 w-full px-4 py-2 border border-[var(--color-lightGrey)] rounded-[6px] focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              className="mt-1 w-full rounded-[6px] border border-[var(--color-lightGrey)] px-4 py-2 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               disabled={isSubmitting}
             />
           </motion.div>
@@ -199,7 +264,7 @@ export default function ContactForm() {
           <motion.div variants={itemVariants} className="text-center">
             <button
               type="submit"
-              className="inline-block px-6 py-3 bg-[var(--color-primary)] text-[var(--color-on-primary)] rounded-[6px] hover:bg-[var(--color-primary)]/80 disabled:opacity-50"
+              className="inline-block rounded-[6px] bg-[var(--color-primary)] px-6 py-3 text-[var(--color-on-primary)] hover:bg-[var(--color-primary)]/80 disabled:opacity-50"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Send Message"}
@@ -210,17 +275,24 @@ export default function ContactForm() {
             variants={itemVariants}
             role="status"
             aria-live="polite"
-            className="text-center mt-2"
+            className="mt-2 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
           >
-            {formStatus === "success" && <span className="text-green-600">Message sent successfully!</span>}
-            {formStatus === "error" && <span className="text-red-600">Failed to send message. Please try again.</span>}
+            {formStatus === "success" && (
+              <span className="text-green-600">Message sent successfully!</span>
+            )}
+            {formStatus === "error" && (
+              <span className="text-red-600">
+                Failed to send message. Please try again.
+              </span>
+            )}
           </motion.p>
 
           <noscript>
             <p className="text-center text-sm text-[var(--color-on-primary)]/70">
-              JavaScript is disabled. Submitting will use the standard form submission.
+              JavaScript is disabled. Submitting will use the standard form
+              submission.
             </p>
           </noscript>
         </motion.form>

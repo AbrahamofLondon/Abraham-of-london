@@ -1,15 +1,17 @@
-// components/LuxuryAnimator.tsx
+// components/LuxuryAnimations.tsx  (or components/LuxuryAnimator.tsx)
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "framer-motion";
 import clsx from "clsx";
+
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 type Props = {
   /** Visible title; if omitted, you can pass custom children */
   title?: string;
   /** Which heading tag to render for the title */
-  headingAs?: keyof JSX.IntrinsicElements; // "h2" | "h3" | ...
+  headingAs?: HeadingTag; // no JSX namespace needed
   /** Extra classes for the outer container */
   className?: string;
   /** Animate on mount (default) or only when in view */
@@ -18,6 +20,9 @@ type Props = {
   ariaLabel?: string;
   children?: React.ReactNode;
 };
+
+// Typed cubic-bezier so Transition["ease"] is satisfied
+const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
 
 export default function LuxuryAnimator({
   title = "LuxuryAnimator",
@@ -28,14 +33,16 @@ export default function LuxuryAnimator({
   children,
 }: Props) {
   const prefersReduced = useReducedMotion();
-  const Heading = headingAs;
+  const Heading = headingAs; // string tag is fine for React elements
 
-  // Prefer subtle opacity when user reduces motion
-  const initial = prefersReduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 6 };
-  const animate = prefersReduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 };
-  const transition = { duration: 0.55, ease: "easeOut" } as const;
+  const initial = prefersReduced
+    ? { opacity: 0 }
+    : { opacity: 0, scale: 0.96, y: 6 };
+  const animate = prefersReduced
+    ? { opacity: 1 }
+    : { opacity: 1, scale: 1, y: 0 };
+  const transition: Transition = { duration: 0.55, ease: EASE };
 
-  // For a11y, prefer section + aria-labelledby when a visible title exists
   const titleId = React.useId();
   const labelledBy = title ? titleId : undefined;
   const label = ariaLabel && !title ? ariaLabel : undefined;

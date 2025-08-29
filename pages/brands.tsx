@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, type Variants } from "framer-motion";
 import Layout from "@/components/Layout";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import { sanitizeSocialLinks } from "@/lib/social";
@@ -29,7 +29,7 @@ const BRANDS = [
 ] as const;
 
 // ---------- Animations ----------
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -37,16 +37,15 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 30, opacity: 0, scale: 0.95 },
   visible: {
     y: 0,
     opacity: 1,
     scale: 1,
-    transition: { type: "spring", stiffness: 100, damping: 15 },
+    transition: { type: "spring" as const, stiffness: 100, damping: 15 },
   },
 };
-
 // Parallax (safe on SSR: framer hooks return inert values until client)
 function useParallax() {
   const { scrollYProgress } = useScroll();

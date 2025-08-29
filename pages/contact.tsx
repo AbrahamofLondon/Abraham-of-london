@@ -1,7 +1,8 @@
+// pages/contact.tsx
 import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -20,15 +21,30 @@ const abs = (path: string): string => {
 };
 
 /* ---------- Animations ---------- */
-const containerVariants = {
+const EASE_OUT = [0.16, 1, 0.3, 1] as const; // smooth easeOut curve
+
+const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut", when: "beforeChildren" } },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.7, ease: EASE_OUT, when: "beforeChildren" as const },
+  },
 };
-const formVariants = {
+
+const formVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 } },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: EASE_OUT, staggerChildren: 0.1 },
+  },
 };
-const itemVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+};
 
 export default function ContactPage() {
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -39,7 +55,8 @@ export default function ContactPage() {
       "@context": "https://schema.org",
       "@type": "ContactPage",
       mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/contact` },
-      description: "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
+      description:
+        "Get in touch with Abraham of London for speaking engagements, media inquiries, or collaborations.",
       url: `${SITE_URL}/contact`,
       potentialAction: { "@type": "CommunicateAction", target: { "@type": "EntryPoint", inLanguage: "en" } },
       contactPoint: {
@@ -49,6 +66,7 @@ export default function ContactPage() {
         email: siteConfig.email,
       },
     };
+
     const breadcrumb = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -57,6 +75,7 @@ export default function ContactPage() {
         { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
       ],
     };
+
     return [contactPageSchema, breadcrumb];
   }, []);
 
@@ -91,15 +110,15 @@ export default function ContactPage() {
       });
 
       const json = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
-
       if (!r.ok || !json?.ok) throw new Error(json?.error || `HTTP ${r.status}`);
 
       setFormStatus("success");
       form.reset();
       setTimeout(() => setFormStatus("idle"), 5000);
-    } catch (err: any) {
-      console.error("Form submission failed:", err?.message || err);
-      setFormError(err?.message || "Failed to send message. Please try again.");
+    } catch (err: unknown) {
+      const msg = (err as any)?.message || "Failed to send message. Please try again.";
+      console.error("Form submission failed:", msg);
+      setFormError(msg);
       setFormStatus("error");
     }
   };
@@ -118,20 +137,29 @@ export default function ContactPage() {
         <link rel="canonical" href={`${SITE_URL}/contact`} />
 
         <meta property="og:title" content="Contact | Abraham of London" />
-        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and media opportunities." />
+        <meta
+          property="og:description"
+          content="Reach out for collaborations, speaking engagements, and media opportunities."
+        />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
-        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
+        <meta
+          property="og:image"
+          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
+        />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")} />
+        <meta
+          name="twitter:image"
+          content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")}
+        />
 
         {structuredData.map((schema, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
         ))}
       </Head>
 
-      {/* NOTE: do NOT nest another <main>; Layout already renders the main element */}
+      {/* NOTE: Layout already renders <main>, so no extra <main> here */}
       <motion.div
         className="relative min-h-screen overflow-hidden bg-gray-50 py-20"
         initial="hidden"
@@ -139,14 +167,14 @@ export default function ContactPage() {
         variants={containerVariants}
       >
         {/* Background pattern */}
-        <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-10">
           <div className="pattern-bg" />
         </div>
 
         {/* Decorative element (served from /public) */}
-        <div className="absolute right-10 top-10 z-0 pointer-events-none">
+        <div className="pointer-events-none absolute right-10 top-10 z-0">
           <div className="relative h-40 w-40 opacity-40 md:h-64 md:w-64">
-            <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" priority={false} />
+            <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" />
           </div>
         </div>
 
@@ -176,21 +204,44 @@ export default function ContactPage() {
               <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
                 Name
               </label>
-              <input id="name" name="name" type="text" required autoComplete="name" disabled={isSubmitting} className="aol-input" />
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                autoComplete="name"
+                disabled={isSubmitting}
+                className="aol-input"
+              />
             </motion.div>
 
             <motion.div variants={itemVariants}>
               <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
                 Email
               </label>
-              <input id="email" name="email" type="email" required autoComplete="email" disabled={isSubmitting} className="aol-input" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                disabled={isSubmitting}
+                className="aol-input"
+              />
             </motion.div>
 
             <motion.div variants={itemVariants}>
               <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
                 Message
               </label>
-              <textarea id="message" name="message" required rows={5} disabled={isSubmitting} className="aol-textarea" />
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={5}
+                disabled={isSubmitting}
+                className="aol-textarea"
+              />
             </motion.div>
 
             <motion.div variants={itemVariants} className="text-center">
@@ -204,7 +255,11 @@ export default function ContactPage() {
               aria-live="polite"
               variants={itemVariants}
               className={`text-center font-medium ${
-                formStatus === "success" ? "text-green-700" : formStatus === "error" ? "text-red-700" : "text-transparent"
+                formStatus === "success"
+                  ? "text-green-700"
+                  : formStatus === "error"
+                  ? "text-red-700"
+                  : "text-transparent"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: formStatus === "idle" ? 0 : 1 }}
@@ -213,7 +268,7 @@ export default function ContactPage() {
               {formStatus === "success"
                 ? "Message sent successfully!"
                 : formStatus === "error"
-                ? (formError || "Failed to send message. Please try again.")
+                ? formError || "Failed to send message. Please try again."
                 : " "}
             </motion.p>
           </motion.form>

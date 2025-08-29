@@ -155,7 +155,7 @@ DefaultLinkIcon.displayName = "DefaultLinkIcon";
 /* ---------- Icon map ---------- */
 const ICONS: Record<
   NonNullable<SocialItem["kind"]>,
-  (p: IconProps) => JSX.Element
+  (p: IconProps) => React.ReactElement
 > = {
   x: XIcon,
   instagram: InstagramIcon,
