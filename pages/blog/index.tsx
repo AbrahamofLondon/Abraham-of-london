@@ -1,6 +1,8 @@
+// pages/blog/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+
 import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BlogPostCard from "@/components/BlogPostCard";
@@ -32,14 +34,17 @@ export default function BlogIndex({ posts }: Props) {
   const [cat, setCat] = React.useState(initialCat);
   const [sort, setSort] = React.useState<"newest" | "oldest">(initialSort);
 
+  // Keep URL in sync with search/filter/sort without full navigation
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (cat && cat !== "All") params.set("cat", cat);
     if (sort !== "newest") params.set("sort", sort);
-    const href = params.toString() ? `/blog?${params.toString()}` : "/blog";
-    router.replace(href, undefined, { shallow: true });
-  }, [q, cat, sort]); // eslint-disable-line react-hooks/exhaustive-deps
+    const href = params.toString() ? `/blog?${params}` : "/blog";
+    if (router.asPath !== href) {
+      router.replace(href, undefined, { shallow: true, scroll: false });
+    }
+  }, [q, cat, sort, router]);
 
   const filtered = React.useMemo(() => {
     let list = posts.filter((p) => {
@@ -51,18 +56,24 @@ export default function BlogIndex({ posts }: Props) {
         (p.excerpt ?? "").toLowerCase().includes(needle);
       return matchesCat && matchesQ;
     });
-    list = list.sort((a, b) => {
+
+    list.sort((a, b) => {
       const at = a.date ? Date.parse(a.date) : 0;
       const bt = b.date ? Date.parse(b.date) : 0;
       return sort === "newest" ? bt - at : at - bt;
     });
+
     return list;
   }, [posts, q, cat, sort]);
 
   return (
     <Layout pageTitle="Blog" hideCTA>
       <Head>
-        <meta name="description" content="Featured insights by Abraham of London — fatherhood, enterprise, society." />
+        <meta
+          name="description"
+          content="Featured insights by Abraham of London — fatherhood, enterprise, society."
+        />
+        <link rel="canonical" href="https://www.abrahamoflondon.org/blog" />
       </Head>
 
       <section className="bg-white">
@@ -83,21 +94,26 @@ export default function BlogIndex({ posts }: Props) {
 
           <div className="mb-8 grid gap-3 md:grid-cols-3">
             <input
+              aria-label="Search posts"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search insights…"
               className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
             />
             <select
+              aria-label="Filter by category"
               value={cat}
               onChange={(e) => setCat(e.target.value)}
               className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
             >
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
             <select
+              aria-label="Sort order"
               value={sort}
               onChange={(e) => setSort(e.target.value as "newest" | "oldest")}
               className="rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none"
@@ -120,9 +136,9 @@ export default function BlogIndex({ posts }: Props) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
-                // NEW framing props to fix crops
+                // Framing props to keep crops consistent with MDX front-matter
                 coverAspect={(p.coverAspect as any) ?? "book"}
-                coverFit={(p.coverFit as any) ?? (p.coverAspect === "book" ? "contain" : "cover")}
+                coverFit={(p.coverFit as any) ?? ((p.coverAspect as any) === "book" ? "contain" : "cover")}
                 coverPosition={(p.coverPosition as any) ?? "center"}
               />
             ))}
@@ -142,7 +158,8 @@ export default function BlogIndex({ posts }: Props) {
 export async function getStaticProps() {
   const posts = getAllPosts();
   // normalize undefined → null for JSON serialization
-  const safe = posts.map((p) => ({ ...p,
+  const safe = posts.map((p) => ({
+    ...p,
     excerpt: p.excerpt ?? null,
     date: p.date ?? null,
     coverImage: p.coverImage ?? null,
@@ -154,5 +171,6 @@ export async function getStaticProps() {
     coverFit: p.coverFit ?? null,
     coverPosition: p.coverPosition ?? null,
   }));
+
   return { props: { posts: safe }, revalidate: 60 };
 }
