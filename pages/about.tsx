@@ -12,7 +12,7 @@ export default function AboutPage() {
   const portraitAbs = absUrl(portrait);                 // absolute URL
 
   const bio =
-    "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help founders and leaders build durable brands and products with clear thinking, principled execution, and a long-term view.";
+    "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help fathers, young founders, and enterprise leaders build durable brands and products with clear thinking, principled execution, and a long view.";
 
   // Prefer an environment-provided URL for InnovateHub; fall back to the site route
   const innovateHubUrl =
@@ -27,7 +27,7 @@ export default function AboutPage() {
     },
     {
       title: "Launched Endureluxe",
-      description: "Premiun fitness equipments and curated community experiences—engineered to last, designed to build.",
+      description: "Premium fitness equipment and curated community—engineered to last, designed to build.",
       year: 2024,
       href: "/ventures?brand=endureluxe",
     },
@@ -35,7 +35,6 @@ export default function AboutPage() {
       title: "Founded Abraham of London",
       description: "A practice for principled strategy, writing, and stewardship.",
       year: 2020,
-      // no href (already on-site)
     },
     {
       title: "Launched Alomarada",
@@ -62,7 +61,7 @@ export default function AboutPage() {
 
   const pageTitle = `About | ${siteConfig.author}`;
   const pageDesc =
-    "About Abraham of London — strategy, fatherhood, craftsmanship, and discreet counsel for leaders who prioritise signal over noise.";
+    "About Abraham of London — quiet counsel and durable execution for fathers, young founders, and enterprise teams.";
 
   // JSON-LD
   const webPageSchema = {
@@ -136,7 +135,54 @@ export default function AboutPage() {
         priority
       />
 
-      {/* House standards — soft, discreet signal (no explicit naming) */}
+      {/* Letter of Practice — trimmed for fathers, young founders, enterprise */}
+      <section
+        aria-labelledby="letter-heading"
+        className="container mx-auto max-w-6xl px-4 py-10"
+      >
+        <h2
+          id="letter-heading"
+          className="mb-4 font-serif text-2xl sm:text-3xl font-semibold text-deepCharcoal"
+        >
+          A Brief Letter of Practice
+        </h2>
+
+        <div className="prose prose-lg max-w-none text-deepCharcoal/90">
+          <p>
+            I work quietly; deliver visibly. My concern is usefulness over noise—
+            the kind of work that stands without explanation. Counsel is discreet,
+            cadence disciplined, outcomes durable.
+          </p>
+
+          <p className="font-medium">For fathers:</p>
+          <ul>
+            <li>Build the house first—schedule, Scripture, and standards.</li>
+            <li>Choose presence over performance; private order before public output.</li>
+            <li>Lead with truth and kindness; own errors without ceremony.</li>
+          </ul>
+
+          <p className="font-medium">For young founders:</p>
+          <ul>
+            <li>Ship less, better. Protect constraints; they preserve quality.</li>
+            <li>Measure twice. Cut once. Record progress; do not perform it.</li>
+            <li>Cash discipline over clout; stewardship over spectacle.</li>
+          </ul>
+
+          <p className="font-medium">For enterprise leaders:</p>
+          <ul>
+            <li>Clarify mandate, remove friction, guard the standard.</li>
+            <li>Keep counsel private; let public work speak.</li>
+            <li>Scale only what proves worthy; heritage over headlines.</li>
+          </ul>
+
+          <p>
+            The promise is modest by design: underpromise and overdeliver. If our
+            standards align, we can begin.
+          </p>
+        </div>
+      </section>
+
+      {/* House standards — quiet signal */}
       <section className="container mx-auto max-w-6xl px-4">
         <aside
           className="mt-8 rounded-2xl border border-lightGrey bg-warmWhite p-5 text-sm text-deepCharcoal/80 shadow-card"
@@ -154,6 +200,7 @@ export default function AboutPage() {
         </aside>
       </section>
 
+      {/* CTA */}
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Link
           href="/contact"
