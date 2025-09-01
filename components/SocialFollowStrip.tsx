@@ -22,7 +22,7 @@ type Props = {
 
 /* ---------- Defaults ---------- */
 const DEFAULT_ITEMS: SocialItem[] = [
-  { href: "https://tiktok.com/@theabrahamoflondon", label: "TikTok", kind: "tiktok" },
+  { href: "https://www.tiktok.com/@theabrahamoflondon", label: "TikTok", kind: "tiktok" },
   { href: "https://x.com/AbrahamAda48634", label: "X", kind: "x" },
   { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", kind: "instagram" },
   { href: "https://www.facebook.com/share/16tvsnTgRG/", label: "Facebook", kind: "facebook" },
