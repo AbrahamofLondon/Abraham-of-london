@@ -11,7 +11,7 @@ type Variant = "light" | "dark";
 export type SocialItem = {
   href: string;
   label: string;
-  kind?: "x" | "instagram" | "facebook" | "linkedin" | "youtube" | "mail" | "phone" | "whatsapp";
+  kind?: "x" | "instagram" | "facebook" | "linkedin" | "youtube" | "tiktok" | "mail" | "phone" | "whatsapp";
 };
 
 type Props = {
@@ -22,6 +22,7 @@ type Props = {
 
 /* ---------- Defaults ---------- */
 const DEFAULT_ITEMS: SocialItem[] = [
+  { href: "https://tiktok.com/@theabrahamoflondon", label: "TikTok", kind: "tiktok" },
   { href: "https://x.com/AbrahamAda48634", label: "X", kind: "x" },
   { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", kind: "instagram" },
   { href: "https://www.facebook.com/share/16tvsnTgRG/", label: "Facebook", kind: "facebook" },
@@ -34,6 +35,7 @@ const DEFAULT_ITEMS: SocialItem[] = [
 
 /* ---------- Brand colours for inline SVG ---------- */
 const BRAND_HEX: Record<NonNullable<SocialItem["kind"]>, string> = {
+  tiktok: "#010101",
   x: "#000000",
   instagram: "#E4405F",
   facebook: "#1877F2",
@@ -68,6 +70,17 @@ export function XIcon(props: IconProps) {
   );
 }
 XIcon.displayName = "XIcon";
+
+export function TikTokIcon(props: IconProps) {
+  const color = props.color ?? "#010101";
+  return (
+    <svg {...withA11yProps(props)} viewBox="0 0 24 24" fill={color}>
+      {/* stylised TikTok note mark */}
+      <path d="M13 3v3.2a5.8 5.8 0 0 0 5.8 5.8H21v3h-.5A8.5 8.5 0 1 1 12.5 6.5V3h.5zM9.2 14.8a3.3 3.3 0 1 0 3.3 3.3v-6.1c.9.8 2.1 1.3 3.3 1.3v-2a5.4 5.4 0 0 1-3.3-1.1v7.9a3.3 3.3 0 0 1-3.3 3.3 3.3 3.3 0 0 1 0-6.6z" />
+    </svg>
+  );
+}
+TikTokIcon.displayName = "TikTokIcon";
 
 export function InstagramIcon(props: IconProps) {
   const color = props.color ?? "#E4405F";
@@ -157,6 +170,7 @@ const ICONS: Record<
   NonNullable<SocialItem["kind"]>,
   (p: IconProps) => React.ReactElement
 > = {
+  tiktok: TikTokIcon,
   x: XIcon,
   instagram: InstagramIcon,
   facebook: FacebookIcon,
