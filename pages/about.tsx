@@ -176,7 +176,7 @@ export default function AboutPage() {
           </ul>
 
           <p>
-            The promise is modest by design: underpromise and overdeliver. If our
+            If our
             standards align, we can begin.
           </p>
         </div>
