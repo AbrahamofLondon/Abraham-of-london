@@ -144,7 +144,7 @@ export default function AboutPage() {
           id="letter-heading"
           className="mb-4 font-serif text-2xl sm:text-3xl font-semibold text-deepCharcoal"
         >
-          A Brief Letter of Practice
+          Our Letter of Practice
         </h2>
 
         <div className="prose prose-lg max-w-none text-deepCharcoal/90">
