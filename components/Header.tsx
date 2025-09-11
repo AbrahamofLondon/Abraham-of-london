@@ -5,10 +5,7 @@ import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { siteConfig } from "@/lib/siteConfig";
 
-type HeaderProps = {
-  /** Keep visual in sync with pages that run a darker shell */
-  variant?: "light" | "dark";
-};
+type HeaderProps = { variant?: "light" | "dark" };
 
 const NAV = [
   { href: "/books", label: "Books" },
@@ -22,16 +19,32 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
 
+  // Robust active: exact match OR prefix match for sections (e.g., /blog/[slug])
+  const isActive = (href: string) => {
+    const p = router.asPath || router.pathname || "";
+    if (href === "/") return p === "/";
+    return p === href || p.startsWith(href + "/");
+  };
+
+  // Lock scroll without jumping; restore on close
   React.useEffect(() => {
-    // lock scroll when mobile menu is open
-    document.documentElement.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const y = window.scrollY;
+    const { style } = document.documentElement;
+    style.position = "fixed";
+    style.top = `-${y}px`;
+    style.left = "0";
+    style.right = "0";
+    style.width = "100%";
     return () => {
-      document.documentElement.style.overflow = "";
+      style.position = "";
+      style.top = "";
+      style.left = "";
+      style.right = "";
+      style.width = "";
+      window.scrollTo(0, y);
     };
   }, [open]);
-
-  const isActive = (href: string) =>
-    router.pathname === href || router.asPath === href;
 
   const shell =
     variant === "dark"
@@ -46,7 +59,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
   const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
-  const PHONE = (siteConfig as any)?.phone || ""; // render Call only if provided
+  const PHONE = (siteConfig as any)?.phone || "";
 
   return (
     <motion.header
@@ -56,6 +69,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       role="navigation"
       aria-label="Primary"
+      // Expose header height via CSS var so main can offset properly
+      style={{ ["--header-h" as any]: "5rem" }} // 80px default; overridden via media query below
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
         {/* Brand */}
@@ -81,10 +96,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 >
                   {item.label}
                 </Link>
-                {/* understated active underline */}
                 <span
                   aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-1 left-0 h-[2px] transition-all ${
+                  className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all ${
                     isActive(item.href) ? `w-full ${underlineActive}` : "w-0"
                   }`}
                 />
@@ -92,7 +106,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
             ))}
           </ul>
 
-          {/* Actions: Email / Call / CTA / Theme */}
+          {/* Actions */}
           <div className="flex items-center gap-3">
             <a
               href={`mailto:${EMAIL}`}
@@ -169,8 +183,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
                         ? "bg-white/10 text-cream"
                         : "bg-black/5 text-deepCharcoal"
                       : variant === "dark"
-                        ? "text-cream/80 hover:bg-white/10 hover:text-cream"
-                        : "text-deepCharcoal/80 hover:bg-black/5 hover:text-deepCharcoal"
+                      ? "text-cream/80 hover:bg-white/10 hover:text-cream"
+                      : "text-deepCharcoal/80 hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
@@ -185,7 +199,6 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 className={`text-base underline-offset-4 hover:underline ${
                   variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
                 }`}
-                aria-label="Email Abraham"
               >
                 Email
               </a>
@@ -196,7 +209,6 @@ export default function Header({ variant = "light" }: HeaderProps) {
                   className={`text-base underline-offset-4 hover:underline ${
                     variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
                   }`}
-                  aria-label="Call Abraham"
                 >
                   Call
                 </a>
@@ -214,6 +226,14 @@ export default function Header({ variant = "light" }: HeaderProps) {
           </ul>
         </nav>
       </div>
+
+      {/* Mobile header height var for layout offset */}
+      <style jsx>{`
+        :global(main) { padding-top: var(--header-h, 5rem); }
+        @media (max-width: 767px) {
+          :global(header[role="navigation"]) { --header-h: 4rem; } /* 64px on mobile */
+        }
+      `}</style>
     </motion.header>
   );
 }

@@ -1,183 +1,99 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* --- THEME VARIABLES --- */
-:root {
-  --color-primary: #0b2e1f;          /* forest */
-  --color-primary-hover: #047857;    /* emerald-700 */
-  --color-on-primary: #f5f5f0;       /* cream */
-  --color-on-primary-hover: #ffffff;
-
-  --color-secondary: #f5f5f0;        /* cream (bg) */
-  --color-on-secondary: #333333;     /* deepCharcoal (text) */
-
-  --color-accent: #d4af37;           /* softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;        /* for contrast */
-
-  --color-lightGrey: #e5e5e5;
-  --color-warmWhite: #fafaf5;
-  --color-midGreen: #4b8b6b;
-
-  /* Sticky CTA: height published by component */
-  --sticky-cta-h: 0px;
-}
-
-.dark {
-  --color-primary: #047857;          /* emerald-700 */
-  --color-primary-hover: #059669;
-  --color-on-primary: #ffffff;
-  --color-on-primary-hover: #f5f5f0;
-
-  --color-secondary: #333333;        /* deepCharcoal (bg) */
-  --color-on-secondary: #f5f5f0;     /* cream (text) */
-
-  --color-accent: #d4af37;
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
-
-  --color-lightGrey: #4b4b4b;
-  --color-warmWhite: #333333;
-  --color-midGreen: #6bb694;
-}
-
-/* --- BASE --- */
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--color-on-secondary);
-  background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Reserve space for the Sticky CTA so it never covers content */
-main {
-  padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px)));
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
-  color: var(--color-primary);
-}
-
-.font-cursive {
-  font-family: var(--font-cursive), "Segoe Script", "Brush Script MT", cursive;
-}
-
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-a:hover {
-  color: var(--color-accent);
-}
-
-/* Cards / Buttons */
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
-}
-
-/* Premium effects */
-.shimmer-text {
-  background: linear-gradient(
-    90deg,
-    var(--color-accent) 0%,
-    #fff8dc 25%,
-    var(--color-accent) 50%,
-    #fff8dc 75%,
-    var(--color-accent) 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-  display: inline-block;
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.fade-up {
-  opacity: 0;
-  transform: translateY(12px);
-  animation: fadeUp 0.8s ease forwards;
-}
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Luxury underline link */
-a.luxury-link {
-  position: relative;
-  color: var(--color-primary);
-}
-a.luxury-link::after {
-  content: "";
-  position: absolute;
-  left: 0; bottom: -2px;
-  width: 0; height: 2px;
-  background-color: var(--color-accent);
-  transition: width 0.3s ease;
-}
-a.luxury-link:hover::after { width: 100%; }
-
-/* SVG safety */
-svg:not([width]):not([height]) { width: 1em; height: 1em; }
-.icon-sm { width: 1.25rem; height: 1.25rem; }
-.icon-md { width: 1.5rem; height: 1.5rem; }
-.icon-lg { width: 2rem; height: 2rem; }
-
-/* Responsive Images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block; /* Remove bottom gap from inline elements */
-}
-
-/* Responsive type */
-@media (max-width: 768px) {
-  h1 { font-size: 2.5rem; letter-spacing: 0.06em; }
-  h2 { font-size: 2rem; letter-spacing: 0.05em; }
-}
-
-/* ---- Tailwind component shortcuts used by contact page ---- */
-@layer components {
-  .aol-input {
-    @apply mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px]
-           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-           bg-white text-deepCharcoal;
-  }
-  .aol-textarea {
-    @apply mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px]
-           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-           bg-white text-deepCharcoal;
-  }
-  .aol-btn {
-    @apply inline-block px-6 py-3 bg-forest text-cream rounded-full
-           hover:bg-forest/90 disabled:opacity-50;
-  }
-  .pattern-bg {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-    background-size: 18px 18px;
-  }
-}
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: "class",
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./content/**/*.{md,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    container: {
+      center: true,
+      padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
+      screens: { "2xl": "1400px" },
+    },
+    extend: {
+      colors: {
+        primary: "var(--color-primary)",
+        "primary-hover": "var(--color-primary-hover)",
+        "on-primary": "var(--color-on-primary)",
+        "on-primary-hover": "var(--color-on-primary-hover)",
+        secondary: "var(--color-secondary)",
+        "on-secondary": "var(--color-on-secondary)",
+        accent: "var(--color-accent)",
+        "accent-hover": "var(--color-accent-hover)",
+        "on-accent": "var(--color-on-accent)",
+        forest: "#0b2e1f",
+        cream: "#f5f5f0",
+        deepCharcoal: "#333333",
+        lightGrey: "#e5e5e5",
+        warmWhite: "#fafaf5",
+        midGreen: "#4b8b6b",
+        softGold: "#d4af37",
+        gold: {
+          DEFAULT: "#d4af37",
+          50: "#f9f3da",
+          100: "#f3e7b6",
+          200: "#ead57a",
+          300: "#e1c55b",
+          400: "#d8b43b",
+          500: "#d4af37",
+          600: "#b89321",
+          700: "#8f721a",
+          800: "#735b14",
+          900: "#58450f",
+        },
+        platinum: "#e5e4e2",
+        emerald: { 700: "#047857" },
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        cursive: ["var(--font-cursive)", "cursive"],
+      },
+      letterSpacing: { brand: "0.05em", widebrand: "0.1em" },
+      boxShadow: {
+        card: "0 10px 30px rgba(27, 67, 50, 0.10)",
+        cardHover: "0 16px 42px rgba(27, 67, 50, 0.15)",
+        header: "0 2px 8px rgba(0,0,0,0.05)",
+      },
+      keyframes: {
+        fadeIn: { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
+        fadeUp: { "0%": { opacity: 0, transform: "translateY(12px)" }, "100%": { opacity: 1, transform: "translateY(0)" } },
+        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+      },
+      animation: {
+        fadeIn: "fadeIn .6s ease both",
+        fadeUp: "fadeUp .6s ease both",
+        shimmer: "shimmer 3s linear infinite",
+      },
+      typography: ({ theme }) => ({
+        DEFAULT: {
+          css: {
+            "--tw-prose-body": theme("colors.deepCharcoal"),
+            "--tw-prose-headings": theme("colors.forest"),
+            "--tw-prose-links": theme("colors.forest"),
+            "--tw-prose-bullets": theme("colors.midGreen"),
+            a: { textDecoration: "none", "&:hover": { color: theme("colors.softGold") } },
+            hr: { borderColor: theme("colors.lightGrey") },
+          },
+        },
+        dark: {
+          css: {
+            "--tw-prose-body": theme("colors.cream"),
+            "--tw-prose-headings": theme("colors.cream"),
+            "--tw-prose-links": theme("colors.softGold"),
+            "--tw-prose-bullets": theme("colors.midGreen"),
+            hr: { borderColor: theme("colors.lightGrey") },
+          },
+        },
+      }),
+    },
+  },
+  plugins: [require("@tailwindcss/typography")],
+  /** Optional: guarantee utilities used only in MDX survive purge */
+  safelist: ["normal-case", "prose", "prose-lg", "prose-invert"],
+};

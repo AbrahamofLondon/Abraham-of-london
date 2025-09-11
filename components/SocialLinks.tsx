@@ -1,25 +1,31 @@
-// components/SocialFollowStrip.tsx
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig, type SocialLink as ConfigLink } from "@/lib/siteConfig";
 
-type SocialItem = {
-  href: string;
-  icon: string;  // local /public path preferred
-  label: string;
-  external?: boolean;
-};
+type SocialItem = Pick<ConfigLink, "href" | "label" | "icon" | "kind" | "external">;
 
 type Props = {
   /** Light (default) = warm card; Dark = subtle glass on dark sections */
   variant?: "light" | "dark";
   className?: string;
-  /** Optionally override/extend items (e.g., add Instagram) */
+  /** Optionally override/extend items (e.g., reorder or limit) */
   itemsOverride?: SocialItem[];
 };
 
-const isExternal = (href: string) => /^https?:\/\//i.test(href);
+const isExternalHttp = (href: string) => /^https?:\/\//i.test(href);
+
+const ICONS: Record<NonNullable<SocialItem["kind"]>, string> = {
+  x: "/assets/images/social/x.svg",
+  instagram: "/assets/images/social/instagram.svg",
+  facebook: "/assets/images/social/facebook.svg",
+  linkedin: "/assets/images/social/linkedin.svg",
+  youtube: "/assets/images/social/youtube.svg",
+  whatsapp: "/assets/images/social/whatsapp.svg",
+  mail: "/assets/images/social/email.svg",
+  phone: "/assets/images/social/phone.svg",
+  tiktok: "/assets/images/social/tiktok.svg", // ✅ new
+};
 
 export default function SocialFollowStrip({
   variant = "light",
@@ -51,10 +57,19 @@ export default function SocialFollowStrip({
           <nav aria-label="Social links">
             <ul className="flex items-center gap-4 sm:gap-6">
               {items.map((it) => {
-                const label = it.label || "Social";
                 const href = it.href;
-                const icon = it.icon || "/assets/images/social/link.svg";
-                const external = it.external ?? isExternal(href);
+                const label = it.label || "Social";
+                const icon = it.icon || (it.kind ? ICONS[it.kind] : "/assets/images/social/link.svg");
+                const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
+                const external = it.external ?? (isExternalHttp(href) && !isUtility);
+
+                // Stronger a11y label: “Follow Abraham of London on TikTok”, etc.
+                const aria =
+                  it.kind === "mail"
+                    ? `Email ${siteConfig.title}`
+                    : it.kind === "phone"
+                    ? `Call ${siteConfig.title}`
+                    : `Follow ${siteConfig.title} on ${label}`;
 
                 const Chip = (
                   <span
@@ -62,7 +77,8 @@ export default function SocialFollowStrip({
                   >
                     <Image
                       src={icon}
-                      alt={`${label} icon`}
+                      alt=""                      // decorative
+                      aria-hidden="true"
                       width={22}
                       height={22}
                       className="inline-block"
@@ -73,29 +89,31 @@ export default function SocialFollowStrip({
                   </span>
                 );
 
-                const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
+                const key = `${it.kind ?? label}-${href}`;
 
                 return (
-                  <li key={`${label}-${href}`}>
-                    {external || isUtility ? (
+                  <li key={key}>
+                    {external ? (
                       <a
                         href={href}
-                        aria-label={label}
+                        aria-label={aria}
+                        title={label}
                         className="group inline-flex items-center"
-                        target={external ? "_blank" : undefined}
-                        rel={external ? "noopener noreferrer" : undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {Chip}
                       </a>
                     ) : (
-                      <Link
-                        href={href}
-                        aria-label={label}
-                        prefetch={false}
-                        className="group inline-flex items-center"
-                      >
-                        {Chip}
-                      </Link>
+                      isUtility ? (
+                        <a href={href} aria-label={aria} title={label} className="group inline-flex items-center">
+                          {Chip}
+                        </a>
+                      ) : (
+                        <Link href={href} aria-label={aria} className="group inline-flex items-center" prefetch={false}>
+                          {Chip}
+                        </Link>
+                      )
                     )}
                   </li>
                 );
