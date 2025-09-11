@@ -8,6 +8,7 @@ import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
+import SEOHead from "@/components/SEOHead"; // ✅ add
 
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
@@ -19,8 +20,10 @@ import remarkGfm from "remark-gfm";
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
+/** include tags so we can emit article:tag */
 type PageMeta = Omit<PostMeta, "tags"> & {
   slug: string;
+  tags?: string[] | null;               // ✅ new
   coverAspect?: "book" | "wide" | "square" | null;
   coverFit?: "cover" | "contain" | null;
   coverPosition?: "left" | "center" | "right" | null;
@@ -48,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     author: (raw.author as any) ?? "Abraham of London",
     readTime: (raw.readTime as string) ?? null,
     category: (raw.category as string) ?? null,
-    // framing hints (optional in front-matter)
+    tags: (raw.tags as string[] | undefined) ?? null,     // ✅ capture tags
     coverAspect: (raw as any).coverAspect ?? null,
     coverFit: (raw as any).coverFit ?? null,
     coverPosition: (raw as any).coverPosition ?? null,
@@ -78,6 +81,7 @@ export default function BlogPost({ post }: Props) {
     author,
     readTime,
     category,
+    tags,
     coverAspect,
     coverFit,
     coverPosition,
@@ -86,50 +90,21 @@ export default function BlogPost({ post }: Props) {
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
   const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
   const canonical = absUrl(`/blog/${slug}`);
-
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    image: [coverForMeta],
-    datePublished: date || null,
-    dateModified: date || null,
-    author: {
-      "@type": "Person",
-      name: (typeof author === "string" ? author : (author as any)?.name) || "Abraham of London",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Abraham of London",
-      logo: { "@type": "ImageObject", url: absUrl("/assets/images/logo/abraham-of-london-logo.svg") },
-    },
-    description: excerpt || null,
-    mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
-  };
-
-  const authorName =
-    typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
+  const authorName = typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
   return (
     <Layout pageTitle={title}>
-      <Head>
-        <title>{title} | Abraham of London</title>
-        {excerpt && <meta name="description" content={excerpt} />}
-        <link rel="canonical" href={canonical} />
-
-        <meta property="og:title" content={title} />
-        {excerpt && <meta property="og:description" content={excerpt} />}
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={coverForMeta} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        {excerpt && <meta name="twitter:description" content={excerpt} />}
-        <meta name="twitter:image" content={coverForMeta} />
-
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-      </Head>
+      {/* ✅ Centralized SEO + JSON-LD */}
+      <SEOHead
+        title={title}
+        description={excerpt ?? ""}
+        slug={`/blog/${slug}`}
+        coverImage={coverForMeta}
+        publishedTime={date ?? undefined}
+        modifiedTime={date ?? undefined}
+        authorName={authorName}
+        tags={tags ?? []}
+      />
 
       <MDXProviderWrapper>
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
@@ -142,7 +117,10 @@ export default function BlogPost({ post }: Props) {
             coverPosition={(coverPosition as any) ?? undefined}
           />
 
-          <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">{title}</h1>
+          {/* ✅ belt & braces against auto-capitalization */}
+          <h1 className="post-title normal-case mb-4 font-serif text-4xl text-forest md:text-5xl">
+            {title}
+          </h1>
 
           <div className="mb-6 text-sm text-deepCharcoal/70">
             <span>By {authorName}</span>

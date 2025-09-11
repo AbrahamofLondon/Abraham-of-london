@@ -11,9 +11,8 @@ export type SocialLink = {
     | "youtube"
     | "whatsapp"
     | "mail"
-    | "phone";
-  external?: boolean;
-};
+    | "phone"
+    | "tiktok"; // ✅ add this
 
 export type SiteConfig = {
   title: string;
