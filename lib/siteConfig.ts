@@ -4,15 +4,15 @@ export type SocialLink = {
   label: string;
   icon?: string;
   kind?:
+    | "tiktok"
+    | "youtube"
     | "x"
     | "instagram"
-    | "facebook"
     | "linkedin"
-    | "youtube"
+    | "facebook"
     | "whatsapp"
     | "mail"
-    | "phone"
-    | "tiktok";
+    | "phone";
   external?: boolean;
 };
 
@@ -30,10 +30,6 @@ export type SiteConfig = {
   authorImage: string;  // path under /public
 };
 
-/**
- * Always prefer NEXT_PUBLIC_SITE_URL; fall back to your real domain.
- * (Avoid preview URLs for canonicals/JSON-LD.)
- */
 const SITE_ORIGIN =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   "https://www.abrahamoflondon.org";
@@ -45,18 +41,21 @@ export const siteConfig: SiteConfig = {
     "Official site of Abraham of London — author, strategist, and fatherhood advocate.",
   siteUrl: SITE_ORIGIN,
 
+  // Ordered by priority; Email / Phone last
   socialLinks: [
     {
-      href: "mailto:info@abrahamoflondon.org",
-      label: "Email",
-      kind: "mail",
-      icon: "/assets/images/social/email.svg",
+      href: "https://www.tiktok.com/@abrahamoflondon",
+      label: "TikTok",
+      kind: "tiktok",
+      icon: "/assets/images/social/tiktok.svg",
+      external: true,
     },
     {
-      href: "tel:+442086225909",
-      label: "Phone",
-      kind: "phone",
-      icon: "/assets/images/social/phone.svg",
+      href: "https://www.youtube.com/@abrahamoflondon",
+      label: "YouTube",
+      kind: "youtube",
+      icon: "/assets/images/social/youtube.svg",
+      external: true,
     },
     {
       href: "https://x.com/AbrahamAda48634",
@@ -73,13 +72,6 @@ export const siteConfig: SiteConfig = {
       external: true,
     },
     {
-      href: "https://www.facebook.com/share/16tvsnTgRG/",
-      label: "Facebook",
-      kind: "facebook",
-      icon: "/assets/images/social/facebook.svg",
-      external: true,
-    },
-    {
       href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
       label: "LinkedIn",
       kind: "linkedin",
@@ -87,10 +79,10 @@ export const siteConfig: SiteConfig = {
       external: true,
     },
     {
-      href: "https://www.youtube.com/@abrahamoflondon",
-      label: "YouTube",
-      kind: "youtube",
-      icon: "/assets/images/social/youtube.svg",
+      href: "https://www.facebook.com/share/16tvsnTgRG/",
+      label: "Facebook",
+      kind: "facebook",
+      icon: "/assets/images/social/facebook.svg",
       external: true,
     },
     {
@@ -100,24 +92,27 @@ export const siteConfig: SiteConfig = {
       icon: "/assets/images/social/whatsapp.svg",
       external: true,
     },
+    // Utility CTAs last
     {
-      href: "https://www.tiktok.com/@abrahamoflondon",
-      label: "TikTok",
-      kind: "tiktok",
-      icon: "/assets/images/social/tiktok.svg",
-      external: true,
+      href: "mailto:info@abrahamoflondon.org",
+      label: "Email",
+      kind: "mail",
+      icon: "/assets/images/social/email.svg",
+    },
+    {
+      href: "tel:+442086225909",
+      label: "Phone",
+      kind: "phone",
+      icon: "/assets/images/social/phone.svg",
     },
   ],
 
   gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || null,
   email: "info@abrahamoflondon.org",
 
-  // These are paths in /public; use absUrl() when you need an absolute URL.
   ogImage: "/assets/images/social/og-image.jpg",
   twitterImage: "/assets/images/social/twitter-image.webp",
   authorImage: "/assets/images/profile-portrait.webp",
 };
 
-/** Safe absolute URL join */
-export const absUrl = (path: string) =>
-  new URL(path, siteConfig.siteUrl).toString();
+export const absUrl = (path: string) => new URL(path, siteConfig.siteUrl).toString();

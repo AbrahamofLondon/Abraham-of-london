@@ -6,25 +6,36 @@ import { siteConfig, type SocialLink as ConfigLink } from "@/lib/siteConfig";
 type SocialItem = Pick<ConfigLink, "href" | "label" | "icon" | "kind" | "external">;
 
 type Props = {
-  /** Light (default) = warm card; Dark = subtle glass on dark sections */
   variant?: "light" | "dark";
   className?: string;
-  /** Optionally override/extend items (e.g., reorder or limit) */
   itemsOverride?: SocialItem[];
 };
 
-const isExternalHttp = (href: string) => /^https?:\/\//i.test(href);
+const isHttp = (href: string) => /^https?:\/\//i.test(href);
 
 const ICONS: Record<NonNullable<SocialItem["kind"]>, string> = {
+  tiktok: "/assets/images/social/tiktok.svg",
+  youtube: "/assets/images/social/youtube.svg",
   x: "/assets/images/social/x.svg",
   instagram: "/assets/images/social/instagram.svg",
-  facebook: "/assets/images/social/facebook.svg",
   linkedin: "/assets/images/social/linkedin.svg",
-  youtube: "/assets/images/social/youtube.svg",
+  facebook: "/assets/images/social/facebook.svg",
   whatsapp: "/assets/images/social/whatsapp.svg",
   mail: "/assets/images/social/email.svg",
   phone: "/assets/images/social/phone.svg",
-  tiktok: "/assets/images/social/tiktok.svg", // ✅ new
+};
+
+// Higher number = earlier in the row
+const KIND_ORDER: Record<string, number> = {
+  tiktok: 90,
+  youtube: 80,
+  x: 70,
+  instagram: 60,
+  linkedin: 50,
+  facebook: 40,
+  whatsapp: 30,
+  mail: 10,
+  phone: 5,
 };
 
 export default function SocialFollowStrip({
@@ -32,7 +43,15 @@ export default function SocialFollowStrip({
   className = "",
   itemsOverride,
 }: Props) {
-  const items: SocialItem[] = (itemsOverride ?? siteConfig.socialLinks) as SocialItem[];
+  const raw: SocialItem[] = (itemsOverride ?? siteConfig.socialLinks) as SocialItem[];
+
+  const items = React.useMemo(
+    () =>
+      raw
+        .filter((it) => !!it?.href) // guard falsy
+        .sort((a, b) => (KIND_ORDER[b.kind ?? ""] ?? 0) - (KIND_ORDER[a.kind ?? ""] ?? 0)),
+    [raw]
+  );
 
   const containerBg =
     variant === "dark"
@@ -57,13 +76,12 @@ export default function SocialFollowStrip({
           <nav aria-label="Social links">
             <ul className="flex items-center gap-4 sm:gap-6">
               {items.map((it) => {
-                const href = it.href;
+                const href = it.href!;
                 const label = it.label || "Social";
                 const icon = it.icon || (it.kind ? ICONS[it.kind] : "/assets/images/social/link.svg");
                 const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
-                const external = it.external ?? (isExternalHttp(href) && !isUtility);
+                const external = it.external ?? (isHttp(href) && !isUtility);
 
-                // Stronger a11y label: “Follow Abraham of London on TikTok”, etc.
                 const aria =
                   it.kind === "mail"
                     ? `Email ${siteConfig.title}`
@@ -72,20 +90,17 @@ export default function SocialFollowStrip({
                     : `Follow ${siteConfig.title} on ${label}`;
 
                 const Chip = (
-                  <span
-                    className={`inline-flex items-center gap-2 sm:gap-3 rounded-full px-3 py-2 ring-1 transition-all duration-200 ${chipBase}`}
-                  >
+                  <span className={`inline-flex items-center gap-2 sm:gap-3 rounded-full px-3 py-2 ring-1 transition-all duration-200 ${chipBase}`}>
                     <Image
                       src={icon}
-                      alt=""                      // decorative
-                      aria-hidden="true"
-                      width={22}
-                      height={22}
+                      alt="" aria-hidden="true"
+                      width={22} height={22}
                       className="inline-block"
                       loading="lazy"
                     />
+                    {/* Visible label ≥ sm; screen-reader only on xs */}
                     <span className="hidden sm:inline text-sm font-serif">{label}</span>
-                    <span className="sr-only sm:not-sr-only sm:hidden">{label}</span>
+                    <span className="sr-only sm:hidden">{label}</span>
                   </span>
                 );
 
@@ -94,26 +109,17 @@ export default function SocialFollowStrip({
                 return (
                   <li key={key}>
                     {external ? (
-                      <a
-                        href={href}
-                        aria-label={aria}
-                        title={label}
-                        className="group inline-flex items-center"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={href} aria-label={aria} title={label} className="group inline-flex items-center" target="_blank" rel="noopener noreferrer">
+                        {Chip}
+                      </a>
+                    ) : isUtility ? (
+                      <a href={href} aria-label={aria} title={label} className="group inline-flex items-center">
                         {Chip}
                       </a>
                     ) : (
-                      isUtility ? (
-                        <a href={href} aria-label={aria} title={label} className="group inline-flex items-center">
-                          {Chip}
-                        </a>
-                      ) : (
-                        <Link href={href} aria-label={aria} className="group inline-flex items-center" prefetch={false}>
-                          {Chip}
-                        </Link>
-                      )
+                      <Link href={href} aria-label={aria} title={label} className="group inline-flex items-center" prefetch={false}>
+                        {Chip}
+                      </Link>
                     )}
                   </li>
                 );
