@@ -100,6 +100,13 @@ export const siteConfig: SiteConfig = {
       external: true,
     },
   ],
+{
+  href: "https://www.tiktok.com/@abrahamoflondon",
+  label: "TikTok",
+  kind: "tiktok",
+  icon: "/assets/images/social/tiktok.svg",
+  external: true,
+}
 
   gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || null,
   email: "info@abrahamoflondon.org",
