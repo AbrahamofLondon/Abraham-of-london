@@ -12,7 +12,9 @@ export type SocialLink = {
     | "whatsapp"
     | "mail"
     | "phone"
-    | "tiktok"; // ✅ add this
+    | "tiktok";
+  external?: boolean;
+};
 
 export type SiteConfig = {
   title: string;
@@ -78,8 +80,7 @@ export const siteConfig: SiteConfig = {
       external: true,
     },
     {
-      href:
-        "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+      href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
       label: "LinkedIn",
       kind: "linkedin",
       icon: "/assets/images/social/linkedin.svg",
@@ -99,14 +100,14 @@ export const siteConfig: SiteConfig = {
       icon: "/assets/images/social/whatsapp.svg",
       external: true,
     },
+    {
+      href: "https://www.tiktok.com/@abrahamoflondon",
+      label: "TikTok",
+      kind: "tiktok",
+      icon: "/assets/images/social/tiktok.svg",
+      external: true,
+    },
   ],
-{
-  href: "https://www.tiktok.com/@abrahamoflondon",
-  label: "TikTok",
-  kind: "tiktok",
-  icon: "/assets/images/social/tiktok.svg",
-  external: true,
-}
 
   gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || null,
   email: "info@abrahamoflondon.org",
@@ -118,5 +119,5 @@ export const siteConfig: SiteConfig = {
 };
 
 /** Safe absolute URL join */
-export const absUrl = (path: string) => new URL(path, siteConfig.siteUrl).toString();
-
+export const absUrl = (path: string) =>
+  new URL(path, siteConfig.siteUrl).toString();
