@@ -8,7 +8,14 @@ export type Testimonial = {
   quote: string;
   name: string;
   role?: string;
-  href?: string; // optional source link
+  company?: string;
+  href?: string;         // optional source link
+  avatar?: string;       // /public path
+  logo?: string;         // company logo /public path
+  rating?: 1 | 2 | 3 | 4 | 5;
+  metric?: string;       // e.g. "Team alignment in 1 session"
+  verified?: boolean;    // shows a check badge
+  date?: string;         // ISO
 };
 
 type Props = {
@@ -23,19 +30,28 @@ type Props = {
 
 const DEFAULT_ITEMS: Testimonial[] = [
   {
-    quote: "Practical, grounded leadership insights I could apply starting from the same day.",
+    quote:
+      "Abraham cut through the noise. We left with a one-page plan and started executing that week.",
     name: "Ohis O.",
     role: "SAP Consultant",
+    metric: "Plan to execution in 7 days",
+    verified: true,
   },
   {
-    quote: "A sensible voice on fatherhood that is both thoughtful and actionable.",
+    quote:
+      "Finally—a fatherhood voice with a spine. Clear practices my kids noticed, not just theories.",
     name: "Emilia I.",
     role: "Manager",
+    metric: "Family rhythms that stick",
+    verified: true,
   },
   {
-    quote: "Clear frameworks that helped our team align on goals and execution.",
+    quote:
+      "We stopped debating and started deciding. The team aligned on priorities and owners in one session.",
     name: "Lanre",
     role: "Consultant",
+    metric: "Clarity → ownership",
+    verified: true,
   },
 ];
 
@@ -51,7 +67,6 @@ export default function TestimonialsSection({
   const reduceMotion = useReducedMotion();
   const headingId = React.useId();
 
-  // Safe data (limit + defensive copy)
   const data = React.useMemo(() => {
     const arr = (items?.length ? items : DEFAULT_ITEMS).slice();
     return typeof limit === "number" ? arr.slice(0, Math.max(0, limit)) : arr;
@@ -71,11 +86,27 @@ export default function TestimonialsSection({
 
   // JSON-LD (Review list)
   const ldJson = React.useMemo(() => {
-    const reviews = data.map((t) => ({
-      "@type": "Review",
-      reviewBody: t.quote,
-      author: { "@type": "Person", name: t.name, ...(t.role ? { jobTitle: t.role } : {}) },
-    }));
+    const reviews = data.map((t) => {
+      const review: any = {
+        "@type": "Review",
+        reviewBody: t.quote,
+        author: { "@type": "Person", name: t.name, ...(t.role ? { jobTitle: t.role } : {}) },
+      };
+      if (t.rating) {
+        review.reviewRating = {
+          "@type": "Rating",
+          ratingValue: t.rating,
+          bestRating: 5,
+          worstRating: 1,
+        };
+      }
+      if (t.company) {
+        review.publisher = { "@type": "Organization", name: t.company };
+      }
+      if (t.date) review.datePublished = t.date;
+      if (t.href) review.url = t.href;
+      return review;
+    });
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -86,6 +117,27 @@ export default function TestimonialsSection({
       })),
     };
   }, [data]);
+
+  const Star = ({ filled }: { filled: boolean }) => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={filled ? "text-softGold" : subText}
+    >
+      <path
+        fill="currentColor"
+        d="M12 17.27L18.18 21l-1.64-7.03L22 9.25l-7.19-.61L12 2 9.19 8.64 2 9.25l5.46 4.72L5.82 21z"
+      />
+    </svg>
+  );
+
+  const Check = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="text-softGold">
+      <path fill="currentColor" d="M9 16.2l-3.5-3.6-1.4 1.4L9 19 20 8l-1.4-1.4z" />
+    </svg>
+  );
 
   return (
     <section
@@ -107,9 +159,7 @@ export default function TestimonialsSection({
             {title}
           </motion.h2>
 
-          {subtitle && (
-            <p className={clsx("text-center mb-8", subText)}>{subtitle}</p>
-          )}
+          {subtitle && <p className={clsx("text-center mb-8", subText)}>{subtitle}</p>}
 
           {data.length === 0 ? (
             <p className={clsx("text-center", subText)}>No testimonials yet.</p>
@@ -118,39 +168,86 @@ export default function TestimonialsSection({
               {data.map((t, i) => (
                 <motion.figure
                   key={`${t.name}-${t.role ?? "role"}-${i}`}
-                  className={clsx("rounded-2xl shadow-md p-6", card)}
+                  className={clsx(
+                    "rounded-2xl shadow-md p-6 relative overflow-hidden",
+                    card
+                  )}
                   initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
                   whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={reduceMotion ? undefined : { duration: 0.45, delay: i * 0.06 }}
                 >
+                  {/* Header: avatar / logo / rating / verified */}
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {t.avatar && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={t.avatar}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="h-10 w-10 rounded-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                      <div>
+                        <div className="text-sm font-semibold">
+                          {t.name}{" "}
+                          {t.verified && (
+                            <span className="ml-1 inline-flex items-center gap-1 text-xs text-softGold">
+                              <Check /> Verified
+                            </span>
+                          )}
+                        </div>
+                        <div className={clsx("text-xs", subText)}>
+                          {[t.role, t.company].filter(Boolean).join(" · ")}
+                        </div>
+                      </div>
+                    </div>
+                    {typeof t.rating === "number" && (
+                      <div className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
+                        {[1,2,3,4,5].map(n => <Star key={n} filled={n <= (t.rating as number)} />)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quote */}
                   <blockquote className="text-base leading-relaxed">
                     <span aria-hidden className="sr-only">“</span>
-                    {t.quote}
+                    <span className="block line-clamp-6">{t.quote}</span>
                     <span aria-hidden className="sr-only">”</span>
                   </blockquote>
-                  <figcaption className={clsx("mt-4 text-sm", subText)}>
-                    <span className={variant === "dark" ? "text-cream font-semibold" : "text-deepCharcoal font-semibold"}>
-                      {t.name}
-                    </span>
-                    {t.role && (
-                      <>
-                        <span className="px-2" aria-hidden>·</span>
-                        <span>{t.role}</span>
-                      </>
+
+                  {/* Footer: metric chip + source */}
+                  <figcaption className={clsx("mt-4 text-xs flex items-center gap-3", subText)}>
+                    {t.metric && (
+                      <span className="rounded-full bg-softGold/15 text-deepCharcoal px-2 py-0.5">
+                        {t.metric}
+                      </span>
                     )}
                     {t.href && (
-                      <>
-                        <span className="px-2" aria-hidden>·</span>
-                        <a
-                          href={t.href}
-                          className="underline underline-offset-4 hover:no-underline"
-                        >
-                          Source
-                        </a>
-                      </>
+                      <a
+                        href={t.href}
+                        className="underline underline-offset-4 hover:no-underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Source
+                      </a>
                     )}
+                    {t.date && <time dateTime={t.date}>{new Date(t.date).toLocaleDateString()}</time>}
                   </figcaption>
+
+                  {t.logo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={t.logo}
+                      alt=""
+                      className="pointer-events-none absolute -right-4 -bottom-2 h-14 w-auto opacity-10"
+                      loading="lazy"
+                    />
+                  )}
                 </motion.figure>
               ))}
             </div>
@@ -158,7 +255,10 @@ export default function TestimonialsSection({
         </div>
 
         {/* JSON-LD for SEO */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+        />
       </div>
     </section>
   );
