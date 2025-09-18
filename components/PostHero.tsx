@@ -1,80 +1,143 @@
-import Image from "next/image";
+// components/PostHero.tsx
 import * as React from "react";
+import Image from "next/image";
 
-type Props = {
-  /** Optional: used for slug-based image fallbacks */
-  slug?: string;
+type PostHeroProps = {
+  slug: string;
   title: string;
+  excerpt?: string | null;
+  date?: string | null;
+  author?: string | { name?: string; image?: string } | null;
   coverImage?: string | null;
-  /** Optional framing controls (read from MDX front-matter) */
-  coverAspect?: "book" | "wide" | "square" | null;
-  coverFit?: "cover" | "contain" | null;
-  coverPosition?: "left" | "center" | "right" | null;
+
+  /** Framing controls from MDX front-matter */
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
+  coverPosition?: "center" | "left" | "right";
 };
 
-const ensureLocal = (p?: string | null) =>
-  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
+function normalizeLocal(src?: string | null) {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return undefined; // local only for Next/Image static
+  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+}
 
-/** Build a local-fallback chain based on slug + defaults */
-function buildCandidates(slug?: string, coverImage?: string | null) {
-  const list: Array<string> = [];
-
-  const normalized = ensureLocal(coverImage);
-  if (normalized) list.push(normalized);
-
-  if (slug) {
-    list.push(
+/** Same fallback strategy as the cards so slug-only posts still look good */
+function useCover(slug: string, coverImage?: string | null) {
+  const candidates = React.useMemo(() => {
+    const list = [
+      normalizeLocal(coverImage),
       `/assets/images/blog/${slug}.webp`,
       `/assets/images/blog/${slug}.jpg`,
       `/assets/images/blog/${slug}.jpeg`,
       `/assets/images/blog/${slug}.png`,
-    );
-  }
+      `/assets/images/blog/default-blog-cover.jpg`,
+    ].filter(Boolean) as string[];
+    return Array.from(new Set(list));
+  }, [slug, coverImage]);
 
-  list.push(`/assets/images/social/og-image.jpg`);
+  const [i, setI] = React.useState(0);
+  const src = candidates[i];
+  const onError = React.useCallback(() => {
+    setI((x) => (x + 1 < candidates.length ? x + 1 : x));
+  }, [candidates.length]);
 
-  // de-dup
-  return Array.from(new Set(list));
+  return { src, onError };
 }
 
 export default function PostHero({
   slug,
   title,
+  excerpt,
+  date,
+  author,
   coverImage,
-  coverAspect = "wide",     // default hero to 16:9
-  coverFit = "cover",       // hero should fill, avoid letterbox
+  coverAspect = "book",
+  coverFit = "contain",          // default to contain for portraits
   coverPosition = "center",
-}: Props) {
-  const candidates = React.useMemo(() => buildCandidates(slug, coverImage), [slug, coverImage]);
+}: PostHeroProps) {
+  const { src: coverSrc, onError } = useCover(slug, coverImage);
 
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
+  const authorName =
+    typeof author === "string" ? author : author?.name || "Abraham of London";
 
-  // frame ratio
+  const dt = date ? new Date(date) : null;
+  const dateStr =
+    dt && !Number.isNaN(+dt)
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(dt)
+      : null;
+
+  // Aspect frame
   const aspectClass =
-    coverAspect === "square" ? "aspect-[1/1]" : coverAspect === "book" ? "aspect-[3/4]" : "aspect-[16/9]";
+    coverAspect === "square"
+      ? "aspect-[1/1]"
+      : coverAspect === "wide"
+      ? "aspect-[16/9]"
+      : "aspect-[2/3]"; // book/portrait
 
-  // fit & position
-  const fitClass = coverFit === "cover" ? "object-cover" : "object-contain";
+  // Fit / position
+  const fitClass = coverFit === "contain" ? "object-contain" : "object-cover";
   const posClass =
-    coverPosition === "left" ? "object-left" : coverPosition === "right" ? "object-right" : "object-center";
+    coverPosition === "left"
+      ? "object-left"
+      : coverPosition === "right"
+      ? "object-right"
+      : "object-center";
 
-  // background for letterboxing when using contain
-  const frameBg = coverFit === "contain" ? "bg-[rgb(10,37,30)]/92" : "bg-transparent";
-
-  if (!src) return null;
+  // Add padding + neutral background when we use `contain`
+  const framePadding = coverFit === "contain" ? "p-2 sm:p-3 md:p-4" : "";
+  const frameBg = coverFit === "contain" ? "bg-warmWhite" : "bg-transparent";
+  const frameBorder =
+    coverFit === "contain" ? "border border-lightGrey/70" : "border border-transparent";
 
   return (
-    <div className={`relative mb-10 w-full overflow-hidden rounded-lg shadow-lg ${aspectClass} ${frameBg}`}>
-      <Image
-        src={src}
-        alt={title}
-        fill
-        sizes="(max-width: 768px) 100vw, 768px"
-        className={`${fitClass} ${posClass}`}
-        priority
-        onError={() => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i))}
-      />
-    </div>
+    <section className="bg-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12">
+        {/* Text block */}
+        <div>
+          <p className="mb-3 text-xs uppercase tracking-widest text-deepCharcoal/60">
+            Featured Insight
+          </p>
+          <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl">
+            {title}
+          </h1>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-deepCharcoal/70">
+            {authorName && <span>By {authorName}</span>}
+            {dateStr && (
+              <>
+                <span aria-hidden>•</span>
+                <time dateTime={dt?.toISOString()}>{dateStr}</time>
+              </>
+            )}
+          </div>
+
+          {excerpt && (
+            <p className="mt-5 max-w-prose text-deepCharcoal/80">{excerpt}</p>
+          )}
+        </div>
+
+        {/* Image block */}
+        {coverSrc && (
+          <div
+            className={`relative w-full overflow-hidden rounded-2xl ${aspectClass} ${frameBg} ${framePadding} ${frameBorder} shadow-card`}
+          >
+            <Image
+              src={coverSrc}
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className={`${fitClass} ${posClass}`}
+              onError={onError}
+              priority
+            />
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

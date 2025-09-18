@@ -1,6 +1,6 @@
-import Head from "next/head";
+// pages/blog/[slug].tsx
 import dynamic from "next/dynamic";
-import type { GetStaticProps, GetStaticPaths } from "next";
+import type { GetStaticPaths, GetStaticProps } from "next";
 import { format } from "date-fns";
 import * as React from "react";
 
@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
-import SEOHead from "@/components/SEOHead"; // ✅ add
+import SEOHead from "@/components/SEOHead";
 
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
@@ -20,10 +20,10 @@ import remarkGfm from "remark-gfm";
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-/** include tags so we can emit article:tag */
+/** Extend with optional tags + hero framing props we read from front-matter */
 type PageMeta = Omit<PostMeta, "tags"> & {
   slug: string;
-  tags?: string[] | null;               // ✅ new
+  tags?: string[] | null;
   coverAspect?: "book" | "wide" | "square" | null;
   coverFit?: "cover" | "contain" | null;
   coverPosition?: "left" | "center" | "right" | null;
@@ -51,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     author: (raw.author as any) ?? "Abraham of London",
     readTime: (raw.readTime as string) ?? null,
     category: (raw.category as string) ?? null,
-    tags: (raw.tags as string[] | undefined) ?? null,     // ✅ capture tags
+    tags: (raw.tags as string[] | undefined) ?? null,
     coverAspect: (raw as any).coverAspect ?? null,
     coverFit: (raw as any).coverFit ?? null,
     coverPosition: (raw as any).coverPosition ?? null,
@@ -88,13 +88,15 @@ export default function BlogPost({ post }: Props) {
   } = post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
-  const canonical = absUrl(`/blog/${slug}`);
-  const authorName = typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
+  const coverForMeta = coverImage
+    ? absUrl(coverImage)
+    : absUrl("/assets/images/social/og-image.jpg");
+  const authorName =
+    typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
   return (
     <Layout pageTitle={title}>
-      {/* ✅ Centralized SEO + JSON-LD */}
+      {/* Centralized SEO + JSON-LD */}
       <SEOHead
         title={title}
         description={excerpt ?? ""}
@@ -117,7 +119,6 @@ export default function BlogPost({ post }: Props) {
             coverPosition={(coverPosition as any) ?? undefined}
           />
 
-          {/* ✅ belt & braces against auto-capitalization */}
           <h1 className="post-title normal-case mb-4 font-serif text-4xl text-forest md:text-5xl">
             {title}
           </h1>
@@ -142,11 +143,17 @@ export default function BlogPost({ post }: Props) {
           </div>
 
           <div className="mt-12">
-            <a href="#comments" className="luxury-link text-sm">Join the discussion ↓</a>
+            <a href="#comments" className="luxury-link text-sm">
+              Join the discussion ↓
+            </a>
           </div>
 
           <section id="comments" className="mt-16">
-            <Comments repo="AbrahamofLondon/abrahamoflondon-comments" issueTerm="pathname" useClassDarkMode />
+            <Comments
+              repo="AbrahamofLondon/abrahamoflondon-comments"
+              issueTerm="pathname"
+              useClassDarkMode
+            />
           </section>
         </article>
       </MDXProviderWrapper>

@@ -11,13 +11,9 @@ type Props = {
   ctaText: string;
   ctaLink: string;
   communityCount: number | string;
-  /** Label for the stat (e.g., "global leaders"). Defaults to "global leaders". */
   statLabel?: string;
-  /** Local /public path preferred. If remote, ensure the domain is whitelisted in next.config.js */
   backgroundSrc?: string;
-  /** If true, Next/Image will prioritize loading (use for above-the-fold hero). */
   backgroundPriority?: boolean;
-  /** Optional secondary CTA */
   secondaryCtaText?: string;
   secondaryCtaLink?: string;
   className?: string;
@@ -32,11 +28,10 @@ export default function HeroSection({
   statLabel = "global leaders",
   backgroundSrc = "/assets/images/abraham-of-london-banner.webp",
   backgroundPriority = true,
-  secondaryCtaText = "Shop Now",
-  secondaryCtaLink = "/books",
+  secondaryCtaText = "Featured Insights",
+  secondaryCtaLink = "/blog",
   className,
 }: Props) {
-  // Prefer Intl for robust, locale-aware formatting; fall back gracefully
   const formattedCount = React.useMemo(() => {
     const n =
       typeof communityCount === "string"
@@ -58,8 +53,8 @@ export default function HeroSection({
       className={`relative isolate w-full min-h-[75vh] sm:min-h-[90vh] overflow-hidden ${className ?? ""}`}
       aria-labelledby={hId}
     >
-      {/* Decorative background image (empty alt + aria-hidden) */}
-      <div className="absolute inset-0 z-0">
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
         <Image
           src={backgroundSrc}
           alt=""
@@ -71,34 +66,35 @@ export default function HeroSection({
           sizes="100vw"
           className="object-cover object-center"
         />
-        {/* Overlay with responsive intensity */}
-        <div className="absolute inset-0 bg-black/70 sm:bg-black/60 md:bg-black/50" />
+        {/* Softer overlay + subtle vignette */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-black/10" />
       </div>
 
-      {/* Foreground content */}
-      <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
+      {/* Foreground */}
+      <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4">
         <motion.div
-          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.7, ease: "easeOut" }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl text-white"
         >
+          <p className="mb-3 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest backdrop-blur">
+            New • Chatham Rooms Available
+          </p>
+
           <h1
             id={hId}
-            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight drop-shadow-lg"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight drop-shadow"
           >
             {title}
           </h1>
 
-          <p className="mt-4 text-lg sm:text-xl md:text-2xl text-white/95 leading-relaxed drop-shadow">
-            {subtitle} <span aria-hidden>—</span>
-            <span className="sr-only">— </span>
-            join{" "}
-            <strong className="font-semibold text-cream">{formattedCount}</strong>{" "}
+          <p className="mt-4 text-lg sm:text-xl md:text-2xl text-white/95 leading-relaxed">
+            {subtitle} — join <strong className="font-semibold text-cream">{formattedCount}</strong>{" "}
             {statLabel}.
           </p>
 
-          {/* CTA buttons */}
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href={ctaLink}
@@ -118,6 +114,8 @@ export default function HeroSection({
               </Link>
             )}
           </div>
+
+          <p className="mt-3 text-xs tracking-wide text-white/80">Chatham Rooms — off the record</p>
         </motion.div>
       </div>
     </section>
