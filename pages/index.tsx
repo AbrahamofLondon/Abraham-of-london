@@ -13,10 +13,7 @@ import EventCard from "@/components/events/EventCard";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
-
 import type { PostMeta } from "@/types/post";
-// NOTE: remove EventMeta import to avoid missing-type errors
-// import type { EventMeta } from "@/types/events";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 const HERO = {
@@ -26,11 +23,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string; // "YYYY-MM-DD" or ISO datetime
+  date: string;
   location: string | null;
   description?: string | null;
-  tags?: string[] | null; // for the subtle "Chatham" chip
-  heroImage?: string; // path under /public
+  tags?: string[] | null;
+  heroImage?: string;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -60,18 +57,19 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero — split, bold type, glass overlay */}
+      {/* Hero */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal text-white">
         <div className="absolute inset-0 -z-10">
-          <Image
-            src={HERO.poster}
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover opacity-40"
-            priority
+          <Image src={HERO.poster} alt="" fill sizes="100vw" className="object-cover opacity-40" priority />
+          {/* stronger gradient for headline legibility */}
+          <div
+            className="absolute inset-0"
+            aria-hidden="true"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.20) 65%, rgba(0,0,0,0.05) 100%)",
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/40 to-transparent" />
         </div>
 
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-24 sm:py-32 lg:grid-cols-2">
@@ -105,7 +103,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <p className="mt-3 text-xs tracking-wide text-white/70">Chatham Rooms — off the record</p>
           </div>
 
-          {/* Accent image block */}
+          {/* Accent image */}
           <div className="relative hidden min-h-[420px] rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur md:block">
             <div className="relative h-full w-full overflow-hidden rounded-xl">
               <Image src={HERO.poster} alt="" fill sizes="50vw" className="object-cover" priority />
@@ -114,7 +112,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Page header crumb & counts */}
+      {/* Counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
@@ -183,7 +181,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
-                // >>> Frame correctly in the grid
                 coverAspect={(p.coverAspect as any) ?? "book"}
                 coverFit={(p.coverFit as any) ?? (p.coverAspect === "book" ? "contain" : "cover")}
                 coverPosition={(p.coverPosition as any) ?? "center"}
@@ -242,9 +239,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               View all
             </Link>
           </header>
-          <p className="mb-6 text-xs text-deepCharcoal/60">
-            Select sessions run as Chatham Rooms (off the record).
-          </p>
+          <p className="mb-6 text-xs text-deepCharcoal/60">Select sessions run as Chatham Rooms (off the record).</p>
 
           {eventsTeaser.length === 0 ? (
             <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
@@ -273,9 +268,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
-              A portfolio built on craftsmanship, stewardship, and endurance.
-            </p>
+            <p className="mt-2 text-sm text-deepCharcoal/70">A portfolio built on craftsmanship, stewardship, and endurance.</p>
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -360,9 +353,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-20 text-center">
-          <h3 className="font-serif text-3xl font-semibold text-cream">
-            Build with Clarity. Lead with Standards. Leave a Legacy.
-          </h3>
+          <h3 className="font-serif text-3xl font-semibold text-cream">Build with Clarity. Lead with Standards. Leave a Legacy.</h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-cream/85">
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
@@ -387,7 +378,6 @@ Home.displayName = "Home";
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals (including new cover-framing hints) to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -404,7 +394,6 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Events (structural type to avoid missing imports)
   type MinimalEvent = {
     slug: string;
     title: string;
@@ -417,9 +406,7 @@ export async function getStaticProps() {
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
-      .filter(
-        (e): e is MinimalEvent => Boolean((e as any)?.slug && (e as any)?.title && (e as any)?.date)
-      )
+      .filter((e): e is MinimalEvent => Boolean((e as any)?.slug && (e as any)?.title && (e as any)?.date))
       .map((e: any) => ({
         slug: String(e.slug),
         title: String(e.title),
@@ -453,7 +440,7 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-    const baseForImage = String(e.slug).replace(/[–—].*$/, ""); // strip after en/em dash
+    const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     return {
       slug: e.slug,
