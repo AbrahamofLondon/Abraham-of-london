@@ -1,20 +1,23 @@
 // pages/events/index.tsx
-import Head from "next/head";
+"use client";
+
 import * as React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
-import { isUpcoming } from "@/lib/events"; // Client-side function
-import { getAllEvents } from "@/lib/server/events-data"; // Server-side function
-mport type { EventMeta } from "@/lib/server/events-data"; 
+import SectionHeading from "@/components/ui/SectionHeading";
+import Button from "@/components/ui/Button";
+import { OgHead } from "@/lib/seo";
+import { getAllEvents } from "@/lib/server/events-data";
+import type { EventMeta } from "@/lib/server/events-data";
 import { formatDate } from "@/lib/date";
 import clsx from "clsx";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { isUpcoming } from "@/lib/events";
 
 type Props = { events: EventMeta[] };
 
-// ---- Helpers ---------------------------------------------------
 const normalize = (s: string = "") => s.toLowerCase();
 const formatPretty = (d: string) =>
   formatDate(d, {
@@ -22,8 +25,15 @@ const formatPretty = (d: string) =>
     format: { day: "2-digit", month: "short", year: "numeric" },
   });
 
-// ---- Components ------------------------------------------------
-const Chip = ({ label, active, onClick }: { label: string; active?: boolean; onClick: () => void }) => (
+const Chip = ({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+}) => (
   <button
     type="button"
     onClick={onClick}
@@ -31,14 +41,13 @@ const Chip = ({ label, active, onClick }: { label: string; active?: boolean; onC
       "rounded-full px-3 py-1 text-sm transition",
       active
         ? "bg-forest text-cream border border-forest"
-        : "bg-white text-deepCharcoal/80 border border-lightGrey hover:text-deepCharcoal",
+        : "bg-white text-deepCharcoal/80 border border-lightGrey hover:text-deepCharcoal"
     )}
   >
     {label}
   </button>
 );
 
-// ---- Page ------------------------------------------------------
 export default function EventsIndex({ events }: Props) {
   const router = useRouter();
 
@@ -63,7 +72,9 @@ export default function EventsIndex({ events }: Props) {
     if (q.trim()) {
       const needle = normalize(q);
       list = list.filter((e) =>
-        [e.title, e.summary || "", e.location || ""].some((field) => normalize(field).includes(needle)),
+        [e.title, e.summary || "", e.location || ""].some((field) =>
+          normalize(field).includes(needle)
+        )
       );
     }
 
@@ -84,36 +95,36 @@ export default function EventsIndex({ events }: Props) {
     const next = new URLSearchParams(router.query as Record<string, string>);
     if (value && value.length) next.set(key, value);
     else next.delete(key);
-    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, { shallow: true });
+    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
+      shallow: true,
+    });
   };
-  
-  // This is the missing declaration
-  const handleReset = () => router.replace("/events", undefined, { shallow: true });
+
+  const handleReset = () =>
+    router.replace({ pathname: "/events" }, undefined, { shallow: true });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setParam("q", e.target.value.trim() || undefined);
   };
-  
   const debouncedSearchChange = useDebounce(handleSearchChange, 300);
-
-  // This is the missing declaration
-  const title = "Events | Abraham of London";
-
 
   return (
     <Layout pageTitle="Events">
-      <Head>
-        <title>{title}</title>
-        <meta name="description" content="Talks, panels, workshops, and appearances from Abraham of London." />
-        <link rel="canonical" href="/events" />
-      </Head>
+      <OgHead
+        title="Events — Abraham of London"
+        description="Talks, salons, and workshops. Select sessions run as Chatham Rooms (off the record)."
+        path="/events"
+      />
 
+      {/* Controls bar */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="hover:text-deepCharcoal">Home</Link>
+                <Link href="/" className="hover:text-deepCharcoal">
+                  Home
+                </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li className="text-deepCharcoal/80">Events</li>
@@ -126,16 +137,37 @@ export default function EventsIndex({ events }: Props) {
             </ol>
           </nav>
           <div className="flex items-center gap-2">
-            <Chip label={`All (${totalCount})`} active={when === "all"} onClick={() => setParam("when", "all")} />
-            <Chip label={`Upcoming (${upcomingCount})`} active={when === "upcoming"} onClick={() => setParam("when", "upcoming")} />
-            <Chip label={`Past (${pastCount})`} active={when === "past"} onClick={() => setParam("when", "past")} />
+            <Chip
+              label={`All (${totalCount})`}
+              active={when === "all"}
+              onClick={() => setParam("when", "all")}
+            />
+            <Chip
+              label={`Upcoming (${upcomingCount})`}
+              active={when === "upcoming"}
+              onClick={() => setParam("when", "upcoming")}
+            />
+            <Chip
+              label={`Past (${pastCount})`}
+              active={when === "past"}
+              onClick={() => setParam("when", "past")}
+            />
           </div>
         </div>
       </section>
 
+      {/* Heading + filters */}
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <SectionHeading
+            eyebrow="Calendar"
+            title="Events"
+            subtitle="Filter by text or location, sort by date, and explore details."
+            align="left"
+            withDivider
+          />
+
+          <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex gap-2">
               <input
                 aria-label="Search events"
@@ -163,18 +195,16 @@ export default function EventsIndex({ events }: Props) {
                 <option value="latest">Latest first</option>
               </select>
               {(q || loc || when !== "upcoming" || sort !== "soonest") && (
-                <button
-                  onClick={handleReset}
-                  className="rounded-lg border border-lightGrey px-3 py-2 text-sm hover:bg-warmWhite"
-                >
+                <Button variant="secondary" size="sm" onClick={handleReset}>
                   Reset
-                </button>
+                </Button>
               )}
             </div>
           </div>
         </div>
       </section>
 
+      {/* List */}
       <section className="bg-white pb-16 pt-2" aria-live="polite">
         <div className="mx-auto max-w-7xl px-4">
           {filteredEvents.length === 0 ? (
@@ -228,20 +258,14 @@ export default function EventsIndex({ events }: Props) {
                         </p>
                       )}
                       <div className="mt-4">
-                        <Link
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           href={`/events/${ev.slug}`}
-                          className="inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-medium text-forest transition-colors hover:bg-forest hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/30"
                           aria-label={`Event details: ${ev.title}`}
                         >
                           Details
-                          <svg className="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path
-                              fillRule="evenodd"
-                              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </Link>
+                        </Button>
                       </div>
                     </div>
                   </article>
@@ -261,6 +285,7 @@ export async function getStaticProps() {
     "slug",
     "title",
     "date",
+    "endDate",
     "location",
     "summary",
     "heroImage",
