@@ -2,9 +2,10 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=20" },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "contentlayer build && next build",
     "start": "next start",
     "lint": "next lint",
     "analyze": "cross-env ANALYZE=true next build"
@@ -16,14 +17,17 @@
     "@next/mdx": "14.2.31",
     "@react-email/components": "0.5.0",
     "@react-email/render": "^1.2.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/typography": "0.5.10",
     "autoprefixer": "10.4.21",
     "clsx": "2.1.1",
+    "contentlayer": "^0.3.4",
     "date-fns": "4.1.0",
     "framer-motion": "^12.23.12",
     "gray-matter": "4.0.3",
     "lucide-react": "^0.542.0",
     "next": "14.2.31",
+    "next-contentlayer": "^0.3.4",
     "next-mdx-remote": "5.0.0",
     "next-themes": "^0.4.6",
     "react": "18.3.1",
@@ -35,7 +39,8 @@
     "remark-html": "^16.0.1",
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.0",
-    "resend": "^6.0.1"
+    "resend": "^6.0.1",
+    "satori": "^0.11.2"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.32",

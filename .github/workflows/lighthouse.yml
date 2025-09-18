@@ -1,0 +1,48 @@
+name: Lighthouse
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Toggle this: set to true if you want newer pushes to cancel older runs.
+    concurrency:
+      group: lighthouse-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Start Next.js (background)
+        run: |
+          nohup npx next start -p 3000 >/dev/null 2>&1 &
+
+      - name: Wait for site
+        run: npx wait-on@7 -t 120000 -i 500 http-get://localhost:3000
+
+      - name: Lighthouse CI
+        run: |
+          npx @lhci/cli@0.13.x autorun \
+            --collect.url=http://localhost:3000 \
+            --upload.target=temporary-public-storage
+
+      # Keep the runner tidy even if a step fails
+      - name: Stop Next.js
+        if: always()
+        run: pkill -f "next start -p 3000" || true

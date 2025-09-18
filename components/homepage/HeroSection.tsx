@@ -4,6 +4,7 @@ import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import Button from "@/components/ui/Button";
 
 type Props = {
   title: string;
@@ -15,6 +16,9 @@ type Props = {
   statLabel?: string;
   /** Local /public path preferred. If remote, ensure the domain is whitelisted in next.config.js */
   backgroundSrc?: string;
+  /** Optional background video sources */
+  videoWebm?: string;
+  videoMp4?: string;
   /** If true, Next/Image will prioritize loading (use for above-the-fold hero). */
   backgroundPriority?: boolean;
   /** Optional secondary CTA */
@@ -31,12 +35,13 @@ export default function HeroSection({
   communityCount,
   statLabel = "global leaders",
   backgroundSrc = "/assets/images/abraham-of-london-banner.webp",
+  videoWebm,
+  videoMp4,
   backgroundPriority = true,
   secondaryCtaText = "Shop Now",
   secondaryCtaLink = "/books",
   className,
 }: Props) {
-  // Prefer Intl for robust, locale-aware formatting; fall back gracefully
   const formattedCount = React.useMemo(() => {
     const n =
       typeof communityCount === "string"
@@ -58,7 +63,7 @@ export default function HeroSection({
       className={`relative isolate w-full min-h-[75vh] sm:min-h-[90vh] overflow-hidden ${className ?? ""}`}
       aria-labelledby={hId}
     >
-      {/* Decorative background image (empty alt + aria-hidden) */}
+      {/* Background media */}
       <div className="absolute inset-0 z-0">
         <Image
           src={backgroundSrc}
@@ -71,11 +76,26 @@ export default function HeroSection({
           sizes="100vw"
           className="object-cover object-center"
         />
-        {/* Overlay with responsive intensity */}
-        <div className="absolute inset-0 bg-black/70 sm:bg-black/60 md:bg-black/50" />
+        {(videoWebm || videoMp4) && (
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            autoPlay
+            playsInline
+            muted
+            loop
+            poster={backgroundSrc}
+            preload="metadata"
+            aria-hidden="true"
+          >
+            {videoWebm ? <source src={videoWebm} type="video/webm" /> : null}
+            {videoMp4 ? <source src={videoMp4} type="video/mp4" /> : null}
+          </video>
+        )}
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/60 sm:bg-black/55 md:bg-black/50" />
       </div>
 
-      {/* Foreground content */}
+      {/* Foreground */}
       <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
         <motion.div
           initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -98,26 +118,29 @@ export default function HeroSection({
             {statLabel}.
           </p>
 
-          {/* CTA buttons */}
+          {/* CTAs */}
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              href={ctaLink}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-7 py-3 text-lg font-semibold shadow-lg hover:bg-forest/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-forest/70"
-              aria-label={ctaText}
-            >
+            <Button variant="primary" size="lg" href={ctaLink} aria-label={ctaText}>
               {ctaText}
-            </Link>
+            </Button>
 
             {secondaryCtaLink && secondaryCtaText && (
-              <Link
+              <Button
+                variant="secondary"
+                size="lg"
                 href={secondaryCtaLink}
-                className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/15 text-white px-7 py-3 text-lg font-semibold backdrop-blur-md shadow-md hover:bg-white/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/70"
                 aria-label={secondaryCtaText}
+                className="backdrop-blur-md border-white/70 text-white hover:bg-white/10 dark:border-white/70"
               >
                 {secondaryCtaText}
-              </Link>
+              </Button>
             )}
           </div>
+
+          {/* Sub-CTA note */}
+          <p className="mt-3 text-xs tracking-wide text-white/75">
+            Chatham Rooms available — off the record
+          </p>
         </motion.div>
       </div>
     </section>

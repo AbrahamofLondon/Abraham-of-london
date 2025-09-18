@@ -1,4 +1,4 @@
-import Head from "next/head";
+// pages/blog/[slug].tsx
 import dynamic from "next/dynamic";
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { format } from "date-fns";
@@ -8,8 +8,6 @@ import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
-import SEOHead from "@/components/SEOHead"; // ✅ add
-
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
@@ -18,12 +16,14 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
+// ✅ centralized SEO
+import { OgHead, ArticleJsonLd } from "@/lib/seo";
+
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-/** include tags so we can emit article:tag */
 type PageMeta = Omit<PostMeta, "tags"> & {
   slug: string;
-  tags?: string[] | null;               // ✅ new
+  tags?: string[] | null;
   coverAspect?: "book" | "wide" | "square" | null;
   coverFit?: "cover" | "contain" | null;
   coverPosition?: "left" | "center" | "right" | null;
@@ -51,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     author: (raw.author as any) ?? "Abraham of London",
     readTime: (raw.readTime as string) ?? null,
     category: (raw.category as string) ?? null,
-    tags: (raw.tags as string[] | undefined) ?? null,     // ✅ capture tags
+    tags: (raw.tags as string[] | undefined) ?? null,
     coverAspect: (raw as any).coverAspect ?? null,
     coverFit: (raw as any).coverFit ?? null,
     coverPosition: (raw as any).coverPosition ?? null,
@@ -88,22 +88,26 @@ export default function BlogPost({ post }: Props) {
   } = post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
-  const canonical = absUrl(`/blog/${slug}`);
+  const canonicalPath = `/blog/${slug}`;
   const authorName = typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
   return (
     <Layout pageTitle={title}>
-      {/* ✅ Centralized SEO + JSON-LD */}
-      <SEOHead
+      {/* ✅ Centralized OG + canonical */}
+      <OgHead
+        title={title}
+        description={excerpt ?? "Insight from Abraham of London."}
+        path={canonicalPath}
+        type="article"
+      />
+      {/* ✅ JSON-LD for richer SERPs */}
+      <ArticleJsonLd
         title={title}
         description={excerpt ?? ""}
-        slug={`/blog/${slug}`}
-        coverImage={coverForMeta}
-        publishedTime={date ?? undefined}
-        modifiedTime={date ?? undefined}
-        authorName={authorName}
-        tags={tags ?? []}
+        author={authorName}
+        datePublished={date ?? undefined}
+        path={canonicalPath}
+        image={coverImage ?? undefined}
       />
 
       <MDXProviderWrapper>
@@ -117,7 +121,6 @@ export default function BlogPost({ post }: Props) {
             coverPosition={(coverPosition as any) ?? undefined}
           />
 
-          {/* ✅ belt & braces against auto-capitalization */}
           <h1 className="post-title normal-case mb-4 font-serif text-4xl text-forest md:text-5xl">
             {title}
           </h1>

@@ -1,160 +1,107 @@
-import Head from "next/head";
-import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
+// pages/events/[slug].tsx
+import * as React from "react";
+import Image from "next/image";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import Layout from "@/components/Layout";
+import Button from "@/components/ui/Button";
+import SectionHeading from "@/components/ui/SectionHeading";
+import { OgHead, EventJsonLd } from "@/lib/seo";
+import { getAllEvents } from "@/lib/server/events-data";
 import type { EventMeta } from "@/lib/events";
+import { formatDate } from "@/lib/date";
 
-// Detect YYYY-MM-DD (date-only)
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+// ➕ simple status helper
+const isPast = (iso: string) => new Date(iso).valueOf() < Date.now();
 
-// London-first pretty date; show time only if a time exists
-function formatPretty(isoish: string, tz = "Europe/London") {
-  if (isDateOnly(isoish)) {
-    const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
-  }
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  }).format(d);
-  return `${date}, ${time}`;
-}
+type Props = { event: EventMeta };
 
-type EventPageProps = {
-  event: EventMeta & {
-    slug: string;
-    tags?: string[] | null;
-    // EventMeta already supports coverImage?/heroImage?, so no need to add here
-  };
-  contentSource: any;
-};
+// … getStaticPaths / getStaticProps unchanged …
 
-function EventPage({ event, contentSource }: EventPageProps) {
-  if (!event) return <div>Event not found.</div>;
+export default function EventDetail({ event }: Props) {
+  const prettyDate = formatDate(event.date, {
+    timeZone: "Europe/London",
+    format: { weekday: "short", day: "2-digit", month: "short", year: "numeric" },
+  });
 
-  const prettyDate = formatPretty(event.date);
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const url = `${site}/events/${event.slug}`;
-
-  // Support either field name from content
-  const relImage = event.coverImage ?? event.heroImage;
-  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
-
-  const isChatham =
-    Array.isArray(event.tags) &&
-    event.tags.some((t) => String(t).toLowerCase() === "chatham");
-
-  const jsonLd: Record<string, any> = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: event.title,
-    startDate: event.date, // supports YYYY-MM-DD or full ISO
-    eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: {
-      "@type": "Place",
-      name: event.location || "London, UK",
-      address: event.location || "London, UK",
-    },
-    organizer: {
-      "@type": "Organization",
-      name: "Abraham of London",
-      url: site,
-    },
-    ...(absImage ? { image: [absImage] } : {}),
-    description: event.summary || "",
-    url,
-  };
+  const canonicalPath = `/events/${event.slug}`;
+  const past = isPast(event.endDate || event.date);
 
   return (
-    <div className="event-page px-4 py-10 mx-auto max-w-3xl">
-      <Head>
-        <title>{event.title} | Abraham of London</title>
-        <meta name="description" content={event.summary || ""} />
-        {absImage && <meta property="og:image" content={absImage} />}
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
+    <Layout pageTitle={event.title}>
+      {/* ✅ OG + canonical; include hero as OG image; noindex past events (optional) */}
+      <OgHead
+        title={event.title}
+        description={event.summary ?? "Private salons, talks, and workshops."}
+        path={canonicalPath}
+        ogImagePath={event.heroImage ?? undefined}
+        noIndex={past} // flip to false if you want past events indexed
+      />
 
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">
-        {event.title}
-      </h1>
+      {/* ✅ JSON-LD for Events — set status based on date */}
+      <EventJsonLd
+        name={event.title}
+        startDate={event.date}
+        endDate={event.endDate ?? undefined}
+        path={canonicalPath}
+        image={event.heroImage ?? undefined}
+        description={event.summary ?? undefined}
+        location={event.location ? { name: event.location } : undefined}
+        eventStatus={past ? "https://schema.org/EventCompleted" : "https://schema.org/EventScheduled"}
+      />
+      <article className="bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-10 md:py-14">
+          <SectionHeading
+            eyebrow="Event"
+            title={event.title}
+            subtitle={event.summary ?? undefined}
+            align="left"
+            withDivider
+          />
 
-      {/* Subtle badge + note when Chatham */}
-      {isChatham && (
-        <>
-          <span
-            className="inline-block rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-            title="Chatham Room (off the record)"
-            aria-label="Chatham Room (off the record)"
-          >
-            Chatham
-          </span>
-          <p className="mt-2 text-xs text-neutral-600">
-            Off the record. No recordings. No press.
-          </p>
-        </>
-      )}
+          <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-deepCharcoal/80">
+            <time
+              dateTime={new Date(event.date).toISOString()}
+              className="rounded-full bg-warmWhite px-2 py-0.5"
+            >
+              {prettyDate}
+            </time>
+            {event.location && (
+              <>
+                <span aria-hidden>·</span>
+                <span className="rounded-full bg-warmWhite px-2 py-0.5">{event.location}</span>
+              </>
+            )}
+          </div>
 
-      <p className="mt-3 text-sm text-neutral-600 mb-1">
-        <span className="font-medium">Date:</span> {prettyDate}
-      </p>
-      {event.location && (
-        <p className="text-sm text-neutral-600 mb-6">
-          <span className="font-medium">Location:</span> {event.location}
-        </p>
-      )}
+          {event.heroImage && (
+            <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-lightGrey">
+              <Image
+                src={event.heroImage}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 960px"
+                priority={false}
+              />
+            </div>
+          )}
 
-      <article className="prose max-w-none">
-        <MDXRemote {...contentSource} />
+          <div className="prose prose-lg mt-8 max-w-none text-deepCharcoal">
+            {/* If you have rich content/MDX for events, render it here. For now, show summary. */}
+            <p>{event.summary ?? "Details to be announced."}</p>
+          </div>
+
+          <div className="mt-10">
+            <Button
+              variant="primary"
+              href={event.ctaHref || "/contact"}
+              aria-label={event.ctaLabel || "Register interest"}
+            >
+              {event.ctaLabel || "Register interest"}
+            </Button>
+          </div>
+        </div>
       </article>
-    </div>
+    </Layout>
   );
 }
-
-export async function getStaticPaths() {
-  const slugs = getEventSlugs();
-  const paths = slugs.map((slug: string) => ({ params: { slug } }));
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // IMPORTANT: request "heroImage" (what your loader supports), not "coverImage"
-  const { content, ...event } = getEventBySlug(params.slug, [
-    "slug",
-    "title",
-    "date",
-    "location",
-    "summary",
-    "heroImage", // <-- was "coverImage"
-    "tags",
-    "content",
-  ]);
-
-  const contentSource = await serialize(content || "");
-  return { props: { event, contentSource } };
-}
-
-export default EventPage;

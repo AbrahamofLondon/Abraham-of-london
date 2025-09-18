@@ -1,11 +1,13 @@
 // pages/books/index.tsx
+"use client";
+
 import * as React from "react";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookCard from "@/components/BookCard";
 import { getAllBooks } from "@/lib/books";
+import { OgHead } from "@/lib/seo";
 
 type BookMetaSafe = {
   slug: string;
@@ -72,9 +74,12 @@ export default function BooksIndex({ books }: Props) {
 
   return (
     <Layout pageTitle="Books">
-      <Head>
-        <meta name="description" content="Books by Abraham of London — clarity, conviction, endurance." />
-      </Head>
+      {/* ✅ Centralized meta + canonical + OG/Twitter */}
+      <OgHead
+        title="Books — Abraham of London"
+        description="Books by Abraham of London — clarity, conviction, endurance."
+        path="/books"
+      />
 
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12">
@@ -141,22 +146,19 @@ export default function BooksIndex({ books }: Props) {
                 title={b.title ?? "Untitled"}
                 author={b.author ?? "Abraham of London"}
                 excerpt={b.excerpt ?? ""}
-
                 /* optionals: null→undefined for the component */
                 coverImage={b.coverImage ?? undefined}
                 buyLink={b.buyLink ?? undefined}
                 downloadPdf={b.downloadPdf ?? undefined}
                 downloadEpub={b.downloadEpub ?? undefined}
-
                 /* BookCard expects a string */
                 genre={b.genre ?? "Uncategorized"}
-
                 featured={false}
                 motionProps={{
                   initial: { opacity: 0, y: 14 },
                   whileInView: { opacity: 1, y: 0 },
                   viewport: { once: true, amount: 0.25 },
-                  transition: { duration: 0.5, delay: i * 0.03 },
+                  transition: { duration: 0.5, delay: i * 0.03 }
                 }}
               />
             ))}
@@ -181,8 +183,7 @@ export async function getStaticProps() {
     "buyLink",
     "genre",
     "downloadPdf",
-    "downloadEpub",
-    // "date", // ⬅️ removed to match current BookMeta keys
+    "downloadEpub"
   ]);
 
   // JSON-safe: NEVER return undefined
@@ -195,7 +196,7 @@ export async function getStaticProps() {
     buyLink: b.buyLink ?? null,
     genre: b.genre ?? null,
     downloadPdf: b.downloadPdf ?? null,
-    downloadEpub: b.downloadEpub ?? null,
+    downloadEpub: b.downloadEpub ?? null
   }));
 
   return { props: { books: safe }, revalidate: 60 };

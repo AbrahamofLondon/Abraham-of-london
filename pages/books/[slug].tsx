@@ -1,6 +1,9 @@
+// pages/books/[slug].tsx
 import type { GetStaticProps, GetStaticPaths } from "next";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import fs from "fs";
+import path from "path";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -8,11 +11,12 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 import MDXComponents from "@/components/MDXComponents";
 import { getBookBySlug, getBookSlugs } from "@/lib/books";
+import { OgHead, BookJsonLd } from "@/lib/seo"; // centralized SEO
 
 // Client-only comments widget (optional)
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-// ✅ Exists in your repo
+// ✅ Fallback if no per-book cover exists
 const DEFAULT_BOOK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
 
 /** JSON-serializable meta (no `undefined`) */
@@ -35,25 +39,64 @@ interface Props {
   };
 }
 
+// ---- helpers ---------------------------------------------------
+
+/** Prefer /public/assets/images/books/<slug>.(jpg|jpeg|png|webp|avif) if present */
+function resolveLocalCover(slug: string): string | null {
+  const relDir = "/assets/images/books";
+  const absDir = path.join(process.cwd(), "public", "assets", "images", "books");
+  const candidates = [
+    `${slug}.jpg`,
+    `${slug}.jpeg`,
+    `${slug}.png`,
+    `${slug}.webp`,
+    `${slug}.avif`,
+  ];
+
+  for (const file of candidates) {
+    const abs = path.join(absDir, file);
+    if (fs.existsSync(abs)) return `${relDir}/${file}`;
+  }
+  return null;
+}
+
 export default function BookPage({ book }: Props) {
   const { meta, content } = book;
+  const canonicalPath = `/books/${meta.slug}`;
 
   return (
     <Layout pageTitle={meta.title}>
+      {/* ✅ OG/Twitter + canonical; pass cover as OG image explicitly */}
+      <OgHead
+        title={meta.title}
+        description={meta.excerpt ?? "Books by Abraham of London."}
+        path={canonicalPath}
+        ogImagePath={meta.coverImage}
+      />
+
+      {/* ✅ JSON-LD for richer SERPs */}
+      <BookJsonLd
+        name={meta.title}
+        author={meta.author ?? "Abraham of London"}
+        path={canonicalPath}
+        image={meta.coverImage}
+        description={meta.excerpt ?? undefined}
+      />
+
       <article className="prose prose-lg mx-auto max-w-3xl px-4 py-10 md:py-16">
-        {/* Cover */}
-        <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg shadow">
+        {/* Cover — use book aspect and don't crop */}
+        <div className="relative mb-8 aspect-[3/4] w-full overflow-hidden rounded-xl border border-lightGrey bg-warmWhite">
           <Image
             src={meta.coverImage}
-            alt={meta.title}
+            alt={`Cover of ${meta.title}`}
             fill
-            className="object-cover"
+            className="object-contain"
             sizes="(max-width: 768px) 100vw, 768px"
             priority={false}
           />
         </div>
 
-        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-2">{meta.title}</h1>
+        <h1 className="mb-2 font-serif text-4xl text-forest md:text-5xl">{meta.title}</h1>
 
         {meta.author && (
           <p className="mb-6 text-sm text-deepCharcoal/70">By {meta.author}</p>
@@ -67,7 +110,7 @@ export default function BookPage({ book }: Props) {
           <MDXRemote {...content} components={MDXComponents} />
         </div>
 
-        {/* Optional: actions */}
+        {/* Actions */}
         <div className="mt-8 flex flex-wrap gap-3">
           {meta.buyLink && (
             <a
@@ -105,7 +148,6 @@ export default function BookPage({ book }: Props) {
           <Comments
             repo="AbrahamofLondon/abrahamoflondon-comments"
             issueTerm="pathname"
-            // label="comments"
             useClassDarkMode
           />
         </section>
@@ -156,16 +198,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
+  // Prefer a file named after the slug in /public/assets/images/books/
+  const localCover = resolveLocalCover(slug);
+  const coverFromFrontmatter =
+    typeof raw.coverImage === "string" && raw.coverImage.trim() ? raw.coverImage : null;
+
   // ✅ Normalize to JSON-safe values (no `undefined`)
   const meta: PageMetaSafe = {
     slug: String(raw.slug),
     title: raw.title ?? "Untitled",
     author: raw.author ?? null,
     excerpt: raw.excerpt ?? null,
-    coverImage:
-      typeof raw.coverImage === "string" && raw.coverImage.trim()
-        ? raw.coverImage
-        : DEFAULT_BOOK_COVER,
+    coverImage: localCover || coverFromFrontmatter || DEFAULT_BOOK_COVER,
     buyLink: raw.buyLink ?? null,
     genre: raw.genre ?? null,
     downloadPdf: raw.downloadPdf ?? null,
