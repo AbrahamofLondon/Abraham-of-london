@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import { isUpcoming } from "@/lib/events"; // Client-side function
 import { getAllEvents } from "@/lib/server/events-data"; // Server-side function
-import type { EventMeta } from "@/lib/events"; 
+mport type { EventMeta } from "@/lib/server/events-data"; 
 import { formatDate } from "@/lib/date";
 import clsx from "clsx";
 import { useDebounce } from "@/lib/hooks/useDebounce";
