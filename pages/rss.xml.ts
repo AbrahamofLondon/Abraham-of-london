@@ -2,49 +2,47 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getAllPosts } from "@/lib/mdx";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-
-const escapeCdata = (s: string) =>
-  s.replaceAll("]]>", "]]]]><![CDATA[>");
+const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+const SITE_NAME = "Abraham of London";
+const DESC = "Featured insights by Abraham of London — fatherhood, enterprise, society.";
 
 export default function handler(_req: NextApiRequest, res: NextApiResponse) {
+  // ✅ no field array here
   const posts = getAllPosts()
-    .filter((p) => p?.slug && p?.title)
+    .map((p: any) => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt ?? "",
+      date: p.date ?? null,
+    }))
     .sort((a, b) => {
       const at = a.date ? Date.parse(a.date) : 0;
       const bt = b.date ? Date.parse(b.date) : 0;
       return bt - at;
-    })
-    .slice(0, 30); // cap feed length
+    });
 
   const items = posts
-    .map((p) => {
-      const url = `${SITE_URL}/blog/${p.slug}`;
-      const desc = p.excerpt ?? "";
-      const pub = p.date ? new Date(p.date).toUTCString() : new Date().toUTCString();
-      return `
-        <item>
-          <title><![CDATA[${escapeCdata(p.title)}]]></title>
-          <link>${url}</link>
-          <guid isPermaLink="true">${url}</guid>
-          <description><![CDATA[${escapeCdata(desc)}]]></description>
-          <pubDate>${pub}</pubDate>
-        </item>`;
-    })
-    .join("");
+    .map(
+      (p) => `<item>
+  <title><![CDATA[${p.title}]]></title>
+  <link>${ORIGIN}/blog/${p.slug}</link>
+  <guid>${ORIGIN}/blog/${p.slug}</guid>
+  ${p.date ? `<pubDate>${new Date(p.date).toUTCString()}</pubDate>` : ""}
+  <description><![CDATA[${p.excerpt}]]></description>
+</item>`
+    )
+    .join("\n");
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-  <rss version="2.0">
-    <channel>
-      <title>Abraham of London — Featured Insights</title>
-      <link>${SITE_URL}/blog</link>
-      <description>Principled strategy, writing, and ventures.</description>
-      <language>en-GB</language>
-      ${items}
-    </channel>
-  </rss>`.trim();
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title><![CDATA[${SITE_NAME}]]></title>
+  <link>${ORIGIN}</link>
+  <description><![CDATA[${DESC}]]></description>
+  ${items}
+</channel>
+</rss>`;
 
   res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
-  res.status(200).send(xml);
+  res.status(200).send(rss);
 }

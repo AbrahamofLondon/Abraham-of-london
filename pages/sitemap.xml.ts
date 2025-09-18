@@ -13,9 +13,10 @@ export default function handler(_req: NextApiRequest, res: NextApiResponse) {
     priority: "0.8",
   }));
 
-  const posts = getAllPosts(["slug", "date"]).map((p) => ({
+  // ✅ call without field array
+  const posts = getAllPosts().map((p: any) => ({
     loc: `${ORIGIN}/blog/${p.slug}`,
-    lastmod: p.date ? new Date(p.date).toISOString() : undefined,
+    lastmod: p?.date ? new Date(p.date).toISOString() : undefined,
     changefreq: "monthly",
     priority: "0.7",
   }));
@@ -36,20 +37,20 @@ export default function handler(_req: NextApiRequest, res: NextApiResponse) {
   const all = [...staticRoutes, ...posts, ...books, ...events];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${all
-      .map(
-        (u) => `<url>
-      <loc>${u.loc}</loc>
-      ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ""}
-      <changefreq>${u.changefreq}</changefreq>
-      <priority>${u.priority}</priority>
-    </url>`
-      )
-      .join("\n")}
-  </urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${all
+  .map(
+    (u) => `<url>
+  <loc>${u.loc}</loc>
+  ${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ""}
+  <changefreq>${u.changefreq}</changefreq>
+  <priority>${u.priority}</priority>
+</url>`
+  )
+  .join("\n")}
+</urlset>`;
 
-  res.setHeader("Content-Type", "application/xml");
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   res.status(200).send(xml);
 }
