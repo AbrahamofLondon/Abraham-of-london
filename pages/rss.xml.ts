@@ -2,49 +2,49 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getAllPosts } from "@/lib/mdx";
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-const SITE_TITLE = "Abraham of London — Featured Insights";
-const SITE_DESC = "Featured insights by Abraham of London — fatherhood, enterprise, society.";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+
+const escapeCdata = (s: string) =>
+  s.replaceAll("]]>", "]]]]><![CDATA[>");
 
 export default function handler(_req: NextApiRequest, res: NextApiResponse) {
-  const posts = getAllPosts(["slug", "title", "excerpt", "date"]).sort((a, b) => {
-    const at = a.date ? Date.parse(a.date) : 0;
-    const bt = b.date ? Date.parse(b.date) : 0;
-    return bt - at;
-  });
+  const posts = getAllPosts()
+    .filter((p) => p?.slug && p?.title)
+    .sort((a, b) => {
+      const at = a.date ? Date.parse(a.date) : 0;
+      const bt = b.date ? Date.parse(b.date) : 0;
+      return bt - at;
+    })
+    .slice(0, 30); // cap feed length
 
   const items = posts
     .map((p) => {
-      const url = `${ORIGIN}/blog/${p.slug}`;
+      const url = `${SITE_URL}/blog/${p.slug}`;
+      const desc = p.excerpt ?? "";
       const pub = p.date ? new Date(p.date).toUTCString() : new Date().toUTCString();
-      const title = escapeXml(p.title || "Untitled");
-      const desc = escapeXml(p.excerpt || "");
-      return `<item>
-  <title>${title}</title>
-  <link>${url}</link>
-  <guid>${url}</guid>
-  <pubDate>${pub}</pubDate>
-  <description><![CDATA[${desc}]]></description>
-</item>`;
+      return `
+        <item>
+          <title><![CDATA[${escapeCdata(p.title)}]]></title>
+          <link>${url}</link>
+          <guid isPermaLink="true">${url}</guid>
+          <description><![CDATA[${escapeCdata(desc)}]]></description>
+          <pubDate>${pub}</pubDate>
+        </item>`;
     })
-    .join("\n");
+    .join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-<channel>
-  <title>${escapeXml(SITE_TITLE)}</title>
-  <link>${ORIGIN}</link>
-  <description>${escapeXml(SITE_DESC)}</description>
-  <language>en-GB</language>
-  ${items}
-</channel>
-</rss>`;
+  <rss version="2.0">
+    <channel>
+      <title>Abraham of London — Featured Insights</title>
+      <link>${SITE_URL}/blog</link>
+      <description>Principled strategy, writing, and ventures.</description>
+      <language>en-GB</language>
+      ${items}
+    </channel>
+  </rss>`.trim();
 
-  res.setHeader("Content-Type", "application/rss+xml; charset=UTF-8");
-  res.setHeader("Cache-Control", "public, max-age=900, stale-while-revalidate=3600");
+  res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
   res.status(200).send(xml);
-}
-
-function escapeXml(s: string) {
-  return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
 }
