@@ -1,13 +1,14 @@
 // pages/rss.xml.ts
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllPosts } from "@/lib/mdx";
+import type { GetServerSideProps } from "next";
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-const SITE_NAME = "Abraham of London";
-const DESC = "Featured insights by Abraham of London — fatherhood, enterprise, society.";
+export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const SITE_NAME = "Abraham of London";
+  const DESC = "Featured insights by Abraham of London — fatherhood, enterprise, society.";
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
-  // ✅ no field array here
+  // 👇 server-only import (pulls in fs) — safe here
+  const { getAllPosts } = await import("@/lib/mdx");
+
   const posts = getAllPosts()
     .map((p: any) => ({
       slug: p.slug,
@@ -15,11 +16,7 @@ export default function handler(_req: NextApiRequest, res: NextApiResponse) {
       excerpt: p.excerpt ?? "",
       date: p.date ?? null,
     }))
-    .sort((a, b) => {
-      const at = a.date ? Date.parse(a.date) : 0;
-      const bt = b.date ? Date.parse(b.date) : 0;
-      return bt - at;
-    });
+    .sort((a, b) => (b.date ? Date.parse(b.date) : 0) - (a.date ? Date.parse(a.date) : 0));
 
   const items = posts
     .map(
@@ -44,5 +41,13 @@ export default function handler(_req: NextApiRequest, res: NextApiResponse) {
 </rss>`;
 
   res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
-  res.status(200).send(rss);
+  res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  res.write(rss);
+  res.end();
+
+  return { props: {} };
+};
+
+export default function RSS() {
+  return null;
 }
