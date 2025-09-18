@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,26 +12,10 @@ const ENDURELUXE_URL = process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://endure
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@abrahamoflondon.org";
 
 const socials = [
-  {
-    href: "https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09",
-    icon: "/assets/images/social/twitter.svg",
-    label: "Twitter / X",
-  },
-  {
-    href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
-    icon: "/assets/images/social/linkedin.svg",
-    label: "LinkedIn",
-  },
-  {
-    href: "https://www.instagram.com/abraham_of_london",
-    icon: "/assets/images/social/instagram.svg",
-    label: "Instagram",
-  },
-  {
-    href: "https://youtube.com",
-    icon: "/assets/images/social/youtube.svg",
-    label: "YouTube",
-  },
+  { href: "https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09", icon: "/assets/images/social/twitter.svg", label: "Twitter / X" },
+  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", icon: "/assets/images/social/linkedin.svg", label: "LinkedIn" },
+  { href: "https://www.instagram.com/abraham_of_london", icon: "/assets/images/social/instagram.svg", label: "Instagram" },
+  { href: "https://youtube.com", icon: "/assets/images/social/youtube.svg", label: "YouTube" },
 ];
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:");
@@ -89,7 +73,10 @@ const Footer: React.FC = () => {
           <SmartLink href="/terms">Terms</SmartLink>
         </nav>
 
-        <nav aria-label="Brand family" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-deepCharcoal/90">
+        <nav
+          aria-label="Brand family"
+          className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-deepCharcoal/90"
+        >
           <SmartLink href={AOF_URL}>Abraham of London</SmartLink>
           <SmartLink href={INNOVATE_HUB_URL}>InnovateHub</SmartLink>
           <SmartLink href={ALOMARADA_URL}>Alomarada</SmartLink>

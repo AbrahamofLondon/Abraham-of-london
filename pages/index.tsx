@@ -4,22 +4,23 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
 import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
 import EventCard from "@/components/events/EventCard";
+
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
+
 import type { PostMeta } from "@/types/post";
-import type { EventMeta } from "@/types/events";
-import { motion } from "framer-motion";
+// NOTE: remove EventMeta import to avoid missing-type errors
+// import type { EventMeta } from "@/types/events";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 const HERO = {
   poster: "/assets/images/abraham-of-london-banner.webp",
-  videoMp4: "/assets/video/brand-reel.mp4#t=0,5",
-  videoWebm: "/assets/video/brand-reel.webm#t=0,5",
 };
 
 type EventsTeaserItem = {
@@ -39,7 +40,7 @@ type HomeProps = {
   eventsTeaser: EventsTeaser;
 };
 
-function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
+export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
 
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -59,79 +60,56 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-white">
+      {/* Hero — split, bold type, glass overlay */}
+      <section className="relative isolate overflow-hidden bg-deepCharcoal text-white">
         <div className="absolute inset-0 -z-10">
-          <Image src={HERO.poster} alt="" fill priority sizes="100vw" className="object-cover" />
-          {(HERO.videoMp4 || HERO.videoWebm) && (
-            <video
-              className="absolute inset-0 h-full w-full object-cover"
-              autoPlay
-              playsInline
-              muted
-              loop
-              poster={HERO.poster}
-              preload="metadata"
-              aria-hidden="true"
-            >
-              {HERO.videoWebm ? <source src={HERO.videoWebm} type="video/webm" /> : null}
-              {HERO.videoMp4 ? <source src={HERO.videoMp4} type="video/mp4" /> : null}
-            </video>
-          )}
-          <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
+          <Image
+            src={HERO.poster}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover opacity-40"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/40 to-transparent" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-28 sm:py-36">
-          <div className="mx-auto max-w-3xl text-center">
-            <motion.h1
-              className="font-serif text-4xl font-bold tracking-wide text-white sm:text-6xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-24 sm:py-32 lg:grid-cols-2">
+          <div className="max-w-xl">
+            <p className="mb-3 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest backdrop-blur">
+              New • Chatham Rooms available
+            </p>
+            <h1 className="font-serif text-4xl font-bold leading-tight sm:text-6xl">
               Principled Strategy for a Legacy That Endures
-            </motion.h1>
-
-            <motion.p
-              className="mt-6 text-lg leading-8 text-white/85"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-            >
+            </h1>
+            <p className="mt-5 text-base/7 text-white/85">
               I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and
               society.
-            </motion.p>
-
-            <motion.p
-              className="mt-3 text-xs tracking-wide text-white/70"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              Chatham Rooms available — off the record
-            </motion.p>
-
-            <motion.div
-              className="mt-8 flex justify-center gap-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={booksHref}
-                className="rounded-full bg-forest px-6 py-3 text-white shadow-sm transition hover:bg-primary-hover"
+                className="rounded-full bg-forest px-6 py-3 text-white hover:bg-primary-hover"
                 prefetch={false}
               >
                 Explore Books
               </Link>
               <Link
                 href={blogHref}
-                className="rounded-full border border-white/80 px-6 py-3 text-white transition hover:bg-white/10"
+                className="rounded-full border border-white/80 px-6 py-3 text-white hover:bg-white/10"
                 prefetch={false}
               >
                 Featured Insights
               </Link>
-            </motion.div>
+            </div>
+            <p className="mt-3 text-xs tracking-wide text-white/70">Chatham Rooms — off the record</p>
+          </div>
+
+          {/* Accent image block */}
+          <div className="relative hidden min-h-[420px] rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur md:block">
+            <div className="relative h-full w-full overflow-hidden rounded-xl">
+              <Image src={HERO.poster} alt="" fill sizes="50vw" className="object-cover" priority />
+            </div>
           </div>
         </div>
       </section>
@@ -404,7 +382,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 }
 
 Home.displayName = "Home";
-export default Home;
 
 // SSG + ISR
 export async function getStaticProps() {
@@ -427,13 +404,21 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Events
+  // Events (structural type to avoid missing imports)
+  type MinimalEvent = {
+    slug: string;
+    title: string;
+    date: string;
+    location?: string;
+    summary?: string;
+    tags?: string[];
+  };
+
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
       .filter(
-        (e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
-          Boolean(e?.slug && e?.title && e?.date)
+        (e): e is MinimalEvent => Boolean((e as any)?.slug && (e as any)?.title && (e as any)?.date)
       )
       .map((e: any) => ({
         slug: String(e.slug),

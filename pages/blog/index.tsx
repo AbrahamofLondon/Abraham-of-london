@@ -123,24 +123,29 @@ export default function BlogIndex({ posts }: Props) {
             </select>
           </div>
 
+          {/* Editorial “magazine” grid */}
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
-              <BlogPostCard
+              <article
                 key={p.slug}
-                slug={p.slug}
-                title={p.title}
-                date={p.date ?? undefined}
-                excerpt={p.excerpt ?? undefined}
-                coverImage={p.coverImage ?? undefined}
-                author={p.author ?? undefined}
-                readTime={p.readTime ?? undefined}
-                category={p.category ?? undefined}
-                tags={p.tags ?? undefined}
-                // Framing props to keep crops consistent with MDX front-matter
-                coverAspect={(p.coverAspect as any) ?? "book"}
-                coverFit={(p.coverFit as any) ?? ((p.coverAspect as any) === "book" ? "contain" : "cover")}
-                coverPosition={(p.coverPosition as any) ?? "center"}
-              />
+                className="group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover"
+              >
+                <BlogPostCard
+                  slug={p.slug}
+                  title={p.title}
+                  date={p.date ?? undefined}
+                  excerpt={p.excerpt ?? undefined}
+                  coverImage={p.coverImage ?? undefined}
+                  author={p.author ?? undefined}
+                  readTime={p.readTime ?? undefined}
+                  category={p.category ?? undefined}
+                  tags={p.tags ?? undefined}
+                  // Framing props → wide editorial cover by default
+                  coverAspect={(p.coverAspect as any) ?? "wide"}
+                  coverFit={(p.coverFit as any) ?? "cover"}
+                  coverPosition={(p.coverPosition as any) ?? "center"}
+                />
+              </article>
             ))}
           </div>
 
