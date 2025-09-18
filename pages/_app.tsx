@@ -1,15 +1,16 @@
+// pages/_app.tsx
 "use client";
 
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-import { ThemeProvider } from "@/lib/ThemeContext";     // <-- named import
-import { pageview, gaEnabled, gaEvent } from "@/lib/gtag";
+import Script from "next/script";
+import { ThemeProvider } from "@/lib/ThemeContext";
+import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 import { sans, serif, cursive } from "@/lib/fonts";
 import "@/styles/globals.css";
 
-// Both components must default-export (see above)
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 const ThemeToggle    = dynamic(() => import("@/components/ThemeToggle"),    { ssr: false });
 
@@ -32,12 +33,33 @@ function AnalyticsRouterTracker() {
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <div className={`${sans.variable} ${serif.variable} ${cursive.variable}`}>
+      {/* GA scripts */}
+      {gaEnabled && process.env.NODE_ENV === "production" && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ga-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { anonymize_ip: true, page_path: window.location.pathname });
+            `}
+          </Script>
+        </>
+      )}
+
       <ThemeProvider>
         <AnalyticsRouterTracker />
         <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
-        <div className="fixed right-4 top-4 z-50">
+
+        {/* If your Header already shows a ThemeToggle, delete this block */}
+        <div className="fixed right-4 top-4 z-50 md:hidden">
           <ThemeToggle />
         </div>
+
         <Component {...pageProps} />
       </ThemeProvider>
     </div>
