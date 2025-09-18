@@ -1,9 +1,12 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { siteConfig } from "@/lib/siteConfig";
+import Button from "@/components/ui/Button";
 
 type HeaderProps = { variant?: "light" | "dark" };
 
@@ -17,16 +20,14 @@ const NAV = [
 
 export default function Header({ variant = "light" }: HeaderProps) {
   const [open, setOpen] = React.useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
 
-  // Robust active: exact match OR prefix match for sections (e.g., /blog/[slug])
   const isActive = (href: string) => {
-    const p = router.asPath || router.pathname || "";
-    if (href === "/") return p === "/";
-    return p === href || p.startsWith(href + "/");
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // Lock scroll without jumping; restore on close
+  // Lock scroll when mobile nav is open
   React.useEffect(() => {
     if (!open) return;
     const y = window.scrollY;
@@ -69,8 +70,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       role="navigation"
       aria-label="Primary"
-      // Expose header height via CSS var so main can offset properly
-      style={{ ["--header-h" as any]: "5rem" }} // 80px default; overridden via media query below
+      style={{ ["--header-h" as any]: "5rem" }}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
         {/* Brand */}
@@ -108,29 +108,27 @@ export default function Header({ variant = "light" }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <a
+            <Button
+              variant="ghost"
+              size="sm"
               href={`mailto:${EMAIL}`}
-              className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
               aria-label="Email Abraham"
             >
               Email
-            </a>
+            </Button>
             {PHONE && (
-              <a
+              <Button
+                variant="ghost"
+                size="sm"
                 href={`tel:${PHONE.replace(/\s+/g, "")}`}
-                className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
                 aria-label="Call Abraham"
               >
                 Call
-              </a>
+              </Button>
             )}
-            <Link
-              href="/contact"
-              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
-              aria-label="Go to contact form"
-            >
+            <Button variant="primary" size="md" href="/contact">
               Enquire
-            </Link>
+            </Button>
             <ThemeToggle />
           </div>
         </div>
@@ -193,35 +191,35 @@ export default function Header({ variant = "light" }: HeaderProps) {
               </li>
             ))}
             <li className="flex items-center gap-4 px-3 pt-3">
-              <a
+              <Button
+                variant="ghost"
+                size="sm"
                 href={`mailto:${EMAIL}`}
                 onClick={() => setOpen(false)}
-                className={`text-base underline-offset-4 hover:underline ${
-                  variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
-                }`}
               >
                 Email
-              </a>
+              </Button>
               {PHONE && (
-                <a
+                <Button
+                  variant="ghost"
+                  size="sm"
                   href={`tel:${PHONE.replace(/\s+/g, "")}`}
                   onClick={() => setOpen(false)}
-                  className={`text-base underline-offset-4 hover:underline ${
-                    variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
-                  }`}
                 >
                   Call
-                </a>
+                </Button>
               )}
             </li>
             <li className="pt-2">
-              <Link
+              <Button
+                variant="primary"
+                size="md"
                 href="/contact"
+                className="w-full justify-center"
                 onClick={() => setOpen(false)}
-                className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
               >
                 Enquire
-              </Link>
+              </Button>
             </li>
           </ul>
         </nav>
@@ -229,9 +227,13 @@ export default function Header({ variant = "light" }: HeaderProps) {
 
       {/* Mobile header height var for layout offset */}
       <style jsx>{`
-        :global(main) { padding-top: var(--header-h, 5rem); }
+        :global(main) {
+          padding-top: var(--header-h, 5rem);
+        }
         @media (max-width: 767px) {
-          :global(header[role="navigation"]) { --header-h: 4rem; } /* 64px on mobile */
+          :global(header[role="navigation"]) {
+            --header-h: 4rem;
+          }
         }
       `}</style>
     </motion.header>

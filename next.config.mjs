@@ -7,18 +7,22 @@ const require = createRequire(import.meta.url);
 
 const relax = process.env.CI_LAX === "1";
 const isAnalyze = process.env.ANALYZE === "true";
+const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || "";
 
-// MDX support
+/* -------------------- MDX -------------------- */
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: { remarkPlugins: [remarkGfm] },
 });
 
+/* --------------- Base Next config ------------- */
 const nextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   reactStrictMode: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+  compress: true,
+  assetPrefix: assetPrefix || undefined,
 
   // CI-only relax (keeps local strict)
   eslint: { ignoreDuringBuilds: relax },
@@ -26,21 +30,71 @@ const nextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
-    dangerouslyAllowSVG: true, // allow SVG via <Image> when needed
+
+    // CSP specifically for Next/Image responses (tightens inline SVG/script risk)
+    contentSecurityPolicy:
+      "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self'; " +
+      "script-src 'none'; style-src 'unsafe-inline'",
+
+    // DO NOT allow arbitrary SVG rendering via <Image/> — safer path.
+    // For inline icons/components, import *.svg as React components via SVGR (see webpack below).
+    // For file-URL usage, append `?url` to the import.
     remotePatterns: [
       { protocol: "https", hostname: "abraham-of-london.netlify.app" },
       { protocol: "https", hostname: "abrahamoflondon.org" },
       { protocol: "https", hostname: "www.abrahamoflondon.org" },
-      // add more CDNs/domains here if you load covers remotely
+      // add future CDNs here, e.g. { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
 
   experimental: {
-    optimizePackageImports: ["framer-motion"], // trims bundle for FM
+    // Cuts bundle size from large libs
+    optimizePackageImports: ["framer-motion", "lucide-react", "date-fns"],
+  },
+
+  // Fine-grained module tweaks
+  modularizeImports: {
+    "lucide-react": { transform: "lucide-react/dist/esm/icons/{{member}}" },
+    "date-fns": { transform: "date-fns/{{member}}" },
+  },
+
+  // SVGR for inline SVG components; keep file-loader via '?url' when needed.
+  webpack: (config, { isServer }) => {
+    // Handle *.svg as React components by default
+    config.module.rules.push({
+      test: /\.svg$/i,
+      resourceQuery: { not: [/url/] }, // *.svg?url => file url
+      use: [
+        {
+          loader: require.resolve("@svgr/webpack"),
+          options: {
+            prettier: false,
+            svgo: true,
+            titleProp: true,
+            ref: true,
+            svgoConfig: {
+              plugins: [
+                { name: "removeViewBox", active: false },
+                { name: "cleanupIDs", active: true },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    // Keep ability to import raw URLs: import iconUrl from './icon.svg?url'
+    config.module.rules.push({
+      test: /\.svg$/i,
+      resourceQuery: /url/,
+      type: "asset/resource",
+    });
+
+    return config;
   },
 };
 
-// Optional bundle analyzer (only when ANALYZE=true and package is present)
+/* --------- Optional bundle analyzer ---------- */
 let withAnalyzer = (cfg) => cfg;
 if (isAnalyze) {
   try {
@@ -52,4 +106,5 @@ if (isAnalyze) {
   }
 }
 
+/* -------------------- Export ------------------ */
 export default withAnalyzer(withMDX(nextConfig));

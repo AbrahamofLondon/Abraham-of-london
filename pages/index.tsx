@@ -1,4 +1,6 @@
 // pages/index.tsx
+"use client";
+
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -8,6 +10,8 @@ import Layout from "@/components/Layout";
 import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
 import EventCard from "@/components/events/EventCard";
+import SectionHeading from "@/components/ui/SectionHeading";
+import Button from "@/components/ui/Button";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
@@ -15,6 +19,7 @@ import type { PostMeta } from "@/types/post";
 import type { EventMeta } from "@/types/events";
 import { motion } from "framer-motion";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
+import { OgHead } from "@/lib/seo";
 
 const HERO = {
   poster: "/assets/images/abraham-of-london-banner.webp",
@@ -25,11 +30,11 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string; // "YYYY-MM-DD" or ISO datetime
+  date: string;
   location: string | null;
   description?: string | null;
-  tags?: string[] | null; // for the subtle "Chatham" chip
-  heroImage?: string; // path under /public
+  tags?: string[] | null;
+  heroImage?: string;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -50,13 +55,15 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
   return (
     <Layout pageTitle="Home" hideCTA>
+      {/* ✅ Centralized meta + OG/Twitter/canonical */}
+      <OgHead
+        title="Abraham of London — Principled Strategy & Enduring Standards"
+        description="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
+        path="/"
+      />
+      {/* keep the image preload separate (outside OgHead) */}
       <Head>
-        <meta
-          name="description"
-          content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
-        />
         <link rel="preload" as="image" href={HERO.poster} />
-        <meta property="og:type" content="website" />
       </Head>
 
       {/* Hero */}
@@ -102,36 +109,28 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               society.
             </motion.p>
 
-            <motion.p
-              className="mt-3 text-xs tracking-wide text-white/70"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              Chatham Rooms available — off the record
-            </motion.p>
-
             <motion.div
               className="mt-8 flex justify-center gap-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <Link
-                href={booksHref}
-                className="rounded-full bg-forest px-6 py-3 text-white shadow-sm transition hover:bg-primary-hover"
-                prefetch={false}
-              >
+              <Button variant="primary" size="lg" href={booksHref}>
                 Explore Books
-              </Link>
-              <Link
-                href={blogHref}
-                className="rounded-full border border-white/80 px-6 py-3 text-white transition hover:bg-white/10"
-                prefetch={false}
-              >
+              </Button>
+              <Button variant="secondary" size="lg" href={blogHref}>
                 Featured Insights
-              </Link>
+              </Button>
             </motion.div>
+
+            <motion.p
+              className="mt-3 text-xs tracking-wide text-white/80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              Chatham Rooms available — off the record
+            </motion.p>
           </div>
         </div>
       </section>
@@ -158,22 +157,22 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
+            <Button
+              variant="secondary"
+              size="sm"
               href={booksHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
-              prefetch={false}
             >
-              Books <span className="ml-1 text-deepCharcoal/60">({booksCount})</span>
-            </Link>
-            <Link
+              Books <span className="ml-1 opacity-60">({booksCount})</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               href={blogHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
               aria-label={`View insights (${postsCount})`}
-              prefetch={false}
             >
-              Insights <span className="ml-1 text-deepCharcoal/60">({postsCount})</span>
-            </Link>
+              Insights <span className="ml-1 opacity-60">({postsCount})</span>
+            </Button>
           </div>
         </div>
       </section>
@@ -181,18 +180,15 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Featured Insights */}
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
-            <Link
-              href={blogHref}
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
-              Read the blog
-            </Link>
-          </header>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeading
+            eyebrow="Editorial"
+            title="Featured Insights"
+            align="left"
+            tone="default"
+            withDivider
+            kicker={<Button variant="ghost" size="sm" href={blogHref}>Read the blog →</Button>}
+          />
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {posts.slice(0, 3).map((p) => (
               <BlogPostCard
                 key={p.slug}
@@ -205,7 +201,6 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
-                // >>> Frame correctly in the grid
                 coverAspect={(p.coverAspect as any) ?? "book"}
                 coverFit={(p.coverFit as any) ?? (p.coverAspect === "book" ? "contain" : "cover")}
                 coverPosition={(p.coverPosition as any) ?? "center"}
@@ -218,18 +213,14 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Featured Books */}
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Books</h2>
-            <Link
-              href={booksHref}
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
-              View all
-            </Link>
-          </header>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeading
+            eyebrow="Catalogue"
+            title="Featured Books"
+            align="left"
+            withDivider
+            kicker={<Button variant="ghost" size="sm" href={booksHref}>View all →</Button>}
+          />
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <BookCard
               slug="fathering-without-fear"
               title="Fathering Without Fear"
@@ -254,53 +245,49 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Upcoming Events */}
       <section className="bg-white px-4 pb-4 pt-2">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-2 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Upcoming Events</h2>
-            <Link
-              href="/events"
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
-              View all
-            </Link>
-          </header>
-          <p className="mb-6 text-xs text-deepCharcoal/60">
-            Select sessions run as Chatham Rooms (off the record).
-          </p>
-
-          {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
-          ) : (
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {eventsTeaser.map((ev) => (
-                <li key={ev.slug}>
-                  <EventCard
-                    slug={ev.slug}
-                    title={ev.title}
-                    date={ev.date}
-                    location={ev.location ?? undefined}
-                    description={ev.description ?? undefined}
-                    tags={ev.tags ?? undefined}
-                    heroImage={ev.heroImage ?? undefined}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+          <SectionHeading
+            eyebrow="Calendar"
+            title="Upcoming Events"
+            subtitle="Select sessions run as Chatham Rooms (off the record)."
+            align="left"
+            withDivider
+            kicker={<Button variant="ghost" size="sm" href="/events">View all →</Button>}
+          />
+          <div className="mt-6">
+            {eventsTeaser.length === 0 ? (
+              <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
+            ) : (
+              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {eventsTeaser.map((ev) => (
+                  <li key={ev.slug}>
+                    <EventCard
+                      slug={ev.slug}
+                      title={ev.title}
+                      date={ev.date}
+                      location={ev.location ?? undefined}
+                      description={ev.description ?? undefined}
+                      tags={ev.tags ?? undefined}
+                      heroImage={ev.heroImage ?? undefined}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Ventures */}
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
-              A portfolio built on craftsmanship, stewardship, and endurance.
-            </p>
-          </header>
-
-          <div className="grid gap-6 md:grid-cols-3">
+          <SectionHeading
+            eyebrow="Ownership"
+            title="Ventures"
+            subtitle="A portfolio built on craftsmanship, stewardship, and endurance."
+            align="left"
+            withDivider
+          />
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
             <Link
               href="/ventures?brand=alomarada"
               className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
@@ -349,11 +336,13 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Testimonials */}
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">What Leaders Say</h2>
-          </header>
-
-          <div className="grid gap-6 md:grid-cols-3">
+          <SectionHeading
+            eyebrow="Proof"
+            title="What Leaders Say"
+            align="left"
+            withDivider
+          />
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
             {[
               { quote: "Clear thinking. Strong standards. Abraham brings both to the table.", name: "E. K., Founder" },
               { quote: "He positions problems with moral clarity—and then solves them.", name: "M. A., Director" },
@@ -389,13 +378,9 @@ function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
           <div className="mt-8">
-            <Link
-              href="/contact"
-              className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
-              prefetch={false}
-            >
+            <Button variant="primary" size="md" href="/contact">
               Connect with a Strategist
-            </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -410,7 +395,6 @@ export default Home;
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals (including new cover-framing hints) to null for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -427,12 +411,11 @@ export async function getStaticProps() {
 
   const booksCount = getAllBooks(["slug"]).length;
 
-  // Events
   const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags"]);
   const deduped = dedupeEventsByTitleAndDay(
     rawEvents
       .filter(
-        (e): e is Required<Pick<EventMeta, "slug" | "title" | "date">> & Partial<EventMeta> =>
+        (e): e is Required<Pick<any, "slug" | "title" | "date">> & Partial<any> =>
           Boolean(e?.slug && e?.title && e?.date)
       )
       .map((e: any) => ({
@@ -468,7 +451,7 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-    const baseForImage = String(e.slug).replace(/[–—].*$/, ""); // strip after en/em dash
+    const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     return {
       slug: e.slug,

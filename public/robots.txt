@@ -1,3 +1,70 @@
-User-agent: *
-Allow: /
-Sitemap: https://abraham-of-london.netlify.app/sitemap.xml
+// pages/sitemap.xml.ts
+import type { GetServerSideProps } from "next";
+import { getAllPosts } from "@/lib/mdx";
+import { getAllBooks } from "@/lib/books";
+import { getAllEvents } from "@/lib/server/events-data";
+import { absUrl } from "@/lib/siteConfig";
+
+function generateSiteMap({ posts, books, events }: any) {
+  const pages = [
+    { url: absUrl("/"), priority: 1.0, changefreq: "daily" },
+    { url: absUrl("/blog"), priority: 0.8, changefreq: "daily" },
+    { url: absUrl("/books"), priority: 0.8, changefreq: "weekly" },
+    { url: absUrl("/events"), priority: 0.7, changefreq: "weekly" },
+  ];
+
+  const postUrls = posts.map((p: any) => ({
+    url: absUrl(`/blog/${p.slug}`),
+    priority: 0.7,
+    changefreq: "weekly",
+    lastmod: p.date ?? undefined,
+  }));
+
+  const bookUrls = books.map((b: any) => ({
+    url: absUrl(`/books/${b.slug}`),
+    priority: 0.6,
+    changefreq: "monthly",
+  }));
+
+  const eventUrls = events.map((e: any) => ({
+    url: absUrl(`/events/${e.slug}`),
+    priority: 0.6,
+    changefreq: "monthly",
+    lastmod: e.date ?? undefined,
+  }));
+
+  const all = [...pages, ...postUrls, ...bookUrls, ...eventUrls];
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${all
+      .map(
+        (x) => `
+      <url>
+        <loc>${x.url}</loc>
+        ${x.lastmod ? `<lastmod>${new Date(x.lastmod).toISOString()}</lastmod>` : ""}
+        <changefreq>${x.changefreq}</changefreq>
+        <priority>${x.priority}</priority>
+      </url>`
+      )
+      .join("")}
+  </urlset>`;
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  const posts = getAllPosts(["slug", "date"]);
+  const books = getAllBooks(["slug"]);
+  const events = getAllEvents(["slug", "date"]);
+
+  const sitemap = generateSiteMap({ posts, books, events });
+
+  res.setHeader("Content-Type", "text/xml");
+  res.write(sitemap);
+  res.end();
+
+  return { props: {} };
+};
+
+export default function SiteMap() {
+  return null;
+}

@@ -1,23 +1,38 @@
-name: Lighthouse
+name: Lighthouse CI
+
 on:
   pull_request:
+  push:
     branches: [main]
+
 jobs:
   lhci:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npx wait-on@7 http://localhost:3000
-        if: ${{ always() }} # pre-install wait-on for the next step
-      - name: Start site
-        run: npx next start -p 3000 &
-      - name: Wait for site
-        run: npx wait-on@7 http://localhost:3000
-      - name: Lighthouse CI
-        run: npx @lhci/cli@0.13.x autorun --config=.lighthouserc.json --upload.target=temporary-public-storage
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: npm run start -- -p 3000 &
+      
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:3000
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: .lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

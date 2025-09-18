@@ -3,14 +3,13 @@
   publish = ".next"
 
   [build.environment]
-  NODE_VERSION = "20"
-  NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  CI_LAX = "1"
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
+    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+    CI_LAX = "1"
 
 [context.production.environment]
-  NODE_ENV = "production"   # ✅ only on real builds
-
+  NODE_ENV = "production"
 
 [functions]
   node_bundler = "esbuild"
@@ -25,7 +24,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Apex → WWW (hard 301)
+# Apex → WWW redirect
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
@@ -33,14 +32,14 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
-# Canonical host: redirect netlify.app to the main domain
+# Canonical host: Netlify → main domain
 [[redirects]]
   from = "https://abraham-of-london.netlify.app/*"
   to   = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
-# Brand domains → deep link (hard 301)
+# Brand domains → Ventures
 [[redirects]]
   from = "https://endureluxe.com/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -61,7 +60,7 @@
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
 
-# Security headers
+# Global security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -71,7 +70,12 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Static caching
+# Edge middleware
+[[edge_functions]]
+  function = "middleware"
+  path = "/*"
+
+# Cache static assets aggressively
 [[headers]]
   for = "/_next/static/*"
   [headers.values]

@@ -1,6 +1,5 @@
 // pages/blog/index.tsx
 import * as React from "react";
-import Head from "next/head";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
@@ -8,6 +7,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import BlogPostCard from "@/components/BlogPostCard";
 import { getAllPosts } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
+import { OgHead } from "@/lib/seo";
 
 type Props = { posts: PostMeta[] };
 
@@ -34,7 +34,6 @@ export default function BlogIndex({ posts }: Props) {
   const [cat, setCat] = React.useState(initialCat);
   const [sort, setSort] = React.useState<"newest" | "oldest">(initialSort);
 
-  // Keep URL in sync with search/filter/sort without full navigation
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
@@ -68,13 +67,12 @@ export default function BlogIndex({ posts }: Props) {
 
   return (
     <Layout pageTitle="Blog" hideCTA>
-      <Head>
-        <meta
-          name="description"
-          content="Featured insights by Abraham of London — fatherhood, enterprise, society."
-        />
-        <link rel="canonical" href="https://www.abrahamoflondon.org/blog" />
-      </Head>
+      {/* ✅ Centralized meta + OG/Twitter/canonical */}
+      <OgHead
+        title="Insights — Abraham of London"
+        description="Featured insights on standards, stewardship, and strategy."
+        path="/blog"
+      />
 
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12">
@@ -136,7 +134,6 @@ export default function BlogIndex({ posts }: Props) {
                 readTime={p.readTime ?? undefined}
                 category={p.category ?? undefined}
                 tags={p.tags ?? undefined}
-                // Framing props to keep crops consistent with MDX front-matter
                 coverAspect={(p.coverAspect as any) ?? "book"}
                 coverFit={(p.coverFit as any) ?? ((p.coverAspect as any) === "book" ? "contain" : "cover")}
                 coverPosition={(p.coverPosition as any) ?? "center"}
@@ -145,7 +142,7 @@ export default function BlogIndex({ posts }: Props) {
           </div>
 
           {filtered.length === 0 && (
-            <p className="mt-10 text-center text-sm text-deepCharcoal/70">
+            <p className="mt-10 text-center text-deepCharcoal/70 text-sm">
               Nothing matched your search. Try a different phrase or category.
             </p>
           )}
@@ -157,7 +154,6 @@ export default function BlogIndex({ posts }: Props) {
 
 export async function getStaticProps() {
   const posts = getAllPosts();
-  // normalize undefined → null for JSON serialization
   const safe = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -171,6 +167,5 @@ export async function getStaticProps() {
     coverFit: p.coverFit ?? null,
     coverPosition: p.coverPosition ?? null,
   }));
-
   return { props: { posts: safe }, revalidate: 60 };
 }

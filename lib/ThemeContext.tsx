@@ -6,8 +6,8 @@ import * as React from "react";
 export type Theme = "light" | "dark" | "system";
 
 type Ctx = {
-  theme: Theme;                     // user preference
-  resolvedTheme: "light" | "dark";  // actual in-use theme
+  theme: Theme;
+  resolvedTheme: "light" | "dark";
   setThemePref: (t: Theme) => void;
   toggle: () => void;
   mounted: boolean;
@@ -18,103 +18,96 @@ const ThemeContext = React.createContext<Ctx | null>(null);
 const STORAGE_KEY = "theme";
 const DARK_QUERY = "(prefers-color-scheme: dark)";
 
-function applyThemeToDom(resolved: "light" | "dark", pref: Theme | null) {
+function detectSystemDark(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia?.(DARK_QUERY).matches ?? false;
+}
+
+function safeGetInitial(): Theme {
+  if (typeof window === "undefined") return "system";
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    if (stored === "light" || stored === "dark" || stored === "system") {
+      return stored;
+    }
+    const hinted = document.documentElement.getAttribute("data-user-theme") as Theme | null;
+    if (hinted === "light" || hinted === "dark" || hinted === "system") {
+      return hinted;
+    }
+  } catch {
+    // ignore
+  }
+  return "system";
+}
+
+function resolveTheme(pref: Theme): "light" | "dark" {
+  if (pref === "light") return "light";
+  if (pref === "dark") return "dark";
+  return detectSystemDark() ? "dark" : "light";
+}
+
+function applyThemeToDom(resolved: "light" | "dark", pref: Theme) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.classList.toggle("dark", resolved === "dark");
   root.setAttribute("data-theme", resolved);
-  if (pref) root.setAttribute("data-user-theme", pref);
-  else root.removeAttribute("data-user-theme");
-}
-
-function getInitialPref(): Theme {
-  if (typeof document === "undefined") return "system";
-  try {
-    const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? null;
-    if (stored === "light" || stored === "dark" || stored === "system") return stored;
-
-    const hinted = document.documentElement.getAttribute("data-user-theme") as Theme | null;
-    if (hinted === "light" || hinted === "dark" || hinted === "system") return hinted;
-  } catch {}
-  return "system";
+  root.setAttribute("data-user-theme", pref);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = React.useState(false);
-  const [theme, setTheme] = React.useState<Theme>(getInitialPref);
-  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">("light");
+  const [theme, setTheme] = React.useState<Theme>(() => safeGetInitial());
+  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">(() =>
+    resolveTheme(safeGetInitial())
+  );
 
-  // Mount & system listener (with legacy Safari support; no @ts-expect-error)
+  // On mount, sync with DOM + listen to system changes
   React.useEffect(() => {
     setMounted(true);
 
-    try {
-      const hasMM = typeof window !== "undefined" && "matchMedia" in window;
-      const mql = hasMM ? window.matchMedia(DARK_QUERY) : null;
-
-      const sysDark = !!mql?.matches;
-      const initialResolved: "light" | "dark" =
-        theme === "dark" ? "dark" : theme === "light" ? "light" : sysDark ? "dark" : "light";
-
-      setResolvedTheme(initialResolved);
-      applyThemeToDom(initialResolved, theme);
-
-      if (theme === "system" && mql) {
-        const handler = (e: MediaQueryListEvent) => {
-          const next = e.matches ? "dark" : "light";
-          setResolvedTheme(next);
-          applyThemeToDom(next, "system");
-        };
-
-        // Modern
-        mql.addEventListener?.("change", handler);
-
-        // Legacy (Safari)
-        type LegacyMQL = MediaQueryList & {
-          addListener?: (listener: (e: MediaQueryListEvent) => void) => void;
-          removeListener?: (listener: (e: MediaQueryListEvent) => void) => void;
-        };
-        const legacy = mql as LegacyMQL;
-        legacy.addListener?.(handler);
-
-        return () => {
-          mql.removeEventListener?.("change", handler);
-          legacy.removeListener?.(handler);
-        };
+    const mql = window.matchMedia?.(DARK_QUERY);
+    const update = (e: MediaQueryListEvent) => {
+      if (theme === "system") {
+        const next = e.matches ? "dark" : "light";
+        setResolvedTheme(next);
+        applyThemeToDom(next, theme);
       }
-    } catch {
-      // no-op
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    };
 
-  // Persist preference & recompute resolved mode when user changes pref
+    if (theme === "system" && mql) {
+      mql.addEventListener?.("change", update);
+      mql.addListener?.(update); // Safari
+    }
+
+    return () => {
+      mql?.removeEventListener?.("change", update);
+      mql?.removeListener?.(update);
+    };
+  }, [theme]);
+
+  // When theme changes, recompute + persist
   React.useEffect(() => {
-    if (!mounted) return;
+    const next = resolveTheme(theme);
+    setResolvedTheme(next);
 
     try {
       localStorage.setItem(STORAGE_KEY, theme);
-    } catch {}
+    } catch {
+      // ignore
+    }
 
-    const hasMM = typeof window !== "undefined" && "matchMedia" in window;
-    const sysDark = hasMM ? window.matchMedia(DARK_QUERY).matches : false;
-
-    const nextResolved: "light" | "dark" =
-      theme === "dark" ? "dark" : theme === "light" ? "light" : sysDark ? "dark" : "light";
-
-    setResolvedTheme(nextResolved);
-    applyThemeToDom(nextResolved, theme);
-  }, [theme, mounted]);
+    applyThemeToDom(next, theme);
+  }, [theme]);
 
   const setThemePref = React.useCallback((t: Theme) => setTheme(t), []);
   const toggle = React.useCallback(() => {
     setTheme((prev) => {
       if (prev === "dark") return "light";
       if (prev === "light") return "dark";
-      // prev === "system": flip the current resolved
-      return resolvedTheme === "dark" ? "light" : "dark";
+      return detectSystemDark() ? "light" : "dark";
     });
-  }, [resolvedTheme]);
+  }, []);
 
   const value: Ctx = { theme, resolvedTheme, setThemePref, toggle, mounted };
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
