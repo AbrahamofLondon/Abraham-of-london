@@ -23,7 +23,7 @@ const HERO = {
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string;
+  date: string; // "YYYY-MM-DD" or ISO
   location: string | null;
   description?: string | null;
   tags?: string[] | null;
@@ -57,17 +57,25 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero */}
+      {/* Hero — crisp text + higher image quality */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal text-white">
         <div className="absolute inset-0 -z-10">
-          <Image src={HERO.poster} alt="" fill sizes="100vw" className="object-cover opacity-40" priority />
-          {/* stronger gradient for headline legibility */}
+          <Image
+            src={HERO.poster}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            quality={90}
+            className="object-cover"
+          />
+          {/* Stronger gradient for legibility across devices */}
           <div
             className="absolute inset-0"
             aria-hidden="true"
             style={{
               background:
-                "linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.20) 65%, rgba(0,0,0,0.05) 100%)",
+                "linear-gradient(90deg, rgba(0,0,0,.80) 0%, rgba(0,0,0,.60) 35%, rgba(0,0,0,.28) 65%, rgba(0,0,0,.12) 100%)",
             }}
           />
         </div>
@@ -77,13 +85,17 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <p className="mb-3 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest backdrop-blur">
               New • Chatham Rooms available
             </p>
-            <h1 className="font-serif text-4xl font-bold leading-tight sm:text-6xl">
+
+            {/* Force true white + subpixel AA + subtle shadow for Windows crispness */}
+            <h1 className="font-serif text-4xl font-bold leading-tight sm:text-6xl text-cream subpixel-antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,.55)]">
               Principled Strategy for a Legacy That Endures
             </h1>
-            <p className="mt-5 text-base/7 text-white/85">
+
+            <p className="mt-5 text-base/7 text-cream/95 subpixel-antialiased drop-shadow-[0_1px_3px_rgba(0,0,0,.5)]">
               I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and
               society.
             </p>
+
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={booksHref}
@@ -100,19 +112,30 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 Featured Insights
               </Link>
             </div>
-            <p className="mt-3 text-xs tracking-wide text-white/70">Chatham Rooms — off the record</p>
+
+            <p className="mt-3 text-xs tracking-wide text-white/80 subpixel-antialiased">
+              Chatham Rooms — off the record
+            </p>
           </div>
 
-          {/* Accent image */}
+          {/* Accent image block */}
           <div className="relative hidden min-h-[420px] rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur md:block">
             <div className="relative h-full w-full overflow-hidden rounded-xl">
-              <Image src={HERO.poster} alt="" fill sizes="50vw" className="object-cover" priority />
+              <Image
+                src={HERO.poster}
+                alt=""
+                fill
+                sizes="50vw"
+                priority
+                quality={90}
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Counts */}
+      {/* Counts / crumb */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
@@ -268,7 +291,9 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
-            <p className="mt-2 text-sm text-deepCharcoal/70">A portfolio built on craftsmanship, stewardship, and endurance.</p>
+            <p className="mt-2 text-sm text-deepCharcoal/70">
+              A portfolio built on craftsmanship, stewardship, and endurance.
+            </p>
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -347,13 +372,16 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             alt=""
             fill
             sizes="100vw"
-            className="object-cover opacity-20"
             priority={false}
+            quality={85}
+            className="object-cover opacity-20"
           />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-20 text-center">
-          <h3 className="font-serif text-3xl font-semibold text-cream">Build with Clarity. Lead with Standards. Leave a Legacy.</h3>
+          <h3 className="font-serif text-3xl font-semibold text-cream">
+            Build with Clarity. Lead with Standards. Leave a Legacy.
+          </h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-cream/85">
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
@@ -378,6 +406,7 @@ Home.displayName = "Home";
 export async function getStaticProps() {
   const posts = getAllPosts();
 
+  // Normalize optionals for JSON serialization (and pass cover framing hints through)
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
@@ -440,7 +469,7 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-    const baseForImage = String(e.slug).replace(/[–—].*$/, "");
+    const baseForImage = String(e.slug).replace(/[–—].*$/, ""); // strip after en/em dash
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     return {
       slug: e.slug,

@@ -23,16 +23,24 @@
 
   /* Sticky CTA: height published by component */
   --sticky-cta-h: 0px;
+
+  /* Fluid type scale */
+  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1.0rem);
+  --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
+  --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
+  --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
+  --step-3:  clamp(1.95rem, 1.66rem + 1.30vw, 2.40rem);
+  --step-4:  clamp(2.35rem, 1.98rem + 1.80vw, 3.00rem);
 }
 
 .dark {
-  --color-primary: #047857;          /* emerald-700 */
+  --color-primary: #047857;
   --color-primary-hover: #059669;
   --color-on-primary: #ffffff;
   --color-on-primary-hover: #f5f5f0;
 
-  --color-secondary: #333333;        /* deepCharcoal (bg) */
-  --color-on-secondary: #f5f5f0;     /* cream (text) */
+  --color-secondary: #333333;
+  --color-on-secondary: #f5f5f0;
 
   --color-accent: #d4af37;
   --color-accent-hover: #b89b2f;
@@ -58,16 +66,9 @@ body {
 }
 
 /* Reserve space for the Sticky CTA so it never covers content */
-main {
-  padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px)));
-}
+main { padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px))); }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
   color: var(--color-primary);
 }
@@ -81,9 +82,7 @@ a {
   text-decoration: none;
   transition: color 0.25s ease;
 }
-a:hover {
-  color: var(--color-accent);
-}
+a:hover { color: var(--color-accent); }
 
 /* Cards / Buttons */
 .card {
@@ -99,46 +98,23 @@ a:hover {
 
 /* Premium effects */
 .shimmer-text {
-  background: linear-gradient(
-    90deg,
-    var(--color-accent) 0%,
-    #fff8dc 25%,
-    var(--color-accent) 50%,
-    #fff8dc 75%,
-    var(--color-accent) 100%
-  );
+  background: linear-gradient(90deg, var(--color-accent) 0%, #fff8dc 25%, var(--color-accent) 50%, #fff8dc 75%, var(--color-accent) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 3s linear infinite;
   display: inline-block;
 }
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-.fade-up {
-  opacity: 0;
-  transform: translateY(12px);
-  animation: fadeUp 0.8s ease forwards;
-}
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
+.fade-up { opacity: 0; transform: translateY(12px); animation: fadeUp 0.8s ease forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
 /* Luxury underline link */
-a.luxury-link {
-  position: relative;
-  color: var(--color-primary);
-}
+a.luxury-link { position: relative; color: var(--color-primary); }
 a.luxury-link::after {
-  content: "";
-  position: absolute;
-  left: 0; bottom: -2px;
-  width: 0; height: 2px;
-  background-color: var(--color-accent);
-  transition: width 0.3s ease;
+  content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 2px;
+  background-color: var(--color-accent); transition: width 0.3s ease;
 }
 a.luxury-link:hover::after { width: 100%; }
 
@@ -149,11 +125,7 @@ svg:not([width]):not([height]) { width: 1em; height: 1em; }
 .icon-lg { width: 2rem; height: 2rem; }
 
 /* Responsive Images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+img { max-width: 100%; height: auto; display: block; }
 
 /* Responsive type */
 @media (max-width: 768px) {
@@ -183,17 +155,7 @@ img {
   }
 }
 
-/* ---------- Reading experience polish (drop-in) ---------- */
-
-/* Fluid type scale (safe, new vars) */
-:root {
-  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1.0rem);
-  --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
-  --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
-  --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
-  --step-3:  clamp(1.95rem, 1.66rem + 1.30vw, 2.40rem);
-  --step-4:  clamp(2.35rem, 1.98rem + 1.80vw, 3.00rem);
-}
+/* ---------- Reading experience polish ---------- */
 
 /* Tailwind Typography (.prose) tuned to your palette */
 .prose {
@@ -205,7 +167,6 @@ img {
   --tw-prose-quote-borders: var(--color-lightGrey);
   --tw-prose-bullets: #9ca3af;
 }
-
 .dark .prose {
   --tw-prose-body: var(--color-on-primary);
   --tw-prose-headings: var(--color-on-primary);
@@ -216,11 +177,7 @@ img {
 }
 
 /* Heading rhythm inside prose */
-.prose h1 {
-  font-size: var(--step-4);
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
+.prose h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -0.01em; }
 .prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -0.01em; }
 .prose h3 { font-size: var(--step-2); line-height: 1.2; }
 .prose h4 { font-size: var(--step-1); line-height: 1.25; }
@@ -245,22 +202,11 @@ img {
 }
 
 /* Nicer text selection + focus */
-::selection {
-  background: color-mix(in oklab, var(--color-accent) 85%, white);
-  color: var(--color-on-accent);
-}
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
+::selection { background: color-mix(in oklab, var(--color-accent) 85%, white); color: var(--color-on-accent); }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 6px; }
 
 /* Respect Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
-  .shimmer-text {
-    animation: none !important;
-    -webkit-text-fill-color: currentColor;
-    background: none;
-  }
+  .shimmer-text { animation: none !important; -webkit-text-fill-color: currentColor; background: none; }
 }
