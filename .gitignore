@@ -51,8 +51,6 @@ Thumbs.db
 # Local Netlify folder
 .netlify
 
-*.mp4
 *.mp3
 *.wav
-*.jpg
 
