@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { siteConfig } from "@/lib/siteConfig";
 
-// lazy-load the palette so it doesn't affect TTFB
+// Lazy-load the command palette so it doesn't affect TTFB
 const SearchPalette = dynamic(() => import("./SearchPalette"), { ssr: false });
 
 type HeaderProps = { variant?: "light" | "dark" };
@@ -71,7 +71,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
     };
   }, [open]);
 
-  // ⌘K / Ctrl-K to open search
+  // ⌘K / Ctrl + K to open search
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mac = navigator.platform.toUpperCase().includes("MAC");
@@ -86,12 +86,11 @@ export default function Header({ variant = "light" }: HeaderProps) {
   }, []);
 
   const lightShell = scrolled ? "bg-white/85 border-black/10 shadow-sm" : "bg-white/70 border-black/10";
-  const darkShell  = scrolled ? "bg-black/60 border-white/10 shadow-sm" : "bg-black/50 border-white/10";
+  const darkShell = scrolled ? "bg-black/60 border-white/10 shadow-sm" : "bg-black/50 border-white/10";
   const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
 
-  const linkBase = variant === "dark"
-    ? "text-cream/80 hover:text-cream"
-    : "text-deepCharcoal/80 hover:text-deepCharcoal";
+  const linkBase =
+    variant === "dark" ? "text-cream/80 hover:text-cream" : "text-deepCharcoal/80 hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
@@ -113,11 +112,12 @@ export default function Header({ variant = "light" }: HeaderProps) {
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         role="navigation"
         aria-label="Primary"
-        // Header height CSS var used to offset <main>
+        {/* Header height CSS var used to offset <main> */}
         style={{ ["--header-h" as any]: scrolled ? "4rem" : "5rem" }}
       >
         <nav
           className="mx-auto flex max-w-7xl items-center justify-between px-4"
+          {/* Smoothly animate the bar height */}
           style={{ height: scrolled ? "3.75rem" : "5rem" }}
         >
           {/* Brand */}
@@ -202,8 +202,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
               }`}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
-                <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" />
               </svg>
             </button>
             <ThemeToggle />
@@ -215,4 +215,100 @@ export default function Header({ variant = "light" }: HeaderProps) {
               className={`inline-flex items-center justify-center rounded-md border p-2 ${
                 variant === "dark" ? "border-white/20 text-cream" : "border-black/20 text-deepCharcoal"
               }`}
-           
+            >
+              <span className="sr-only">Toggle navigation</span>
+              {!open ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile drawer */}
+        <div
+          id="mobile-nav"
+          className={`md:hidden ${open ? "block" : "hidden"} ${
+            variant === "dark" ? "bg-black/80" : "bg-white/95"
+          } border-t ${variant === "dark" ? "border-white/10" : "border-black/10"} backdrop-blur`}
+        >
+          <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile Primary">
+            <ul className="grid gap-2">
+              {NAV.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`block rounded-md px-3 py-2 text-base font-medium ${
+                      isActive(item.href)
+                        ? variant === "dark"
+                          ? "bg-white/10 text-cream"
+                          : "bg-black/5 text-deepCharcoal"
+                        : variant === "dark"
+                        ? "text-cream/80 hover:bg-white/10 hover:text-cream"
+                        : "text-deepCharcoal/80 hover:bg-black/5 hover:text-deepCharcoal"
+                    }`}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="flex items-center gap-4 px-3 pt-3">
+                <a
+                  href={`mailto:${EMAIL}`}
+                  onClick={() => setOpen(false)}
+                  className={`text-base underline-offset-4 hover:underline ${
+                    variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                  }`}
+                >
+                  Email
+                </a>
+                {PHONE && (
+                  <a
+                    href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                    onClick={() => setOpen(false)}
+                    className={`text-base underline-offset-4 hover:underline ${
+                      variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                    }`}
+                  >
+                    Call
+                  </a>
+                )}
+              </li>
+              <li className="pt-2">
+                <Link
+                  href="/contact"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
+                >
+                  Enquire
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        {/* Offset main by header height var */}
+        <style jsx>{`
+          :global(main) {
+            padding-top: var(--header-h, 5rem);
+          }
+          @media (max-width: 767px) {
+            :global(header[role="navigation"]) {
+              --header-h: ${scrolled ? "3.5rem" : "4rem"};
+            }
+          }
+        `}</style>
+      </motion.header>
+
+      {/* Command palette (lazy) */}
+      <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
+  );
+}
