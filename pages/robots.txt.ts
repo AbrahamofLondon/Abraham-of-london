@@ -1,16 +1,23 @@
 // pages/robots.txt.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { GetServerSideProps } from "next";
 
-const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const body = [
+    "User-agent: *",
+    "Allow: /",
+    `Sitemap: ${ORIGIN}/sitemap.xml`,
+    `Host: ${ORIGIN.replace(/^https?:\/\//, "")}`,
+  ].join("\n");
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  res.status(200).send(
-    [
-      "User-agent: *",
-      "Allow: /",
-      `Sitemap: ${ORIGIN}/sitemap.xml`,
-      `Host: ${ORIGIN.replace(/^https?:\/\//, "")}`,
-    ].join("\n")
-  );
+  res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  res.write(body);
+  res.end();
+
+  return { props: {} };
+};
+
+export default function Robots() {
+  return null;
 }
