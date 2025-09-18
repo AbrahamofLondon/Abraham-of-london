@@ -1,5 +1,7 @@
+if (typeof window !== "undefined") {
+  throw new Error("This module is server-only");
+}
 import type { NextApiRequest, NextApiResponse } from "next";
-import "server-only"; // guards against client bundling
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";

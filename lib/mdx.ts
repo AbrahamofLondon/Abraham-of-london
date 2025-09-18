@@ -1,9 +1,11 @@
+if (typeof window !== "undefined") {
+  throw new Error("This module is server-only");
+}
 // lib/mdx.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import type { PostMeta } from "@/types/post";
-import "server-only";
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
