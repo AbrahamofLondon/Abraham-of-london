@@ -1,5 +1,8 @@
+if (typeof window !== "undefined") {
+  throw new Error("This module is server-only");
+}
 // lib/server/events-data.ts
-import "server-only";
+
 export interface EventMeta {
   slug: string;
   title: string;
