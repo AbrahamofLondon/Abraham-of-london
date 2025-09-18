@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import "server-only";
 
 export interface BookMeta {
   slug: string;

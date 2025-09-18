@@ -1,4 +1,5 @@
 // lib/server/events-data.ts
+import "server-only";
 export interface EventMeta {
   slug: string;
   title: string;
