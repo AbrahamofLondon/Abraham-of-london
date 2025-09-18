@@ -1,64 +1,72 @@
+// components/ui/Button.tsx
 import * as React from "react";
-import Link from "next/link";
 import clsx from "clsx";
+import Link from "next/link";
 
-type ButtonBaseProps = {
-  children: React.ReactNode;
+type Variant = "primary" | "secondary" | "ghost";
+type Size = "sm" | "md" | "lg";
+
+type Props = {
+  variant?: Variant;
+  size?: Size;
   className?: string;
-  variant?: "primary" | "secondary" | "ghost";
-  size?: "sm" | "md" | "lg";
-  ariaLabel?: string;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+  children: React.ReactNode;
+  href?: string;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className" | "color" | "href"> &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "className" | "color" | "href">;
 
-type ButtonLinkProps = ButtonBaseProps & {
-  href: string;
-} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">;
-
-type ButtonProps = ButtonBaseProps | ButtonLinkProps;
-
-const variantCls = {
+const variantCls: Record<Variant, string> = {
   primary:
-    "bg-forest text-white hover:bg-forest/90 focus-visible:ring-forest/30",
+    "rounded-full bg-forest text-white hover:bg-forest/90 focus-visible:ring-forest/30",
   secondary:
-    "border border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite focus-visible:ring-deepCharcoal/20",
+    "rounded-full border border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite focus-visible:ring-deepCharcoal/30",
   ghost:
-    "text-deepCharcoal/80 hover:text-deepCharcoal hover:bg-warmWhite focus-visible:ring-deepCharcoal/20",
+    "rounded-full text-deepCharcoal hover:bg-warmWhite border border-transparent focus-visible:ring-deepCharcoal/20",
 };
 
-const sizeCls = {
-  sm: "px-3 py-1.5 text-xs rounded-full",
-  md: "px-4 py-2 text-sm rounded-full",
-  lg: "px-5 py-2.5 text-base rounded-full",
+const sizeCls: Record<Size, string> = {
+  sm: "px-3 py-1.5 text-xs",
+  md: "px-4 py-2 text-sm",
+  lg: "px-5 py-2.5 text-base",
 };
 
-export default function Button(props: ButtonProps) {
-  const {
-    children,
-    className,
-    variant = "primary",
-    size = "md",
-    ariaLabel,
-    ...rest
-  } = props as any;
-
+export default function Button({
+  variant = "primary",
+  size = "md",
+  className,
+  href,
+  children,
+  ...rest
+}: Props) {
   const classes = clsx(
-    "inline-flex items-center justify-center font-medium outline-none transition focus-visible:ring-2",
+    "inline-flex items-center justify-center font-medium outline-none transition",
+    "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+    "disabled:opacity-60 disabled:cursor-not-allowed",
     variantCls[variant],
     sizeCls[size],
     className
   );
 
-  if ("href" in props && props.href) {
-    const { href, ...aRest } = rest;
+  if (href) {
+    const isExternal =
+      /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
+    if (isExternal) {
+      return (
+        <a href={href} className={classes} {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+          {children}
+        </a>
+      );
+    }
+    // Internal route → Next Link
     return (
-      <Link href={href} className={classes} aria-label={ariaLabel} {...(aRest as any)}>
+      <Link href={href} className={classes} {...(rest as any)}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button className={classes} aria-label={ariaLabel} {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
+    <button className={classes} {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
       {children}
     </button>
   );
