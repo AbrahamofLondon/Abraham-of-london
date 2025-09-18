@@ -182,3 +182,85 @@ img {
     background-size: 18px 18px;
   }
 }
+
+/* ---------- Reading experience polish (drop-in) ---------- */
+
+/* Fluid type scale (safe, new vars) */
+:root {
+  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1.0rem);
+  --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
+  --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
+  --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
+  --step-3:  clamp(1.95rem, 1.66rem + 1.30vw, 2.40rem);
+  --step-4:  clamp(2.35rem, 1.98rem + 1.80vw, 3.00rem);
+}
+
+/* Tailwind Typography (.prose) tuned to your palette */
+.prose {
+  --tw-prose-body: var(--color-on-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-primary);
+  --tw-prose-quotes: var(--color-on-secondary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+  --tw-prose-bullets: #9ca3af;
+}
+
+.dark .prose {
+  --tw-prose-body: var(--color-on-primary);
+  --tw-prose-headings: var(--color-on-primary);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-on-primary);
+  --tw-prose-quotes: var(--color-on-primary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+}
+
+/* Heading rhythm inside prose */
+.prose h1 {
+  font-size: var(--step-4);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -0.01em; }
+.prose h3 { font-size: var(--step-2); line-height: 1.2; }
+.prose h4 { font-size: var(--step-1); line-height: 1.25; }
+
+/* Body copy + lists in prose */
+.prose p, .prose li { font-size: var(--step-0); line-height: 1.7; }
+
+/* Balanced images in articles */
+.prose img {
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+/* Pullquote */
+.prose blockquote {
+  font-style: normal;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  padding-left: 1rem;
+  border-left-width: 3px;
+  border-left-color: var(--color-lightGrey);
+}
+
+/* Nicer text selection + focus */
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 85%, white);
+  color: var(--color-on-accent);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .shimmer-text {
+    animation: none !important;
+    -webkit-text-fill-color: currentColor;
+    background: none;
+  }
+}

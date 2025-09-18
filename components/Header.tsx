@@ -17,16 +17,36 @@ const NAV = [
 
 export default function Header({ variant = "light" }: HeaderProps) {
   const [open, setOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
   const router = useRouter();
 
-  // Robust active: exact match OR prefix match for sections (e.g., /blog/[slug])
+  // Active = exact or section prefix (e.g., /blog/[slug])
   const isActive = (href: string) => {
     const p = router.asPath || router.pathname || "";
     if (href === "/") return p === "/";
     return p === href || p.startsWith(href + "/");
   };
 
-  // Lock scroll without jumping; restore on close
+  // Close drawer on route changes
+  React.useEffect(() => {
+    const close = () => setOpen(false);
+    router.events?.on("routeChangeComplete", close);
+    router.events?.on("hashChangeComplete", close);
+    return () => {
+      router.events?.off("routeChangeComplete", close);
+      router.events?.off("hashChangeComplete", close);
+    };
+  }, [router.events]);
+
+  // Track scroll to condense header
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Lock scroll when mobile drawer is open; restore on close
   React.useEffect(() => {
     if (!open) return;
     const y = window.scrollY;
@@ -46,20 +66,24 @@ export default function Header({ variant = "light" }: HeaderProps) {
     };
   }, [open]);
 
-  const shell =
-    variant === "dark"
-      ? "bg-black/50 border-white/10 text-cream"
-      : "bg-white/70 border-black/10 text-deepCharcoal";
+  const lightShell = scrolled ? "bg-white/85 border-black/10 shadow-sm" : "bg-white/70 border-black/10";
+  const darkShell  = scrolled ? "bg-black/60 border-white/10 shadow-sm" : "bg-black/50 border-white/10";
+  const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
 
-  const linkBase =
-    variant === "dark"
-      ? "text-cream/80 hover:text-cream"
-      : "text-deepCharcoal/80 hover:text-deepCharcoal";
+  const linkBase = variant === "dark"
+    ? "text-cream/80 hover:text-cream"
+    : "text-deepCharcoal/80 hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
   const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
   const PHONE = (siteConfig as any)?.phone || "";
+
+  const brandClass = [
+    "font-serif font-bold transition-all duration-200",
+    scrolled ? "text-[1.35rem] md:text-[1.75rem]" : "text-2xl md:text-3xl",
+    variant === "dark" ? "text-cream" : "text-deepCharcoal",
+  ].join(" ");
 
   return (
     <motion.header
@@ -69,18 +93,16 @@ export default function Header({ variant = "light" }: HeaderProps) {
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       role="navigation"
       aria-label="Primary"
-      // Expose header height via CSS var so main can offset properly
-      style={{ ["--header-h" as any]: "5rem" }} // 80px default; overridden via media query below
+      // Header height CSS var used to offset <main>
+      style={{ ["--header-h" as any]: scrolled ? "4rem" : "5rem" }}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
+      <nav
+        className="mx-auto flex max-w-7xl items-center justify-between px-4"
+        // Smoothly animate the bar height with inline style (overrides any class height)
+        style={{ height: scrolled ? "3.75rem" : "5rem" }}
+      >
         {/* Brand */}
-        <Link
-          href="/"
-          className={`text-2xl md:text-3xl font-serif font-bold ${
-            variant === "dark" ? "text-cream" : "text-deepCharcoal"
-          }`}
-          aria-label="Home"
-        >
+        <Link href="/" aria-label="Home" className={brandClass}>
           Abraham of London
         </Link>
 
@@ -194,7 +216,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
             ))}
             <li className="flex items-center gap-4 px-3 pt-3">
               <a
-                href={`mailto:${EMAIL}`}
+                href={`mailto:${siteConfig?.email || "info@abrahamoflondon.org"}`}
                 onClick={() => setOpen(false)}
                 className={`text-base underline-offset-4 hover:underline ${
                   variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
@@ -202,9 +224,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
               >
                 Email
               </a>
-              {PHONE && (
+              {(siteConfig as any)?.phone && (
                 <a
-                  href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                  href={`tel:${String((siteConfig as any).phone).replace(/\s+/g, "")}`}
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
                     variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
@@ -227,11 +249,11 @@ export default function Header({ variant = "light" }: HeaderProps) {
         </nav>
       </div>
 
-      {/* Mobile header height var for layout offset */}
+      {/* Offset main by header height var */}
       <style jsx>{`
         :global(main) { padding-top: var(--header-h, 5rem); }
         @media (max-width: 767px) {
-          :global(header[role="navigation"]) { --header-h: 4rem; } /* 64px on mobile */
+          :global(header[role="navigation"]) { --header-h: ${scrolled ? "3.5rem" : "4rem"}; }
         }
       `}</style>
     </motion.header>
