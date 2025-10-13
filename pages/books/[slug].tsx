@@ -1,3 +1,4 @@
+// pages/books/[slug].tsx
 import type { GetStaticProps, GetStaticPaths } from "next";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -6,22 +7,20 @@ import remarkGfm from "remark-gfm";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
-import MDXComponents from "@/components/MDXComponents";
+// ⬇️ use the named export
+import { MDXComponents } from "@/components/MDXComponents";
 import { getBookBySlug, getBookSlugs } from "@/lib/books";
 
-// Client-only comments widget (optional)
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-// ✅ Exists in your repo
 const DEFAULT_BOOK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
 
-/** JSON-serializable meta (no `undefined`) */
 type PageMetaSafe = {
   slug: string;
   title: string;
   author: string | null;
   excerpt: string | null;
-  coverImage: string;         // always a string (falls back to DEFAULT_BOOK_COVER)
+  coverImage: string;
   buyLink: string | null;
   genre: string | null;
   downloadPdf: string | null;
@@ -41,7 +40,6 @@ export default function BookPage({ book }: Props) {
   return (
     <Layout pageTitle={meta.title}>
       <article className="prose prose-lg mx-auto max-w-3xl px-4 py-10 md:py-16">
-        {/* Cover */}
         <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg shadow">
           <Image
             src={meta.coverImage}
@@ -53,21 +51,15 @@ export default function BookPage({ book }: Props) {
           />
         </div>
 
-        <h1 className="font-serif text-4xl md:text-5xl text-forest mb-2">{meta.title}</h1>
+        <h1 className="mb-2 font-serif text-4xl text-forest md:text-5xl">{meta.title}</h1>
 
-        {meta.author && (
-          <p className="mb-6 text-sm text-deepCharcoal/70">By {meta.author}</p>
-        )}
-
-        {meta.excerpt && (
-          <p className="mb-8 text-base text-deepCharcoal/85">{meta.excerpt}</p>
-        )}
+        {meta.author && <p className="mb-6 text-sm text-deepCharcoal/70">By {meta.author}</p>}
+        {meta.excerpt && <p className="mb-8 text-base text-deepCharcoal/85">{meta.excerpt}</p>}
 
         <div className="mt-8">
           <MDXRemote {...content} components={MDXComponents} />
         </div>
 
-        {/* Optional: actions */}
         <div className="mt-8 flex flex-wrap gap-3">
           {meta.buyLink && (
             <a
@@ -97,15 +89,15 @@ export default function BookPage({ book }: Props) {
           )}
         </div>
 
-        {/* Optional: comments */}
         <div className="mt-12">
-          <a href="#comments" className="luxury-link text-sm">Join the discussion ↓</a>
+          <a href="#comments" className="luxury-link text-sm">
+            Join the discussion ↓
+          </a>
         </div>
         <section id="comments" className="mt-16">
           <Comments
             repo="AbrahamofLondon/abrahamoflondon-comments"
             issueTerm="pathname"
-            // label="comments"
             useClassDarkMode
           />
         </section>
@@ -115,11 +107,9 @@ export default function BookPage({ book }: Props) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getBookSlugs(); // e.g. ["fathering-without-fear.mdx", ...]
+  const slugs = getBookSlugs();
   return {
-    paths: slugs.map((slug) => ({
-      params: { slug: slug.replace(/\.mdx?$/i, "") },
-    })),
+    paths: slugs.map((slug) => ({ params: { slug: slug.replace(/\.mdx?$/i, "") } })),
     fallback: "blocking",
   };
 };
@@ -127,7 +117,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug ?? "");
 
-  // Pull everything we need (content + meta), tolerate missing fields
   const raw = getBookBySlug(slug, [
     "slug",
     "title",
@@ -152,11 +141,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     content: string;
   }>;
 
-  if (!raw?.slug || raw.title === "Book Not Found") {
-    return { notFound: true };
-  }
+  if (!raw?.slug || raw.title === "Book Not Found") return { notFound: true };
 
-  // ✅ Normalize to JSON-safe values (no `undefined`)
   const meta: PageMetaSafe = {
     slug: String(raw.slug),
     title: raw.title ?? "Untitled",
@@ -177,8 +163,5 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
   });
 
-  return {
-    props: { book: { meta, content: mdx } },
-    revalidate: 60,
-  };
+  return { props: { book: { meta, content: mdx } }, revalidate: 60 };
 };
