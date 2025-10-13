@@ -21,7 +21,7 @@ const abs = (path: string): string => {
 };
 
 /* ---------- Animations ---------- */
-const EASE_OUT = [0.16, 1, 0.3, 1] as const; // smooth easeOut curve
+const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98 },
@@ -34,20 +34,14 @@ const containerVariants: Variants = {
 
 const formVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.6, ease: EASE_OUT, staggerChildren: 0.1 },
-  },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: EASE_OUT, staggerChildren: 0.1 } },
 };
 
-const itemVariants: Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1 },
-};
+const itemVariants: Variants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
 export default function ContactPage() {
-  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formStatus, setFormStatus] =
+    useState<"idle" | "submitting" | "success" | "error">("idle");
   const [formError, setFormError] = useState<string>("");
 
   const structuredData = useMemo(() => {
@@ -66,7 +60,6 @@ export default function ContactPage() {
         email: siteConfig.email,
       },
     };
-
     const breadcrumb = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -75,7 +68,6 @@ export default function ContactPage() {
         { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
       ],
     };
-
     return [contactPageSchema, breadcrumb];
   }, []);
 
@@ -100,6 +92,10 @@ export default function ContactPage() {
         email: String(formData.get("email") || ""),
         subject: "Website contact",
         message: String(formData.get("message") || ""),
+        teaserOptIn: formData.get("teaserOptIn") === "on",
+        newsletterOptIn: formData.get("newsletterOptIn") === "on",
+        // optional source hint
+        source: "contact-page",
         "bot-field": "",
       };
 
@@ -135,43 +131,25 @@ export default function ContactPage() {
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_URL}/contact`} />
-
         <meta property="og:title" content="Contact | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Reach out for collaborations, speaking engagements, and media opportunities."
-        />
+        <meta property="og:description" content="Reach out for collaborations, speaking engagements, and media opportunities." />
         <meta property="og:url" content={`${SITE_URL}/contact`} />
-        <meta
-          property="og:image"
-          content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")}
-        />
+        <meta property="og:image" content={abs(siteConfig.ogImage || "/assets/images/social/og-image.jpg")} />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:image"
-          content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")}
-        />
-
+        <meta name="twitter:image" content={abs(siteConfig.twitterImage || "/assets/images/social/twitter-image.webp")} />
         {structuredData.map((schema, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
         ))}
       </Head>
 
-      {/* NOTE: Layout already renders <main>, so no extra <main> here */}
-      <motion.div
-        className="relative min-h-screen overflow-hidden bg-gray-50 py-20"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
+      <motion.div className="relative min-h-screen overflow-hidden bg-gray-50 py-20"
+        initial="hidden" animate="visible" variants={containerVariants}>
         {/* Background pattern */}
         <div className="pointer-events-none absolute inset-0 z-0 opacity-10">
           <div className="pattern-bg" />
         </div>
-
-        {/* Decorative element (served from /public) */}
+        {/* Decorative element */}
         <div className="pointer-events-none absolute right-10 top-10 z-0">
           <div className="relative h-40 w-40 opacity-40 md:h-64 md:w-64">
             <Image src="/assets/images/contact-element.svg" alt="" fill className="object-contain" />
@@ -195,54 +173,42 @@ export default function ContactPage() {
           >
             {/* Honeypot */}
             <p className="hidden">
-              <label>
-                Don’t fill this out if you’re human: <input name="bot-field" />
-              </label>
+              <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
             </p>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                autoComplete="name"
-                disabled={isSubmitting}
-                className="aol-input"
-              />
+              <label htmlFor="name" className="block text-sm font-medium text-deepCharcoal">Name</label>
+              <input id="name" name="name" type="text" required autoComplete="name" disabled={isSubmitting} className="aol-input" />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                disabled={isSubmitting}
-                className="aol-input"
-              />
+              <label htmlFor="email" className="block text-sm font-medium text-deepCharcoal">Email</label>
+              <input id="email" name="email" type="email" required autoComplete="email" disabled={isSubmitting} className="aol-input" />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                required
-                rows={5}
-                disabled={isSubmitting}
-                className="aol-textarea"
-              />
+              <label htmlFor="message" className="block text-sm font-medium text-deepCharcoal">Message</label>
+              <textarea id="message" name="message" required rows={5} disabled={isSubmitting} className="aol-textarea" />
             </motion.div>
+
+            {/* New: teaser + newsletter opt-ins */}
+            <motion.fieldset variants={itemVariants} className="space-y-3 rounded-lg border border-lightGrey/70 p-4">
+              <legend className="px-1 text-sm font-semibold text-deepCharcoal">Extras</legend>
+
+              <label className="flex items-start gap-3 text-sm">
+                <input type="checkbox" name="teaserOptIn" className="mt-1" />
+                <span>
+                  Email me the <strong>Fathering Without Fear — Teaser</strong> (A4/Letter + Mobile PDFs)
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm">
+                <input type="checkbox" name="newsletterOptIn" className="mt-1" />
+                <span>
+                  Add me to updates (chapter drops &amp; launch). <em>No spam; unsubscribe anytime.</em>
+                </span>
+              </label>
+            </motion.fieldset>
 
             <motion.div variants={itemVariants} className="text-center">
               <button type="submit" className="aol-btn" disabled={isSubmitting}>
@@ -266,11 +232,16 @@ export default function ContactPage() {
               role={formStatus === "error" ? "alert" : "status"}
             >
               {formStatus === "success"
-                ? "Message sent successfully!"
+                ? "Thanks—check your inbox!"
                 : formStatus === "error"
                 ? formError || "Failed to send message. Please try again."
                 : " "}
             </motion.p>
+
+            <p className="text-center text-xs text-deepCharcoal/60">
+              By submitting, you agree to our{" "}
+              <a className="underline" href="/privacy">Privacy Policy</a>.
+            </p>
           </motion.form>
         </section>
       </motion.div>
