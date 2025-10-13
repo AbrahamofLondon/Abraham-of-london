@@ -1,73 +1,111 @@
 // components/mdx/ResourcesCTA.tsx
 import Link from "next/link";
+import { CTA_PRESETS } from "./ctas";
 
 type LinkItem = { href: string; label: string; sub?: string };
 
-export type ResourcesCTAProps = {
-  title?: string;
-  reads?: LinkItem[];
-  downloads?: LinkItem[];
-  className?: string;
-};
+export type ResourcesCTAProps =
+  | {
+      /** Use a preset key from CTA_PRESETS (e.g., "fatherhood", "leadership", "entrepreneurship", "community", "justice") */
+      preset: keyof typeof CTA_PRESETS;
+      title?: never;
+      reads?: never;
+      downloads?: never;
+      className?: string;
+    }
+  | {
+    /** Manual mode */
+      preset?: never;
+      title?: string;
+      reads?: LinkItem[];
+      downloads?: LinkItem[];
+      className?: string;
+    };
 
+// Internal posts (these slugs exist)
 const defaultReads: LinkItem[] = [
   { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Court-season clarity" },
   { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
   { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Lead from the inside out" },
 ];
 
+// PDFs that exist today
 const defaultDownloads: LinkItem[] = [
-  { href: "/downloads/Fathers_in_Family_Court_Practical_Pack.pdf", label: "Practical Pack (Family Court)" },
-  { href: "/downloads/Brotherhood_Starter_Kit.pdf", label: "Brotherhood Starter Kit" },
-  { href: "/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf", label: "Leader Guide — First 4 Weeks" },
+  { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
+  { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
+  { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
 ];
 
-export default function ResourcesCTA({
-  title = "Further Reading & Tools",
-  reads = defaultReads,
-  downloads = defaultDownloads,
-  className,
-}: ResourcesCTAProps) {
+function isInternal(href = "") {
+  return href.startsWith("/") && !href.endsWith(".pdf");
+}
+
+export default function ResourcesCTA(props: ResourcesCTAProps) {
+  const data =
+    "preset" in props && props.preset
+      ? CTA_PRESETS[props.preset]
+      : {
+          title: props.title ?? "Further Reading & Tools",
+          reads: props.reads ?? defaultReads,
+          downloads: props.downloads ?? defaultDownloads,
+        };
+
+  if (!data) return null;
+
+  const reads = (data.reads ?? []).filter(Boolean);
+  const downloads = (data.downloads ?? []).filter(Boolean);
+
   return (
     <section
-      className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${className || ""}`}
+      className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${("className" in props && props.className) || ""}`}
       aria-labelledby="resources-cta-title"
     >
       <h3 id="resources-cta-title" className="mb-4 font-serif text-2xl text-forest">
-        {title}
+        {data.title}
       </h3>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
-            Further Reading
-          </h4>
-          <ul className="space-y-2">
-            {reads.map((r) => (
-              <li key={r.href}>
-                <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
-                  {r.label}
-                </Link>
-                {r.sub && <span className="ml-2 text-sm text-deepCharcoal/70">— {r.sub}</span>}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {!!reads.length && (
+          <div>
+            <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
+              Further Reading
+            </h4>
+            <ul className="space-y-2">
+              {reads.map((r) => (
+                <li key={r.href}>
+                  {isInternal(r.href) ? (
+                    <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
+                      {r.label}
+                    </Link>
+                  ) : (
+                    <a href={r.href} className="luxury-link text-forest" target="_blank" rel="noopener noreferrer">
+                      {r.label}
+                    </a>
+                  )}
+                  {r.sub && <span className="ml-2 text-sm text-deepCharcoal/70">— {r.sub}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-        <div>
-          <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
-            Downloads
-          </h4>
-          <ul className="space-y-2">
-            {downloads.map((d) => (
-              <li key={d.href}>
-                <a href={d.href} className="luxury-link text-forest" rel="noopener">
-                  {d.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {!!downloads.length && (
+          <div>
+            <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
+              Downloads
+            </h4>
+            <ul className="space-y-2">
+              {downloads.map((d) => (
+                <li key={d.href}>
+                  {/* PDFs served from /public/downloads – make them download-friendly */}
+                  <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
+                    {d.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );
