@@ -9,6 +9,7 @@ import MDXComponents from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
 import SEOHead from "@/components/SEOHead";
+import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
@@ -94,6 +95,11 @@ export default function BlogPost({ post }: Props) {
   const authorName =
     typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
+  // Auto-append resources for Fatherhood posts (or when tagged "fatherhood")
+  const isFatherhood =
+    category === "Fatherhood" ||
+    (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
+
   return (
     <Layout pageTitle={title}>
       {/* Centralized SEO + JSON-LD */}
@@ -141,6 +147,8 @@ export default function BlogPost({ post }: Props) {
           <div className="prose prose-lg max-w-none text-deepCharcoal">
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
+
+          {isFatherhood && <ResourcesCTA className="mt-12" />}
 
           <div className="mt-12">
             <a href="#comments" className="luxury-link text-sm">

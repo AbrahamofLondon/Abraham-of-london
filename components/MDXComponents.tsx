@@ -1,3 +1,4 @@
+// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -7,8 +8,9 @@ import PullLine from "@/components/mdx/PullLine";
 import Verse from "@/components/mdx/Verse";
 import Rule from "@/components/mdx/Rule";
 import Note from "@/components/mdx/Note";
+import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 
-/* utils */
+/* ---------- utils ---------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 function toNumber(v?: number | string) {
   if (v == null) return undefined;
@@ -17,7 +19,7 @@ function toNumber(v?: number | string) {
   return Number.isFinite(n) ? n : undefined;
 }
 
-/* MDX <a> */
+/* ---------- MDX <a> ---------- */
 const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) => {
   const base =
     "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
@@ -45,7 +47,7 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
   );
 };
 
-/* MDX <img> -> next/image */
+/* ---------- MDX <img> -> next/image ---------- */
 type MDXImgProps = Omit<
   React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
   "src"
@@ -111,7 +113,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
   );
 };
 
-/* YouTube + safe iframe */
+/* ---------- YouTube + safe iframe ---------- */
 type YouTubeProps = { id?: string; url?: string; title?: string; className?: string; start?: number };
 
 function parseYouTubeId(urlOrId?: string): string | null {
@@ -201,17 +203,19 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
   );
 };
 
+/* ---------- export to MDX ---------- */
 export const MDXComponents: MDXComponentsType = {
   a: A,
   img: (props) => <Img {...(props as any)} />,
   YouTube,
   iframe: Iframe,
   EventJsonLd,
-  // Custom MDX elements (no imports needed inside .mdx files)
+  // Custom MDX elements (usable directly in .mdx)
   PullLine,
   Verse,
   Rule,
   Note,
+  ResourcesCTA,
 };
 
 export default MDXComponents;
