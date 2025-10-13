@@ -10,48 +10,34 @@ export type Achievement = {
   title: string;
   description?: string;
   year: number;
-  href?: string; // optional deep link
+  href?: string;
 };
 
 type Props = {
   bio: string;
   achievements?: Achievement[];
-  /** Optional; defaults to siteConfig.authorImage */
   portraitSrc?: string;
   portraitAlt?: string;
-  /** If true, Next/Image preloads the portrait */
   priority?: boolean;
   className?: string;
   id?: string;
 };
 
-/** Use a cubic-bezier so TS is happy about Transition["ease"] */
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
 
 const container: Variants = {
   hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: EASE },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
 };
 
 const list: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { delay: 0.1, staggerChildren: 0.08 },
-  },
+  visible: { opacity: 1, transition: { delay: 0.1, staggerChildren: 0.08 } },
 };
 
 const item: Variants = {
   hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: EASE },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
 };
 
 export default function AboutSection({
@@ -65,7 +51,6 @@ export default function AboutSection({
 }: Props) {
   const [src, setSrc] = React.useState(portraitSrc);
 
-  // Keep local src in sync if prop changes
   React.useEffect(() => setSrc(portraitSrc), [portraitSrc]);
 
   return (
@@ -144,7 +129,7 @@ export default function AboutSection({
           )}
         </motion.div>
 
-        {/* Portrait with safe fallback */}
+        {/* Portrait */}
         <motion.div
           variants={container}
           initial="hidden"
