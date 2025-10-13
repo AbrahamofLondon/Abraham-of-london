@@ -1,0 +1,13 @@
+// app/(site)/posts/[slug]/page.tsx
+import PostProse from "@/components/PostProse";
+import { getPost } from "@/lib/content"; // your loader
+
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug);
+  return (
+    <div className="px-4 md:px-6">
+      {/* cover, title, meta… */}
+      <PostProse>{post.content}</PostProse>
+    </div>
+  );
+}

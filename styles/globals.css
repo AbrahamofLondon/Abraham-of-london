@@ -1,9 +1,14 @@
 /* styles/globals.css */
+/* ----------------------------------------------------------
+   Tailwind layers
+---------------------------------------------------------- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- THEME VARIABLES --- */
+/* ----------------------------------------------------------
+   THEME VARIABLES (light + dark)
+---------------------------------------------------------- */
 :root {
   --color-primary: #0b2e1f;          /* forest */
   --color-primary-hover: #047857;    /* emerald-700 */
@@ -25,7 +30,7 @@
   --sticky-cta-h: 0px;
 
   /* Fluid type scale */
-  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1.0rem);
+  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);
   --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
   --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
   --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
@@ -51,26 +56,43 @@
   --color-midGreen: #6bb694;
 }
 
-/* --- BASE --- */
-html,
-body {
+/* ----------------------------------------------------------
+   BASE / RESET / ACCESSIBILITY
+---------------------------------------------------------- */
+html {
+  color-scheme: light dark;
+  hanging-punctuation: first allow-end;
+}
+
+html, body {
   padding: 0;
   margin: 0;
+}
+
+body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: var(--step-0);
+  line-height: 1.7;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Reserve space for the Sticky CTA so it never covers content */
-main { padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px))); }
+main {
+  padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px)));
+}
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
   color: var(--color-primary);
+}
+
+/* Mobile heading tune (avoid shouty tracking) */
+@media (max-width: 768px) {
+  h1 { font-size: 2.35rem; letter-spacing: -0.005em; }
+  h2 { font-size: 1.9rem;  letter-spacing: -0.005em; }
 }
 
 .font-cursive {
@@ -84,33 +106,7 @@ a {
 }
 a:hover { color: var(--color-accent); }
 
-/* Cards / Buttons */
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
-}
-
-/* Premium effects */
-.shimmer-text {
-  background: linear-gradient(90deg, var(--color-accent) 0%, #fff8dc 25%, var(--color-accent) 50%, #fff8dc 75%, var(--color-accent) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-  display: inline-block;
-}
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-.fade-up { opacity: 0; transform: translateY(12px); animation: fadeUp 0.8s ease forwards; }
-@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-/* Luxury underline link */
+/* Luxury underline link (for brand accents) */
 a.luxury-link { position: relative; color: var(--color-primary); }
 a.luxury-link::after {
   content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 2px;
@@ -127,37 +123,101 @@ svg:not([width]):not([height]) { width: 1em; height: 1em; }
 /* Responsive Images */
 img { max-width: 100%; height: auto; display: block; }
 
-/* Responsive type */
-@media (max-width: 768px) {
-  h1 { font-size: 2.5rem; letter-spacing: 0.06em; }
-  h2 { font-size: 2rem; letter-spacing: 0.05em; }
+/* Nicer text selection + focus */
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 90%, white);
+  color: var(--color-on-accent);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
-/* ---- Tailwind component shortcuts used by contact page ---- */
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .shimmer-text { animation: none !important; -webkit-text-fill-color: currentColor; background: none; }
+}
+
+/* ----------------------------------------------------------
+   EFFECTS / UTILITIES
+---------------------------------------------------------- */
+.shimmer-text {
+  background: linear-gradient(90deg, var(--color-accent) 0%, #fff8dc 25%, var(--color-accent) 50%, #fff8dc 75%, var(--color-accent) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+  display: inline-block;
+}
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+.fade-up { opacity: 0; transform: translateY(12px); animation: fadeUp 0.8s ease forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* Article reading width (60–75ch sweet spot) */
+.reading-measure {
+  max-width: 70ch;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2rem);
+}
+
+/* ----------------------------------------------------------
+   CARDS / BUTTONS
+---------------------------------------------------------- */
+.card {
+  border: 1px solid var(--color-lightGrey);
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .card:hover {
+    transition: none !important;
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(27,67,50,0.10) !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   TAILWIND COMPONENT SHORTCUTS
+---------------------------------------------------------- */
 @layer components {
   .aol-input {
-    @apply mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px]
+    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
            focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
            bg-white text-deepCharcoal;
+    border-color: var(--color-lightGrey);
   }
+
   .aol-textarea {
-    @apply mt-1 w-full px-4 py-2 border border-lightGrey rounded-[10px]
+    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
            focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
            bg-white text-deepCharcoal;
+    border-color: var(--color-lightGrey);
   }
+
   .aol-btn {
-    @apply inline-block px-6 py-3 bg-forest text-cream rounded-full
-           hover:bg-forest/90 disabled:opacity-50;
+    @apply inline-block px-6 py-3 rounded-full text-cream;
+    background-color: var(--color-primary);
   }
+  .aol-btn:hover { background-color: color-mix(in oklab, var(--color-primary) 90%, black); }
+
   .pattern-bg {
     background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
     background-size: 18px 18px;
   }
 }
 
-/* ---------- Reading experience polish ---------- */
-
-/* Tailwind Typography (.prose) tuned to your palette */
+/* ----------------------------------------------------------
+   READING EXPERIENCE POLISH (Tailwind Typography)
+---------------------------------------------------------- */
+/* Palette bridge for .prose */
 .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
@@ -167,6 +227,8 @@ img { max-width: 100%; height: auto; display: block; }
   --tw-prose-quote-borders: var(--color-lightGrey);
   --tw-prose-bullets: #9ca3af;
 }
+
+/* Dark parity (works with `dark:prose-invert`) */
 .dark .prose {
   --tw-prose-body: var(--color-on-primary);
   --tw-prose-headings: var(--color-on-primary);
@@ -177,36 +239,81 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* Heading rhythm inside prose */
-.prose h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -0.01em; }
-.prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -0.01em; }
-.prose h3 { font-size: var(--step-2); line-height: 1.2; }
+.prose h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -0.01em; margin-bottom: .5rem; }
+.prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -0.01em; margin-top: 2.2rem; margin-bottom: .6rem; }
+.prose h3 { font-size: var(--step-2); line-height: 1.2; margin-top: 1.8rem; margin-bottom: .4rem; }
 .prose h4 { font-size: var(--step-1); line-height: 1.25; }
 
-/* Body copy + lists in prose */
-.prose p, .prose li { font-size: var(--step-0); line-height: 1.7; }
+/* Lead paragraph after a heading */
+.prose :where(h1 + p, h2 + p) {
+  font-size: var(--step-1);
+  line-height: 1.8;
+  color: color-mix(in oklab, var(--color-on-secondary) 92%, black);
+}
+.dark .prose :where(h1 + p, h2 + p) {
+  color: color-mix(in oklab, var(--color-on-primary) 90%, white);
+}
 
-/* Balanced images in articles */
+/* Body copy + lists */
+.prose p,
+.prose li {
+  font-size: var(--step-0);
+  line-height: 1.75;
+  margin-block: .75rem;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* Lists */
+.prose ul { padding-left: 1.15rem; }
+.prose ul > li::marker { color: var(--color-midGreen); }
+
+/* Links inside prose */
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.18em;
+  transition: color .2s ease, text-decoration-color .2s ease;
+  text-decoration-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+.prose a:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+
+/* Balanced images */
 .prose img {
   border-radius: 0.75rem;
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  margin-block: 1.25rem;
 }
 
-/* Pullquote */
+/* Blockquote */
 .prose blockquote {
   font-style: normal;
   font-size: var(--step-1);
-  line-height: 1.5;
+  line-height: 1.55;
   padding-left: 1rem;
   border-left-width: 3px;
   border-left-color: var(--color-lightGrey);
+  color: color-mix(in oklab, var(--color-on-secondary) 85%, black);
+}
+.dark .prose blockquote {
+  border-left-color: var(--color-lightGrey);
+  color: color-mix(in oklab, var(--color-on-primary) 90%, white);
 }
 
-/* Nicer text selection + focus */
-::selection { background: color-mix(in oklab, var(--color-accent) 85%, white); color: var(--color-on-accent); }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 6px; }
-
-/* Respect Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
-  .shimmer-text { animation: none !important; -webkit-text-fill-color: currentColor; background: none; }
+/* Optional pull-line (if not using MDX component) */
+.prose .pull-line {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--color-lightGrey);
+  font-weight: 600;
+  font-size: clamp(1.125rem, 1.05rem + .6vw, 1.35rem);
+  line-height: 1.35;
+  color: color-mix(in oklab, var(--color-on-secondary) 92%, black);
+}
+.dark .prose .pull-line {
+  border-left-color: var(--color-lightGrey);
+  color: color-mix(in oklab, var(--color-on-primary) 95%, white);
 }
