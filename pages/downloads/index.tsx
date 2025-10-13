@@ -66,8 +66,7 @@ export default function DownloadsIndex({ items }: Props) {
         <header className="mb-8 md:mb-12">
           <h1 className="font-serif text-4xl text-forest md:text-5xl">Downloads</h1>
           <p className="mt-2 max-w-2xl text-deepCharcoal/80">
-            Free, practical resources you can deploy this week. Print them. Share them. Lead with
-            clarity.
+            Free, practical resources you can deploy this week. Print them. Share them. Lead with clarity.
           </p>
         </header>
 
@@ -80,6 +79,8 @@ export default function DownloadsIndex({ items }: Props) {
               <Link
                 href={`/downloads/${d.slug}`}
                 className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+                prefetch={false}
+                aria-label={`Open ${d.title}`}
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image
@@ -97,23 +98,31 @@ export default function DownloadsIndex({ items }: Props) {
                 <div className="mb-2 flex items-center justify-between">
                   {d.category && <Badge>{d.category}</Badge>}
                 </div>
+
                 <h2 className="font-serif text-xl text-forest">
-                  <Link href={`/downloads/${d.slug}`} className="luxury-link">
+                  <Link href={`/downloads/${d.slug}`} className="luxury-link" prefetch={false}>
                     {d.title}
                   </Link>
                 </h2>
+
                 {d.excerpt && (
                   <p className="mt-2 line-clamp-3 text-sm text-deepCharcoal/80">{d.excerpt}</p>
                 )}
 
                 <div className="mt-4 flex items-center gap-3">
-                  <Link href={`/downloads/${d.slug}`} className="aol-btn rounded-full px-4 py-2 text-sm">
+                  <Link
+                    href={`/downloads/${d.slug}`}
+                    className="aol-btn rounded-full px-4 py-2 text-sm"
+                    prefetch={false}
+                  >
                     Read online
                   </Link>
+
                   {d.pdfPath && (
                     <Link
                       href={d.pdfPath}
                       className="text-sm text-forest underline underline-offset-2 hover:text-softGold"
+                      rel="noopener"
                     >
                       Download PDF →
                     </Link>

@@ -1,5 +1,7 @@
 // pages/downloads/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { format } from "date-fns";
 import * as React from "react";
 
@@ -15,7 +17,6 @@ import matter from "gray-matter";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
-import Link from "next/link";
 
 const ROOT = process.cwd();
 const CONTENT_DIR = path.join(ROOT, "content", "downloads");
@@ -36,10 +37,7 @@ type DownloadMeta = {
   coverPosition?: "left" | "center" | "right" | null;
 };
 
-type Props = {
-  meta: DownloadMeta;
-  content: MDXRemoteSerializeResult;
-};
+type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
 
 function getDownloadSlugs(): string[] {
   if (!fs.existsSync(CONTENT_DIR)) return [];
@@ -107,9 +105,7 @@ export default function DownloadPage({ meta, content }: Props) {
   } = meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage
-    ? absUrl(coverImage)
-    : absUrl("/assets/images/social/og-image.jpg");
+  const coverForMeta = absUrl(coverImage || "/assets/images/social/og-image.jpg");
   const authorName = typeof author === "string" ? author : "Abraham of London";
 
   return (
@@ -129,8 +125,15 @@ export default function DownloadPage({ meta, content }: Props) {
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
           {coverImage && (
             <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={coverImage} alt={title} className="h-64 w-full object-cover" />
+              <Image
+                src={coverImage}
+                alt={title}
+                width={1600}
+                height={900}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                className="h-auto w-full object-cover"
+                priority
+              />
             </div>
           )}
 
@@ -157,7 +160,7 @@ export default function DownloadPage({ meta, content }: Props) {
 
           {pdfPath && (
             <div className="mt-10">
-              <Link href={pdfPath} className="aol-btn">
+              <Link href={pdfPath} className="aol-btn" rel="noopener">
                 Download PDF
               </Link>
             </div>
