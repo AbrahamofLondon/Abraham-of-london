@@ -5,6 +5,12 @@ import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
 import EventJsonLd from "@/components/seo/EventJsonLd";
 
+// --- Custom MDX UI elements (SSR-safe) ---
+import PullLine from "@/components/mdx/PullLine";
+import Verse from "@/components/mdx/Verse";
+import Rule from "@/components/mdx/Rule";
+import Note from "@/components/mdx/Note";
+
 /* ---------------- utils ---------------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
 function toNumber(v?: number | string) {
@@ -207,6 +213,11 @@ export const MDXComponents: MDXComponentsType = {
   YouTube,
   iframe: Iframe,
   EventJsonLd,
+  // ---- Custom MDX elements available without importing inside .mdx ----
+  PullLine,
+  Verse,
+  Rule,
+  Note,
 };
 
 export default MDXComponents;
