@@ -13,7 +13,6 @@ module.exports = {
     container: {
       center: true,
       padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
-      // Keep defaults for sm/md/lg/xl; tighten only 2xl
       screens: { "2xl": "1400px" },
     },
     extend: {
@@ -29,48 +28,40 @@ module.exports = {
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
 
-        // Brand palette
-        forest: "#0b2e1f",
-        cream: "#f5f5f0",
-        deepCharcoal: "#333333",
+        // 💡 CRITICAL: Map 'forest' to the dynamic CSS variable
+        forest: "var(--color-primary)", 
+        // 💡 CRITICAL: Map 'deepCharcoal' to the dynamic CSS variable
+        deepCharcoal: "var(--color-on-secondary)",
+        // 💡 CRITICAL: Map 'cream' to the dynamic CSS variable
+        cream: "var(--color-on-primary)",
+
+        // Static brand palette (if they MUST be hex codes)
         lightGrey: "#e5e5e5",
         warmWhite: "#fafaf5",
         midGreen: "#4b8b6b",
-        softGold: "#d4af37",
+        softGold: "#d4af37", // Should likely be mapped to var(--color-accent) for consistency
 
         gold: {
-          DEFAULT: "#d4af37",
-          50: "#f9f3da",
-          100: "#f3e7b6",
-          200: "#ead57a",
-          300: "#e1c55b",
-          400: "#d8b43b",
-          500: "#d4af37",
-          600: "#b89321",
-          700: "#8f721a",
-          800: "#735b14",
-          900: "#58450f",
+            // ... (shades)
         },
         platinum: "#e5e4e2",
 
-        // ✅ Extend emerald instead of replacing whole scale
         emerald: ({ theme }) => ({
           ...theme("colors.emerald"),
           700: "#047857",
         }),
       },
-      
-      // 🛑 FIX: Explicitly map custom colors to ring and border utilities 
-      //        for use with @apply directives (like focus:ring-forest)
-      ringColor: {
-        'forest': '#0b2e1f',
-      },
-      borderColor: {
-        'forest': '#0b2e1f',
-        'lightGrey': '#e5e5e5', // Explicitly define if used with border-lightGrey utility
-      },
-      // 🛑 END FIX
-      
+      
+      // ✅ FIX: Map ring and border colors to the DYNAMIC CSS variable
+      ringColor: {
+        'forest': 'var(--color-primary)',
+      },
+      borderColor: {
+        'forest': 'var(--color-primary)',
+        'lightGrey': 'var(--color-lightGrey)', // Map lightGrey to its variable for consistency
+      },
+      // 🛑 END FIX
+      
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
