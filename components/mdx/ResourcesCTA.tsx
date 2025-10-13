@@ -45,11 +45,7 @@ export default function ResourcesCTA({
           <ul className="space-y-2">
             {reads.map((r) => (
               <li key={r.href}>
-                <Link
-                  href={r.href}
-                  className="luxury-link text-forest"
-                  prefetch={false}
-                >
+                <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
                   {r.label}
                 </Link>
                 {r.sub && <span className="ml-2 text-sm text-deepCharcoal/70">— {r.sub}</span>}
@@ -65,12 +61,7 @@ export default function ResourcesCTA({
           <ul className="space-y-2">
             {downloads.map((d) => (
               <li key={d.href}>
-                <a
-                  href={d.href}
-                  className="luxury-link text-forest"
-                  target="_self"
-                  rel="noopener"
-                >
+                <a href={d.href} className="luxury-link text-forest" rel="noopener">
                   {d.label}
                 </a>
               </li>
