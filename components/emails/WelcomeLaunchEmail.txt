@@ -1,0 +1,25 @@
+// components/emails/WelcomeLaunchEmail.tsx
+import * as React from "react";
+
+export default function WelcomeLaunchEmail({ siteUrl, name }: { siteUrl: string; name?: string }) {
+  return (
+    <div style={{ fontFamily: "ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial", color: "#1b1f1a", lineHeight: 1.6 }}>
+      <p>{name ? `Hi ${name},` : "Hi,"}</p>
+      <p>
+        Thanks for joining the <strong>Fathering Without Fear</strong> launch list. I’ll send chapter
+        drops, dates, and behind-the-scenes notes (not spam).
+      </p>
+      <p>
+        Meanwhile, you can grab the free teaser here:
+        <br />
+        <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-A4.pdf`}>A4/Letter PDF</a> ·{" "}
+        <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`}>Mobile PDF</a>
+      </p>
+      <p>Grace and courage,<br/>Abraham</p>
+      <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
+      <p style={{ fontSize: 12, color: "#6b7280" }}>
+        You can unsubscribe any time by replying <em>“stop”</em>.
+      </p>
+    </div>
+  );
+}
