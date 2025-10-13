@@ -11,7 +11,6 @@
 [context.production.environment]
   NODE_ENV = "production"   # ✅ only on real builds
 
-
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
@@ -81,3 +80,15 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# 🔒 Fast downloads (PDFs cached hard; rename file to bust cache)
+[[headers]]
+  for = "/downloads/*.pdf"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 🎯 Download cover images (used on /downloads)
+[[headers]]
+  for = "/assets/images/downloads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

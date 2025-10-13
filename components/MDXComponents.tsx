@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
 import * as React from "react";
+
 import EventJsonLd from "@/components/seo/EventJsonLd";
 import PullLine from "@/components/mdx/PullLine";
 import Verse from "@/components/mdx/Verse";
