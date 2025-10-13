@@ -1,7 +1,9 @@
-﻿// postcss.config.js (or .cjs) - Correct
+﻿// postcss.config.js
 module.exports = {
   plugins: {
-    '@tailwindcss/postcss': {}, // Use the new dedicated plugin package
-    'autoprefixer': {},
+    // 1. Tailwind must be listed first to generate the utilities
+    tailwindcss: {}, 
+    // 2. Autoprefixer must be listed second to handle browser prefixes
+    autoprefixer: {}, 
   },
-}
+};
