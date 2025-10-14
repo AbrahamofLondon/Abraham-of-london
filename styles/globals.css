@@ -202,7 +202,7 @@ img { max-width: 100%; height: auto; display: block; }
   .aol-btn {
     @apply inline-flex items-center rounded-full px-4 py-2 text-cream transition
            hover:brightness-95 focus:outline-none
-           focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40;
+           focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.40]; /* CORRECT ARBITRARY VALUE SYNTAX */
     background-color: var(--color-primary);
   }
 
