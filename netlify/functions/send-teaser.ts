@@ -1,65 +1,89 @@
-// netlify/functions/send-teaser.tsx
-import React from "react";
 import type { Handler } from "@netlify/functions";
+import * as React from "react";
 import { render } from "@react-email/render";
-import { Resend } from "resend";
 
+// IMPORTANT: no JSX in .ts files. We import the component but create it via React.createElement.
 import TeaserEmail from "../../components/emails/TeaserEmail";
-import {
-  EMAIL_RE,
-  getSiteUrl,
-  readJson,
-  ok,
-  bad,
-  methodNotAllowed,
-  handleOptions,
-} from "./_utils";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.URL ||
+  process.env.DEPLOY_PRIME_URL ||
+  "https://www.abrahamoflondon.org";
+
+function safeJsonParse<T = any>(s: string | null | undefined): T | Record<string, never> {
+  if (!s) return {};
+  try {
+    return JSON.parse(s);
+  } catch {
+    return {};
+  }
+}
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") return handleOptions();
-  if (event.httpMethod !== "POST") return methodNotAllowed();
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      headers: { "Content-Type": "application/json", Allow: "POST" },
+      body: JSON.stringify({ ok: false, message: "Method Not Allowed" }),
+    };
+  }
 
-  const body = await readJson<{ name?: string; email?: string }>(new Request("http://x", {
-    method: "POST",
-    headers: { "content-type": event.headers["content-type"] || "" },
-    body: event.body || "{}",
-  }));
+  const body = typeof event.body === "string" ? safeJsonParse(event.body) : {};
+  const name = String((body as any).name ?? "").trim() || undefined;
+  const to = String((body as any).email ?? (body as any).to ?? "").trim().toLowerCase();
 
-  const name = String(body.name || "").trim().slice(0, 100);
-  const email = String(body.email || "").trim().toLowerCase();
+  if (!to || !EMAIL_RE.test(to)) {
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ok: false, message: "Valid recipient email required." }),
+    };
+  }
 
-  if (!email || !EMAIL_RE.test(email)) return bad("Valid email required");
-
-  const SITE_URL = getSiteUrl();
-
-  // Build HTML with React Email
-  const html = render(<TeaserEmail name={name || undefined} siteUrl={SITE_URL} />, {
-    pretty: true,
+  // Render the email HTML without JSX
+  const element = React.createElement(TeaserEmail as any, {
+    name,
+    siteUrl: SITE_URL,
   });
+  const html = render(element);
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+  // Optional: send via Resend if configured
+  const RESEND_KEY = process.env.RESEND_API_KEY || "";
+  const MAIL_FROM = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
 
-  // DRY-RUN if no API key (still returns ok for testing)
-  if (!apiKey) {
-    return ok("DRY-RUN: email not sent (RESEND_API_KEY missing)", {
-      preview: true,
-      to: email.replace(/^(.).+(@.*)$/, "$1***$2"),
+  if (RESEND_KEY) {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to,
+        subject: "Fathering Without Fear — the story they thought they knew",
+        html,
+        reply_to: name ? [{ email: to, name }] : [{ email: to }],
+      }),
     });
+
+    if (!r.ok) {
+      const text = await r.text().catch(() => "");
+      console.error("[send-teaser] Resend error:", r.status, text);
+      return {
+        statusCode: 502,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ok: false, message: "Email provider error." }),
+      };
+    }
   }
 
-  try {
-    const resend = new Resend(apiKey);
-    await resend.emails.send({
-      from,
-      to: [email],
-      subject: "Fathering Without Fear — teaser links",
-      html,
-    });
-
-    return ok("Teaser sent");
-  } catch (e: any) {
-    console.error("[send-teaser] error:", e?.message || e);
-    return bad("Email provider error", 502);
-  }
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ok: true, message: "Teaser sent (or rendered) successfully." }),
+  };
 };
