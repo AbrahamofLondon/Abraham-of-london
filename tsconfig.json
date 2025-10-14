@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,47 +15,27 @@
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": ".",
+    "types": ["node"],
     "paths": {
-      "@/*": [
-        "*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/styles/*": [
-        "styles/*"
-      ],
-      "@/public/*": [
-        "public/*"
-      ],
-      "@/config/*": [
-        "config/*"
-      ], // 👈 add this
-      "@netlify/functions": [
-        "node_modules/@netlify/functions"
-      ],
-      "@netlify/emails": [
-        "node_modules/@netlify/emails"
-      ]
+      "@/*": ["*"],
+      "@/lib/*": ["lib/*"],
+      "@/components/*": ["components/*"],
+      "@/styles/*": ["styles/*"],
+      "@/public/*": ["public/*"],
+      "@/config/*": ["config/*"],
+      "@netlify/functions": ["node_modules/@netlify/functions"],
+      "@netlify/emails": ["node_modules/@netlify/emails"]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "netlify/**/*.ts",
+    "netlify/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules",
-    ".next"
-  ]
+  "exclude": ["node_modules", ".next"]
 }
