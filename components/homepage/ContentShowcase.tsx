@@ -48,12 +48,12 @@ export default function ContentShowcase({
                 {title}
               </h2>
               {subtitle && (
-                <p className="mt-2 text-base text-deepCharcoal/80">{subtitle}</p>
+                <p className="mt-2 text-base text-[color:var(--color-on-secondary)/0.8]">{subtitle}</p>
               )}
             </div>
             <Link
               href={link}
-              className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-forest/90 transition"
+              className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-[color:var(--color-primary)/0.9] transition"
               aria-label={linkAriaLabel}
             >
               {linkText}

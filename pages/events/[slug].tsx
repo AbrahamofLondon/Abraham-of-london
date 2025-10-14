@@ -106,7 +106,7 @@ function EventPage({ event, contentSource }: EventPageProps) {
       {isChatham && (
         <>
           <span
-            className="inline-block rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+            className="inline-block rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
             title="Chatham Room (off the record)"
             aria-label="Chatham Room (off the record)"
           >

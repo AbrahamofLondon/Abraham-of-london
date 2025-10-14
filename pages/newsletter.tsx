@@ -53,7 +53,7 @@ export default function NewsletterPage() {
             <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">
               Join the Newsletter
             </h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               Essays, event invitations, and project updates. No spam — ever.
             </p>
           </header>
@@ -74,13 +74,13 @@ export default function NewsletterPage() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-deepCharcoal/50 focus:border-deepCharcoal focus:outline-none"
+              className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal focus:outline-none"
               aria-describedby="newsletter-status"
             />
             <button
               type="submit"
               disabled={status.state === "loading"}
-              className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status.state === "loading" ? "Subscribing…" : "Subscribe"}
             </button>

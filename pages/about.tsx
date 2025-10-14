@@ -29,8 +29,8 @@ function FeatureCard({
         <h3 className="font-serif text-xl text-forest group-hover:underline underline-offset-4">
           {title}
         </h3>
-        {sub && <p className="mt-1 text-sm text-deepCharcoal/80">{sub}</p>}
-        <span className="mt-3 inline-block text-sm text-forest/80 group-hover:text-forest">
+        {sub && <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">{sub}</p>}
+        <span className="mt-3 inline-block text-sm text-[color:var(--color-primary)/0.8] group-hover:text-forest">
           Read →
         </span>
       </Link>
@@ -213,7 +213,7 @@ export default function AboutPage() {
           Our Letter of Practice
         </h2>
 
-        <div className="prose md:prose-lg max-w-none text-deepCharcoal/90 dark:prose-invert">
+        <div className="prose md:prose-lg max-w-none text-[color:var(--color-on-secondary)/0.9] dark:prose-invert">
           <p>
             I work quietly; deliver visibly. My concern is usefulness over noise—the kind of work that stands without
             explanation. Counsel is discreet, cadence disciplined, outcomes durable.
@@ -257,7 +257,7 @@ export default function AboutPage() {
       {/* House standards */}
       <section className="container mx-auto max-w-6xl px-4">
         <aside
-          className="mt-4 rounded-2xl border border-lightGrey bg-warmWhite p-5 text-sm text-deepCharcoal/80 shadow-card"
+          className="mt-4 rounded-2xl border border-lightGrey bg-warmWhite p-5 text-sm text-[color:var(--color-on-secondary)/0.8] shadow-card"
           aria-label="House standards"
         >
           <h2 className="mb-2 font-serif text-lg font-semibold text-deepCharcoal">House Standards</h2>
@@ -266,7 +266,7 @@ export default function AboutPage() {
             <li>Devices silent. No photos. No recordings.</li>
             <li>Names and affiliations kept private.</li>
           </ul>
-          <p className="mt-3 text-xs text-deepCharcoal/60">Private rooms available for sensitive work.</p>
+          <p className="mt-3 text-xs text-[color:var(--color-on-secondary)/0.6]">Private rooms available for sensitive work.</p>
         </aside>
       </section>
 

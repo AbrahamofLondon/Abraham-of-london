@@ -152,7 +152,7 @@ export default function StickyCTA({
       style={{ right: PAD }}
     >
       <div
-        className="relative rounded-full bg-white/95 shadow-card backdrop-blur dark:bg-deepCharcoal/95"
+        className="relative rounded-full bg-white/95 shadow-card backdrop-blur dark:bg-[color:var(--color-on-secondary)/0.95]"
         style={{ padding: FAB_PAD }}
       >
         <button
@@ -212,8 +212,8 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
     <div
       ref={ref}
       className={clsx(
-        "relative overflow-hidden rounded-2xl border border-forest/15 bg-white/95 shadow-card backdrop-blur",
-        "px-4 py-3 sm:px-5 sm:py-4 dark:bg-deepCharcoal/95 dark:border-white/10",
+        "relative overflow-hidden rounded-2xl border border-[color:var(--color-primary)/0.15] bg-white/95 shadow-card backdrop-blur",
+        "px-4 py-3 sm:px-5 sm:py-4 dark:bg-[color:var(--color-on-secondary)/0.95] dark:border-white/10",
         collapsed && "px-3 py-2 sm:px-3 sm:py-2"
       )}
     >
@@ -222,7 +222,7 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
         onClick={onDismiss}
         aria-label="Dismiss"
         title="Dismiss"
-        className={clsx("absolute right-2 top-2 rounded-md p-1 text-deepCharcoal/60 hover:bg-black/5", "dark:text-cream/70 dark:hover:bg-white/10")}
+        className={clsx("absolute right-2 top-2 rounded-md p-1 text-[color:var(--color-on-secondary)/0.6] hover:bg-black/5", "dark:text-[color:var(--color-on-primary)/0.7] dark:hover:bg-white/10")}
       >
         <span aria-hidden>×</span>
       </button>
@@ -280,8 +280,8 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
                   href={secondaryHref}
                   prefetch={false}
                   className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                    "inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-semibold text-forest",
+                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]",
                     "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
                   )}
                   aria-label={secondaryLabel}
@@ -294,8 +294,8 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
                   target="_blank"
                   rel="noopener noreferrer"
                   className={clsx(
-                    "inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-semibold text-forest",
-                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/30",
+                    "inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-semibold text-forest",
+                    "transition hover:bg-forest hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]",
                     "dark:text-cream dark:border-white/20 dark:hover:bg-white/10"
                   )}
                   aria-label={secondaryLabel}

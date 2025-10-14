@@ -1,0 +1,54 @@
+# .github/workflows/tw-opacity-guard.yml — CI: converter check + PostCSS dry run, upload artifacts
+name: Tailwind Slash-Opacity Guard
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'pages/**'
+      - 'components/**'
+      - 'content/**'
+      - 'styles/**'
+      - 'postcss/**'
+      - 'scripts/convert-tailwind-slash-opacity.mjs'
+      - 'scripts/postcss-guard-dryrun.mjs'
+      - 'postcss.config.js'
+      - 'tailwind.config.*'
+      - 'package.json'
+  workflow_dispatch: {}
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run converter in check mode
+        run: node scripts/convert-tailwind-slash-opacity.mjs --check
+        continue-on-error: false
+
+      - name: PostCSS guard dry-run (error mode)
+        run: node scripts/postcss-guard-dryrun.mjs
+        continue-on-error: true # capture report even if it fails
+
+      - name: Upload PostCSS guard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postcss-guard-report
+          path: artifacts/postcss-guard-report.txt
+
+      - name: Fail if PostCSS guard found violations
+        run: |
+          if grep -q "^✖ " artifacts/postcss-guard-report.txt; then
+            echo "::error::PostCSS guard found slash-opacity violations."
+            exit 1
+          fi

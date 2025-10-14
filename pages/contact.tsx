@@ -158,7 +158,7 @@ export default function ContactPage() {
 
         <section className="z-10 mx-auto w-full max-w-3xl px-4">
           <h1 className="mb-6 text-center font-serif text-4xl text-forest md:text-5xl">Get in Touch</h1>
-          <p className="mb-8 text-center text-lg text-deepCharcoal/80">
+          <p className="mb-8 text-center text-lg text-[color:var(--color-on-secondary)/0.8]">
             Reach out for speaking engagements, book signings, media inquiries, or collaborations.
           </p>
 
@@ -238,7 +238,7 @@ export default function ContactPage() {
                 : " "}
             </motion.p>
 
-            <p className="text-center text-xs text-deepCharcoal/60">
+            <p className="text-center text-xs text-[color:var(--color-on-secondary)/0.6]">
               By submitting, you agree to our{" "}
               <Link className="underline" href="/privacy">Privacy Policy</Link>.
             </p>

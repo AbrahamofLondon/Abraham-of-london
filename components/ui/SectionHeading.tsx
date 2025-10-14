@@ -36,7 +36,7 @@ export default function SectionHeading({
             <p
               className={clsx(
                 "text-xs tracking-widest uppercase",
-                tone === "muted" ? "text-deepCharcoal/60" : "text-deepCharcoal/70"
+                tone === "muted" ? "text-[color:var(--color-on-secondary)/0.6]" : "text-[color:var(--color-on-secondary)/0.7]"
               )}
             >
               {eyebrow}
@@ -48,7 +48,7 @@ export default function SectionHeading({
           </h2>
 
           {subtitle && (
-            <p className="mt-2 text-sm leading-relaxed text-deepCharcoal/70">
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.7]">
               {subtitle}
             </p>
           )}

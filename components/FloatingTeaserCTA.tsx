@@ -33,7 +33,7 @@ export default function FloatingTeaserCTA() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-40 rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream shadow-card hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/60"
+        className="fixed bottom-5 right-5 z-40 rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream shadow-card hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.6]"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls="teaser-cta-panel"
@@ -59,7 +59,7 @@ export default function FloatingTeaserCTA() {
                 <button
                   type="button"
                   onClick={() => snooze()}
-                  className="text-xs text-deepCharcoal/70 underline underline-offset-2 hover:text-deepCharcoal"
+                  className="text-xs text-[color:var(--color-on-secondary)/0.7] underline underline-offset-2 hover:text-deepCharcoal"
                   title="Hide for a week"
                 >
                   hide 7 days
@@ -67,7 +67,7 @@ export default function FloatingTeaserCTA() {
                 <button
                   type="button"
                   onClick={() => snooze(365)}
-                  className="text-xs text-deepCharcoal/70 underline underline-offset-2 hover:text-deepCharcoal"
+                  className="text-xs text-[color:var(--color-on-secondary)/0.7] underline underline-offset-2 hover:text-deepCharcoal"
                   title="Never show again"
                 >
                   never

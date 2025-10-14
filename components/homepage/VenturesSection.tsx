@@ -97,10 +97,10 @@ function BrandCard({ brand }: { brand: Brand }) {
       </div>
 
       <h3 className="text-2xl font-semibold mb-1 text-gray-900">{brand.name}</h3>
-      <p className="text-deepCharcoal/80 mb-3 flex-1">{brand.description}</p>
+      <p className="text-[color:var(--color-on-secondary)/0.8] mb-3 flex-1">{brand.description}</p>
 
       {brand.metric && (
-        <p className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-deepCharcoal/80 border border-black/10 px-3 py-1 text-xs">
+        <p className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-[color:var(--color-on-secondary)/0.8] border border-black/10 px-3 py-1 text-xs">
           {brand.metric}
         </p>
       )}
@@ -152,7 +152,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             <h2 id="ventures-title" className="text-3xl md:text-5xl font-serif font-bold mb-4 text-gray-900">
               Ventures & Brands
             </h2>
-            <p className="text-lg md:text-xl text-deepCharcoal/80 max-w-2xl">
+            <p className="text-lg md:text-xl text-[color:var(--color-on-secondary)/0.8] max-w-2xl">
               A portfolio at the intersection of strategy, sustainability, and impact.
             </p>
           </motion.header>
@@ -170,7 +170,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </div>
             <div className="text-center md:text-left">
               <h3 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900">Abraham of London</h3>
-              <p className="text-deepCharcoal/80">
+              <p className="text-[color:var(--color-on-secondary)/0.8]">
                 Strategic stewardship, thought leadership, and the standards that hold the family together.
               </p>
               <div className="mt-4">

@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
           <SmartLink href="/terms">Terms</SmartLink>
         </nav>
 
-        <nav aria-label="Brand family" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-deepCharcoal/90">
+        <nav aria-label="Brand family" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[color:var(--color-on-secondary)/0.9]">
           <SmartLink href={AOF_URL}>Abraham of London</SmartLink>
           <SmartLink href={INNOVATE_HUB_URL}>InnovateHub</SmartLink>
           <SmartLink href={ALOMARADA_URL}>Alomarada</SmartLink>
@@ -95,7 +95,7 @@ const Footer: React.FC = () => {
           ))}
         </div>
 
-        <p className="mt-6 text-center text-sm text-deepCharcoal/60">
+        <p className="mt-6 text-center text-sm text-[color:var(--color-on-secondary)/0.6]">
           © {year}{" "}
           <a href={AOF_URL} className="underline decoration-forest hover:decoration-forest">
             Abraham of London

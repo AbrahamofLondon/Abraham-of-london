@@ -221,12 +221,12 @@ export default function Comments({
       <div key={router.asPath} ref={containerRef} className="min-h-[120px]" />
       {(loading || error) && (
         <p role="status" aria-live="polite" className="mt-4 text-sm">
-          {loading && !error && <span className="text-deepCharcoal/70">Loading comments…</span>}
+          {loading && !error && <span className="text-[color:var(--color-on-secondary)/0.7]">Loading comments…</span>}
           {error && <span className="text-red-600">{error}</span>}
         </p>
       )}
       <noscript>
-        <p className="mt-4 text-sm text-deepCharcoal/70">
+        <p className="mt-4 text-sm text-[color:var(--color-on-secondary)/0.7]">
           Comments require JavaScript. Please enable it to view and post.
         </p>
       </noscript>

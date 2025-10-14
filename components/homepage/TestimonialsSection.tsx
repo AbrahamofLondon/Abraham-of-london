@@ -82,7 +82,7 @@ export default function TestimonialsSection({
       ? "bg-white/10 border border-white/10 text-cream"
       : "bg-white ring-1 ring-black/10 text-deepCharcoal";
 
-  const subText = variant === "dark" ? "text-cream/80" : "text-deepCharcoal/80";
+  const subText = variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-[color:var(--color-on-secondary)/0.8]";
 
   // JSON-LD (Review list)
   const ldJson = React.useMemo(() => {

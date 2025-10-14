@@ -36,7 +36,7 @@ const EmailSignup: React.FC = () => {
     <section className="bg-emerald-50 py-16">
       <div className="container mx-auto px-4 max-w-2xl text-center">
         <h2 className="text-3xl font-bold text-deepCharcoal mb-4">Join the Legacy Circle</h2>
-        <p className="text-deepCharcoal/80 mb-6">
+        <p className="text-[color:var(--color-on-secondary)/0.8] mb-6">
           Subscribe to receive exclusive insights, fatherhood wisdom, and book updates.
         </p>
 
@@ -64,7 +64,7 @@ const EmailSignup: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full sm:w-auto px-6 py-3 rounded-full border border-lightGrey text-deepCharcoal placeholder:text-deepCharcoal/60 focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest"
+              className="w-full sm:w-auto px-6 py-3 rounded-full border border-lightGrey text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.6] focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest"
               placeholder="Enter your email"
               disabled={status === "submitting"}
               autoComplete="email"
@@ -74,7 +74,7 @@ const EmailSignup: React.FC = () => {
 
             <button
               type="submit"
-              className="bg-forest text-cream px-6 py-3 rounded-full font-semibold hover:bg-forest/90 transition disabled:opacity-50"
+              className="bg-forest text-cream px-6 py-3 rounded-full font-semibold hover:bg-[color:var(--color-primary)/0.9] transition disabled:opacity-50"
               disabled={status === "submitting"}
               aria-busy={status === "submitting"}
             >

@@ -63,7 +63,7 @@ export default function BrandFrame({
             <div className="leading-tight">
               <p className="font-serif text-xl text-forest">{siteName}</p>
               {tagline ? (
-                <p className="text-xs tracking-wide text-deepCharcoal/70">
+                <p className="text-xs tracking-wide text-[color:var(--color-on-secondary)/0.7]">
                   {tagline}
                 </p>
               ) : null}
@@ -106,7 +106,7 @@ export default function BrandFrame({
         <main className="relative z-10 px-6 py-8 print:px-0">
           <h1 className="mb-1 font-serif text-3xl text-forest">{title}</h1>
           {subtitle ? (
-            <p className="mb-6 text-sm text-deepCharcoal/70">{subtitle}</p>
+            <p className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">{subtitle}</p>
           ) : null}
 
           <article className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert print:text-black">
@@ -115,7 +115,7 @@ export default function BrandFrame({
         </main>
 
         {/* Footer */}
-        <footer className="relative z-10 mt-8 border-t border-lightGrey/80 px-6 py-4 text-[12px] text-deepCharcoal/70 print:px-0">
+        <footer className="relative z-10 mt-8 border-t border-lightGrey/80 px-6 py-4 text-[12px] text-[color:var(--color-on-secondary)/0.7] print:px-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p>
               © {new Date().getFullYear()} {siteName} ·{" "}

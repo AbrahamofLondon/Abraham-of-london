@@ -91,7 +91,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               Principled Strategy for a Legacy That Endures
             </h1>
 
-            <p className="mt-5 text-base/7 text-cream/95 subpixel-antialiased drop-shadow-[0_1px_3px_rgba(0,0,0,.5)]">
+            <p className="mt-5 text-base/7 text-[color:var(--color-on-primary)/0.95] subpixel-antialiased drop-shadow-[0_1px_3px_rgba(0,0,0,.5)]">
               I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and
               society.
             </p>
@@ -138,7 +138,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Counts / crumb */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-          <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
+          <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
             <ol className="flex items-center gap-2">
               <li>
                 <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>
@@ -146,11 +146,11 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-deepCharcoal/80">Overview</li>
+              <li className="text-[color:var(--color-on-secondary)/0.8]">Overview</li>
               {incomingQ ? (
                 <>
                   <li aria-hidden="true">/</li>
-                  <li className="text-deepCharcoal/60">“{incomingQ}”</li>
+                  <li className="text-[color:var(--color-on-secondary)/0.6]">“{incomingQ}”</li>
                 </>
               ) : null}
             </ol>
@@ -159,19 +159,19 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <div className="flex items-center gap-3">
             <Link
               href={booksHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
               prefetch={false}
             >
-              Books <span className="ml-1 text-deepCharcoal/60">({booksCount})</span>
+              Books <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({booksCount})</span>
             </Link>
             <Link
               href={blogHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-deepCharcoal/80 hover:text-deepCharcoal"
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal"
               aria-label={`View insights (${postsCount})`}
               prefetch={false}
             >
-              Insights <span className="ml-1 text-deepCharcoal/60">({postsCount})</span>
+              Insights <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({postsCount})</span>
             </Link>
           </div>
         </div>
@@ -262,10 +262,10 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               View all
             </Link>
           </header>
-          <p className="mb-6 text-xs text-deepCharcoal/60">Select sessions run as Chatham Rooms (off the record).</p>
+          <p className="mb-6 text-xs text-[color:var(--color-on-secondary)/0.6]">Select sessions run as Chatham Rooms (off the record).</p>
 
           {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-deepCharcoal/70">No upcoming events at the moment.</p>
+            <p className="text-sm text-[color:var(--color-on-secondary)/0.7]">No upcoming events at the moment.</p>
           ) : (
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
@@ -291,7 +291,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               A portfolio built on craftsmanship, stewardship, and endurance.
             </p>
           </header>
@@ -306,7 +306,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
                 Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
               </p>
             </Link>
@@ -320,7 +320,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
                 Essential goods and refined experiences—engineered to last, designed to serve.
               </p>
             </Link>
@@ -334,7 +334,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-deepCharcoal/80">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
                 Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
               </p>
             </Link>
@@ -356,8 +356,8 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               { quote: "No noise. Just the signal you need to make enduring decisions.", name: "R. T., Investor" },
             ].map((t) => (
               <figure key={t.name} className="rounded-2xl border border-lightGrey bg-white p-6 shadow-card">
-                <blockquote className="text-sm leading-relaxed text-deepCharcoal/90">“{t.quote}”</blockquote>
-                <figcaption className="mt-4 text-xs font-medium text-deepCharcoal/70">— {t.name}</figcaption>
+                <blockquote className="text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">“{t.quote}”</blockquote>
+                <figcaption className="mt-4 text-xs font-medium text-[color:var(--color-on-secondary)/0.7]">— {t.name}</figcaption>
               </figure>
             ))}
           </div>
@@ -382,7 +382,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <h3 className="font-serif text-3xl font-semibold text-cream">
             Build with Clarity. Lead with Standards. Leave a Legacy.
           </h3>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-cream/85">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-on-primary)/0.85]">
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
           <div className="mt-8">

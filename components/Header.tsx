@@ -67,7 +67,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
 
   const linkBase =
-    variant === "dark" ? "text-cream/80 hover:text-cream" : "text-deepCharcoal/80 hover:text-deepCharcoal";
+    variant === "dark" ? "text-[color:var(--color-on-primary)/0.8] hover:text-cream" : "text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
@@ -205,8 +205,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
                         ? "bg-white/10 text-cream"
                         : "bg-black/5 text-deepCharcoal"
                       : variant === "dark"
-                      ? "text-cream/80 hover:bg-white/10 hover:text-cream"
-                      : "text-deepCharcoal/80 hover:bg-black/5 hover:text-deepCharcoal"
+                      ? "text-[color:var(--color-on-primary)/0.8] hover:bg-white/10 hover:text-cream"
+                      : "text-[color:var(--color-on-secondary)/0.8] hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
@@ -219,7 +219,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 href={`mailto:${EMAIL}`}
                 onClick={() => setOpen(false)}
                 className={`text-base underline-offset-4 hover:underline ${
-                  variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                  variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
                 }`}
               >
                 Email
@@ -229,7 +229,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                   href={`tel:${PHONE.replace(/\s+/g, "")}`}
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
-                    variant === "dark" ? "text-cream/90" : "text-deepCharcoal/90"
+                    variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
                   }`}
                 >
                   Call

@@ -77,7 +77,7 @@ export default function AboutSection({
         </motion.aside>
 
         {/* Main content */}
-        <motion.div variants={item} className="prose md:prose-lg max-w-none text-deepCharcoal/90 dark:prose-invert">
+        <motion.div variants={item} className="prose md:prose-lg max-w-none text-[color:var(--color-on-secondary)/0.9] dark:prose-invert">
           <h1 className="font-serif text-3xl md:text-5xl font-bold !mb-3 !mt-0 text-forest">About</h1>
           <p className="!mt-0">{bio}</p>
 
@@ -92,12 +92,12 @@ export default function AboutSection({
                   .map((a) => {
                     const body = (
                       <div className="flex items-start gap-3 rounded-xl border border-lightGrey bg-warmWhite p-4 shadow-card hover:shadow-cardHover transition">
-                        <div className="mt-0.5 shrink-0 rounded-full bg-forest/10 px-2 py-1 text-xs font-semibold text-forest">
+                        <div className="mt-0.5 shrink-0 rounded-full bg-[color:var(--color-primary)/0.1] px-2 py-1 text-xs font-semibold text-forest">
                           {a.year}
                         </div>
                         <div className="min-w-0">
                           <div className="font-semibold text-deepCharcoal">{a.title}</div>
-                          <p className="text-sm text-deepCharcoal/80">{a.description}</p>
+                          <p className="text-sm text-[color:var(--color-on-secondary)/0.8]">{a.description}</p>
                         </div>
                       </div>
                     );
