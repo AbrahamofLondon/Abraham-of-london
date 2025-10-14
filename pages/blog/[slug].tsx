@@ -1,15 +1,13 @@
-// pages/blog/[slug].tsx
 import dynamic from "next/dynamic";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { format } from "date-fns";
 import * as React from "react";
 
 import Layout from "@/components/Layout";
-import MDXComponents from "@/components/MDXComponents";
+import { MDXComponents } from "@/components/MDXComponents"; // Use named export
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
 import SEOHead from "@/components/SEOHead";
-import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
@@ -21,7 +19,6 @@ import remarkGfm from "remark-gfm";
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-/** Extend with optional tags + hero framing props we read from front-matter */
 type PageMeta = Omit<PostMeta, "tags"> & {
   slug: string;
   tags?: string[] | null;
@@ -95,14 +92,12 @@ export default function BlogPost({ post }: Props) {
   const authorName =
     typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
-  // Auto-append resources for Fatherhood posts (or when tagged "fatherhood")
   const isFatherhood =
     category === "Fatherhood" ||
     (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
 
   return (
     <Layout pageTitle={title} hideSocialStrip hideCTA>
-      {/* Centralized SEO + JSON-LD */}
       <SEOHead
         title={title}
         description={excerpt ?? ""}
@@ -116,7 +111,6 @@ export default function BlogPost({ post }: Props) {
 
       <MDXProviderWrapper>
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-          {/* Keep PostHero for image framing. Avoid duplicate visual title below. */}
           <PostHero
             slug={slug}
             title={title}
@@ -126,7 +120,6 @@ export default function BlogPost({ post }: Props) {
             coverPosition={(coverPosition as any) ?? undefined}
           />
 
-          {/* Single semantic H1 for SEO/accessibility, visually hidden to avoid duplicate title */}
           <h1 className="sr-only">{title}</h1>
 
           <div className="mb-6 text-sm text-deepCharcoal/70">
@@ -148,7 +141,7 @@ export default function BlogPost({ post }: Props) {
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
 
-          {isFatherhood && <ResourcesCTA className="mt-12" />}
+          {isFatherhood && <MDXComponents.ResourcesCTA className="mt-12" />}
 
           <div className="mt-12">
             <a href="#comments" className="luxury-link text-sm">

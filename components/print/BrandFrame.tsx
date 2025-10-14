@@ -1,25 +1,16 @@
-// components/BrandFrame.tsx
 import * as React from "react";
 import Head from "next/head";
+import Image from "next/image";
 
 type BrandFrameProps = {
-  /** Main document title (rendered as H1 on page and in print) */
   title: string;
-  /** Optional subheading under the title */
   subtitle?: string;
-  /** Content body (rendered inside a prose container) */
   children: React.ReactNode;
-  /** Hide the large page watermark (keeps small logo only) */
   noWatermark?: boolean;
-  /** Override robots meta; defaults to "noindex" for printable docs */
   robots?: "noindex" | "index,follow" | "index" | "noindex,nofollow";
-  /** Override site name in header/footer */
   siteName?: string;
-  /** Override small tagline under the brand */
   tagline?: string;
-  /** Override logo path (relative or absolute) */
   logoSrc?: string;
-  /** Hide the print button (useful when embedding) */
   hidePrintButton?: boolean;
 };
 
@@ -42,7 +33,6 @@ export default function BrandFrame({
   logoSrc = DEFAULT_LOGO,
   hidePrintButton = false,
 }: BrandFrameProps) {
-  // SSR-safe print handler
   const onPrint = React.useCallback(() => {
     if (typeof window !== "undefined" && "print" in window) window.print();
   }, []);
@@ -52,9 +42,7 @@ export default function BrandFrame({
   return (
     <>
       <Head>
-        {/* Printable docs are typically not intended for indexing */}
         {robots && <meta name="robots" content={robots} />}
-        {/* Preload logo for cleaner LCP on export/print */}
         {logoSrc?.startsWith("/") && <link rel="preload" as="image" href={logoSrc} />}
       </Head>
 
@@ -62,12 +50,15 @@ export default function BrandFrame({
         {/* Header */}
         <header className="relative z-10 flex items-center justify-between gap-4 border-b border-lightGrey/80 px-6 py-5 print:px-0 print:py-0 print:border-0">
           <div className="flex items-center gap-3">
-            {/* Use <img> for reliable print rendering across browsers */}
-            <img
+            <Image
               src={logoSrc}
               alt={siteName}
-              className="h-9 w-auto"
+              width={36} // Adjust based on logo dimensions
+              height={36} // Adjust based on logo dimensions
+              className="h-9 w-auto print:saturate-90"
               style={{ filter: "saturate(0.9)" }}
+              priority={false}
+              sizes="(max-width: 768px) 36px, 36px"
             />
             <div className="leading-tight">
               <p className="font-serif text-xl text-forest">{siteName}</p>
@@ -91,7 +82,7 @@ export default function BrandFrame({
           )}
         </header>
 
-        {/* Watermark — only visible in print to keep screen clean */}
+        {/* Watermark */}
         {!noWatermark && (
           <div
             aria-hidden="true"
@@ -118,7 +109,6 @@ export default function BrandFrame({
             <p className="mb-6 text-sm text-deepCharcoal/70">{subtitle}</p>
           ) : null}
 
-          {/* Prose with dark-mode support on screen; force black text in print */}
           <article className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert print:text-black">
             {children}
           </article>
@@ -149,23 +139,19 @@ export default function BrandFrame({
           body {
             background: #ffffff !important;
           }
-          /* ensure brand colors are preserved by printers */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Avoid broken splits for header/footer */
           header,
           footer {
             page-break-inside: avoid;
             break-inside: avoid;
           }
-          /* Improve link readability in print (append URL after text) */
           a[href^="http"]:after {
             content: " (" attr(href) ")";
             font-size: 0.9em;
           }
-          /* Tame shadows and rounded corners on print */
           .shadow-card,
           .shadow-cardHover {
             box-shadow: none !important;
