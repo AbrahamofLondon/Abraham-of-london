@@ -8,7 +8,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css", // ✅ correct glob
+    "./styles/**/*.css", // ✅ correct glob (fixes warning)
   ],
   theme: {
     container: {
@@ -18,6 +18,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        // CSS var mappings
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
@@ -28,12 +29,12 @@ module.exports = {
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
 
-        // map brand tokens
+        // Named brand tokens
         forest: "var(--color-primary)",
         deepCharcoal: "var(--color-on-secondary)",
         cream: "var(--color-on-primary)",
 
-        // static palette
+        // Static palette
         lightGrey: "#e5e5e5",
         warmWhite: "#fafaf5",
         midGreen: "#4b8b6b",
@@ -67,14 +68,8 @@ module.exports = {
 
       keyframes: {
         fadeIn: { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
-        fadeUp: {
-          "0%": { opacity: 0, transform: "translateY(12px)" },
-          "100%": { opacity: 1, transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
+        fadeUp: { "0%": { opacity: 0, transform: "translateY(12px)" }, "100%": { opacity: 1, transform: "translateY(0)" } },
+        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
       },
 
       animation: {
@@ -92,7 +87,6 @@ module.exports = {
             "--tw-prose-bullets": theme("colors.midGreen"),
             "--tw-prose-counters": theme("colors.midGreen"),
             "--tw-prose-hr": theme("colors.lightGrey"),
-
             p: { lineHeight: "1.85" },
             a: {
               textDecoration: "none",
