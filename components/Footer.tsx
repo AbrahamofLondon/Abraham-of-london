@@ -33,7 +33,7 @@ function SmartLink({
 }) {
   const base =
     className ||
-    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-sm";
+    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-sm";
 
   if (isExternal(href)) {
     const isHttp = href.startsWith("http");
@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={s.label}
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               <Image src={s.icon} alt={s.label} width={24} height={24} loading="lazy" decoding="async" />
             </a>

@@ -1,4 +1,3 @@
-// components/homepage/VenturesSection.tsx
 "use client";
 
 import React from "react";
@@ -64,6 +63,7 @@ const container = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 } as const;
+
 const item = { hidden: { y: 18, opacity: 0 }, visible: { y: 0, opacity: 1 } } as const;
 
 function BrandCard({ brand }: { brand: Brand }) {
@@ -71,7 +71,7 @@ function BrandCard({ brand }: { brand: Brand }) {
   const isSecondaryInternal = brand.secondaryHref && !/^https?:\/\//.test(brand.secondaryHref || "");
 
   const LearnMore = (
-    <span className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full px-4 py-2">
+    <span className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-full px-4 py-2">
       Learn More
       <svg className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path
@@ -125,7 +125,7 @@ function BrandCard({ brand }: { brand: Brand }) {
             <Link
               href={brand.secondaryHref}
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>
@@ -135,7 +135,7 @@ function BrandCard({ brand }: { brand: Brand }) {
               target="_blank"
               rel="noopener noreferrer"
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>

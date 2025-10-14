@@ -1,4 +1,3 @@
-// pages/about.tsx
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import SEOHead from "@/components/SEOHead";
@@ -274,7 +273,7 @@ export default function AboutPage() {
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Link
           href="/contact"
-          className="mt-8 inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+          className="mt-8 inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
           prefetch={false}
         >
           Work with me

@@ -117,7 +117,7 @@ export default function VenturesPage() {
                 <Link
                   key={b.name}
                   href={b.href}
-                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
                 >
                   {Card}
                 </Link>
@@ -127,7 +127,7 @@ export default function VenturesPage() {
                   href={b.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
                 >
                   {Card}
                 </a>
