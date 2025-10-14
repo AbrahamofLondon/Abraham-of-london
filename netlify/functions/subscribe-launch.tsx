@@ -3,11 +3,8 @@ import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions"
 import { Resend } from "resend";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import WelcomeLaunchEmail from "../emails/WelcomeLaunchEmail";
 
-// ☑️ import your React email component
-import WelcomeLaunchEmail from "../../components/emails/WelcomeLaunchEmail";
-
-// ---------- helpers ----------
 const JSON_HEADERS: Record<string, string | number | boolean> = {
   "Content-Type": "application/json",
 };
@@ -21,11 +18,7 @@ const SITE_URL =
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function json(statusCode: number, data: unknown): HandlerResponse {
-  return {
-    statusCode,
-    headers: JSON_HEADERS,
-    body: JSON.stringify(data),
-  };
+  return { statusCode, headers: JSON_HEADERS, body: JSON.stringify(data) };
 }
 
 function parseBody(event: HandlerEvent): Record<string, unknown> {
@@ -37,7 +30,6 @@ function parseBody(event: HandlerEvent): Record<string, unknown> {
   }
 }
 
-// ---------- handler ----------
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return {
@@ -49,17 +41,11 @@ export const handler: Handler = async (event) => {
 
   const { email, name } = parseBody(event);
   const to = String(email || "").trim().toLowerCase();
-
-  if (!to || !EMAIL_RE.test(to)) {
-    return json(400, { ok: false, message: "Valid email is required" });
-  }
+  if (!to || !EMAIL_RE.test(to)) return json(400, { ok: false, message: "Valid email is required" });
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  if (!RESEND_API_KEY) {
-    return json(500, { ok: false, message: "Email provider not configured" });
-  }
+  if (!RESEND_API_KEY) return json(500, { ok: false, message: "Email provider not configured" });
 
-  // Render the React email to HTML
   const html = renderToStaticMarkup(
     <WelcomeLaunchEmail name={typeof name === "string" ? name : undefined} siteUrl={SITE_URL} />
   );
@@ -75,7 +61,6 @@ export const handler: Handler = async (event) => {
       html,
       replyTo: "info@abrahamoflondon.org",
     });
-
     return json(200, { ok: true, message: "Welcome email sent" });
   } catch (err: any) {
     console.error("[subscribe-launch] send failed:", err?.message || err);
