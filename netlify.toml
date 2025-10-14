@@ -1,5 +1,4 @@
-# netlify.toml — full replacement (aligned with Resend + React server render)
-
+# netlify.toml — aligned with functions using netlify/emails/*
 [build]
   command = "npm run build"
   publish = ".next"
@@ -11,30 +10,23 @@
     CI_LAX = "1"
 
 [context.production.environment]
-  NODE_ENV = "production"   # ✅ only on real builds
+  NODE_ENV = "production"
 
-# Functions bundling (esbuild) + include React email components
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
-  # Only what we actually import at runtime
   external_node_modules = [
     "@netlify/functions",
     "resend"
   ]
-  # Ensure React email components are packaged with functions
   included_files = [
-    "components/emails/**"
+    "netlify/emails/**"
   ]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Redirects
-# ────────────────────────────────────────────────────────────────────────────────
-
-# Apex → WWW (hard 301)
+# Redirects & headers unchanged…
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
@@ -42,14 +34,12 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
-# Canonical host: redirect netlify.app to the main domain
 [[redirects]]
   from = "https://abraham-of-london.netlify.app/*"
   to   = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
-# Brand domains → deep link (hard 301)
 [[redirects]]
   from = "https://endureluxe.com/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -70,9 +60,6 @@
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Security headers
-# ────────────────────────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
@@ -82,7 +69,6 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Static caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -93,13 +79,11 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# 🔒 Fast downloads (PDFs cached hard; rename file to bust cache)
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# 🎯 Download cover images (used on /downloads)
 [[headers]]
   for = "/assets/images/downloads/*"
   [headers.values]
