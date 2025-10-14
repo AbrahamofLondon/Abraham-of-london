@@ -8,7 +8,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css", // ✅ correct glob
+    "./styles/**/*.css", // ✅ Correct glob pattern
   ],
   theme: {
     container: {
