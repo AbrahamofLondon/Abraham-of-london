@@ -1,4 +1,7 @@
+// tailwind.config.js — corrected
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors');
+
 module.exports = {
   darkMode: "class",
   content: [
@@ -8,7 +11,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css", // ✅ correct glob (fixes warning)
+    "./styles/**/*.css"
   ],
   theme: {
     container: {
@@ -40,12 +43,11 @@ module.exports = {
         midGreen: "#4b8b6b",
         softGold: "#d4af37",
 
-        emerald: ({ theme }) => ({
-          ...theme("colors.emerald"),
-          700: "#047857",
-        }),
+        // Tailwind palette (keep available)
+        emerald: { ...colors.emerald, 700: "#047857" }
       },
 
+      // Note: slash opacity with CSS vars doesn’t work; use arbitrary ring color
       ringColor: { forest: "var(--color-primary)" },
       borderColor: {
         forest: "var(--color-primary)",

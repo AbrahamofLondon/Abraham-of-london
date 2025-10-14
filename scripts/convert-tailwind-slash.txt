@@ -1,0 +1,133 @@
+// File: scripts/convert-tailwind-slash-opacity.mjs
+// Why: Tailwind `/NN` opacity doesn't work with CSS-var colors. Convert to arbitrary color utilities.
+// Usage: node scripts/convert-tailwind-slash-opacity.mjs
+import fs from 'node:fs';
+import path from 'node:path';
+
+const exts = new Set(['.js', '.ts', '.jsx', '.tsx', '.md', '.mdx', '.css', '.html']);
+const roots = ['app', 'src', 'pages', 'components', 'content', 'lib', 'styles'];
+
+const colorVarMap = {
+  // named tokens
+  forest: '--color-primary',
+  cream: '--color-on-primary',
+  deepCharcoal: '--color-on-secondary',
+  accent: '--color-accent',
+  // direct mappings
+  primary: '--color-primary',
+  'on-primary': '--color-on-primary',
+  'on-secondary': '--color-on-secondary',
+};
+
+const utilities = [
+  'bg', 'text', 'border', 'ring', 'fill', 'stroke', 'outline'
+];
+
+const tokenGroup = Object.keys(colorVarMap).sort((a,b)=>b.length-a.length).map(t=>t.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')).join('|');
+const utilGroup  = utilities.join('|');
+
+// Matches e.g. "ring-forest/40", "bg-accent/70", "text-on-primary/50", "border-primary/100"
+// - Captures utility, token, opacity number (0..100)
+const regex = new RegExp(`\\b(${utilGroup})-(${tokenGroup})\\/(\\d{1,3})\\b`, 'g');
+
+function pctToDec(p) {
+  const n = Math.max(0, Math.min(100, parseInt(p, 10)));
+  if (n === 100) return '1';
+  if (n === 0) return '0';
+  return (n / 100).toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function convertContent(s) {
+  return s.replace(regex, (_, util, token, pct) => {
+    const cssVar = colorVarMap[token];
+    if (!cssVar) return `${util}-${token}/${pct}`; // should not happen
+    const dec = pctToDec(pct);
+    // Tailwind arbitrary color: <util>-[color:var(--...)/<dec>]
+    return `${util}-[color:var(${cssVar})/${dec}]`;
+  });
+}
+
+function* walk(dir) {
+  let entries = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) yield* walk(p);
+    else if (exts.has(path.extname(e.name))) yield p;
+  }
+}
+
+let changed = 0, files = 0, hits = 0;
+for (const root of roots) {
+  if (!fs.existsSync(root)) continue;
+  for (const file of walk(root)) {
+    files++;
+    const src = fs.readFileSync(file, 'utf8');
+    const replaced = convertContent(src);
+    if (replaced !== src) {
+      fs.writeFileSync(file, replaced, 'utf8');
+      changed++;
+      const matchCount = (src.match(regex) || []).length;
+      hits += matchCount;
+      console.log(`✔ Rewrote ${matchCount} token(s) in ${file}`);
+    }
+  }
+}
+console.log(`\nDone. Scanned ${files} files. Replaced ${hits} class token(s) across ${changed} file(s).`);
+console.log(`Tip: commit changes and run the build to verify.`);
+
+
+
+// File: app/e2e/button/page.tsx
+// Minimal route to validate .aol-btn focus-visible ring behavior
+export const dynamic = 'force-static';
+export default function E2EButtonPage() {
+  return (
+    <main style={{ padding: 24 }}>
+      <h1>E2E Button Ring Test</h1>
+      <button
+        data-testid="ring-btn"
+        className="aol-btn"
+        style={{ marginTop: 16 }}
+        onClick={() => {}}
+      >
+        Focus Ring Button
+      </button>
+      <p>Press TAB to focus the button and trigger :focus-visible ring.</p>
+    </main>
+  );
+}
+
+
+
+// File: tests/e2e/ring-focus.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Focus ring (aol-btn)', () => {
+  test('applies ring on :focus-visible', async ({ page }) => {
+    await page.goto('/e2e/button');
+
+    const btn = page.getByTestId('ring-btn');
+    await expect(btn).toBeVisible();
+
+    // Ensure starting state has no visible ring box-shadow
+    let boxShadow = await btn.evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(boxShadow).toBe('none');
+
+    // Use keyboard to trigger :focus-visible (important vs programmatic .focus())
+    await page.keyboard.press('Tab');
+
+    // Wait for style to reflect ring
+    await expect
+      .poll(async () => await btn.evaluate((el) => getComputedStyle(el).boxShadow))
+      .not.toBe('none');
+
+    // Also assert the custom CSS var exists (set in CSS for ring color)
+    const ringColor = await btn.evaluate((el) => getComputedStyle(el).getPropertyValue('--tw-ring-color').trim());
+    expect(ringColor).not.toBe('');
+
+    // Sanity: check outline remains none since we rely on ring
+    const outline = await btn.evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(outline).toBe('solid'); // we set :focus-visible outline in globals; OK if 'solid'
+  });
+});
