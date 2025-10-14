@@ -8,7 +8,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css", // ✅ fixed glob
+    "./styles/**/*.css", // ✅ correct glob
   ],
   theme: {
     container: {
@@ -27,13 +27,16 @@ module.exports = {
         accent: "var(--color-accent)",
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
+
         forest: "var(--color-primary)",
         deepCharcoal: "var(--color-on-secondary)",
         cream: "var(--color-on-primary)",
+
         lightGrey: "#e5e5e5",
         warmWhite: "#fafaf5",
         midGreen: "#4b8b6b",
         softGold: "#d4af37",
+
         emerald: ({ theme }) => ({
           ...theme("colors.emerald"),
           700: "#047857",
@@ -92,16 +95,6 @@ module.exports = {
             hr: { borderColor: theme("colors.lightGrey") },
             ul: { paddingLeft: "1.1rem" },
             "ul > li::marker": { color: theme("colors.midGreen") },
-          },
-        },
-        dark: {
-          css: {
-            "--tw-prose-body": theme("colors.cream"),
-            "--tw-prose-headings": theme("colors.cream"),
-            "--tw-prose-links": theme("colors.softGold"),
-            "--tw-prose-bullets": theme("colors.midGreen"),
-            "--tw-prose-hr": theme("colors.lightGrey"),
-            blockquote: { borderLeftColor: theme("colors.lightGrey"), color: theme("colors.cream") },
           },
         },
         invert: {

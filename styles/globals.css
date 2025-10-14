@@ -182,7 +182,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* ----------------------------------------------------------
-   TAILwind COMPONENT SHORTCUTS
+   TAILWIND COMPONENT SHORTCUTS
 ---------------------------------------------------------- */
 @layer components {
   .aol-input {
