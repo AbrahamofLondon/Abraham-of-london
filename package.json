@@ -1,11 +1,11 @@
+// package.json — add "prebuild" so Netlify runs the guard automatically
 {
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": {
-    "node": ">=20 <21"
-  },
+  "engines": { "node": ">=20 <21" },
   "scripts": {
+    "prebuild": "node scripts/convert-tailwind-slash-opacity.mjs --check",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -54,7 +54,7 @@
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.0.0",
     "@next/bundle-analyzer": "14.2.32",
-    "@playwright/test": "^1.56.0",
+    "@playwright/test": "^1.48.2",
     "@types/mdx": "2.0.13",
     "@types/node": "20.14.10",
     "@types/react": "18.3.26",
