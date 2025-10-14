@@ -200,10 +200,10 @@ img { max-width: 100%; height: auto; display: block; }
   }
 
   .aol-btn {
-    @apply inline-block px-6 py-3 rounded-full text-cream;
+    @apply inline-flex items-center rounded-full px-4 py-2 text-cream transition
+           hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40;
     background-color: var(--color-primary);
   }
-  .aol-btn:hover { background-color: color-mix(in oklab, var(--color-primary) 90%, black); }
 
   .pattern-bg {
     background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);

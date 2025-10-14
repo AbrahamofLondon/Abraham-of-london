@@ -216,6 +216,17 @@ const components: MDXComponentsType = {
   Rule,
   Note,
   ResourcesCTA,
+
+  // Normalize headings: the page owns <h1>
+  h1: (props) => <h2 {...props} />,
+  // Tighten common blocks for rhythm/consistency
+  ul: (props) => <ul className="list-disc pl-6 space-y-2" {...props} />,
+  ol: (props) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
+  p:  (props) => <p className="leading-7" {...props} />,
+  hr: (props) => <hr className="my-10 border-lightGrey" {...props} />,
+  blockquote: (props) => (
+    <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />
+  ),
 };
 
 /* Both default and named export */

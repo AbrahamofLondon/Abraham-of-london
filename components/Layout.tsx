@@ -247,10 +247,10 @@ export default function Layout({
         </div>
       )}
 
-      {/* Main */}
+      {/* Main — remove container/padding here; let pages own spacing */}
       <main
         id="main-content"
-        className="min-h-screen bg-white dark:bg-black container mx-auto px-4"
+        className="min-h-screen bg-white dark:bg-black"
         style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}
       >
         {children}

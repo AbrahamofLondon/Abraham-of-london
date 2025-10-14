@@ -101,7 +101,7 @@ export default function BlogPost({ post }: Props) {
     (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
 
   return (
-    <Layout pageTitle={title}>
+    <Layout pageTitle={title} hideSocialStrip hideCTA>
       {/* Centralized SEO + JSON-LD */}
       <SEOHead
         title={title}
@@ -116,6 +116,7 @@ export default function BlogPost({ post }: Props) {
 
       <MDXProviderWrapper>
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
+          {/* Keep PostHero for image framing. Avoid duplicate visual title below. */}
           <PostHero
             slug={slug}
             title={title}
@@ -125,9 +126,8 @@ export default function BlogPost({ post }: Props) {
             coverPosition={(coverPosition as any) ?? undefined}
           />
 
-          <h1 className="post-title normal-case mb-4 font-serif text-4xl text-forest md:text-5xl">
-            {title}
-          </h1>
+          {/* Single semantic H1 for SEO/accessibility, visually hidden to avoid duplicate title */}
+          <h1 className="sr-only">{title}</h1>
 
           <div className="mb-6 text-sm text-deepCharcoal/70">
             <span>By {authorName}</span>
@@ -144,7 +144,7 @@ export default function BlogPost({ post }: Props) {
             )}
           </div>
 
-          <div className="prose prose-lg max-w-none text-deepCharcoal">
+          <div className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert">
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
 

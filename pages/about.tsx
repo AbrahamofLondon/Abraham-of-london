@@ -1,6 +1,7 @@
-import Head from "next/head";
+// pages/about.tsx
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import SEOHead from "@/components/SEOHead";
 import AboutSection, { type Achievement } from "@/components/homepage/AboutSection";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 import { CTA_PRESETS } from "@/components/mdx/ctas";
@@ -23,13 +24,14 @@ function FeatureCard({
         href={href}
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-forest"
         prefetch={false}
+        aria-label={sub ? `${title} — ${sub}` : title}
       >
         <h3 className="font-serif text-xl text-forest group-hover:underline underline-offset-4">
           {title}
         </h3>
         {sub && <p className="mt-1 text-sm text-deepCharcoal/80">{sub}</p>}
         <span className="mt-3 inline-block text-sm text-forest/80 group-hover:text-forest">
-          Read → 
+          Read →
         </span>
       </Link>
     </li>
@@ -40,9 +42,7 @@ export default function AboutPage() {
   const CANONICAL = absUrl("/about");
 
   const portrait = siteConfig.authorImage;
-  const portraitAbs = absUrl(
-    portrait?.startsWith("/") ? portrait : siteConfig.authorImage
-  );
+  const portraitAbs = absUrl(portrait?.startsWith("/") ? portrait : siteConfig.authorImage);
 
   const bio =
     "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help fathers, young founders, and enterprise leaders build durable brands and products with clear thinking, principled execution, and a long view.";
@@ -53,8 +53,7 @@ export default function AboutPage() {
   const achievements: Achievement[] = [
     {
       title: "Launched InnovateHub",
-      description:
-        "Innovation studio for prototypes, research, and venture experiments.",
+      description: "Innovation studio for prototypes, research, and venture experiments.",
       year: 2025,
       href: innovateHubUrl,
     },
@@ -67,14 +66,12 @@ export default function AboutPage() {
     },
     {
       title: "Founded Abraham of London",
-      description:
-        "A practice for principled strategy, writing, and stewardship.",
+      description: "A practice for principled strategy, writing, and stewardship.",
       year: 2020,
     },
     {
       title: "Launched Alomarada",
-      description:
-        "Advisory for investors & entrepreneurs developing African markets.",
+      description: "Advisory for investors & entrepreneurs developing African markets.",
       year: 2018,
       href: "/ventures?brand=alomarada",
     },
@@ -97,11 +94,11 @@ export default function AboutPage() {
     ? absUrl(siteConfig.twitterImage)
     : siteConfig.twitterImage;
 
-  const pageTitle = `About | ${siteConfig.author}`;
+  const pageTitle = "About";
   const pageDesc =
     "About Abraham of London — quiet counsel and durable execution for fathers, young founders, and enterprise teams.";
 
-  // JSON-LD
+  // JSON-LD (web page + person)
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -124,45 +121,29 @@ export default function AboutPage() {
     name: siteConfig.author,
     url: siteConfig.siteUrl,
     image: portraitAbs,
+    ...(sameAs.length ? { sameAs } : {}),
   };
-  if (sameAs.length > 0) personSchema.sameAs = sameAs;
 
   // Pull leadership CTA preset
   const leadershipCTA = CTA_PRESETS.leadership;
 
   return (
-    <Layout pageTitle="About">
-      <Head>
-        <title>{pageTitle}</title>
-        <link rel="canonical" href={CANONICAL} />
-        <meta name="description" content={pageDesc} />
-
-        {/* Open Graph */}
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDesc} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={CANONICAL} />
-        <meta property="og:site_name" content={siteConfig.title} />
-        {ogImageAbs ? (
-          <>
-            <meta property="og:image" content={ogImageAbs} />
-            <meta property="og:image:alt" content="Abraham of London — official site image" />
-          </>
-        ) : null}
-
-        {/* Twitter / X */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDesc} />
+    <Layout pageTitle={pageTitle}>
+      <SEOHead
+        title={pageTitle}
+        type="website"
+        description={pageDesc}
+        slug="/about"
+        coverImage={ogImageAbs || undefined}
+      >
+        {/* Twitter / X override */}
         {twitterImageAbs ? <meta name="twitter:image" content={twitterImageAbs} /> : null}
-
-        {/* LCP hint */}
-        {portrait?.startsWith("/") && <link rel="preload" as="image" href={portrait} />}
-
+        {/* LCP hint for local portrait */}
+        {portrait?.startsWith("/") ? <link rel="preload" as="image" href={portrait} /> : null}
         {/* JSON-LD */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
-      </Head>
+      </SEOHead>
 
       {/* Hero/About */}
       <AboutSection
@@ -175,10 +156,7 @@ export default function AboutPage() {
       />
 
       {/* Featured Writing – feels like the blog CTAs */}
-      <section
-        aria-labelledby="featured-writing"
-        className="container mx-auto max-w-6xl px-4 py-10 md:py-12"
-      >
+      <section aria-labelledby="featured-writing" className="container mx-auto max-w-6xl px-4 py-10 md:py-12">
         <h2 id="featured-writing" className="mb-4 font-serif text-2xl sm:text-3xl font-semibold text-deepCharcoal">
           Featured Writing
         </h2>
@@ -202,49 +180,43 @@ export default function AboutPage() {
       </section>
 
       {/* Quick Downloads */}
-      <section
-        aria-labelledby="quick-downloads"
-        className="container mx-auto max-w-6xl px-4 py-8"
-      >
+      <section aria-labelledby="quick-downloads" className="container mx-auto max-w-6xl px-4 py-8">
         <h2 id="quick-downloads" className="mb-3 font-serif text-2xl font-semibold text-deepCharcoal">
           Quick Downloads
         </h2>
         <ul className="flex flex-wrap gap-3 text-sm">
           <li>
-            <Link href="/downloads/Leadership_Playbook.pdf" className="aol-btn rounded-full px-4 py-2">
+            <Link href="/downloads/Leadership_Playbook.pdf" className="aol-btn rounded-full px-4 py-2" prefetch={false}>
               Leadership Playbook (30•60•90)
             </Link>
           </li>
           <li>
-            <Link href="/downloads/Mentorship_Starter_Kit.pdf" className="aol-btn rounded-full px-4 py-2">
+            <Link href="/downloads/Mentorship_Starter_Kit.pdf" className="aol-btn rounded-full px-4 py-2" prefetch={false}>
               Mentorship Starter Kit
             </Link>
           </li>
           <li>
-            <Link href="/downloads/Entrepreneur_Operating_Pack.pdf" className="aol-btn rounded-full px-4 py-2">
+            <Link
+              href="/downloads/Entrepreneur_Operating_Pack.pdf"
+              className="aol-btn rounded-full px-4 py-2"
+              prefetch={false}
+            >
               Entrepreneur Operating Pack
             </Link>
           </li>
         </ul>
       </section>
 
-      {/* Letter of Practice (kept) */}
-      <section
-        aria-labelledby="letter-heading"
-        className="container mx-auto max-w-6xl px-4 py-10"
-      >
-        <h2
-          id="letter-heading"
-          className="mb-4 font-serif text-2xl sm:text-3xl font-semibold text-deepCharcoal"
-        >
+      {/* Letter of Practice */}
+      <section aria-labelledby="letter-heading" className="container mx-auto max-w-6xl px-4 py-10">
+        <h2 id="letter-heading" className="mb-4 font-serif text-2xl sm:text-3xl font-semibold text-deepCharcoal">
           Our Letter of Practice
         </h2>
 
-        <div className="prose prose-lg max-w-none text-deepCharcoal/90">
+        <div className="prose md:prose-lg max-w-none text-deepCharcoal/90 dark:prose-invert">
           <p>
-            I work quietly; deliver visibly. My concern is usefulness over noise—
-            the kind of work that stands without explanation. Counsel is discreet,
-            cadence disciplined, outcomes durable.
+            I work quietly; deliver visibly. My concern is usefulness over noise—the kind of work that stands without
+            explanation. Counsel is discreet, cadence disciplined, outcomes durable.
           </p>
 
           <p className="font-medium">For fathers:</p>
@@ -288,17 +260,13 @@ export default function AboutPage() {
           className="mt-4 rounded-2xl border border-lightGrey bg-warmWhite p-5 text-sm text-deepCharcoal/80 shadow-card"
           aria-label="House standards"
         >
-          <h2 className="mb-2 font-serif text-lg font-semibold text-deepCharcoal">
-            House Standards
-          </h2>
+          <h2 className="mb-2 font-serif text-lg font-semibold text-deepCharcoal">House Standards</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>Use insights freely; attribution by permission.</li>
             <li>Devices silent. No photos. No recordings.</li>
             <li>Names and affiliations kept private.</li>
           </ul>
-          <p className="mt-3 text-xs text-deepCharcoal/60">
-            Private rooms available for sensitive work.
-          </p>
+          <p className="mt-3 text-xs text-deepCharcoal/60">Private rooms available for sensitive work.</p>
         </aside>
       </section>
 
@@ -306,7 +274,7 @@ export default function AboutPage() {
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Link
           href="/contact"
-          className="mt-8 inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95"
+          className="mt-8 inline-flex items-center rounded-full bg-forest px-5 py-2 text-cream hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
           prefetch={false}
         >
           Work with me
