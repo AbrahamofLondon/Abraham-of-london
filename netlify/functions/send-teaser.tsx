@@ -1,10 +1,10 @@
 // netlify/functions/send-teaser.tsx
-import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
+import type { HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { Resend } from "resend";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-/** JSON helper (headers type compatible with HandlerResponse) */
+/** JSON helper */
 const json = (statusCode: number, data: unknown): HandlerResponse => ({
   statusCode,
   headers: { "Content-Type": "application/json" },
@@ -62,7 +62,7 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
   );
 };
 
-export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
+export const handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -89,11 +89,10 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
     const html = renderToStaticMarkup(<TeaserEmail name={name} siteUrl={SITE_URL.replace(/\/$/, "")} />);
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const MAIL_TO = email; // send to the requester
+    const MAIL_TO = email;
     const MAIL_FROM = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
 
     if (!RESEND_API_KEY) {
-      // In dev, don’t fail hard — just return the HTML so you can verify
       if (process.env.NODE_ENV !== "production") {
         return json(200, { ok: true, preview: html });
       }
