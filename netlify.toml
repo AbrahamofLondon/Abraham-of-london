@@ -9,7 +9,7 @@
     NEXT_TELEMETRY_DISABLED = "1"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
-    NPM_FLAGS = "--include=dev"
+    # NPM_FLAGS removed: Netlify installs dev deps in build by default
 
 [context.production.environment]
   NODE_ENV = "production"
@@ -21,10 +21,8 @@
   node_bundler = "esbuild"
   directory = "netlify/functions"
   external_node_modules = [
-    "@netlify/functions",
     "resend"
   ]
-  # bundle any email templates under netlify/emails
   included_files = [
     "netlify/emails/**"
   ]
@@ -49,8 +47,7 @@
   to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-# (Optional) also rewrite the canonical (non-versioned) to itself
-# This keeps behavior consistent and future-proofs if you later map it to vN
+# Optional: self-map canonical; harmless no-op for consistency
 [[redirects]]
   from = "/downloads/Fathering_Without_Fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
@@ -68,33 +65,26 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
-# Netlify preview → main domain
+# Netlify preview host → main domain
 [[redirects]]
-  from = "https://abraham-of-london.netlify.app/*"
+  from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
   status = 301
-  force = true
+  force  = true
+  conditions = { Host = ["abraham-of-london.netlify.app"] }
 
-# Brand domains
+# Brand domains → Ventures, keyed by brand
 [[redirects]]
-  from = "https://endureluxe.com/*"
+  from = "/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
   status = 301
+  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
 [[redirects]]
-  from = "https://www.endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-
-[[redirects]]
-  from = "https://alomarada.com/*"
+  from = "/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
-
-[[redirects]]
-  from = "https://www.alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
+  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
 # ────────────────────────────────────────────────────────────
 # Headers
@@ -121,14 +111,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# PDFs: immutable for any filename you publish (safe with versioning)
+# PDFs: immutable for versioned filenames
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Override the *legacy* lower-case path to avoid stale browser caches
-# (applies because the request URL stays the same on a 200 rewrite)
+# Override the *legacy* lower-case path to avoid stale caches
 [[headers]]
   for = "/downloads/fathering-without-fear.pdf"
   [headers.values]
