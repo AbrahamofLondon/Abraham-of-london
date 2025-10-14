@@ -1,4 +1,5 @@
-# netlify.toml — aligned with functions using netlify/emails/*
+# netlify.toml — full replacement
+
 [build]
   command = "npm run build"
   publish = ".next"
@@ -19,6 +20,7 @@
     "@netlify/functions",
     "resend"
   ]
+  # package any React email templates living under netlify/emails
   included_files = [
     "netlify/emails/**"
   ]
@@ -26,7 +28,12 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirects & headers unchanged…
+
+# ────────────────────────────────────────────────────────────
+# Canonical redirects
+# ────────────────────────────────────────────────────────────
+
+# Apex → WWW (hard 301)
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
@@ -34,12 +41,14 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
+# Canonical host: redirect netlify.app to the main domain
 [[redirects]]
   from = "https://abraham-of-london.netlify.app/*"
   to   = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
+# Brand domains → deep link (hard 301)
 [[redirects]]
   from = "https://endureluxe.com/*"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -60,6 +69,43 @@
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
 
+# ── Legacy aliases → serve the new PDFs directly
+[[redirects]]
+  from = "/downloads/fathering-without-fear.pdf"        # old lowercase path
+  to   = "/downloads/Fathering_Without_Fear.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Fathering_Without_Fear.pdf"        # old canonical path
+  to   = "/downloads/Fathering_Without_Fear.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/fathering-without-fear-mobile.pdf" # if this ever existed
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
+  status = 200
+
+# ────────────────────────────────────────────────────────────
+# Legacy PDF → versioned PDFs (so immutable caching is safe)
+# ────────────────────────────────────────────────────────────
+
+# Old lowercase legacy path → new A4/Letter
+[[redirects]]
+  from = "/downloads/fathering-without-fear.pdf"
+  to   = "/downloads/Fathering_Without_Fear.pdf"
+  status = 302
+  force  = true
+
+# (Optional) If an old Mobile link ever existed, redirect it too
+[[redirects]]
+  from = "/downloads/fathering-without-fear-mobile.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile_v2.pdf"
+  status = 302
+  force  = true
+
+# ────────────────────────────────────────────────────────────
+# Security headers
+# ────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
@@ -70,6 +116,12 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
 [[headers]]
+  for = "/downloads/fathering-without-fear.pdf"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# Static caching
+[[headers]]
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
@@ -79,11 +131,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
+# PDFs are immutable: always **rename** on update (e.g., _v3)
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Download cover images (used on /downloads)
 [[headers]]
   for = "/assets/images/downloads/*"
   [headers.values]

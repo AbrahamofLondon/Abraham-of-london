@@ -1,13 +1,24 @@
 /* styles/globals.css */
 /* ----------------------------------------------------------
-   Tailwind layers
+   Tailwind v4: import + reference + theme tokens
 ---------------------------------------------------------- */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@reference "tailwindcss";
+
+/* Tailwind v4 design tokens for custom color utilities
+   (enables classes like text-deepCharcoal, ring-forest, text-cream, etc.) */
+@theme {
+  --color-forest: #0b2e1f;
+  --color-deepCharcoal: #333333;
+  --color-cream: #f5f5f0;
+  --color-softGold: #d4af37;
+  --color-lightGrey: #e5e5e5;
+  --color-warmWhite: #fafaf5;
+}
 
 /* ----------------------------------------------------------
-   THEME VARIABLES (light + dark)
+   THEME VARIABLES (light + dark) — your runtime CSS vars
+   (these power inline styles and non-TW parts of the UI)
 ---------------------------------------------------------- */
 :root {
   --color-primary: #0b2e1f;          /* forest */
@@ -64,10 +75,7 @@ html {
   hanging-punctuation: first allow-end;
 }
 
-html, body {
-  padding: 0;
-  margin: 0;
-}
+html, body { padding: 0; margin: 0; }
 
 body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
