@@ -1,10 +1,7 @@
 // netlify/functions/subscribe-launch.ts
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
-import * as React from "react";
-import { render } from "@react-email/render";
-// If you have a welcome/confirmation email component, import it here.
-// You can replace this with your actual component path & props.
-import WelcomeLaunchEmail from "../../components/emails/WelcomeLaunchEmail";
+import { sendEmail } from "@netlify/emails";
+import { renderWelcomeLaunchHtml } from "../emails";
 
 const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json" };
 const SITE_URL =
@@ -15,116 +12,61 @@ const SITE_URL =
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function ok(body: unknown): HandlerResponse {
-  return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify(body) };
-}
+export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      headers: { ...JSON_HEADERS, Allow: "POST" },
+      body: JSON.stringify({ ok: false, message: "Method Not Allowed" }),
+    };
+  }
 
-function badRequest(message: string): HandlerResponse {
-  return { statusCode: 400, headers: JSON_HEADERS, body: JSON.stringify({ ok: false, message }) };
-}
-
-function serverError(message = "Email provider error"): HandlerResponse {
-  return { statusCode: 502, headers: JSON_HEADERS, body: JSON.stringify({ ok: false, message }) };
-}
-
-function methodNotAllowed(): HandlerResponse {
-  return {
-    statusCode: 405,
-    headers: { ...JSON_HEADERS, Allow: "POST" },
-    body: JSON.stringify({ ok: false, message: "Method Not Allowed" }),
-  };
-}
-
-function safeParse(body: string | null): any {
-  if (!body) return {};
   try {
-    return JSON.parse(body);
+    const body = parseBody(event.body);
+    const email = String(body.email || "").trim().toLowerCase();
+    const name = String(body.name || "").trim() || undefined;
+
+    if (!EMAIL_RE.test(email)) {
+      return {
+        statusCode: 400,
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ ok: false, message: "Invalid email" }),
+      };
+    }
+
+    // OPTIONAL: Add to your ESP (Buttondown, etc.) here if desired.
+
+    // Send welcome/confirmation email if provider configured
+    if (process.env.CONTACT_PROVIDER?.toLowerCase() === "resend") {
+      const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+      const to = email;
+      const subject = "Welcome — Fathering Without Fear launch list";
+      const html = renderWelcomeLaunchHtml({ name, siteUrl: SITE_URL });
+
+      // @netlify/emails will proxy to your configured email provider
+      await sendEmail({ from, to, subject, html });
+    }
+
+    return {
+      statusCode: 200,
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ ok: true, message: "Subscribed (or recorded) successfully" }),
+    };
+  } catch (err: any) {
+    console.error("[subscribe-launch] error:", err?.message || err);
+    return {
+      statusCode: 500,
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ ok: false, message: "Internal Server Error" }),
+    };
+  }
+};
+
+function parseBody(b?: string | null): Record<string, unknown> {
+  if (!b) return {};
+  try {
+    return JSON.parse(b);
   } catch {
     return {};
   }
 }
-
-export const handler: Handler = async (event: HandlerEvent) => {
-  if (event.httpMethod !== "POST") {
-    return methodNotAllowed();
-  }
-
-  const data = safeParse(event.body || null);
-
-  const name: string | undefined = typeof data?.name === "string" && data.name.trim() ? data.name.trim() : undefined;
-  const email: string | undefined =
-    typeof data?.email === "string" && data.email.trim() ? data.email.trim().toLowerCase() : undefined;
-
-  if (!email || !EMAIL_RE.test(email)) {
-    return badRequest("Valid 'email' is required.");
-  }
-
-  // (Optional) Add them to your list provider here (Buttondown, MailerLite, etc.)
-  // Example: Buttondown (requires BUTTONDOWN_API_KEY)
-  const bdKey = process.env.BUTTONDOWN_API_KEY;
-  if (bdKey) {
-    try {
-      const r = await fetch("https://api.buttondown.email/v1/subscribers", {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${bdKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, notes: name ? `Name: ${name}` : undefined }),
-      });
-      if (!r.ok) {
-        const text = await r.text().catch(() => "");
-        console.warn("[subscribe-launch] Buttondown error:", r.status, text);
-        // Don’t fail the whole function; continue to send the welcome email.
-      }
-    } catch (e) {
-      console.warn("[subscribe-launch] Buttondown request failed:", e);
-    }
-  }
-
-  // Send a confirmation/welcome email via Resend
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
-  const subject = "Welcome — Fathering Without Fear launch updates";
-
-  const html = render(
-    // Avoid JSX: createElement to keep this .ts file happy
-    React.createElement(WelcomeLaunchEmail, { siteUrl: SITE_URL, name })
-  );
-
-  if (!apiKey) {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[subscribe-launch] Missing RESEND_API_KEY; would have sent to:", email);
-      return ok({ ok: true, dev: true, message: "Simulated welcome (no RESEND_API_KEY set)" });
-    }
-    return serverError("Email provider not configured");
-  }
-
-  try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: email,
-        subject,
-        html,
-        reply_to: name ? [{ email, name }] : [{ email }],
-      }),
-    });
-
-    if (!r.ok) {
-      const text = await r.text().catch(() => "");
-      console.error("[subscribe-launch] Resend failed:", r.status, text);
-      return serverError();
-    }
-
-    return ok({ ok: true, message: "Subscribed and welcome email sent" });
-  } catch (err) {
-    console.error("[subscribe-launch] Error:", err);
-    return serverError("Failed to send welcome email");
-  }
-};
