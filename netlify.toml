@@ -1,28 +1,40 @@
+# netlify.toml — full replacement
+
 [build]
   command = "npm run build"
   publish = ".next"
 
   [build.environment]
-  NODE_VERSION = "20"
-  NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  CI_LAX = "1"
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
+    NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+    CI_LAX = "1"
 
 [context.production.environment]
-  NODE_ENV = "production"   # ✅ only on real builds
+  NODE_ENV = "production"   # ✅ set only on real builds
 
+# Functions bundling (esbuild) + ensure React email components are included
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
+  # External deps for server functions
   external_node_modules = [
     "@netlify/functions",
     "@netlify/emails",
     "resend",
     "@react-email/render"
   ]
+  # 🔑 Crucial: package your React email components with the functions
+  included_files = [
+    "components/emails/**"
+  ]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Redirects
+# ────────────────────────────────────────────────────────────────────────────────
 
 # Apex → WWW (hard 301)
 [[redirects]]
@@ -60,7 +72,9 @@
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
   status = 301
 
+# ────────────────────────────────────────────────────────────────────────────────
 # Security headers
+# ────────────────────────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]

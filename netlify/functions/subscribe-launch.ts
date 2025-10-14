@@ -1,53 +1,79 @@
-import { Handler } from "@netlify/functions";
-import { Resend } from "resend";
+// netlify/functions/subscribe-launch.tsx
+import React from "react";
+import type { Handler } from "@netlify/functions";
 import { render } from "@react-email/render";
+import { Resend } from "resend";
+
 import WelcomeLaunchEmail from "../../components/emails/WelcomeLaunchEmail";
+import {
+  EMAIL_RE,
+  getSiteUrl,
+  readJson,
+  ok,
+  bad,
+  methodNotAllowed,
+  handleOptions,
+} from "./_utils";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-const FROM = process.env.MAIL_FROM!;
-const ADMIN = process.env.MAIL_ADMIN!;
-const SITE_URL = process.env.SITE_URL || "https://www.abrahamoflondon.org";
-
-// If you also use Netlify Forms, this function can be called from its webhook as well.
+// Optional: save to a list provider here (Buttondown, ConvertKit, etc.)
+// For now we only send a welcome email.
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
+  if (event.httpMethod === "OPTIONS") return handleOptions();
+  if (event.httpMethod !== "POST") return methodNotAllowed();
+
+  const body = await readJson<{ name?: string; email?: string }>(new Request("http://x", {
+    method: "POST",
+    headers: { "content-type": event.headers["content-type"] || "" },
+    body: event.body || "{}",
+  }));
+
+  const name = String(body.name || "").trim().slice(0, 100);
+  const email = String(body.email || "").trim().toLowerCase();
+
+  if (!email || !EMAIL_RE.test(email)) return bad("Valid email required");
+
+  const SITE_URL = getSiteUrl();
+  const html = render(<WelcomeLaunchEmail siteUrl={SITE_URL} name={name || undefined} />, {
+    pretty: true,
+  });
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+
+  if (!apiKey) {
+    // DRY-RUN
+    return ok("DRY-RUN: subscribed (no provider) & welcome not sent (RESEND_API_KEY missing)", {
+      preview: true,
+      to: email.replace(/^(.).+(@.*)$/, "$1***$2"),
+    });
+  }
 
   try {
-    const { email, name } = JSON.parse(event.body || "{}");
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return { statusCode: 400, body: "Invalid email" };
+    const resend = new Resend(apiKey);
+
+    // Send welcome email
+    await resend.emails.send({
+      from,
+      to: [email],
+      subject: "Welcome — Fathering Without Fear launch updates",
+      html,
+    });
+
+    // Optional: notify you (admin)
+    const notify = process.env.MAIL_TO;
+    if (notify) {
+      await resend.emails.send({
+        from,
+        to: [notify],
+        subject: "New launch subscriber",
+        html: `<p>New subscriber: <strong>${name || "—"}</strong> &lt;${email}&gt;</p>`,
+      });
     }
 
-    const html = render(<WelcomeLaunchEmail siteUrl={SITE_URL} name={name} />);
-    const text =
-`Thanks for joining the Fathering Without Fear launch list!
-Grab the free teaser:
-A4/Letter: ${SITE_URL}/downloads/Fathering_Without_Fear_Teaser-A4.pdf
-Mobile: ${SITE_URL}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf
-Unsubscribe any time by replying "stop".`;
-
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: "Welcome — Fathering Without Fear launch list",
-      html,
-      text,
-      reply_to: FROM,
-      headers: { "List-Unsubscribe": "<mailto:" + FROM.replace(/.*<|>.*/g, "") + "?subject=stop>" },
-    });
-
-    // Simple notification to you
-    await resend.emails.send({
-      from: FROM,
-      to: ADMIN,
-      subject: "New launch subscriber",
-      text: `New subscriber: ${email}${name ? ` (name: ${name})` : ""}`,
-    });
-
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  } catch (e) {
-    console.error(e);
-    return { statusCode: 500, body: "Server error" };
+    return ok("Subscribed & welcome sent");
+  } catch (e: any) {
+    console.error("[subscribe-launch] error:", e?.message || e);
+    return bad("Email provider error", 502);
   }
 };

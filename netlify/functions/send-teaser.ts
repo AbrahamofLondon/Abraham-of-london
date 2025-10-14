@@ -1,61 +1,65 @@
-import { Handler } from "@netlify/functions";
-import { Resend } from "resend";
+// netlify/functions/send-teaser.tsx
+import React from "react";
+import type { Handler } from "@netlify/functions";
 import { render } from "@react-email/render";
-import TeaserEmail from "../../components/emails/TeaserEmail";
+import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-const FROM = process.env.MAIL_FROM!;
-const ADMIN = process.env.MAIL_ADMIN!;
-const SITE_URL = process.env.SITE_URL || "https://www.abrahamoflondon.org";
+import TeaserEmail from "../../components/emails/TeaserEmail";
+import {
+  EMAIL_RE,
+  getSiteUrl,
+  readJson,
+  ok,
+  bad,
+  methodNotAllowed,
+  handleOptions,
+} from "./_utils";
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+  if (event.httpMethod === "OPTIONS") return handleOptions();
+  if (event.httpMethod !== "POST") return methodNotAllowed();
+
+  const body = await readJson<{ name?: string; email?: string }>(new Request("http://x", {
+    method: "POST",
+    headers: { "content-type": event.headers["content-type"] || "" },
+    body: event.body || "{}",
+  }));
+
+  const name = String(body.name || "").trim().slice(0, 100);
+  const email = String(body.email || "").trim().toLowerCase();
+
+  if (!email || !EMAIL_RE.test(email)) return bad("Valid email required");
+
+  const SITE_URL = getSiteUrl();
+
+  // Build HTML with React Email
+  const html = render(<TeaserEmail name={name || undefined} siteUrl={SITE_URL} />, {
+    pretty: true,
+  });
+
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+
+  // DRY-RUN if no API key (still returns ok for testing)
+  if (!apiKey) {
+    return ok("DRY-RUN: email not sent (RESEND_API_KEY missing)", {
+      preview: true,
+      to: email.replace(/^(.).+(@.*)$/, "$1***$2"),
+    });
   }
 
   try {
-    const { email, name } = JSON.parse(event.body || "{}");
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return { statusCode: 400, body: "Invalid email" };
-    }
-
-    // HTML + Text
-    const html = render(<TeaserEmail name={name} siteUrl={SITE_URL} />);
-    const text =
-`Friends—
-I’m releasing Fathering Without Fear, a memoir forged in the middle of loss, legal storms, and a father’s stubborn hope.
-
-Teaser PDFs:
-A4/Letter: ${SITE_URL}/downloads/Fathering_Without_Fear_Teaser-A4.pdf
-Mobile: ${SITE_URL}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf
-
-Want chapter drops and launch dates? Reply "keep me posted" or join the list here: ${SITE_URL}/contact
-
-Grace and courage,
-Abraham of London`;
-
-    // Send to reader
+    const resend = new Resend(apiKey);
     await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: "Fathering Without Fear — the story they thought they knew",
+      from,
+      to: [email],
+      subject: "Fathering Without Fear — teaser links",
       html,
-      text,
-      reply_to: FROM,
-      headers: { "List-Unsubscribe": "<mailto:" + FROM.replace(/.*<|>.*/g, "") + "?subject=stop>" },
     });
 
-    // Notify admin (optional)
-    await resend.emails.send({
-      from: FROM,
-      to: ADMIN,
-      subject: "Teaser sent",
-      text: `Teaser sent to ${email}${name ? ` (name: ${name})` : ""}`,
-    });
-
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  } catch (err: any) {
-    console.error(err);
-    return { statusCode: 500, body: "Server error" };
+    return ok("Teaser sent");
+  } catch (e: any) {
+    console.error("[send-teaser] error:", e?.message || e);
+    return bad("Email provider error", 502);
   }
 };
