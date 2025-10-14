@@ -1,4 +1,3 @@
-// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -18,6 +17,78 @@ function toNumber(v?: number | string) {
   if (typeof v === "number") return v;
   const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
   return Number.isFinite(n) ? n : undefined;
+}
+
+/* ---------- Tiny helpers ---------- */
+const cx = (...cls: (string | false | null | undefined)[]) => cls.filter(Boolean).join(" ");
+
+/* ---------- HeroEyebrow ---------- */
+export function HeroEyebrow({ children, className }: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div className={cx(
+      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-deepCharcoal/70",
+      className
+    )}>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- Callout ---------- */
+type CalloutTone = "info" | "key" | "caution" | "success";
+const toneStyles: Record<CalloutTone, string> = {
+  info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800/60 dark:bg-blue-900/20 dark:text-blue-100",
+  key: "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-100",
+  caution: "border-red-200 bg-red-50 text-red-900 dark:border-red-800/60 dark:bg-red-900/20 dark:text-red-100",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-100",
+};
+
+export function Callout({
+  title,
+  tone = "info",
+  children,
+  className,
+}: React.PropsWithChildren<{ title?: string; tone?: CalloutTone; className?: string }>) {
+  return (
+    <div className={cx(
+      "my-4 rounded-xl border p-4 shadow-card",
+      toneStyles[tone],
+      className
+    )}>
+      {title && <div className="mb-2 font-semibold tracking-wide">{title}</div>}
+      <div className="space-y-2 text-[0.95rem] leading-relaxed">{children}</div>
+    </div>
+  );
+}
+
+/* ---------- Badge ---------- */
+export function Badge({ children, className }: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <span className={cx(
+      "inline-flex items-center rounded-full border border-lightGrey bg-warmWhite/70 px-2.5 py-1 text-xs font-medium",
+      className
+    )}>
+      {children}
+    </span>
+  );
+}
+
+/* ---------- ShareRow ---------- */
+export function ShareRow({ text, hashtags }: { text: string; hashtags: string }) {
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+  return (
+    <div className="my-8">
+      <a
+        href={twitterUrl}
+        className="aol-btn text-sm"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Share on Twitter
+      </a>
+    </div>
+  );
 }
 
 /* ---------- MDX <a> ---------- */
@@ -207,7 +278,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
 /* ---------- component map ---------- */
 const components: MDXComponentsType = {
   a: A,
-  img: (props) => <Img {...(props as any)} />,
+  img: Img,
   YouTube,
   iframe: Iframe,
   EventJsonLd,
@@ -216,13 +287,17 @@ const components: MDXComponentsType = {
   Rule,
   Note,
   ResourcesCTA,
+  HeroEyebrow,
+  Callout,
+  Badge,
+  ShareRow,
 
   // Normalize headings: the page owns <h1>
   h1: (props) => <h2 {...props} />,
   // Tighten common blocks for rhythm/consistency
   ul: (props) => <ul className="list-disc pl-6 space-y-2" {...props} />,
   ol: (props) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-  p:  (props) => <p className="leading-7" {...props} />,
+  p: (props) => <p className="leading-7" {...props} />,
   hr: (props) => <hr className="my-10 border-lightGrey" {...props} />,
   blockquote: (props) => (
     <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />
