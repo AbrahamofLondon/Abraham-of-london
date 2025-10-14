@@ -1,4 +1,4 @@
-# netlify.toml — full replacement
+# netlify.toml — full replacement (aligned with Resend + React server render)
 
 [build]
   command = "npm run build"
@@ -11,20 +11,18 @@
     CI_LAX = "1"
 
 [context.production.environment]
-  NODE_ENV = "production"   # ✅ set only on real builds
+  NODE_ENV = "production"   # ✅ only on real builds
 
-# Functions bundling (esbuild) + ensure React email components are included
+# Functions bundling (esbuild) + include React email components
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
-  # External deps for server functions
+  # Only what we actually import at runtime
   external_node_modules = [
     "@netlify/functions",
-    "@netlify/emails",
-    "resend",
-    "@react-email/render"
+    "resend"
   ]
-  # 🔑 Crucial: package your React email components with the functions
+  # Ensure React email components are packaged with functions
   included_files = [
     "components/emails/**"
   ]
