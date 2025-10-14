@@ -1,0 +1,25 @@
+# File: .github/workflows/tailwind-guard.yml
+name: Tailwind Slash-Opacity Guard
+on:
+  pull_request:
+    paths:
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.jsx'
+      - '**/*.md'
+      - '**/*.mdx'
+      - '**/*.css'
+      - 'scripts/convert-tailwind-slash-opacity.mjs'
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - name: Guard Tailwind slash opacity usage
+        run: node scripts/convert-tailwind-slash-opacity.mjs --check
