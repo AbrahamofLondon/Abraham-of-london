@@ -1,24 +1,46 @@
 // components/emails/WelcomeLaunchEmail.tsx
 import * as React from "react";
 
-export default function WelcomeLaunchEmail({ siteUrl, name }: { siteUrl: string; name?: string }) {
+type Props = { name?: string; siteUrl: string };
+
+export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
   return (
     <div style={{ fontFamily: "ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial", color: "#1b1f1a", lineHeight: 1.6 }}>
       <p>{name ? `Hi ${name},` : "Hi,"}</p>
+
       <p>
-        Thanks for joining the <strong>Fathering Without Fear</strong> launch list. I’ll send chapter
-        drops, dates, and behind-the-scenes notes (not spam).
+        Thank you for joining the <strong>Fathering Without Fear</strong> launch list. You’ll get early
+        chapter drops, release dates, and practical resources for fathers under pressure.
       </p>
+
       <p>
-        Meanwhile, you can grab the free teaser here:
-        <br />
-        <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-A4.pdf`}>A4/Letter PDF</a> ·{" "}
-        <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`}>Mobile PDF</a>
+        While you wait, grab the free teaser PDFs:
       </p>
-      <p>Grace and courage,<br/>Abraham</p>
+      <ul>
+        <li>
+          <a href={`${siteUrl}/downloads/Fathering_Without_Fear.pdf`} target="_blank" rel="noopener noreferrer">
+            Teaser PDF (A4/Letter)
+          </a>
+        </li>
+        <li>
+          <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`} target="_blank" rel="noopener noreferrer">
+            Teaser PDF (Mobile)
+          </a>
+        </li>
+      </ul>
+
+      <p>
+        If you ever want to reach me directly, reply to this email or use the contact page:
+        {" "}
+        <a href={`${siteUrl}/contact`} target="_blank" rel="noopener noreferrer">{siteUrl}/contact</a>.
+      </p>
+
+      <p>Grace and courage,<br/>Abraham of London</p>
+
       <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        You can unsubscribe any time by replying <em>“stop”</em>.
+        You’re receiving this because you asked to be notified about the launch.
+        Unsubscribe: reply with <em>“stop”</em>.
       </p>
     </div>
   );
