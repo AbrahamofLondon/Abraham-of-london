@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link"; // ✅ use next/link for internal routes
 import { motion, type Variants } from "framer-motion";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/siteConfig";
@@ -94,7 +95,6 @@ export default function ContactPage() {
         message: String(formData.get("message") || ""),
         teaserOptIn: formData.get("teaserOptIn") === "on",
         newsletterOptIn: formData.get("newsletterOptIn") === "on",
-        // optional source hint
         source: "contact-page",
         "bot-field": "",
       };
@@ -240,7 +240,7 @@ export default function ContactPage() {
 
             <p className="text-center text-xs text-deepCharcoal/60">
               By submitting, you agree to our{" "}
-              <a className="underline" href="/privacy">Privacy Policy</a>.
+              <Link className="underline" href="/privacy">Privacy Policy</Link>.
             </p>
           </motion.form>
         </section>
