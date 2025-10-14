@@ -59,11 +59,7 @@ export const defaultBrands: Brand[] = [
 
 type VenturesProps = { brandsData?: Brand[] };
 
-const container = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
-} as const;
-
+const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } } as const;
 const item = { hidden: { y: 18, opacity: 0 }, visible: { y: 0, opacity: 1 } } as const;
 
 function BrandCard({ brand }: { brand: Brand }) {
@@ -125,7 +121,7 @@ function BrandCard({ brand }: { brand: Brand }) {
             <Link
               href={brand.secondaryHref}
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>
@@ -135,7 +131,7 @@ function BrandCard({ brand }: { brand: Brand }) {
               target="_blank"
               rel="noopener noreferrer"
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>
@@ -178,7 +174,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
                 Strategic stewardship, thought leadership, and the standards that hold the family together.
               </p>
               <div className="mt-4">
-                <Link href="/about" className="inline-flex items-center px-4 py-2 rounded-full bg-forest text-cream text-sm font-medium hover:bg-forest/90 transition-colors">
+                <Link href="/about" className="inline-flex items-center px-4 py-2 rounded-full bg-forest text-cream text-sm font-medium hover:brightness-95 transition-colors">
                   Learn more
                 </Link>
               </div>
@@ -190,7 +186,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
           </motion.div>
 
           <motion.div variants={item} className="mt-12 text-center">
-            <Link href="/ventures" className="inline-flex items-center px-6 py-3 bg-forest text-cream rounded-full font-medium hover:bg-forest/90 transition-colors shadow-lg">
+            <Link href="/ventures" className="inline-flex items-center px-6 py-3 bg-forest text-cream rounded-full font-medium hover:brightness-95 transition-colors shadow-lg">
               View All Ventures
             </Link>
           </motion.div>
