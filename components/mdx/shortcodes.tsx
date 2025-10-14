@@ -12,7 +12,7 @@ const cx = (...cls: (string | false | null | undefined)[]) => cls.filter(Boolean
 export function HeroEyebrow({ children, className }: React.PropsWithChildren<{ className?: string }>) {
   return (
     <div className={cx(
-      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-deepCharcoal/70",
+      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
       className
     )}>
       {children}
@@ -84,7 +84,7 @@ export function Verse({ cite, children, className }: React.PropsWithChildren<{ c
   return (
     <blockquote className={cx("not-prose my-4 rounded-xl border border-lightGrey bg-warmWhite/70 p-4", className)}>
       <div className="text-[0.95rem] leading-relaxed">{children}</div>
-      {cite && <div className="mt-2 text-right text-xs uppercase tracking-wide text-deepCharcoal/70">— {cite}</div>}
+      {cite && <div className="mt-2 text-right text-xs uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]">— {cite}</div>}
     </blockquote>
   );
 }
@@ -111,12 +111,12 @@ export function ResourcesCTA({
       <h3 className="mb-3 text-lg font-semibold text-forest">{title}</h3>
       {!!reads?.length && (
         <div className="mb-3">
-          <div className="mb-1 text-sm font-medium uppercase tracking-wide text-deepCharcoal/60">Reading</div>
+          <div className="mb-1 text-sm font-medium uppercase tracking-wide text-[color:var(--color-on-secondary)/0.6]">Reading</div>
           <ul className="list-inside space-y-1">
             {reads.map((r, i) => (
               <li key={i} className="leading-snug">
                 <Link href={r.href} className="luxury-link">{r.label}</Link>
-                {r.sub && <span className="ml-2 text-xs text-deepCharcoal/70">— {r.sub}</span>}
+                {r.sub && <span className="ml-2 text-xs text-[color:var(--color-on-secondary)/0.7]">— {r.sub}</span>}
               </li>
             ))}
           </ul>
@@ -124,7 +124,7 @@ export function ResourcesCTA({
       )}
       {!!downloads?.length && (
         <div>
-          <div className="mb-1 text-sm font-medium uppercase tracking-wide text-deepCharcoal/60">Downloads</div>
+          <div className="mb-1 text-sm font-medium uppercase tracking-wide text-[color:var(--color-on-secondary)/0.6]">Downloads</div>
           <ul className="list-inside space-y-1">
             {downloads.map((d, i) => (
               <li key={i}>

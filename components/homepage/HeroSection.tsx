@@ -98,7 +98,7 @@ export default function HeroSection({
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href={ctaLink}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-7 py-3 text-lg font-semibold shadow-lg hover:bg-forest/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-forest/70"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-7 py-3 text-lg font-semibold shadow-lg hover:bg-[color:var(--color-primary)/0.9] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[color:var(--color-primary)/0.7]"
               aria-label={ctaText}
             >
               {ctaText}

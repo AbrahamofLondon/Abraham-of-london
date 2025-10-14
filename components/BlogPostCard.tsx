@@ -114,14 +114,14 @@ export default function BlogPostCard({
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-deepCharcoal/70">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
             {readTime && <span aria-label="Estimated reading time">{readTime} min read</span>}
             {category && <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>}
             <span className="luxury-link">Discuss</span>
           </div>
 
-          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-deepCharcoal/80">{excerpt}</p>}
+          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{excerpt}</p>}
 
           <div className="mt-4 flex items-center gap-3">
             <Image
@@ -132,7 +132,7 @@ export default function BlogPostCard({
               className="rounded-full object-cover"
               onError={() => setAvatarSrc(FALLBACK_AVATAR)}
             />
-            <div className="text-xs text-deepCharcoal/70">
+            <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
               <p className="font-medium">{authorName}</p>
             </div>
           </div>

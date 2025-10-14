@@ -67,7 +67,7 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
       <div className="grid gap-6 md:grid-cols-2">
         {!!reads.length && (
           <div>
-            <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
+            <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
               Further Reading
             </h4>
             <ul className="space-y-2">
@@ -82,7 +82,7 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
                       {r.label}
                     </a>
                   )}
-                  {r.sub && <span className="ml-2 text-sm text-deepCharcoal/70">— {r.sub}</span>}
+                  {r.sub && <span className="ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]">— {r.sub}</span>}
                 </li>
               ))}
             </ul>
@@ -91,7 +91,7 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
 
         {!!downloads.length && (
           <div>
-            <h4 className="mb-2 text-sm font-semibold tracking-wide text-deepCharcoal/70 uppercase">
+            <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
               Downloads
             </h4>
             <ul className="space-y-2">

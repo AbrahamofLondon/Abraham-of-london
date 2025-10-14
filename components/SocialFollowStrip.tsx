@@ -228,7 +228,7 @@ export default function SocialFollowStrip({ variant = "light", className = "", i
           <p
             className={clsx(
               "font-serif leading-relaxed",
-              variant === "dark" ? "text-cream/85" : "text-deepCharcoal/80",
+              variant === "dark" ? "text-[color:var(--color-on-primary)/0.85]" : "text-[color:var(--color-on-secondary)/0.8]",
               "text-base sm:text-lg"
             )}
           >

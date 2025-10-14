@@ -36,14 +36,14 @@ export default function SocialFollowStrip({
 
   const containerBg =
     variant === "dark"
-      ? "from-black/60 to-deepCharcoal/60 ring-white/10"
-      : "from-white/90 to-warmWhite/90 ring-deepCharcoal/10";
+      ? "from-black/60 to-[color:var(--color-on-secondary)/0.6] ring-white/10"
+      : "from-white/90 to-warmWhite/90 ring-[color:var(--color-on-secondary)/0.1]";
 
-  const textColor = variant === "dark" ? "text-cream" : "text-deepCharcoal/80";
+  const textColor = variant === "dark" ? "text-cream" : "text-[color:var(--color-on-secondary)/0.8]";
   const chipBase =
     variant === "dark"
       ? "bg-white/10 text-cream ring-white/15 hover:bg-white/15"
-      : "bg-softGold text-deepCharcoal ring-deepCharcoal/20 hover:bg-forest hover:text-cream";
+      : "bg-softGold text-deepCharcoal ring-[color:var(--color-on-secondary)/0.2] hover:bg-forest hover:text-cream";
 
   return (
     <section className={`mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12 ${className}`}>

@@ -289,7 +289,7 @@ export default function BrandsPage() {
             </p>
             <Link
               href="/contact"
-              className="inline-block rounded-full bg-forest px-8 py-3 font-bold text-cream shadow-lg transition-colors duration-300 hover:bg-forest/90"
+              className="inline-block rounded-full bg-forest px-8 py-3 font-bold text-cream shadow-lg transition-colors duration-300 hover:bg-[color:var(--color-primary)/0.9]"
               prefetch={false}
             >
               Get in Touch

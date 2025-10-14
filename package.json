@@ -1,11 +1,11 @@
-// package.json — add "prebuild" so Netlify runs the guard automatically
+// package.json — add scripts + husky; keep your existing fields
 {
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
   "engines": { "node": ">=20 <21" },
   "scripts": {
-    "prebuild": "node scripts/convert-tailwind-slash-opacity.mjs --check",
+    "prebuild": "node scripts/convert-tailwind-slash-opacity.mjs --check && node scripts/postcss-guard-dryrun.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -15,9 +15,13 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "prepare": "node scripts/prepare-playwright.mjs",
+    "prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs",
     "fix:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs",
-    "check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check"
+    "check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check",
+    "guard:css": "node scripts/postcss-guard-dryrun.mjs",
+    "fix:css-slash": "cross-env NO_SLASH_OPACITY_MODE=fix node scripts/postcss-guard-dryrun.mjs --write",
+    "fix:classnames-slash": "node scripts/codemods/convert-classnames-slash-opacity.mjs",
+    "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash && npm run fix:classnames-slash"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
@@ -65,6 +69,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.31",
     "glob": "^11.0.3",
+    "husky": "^9.1.6",
     "sharp": "0.34.3",
     "simple-icons": "15.14.0",
     "typescript": "5.9.2"

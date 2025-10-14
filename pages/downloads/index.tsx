@@ -65,7 +65,7 @@ export default function DownloadsIndex({ items }: Props) {
       <main className="container mx-auto px-4 py-10 md:py-16">
         <header className="mb-8 md:mb-12">
           <h1 className="font-serif text-4xl text-forest md:text-5xl">Downloads</h1>
-          <p className="mt-2 max-w-2xl text-deepCharcoal/80">
+          <p className="mt-2 max-w-2xl text-[color:var(--color-on-secondary)/0.8]">
             Free, practical resources you can deploy this week. Print them. Share them. Lead with clarity.
           </p>
         </header>
@@ -106,7 +106,7 @@ export default function DownloadsIndex({ items }: Props) {
                 </h2>
 
                 {d.excerpt && (
-                  <p className="mt-2 line-clamp-3 text-sm text-deepCharcoal/80">{d.excerpt}</p>
+                  <p className="mt-2 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{d.excerpt}</p>
                 )}
 
                 <div className="mt-4 flex items-center gap-3">

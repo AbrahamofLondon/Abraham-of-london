@@ -84,7 +84,7 @@ export default function LuxuryLoader({
             className={[
               "rounded-full border-solid",
               // ring background + brand accent for the top segment
-              "border-deepCharcoal/15 dark:border-cream/20",
+              "border-[color:var(--color-on-secondary)/0.15] dark:border-[color:var(--color-on-primary)/0.2]",
               "border-t-softGold",
               "shadow-md",
             ].join(" ")}
