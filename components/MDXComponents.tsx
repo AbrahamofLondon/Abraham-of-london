@@ -26,7 +26,7 @@ const cx = (...cls: (string | false | null | undefined)[]) => cls.filter(Boolean
 export function HeroEyebrow({ children, className }: React.PropsWithChildren<{ className?: string }>) {
   return (
     <div className={cx(
-      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-deepCharcoal/70",
+      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
       className
     )}>
       {children}
@@ -177,7 +177,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
         </span>
       )}
       {title && (
-        <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
+        <figcaption className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]">
           {title}
         </figcaption>
       )}
@@ -246,7 +246,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
-      <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">
+      <div className="my-6 rounded-md border p-4 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]">
         Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.
       </div>
     );

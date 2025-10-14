@@ -122,7 +122,7 @@ export default function BlogPost({ post }: Props) {
 
           <h1 className="sr-only">{title}</h1>
 
-          <div className="mb-6 text-sm text-deepCharcoal/70">
+          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
             <span>By {authorName}</span>
             {date && (
               <>
