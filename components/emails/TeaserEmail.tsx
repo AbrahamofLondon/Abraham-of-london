@@ -3,28 +3,18 @@ import * as React from "react";
 type Props = { name?: string; siteUrl: string };
 
 export default function TeaserEmail({ name, siteUrl }: Props) {
-  const A4 = `${siteUrl.replace(/\/$/, "")}/downloads/Fathering_Without_Fear.pdf`;
-  const Mobile = `${siteUrl.replace(/\/$/, "")}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`;
+  const base = siteUrl.replace(/\/$/, "");
+  const A4 = `${base}/downloads/Fathering_Without_Fear.pdf`;
+  const Mobile = `${base}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`;
 
   const link = (href: string, label: string) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ color: "#0f5132", textDecoration: "underline" }}
-    >
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: "#0f5132", textDecoration: "underline" }}>
       {label}
     </a>
   );
 
   return (
-    <div
-      style={{
-        fontFamily: "ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial",
-        color: "#1b1f1a",
-        lineHeight: 1.6,
-      }}
-    >
+    <div style={{ fontFamily: "ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial", color: "#1b1f1a", lineHeight: 1.6 }}>
       <p>Friends—{name ? ` ${name},` : ""}</p>
 
       <p>
@@ -42,7 +32,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
 
       <p>
         Want chapter drops and launch dates? Reply <em>“keep me posted”</em> or join the list here:{" "}
-        {link(`${siteUrl.replace(/\/$/, "")}/contact`, `${siteUrl.replace(/\/$/, "")}/contact`)}.
+        {link(`${base}/contact`, `${base}/contact`)}.
       </p>
 
       <p>

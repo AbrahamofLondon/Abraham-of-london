@@ -1,5 +1,4 @@
 // netlify/functions/send-teaser.tsx
-import type { HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { Resend } from "resend";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
