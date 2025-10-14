@@ -1,89 +1,106 @@
-import type { Handler } from "@netlify/functions";
+// netlify/functions/send-teaser.ts
+import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
 import * as React from "react";
 import { render } from "@react-email/render";
-
-// IMPORTANT: no JSX in .ts files. We import the component but create it via React.createElement.
+// Adjust the relative import if your folder layout differs:
 import TeaserEmail from "../../components/emails/TeaserEmail";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json" };
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.URL ||
   process.env.DEPLOY_PRIME_URL ||
   "https://www.abrahamoflondon.org";
 
-function safeJsonParse<T = any>(s: string | null | undefined): T | Record<string, never> {
-  if (!s) return {};
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function ok(body: unknown): HandlerResponse {
+  return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify(body) };
+}
+
+function badRequest(message: string): HandlerResponse {
+  return { statusCode: 400, headers: JSON_HEADERS, body: JSON.stringify({ ok: false, message }) };
+}
+
+function serverError(message = "Email provider error"): HandlerResponse {
+  return { statusCode: 502, headers: JSON_HEADERS, body: JSON.stringify({ ok: false, message }) };
+}
+
+function methodNotAllowed(): HandlerResponse {
+  // Include Allow on this branch; still typed as Record<string,string>
+  return {
+    statusCode: 405,
+    headers: { ...JSON_HEADERS, Allow: "POST" },
+    body: JSON.stringify({ ok: false, message: "Method Not Allowed" }),
+  };
+}
+
+function safeParse(body: string | null): any {
+  if (!body) return {};
   try {
-    return JSON.parse(s);
+    return JSON.parse(body);
   } catch {
     return {};
   }
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event: HandlerEvent) => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json", Allow: "POST" },
-      body: JSON.stringify({ ok: false, message: "Method Not Allowed" }),
-    };
+    return methodNotAllowed();
   }
 
-  const body = typeof event.body === "string" ? safeJsonParse(event.body) : {};
-  const name = String((body as any).name ?? "").trim() || undefined;
-  const to = String((body as any).email ?? (body as any).to ?? "").trim().toLowerCase();
+  const data = safeParse(event.body || null);
 
-  if (!to || !EMAIL_RE.test(to)) {
-    return {
-      statusCode: 400,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ok: false, message: "Valid recipient email required." }),
-    };
+  const name: string | undefined = typeof data?.name === "string" && data.name.trim() ? data.name.trim() : undefined;
+  const email: string | undefined =
+    typeof data?.email === "string" && data.email.trim() ? data.email.trim().toLowerCase() : undefined;
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return badRequest("Valid 'email' is required.");
   }
 
-  // Render the email HTML without JSX
-  const element = React.createElement(TeaserEmail as any, {
-    name,
-    siteUrl: SITE_URL,
-  });
-  const html = render(element);
+  // Render the email HTML without JSX in this .ts file
+  const html = render(React.createElement(TeaserEmail, { name, siteUrl: SITE_URL }));
 
-  // Optional: send via Resend if configured
-  const RESEND_KEY = process.env.RESEND_API_KEY || "";
-  const MAIL_FROM = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+  const subject = "Fathering Without Fear — the teaser you requested";
 
-  if (RESEND_KEY) {
+  if (!apiKey) {
+    // In dev, just log and return OK to avoid blocking
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[send-teaser] Missing RESEND_API_KEY; would have sent to:", email);
+      return ok({ ok: true, dev: true, message: "Simulated send (no RESEND_API_KEY set)" });
+    }
+    return serverError("Email provider not configured");
+  }
+
+  try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${RESEND_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: MAIL_FROM,
-        to,
-        subject: "Fathering Without Fear — the story they thought they knew",
+        from,
+        to: email,
+        subject,
         html,
-        reply_to: name ? [{ email: to, name }] : [{ email: to }],
+        // Helps direct replies back to the requester if desired:
+        reply_to: name ? [{ email, name }] : [{ email }],
       }),
     });
 
     if (!r.ok) {
       const text = await r.text().catch(() => "");
-      console.error("[send-teaser] Resend error:", r.status, text);
-      return {
-        statusCode: 502,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ok: false, message: "Email provider error." }),
-      };
+      console.error("[send-teaser] Resend failed:", r.status, text);
+      return serverError();
     }
-  }
 
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ok: true, message: "Teaser sent (or rendered) successfully." }),
-  };
+    return ok({ ok: true, message: "Teaser sent" });
+  } catch (err) {
+    console.error("[send-teaser] Error:", err);
+    return serverError("Failed to send email");
+  }
 };

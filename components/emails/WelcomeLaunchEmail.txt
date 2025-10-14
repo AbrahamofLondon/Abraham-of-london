@@ -4,6 +4,9 @@ import * as React from "react";
 type Props = { name?: string; siteUrl: string };
 
 export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
+  const A4 = `${siteUrl}/downloads/Fathering_Without_Fear.pdf`;
+  const Mobile = `${siteUrl}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`;
+
   return (
     <div style={{ fontFamily: "ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial", color: "#1b1f1a", lineHeight: 1.6 }}>
       <p>{name ? `Hi ${name},` : "Hi,"}</p>
@@ -13,26 +16,21 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
         chapter drops, release dates, and practical resources for fathers under pressure.
       </p>
 
-      <p>
-        While you wait, grab the free teaser PDFs:
-      </p>
+      <p>While you wait, grab the free teaser PDFs:</p>
       <ul>
         <li>
-          <a href={`${siteUrl}/downloads/Fathering_Without_Fear.pdf`} target="_blank" rel="noopener noreferrer">
-            Teaser PDF (A4/Letter)
-          </a>
+          <a href={A4} target="_blank" rel="noopener noreferrer">Teaser PDF (A4/Letter)</a>
         </li>
         <li>
-          <a href={`${siteUrl}/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf`} target="_blank" rel="noopener noreferrer">
-            Teaser PDF (Mobile)
-          </a>
+          <a href={Mobile} target="_blank" rel="noopener noreferrer">Teaser PDF (Mobile)</a>
         </li>
       </ul>
 
       <p>
-        If you ever want to reach me directly, reply to this email or use the contact page:
-        {" "}
-        <a href={`${siteUrl}/contact`} target="_blank" rel="noopener noreferrer">{siteUrl}/contact</a>.
+        If you ever want to reach me directly, reply to this email or use the contact page:{" "}
+        <a href={`${siteUrl}/contact`} target="_blank" rel="noopener noreferrer">
+          {siteUrl}/contact
+        </a>.
       </p>
 
       <p>Grace and courage,<br/>Abraham of London</p>
