@@ -182,7 +182,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* ----------------------------------------------------------
-   TAILWIND COMPONENT SHORTCUTS
+   TAILwind COMPONENT SHORTCUTS
 ---------------------------------------------------------- */
 @layer components {
   .aol-input {
@@ -201,7 +201,8 @@ img { max-width: 100%; height: auto; display: block; }
 
   .aol-btn {
     @apply inline-flex items-center rounded-full px-4 py-2 text-cream transition
-           hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40;
+           hover:brightness-95 focus:outline-none
+           focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40;
     background-color: var(--color-primary);
   }
 
