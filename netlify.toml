@@ -9,7 +9,8 @@
     NEXT_TELEMETRY_DISABLED = "1"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
-    NPM_FLAGS = "--include=dev"
+    # NPM_FLAGS intentionally omitted; Netlify installs dev deps during build
+    NO_SLASH_OPACITY_MODE = "fix"   # belt & braces for CI
 
 [context.production.environment]
   NODE_ENV = "production"
@@ -20,47 +21,67 @@
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
-  external_node_modules = [
-    "@netlify/functions",
-    "resend"
-  ]
-  # bundle any email templates under netlify/emails
-  included_files = [
-    "netlify/emails/**"
-  ]
+  external_node_modules = ["resend"]
+  included_files = ["netlify/emails/**"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 # ────────────────────────────────────────────────────────────
 # Legacy PDF aliases → serve new files directly (200 rewrites)
-# Put these BEFORE other redirects
+# Keep BEFORE any redirects
 # ────────────────────────────────────────────────────────────
-
-# lower-case legacy path → canonical teaser (A4/Letter)
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
   status = 200
 
-# if an old mobile filename ever circulated
 [[redirects]]
   from = "/downloads/fathering-without-fear-mobile.pdf"
   to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-# (Optional) also rewrite the canonical (non-versioned) to itself
-# This keeps behavior consistent and future-proofs if you later map it to vN
+# Self-map canonical (no-op, keeps behavior explicit)
 [[redirects]]
   from = "/downloads/Fathering_Without_Fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
   status = 200
 
 # ────────────────────────────────────────────────────────────
-# Canonical host redirects
+# Brand domains: root → 301 to Ventures; all other paths → 410
+# Place BEFORE global canonical host redirects
 # ────────────────────────────────────────────────────────────
+# Endureluxe
+[[redirects]]
+  from = "/"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
+  status = 301
+  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
-# Apex → WWW (hard 301)
+[[redirects]]
+  from = "/*"
+  to   = "/410.html"
+  status = 410
+  force = true
+  conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
+
+# Alomarada
+[[redirects]]
+  from = "/"
+  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
+  status = 301
+  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+
+[[redirects]]
+  from = "/*"
+  to   = "/410.html"
+  status = 410
+  force = true
+  conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
+
+# ────────────────────────────────────────────────────────────
+# Canonical host redirects (apex/preview → www)
+# ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
@@ -68,38 +89,16 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
-# Netlify preview → main domain
 [[redirects]]
-  from = "https://abraham-of-london.netlify.app/*"
+  from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"
   status = 301
-  force = true
-
-# Brand domains
-[[redirects]]
-  from = "https://endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-
-[[redirects]]
-  from = "https://www.endureluxe.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
-  status = 301
-
-[[redirects]]
-  from = "https://alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
-
-[[redirects]]
-  from = "https://www.alomarada.com/*"
-  to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
-  status = 301
+  force  = true
+  conditions = { Host = ["abraham-of-london.netlify.app"] }
 
 # ────────────────────────────────────────────────────────────
 # Headers
 # ────────────────────────────────────────────────────────────
-
 # Security
 [[headers]]
   for = "/*"
@@ -121,14 +120,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# PDFs: immutable for any filename you publish (safe with versioning)
+# PDFs: immutable for versioned filenames
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Override the *legacy* lower-case path to avoid stale browser caches
-# (applies because the request URL stays the same on a 200 rewrite)
+# Override legacy alias path to avoid stale caches (applies to the 200 rewrite)
 [[headers]]
   for = "/downloads/fathering-without-fear.pdf"
   [headers.values]

@@ -50,7 +50,7 @@ export default function BookCard({
       {...motionProps}
       className={clsx(
         "group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all hover:shadow-cardHover",
-        "focus-within:ring-1 focus-within:ring-forest/30",
+        "focus-within:ring-1 focus-within:ring-[color:var(--color-primary)/0.3]",
         featured && "ring-1 ring-softGold/30",
         className
       )}
@@ -85,18 +85,18 @@ export default function BookCard({
             {title}
           </Link>
         </h3>
-        <p className="mt-1 text-sm text-deepCharcoal/70">By {author}</p>
-        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-deepCharcoal/90">{excerpt}</p>
+        <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">By {author}</p>
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">{excerpt}</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-deepCharcoal/70">
+          <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {genre || "Uncategorized"}
           </span>
 
           <Link
             href={detailHref}
             prefetch={false}
-            className="ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-forest/90"
+            className="ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9]"
           >
             Learn more
           </Link>
@@ -106,7 +106,7 @@ export default function BookCard({
               href={buyLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center rounded-full border border-forest/25 px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream"
+              className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.25] px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream"
               aria-label={`Buy ${title} (opens in new tab)`}
             >
               Buy

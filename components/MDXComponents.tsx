@@ -10,6 +10,7 @@ import Verse from "@/components/mdx/Verse";
 import Rule from "@/components/mdx/Rule";
 import Note from "@/components/mdx/Note";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
+import JsonLd from "@/components/mdx/JsonLd";
 
 /* ---------- utils ---------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
@@ -18,6 +19,87 @@ function toNumber(v?: number | string) {
   if (typeof v === "number") return v;
   const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
   return Number.isFinite(n) ? n : undefined;
+}
+const cx = (...cls: (string | false | null | undefined)[]) => cls.filter(Boolean).join(" ");
+
+/* ---------- small UI helpers for MDX ---------- */
+export function HeroEyebrow({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div
+      className={cx(
+        "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+type CalloutTone = "info" | "key" | "caution" | "success";
+const toneStyles: Record<CalloutTone, string> = {
+  info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800/60 dark:bg-blue-900/20 dark:text-blue-100",
+  key: "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-100",
+  caution: "border-red-200 bg-red-50 text-red-900 dark:border-red-800/60 dark:bg-red-900/20 dark:text-red-100",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-100",
+};
+
+export function Callout({
+  title,
+  tone = "info",
+  children,
+  className,
+}: React.PropsWithChildren<{ title?: string; tone?: CalloutTone; className?: string }>) {
+  return (
+    <div className={cx("my-4 rounded-xl border p-4 shadow-card", toneStyles[tone], className)}>
+      {title && <div className="mb-2 font-semibold tracking-wide">{title}</div>}
+      <div className="space-y-2 text-[0.95rem] leading-relaxed">{children}</div>
+    </div>
+  );
+}
+
+export function Badge({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <span className={cx("inline-flex items-center rounded-full border border-lightGrey bg-warmWhite/70 px-2.5 py-1 text-xs font-medium", className)}>
+      {children}
+    </span>
+  );
+}
+
+export function BadgeRow({
+  items = [] as string[],
+  className,
+}: {
+  items?: string[];
+  className?: string;
+}) {
+  return (
+    <div className={cx("my-4 flex flex-wrap items-center gap-2", className)}>
+      {items.map((t, i) => (
+        <Badge key={i}>{t}</Badge>
+      ))}
+    </div>
+  );
+}
+
+export function ShareRow({ text, hashtags }: { text: string; hashtags: string }) {
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    text
+  )}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+  return (
+    <div className="my-8">
+      <a href={twitterUrl} className="aol-btn text-sm" target="_blank" rel="noopener noreferrer">
+        Share on Twitter
+      </a>
+    </div>
+  );
 }
 
 /* ---------- MDX <a> ---------- */
@@ -96,8 +178,12 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
             <>
               <style jsx>{`
                 @keyframes shimmer {
-                  0% { background-position: -200% 0; }
-                  100% { background-position: 200% 0; }
+                  0% {
+                    background-position: -200% 0;
+                  }
+                  100% {
+                    background-position: 200% 0;
+                  }
                 }
               `}</style>
               <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
@@ -106,7 +192,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
         </span>
       )}
       {title && (
-        <figcaption className="mt-2 text-sm text-deepCharcoal/70 dark:text-cream/80">
+        <figcaption className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]">
           {title}
         </figcaption>
       )}
@@ -175,7 +261,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
-      <div className="my-6 rounded-md border p-4 text-sm text-deepCharcoal/70 dark:text-cream/80">
+      <div className="my-6 rounded-md border p-4 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]">
         Embedded content blocked for security. Allowed: YouTube, Vimeo, Spotify.
       </div>
     );
@@ -204,29 +290,100 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
   );
 };
 
+/* ---------- Minimal DownloadCard (to satisfy MDX references) ---------- */
+function DownloadCard({
+  title,
+  href,
+  description,
+  image,
+}: {
+  title: string;
+  href: string;
+  description?: string;
+  image?: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="group block rounded-2xl border border-lightGrey bg-white p-4 shadow-card transition hover:shadow-cardHover"
+    >
+      <div className="flex items-center gap-4">
+        {image ? (
+          <span className="relative h-16 w-16 overflow-hidden rounded-lg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+          </span>
+        ) : null}
+        <div className="min-w-0">
+          <div className="truncate text-lg font-semibold text-deepCharcoal">{title}</div>
+          {description ? (
+            <div className="mt-1 line-clamp-2 text-sm text-[color:var(--color-on-secondary)/0.8]">
+              {description}
+            </div>
+          ) : null}
+          <div className="mt-2 text-sm text-softGold">Download →</div>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+/* ---------- tiny shims for legacy MDX tags ---------- */
+function Caption(props: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] italic", props.className)}
+      {...props}
+    />
+  );
+}
+function Grid(props: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cx("grid gap-4 sm:grid-cols-2", props.className)} {...props} />;
+}
+function Quote(props: React.HTMLAttributes<HTMLElement>) {
+  return (
+    <blockquote className={cx("border-l-4 border-lightGrey pl-4 italic", props.className)} {...props} />
+  );
+}
+
 /* ---------- component map ---------- */
 const components: MDXComponentsType = {
   a: A,
-  img: (props) => <Img {...(props as any)} />,
+  img: Img,
   YouTube,
   iframe: Iframe,
+
+  // MDX-specific components
   EventJsonLd,
   PullLine,
   Verse,
   Rule,
   Note,
   ResourcesCTA,
+  CTA: ResourcesCTA, // legacy alias
+  JsonLd,
+
+  // MDX helpers
+  HeroEyebrow,
+  Callout,
+  Badge,
+  BadgeRow,
+  ShareRow,
+
+  // legacy shims
+  Caption,
+  Grid,
+  Quote,
+  DownloadCard,
 
   // Normalize headings: the page owns <h1>
   h1: (props) => <h2 {...props} />,
-  // Tighten common blocks for rhythm/consistency
+  // Tighten common blocks
   ul: (props) => <ul className="list-disc pl-6 space-y-2" {...props} />,
   ol: (props) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
-  p:  (props) => <p className="leading-7" {...props} />,
+  p: (props) => <p className="leading-7" {...props} />,
   hr: (props) => <hr className="my-10 border-lightGrey" {...props} />,
-  blockquote: (props) => (
-    <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />
-  ),
+  blockquote: (props) => <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />,
 };
 
 /* Both default and named export */

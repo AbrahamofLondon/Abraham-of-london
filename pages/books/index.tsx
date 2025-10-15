@@ -70,7 +70,7 @@ function GenreShelves({
       className={
         selected
           ? "whitespace-nowrap rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream"
-          : "whitespace-nowrap rounded-full border border-lightGrey bg-white px-3 py-1.5 text-xs font-medium text-deepCharcoal/85 hover:bg-warmWhite"
+          : "whitespace-nowrap rounded-full border border-lightGrey bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.85] hover:bg-warmWhite"
       }
       aria-pressed={selected}
     >
@@ -202,7 +202,7 @@ export default function BooksIndex({ books }: Props) {
           {/* Top bar */}
           <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <Breadcrumb items={[{ href: "/", label: "Home" }, { label: "Books" }]} />
-            <p className="text-xs text-deepCharcoal/60">
+            <p className="text-xs text-[color:var(--color-on-secondary)/0.6]">
               {books.length} {books.length === 1 ? "book" : "books"}
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function BooksIndex({ books }: Props) {
           {/* Header */}
           <header className="mb-6 md:mb-8">
             <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">Books</h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               Works of memoir, conviction, and craftsmanship. Written to endure.
             </p>
           </header>
@@ -221,7 +221,7 @@ export default function BooksIndex({ books }: Props) {
               aria-labelledby="featured-book"
               className="mb-10 overflow-hidden rounded-2xl border border-lightGrey bg-warmWhite p-5 shadow-card"
             >
-              <h2 id="featured-book" className="mb-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal/70">
+              <h2 id="featured-book" className="mb-3 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]">
                 Featured
               </h2>
               <div className="grid gap-5 md:grid-cols-3">
@@ -232,7 +232,7 @@ export default function BooksIndex({ books }: Props) {
                     </Link>
                   </h3>
                   {featured.excerpt && (
-                    <p className="mt-2 text-deepCharcoal/80">{featured.excerpt}</p>
+                    <p className="mt-2 text-[color:var(--color-on-secondary)/0.8]">{featured.excerpt}</p>
                   )}
                   <div className="mt-4 flex flex-wrap gap-3 text-sm">
                     <Link href={`/books/${featured.slug}`} className="aol-btn rounded-full px-4 py-2">
@@ -266,7 +266,7 @@ export default function BooksIndex({ books }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="rounded-xl bg-white p-4 text-sm text-deepCharcoal/80">
+                <div className="rounded-xl bg-white p-4 text-sm text-[color:var(--color-on-secondary)/0.8]">
                   <p className="mb-2 font-semibold">Why this book</p>
                   <p>
                     A distilled entry point into the themes readers ask for most:
@@ -302,7 +302,7 @@ export default function BooksIndex({ books }: Props) {
                     className={
                       active
                         ? "rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream"
-                        : "rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-deepCharcoal/80 hover:bg-warmWhite"
+                        : "rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite"
                     }
                     aria-pressed={active}
                   >
@@ -326,14 +326,14 @@ export default function BooksIndex({ books }: Props) {
 
           {/* Results count + clear */}
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs text-deepCharcoal/60">
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">
               Showing {filtered.length} of {books.length}
             </span>
             {hasFilters && (
               <button
                 type="button"
                 onClick={resetFilters}
-                className="rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-deepCharcoal/80 hover:bg-warmWhite"
+                className="rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite"
               >
                 Clear filters
               </button>
@@ -367,7 +367,7 @@ export default function BooksIndex({ books }: Props) {
 
           {/* Empty state */}
           {filtered.length === 0 && (
-            <div className="mt-10 rounded-xl border border-lightGrey bg-warmWhite p-6 text-center text-sm text-deepCharcoal/80">
+            <div className="mt-10 rounded-xl border border-lightGrey bg-warmWhite p-6 text-center text-sm text-[color:var(--color-on-secondary)/0.8]">
               <p className="mb-2 font-medium">No books match your filters yet.</p>
               <p>
                 Try{" "}

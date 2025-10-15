@@ -41,7 +41,7 @@ const Chip = ({
       "rounded-full px-3 py-1 text-sm transition",
       active
         ? "bg-forest text-cream border border-forest"
-        : "bg-white text-deepCharcoal/80 border border-lightGrey hover:text-deepCharcoal"
+        : "bg-white text-[color:var(--color-on-secondary)/0.8] border border-lightGrey hover:text-deepCharcoal"
     )}
   >
     {label}
@@ -119,7 +119,7 @@ export default function EventsIndex({ events }: Props) {
       {/* Controls bar */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-          <nav aria-label="Breadcrumb" className="text-deepCharcoal/70">
+          <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
             <ol className="flex items-center gap-2">
               <li>
                 <Link href="/" className="hover:text-deepCharcoal">
@@ -127,11 +127,11 @@ export default function EventsIndex({ events }: Props) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-deepCharcoal/80">Events</li>
+              <li className="text-[color:var(--color-on-secondary)/0.8]">Events</li>
               {q ? (
                 <>
                   <li aria-hidden="true">/</li>
-                  <li className="text-deepCharcoal/60">“{q}”</li>
+                  <li className="text-[color:var(--color-on-secondary)/0.6]">“{q}”</li>
                 </>
               ) : null}
             </ol>
@@ -208,7 +208,7 @@ export default function EventsIndex({ events }: Props) {
       <section className="bg-white pb-16 pt-2" aria-live="polite">
         <div className="mx-auto max-w-7xl px-4">
           {filteredEvents.length === 0 ? (
-            <div className="rounded-2xl border border-lightGrey bg-warmWhite px-4 py-10 text-center text-deepCharcoal/70">
+            <div className="rounded-2xl border border-lightGrey bg-warmWhite px-4 py-10 text-center text-[color:var(--color-on-secondary)/0.7]">
               No events match your filters.
             </div>
           ) : (
@@ -231,14 +231,14 @@ export default function EventsIndex({ events }: Props) {
                       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
                         <time
                           dateTime={new Date(ev.date).toISOString()}
-                          className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
+                          className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]"
                         >
                           {formatPretty(ev.date)}
                         </time>
                         {ev.location ? (
                           <>
                             <span aria-hidden="true">·</span>
-                            <span className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80">
+                            <span className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]">
                               {ev.location}
                             </span>
                           </>
@@ -247,7 +247,7 @@ export default function EventsIndex({ events }: Props) {
                       <h3 className="text-lg font-semibold leading-snug text-gray-900">
                         <Link
                           href={`/events/${ev.slug}`}
-                          className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-forest/30"
+                          className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
                         >
                           {ev.title}
                         </Link>

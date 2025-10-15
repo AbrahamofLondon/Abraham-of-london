@@ -66,7 +66,7 @@ export default function FeaturedBook({
             {title}
           </h3>
 
-          <p className="text-sm text-deepCharcoal/80 mb-4">
+          <p className="text-sm text-[color:var(--color-on-secondary)/0.8] mb-4">
             By <span itemProp="author">{author}</span>
           </p>
 

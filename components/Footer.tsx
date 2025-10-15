@@ -33,7 +33,7 @@ function SmartLink({
 }) {
   const base =
     className ||
-    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-sm";
+    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-sm";
 
   if (isExternal(href)) {
     const isHttp = href.startsWith("http");
@@ -73,10 +73,7 @@ const Footer: React.FC = () => {
           <SmartLink href="/terms">Terms</SmartLink>
         </nav>
 
-        <nav
-          aria-label="Brand family"
-          className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-deepCharcoal/90"
-        >
+        <nav aria-label="Brand family" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[color:var(--color-on-secondary)/0.9]">
           <SmartLink href={AOF_URL}>Abraham of London</SmartLink>
           <SmartLink href={INNOVATE_HUB_URL}>InnovateHub</SmartLink>
           <SmartLink href={ALOMARADA_URL}>Alomarada</SmartLink>
@@ -91,16 +88,16 @@ const Footer: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={s.label}
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               <Image src={s.icon} alt={s.label} width={24} height={24} loading="lazy" decoding="async" />
             </a>
           ))}
         </div>
 
-        <p className="mt-6 text-center text-sm text-deepCharcoal/60">
+        <p className="mt-6 text-center text-sm text-[color:var(--color-on-secondary)/0.6]">
           © {year}{" "}
-          <a href={AOF_URL} className="underline decoration-forest/30 hover:decoration-forest">
+          <a href={AOF_URL} className="underline decoration-forest hover:decoration-forest">
             Abraham of London
           </a>
           . All rights reserved.

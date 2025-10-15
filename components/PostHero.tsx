@@ -99,14 +99,14 @@ export default function PostHero({
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12">
         {/* Text block */}
         <div>
-          <p className="mb-3 text-xs uppercase tracking-widest text-deepCharcoal/60">
+          <p className="mb-3 text-xs uppercase tracking-widest text-[color:var(--color-on-secondary)/0.6]">
             Featured Insight
           </p>
           <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl">
             {title}
           </h1>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-deepCharcoal/70">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[color:var(--color-on-secondary)/0.7]">
             {authorName && <span>By {authorName}</span>}
             {dateStr && (
               <>
@@ -117,7 +117,7 @@ export default function PostHero({
           </div>
 
           {excerpt && (
-            <p className="mt-5 max-w-prose text-deepCharcoal/80">{excerpt}</p>
+            <p className="mt-5 max-w-prose text-[color:var(--color-on-secondary)/0.8]">{excerpt}</p>
           )}
         </div>
 

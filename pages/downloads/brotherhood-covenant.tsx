@@ -45,19 +45,19 @@ export default function BrotherhoodCovenant() {
             <div className="mb-6">
               <div className="mb-5 border-b border-lightGrey pb-5">
                 <div className="h-6" />
-                <span className="text-xs text-deepCharcoal/60">Name</span>
+                <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Name</span>
               </div>
               <div className="mb-5 border-b border-lightGrey pb-5">
                 <div className="h-6" />
-                <span className="text-xs text-deepCharcoal/60">Signature</span>
+                <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Signature</span>
               </div>
               <div className="border-b border-lightGrey pb-5">
                 <div className="h-6" />
-                <span className="text-xs text-deepCharcoal/60">Date</span>
+                <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Date</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11.5px] text-deepCharcoal/60">
+            <div className="flex items-center justify-between text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
               <span>90-day cohort</span>
               <span className="text-forest">The Brotherhood Code</span>
             </div>

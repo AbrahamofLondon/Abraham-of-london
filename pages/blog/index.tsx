@@ -80,14 +80,14 @@ export default function BlogIndex({ posts }: Props) {
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <Breadcrumb items={[{ href: "/", label: "Home" }, { label: "Blog" }]} />
-            <p className="text-xs text-deepCharcoal/60">
+            <p className="text-xs text-[color:var(--color-on-secondary)/0.6]">
               {filtered.length} {filtered.length === 1 ? "post" : "posts"}
             </p>
           </div>
 
           <header className="mb-8">
             <h1 className="font-serif text-4xl font-semibold text-deepCharcoal">Featured Insights</h1>
-            <p className="mt-2 text-sm text-deepCharcoal/70">
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               A curated journal on standards, stewardship, and strategy.
             </p>
           </header>
@@ -150,7 +150,7 @@ export default function BlogIndex({ posts }: Props) {
           </div>
 
           {filtered.length === 0 && (
-            <p className="mt-10 text-center text-sm text-deepCharcoal/70">
+            <p className="mt-10 text-center text-sm text-[color:var(--color-on-secondary)/0.7]">
               Nothing matched your search. Try a different phrase or category.
             </p>
           )}

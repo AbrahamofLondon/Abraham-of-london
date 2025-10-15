@@ -115,7 +115,7 @@ export default function EventCard({
       {/* Subtle badge (only when tagged) */}
       {isChatham && (
         <span
-          className="absolute right-3 top-3 rounded-full bg-deepCharcoal/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
+          className="absolute right-3 top-3 rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
           title="Chatham Room (off the record)"
           aria-label="Chatham Room (off the record)"
         >
@@ -126,7 +126,7 @@ export default function EventCard({
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
         <time
           dateTime={machine}
-          className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
+          className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]"
           itemProp="startDate"
         >
           {nice}
@@ -135,7 +135,7 @@ export default function EventCard({
           <>
             <span aria-hidden="true">·</span>
             <span
-              className="rounded-full bg-warmWhite px-2 py-0.5 text-deepCharcoal/80"
+              className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]"
               itemProp="location"
             >
               {location}
@@ -147,7 +147,7 @@ export default function EventCard({
       <h3 id={titleId} className="text-lg font-semibold leading-snug text-gray-900" itemProp="name">
         <Link
           href={`/events/${slug}`}
-          className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-forest/30"
+          className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
           prefetch={prefetch}
         >
           {title}
@@ -163,7 +163,7 @@ export default function EventCard({
       <div className="mt-4">
         <Link
           href={`/events/${slug}`}
-          className="inline-flex items-center rounded-full border border-forest/20 px-3 py-1.5 text-sm font-medium text-forest transition-colors hover:bg-forest hover:text-cream"
+          className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest transition-colors hover:bg-forest hover:text-cream"
           prefetch={prefetch}
           aria-labelledby={titleId}
         >

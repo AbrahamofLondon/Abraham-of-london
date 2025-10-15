@@ -17,11 +17,11 @@ type Props = {
 
 const variantCls: Record<Variant, string> = {
   primary:
-    "rounded-full bg-forest text-white hover:bg-forest/90 focus-visible:ring-forest/30",
+    "rounded-full bg-forest text-white hover:bg-[color:var(--color-primary)/0.9] focus-visible:ring-[color:var(--color-primary)/0.3]",
   secondary:
-    "rounded-full border border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite focus-visible:ring-deepCharcoal/30",
+    "rounded-full border border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite focus-visible:ring-[color:var(--color-on-secondary)/0.3]",
   ghost:
-    "rounded-full text-deepCharcoal hover:bg-warmWhite border border-transparent focus-visible:ring-deepCharcoal/20",
+    "rounded-full text-deepCharcoal hover:bg-warmWhite border border-transparent focus-visible:ring-[color:var(--color-on-secondary)/0.2]",
 };
 
 const sizeCls: Record<Size, string> = {
