@@ -1,132 +1,81 @@
 // components/homepage/HeroBanner.tsx
 import * as React from "react";
 import Image from "next/image";
+import clsx from "clsx";
 
 export type VideoSource = { src: string; type: string };
 
-type HeroBannerProps = {
+export type HeroBannerProps = {
+  /** Poster image path (public/...) shown immediately and as video poster */
+  poster: string;
+  /** Optional sources for autoplaying background video */
   videoSources?: VideoSource[];
-  poster?: string;
-  mobileObjectPositionClass?: string;
+  /** Optional overlay content (eyebrow, title, body, button, etc.) */
   overlay?: React.ReactNode;
-  showMute?: boolean;
-  kenBurnsIfNoVideo?: boolean;
+  /** Tailwind object-position helpers for mobile (applied to video & poster) */
+  mobileObjectPositionClass?: string;
+  /** Tailwind height classes for the banner container */
   heightClassName?: string;
-  className?: string;
+  /** If true, prioritize the poster image */
+  priorityPoster?: boolean;
 };
 
-function normalize(src?: string) {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return src;
-  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-}
-
 export default function HeroBanner({
-  videoSources,
   poster,
-  mobileObjectPositionClass = "object-center md:object-center",
+  videoSources,
   overlay,
-  showMute = true,
-  kenBurnsIfNoVideo = true,
-  heightClassName,
-  className,
+  mobileObjectPositionClass = "object-center md:object-center",
+  heightClassName = "h-[56svh] md:h-[72svh] lg:h-[78svh]",
+  priorityPoster = true,
 }: HeroBannerProps) {
   const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
-  const posterSrc = normalize(poster) ?? "/assets/images/abraham-of-london-banner.webp";
-
-  // Persist mute preference
-  const [muted, setMuted] = React.useState(true);
-  React.useEffect(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("aol-hero-muted") : null;
-    if (saved !== null) setMuted(saved === "1");
-  }, []);
-  React.useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("aol-hero-muted", muted ? "1" : "0");
-  }, [muted]);
-
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  React.useEffect(() => {
-    if (videoRef.current) videoRef.current.muted = muted;
-  }, [muted]);
 
   return (
-    <section
-      className={[
-        "relative w-full overflow-hidden bg-black",
-        heightClassName ?? "h-[52vh] sm:h-[60vh] md:h-[70vh] lg:h-[78vh] xl:h-[86vh]",
-        className || "",
-      ].join(" ")}
-      aria-label="Brand banner"
-    >
-      {/* Media */}
-      {hasVideo ? (
+    <section className={clsx("relative w-full overflow-hidden bg-black", heightClassName)}>
+      {/* Poster (always rendered so there’s no flash even if video stalls) */}
+      <Image
+        src={poster}
+        alt=""
+        fill
+        sizes="100vw"
+        priority={priorityPoster}
+        className={clsx("pointer-events-none select-none object-cover", mobileObjectPositionClass)}
+      />
+
+      {/* Video layer (if provided) */}
+      {hasVideo && (
         <video
-          ref={videoRef}
-          className={["absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass].join(" ")}
+          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
           autoPlay
           muted
           loop
           playsInline
-          poster={posterSrc}
           preload="metadata"
+          poster={poster}
+          aria-hidden="true"
         >
           {videoSources!.map((s) => (
-            <source key={s.src} src={normalize(s.src)} type={s.type} />
+            <source key={s.src} src={s.src} type={s.type} />
           ))}
         </video>
-      ) : (
-        <div className={["absolute inset-0", kenBurnsIfNoVideo ? "aol-kenburns" : ""].join(" ")}>
-          <Image
-            src={posterSrc!}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className={["object-cover", mobileObjectPositionClass].join(" ")}
-          />
-        </div>
       )}
 
-      {/* Vignette */}
+      {/* Scrims to keep overlay readable */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_10%,rgba(0,0,0,.22),transparent_65%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)] dark:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.25),transparent_30%,transparent_70%,rgba(0,0,0,0.35))]"
       />
 
-      {/* Overlay */}
+      {/* Content container */}
       {overlay ? (
-        <div className="absolute inset-0 z-[1] flex items-end md:items-center">
-          <div className="mx-auto w-full max-w-7xl px-4 pb-8 md:pb-0">
-            <div className="max-w-2xl animate-fadeUp text-cream">{overlay}</div>
-          </div>
+        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10 text-cream">
+          <div className="max-w-3xl drop-shadow-[0_1px_12px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
-
-      {/* Mute */}
-      {hasVideo && showMute ? (
-        <button
-          type="button"
-          onClick={() => setMuted((m) => !m)}
-          className="absolute bottom-4 right-4 z-[2] rounded-full bg-white/85 px-3 py-1 text-xs font-medium text-deepCharcoal shadow-sm backdrop-blur hover:bg-white"
-          aria-label={muted ? "Unmute background video" : "Mute background video"}
-        >
-          {muted ? "Unmute" : "Mute"}
-        </button>
-      ) : null}
-
-      {/* Ken Burns styles (no arbitrary Tailwind values) */}
-      <style jsx global>{`
-        @keyframes aol-kenburns-zoom {
-          from { transform: scale(1); }
-          to   { transform: scale(1.08); }
-        }
-        .aol-kenburns {
-          will-change: transform;
-        }
-        @media (prefers-reduced-motion: no-preference) {
-          .aol-kenburns { animation: aol-kenburns-zoom 22s ease-in-out infinite alternate; }
-        }
-      `}</style>
     </section>
   );
 }
