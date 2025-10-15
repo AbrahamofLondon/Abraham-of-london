@@ -46,6 +46,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
   // Choose banner (scheduled/rotated)
   const banner = React.useMemo(() => getActiveBanner(), []);
+
   const overlay =
     banner.overlay ? (
       <>
@@ -55,7 +56,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </span>
         ) : null}
         {banner.overlay.title ? (
-          <h1 className="mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight">
+          <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">
             {banner.overlay.title}
           </h1>
         ) : null}
@@ -363,7 +364,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">What Leaders Say</h2>
           </header>
 
-          <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
             {[
               { quote: "Clear thinking. Strong standards. Abraham brings both to the table.", name: "E. K., Founder" },
               { quote: "He positions problems with moral clarity—and then solves them.", name: "M. A., Director" },
