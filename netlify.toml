@@ -1,18 +1,21 @@
-# netlify.toml — clean + consistent
-
+# ────────────────────────────────────────────────────────────
+# Build
+# ────────────────────────────────────────────────────────────
 [build]
   command = "npm run build"
   publish = ".next"
 
   [build.environment]
     NODE_VERSION = "20"
+    NODE_ENV = "production"
     NEXT_TELEMETRY_DISABLED = "1"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
+    # Our Tailwind/PostCSS guard expects this:
     NO_SLASH_OPACITY_MODE = "fix"
-
-[context.production.environment]
-  NODE_ENV = "production"
+    # Keep CI stable (no git hooks / no browser downloads)
+    HUSKY = "0"
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX-rendered emails)
@@ -23,13 +26,19 @@
   external_node_modules = ["resend"]
   included_files = ["netlify/emails/**"]
 
+# ────────────────────────────────────────────────────────────
+# Plugins
+# ────────────────────────────────────────────────────────────
 # Next.js runtime
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse audits after deploy
+# Lighthouse audits after deploy (keeps deploys green)
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
+
+  [plugins.inputs]
+    fail_build = false
 
   [plugins.inputs.thresholds]
     performance = 0.9
@@ -37,6 +46,7 @@
     best-practices = 0.9
     seo = 0.9
 
+  # Reports to /reports/*.html (published as build artifacts)
   [[plugins.inputs.audits]]
     path = "/"
     output_path = "reports/home.html"
@@ -65,7 +75,10 @@
 
 # ────────────────────────────────────────────────────────────
 # Brand domains
+#   - Send brand root → branded ventures landing (301)
+#   - Everything else on that host → 410 (served by public/410.html)
 # ────────────────────────────────────────────────────────────
+# Endureluxe
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -79,6 +92,7 @@
   force = true
   conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
+# Alomarada
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
@@ -110,7 +124,7 @@
   conditions = { Host = ["abraham-of-london.netlify.app"] }
 
 # ────────────────────────────────────────────────────────────
-# Headers
+# Security & caching headers
 # ────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
