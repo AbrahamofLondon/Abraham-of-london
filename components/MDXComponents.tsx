@@ -1,3 +1,4 @@
+// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -296,6 +297,32 @@ function DownloadCard({
   );
 }
 
+/* ---------- NEW: Caption + Grid used in MDX ---------- */
+function Caption({ children, className }: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <figcaption className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]", className)}>
+      {children}
+    </figcaption>
+  );
+}
+
+function Grid({
+  children,
+  cols = 2,
+  className,
+}: React.PropsWithChildren<{ cols?: 1 | 2 | 3 | 4; className?: string }>) {
+  const colClass =
+    cols === 1 ? "md:grid-cols-1" :
+    cols === 2 ? "md:grid-cols-2" :
+    cols === 3 ? "md:grid-cols-3" :
+    "md:grid-cols-4"; // 4+
+  return (
+    <div className={cx("grid grid-cols-1 gap-6", colClass, className)}>
+      {children}
+    </div>
+  );
+}
+
 /* ---------- component map ---------- */
 const components: MDXComponentsType = {
   a: A,
@@ -308,7 +335,7 @@ const components: MDXComponentsType = {
   Rule,
   Note,
   ResourcesCTA,
-  CTA: ResourcesCTA, // legacy alias (MDX may reference <CTA/>)
+  CTA: ResourcesCTA, // legacy alias
   JsonLd,            // for JSON-LD injection
   HeroEyebrow,
   Callout,
@@ -316,6 +343,8 @@ const components: MDXComponentsType = {
   BadgeRow,
   ShareRow,
   DownloadCard,
+  Caption,
+  Grid,
 
   // Normalize headings: the page owns <h1>
   h1: (props) => <h2 {...props} />,
