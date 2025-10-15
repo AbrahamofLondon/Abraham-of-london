@@ -4,7 +4,7 @@
   "private": true,
   "engines": { "node": ">=20 <21" },
   "scripts": {
-    "prebuild": "node scripts/convert-tailwind-slash-opacity.mjs --check && node scripts/postcss-guard-dryrun.mjs",
+    "prebuild": "cross-env NO_SLASH_OPACITY_MODE=fix node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
