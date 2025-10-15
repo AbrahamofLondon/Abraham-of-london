@@ -1,120 +1,132 @@
-// lib/hero-banners.ts
+// components/homepage/HeroBanner.tsx
+import * as React from "react";
+import Image from "next/image";
+
 export type VideoSource = { src: string; type: string };
 
-export type BannerConfig = {
-  id: string;
-  poster: string;
+type HeroBannerProps = {
   videoSources?: VideoSource[];
-  /** ISO date/time in site timezone; inclusive start, exclusive end */
-  activeFrom?: string; // "2025-11-01"
-  activeUntil?: string; // "2025-12-31T23:59:59Z"
-  /** Optional daily rotation weight among unscheduled banners */
-  weight?: number;
-  /** Optional simple overlay schema (rendered in page) */
-  overlay?: {
-    eyebrow?: string;
-    title?: string;
-    body?: string;
-    cta?: { href: string; label: string };
-  };
+  poster?: string;
   mobileObjectPositionClass?: string;
+  overlay?: React.ReactNode;
+  showMute?: boolean;
+  kenBurnsIfNoVideo?: boolean;
   heightClassName?: string;
+  className?: string;
 };
 
-export const BANNERS: BannerConfig[] = [
-  // Default brand reel (video + poster)
-  {
-    id: "brand",
-    poster: "/assets/images/abraham-of-london-banner.webp",
-    videoSources: [
-      { src: "/assets/video/brand-reel.webm", type: "video/webm" },
-      { src: "/assets/video/brand-reel.mp4", type: "video/mp4" },
-    ],
-    mobileObjectPositionClass: "object-[center_45%] md:object-center",
-    weight: 3,
-  },
+function normalize(src?: string) {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+}
 
-  // Evergreen static option (lighter LCP)
-  {
-    id: "writing",
-    poster: "/assets/images/writing-desk.webp",
-    mobileObjectPositionClass: "object-[center_35%] md:object-center",
-    heightClassName: "h-[48vh] sm:h-[56vh] md:h-[64vh] lg:h-[72vh] xl:h-[80vh]",
-    weight: 2,
-  },
+export default function HeroBanner({
+  videoSources,
+  poster,
+  mobileObjectPositionClass = "object-center md:object-center",
+  overlay,
+  showMute = true,
+  kenBurnsIfNoVideo = true,
+  heightClassName,
+  className,
+}: HeroBannerProps) {
+  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
+  const posterSrc = normalize(poster) ?? "/assets/images/abraham-of-london-banner.webp";
 
-  // Example seasonal overlay (dates are just examples; adjust freely)
-  {
-    id: "book-launch",
-    poster: "/assets/images/fathering-without-fear.jpg",
-    mobileObjectPositionClass: "object-[center_40%] md:object-center",
-    activeFrom: "2025-11-01T00:00:00+00:00",
-    activeUntil: "2026-01-15T00:00:00+00:00",
-    overlay: {
-      eyebrow: "Launch",
-      title: "Fathering Without Fear",
-      body: "A bold memoir reclaiming fatherhood—clarity, discipline, and standards that endure.",
-      cta: { href: "/books/fathering-without-fear", label: "Discover the book" },
-    },
-  },
-];
+  // Persist mute preference
+  const [muted, setMuted] = React.useState(true);
+  React.useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("aol-hero-muted") : null;
+    if (saved !== null) setMuted(saved === "1");
+  }, []);
+  React.useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("aol-hero-muted", muted ? "1" : "0");
+  }, [muted]);
 
-/**
- * Return the “active” banner. If one or more banners are in an active window,
- * pick the first (top priority). Otherwise rotate daily among unscheduled banners
- * (deterministic by day) using weights; falls back to the first entry.
- */
-export function getActiveBanner(
-  now = new Date(),
-  timeZone: string = "Europe/London"
-): BannerConfig {
-  const isActiveWindow = (b: BannerConfig) => {
-    if (!b.activeFrom && !b.activeUntil) return false;
-    const fmt = new Intl.DateTimeFormat("en-CA", {
-      timeZone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-    const mkKey = (d: Date) => fmt.format(d);
-    const toDate = (iso?: string) => (iso ? new Date(iso) : undefined);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  React.useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted]);
 
-    const start = toDate(b.activeFrom);
-    const end = toDate(b.activeUntil);
-    const nowKey = +new Date(mkKey(now));
-    const startKey = start ? +new Date(mkKey(start)) : -Infinity;
-    const endKey = end ? +new Date(mkKey(end)) : Infinity;
-    return nowKey >= startKey && nowKey < endKey;
-  };
+  return (
+    <section
+      className={[
+        "relative w-full overflow-hidden bg-black",
+        heightClassName ?? "h-[52vh] sm:h-[60vh] md:h-[70vh] lg:h-[78vh] xl:h-[86vh]",
+        className || "",
+      ].join(" ")}
+      aria-label="Brand banner"
+    >
+      {/* Media */}
+      {hasVideo ? (
+        <video
+          ref={videoRef}
+          className={["absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass].join(" ")}
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={posterSrc}
+          preload="metadata"
+        >
+          {videoSources!.map((s) => (
+            <source key={s.src} src={normalize(s.src)} type={s.type} />
+          ))}
+        </video>
+      ) : (
+        <div className={["absolute inset-0", kenBurnsIfNoVideo ? "aol-kenburns" : ""].join(" ")}>
+          <Image
+            src={posterSrc!}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className={["object-cover", mobileObjectPositionClass].join(" ")}
+          />
+        </div>
+      )}
 
-  const actives = BANNERS.filter(isActiveWindow);
-  if (actives.length) return actives[0];
+      {/* Vignette */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_10%,rgba(0,0,0,.22),transparent_65%)]"
+      />
 
-  const pool = BANNERS.filter((b) => !b.activeFrom && !b.activeUntil);
-  if (!pool.length) return BANNERS[0];
+      {/* Overlay */}
+      {overlay ? (
+        <div className="absolute inset-0 z-[1] flex items-end md:items-center">
+          <div className="mx-auto w-full max-w-7xl px-4 pb-8 md:pb-0">
+            <div className="max-w-2xl animate-fadeUp text-cream">{overlay}</div>
+          </div>
+        </div>
+      ) : null}
 
-  // Deterministic “day index” for rotation
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" })
-    .format(now)
-    .split("-");
-  const y = Number(parts[0]);
-  const m = Number(parts[1]);
-  const d = Number(parts[2]);
-  const today = new Date(`${y}-${pad(m)}-${pad(d)}T00:00:00Z`);
-  const startOfYear = new Date(`${y}-01-01T00:00:00Z`);
-  const dayIndex = Math.floor((+today - +startOfYear) / 86_400_000);
+      {/* Mute */}
+      {hasVideo && showMute ? (
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          className="absolute bottom-4 right-4 z-[2] rounded-full bg-white/85 px-3 py-1 text-xs font-medium text-deepCharcoal shadow-sm backdrop-blur hover:bg-white"
+          aria-label={muted ? "Unmute background video" : "Mute background video"}
+        >
+          {muted ? "Unmute" : "Mute"}
+        </button>
+      ) : null}
 
-  // Build weighted list
-  const weighted: BannerConfig[] = [];
-  pool.forEach((b) => {
-    const w = Math.max(1, Math.floor(b.weight ?? 1));
-    for (let i = 0; i < w; i++) weighted.push(b);
-  });
-
-  return weighted[dayIndex % weighted.length] ?? pool[0];
+      {/* Ken Burns styles (no arbitrary Tailwind values) */}
+      <style jsx global>{`
+        @keyframes aol-kenburns-zoom {
+          from { transform: scale(1); }
+          to   { transform: scale(1.08); }
+        }
+        .aol-kenburns {
+          will-change: transform;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          .aol-kenburns { animation: aol-kenburns-zoom 22s ease-in-out infinite alternate; }
+        }
+      `}</style>
+    </section>
+  );
 }
