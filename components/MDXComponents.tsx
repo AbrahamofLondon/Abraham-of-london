@@ -1,3 +1,4 @@
+// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -71,7 +72,13 @@ export function Badge({
   );
 }
 
-export function BadgeRow({ items = [] as string[], className }: { items?: string[]; className?: string }) {
+export function BadgeRow({
+  items = [] as string[],
+  className,
+}: {
+  items?: string[];
+  className?: string;
+}) {
   return (
     <div className={cx("my-4 flex flex-wrap items-center gap-2", className)}>
       {items.map((t, i) => (
@@ -83,7 +90,9 @@ export function BadgeRow({ items = [] as string[], className }: { items?: string
 
 export function ShareRow({ text, hashtags }: { text: string; hashtags: string }) {
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    text
+  )}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
   return (
     <div className="my-8">
       <a href={twitterUrl} className="aol-btn text-sm" target="_blank" rel="noopener noreferrer">
@@ -122,7 +131,10 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 };
 
 /* ---------- MDX <img> -> next/image ---------- */
-type MDXImgProps = Omit<React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>, "src"> & { src?: string };
+type MDXImgProps = Omit<
+  React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
+  "src"
+> & { src?: string };
 
 const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
   const srcStr = typeof src === "string" ? src : undefined;
@@ -132,7 +144,8 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
   const h = toNumber(height);
   const [loaded, setLoaded] = React.useState(false);
 
-  const skeleton = "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
+  const skeleton =
+    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
   const altText = alt || (title ? String(title) : "Embedded image");
 
   return (
@@ -165,8 +178,12 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
             <>
               <style jsx>{`
                 @keyframes shimmer {
-                  0% { background-position: -200% 0; }
-                  100% { background-position: 200% 0; }
+                  0% {
+                    background-position: -200% 0;
+                  }
+                  100% {
+                    background-position: 200% 0;
+                  }
                 }
               `}</style>
               <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
@@ -208,7 +225,10 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src.toString()}
         title={title || "YouTube video"}
@@ -235,7 +255,9 @@ const ALLOWED_IFRAME_HOSTS = [
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try { url = new URL(src); } catch {}
+  try {
+    url = new URL(src);
+  } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
@@ -249,7 +271,10 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
     if (id) return <YouTube id={id} title={title} className={className} />;
   }
   return (
-    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
+    <div
+      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
+      style={{ aspectRatio: "16 / 9" }}
+    >
       <iframe
         src={src}
         title={title}
@@ -278,7 +303,10 @@ function DownloadCard({
   image?: string;
 }) {
   return (
-    <a href={href} className="group block rounded-2xl border border-lightGrey bg-white p-4 shadow-card transition hover:shadow-cardHover">
+    <a
+      href={href}
+      className="group block rounded-2xl border border-lightGrey bg-white p-4 shadow-card transition hover:shadow-cardHover"
+    >
       <div className="flex items-center gap-4">
         {image ? (
           <span className="relative h-16 w-16 overflow-hidden rounded-lg">
@@ -288,7 +316,11 @@ function DownloadCard({
         ) : null}
         <div className="min-w-0">
           <div className="truncate text-lg font-semibold text-deepCharcoal">{title}</div>
-          {description ? <div className="mt-1 line-clamp-2 text-sm text-[color:var(--color-on-secondary)/0.8]">{description}</div> : null}
+          {description ? (
+            <div className="mt-1 line-clamp-2 text-sm text-[color:var(--color-on-secondary)/0.8]">
+              {description}
+            </div>
+          ) : null}
           <div className="mt-2 text-sm text-softGold">Download →</div>
         </div>
       </div>
@@ -298,13 +330,20 @@ function DownloadCard({
 
 /* ---------- tiny shims for legacy MDX tags ---------- */
 function Caption(props: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] italic", props.className)} {...props} />;
+  return (
+    <div
+      className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] italic", props.className)}
+      {...props}
+    />
+  );
 }
 function Grid(props: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cx("grid gap-4 sm:grid-cols-2", props.className)} {...props} />;
 }
 function Quote(props: React.HTMLAttributes<HTMLElement>) {
-  return <blockquote className={cx("border-l-4 border-lightGrey pl-4 italic", props.className)} {...props} />;
+  return (
+    <blockquote className={cx("border-l-4 border-lightGrey pl-4 italic", props.className)} {...props} />
+  );
 }
 
 /* ---------- component map ---------- */
@@ -313,6 +352,8 @@ const components: MDXComponentsType = {
   img: Img,
   YouTube,
   iframe: Iframe,
+
+  // MDX-specific components
   EventJsonLd,
   PullLine,
   Verse,
@@ -321,6 +362,13 @@ const components: MDXComponentsType = {
   ResourcesCTA,
   CTA: ResourcesCTA, // legacy alias
   JsonLd,
+
+  // MDX helpers
+  HeroEyebrow,
+  Callout,
+  Badge,
+  BadgeRow,
+  ShareRow,
 
   // legacy shims
   Caption,
@@ -338,5 +386,6 @@ const components: MDXComponentsType = {
   blockquote: (props) => <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />,
 };
 
+/* Both default and named export */
 export default components;
 export { components as MDXComponents };

@@ -15,6 +15,7 @@ import type { PostMeta } from "@/types/post";
 
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 // IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
