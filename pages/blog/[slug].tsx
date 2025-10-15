@@ -15,7 +15,7 @@ import type { PostMeta } from "@/types/post";
 
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
+// IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
@@ -55,22 +55,21 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     coverPosition: (raw as any).coverPosition ?? null,
   };
 
-  const content = raw.content || "";
+  const source = raw.content || "";
 
-  const mdx = await serialize(content, {
+  // Workaround the GFM tables crash by not enabling remark-gfm here.
+  // If you later need GFM features, we can selectively re-enable parts that are safe.
+  const mdx = await serialize(source, {
     parseFrontmatter: false,
     scope: meta,
     mdxOptions: {
-      remarkPlugins: [remarkGfm],
+      remarkPlugins: [], // no GFM
       rehypePlugins: [],
       format: "mdx",
     },
   });
 
-  return {
-    props: { post: { meta, content: mdx } },
-    revalidate: 60,
-  };
+  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -95,7 +94,9 @@ export default function BlogPost({ post }: Props) {
   } = post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
+  const coverForMeta = coverImage
+    ? absUrl(coverImage)
+    : absUrl("/assets/images/social/og-image.jpg");
   const authorName =
     typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 
@@ -148,7 +149,7 @@ export default function BlogPost({ post }: Props) {
             <MDXRemote {...post.content} components={MDXComponents} />
           </div>
 
-          {isFatherhood && <MDXComponents.ResourcesCTA className="mt-12" />}
+          {isFatherhood && <ResourcesCTA className="mt-12" />}
 
           <div className="mt-12">
             <a href="#comments" className="luxury-link text-sm">
