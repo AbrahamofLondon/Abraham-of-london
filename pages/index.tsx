@@ -17,22 +17,14 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-/* ---------- constants ---------- */
-
+* ---------- constants ---------- */
 const HERO = {
-  coverImage: "/assets/images/books/when-the-system-breaks-cover.jpg",
-};
-
-type EventsTeaserItem = {
-  slug: string;
-  title: string;
-  date: string;
-  location: string | null;
-  description?: string | null;
-  tags?: string[] | null;
-  heroImage?: string | null;
-};
-type EventsTeaser = Array<EventsTeaserItem>;
+  coverImage: "/assets/images/abraham-of-london-banner.webp",
+  videoSources: [
+    { src: "/assets/video/brand-reel.webm", type: "video/webm" },
+    { src: "/assets/video/brand-reel.mp4", type: "video/mp4" },
+  ],
+};type EventsTeaser = Array<EventsTeaserItem>;
 
 type HomeProps = {
   posts: PostMeta[];
@@ -61,19 +53,21 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       </Head>
 
       {/* HERO */}
-      <HeroSection
-        eyebrow="Featured Insight"
-        title="When the System Breaks You: Finding Purpose in Pain"
-        subtitle="Win the only battle you fully control — the one inside your chest."
-        primaryCta={{
-          href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-          label: "Get the free teaser",
-        }}
-        secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
-        coverImage={HERO.coverImage}
-        coverAspect="book"
-        coverFit="contain"
-      />
+<HeroSection
+  eyebrow="Featured Insight"
+  title="When the System Breaks You: Finding Purpose in Pain"
+  subtitle="Win the only battle you fully control — the one inside your chest."
+  primaryCta={{
+    href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
+    label: "Get the free teaser",
+  }}
+  secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
+  coverImage={HERO.coverImage}
+  coverAspect="wide"
+  coverFit="cover"
+  videoSources={HERO.videoSources}
+  poster={HERO.coverImage}
+/>
 
       {/* Breadcrumb + quick counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
