@@ -1,4 +1,3 @@
-// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -297,30 +296,15 @@ function DownloadCard({
   );
 }
 
-/* ---------- NEW: Caption + Grid used in MDX ---------- */
-function Caption({ children, className }: React.PropsWithChildren<{ className?: string }>) {
-  return (
-    <figcaption className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]", className)}>
-      {children}
-    </figcaption>
-  );
+/* ---------- tiny shims for legacy MDX tags ---------- */
+function Caption(props: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cx("mt-2 text-sm text-[color:var(--color-on-secondary)/0.7] italic", props.className)} {...props} />;
 }
-
-function Grid({
-  children,
-  cols = 2,
-  className,
-}: React.PropsWithChildren<{ cols?: 1 | 2 | 3 | 4; className?: string }>) {
-  const colClass =
-    cols === 1 ? "md:grid-cols-1" :
-    cols === 2 ? "md:grid-cols-2" :
-    cols === 3 ? "md:grid-cols-3" :
-    "md:grid-cols-4"; // 4+
-  return (
-    <div className={cx("grid grid-cols-1 gap-6", colClass, className)}>
-      {children}
-    </div>
-  );
+function Grid(props: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cx("grid gap-4 sm:grid-cols-2", props.className)} {...props} />;
+}
+function Quote(props: React.HTMLAttributes<HTMLElement>) {
+  return <blockquote className={cx("border-l-4 border-lightGrey pl-4 italic", props.className)} {...props} />;
 }
 
 /* ---------- component map ---------- */
@@ -336,15 +320,13 @@ const components: MDXComponentsType = {
   Note,
   ResourcesCTA,
   CTA: ResourcesCTA, // legacy alias
-  JsonLd,            // for JSON-LD injection
-  HeroEyebrow,
-  Callout,
-  Badge,
-  BadgeRow,
-  ShareRow,
-  DownloadCard,
+  JsonLd,
+
+  // legacy shims
   Caption,
   Grid,
+  Quote,
+  DownloadCard,
 
   // Normalize headings: the page owns <h1>
   h1: (props) => <h2 {...props} />,
