@@ -4,12 +4,13 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-import HeroSection from "@/components/homepage/HeroSection"; // <-- back to static import
+const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -17,20 +18,14 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-* ---------- constants ---------- */
+/* ---------- constants ---------- */
 const HERO = {
   coverImage: "/assets/images/abraham-of-london-banner.webp",
   videoSources: [
     { src: "/assets/video/brand-reel.webm", type: "video/webm" },
     { src: "/assets/video/brand-reel.mp4", type: "video/mp4" },
   ],
-};type EventsTeaser = Array<EventsTeaserItem>;
-
-type HomeProps = {
-  posts: PostMeta[];
-  booksCount: number;
-  eventsTeaser: EventsTeaser;
-};
+} as const;
 
 /* ---------- page ---------- */
 
