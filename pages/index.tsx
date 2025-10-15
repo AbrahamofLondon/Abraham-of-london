@@ -9,7 +9,7 @@ import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-import HeroSection from "@/components/homepage/HeroSection";
+import HeroSection from "@/components/homepage/HeroSection"; // <-- back to static import
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -18,6 +18,7 @@ import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 /* ---------- constants ---------- */
+
 const HERO = {
   coverImage: "/assets/images/books/when-the-system-breaks-cover.jpg",
 };
@@ -40,6 +41,7 @@ type HomeProps = {
 };
 
 /* ---------- page ---------- */
+
 export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -49,25 +51,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const postsCount = posts.length;
 
   return (
-    <Layout
-      pageTitle="Home"
-      hideCTA
-      hero={
-        <HeroSection
-          eyebrow="Featured Insight"
-          title="When the System Breaks You: Finding Purpose in Pain"
-          subtitle="Win the only battle you fully control — the one inside your chest."
-          primaryCta={{
-            href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-            label: "Get the free teaser",
-          }}
-          secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
-          coverImage={HERO.coverImage}
-          coverAspect="book"
-          coverFit="contain"
-        />
-      }
-    >
+    <Layout pageTitle="Home" hideCTA>
       <Head>
         <meta
           name="description"
@@ -75,6 +59,21 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         />
         <meta property="og:type" content="website" />
       </Head>
+
+      {/* HERO */}
+      <HeroSection
+        eyebrow="Featured Insight"
+        title="When the System Breaks You: Finding Purpose in Pain"
+        subtitle="Win the only battle you fully control — the one inside your chest."
+        primaryCta={{
+          href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
+          label: "Get the free teaser",
+        }}
+        secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
+        coverImage={HERO.coverImage}
+        coverAspect="book"
+        coverFit="contain"
+      />
 
       {/* Breadcrumb + quick counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
@@ -344,7 +343,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">What Leaders Say</h2>
           </header>
 
-        <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
               { quote: "Clear thinking. Strong standards. Abraham brings both to the table.", name: "E. K., Founder" },
               { quote: "He positions problems with moral clarity—and then solves them.", name: "M. A., Director" },
@@ -397,10 +396,10 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 
 /* ---------- SSG + ISR ---------- */
+
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
