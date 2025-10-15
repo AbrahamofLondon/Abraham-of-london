@@ -1,4 +1,4 @@
-/* styles/globals.css — corrected (balanced braces + valid ring color) */
+/* FILE: styles/globals.css  (only the relevant parts shown; keep the rest of your file unchanged) */
 
 /* ----------------------------------------------------------
    Tailwind layers (v3 syntax)
@@ -7,54 +7,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* … your variables and base styles … */
+
 /* ----------------------------------------------------------
-   THEME VARIABLES (light + dark) — runtime CSS vars
+   TAILWIND COMPONENT SHORTCUTS
 ---------------------------------------------------------- */
-:root {
-  --color-primary: #0b2e1f;          /* forest */
-  --color-primary-hover: #047857;    /* emerald-700 */
-  --color-on-primary: #f5f5f0;       /* cream */
-  --color-on-primary-hover: #ffffff;
+@layer components {
+  .aol-input {
+    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
+           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
+           bg-white text-deepCharcoal;
+    border-color: var(--color-lightGrey);
+  }
 
-  --color-secondary: #f5f5f0;        /* cream (bg) */
-  --color-on-secondary: #333333;     /* deepCharcoal (text) */
+  .aol-textarea {
+    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
+           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
+           bg-white text-deepCharcoal;
+    border-color: var(--color-lightGrey);
+  }
 
-  --color-accent: #d4af37;           /* softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
+  /* ✅ Fixed: no `ring-forest/40`. Use ring size + arbitrary color bound to CSS var. */
+  .aol-btn {
+    @apply inline-flex items-center rounded-full px-4 py-2 text-cream transition;
+           hover:brightness-95 focus:outline-none
+           focus-visible:ring-2;              /* size only */
+    --tw-ring-color: color-mix(in oklab, var(--color-primary) 40%, transparent); /* why: set ring color/opacity */
+    background-color: var(--color-primary);
+  }
 
-  --color-lightGrey: #e5e5e5;
-  --color-warmWhite: #fafaf5;
-  --color-midGreen: #4b8b6b;
-
-  /* Sticky CTA: height published by component */
-  --sticky-cta-h: 0px;
-
-  /* Fluid type scale */
-  --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);
-  --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
-  --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
-  --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
-  --step-3:  clamp(1.95rem, 1.66rem + 1.30vw, 2.40rem);
-  --step-4:  clamp(2.35rem, 1.98rem + 1.80vw, 3.00rem);
-}
-
-.dark {
-  --color-primary: #047857;
-  --color-primary-hover: #059669;
-  --color-on-primary: #ffffff;
-  --color-on-primary-hover: #f5f5f0;
-
-  --color-secondary: #333333;
-  --color-on-secondary: #f5f5f0;
-
-  --color-accent: #d4af37;
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
-
-  --color-lightGrey: #4b4b4b;
-  --color-warmWhite: #333333;
-  --color-midGreen: #6bb694;
+  .pattern-bg {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
 }
 
 /* ----------------------------------------------------------
