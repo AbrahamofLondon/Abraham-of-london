@@ -32,13 +32,19 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse plugin — valid inputs only
+# after the Next.js plugin
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
-
-  # (Optional) fail the deploy when any score drops below thresholds
-  # If you want this behavior, uncomment the line below:
-  # fail_deploy_on_score_threshold = true
+  [plugins.inputs]
+    # Audit the deployed site (Netlify supplies DEPLOY_URL on onSuccess)
+    audit_url = ["/", "/blog"]
+    # Stable desktop scoring reduces mobile-emulation flakiness in CI
+    settings = { preset = "desktop" }
+    output_path = "reports"
+    thresholds = { performance = 0.9, accessibility = 0.9, seo = 0.9, best_practices = 0.9 }
 
   [plugins.inputs.thresholds]
     performance = 0.9
@@ -58,6 +64,11 @@
 # ────────────────────────────────────────────────────────────
 # Legacy PDF aliases (200 rewrites)
 # ────────────────────────────────────────────────────────────
+[[redirects]]
+  from = "/import"
+  to   = "/"
+  status = 301
+
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"

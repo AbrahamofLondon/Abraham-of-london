@@ -27,6 +27,8 @@
     "lhci:local": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=http://localhost:3000/ --upload.target=temporary-public-storage",
     "lhci:preview": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=$DEPLOY_URL/ --upload.target=temporary-public-storage",
     "lhci:prod": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=$URL/ --upload.target=temporary-public-storage"
+    "print:serve": "next start -p 3000",
+    "print:pdfs": "node scripts/render-pdfs.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
