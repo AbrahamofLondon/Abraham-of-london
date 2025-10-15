@@ -1,34 +1,99 @@
 // scripts/render-pdfs.mjs
 import { chromium } from "playwright";
-import { mkdirSync, existsSync } from "fs";
-import { resolve } from "path";
+import { mkdirSync } from "fs";
+import { dirname, resolve } from "path";
+import http from "http";
 
-const BASE = process.env.PDF_BASE_URL || "http://localhost:3000";
-const OUTDIR = resolve("public", "downloads");
-if (!existsSync(OUTDIR)) mkdirSync(OUTDIR, { recursive: true });
+function parseArgs(argv) {
+  const out = { base: "http://localhost:3000", outDir: "public/downloads", paths: [] };
+  for (let i = 2; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--base") out.base = argv[++i];
+    else if (a === "--out") out.outDir = argv[++i];
+    else if (a === "--paths") out.paths = argv[++i].split(",").map(s => s.trim()).filter(Boolean);
+  }
+  return out;
+}
 
-const JOBS = [
-  { url: `${BASE}/print/leadership-playbook`, out: resolve(OUTDIR, "Leadership_Playbook.pdf"), title: "Leadership Playbook — 30•60•90" },
-  { url: `${BASE}/print/mentorship-starter-kit`, out: resolve(OUTDIR, "Mentorship_Starter_Kit.pdf"), title: "Mentorship Starter Kit" },
+function toFilenameFromPath(p) {
+  // /print/leadership-playbook -> Leadership_Playbook.pdf
+  const name = p.split("/").filter(Boolean).pop() || "document";
+  return name
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .replace(/\s+/g, "_") + ".pdf";
+}
+
+async function waitForServer(url, timeoutMs = 15000) {
+  const started = Date.now();
+  const u = new URL(url);
+  const host = u.hostname;
+  const port = Number(u.port || (u.protocol === "https:" ? 443 : 80));
+  const path = u.pathname.endsWith("/") ? u.pathname : u.pathname + "/";
+  return new Promise((resolveWait, rejectWait) => {
+    (function poll() {
+      const req = http.get({ host, port, path }, res => {
+        res.resume();
+        resolveWait(true);
+      });
+      req.on("error", () => {
+        if (Date.now() - started > timeoutMs) rejectWait(new Error(`Timed out waiting for ${url}`));
+        else setTimeout(poll, 500);
+      });
+    })();
+  });
+}
+
+const args = parseArgs(process.argv);
+
+// default set of known print routes (will skip 404s gracefully)
+const defaultPaths = [
+  "/print/leadership-playbook",
+  "/print/mentorship-starter-kit",
+  "/print/a6/leaders-cue-card-two-up",
+  "/print/a6/brotherhood-cue-card-two-up"
 ];
 
-(async () => {
-  const browser = await chromium.launch();
-  const ctx = await browser.newContext();
-  const page = await ctx.newPage();
+const paths = args.paths.length ? args.paths : defaultPaths;
 
-  for (const job of JOBS) {
-    console.log(`→ Rendering ${job.url} → ${job.out}`);
-    await page.goto(job.url, { waitUntil: "networkidle" });
+console.log(`Base: ${args.base}`);
+console.log(`Out : ${resolve(args.outDir)}`);
+console.log(`Paths: ${paths.join(", ")}`);
+
+await waitForServer(args.base).catch(() => {
+  console.error(`\n✖ No server responding at ${args.base}. Start one first (e.g. "npm run print:serve").\n`);
+  process.exit(1);
+});
+
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext();
+const page = await context.newPage();
+
+for (const p of paths) {
+  const url = new URL(p.replace(/^\/*/, "/"), args.base).toString();
+  const outFile = resolve(args.outDir, toFilenameFromPath(p));
+  try {
+    console.log(`→ Rendering ${url} → ${outFile}`);
+    const resp = await page.goto(url, { waitUntil: "networkidle" });
+    if (!resp || resp.status() >= 400) {
+      console.warn(`  ! Skipping (${resp ? resp.status() : "no response"}) ${url}`);
+      continue;
+    }
     await page.emulateMedia({ media: "print" });
+    mkdirSync(dirname(outFile), { recursive: true });
     await page.pdf({
-      path: job.out,
+      path: outFile,
       printBackground: true,
-      preferCSSPageSize: true,
-      margin: { top: "10mm", right: "10mm", bottom: "12mm", left: "10mm" },
+      format: "A4",
+      scale: 1,
+      preferCSSPageSize: true
     });
+    console.log(`  ✔ Saved ${outFile}`);
+  } catch (err) {
+    console.error(`  ✖ Failed ${url}`);
+    console.error(err);
   }
+}
 
-  await browser.close();
-  console.log("✓ PDFs written to /public/downloads");
-})();
+await browser.close();
+console.log("\nAll done.");
