@@ -6,4 +6,5 @@ export default defineConfig({
   use: { baseURL: BASE_URL, trace: "on-first-retry" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: { command: "npm run dev", url: "http://localhost:3000", timeout: 120000, reuseExistingServer: !process.env.CI, env: { PORT: "3000" } }
+  webServer: { command: "PORT=3100 npm run dev", url: "http://localhost:3100", timeout: 120000, reuseExistingServer: !process.env.CI, env: { PORT: "3100" } }
 });
