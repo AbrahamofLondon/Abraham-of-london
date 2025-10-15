@@ -1,3 +1,25 @@
+/* =====================================================================
+   Global Styles (Tailwind + Theme + Self-Hosted Fonts)
+   - Uses plain @font-face to avoid next/font build issues.
+   - Fonts expected at: /public/fonts/geist-black.woff2, /public/fonts/GeistMono-Regular.woff2
+===================================================================== */
+
+/* ---------- Self-hosted fonts ---------- */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "GeistMono";
+  src: url("/fonts/GeistMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ----------------------------------------------------------
    Tailwind layers (v3 syntax)
 ---------------------------------------------------------- */
@@ -35,6 +57,14 @@
   --step-2:  clamp(1.55rem, 1.36rem + 0.95vw, 1.85rem);
   --step-3:  clamp(1.95rem, 1.66rem + 1.30vw, 2.40rem);
   --step-4:  clamp(2.35rem, 1.98rem + 1.80vw, 3.00rem);
+
+  /* Font CSS variables (safe fallbacks first).
+     NOTE: We put system fonts before "Geist" to avoid using the only
+     available 900 weight for normal body text. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Geist";
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-cursive: "Segoe Script", "Brush Script MT", cursive;
+  --font-mono: "GeistMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .dark {
@@ -66,8 +96,7 @@ html {
 html, body { padding: 0; margin: 0; }
 
 body {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-sans);
   font-size: var(--step-0);
   line-height: 1.7;
   color: var(--color-on-secondary);
@@ -88,7 +117,7 @@ main {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: var(--font-serif);
   color: var(--color-primary);
 }
 
@@ -99,7 +128,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .font-cursive {
-  font-family: var(--font-cursive), "Segoe Script", "Brush Script MT", cursive;
+  font-family: var(--font-cursive);
+}
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 a {

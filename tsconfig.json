@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2020",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": ".",
     "types": ["node"],
+    "downlevelIteration": true,
     "paths": {
       "@/*": ["*"],
       "@/lib/*": ["lib/*"],
@@ -35,7 +36,9 @@
     "**/*.d.ts",
     ".next/types/**/*.ts",
     "netlify/**/*.ts",
-    "netlify/**/*.tsx"
+    "netlify/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
   ],
   "exclude": ["node_modules", ".next"]
 }

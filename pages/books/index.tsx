@@ -8,7 +8,6 @@ import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BookCard from "@/components/BookCard";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
-import { CTA_PRESETS } from "@/components/mdx/ctas";
 import { getAllBooks } from "@/lib/books";
 
 type BookMetaSafe = {
@@ -25,10 +24,8 @@ type BookMetaSafe = {
 
 type Props = { books: BookMetaSafe[] };
 
-// Optionally pin one or more featured titles by slug
 const FEATURED_SLUGS = ["the-fiction-adaptation"];
 
-/** Compact genre “shelves” with counts (popular first), clickable to filter */
 function GenreShelves({
   books,
   active,
@@ -44,7 +41,6 @@ function GenreShelves({
       const g = b.genre || "Uncategorized";
       map.set(g, (map.get(g) || 0) + 1);
     }
-    // Popular first, then A→Z
     return Array.from(map.entries()).sort((a, b) => {
       if (b[1] !== a[1]) return b[1] - a[1];
       return a[0].localeCompare(b[0]);
@@ -84,20 +80,9 @@ function GenreShelves({
       className="not-prose mb-4 overflow-x-auto rounded-xl border border-lightGrey bg-warmWhite/60 p-3"
     >
       <div className="flex min-w-max items-center gap-6 px-1">
-        <Pill
-          label="All"
-          count={total}
-          selected={active === "All"}
-          onClick={() => onSelect("All")}
-        />
+        <Pill label="All" count={total} selected={active === "All"} onClick={() => onSelect("All")} />
         {counts.map(([g, c]) => (
-          <Pill
-            key={g}
-            label={g}
-            count={c}
-            selected={active === g}
-            onClick={() => onSelect(g)}
-          />
+          <Pill key={g} label={g} count={c} selected={active === g} onClick={() => onSelect(g)} />
         ))}
       </div>
     </div>
@@ -107,14 +92,12 @@ function GenreShelves({
 export default function BooksIndex({ books }: Props) {
   const router = useRouter();
 
-  // --- Genres
   const genres = React.useMemo(() => {
     const set = new Set<string>();
     books.forEach((b) => b.genre && set.add(b.genre));
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [books]);
 
-  // --- Initial state from URL
   const initialQ = typeof router.query.q === "string" ? router.query.q : "";
   const initialGenre =
     typeof router.query.genre === "string" && genres.includes(router.query.genre)
@@ -126,7 +109,6 @@ export default function BooksIndex({ books }: Props) {
 
   const hasFilters = q !== "" || genre !== "All";
 
-  // --- Keep URL in sync (shallow)
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
@@ -135,7 +117,6 @@ export default function BooksIndex({ books }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, genre]);
 
-  // --- Filtering
   const filtered = React.useMemo(
     () =>
       books.filter((b) => {
@@ -151,22 +132,17 @@ export default function BooksIndex({ books }: Props) {
     [books, q, genre]
   );
 
-  // --- Featured pick (first matching from FEATURED_SLUGS, else first filtered)
   const featured = React.useMemo(() => {
     const bySlug =
       FEATURED_SLUGS.map((s) => filtered.find((b) => b.slug === s)).find(Boolean) || null;
     return bySlug || filtered[0] || null;
   }, [filtered]);
 
-  const leadershipCTA = CTA_PRESETS.leadership;
-
-  // --- UI helpers
   const resetFilters = () => {
     setQ("");
     setGenre("All");
   };
 
-  // JSON-LD ItemList for SEO
   const itemList = filtered.map((b, idx) => ({
     "@type": "ListItem",
     position: idx + 1,
@@ -182,10 +158,8 @@ export default function BooksIndex({ books }: Props) {
           name="description"
           content="Books by Abraham of London — clarity, conviction, endurance."
         />
-        {/* JSON-LD: ItemList */}
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -221,7 +195,10 @@ export default function BooksIndex({ books }: Props) {
               aria-labelledby="featured-book"
               className="mb-10 overflow-hidden rounded-2xl border border-lightGrey bg-warmWhite p-5 shadow-card"
             >
-              <h2 id="featured-book" className="mb-3 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]">
+              <h2
+                id="featured-book"
+                className="mb-3 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]"
+              >
                 Featured
               </h2>
               <div className="grid gap-5 md:grid-cols-3">
@@ -232,7 +209,9 @@ export default function BooksIndex({ books }: Props) {
                     </Link>
                   </h3>
                   {featured.excerpt && (
-                    <p className="mt-2 text-[color:var(--color-on-secondary)/0.8]">{featured.excerpt}</p>
+                    <p className="mt-2 text-[color:var(--color-on-secondary)/0.8]">
+                      {featured.excerpt}
+                    </p>
                   )}
                   <div className="mt-4 flex flex-wrap gap-3 text-sm">
                     <Link href={`/books/${featured.slug}`} className="aol-btn rounded-full px-4 py-2">
@@ -269,8 +248,8 @@ export default function BooksIndex({ books }: Props) {
                 <div className="rounded-xl bg-white p-4 text-sm text-[color:var(--color-on-secondary)/0.8]">
                   <p className="mb-2 font-semibold">Why this book</p>
                   <p>
-                    A distilled entry point into the themes readers ask for most:
-                    principled love, pressure-tested faith, and the craft of staying.
+                    A distilled entry point into the themes readers ask for most: principled love,
+                    pressure-tested faith, and the craft of staying.
                   </p>
                 </div>
               </div>
@@ -313,14 +292,13 @@ export default function BooksIndex({ books }: Props) {
             </div>
           </div>
 
-          {/* Genre Shelves (popular-first, quick filter) */}
+          {/* Genre Shelves */}
           <GenreShelves
             books={books}
             active={genre}
             onSelect={(g) => {
               setGenre(g);
-              // Optional: clear search when switching shelves
-              // setQ("");
+              // Optionally: setQ("");
             }}
           />
 
@@ -385,12 +363,9 @@ export default function BooksIndex({ books }: Props) {
 
           {/* Contextual CTA */}
           <section className="mx-auto mt-12 max-w-3xl">
-            <ResourcesCTA
-              title={leadershipCTA.title}
-              reads={leadershipCTA.reads}
-              downloads={leadershipCTA.downloads}
-            />
+            <ResourcesCTA preset="leadership" />
           </section>
+
         </div>
       </section>
     </Layout>

@@ -1,15 +1,16 @@
+// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Script from "next/script";
+
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
-import { sans, serif, cursive } from "@/lib/fonts";
 import "@/styles/globals.css";
 
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
-const ThemeToggle    = dynamic(() => import("@/components/ThemeToggle"),    { ssr: false });
+const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), { ssr: false });
 
 function AnalyticsRouterTracker() {
   const router = useRouter();
@@ -29,7 +30,7 @@ function AnalyticsRouterTracker() {
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <div className={`${sans.variable} ${serif.variable} ${cursive.variable}`}>
+    <>
       {gaEnabled && process.env.NODE_ENV === "production" && (
         <>
           <Script
@@ -58,7 +59,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
         <Component {...pageProps} />
       </ThemeProvider>
-    </div>
+    </>
   );
 }
 
