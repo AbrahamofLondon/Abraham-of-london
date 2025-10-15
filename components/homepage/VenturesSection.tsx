@@ -1,4 +1,3 @@
-// components/homepage/VenturesSection.tsx
 "use client";
 
 import React from "react";
@@ -60,10 +59,7 @@ export const defaultBrands: Brand[] = [
 
 type VenturesProps = { brandsData?: Brand[] };
 
-const container = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
-} as const;
+const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } } as const;
 const item = { hidden: { y: 18, opacity: 0 }, visible: { y: 0, opacity: 1 } } as const;
 
 function BrandCard({ brand }: { brand: Brand }) {
@@ -71,7 +67,7 @@ function BrandCard({ brand }: { brand: Brand }) {
   const isSecondaryInternal = brand.secondaryHref && !/^https?:\/\//.test(brand.secondaryHref || "");
 
   const LearnMore = (
-    <span className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40 rounded-full px-4 py-2">
+    <span className="inline-flex items-center justify-center text-forest font-medium hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-full px-4 py-2">
       Learn More
       <svg className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path
@@ -101,10 +97,10 @@ function BrandCard({ brand }: { brand: Brand }) {
       </div>
 
       <h3 className="text-2xl font-semibold mb-1 text-gray-900">{brand.name}</h3>
-      <p className="text-deepCharcoal/80 mb-3 flex-1">{brand.description}</p>
+      <p className="text-[color:var(--color-on-secondary)/0.8] mb-3 flex-1">{brand.description}</p>
 
       {brand.metric && (
-        <p className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-deepCharcoal/80 border border-black/10 px-3 py-1 text-xs">
+        <p className="inline-flex items-center justify-center mx-auto mb-4 rounded-full bg-cream text-[color:var(--color-on-secondary)/0.8] border border-black/10 px-3 py-1 text-xs">
           {brand.metric}
         </p>
       )}
@@ -125,7 +121,7 @@ function BrandCard({ brand }: { brand: Brand }) {
             <Link
               href={brand.secondaryHref}
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>
@@ -135,7 +131,7 @@ function BrandCard({ brand }: { brand: Brand }) {
               target="_blank"
               rel="noopener noreferrer"
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:bg-forest/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+              className="inline-flex items-center justify-center rounded-full bg-forest text-cream px-3 py-1.5 text-sm font-semibold hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
             >
               {brand.secondaryText}
             </Link>
@@ -156,7 +152,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             <h2 id="ventures-title" className="text-3xl md:text-5xl font-serif font-bold mb-4 text-gray-900">
               Ventures & Brands
             </h2>
-            <p className="text-lg md:text-xl text-deepCharcoal/80 max-w-2xl">
+            <p className="text-lg md:text-xl text-[color:var(--color-on-secondary)/0.8] max-w-2xl">
               A portfolio at the intersection of strategy, sustainability, and impact.
             </p>
           </motion.header>
@@ -174,11 +170,11 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </div>
             <div className="text-center md:text-left">
               <h3 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900">Abraham of London</h3>
-              <p className="text-deepCharcoal/80">
+              <p className="text-[color:var(--color-on-secondary)/0.8]">
                 Strategic stewardship, thought leadership, and the standards that hold the family together.
               </p>
               <div className="mt-4">
-                <Link href="/about" className="inline-flex items-center px-4 py-2 rounded-full bg-forest text-cream text-sm font-medium hover:bg-forest/90 transition-colors">
+                <Link href="/about" className="inline-flex items-center px-4 py-2 rounded-full bg-forest text-cream text-sm font-medium hover:brightness-95 transition-colors">
                   Learn more
                 </Link>
               </div>
@@ -190,7 +186,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
           </motion.div>
 
           <motion.div variants={item} className="mt-12 text-center">
-            <Link href="/ventures" className="inline-flex items-center px-6 py-3 bg-forest text-cream rounded-full font-medium hover:bg-forest/90 transition-colors shadow-lg">
+            <Link href="/ventures" className="inline-flex items-center px-6 py-3 bg-forest text-cream rounded-full font-medium hover:brightness-95 transition-colors shadow-lg">
               View All Ventures
             </Link>
           </motion.div>

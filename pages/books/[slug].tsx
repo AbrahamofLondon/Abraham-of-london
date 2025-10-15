@@ -53,8 +53,8 @@ export default function BookPage({ book }: Props) {
 
         <h1 className="mb-2 font-serif text-4xl text-forest md:text-5xl">{meta.title}</h1>
 
-        {meta.author && <p className="mb-6 text-sm text-deepCharcoal/70">By {meta.author}</p>}
-        {meta.excerpt && <p className="mb-8 text-base text-deepCharcoal/85">{meta.excerpt}</p>}
+        {meta.author && <p className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">By {meta.author}</p>}
+        {meta.excerpt && <p className="mb-8 text-base text-[color:var(--color-on-secondary)/0.85]">{meta.excerpt}</p>}
 
         <div className="mt-8">
           <MDXRemote {...content} components={MDXComponents} />

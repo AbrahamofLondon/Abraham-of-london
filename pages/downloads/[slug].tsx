@@ -139,7 +139,7 @@ export default function DownloadPage({ meta, content }: Props) {
 
           <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">{title}</h1>
 
-          <div className="mb-6 text-sm text-deepCharcoal/70">
+          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
             <span>By {authorName}</span>
             {date && (
               <>

@@ -114,7 +114,7 @@ export default function NewsletterForm() {
         placeholder="you@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-deepCharcoal/50 focus:border-deepCharcoal focus:outline-none"
+        className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal focus:outline-none"
         aria-describedby="newsletter-status"
         aria-invalid={isError || undefined}
         disabled={isLoading}
@@ -123,7 +123,7 @@ export default function NewsletterForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? "Subscribing…" : "Subscribe"}
       </button>

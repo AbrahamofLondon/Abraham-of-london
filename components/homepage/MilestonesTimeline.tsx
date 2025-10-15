@@ -45,7 +45,7 @@ export default function MilestonesTimeline({
     variant === "dark"
       ? "bg-white/10 text-cream border border-white/10 backdrop-blur"
       : "bg-white text-deepCharcoal ring-1 ring-black/5";
-  const subText = variant === "dark" ? "text-cream/80" : "text-deepCharcoal/80";
+  const subText = variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-[color:var(--color-on-secondary)/0.8]";
 
   return (
     <section
@@ -81,7 +81,7 @@ export default function MilestonesTimeline({
                 >
                   <span
                     aria-hidden
-                    className="absolute -left-3 top-1.5 h-3 w-3 rounded-full bg-forest ring-4 ring-forest/20"
+                    className="absolute -left-3 top-1.5 h-3 w-3 rounded-full bg-forest ring-4 ring-[color:var(--color-primary)/0.2]"
                   />
                   <div className="text-forest text-sm font-semibold">
                     <time dateTime={String(m.year)}>{m.year}</time>

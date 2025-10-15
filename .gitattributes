@@ -1,14 +1,9 @@
-# Normalise text to LF, keep UTF-8 clean
 * text=auto eol=lf
+*.bat eol=crlf
+*.cmd eol=crlf
+* text=auto eol=lf
+*.css text eol=lf
+*.mdx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
 
-# Treat these as text always
-*.md text
-*.mdx text
-*.ts text
-*.tsx text
-*.js text
-*.css text
-*.json text
-*.yml text
-*.yaml text
-*.toml text

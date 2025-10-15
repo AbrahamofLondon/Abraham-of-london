@@ -21,7 +21,7 @@ export default function Breadcrumb({
 
   return (
     <nav aria-label={ariaLabel} className={className}>
-      <ol className="flex flex-wrap items-center gap-2 text-sm text-deepCharcoal/70">
+      <ol className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
         {items.map((c, i) => {
           const last = i === items.length - 1;
           const key = `${c.label}-${i}`;
@@ -36,7 +36,7 @@ export default function Breadcrumb({
                 </Link>
               ) : (
                 <span
-                  className="text-deepCharcoal/70 max-w-[22ch] truncate"
+                  className="text-[color:var(--color-on-secondary)/0.7] max-w-[22ch] truncate"
                   aria-current={last ? "page" : undefined}
                   title={c.label}
                 >

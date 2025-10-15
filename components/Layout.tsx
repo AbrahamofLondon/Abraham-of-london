@@ -114,7 +114,7 @@ export default function Layout({
       </a>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-deepCharcoal/10 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-black/50">
+      <header className="sticky top-0 z-40 border-b border-[color:var(--color-on-secondary)/0.1] bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-black/50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
           {/* Brand */}
           <Link href="/" className="group inline-flex items-baseline gap-2" prefetch={false}>

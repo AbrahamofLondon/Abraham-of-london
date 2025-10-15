@@ -66,7 +66,7 @@ export default function VenturesPage() {
         <div className="mx-auto max-w-6xl">
           <header className="mb-8 md:mb-10 text-center">
             <h1 className="text-3xl md:text-5xl font-serif font-bold">Ventures & Brands</h1>
-            <p className="mt-3 text-deepCharcoal/80">
+            <p className="mt-3 text-[color:var(--color-on-secondary)/0.8]">
               A portfolio at the intersection of strategy, sustainability, and impact.
             </p>
           </header>
@@ -98,12 +98,12 @@ export default function VenturesPage() {
                   <h2 className="text-xl font-semibold text-gray-900 text-center">{b.name}</h2>
 
                   {b.badge ? (
-                    <span className="mt-2 self-center rounded-full border border-black/10 bg-cream px-2.5 py-1 text-xs text-deepCharcoal/80">
+                    <span className="mt-2 self-center rounded-full border border-black/10 bg-cream px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.8]">
                       {b.badge}
                     </span>
                   ) : null}
 
-                  <p className="mt-3 text-center text-deepCharcoal/80">{b.desc}</p>
+                  <p className="mt-3 text-center text-[color:var(--color-on-secondary)/0.8]">{b.desc}</p>
 
                   <span className="mt-5 inline-flex justify-center">
                     <span className="rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream">
@@ -117,7 +117,7 @@ export default function VenturesPage() {
                 <Link
                   key={b.name}
                   href={b.href}
-                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
                 >
                   {Card}
                 </Link>
@@ -127,7 +127,7 @@ export default function VenturesPage() {
                   href={b.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+                  className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
                 >
                   {Card}
                 </a>

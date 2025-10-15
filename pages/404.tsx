@@ -20,7 +20,7 @@ export default function NotFoundPage() {
           Page Not Found
         </h1>
 
-        <p className="text-deepCharcoal/80 mb-8">
+        <p className="text-[color:var(--color-on-secondary)/0.8] mb-8">
           Sorry, the page you&rsquo;re looking for doesn&rsquo;t exist.
         </p>
 

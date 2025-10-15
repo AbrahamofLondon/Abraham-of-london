@@ -93,7 +93,7 @@ export default function EventsSection({
       ? "border border-white/10 bg-white/10 backdrop-blur text-cream"
       : "border border-black/10 bg-white text-gray-900"
   );
-  const subText = variant === "dark" ? "text-cream/80" : "text-gray-600";
+  const subText = variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-gray-600";
 
   const fmt = React.useMemo(
     () =>
@@ -140,7 +140,7 @@ export default function EventsSection({
               </div>
               <h3 className="text-xl font-semibold mt-1">{ev.title}</h3>
               {ev.location && (
-                <p className={clsx("mt-1", variant === "dark" ? "text-cream/80" : "text-gray-700")}>
+                <p className={clsx("mt-1", variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-gray-700")}>
                   {ev.location}
                 </p>
               )}
@@ -151,7 +151,7 @@ export default function EventsSection({
                     "inline-flex items-center mt-4 px-4 py-2 rounded-full transition",
                     variant === "dark"
                       ? "bg-forest text-cream hover:bg-emerald-700"
-                      : "bg-forest text-cream hover:bg-forest/90"
+                      : "bg-forest text-cream hover:bg-[color:var(--color-primary)/0.9]"
                   )}
                 >
                   Details
