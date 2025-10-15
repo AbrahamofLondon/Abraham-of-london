@@ -1,7 +1,6 @@
 // app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { sans, serif, cursive } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en-GB"
-      className={`scroll-smooth ${sans.variable} ${serif.variable} ${cursive.variable}`}
+      className="scroll-smooth"
       data-theme="light"
       data-user-theme="system"
       suppressHydrationWarning
