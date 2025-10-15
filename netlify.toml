@@ -7,18 +7,17 @@
 
   [build.environment]
     NODE_VERSION = "20"
-    NODE_ENV = "production"
     NEXT_TELEMETRY_DISABLED = "1"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
-    # Our Tailwind/PostCSS guard expects this:
     NO_SLASH_OPACITY_MODE = "fix"
-    # Keep CI stable (no git hooks / no browser downloads)
-    HUSKY = "0"
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+
+# Production-only env
+[context.production.environment]
+  NODE_ENV = "production"
 
 # ────────────────────────────────────────────────────────────
-# Functions (Resend + JSX-rendered emails)
+# Functions (Resend + JSX emails)
 # ────────────────────────────────────────────────────────────
 [functions]
   node_bundler = "esbuild"
@@ -26,49 +25,43 @@
   external_node_modules = ["resend"]
   included_files = ["netlify/emails/**"]
 
-# ────────────────────────────────────────────────────────────
-# Plugins
-# ────────────────────────────────────────────────────────────
+# Next.js runtime
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# after the Next.js plugin
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[[plugins]]
+# Lighthouse – run ONLY on production deploys
+# (No invalid "fail_build". Use supported inputs below.)
+[[context.production.plugins]]
   package = "@netlify/plugin-lighthouse"
-  [plugins.inputs]
-    # Audit the deployed site (Netlify supplies DEPLOY_URL on onSuccess)
-    audit_url = ["/", "/blog"]
-    # Stable desktop scoring reduces mobile-emulation flakiness in CI
-    settings = { preset = "desktop" }
-    output_path = "reports"
-    thresholds = { performance = 0.9, accessibility = 0.9, seo = 0.9, best_practices = 0.9 }
 
-  [plugins.inputs.thresholds]
+  # What to audit (relative paths off the deployed URL)
+  [[context.production.plugins.inputs.audits]]
+    path = "/"
+    output_path = "reports/home.html"
+
+  [[context.production.plugins.inputs.audits]]
+    path = "/blog"
+    output_path = "reports/blog.html"
+
+  # Score thresholds (deploy will fail if below)
+  [context.production.plugins.inputs.thresholds]
     performance = 0.9
     accessibility = 0.9
     best-practices = 0.9
     seo = 0.9
 
-  # Audits to run (add more paths if you like)
-  [[plugins.inputs.audits]]
-    path = "/"
-    output_path = "reports/home.html"
+  # Global settings for Lighthouse
+  [context.production.plugins.inputs.settings]
+    chromeFlags = "--no-sandbox"
 
-  [[plugins.inputs.audits]]
-    path = "/blog"
-    output_path = "reports/blog.html"
+  # Whether to fail the deploy on thresholds (true/false)
+  # Set to true when you’re ready to enforce budgets.
+  [context.production.plugins.inputs]
+    fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
-# Legacy PDF aliases (200 rewrites)
+# Legacy PDF aliases → serve the new files directly (200 rewrites)
 # ────────────────────────────────────────────────────────────
-[[redirects]]
-  from = "/import"
-  to   = "/"
-  status = 301
-
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
@@ -85,11 +78,8 @@
   status = 200
 
 # ────────────────────────────────────────────────────────────
-# Brand domains
-#   - Send brand root → branded ventures landing (301)
-#   - Everything else on that host → 410 (served by public/410.html)
+# Brand domains → 301 root to Ventures; everything else 410
 # ────────────────────────────────────────────────────────────
-# Endureluxe
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -103,7 +93,6 @@
   force = true
   conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
-# Alomarada
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
@@ -118,7 +107,8 @@
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
 # ────────────────────────────────────────────────────────────
-# Canonical host redirects (apex/preview → www)
+# Canonical host redirects (apex → www). 
+# NOTE: do NOT redirect Netlify preview host; Lighthouse needs it.
 # ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
@@ -127,24 +117,17 @@
   force  = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
-[[redirects]]
-  from = "/*"
-  to   = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  force  = true
-  conditions = { Host = ["abraham-of-london.netlify.app"] }
-
 # ────────────────────────────────────────────────────────────
-# Security & caching headers
+# Headers
 # ────────────────────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    X-Content-Type-Options    = "nosniff"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    X-Frame-Options           = "SAMEORIGIN"
+    Permissions-Policy        = "camera=(), microphone=(), geolocation=()"
 
 [[headers]]
   for = "/_next/static/*"
