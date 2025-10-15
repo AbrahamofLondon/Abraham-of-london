@@ -17,6 +17,8 @@ export type LayoutProps = {
   footerVariant?: "light" | "dark";
   /** Hide the sticky CTA on specific pages (e.g., /contact, /newsletter) */
   hideCTA?: boolean;
+  /** Optional page-level hero, rendered below the social strip and above <main> */
+  hero?: React.ReactNode;
 };
 
 export default function Layout({
@@ -25,6 +27,7 @@ export default function Layout({
   hideSocialStrip,
   footerVariant = "light",
   hideCTA = false,
+  hero,
 }: LayoutProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -197,7 +200,7 @@ export default function Layout({
         {/* Mobile Drawer */}
         <div
           id="mobile-nav"
-          className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg-black`}
+          className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg:black`}
         >
           <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile">
             <ul className="grid gap-2">
@@ -247,7 +250,10 @@ export default function Layout({
         </div>
       )}
 
-      {/* Main — remove container/padding here; let pages own spacing */}
+      {/* Page-level hero (if provided) */}
+      {hero ? <div data-layout-hero>{hero}</div> : null}
+
+      {/* Main */}
       <main
         id="main-content"
         className="min-h-screen bg-white dark:bg-black"
