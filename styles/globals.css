@@ -1,23 +1,18 @@
-/* ----------------------------------------------------------
-   Tailwind layers (v3 syntax)
----------------------------------------------------------- */
+/* ---------- Tailwind layers ---------- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ----------------------------------------------------------
-   THEME VARIABLES (light + dark)
----------------------------------------------------------- */
+/* ---------- Theme variables ---------- */
 :root {
-  --color-primary: #0b2e1f;          /* forest */
-  --color-primary-hover: #047857;    /* emerald-700 */
-  --color-on-primary: #f5f5f0;       /* cream */
-  --color-on-primary-hover: #ffffff;
+  --color-primary: #0b2e1f;     /* forest */
+  --color-primary-hover: #047857;
+  --color-on-primary: #f5f5f0;  /* cream */
 
-  --color-secondary: #f5f5f0;        /* cream (bg) */
-  --color-on-secondary: #333333;     /* deepCharcoal (text) */
+  --color-secondary: #f5f5f0;   /* page bg */
+  --color-on-secondary: #333333;
 
-  --color-accent: #d4af37;           /* softGold */
+  --color-accent: #d4af37;      /* softGold */
   --color-accent-hover: #b89b2f;
   --color-on-accent: #ffffff;
 
@@ -25,10 +20,6 @@
   --color-warmWhite: #fafaf5;
   --color-midGreen: #4b8b6b;
 
-  /* Sticky CTA: height published by component */
-  --sticky-cta-h: 0px;
-
-  /* Fluid type scale */
   --step--1: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);
   --step-0:  clamp(1.05rem, 0.98rem + 0.35vw, 1.15rem);
   --step-1:  clamp(1.25rem, 1.12rem + 0.70vw, 1.45rem);
@@ -41,180 +32,65 @@
   --color-primary: #047857;
   --color-primary-hover: #059669;
   --color-on-primary: #ffffff;
-  --color-on-primary-hover: #f5f5f0;
 
   --color-secondary: #333333;
   --color-on-secondary: #f5f5f0;
-
-  --color-accent: #d4af37;
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
 
   --color-lightGrey: #4b4b4b;
   --color-warmWhite: #333333;
   --color-midGreen: #6bb694;
 }
 
-/* ----------------------------------------------------------
-   BASE / RESET / ACCESSIBILITY
----------------------------------------------------------- */
-html {
-  color-scheme: light dark;
-  hanging-punctuation: first allow-end;
-}
-
-html, body { padding: 0; margin: 0; }
-
+/* ---------- Base / reset ---------- */
+html { color-scheme: light dark; hanging-punctuation: first allow-end; }
+html, body { margin: 0; padding: 0; }
 body {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial);
   font-size: var(--step-0);
   line-height: 1.7;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Reserve space for the Sticky CTA so it never covers content */
-main {
-  padding-bottom: calc(var(--sticky-cta-h, 0px) + max(16px, env(safe-area-inset-bottom, 0px)));
+  transition: background-color .3s ease, color .3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: var(--font-serif, Georgia, Cambria, "Times New Roman", Times, serif);
   color: var(--color-primary);
 }
 
-/* Mobile heading tune */
-@media (max-width: 768px) {
-  h1 { font-size: 2.35rem; letter-spacing: -0.005em; }
-  h2 { font-size: 1.9rem;  letter-spacing: -0.005em; }
-}
-
-.font-cursive {
-  font-family: var(--font-cursive), "Segoe Script", "Brush Script MT", cursive;
-}
-
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
+a { color: var(--color-primary); text-decoration: none; transition: color .25s ease; }
 a:hover { color: var(--color-accent); }
 
-/* Luxury underline link */
-a.luxury-link { position: relative; color: var(--color-primary); }
-a.luxury-link::after {
-  content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 2px;
-  background-color: var(--color-accent); transition: width 0.3s ease;
-}
-a.luxury-link:hover::after { width: 100%; }
+::selection { background: #e9d79a; color: #1a1a1a; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 6px; }
 
-/* SVG safety */
-svg:not([width]):not([height]) { width: 1em; height: 1em; }
-.icon-sm { width: 1.25rem; height: 1.25rem; }
-.icon-md { width: 1.5rem; height: 1.5rem; }
-.icon-lg { width: 2rem; height: 2rem; }
+img { display: block; max-width: 100%; height: auto; }
 
-/* Responsive Images */
-img { max-width: 100%; height: auto; display: block; }
-
-/* Selection + focus */
-::selection {
-  background: color-mix(in oklab, var(--color-accent) 90%, white);
-  color: var(--color-on-accent);
-}
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
-  .shimmer-text { animation: none !important; -webkit-text-fill-color: currentColor; background: none; }
-}
-
-/* ----------------------------------------------------------
-   EFFECTS / UTILITIES
----------------------------------------------------------- */
-.shimmer-text {
-  background: linear-gradient(90deg, var(--color-accent) 0%, #fff8dc 25%, var(--color-accent) 50%, #fff8dc 75%, var(--color-accent) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-  display: inline-block;
-}
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-.fade-up { opacity: 0; transform: translateY(12px); animation: fadeUp 0.8s ease forwards; }
-@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-/* Reading width */
-.reading-measure {
-  max-width: 70ch;
-  margin-inline: auto;
-  padding-inline: clamp(1rem, 3vw, 2rem);
-}
-
-/* ----------------------------------------------------------
-   CARDS / BUTTONS
----------------------------------------------------------- */
+/* ---------- Cards / buttons ---------- */
 .card {
   border: 1px solid var(--color-lightGrey);
   padding: 32px;
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 10px 30px rgba(27,67,50,.10);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27, 67, 50, 0.15);
-}
-@media (prefers-reduced-motion: reduce) {
-  .card, .card:hover {
-    transition: none !important;
-    transform: none !important;
-    box-shadow: 0 10px 30px rgba(27,67,50,0.10) !important;
-  }
-}
+.card:hover { transform: translateY(-4px); box-shadow: 0 16px 42px rgba(27,67,50,.15); }
 
-/* ----------------------------------------------------------
-   TAILWIND COMPONENT SHORTCUTS (single block)
----------------------------------------------------------- */
+/* ---------- Tailwind component shortcuts ---------- */
 @layer components {
-  .aol-input {
-    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
-           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-           bg-white text-deepCharcoal;
-    border-color: var(--color-lightGrey);
-  }
-
-  .aol-textarea {
-    @apply mt-1 w-full px-4 py-2 border rounded-[10px]
-           focus:outline-none focus:ring-2 focus:ring-forest focus:border-forest
-           bg-white text-deepCharcoal;
-    border-color: var(--color-lightGrey);
-  }
-
-  /* FINAL: no slash opacity; ring color set via CSS var */
   .aol-btn {
-    @apply inline-flex items-center rounded-full px-4 py-2 text-cream transition
-           hover:brightness-95 focus:outline-none focus-visible:ring-2;
-    --tw-ring-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    @apply inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white
+           focus:outline-none focus-visible:ring-2;
     background-color: var(--color-primary);
+    --tw-ring-color: rgba(11,46,31,.35);
   }
 
   .pattern-bg {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
     background-size: 18px 18px;
   }
 }
 
-/* ----------------------------------------------------------
-   READING EXPERIENCE POLISH (Tailwind Typography)
----------------------------------------------------------- */
+/* ---------- Typography polish (prose) ---------- */
 .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
@@ -222,9 +98,7 @@ img { max-width: 100%; height: auto; display: block; }
   --tw-prose-bold: var(--color-primary);
   --tw-prose-quotes: var(--color-on-secondary);
   --tw-prose-quote-borders: var(--color-lightGrey);
-  --tw-prose-bullets: #9ca3af;
 }
-
 .dark .prose {
   --tw-prose-body: var(--color-on-primary);
   --tw-prose-headings: var(--color-on-primary);
@@ -234,85 +108,13 @@ img { max-width: 100%; height: auto; display: block; }
   --tw-prose-quote-borders: var(--color-lightGrey);
 }
 
-/* Headings rhythm */
-.prose h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -0.01em; margin-bottom: .5rem; text-wrap: balance; }
-.prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -0.01em; margin-top: 2.2rem; margin-bottom: .6rem; text-wrap: balance; }
-.prose h3 { font-size: var(--step-2); line-height: 1.2; margin-top: 1.8rem; margin-bottom: .4rem; }
-.prose h4 { font-size: var(--step-1); line-height: 1.25; }
-
-/* Lead paragraph after a heading */
-.prose :where(h1 + p, h2 + p) {
-  font-size: var(--step-1);
-  line-height: 1.8;
-  color: color-mix(in oklab, var(--color-on-secondary) 92%, black);
-}
-.dark .prose :where(h1 + p, h2 + p) {
-  color: color-mix(in oklab, var(--color-on-primary) 90%, white);
-}
-
-/* Body + lists */
+.prose h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -.01em; margin-bottom: .5rem; }
+.prose h2 { font-size: var(--step-3); line-height: 1.15; letter-spacing: -.01em; margin: 2.2rem 0 .6rem; }
+.prose h3 { font-size: var(--step-2); line-height: 1.2; margin: 1.8rem 0 .4rem; }
 .prose p,
-.prose li {
-  font-size: var(--step-0);
-  line-height: 1.75;
-  margin-block: .75rem;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-}
-
-.prose ul { padding-left: 1.15rem; }
-.prose ul > li::marker { color: var(--color-midGreen); }
-
-/* Links inside prose */
-.prose a {
-  text-decoration: underline;
-  text-decoration-thickness: 0.06em;
-  text-underline-offset: 0.18em;
-  transition: color .2s ease, text-decoration-color .2s ease;
-  text-decoration-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
-}
-.prose a:hover {
-  color: var(--color-accent);
-  text-decoration-color: var(--color-accent);
-}
-
-/* Images */
-.prose img {
-  border-radius: 0.9rem;
-  box-shadow: 0 10px 24px rgb(0 0 0 / 0.10);
-  margin-block: 1.25rem;
-  border: 1px solid color-mix(in oklab, var(--color-on-secondary) 10%, transparent);
-}
-.dark .prose img {
-  border-color: color-mix(in oklab, var(--color-on-primary) 12%, transparent);
-}
-
-/* Blockquote */
+.prose li { font-size: var(--step-0); line-height: 1.75; margin-block: .75rem; }
 .prose blockquote {
-  font-style: italic;
-  font-size: var(--step-1);
-  line-height: 1.55;
-  padding-left: 1rem;
-  border-left-width: 3px;
-  border-left-color: var(--color-lightGrey);
-  color: color-mix(in oklab, var(--color-on-secondary) 90%, black);
-  opacity: .95;
-}
-.dark .prose blockquote {
-  border-left-color: color-mix(in oklab, var(--color-on-primary) 35%, transparent);
-  color: color-mix(in oklab, var(--color-on-primary) 92%, white);
-}
-
-/* Optional pull-line */
-.prose .pull-line {
-  margin: 1rem 0;
-  padding-left: 1rem;
-  border-left: 2px solid var(--color-lightGrey);
-  font-weight: 600;
-  font-size: clamp(1.125rem, 1.05rem + .6vw, 1.35rem);
-  color: color-mix(in oklab, var(--color-on-secondary) 92%, black);
-}
-.dark .prose .pull-line {
-  border-left-color: var(--color-lightGrey);
-  color: color-mix(in oklab, var(--color-on-primary) 95%, white);
+  font-style: italic; font-size: var(--step-1); line-height: 1.55;
+  padding-left: 1rem; border-left: 3px solid var(--color-lightGrey);
+  color: #2d2d2d;
 }
