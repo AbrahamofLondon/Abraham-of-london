@@ -1,20 +1,18 @@
 // components/mdx/ResourcesCTA.tsx
 import Link from "next/link";
-import { CTA_PRESETS } from "./ctas";
+import { CTA_PRESETS, getCtaPreset, type CtaLink, type CtaPresetKey } from "./ctas";
 
-type LinkItem = { href: string; label: string; sub?: string };
+type LinkItem = CtaLink;
 
 export type ResourcesCTAProps =
   | {
-      /** Use a preset key from CTA_PRESETS (e.g., "fatherhood", "leadership", "entrepreneurship", "community", "justice") */
-      preset: keyof typeof CTA_PRESETS;
+      preset: CtaPresetKey;
       title?: never;
       reads?: never;
       downloads?: never;
       className?: string;
     }
   | {
-    /** Manual mode */
       preset?: never;
       title?: string;
       reads?: LinkItem[];
@@ -22,14 +20,12 @@ export type ResourcesCTAProps =
       className?: string;
     };
 
-// Internal posts (these slugs exist)
 const defaultReads: LinkItem[] = [
   { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Court-season clarity" },
   { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
   { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Lead from the inside out" },
 ];
 
-// PDFs that exist today
 const defaultDownloads: LinkItem[] = [
   { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
   { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
@@ -43,7 +39,7 @@ function isInternal(href = "") {
 export default function ResourcesCTA(props: ResourcesCTAProps) {
   const data =
     "preset" in props && props.preset
-      ? CTA_PRESETS[props.preset]
+      ? getCtaPreset(props.preset) ?? null
       : {
           title: props.title ?? "Further Reading & Tools",
           reads: props.reads ?? defaultReads,
@@ -97,7 +93,6 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
             <ul className="space-y-2">
               {downloads.map((d) => (
                 <li key={d.href}>
-                  {/* PDFs served from /public/downloads – make them download-friendly */}
                   <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
                     {d.label}
                   </a>
