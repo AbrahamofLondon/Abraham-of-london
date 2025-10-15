@@ -1,3 +1,4 @@
+// pages/blog/[slug].tsx
 import dynamic from "next/dynamic";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { format } from "date-fns";
@@ -15,7 +16,6 @@ import type { PostMeta } from "@/types/post";
 
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 // IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
@@ -59,12 +59,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const source = raw.content || "";
 
   // Workaround the GFM tables crash by not enabling remark-gfm here.
-  // If you later need GFM features, we can selectively re-enable parts that are safe.
   const mdx = await serialize(source, {
     parseFrontmatter: false,
     scope: meta,
     mdxOptions: {
-      remarkPlugins: [], // no GFM
+      remarkPlugins: [],
       rehypePlugins: [],
       format: "mdx",
     },
@@ -131,7 +130,7 @@ export default function BlogPost({ post }: Props) {
 
           <h1 className="sr-only">{title}</h1>
 
-          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
+          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.75]">
             <span>By {authorName}</span>
             {date && (
               <>

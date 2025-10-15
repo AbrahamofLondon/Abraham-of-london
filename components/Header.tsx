@@ -1,3 +1,4 @@
+// components/Header.tsx
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -67,7 +68,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
 
   const linkBase =
-    variant === "dark" ? "text-[color:var(--color-on-primary)/0.8] hover:text-cream" : "text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal";
+    variant === "dark"
+      ? "text-[color:var(--color-on-primary)/0.8] hover:text-cream"
+      : "text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
@@ -80,7 +83,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
     variant === "dark" ? "text-cream" : "text-deepCharcoal",
   ].join(" ");
 
-  // Build a style object with a custom property without putting "as any" in JSX
+  // CSS var for header height
   const headerStyle = React.useMemo(
     () =>
       ({ ["--header-h"]: scrolled ? "4rem" : "5rem" } as React.CSSProperties & {
@@ -148,9 +151,10 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 Call
               </a>
             )}
+            {/* Removed slash-opacity ring class to avoid guards */}
             <Link
               href="/contact"
-              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/40"
+              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               aria-label="Go to contact form"
             >
               Enquire
@@ -240,7 +244,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
+                className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               >
                 Enquire
               </Link>

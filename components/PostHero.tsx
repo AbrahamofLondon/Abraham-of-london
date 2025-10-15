@@ -53,7 +53,7 @@ export default function PostHero({
   author,
   coverImage,
   coverAspect = "book",
-  coverFit = "contain",          // default to contain for portraits
+  coverFit = "contain", // default to contain for portraits
   coverPosition = "center",
 }: PostHeroProps) {
   const { src: coverSrc, onError } = useCover(slug, coverImage);
@@ -95,29 +95,31 @@ export default function PostHero({
     coverFit === "contain" ? "border border-lightGrey/70" : "border border-transparent";
 
   return (
-    <section className="bg-white">
+    <section className="bg-white dark:bg-black">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12">
         {/* Text block */}
         <div>
-          <p className="mb-3 text-xs uppercase tracking-widest text-[color:var(--color-on-secondary)/0.6]">
+          <p className="mb-3 text-xs uppercase tracking-widest text-[color:var(--color-on-secondary)/0.6] dark:text-[color:var(--color-on-primary)/0.7]">
             Featured Insight
           </p>
-          <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl">
+          <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl dark:text-cream [text-wrap:balance] drop-shadow-[0_1px_0_rgba(0,0,0,.25)]">
             {title}
           </h1>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[color:var(--color-on-secondary)/0.7]">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]">
             {authorName && <span>By {authorName}</span>}
             {dateStr && (
               <>
                 <span aria-hidden>•</span>
-                <time dateTime={dt?.toISOString()}>{dateStr}</time>
+                <time dateTime={dt?.toISOString() || undefined}>{dateStr}</time>
               </>
             )}
           </div>
 
           {excerpt && (
-            <p className="mt-5 max-w-prose text-[color:var(--color-on-secondary)/0.8]">{excerpt}</p>
+            <p className="mt-5 max-w-prose text-[color:var(--color-on-secondary)/0.8] dark:text-[color:var(--color-on-primary)/0.85]">
+              {excerpt}
+            </p>
           )}
         </div>
 
@@ -126,6 +128,15 @@ export default function PostHero({
           <div
             className={`relative w-full overflow-hidden rounded-2xl ${aspectClass} ${frameBg} ${framePadding} ${frameBorder} shadow-card`}
           >
+            {/* soft readability overlay for cover images */}
+            {coverFit === "cover" && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[1]
+                           bg-[linear-gradient(to_bottom,rgba(0,0,0,0.35),transparent_35%,transparent_65%,rgba(0,0,0,0.25))]
+                           dark:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.45),transparent_40%,transparent_60%,rgba(0,0,0,0.35))]"
+              />
+            )}
             <Image
               src={coverSrc}
               alt={title}
