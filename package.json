@@ -11,18 +11,15 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "analyze": "cross-env ANALYZE=true next build",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report",
-    "prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs",
+    "guard:css": "node scripts/postcss-guard-dryrun.mjs",
     "fix:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs",
     "check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check",
-    "guard:css": "node scripts/postcss-guard-dryrun.mjs",
     "fix:css-slash": "cross-env NO_SLASH_OPACITY_MODE=fix node scripts/postcss-guard-dryrun.mjs --write",
     "fix:classnames-slash": "node scripts/codemods/convert-classnames-slash-opacity.mjs",
     "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash && npm run fix:classnames-slash",
     "fix:tw-pr": "npm run fix:tw-all"
-  },
+  }
+}
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "3.0.1",

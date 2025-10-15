@@ -5,14 +5,14 @@ const colors = require('tailwindcss/colors');
 module.exports = {
   darkMode: "class",
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./content/**/*.{md,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css"
-  ],
+  "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+  "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  "./content/**/*.{md,mdx}",
+  "./lib/**/*.{js,ts,jsx,tsx}",
+  "./styles/**/*.css" // <- correct
+],
   theme: {
     container: {
       center: true,
