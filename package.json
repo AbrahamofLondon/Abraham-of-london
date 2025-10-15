@@ -21,6 +21,8 @@
     "fix:css-slash": "node scripts/postcss-guard-dryrun.mjs --write",
     "fix:classnames-slash": "node scripts/codemods/convert-classnames-slash-opacity.mjs",
     "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash && npm run fix:classnames-slash",
+    "prebuild": "node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check",
+    "build": "next build",
     "fix:tw-pr": "npm run fix:tw-all"
   },
   "dependencies": {
