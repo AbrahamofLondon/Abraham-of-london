@@ -29,16 +29,16 @@
 # ────────────────────────────────────────────────────────────
 # Plugins
 # ────────────────────────────────────────────────────────────
-# Next.js runtime
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse audits after deploy (keeps deploys green)
+# Lighthouse plugin — valid inputs only
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
 
-  [plugins.inputs]
-    fail_build = false
+  # (Optional) fail the deploy when any score drops below thresholds
+  # If you want this behavior, uncomment the line below:
+  # fail_deploy_on_score_threshold = true
 
   [plugins.inputs.thresholds]
     performance = 0.9
@@ -46,7 +46,7 @@
     best-practices = 0.9
     seo = 0.9
 
-  # Reports to /reports/*.html (published as build artifacts)
+  # Audits to run (add more paths if you like)
   [[plugins.inputs.audits]]
     path = "/"
     output_path = "reports/home.html"
