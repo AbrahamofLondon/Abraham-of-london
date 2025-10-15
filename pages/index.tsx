@@ -4,31 +4,38 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), { ssr: false });
+import HeroBanner from "@/components/homepage/HeroBanner";
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
+import { getActiveBanner } from "@/lib/hero-banners";
 
-/* ---------- constants ---------- */
-const HERO = {
-  coverImage: "/assets/images/abraham-of-london-banner.webp",
-  videoSources: [
-    { src: "/assets/video/brand-reel.webm", type: "video/webm" },
-    { src: "/assets/video/brand-reel.mp4", type: "video/mp4" },
-  ],
-} as const;
+/* ---------- local types ---------- */
+type EventsTeaserItem = {
+  slug: string;
+  title: string;
+  date: string;
+  location: string | null;
+  description?: string | null;
+  tags?: string[] | null;
+  heroImage?: string | null;
+};
+type EventsTeaser = Array<EventsTeaserItem>;
+type HomeProps = {
+  posts: PostMeta[];
+  booksCount: number;
+  eventsTeaser: EventsTeaser;
+};
 
 /* ---------- page ---------- */
-
 export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -36,6 +43,38 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
   const booksHref = `/books${qSuffix}`;
   const postsCount = posts.length;
+
+  // Choose banner (scheduled/rotated)
+  const banner = React.useMemo(() => getActiveBanner(), []);
+  const overlay =
+    banner.overlay ? (
+      <>
+        {banner.overlay.eyebrow ? (
+          <span className="inline-block rounded-full border border-white/30 bg-black/30 px-3 py-1 text-[11px] uppercase tracking-[0.2em]">
+            {banner.overlay.eyebrow}
+          </span>
+        ) : null}
+        {banner.overlay.title ? (
+          <h1 className="mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight">
+            {banner.overlay.title}
+          </h1>
+        ) : null}
+        {banner.overlay.body ? (
+          <p className="mt-3 max-w-prose text-sm text-[rgba(255,255,255,.85)]">{banner.overlay.body}</p>
+        ) : null}
+        {banner.overlay.cta ? (
+          <div className="mt-5">
+            <Link
+              href={banner.overlay.cta.href}
+              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal"
+              prefetch={false}
+            >
+              {banner.overlay.cta.label}
+            </Link>
+          </div>
+        ) : null}
+      </>
+    ) : undefined;
 
   return (
     <Layout pageTitle="Home" hideCTA>
@@ -47,22 +86,14 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* HERO */}
-<HeroSection
-  eyebrow="Featured Insight"
-  title="When the System Breaks You: Finding Purpose in Pain"
-  subtitle="Win the only battle you fully control — the one inside your chest."
-  primaryCta={{
-    href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-    label: "Get the free teaser",
-  }}
-  secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
-  coverImage={HERO.coverImage}
-  coverAspect="wide"
-  coverFit="cover"
-  videoSources={HERO.videoSources}
-  poster={HERO.coverImage}
-/>
+      {/* FULL-BLEED HERO (media-first) */}
+      <HeroBanner
+        poster={banner.poster}
+        videoSources={banner.videoSources}
+        overlay={overlay}
+        mobileObjectPositionClass={banner.mobileObjectPositionClass}
+        heightClassName={banner.heightClassName}
+      />
 
       {/* Breadcrumb + quick counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
@@ -385,7 +416,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 
 /* ---------- SSG + ISR ---------- */
-
 export async function getStaticProps() {
   const posts = getAllPosts();
 
