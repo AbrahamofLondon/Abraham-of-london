@@ -1,18 +1,18 @@
 // components/mdx/ResourcesCTA.tsx
 import Link from "next/link";
-import { CTA_PRESETS, getCtaPreset, type CtaLink, type CtaPresetKey } from "./ctas";
-
-type LinkItem = CtaLink;
+import { CTA_PRESETS, getCtaPreset, type LinkItem } from "./cta-presets";
 
 export type ResourcesCTAProps =
   | {
-      preset: CtaPresetKey;
+      /** Use a preset key from CTA_PRESETS (e.g., "fatherhood") */
+      preset: keyof typeof CTA_PRESETS | string;
       title?: never;
       reads?: never;
       downloads?: never;
       className?: string;
     }
   | {
+      /** Manual mode */
       preset?: never;
       title?: string;
       reads?: LinkItem[];
@@ -20,12 +20,14 @@ export type ResourcesCTAProps =
       className?: string;
     };
 
+// Internal posts (these slugs exist)
 const defaultReads: LinkItem[] = [
   { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Court-season clarity" },
   { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
   { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Lead from the inside out" },
 ];
 
+// PDFs that exist today
 const defaultDownloads: LinkItem[] = [
   { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
   { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
@@ -37,14 +39,16 @@ function isInternal(href = "") {
 }
 
 export default function ResourcesCTA(props: ResourcesCTAProps) {
-  const data =
-    "preset" in props && props.preset
-      ? getCtaPreset(props.preset) ?? null
-      : {
-          title: props.title ?? "Further Reading & Tools",
-          reads: props.reads ?? defaultReads,
-          downloads: props.downloads ?? defaultDownloads,
-        };
+  const presetKey = "preset" in props ? props.preset : undefined;
+  const preset = presetKey ? getCtaPreset(String(presetKey)) : null;
+
+  const data = preset
+    ? preset
+    : {
+        title: ("title" in props && props.title) || "Further Reading & Tools",
+        reads: ("reads" in props && props.reads) || defaultReads,
+        downloads: ("downloads" in props && props.downloads) || defaultDownloads,
+      };
 
   if (!data) return null;
 
