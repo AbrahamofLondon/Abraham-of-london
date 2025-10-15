@@ -4,25 +4,12 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-// Mount hero via dynamic import (adds resilience to hydration / route conflicts)
-const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), {
-  ssr: false,
-  loading: () => (
-    <section className="bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-10">
-        <div className="h-10 w-48 animate-pulse rounded bg-lightGrey/60" />
-        <div className="mt-3 h-8 w-3/4 animate-pulse rounded bg-lightGrey/60" />
-        <div className="mt-4 h-5 w-2/3 animate-pulse rounded bg-lightGrey/50" />
-      </div>
-    </section>
-  ),
-});
+import HeroSection from "@/components/homepage/HeroSection";
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -31,7 +18,6 @@ import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
 /* ---------- constants ---------- */
-
 const HERO = {
   coverImage: "/assets/images/books/when-the-system-breaks-cover.jpg",
 };
@@ -54,7 +40,6 @@ type HomeProps = {
 };
 
 /* ---------- page ---------- */
-
 export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -64,7 +49,25 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const postsCount = posts.length;
 
   return (
-    <Layout pageTitle="Home" hideCTA>
+    <Layout
+      pageTitle="Home"
+      hideCTA
+      hero={
+        <HeroSection
+          eyebrow="Featured Insight"
+          title="When the System Breaks You: Finding Purpose in Pain"
+          subtitle="Win the only battle you fully control — the one inside your chest."
+          primaryCta={{
+            href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
+            label: "Get the free teaser",
+          }}
+          secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
+          coverImage={HERO.coverImage}
+          coverAspect="book"
+          coverFit="contain"
+        />
+      }
+    >
       <Head>
         <meta
           name="description"
@@ -72,21 +75,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         />
         <meta property="og:type" content="website" />
       </Head>
-
-      {/* HERO */}
-      <HeroSection
-        eyebrow="Featured Insight"
-        title="When the System Breaks You: Finding Purpose in Pain"
-        subtitle="Win the only battle you fully control — the one inside your chest."
-        primaryCta={{
-          href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-          label: "Get the free teaser",
-        }}
-        secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
-        coverImage={HERO.coverImage}
-        coverAspect="book"
-        coverFit="contain"
-      />
 
       {/* Breadcrumb + quick counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
@@ -112,7 +100,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <div className="flex items-center gap-3">
             <Link
               href={booksHref}
-              /* FIX: removed stray trailing ')' that broke this utility class */
               className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
               prefetch={false}
@@ -357,7 +344,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">What Leaders Say</h2>
           </header>
 
-          <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
             {[
               { quote: "Clear thinking. Strong standards. Abraham brings both to the table.", name: "E. K., Founder" },
               { quote: "He positions problems with moral clarity—and then solves them.", name: "M. A., Director" },
@@ -410,10 +397,10 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 Home.displayName = "Home";
 
 /* ---------- SSG + ISR ---------- */
-
 export async function getStaticProps() {
   const posts = getAllPosts();
 
+  // Normalize optionals for JSON serialization
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
