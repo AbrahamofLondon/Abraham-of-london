@@ -10,6 +10,7 @@
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
     # NPM_FLAGS intentionally omitted; Netlify installs dev deps during build
+    NO_SLASH_OPACITY_MODE = "fix"   # belt & braces for CI
 
 [context.production.environment]
   NODE_ENV = "production"

@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import * as React from "react";
 
 import Layout from "@/components/Layout";
-import { MDXComponents } from "@/components/MDXComponents"; // Use named export
+import { MDXComponents } from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
 import SEOHead from "@/components/SEOHead";
@@ -55,13 +55,22 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     coverPosition: (raw as any).coverPosition ?? null,
   };
 
-  const mdx = await serialize(raw.content ?? "", {
+  const content = raw.content || "";
+
+  const mdx = await serialize(content, {
     parseFrontmatter: false,
     scope: meta,
-    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [],
+      format: "mdx",
+    },
   });
 
-  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+  return {
+    props: { post: { meta, content: mdx } },
+    revalidate: 60,
+  };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -86,9 +95,7 @@ export default function BlogPost({ post }: Props) {
   } = post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage
-    ? absUrl(coverImage)
-    : absUrl("/assets/images/social/og-image.jpg");
+  const coverForMeta = coverImage ? absUrl(coverImage) : absUrl("/assets/images/social/og-image.jpg");
   const authorName =
     typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
 

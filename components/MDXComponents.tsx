@@ -9,6 +9,7 @@ import Verse from "@/components/mdx/Verse";
 import Rule from "@/components/mdx/Rule";
 import Note from "@/components/mdx/Note";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
+import JsonLd from "@/components/mdx/JsonLd";
 
 /* ---------- utils ---------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
@@ -18,23 +19,25 @@ function toNumber(v?: number | string) {
   const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
   return Number.isFinite(n) ? n : undefined;
 }
-
-/* ---------- Tiny helpers ---------- */
 const cx = (...cls: (string | false | null | undefined)[]) => cls.filter(Boolean).join(" ");
 
-/* ---------- HeroEyebrow ---------- */
-export function HeroEyebrow({ children, className }: React.PropsWithChildren<{ className?: string }>) {
+/* ---------- small UI helpers for MDX ---------- */
+export function HeroEyebrow({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <div className={cx(
-      "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
-      className
-    )}>
+    <div
+      className={cx(
+        "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
+        className
+      )}
+    >
       {children}
     </div>
   );
 }
 
-/* ---------- Callout ---------- */
 type CalloutTone = "info" | "key" | "caution" | "success";
 const toneStyles: Record<CalloutTone, string> = {
   info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800/60 dark:bg-blue-900/20 dark:text-blue-100",
@@ -50,41 +53,40 @@ export function Callout({
   className,
 }: React.PropsWithChildren<{ title?: string; tone?: CalloutTone; className?: string }>) {
   return (
-    <div className={cx(
-      "my-4 rounded-xl border p-4 shadow-card",
-      toneStyles[tone],
-      className
-    )}>
+    <div className={cx("my-4 rounded-xl border p-4 shadow-card", toneStyles[tone], className)}>
       {title && <div className="mb-2 font-semibold tracking-wide">{title}</div>}
       <div className="space-y-2 text-[0.95rem] leading-relaxed">{children}</div>
     </div>
   );
 }
 
-/* ---------- Badge ---------- */
-export function Badge({ children, className }: React.PropsWithChildren<{ className?: string }>) {
+export function Badge({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <span className={cx(
-      "inline-flex items-center rounded-full border border-lightGrey bg-warmWhite/70 px-2.5 py-1 text-xs font-medium",
-      className
-    )}>
+    <span className={cx("inline-flex items-center rounded-full border border-lightGrey bg-warmWhite/70 px-2.5 py-1 text-xs font-medium", className)}>
       {children}
     </span>
   );
 }
 
-/* ---------- ShareRow ---------- */
+export function BadgeRow({ items = [] as string[], className }: { items?: string[]; className?: string }) {
+  return (
+    <div className={cx("my-4 flex flex-wrap items-center gap-2", className)}>
+      {items.map((t, i) => (
+        <Badge key={i}>{t}</Badge>
+      ))}
+    </div>
+  );
+}
+
 export function ShareRow({ text, hashtags }: { text: string; hashtags: string }) {
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
   return (
     <div className="my-8">
-      <a
-        href={twitterUrl}
-        className="aol-btn text-sm"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a href={twitterUrl} className="aol-btn text-sm" target="_blank" rel="noopener noreferrer">
         Share on Twitter
       </a>
     </div>
@@ -120,10 +122,7 @@ const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) =>
 };
 
 /* ---------- MDX <img> -> next/image ---------- */
-type MDXImgProps = Omit<
-  React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
-  "src"
-> & { src?: string };
+type MDXImgProps = Omit<React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>, "src"> & { src?: string };
 
 const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, height }) => {
   const srcStr = typeof src === "string" ? src : undefined;
@@ -133,8 +132,7 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
   const h = toNumber(height);
   const [loaded, setLoaded] = React.useState(false);
 
-  const skeleton =
-    "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
+  const skeleton = "bg-gradient-to-r from-lightGrey/20 via-lightGrey/40 to-lightGrey/20 animate-[shimmer_1.8s_linear_infinite]";
   const altText = alt || (title ? String(title) : "Embedded image");
 
   return (
@@ -210,10 +208,7 @@ export const YouTube: React.FC<YouTubeProps> = ({ id, url, title, className, sta
   if (typeof start === "number" && start > 0) src.searchParams.set("start", String(start));
 
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-      style={{ aspectRatio: "16 / 9" }}
-    >
+    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
       <iframe
         src={src.toString()}
         title={title || "YouTube video"}
@@ -240,9 +235,7 @@ const ALLOWED_IFRAME_HOSTS = [
 
 const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", className, ...rest }) => {
   let url: URL | null = null;
-  try {
-    url = new URL(src);
-  } catch {}
+  try { url = new URL(src); } catch {}
   const allowed = !!url && ALLOWED_IFRAME_HOSTS.some((h) => url!.hostname.endsWith(h));
   if (!allowed) {
     return (
@@ -256,10 +249,7 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
     if (id) return <YouTube id={id} title={title} className={className} />;
   }
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`}
-      style={{ aspectRatio: "16 / 9" }}
-    >
+    <div className={`relative w-full overflow-hidden rounded-lg shadow-card ${className || ""}`} style={{ aspectRatio: "16 / 9" }}>
       <iframe
         src={src}
         title={title}
@@ -275,6 +265,37 @@ const Iframe: React.FC<IframeProps> = ({ src = "", title = "Embedded content", c
   );
 };
 
+/* ---------- Minimal DownloadCard (to satisfy MDX references) ---------- */
+function DownloadCard({
+  title,
+  href,
+  description,
+  image,
+}: {
+  title: string;
+  href: string;
+  description?: string;
+  image?: string;
+}) {
+  return (
+    <a href={href} className="group block rounded-2xl border border-lightGrey bg-white p-4 shadow-card transition hover:shadow-cardHover">
+      <div className="flex items-center gap-4">
+        {image ? (
+          <span className="relative h-16 w-16 overflow-hidden rounded-lg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+          </span>
+        ) : null}
+        <div className="min-w-0">
+          <div className="truncate text-lg font-semibold text-deepCharcoal">{title}</div>
+          {description ? <div className="mt-1 line-clamp-2 text-sm text-[color:var(--color-on-secondary)/0.8]">{description}</div> : null}
+          <div className="mt-2 text-sm text-softGold">Download →</div>
+        </div>
+      </div>
+    </a>
+  );
+}
+
 /* ---------- component map ---------- */
 const components: MDXComponentsType = {
   a: A,
@@ -287,23 +308,24 @@ const components: MDXComponentsType = {
   Rule,
   Note,
   ResourcesCTA,
+  CTA: ResourcesCTA, // legacy alias (MDX may reference <CTA/>)
+  JsonLd,            // for JSON-LD injection
   HeroEyebrow,
   Callout,
   Badge,
+  BadgeRow,
   ShareRow,
+  DownloadCard,
 
   // Normalize headings: the page owns <h1>
   h1: (props) => <h2 {...props} />,
-  // Tighten common blocks for rhythm/consistency
+  // Tighten common blocks
   ul: (props) => <ul className="list-disc pl-6 space-y-2" {...props} />,
   ol: (props) => <ol className="list-decimal pl-6 space-y-2" {...props} />,
   p: (props) => <p className="leading-7" {...props} />,
   hr: (props) => <hr className="my-10 border-lightGrey" {...props} />,
-  blockquote: (props) => (
-    <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />
-  ),
+  blockquote: (props) => <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />,
 };
 
-/* Both default and named export */
 export default components;
 export { components as MDXComponents };
