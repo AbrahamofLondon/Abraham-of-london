@@ -1,14 +1,28 @@
+// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-import HeroSection from "@/components/homepage/HeroSection";
+// Mount hero via dynamic import (adds resilience to hydration / route conflicts)
+const HeroSection = dynamic(() => import("@/components/homepage/HeroSection"), {
+  ssr: false,
+  loading: () => (
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <div className="h-10 w-48 animate-pulse rounded bg-lightGrey/60" />
+        <div className="mt-3 h-8 w-3/4 animate-pulse rounded bg-lightGrey/60" />
+        <div className="mt-4 h-5 w-2/3 animate-pulse rounded bg-lightGrey/50" />
+      </div>
+    </section>
+  ),
+});
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -98,7 +112,8 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           <div className="flex items-center gap-3">
             <Link
               href={booksHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85)] hover:text-deepCharcoal"
+              /* FIX: removed stray trailing ')' that broke this utility class */
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
               prefetch={false}
             >
@@ -188,7 +203,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Downloads spotlight – fixed links */}
+      {/* Downloads spotlight */}
       <section className="bg-white px-4 pb-4">
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
@@ -399,7 +414,6 @@ Home.displayName = "Home";
 export async function getStaticProps() {
   const posts = getAllPosts();
 
-  // Normalize optionals for JSON serialization (and pass cover framing hints through)
   const safePosts = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,
