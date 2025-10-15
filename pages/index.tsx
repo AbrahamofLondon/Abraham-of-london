@@ -1,14 +1,14 @@
-// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
-import BookCard from "@/components/BookCard";
 import BlogPostCard from "@/components/BlogPostCard";
+import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
+import HeroSection from "@/components/homepage/HeroSection";
 
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
@@ -16,18 +16,20 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
+/* ---------- constants ---------- */
+
 const HERO = {
-  poster: "/assets/images/abraham-of-london-banner.webp",
+  coverImage: "/assets/images/books/when-the-system-breaks-cover.jpg",
 };
 
 type EventsTeaserItem = {
   slug: string;
   title: string;
-  date: string; // "YYYY-MM-DD" or ISO
+  date: string;
   location: string | null;
   description?: string | null;
   tags?: string[] | null;
-  heroImage?: string;
+  heroImage?: string | null;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -37,9 +39,10 @@ type HomeProps = {
   eventsTeaser: EventsTeaser;
 };
 
+/* ---------- page ---------- */
+
 export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const router = useRouter();
-
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
   const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
   const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
@@ -53,89 +56,25 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           name="description"
           content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
         />
-        <link rel="preload" as="image" href={HERO.poster} />
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Hero — crisp text + higher image quality */}
-      <section className="relative isolate overflow-hidden bg-deepCharcoal text-white">
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src={HERO.poster}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            quality={90}
-            className="object-cover"
-          />
-          {/* Stronger gradient for legibility across devices */}
-          <div
-            className="absolute inset-0"
-            aria-hidden="true"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(0,0,0,.80) 0%, rgba(0,0,0,.60) 35%, rgba(0,0,0,.28) 65%, rgba(0,0,0,.12) 100%)",
-            }}
-          />
-        </div>
+      {/* HERO */}
+      <HeroSection
+        eyebrow="Featured Insight"
+        title="When the System Breaks You: Finding Purpose in Pain"
+        subtitle="Win the only battle you fully control — the one inside your chest."
+        primaryCta={{
+          href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
+          label: "Get the free teaser",
+        }}
+        secondaryCta={{ href: blogHref, label: "Read the latest insights" }}
+        coverImage={HERO.coverImage}
+        coverAspect="book"
+        coverFit="contain"
+      />
 
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-24 sm:py-32 lg:grid-cols-2">
-          <div className="max-w-xl">
-            <p className="mb-3 inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs uppercase tracking-widest backdrop-blur">
-              New • Chatham Rooms available
-            </p>
-
-            {/* Force true white + subpixel AA + subtle shadow for Windows crispness */}
-            <h1 className="font-serif text-4xl font-bold leading-tight sm:text-6xl text-cream subpixel-antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,.55)]">
-              Principled Strategy for a Legacy That Endures
-            </h1>
-
-            <p className="mt-5 text-base/7 text-[color:var(--color-on-primary)/0.95] subpixel-antialiased drop-shadow-[0_1px_3px_rgba(0,0,0,.5)]">
-              I help leaders build with clarity, discipline, and standards that endure—across family, enterprise, and
-              society.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={booksHref}
-                className="rounded-full bg-forest px-6 py-3 text-white hover:bg-primary-hover"
-                prefetch={false}
-              >
-                Explore Books
-              </Link>
-              <Link
-                href={blogHref}
-                className="rounded-full border border-white/80 px-6 py-3 text-white hover:bg-white/10"
-                prefetch={false}
-              >
-                Featured Insights
-              </Link>
-            </div>
-
-            <p className="mt-3 text-xs tracking-wide text-white/80 subpixel-antialiased">
-              Chatham Rooms — off the record
-            </p>
-          </div>
-
-          {/* Accent image block */}
-          <div className="relative hidden min-h-[420px] rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur md:block">
-            <div className="relative h-full w-full overflow-hidden rounded-xl">
-              <Image
-                src={HERO.poster}
-                alt=""
-                fill
-                sizes="50vw"
-                priority
-                quality={90}
-                className="object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Counts / crumb */}
+      {/* Breadcrumb + quick counts */}
       <section className="border-b border-lightGrey/70 bg-warmWhite/60">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
@@ -145,21 +84,21 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                   Home
                 </Link>
               </li>
-              <li aria-hidden="true">/</li>
+              <li aria-hidden>/</li>
               <li className="text-[color:var(--color-on-secondary)/0.8]">Overview</li>
-              {incomingQ ? (
+              {incomingQ && (
                 <>
-                  <li aria-hidden="true">/</li>
+                  <li aria-hidden>/</li>
                   <li className="text-[color:var(--color-on-secondary)/0.6]">“{incomingQ}”</li>
                 </>
-              ) : null}
+              )}
             </ol>
           </nav>
 
           <div className="flex items-center gap-3">
             <Link
               href={booksHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal"
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85)] hover:text-deepCharcoal"
               aria-label={`View books (${booksCount})`}
               prefetch={false}
             >
@@ -167,7 +106,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             </Link>
             <Link
               href={blogHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal"
+              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal"
               aria-label={`View insights (${postsCount})`}
               prefetch={false}
             >
@@ -249,6 +188,58 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
+      {/* Downloads spotlight – fixed links */}
+      <section className="bg-white px-4 pb-4">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-6">
+            <h2 className="font-serif text-2xl font-semibold text-deepCharcoal">Downloads</h2>
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
+              Practical tools to help you lead with clarity.
+            </p>
+          </header>
+
+          <ul className="grid gap-6 sm:grid-cols-2">
+            <li>
+              <Link
+                href="/downloads/brotherhood-covenant"
+                prefetch={false}
+                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
+                aria-label="Brotherhood Covenant (Printable)"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
+                      Brotherhood Covenant (Printable)
+                    </div>
+                    <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
+                  </div>
+                  <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
+                </div>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/downloads/leaders-cue-card"
+                prefetch={false}
+                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
+                aria-label="Leader’s Cue Card (A6, Two-Up)"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
+                      Leader’s Cue Card (A6, Two-Up)
+                    </div>
+                    <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
+                  </div>
+                  <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
+                </div>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       {/* Upcoming Events */}
       <section className="bg-white px-4 pb-4 pt-2">
         <div className="mx-auto max-w-7xl">
@@ -262,10 +253,12 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               View all
             </Link>
           </header>
-          <p className="mb-6 text-xs text-[color:var(--color-on-secondary)/0.6]">Select sessions run as Chatham Rooms (off the record).</p>
+          <p className="mb-6 text-xs text-[color:var(--color-on-secondary)/0.6]">
+            Select sessions run as Chatham Rooms (off the record).
+          </p>
 
           {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-[color:var(--color-on-secondary)/0.7]">No upcoming events at the moment.</p>
+            <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">No upcoming events at the moment.</p>
           ) : (
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
@@ -306,7 +299,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                 Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
               </p>
             </Link>
@@ -320,7 +313,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                 Essential goods and refined experiences—engineered to last, designed to serve.
               </p>
             </Link>
@@ -334,7 +327,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.8]">
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                 Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
               </p>
             </Link>
@@ -372,7 +365,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             alt=""
             fill
             sizes="100vw"
-            priority={false}
             quality={85}
             className="object-cover opacity-20"
           />
@@ -402,7 +394,8 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
 Home.displayName = "Home";
 
-// SSG + ISR
+/* ---------- SSG + ISR ---------- */
+
 export async function getStaticProps() {
   const posts = getAllPosts();
 
@@ -469,7 +462,7 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-    const baseForImage = String(e.slug).replace(/[–—].*$/, ""); // strip after en/em dash
+    const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     return {
       slug: e.slug,

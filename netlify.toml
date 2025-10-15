@@ -9,8 +9,7 @@
     NEXT_TELEMETRY_DISABLED = "1"
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
-    # NPM_FLAGS intentionally omitted; Netlify installs dev deps during build
-    NO_SLASH_OPACITY_MODE = "fix"   # belt & braces for CI
+    NO_SLASH_OPACITY_MODE = "fix"
 
 [context.production.environment]
   NODE_ENV = "production"
@@ -24,12 +23,30 @@
   external_node_modules = ["resend"]
   included_files = ["netlify/emails/**"]
 
+# Next.js runtime
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Lighthouse audits after deploy
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+  [plugins.inputs.thresholds]
+    performance = 0.9
+    accessibility = 0.9
+    best-practices = 0.9
+    seo = 0.9
+
+  [[plugins.inputs.audits]]
+    path = "/"
+    output_path = "reports/home.html"
+
+  [[plugins.inputs.audits]]
+    path = "/blog"
+    output_path = "reports/blog.html"
+
 # ────────────────────────────────────────────────────────────
-# Legacy PDF aliases → serve new files directly (200 rewrites)
-# Keep BEFORE any redirects
+# Legacy PDF aliases (200 rewrites)
 # ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
@@ -41,17 +58,14 @@
   to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-# Self-map canonical (no-op, keeps behavior explicit)
 [[redirects]]
   from = "/downloads/Fathering_Without_Fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
   status = 200
 
 # ────────────────────────────────────────────────────────────
-# Brand domains: root → 301 to Ventures; all other paths → 410
-# Place BEFORE global canonical host redirects
+# Brand domains
 # ────────────────────────────────────────────────────────────
-# Endureluxe
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -65,7 +79,6 @@
   force = true
   conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
-# Alomarada
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
@@ -99,7 +112,6 @@
 # ────────────────────────────────────────────────────────────
 # Headers
 # ────────────────────────────────────────────────────────────
-# Security
 [[headers]]
   for = "/*"
   [headers.values]
@@ -109,7 +121,6 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Static caching
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -120,19 +131,16 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# PDFs: immutable for versioned filenames
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Override legacy alias path to avoid stale caches (applies to the 200 rewrite)
 [[headers]]
   for = "/downloads/fathering-without-fear.pdf"
   [headers.values]
     Cache-Control = "no-store"
 
-# Images used on /downloads
 [[headers]]
   for = "/assets/images/downloads/*"
   [headers.values]

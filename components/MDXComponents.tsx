@@ -30,7 +30,7 @@ export function HeroEyebrow({
   return (
     <div
       className={cx(
-        "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7]",
+        "mb-3 inline-flex items-center gap-2 rounded-full border border-lightGrey/70 bg-warmWhite/70 px-3 py-1 text-xs tracking-wide uppercase text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]",
         className
       )}
     >
@@ -106,7 +106,7 @@ export function ShareRow({ text, hashtags }: { text: string; hashtags: string })
 const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) => {
   const base =
     "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " + // no slash opacity
     "dark:text-softGold dark:hover:text-cream dark:focus-visible:ring-softGold";
   const cls = className ? `${base} ${className}` : base;
 
@@ -178,12 +178,8 @@ const Img: React.FC<MDXImgProps> = ({ src, alt = "", className, title, width, he
             <>
               <style jsx>{`
                 @keyframes shimmer {
-                  0% {
-                    background-position: -200% 0;
-                  }
-                  100% {
-                    background-position: 200% 0;
-                  }
+                  0% { background-position: -200% 0; }
+                  100% { background-position: 200% 0; }
                 }
               `}</style>
               <span className={`absolute inset-0 ${skeleton}`} aria-hidden="true" />
@@ -315,7 +311,7 @@ function DownloadCard({
           </span>
         ) : null}
         <div className="min-w-0">
-          <div className="truncate text-lg font-semibold text-deepCharcoal">{title}</div>
+          <div className="truncate text-lg font-semibold text-deepCharcoal"> {title} </div>
           {description ? (
             <div className="mt-1 line-clamp-2 text-sm text-[color:var(--color-on-secondary)/0.8]">
               {description}
@@ -386,6 +382,5 @@ const components: MDXComponentsType = {
   blockquote: (props) => <blockquote className="border-l-4 border-lightGrey pl-4 italic" {...props} />,
 };
 
-/* Both default and named export */
 export default components;
 export { components as MDXComponents };
