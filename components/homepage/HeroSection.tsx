@@ -22,26 +22,28 @@ function Eyebrow({
   );
 }
 
+type VideoSource = { src: string; type: string };
+
 type HeroProps = {
-  /** Main heading. If omitted, children can render custom content. */
   title?: string;
-  /** Optional subcopy under the heading */
   subtitle?: string;
-  /** Primary CTA */
   primaryCta?: { href: string; label: string; ariaLabel?: string };
-  /** Secondary CTA (outline style) */
   secondaryCta?: { href: string; label: string; ariaLabel?: string };
 
-  /** Optional cover art on the right */
+  /** Image shown when no video or as poster fallback */
   coverImage?: string | null;
-  /** “book” (2/3), “wide” (16/9) or “square” (1/1) frame */
+  /** “book” (2/3), “wide” (16/9), “square” (1/1) */
   coverAspect?: "book" | "wide" | "square";
-  /** contain (for book covers) or cover (edge-to-edge) */
+  /** contain (book covers) or cover (edge-to-edge) */
   coverFit?: "contain" | "cover";
-  /** object position for the cover image */
+  /** object position */
   coverPosition?: "left" | "center" | "right";
 
-  /** Optional eyebrow text above the H1 */
+  /** Optional autoplaying looped background video */
+  videoSources?: VideoSource[];
+  /** Poster image for the video (defaults to coverImage) */
+  poster?: string | null;
+
   eyebrow?: string;
 };
 
@@ -55,12 +57,19 @@ export default function HeroSection({
   title = "When the System Breaks You: Finding Purpose in Pain",
   subtitle = "Win the only battle you fully control — the one inside your chest.",
   eyebrow = "Featured Insight",
-  primaryCta = { href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf", label: "Get the free teaser" },
+  primaryCta = {
+    href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
+    label: "Get the free teaser",
+  },
   secondaryCta = { href: "/blog", label: "Read the latest insights" },
+
   coverImage,
   coverAspect = "book",
   coverFit = "contain",
   coverPosition = "center",
+
+  videoSources = [],
+  poster = null,
 }: HeroProps) {
   const aspectClass =
     coverAspect === "square"
@@ -77,11 +86,13 @@ export default function HeroSection({
       ? "object-right"
       : "object-center";
 
-  const fallback =
-    coverImage ||
-    "/assets/images/books/when-the-system-breaks-cover.jpg";
+  const imgSrc =
+    normalizeLocal(
+      coverImage || "/assets/images/abraham-of-london-banner.webp"
+    )!;
 
-  const imgSrc = normalizeLocal(fallback)!;
+  const posterSrc = normalizeLocal(poster) || imgSrc;
+  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
 
   // extra padding/background when using contain to give a “frame”
   const framePadding = coverFit === "contain" ? "p-2 sm:p-3 md:p-4" : "";
@@ -93,7 +104,6 @@ export default function HeroSection({
     <section
       className={[
         "relative overflow-hidden",
-        // subtle gradient band and top glow; works in dark as well
         "bg-white dark:bg-black",
         "before:pointer-events-none before:absolute before:inset-0",
         "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
@@ -115,14 +125,12 @@ export default function HeroSection({
             </p>
           )}
 
-          {/* CTAs */}
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {primaryCta && (
               <Link
                 href={primaryCta.href}
                 aria-label={primaryCta.ariaLabel || primaryCta.label}
                 className="aol-btn"
-                // aol-btn comes from globals.css; ring color handled via CSS var
               >
                 {primaryCta.label}
               </Link>
@@ -139,7 +147,7 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* RIGHT: cover visual */}
+        {/* RIGHT: visual */}
         <div
           className={[
             "relative w-full overflow-hidden rounded-2xl shadow-card",
@@ -149,7 +157,7 @@ export default function HeroSection({
             frameBorder,
           ].join(" ")}
         >
-          {/* readability veil only if we’re using object-cover poster art */}
+          {/* Gradient veil for cover-fit visuals */}
           {coverFit === "cover" && (
             <div
               aria-hidden
@@ -158,14 +166,33 @@ export default function HeroSection({
                          dark:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.45),transparent_40%,transparent_60%,rgba(0,0,0,0.35))]"
             />
           )}
-          <Image
-            src={imgSrc}
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className={[fitClass, posClass].join(" ")}
-          />
+
+          {/* Prefer video if provided; fall back to image automatically */}
+          {hasVideo ? (
+            <video
+              className={["absolute inset-0 h-full w-full", fitClass, posClass].join(" ")}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={posterSrc}
+            >
+              {videoSources.map((s) => (
+                <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
+              ))}
+              {/* If the browser can’t play the sources, the poster remains visible */}
+            </video>
+          ) : (
+            <Image
+              src={imgSrc}
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className={[fitClass, posClass].join(" ")}
+            />
+          )}
         </div>
       </div>
 
