@@ -9,6 +9,7 @@ import { MDXComponents } from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
 import SEOHead from "@/components/SEOHead";
+import ResourcesCTA from "@/components/mdx/ResourcesCTA"; // ✅ added
 
 import { absUrl } from "@/lib/siteConfig";
 import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
