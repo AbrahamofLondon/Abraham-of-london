@@ -2,7 +2,7 @@
 # Build
 # ────────────────────────────────────────────────────────────
 [build]
-  # Default build command (for local/preview unless overridden below)
+  # Default build for local/preview
   command = "npm run build"
   publish = ".next"
 
@@ -12,16 +12,16 @@
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
     NO_SLASH_OPACITY_MODE = "fix"
+    DOWNLOADS_STRICT = "0"
 
-# In production, build PDFs first, then Next.
+# In production, build PDFs first, then Next
 [context.production]
   command = "npm run pdfs && npm run build"
 
 [context.production.environment]
   NODE_ENV = "production"
-  # If your `pdfs` script needs devDependencies (e.g., glob, puppeteer),
-  # uncomment the next line OR move those packages to "dependencies".
-  # NPM_FLAGS = "--include=dev"
+  # If your `pdfs` script needs devDependencies, you can move them to "dependencies"
+  # or enable: NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX emails)
@@ -70,7 +70,19 @@
 
 [[redirects]]
   from = "/downloads/fathering-without-fear-mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  status = 200
+
+# Normalize hyphen variant to underscore canonical
+[[redirects]]
+  from = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  status = 200
+
+# Common A4 alias normalization
+[[redirects]]
+  from = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser_A4.pdf"
   status = 200
 
 # ────────────────────────────────────────────────────────────

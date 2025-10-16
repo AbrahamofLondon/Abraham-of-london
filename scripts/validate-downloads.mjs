@@ -8,11 +8,12 @@
  * - Enforces naming rules and basic file sanity
  *
  * Flags:
- *   --strict            Treat warnings as errors (overrides CI_LAX=1)
+ *   --strict            Treat warnings as errors (overrides CI_LAX=1 / DOWNLOADS_STRICT=0)
  *   --skip-covers       Don’t require cover images to exist
  *
  * Env:
- *   CI_LAX=1            Warnings don’t fail the build (default on Netlify per your env)
+ *   CI_LAX=1                 Warnings don’t fail the build (Netlify env in your config)
+ *   DOWNLOADS_STRICT=0|1     If "1", strict mode; if "0", lax (warnings won't fail)
  */
 
 import fs from 'node:fs';
@@ -27,7 +28,10 @@ const COVERS_DIR = path.resolve(ROOT, 'public', 'assets', 'images', 'downloads')
 const NETLIFY_TOML = path.resolve(ROOT, 'netlify.toml');
 
 const args = new Set(process.argv.slice(2));
-const STRICT = args.has('--strict') || process.env.CI_LAX !== '1';
+const STRICT =
+  args.has('--strict') ||
+  process.env.DOWNLOADS_STRICT === '1' ||
+  process.env.CI_LAX !== '1';
 const SKIP_COVERS = args.has('--skip-covers');
 
 const PDF_EXT = '.pdf';
@@ -41,13 +45,13 @@ const log = {
   info: (msg) => console.log(msg),
   ok:   (msg) => console.log(`✅ ${msg}`),
   warn: (msg) => console.warn(`⚠️  ${msg}`),
-  err:  (msg) => console.error(`❌ ${msg}`),
+  err:  (msg) => console.error(`❌ ${msg}`)
 };
 
 function toKebabBase(filename) {
   const base = filename.replace(/\.pdf$/i, '');
   return base
-    .replace(/[_\s]+/g, '-')        // underscores/spaces -> hyphen
+    .replace(/[_\s]+/g, '-')         // underscores/spaces -> hyphen
     .replace(/[^a-zA-Z0-9-]+/g, '-') // strip odd chars
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
@@ -95,10 +99,9 @@ function extractDownloadsFromText(text) {
   const hits = new Set();
   let m;
   while ((m = rx.exec(text))) {
-    // decode %20 etc
     try {
       const decoded = decodeURIComponent(m[1]);
-      hits.add(decoded.replace(/^\//, '')); // don't keep leading slash
+      hits.add(decoded.replace(/^\//, ''));
     } catch {
       hits.add(m[1].replace(/^\//, ''));
     }
@@ -118,14 +121,13 @@ async function extractNetlifyTargets() {
 }
 
 async function findAllRepoDownloadRefs() {
-  // scan a small set of common roots for speed
   const roots = [
     path.resolve(ROOT, 'content'),
     path.resolve(ROOT, 'pages'),
     path.resolve(ROOT, 'app'),
     path.resolve(ROOT, 'components'),
     path.resolve(ROOT, 'public'),
-    NETLIFY_TOML,
+    NETLIFY_TOML
   ];
 
   const refs = new Set();
@@ -133,16 +135,17 @@ async function findAllRepoDownloadRefs() {
   for (const root of roots) {
     const exists = await pathExists(root);
     if (!exists) continue;
+
     const stat = await fsp.stat(root);
     if (stat.isFile()) {
       const text = await readTextIfExists(root);
       extractDownloadsFromText(text).forEach((r) => refs.add(r));
       continue;
-      }
+    }
+
     const files = await listFilesRecursive(root);
     for (const f of files) {
-      // skip binary-ish
-      if (/\.(png|jpg|jpeg|webp|gif|ico|mp4|webm|pdf)$/i.test(f)) continue;
+      if (/\.(png|jpg|jpeg|webp|gif|ico|mp4|webm|pdf)$/i.test(f)) continue; // skip binary-ish
       const text = await readTextIfExists(f);
       if (!text) continue;
       extractDownloadsFromText(text).forEach((r) => refs.add(r));
@@ -156,7 +159,6 @@ async function checkCoversFor(pdfName) {
   const slug = toKebabBase(pdfName);
   for (const ext of COVER_EXTS) {
     const p = path.join(COVERS_DIR, slug + ext);
-    // allow either with or without leading /assets in repo references; on disk it’s under public/assets
     if (await pathExists(p)) return true;
   }
   return false;
@@ -170,14 +172,13 @@ async function main() {
   // dir exists
   if (!(await pathExists(DOWNLOADS_DIR))) {
     errors.push(`Missing directory: ${DOWNLOADS_DIR}`);
-    reportAndExit(errors, warnings);
-    return;
+    return reportAndExit(errors, warnings);
   }
 
   // gather PDFs
   const files = (await listFilesRecursive(DOWNLOADS_DIR))
     .filter((f) => isPDF(f))
-    .map((f) => path.relative(DOWNLOADS_DIR, f).replace(/\\/g, '/')); // relative within downloads
+    .map((f) => path.relative(DOWNLOADS_DIR, f).replace(/\\/g, '/'));
 
   if (files.length === 0) {
     warnings.push('No PDFs found in public/downloads.');
@@ -185,7 +186,7 @@ async function main() {
     log.ok(`Found ${files.length} PDF(s).`);
   }
 
-  // detect case-insensitive collisions
+  // case-insensitive collisions
   const lcMap = new Map();
   for (const f of files) {
     const lc = f.toLowerCase();
@@ -193,23 +194,26 @@ async function main() {
     list.push(f);
     lcMap.set(lc, list);
   }
-  for (const [_, group] of lcMap.entries()) {
+  for (const group of lcMap.values()) {
     if (group.length > 1) {
       errors.push(`Case-insensitive filename collision in /public/downloads: ${group.join(', ')}`);
     }
   }
 
-  // validate naming, size, spaces
+  // validate each
   for (const rel of files) {
     const name = path.basename(rel);
+
     if (/\s/.test(name)) {
       warnings.push(`Filename contains spaces (discouraged): ${name}`);
     }
+
     if (!(RX_TITLE_CASE_UNDERSCORE.test(name) || RX_KEBAB.test(name))) {
       warnings.push(
         `Filename style should be Title_Case_With_Underscores.pdf or kebab-case.pdf: ${name}`
       );
     }
+
     const abs = path.join(DOWNLOADS_DIR, rel);
     try {
       const stat = await fsp.stat(abs);
@@ -220,7 +224,6 @@ async function main() {
       errors.push(`Cannot stat file ${name}: ${e.message}`);
     }
 
-    // covers
     if (!SKIP_COVERS) {
       const hasCover = await checkCoversFor(name);
       if (!hasCover) {
@@ -233,26 +236,29 @@ async function main() {
     }
   }
 
-  // cross-check references: netlify.toml "to" targets
-  const netlifyTargets = await extractNetlifyTargets(); // e.g., Fathering_Without_Fear.pdf
+  // netlify.toml "to" targets
+  const netlifyTargets = await extractNetlifyTargets();
   for (const t of netlifyTargets) {
     const exists = await pathExists(path.join(DOWNLOADS_DIR, t));
-    if (!exists) {
-      errors.push(`netlify.toml 'to' target is missing: /downloads/${t}`);
-    }
+    const msg = `netlify.toml 'to' target is missing: /downloads/${t}`;
+    if (!exists) (STRICT ? errors : warnings).push(msg);
   }
 
-  // cross-check repo references to /downloads/*.pdf
-  const repoRefs = await findAllRepoDownloadRefs(); // paths relative to /downloads/
-  const missingFromRefs = repoRefs.filter((r) => !files.some((f) => f.toLowerCase() === r.toLowerCase()));
+  // repo references to /downloads/*.pdf
+  const repoRefs = await findAllRepoDownloadRefs();
+  const missingFromRefs = repoRefs.filter(
+    (r) => !files.some((f) => f.toLowerCase() === r.toLowerCase())
+  );
   for (const miss of missingFromRefs) {
-    errors.push(`Referenced download not found: /downloads/${miss}`);
+    const msg = `Referenced download not found: /downloads/${miss}`;
+    (STRICT ? errors : warnings).push(msg);
   }
 
-  // extra: unexpected files not referenced anywhere (nice-to-know)
+  // Unreferenced PDFs (FYI)
   const unreferenced = files.filter(
-    (f) => !repoRefs.some((r) => r.toLowerCase() === f.toLowerCase()) &&
-           !netlifyTargets.some((r) => r.toLowerCase() === f.toLowerCase())
+    (f) =>
+      !repoRefs.some((r) => r.toLowerCase() === f.toLowerCase()) &&
+      !netlifyTargets.some((r) => r.toLowerCase() === f.toLowerCase())
   );
   if (unreferenced.length) {
     warnings.push(
@@ -264,12 +270,8 @@ async function main() {
 }
 
 function reportAndExit(errors, warnings) {
-  if (warnings.length) {
-    for (const w of warnings) log.warn(w);
-  }
-  if (errors.length) {
-    for (const e of errors) log.err(e);
-  }
+  if (warnings.length) warnings.forEach((w) => log.warn(w));
+  if (errors.length) errors.forEach((e) => log.err(e));
 
   const warnCount = warnings.length;
   const errCount = errors.length;
@@ -288,7 +290,7 @@ function reportAndExit(errors, warnings) {
 
   if (warnCount > 0) {
     if (lax) {
-      log.ok(`\nPassed with warnings (CI_LAX=1): ${warnCount} warning(s).`);
+      log.ok(`\nPassed with warnings (CI_LAX=1 / lax mode): ${warnCount} warning(s).`);
       process.exit(0);
     } else {
       log.err(`\nFailed due to warnings (strict mode): ${warnCount} warning(s).`);
