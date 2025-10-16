@@ -20,8 +20,8 @@
 
 [context.production.environment]
   NODE_ENV = "production"
-  # If your `pdfs` script needs devDependencies, you can move them to "dependencies"
-  # or enable: NPM_FLAGS = "--include=dev"
+  # Enable devDependencies during the build so pdf scripts can import puppeteer/glob/etc
+  NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX emails)
