@@ -6,7 +6,7 @@
     "node": ">=20 <21"
   },
   "scripts": {
-    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && (cross-env CI_LAX=1 node scripts/validate-  downloads.mjs --skip-covers || true)",
+    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && (cross-env CI_LAX=1 node scripts/validate-downloads.mjs --skip-covers || true)",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -55,7 +55,7 @@
     "next-themes": "0.4.6",
     "nprogress": "0.2.0",
     "postcss": "8.5.6",
-    "puppeteer": "22.15.0",
+    "puppeteer": "22.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-icons": "5.5.0",
