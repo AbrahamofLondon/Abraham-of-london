@@ -1,4 +1,3 @@
-// components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
 
@@ -10,8 +9,8 @@ type VideoSource = {
 
 type Props = {
   poster: string;
-  // Accept readonly here too; mapping/length still work
-  videoSources?: ReadonlyArray<VideoSource>;
+  // Accept readonly arrays and null/undefined; we normalize internally
+  videoSources?: ReadonlyArray<VideoSource> | null;
   heightClassName?: string;
   mobileObjectPositionClass?: string;
   overlay?: React.ReactNode;
@@ -20,13 +19,17 @@ type Props = {
 
 export default function HeroBanner({
   poster,
-  videoSources = [],
+  videoSources,
   heightClassName = "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]",
   mobileObjectPositionClass = "object-center",
   overlay,
   className,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+  // Normalize sources: undefined/null → empty array
+  const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
+  const hasVideo = sources.length > 0;
 
   // Respect reduced motion, and be resilient if autoplay is blocked.
   React.useEffect(() => {
@@ -38,8 +41,9 @@ export default function HeroBanner({
       if (mql?.matches) {
         v.pause();
       } else {
-        // try to play; if blocked, just let the poster show
-        v.play().catch(() => {});
+        v.play().catch(() => {
+          // Autoplay blocked; poster is already shown.
+        });
       }
     };
 
@@ -48,12 +52,10 @@ export default function HeroBanner({
     return () => mql?.removeEventListener?.("change", handle);
   }, []);
 
-  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
-
   return (
     <section
       className={clsx(
-        "relative isolate w-full overflow-hidden bg-black",
+        "relative isolate w-full overflow-hidden bg-black", // bg avoids flashes/gaps
         heightClassName,
         className
       )}
@@ -71,12 +73,12 @@ export default function HeroBanner({
           preload="auto"
           aria-hidden
         >
-          {videoSources.map((s, i) => (
+          {sources.map((s, i) => (
             <source key={i} src={s.src} type={s.type} {...(s.media ? { media: s.media } : {})} />
           ))}
         </video>
       ) : (
-        // Fallback if no sources or autoplay is blocked and <source> fails
+        // Fallback if no sources
         <img
           src={poster}
           alt=""

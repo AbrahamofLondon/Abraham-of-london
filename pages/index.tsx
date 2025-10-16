@@ -1,4 +1,3 @@
-// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -32,7 +31,7 @@ type VideoSource = { src: string; type: "video/webm" | "video/mp4" };
 
 type BannerConfig = {
   poster: string;
-  // Accept readonly to tolerate sources coming from `as const`
+  // Accept readonly to tolerate `as const`, allow null (normalized by HeroBanner)
   videoSources?: ReadonlyArray<VideoSource> | null;
   overlay?: BannerOverlay;
   /** e.g. "object-[40%_50%]" for mobile focus */
@@ -128,7 +127,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* FULL-BLEED HERO */}
       <HeroBanner
         poster={banner.poster}
-        videoSources={banner.videoSources}
+        videoSources={banner.videoSources} // can be readonly or null; component normalizes
         overlay={overlayNode}
         mobileObjectPositionClass="object-left md:object-[30%_center] lg:object-[40%_center]"
         heightClassName={banner.heightClassName}
@@ -179,7 +178,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Featured Insights */}
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items=end justify-between">
+          <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
             <Link
               href={blogHref}
