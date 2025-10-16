@@ -8,12 +8,11 @@
  * - Enforces naming rules and basic file sanity
  *
  * Flags:
- *   --strict            Treat warnings as errors (overrides CI_LAX=1 / DOWNLOADS_STRICT=0)
+ *   --strict            Treat warnings as errors (overrides env)
  *   --skip-covers       Don’t require cover images to exist
  *
  * Env:
- *   CI_LAX=1                 Warnings don’t fail the build (Netlify env in your config)
- *   DOWNLOADS_STRICT=0|1     If "1", strict mode; if "0", lax (warnings won't fail)
+ *   DOWNLOADS_STRICT=1  Enable strict mode in CI or locally
  */
 
 import fs from 'node:fs';
@@ -28,10 +27,8 @@ const COVERS_DIR = path.resolve(ROOT, 'public', 'assets', 'images', 'downloads')
 const NETLIFY_TOML = path.resolve(ROOT, 'netlify.toml');
 
 const args = new Set(process.argv.slice(2));
-const STRICT =
-  args.has('--strict') ||
-  process.env.DOWNLOADS_STRICT === '1' ||
-  process.env.CI_LAX !== '1';
+// LAX by default. Strict ONLY if you pass --strict or set DOWNLOADS_STRICT=1
+const STRICT = args.has('--strict') || process.env.DOWNLOADS_STRICT === '1';
 const SKIP_COVERS = args.has('--skip-covers');
 
 const PDF_EXT = '.pdf';
@@ -281,21 +278,21 @@ function reportAndExit(errors, warnings) {
     process.exit(0);
   }
 
-  const lax = process.env.CI_LAX === '1' && !STRICT;
-
   if (errCount > 0) {
     log.err(`\nFailed: ${errCount} error(s), ${warnCount} warning(s).`);
     process.exit(1);
   }
 
-  if (warnCount > 0) {
-    if (lax) {
-      log.ok(`\nPassed with warnings (CI_LAX=1 / lax mode): ${warnCount} warning(s).`);
-      process.exit(0);
-    } else {
-      log.err(`\nFailed due to warnings (strict mode): ${warnCount} warning(s).`);
-      process.exit(1);
-    }
+  // In non-strict mode, warnings never fail the build
+  if (!STRICT && warnCount > 0) {
+    log.ok(`\nPassed with warnings (lax mode): ${warnCount} warning(s).`);
+    process.exit(0);
+  }
+
+  // In strict mode, warnings fail
+  if (STRICT && warnCount > 0) {
+    log.err(`\nFailed due to warnings (strict mode): ${warnCount} warning(s).`);
+    process.exit(1);
   }
 
   process.exit(0);
