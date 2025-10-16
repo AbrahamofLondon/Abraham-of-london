@@ -1,4 +1,4 @@
-lib/hero-banners.ts
+// lib/hero-banners.ts
 export type Banner = {
   poster: string;
   videoSources: Array<{ src: string; type: string; media?: string }>;
@@ -12,30 +12,24 @@ export type Banner = {
   heightClassName?: string;
 };
 
-const base = "/assets/video";
+const V = "/assets/video";
 const poster = "/assets/images/abraham-of-london-banner@2560.webp";
 
-/**
- * Prefer AV1 (libaom-av1) → VP9 (libvpx-vp9) → H.264 (libx264)
- * Resolution choice via media queries so large screens get 4K when available.
- */
 const DEFAULT_BANNER: Banner = {
   poster,
   videoSources: [
-    // AV1 (Chrome/Edge/Firefox/Safari 17+)
-    { src: `${base}/brand-reel-2160p-av1.webm`, type: "video/webm", media: "(min-width:1600px)" },
-    { src: `${base}/brand-reel-1440p-av1.webm`, type: "video/webm", media: "(min-width:1100px)" },
-    { src: `${base}/brand-reel-1080p-av1.webm`, type: "video/webm" },
-
+    // AV1 first
+    { src: `${V}/brand-reel-2160p-av1.webm`, type: "video/webm", media: "(min-width:1600px)" },
+    { src: `${V}/brand-reel-1440p-av1.webm`, type: "video/webm", media: "(min-width:1100px)" },
+    { src: `${V}/brand-reel-1080p-av1.webm`, type: "video/webm" },
     // VP9 fallback
-    { src: `${base}/brand-reel-2160p.webm`, type: "video/webm", media: "(min-width:1600px)" },
-    { src: `${base}/brand-reel-1440p.webm`, type: "video/webm", media: "(min-width:1100px)" },
-    { src: `${base}/brand-reel-1080p.webm`, type: "video/webm" },
-
-    // H.264 fallback (widest compatibility)
-    { src: `${base}/brand-reel-2160p.mp4`, type: "video/mp4", media: "(min-width:1600px)" },
-    { src: `${base}/brand-reel-1440p.mp4`, type: "video/mp4", media: "(min-width:1100px)" },
-    { src: `${base}/brand-reel-1080p.mp4`, type: "video/mp4" },
+    { src: `${V}/brand-reel-2160p.webm`, type: "video/webm", media: "(min-width:1600px)" },
+    { src: `${V}/brand-reel-1440p.webm`, type: "video/webm", media: "(min-width:1100px)" },
+    { src: `${V}/brand-reel-1080p.webm`, type: "video/webm" },
+    // H.264 fallback
+    { src: `${V}/brand-reel-2160p.mp4`, type: "video/mp4", media: "(min-width:1600px)" },
+    { src: `${V}/brand-reel-1440p.mp4`, type: "video/mp4", media: "(min-width:1100px)" },
+    { src: `${V}/brand-reel-1080p.mp4`, type: "video/mp4" },
   ],
   overlay: {
     eyebrow: "Abraham of London",
@@ -48,6 +42,5 @@ const DEFAULT_BANNER: Banner = {
 };
 
 export function getActiveBanner(): Banner {
-  // Later: rotate by date/campaign if you wish.
   return DEFAULT_BANNER;
 }
