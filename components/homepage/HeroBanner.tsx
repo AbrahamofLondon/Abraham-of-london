@@ -1,17 +1,14 @@
+// components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
 
-type VideoSource = {
-  src: string;
-  type: "video/webm" | "video/mp4";
-  media?: string;
-};
+type VideoSource = { src: string; type: "video/webm" | "video/mp4"; media?: string };
 
 type Props = {
   poster: string;
-  // Accept readonly arrays and null/undefined; we normalize internally
   videoSources?: ReadonlyArray<VideoSource> | null;
-  heightClassName?: string;
+  /** accept null; we’ll normalize */
+  heightClassName?: string | null;
   mobileObjectPositionClass?: string;
   overlay?: React.ReactNode;
   className?: string;
@@ -20,33 +17,28 @@ type Props = {
 export default function HeroBanner({
   poster,
   videoSources,
-  heightClassName = "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]",
+  heightClassName,
   mobileObjectPositionClass = "object-center",
   overlay,
   className,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
-  // Normalize sources: undefined/null → empty array
   const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
   const hasVideo = sources.length > 0;
 
-  // Respect reduced motion, and be resilient if autoplay is blocked.
+  // normalize height
+  const normalizedHeight =
+    heightClassName ?? "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]";
+
   React.useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-
     const mql = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     const handle = () => {
-      if (mql?.matches) {
-        v.pause();
-      } else {
-        v.play().catch(() => {
-          // Autoplay blocked; poster is already shown.
-        });
-      }
+      if (mql?.matches) v.pause();
+      else v.play().catch(() => {});
     };
-
     handle();
     mql?.addEventListener?.("change", handle);
     return () => mql?.removeEventListener?.("change", handle);
@@ -55,12 +47,11 @@ export default function HeroBanner({
   return (
     <section
       className={clsx(
-        "relative isolate w-full overflow-hidden bg-black", // bg avoids flashes/gaps
-        heightClassName,
+        "relative isolate w-full overflow-hidden bg-black",
+        normalizedHeight,
         className
       )}
     >
-      {/* media */}
       {hasVideo ? (
         <video
           ref={videoRef}
@@ -78,7 +69,6 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        // Fallback if no sources
         <img
           src={poster}
           alt=""
@@ -90,20 +80,15 @@ export default function HeroBanner({
         />
       )}
 
-      {/* top gradient veil for legibility */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
       />
-
-      {/* overlay copy (optional) */}
       {overlay ? (
         <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
           <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
-
-      {/* No-JS fallback */}
       <noscript>
         <img
           src={poster}
