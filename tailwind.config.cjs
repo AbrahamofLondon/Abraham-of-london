@@ -7,7 +7,7 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",   // <-- fixed closing quote
+    "./components/**/*.{js,ts,jsx,tsx,mdx}", // fixed closing quote
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
     "./styles/**/*.css",
@@ -51,7 +51,7 @@ module.exports = {
       ringColor: { forest: "var(--color-primary)" },
       borderColor: {
         forest: "var(--color-primary)",
-        lightGrey: "var(--color-lightGrey)",
+        lightGrey: "#e5e5e5",
       },
 
       fontFamily: {
@@ -86,7 +86,8 @@ module.exports = {
         shimmer: "shimmer 3s linear infinite",
       },
 
-      typography: ({ theme }) => ({
+      // IMPORTANT: use (theme) => ..., not ({ theme }) => ...
+      typography: (theme) => ({
         DEFAULT: {
           css: {
             "--tw-prose-body": theme("colors.deepCharcoal"),
