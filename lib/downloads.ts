@@ -1,9 +1,11 @@
 // lib/downloads.ts
-// Server-only helper: scans /public/downloads for files (e.g. PDFs)
 
 import fs from "node:fs";
 import path from "node:path";
 
+// --- DYNAMIC DOWNLOAD LISTING ---
+
+/** Represents a dynamically discovered file in the /public/downloads directory. */
 export type DownloadItem = {
   file: string;          // file name (e.g. "Mentorship_Starter_Kit.pdf")
   href: string;          // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
@@ -17,6 +19,7 @@ export type DownloadItem = {
 const ROOT = process.cwd();
 const DIR = path.join(ROOT, "public", "downloads");
 
+/** Converts bytes to a human-readable size string. */
 function human(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   const kb = bytes / 1024;
@@ -25,11 +28,13 @@ function human(bytes: number): string {
   return `${mb.toFixed(mb < 10 ? 1 : 0)} MB`;
 }
 
+/** Converts a file name (e.g., "File_Name.pdf") to a title (e.g., "File Name"). */
 function toTitle(file: string) {
   const base = file.replace(/\.[^.]+$/, "");
   return base.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Scans the /public/downloads directory for files (PDFs only, currently). */
 export function getDownloads(): DownloadItem[] {
   if (!fs.existsSync(DIR)) return [];
   const entries = fs.readdirSync(DIR, { withFileTypes: true });
@@ -39,7 +44,7 @@ export function getDownloads(): DownloadItem[] {
     if (!e.isFile()) continue;
     const file = e.name;
     const ext = path.extname(file).toLowerCase();
-    // include PDFs; add more extensions if you like
+    // Only include PDFs
     if (![".pdf"].includes(ext)) continue;
 
     const full = path.join(DIR, file);
@@ -55,7 +60,52 @@ export function getDownloads(): DownloadItem[] {
     });
   }
 
-  // newest first by mtime
+  // Sort by newest first by modification time
   items.sort((a, b) => Date.parse(b.modified) - Date.parse(a.modified));
   return items;
+}
+
+// --- STATIC DOWNLOAD METADATA ---
+
+export type DownloadEntry = {
+  /** Pretty label for this resource (used on detail pages, etc.) */
+  label: string;
+  /** Route to the notes/landing page (your /pages/downloads/[slug].tsx) */
+  page: string;
+  /** Direct PDF path under /public/downloads (optional) */
+  pdf?: string;
+};
+
+/**
+ * Hard-coded list of featured downloads, used for static linking
+ * in navigation and content components.
+ */
+export const DOWNLOADS = {
+  brotherhoodCovenant: {
+    label: "Brotherhood Covenant (Printable)",
+    page: "/downloads/brotherhood-covenant",
+    // ⬇️ Update the filename if yours differs
+    pdf: "/downloads/Brotherhood_Covenant_Printable.pdf",
+  },
+  leadersCueCard: {
+    label: "Leader’s Cue Card (A6, Two-Up)",
+    page: "/downloads/leaders-cue-card",
+    // ⬇️ Update the filename if yours differs
+    pdf: "/downloads/Leaders_Cue_Card_A6_Two-Up.pdf",
+  },
+} as const;
+
+export type DownloadKey = keyof typeof DOWNLOADS;
+
+/** Utility to produce pill items for Notes + PDF */
+export function buildNotesAndPdfPills(keys: DownloadKey[]) {
+  return keys.flatMap((key) => {
+    const d = DOWNLOADS[key];
+    if (!d) return [];
+    const items = [
+      { kind: "notes" as const, label: "Notes", href: d.page },
+    ];
+    if (d.pdf) items.push({ kind: "pdf" as const, label: "PDF", href: d.pdf, download: true });
+    return items;
+  });
 }

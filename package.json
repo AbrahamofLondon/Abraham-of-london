@@ -38,9 +38,11 @@
     "@react-email/render": "1.2.1",
     "@tailwindcss/typography": "0.5.19",
     "autoprefixer": "10.4.21",
+    "chokidar": "^3.6.0",
     "clsx": "2.1.1",
     "cross-env": "10.0.0",
     "date-fns": "4.1.0",
+    "fast-glob": "^3.3.2",
     "framer-motion": "12.23.12",
     "fuse.js": "7.1.0",
     "gray-matter": "4.0.3",
@@ -53,6 +55,7 @@
     "next-themes": "0.4.6",
     "nprogress": "0.2.0",
     "postcss": "8.5.6",
+    "puppeteer": "22.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-icons": "5.5.0",
@@ -63,7 +66,7 @@
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.0",
     "resend": "6.1.2",
-    "tailwindcss": "3.4"
+    "tailwindcss": "3.4.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
@@ -81,7 +84,6 @@
     "eslint-config-next": "14.2.32",
     "glob": "^11.0.3",
     "husky": "^9.1.6",
-    "puppeteer": "^23.11.1",
     "sharp": "0.34.3",
     "simple-icons": "15.14.0",
     "typescript": "5.9.2"

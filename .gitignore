@@ -54,3 +54,4 @@ Thumbs.db
 *.mp3
 *.wav
 
+public/downloads/*.pdf binary
