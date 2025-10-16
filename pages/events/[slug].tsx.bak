@@ -1,9 +1,12 @@
 // pages/events/[slug].tsx
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
 import type { EventMeta } from "@/lib/server/events-data";
+import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
 
 // Detect YYYY-MM-DD (date-only)
 const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -43,22 +46,21 @@ type EventPageProps = {
   event: EventMeta & {
     slug: string;
     tags?: string[] | null;
-    // tolerate optional fields at runtime
-    coverImage?: string | null;
-    heroImage?: string | null;
+    resources?: string[] | null;
   };
   contentSource: any;
+  resourcesMeta: DownloadMeta[];
 };
 
-function EventPage({ event, contentSource }: EventPageProps) {
+function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
   if (!event) return <div>Event not found.</div>;
 
   const prettyDate = formatPretty(event.date);
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/events/${event.slug}`;
 
-  // Prefer heroImage; fall back to coverImage if present in content
-  const relImage = event.heroImage ?? event.coverImage ?? undefined;
+  // Support either field name from content
+  const relImage = (event as any).coverImage ?? (event as any).heroImage;
   const absImage = relImage ? new URL(relImage, site).toString() : undefined;
 
   const isChatham =
@@ -97,14 +99,11 @@ function EventPage({ event, contentSource }: EventPageProps) {
         <meta property="og:url" content={url} />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
 
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">
-        {event.title}
-      </h1>
+      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{event.title}</h1>
 
       {isChatham && (
         <>
@@ -115,9 +114,7 @@ function EventPage({ event, contentSource }: EventPageProps) {
           >
             Chatham
           </span>
-          <p className="mt-2 text-xs text-neutral-600">
-            Off the record. No recordings. No press.
-          </p>
+          <p className="mt-2 text-xs text-neutral-600">Off the record. No recordings. No press.</p>
         </>
       )}
 
@@ -133,6 +130,59 @@ function EventPage({ event, contentSource }: EventPageProps) {
       <article className="prose max-w-none">
         <MDXRemote {...contentSource} />
       </article>
+
+      {resourcesMeta?.length ? (
+        <section className="mt-10 border-t border-lightGrey pt-8">
+          <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-4">
+            Suggested Resources
+          </h2>
+          <ul className="grid gap-5 sm:grid-cols-2">
+            {resourcesMeta.map((r) => (
+              <li key={r.slug} className="group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
+                {r.coverImage ? (
+                  <div className="relative aspect-[3/2] w-full">
+                    <Image
+                      src={r.coverImage}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                ) : null}
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-deepCharcoal">
+                    <Link href={`/downloads/${r.slug}`} className="hover:underline">
+                      {r.title}
+                    </Link>
+                  </h3>
+                  {r.excerpt ? (
+                    <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.85] line-clamp-3">
+                      {r.excerpt}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 flex gap-2">
+                    <Link
+                      href={`/downloads/${r.slug}`}
+                      className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest hover:bg-forest hover:text-cream"
+                    >
+                      Notes
+                    </Link>
+                    {r.file ? (
+                      <Link
+                        href={r.file}
+                        className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
+                      >
+                        Download
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
@@ -144,7 +194,7 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // Only request supported FieldKeys
+  // Include "resources" so we can wire up Suggested Resources
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
@@ -152,12 +202,22 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
     "location",
     "summary",
     "heroImage",
+    "coverImage",
     "tags",
+    "resources",
     "content",
   ]);
 
   const contentSource = await serialize(content || "");
-  return { props: { event, contentSource } };
+
+  const resourcesList: string[] = Array.isArray((event as any).resources)
+    ? ((event as any).resources as string[])
+    : [];
+  const resourcesMeta = resourcesList.length
+    ? getDownloadsBySlugs(resourcesList)
+    : [];
+
+  return { props: { event, contentSource, resourcesMeta } };
 }
 
 export default EventPage;
