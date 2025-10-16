@@ -1,31 +1,40 @@
-// scripts/make-pdfs.mjs
 // Node ESM script: auto-discovers Markdown/MDX/HTML docs, renders branded PDFs.
 // Usage:
 //   node scripts/make-pdfs.mjs [--all] [--watch] [--open] [--debug]
 //
-// Inputs it discovers automatically:
+// Inputs discovered automatically:
 //   - content/downloads/**/*.{md,mdx,html}
 //   - content/events/**/*.{md,mdx}   (only if front matter has pdf: true)
 //   - scripts/pdfs/static/**/*.html  (raw HTML docs)
 // Output:
-//   - public/downloads/<FileName>.pdf  (configurable via front matter)
+//   - public/downloads/<FileName>.pdf
 //
-// Front matter keys it understands (optional):
+// Front matter keys (optional):
 //   title, author, date, excerpt, coverImage, pdfFileName, file, pdf (boolean)
-// If `file` points to a .pdf (e.g. already supplied), it will skip rendering but still copy/rename if needed.
+// If `file` points to a .pdf (already supplied), it will be copied/renamed.
+//
+// CI behavior:
+// - Skips by default when CI/NETLIFY is set, unless PDF_ON_CI=1 is present.
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
-import url from "node:url";
+import { fileURLToPath } from "node:url";
 import chokidar from "chokidar";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 import mila from "markdown-it-link-attributes";
 import anchor from "markdown-it-anchor";
 import puppeteer from "puppeteer";
-import glob from "fast-glob";
-import { fileURLToPath } from "node:url";
+import fg from "fast-glob";
+
+// ───────────────────────────────────────────────────────────
+// CI guard
+// ───────────────────────────────────────────────────────────
+if ((process.env.CI || process.env.NETLIFY) && process.env.PDF_ON_CI !== "1") {
+  console.log("[pdfs] CI detected and PDF_ON_CI != '1' — skipping.");
+  process.exit(0);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,20 +45,22 @@ const WATCH = argv.has("--watch");
 const OPEN = argv.has("--open");
 const DEBUG = argv.has("--debug");
 
-// --- Paths
+// Paths
 const ROOT = path.join(__dirname, "..");
-const CONTENT_DIRS = [
-  "content/downloads/**/*.{md,mdx,html}",
-  "content/events/**/*.{md,mdx}",
-  "scripts/pdfs/static/**/*.html",
-];
-const PUBLIC_DOWNLOADS = path.join(ROOT, "public", "downloads");
+const PUBLIC_DIR = path.join(ROOT, "public");
+const PUBLIC_DOWNLOADS = path.join(PUBLIC_DIR, "downloads");
 const BRAND_DIR = path.join(ROOT, "scripts", "pdfs");
 const BRAND_CSS = path.join(BRAND_DIR, "brand.css");
 const BRAND_TEMPLATE = path.join(BRAND_DIR, "template.html");
 const CACHE_DIR = path.join(ROOT, ".pdfcache");
 
-// --- Utils
+const CONTENT_DIRS = [
+  "content/downloads/**/*.{md,mdx,html}",
+  "content/events/**/*.{md,mdx}",
+  "scripts/pdfs/static/**/*.html",
+];
+
+// Utils
 const log = (...a) => console.log("[pdfs]", ...a);
 const dbg = (...a) => DEBUG && console.log("[pdfs:debug]", ...a);
 
@@ -64,7 +75,6 @@ const slugify = (s) =>
     .replace(/\s+/g, "-");
 
 const toOutName = (fm, sourcePath) => {
-  // Precedence: pdfFileName > file (basename if pdf) > title > basename
   if (fm?.pdfFileName) return fm.pdfFileName.replace(/\.pdf$/i, "") + ".pdf";
   if (fm?.file && /\.pdf$/i.test(fm.file)) return path.basename(fm.file);
   if (fm?.title) return slugify(fm.title) + ".pdf";
@@ -73,16 +83,12 @@ const toOutName = (fm, sourcePath) => {
 
 const readOr = async (p, orStr) => (await exists(p) ? fs.readFile(p, "utf8") : orStr);
 
-// --- Markdown renderer (opinionated, typography on)
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  typographer: true,
-})
+// Markdown renderer
+const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
   .use(anchor, { permalink: anchor.permalink.ariaHidden({}) })
   .use(mila, { attrs: { target: "_blank", rel: "noopener" } });
 
-// --- HTML Template (fallbacks)
+// HTML template (fallbacks)
 const FALLBACK_CSS = `
 :root{ --brand:#1B4332; --ink:#111827; --muted:#6B7280; --gold:#D4AF37; }
 *{ box-sizing:border-box; }
@@ -102,23 +108,20 @@ code{ background:#f7f7f9; padding:.1em .35em; border-radius:4px; }
 .footer{ position: fixed; bottom: 10px; right: 16mm; font-size: 10px; color: #9CA3AF;}
 `;
 
-const FALLBACK_TEMPLATE = (payload) => `<!doctype html>
+const FALLBACK_TEMPLATE = (payload, baseHref) => `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${payload.title}</title>
+<base href="${baseHref}">
 <style>${payload.brandCss}</style>
 </head>
 <body>
   <div class="header">
     <div class="brand">Abraham of London</div>
     <div class="title">${payload.title}</div>
-    ${
-      payload.excerpt
-        ? `<div class="meta">${payload.excerpt}</div>`
-        : ""
-    }
+    ${payload.excerpt ? `<div class="meta">${payload.excerpt}</div>` : ""}
     <div class="meta">${[payload.author, payload.prettyDate].filter(Boolean).join(" — ")}</div>
     ${payload.coverImage ? `<div class="cover"><img src="${payload.coverImage}" style="width:100%; margin-top:8mm;"/></div>` : ""}
   </div>
@@ -129,7 +132,7 @@ const FALLBACK_TEMPLATE = (payload) => `<!doctype html>
 </body>
 </html>`;
 
-// --- Date prettifier
+// Date prettifier
 const isDateOnly = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || "");
 function prettyDate(s, tz = "Europe/London") {
   if (!s) return "";
@@ -144,15 +147,21 @@ function prettyDate(s, tz = "Europe/London") {
   }).format(d);
 }
 
-// --- Discover all candidate files
+// file:// helper
+function toFileURL(absPath) {
+  return "file://" + absPath.replace(/\\/g, "/");
+}
+const PUBLIC_BASE_HREF = toFileURL(PUBLIC_DIR) + "/"; // used in <base href="...">
+
+// Discover
 async function discover() {
-  const matches = await glob(CONTENT_DIRS, {
+  const matches = await fg(CONTENT_DIRS, {
     cwd: ROOT,
     onlyFiles: true,
     absolute: true,
     dot: false,
   });
-  // Filter event MD/MDX for `pdf: true`
+
   const items = [];
   for (const abs of matches) {
     const ext = path.extname(abs).toLowerCase();
@@ -174,7 +183,7 @@ async function discover() {
   return items;
 }
 
-// --- Build one file
+// Build one
 async function buildOne(browser, item) {
   const brandCss = await readOr(BRAND_CSS, FALLBACK_CSS);
   const tplStr = await readOr(BRAND_TEMPLATE, null);
@@ -191,15 +200,16 @@ async function buildOne(browser, item) {
     const body = parsed.content || "";
     html = md.render(body);
   } else {
-    // raw HTML
     html = await fs.readFile(item.abs, "utf8");
     srcBuf = Buffer.from(html);
-    fm = {}; // may still be supplied via file name convention
+    fm = {};
   }
 
-  // Skip if front-matter points to a ready-made PDF under `file:`
+  // If front-matter points to a ready-made PDF
   if (fm.file && /\.pdf$/i.test(fm.file)) {
-    const srcPdf = path.isAbsolute(fm.file) ? fm.file : path.join(ROOT, "public", fm.file.replace(/^\/+/, ""));
+    const srcPdf = path.isAbsolute(fm.file)
+      ? fm.file
+      : path.join(PUBLIC_DIR, fm.file.replace(/^\/+/, ""));
     const outName = toOutName(fm, item.abs);
     const outPath = path.join(PUBLIC_DOWNLOADS, outName);
     await ensureDir(PUBLIC_DOWNLOADS);
@@ -209,20 +219,27 @@ async function buildOne(browser, item) {
       return outPath;
     } else {
       log("warn: file declared but not found:", fm.file);
-      // continue to render HTML if available
+      // fall through to render if we have HTML
     }
   }
+
+  // Normalize coverImage to file:// if it starts with "/" (served from /public)
+  const coverImage =
+    fm.coverImage && fm.coverImage.startsWith("/")
+      ? PUBLIC_BASE_HREF + fm.coverImage.replace(/^\//, "")
+      : fm.coverImage || "";
 
   const payload = {
     title: fm.title || path.parse(item.abs).name.replace(/[-_]/g, " "),
     author: fm.author || "Abraham of London",
     excerpt: fm.excerpt || "",
     prettyDate: prettyDate(fm.date),
-    coverImage: fm.coverImage || "",
+    coverImage,
     brandCss,
     html,
   };
 
+  // Build HTML (inject <base> to resolve /assets/... from /public)
   const templateHtml =
     tplStr && tplStr.includes("{{content}}")
       ? tplStr
@@ -233,7 +250,8 @@ async function buildOne(browser, item) {
           .replace(/{{\s*coverImage\s*}}/g, payload.coverImage || "")
           .replace(/{{\s*brandCss\s*}}/g, payload.brandCss)
           .replace(/{{\s*content\s*}}/g, payload.html)
-      : FALLBACK_TEMPLATE(payload);
+          .replace(/<head>/i, `<head>\n<base href="${PUBLIC_BASE_HREF}">`)
+      : FALLBACK_TEMPLATE(payload, PUBLIC_BASE_HREF);
 
   const outName = toOutName(fm, item.abs);
   const outPath = path.join(PUBLIC_DOWNLOADS, outName);
@@ -253,9 +271,12 @@ async function buildOne(browser, item) {
     return outPath;
   }
 
-  // Render with Puppeteer
-  await ensureDir(PUBLIC_DOWNLOADS);
-  const page = await browser.newPage();
+  // Puppeteer launch (honor PUPPETEER_EXECUTABLE_PATH if present)
+  const launchOpts = {};
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  const page = await (await browser).newPage();
   await page.setContent(templateHtml, { waitUntil: "networkidle0" });
   await page.pdf({
     path: outPath,
@@ -278,7 +299,7 @@ async function buildAll() {
     log("No sources found — add MD/MDX/HTML to content/downloads or scripts/pdfs/static.");
     return [];
   }
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = puppeteer.launch({ headless: "new" });
   const outs = [];
   try {
     for (const item of items) {
@@ -286,11 +307,11 @@ async function buildAll() {
         const outPath = await buildOne(browser, item);
         if (outPath) outs.push(outPath);
       } catch (err) {
-        console.error("[pdfs:error]", item.abs, err.message);
+        console.error("[pdfs:error]", item.abs, err?.message || err);
       }
     }
   } finally {
-    await browser.close();
+    (await browser).close();
   }
   return outs;
 }
