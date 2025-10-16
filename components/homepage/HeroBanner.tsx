@@ -10,7 +10,8 @@ type VideoSource = {
 
 type Props = {
   poster: string;
-  videoSources?: VideoSource[]; // optional + guarded
+  // Accept readonly here too; mapping/length still work
+  videoSources?: ReadonlyArray<VideoSource>;
   heightClassName?: string;
   mobileObjectPositionClass?: string;
   overlay?: React.ReactNode;
@@ -52,7 +53,7 @@ export default function HeroBanner({
   return (
     <section
       className={clsx(
-        "relative isolate w-full overflow-hidden bg-black", // bg avoids flashes/gaps
+        "relative isolate w-full overflow-hidden bg-black",
         heightClassName,
         className
       )}

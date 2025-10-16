@@ -32,7 +32,8 @@ type VideoSource = { src: string; type: "video/webm" | "video/mp4" };
 
 type BannerConfig = {
   poster: string;
-  videoSources?: VideoSource[] | null;
+  // Accept readonly to tolerate sources coming from `as const`
+  videoSources?: ReadonlyArray<VideoSource> | null;
   overlay?: BannerOverlay;
   /** e.g. "object-[40%_50%]" for mobile focus */
   mobileObjectPositionClass?: string | null;
@@ -64,14 +65,15 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const postsCount = posts.length;
 
   // Safe banner with sane fallbacks to prevent layout voids
-  const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as BannerConfig, []);
+  const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as unknown as BannerConfig, []);
   const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
     poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
     videoSources:
-      raw?.videoSources ?? [
+      raw?.videoSources ??
+      ([
         { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
         { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
-      ],
+      ] as const),
     overlay: raw?.overlay ?? null,
     mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-center",
     // taller default helps avoid black edges on ultra-wide screens
@@ -177,7 +179,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Featured Insights */}
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-8 flex items-end justify-between">
+          <header className="mb-8 flex items=end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
             <Link
               href={blogHref}
@@ -397,7 +399,14 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Closing CTA */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal">
         <div className="absolute inset-0 -z-10">
-          <Image src="/assets/images/cta/cta-bg.jpg" alt="" fill sizes="100vw" quality={85} className="object-cover opacity-20" />
+          <Image
+            src="/assets/images/cta/cta-bg.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={85}
+            className="object-cover opacity-20"
+          />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-20 text-center">
