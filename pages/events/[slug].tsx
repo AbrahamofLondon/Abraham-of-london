@@ -92,6 +92,7 @@ export default function BlogPost({ post }: Props) {
     coverAspect,
     coverFit,
     coverPosition,
+    content
   } = post.meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
