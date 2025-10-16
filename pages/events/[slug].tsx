@@ -1,8 +1,9 @@
+// pages/events/[slug].tsx
 import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
-import type { EventMeta } from "@/lib/events";
+import type { EventMeta } from "@/lib/server/events-data";
 
 // Detect YYYY-MM-DD (date-only)
 const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -42,7 +43,6 @@ type EventPageProps = {
   event: EventMeta & {
     slug: string;
     tags?: string[] | null;
-    // EventMeta already supports coverImage?/heroImage?, so no need to add here
   };
   contentSource: any;
 };
@@ -51,8 +51,7 @@ function EventPage({ event, contentSource }: EventPageProps) {
   if (!event) return <div>Event not found.</div>;
 
   const prettyDate = formatPretty(event.date);
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/events/${event.slug}`;
 
   // Support either field name from content
@@ -67,7 +66,7 @@ function EventPage({ event, contentSource }: EventPageProps) {
     "@context": "https://schema.org",
     "@type": "Event",
     name: event.title,
-    startDate: event.date, // supports YYYY-MM-DD or full ISO
+    startDate: event.date,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: {
@@ -91,6 +90,8 @@ function EventPage({ event, contentSource }: EventPageProps) {
         <title>{event.title} | Abraham of London</title>
         <meta name="description" content={event.summary || ""} />
         {absImage && <meta property="og:image" content={absImage} />}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={url} />
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
@@ -102,7 +103,6 @@ function EventPage({ event, contentSource }: EventPageProps) {
         {event.title}
       </h1>
 
-      {/* Subtle badge + note when Chatham */}
       {isChatham && (
         <>
           <span
@@ -141,14 +141,14 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // IMPORTANT: request "heroImage" (what your loader supports), not "coverImage"
+  // IMPORTANT: request "heroImage" (what your loader supports), not just "coverImage"
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
     "date",
     "location",
     "summary",
-    "heroImage", // <-- was "coverImage"
+    "heroImage",
     "tags",
     "content",
   ]);

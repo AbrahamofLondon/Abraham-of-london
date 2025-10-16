@@ -1,29 +1,28 @@
 // pages/events/index.tsx
-"use client";
-
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import clsx from "clsx";
+
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import { OgHead } from "@/lib/seo";
-import { getAllEvents } from "@/lib/server/events-data";
-import type { EventMeta } from "@/lib/server/events-data";
-import { formatDate } from "@/lib/date";
-import clsx from "clsx";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { isUpcoming } from "@/lib/events";
+import type { EventMeta } from "@/lib/server/events-data";
 
 type Props = { events: EventMeta[] };
 
-const normalize = (s: string = "") => s.toLowerCase();
+const normalize = (s = "") => s.toLowerCase();
 const formatPretty = (d: string) =>
-  formatDate(d, {
+  new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/London",
-    format: { day: "2-digit", month: "short", year: "numeric" },
-  });
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(d));
 
 const Chip = ({
   label,
@@ -122,7 +121,7 @@ export default function EventsIndex({ events }: Props) {
           <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
             <ol className="flex items-center gap-2">
               <li>
-                <Link href="/" className="hover:text-deepCharcoal">
+                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>
                   Home
                 </Link>
               </li>
@@ -137,21 +136,9 @@ export default function EventsIndex({ events }: Props) {
             </ol>
           </nav>
           <div className="flex items-center gap-2">
-            <Chip
-              label={`All (${totalCount})`}
-              active={when === "all"}
-              onClick={() => setParam("when", "all")}
-            />
-            <Chip
-              label={`Upcoming (${upcomingCount})`}
-              active={when === "upcoming"}
-              onClick={() => setParam("when", "upcoming")}
-            />
-            <Chip
-              label={`Past (${pastCount})`}
-              active={when === "past"}
-              onClick={() => setParam("when", "past")}
-            />
+            <Chip label={`All (${totalCount})`} active={when === "all"} onClick={() => setParam("when", "all")} />
+            <Chip label={`Upcoming (${upcomingCount})`} active={when === "upcoming"} onClick={() => setParam("when", "upcoming")} />
+            <Chip label={`Past (${pastCount})`} active={when === "past"} onClick={() => setParam("when", "past")} />
           </div>
         </div>
       </section>
@@ -224,6 +211,7 @@ export default function EventsIndex({ events }: Props) {
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          priority={false}
                         />
                       </div>
                     ) : null}
@@ -281,6 +269,8 @@ export default function EventsIndex({ events }: Props) {
 
 // SSG
 export async function getStaticProps() {
+  // Pull server code only on the server
+  const { getAllEvents } = await import("@/lib/server/events-data");
   const events = getAllEvents([
     "slug",
     "title",
