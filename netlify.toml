@@ -14,9 +14,9 @@
     NO_SLASH_OPACITY_MODE = "fix"
     DOWNLOADS_STRICT = "0"
 
-# In production, build PDFs first, then Next
+# In production, build PDFs first, then seed/validate placeholders, then Next
 [context.production]
-  command = "npm run pdfs && npm run build"
+  command = "npm run pdfs && npm run seed:downloads && npm run build" 
 
 [context.production.environment]
   NODE_ENV = "production"
@@ -70,19 +70,13 @@
 
 [[redirects]]
   from = "/downloads/fathering-without-fear-mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf" # Corrected to hyphen
   status = 200
 
 # Normalize hyphen variant to underscore canonical
 [[redirects]]
   from = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
-  status = 200
-
-# Common A4 alias normalization
-[[redirects]]
-  from = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser_A4.pdf"
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf" # Corrected to hyphen
   status = 200
 
 # ────────────────────────────────────────────────────────────
