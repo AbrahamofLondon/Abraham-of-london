@@ -1,79 +1,122 @@
-// components/homepage/HeroBanner.tsx
+components/homepage/HeroBanner.tsx
 import * as React from "react";
-import Image from "next/image";
-import clsx from "clsx";
+import HighQImage from "@/components/HighQImage";
 
-export type VideoSource = { src: string; type: string };
-
-export type HeroBannerProps = {
-  /** Poster image path (public/...) shown immediately and as video poster */
-  poster: string;
-  /** Optional sources for autoplaying background video */
-  videoSources?: VideoSource[];
-  /** Optional overlay content (eyebrow, title, body, button, etc.) */
-  overlay?: React.ReactNode;
-  /** Tailwind object-position helpers for mobile (applied to video & poster) */
-  mobileObjectPositionClass?: string;
-  /** Tailwind height classes for the banner container */
-  heightClassName?: string;
-  /** If true, prioritize the poster image */
-  priorityPoster?: boolean;
+export type VideoSource = {
+  src: string;
+  type: string;          // e.g. "video/webm" or "video/mp4"
+  media?: string;        // optional media query
 };
 
+type HeroBannerProps = {
+  poster: string;                            // /public path
+  videoSources?: VideoSource[];              // AV1 → VP9 → H.264 order
+  overlay?: React.ReactNode;                 // overlay content (safe HTML/React)
+  className?: string;
+  /** object-position helper (Tailwind) for mobile crop, e.g. "object-[50%_30%]" */
+  mobileObjectPositionClass?: string;
+  /** height utility string. default = responsive full-bleed band */
+  heightClassName?: string;
+};
+
+/**
+ * Full-bleed, media-first hero. Respects reduced motion and defers playback
+ * until intersecting viewport. AV1→VP9→H.264 fallback ordering for quality+reach.
+ */
 export default function HeroBanner({
   poster,
-  videoSources,
+  videoSources = [],
   overlay,
-  mobileObjectPositionClass = "object-center md:object-center",
-  heightClassName = "h-[56svh] md:h-[72svh] lg:h-[78svh]",
-  priorityPoster = true,
+  className = "",
+  mobileObjectPositionClass = "object-center",
+  heightClassName = "h-[min(88vh,900px)] sm:h-[82vh]",
 }: HeroBannerProps) {
-  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const [canPlay, setCanPlay] = React.useState(false);
+  const [shouldPlay, setShouldPlay] = React.useState(false);
+
+  // Reduced motion: never autoplay video
+  const prefersReduced = React.useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
+  // Defer loading/playing until the hero enters viewport a bit
+  React.useEffect(() => {
+    if (prefersReduced) return; // show poster only
+    const el = videoRef.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setShouldPlay(true);
+          }
+        }
+      },
+      { rootMargin: "200px 0px 0px 0px", threshold: 0.2 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [prefersReduced]);
+
+  // When we should play and the video can play, attempt autoplay
+  React.useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !shouldPlay || prefersReduced) return;
+    el.play().catch(() => {
+      // if autoplay fails (rare with muted), we still show the poster
+    });
+  }, [shouldPlay, prefersReduced]);
 
   return (
-    <section className={clsx("relative w-full overflow-hidden bg-black", heightClassName)}>
-      {/* Poster (always rendered so there’s no flash even if video stalls) */}
-      <Image
-        src={poster}
-        alt=""
-        fill
-        sizes="100vw"
-        priority={priorityPoster}
-        className={clsx("pointer-events-none select-none object-cover", mobileObjectPositionClass)}
-      />
+    <section className={`relative isolate w-full ${heightClassName} ${className}`}>
+      {/* Poster underneath for instant paint */}
+      <div className="absolute inset-0 -z-10">
+        <HighQImage
+          src={poster}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover" }}
+          className={mobileObjectPositionClass}
+          aboveTheFold
+        />
+      </div>
 
-      {/* Video layer (if provided) */}
-      {hasVideo && (
+      {/* Video layer (hidden if reduced motion) */}
+      {!prefersReduced && videoSources.length > 0 && (
         <video
-          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
-          autoPlay
+          ref={videoRef}
+          className={`absolute inset-0 h-full w-full object-cover ${mobileObjectPositionClass}`}
+          playsInline
           muted
           loop
-          playsInline
-          preload="metadata"
+          preload="auto"
           poster={poster}
-          aria-hidden="true"
+          onCanPlay={() => setCanPlay(true)}
+          aria-hidden
         >
-          {videoSources!.map((s) => (
-            <source key={s.src} src={s.src} type={s.type} />
+          {videoSources.map((s, i) => (
+            <source key={`${s.src}-${i}`} src={s.src} type={s.type} media={s.media} />
           ))}
         </video>
       )}
 
-      {/* Scrims to keep overlay readable */}
+      {/* Decorative soft vignette for text legibility */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)] dark:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.25),transparent_30%,transparent_70%,rgba(0,0,0,0.35))]"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30"
       />
 
-      {/* Content container */}
+      {/* Overlay content (title/CTA/etc) */}
       {overlay ? (
-        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10 text-cream">
-          <div className="max-w-3xl drop-shadow-[0_1px_12px_rgba(0,0,0,.35)]">{overlay}</div>
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-4 pb-10 sm:pb-14">
+          <div className="max-w-3xl text-cream drop-shadow-md">
+            {overlay}
+          </div>
         </div>
       ) : null}
     </section>

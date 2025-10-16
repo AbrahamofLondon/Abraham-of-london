@@ -1,9 +1,9 @@
-// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Script from "next/script";
+import Head from "next/head";
 
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
@@ -31,18 +31,27 @@ function AnalyticsRouterTracker() {
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
+      <Head>
+        {/* Performance hints */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        {/* Inline preconnect for GA if enabled */}
+        {gaEnabled && process.env.NODE_ENV === "production" && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+          </>
+        )}
+      </Head>
+
       {gaEnabled && process.env.NODE_ENV === "production" && (
         <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
           <Script id="ga-init" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', '${GA_ID}', { anonymize_ip: true, page_path: window.location.pathname });
+              gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });
             `}
           </Script>
         </>

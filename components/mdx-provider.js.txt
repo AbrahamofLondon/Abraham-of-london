@@ -1,7 +1,0 @@
-// mdx-provider.js
-import * as React from 'react';
-import { MDXProvider } from '@mdx-js/react';
-
-export const MDXWrapper = ({ children }) => (
-  <MDXProvider components={{}}>{children}</MDXProvider>
-);
