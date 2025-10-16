@@ -23,19 +23,19 @@ function formatPretty(isoish: string, tz = "Europe/London") {
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
   const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
+      timeZone: tz,
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
   const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  }).format(d);
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    }).format(d);
   return `${date}, ${time}`;
 }
 
@@ -43,6 +43,9 @@ type EventPageProps = {
   event: EventMeta & {
     slug: string;
     tags?: string[] | null;
+    // tolerate either name in front-matter at runtime (we don't request coverImage from the loader)
+    coverImage?: string | null;
+    heroImage?: string | null;
   };
   contentSource: any;
 };
@@ -54,8 +57,8 @@ function EventPage({ event, contentSource }: EventPageProps) {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/events/${event.slug}`;
 
-  // prefer heroImage; some older content might have coverImage but our loader serves heroImage
-  const relImage = (event as any).heroImage ?? (event as any).coverImage;
+  // Use whichever the content provides; we don't request coverImage in FieldKeys
+  const relImage = event.coverImage ?? event.heroImage ?? undefined;
   const absImage = relImage ? new URL(relImage, site).toString() : undefined;
 
   const isChatham =
@@ -141,13 +144,14 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
+  // Request ONLY supported FieldKeys from your loader
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
     "date",
     "location",
     "summary",
-    "heroImage", // use this; your loader supports it
+    "heroImage",
     "tags",
     "content",
   ]);
