@@ -4,7 +4,6 @@
   "private": true,
   "engines": { "node": ">=20 <21" },
   "scripts": {
-    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -22,11 +21,11 @@
     "fix:classnames-slash": "node scripts/codemods/convert-classnames-slash-opacity.mjs",
     "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash && npm run fix:classnames-slash",
     "check:mdx": "node scripts/check-mdx-for-html.js",
-    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && node scripts/validate-downloads.mjs"
+    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && node scripts/validate-downloads.mjs",
     "lhci:local": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=http://localhost:3000/ --upload.target=temporary-public-storage",
     "lhci:preview": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=$DEPLOY_URL/ --upload.target=temporary-public-storage",
     "lhci:prod": "lhci autorun --config=./lighthouserc.json --collect.numberOfRuns=2 --collect.url=$URL/ --upload.target=temporary-public-storage",
-    "pdfs": "node scripts/make-pdfs.mjs"
+    "pdfs": "node scripts/make-pdfs.mjs",
     "print:serve": "next start -p 5555",
     "print:pdfs": "node scripts/render-pdfs.mjs --base http://localhost:5555 --out public/downloads"
   },
@@ -81,7 +80,7 @@
     "husky": "^9.1.6",
     "sharp": "0.34.3",
     "simple-icons": "15.14.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
     "puppeteer": "^23.0.0"
   }
 }

@@ -2,6 +2,7 @@
 # Build
 # ────────────────────────────────────────────────────────────
 [build]
+  # Default build command (for local/preview unless overridden below)
   command = "npm run build"
   publish = ".next"
 
@@ -12,8 +13,15 @@
     CI_LAX = "1"
     NO_SLASH_OPACITY_MODE = "fix"
 
+# In production, build PDFs first, then Next.
+[context.production]
+  command = "npm run pdfs && npm run build"
+
 [context.production.environment]
   NODE_ENV = "production"
+  # If your `pdfs` script needs devDependencies (e.g., glob, puppeteer),
+  # uncomment the next line OR move those packages to "dependencies".
+  # NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX emails)
