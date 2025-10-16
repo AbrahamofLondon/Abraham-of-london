@@ -194,7 +194,7 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // Include "resources" so we can wire up Suggested Resources
+  // Include so we can wire up Suggested Resources
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
@@ -202,9 +202,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
     "location",
     "summary",
     "heroImage",
-    "coverImage",
     "tags",
-    "resources",
     "content",
   ]);
 
