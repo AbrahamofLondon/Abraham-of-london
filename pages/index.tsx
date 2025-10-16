@@ -127,7 +127,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       <HeroBanner
         poster={banner.poster}
         videoSources={banner.videoSources}
-        overlay={overlayNode} {/* ✅ was `overlay` */}
+        overlay={overlayNode}
         mobileObjectPositionClass="object-left md:object-[30%_center] lg:object-[40%_center]"
         heightClassName={banner.heightClassName}
       />
