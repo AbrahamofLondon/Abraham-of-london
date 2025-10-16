@@ -11,14 +11,34 @@ import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
 import { getActiveBanner } from "@/lib/hero-banners";
-
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-// ✅ client-only hero to dodge SSR evaluation issues
+// ── Types to keep the banner strictly typed and predictable ──────────────
+type BannerCTA = { label: string; href: string };
+type BannerOverlay = {
+  eyebrow?: string;
+  title?: string;
+  body?: string;
+  cta?: BannerCTA;
+} | null;
+
+type VideoSource = { src: string; type: "video/webm" | "video/mp4" };
+
+type BannerConfig = {
+  poster: string;
+  videoSources?: VideoSource[] | null;
+  overlay?: BannerOverlay;
+  /** e.g. "object-[40%_50%]" for mobile focus */
+  mobileObjectPositionClass?: string | null;
+  /** e.g. "min-h-[65svh] lg:min-h-[78svh]" */
+  heightClassName?: string | null;
+};
+
+// ✅ client-only hero to dodge SSR media evaluation
 const HeroBanner = dynamic(() => import("@/components/homepage/HeroBanner"), { ssr: false });
 
 type EventsTeaserItem = {
@@ -41,9 +61,22 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const booksHref = `/books${qSuffix}`;
   const postsCount = posts.length;
 
-  const banner = React.useMemo(() => getActiveBanner(), []);
+  // Safe banner with sane fallbacks to prevent layout voids
+  const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as BannerConfig, []);
+  const banner: Required<Pick<BannerConfig, "poster">> &
+    Omit<BannerConfig, "poster"> = {
+    poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
+    videoSources: raw?.videoSources ?? [
+      { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
+      { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
+    ],
+    overlay: raw?.overlay ?? null,
+    mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-center",
+    // taller default helps avoid black edges on ultra-wide screens
+    heightClassName: raw?.heightClassName ?? "min-h-[65svh] sm:min-h-[70svh] lg:min-h-[78svh]",
+  };
 
-  const overlay =
+  const overlayNode: React.ReactNode =
     banner.overlay ? (
       <>
         {banner.overlay.eyebrow && (
@@ -81,15 +114,20 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
         />
         <meta property="og:type" content="website" />
+        {/* Hint the browser to grab hero sources early */}
+        <link rel="preload" as="image" href={banner.poster} />
+        {banner.videoSources?.map((s, i) => (
+          <link key={i} rel="preload" as="fetch" href={s.src} crossOrigin="anonymous" />
+        ))}
       </Head>
 
       {/* FULL-BLEED HERO */}
       <HeroBanner
         poster={banner.poster}
-        videoSources={banner.videoSources}
-        overlay={overlay}
-        mobileObjectPositionClass={banner.mobileObjectPositionClass}
-        heightClassName={banner.heightClassName}
+        videoSources={banner.videoSources || []}
+        overlay={overlayNode}
+        mobileObjectPositionClass={banner.mobileObjectPositionClass || "object-center"}
+        heightClassName={banner.heightClassName || "min-h-[70svh] lg:min-h-[78svh]"}
       />
 
       {/* Breadcrumb + quick counts */}
@@ -97,7 +135,11 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
             <ol className="flex items-center gap-2">
-              <li><Link href="/" className="hover:text-deepCharcoal" prefetch={false}>Home</Link></li>
+              <li>
+                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>
+                  Home
+                </Link>
+              </li>
               <li aria-hidden>/</li>
               <li className="text-[color:var(--color-on-secondary)/0.8]">Overview</li>
               {incomingQ && (
@@ -135,7 +177,11 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
-            <Link href={blogHref} className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
+            <Link
+              href={blogHref}
+              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
+            >
               Read the blog
             </Link>
           </header>
@@ -167,7 +213,11 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Books</h2>
-            <Link href={booksHref} className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
+            <Link
+              href={booksHref}
+              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
+            >
               View all
             </Link>
           </header>
@@ -199,15 +249,24 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
             <h2 className="font-serif text-2xl font-semibold text-deepCharcoal">Downloads</h2>
-            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">Practical tools to help you lead with clarity.</p>
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
+              Practical tools to help you lead with clarity.
+            </p>
           </header>
 
           <ul className="grid gap-6 sm:grid-cols-2">
             <li>
-              <Link href="/downloads/brotherhood-covenant" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Brotherhood Covenant (Printable)">
+              <Link
+                href="/downloads/brotherhood-covenant"
+                prefetch={false}
+                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
+                aria-label="Brotherhood Covenant (Printable)"
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Brotherhood Covenant (Printable)</div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
+                      Brotherhood Covenant (Printable)
+                    </div>
                     <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
                   </div>
                   <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
@@ -215,10 +274,17 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               </Link>
             </li>
             <li>
-              <Link href="/downloads/leaders-cue-card" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Leader’s Cue Card (A6, Two-Up)">
+              <Link
+                href="/downloads/leaders-cue-card"
+                prefetch={false}
+                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
+                aria-label="Leader’s Cue Card (A6, Two-Up)"
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Leader’s Cue Card (A6, Two-Up)</div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
+                      Leader’s Cue Card (A6, Two-Up)
+                    </div>
                     <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
                   </div>
                   <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
@@ -234,14 +300,22 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-2 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Upcoming Events</h2>
-            <Link href="/events" className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
+            <Link
+              href="/events"
+              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
+              prefetch={false}
+            >
               View all
             </Link>
           </header>
-          <p className="mb-6 text-xs text-[color:var(--color-on-secondary)/0.6]">Select sessions run as Chatham Rooms (off the record).</p>
+          <p className="mb-6 text-xs text-[color:var(--color-on-secondary)/0.6]">
+            Select sessions run as Chatham Rooms (off the record).
+          </p>
 
           {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">No upcoming events at the moment.</p>
+            <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">
+              No upcoming events at the moment.
+            </p>
           ) : (
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {eventsTeaser.map((ev) => (
@@ -267,32 +341,52 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
-            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">A portfolio built on craftsmanship, stewardship, and endurance.</p>
+            <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
+              A portfolio built on craftsmanship, stewardship, and endurance.
+            </p>
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <Link href="/ventures?brand=alomarada" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+            <Link
+              href="/ventures?brand=alomarada"
+              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
+            >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">Strategy & capital—focused on durable businesses with moral clarity and operational discipline.</p>
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
+              </p>
             </Link>
 
-            <Link href="/ventures?brand=endureluxe" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+            <Link
+              href="/ventures?brand=endureluxe"
+              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
+            >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">Essential goods and refined experiences—engineered to last, designed to serve.</p>
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                Essential goods and refined experiences—engineered to last, designed to serve.
+              </p>
             </Link>
 
-            <Link href="/about" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+            <Link
+              href="/about"
+              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
+              prefetch={false}
+            >
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">Writing, counsel, and cultural work at the intersection of family, enterprise, and society.</p>
+              <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
+              </p>
             </Link>
           </div>
         </div>
@@ -301,23 +395,22 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Closing CTA */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal">
         <div className="absolute inset-0 -z-10">
-          <Image
-            src="/assets/images/cta/cta-bg.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={85}
-            className="object-cover opacity-20"
-          />
+          <Image src="/assets/images/cta/cta-bg.jpg" alt="" fill sizes="100vw" quality={85} className="object-cover opacity-20" />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-20 text-center">
-          <h3 className="font-serif text-3xl font-semibold text-cream">Build with Clarity. Lead with Standards. Leave a Legacy.</h3>
+          <h3 className="font-serif text-3xl font-semibold text-cream">
+            Build with Clarity. Lead with Standards. Leave a Legacy.
+          </h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-on-primary)/0.85]">
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
           <div className="mt-8">
-            <Link href="/contact" className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95" prefetch={false}>
+            <Link
+              href="/contact"
+              className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
+              prefetch={false}
+            >
               Connect with a Strategist
             </Link>
           </div>
