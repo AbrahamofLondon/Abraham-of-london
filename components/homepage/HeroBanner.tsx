@@ -1,91 +1,53 @@
 // components/homepage/HeroBanner.tsx
 import * as React from "react";
-import Image from "next/image";
+import clsx from "clsx";
 
-export type VideoSource = { src: string; type: string; media?: string };
-
-type HeroBannerProps = {
-  poster: string;
-  videoSources?: VideoSource[];
-  overlay?: React.ReactNode;
-  className?: string;
-  mobileObjectPositionClass?: string;
-  heightClassName?: string;
+type VideoSource = {
+  src: string;
+  type: "video/webm" | "video/mp4";
+  media?: string;
 };
 
 export default function HeroBanner({
   poster,
-  videoSources = [],
-  overlay,
-  className = "",
+  videoSources,
+  heightClassName = "h-[70svh]",
   mobileObjectPositionClass = "object-center",
-  heightClassName = "h-[min(88vh,900px)] sm:h-[82vh]",
-}: HeroBannerProps) {
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const [shouldPlay, setShouldPlay] = React.useState(false);
-
-  // Reduced motion check — guarded for SSR
-  const prefersReduced = React.useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  React.useEffect(() => {
-    if (prefersReduced) return;
-    const el = videoRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => entries.some((e) => e.isIntersecting) && setShouldPlay(true),
-      { rootMargin: "200px 0px 0px 0px", threshold: 0.2 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [prefersReduced]);
-
-  React.useEffect(() => {
-    if (!shouldPlay || prefersReduced) return;
-    videoRef.current?.play().catch(() => {});
-  }, [shouldPlay, prefersReduced]);
-
+  overlay,
+}: {
+  poster: string;
+  videoSources: VideoSource[];
+  heightClassName?: string;
+  mobileObjectPositionClass?: string;
+  overlay?: React.ReactNode;
+}) {
   return (
-    <section className={`relative isolate w-full ${heightClassName} ${className}`}>
-      {/* Instant paint poster */}
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src={poster}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className={`object-cover ${mobileObjectPositionClass}`}
-        />
-      </div>
+    <section className={clsx("relative isolate overflow-hidden", heightClassName)}>
+      {/* media */}
+      <video
+        className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      >
+        {videoSources.map((s, i) => (
+          <source key={i} src={s.src} type={s.type} {...(s.media ? { media: s.media } : {})} />
+        ))}
+      </video>
 
-      {/* Video (client will hydrate when visible) */}
-      {!prefersReduced && videoSources.length > 0 && (
-        <video
-          ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-cover ${mobileObjectPositionClass}`}
-          playsInline
-          muted
-          loop
-          preload="auto"
-          poster={poster}
-          aria-hidden
-        >
-          {videoSources.map((s, i) => (
-            <source key={`${s.src}-${i}`} src={s.src} type={s.type} media={s.media} />
-          ))}
-        </video>
-      )}
+      {/* top gradient veil for legibility */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
+      />
 
-      {/* Soft vignette for legibility */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
-
-      {/* Overlay */}
+      {/* overlay copy (optional) */}
       {overlay ? (
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl items-end px-4 pb-10 sm:pb-14">
-          <div className="max-w-3xl text-cream drop-shadow-md">{overlay}</div>
+        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
+          <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
     </section>
