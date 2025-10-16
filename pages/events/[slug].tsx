@@ -1,171 +1,132 @@
-﻿// pages/blog/[slug].tsx
-import dynamic from "next/dynamic";
+﻿// pages/events/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
-import { format } from "date-fns";
 import * as React from "react";
-
-import Layout from "@/components/Layout";
-import { MDXComponents } from "@/components/MDXComponents";
-import MDXProviderWrapper from "@/components/MDXProviderWrapper";
-import PostHero from "@/components/PostHero";
-import SEOHead from "@/components/SEOHead";
-import ResourcesCTA from "@/components/mdx/ResourcesCTA"; // ✅ added
-
-import { absUrl } from "@/lib/siteConfig";
-import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post";
-
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-// IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
 
-const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
+import Layout from "@/components/Layout";
+import SEOHead from "@/components/SEOHead";
+import EventHero from "@/components/events/EventHero";
+import { MDXComponents } from "@/components/MDXComponents";
+import MDXProviderWrapper from "@/components/MDXProviderWrapper";
+import EventResources from "@/components/events/EventResources";
 
-type PageMeta = Omit<PostMeta, "tags"> & {
-  slug: string;
-  tags?: string[] | null;
-  coverAspect?: "book" | "wide" | "square" | null;
-  coverFit?: "cover" | "contain" | null;
-  coverPosition?: "left" | "center" | "right" | null;
+import { absUrl } from "@/lib/siteConfig";
+import { getAllEvents, getEventBySlug } from "@/lib/server/events-data";
+
+type FrontmatterExtras = {
+  reads?: { href: string; label: string; sub?: string }[];
+  downloads?: { href: string; label: string }[];
 };
 
+type EventPageMeta = {
+  slug: string;
+  title: string;
+  date?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  summary?: string | null;
+  heroImage?: string | null;
+  tags?: string[] | null;
+} & FrontmatterExtras;
+
 type Props = {
-  post: {
-    meta: PageMeta;
-    content: MDXRemoteSerializeResult;
-  };
+  meta: EventPageMeta;
+  mdx: MDXRemoteSerializeResult;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const items = getAllEvents(["slug"]);
+  const paths = items
+    .map((e) => e.slug)
+    .filter(Boolean)
+    .map((slug) => ({ params: { slug: String(slug) } }));
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
-  const raw = getPostBySlug(slug, { withContent: true });
+  const raw = getEventBySlug(slug, [
+    "slug",
+    "title",
+    "date",
+    "endDate",
+    "location",
+    "summary",
+    "heroImage",
+    "tags",
+    "content",
+  ]) as any;
 
-  if (!raw.slug || !raw.title) return { notFound: true };
+  if (!raw?.slug || !raw?.title) return { notFound: true };
 
-  const meta: PageMeta = {
-    slug: raw.slug!,
-    title: raw.title!,
-    date: (raw.date as string) ?? null,
-    excerpt: (raw.excerpt as string) ?? null,
-    coverImage: (raw.coverImage as string) ?? null,
-    author: (raw.author as any) ?? "Abraham of London",
-    readTime: (raw.readTime as string) ?? null,
-    category: (raw.category as string) ?? null,
-    tags: (raw.tags as string[] | undefined) ?? null,
-    coverAspect: (raw as any).coverAspect ?? null,
-    coverFit: (raw as any).coverFit ?? null,
-    coverPosition: (raw as any).coverPosition ?? null,
+  // Pull resource arrays directly from front-matter if present
+  const reads = Array.isArray(raw.reads) ? raw.reads : [];
+  const downloads = Array.isArray(raw.downloads) ? raw.downloads : [];
+
+  const meta: EventPageMeta = {
+    slug: raw.slug,
+    title: raw.title,
+    date: raw.date ?? null,
+    endDate: raw.endDate ?? null,
+    location: raw.location ?? null,
+    summary: raw.summary ?? null,
+    heroImage: raw.heroImage ?? null,
+    tags: Array.isArray(raw.tags) ? raw.tags : null,
+    reads,
+    downloads,
   };
 
-  const source = raw.content || "";
-
-  // Workaround the GFM tables crash by not enabling remark-gfm here.
+  const source = String(raw.content || "");
   const mdx = await serialize(source, {
     parseFrontmatter: false,
     scope: meta,
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-      format: "mdx",
-    },
+    mdxOptions: { remarkPlugins: [], rehypePlugins: [], format: "mdx" },
   });
 
-  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+  return { props: { meta, mdx }, revalidate: 60 };
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getPostSlugs();
-  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
-};
-
-export default function BlogPost({ post }: Props) {
-  const {
-    slug,
-    title,
-    date,
-    excerpt,
-    coverImage,
-    author,
-    readTime,
-    category,
-    tags,
-    coverAspect,
-    coverFit,
-    coverPosition,
-    content
-  } = post.meta;
-
-  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage
-    ? absUrl(coverImage)
+export default function EventPage({ meta, mdx }: Props) {
+  const coverForMeta = meta.heroImage
+    ? absUrl(meta.heroImage)
     : absUrl("/assets/images/social/og-image.jpg");
-  const authorName =
-    typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
-
-  const isFatherhood =
-    category === "Fatherhood" ||
-    (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
 
   return (
-    <Layout pageTitle={title} hideSocialStrip hideCTA>
+    <Layout pageTitle={meta.title} hideCTA>
       <SEOHead
-        title={title}
-        description={excerpt ?? ""}
-        slug={`/blog/${slug}`}
+        title={meta.title}
+        description={meta.summary ?? ""}
+        slug={`/events/${meta.slug}`}
         coverImage={coverForMeta}
-        publishedTime={date ?? undefined}
-        modifiedTime={date ?? undefined}
-        authorName={authorName}
-        tags={tags ?? []}
+        publishedTime={meta.date ?? undefined}
+        modifiedTime={meta.date ?? undefined}
+        tags={meta.tags ?? []}
+      />
+
+      <EventHero
+        slug={meta.slug}
+        title={meta.title}
+        date={meta.date ?? undefined}
+        endDate={meta.endDate ?? undefined}
+        location={meta.location ?? undefined}
+        summary={meta.summary ?? undefined}
+        heroImage={meta.heroImage ?? undefined}
+        aspect="wide"
+        fit="contain"
       />
 
       <MDXProviderWrapper>
-        <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-          <PostHero
-            slug={slug}
-            title={title}
-            coverImage={coverImage ?? undefined}
-            coverAspect={(coverAspect as any) ?? undefined}
-            coverFit={(coverFit as any) ?? undefined}
-            coverPosition={(coverPosition as any) ?? undefined}
-          />
-
-          <h1 className="sr-only">{title}</h1>
-
-          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.75]">
-            <span>By {authorName}</span>
-            {date && (
-              <>
-                {" "}· <time dateTime={date}>{formattedDate}</time>
-              </>
-            )}
-            {readTime && <> · {readTime}</>}
-            {category && (
-              <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
-                {category}
-              </span>
-            )}
-          </div>
-
+        <article className="mx-auto max-w-3xl px-4 py-8 md:py-12">
           <div className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert">
-            <MDXRemote {...post.content} components={MDXComponents} />
+            <MDXRemote {...mdx} components={MDXComponents} />
           </div>
 
-          {isFatherhood && <ResourcesCTA className="mt-12" />}
-
-          <div className="mt-12">
-            <a href="#comments" className="luxury-link text-sm">
-              Join the discussion ↓
-            </a>
-          </div>
-
-          <section id="comments" className="mt-16">
-            <Comments
-              repo="AbrahamofLondon/abrahamoflondon-comments"
-              issueTerm="pathname"
-              useClassDarkMode
-            />
-          </section>
+          <EventResources
+            className="mt-10"
+            reads={meta.reads || []}
+            downloads={meta.downloads || []}
+          />
         </article>
       </MDXProviderWrapper>
     </Layout>
