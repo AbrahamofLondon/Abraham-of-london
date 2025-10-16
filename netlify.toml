@@ -12,7 +12,6 @@
     CI_LAX = "1"
     NO_SLASH_OPACITY_MODE = "fix"
 
-# Production-only env
 [context.production.environment]
   NODE_ENV = "production"
 
@@ -29,12 +28,10 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse – run ONLY on production deploys
-# (No invalid "fail_build". Use supported inputs below.)
+# Lighthouse — prod only
 [[context.production.plugins]]
   package = "@netlify/plugin-lighthouse"
 
-  # What to audit (relative paths off the deployed URL)
   [[context.production.plugins.inputs.audits]]
     path = "/"
     output_path = "reports/home.html"
@@ -43,24 +40,20 @@
     path = "/blog"
     output_path = "reports/blog.html"
 
-  # Score thresholds (deploy will fail if below)
   [context.production.plugins.inputs.thresholds]
     performance = 0.9
     accessibility = 0.9
     best-practices = 0.9
     seo = 0.9
 
-  # Global settings for Lighthouse
   [context.production.plugins.inputs.settings]
     chromeFlags = "--no-sandbox"
 
-  # Whether to fail the deploy on thresholds (true/false)
-  # Set to true when you’re ready to enforce budgets.
   [context.production.plugins.inputs]
     fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
-# Legacy PDF aliases → serve the new files directly (200 rewrites)
+# Legacy PDF aliases
 # ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
@@ -70,11 +63,6 @@
 [[redirects]]
   from = "/downloads/fathering-without-fear-mobile.pdf"
   to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
-  status = 200
-
-[[redirects]]
-  from = "/downloads/Fathering_Without_Fear.pdf"
-  to   = "/downloads/Fathering_Without_Fear.pdf"
   status = 200
 
 # ────────────────────────────────────────────────────────────
@@ -107,8 +95,7 @@
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
 # ────────────────────────────────────────────────────────────
-# Canonical host redirects (apex → www). 
-# NOTE: do NOT redirect Netlify preview host; Lighthouse needs it.
+# Canonical host redirects (apex → www)
 # ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
@@ -121,9 +108,9 @@
 # Headers
 # ────────────────────────────────────────────────────────────
 [[headers]]
-for = "/"
+  for = "/"
   [headers.values]
-  Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/*"
@@ -134,8 +121,25 @@ for = "/"
     X-Frame-Options           = "SAMEORIGIN"
     Permissions-Policy        = "camera=(), microphone=(), geolocation=()"
 
+# Immutable media
+[[headers]]
+  for = "/assets/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Accept-Ranges = "bytes"
+
 [[headers]]
   for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/image*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
@@ -146,15 +150,5 @@ for = "/"
 
 [[headers]]
   for = "/downloads/*.pdf"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/downloads/fathering-without-fear.pdf"
-  [headers.values]
-    Cache-Control = "no-store"
-
-[[headers]]
-  for = "/assets/images/downloads/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

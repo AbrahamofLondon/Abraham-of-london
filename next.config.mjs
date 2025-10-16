@@ -1,14 +1,11 @@
-// next.config.mjs
 import createMDX from "@next/mdx";
 import remarkGfm from "remark-gfm";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-
 const relax = process.env.CI_LAX === "1";
 const isAnalyze = process.env.ANALYZE === "true";
 
-// MDX support
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: { remarkPlugins: [remarkGfm] },
@@ -20,27 +17,24 @@ const nextConfig = {
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
 
-  // CI-only relax (keeps local strict)
   eslint: { ignoreDuringBuilds: relax },
   typescript: { ignoreBuildErrors: relax },
 
   images: {
     formats: ["image/avif", "image/webp"],
-    dangerouslyAllowSVG: true, // allow SVG via <Image> when needed
+    dangerouslyAllowSVG: true,
     remotePatterns: [
       { protocol: "https", hostname: "abraham-of-london.netlify.app" },
       { protocol: "https", hostname: "abrahamoflondon.org" },
       { protocol: "https", hostname: "www.abrahamoflondon.org" },
-      // add more CDNs/domains here if you load covers remotely
     ],
   },
 
   experimental: {
-    optimizePackageImports: ["framer-motion"], // trims bundle for FM
+    optimizePackageImports: ["framer-motion"],
   },
 };
 
-// Optional bundle analyzer (only when ANALYZE=true and package is present)
 let withAnalyzer = (cfg) => cfg;
 if (isAnalyze) {
   try {
@@ -48,7 +42,7 @@ if (isAnalyze) {
       require("@next/bundle-analyzer").default ?? require("@next/bundle-analyzer");
     withAnalyzer = analyzer({ enabled: true });
   } catch {
-    // analyzer not installed — skip silently
+    // analyzer not installed — skip
   }
 }
 
