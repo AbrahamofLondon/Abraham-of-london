@@ -17,14 +17,16 @@ import { getAllEvents } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-// ── Types to keep the banner strictly typed and predictable ──────────────
+/* ── Types to keep the banner strictly typed and predictable ───────────── */
 type BannerCTA = { label: string; href: string };
-type BannerOverlay = {
-  eyebrow?: string;
-  title?: string;
-  body?: string;
-  cta?: BannerCTA;
-} | null;
+type BannerOverlay =
+  | {
+      eyebrow?: string;
+      title?: string;
+      body?: string;
+      cta?: BannerCTA;
+    }
+  | null;
 
 type VideoSource = { src: string; type: "video/webm" | "video/mp4" };
 
@@ -63,13 +65,13 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
   // Safe banner with sane fallbacks to prevent layout voids
   const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as BannerConfig, []);
-  const banner: Required<Pick<BannerConfig, "poster">> &
-    Omit<BannerConfig, "poster"> = {
+  const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
     poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
-    videoSources: raw?.videoSources ?? [
-      { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
-      { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
-    ],
+    videoSources:
+      raw?.videoSources ?? [
+        { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
+        { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
+      ],
     overlay: raw?.overlay ?? null,
     mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-center",
     // taller default helps avoid black edges on ultra-wide screens
@@ -117,17 +119,17 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         {/* Hint the browser to grab hero sources early */}
         <link rel="preload" as="image" href={banner.poster} />
         {banner.videoSources?.map((s, i) => (
-          <link key={i} rel="preload" as="fetch" href={s.src} crossOrigin="anonymous" />
+          <link key={i} rel="preload" as="video" href={s.src} type={s.type} />
         ))}
       </Head>
 
       {/* FULL-BLEED HERO */}
       <HeroBanner
         poster={banner.poster}
-        videoSources={banner.videoSources || []}
-        overlay={overlayNode}
-        mobileObjectPositionClass={banner.mobileObjectPositionClass || "object-center"}
-        heightClassName={banner.heightClassName || "min-h-[70svh] lg:min-h-[78svh]"}
+        videoSources={banner.videoSources}
+        overlay={overlayNode} {/* ✅ was `overlay` */}
+        mobileObjectPositionClass="object-left md:object-[30%_center] lg:object-[40%_center]"
+        heightClassName={banner.heightClassName}
       />
 
       {/* Breadcrumb + quick counts */}
