@@ -196,14 +196,15 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: { params: { slug: string } }) {
   // Include so we can wire up Suggested Resources
   const { content, ...event } = getEventBySlug(params.slug, [
-    "slug",
-    "title",
-    "date",
-    "location",
-    "summary",
-    "heroImage",
-    "tags",
-    "content",
+    | "slug"
+  | "title"
+  | "date"
+  | "location"
+  | "summary"
+  | "heroImage"
+  | "tags"
+  | "resources"   // ✅
+  | "content";
   ]);
 
   const contentSource = await serialize(content || "");
