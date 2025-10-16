@@ -1,223 +1,172 @@
-﻿// pages/events/[slug].tsx
-import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
-import { MDXRemote } from "next-mdx-remote";
+﻿// pages/blog/[slug].tsx
+import dynamic from "next/dynamic";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import { format } from "date-fns";
+import * as React from "react";
+
+import Layout from "@/components/Layout";
+import { MDXComponents } from "@/components/MDXComponents";
+import MDXProviderWrapper from "@/components/MDXProviderWrapper";
+import PostHero from "@/components/PostHero";
+import SEOHead from "@/components/SEOHead";
+import ResourcesCTA from "@/components/mdx/ResourcesCTA"; // ✅ added
+
+import { absUrl } from "@/lib/siteConfig";
+import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
-import type { EventMeta } from "@/lib/server/events-data";
-import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
+// IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
 
-// Detect YYYY-MM-DD (date-only)
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
 
-// London-first pretty date; show time only if a time exists
-function formatPretty(isoish: string, tz = "Europe/London") {
-  if (isDateOnly(isoish)) {
-    const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
-  }
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  }).format(d);
-  return `${date}, ${time}`;
-}
-
-type EventPageProps = {
-  event: EventMeta & {
-    slug: string;
-    tags?: string[] | null;
-    resources?: string[] | null;
-  };
-  contentSource: any;
-  resourcesMeta: DownloadMeta[];
+type PageMeta = Omit<PostMeta, "tags"> & {
+  slug: string;
+  tags?: string[] | null;
+  coverAspect?: "book" | "wide" | "square" | null;
+  coverFit?: "cover" | "contain" | null;
+  coverPosition?: "left" | "center" | "right" | null;
 };
 
-function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
-  if (!event) return <div>Event not found.</div>;
+type Props = {
+  post: {
+    meta: PageMeta;
+    content: MDXRemoteSerializeResult;
+  };
+};
 
-  const prettyDate = formatPretty(event.date);
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const url = `${site}/events/${event.slug}`;
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.slug || "");
+  const raw = getPostBySlug(slug, { withContent: true });
 
-  // Support either field name from content
-  const relImage = (event as any).coverImage ?? (event as any).heroImage;
-  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
+  if (!raw.slug || !raw.title) return { notFound: true };
 
-  const isChatham =
-    Array.isArray(event.tags) &&
-    event.tags.some((t) => String(t).toLowerCase() === "chatham");
-
-  const jsonLd: Record<string, any> = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: event.title,
-    startDate: event.date,
-    eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: {
-      "@type": "Place",
-      name: event.location || "London, UK",
-      address: event.location || "London, UK",
-    },
-    organizer: {
-      "@type": "Organization",
-      name: "Abraham of London",
-      url: site,
-    },
-    ...(absImage ? { image: [absImage] } : {}),
-    description: event.summary || "",
-    url,
+  const meta: PageMeta = {
+    slug: raw.slug!,
+    title: raw.title!,
+    date: (raw.date as string) ?? null,
+    excerpt: (raw.excerpt as string) ?? null,
+    coverImage: (raw.coverImage as string) ?? null,
+    author: (raw.author as any) ?? "Abraham of London",
+    readTime: (raw.readTime as string) ?? null,
+    category: (raw.category as string) ?? null,
+    tags: (raw.tags as string[] | undefined) ?? null,
+    coverAspect: (raw as any).coverAspect ?? null,
+    coverFit: (raw as any).coverFit ?? null,
+    coverPosition: (raw as any).coverPosition ?? null,
   };
 
+  const source = raw.content || "";
+
+  // Workaround the GFM tables crash by not enabling remark-gfm here.
+  const mdx = await serialize(source, {
+    parseFrontmatter: false,
+    scope: meta,
+    mdxOptions: {
+      remarkPlugins: [],
+      rehypePlugins: [],
+      format: "mdx",
+    },
+  });
+
+  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getPostSlugs();
+  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
+};
+
+export default function BlogPost({ post }: Props) {
+  const {
+    slug,
+    title,
+    date,
+    excerpt,
+    coverImage,
+    author,
+    readTime,
+    category,
+    tags,
+    coverAspect,
+    coverFit,
+    coverPosition,
+  } = post.meta;
+
+  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
+  const coverForMeta = coverImage
+    ? absUrl(coverImage)
+    : absUrl("/assets/images/social/og-image.jpg");
+  const authorName =
+    typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
+
+  const isFatherhood =
+    category === "Fatherhood" ||
+    (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
+
   return (
-    <div className="event-page px-4 py-10 mx-auto max-w-3xl">
-      <Head>
-        <title>{event.title} | Abraham of London</title>
-        <meta name="description" content={event.summary || ""} />
-        {absImage && <meta property="og:image" content={absImage} />}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={url} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
+    <Layout pageTitle={title} hideSocialStrip hideCTA>
+      <SEOHead
+        title={title}
+        description={excerpt ?? ""}
+        slug={`/blog/${slug}`}
+        coverImage={coverForMeta}
+        publishedTime={date ?? undefined}
+        modifiedTime={date ?? undefined}
+        authorName={authorName}
+        tags={tags ?? []}
+      />
 
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{event.title}</h1>
+      <MDXProviderWrapper>
+        <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
+          <PostHero
+            slug={slug}
+            title={title}
+            coverImage={coverImage ?? undefined}
+            coverAspect={(coverAspect as any) ?? undefined}
+            coverFit={(coverFit as any) ?? undefined}
+            coverPosition={(coverPosition as any) ?? undefined}
+          />
 
-      {isChatham && (
-        <>
-          <span
-            className="inline-block rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-            title="Chatham Room (off the record)"
-            aria-label="Chatham Room (off the record)"
-          >
-            Chatham
-          </span>
-          <p className="mt-2 text-xs text-neutral-600">Off the record. No recordings. No press.</p>
-        </>
-      )}
+          <h1 className="sr-only">{title}</h1>
 
-      <p className="mt-3 text-sm text-neutral-600 mb-1">
-        <span className="font-medium">Date:</span> {prettyDate}
-      </p>
-      {event.location && (
-        <p className="text-sm text-neutral-600 mb-6">
-          <span className="font-medium">Location:</span> {event.location}
-        </p>
-      )}
+          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.75]">
+            <span>By {authorName}</span>
+            {date && (
+              <>
+                {" "}· <time dateTime={date}>{formattedDate}</time>
+              </>
+            )}
+            {readTime && <> · {readTime}</>}
+            {category && (
+              <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
+                {category}
+              </span>
+            )}
+          </div>
 
-      <article className="prose max-w-none">
-        <MDXRemote {...contentSource} />
-      </article>
+          <div className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert">
+            <MDXRemote {...post.content} components={MDXComponents} />
+          </div>
 
-      {resourcesMeta?.length ? (
-        <section className="mt-10 border-t border-lightGrey pt-8">
-          <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-4">
-            Suggested Resources
-          </h2>
-          <ul className="grid gap-5 sm:grid-cols-2">
-            {resourcesMeta.map((r) => (
-              <li key={r.slug} className="group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-                {r.coverImage ? (
-                  <div className="relative aspect-[3/2] w-full">
-                    <Image
-                      src={r.coverImage}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                  </div>
-                ) : null}
-                <div className="p-4">
-                  <h3 className="text-base font-semibold text-deepCharcoal">
-                    <Link href={`/downloads/${r.slug}`} className="hover:underline">
-                      {r.title}
-                    </Link>
-                  </h3>
-                  {r.excerpt ? (
-                    <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.85] line-clamp-3">
-                      {r.excerpt}
-                    </p>
-                  ) : null}
-                  <div className="mt-3 flex gap-2">
-                    <Link
-                      href={`/downloads/${r.slug}`}
-                      className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest hover:bg-forest hover:text-cream"
-                    >
-                      Notes
-                    </Link>
-                    {r.file ? (
-                      <Link
-                        href={r.file}
-                        className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
-                      >
-                        Download
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </div>
+          {isFatherhood && <ResourcesCTA className="mt-12" />}
+
+          <div className="mt-12">
+            <a href="#comments" className="luxury-link text-sm">
+              Join the discussion ↓
+            </a>
+          </div>
+
+          <section id="comments" className="mt-16">
+            <Comments
+              repo="AbrahamofLondon/abrahamoflondon-comments"
+              issueTerm="pathname"
+              useClassDarkMode
+            />
+          </section>
+        </article>
+      </MDXProviderWrapper>
+    </Layout>
   );
 }
-
-export async function getStaticPaths() {
-  const slugs = getEventSlugs();
-  const paths = slugs.map((slug: string) => ({ params: { slug } }));
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // Include so we can wire up Suggested Resources
-  const { content, ...event } = getEventBySlug(params.slug, [
-    | "slug"
-  | "title"
-  | "date"
-  | "location"
-  | "summary"
-  | "heroImage"
-  | "tags"
-  | "resources"   // ✅
-  | "content";
-  ]);
-
-  const contentSource = await serialize(content || "");
-
-  const resourcesList: string[] = Array.isArray((event as any).resources)
-    ? ((event as any).resources as string[])
-    : [];
-  const resourcesMeta = resourcesList.length
-    ? getDownloadsBySlugs(resourcesList)
-    : [];
-
-  return { props: { event, contentSource, resourcesMeta } };
-}
-
-export default EventPage;
-
