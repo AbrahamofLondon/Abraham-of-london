@@ -141,16 +141,14 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  // IMPORTANT: request field keys your loader supports (heroImage yes; coverImage no)
   const { content, ...event } = getEventBySlug(params.slug, [
     "slug",
     "title",
     "date",
     "location",
     "summary",
-    "heroImage",   // keep
+    "heroImage", // use this; your loader supports it
     "tags",
-    "resources",   // ok if defined in your loader; remove if not
     "content",
   ]);
 
