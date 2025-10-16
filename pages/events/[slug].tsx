@@ -1,4 +1,4 @@
-// pages/events/[slug].tsx
+﻿// pages/events/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -219,3 +219,4 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
 }
 
 export default EventPage;
+
