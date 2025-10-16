@@ -2,7 +2,9 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=20 <21" },
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -60,6 +62,7 @@
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.0",
     "resend": "6.1.2",
+    "swiper": "^11.1.5", 
     "tailwindcss": "3.4"
   },
   "devDependencies": {
