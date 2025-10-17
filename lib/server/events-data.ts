@@ -1,21 +1,22 @@
+/* eslint-disable no-throw-literal */
 if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
-// lib/server/events-data.ts
 
+// lib/server/events-data.ts
 export interface EventMeta {
   slug: string;
   title: string;
   date: string;
-  endDate?: string;
+  endDate?: string | null;
   location?: string;
-  excerpt?: string;
-  summary?: string;
-  heroImage?: string;
-  ctaHref?: string;
-  ctaLabel?: string;
+  excerpt?: string | null;
+  summary?: string | null;
+  heroImage?: string | null;
+  ctaHref?: string | null;
+  ctaLabel?: string | null;
   tags?: string[];
-  content?: string;
+  content?: string; // raw MDX content (optional)
 }
 
 import fs from "fs";
@@ -27,14 +28,13 @@ const exts = [".mdx", ".md"] as const;
 
 const LONDON_TZ = "Europe/London";
 
-// ---------- helpers: dates / tz ----------
+/* ───────── date helpers ───────── */
 function isDateOnly(s: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s || "");
 }
-
 function dayKey(iso: string, tz = LONDON_TZ): string {
   if (!iso) return "";
-  if (isDateOnly(iso)) return iso; // already YYYY-MM-DD
+  if (isDateOnly(iso)) return iso;
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return "";
   return new Intl.DateTimeFormat("en-CA", {
@@ -42,12 +42,11 @@ function dayKey(iso: string, tz = LONDON_TZ): string {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(d); // YYYY-MM-DD
+  }).format(d);
 }
-
 function isMidnightLocal(iso: string, tz = LONDON_TZ): boolean {
   if (!iso) return false;
-  if (isDateOnly(iso)) return true; // treat date-only as midnight
+  if (isDateOnly(iso)) return true;
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return false;
   const hh = Number(
@@ -58,7 +57,6 @@ function isMidnightLocal(iso: string, tz = LONDON_TZ): boolean {
   );
   return hh === 0 && mm === 0;
 }
-
 function localMinutes(iso: string, tz = LONDON_TZ): number {
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return Number.POSITIVE_INFINITY;
@@ -71,31 +69,26 @@ function localMinutes(iso: string, tz = LONDON_TZ): number {
   return hh * 60 + mm;
 }
 
-// ---------- helpers: normalization ----------
+/* ───────── normalization ───────── */
 function normalizeDate(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const s = value.trim();
-  // Preserve date-only strings to avoid implicit midnight TZ churn
-  if (isDateOnly(s)) return s;
-
+  if (isDateOnly(s)) return s; // keep YYYY-MM-DD as-is
   const d = new Date(s);
   if (!Number.isNaN(d.getTime())) return d.toISOString();
-
   const ts = Date.parse(s);
   return Number.isNaN(ts) ? undefined : new Date(ts).toISOString();
 }
-
 function normalizeTags(value: unknown): string[] | undefined {
   if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
   if (typeof value === "string") return value.split(",").map((s) => s.trim()).filter(Boolean);
   return undefined;
 }
-
 function normTitle(s: unknown): string {
   return String(s ?? "").trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-// ---------- fs helpers ----------
+/* ───────── fs helpers ───────── */
 export function getEventSlugs(): string[] {
   if (!fs.existsSync(eventsDir)) return [];
   return fs
@@ -103,7 +96,6 @@ export function getEventSlugs(): string[] {
     .filter((f) => exts.some((e) => f.endsWith(e)))
     .map((f) => f.replace(/\.mdx?$/i, ""));
 }
-
 function resolveEventPath(slug: string): string | null {
   for (const ext of exts) {
     const p = path.join(eventsDir, `${slug}${ext}`);
@@ -127,7 +119,7 @@ const DEFAULT_FIELDS: FieldKey[] = [
   "tags",
 ];
 
-// ---------- loader ----------
+/* ───────── loader ───────── */
 export function getEventBySlug(
   slug: string,
   fields: FieldKey[] = [],
@@ -136,13 +128,13 @@ export function getEventBySlug(
   const fullPath = resolveEventPath(realSlug);
 
   if (!fullPath) {
-    const fallback: Partial<EventMeta> = {
+    const fallback: Partial<EventMeta> & { content?: string } = {
       slug: realSlug,
       title: "Event Not Found",
       date: new Date().toISOString(),
     };
-    if (fields.includes("content")) (fallback as any).content = "";
-    return fallback as Partial<EventMeta> & { content?: string };
+    if (fields.includes("content")) fallback.content = "";
+    return fallback;
   }
 
   const file = fs.readFileSync(fullPath, "utf8");
@@ -167,7 +159,8 @@ export function getEventBySlug(
 
     if (field === "date" || field === "endDate") {
       const iso = normalizeDate(raw);
-      if (iso) (item as any)[field] = iso;
+      // Important: do not leave undefined; Next export cannot serialize undefined
+      (item as any)[field] = iso ?? null;
       continue;
     }
 
@@ -193,13 +186,35 @@ export function getEventBySlug(
   return item;
 }
 
-// ---------- dedupe logic ----------
-function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz = LONDON_TZ): T[] {
-  const map = new Map<string, T>();
+/* ───────── resource summary (for cards/teasers) ───────── */
+export function getEventResourcesSummary(
+  slug: string
+): { downloads?: { href: string; label: string }[]; reads?: { href: string; label: string }[] } | null {
+  const p = resolveEventPath(slug);
+  if (!p) return null;
+  const raw = fs.readFileSync(p, "utf8");
+  const { data } = matter(raw);
+  const res = (data?.resources ?? null) as any;
+  if (!res || typeof res !== "object") return null;
 
+  const toPairs = (arr?: any[]) =>
+    Array.isArray(arr)
+      ? arr
+          .map((x) => ({ href: String(x?.href || ""), label: String(x?.label || "") }))
+          .filter((x) => x.href && x.label)
+      : undefined;
+
+  const downloads = toPairs(res.downloads);
+  const reads = toPairs(res.reads);
+  return downloads?.length || reads?.length ? { downloads, reads } : null;
+}
+
+/* ───────── dedupe (exported for reuse in pages) ───────── */
+export function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz = LONDON_TZ): T[] {
+  const map = new Map<string, T>();
   for (const ev of items) {
-    const title = normTitle(ev?.title);
-    const date = ev?.date || "";
+    const title = normTitle((ev as any)?.title);
+    const date = (ev as any)?.date || "";
     const dk = dayKey(date, tz);
     if (!title || !dk) continue;
 
@@ -209,33 +224,24 @@ function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz 
       map.set(key, ev);
       continue;
     }
-
-    // Prefer non-midnight over midnight
-    const aMid = isMidnightLocal(existing.date || "", tz);
+    const aMid = isMidnightLocal((existing as any).date || "", tz);
     const bMid = isMidnightLocal(date, tz);
 
     if (aMid && !bMid) {
       map.set(key, ev);
-      continue;
-    }
-    if (!aMid && bMid) {
-      continue; // keep existing
-    }
-
-    // If both non-midnight, keep the earlier local time
-    if (!aMid && !bMid) {
-      const aMin = localMinutes(existing.date || "", tz);
+    } else if (!aMid && bMid) {
+      // keep existing
+    } else if (!aMid && !bMid) {
+      const aMin = localMinutes((existing as any).date || "", tz);
       const bMin = localMinutes(date, tz);
       if (bMin < aMin) map.set(key, ev);
-      continue;
     }
-    // Both midnight → keep first
   }
 
   const seenSlugs = new Set<string>();
   const out: T[] = [];
   for (const ev of Array.from(map.values())) {
-    const s = (ev.slug as string) || "";
+    const s = ((ev as any).slug as string) || "";
     if (s && seenSlugs.has(s)) continue;
     if (s) seenSlugs.add(s);
     out.push(ev);
@@ -243,16 +249,15 @@ function dedupeEventsByTitleAndDay<T extends Partial<EventMeta>>(items: T[], tz 
   return out;
 }
 
-// ---------- list ----------
+/* ───────── list ───────── */
 export function getAllEvents(fields: FieldKey[] = DEFAULT_FIELDS): Partial<EventMeta>[] {
   const slugs = getEventSlugs();
   const events = slugs.map((slug) => getEventBySlug(slug, fields));
-
   const deduped = dedupeEventsByTitleAndDay(events);
 
   deduped.sort((a, b) => {
-    const da = a.date ? Date.parse(String(a.date)) : 0;
-    const db = b.date ? Date.parse(String(b.date)) : 0;
+    const da = (a as any).date ? Date.parse(String((a as any).date)) : 0;
+    const db = (b as any).date ? Date.parse(String((b as any).date)) : 0;
     return db - da; // newest first
   });
 

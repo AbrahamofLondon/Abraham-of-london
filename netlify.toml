@@ -2,7 +2,6 @@
 # Build
 # ────────────────────────────────────────────────────────────
 [build]
-  # Default build for local/preview
   command = "npm run build"
   publish = ".next"
 
@@ -14,13 +13,12 @@
     NO_SLASH_OPACITY_MODE = "fix"
     DOWNLOADS_STRICT = "0"
 
-# In production, build PDFs first, then seed/validate placeholders, then Next
+# In production, build PDFs first (via Puppeteer), seed/validate, then Next
 [context.production]
-  command = "npm run pdfs && npm run seed:downloads && npm run build" 
+  command = "npm run pdfs && npm run seed:downloads && npm run build"
 
 [context.production.environment]
   NODE_ENV = "production"
-  # Enable devDependencies during the build so pdf scripts can import puppeteer/glob/etc
   NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
@@ -61,8 +59,21 @@
     fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
-# Legacy PDF aliases
+# Redirects (downloads + brand domains + canonical host)
 # ────────────────────────────────────────────────────────────
+
+# Pretty → file (kebab-case preferred)
+[[redirects]]
+  from = "/downloads/brotherhood-covenant"
+  to   = "/downloads/brotherhood-covenant.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-cue-card"
+  to   = "/downloads/brotherhood-cue-card.pdf"
+  status = 301
+
+# Legacy PDF aliases kept as 200 rewrites
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
@@ -70,18 +81,15 @@
 
 [[redirects]]
   from = "/downloads/fathering-without-fear-mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf" # Corrected to hyphen
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-# Normalize hyphen variant to underscore canonical
 [[redirects]]
   from = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf" # Corrected to hyphen
+  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-# ────────────────────────────────────────────────────────────
-# Brand domains → 301 root to Ventures; everything else 410
-# ────────────────────────────────────────────────────────────
+# Brand domains → 301 root to Ventures; all else 410
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -108,9 +116,7 @@
   force = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
-# ────────────────────────────────────────────────────────────
-# Canonical host redirects (apex → www)
-# ────────────────────────────────────────────────────────────
+# Canonical host (apex → www)
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"

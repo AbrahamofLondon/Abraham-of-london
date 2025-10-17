@@ -12,37 +12,27 @@ import EventCard from "@/components/events/EventCard";
 import { getActiveBanner } from "@/lib/hero-banners";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
-import { getAllEvents } from "@/lib/server/events-data";
+import { getAllEvents, getEventResourcesSummary, dedupeEventsByTitleAndDay } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
-import { dedupeEventsByTitleAndDay } from "@/utils/events";
 
-/* ── Types to keep the banner strictly typed and predictable ───────────── */
+/* ── banner types ── */
 type BannerCTA = { label: string; href: string };
 type BannerOverlay =
-  | {
-      eyebrow?: string;
-      title?: string;
-      body?: string;
-      cta?: BannerCTA;
-    }
+  | { eyebrow?: string; title?: string; body?: string; cta?: BannerCTA }
   | null;
-
 type VideoSource = { src: string; type: "video/webm" | "video/mp4" };
-
 type BannerConfig = {
   poster: string;
-  // Accept readonly to tolerate `as const`, allow null (normalized by HeroBanner)
   videoSources?: ReadonlyArray<VideoSource> | null;
   overlay?: BannerOverlay;
-  /** e.g. "object-[40%_50%]" for mobile focus */
   mobileObjectPositionClass?: string | null;
-  /** e.g. "min-h-[65svh] lg:min-h-[78svh]" */
   heightClassName?: string | null;
 };
 
-// ✅ client-only hero to dodge SSR media evaluation
+// client-only hero to avoid SSR media evaluation
 const HeroBanner = dynamic(() => import("@/components/homepage/HeroBanner"), { ssr: false });
 
+/* ── events teaser types ── */
 type EventsTeaserItem = {
   slug: string;
   title: string;
@@ -51,8 +41,10 @@ type EventsTeaserItem = {
   description?: string | null;
   tags?: string[] | null;
   heroImage?: string | null;
+  resources?: { downloads?: { href: string; label: string }[]; reads?: { href: string; label: string }[] } | null;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
+
 type HomeProps = { posts: PostMeta[]; booksCount: number; eventsTeaser: EventsTeaser };
 
 export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
@@ -63,7 +55,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const booksHref = `/books${qSuffix}`;
   const postsCount = posts.length;
 
-  // Safe banner with sane fallbacks to prevent layout voids
   const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as unknown as BannerConfig, []);
   const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
     poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
@@ -75,7 +66,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       ] as const),
     overlay: raw?.overlay ?? null,
     mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-center",
-    // taller default helps avoid black edges on ultra-wide screens
     heightClassName: raw?.heightClassName ?? "min-h-[65svh] sm:min-h-[70svh] lg:min-h-[78svh]",
   };
 
@@ -117,17 +107,16 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
         />
         <meta property="og:type" content="website" />
-        {/* Hint the browser to grab hero sources early */}
         <link rel="preload" as="image" href={banner.poster} />
         {banner.videoSources?.map((s, i) => (
           <link key={i} rel="preload" as="video" href={s.src} type={s.type} />
         ))}
       </Head>
 
-      {/* FULL-BLEED HERO */}
+      {/* HERO */}
       <HeroBanner
         poster={banner.poster}
-        videoSources={banner.videoSources} // can be readonly or null; component normalizes
+        videoSources={banner.videoSources}
         overlay={overlayNode}
         mobileObjectPositionClass="object-left md:object-[30%_center] lg:object-[40%_center]"
         heightClassName={banner.heightClassName}
@@ -138,37 +127,18 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
           <nav aria-label="Breadcrumb" className="text-[color:var(--color-on-secondary)/0.7]">
             <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-deepCharcoal" prefetch={false}>
-                  Home
-                </Link>
-              </li>
+              <li><Link href="/" className="hover:text-deepCharcoal" prefetch={false}>Home</Link></li>
               <li aria-hidden>/</li>
               <li className="text-[color:var(--color-on-secondary)/0.8]">Overview</li>
-              {incomingQ && (
-                <>
-                  <li aria-hidden>/</li>
-                  <li className="text-[color:var(--color-on-secondary)/0.6]">“{incomingQ}”</li>
-                </>
-              )}
+              {incomingQ && (<><li aria-hidden>/</li><li className="text-[color:var(--color-on-secondary)/0.6]">“{incomingQ}”</li></>)}
             </ol>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href={booksHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal"
-              aria-label={`View books (${booksCount})`}
-              prefetch={false}
-            >
+            <Link href={booksHref} className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal" aria-label={`View books (${booksCount})`} prefetch={false}>
               Books <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({booksCount})</span>
             </Link>
-            <Link
-              href={blogHref}
-              className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal"
-              aria-label={`View insights (${postsCount})`}
-              prefetch={false}
-            >
+            <Link href={blogHref} className="rounded-full border border-lightGrey bg-white px-3 py-1 text-[color:var(--color-on-secondary)/0.85] hover:text-deepCharcoal" aria-label={`View insights (${postsCount})`} prefetch={false}>
               Insights <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({postsCount})</span>
             </Link>
           </div>
@@ -180,11 +150,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
-            <Link
-              href={blogHref}
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
+            <Link href={blogHref} className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
               Read the blog
             </Link>
           </header>
@@ -216,11 +182,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Books</h2>
-            <Link
-              href={booksHref}
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
+            <Link href={booksHref} className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
               View all
             </Link>
           </header>
@@ -247,7 +209,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Downloads */}
+      {/* Downloads (quick links) */}
       <section className="bg-white px-4 pb-4">
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
@@ -259,17 +221,10 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
           <ul className="grid gap-6 sm:grid-cols-2">
             <li>
-              <Link
-                href="/downloads/brotherhood-covenant"
-                prefetch={false}
-                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
-                aria-label="Brotherhood Covenant (Printable)"
-              >
+              <Link href="/downloads/brotherhood-covenant" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Brotherhood Covenant (Printable)">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
-                      Brotherhood Covenant (Printable)
-                    </div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Brotherhood Covenant (Printable)</div>
                     <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
                   </div>
                   <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
@@ -277,17 +232,10 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               </Link>
             </li>
             <li>
-              <Link
-                href="/downloads/leaders-cue-card"
-                prefetch={false}
-                className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
-                aria-label="Leader’s Cue Card (A6, Two-Up)"
-              >
+              <Link href="/downloads/leaders-cue-card" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Leader’s Cue Card (A6, Two-Up)">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">
-                      Leader’s Cue Card (A6, Two-Up)
-                    </div>
+                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Leader’s Cue Card (A6, Two-Up)</div>
                     <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
                   </div>
                   <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
@@ -303,11 +251,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         <div className="mx-auto max-w-7xl">
           <header className="mb-2 flex items-end justify-between">
             <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Upcoming Events</h2>
-            <Link
-              href="/events"
-              className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
-              prefetch={false}
-            >
+            <Link href="/events" className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold" prefetch={false}>
               View all
             </Link>
           </header>
@@ -315,27 +259,22 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             Select sessions run as Chatham Rooms (off the record).
           </p>
 
-          {eventsTeaser.length === 0 ? (
-            <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">
-              No upcoming events at the moment.
-            </p>
-          ) : (
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {eventsTeaser.map((ev) => (
-                <li key={ev.slug}>
-                  <EventCard
-                    slug={ev.slug}
-                    title={ev.title}
-                    date={ev.date}
-                    location={ev.location ?? undefined}
-                    description={ev.description ?? undefined}
-                    tags={ev.tags ?? undefined}
-                    heroImage={ev.heroImage ?? undefined}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {eventsTeaser.map((ev) => (
+              <li key={ev.slug}>
+                <EventCard
+                  slug={ev.slug}
+                  title={ev.title}
+                  date={ev.date}
+                  location={ev.location ?? undefined}
+                  description={ev.description ?? undefined}
+                  tags={ev.tags ?? undefined}
+                  heroImage={ev.heroImage ?? undefined}
+                  resources={ev.resources ?? undefined}  // ← show pills
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -350,11 +289,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <Link
-              href="/ventures?brand=alomarada"
-              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
-              prefetch={false}
-            >
+            <Link href="/ventures?brand=alomarada" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
@@ -364,11 +299,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               </p>
             </Link>
 
-            <Link
-              href="/ventures?brand=endureluxe"
-              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
-              prefetch={false}
-            >
+            <Link href="/ventures?brand=endureluxe" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
@@ -378,11 +309,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
               </p>
             </Link>
 
-            <Link
-              href="/about"
-              className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover"
-              prefetch={false}
-            >
+            <Link href="/about" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
               <div className="flex items-center justify-between">
                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
@@ -398,29 +325,16 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
       {/* Closing CTA */}
       <section className="relative isolate overflow-hidden bg-deepCharcoal">
         <div className="absolute inset-0 -z-10">
-          <Image
-            src="/assets/images/cta/cta-bg.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={85}
-            className="object-cover opacity-20"
-          />
+          <Image src="/assets/images/cta/cta-bg.jpg" alt="" fill sizes="100vw" quality={85} className="object-cover opacity-20" />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-20 text-center">
-          <h3 className="font-serif text-3xl font-semibold text-cream">
-            Build with Clarity. Lead with Standards. Leave a Legacy.
-          </h3>
+          <h3 className="font-serif text-3xl font-semibold text-cream">Build with Clarity. Lead with Standards. Leave a Legacy.</h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-on-primary)/0.85]">
             Start a conversation that moves your family, your venture, and your community forward.
           </p>
           <div className="mt-8">
-            <Link
-              href="/contact"
-              className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95"
-              prefetch={false}
-            >
+            <Link href="/contact" className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95" prefetch={false}>
               Connect with a Strategist
             </Link>
           </div>
@@ -432,7 +346,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
 Home.displayName = "Home";
 
-/* ---------- SSG + ISR ---------- */
+/* ── SSG + ISR ── */
 export async function getStaticProps() {
   const posts = getAllPosts();
   const safePosts = posts.map((p) => ({
@@ -466,14 +380,15 @@ export async function getStaticProps() {
       }))
   );
 
+  const todayKey = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
   const upcomingSorted = deduped
     .filter((e) => {
-      const todayKey = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Europe/London",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date());
       const only = /^\d{4}-\d{2}-\d{2}$/.test(e.date);
       if (only) return e.date >= todayKey;
       const d = new Date(e.date);
@@ -491,6 +406,7 @@ export async function getStaticProps() {
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
     const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
+    const resources = getEventResourcesSummary(e.slug);
     return {
       slug: e.slug,
       title: e.title,
@@ -499,6 +415,7 @@ export async function getStaticProps() {
       description: e.summary ?? null,
       tags: Array.isArray(e.tags) ? e.tags : null,
       heroImage,
+      resources: resources ?? null,
     };
   });
 
