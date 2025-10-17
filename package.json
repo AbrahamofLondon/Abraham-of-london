@@ -27,7 +27,7 @@
     "pdfs": "node scripts/make-pdfs.mjs",
     "print:serve": "next start -p 5555",
     "print:pdfs": "node scripts/render-pdfs.mjs --base http://localhost:5555 --out public/downloads",
-    "seed:downloads": "node scripts/generate-placeholder-downloads.mjs && (node scripts/validate-downloads.mjs --strict || true)",
+    **"seed:downloads": "node scripts/generate-placeholder-downloads.mjs && (node scripts/validate-downloads.mjs --strict || true)",**
     "covers:events": "node scripts/covers/make-event-covers.mjs"
   },
   "dependencies": {
