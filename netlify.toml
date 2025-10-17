@@ -13,12 +13,12 @@
     NO_SLASH_OPACITY_MODE = "fix"
     DOWNLOADS_STRICT = "0"
 
-# In production, build PDFs first (via Puppeteer), seed/validate, then Next
 [context.production]
   command = "npm run pdfs && npm run seed:downloads && npm run build"
 
 [context.production.environment]
   NODE_ENV = "production"
+  # Install devDependencies during production build (for scripts like puppeteer/sharp)
   NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
@@ -59,10 +59,14 @@
     fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
-# Redirects (downloads + brand domains + canonical host)
+# Legacy PDF aliases & Friendly slugs
 # ────────────────────────────────────────────────────────────
+# Friendly download slugs → PDFs
+[[redirects]]
+  from = "/downloads/leaders-cue-card"
+  to   = "/downloads/leaders-cue-card.pdf"
+  status = 301
 
-# Pretty → file (kebab-case preferred)
 [[redirects]]
   from = "/downloads/brotherhood-covenant"
   to   = "/downloads/brotherhood-covenant.pdf"
@@ -73,7 +77,13 @@
   to   = "/downloads/brotherhood-cue-card.pdf"
   status = 301
 
-# Legacy PDF aliases kept as 200 rewrites
+# If actual filenames are Title_Case, alias them
+[[redirects]]
+  from = "/downloads/leaders-cue-card.pdf"
+  to   = "/downloads/Leaders_Cue_Card.pdf"
+  status = 200
+
+# Historical variants for Fathering Without Fear
 [[redirects]]
   from = "/downloads/fathering-without-fear.pdf"
   to   = "/downloads/Fathering_Without_Fear.pdf"
@@ -84,12 +94,9 @@
   to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
   status = 200
 
-[[redirects]]
-  from = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
-  to   = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf"
-  status = 200
-
-# Brand domains → 301 root to Ventures; all else 410
+# ────────────────────────────────────────────────────────────
+# Brand domains → 301 root to Ventures; everything else 410
+# ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/"
   to   = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -116,7 +123,9 @@
   force = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
-# Canonical host (apex → www)
+# ────────────────────────────────────────────────────────────
+# Canonical host redirects (apex → www)
+# ────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
   to   = "https://www.abrahamoflondon.org/:splat"

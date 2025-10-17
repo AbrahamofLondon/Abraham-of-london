@@ -14,12 +14,14 @@ import { getEventSlugs, getEventBySlug } from "@/lib/server/events-data";
 /* ---------- types ---------- */
 type LinkItem = { href: string; label: string; sub?: string };
 
-type FMResources = {
-  title?: string;
-  preset?: "leadership" | "founders";
-  reads?: LinkItem[];
-  downloads?: { href: string; label: string }[];
-} | null;
+type FMResources =
+  | {
+      title?: string;
+      preset?: "leadership" | "founders";
+      reads?: LinkItem[];
+      downloads?: { href: string; label: string }[];
+    }
+  | null;
 
 type Props = {
   meta: {
@@ -43,21 +45,32 @@ function niceDate(iso?: string, tz = "Europe/London") {
   if (!iso) return "";
   if (isDateOnly(iso)) {
     const [y, m, d] = iso.split("-").map(Number);
-    return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" })
-      .format(new Date(Date.UTC(y, m - 1, d)));
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(Date.UTC(y, m - 1, d)));
   }
   const d = new Date(iso);
-  const dateStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
-  const timeStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+  const dateStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+  const timeStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
   return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
 }
 
 /** Ensure no `undefined` is returned inside props */
 function toJSONSafe<T>(obj: T): T {
-  // Replace undefined with null recursively
-  return JSON.parse(
-    JSON.stringify(obj, (_k, v) => (typeof v === "undefined" ? null : v))
-  );
+  return JSON.parse(JSON.stringify(obj, (_k, v) => (typeof v === "undefined" ? null : v)));
 }
 
 /* ---------- SSG ---------- */
@@ -80,7 +93,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     "content",
   ] as any);
 
-  // Serialize MDX with front-matter parsing so we can pick custom keys like `resources` and `chatham`
+  // Parse MDX with front matter to pull optional per-page keys like resources/chatham
   const mdx = await serialize(String(raw.content || ""), {
     parseFrontmatter: true,
     mdxOptions: { remarkPlugins: [], rehypePlugins: [], format: "mdx" },
@@ -89,23 +102,21 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const fm: any = (mdx as any).frontmatter || {};
   const fmResources: FMResources = fm.resources ?? null;
   const tagList = Array.isArray(raw.tags) ? raw.tags.map(String) : [];
-  const chatham =
-    fm.chatham === true || tagList.some((t) => t.toLowerCase() === "chatham");
+  const chatham = fm.chatham === true || tagList.some((t) => t.toLowerCase() === "chatham");
 
   const meta = {
     slug: String(raw.slug || slug),
     title: String(raw.title || slug),
     date: String(raw.date || new Date().toISOString()),
-    endDate: raw.endDate ? String(raw.endDate) : null, // ← normalize
-    location: raw.location ? String(raw.location) : null, // ← normalize
-    summary: raw.summary ? String(raw.summary) : null, // ← normalize
-    heroImage: raw.heroImage ? String(raw.heroImage) : null, // ← normalize
+    endDate: raw.endDate ? String(raw.endDate) : null,
+    location: raw.location ? String(raw.location) : null,
+    summary: raw.summary ? String(raw.summary) : null,
+    heroImage: raw.heroImage ? String(raw.heroImage) : null,
     tags: tagList,
     resources: fmResources,
     chatham,
   };
 
-  // Guard: never return `undefined`
   return {
     props: toJSONSafe({
       meta,
@@ -117,21 +128,24 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
 /* ---------- Page ---------- */
 export default function EventPage({ meta, content }: Props) {
-  const {
-    slug, title, date, location, summary, heroImage, tags, resources, chatham,
-  } = meta;
+  const { slug, title, date, location, summary, heroImage, tags, resources, chatham } = meta;
 
   const when = niceDate(date);
 
-  // Try explicit hero, then a few conventional names, then fallback
+  // Try explicit hero, then conventional names, then fallback
   const heroSrcCandidates = React.useMemo(() => {
     const clean = (p?: string | null) =>
       p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p}`) : p || undefined;
     const explicit = clean(heroImage);
-    const base = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const base = slug
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
     const exts = ["webp", "jpg", "jpeg", "png"];
-    return Array.from(new Set([explicit, ...exts.map((e) => `/assets/images/events/${base}.${e}`), "/assets/images/events/default.jpg"]
-      .filter(Boolean))) as string[];
+    return Array.from(
+      new Set([explicit, ...exts.map((e) => `/assets/images/events/${base}.${e}`), "/assets/images/events/default.jpg"].filter(Boolean))
+    ) as string[];
   }, [slug, heroImage]);
 
   const [i, setI] = React.useState(0);
