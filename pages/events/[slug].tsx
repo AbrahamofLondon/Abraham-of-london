@@ -11,36 +11,40 @@ import { MDXComponents } from "@/components/MDXComponents";
 import EventResources from "@/components/events/EventResources";
 import { getEventSlugs, getEventBySlug } from "@/lib/server/events-data";
 
+/* ---------- types ---------- */
+type LinkItem = { href: string; label: string; sub?: string };
+
 type FMResources = {
-  reads?: { href: string; label: string; sub?: string }[];
-  downloads?: { href: string; label: string }[];
+  title?: string;
   preset?: "leadership" | "founders";
-};
+  reads?: LinkItem[];
+  downloads?: { href: string; label: string }[];
+} | null;
 
 type Props = {
   meta: {
     slug: string;
     title: string;
     date: string;
-    endDate?: string;
-    location?: string;
-    summary?: string;
-    heroImage?: string;
-    tags?: string[];
-    resources?: FMResources | null;
-    chatham?: boolean;
+    endDate: string | null;
+    location: string | null;
+    summary: string | null;
+    heroImage: string | null;
+    tags: string[];
+    resources: FMResources;
+    chatham: boolean;
   };
   content: MDXRemoteSerializeResult;
 };
 
+/* ---------- utils ---------- */
 const isDateOnly = (s?: string) => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
 function niceDate(iso?: string, tz = "Europe/London") {
   if (!iso) return "";
   if (isDateOnly(iso)) {
     const [y, m, d] = iso.split("-").map(Number);
-    return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" }).format(
-      new Date(Date.UTC(y, m - 1, d))
-    );
+    return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "2-digit", month: "short", year: "numeric" })
+      .format(new Date(Date.UTC(y, m - 1, d)));
   }
   const d = new Date(iso);
   const dateStr = new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
@@ -48,6 +52,15 @@ function niceDate(iso?: string, tz = "Europe/London") {
   return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
 }
 
+/** Ensure no `undefined` is returned inside props */
+function toJSONSafe<T>(obj: T): T {
+  // Replace undefined with null recursively
+  return JSON.parse(
+    JSON.stringify(obj, (_k, v) => (typeof v === "undefined" ? null : v))
+  );
+}
+
+/* ---------- SSG ---------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getEventSlugs();
   return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
@@ -67,75 +80,66 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     "content",
   ] as any);
 
-  // Pull resources & chatham flag from front-matter (gracefully optional)
-  let fm: any = {};
-  try {
-    // re-read file to parse FM only for resources/chatham
-    const again = getEventBySlug(slug, ["content"] as any);
-    // gray-matter data was already used inside loader for known fields;
-    // we accept resources/chatham via a light MDX serialize inspection (optional).
-    // Simpler: expect resources/chatham to have been placed into "content" front matter by the file itself:
-  } catch {}
-
+  // Serialize MDX with front-matter parsing so we can pick custom keys like `resources` and `chatham`
   const mdx = await serialize(String(raw.content || ""), {
     parseFrontmatter: true,
     mdxOptions: { remarkPlugins: [], rehypePlugins: [], format: "mdx" },
   });
 
-  // After serialize with parseFrontmatter: mdx.frontmatter contains custom keys.
-  const fmAny = (mdx as any).frontmatter || {};
-  const resources: FMResources | null = fmAny.resources || null;
-  const chatham: boolean | undefined = fmAny.chatham === true || (raw.tags || []).some((t) => String(t).toLowerCase() === "chatham");
+  const fm: any = (mdx as any).frontmatter || {};
+  const fmResources: FMResources = fm.resources ?? null;
+  const tagList = Array.isArray(raw.tags) ? raw.tags.map(String) : [];
+  const chatham =
+    fm.chatham === true || tagList.some((t) => t.toLowerCase() === "chatham");
 
+  const meta = {
+    slug: String(raw.slug || slug),
+    title: String(raw.title || slug),
+    date: String(raw.date || new Date().toISOString()),
+    endDate: raw.endDate ? String(raw.endDate) : null, // ← normalize
+    location: raw.location ? String(raw.location) : null, // ← normalize
+    summary: raw.summary ? String(raw.summary) : null, // ← normalize
+    heroImage: raw.heroImage ? String(raw.heroImage) : null, // ← normalize
+    tags: tagList,
+    resources: fmResources,
+    chatham,
+  };
+
+  // Guard: never return `undefined`
   return {
-    props: {
-      meta: {
-        slug: raw.slug as string,
-        title: (raw.title as string) || slug,
-        date: raw.date as string,
-        endDate: (raw.endDate as string) || undefined,
-        location: (raw.location as string) || undefined,
-        summary: (raw.summary as string) || undefined,
-        heroImage: (raw.heroImage as string) || undefined,
-        tags: (raw.tags as string[]) || [],
-        resources: resources || null,
-        chatham,
-      },
+    props: toJSONSafe({
+      meta,
       content: mdx,
-    },
+    }),
     revalidate: 60,
   };
 };
 
+/* ---------- Page ---------- */
 export default function EventPage({ meta, content }: Props) {
   const {
-    slug,
-    title,
-    date,
-    location,
-    summary,
-    heroImage,
-    tags = [],
-    resources,
-    chatham,
+    slug, title, date, location, summary, heroImage, tags, resources, chatham,
   } = meta;
 
   const when = niceDate(date);
 
-  // Try a few hero paths: explicit → /assets/images/events/<slug>.(webp|jpg…)
+  // Try explicit hero, then a few conventional names, then fallback
   const heroSrcCandidates = React.useMemo(() => {
-    const clean = (p?: string) => (p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p}`) : p) || undefined;
+    const clean = (p?: string | null) =>
+      p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p}`) : p || undefined;
     const explicit = clean(heroImage);
     const base = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
     const exts = ["webp", "jpg", "jpeg", "png"];
-    return Array.from(
-      new Set([explicit, ...exts.map((e) => `/assets/images/events/${base}.${e}`), "/assets/images/events/default.jpg"].filter(Boolean))
-    ) as string[];
+    return Array.from(new Set([explicit, ...exts.map((e) => `/assets/images/events/${base}.${e}`), "/assets/images/events/default.jpg"]
+      .filter(Boolean))) as string[];
   }, [slug, heroImage]);
 
   const [i, setI] = React.useState(0);
   const heroSrc = heroSrcCandidates[i];
-  const onHeroError = React.useCallback(() => setI((x) => (x + 1 < heroSrcCandidates.length ? x + 1 : x)), [heroSrcCandidates.length]);
+  const onHeroError = React.useCallback(
+    () => setI((x) => (x + 1 < heroSrcCandidates.length ? x + 1 : x)),
+    [heroSrcCandidates.length]
+  );
 
   return (
     <Layout pageTitle={title} hideCTA>
@@ -196,27 +200,28 @@ export default function EventPage({ meta, content }: Props) {
         </div>
       </section>
 
-      {/* Body */}
+      {/* Body + Resources */}
       <article className="mx-auto max-w-3xl px-4 pb-12">
         <div className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert">
           <MDXRemote {...content} components={MDXComponents} />
         </div>
 
-        {/* Resources (front-matter driven) */}
         {resources ? (
-          "preset" in resources && (resources as any).preset ? (
+          (resources as any).preset ? (
             <EventResources preset={(resources as any).preset} className="mt-12" />
           ) : (
             <EventResources
-              title={resources.title as any}
+              title={resources.title}
               reads={resources.reads}
               downloads={resources.downloads}
               className="mt-12"
             />
           )
         ) : (
-          // default if nothing in FM but page is about leadership/founders
-          <EventResources preset={tags?.some((t) => /founder|venture|capital/i.test(t)) ? "founders" : "leadership"} className="mt-12" />
+          <EventResources
+            preset={tags?.some((t) => /founder|venture|capital/i.test(t)) ? "founders" : "leadership"}
+            className="mt-12"
+          />
         )}
       </article>
     </Layout>
