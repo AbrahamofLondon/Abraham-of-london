@@ -3,48 +3,96 @@ import Link from "next/link";
 
 type LinkItem = { href: string; label: string; sub?: string };
 
-export default function EventResources({
-  reads = [],
-  downloads = [],
-  className = "",
-  title = "Event Resources",
-}: {
-  reads?: LinkItem[];
-  downloads?: LinkItem[];
-  className?: string;
-  title?: string;
-}) {
-  const safeReads = (reads || []).filter(Boolean);
-  const safeDownloads = (downloads || []).filter(Boolean);
+export type EventResourcesProps =
+  | {
+      preset: "leadership" | "founders";
+      title?: never;
+      reads?: never;
+      downloads?: never;
+      className?: string;
+    }
+  | {
+      preset?: never;
+      title?: string;
+      reads?: LinkItem[];
+      downloads?: LinkItem[];
+      className?: string;
+    };
 
-  if (!safeReads.length && !safeDownloads.length) return null;
+const PRESETS: Record<NonNullable<EventResourcesProps extends { preset: infer P } ? P : never>, {
+  title: string; reads: LinkItem[]; downloads: LinkItem[];
+}> = {
+  leadership: {
+    title: "Leadership Tools & Further Reading",
+    reads: [
+      { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Order under pressure" },
+      { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build a band of standards" },
+      { href: "/blog/kingdom-strategies-for-a-loving-legacy", label: "Loving Legacy, Real Standards" },
+    ],
+    downloads: [
+      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/Weekly_Operating_Rhythm.pdf", label: "Weekly Operating Rhythm" },
+      { href: "/downloads/Board_Update_Onepager.pdf", label: "Board Update One-Pager" },
+    ],
+  },
+  founders: {
+    title: "Founder’s Toolkit",
+    reads: [
+      { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Signal over noise" },
+      { href: "/blog/out-of-context-truth", label: "Out of Context Truth", sub: "Clarity under fire" },
+      { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home" },
+    ],
+    downloads: [
+      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/Entrepreneur_Survival_Checklist.pdf", label: "Entrepreneur Survival Checklist" },
+      { href: "/downloads/Communication_Script_BPF.pdf", label: "Communication Script (B•P•F)" },
+    ],
+  },
+};
 
-  const isInternal = (href = "") => href.startsWith("/") && !href.endsWith(".pdf");
+function isInternal(href = "") {
+  return href.startsWith("/") && !href.endsWith(".pdf");
+}
+
+export default function EventResources(props: EventResourcesProps) {
+  const data =
+    "preset" in props && props.preset
+      ? PRESETS[props.preset]
+      : {
+          title: props.title ?? "Resources",
+          reads: props.reads ?? [],
+          downloads: props.downloads ?? [],
+        };
+
+  const reads = (data.reads ?? []).filter(Boolean);
+  const downloads = (data.downloads ?? []).filter(Boolean);
+
+  if (!reads.length && !downloads.length) return null;
 
   return (
     <section
-      className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${className}`}
+      className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${("className" in props && props.className) || ""}`}
       aria-labelledby="event-resources-title"
     >
       <h3 id="event-resources-title" className="mb-4 font-serif text-2xl text-forest">
-        {title}
+        {data.title}
       </h3>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {!!safeReads.length && (
+        {!!reads.length && (
           <div>
             <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
               Further Reading
             </h4>
             <ul className="space-y-2">
-              {safeReads.map((r) => (
+              {reads.map((r) => (
                 <li key={r.href}>
                   {isInternal(r.href) ? (
-                    <Link href={r.href} prefetch={false} className="luxury-link text-forest">
+                    <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
                       {r.label}
                     </Link>
                   ) : (
-                    <a href={r.href} target="_blank" rel="noopener noreferrer" className="luxury-link text-forest">
+                    <a href={r.href} className="luxury-link text-forest" target="_blank" rel="noopener noreferrer">
                       {r.label}
                     </a>
                   )}
@@ -55,15 +103,15 @@ export default function EventResources({
           </div>
         )}
 
-        {!!safeDownloads.length && (
+        {!!downloads.length && (
           <div>
             <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
               Downloads
             </h4>
             <ul className="space-y-2">
-              {safeDownloads.map((d) => (
+              {downloads.map((d) => (
                 <li key={d.href}>
-                  <a href={d.href} className="luxury-link text-forest" download rel="noopener">
+                  <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
                     {d.label}
                   </a>
                 </li>
