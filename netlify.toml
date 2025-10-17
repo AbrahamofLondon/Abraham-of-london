@@ -77,7 +77,7 @@
   to   = "/downloads/brotherhood-cue-card.pdf"
   status = 301
 
-# If actual filenames are Title_Case, alias them
+# If actual filenames are Title_Case, alias them (keeps old links working)
 [[redirects]]
   from = "/downloads/leaders-cue-card.pdf"
   to   = "/downloads/Leaders_Cue_Card.pdf"
