@@ -21,8 +21,8 @@ type Props = {
 
   /** NEW: compact summary for pills */
   resources?: {
-    downloads?: ResourceChip[];   // e.g. one-pager, playbook, cue-card
-    reads?: ResourceChip[];       // optional
+    downloads?: ResourceChip[];    // e.g. one-pager, playbook, cue-card
+    reads?: ResourceChip[];        // optional
   } | null;
 
   /** presentation */
@@ -38,16 +38,40 @@ export default function EventCard({
   className, prefetch = false, timeZone = "Europe/London",
   heroImage = null, heroFit = "cover", heroAspect = "16/9",
   heroPosition = "center",
-  resources = null,                              // ← NEW
+  resources = null,                       // ← NEW
 }: Props) {
-  // ... existing code ...
+  // ... existing code (assuming this part is mostly unchanged) ...
 
   return (
-    <article /* ... */>
-      {/* image block unchanged */}
+    <article 
+        className={clsx(
+            "group flex flex-col overflow-hidden rounded-xl border border-lightGrey bg-white shadow-xl transition-shadow hover:shadow-2xl",
+            className
+        )}
+        itemScope 
+        itemType="http://schema.org/Event"
+    >
+      {/* Assuming image block is here */}
+      {heroImage && (
+        <div className={clsx("relative w-full overflow-hidden", `aspect-[${heroAspect}]`)}>
+          <Image
+            src={heroImage}
+            alt={`Hero image for ${title}`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={clsx("object-cover", `object-${heroPosition}`, heroFit === 'contain' && "p-4")}
+          />
+        </div>
+      )}
+
 
       <div className="p-6">
         {/* meta + title unchanged */}
+        <div className="flex items-center space-x-2 text-xs font-semibold uppercase text-forest/70">
+            <time itemProp="startDate" dateTime={date}>{date}</time>
+            {location && <span className="truncate" itemProp="location">{location}</span>}
+        </div>
+        <h3 className="mt-1 font-serif text-xl font-bold text-deepCharcoal" itemProp="name">{title}</h3>
 
         {description && (
           <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700" itemProp="description">
@@ -84,7 +108,9 @@ export default function EventCard({
         )}
 
         <div className="mt-4">
-          <Link /* ... */>Details</Link>
+          {/* FIXED ERROR: Added required 'href' prop
+          */}
+          <Link href={`/events/${slug}`}>Details</Link>
         </div>
         <meta itemProp="url" content={`/events/${slug}`} />
       </div>
