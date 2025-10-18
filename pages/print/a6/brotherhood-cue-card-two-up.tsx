@@ -1,40 +1,39 @@
-// pages/print/a6/leaders-cue-card-two-up.tsx
 import Head from "next/head";
 
-export default function LeadersCueCardTwoUp() {
+export default function BrotherhoodCueCardTwoUp() {
   return (
     <>
-      <Head><title>Leader’s Cue Card — A6 Two-Up (Print)</title></Head>
+      <Head><title>Brotherhood Cue Card — A6 Two-Up (Print)</title></Head>
       <main className="sheet">
         <section className="card">
-          <h1>Leader’s Cue Card</h1>
-          <h2>Mandate</h2>
+          <h1>Brotherhood Cue Card</h1>
+          <h2>Principles</h2>
           <ul>
-            <li>Clarify the goal.</li>
-            <li>Guard the standard.</li>
-            <li>Remove friction.</li>
+            <li>Stand together.</li>
+            <li>Build trust.</li>
+            <li>Share burdens.</li>
           </ul>
-          <h2>Check</h2>
+          <h2>Actions</h2>
           <ul>
-            <li>Who is accountable?</li>
-            <li>Next irreversible step?</li>
-            <li>What must we stop?</li>
+            <li>Connect weekly.</li>
+            <li>Support goals.</li>
+            <li>Celebrate wins.</li>
           </ul>
         </section>
 
         <section className="card">
-          <h1>Leader’s Cue Card</h1>
-          <h2>Cadence</h2>
+          <h1>Brotherhood Cue Card</h1>
+          <h2>Commitments</h2>
           <ul>
-            <li>Daily: status, blockers, risks.</li>
-            <li>Weekly: outcomes & lessons.</li>
-            <li>Monthly: standards review.</li>
+            <li>Be present.</li>
+            <li>Stay honest.</li>
+            <li>Act with integrity.</li>
           </ul>
-          <h2>Record</h2>
+          <h2>Check-ins</h2>
           <ul>
-            <li>Decision log</li>
-            <li>Assumptions & tests</li>
-            <li>Follow-ups due</li>
+            <li>Weekly: progress.</li>
+            <li>Monthly: alignment.</li>
+            <li>Quarterly: vision.</li>
           </ul>
         </section>
       </main>
@@ -46,14 +45,11 @@ export default function LeadersCueCardTwoUp() {
         .card {
           box-sizing: border-box; width: 100%; height: 100%;
           border: .6pt solid #dadada; border-radius: 6pt; padding: 8mm;
-          /* ✅ FIX: Quoted font stack to avoid JSX parser error. */
-          font: 10pt/1.45 var(--font-sans, "ui-sans-serif");
+          font: 10pt/1.45 var(--font-sans, "ui-sans-serif, system-ui, sans-serif");
           display: flex; flex-direction: column; justify-content: space-between;
         }
-        /* ✅ FIX: Quoted font stack to avoid JSX parser error. */
-        h1 { font: 700 12pt/1.2 var(--font-serif, "Georgia"); margin: 0 0 4mm; color: var(--color-primary); }
-        /* ✅ FIX: Quoted font stack to avoid JSX parser error. */
-        h2 { font: 600 10pt/1.2 var(--font-serif, "Georgia"); margin: 3mm 0 2mm; color: var(--color-primary); }
+        h1 { font: 700 12pt/1.2 var(--font-serif, "Georgia, serif"); margin: 0 0 4mm; color: var(--color-primary); }
+        h2 { font: 600 10pt/1.2 var(--font-serif, "Georgia, serif"); margin: 3mm 0 2mm; color: var(--color-primary); }
         ul { margin: 0; padding-left: 4mm; }
         li { margin: .8mm 0; }
         @media screen {
