@@ -4,7 +4,7 @@
   "private": true,
   "engines": { "node": ">=20 <21" },
   "scripts": {
-    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check",
+    "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && npm run downloads:build-safe",
     "dev": "next dev",
     "build": "node -e \"console.log('>>> starting next build')\" && next build && node -e \"console.log('>>> finished next build')\"",
     "start": "next start",
@@ -28,7 +28,10 @@
     "seed:downloads": "node scripts/generate-placeholder-downloads.mjs",
     "validate:downloads": "node scripts/validate-downloads.mjs",
     "validate:downloads:strict": "node scripts/validate-downloads.mjs --strict",
+    
     "run:downloads": "node scripts/run-validate-downloads.mjs",
+    "downloads:build-safe": "npm run seed:downloads && npm run run:downloads || true",
+    
     "covers:events": "node scripts/covers/make-event-covers.mjs"
   },
   "dependencies": {
