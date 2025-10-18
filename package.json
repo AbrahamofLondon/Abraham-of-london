@@ -2,7 +2,9 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=20 <21" },
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs && npm run downloads:build-safe",
     "dev": "next dev",
@@ -28,10 +30,8 @@
     "seed:downloads": "node scripts/generate-placeholder-downloads.mjs",
     "validate:downloads": "node scripts/validate-downloads.mjs",
     "validate:downloads:strict": "node scripts/validate-downloads.mjs --strict",
-    
     "run:downloads": "node scripts/run-validate-downloads.mjs",
     "downloads:build-safe": "npm run seed:downloads && npm run run:downloads || true",
-    
     "covers:events": "node scripts/covers/make-event-covers.mjs"
   },
   "dependencies": {
@@ -66,7 +66,7 @@
     "react-icons": "5.5.0",
     "rehype-stringify": "10.0.0",
     "remark": "15.0.1",
-    "remark-gfm": "4.0.0",
+    "remark-gfm": "^4.0.0",
     "remark-html": "16.0.1",
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.0",
