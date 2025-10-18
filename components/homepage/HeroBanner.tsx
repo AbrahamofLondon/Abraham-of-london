@@ -1,6 +1,7 @@
 // components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
+import Image from "next/image"; // Should be imported now
 
 type VideoSource = { src: string; type: "video/webm" | "video/mp4"; media?: string };
 
@@ -44,6 +45,17 @@ export default function HeroBanner({
     return () => mql?.removeEventListener?.("change", handle);
   }, []);
 
+  // Props used for the replacement Image component
+  const imageProps = {
+    src: poster,
+    alt: "",
+    className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
+    // Crucial for background images in a full-bleed container
+    fill: true as const,
+    // Helps Next.js optimize the image size and format
+    sizes: "100vw",
+  };
+
   return (
     <section
       className={clsx(
@@ -69,13 +81,10 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        <img
-          src={poster}
-          alt=""
-          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
-          decoding="async"
-          loading="eager"
-          fetchPriority="high"
+        // Replaced <img> with <Image /> to fix LCP warning
+        <Image
+          {...imageProps}
+          priority // Equivalent to loading="eager" and fetchPriority="high"
           draggable={false}
         />
       )}
@@ -90,9 +99,12 @@ export default function HeroBanner({
         </div>
       ) : null}
       <noscript>
+        {/* Revert to <img> for noscript and add alt="" to satisfy linter (jsx-a11y/alt-text) */}
+        {/* ADDED eslint-disable @next/next/no-img-element HERE */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={poster}
-          alt=""
+          alt="" {/* <-- ADDED THIS */}
           className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
         />
       </noscript>

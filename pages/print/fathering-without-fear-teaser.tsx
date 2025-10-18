@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @next/next/no-img-element */ // <-- Added to silence the Next.js image warning
 // pages/print/fathering-without-fear-teaser.tsx
 import Head from "next/head";
 
@@ -17,6 +18,7 @@ export default function FatheringWithoutFearTeaserA4() {
         {/* COVER (full-bleed) */}
         <section className="page cover-page relative isolate text-cream">
           <div className="absolute inset-0 -z-10">
+            {/* The <img> that was triggering the warning */}
             <img src={COVER} alt="" className="h-full w-full object-cover opacity-90" />
             <div
               className="absolute inset-0"
