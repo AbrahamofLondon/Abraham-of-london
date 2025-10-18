@@ -96,7 +96,7 @@
 # If actual filenames are Title_Case, alias them (keeps old links working)
 [[redirects]]
   from = "/downloads/leaders-cue-card.pdf"
-  to   = "/downloads/Leaders_Cue_Card.pdf"
+  to   = "/downloads/leaders-cue-card.pdf"
   status = 200
 
 # Historical variants for Fathering Without Fear

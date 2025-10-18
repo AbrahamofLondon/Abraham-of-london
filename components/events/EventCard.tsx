@@ -1,231 +1,201 @@
-// components/events/EventCard.tsx
+"use client";
+
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
-import React from "react";
 
-type Props = {
-  slug: string;
-  title: string;
-  date: string;
-  location?: string;
+/** Utility guards */
+const s = (v: unknown) => (typeof v === "string" ? v : "");
+const lower = (v: unknown) => (typeof v === "string" ? v.toLowerCase() : "");
+const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+const isHttp = (u?: string | null) => !!u && /^https?:\/\//i.test(u || "");
+
+type ResourceLink = { href: string; label: string };
+type Resources = {
+  downloads?: ResourceLink[];
+  reads?: ResourceLink[];
+} | null;
+
+export type EventCardProps = {
+  slug?: string | null;
+  title?: string | null;
+  date?: string | null; // ISO or YYYY-MM-DD
+  location?: string | null;
   description?: string | null;
   tags?: string[] | null;
-  chatham?: boolean;
-  heroImage?: string | null;        // explicit override from front matter
+  heroImage?: string | null;
+  resources?: Resources;
   className?: string;
-  prefetch?: boolean;
-  timeZone?: string;
-
-  /** Optional presentation tuning (per-event overrides) */
-  heroFit?: "cover" | "contain";           // default "cover"
-  heroAspect?: "16/9" | "21/9" | "3/1";    // default "16/9"
-  heroPosition?: "center" | "top" | "left" | "right"; // default "center"
 };
 
-/* ---------- per-slug presentation overrides ---------- */
+/** Brand overrides to force-fit known covers */
 const HERO_OVERRIDES: Record<
   string,
-  { heroFit?: Props["heroFit"]; heroAspect?: Props["heroAspect"]; heroPosition?: Props["heroPosition"] }
+  { heroFit?: "cover" | "contain"; heroAspect?: `${number}/${number}` | string; heroPosition?: string }
 > = {
   "leadership-workshop": { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
-  "founders-salon":      { heroFit: "cover",   heroAspect: "21/9", heroPosition: "center" },
-  // add more as needed…
+  "founders-salon": { heroFit: "cover", heroAspect: "21/9", heroPosition: "center" },
+  // add more here as needed
 };
 
-/* ---------- date helpers ---------- */
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-const isValidDate = (d: Date) => !Number.isNaN(d.valueOf());
+/** Build a robust hero image chain (explicit -> conventional -> fallback) */
+function useHeroChain(slug?: string | null, heroImage?: string | null) {
+  const cleanPath = (p?: string | null) =>
+    p && !isHttp(p) ? (p.startsWith("/") ? p : `/${p}`) : p || undefined;
 
-function formatNiceDate(iso: string, tz = "Europe/London") {
-  if (isDateOnly(iso)) {
-    const [y, m, d] = iso.split("-").map(Number);
-    const dt = new Date(Date.UTC(y, m - 1, d));
-    if (!isValidDate(dt)) return iso;
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: "UTC",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(dt);
-  }
-  const dt = new Date(iso);
-  if (!isValidDate(dt)) return iso;
-  const dateStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(dt);
-  const timeStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(dt);
-  return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
-}
-
-/* ---------- image helpers ---------- */
-const ensureLocal = (p?: string | null) =>
-  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
-
-/** Try: explicit, exact slug, normalized slug, shortened slug, then default */
-function useEventImageCandidates(slug: string, heroImage?: string | null) {
-  const { candidates } = React.useMemo(() => {
-    const explicit = ensureLocal(heroImage);
-
-    const base = slug
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-    const short2 = base.split("-").slice(0, 2).join("-");
-    const short3 = base.split("-").slice(0, 3).join("-");
-
+  return React.useMemo(() => {
+    const safeSlug = s(slug);
+    const explicit = cleanPath(heroImage);
+    const base =
+      safeSlug
+        .toLowerCase() // guarded
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "default";
     const exts = ["webp", "jpg", "jpeg", "png"];
-    const from = (name: string) => exts.map((e) => `/assets/images/events/${name}.${e}`);
-
-    const list = [
+    const candidates = [
       explicit,
-      ...from(base),
-      ...from(short3),
-      ...from(short2),
+      ...exts.map((e) => `/assets/images/events/${base}.${e}`),
       "/assets/images/events/default.jpg",
     ].filter(Boolean) as string[];
-
-    return { candidates: Array.from(new Set(list)) };
+    return Array.from(new Set(candidates));
   }, [slug, heroImage]);
-
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-  const onError = React.useCallback(
-    () => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)),
-    [candidates.length]
-  );
-
-  return { src, hasAny: candidates.length > 0, onError };
 }
 
-/* ---------- component ---------- */
-export default function EventCard({
-  slug,
-  title,
-  date,
-  location,
-  description,
-  tags = null,
-  chatham,
-  className,
-  prefetch = false,
-  timeZone = "Europe/London",
-  heroImage = null,
-  heroFit,
-  heroAspect,
-  heroPosition,
-}: Props) {
-  // merge per-slug overrides (lowest), explicit props (highest)
-  const preset = HERO_OVERRIDES[slug] || {};
-  const _heroFit: NonNullable<Props["heroFit"]> = heroFit || preset.heroFit || "cover";
-  const _heroAspect: NonNullable<Props["heroAspect"]> = heroAspect || preset.heroAspect || "16/9";
-  const _heroPosition: NonNullable<Props["heroPosition"]> = heroPosition || preset.heroPosition || "center";
+/** Display pill buttons for resources (defensive) */
+function ResourcePills({ resources }: { resources?: Resources }) {
+  const downloads = arr<ResourceLink>(resources?.downloads).filter(
+    (d) => s(d?.href) && s(d?.label)
+  );
+  const reads = arr<ResourceLink>(resources?.reads).filter((r) => s(r?.href) && s(r?.label));
 
-  const nice = formatNiceDate(date, timeZone);
-  const titleId = React.useId();
-  const isChatham =
-    Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
+  if (!downloads.length && !reads.length) return null;
 
-  const { src, hasAny, onError } = useEventImageCandidates(slug, heroImage);
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {downloads.map((d, i) => (
+        <Link
+          key={`dl-${i}-${s(d.label)}`}
+          href={s(d.href)}
+          prefetch={false}
+          className="inline-flex items-center rounded-full border border-lightGrey bg-warmWhite px-2.5 py-1 text-xs font-medium hover:bg-white"
+          aria-label={`${s(d.label)} (download)`}
+        >
+          {s(d.label)}
+        </Link>
+      ))}
+      {reads.map((r, i) => (
+        <Link
+          key={`rd-${i}-${s(r.label)}`}
+          href={s(r.href)}
+          prefetch={false}
+          target={isHttp(r.href) ? "_blank" : undefined}
+          rel={isHttp(r.href) ? "noopener noreferrer" : undefined}
+          className="inline-flex items-center rounded-full border border-lightGrey bg-white px-2.5 py-1 text-xs font-medium hover:bg-warmWhite"
+          aria-label={`${s(r.label)} (link)`}
+        >
+          {s(r.label)}
+        </Link>
+      ))}
+    </div>
+  );
+}
 
-  const aspectClass =
-    _heroAspect === "21/9" ? "aspect-[21/9]" : _heroAspect === "3/1" ? "aspect-[3/1]" : "aspect-[16/9]";
+export default function EventCard(props: EventCardProps) {
+  const slug = s(props.slug);
+  const title = s(props.title) || slug || "Untitled event";
+  const location = s(props.location);
+  const description = s(props.description);
+  const tags = arr<string>(props.tags).map(s).filter(Boolean);
+  const date = s(props.date);
 
-  const fitClass = _heroFit === "contain" ? "object-contain bg-warmWhite" : "object-cover";
-  const posClass =
-    _heroPosition === "top"
-      ? "object-top"
-      : _heroPosition === "left"
-      ? "object-left"
-      : _heroPosition === "right"
-      ? "object-right"
-      : "object-center";
+  // hero chain + fallbacks
+  const heroChain = useHeroChain(slug, props.heroImage);
+  const [idx, setIdx] = React.useState(0);
+  const heroSrc = heroChain[idx];
+  const onHeroError = React.useCallback(() => {
+    setIdx((x) => (x + 1 < heroChain.length ? x + 1 : x));
+  }, [heroChain.length]);
+
+  // brand override
+  const o = HERO_OVERRIDES[slug] || {};
+  const fit = o.heroFit ?? "cover";
+  const aspect = o.heroAspect ?? "21/9";
+  const pos = o.heroPosition ?? "center";
+
+  // Simple date badge (keeps it robust)
+  const when = React.useMemo(() => {
+    if (!date) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const [y, m, d] = date.split("-").map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(dt);
+    }
+    const d = new Date(date);
+    if (Number.isNaN(d.valueOf())) return "";
+    const dd = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Europe/London" }).format(d);
+    const tt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/London" }).format(d);
+    return /\b00:00\b/.test(tt) ? dd : `${dd}, ${tt}`;
+  }, [date]);
 
   return (
     <article
       className={clsx(
-        "relative overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
-        className
+        "group flex h-full flex-col overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
+        props.className
       )}
-      aria-labelledby={titleId}
-      itemScope
-      itemType="https://schema.org/Event"
     >
-      {hasAny && src && (
-        <div className={clsx("relative w-full", aspectClass)}>
+      {/* Media */}
+      <div className={clsx("relative w-full", `aspect-[${aspect}]`, "bg-warmWhite")}>
+        {heroSrc ? (
           <Image
-            src={src}
-            alt={`${title} image`}
+            src={heroSrc}
+            alt=""
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className={clsx(fitClass, posClass)}
-            onError={onError}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={clsx(fit === "contain" ? "object-contain" : "object-cover", `object-${pos}`)}
+            onError={onHeroError}
             priority={false}
           />
-          {isChatham && (
-            <span
-              className="absolute right-3 top-3 rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-              title="Chatham Room (off the record)"
-              aria-label="Chatham Room (off the record)"
-            >
-              Chatham
-            </span>
-          )}
-        </div>
-      )}
+        ) : null}
+        {when ? (
+          <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[11px] font-medium shadow">
+            {when}
+          </div>
+        ) : null}
+      </div>
 
-      <div className="p-6">
-        <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <time dateTime={date} className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]" itemProp="startDate">
-            {nice}
-          </time>
-          {location?.trim() && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]" itemProp="location">
-                {location}
-              </span>
-            </>
-          )}
-        </div>
-
-        <h3 id={titleId} className="text-lg font-semibold leading-snug text-gray-900" itemProp="name">
-          <Link
-            href={`/events/${slug}`}
-            className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
-            prefetch={prefetch}
-          >
+      {/* Body */}
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="font-serif text-lg font-semibold text-deepCharcoal">
+          <Link href={`/events/${encodeURIComponent(slug || "")}`} prefetch={false} className="hover:underline">
             {title}
           </Link>
         </h3>
 
+        <div className="mt-1 text-xs text-[color:var(--color-on-secondary)/0.75]">
+          {location && <span>{location}</span>}
+          {location && tags.length ? <span aria-hidden> • </span> : null}
+          {tags.length ? <span>{tags.slice(0, 3).join(" · ")}</span> : null}
+        </div>
+
         {description && (
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700" itemProp="description">
-            {description}
-          </p>
+          <p className="mt-2 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.9]">{description}</p>
         )}
+
+        <ResourcePills resources={props.resources ?? null} />
 
         <div className="mt-4">
           <Link
-            href={`/events/${slug}`}
-            className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest transition-colors hover:bg-forest hover:text-cream"
-            prefetch={prefetch}
-            aria-labelledby={titleId}
+            href={`/events/${encodeURIComponent(slug || "")}`}
+            prefetch={false}
+            className="inline-flex items-center gap-1 text-sm font-medium text-forest hover:underline"
+            aria-label={`View event: ${title}`}
           >
-            Details
+            View details <span aria-hidden>↗</span>
           </Link>
         </div>
-
-        <meta itemProp="url" content={`/events/${slug}`} />
       </div>
     </article>
   );
