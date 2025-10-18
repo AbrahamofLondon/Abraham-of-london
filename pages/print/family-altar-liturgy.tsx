@@ -7,7 +7,7 @@ import Head from "next/head";
  * - Gentle, simple call/response; formation-forward; print-safe.
  * - Page 1: Opening, Scripture, Confession & Assurance, Household Creed.
  * - Page 2: Intercessions (weekly cycle), The Lord’s Prayer (ecumenical form),
- *           micro-commitments + signatures, closing blessing.
+ * micro-commitments + signatures, closing blessing.
  */
 export default function FamilyAltarLiturgy() {
   return (
@@ -163,7 +163,7 @@ export default function FamilyAltarLiturgy() {
         {/* Commitments + Signatures */}
         <div className="block">
           <h2 className="h2">Micro-Commitments (This Week)</h2>
-          <p className="muted small">Each person: one small, concrete step. Keepable > grand.</p>
+          <p className="muted small">Each person: one small, concrete step. Keepable &gt; grand.</p>
           <div className="commit-grid">
             {Array.from({ length: 4 }).map((_, i) => (
               <div className="commit" key={i}>
@@ -208,7 +208,8 @@ const PRINT_CSS = `
 }
 
 *{ box-sizing: border-box; }
-html,body{ margin:0; color:var(--ink); font: 10.75pt/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; }
+/* ✅ FIX: Quoted the complex font stack to avoid JSX parser error. */
+html,body{ margin:0; color:var(--ink); font: 10.75pt/1.5 "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, Liberation Sans, sans-serif"; }
 
 .page{
   display:flex; flex-direction:column; gap:10mm;
