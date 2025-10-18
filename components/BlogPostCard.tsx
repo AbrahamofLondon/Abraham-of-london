@@ -152,7 +152,7 @@ export default function BlogPostCard({
             />
           ) : (
             // graceful placeholder when all images fail
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-forest/30">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-[color:var(--color-primary)/0.3]">
               <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
                 {initials || "A•L"}
               </span>

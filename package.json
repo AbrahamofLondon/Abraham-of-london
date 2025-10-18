@@ -34,7 +34,12 @@
     "downloads:build-safe": "npm run seed:downloads && npm run run:downloads || true",
     "covers:events": "node scripts/covers/make-event-covers.mjs",
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
-    "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write"
+    "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
+    "print": "node scripts/print-all.mjs",
+    "downloads:normalize": "node scripts/normalize-download-filenames.mjs",
+    "downloads:normalize:write": "node scripts/normalize-download-filenames.mjs --write",
+    "downloads:normalize:fix": "node scripts/normalize-download-filenames.mjs --write --fix-refs",
+    "downloads:normalize:git": "node scripts/normalize-download-filenames.mjs --write --git --fix-refs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",

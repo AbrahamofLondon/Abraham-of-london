@@ -55,3 +55,4 @@ Thumbs.db
 *.wav
 
 public/downloads/*.pdf binary
+.pdf.sha
