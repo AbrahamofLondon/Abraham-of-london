@@ -1,4 +1,3 @@
-// components/events/EventCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
@@ -12,15 +11,19 @@ type Props = {
   description?: string | null;
   tags?: string[] | null;
   chatham?: boolean;
-  heroImage?: string | null;        // explicit override from front matter
+  heroImage?: string | null;
   className?: string;
   prefetch?: boolean;
   timeZone?: string;
 
-  /** Optional presentation tuning (per-event overrides) */
-  heroFit?: "cover" | "contain";           // default "cover"
-  heroAspect?: "16/9" | "21/9" | "3/1";    // default "16/9"
-  heroPosition?: "center" | "top" | "left" | "right"; // default "center"
+  heroFit?: "cover" | "contain";
+  heroAspect?: "16/9" | "21/9" | "3/1";
+  heroPosition?: "center" | "top" | "left" | "right";
+
+  resources?: {
+    downloads?: { href: string; label: string }[];
+    reads?: { href: string; label: string }[];
+  } | null;
 };
 
 /* ---------- per-slug presentation overrides ---------- */
@@ -28,9 +31,8 @@ const HERO_OVERRIDES: Record<
   string,
   { heroFit?: Props["heroFit"]; heroAspect?: Props["heroAspect"]; heroPosition?: Props["heroPosition"] }
 > = {
-  "leadership-workshop": { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
+  "leadership-workshop": { heroFit: "contain", heroAspect: "3/1",  heroPosition: "top" },
   "founders-salon":      { heroFit: "cover",   heroAspect: "21/9", heroPosition: "center" },
-  // add more as needed…
 };
 
 /* ---------- date helpers ---------- */
@@ -70,7 +72,6 @@ function formatNiceDate(iso: string, tz = "Europe/London") {
 const ensureLocal = (p?: string | null) =>
   p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
 
-/** Try: explicit, exact slug, normalized slug, shortened slug, then default */
 function useEventImageCandidates(slug: string, heroImage?: string | null) {
   const { candidates } = React.useMemo(() => {
     const explicit = ensureLocal(heroImage);
@@ -123,8 +124,9 @@ export default function EventCard({
   heroFit,
   heroAspect,
   heroPosition,
+  resources = null,
 }: Props) {
-  // merge per-slug overrides (lowest), explicit props (highest)
+  // merge per-slug overrides first, then explicit props
   const preset = HERO_OVERRIDES[slug] || {};
   const _heroFit: NonNullable<Props["heroFit"]> = heroFit || preset.heroFit || "cover";
   const _heroAspect: NonNullable<Props["heroAspect"]> = heroAspect || preset.heroAspect || "16/9";
@@ -150,6 +152,15 @@ export default function EventCard({
       ? "object-right"
       : "object-center";
 
+  const pills: Array<{ href: string; label: string; kind: "download" | "read" }> = [];
+  if (resources?.downloads?.length) {
+    for (const d of resources.downloads.slice(0, 2)) pills.push({ href: d.href, label: d.label, kind: "download" });
+  }
+  if (pills.length < 2 && resources?.reads?.length) {
+    for (const r of resources.reads.slice(0, 2 - pills.length))
+      pills.push({ href: r.href, label: r.label, kind: "read" });
+  }
+
   return (
     <article
       className={clsx(
@@ -174,8 +185,6 @@ export default function EventCard({
           {isChatham && (
             <span
               className="absolute right-3 top-3 rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-              title="Chatham Room (off the record)"
-              aria-label="Chatham Room (off the record)"
             >
               Chatham
             </span>
@@ -212,6 +221,30 @@ export default function EventCard({
           <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700" itemProp="description">
             {description}
           </p>
+        )}
+
+        {/* quick resource pills */}
+        {pills.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {pills.map((p, i) => (
+              <li key={i}>
+                <Link
+                  href={p.href}
+                  prefetch={false}
+                  className={clsx(
+                    "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition",
+                    p.kind === "download"
+                      ? "border-[color:var(--color-primary)/0.2] text-forest hover:bg-forest hover:text-cream"
+                      : "border-lightGrey text-[color:var(--color-on-secondary)] hover:bg-warmWhite"
+                  )}
+                  target={/\.pdf$/i.test(p.href) ? "_blank" : undefined}
+                  rel={/\.pdf$/i.test(p.href) ? "noopener noreferrer" : undefined}
+                >
+                  {p.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
 
         <div className="mt-4">

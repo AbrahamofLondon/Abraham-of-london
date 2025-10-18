@@ -9,10 +9,15 @@ import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
+import DownloadsGrid from "@/components/downloads/DownloadsGrid"; // ← NEW
 import { getActiveBanner } from "@/lib/hero-banners";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
-import { getAllEvents, getEventResourcesSummary, dedupeEventsByTitleAndDay } from "@/lib/server/events-data";
+import {
+  getAllEvents,
+  getEventResourcesSummary,            // ← NEW
+  dedupeEventsByTitleAndDay,           // ← exported from events-data.ts
+} from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 
 /* ── banner types ── */
@@ -41,7 +46,10 @@ type EventsTeaserItem = {
   description?: string | null;
   tags?: string[] | null;
   heroImage?: string | null;
-  resources?: { downloads?: { href: string; label: string }[]; reads?: { href: string; label: string }[] } | null;
+  resources?: {
+    downloads?: { href: string; label: string }[];
+    reads?: { href: string; label: string }[];
+  } | null;
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
@@ -98,6 +106,16 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         )}
       </>
     ) : undefined;
+
+  /* quick list for homepage downloads */
+  const downloads = React.useMemo(
+    () => [
+      { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
+      { href: "/downloads/leaders-cue-card",     title: "Leader’s Cue Card (A6, Two-Up)",   sub: "Pocket reference" },
+      { href: "/downloads/brotherhood-cue-card", title: "Brotherhood Cue Card" },
+    ],
+    []
+  );
 
   return (
     <Layout pageTitle="Home" hideCTA>
@@ -209,7 +227,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Downloads (quick links) */}
+      {/* Downloads — now using the grid component */}
       <section className="bg-white px-4 pb-4">
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
@@ -219,30 +237,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             </p>
           </header>
 
-          <ul className="grid gap-6 sm:grid-cols-2">
-            <li>
-              <Link href="/downloads/brotherhood-covenant" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Brotherhood Covenant (Printable)">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Brotherhood Covenant (Printable)</div>
-                    <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
-                  </div>
-                  <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
-                </div>
-              </Link>
-            </li>
-            <li>
-              <Link href="/downloads/leaders-cue-card" prefetch={false} className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2" aria-label="Leader’s Cue Card (A6, Two-Up)">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-serif text-xl font-semibold text-deepCharcoal">Leader’s Cue Card (A6, Two-Up)</div>
-                    <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">Download →</div>
-                  </div>
-                  <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
-                </div>
-              </Link>
-            </li>
-          </ul>
+          <DownloadsGrid items={downloads} columns={2} className="mt-2" />
         </div>
       </section>
 
@@ -270,7 +265,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                   description={ev.description ?? undefined}
                   tags={ev.tags ?? undefined}
                   heroImage={ev.heroImage ?? undefined}
-                  resources={ev.resources ?? undefined}  // ← show pills
+                  resources={ev.resources ?? undefined}  // ← shows resource pills if present
                 />
               </li>
             ))}

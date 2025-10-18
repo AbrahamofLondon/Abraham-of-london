@@ -11,10 +11,10 @@ export type Milestone = {
 };
 
 type Props = {
-  items?: Milestone[];               // optional; defaults to built-in sample
-  title?: string;                    // defaults to "Milestones"
-  ariaLabel?: string;                // accessible label for the section
-  variant?: "light" | "dark";        // light (default) or dark surface
+  items?: Milestone[];
+  title?: string;
+  ariaLabel?: string;
+  variant?: "light" | "dark";
   className?: string;
 };
 
@@ -31,10 +31,10 @@ export default function MilestonesTimeline({
   variant = "light",
   className = "",
 }: Props) {
-  const reduceMotion = useReducedMotion();
+  const reduce = useReducedMotion();
   const headingId = React.useId();
 
-  // Defensive copy + ascending sort by year, stable keys
+  // Defensive copy + ascending sort by year
   const data = React.useMemo(() => {
     const arr = (items && items.length ? items : DEFAULT_ITEMS).slice();
     arr.sort((a, b) => a.year - b.year);
@@ -45,53 +45,59 @@ export default function MilestonesTimeline({
     variant === "dark"
       ? "bg-white/10 text-cream border border-white/10 backdrop-blur"
       : "bg-white text-deepCharcoal ring-1 ring-black/5";
-  const subText = variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-[color:var(--color-on-secondary)/0.8]";
+
+  const subText =
+    variant === "dark"
+      ? "text-[color:var(--color-on-primary)/0.8]"
+      : "text-[color:var(--color-on-secondary)/0.8]";
 
   return (
     <section
-      className={`py-16 px-4 ${className}`}
+      className={`px-4 py-16 ${className}`}
       aria-label={ariaLabel || title}
       aria-labelledby={headingId}
     >
       <div className="container mx-auto max-w-4xl">
-        <div className={`rounded-3xl shadow-2xl p-8 md:p-12 ${surface}`}>
+        <div className={`rounded-3xl p-8 shadow-2xl md:p-12 ${surface}`}>
           <motion.h2
             id={headingId}
-            className="text-3xl md:text-4xl font-serif font-bold text-center mb-8"
-            initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            className="text-center font-serif text-3xl font-bold md:text-4xl"
+            initial={reduce ? undefined : { opacity: 0, y: 12 }}
+            whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={reduceMotion ? undefined : { duration: 0.5 }}
+            transition={reduce ? undefined : { duration: 0.5 }}
           >
             {title}
           </motion.h2>
 
           {data.length === 0 ? (
-            <p className={`text-center ${subText}`}>No milestones to display (yet!).</p>
+            <p className={`mt-6 text-center ${subText}`}>No milestones to display (yet!).</p>
           ) : (
-            <ol className="relative border-l border-gray-200 pl-6 dark:border-white/15">
+            <ol className="relative mt-10 border-l border-gray-200 pl-6 dark:border-white/15">
               {data.map((m, i) => (
                 <motion.li
                   key={`${m.year}-${m.title}-${i}`}
                   className="mb-8 ml-2"
-                  initial={reduceMotion ? undefined : { opacity: 0, x: -12 }}
-                  whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+                  initial={reduce ? undefined : { opacity: 0, x: -12 }}
+                  whileInView={reduce ? undefined : { opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={reduceMotion ? undefined : { duration: 0.4, delay: i * 0.06 }}
+                  transition={reduce ? undefined : { duration: 0.4, delay: i * 0.06 }}
                 >
                   <span
                     aria-hidden
                     className="absolute -left-3 top-1.5 h-3 w-3 rounded-full bg-forest ring-4 ring-[color:var(--color-primary)/0.2]"
                   />
-                  <div className="text-forest text-sm font-semibold">
+                  <div className="text-sm font-semibold text-forest">
                     <time dateTime={String(m.year)}>{m.year}</time>
                   </div>
-                  <h3 className="text-xl font-semibold mt-1">{m.title}</h3>
-                  {m.detail && <p className={`${subText} mt-1`}>{m.detail}</p>}
+                  <h3 className="mt-1 text-xl font-semibold">{m.title}</h3>
+                  {m.detail && <p className={`mt-1 ${subText}`}>{m.detail}</p>}
                   {m.href && (
                     <a
                       href={m.href}
-                      className="inline-flex items-center mt-3 text-sm text-forest underline underline-offset-4 hover:no-underline"
+                      target={/^https?:\/\//i.test(m.href) ? "_blank" : undefined}
+                      rel={/^https?:\/\//i.test(m.href) ? "noopener noreferrer" : undefined}
+                      className="mt-3 inline-flex items-center text-sm text-forest underline underline-offset-4 hover:no-underline"
                     >
                       Learn more
                     </a>
