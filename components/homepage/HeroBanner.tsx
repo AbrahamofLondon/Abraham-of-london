@@ -1,3 +1,4 @@
+components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -105,9 +106,7 @@ export default function HeroBanner({
       </noscript>
     </section>
   );
-}   </noscript>
-    </section>
-  );
+}
 }px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
