@@ -365,6 +365,7 @@ const components: MDXComponentsType = {
   Badge,
   BadgeRow,
   ShareRow,
+  BrandFrame,
 
   // legacy shims
   Caption,
