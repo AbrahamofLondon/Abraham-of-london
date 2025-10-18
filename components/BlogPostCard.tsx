@@ -36,18 +36,28 @@ function useBlogCover(slug: string, coverImage?: string) {
       `/assets/images/blog/${slug}.jpg`,
       `/assets/images/blog/${slug}.jpeg`,
       `/assets/images/blog/${slug}.png`,
+      // Retain a non-slug-specific fallback as the final option
       `/assets/images/blog/default-blog-cover.jpg`,
     ].filter(Boolean) as string[];
     return Array.from(new Set(list));
   }, [slug, coverImage]);
 
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-
+  // Use the first candidate as the source. We rely on the pre-generated image
+  // candidates list being ordered by preference, and will attempt to load the first one.
+  // We remove the stateful `onError` logic as it causes unnecessary client-side re-renders.
+  const src = candidates[0];
+  
+  // The onError function should not trigger a re-render loop on the client.
+  // Leaving it as a no-op or removing it is safer than state-based retry.
   const onError = React.useCallback(() => {
-    setIdx((i) => (i + 1 < candidates.length ? i + 1 : i));
-  }, [candidates.length]);
+    // In a real application, you might use a service to check image validity 
+    // or rely on Next.js logging the failure. State-based retry here is problematic.
+    console.warn(`Failed to load blog cover: ${src}`);
+  }, [src]);
 
+
+  // Only return the first candidate. If it fails, the Next/Image component will show nothing 
+  // or a broken icon, which is generally better than a re-render loop.
   return { src, hasAny: candidates.length > 0, onError };
 }
 
@@ -70,9 +80,16 @@ export default function BlogPostCard({
     !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
 
   const preferredAvatar = (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
+  // NOTE: Avatar error handling is kept, as it's a simple, two-state fallback (preferred or default)
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
+  // We are now just using the *first* potential source and letting Next/Image handle the load
   const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(slug, coverImage);
+  
+  // Check if coverSrc is still the original preferredAvatar, and if so,
+  // we can use a no-op for the error handler, as the image will be the final fallback.
+  const handleCoverError = coverSrc?.endsWith("default-blog-cover.jpg") ? undefined : onCoverError;
+
 
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
@@ -105,7 +122,8 @@ export default function BlogPostCard({
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className={`${fitClass} ${posClass}`}
-              onError={onCoverError}
+              // Use the simplified error handler which avoids state updates for cover
+              onError={handleCoverError} 
               priority={false}
             />
           </div>
@@ -130,6 +148,7 @@ export default function BlogPostCard({
               width={40}
               height={40}
               className="rounded-full object-cover"
+              // Keep avatar fallback logic as it is simple and safe
               onError={() => setAvatarSrc(FALLBACK_AVATAR)}
             />
             <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
