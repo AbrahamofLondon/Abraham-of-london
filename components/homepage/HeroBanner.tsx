@@ -1,9 +1,13 @@
 // components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
-import Image from "next/image"; // Should be imported now
+import Image from "next/image";
 
-type VideoSource = { src: string; type: "video/webm" | "video/mp4"; media?: string };
+type VideoSource = {
+  src: string;
+  type: "video/webm" | "video/mp4";
+  media?: string;
+};
 
 type Props = {
   poster: string;
@@ -81,10 +85,11 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        // Replaced <img> with <Image /> to fix LCP warning
+        // Use Next Image for performance, replacing the old <img>
         <Image
           {...imageProps}
-          priority // Equivalent to loading="eager" and fetchPriority="high"
+          alt=""
+          priority
           draggable={false}
         />
       )}
@@ -99,12 +104,10 @@ export default function HeroBanner({
         </div>
       ) : null}
       <noscript>
-        {/* Revert to <img> for noscript and add alt="" to satisfy linter (jsx-a11y/alt-text) */}
-        {/* ADDED eslint-disable @next/next/no-img-element HERE */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          alt="" 
           src={poster}
-          alt="" {/* <-- ADDED THIS */}
           className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
         />
       </noscript>
