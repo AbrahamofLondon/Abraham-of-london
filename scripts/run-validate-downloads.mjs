@@ -1,5 +1,5 @@
 // scripts/run-validate-downloads.mjs
-// Cross-platform runner for downloads pipeline (placeholders → validator).
+// CI-safe runner: generate placeholders, then validate (strict in CI).
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -8,11 +8,11 @@ import { spawn } from "node:child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, "..");        // <repo>/scripts -> <repo>
+const ROOT = path.resolve(__dirname, "..");
 const SCRIPTS = path.join(ROOT, "scripts");
 
 const GEN = path.join(SCRIPTS, "generate-placeholder-downloads.mjs");
-const VAL = path.join(SCRIPTS, "validate-downloads.mjs"); // <- robust local path (NOT /opt/build)
+const VAL = path.join(SCRIPTS, "validate-downloads.mjs");
 
 function runNode(scriptPath, args = []) {
   return new Promise((resolve, reject) => {
@@ -21,10 +21,7 @@ function runNode(scriptPath, args = []) {
       env: process.env,
       cwd: ROOT,
     });
-    child.on("exit", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`Script failed (${path.basename(scriptPath)}): exit ${code}`));
-    });
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`exit ${code}`))));
     child.on("error", reject);
   });
 }
@@ -43,26 +40,21 @@ async function main() {
   }
 
   if (!hasValidator) {
-    console.warn(
-      `[downloads:warn] Missing validator at ${VAL}. Skipping validation (deploy will continue).`
-    );
+    console.warn(`[downloads:warn] Missing validator at ${VAL}. Skipping validation (deploy continues).`);
     console.log("[downloads:ok] downloads look good (validator unavailable).");
     return;
   }
 
   try {
-    // Use --strict in CI, otherwise soft-checks locally
-    const args = process.env.CI ? ["--strict"] : [];
-    await runNode(VAL, args);
+    await runNode(VAL, ["--strict"]);
     console.log("[downloads:ok] validation passed.");
   } catch (err) {
-    // On Netlify we still want the build to continue if strict mode is disabled.
-    const strict = Boolean(process.env.DOWNLOADS_STRICT === "1");
+    const strict = process.env.DOWNLOADS_STRICT === "1";
     if (strict) {
       console.error("[downloads:fail] strict mode ON → failing build.");
       throw err;
     } else {
-      console.warn("[downloads:warn] validation raised errors, but strict mode is OFF → continuing.");
+      console.warn("[downloads:warn] validator reported errors, but strict mode OFF → continuing.");
       console.warn(String(err?.message || err));
     }
   }
