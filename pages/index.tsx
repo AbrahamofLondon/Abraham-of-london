@@ -1,7 +1,8 @@
-import * as React from "react";
+import type { GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import * as React from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 
@@ -9,14 +10,14 @@ import Layout from "@/components/Layout";
 import BlogPostCard from "@/components/BlogPostCard";
 import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
-import DownloadsGrid from "@/components/downloads/DownloadsGrid"; // ← NEW
+import DownloadsGrid from "@/components/downloads/DownloadsGrid";
 import { getActiveBanner } from "@/lib/hero-banners";
 import { getAllPosts } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
 import {
   getAllEvents,
-  getEventResourcesSummary,            // ← NEW
-  dedupeEventsByTitleAndDay,           // ← exported from events-data.ts
+  getEventResourcesSummary,
+  dedupeEventsByTitleAndDay,
 } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 
@@ -63,7 +64,9 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const booksHref = `/books${qSuffix}`;
   const postsCount = posts.length;
 
-  const raw = React.useMemo<BannerConfig>(() => getActiveBanner() as unknown as BannerConfig, []);
+  // FIX APPLIED HERE: Use ?? {} to ensure raw is at least an empty object if getActiveBanner() returns null/undefined.
+  const raw = React.useMemo<BannerConfig>(() => (getActiveBanner() ?? {}) as unknown as BannerConfig, []);
+  
   const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
     poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
     videoSources:
@@ -111,7 +114,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const downloads = React.useMemo(
     () => [
       { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-      { href: "/downloads/leaders-cue-card",     title: "Leader’s Cue Card (A6, Two-Up)",   sub: "Pocket reference" },
+      { href: "/downloads/leaders-cue-card",    title: "Leader’s Cue Card (A6, Two-Up)",    sub: "Pocket reference" },
       { href: "/downloads/brotherhood-cue-card", title: "Brotherhood Cue Card" },
     ],
     []
@@ -265,7 +268,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                   description={ev.description ?? undefined}
                   tags={ev.tags ?? undefined}
                   heroImage={ev.heroImage ?? undefined}
-                  resources={ev.resources ?? undefined}  // ← shows resource pills if present
+                  resources={ev.resources ?? undefined}
                 />
               </li>
             ))}
@@ -399,6 +402,7 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
+    // This line is safe because e.slug is checked in the filter above
     const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     const resources = getEventResourcesSummary(e.slug);
