@@ -1,8 +1,9 @@
-import type { GetStaticProps } from "next";
+// pages/index.tsx
+import type { GetStaticProps } from "next"; // Added missing import for GetStaticProps
+import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import * as React from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 
@@ -64,7 +65,8 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
   const booksHref = `/books${qSuffix}`;
   const postsCount = posts.length;
 
-  // FIX APPLIED HERE: Use ?? {} to ensure raw is at least an empty object if getActiveBanner() returns null/undefined.
+  // FIX APPLIED HERE: Ensure raw is an object by using the nullish coalescing operator (?? {})
+  // This prevents the error if getActiveBanner() returns null or undefined.
   const raw = React.useMemo<BannerConfig>(() => (getActiveBanner() ?? {}) as unknown as BannerConfig, []);
   
   const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
@@ -230,7 +232,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
         </div>
       </section>
 
-      {/* Downloads — now using the grid component */}
+      {/* Downloads — grid */}
       <section className="bg-white px-4 pb-4">
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
@@ -402,7 +404,6 @@ export async function getStaticProps() {
     .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-    // This line is safe because e.slug is checked in the filter above
     const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = `/assets/images/events/${baseForImage}.jpg`;
     const resources = getEventResourcesSummary(e.slug);
