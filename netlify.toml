@@ -11,15 +11,17 @@
     NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
     CI_LAX = "1"
     NO_SLASH_OPACITY_MODE = "fix"
-    DOWNLOADS_STRICT = "0"
+    DOWNLOADS_STRICT = "0" # set to "1" to fail build on download warnings
 
+# In production, (1) try PDFs (script skips in CI unless PDF_ON_CI=1),
+# (2) validate/seed downloads with a CI-safe runner, (3) Next build.
 [context.production]
-  command = "npm run pdfs && npm run seed:downloads && npm run build"
+  command = "npm run pdfs && node scripts/run-validate-downloads.mjs && npm run build"
 
 [context.production.environment]
   NODE_ENV = "production"
-  # Install devDependencies during production build (for scripts like puppeteer/sharp)
-  NPM_FLAGS = "--include=dev"
+  # Install devDependencies during production build only if you render PDFs in CI
+  # NPM_FLAGS = "--include=dev" # uncomment only when PDF_ON_CI=1
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX emails)
@@ -34,29 +36,24 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse — prod only
-[[context.production.plugins]]
-  package = "@netlify/plugin-lighthouse"
-
-  [[context.production.plugins.inputs.audits]]
-    path = "/"
-    output_path = "reports/home.html"
-
-  [[context.production.plugins.inputs.audits]]
-    path = "/blog"
-    output_path = "reports/blog.html"
-
-  [context.production.plugins.inputs.thresholds]
-    performance = 0.9
-    accessibility = 0.9
-    best-practices = 0.9
-    seo = 0.9
-
-  [context.production.plugins.inputs.settings]
-    chromeFlags = "--no-sandbox"
-
-  [context.production.plugins.inputs]
-    fail_deploy_on_score_thresholds = false
+# (Temporarily disable Lighthouse while we stabilise CI to avoid Chrome hangs)
+# [[context.production.plugins]]
+#   package = "@netlify/plugin-lighthouse"
+#   [[context.production.plugins.inputs.audits]]
+#     path = "/"
+#     output_path = "reports/home.html"
+#   [[context.production.plugins.inputs.audits]]
+#     path = "/blog"
+#     output_path = "reports/blog.html"
+#   [context.production.plugins.inputs.thresholds]
+#     performance = 0.9
+#     accessibility = 0.9
+#     best-practices = 0.9
+#     seo = 0.9
+#   [context.production.plugins.inputs.settings]
+#     chromeFlags = "--no-sandbox"
+#   [context.production.plugins.inputs]
+#     fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
 # Legacy PDF aliases & Friendly slugs

@@ -2,13 +2,11 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": {
-    "node": ">=20 <21"
-  },
+  "engines": { "node": ">=20 <21" },
   "scripts": {
     "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs --check && node scripts/run-validate-downloads.mjs",
     "dev": "next dev",
-    "build": "next build",
+    "build": "node -e \"console.log('>>> starting next build')\" && next build && node -e \"console.log('>>> finished next build')\"",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
