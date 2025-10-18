@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2025-10-18_16-48-01",
+  "dir": "public\\downloads",
+  "renames": [
+    {
+      "from": "Board_Update_OnePager.pdf",
+      "to": "board-update-onepager.pdf"
+    },
+    {
+      "from": "Brotherhood_Cue_Card_Two_Up.pdf",
+      "to": "brotherhood-cue-card-two-up.pdf"
+    },
+    {
+      "from": "Brotherhood_Leader_Guide_4_Weeks.pdf",
+      "to": "brotherhood-leader-guide-4-weeks.pdf"
+    },
+    {
+      "from": "Brotherhood_Starter_Kit.pdf",
+      "to": "brotherhood-starter-kit.pdf"
+    },
+    {
+      "from": "Communication_Script_BPF.pdf",
+      "to": "communication-script-bpf.pdf"
+    },
+    {
+      "from": "downloadsBoard_Update_OnePager.pdf",
+      "to": "downloadsboard-update-onepager.pdf"
+    },
+    {
+      "from": "Entrepreneur_Operating_Pack.pdf",
+      "to": "entrepreneur-operating-pack.pdf"
+    },
+    {
+      "from": "Entrepreneur_Survival_Checklist.pdf",
+      "to": "entrepreneur-survival-checklist.pdf"
+    },
+    {
+      "from": "Evidence_Log_Template.pdf",
+      "to": "evidence-log-template.pdf"
+    },
+    {
+      "from": "Fathering_Without_Fear.pdf",
+      "to": "fathering-without-fear.pdf"
+    },
+    {
+      "from": "Fathering_Without_Fear_Teaser-Mobile.pdf",
+      "to": "fathering-without-fear-teaser-mobile.pdf"
+    },
+    {
+      "from": "Fathers_in_Family_Court_Practical_Pack.pdf",
+      "to": "fathers-in-family-court-practical-pack.pdf"
+    },
+    {
+      "from": "Leadership_Playbook.pdf",
+      "to": "leadership-playbook.pdf"
+    },
+    {
+      "from": "Mentorship_Starter_Kit.pdf",
+      "to": "mentorship-starter-kit.pdf"
+    },
+    {
+      "from": "The_Fiction_Adaptation_OnePager.pdf",
+      "to": "the-fiction-adaptation-onepager.pdf"
+    },
+    {
+      "from": "Weekly_Operating_Rhythm.pdf",
+      "to": "weekly-operating-rhythm.pdf"
+    }
+  ]
+}

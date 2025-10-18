@@ -2,29 +2,16 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
+import rehypeRaw from "rehype-raw";               // ⟵ add
 import rehypeStringify from "rehype-stringify";
 
-export default async function markdownToHtml(
-  markdown: string,
-): Promise<string> {
+export default async function markdownToHtml(markdown: string): Promise<string> {
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkRehype)
-    .use(rehypeStringify)
+    .use(remarkRehype, { allowDangerousHtml: true })  // ⟵ pass HTML through
+    .use(rehypeRaw)                                   // ⟵ parse in-place HTML
+    .use(rehypeStringify, { allowDangerousHtml: true })
     .process(markdown);
   return String(file);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
