@@ -63,7 +63,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 	const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
 	const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
 	const booksHref = `/books${qSuffix}`;
-	const postsCount = posts.length;
+	const postsCount = posts.length; // This is now the count of the *featured* posts (always 3 unless there are <3 total)
 
 	// FIX APPLIED HERE: Ensure raw is an object by using the nullish coalescing operator (?? {})
 	// This prevents the error if getActiveBanner() returns null or undefined.
@@ -130,7 +130,8 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 					content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
 				/>
 				<meta property="og:type" content="website" />
-				<link rel="preload" as="image" href={banner.poster} />
+				{/* LCP Optimization: Add fetchpriority="high" to the primary image preload */}
+				<link rel="preload" as="image" href={banner.poster} fetchPriority="high" /> 
 				{banner.videoSources?.map((s, i) => (
 					<link key={i} rel="preload" as="video" href={s.src} type={s.type} />
 				))}
@@ -179,12 +180,14 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 					</header>
 
 					<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-						{posts.slice(0, 3).map((p) => (
+						{/* Use the already-sliced 'posts' prop */}
+						{posts.map((p) => (
 							<BlogPostCard
 								key={p.slug}
 								slug={p.slug}
 								title={p.title}
-								date={p.date ?? undefined}
+								// Props passed directly from safePosts, which already handles null/undefined
+								date={p.date ?? undefined} 
 								excerpt={p.excerpt ?? undefined}
 								coverImage={p.coverImage ?? undefined}
 								author={p.author ?? undefined}
@@ -325,7 +328,15 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 			{/* Closing CTA */}
 			<section className="relative isolate overflow-hidden bg-deepCharcoal">
 				<div className="absolute inset-0 -z-10">
-					<Image src="/assets/images/cta/cta-bg.jpg" alt="" fill sizes="100vw" quality={85} className="object-cover opacity-20" />
+					<Image 
+                        src="/assets/images/cta/cta-bg.jpg" 
+                        alt="" 
+                        fill 
+                        sizes="100vw" 
+                        quality={85} 
+                        className="object-cover opacity-20" 
+                        priority={false} // Since this is a closing CTA, set to false
+                    />
 				</div>
 
 				<div className="mx-auto max-w-7xl px-4 py-20 text-center">
@@ -348,8 +359,12 @@ Home.displayName = "Home";
 
 /* ── SSG + ISR ── */
 export async function getStaticProps() {
-	const posts = getAllPosts();
-	const safePosts = posts.map((p) => ({
+	const allPosts = getAllPosts();
+	// Optimization: Slice the array to only process and pass the 3 featured posts
+	const limitedPosts = allPosts.slice(0, 3);
+
+	// Map and sanitize ONLY the limited set of posts for serialization
+	const safePosts = limitedPosts.map((p) => ({
 		...p,
 		excerpt: p.excerpt ?? null,
 		date: p.date ?? null,
@@ -408,7 +423,7 @@ export async function getStaticProps() {
 		const heroImage = `/assets/images/events/${baseForImage}.jpg`;
 		const resources = getEventResourcesSummary(e.slug);
         
-        // FIX APPLIED: Ensure nested 'reads' and 'downloads' are not 'undefined'.
+        // FIX APPLIED (from previous step): Ensure nested 'reads' and 'downloads' are not 'undefined'.
         const safeResources = resources ? {
             // Use nullish coalescing to convert any nested 'undefined' properties to 'null'
             downloads: resources.downloads ?? null,
@@ -427,5 +442,6 @@ export async function getStaticProps() {
 		};
 	});
 
+	// Note: postsCount in the component will reflect the length of safePosts (max 3)
 	return { props: { posts: safePosts, booksCount, eventsTeaser }, revalidate: 3600 };
 }
