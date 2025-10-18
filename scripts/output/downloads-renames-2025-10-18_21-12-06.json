@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2025-10-18_21-12-06",
+  "dir": "public\\downloads",
+  "renames": [
+    {
+      "from": "Communication_Script_BPF.pdf",
+      "to": "communication-script-bpf-2.pdf"
+    },
+    {
+      "from": "Entrepreneur_Survival_Checklist.pdf",
+      "to": "entrepreneur-survival-checklist-2.pdf"
+    },
+    {
+      "from": "Family_Altar_Liturgy.pdf",
+      "to": "family-altar-liturgy-2.pdf"
+    },
+    {
+      "from": "Fatherhood_Guide.pdf",
+      "to": "fatherhood-guide-2.pdf"
+    },
+    {
+      "from": "Fathering_Without_Fear_Teaser-A4.pdf",
+      "to": "fathering-without-fear-teaser-a4-2.pdf"
+    },
+    {
+      "from": "Fathering_Without_Fear_Teaser_A4.pdf",
+      "to": "fathering-without-fear-teaser-a4-3.pdf"
+    },
+    {
+      "from": "Fathering_Without_Fear_Teaser_Mobile.pdf",
+      "to": "fathering-without-fear-teaser-mobile-2.pdf"
+    },
+    {
+      "from": "Household_Rhythm_Starter.pdf",
+      "to": "household-rhythm-starter-2.pdf"
+    },
+    {
+      "from": "Principles_for_My_Son.pdf",
+      "to": "principles-for-my-son-2.pdf"
+    },
+    {
+      "from": "Principles_for_My_Son_Cue_Card.pdf",
+      "to": "principles-for-my-son-cue-card-2.pdf"
+    },
+    {
+      "from": "Scripture_Track_John14.pdf",
+      "to": "scripture-track-john14-2.pdf"
+    }
+  ]
+}
