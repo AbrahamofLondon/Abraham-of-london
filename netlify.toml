@@ -2,6 +2,7 @@
 # Build
 # ────────────────────────────────────────────────────────────
 [build]
+  # Local/preview: Next build only; scripts run via prebuild
   command = "npm run build"
   publish = ".next"
 
@@ -13,15 +14,14 @@
     NO_SLASH_OPACITY_MODE = "fix"
     DOWNLOADS_STRICT = "0" # set to "1" to fail build on download warnings
 
-# In production, (1) try PDFs (script skips in CI unless PDF_ON_CI=1),
-# (2) validate/seed downloads with a CI-safe runner, (3) Next build.
+# In production: (1) try PDFs (skips unless PDF_ON_CI=1), (2) seed + validate, (3) Next build.
 [context.production]
   command = "npm run pdfs && node scripts/run-validate-downloads.mjs && npm run build"
 
 [context.production.environment]
   NODE_ENV = "production"
-  # Install devDependencies during production build only if you render PDFs in CI
-  # NPM_FLAGS = "--include=dev" # uncomment only when PDF_ON_CI=1
+  # Install devDependencies only when you render PDFs in CI. Keep commented if PDF_ON_CI is not used.
+  # NPM_FLAGS = "--include=dev"
 
 # ────────────────────────────────────────────────────────────
 # Functions (Resend + JSX emails)
@@ -32,32 +32,51 @@
   external_node_modules = ["resend"]
   included_files = ["netlify/emails/**"]
 
+# ────────────────────────────────────────────────────────────
+# Plugins
+# ────────────────────────────────────────────────────────────
+
 # Next.js runtime
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# (Temporarily disable Lighthouse while we stabilise CI to avoid Chrome hangs)
-# [[context.production.plugins]]
-#   package = "@netlify/plugin-lighthouse"
-#   [[context.production.plugins.inputs.audits]]
-#     path = "/"
-#     output_path = "reports/home.html"
-#   [[context.production.plugins.inputs.audits]]
-#     path = "/blog"
-#     output_path = "reports/blog.html"
-#   [context.production.plugins.inputs.thresholds]
-#     performance = 0.9
-#     accessibility = 0.9
-#     best-practices = 0.9
-#     seo = 0.9
-#   [context.production.plugins.inputs.settings]
-#     chromeFlags = "--no-sandbox"
-#   [context.production.plugins.inputs]
-#     fail_deploy_on_score_thresholds = false
+# Lighthouse — post-deploy, non-blocking, Chrome hardened
+[[context.production.plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+  [context.production.plugins.inputs.settings]
+    chromeFlags = "--no-sandbox --headless=new --disable-gpu --disable-dev-shm-usage"
+    emulatedFormFactor = "mobile"
+    throttlingMethod   = "provided"
+    locale             = "en-GB"
+
+  # Audits to run
+  [[context.production.plugins.inputs.audits]]
+    path = "/"
+    output_path = "reports/home.html"
+
+  [[context.production.plugins.inputs.audits]]
+    path = "/blog"
+    output_path = "reports/blog.html"
+
+  [[context.production.plugins.inputs.audits]]
+    path = "/events"
+    output_path = "reports/events.html"
+
+  # Do not block deploy on scores while stabilising
+  [context.production.plugins.inputs.thresholds]
+    performance = 0.0
+    accessibility = 0.0
+    best-practices = 0.0
+    seo = 0.0
+
+  [context.production.plugins.inputs]
+    fail_deploy_on_score_thresholds = false
 
 # ────────────────────────────────────────────────────────────
 # Legacy PDF aliases & Friendly slugs
 # ────────────────────────────────────────────────────────────
+
 # Friendly download slugs → PDFs
 [[redirects]]
   from = "/downloads/leaders-cue-card"
@@ -133,11 +152,14 @@
 # ────────────────────────────────────────────────────────────
 # Headers
 # ────────────────────────────────────────────────────────────
+
+# Root: revalidate immediately
 [[headers]]
   for = "/"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# Defaults site-wide
 [[headers]]
   for = "/*"
   [headers.values]
@@ -174,7 +196,9 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
+# PDFs — explicit MIME helps Safari
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type  = "application/pdf"
