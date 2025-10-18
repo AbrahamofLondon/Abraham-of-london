@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/lib/siteConfig";
 
+/* ---------- types ---------- */
 type BlogPostCardProps = {
   slug: string;
   title: string;
@@ -19,48 +20,47 @@ type BlogPostCardProps = {
   coverPosition?: "center" | "left" | "right";
 };
 
+/* ---------- constants ---------- */
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
-/** Normalize to /public paths + provide fallbacks by slug */
-function useBlogCover(slug: string, coverImage?: string) {
-  const normalizeLocal = (src?: string) => {
-    if (!src) return undefined;
-    if (/^https?:\/\//i.test(src)) return undefined;
-    return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-  };
+// We’ll try these default blog covers if everything else fails
+const DEFAULT_COVERS = [
+  "/assets/images/blog/default.webp",
+  "/assets/images/blog/default.jpg",
+] as const;
 
-  const candidates = React.useMemo(() => {
-    const list = [
-      normalizeLocal(coverImage),
-      `/assets/images/blog/${slug}.webp`,
-      `/assets/images/blog/${slug}.jpg`,
-      `/assets/images/blog/${slug}.jpeg`,
-      `/assets/images/blog/${slug}.png`,
-      // Retain a non-slug-specific fallback as the final option
-      `/assets/images/blog/default-blog-cover.jpg`,
-    ].filter(Boolean) as string[];
-    return Array.from(new Set(list));
-  }, [slug, coverImage]);
-
-  // Use the first candidate as the source. We rely on the pre-generated image
-  // candidates list being ordered by preference, and will attempt to load the first one.
-  // We remove the stateful `onError` logic as it causes unnecessary client-side re-renders.
-  const src = candidates[0];
-  
-  // The onError function should not trigger a re-render loop on the client.
-  // Leaving it as a no-op or removing it is safer than state-based retry.
-  const onError = React.useCallback(() => {
-    // In a real application, you might use a service to check image validity 
-    // or rely on Next.js logging the failure. State-based retry here is problematic.
-    console.warn(`Failed to load blog cover: ${src}`);
-  }, [src]);
-
-
-  // Only return the first candidate. If it fails, the Next/Image component will show nothing 
-  // or a broken icon, which is generally better than a re-render loop.
-  return { src, hasAny: candidates.length > 0, onError };
+/* ---------- helpers ---------- */
+// quick, safe “strip tags / MDX components” for list cards
+function stripMarkup(input?: string | null) {
+  if (!input) return "";
+  // remove anything that looks like a tag or MDX component
+  return input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+function normalizeLocal(src?: string | null): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return undefined; // external images not handled here
+  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+}
+
+/** Build a strong list of candidates we can try in order */
+function buildCoverCandidates(slug: string, coverImage?: string | null) {
+  const cleanSlug = String(slug).trim();
+
+  const baseCandidates = [
+    normalizeLocal(coverImage),
+    `/assets/images/blog/${cleanSlug}.webp`,
+    `/assets/images/blog/${cleanSlug}.jpg`,
+    `/assets/images/blog/${cleanSlug}.jpeg`,
+    `/assets/images/blog/${cleanSlug}.png`,
+    ...DEFAULT_COVERS,
+  ].filter(Boolean) as string[];
+
+  // de-dup while preserving order
+  return Array.from(new Set(baseCandidates));
+}
+
+/* ---------- component ---------- */
 export default function BlogPostCard({
   slug,
   title,
@@ -75,27 +75,43 @@ export default function BlogPostCard({
   coverPosition = "center",
 }: BlogPostCardProps) {
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
+  const preferredAvatar =
+    (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
 
-  const normalizeLocal = (src?: string) =>
-    !src || /^https?:\/\//i.test(src) ? undefined : src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-
-  const preferredAvatar = (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
-  // NOTE: Avatar error handling is kept, as it's a simple, two-state fallback (preferred or default)
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  // We are now just using the *first* potential source and letting Next/Image handle the load
-  const { src: coverSrc, hasAny: showCover, onError: onCoverError } = useBlogCover(slug, coverImage);
-  
-  // Check if coverSrc is still the original preferredAvatar, and if so,
-  // we can use a no-op for the error handler, as the image will be the final fallback.
-  const handleCoverError = coverSrc?.endsWith("default-blog-cover.jpg") ? undefined : onCoverError;
+  // cover candidates + failure handling
+  const candidates = React.useMemo(
+    () => buildCoverCandidates(slug, coverImage),
+    [slug, coverImage]
+  );
+  const [idx, setIdx] = React.useState(0);
+  const [coverFailed, setCoverFailed] = React.useState(false);
 
+  const coverSrc = !coverFailed ? candidates[idx] : undefined;
 
+  const onCoverError = React.useCallback(() => {
+    setIdx((i) => {
+      const next = i + 1;
+      if (next >= candidates.length) {
+        // exhausted all candidates → show placeholder
+        setCoverFailed(true);
+        return i;
+      }
+      return next;
+    });
+  }, [candidates.length]);
+
+  // date label
   const dt = date ? new Date(date) : null;
   const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
   const dateLabel =
     dt && !Number.isNaN(+dt)
-      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt)
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(dt)
       : undefined;
 
   // aspect frame
@@ -111,44 +127,63 @@ export default function BlogPostCard({
   const framePadding = coverFit === "contain" ? "p-2 sm:p-3" : "";
   const frameBg = coverFit === "contain" ? "bg-warmWhite" : "bg-transparent";
 
+  // Initials for the placeholder
+  const initials = React.useMemo(() => {
+    const words = String(title || "").trim().split(/\s+/).slice(0, 3);
+    return words.map((w) => w[0]?.toUpperCase() || "").join("");
+  }, [title]);
+
+  const safeExcerpt = stripMarkup(excerpt);
+
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {showCover && coverSrc && (
-          <div className={`relative w-full overflow-hidden rounded-t-2xl ${aspectClass} ${frameBg} ${framePadding}`}>
+        {/* Cover frame */}
+        <div className={`relative w-full overflow-hidden rounded-t-2xl ${aspectClass} ${frameBg} ${framePadding}`}>
+          {!coverFailed && coverSrc ? (
             <Image
               src={coverSrc}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className={`${fitClass} ${posClass}`}
-              // Use the simplified error handler which avoids state updates for cover
-              onError={handleCoverError} 
+              onError={onCoverError}
               priority={false}
             />
-          </div>
-        )}
+          ) : (
+            // graceful placeholder when all images fail
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-forest/30">
+              <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
+                {initials || "A•L"}
+              </span>
+            </div>
+          )}
+        </div>
 
+        {/* Body */}
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
             {readTime && <span aria-label="Estimated reading time">{readTime} min read</span>}
-            {category && <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>}
+            {category && (
+              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>
+            )}
             <span className="luxury-link">Discuss</span>
           </div>
 
-          {excerpt && <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{excerpt}</p>}
+          {safeExcerpt && (
+            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{safeExcerpt}</p>
+          )}
 
           <div className="mt-4 flex items-center gap-3">
             <Image
               src={avatarSrc}
-              alt={authorName}
+              alt={authorName || "Author"}
               width={40}
               height={40}
               className="rounded-full object-cover"
-              // Keep avatar fallback logic as it is simple and safe
               onError={() => setAvatarSrc(FALLBACK_AVATAR)}
             />
             <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
