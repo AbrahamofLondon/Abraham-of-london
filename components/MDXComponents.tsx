@@ -1,4 +1,3 @@
-// components/MDXComponents.tsx
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents as MDXComponentsType } from "mdx/types";
@@ -11,6 +10,17 @@ import Rule from "@/components/mdx/Rule";
 import Note from "@/components/mdx/Note";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 import JsonLd from "@/components/mdx/JsonLd";
+
+/* ---------- BrandFrame Component ---------- */
+export function BrandFrame({ children, title, subtitle }: { children: React.ReactNode; title?: string; subtitle?: string }) {
+  return (
+    <div className="border-2 border-midGreen p-4 rounded-lg">
+      {title && <h1 className="text-2xl font-bold">{title}</h1>}
+      {subtitle && <p className="text-lg text-gray-600">{subtitle}</p>}
+      {children}
+    </div>
+  );
+}
 
 /* ---------- utils ---------- */
 const isInternal = (href = "") => href.startsWith("/") || href.startsWith("#");
@@ -106,7 +116,7 @@ export function ShareRow({ text, hashtags }: { text: string; hashtags: string })
 const A: MDXComponentsType["a"] = ({ href = "", children, className, title }) => {
   const base =
     "text-forest underline underline-offset-2 hover:text-softGold transition-colors " +
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " + // no slash opacity
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-forest " +
     "dark:text-softGold dark:hover:text-cream dark:focus-visible:ring-softGold";
   const cls = className ? `${base} ${className}` : base;
 
@@ -306,7 +316,6 @@ function DownloadCard({
       <div className="flex items-center gap-4">
         {image ? (
           <span className="relative h-16 w-16 overflow-hidden rounded-lg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
           </span>
         ) : null}
