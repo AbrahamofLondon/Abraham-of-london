@@ -93,11 +93,17 @@
   to   = "/downloads/brotherhood-cue-card.pdf"
   status = 301
 
-# If actual filenames are Title_Case, alias them (keeps old links working)
+# If the physical file is Title_Case, alias the slugged filename to it (keeps old links working)
 [[redirects]]
   from = "/downloads/leaders-cue-card.pdf"
-  to   = "/downloads/leaders-cue-card.pdf"
+  to   = "/downloads/Leaders_Cue_Card.pdf"
   status = 200
+
+# Optional friendly slug for the Starter Kit you linked in the post
+[[redirects]]
+  from = "/downloads/brotherhood-starter-kit"
+  to   = "/downloads/Brotherhood_Starter_Kit.pdf"
+  status = 301
 
 # Historical variants for Fathering Without Fear
 [[redirects]]
@@ -196,9 +202,9 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# PDFs — explicit MIME helps Safari
+# PDFs — short TTL + strong freshness to prevent stale copies in Safari/UA caches
 [[headers]]
   for = "/downloads/*.pdf"
   [headers.values]
-    Cache-Control = "public, max-age=600"
+    Cache-Control = "public, max-age=600, must-revalidate"
     Content-Type  = "application/pdf"
