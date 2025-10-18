@@ -1,45 +1,49 @@
+// components/downloads/DownloadsGrid.tsx
 "use client";
 
-import * as React from "react";
-import DownloadCard from "./DownloadCard";
+import Link from "next/link";
+import clsx from "clsx";
 
 export type DownloadItem = {
-  href: string;       // friendly slug preferred, e.g. /downloads/leaders-cue-card
-  title: string;      // display text
-  sub?: string;       // optional small descriptor
-  newTab?: boolean;   // default true for PDFs & friendly slugs
-  id?: string;        // optional test id
+  href: string;
+  title: string;
+  sub?: string;
 };
 
 type Props = {
-  items: DownloadItem[];
-  className?: string;
-  columns?: 1 | 2 | 3; // default 2
+  items: DownloadItem[];
+  columns?: 1 | 2 | 3;
+  className?: string;
 };
 
-export default function DownloadsGrid({ items, className = "", columns = 2 }: Props) {
-  const grid =
-    columns === 3
-      ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-      : columns === 1
-      ? "grid gap-6 grid-cols-1"
-      : "grid gap-6 sm:grid-cols-2";
+export default function DownloadsGrid({ items, columns = 2, className }: Props) {
+  const grid =
+    columns === 3 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
+    columns === 2 ? "grid-cols-1 sm:grid-cols-2" :
+    "grid-cols-1";
 
-  if (!Array.isArray(items) || items.length === 0) {
-    return (
-      <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">
-        No downloads available yet.
-      </p>
-    );
-  }
-
-  return (
-    <ul className={`${grid} ${className}`}>
-      {items.map((d, i) => (
-        <li key={d.href || i} data-testid={d.id}>
-          <DownloadCard href={d.href} title={d.title} sub={d.sub} newTab={d.newTab} />
-        </li>
-      ))}
-    </ul>
-  );
+  return (
+    <ul className={clsx("grid gap-6", grid, className)}>
+      {items.map((it) => (
+        <li key={it.href}>
+          <Link
+            href={it.href}
+            prefetch={false}
+            className="group block rounded-2xl border border-lightGrey bg-white p-5 shadow-card transition hover:shadow-cardHover focus:outline-none focus-visible:ring-2"
+            aria-label={it.title}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-serif text-xl font-semibold text-deepCharcoal">{it.title}</div>
+                {it.sub && (
+                  <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">{it.sub}</div>
+                )}
+              </div>
+              <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
 }
