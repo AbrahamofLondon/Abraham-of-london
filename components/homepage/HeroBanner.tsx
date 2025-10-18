@@ -1,4 +1,3 @@
-// components/homepage/HeroBanner.tsx
 import * as React from "react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -12,7 +11,6 @@ type VideoSource = {
 type Props = {
   poster: string;
   videoSources?: ReadonlyArray<VideoSource> | null;
-  /** accept null; we’ll normalize */
   heightClassName?: string | null;
   mobileObjectPositionClass?: string;
   overlay?: React.ReactNode;
@@ -32,7 +30,6 @@ export default function HeroBanner({
   const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
   const hasVideo = sources.length > 0;
 
-  // normalize height
   const normalizedHeight =
     heightClassName ?? "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]";
 
@@ -49,14 +46,11 @@ export default function HeroBanner({
     return () => mql?.removeEventListener?.("change", handle);
   }, []);
 
-  // Props used for the replacement Image component
   const imageProps = {
     src: poster,
     alt: "",
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
-    // Crucial for background images in a full-bleed container
     fill: true as const,
-    // Helps Next.js optimize the image size and format
     sizes: "100vw",
   };
 
@@ -85,7 +79,6 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        // Use Next Image for performance, replacing the old <img>
         <Image
           {...imageProps}
           alt=""
@@ -101,6 +94,21 @@ export default function HeroBanner({
       {overlay ? (
         <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
           <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
+        </div>
+      ) : null}
+      <noscript>
+        <img
+          alt=""
+          src={poster}
+          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
+        />
+      </noscript>
+    </section>
+  );
+}   </noscript>
+    </section>
+  );
+}px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
       <noscript>
