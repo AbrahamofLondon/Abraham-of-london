@@ -7,13 +7,13 @@ import path from "node:path";
 
 /** Represents a dynamically discovered file in the /public/downloads directory. */
 export type DownloadItem = {
-  file: string;          // file name (e.g. "Mentorship_Starter_Kit.pdf")
-  href: string;          // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
-  title: string;         // pretty title (e.g. "Mentorship Starter Kit")
-  bytes: number;         // raw size
-  size: string;          // human size (e.g. "45 KB")
-  modified: string;      // ISO mtime
-  ext: string;           // ".pdf"
+  file: string;           // file name (e.g. "Mentorship_Starter_Kit.pdf")
+  href: string;           // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
+  title: string;          // pretty title (e.g. "Mentorship Starter Kit")
+  bytes: number;          // raw size
+  size: string;           // human size (e.g. "45 KB")
+  modified: string;       // ISO mtime
+  ext: string;            // ".pdf"
 };
 
 const ROOT = process.cwd();
@@ -35,6 +35,7 @@ function toTitle(file: string) {
 }
 
 /** Scans the /public/downloads directory for files (PDFs only, currently). */
+// FIX: Restored export for the getDownloads function
 export function getDownloads(): DownloadItem[] {
   if (!fs.existsSync(DIR)) return [];
   const entries = fs.readdirSync(DIR, { withFileTypes: true });
@@ -97,12 +98,19 @@ export const DOWNLOADS = {
 
 export type DownloadKey = keyof typeof DOWNLOADS;
 
+// NEW TYPE: Define the union of possible "pill" item types
+type PillItem = 
+  | { kind: "notes", label: string, href: string }
+  | { kind: "pdf", label: string, href: string, download: true };
+
 /** Utility to produce pill items for Notes + PDF */
 export function buildNotesAndPdfPills(keys: DownloadKey[]) {
   return keys.flatMap((key) => {
     const d = DOWNLOADS[key];
     if (!d) return [];
-    const items = [
+    
+    // FIX: Explicitly type the items array as PillItem[]
+    const items: PillItem[] = [ 
       { kind: "notes" as const, label: "Notes", href: d.page },
     ];
     if (d.pdf) items.push({ kind: "pdf" as const, label: "PDF", href: d.pdf, download: true });
