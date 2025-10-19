@@ -1,4 +1,6 @@
-# The Brotherhood Code — Starter Kit (One-Page Covenant)
+title: "The Brotherhood Code — Starter Kit (One-Page Covenant)"
+
+# The Brotherhood Code — Starter Kit (One-Page Covenant)"
 
 **Purpose:** Break cycles of absence by a covenant of presence and integrity.
 

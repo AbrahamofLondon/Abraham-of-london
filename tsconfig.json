@@ -16,6 +16,7 @@
     "incremental": true,
     "baseUrl": ".",
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "downlevelIteration": true,
     "paths": {
       "@/*": ["*"],
@@ -25,7 +26,8 @@
       "@/public/*": ["public/*"],
       "@/config/*": ["config/*"],
       "@netlify/functions": ["node_modules/@netlify/functions"],
-      "@netlify/emails": ["node_modules/@netlify/emails"]
+      "@netlify/emails": ["node_modules/@netlify/emails"],
+      "contentlayer/generated": ["./.contentlayer/generated"]
     },
     "plugins": [{ "name": "next" }]
   },
@@ -38,7 +40,8 @@
     "netlify/**/*.ts",
     "netlify/**/*.tsx",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    ".contentlayer/generated/**/*.ts"
   ],
   "exclude": ["node_modules", ".next"]
 }

@@ -1,4 +1,6 @@
-# Brotherhood Leader Guide — First 4 Weeks
+title: "Brotherhood Leader Guide (4 Weeks)"
+
+# Brotherhood Leader Guide (4 Weeks)
 
 **Outcome:** A small band of present men living the Brotherhood Code with predictable rhythm.
 

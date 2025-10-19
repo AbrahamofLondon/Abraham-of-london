@@ -1,17 +1,18 @@
-// pages/events/index.tsx
+"use client";
+
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import clsx from "clsx";
-
+import EventCard from "@/components/events/EventCard";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import { OgHead } from "@/lib/seo";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { isUpcoming } from "@/lib/events";
-import type { EventMeta } from "@/lib/server/events-data";
+import type { EventMeta } from "@/lib/events";
 
 type Props = { events: EventMeta[] };
 
@@ -78,7 +79,6 @@ export default function EventsIndex({ events }: Props) {
     }
 
     list.sort((a, b) => {
-      // FIX: Ensures sorting handles missing dates safely
       const dateA = new Date(a.date ?? "").valueOf();
       const dateB = new Date(b.date ?? "").valueOf();
       return sort === "soonest" ? dateA - dateB : dateB - dateA;
@@ -202,65 +202,17 @@ export default function EventsIndex({ events }: Props) {
           ) : (
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredEvents.map((ev) => (
-                <li key={ev.slug}>
-                  <article className="group h-full overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-black/10 transition hover:shadow-lg">
-                    {ev.heroImage ? (
-                      <div className="relative aspect-[16/9] w-full">
-                        <Image
-                          src={String(ev.heroImage)}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          priority={false}
-                        />
-                      </div>
-                    ) : null}
-                    <div className="p-5">
-                      <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                        <time
-                          // FIX: Ensure dateTime attribute handles missing dates safely
-                          dateTime={new Date(ev.date ?? "").toISOString()}
-                          className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]"
-                        >
-                          {/* FIX: Ensure formatPretty function receives a string */}
-                          {formatPretty(ev.date ?? '')}
-                        </time>
-                        {ev.location ? (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]">
-                              {ev.location}
-                            </span>
-                          </>
-                        ) : null}
-                      </div>
-                      <h3 className="text-lg font-semibold leading-snug text-gray-900">
-                        <Link
-                          href={`/events/${ev.slug}`}
-                          className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
-                        >
-                          {ev.title}
-                        </Link>
-                      </h3>
-                      {ev.summary && (
-                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700">
-                          {ev.summary}
-                        </p>
-                      )}
-                      <div className="mt-4">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          href={`/events/${ev.slug}`}
-                          aria-label={`Event details: ${ev.title}`}
-                        >
-                          Details
-                        </Button>
-                      </div>
-                    </div>
-                  </article>
-                </li>
+                <EventCard
+                  key={ev.slug}
+                  slug={ev.slug}
+                  title={ev.title}
+                  date={ev.date}
+                  location={ev.location}
+                  description={ev.summary}
+                  tags={ev.tags ?? undefined}
+                  heroImage={ev.heroImage ?? undefined}
+                  resources={ev.resources ? { downloads: ev.resources.downloads ?? [], reads: ev.resources.reads ?? [] } : null}
+                />
               ))}
             </ul>
           )}
@@ -270,22 +222,8 @@ export default function EventsIndex({ events }: Props) {
   );
 }
 
-// SSG
 export async function getStaticProps() {
-  // Pull server code only on the server
   const { getAllEvents } = await import("@/lib/server/events-data");
-  const events = getAllEvents([
-    "slug",
-    "title",
-    "date",
-    "endDate",
-    "location",
-    "summary",
-    "heroImage",
-    "ctaHref", // Now correctly included in EventMeta
-    "ctaLabel", // Now correctly included in EventMeta
-    "tags",
-  ]) as EventMeta[];
-
+  const events = await getAllEvents();
   return { props: { events }, revalidate: 60 };
 }

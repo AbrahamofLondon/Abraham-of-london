@@ -9,9 +9,10 @@ import allEvents from './Event/_index.json' assert { type: 'json' }
 import allPosts from './Post/_index.json' assert { type: 'json' }
 import allBooks from './Book/_index.json' assert { type: 'json' }
 import allResources from './Resource/_index.json' assert { type: 'json' }
+import allStrategies from './Strategy/_index.json' assert { type: 'json' }
 
-export { allDownloads, allEvents, allPosts, allBooks, allResources }
+export { allDownloads, allEvents, allPosts, allBooks, allResources, allStrategies }
 
-export const allDocuments = [...allDownloads, ...allEvents, ...allPosts, ...allBooks, ...allResources]
+export const allDocuments = [...allDownloads, ...allEvents, ...allPosts, ...allBooks, ...allResources, ...allStrategies]
 
 

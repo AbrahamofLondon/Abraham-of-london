@@ -1,3 +1,5 @@
+title: "Events Blueprint"
+
 # Abraham of London — Events Blueprint (Rolling 1–5 Year Plan)
 
 **Principle:** Clarity, Capital, Character

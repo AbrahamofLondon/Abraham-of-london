@@ -1,6 +1,6 @@
 // contentlayer.config.ts
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
-import remarkGfm from "remark-gfm";
+// Removed remarkGfm import to fix the table/MDX parsing bug
 
 // Define the Download Document Type
 const Download = defineDocumentType(() => ({
@@ -22,7 +22,7 @@ const Download = defineDocumentType(() => ({
     coverPosition: { type: "string", required: true },
     pdfPath: { type: "string", required: false },
     file: { type: "string", required: false },
-    description: { type: "string", required: false }, // Added based on content errors
+    description: { type: "string", required: false },
   },
   computedFields: {
     url_path: {
@@ -32,7 +32,7 @@ const Download = defineDocumentType(() => ({
   },
 }));
 
-// Define the Event Document Type (Includes all required fields)
+// Define the Event Document Type
 const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/*.mdx",
@@ -48,9 +48,9 @@ const Event = defineDocumentType(() => ({
     tags: { type: "list", of: { type: "string" }, required: false },
     ctaHref: { type: "string", required: false }, 
     ctaLabel: { type: "string", required: false },
-    chatham: { type: "boolean", required: false }, // Added based on content errors
-    resources: { type: "json", required: false }, // Added based on content errors
-    related: { type: "list", of: { type: "string" }, required: false }, // Added based on leadership-workshop content
+    chatham: { type: "boolean", required: false },
+    resources: { type: "json", required: false },
+    related: { type: "list", of: { type: "string" }, required: false },
   },
   computedFields: {
     url_path: {
@@ -60,7 +60,7 @@ const Event = defineDocumentType(() => ({
   },
 }));
 
-// Define the Post Document Type (Includes all required fields)
+// Define the Post Document Type
 const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/*.mdx", 
@@ -78,7 +78,6 @@ const Post = defineDocumentType(() => ({
     coverFit: { type: "string", required: true },
     coverPosition: { type: "string", required: true },
     
-    // Added based on content errors/provided content
     description: { type: "string", required: false },
     ogTitle: { type: "string", required: false },
     ogDescription: { type: "string", required: false },
@@ -94,7 +93,7 @@ const Post = defineDocumentType(() => ({
   },
 }));
 
-// Define the Book Document Type (Includes all required fields)
+// Define the Book Document Type
 const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/*.mdx", 
@@ -103,7 +102,6 @@ const Book = defineDocumentType(() => ({
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
     
-    // Added based on content errors/provided content
     author: { type: "string", required: false },
     excerpt: { type: "string", required: false },
     genre: { type: "string", required: false },
@@ -121,31 +119,31 @@ const Book = defineDocumentType(() => ({
 const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/*.md", 
-  contentType: "markdown", // Fixed: "md" to "markdown"
+  contentType: "markdown",
   fields: {
     title: { type: "string", required: true },
-    // NOTE: Add other required resource fields here if they exist
   },
 }));
 
-// Define a new Strategy Document Type to capture the mis-categorized file
+// Define the Strategy Document Type
 const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/*.md",
   contentType: "markdown",
   fields: {
     title: { type: "string", required: true },
-    // NOTE: Define fields based on frontmatter in strategy/events-blueprint.md
+    // Add other fields from strategy/events-blueprint.md here
   },
 }));
 
 
-export default makeSource({
+export default {
   contentDirPath: "content",
-  // Register ALL document types, including the new Strategy type
+  // Register ALL document types
   documentTypes: [Download, Event, Post, Book, Resource, Strategy], 
   mdx: {
-    remarkPlugins: [remarkGfm],
+    // TEMPORARILY REMOVED remarkGfm to fix the table parsing error
+    remarkPlugins: [], 
     rehypePlugins: [],
   },
 });

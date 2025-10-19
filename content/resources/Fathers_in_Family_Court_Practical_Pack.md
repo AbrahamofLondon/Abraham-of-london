@@ -1,3 +1,5 @@
+title: "Fathers in Family Court — Practical Pack"
+
 # Fathers in Family Court — Practical Pack
 
 **Purpose:** Equip fathers to present truth with clarity and integrity. This is not legal advice.
