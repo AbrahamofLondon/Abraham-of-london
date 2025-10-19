@@ -21,8 +21,8 @@ const Download = defineDocumentType(() => ({
     coverFit: { type: "string", required: true },
     coverPosition: { type: "string", required: true },
     pdfPath: { type: "string", required: false },
-    // NOTE: Check your content files to ensure 'file' is not used instead of 'pdfPath'
     file: { type: "string", required: false },
+    description: { type: "string", required: false }, // Added based on content errors
   },
   computedFields: {
     url_path: {
@@ -32,7 +32,7 @@ const Download = defineDocumentType(() => ({
   },
 }));
 
-// Define the Event Document Type (Includes ctaHref/ctaLabel)
+// Define the Event Document Type (Includes all required fields)
 const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/*.mdx",
@@ -46,9 +46,11 @@ const Event = defineDocumentType(() => ({
     summary: { type: "string", required: false },
     heroImage: { type: "string", required: false },
     tags: { type: "list", of: { type: "string" }, required: false },
-    // Fields required to fix the error in pages/events/index.tsx
     ctaHref: { type: "string", required: false }, 
     ctaLabel: { type: "string", required: false },
+    chatham: { type: "boolean", required: false }, // Added based on content errors
+    resources: { type: "json", required: false }, // Added based on content errors
+    related: { type: "list", of: { type: "string" }, required: false }, // Added based on leadership-workshop content
   },
   computedFields: {
     url_path: {
@@ -58,7 +60,7 @@ const Event = defineDocumentType(() => ({
   },
 }));
 
-// Define the Post Document Type (For blog/ documents)
+// Define the Post Document Type (Includes all required fields)
 const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/*.mdx", 
@@ -75,7 +77,14 @@ const Post = defineDocumentType(() => ({
     coverAspect: { type: "string", required: true },
     coverFit: { type: "string", required: true },
     coverPosition: { type: "string", required: true },
-    // NOTE: Add other required blog fields here
+    
+    // Added based on content errors/provided content
+    description: { type: "string", required: false },
+    ogTitle: { type: "string", required: false },
+    ogDescription: { type: "string", required: false },
+    socialCaption: { type: "string", required: false },
+    category: { type: "string", required: false },
+    draft: { type: "boolean", required: false },
   },
   computedFields: {
     url_path: {
@@ -85,7 +94,7 @@ const Post = defineDocumentType(() => ({
   },
 }));
 
-// Define the Book Document Type (For books/ documents)
+// Define the Book Document Type (Includes all required fields)
 const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/*.mdx", 
@@ -93,27 +102,48 @@ const Book = defineDocumentType(() => ({
   fields: {
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
-    // NOTE: Add other required book fields here
+    
+    // Added based on content errors/provided content
+    author: { type: "string", required: false },
+    excerpt: { type: "string", required: false },
+    genre: { type: "string", required: false },
+    coverImage: { type: "string", required: false },
+    buyLink: { type: "string", required: false },
+    downloadPdf: { type: "string", required: false },
+    downloadEpub: { type: "string", required: false },
+    description: { type: "string", required: false },
+    date: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
   },
 }));
 
-// Define the Resource Document Type (For resources/ documents)
+// Define the Resource Document Type
 const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/*.md", 
-  // FIX: Change "md" to "markdown"
-  contentType: "markdown", 
+  contentType: "markdown", // Fixed: "md" to "markdown"
   fields: {
     title: { type: "string", required: true },
-    // NOTE: Add other required resource fields here
+    // NOTE: Add other required resource fields here if they exist
+  },
+}));
+
+// Define a new Strategy Document Type to capture the mis-categorized file
+const Strategy = defineDocumentType(() => ({
+  name: "Strategy",
+  filePathPattern: "strategy/*.md",
+  contentType: "markdown",
+  fields: {
+    title: { type: "string", required: true },
+    // NOTE: Define fields based on frontmatter in strategy/events-blueprint.md
   },
 }));
 
 
 export default makeSource({
   contentDirPath: "content",
-  // Register ALL document types
-  documentTypes: [Download, Event, Post, Book, Resource], 
+  // Register ALL document types, including the new Strategy type
+  documentTypes: [Download, Event, Post, Book, Resource, Strategy], 
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [],
