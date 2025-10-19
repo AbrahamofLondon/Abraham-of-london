@@ -39,6 +39,7 @@ export default function HeroBanner({
   React.useEffect(() => {
     const v = videoRef.current;
     if (!v || !("matchMedia" in window)) return;
+    // Check for `window` before calling `matchMedia` for safety on platforms without it
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handle = () => {
       if (mql.matches) v.pause();
@@ -56,7 +57,7 @@ export default function HeroBanner({
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
-    priority: false,
+    priority: true as const, // Set priority to true for LCP image
     draggable: false,
   };
 
@@ -111,9 +112,5 @@ export default function HeroBanner({
         />
       </noscript>
     </section>
-  );
-}
-
-}</section>
   );
 }
