@@ -1,4 +1,3 @@
-// components/events/EventResources.tsx
 import Link from "next/link";
 
 type LinkItem = { href: string; label: string; sub?: string };
@@ -8,7 +7,7 @@ type PresetKey = "leadership" | "founders";
 
 export type EventResourcesProps =
   | {
-      preset: PresetKey; // Use the explicit type here
+      preset: PresetKey;
       title?: never;
       reads?: never;
       downloads?: never;
@@ -121,17 +120,6 @@ export default function EventResources(props: EventResourcesProps) {
               {downloads.map((d) => (
                 <li key={d.href}>
                   <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
-                    {d.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}ssName="luxury-link text-forest" rel="noopener" download>
                     {d.label}
                   </a>
                 </li>
