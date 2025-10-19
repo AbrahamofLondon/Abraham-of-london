@@ -1,4 +1,8 @@
+---
 title: "Brotherhood Leader Guide (4 Weeks)"
+type: Resource
+title: Brotherhood Leader Guide (4 Weeks)
+---
 
 # Brotherhood Leader Guide (4 Weeks)
 

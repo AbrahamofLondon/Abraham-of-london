@@ -36,7 +36,7 @@ Thumbs.db
 .rts2_cache_cjs/
 .rts2_cache_es/
 .rts2_cache_umd/
-
+.contentlayer/.cache/
 # IDE
 .vscode/
 .idea/
