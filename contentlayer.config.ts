@@ -1,44 +1,31 @@
-import { defineDocumentType, makeSource } from "contentlayer/source-files";
-import remarkGfm from "remark-gfm";
+// Add this definition alongside the 'Download' definition
 
-// 1. Define the Download Document Type
-const Download = defineDocumentType(() => ({
-  name: "Download",
-  // Crucial: Only target files in the 'content/downloads' folder
-  filePathPattern: "downloads/*.mdx", 
-  // Crucial: Set content type to MDX to enable MDX features (like tables via remarkGfm)
-  contentType: "mdx", 
+const Event = defineDocumentType(() => ({
+  name: "Event",
+  // Target your event files (adjust path as needed)
+  filePathPattern: "events/*.mdx", 
+  contentType: "mdx",
   fields: {
+    // Crucial: Add 'date' and other fields required by pages/events/index.tsx
     title: { type: "string", required: true },
-    slug: { type: "string", required: true },
     date: { type: "string", required: true },
-    author: { type: "string", required: true },
-    excerpt: { type: "string", required: true },
-    readTime: { type: "string", required: true },
-    category: { type: "string", required: true },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    coverImage: { type: "string", required: true },
-    coverAspect: { type: "string", required: true },
-    coverFit: { type: "string", required: true },
-    coverPosition: { type: "string", required: true },
-    pdfPath: { type: "string", required: false },
+    
+    // ✅ ADD THESE TWO MISSING FIELDS:
+    ctaHref: { type: "string", required: false }, // Mismatch here caused the error
+    ctaLabel: { type: "string", required: false },
+    // ... all other event fields (endDate, location, summary, heroImage, tags)
   },
   computedFields: {
     url_path: {
       type: "string",
-      resolve: (doc) => `/downloads/${doc.slug}`,
+      resolve: (doc) => `/events/${doc.slug}`, // Assuming you define 'slug' in fields
     },
   },
 }));
 
-// (If you have a Post type, it would be defined here)
-
+// Then, update makeSource to include Event:
 export default makeSource({
   contentDirPath: "content",
-  // 2. Register the new document type
-  documentTypes: [Download /*, Post, Event, etc. */], 
-  mdx: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [],
-  },
+  documentTypes: [Download, Event /*, Post, etc. */], // Make sure Event is listed here!
+  // ... rest of config
 });
