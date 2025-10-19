@@ -270,7 +270,7 @@ export default function EventsIndex({ events }: Props) {
   );
 }
 
-/ SSG
+// SSG
 export async function getStaticProps() {
   // Pull server code only on the server
   const { getAllEvents } = await import("@/lib/server/events-data");
