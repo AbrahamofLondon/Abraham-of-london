@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../contentlayer.config.ts"],
+  "sourcesContent": ["// contentlayer.config.ts (Full, combined document definitions)\r\nimport { defineDocumentType, makeSource } from \"contentlayer/source-files\";\r\nimport remarkGfm from \"remark-gfm\";\r\n\r\n// 1. Download Definition (MUST have 'name')\r\nconst Download = defineDocumentType(() => ({\r\n  name: \"Download\", // \u2705 Fixed\r\n  // ... rest of Download definition\r\n}));\r\n\r\n// 2. Event Definition (MUST have 'name' and the missing fields)\r\nconst Event = defineDocumentType(() => ({\r\n  name: \"Event\", // \u2705 Must have 'name'\r\n  // ... required fields including ctaHref and ctaLabel\r\n}));\r\n\r\nexport default makeSource({\r\n  contentDirPath: \"content\",\r\n  documentTypes: [Download, Event], // Ensure both are registered\r\n  // ... mdx config\r\n});"],
+  "mappings": ";AACA,SAAS,oBAAoB,kBAAkB;AAI/C,IAAM,WAAW,mBAAmB,OAAO;AAAA,EACzC,MAAM;AAAA;AAAA;AAER,EAAE;AAGF,IAAM,QAAQ,mBAAmB,OAAO;AAAA,EACtC,MAAM;AAAA;AAAA;AAER,EAAE;AAEF,IAAO,8BAAQ,WAAW;AAAA,EACxB,gBAAgB;AAAA,EAChB,eAAe,CAAC,UAAU,KAAK;AAAA;AAAA;AAEjC,CAAC;",
+  "names": []
+}
