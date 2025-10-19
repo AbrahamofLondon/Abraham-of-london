@@ -29,7 +29,7 @@ type PresetData = {
   downloads: LinkItem[];
 };
 
-// 3. Define PRESETS with a clear Record type and use 'as const'
+// 3. Define PRESETS with a clear Record type
 const PRESETS: Record<PresetKey, PresetData> = {
   leadership: {
     title: "Leadership Tools & Further Reading",
@@ -58,14 +58,12 @@ const PRESETS: Record<PresetKey, PresetData> = {
     ],
   },
 };
-// NOTE: We don't need `as const` here because we explicitly provided the Record<PresetKey, PresetData> type.
 
 function isInternal(href = "") {
   return href.startsWith("/") && !href.endsWith(".pdf");
 }
 
 export default function EventResources(props: EventResourcesProps) {
-  // Line 60: The type check now succeeds because props.preset is correctly typed as 'leadership' | 'founders'
   const data =
     "preset" in props && props.preset
       ? PRESETS[props.preset]
@@ -123,6 +121,17 @@ export default function EventResources(props: EventResourcesProps) {
               {downloads.map((d) => (
                 <li key={d.href}>
                   <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
+                    {d.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}ssName="luxury-link text-forest" rel="noopener" download>
                     {d.label}
                   </a>
                 </li>
