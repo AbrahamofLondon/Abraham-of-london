@@ -3,9 +3,12 @@ import Link from "next/link";
 
 type LinkItem = { href: string; label: string; sub?: string };
 
+// 1. Explicitly define the union type for the preset keys
+type PresetKey = "leadership" | "founders";
+
 export type EventResourcesProps =
   | {
-      preset: "leadership" | "founders";
+      preset: PresetKey; // Use the explicit type here
       title?: never;
       reads?: never;
       downloads?: never;
@@ -19,9 +22,15 @@ export type EventResourcesProps =
       className?: string;
     };
 
-const PRESETS: Record<NonNullable<EventResourcesProps extends { preset: infer P } ? P : never>, {
-  title: string; reads: LinkItem[]; downloads: LinkItem[];
-}> = {
+// 2. Define the expected structure for a single preset's data
+type PresetData = {
+  title: string;
+  reads: LinkItem[];
+  downloads: LinkItem[];
+};
+
+// 3. Define PRESETS with a clear Record type and use 'as const'
+const PRESETS: Record<PresetKey, PresetData> = {
   leadership: {
     title: "Leadership Tools & Further Reading",
     reads: [
@@ -49,12 +58,14 @@ const PRESETS: Record<NonNullable<EventResourcesProps extends { preset: infer P 
     ],
   },
 };
+// NOTE: We don't need `as const` here because we explicitly provided the Record<PresetKey, PresetData> type.
 
 function isInternal(href = "") {
   return href.startsWith("/") && !href.endsWith(".pdf");
 }
 
 export default function EventResources(props: EventResourcesProps) {
+  // Line 60: The type check now succeeds because props.preset is correctly typed as 'leadership' | 'founders'
   const data =
     "preset" in props && props.preset
       ? PRESETS[props.preset]
