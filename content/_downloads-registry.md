@@ -1,6 +1,6 @@
 ---
-title: "Downloads Registry (internal)"
-description: "Invisible list so the validator finds references."
+title: Downloads Registry (internal)
+description: Invisible list so the validator finds references.
 ---
 
 <!-- Do not delete: these lines make unreferenced items count as referenced for validation. -->

@@ -15,6 +15,16 @@ export type Book = {
   type: 'Book'
   title: string
   slug: string
+  author?: string | undefined
+  excerpt?: string | undefined
+  genre?: string | undefined
+  coverImage?: string | undefined
+  buyLink?: string | undefined
+  downloadPdf?: string | undefined
+  downloadEpub?: string | undefined
+  description?: string | undefined
+  date?: string | undefined
+  tags?: string[] | undefined
   /** MDX file body */
   body: MDX
 
@@ -39,6 +49,7 @@ export type Download = {
   coverPosition: string
   pdfPath?: string | undefined
   file?: string | undefined
+  description?: string | undefined
   /** MDX file body */
   body: MDX
   url_path: string
@@ -59,6 +70,9 @@ export type Event = {
   tags?: string[] | undefined
   ctaHref?: string | undefined
   ctaLabel?: string | undefined
+  chatham?: boolean | undefined
+  resources?: any | undefined
+  related?: string[] | undefined
   /** MDX file body */
   body: MDX
   url_path: string
@@ -80,6 +94,12 @@ export type Post = {
   coverAspect: string
   coverFit: string
   coverPosition: string
+  description?: string | undefined
+  ogTitle?: string | undefined
+  ogDescription?: string | undefined
+  socialCaption?: string | undefined
+  category?: string | undefined
+  draft?: boolean | undefined
   /** MDX file body */
   body: MDX
   url_path: string
@@ -94,6 +114,17 @@ export type Resource = {
   /** Markdown file body */
   body: Markdown
 
+}
+
+export type Strategy = {
+  /** File path relative to `contentDirPath` */
+  _id: string
+  _raw: Local.RawDocumentData
+  type: 'Strategy'
+  title: string
+  /** Markdown file body */
+  body: Markdown
+
 }  
 
 /** Nested types */
@@ -104,8 +135,8 @@ export type Resource = {
 export type AllTypes = DocumentTypes | NestedTypes
 export type AllTypeNames = DocumentTypeNames | NestedTypeNames
 
-export type DocumentTypes = Book | Download | Event | Post | Resource
-export type DocumentTypeNames = 'Book' | 'Download' | 'Event' | 'Post' | 'Resource'
+export type DocumentTypes = Book | Download | Event | Post | Resource | Strategy
+export type DocumentTypeNames = 'Book' | 'Download' | 'Event' | 'Post' | 'Resource' | 'Strategy'
 
 export type NestedTypes = never
 export type NestedTypeNames = never
@@ -117,6 +148,7 @@ export type DataExports = {
   allPosts: Post[]
   allBooks: Book[]
   allResources: Resource[]
+  allStrategies: Strategy[]
 }
 
 
@@ -141,6 +173,7 @@ export type DocumentTypeMap = {
   Event: Event
   Post: Post
   Resource: Resource
+  Strategy: Strategy
 }
 
 export type NestedTypeMap = {
