@@ -1,9 +1,7 @@
 // contentlayer.config.ts
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import remarkGfm from "remark-gfm";
-
-// Define the Download Document Type
-const Download = defineDocumentType(() => ({
+var Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/*.mdx",
   contentType: "mdx",
@@ -20,20 +18,18 @@ const Download = defineDocumentType(() => ({
     coverAspect: { type: "string", required: true },
     coverFit: { type: "string", required: true },
     coverPosition: { type: "string", required: true },
-    pdfPath: { type: "string", required: false },
-    // NOTE: Check your content files to ensure 'file' is not used instead of 'pdfPath'
-    file: { type: "string", required: false },
+    pdfPath: { type: "string", required: false }
+    // NOTE: If some of your downloads have a 'file' field instead of 'pdfPath', 
+    // you need to unify them or add 'file' here as well.
   },
   computedFields: {
     url_path: {
       type: "string",
-      resolve: (doc) => `/downloads/${doc.slug}`,
-    },
-  },
+      resolve: (doc) => `/downloads/${doc.slug}`
+    }
+  }
 }));
-
-// Define the Event Document Type (Includes ctaHref/ctaLabel)
-const Event = defineDocumentType(() => ({
+var Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/*.mdx",
   contentType: "mdx",
@@ -46,22 +42,20 @@ const Event = defineDocumentType(() => ({
     summary: { type: "string", required: false },
     heroImage: { type: "string", required: false },
     tags: { type: "list", of: { type: "string" }, required: false },
-    // Fields required to fix the error in pages/events/index.tsx
-    ctaHref: { type: "string", required: false }, 
-    ctaLabel: { type: "string", required: false },
+    // REQUIRED to fix the error in pages/events/index.tsx
+    ctaHref: { type: "string", required: false },
+    ctaLabel: { type: "string", required: false }
   },
   computedFields: {
     url_path: {
       type: "string",
-      resolve: (doc) => `/events/${doc.slug}`,
-    },
-  },
+      resolve: (doc) => `/events/${doc.slug}`
+    }
+  }
 }));
-
-// Define the Post Document Type (For blog/ documents)
-const Post = defineDocumentType(() => ({
+var Post = defineDocumentType(() => ({
   name: "Post",
-  filePathPattern: "blog/*.mdx", 
+  filePathPattern: "blog/*.mdx",
   contentType: "mdx",
   fields: {
     title: { type: "string", required: true },
@@ -74,48 +68,46 @@ const Post = defineDocumentType(() => ({
     coverImage: { type: "string", required: true },
     coverAspect: { type: "string", required: true },
     coverFit: { type: "string", required: true },
-    coverPosition: { type: "string", required: true },
-    // NOTE: Add other required blog fields here
+    coverPosition: { type: "string", required: true }
+    // Add other fields from your blog frontmatter here
   },
   computedFields: {
     url_path: {
       type: "string",
-      resolve: (doc) => `/blog/${doc.slug}`,
-    },
-  },
+      resolve: (doc) => `/blog/${doc.slug}`
+    }
+  }
 }));
-
-// Define the Book Document Type (For books/ documents)
-const Book = defineDocumentType(() => ({
+var Book = defineDocumentType(() => ({
   name: "Book",
-  filePathPattern: "books/*.mdx", 
+  filePathPattern: "books/*.mdx",
   contentType: "mdx",
   fields: {
     title: { type: "string", required: true },
-    slug: { type: "string", required: true },
-    // NOTE: Add other required book fields here
-  },
+    slug: { type: "string", required: true }
+    // Add fields specific to your book frontmatter here
+  }
 }));
-
-// Define the Resource Document Type (For resources/ documents)
-const Resource = defineDocumentType(() => ({
+var Resource = defineDocumentType(() => ({
   name: "Resource",
-  filePathPattern: "resources/*.md", 
-  // FIX: Change "md" to "markdown"
-  contentType: "markdown", 
+  filePathPattern: "resources/*.md",
+  contentType: "md",
+  // Assuming resources are plain markdown
   fields: {
-    title: { type: "string", required: true },
-    // NOTE: Add other required resource fields here
-  },
+    title: { type: "string", required: true }
+    // Add fields specific to your resource frontmatter here
+  }
 }));
-
-
-export default makeSource({
+var contentlayer_config_default = makeSource({
   contentDirPath: "content",
   // Register ALL document types
-  documentTypes: [Download, Event, Post, Book, Resource], 
+  documentTypes: [Download, Event, Post, Book, Resource],
   mdx: {
     remarkPlugins: [remarkGfm],
-    rehypePlugins: [],
-  },
+    rehypePlugins: []
+  }
 });
+export {
+  contentlayer_config_default as default
+};
+//# sourceMappingURL=compiled-contentlayer-config-UX2RHUZU.mjs.map

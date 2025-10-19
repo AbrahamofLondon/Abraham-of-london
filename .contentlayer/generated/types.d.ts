@@ -8,14 +8,39 @@ export { isType } from 'contentlayer/client'
 export type { Markdown, MDX, ImageFieldData, IsoDateTimeString }
 
 /** Document types */
+export type Book = {
+  /** File path relative to `contentDirPath` */
+  _id: string
+  _raw: Local.RawDocumentData
+  type: 'Book'
+  title: string
+  slug: string
+  /** MDX file body */
+  body: MDX
+
+}
+
 export type Download = {
   /** File path relative to `contentDirPath` */
   _id: string
   _raw: Local.RawDocumentData
   type: 'Download'
-  /** Markdown file body */
-  body: Markdown
-
+  title: string
+  slug: string
+  date: string
+  author: string
+  excerpt: string
+  readTime: string
+  category: string
+  tags?: string[] | undefined
+  coverImage: string
+  coverAspect: string
+  coverFit: string
+  coverPosition: string
+  pdfPath?: string | undefined
+  /** MDX file body */
+  body: MDX
+  url_path: string
 }
 
 export type Event = {
@@ -23,8 +48,48 @@ export type Event = {
   _id: string
   _raw: Local.RawDocumentData
   type: 'Event'
-  /** Markdown file body */
-  body: Markdown
+  title: string
+  slug: string
+  date: string
+  endDate?: string | undefined
+  location?: string | undefined
+  summary?: string | undefined
+  heroImage?: string | undefined
+  tags?: string[] | undefined
+  ctaHref?: string | undefined
+  ctaLabel?: string | undefined
+  /** MDX file body */
+  body: MDX
+  url_path: string
+}
+
+export type Post = {
+  /** File path relative to `contentDirPath` */
+  _id: string
+  _raw: Local.RawDocumentData
+  type: 'Post'
+  title: string
+  slug: string
+  date: string
+  author: string
+  excerpt: string
+  readTime: string
+  tags?: string[] | undefined
+  coverImage: string
+  coverAspect: string
+  coverFit: string
+  coverPosition: string
+  /** MDX file body */
+  body: MDX
+  url_path: string
+}
+
+export type Resource = {
+  /** File path relative to `contentDirPath` */
+  _id: string
+  _raw: Local.RawDocumentData
+  type: 'Resource'
+  title: string
 
 }  
 
@@ -36,8 +101,8 @@ export type Event = {
 export type AllTypes = DocumentTypes | NestedTypes
 export type AllTypeNames = DocumentTypeNames | NestedTypeNames
 
-export type DocumentTypes = Download | Event
-export type DocumentTypeNames = 'Download' | 'Event'
+export type DocumentTypes = Book | Download | Event | Post | Resource
+export type DocumentTypeNames = 'Book' | 'Download' | 'Event' | 'Post' | 'Resource'
 
 export type NestedTypes = never
 export type NestedTypeNames = never
@@ -46,6 +111,9 @@ export type DataExports = {
   allDocuments: DocumentTypes[]
   allDownloads: Download[]
   allEvents: Event[]
+  allPosts: Post[]
+  allBooks: Book[]
+  allResources: Resource[]
 }
 
 
@@ -65,8 +133,11 @@ declare global {
 }
 
 export type DocumentTypeMap = {
+  Book: Book
   Download: Download
   Event: Event
+  Post: Post
+  Resource: Resource
 }
 
 export type NestedTypeMap = {
