@@ -38,6 +38,7 @@ export type Download = {
   coverFit: string
   coverPosition: string
   pdfPath?: string | undefined
+  file?: string | undefined
   /** MDX file body */
   body: MDX
   url_path: string
@@ -90,6 +91,8 @@ export type Resource = {
   _raw: Local.RawDocumentData
   type: 'Resource'
   title: string
+  /** Markdown file body */
+  body: Markdown
 
 }  
 
