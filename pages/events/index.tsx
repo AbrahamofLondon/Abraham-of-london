@@ -78,7 +78,7 @@ export default function EventsIndex({ events }: Props) {
     }
 
     list.sort((a, b) => {
-      // 🐛 FIX: Use nullish coalescing (??) to handle potential undefined or null dates safely
+      // FIX 1: Ensure sorting handles missing dates safely
       const dateA = new Date(a.date ?? "").valueOf();
       const dateB = new Date(b.date ?? "").valueOf();
       return sort === "soonest" ? dateA - dateB : dateB - dateA;
@@ -219,11 +219,12 @@ export default function EventsIndex({ events }: Props) {
                     <div className="p-5">
                       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
                         <time
-                          // FIX: Use optional chaining or fallback here too, for safety
-                          dateTime={new Date(ev.date ?? "").toISOString()} 
+                          // FIX 2a: Ensure dateTime attribute handles missing dates safely
+                          dateTime={new Date(ev.date ?? "").toISOString()}
                           className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]"
                         >
-                          {formatPretty(ev.date)}
+                          {/* FIX 2b: Ensure formatPretty function receives a string */}
+                          {formatPretty(ev.date ?? '')}
                         </time>
                         {ev.location ? (
                           <>
