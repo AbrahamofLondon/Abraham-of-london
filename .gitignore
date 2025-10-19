@@ -5,6 +5,12 @@ out/
 /coverage
 /build
 
+.next
+node_modules
+.contentlayer
+*.log
+.env.local
+
 # Next.js
 /.next/
 /out/
