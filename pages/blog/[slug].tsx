@@ -1,32 +1,41 @@
-// pages/blog/[slug].tsx
 import dynamic from "next/dynamic";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { format } from "date-fns";
+import { promises as fs } from "fs";
+import path from "path";
+import matter from "gray-matter";
 import * as React from "react";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import { MDXComponents } from "@/components/MDXComponents";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
 import PostHero from "@/components/PostHero";
 import SEOHead from "@/components/SEOHead";
-import ResourcesCTA from "@/components/mdx/ResourcesCTA"; // ✅ added
+import ResourcesCTA from "@/components/mdx/ResourcesCTA";
+import BrandFrame from "@/components/BrandFrame"; // ✅ Added for <BrandFrame> support
 
 import { absUrl } from "@/lib/siteConfig";
-import { getPostSlugs, getPostBySlug } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post";
 
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-// IMPORTANT: do NOT import remark-gfm here to avoid the inTable crash
-
-const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
-
-type PageMeta = Omit<PostMeta, "tags"> & {
+type PageMeta = {
   slug: string;
-  tags?: string[] | null;
-  coverAspect?: "book" | "wide" | "square" | null;
-  coverFit?: "cover" | "contain" | null;
-  coverPosition?: "left" | "center" | "right" | null;
+  title: string;
+  date?: string;
+  excerpt?: string;
+  coverImage?: string;
+  author?: string;
+  readTime?: string;
+  category?: string;
+  tags?: string[];
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
+  coverPosition?: "left" | "center" | "right";
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  socialCaption?: string;
+  draft?: boolean;
 };
 
 type Props = {
@@ -38,44 +47,63 @@ type Props = {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
-  const raw = getPostBySlug(slug, { withContent: true });
+  const postsDir = path.join(process.cwd(), "content/blog");
+  const filePath = path.join(postsDir, `${slug}.mdx`);
 
-  if (!raw.slug || !raw.title) return { notFound: true };
+  try {
+    const fileContent = await fs.readFile(filePath, "utf-8");
+    const { data: frontMatter, content } = matter(fileContent);
 
-  const meta: PageMeta = {
-    slug: raw.slug!,
-    title: raw.title!,
-    date: (raw.date as string) ?? null,
-    excerpt: (raw.excerpt as string) ?? null,
-    coverImage: (raw.coverImage as string) ?? null,
-    author: (raw.author as any) ?? "Abraham of London",
-    readTime: (raw.readTime as string) ?? null,
-    category: (raw.category as string) ?? null,
-    tags: (raw.tags as string[] | undefined) ?? null,
-    coverAspect: (raw as any).coverAspect ?? null,
-    coverFit: (raw as any).coverFit ?? null,
-    coverPosition: (raw as any).coverPosition ?? null,
-  };
+    if (!frontMatter.title || !frontMatter.slug) {
+      return { notFound: true };
+    }
 
-  const source = raw.content || "";
+    const meta: PageMeta = {
+      slug: frontMatter.slug,
+      title: frontMatter.title,
+      date: frontMatter.date ?? undefined,
+      excerpt: frontMatter.excerpt ?? undefined,
+      coverImage: frontMatter.coverImage ?? undefined,
+      author: frontMatter.author ?? "Abraham of London",
+      readTime: frontMatter.readTime ?? undefined,
+      category: frontMatter.category ?? undefined,
+      tags: frontMatter.tags ?? undefined,
+      coverAspect: frontMatter.coverAspect ?? undefined,
+      coverFit: frontMatter.coverFit ?? undefined,
+      coverPosition: frontMatter.coverPosition ?? undefined,
+      description: frontMatter.description ?? undefined,
+      ogTitle: frontMatter.ogTitle ?? undefined,
+      ogDescription: frontMatter.ogDescription ?? undefined,
+      socialCaption: frontMatter.socialCaption ?? undefined,
+      draft: frontMatter.draft ?? false,
+    };
 
-  // Workaround the GFM tables crash by not enabling remark-gfm here.
-  const mdx = await serialize(source, {
-    parseFrontmatter: false,
-    scope: meta,
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-      format: "mdx",
-    },
-  });
+    const mdx = await serialize(content, {
+      scope: meta,
+      mdxOptions: {
+        remarkPlugins: [],
+        rehypePlugins: [],
+        format: "mdx",
+      },
+    });
 
-  return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+    return { props: { post: { meta, content: mdx } }, revalidate: 60 };
+  } catch (error) {
+    console.error(`Error processing ${slug}.mdx:`, error);
+    return { notFound: true };
+  }
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getPostSlugs();
-  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
+  const postsDir = path.join(process.cwd(), "content/blog");
+  const filenames = await fs.readdir(postsDir);
+  const paths = filenames
+    .filter((file) => file.endsWith(".mdx"))
+    .map((file) => ({
+      params: { slug: file.replace(/\.mdx$/, "") },
+    }));
+
+  return { paths, fallback: "blocking" };
 };
 
 export default function BlogPost({ post }: Props) {
@@ -92,14 +120,21 @@ export default function BlogPost({ post }: Props) {
     coverAspect,
     coverFit,
     coverPosition,
+    description,
+    ogTitle,
+    ogDescription,
+    draft,
   } = post.meta;
+
+  if (draft) {
+    return <Layout pageTitle="Draft Post">This post is a draft and not publicly available.</Layout>;
+  }
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
   const coverForMeta = coverImage
     ? absUrl(coverImage)
     : absUrl("/assets/images/social/og-image.jpg");
-  const authorName =
-    typeof author === "string" ? author : (author as any)?.name || "Abraham of London";
+  const authorName = author || "Abraham of London";
 
   const isFatherhood =
     category === "Fatherhood" ||
@@ -108,14 +143,14 @@ export default function BlogPost({ post }: Props) {
   return (
     <Layout pageTitle={title} hideSocialStrip hideCTA>
       <SEOHead
-        title={title}
-        description={excerpt ?? ""}
+        title={ogTitle || title}
+        description={description || excerpt || ""}
         slug={`/blog/${slug}`}
         coverImage={coverForMeta}
-        publishedTime={date ?? undefined}
-        modifiedTime={date ?? undefined}
+        publishedTime={date}
+        modifiedTime={date}
         authorName={authorName}
-        tags={tags ?? []}
+        tags={tags || []}
       />
 
       <MDXProviderWrapper>
@@ -123,10 +158,10 @@ export default function BlogPost({ post }: Props) {
           <PostHero
             slug={slug}
             title={title}
-            coverImage={coverImage ?? undefined}
-            coverAspect={(coverAspect as any) ?? undefined}
-            coverFit={(coverFit as any) ?? undefined}
-            coverPosition={(coverPosition as any) ?? undefined}
+            coverImage={coverImage}
+            coverAspect={coverAspect}
+            coverFit={coverFit}
+            coverPosition={coverPosition}
           />
 
           <h1 className="sr-only">{title}</h1>
@@ -147,7 +182,7 @@ export default function BlogPost({ post }: Props) {
           </div>
 
           <div className="prose md:prose-lg max-w-none text-deepCharcoal dark:prose-invert">
-            <MDXRemote {...post.content} components={MDXComponents} />
+            <MDXRemote {...post.content} components={{ ...MDXComponents, ResourcesCTA, BrandFrame }} />
           </div>
 
           {isFatherhood && <ResourcesCTA className="mt-12" />}
