@@ -15,16 +15,11 @@ export type Book = {
   type: 'Book'
   title: string
   slug: string
-  author?: string | undefined
-  excerpt?: string | undefined
-  genre?: string | undefined
+  date: string
+  author: string
+  readTime: string
+  category: string
   coverImage?: string | undefined
-  buyLink?: string | undefined
-  downloadPdf?: string | undefined
-  downloadEpub?: string | undefined
-  description?: string | undefined
-  date?: string | undefined
-  tags?: string[] | undefined
   /** MDX file body */
   body: MDX
 
@@ -39,20 +34,13 @@ export type Download = {
   slug: string
   date: string
   author: string
-  excerpt: string
   readTime: string
   category: string
-  tags?: string[] | undefined
-  coverImage: string
-  coverAspect: string
-  coverFit: string
-  coverPosition: string
   pdfPath?: string | undefined
-  file?: string | undefined
-  description?: string | undefined
+  coverImage?: string | undefined
   /** MDX file body */
   body: MDX
-  url_path: string
+
 }
 
 export type Event = {
@@ -60,22 +48,19 @@ export type Event = {
   _id: string
   _raw: Local.RawDocumentData
   type: 'Event'
-  title: string
   slug: string
+  title: string
   date: string
-  endDate?: string | undefined
   location?: string | undefined
   summary?: string | undefined
   heroImage?: string | undefined
   tags?: string[] | undefined
-  ctaHref?: string | undefined
-  ctaLabel?: string | undefined
   chatham?: boolean | undefined
-  resources?: any | undefined
   related?: string[] | undefined
+  resources?: any | undefined
   /** MDX file body */
   body: MDX
-  url_path: string
+
 }
 
 export type Post = {
@@ -87,22 +72,22 @@ export type Post = {
   slug: string
   date: string
   author: string
-  excerpt: string
   readTime: string
+  category: string
   tags?: string[] | undefined
-  coverImage: string
-  coverAspect: string
-  coverFit: string
-  coverPosition: string
+  coverImage?: string | undefined
   description?: string | undefined
   ogTitle?: string | undefined
   ogDescription?: string | undefined
   socialCaption?: string | undefined
-  category?: string | undefined
+  excerpt?: string | undefined
+  coverAspect?: string | undefined
+  coverFit?: string | undefined
+  coverPosition?: string | undefined
   draft?: boolean | undefined
   /** MDX file body */
   body: MDX
-  url_path: string
+  url: string
 }
 
 export type Resource = {
@@ -143,9 +128,9 @@ export type NestedTypeNames = never
 
 export type DataExports = {
   allDocuments: DocumentTypes[]
+  allPosts: Post[]
   allDownloads: Download[]
   allEvents: Event[]
-  allPosts: Post[]
   allBooks: Book[]
   allResources: Resource[]
   allStrategies: Strategy[]
