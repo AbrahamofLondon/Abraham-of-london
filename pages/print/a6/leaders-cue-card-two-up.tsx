@@ -1,5 +1,6 @@
 // pages/print/a6/leaders-cue-card-two-up.tsx
 import Head from "next/head";
+import React from "react"; // Explicit import of React is good practice
 
 export default function LeadersCueCardTwoUp() {
   return (
@@ -46,12 +47,14 @@ export default function LeadersCueCardTwoUp() {
         .card {
           box-sizing: border-box; width: 100%; height: 100%;
           border: .6pt solid #dadada; border-radius: 6pt; padding: 8mm;
-          /* Fixed font stack with quoted fallback */
-          font: 10pt/1.45 var(--font-sans, "ui-sans-serif, system-ui, sans-serif");
+          /* FIX: Simplified font fallback to a single quoted value to eliminate parser error */
+          font: 10pt/1.45 var(--font-sans, "ui-sans-serif");
           display: flex; flex-direction: column; justify-content: space-between;
         }
-        h1 { font: 700 12pt/1.2 var(--font-serif, "Georgia, serif"); margin: 0 0 4mm; color: var(--color-primary); }
-        h2 { font: 600 10pt/1.2 var(--font-serif, "Georgia, serif"); margin: 3mm 0 2mm; color: var(--color-primary); }
+        /* FIX: Simplified font fallback */
+        h1 { font: 700 12pt/1.2 var(--font-serif, "Georgia"); margin: 0 0 4mm; color: var(--color-primary); }
+        /* FIX: Simplified font fallback */
+        h2 { font: 600 10pt/1.2 var(--font-serif, "Georgia"); margin: 3mm 0 2mm; color: var(--color-primary); }
         ul { margin: 0; padding-left: 4mm; }
         li { margin: .8mm 0; }
         @media screen {
