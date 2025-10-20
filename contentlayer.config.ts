@@ -1,9 +1,10 @@
 // contentlayer.config.ts
+import { defineDocumentType, makeSource } from "contentlayer2/source-files";
+import remarkGfm from "remark-gfm";
 
-import { defineDocumentType, makeSource } from "contentlayer/source-files";
-import remarkGfm from 'remark-gfm'; // 💡 FIX 1: Import the necessary plugin for GFM (tables, etc.)
+/** ---------- Document Types ---------- */
 
-export const Post = defineDocumentType(() => ({
+const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.mdx",
   fields: {
@@ -13,8 +14,6 @@ export const Post = defineDocumentType(() => ({
     author: { type: "string", required: true },
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
-    
-    // Non-required fields for Posts
     tags: { type: "list", of: { type: "string" } },
     coverImage: { type: "string" },
     description: { type: "string" },
@@ -32,11 +31,10 @@ export const Post = defineDocumentType(() => ({
   },
 }));
 
-export const Download = defineDocumentType(() => ({
+const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.mdx",
   fields: {
-    // Required fields for Downloads
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
     date: { type: "string", required: true },
@@ -44,44 +42,35 @@ export const Download = defineDocumentType(() => ({
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
     type: { type: "string", required: true },
-    
-    // Non-required fields for Downloads
     coverImage: { type: "string" },
     pdfPath: { type: "string" },
-    excerpt: { type: "string" }, 
-    tags: { type: "list", of: { type: "string" } }, 
-    coverAspect: { type: "string" }, 
-    coverFit: { type: "string" }, 
-    coverPosition: { type: "string" }, 
+    excerpt: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    coverAspect: { type: "string" },
+    coverFit: { type: "string" },
+    coverPosition: { type: "string" },
   },
 }));
 
-export const Event = defineDocumentType(() => ({
+const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/**/*.mdx",
   fields: {
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
     date: { type: "string", required: true },
-    
-    // Non-required fields for Events
     location: { type: "string" },
     summary: { type: "string" },
     heroImage: { type: "string" },
     tags: { type: "list", of: { type: "string" } },
     chatham: { type: "boolean" },
+    // Keep flexible: allow array, string, or object via raw JSON
+    resources: { type: "json" },
     related: { type: "list", of: { type: "string" } },
-    resources: {
-      type: "json", 
-      of: {
-        downloads: { type: "list", of: { type: "json", fields: { href: { type: "string" }, label: { type: "string" } } } },
-        reads: { type: "list", of: { type: "json", fields: { href: { type: "string" }, label: { type: "string" } } } },
-      },
-    },
   },
 }));
 
-export const Book = defineDocumentType(() => ({
+const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.mdx",
   fields: {
@@ -91,20 +80,18 @@ export const Book = defineDocumentType(() => ({
     author: { type: "string", required: true },
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
-    type: { type: "string", required: true },
     coverImage: { type: "string" },
     description: { type: "string" },
     ogDescription: { type: "string" },
   },
 }));
 
-export const Resource = defineDocumentType(() => ({
+const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/**/*.md",
   fields: {
     title: { type: "string", required: true },
     type: { type: "string", required: true },
-    
     slug: { type: "string" },
     date: { type: "string" },
     author: { type: "string" },
@@ -119,13 +106,12 @@ export const Resource = defineDocumentType(() => ({
   },
 }));
 
-export const Strategy = defineDocumentType(() => ({
+const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.md",
   fields: {
     title: { type: "string", required: true },
     type: { type: "string", required: true },
-    
     description: { type: "string" },
     ogTitle: { type: "string" },
     ogDescription: { type: "string" },
@@ -145,16 +131,24 @@ export const Strategy = defineDocumentType(() => ({
   },
 }));
 
+/** ---------- Source ---------- */
+
 export default makeSource({
-  contentDirPath: 'content',
+  contentDirPath: "content",
+  contentDirExclude: ["_downloads-registry.md"], // ignore the registry helper file
   documentTypes: [Post, Download, Event, Book, Resource, Strategy],
-  
-  // 💡 FIX 2: Add MDX configuration block with remarkGfm
   mdx: {
-    remarkPlugins: [
-      remarkGfm, // Enables table parsing
-      // Add other remark plugins here if needed
-    ],
-    // Add rehype plugins here if needed
+    remarkPlugins: [remarkGfm],
+    esbuildOptions: (options) => {
+      // Let esbuild ignore Next’s "@/*" imports inside MDX;
+      // Next will resolve them at runtime. This fixes the “Could not resolve @/components/*” errors.
+      options.external = [
+        ...(options.external ?? []),
+        "@/components/*",
+        "@/components/*.*",
+        "@/*",
+      ];
+      return options;
+    },
   },
 });
