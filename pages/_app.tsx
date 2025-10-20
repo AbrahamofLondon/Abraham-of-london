@@ -72,16 +72,9 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
 
   const value =
-    metric.name === "CLS"
-      ? Math.round(metric.value * 1000)
-      : Math.round(metric.value);
+    metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
 
   try {
-    gaEvent("web-vital", {
-      id: metric.id,
-      name: metric.name,
-      label: metric.label,
-      value,
-    });
+    gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
   } catch {}
 }
