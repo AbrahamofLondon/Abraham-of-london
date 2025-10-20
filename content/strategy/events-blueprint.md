@@ -1,28 +1,28 @@
----
-title: Event Strategy Blueprint
-type: Strategy
-description: A high-level blueprint for planning and executing multi-city events for audience engagement and community building.
-ogTitle: Event Strategy Blueprint
-ogDescription: The high-level blueprint for effective community-building event execution.
-socialCaption: Run events that build community and deliver value. #Events #Strategy #Leadership
-slug: event-strategy-blueprint
-date: '2025-11-01'
-author: Abraham of London
-excerpt: A blueprint for planning and executing multi-city events for audience engagement and community building.
-readTime: 5 min read
-category: Strategy
+﻿---
+title: "Event Strategy Blueprint"
+type: "Strategy"
+description: "A high-level blueprint for planning and executing multi-city events for audience engagement and community building."
+ogTitle: "Event Strategy Blueprint"
+ogDescription: "The high-level blueprint for effective community-building event execution."
+socialCaption: "Run events that build community and deliver value. #Events #Strategy #Leadership"
+slug: "event-strategy-blueprint"
+date: "2025-11-01"
+author: "Abraham of London"
+excerpt: "A blueprint for planning and executing multi-city events for audience engagement and community building."
+readTime: "5 min read"
+category: "Strategy"
 tags:
-  - strategy
-  - events
-  - leadership
-coverImage: /assets/images/strategy/events-blueprint.jpg
-coverAspect: wide
-coverFit: cover
-coverPosition: center
-draft: false 
+  - "strategy"
+  - "events"
+  - "leadership"
+coverImage: "/assets/images/strategy/events-blueprint.jpg"
+coverAspect: "wide"
+coverFit: "cover"
+coverPosition: "center"
+draft: false
 ---
 
-# Abraham of London — Events Blueprint (Rolling 1–5 Year Plan)
+# Abraham of London â€” Events Blueprint (Rolling 1â€“5 Year Plan)
 
 **Principle:** Clarity, Capital, Character
 **Room standard:** Chatham (off the record)
@@ -32,11 +32,11 @@ draft: false
 
 ## Pillars (Event Types)
 
-1. **Salon** — curated conversation; 12–16 seats; 90 minutes
-2. **Workshop** — working session; 12–16 seats; 2–3 hours
-3. **Briefing** — principal update; 30–45 minutes; remote or in-room
-4. **Retreat** — 1–2 day deep work; 8–12 principals
-5. **Community** — invite-only dinners, stewardship forums
+1. **Salon** â€” curated conversation; 12â€“16 seats; 90 minutes
+2. **Workshop** â€” working session; 12â€“16 seats; 2â€“3 hours
+3. **Briefing** â€” principal update; 30â€“45 minutes; remote or in-room
+4. **Retreat** â€” 1â€“2 day deep work; 8â€“12 principals
+5. **Community** â€” invite-only dinners, stewardship forums
 
 ---
 
@@ -48,10 +48,10 @@ draft: false
 
 ## Annual Themes & Quarterly Arcs
 
-* **Standards Council (Curatorial Board):** 1–2 named principals approve the **Annual Theme** and curatorial standards.
+* **Standards Council (Curatorial Board):** 1â€“2 named principals approve the **Annual Theme** and curatorial standards.
 * **Yearly theme (1)** sets tone (e.g., *Enduring Enterprise*).
-* **Quarter arcs (4)**: *Clarity → Capital → Cadence → Character*.
-* **IP Development Map (replaces “Library alignment”):** Each quarter produces **2–3 assets** (pre-reads, notes, frameworks, or white papers) that compound into durable IP.
+* **Quarter arcs (4)**: *Clarity â†’ Capital â†’ Cadence â†’ Character*.
+* **IP Development Map (replaces â€œLibrary alignmentâ€):** Each quarter produces **2â€“3 assets** (pre-reads, notes, frameworks, or white papers) that compound into durable IP.
 
 ---
 
@@ -62,15 +62,15 @@ draft: false
 * **Principal Track:** Access bundled in an **Annual Advisory Retainer**.
 * **Guest Track:** Paid, tiered access *(guide rails)*
 
-  * Workshop: **£500–£1,500**
-  * Briefing: **£0–£200**
-  * Retreat: **£5,000+**
+  * Workshop: **Â£500â€“Â£1,500**
+  * Briefing: **Â£0â€“Â£200**
+  * Retreat: **Â£5,000+**
 
-**Fellowship Seats (1–2 per room)**
+**Fellowship Seats (1â€“2 per room)**
 
 * **Invite-only, fully subsidised**, nominated by a Principal/Partner.
 * Signals potential, not status; protects the room while developing up-and-comers.
-* **Conversion KPI:** Fellowship → **Paid Advisory Pilot**.
+* **Conversion KPI:** Fellowship â†’ **Paid Advisory Pilot**.
 
 **Social Contract (beyond Chatham)**
 
@@ -83,8 +83,8 @@ draft: false
 ## Capacity & Cadence
 
 * **Quarterly minimum:** 1 Salon, 1 Workshop, 1 Briefing
-* **Seat guardrails:** 12–16 seats; **85%+ attendance** target
-* **Quality bar:** **NPS ≥ 9.0**, **80% “actionable within 7 days”**
+* **Seat guardrails:** 12â€“16 seats; **85%+ attendance** target
+* **Quality bar:** **NPS â‰¥ 9.0**, **80% â€œactionable within 7 daysâ€**
 
 ---
 
@@ -101,10 +101,10 @@ draft: false
 
 **Decisions**
 
-* Themes & pillars — *Principal, Director*
-* Room list — *Principal & Director*, privacy check by *Ops*
-* Budget, venues — *Director*
-* Standards (Chatham, devices, social contract) — *Principal*
+* Themes & pillars â€” *Principal, Director*
+* Room list â€” *Principal & Director*, privacy check by *Ops*
+* Budget, venues â€” *Director*
+* Standards (Chatham, devices, social contract) â€” *Principal*
 
 ---
 
@@ -114,7 +114,7 @@ draft: false
 * **Quarterly (Q-1):** Room selection; **IP Development Map**; outreach plan
 * **Monthly:** **Portfolio Risk Assessment**; stewardship pipeline; run-sheet QA
 * **Weekly (8-week runway):** Checklist burn-down; confirmations
-* **48–72 hrs pre:** **Final Vetting & Room Orchestration**; Principal-specific **Briefing Pack**; seating chart
+* **48â€“72 hrs pre:** **Final Vetting & Room Orchestration**; Principal-specific **Briefing Pack**; seating chart
 * **<24 hrs:** Principal brief; **Ops Pack**; materials printed
 * **+24 hrs post:** **Chatham Post-Mortem (de-identified)**; NPS; stewardship activations; repo updates
 
@@ -124,8 +124,8 @@ draft: false
 
 * **Cost per seat (target / ceiling):**
 
-  * **Workshop:** £90 / £140
-  * **Salon:** £60 / £100
+  * **Workshop:** Â£90 / Â£140
+  * **Salon:** Â£60 / Â£100
 * **Net margin:** Breakeven on room; **margin from advisory/follow-on**
 * **No sponsorship logos** in room; co-hosts by Principal approval only
 
@@ -133,39 +133,39 @@ draft: false
 
 ## KPIs (per quarter)
 
-* Attendance rate ≥ **85%**
-* NPS ≥ **9.0**
-* “Actionable within 7 days” ≥ **80%**
-* **Fellowship Conversion:** ≥ **X%** move to **Paid Advisory Pilot**
-* Materials: **≥ 3** new PDFs shipped; **≥ 500** downloads
-* List growth: **+7–10%**
-* Press: **0** (by design); Referrals: **≥ 2** principal introductions
+* Attendance rate â‰¥ **85%**
+* NPS â‰¥ **9.0**
+* â€œActionable within 7 daysâ€ â‰¥ **80%**
+* **Fellowship Conversion:** â‰¥ **X%** move to **Paid Advisory Pilot**
+* Materials: **â‰¥ 3** new PDFs shipped; **â‰¥ 500** downloads
+* List growth: **+7â€“10%**
+* Press: **0** (by design); Referrals: **â‰¥ 2** principal introductions
 
 ---
 
-## 1–5 Year Milestones (Rolling)
+## 1â€“5 Year Milestones (Rolling)
 
-**Year 1 — Pilot & Proof**
+**Year 1 â€” Pilot & Proof**
 
 * 4 salons, 4 workshops, 4 briefings
 * Library v1: 10 core PDFs (cadence, comms, stewardship, decision)
 
-**Year 2 — Scale & Systemise**
+**Year 2 â€” Scale & Systemise**
 
 * Each pillar runs quarterly with rhythm
 * Stewardship CRM, referral flywheel, materials index/search
 
-**Year 3 — Syndicate & Partners**
+**Year 3 â€” Syndicate & Partners**
 
-* 2–3 **aligned co-hosts** (carefully curated)
-* **Fellowship cohort** (6–8 leaders; 6-month cadence)
+* 2â€“3 **aligned co-hosts** (carefully curated)
+* **Fellowship cohort** (6â€“8 leaders; 6-month cadence)
 
-**Year 4 — Institute**
+**Year 4 â€” Institute**
 
-* “**Standards & Stewardship Institute**” brand; curriculum map
+* â€œ**Standards & Stewardship Institute**â€ brand; curriculum map
 * Signature retreat; **de-identified case compendium**
 
-**Year 5 — Legacy**
+**Year 5 â€” Legacy**
 
 * Annual impact report (standards, alumni)
 * **Endowed Institute of Standards**; curation of **Global Chapter Principals**
@@ -218,7 +218,7 @@ draft: false
 Content lives in `content/events/<slug>.mdx`. **Front matter:**
 
 ```yaml
-title: "Leadership Workshop — Standards that Endure"
+title: "Leadership Workshop â€” Standards that Endure"
 slug: "leadership-workshop"
 pillar: "workshop"                    # salon | workshop | briefing | retreat | community
 date: "2026-09-12T10:00:00+01:00"
@@ -227,9 +227,9 @@ summary: "Standards, stewardship, decision-making."
 tags: ["leadership","stewardship","chatham"]
 inviteOnly: true
 chatham: true
-fellowshipSeats: 1                    # 0–2 typical
+fellowshipSeats: 1                    # 0â€“2 typical
 preread:
-  title: "Standards that Endure — 2-Page Brief"
+  title: "Standards that Endure â€” 2-Page Brief"
   href: "/downloads/standards-brief.pdf"
 pdf: true                             # render a PDF of the notes
 pdfFileName: "Leadership_Workshop_Notes.pdf"
@@ -257,7 +257,7 @@ archive:
 
 ## Budget Model (Quick Reference)
 
-* **Room P&L:** Venue + materials + light hospitality + ops time → **breakeven target**
+* **Room P&L:** Venue + materials + light hospitality + ops time â†’ **breakeven target**
 * **Revenue:**
 
   * **Retainers (Principal Track)** include access
@@ -270,8 +270,9 @@ archive:
 ## Language Standards (Room & Invites)
 
 * **Restrained, precise, benevolent authority**
-* Action verbs, low adjectives, no “hype words”
+* Action verbs, low adjectives, no â€œhype wordsâ€
 * Standards over slogans; mechanisms over platitudes
 
 ---
+
 
