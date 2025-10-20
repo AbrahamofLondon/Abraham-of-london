@@ -62,3 +62,12 @@ Thumbs.db
 
 public/downloads/*.pdf binary
 .pdf.sha
+
+# Temporary build folders
+.next/
+.contentlayer/
+.pdfcache/
+scripts/output/
+
+# Personal/Sensitive
+github-recovery-codes.txt

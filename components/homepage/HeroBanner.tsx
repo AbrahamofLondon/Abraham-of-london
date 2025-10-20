@@ -86,7 +86,7 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        <Image {...imageProps} />
+        <Image {...imageProps} alt="Decorative background image for hero section" />
       )}
 
       {/* Subtle top/bottom gradient for legibility */}

@@ -1,7 +1,19 @@
 ---
-title: "Brotherhood Leader Guide (4 Weeks)"
-type: Resource
+type: Resource # Should be exactly 'Resource'
 title: Brotherhood Leader Guide (4 Weeks)
+slug: brotherhood-leader-guide-4-weeks
+date: '2025-10-13'
+author: Abraham of London
+excerpt: "A four-week guide for leaders initiating and maintaining a small band of brothers."
+readTime: 30 min read
+category: Leadership
+tags:
+  - brotherhood
+  - leadership
+coverImage: /assets/images/resources/brotherhood-leader-guide.jpg
+coverAspect: book
+coverFit: cover
+coverPosition: center
 ---
 
 # Brotherhood Leader Guide (4 Weeks)
