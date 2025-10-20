@@ -1,35 +1,47 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "target": "es5", // From remote
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ], // From remote
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true, // Add from local for safety
+    "strictNullChecks": true, // Add from remote end
+
     "baseUrl": ".",
     "types": ["node"],
     "typeRoots": ["./node_modules/@types", "./types"],
-    "downlevelIteration": true,
     "paths": {
       "@/*": ["*"],
+      // Keep all custom paths for your app structure (components, lib, etc.)
       "@/lib/*": ["lib/*"],
       "@/components/*": ["components/*"],
       "@/styles/*": ["styles/*"],
       "@/public/*": ["public/*"],
       "@/config/*": ["config/*"],
+      // Keep Contentlayer and Netlify specific paths
       "@netlify/functions": ["node_modules/@netlify/functions"],
       "@netlify/emails": ["node_modules/@netlify/emails"],
       "contentlayer/generated": ["./.contentlayer/generated"]
     },
-    "plugins": [{ "name": "next" }]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -43,5 +55,5 @@
     "tests/**/*.tsx",
     ".contentlayer/generated/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next"]
+  "exclude": ["node_modules", ".next"] // Exclude .next from local, keep exclude node_modules
 }
