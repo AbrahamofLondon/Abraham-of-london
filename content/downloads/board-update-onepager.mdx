@@ -1,83 +1,106 @@
----
-type: Download 
-title: Board/Investor One-Pager Template
-slug: board-investor-one-pager-template
-date: '2025-10-13'
-author: Abraham of London
-excerpt: >-
-  Communicate clearly, concisely, and consistently with your board and
-  investors.
-readTime: 2 min read
-category: Entrepreneurship/ "Resources"
-tags:
-  - investors
-  - board
-  - communication
-coverImage: /assets/images/downloads/board-update.jpg
-coverAspect: book
-coverFit: contain
-coverPosition: center
-pdfPath: /downloads/Board_Update_Template.pdf
----
+// pages/print/board-investor-one-pager-template.tsx
 
-# Board/Investor One-Pager Template
+import BrandFrame from "../../components/print/BrandFrame";
+import { PullLine } from "../../components/PullLine"; // Assuming this component exists
+import * as React from "react";
 
-<PullLine subtle>Respect their time. Lead with the punchline. This one-pager forces clarity.</PullLine>
+const BoardInvestorTemplate = () => {
+  return (
+    <BrandFrame
+      title="Board/Investor One-Pager Template"
+      subtitle="Communicate clearly, concisely, and consistently with your board and investors."
+      pageSize="A4"
+    >
+      <PullLine subtle>Respect their time. Lead with the punchline. This one-pager forces clarity.</PullLine>
 
-## Top-Line Metrics (Header)
+      <h2 className="mt-8">Top-Line Metrics (Header)</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 border border-lightGrey rounded-lg bg-warmWhite">
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-[color:var(--color-on-secondary)/0.6]">Reporting Period:</span>
+          <span className="text-lg font-mono text-deepCharcoal">(e.g., September 2025)</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-[color:var(--color-on-secondary)/0.6]">Runway:</span>
+          <span className="text-lg font-mono text-deepCharcoal">(in months)</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-[color:var(--color-on-secondary)/0.6]">MRR / Revenue:</span>
+          <span className="text-lg font-mono text-deepCharcoal">(Current Status)</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-[color:var(--color-on-secondary)/0.6]">Gross Margin:</span>
+          <span className="text-lg font-mono text-deepCharcoal">(Current %)</span>
+        </div>
+      </div>
+      
+      <h2 className="mt-10">Performance Summary (The 3x3)</h2>
+      <p className="italic text-sm text-[color:var(--color-on-secondary)/0.8]">
+        Be brutally honest in this section. Facts, not optimism.
+      </p>
 
-- **Reporting Period:** (e.g., September 2025)
-- **Runway:** (in months)
-- **MRR / Revenue:** (Current Status)
-- **Gross Margin:** (Current %)
+      {/* Re-implementing the table using Tailwind for better print control */}
+      <table className="mt-4 w-full border-collapse">
+        <thead>
+          <tr className="bg-forest/10 text-forest">
+            <th className="p-3 text-left border-b-2 border-forest/20">Category</th>
+            <th className="p-3 text-left border-b-2 border-forest/20">Item 1</th>
+            <th className="p-3 text-left border-b-2 border-forest/20">Item 2</th>
+            <th className="p-3 text-left border-b-2 border-forest/20">Item 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-lightGrey/60">
+            <td className="p-3 font-bold text-deepCharcoal">Highlights (Wins)</td>
+            <td className="p-3 text-sm text-gray-700">(Concrete, measurable success)</td>
+            <td className="p-3 text-sm text-gray-700">(Team or product milestone)</td>
+            <td className="p-3 text-sm text-gray-700">(Major risk mitigated)</td>
+          </tr>
+          <tr className="bg-warmWhite/50">
+            <td className="p-3 font-bold text-deepCharcoal">Lowlights (Concerns)</td>
+            <td className="p-3 text-sm text-gray-700">(Revenue/pipeline gap)</td>
+            <td className="p-3 text-sm text-gray-700">(Key hire missing/churn)</td>
+            <td className="p-3 text-sm text-gray-700">(External market risk)</td>
+          </tr>
+        </tbody>
+      </table>
 
+      <h2 className="mt-10">The Asks (How They Can Help)</h2>
+      <ol className="list-decimal pl-6 space-y-3">
+        <li>
+          <strong className="text-forest">(Specific Ask 1):</strong> 
+          <span className="text-gray-700 italic">e.g., Introduction to X for partnership.</span>
+        </li>
+        <li>
+          <strong className="text-forest">(Specific Ask 2):</strong> 
+          <span className="text-gray-700 italic">e.g., 30 minutes to pressure-test the 2026 budget.</span>
+        </li>
+        <li>
+          <strong className="text-forest">(Specific Ask 3):</strong> 
+          <span className="text-gray-700 italic">e.g., Advice on managing supplier contract negotiation.</span>
+        </li>
+      </ol>
 
-***
+      <h2 className="mt-10">Optional Section</h2>
+      <p className="text-gray-700">
+        Include **one** visual aid: a small chart showing revenue growth, burn rate, 
+        or customer retention over the last 6 months.
+      </p>
 
+      <div className="mt-12 text-center">
+         {/* Placeholder for the embossed logo, using the component we created */}
+         <EmbossedBrandMark
+            src="/assets/images/abraham-logo.jpg"
+            alt="Abraham of London Brand Mark"
+            width={80}
+            height={80}
+            effect="deboss"
+            className="inline-block"
+            baseColor="transparent" // Use transparent background on print page
+         />
+      </div>
 
-## Performance Summary (The 3x3)
+    </BrandFrame>
+  );
+};
 
-*Be brutally honest in this section. Facts, not optimism.*
-
-<table>
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Item 1</th>
-      <th>Item 2</th>
-      <th>Item 3</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Highlights (Wins)</strong></td>
-      <td>(Concrete, measurable success)</td>
-      <td>(Team or product milestone)</td>
-      <td>(Major risk mitigated)</td>
-    </tr>
-    <tr>
-      <td><strong>Lowlights (Concerns)</strong></td>
-      <td>(Revenue/pipeline gap)</td>
-      <td>(Key hire missing/churn)</td>
-      <td>(External market risk)</td>
-    </tr>
-  </tbody>
-</table>
-
-
-***
-
-
-## The Asks (How They Can Help)
-
-1. **(Specific Ask 1):** *e.g., Introduction to X for partnership.*
-2. **(Specific Ask 2):** *e.g., 30 minutes to pressure-test the 2026 budget.*
-3. **(Specific Ask 3):** *e.g., Advice on managing supplier contract negotiation.*
-
-
-***
-
-
-## Optional Section
-
-Include **one** visual aid: a small chart showing revenue growth, burn rate, or customer retention over the last 6 months.
+export default BoardInvestorTemplate;
