@@ -1,0 +1,52 @@
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  year: number;
+  client: string;
+  tags: string[];
+  imageUrl: string;
+  projectUrl?: string;
+}
+
+export const featuredProjects: Project[] = [
+  {
+    id: "p1",
+    title: "Luxury Watch E-Commerce Platform",
+    description: "End-to-end digital transformation for a Swiss watchmaker, increasing online sales by 240%.",
+    category: "Digital Strategy",
+    year: 2023,
+    client: "Horologe Suisse",
+    tags: ["E-Commerce", "Luxury Retail", "Brand Strategy"],
+    imageUrl: "/projects/watch-ecommerce.jpg",
+    projectUrl: "https://example.com/horologe"
+  },
+  {
+    id: "p2",
+    title: "Premium Automotive Brand Refresh",
+    description: "Complete visual identity overhaul for British luxury car manufacturer.",
+    category: "Brand Identity",
+    year: 2022,
+    client: "Aston Motoring",
+    tags: ["Branding", "Visual Design", "Positioning"],
+    imageUrl: "/projects/auto-branding.jpg"
+  },
+  {
+    id: "p3",
+    title: "Private Members Club Launch",
+    description: "From concept to launch for London's most exclusive new social club.",
+    category: "Concept Development",
+    year: 2021,
+    client: "The Mayfair Circle",
+    tags: ["Hospitality", "Luxury", "Launch Strategy"],
+    imageUrl: "/projects/members-club.jpg"
+  }
+];
+
+export const allProjects: Project[] = [
+  ...featuredProjects,
+  // Add more projects here
+];
+export const featuredProjects: Project[] = [...]
+export const allProjects: Project[] = [...]
