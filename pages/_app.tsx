@@ -1,4 +1,3 @@
-// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -11,7 +10,7 @@ import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 import "@/styles/globals.css";
 
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
-const ThemeToggle   = dynamic(() => import("@/components/ThemeToggle"),   { ssr: false });
+const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), { ssr: false });
 
 function AnalyticsRouterTracker() {
   const router = useRouter();
@@ -71,5 +70,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
   const value = metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
-  try { gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value }); } catch {}
+  try {
+    gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
+  } catch {}
 }
