@@ -73,10 +73,12 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
+
   const value =
     metric.name === "CLS"
       ? Math.round(metric.value * 1000)
       : Math.round(metric.value);
+
   try {
     gaEvent("web-vital", {
       id: metric.id,
@@ -86,6 +88,6 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
     });
   } catch {}
 }
-lue });
+e });
   } catch {}
 }
