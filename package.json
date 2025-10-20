@@ -34,8 +34,9 @@
     "downloads:build-safe": "npm run seed:downloads && npm run run:downloads || true",
     "covers:events": "node scripts/covers/make-event-covers.mjs",
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
-    "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write"
-    "downloads:export": "node scripts/print-pdfs.mjs"
+    "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
+    "downloads:export": "node scripts/print-pdfs.mjs",
+    "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -49,7 +50,6 @@
     "autoprefixer": "10.4.21",
     "chokidar": "^3.6.0",
     "clsx": "2.1.1",
-    "cross-env": "10.0.0",
     "date-fns": "4.1.0",
     "fast-glob": "^3.3.2",
     "framer-motion": "12.23.12",
@@ -90,6 +90,7 @@
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "contentlayer2": "^0.5.8",
+    "cross-env": "^10.1.0",
     "esbuild-plugin-tsconfig-paths": "^1.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.32",
