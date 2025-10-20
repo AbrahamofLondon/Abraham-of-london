@@ -21,12 +21,20 @@
   directory = "netlify/functions"
   external_node_modules = ["resend"]
 
+[functions.emails]
+  included_files = ["emails/**"]
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Redirects
 # ─────────────────────────────────────────────────────────────────────────────
+[[redirects]]
+  from = "/.netlify/*"
+  to = "/.netlify/:splat"
+  status = 200
+
 [[redirects]]
   from = "/downloads/leaders-cue-card"
   to = "/downloads/leaders-cue-card.pdf"

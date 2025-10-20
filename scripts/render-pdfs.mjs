@@ -10,20 +10,21 @@ const outArg = args.find((a) => a.startsWith("--out="));
 const BASE = (baseArg ? baseArg.split("=")[1] : "http://localhost:5555").replace(/\/+$/, "");
 const OUT = outArg ? outArg.split("=")[1] : "public/downloads";
 
+// UPDATED TASKS LIST using the provided list for consistent naming
 const TASKS = [
-  { path: "/print/fathering-without-fear-teaser",        file: "fathering-without-fear-teaser.pdf" },
-  { path: "/print/fathering-without-fear-teaser-mobile", file: "fathering-without-fear-teaser-mobile.pdf" },
-  { path: "/print/leadership-playbook",                  file: "leadership-playbook.pdf" },
-  { path: "/print/mentorship-starter-kit",               file: "mentorship-starter-kit.pdf" },
-  { path: "/print/a6/leaders-cue-card-two-up",           file: "leaders-cue-card-two-up.pdf" },
-  { path: "/print/a6/brotherhood-cue-card-two-up",       file: "brotherhood-cue-card-two-up.pdf" },
-
-  // NEW
-  { path: "/print/principles-for-my-son",                file: "principles-for-my-son.pdf" },
-  { path: "/print/a6/principles-for-my-son-two-up",      file: "principles-for-my-son-cue-card.pdf" },
-  { path: "/print/scripture-track-john14",               file: "scripture-track-john14.pdf" },
-  { path: "/print/family-altar-liturgy",                 file: "family-altar-liturgy.pdf" },
-  { path: "/print/standards-brief",                      file: "standards-brief.pdf" },
+  { path: "/print/leadership-playbook", file: "Leadership_Playbook.pdf" },
+  { path: "/print/mentorship-starter-kit", file: "Mentorship_Starter_Kit.pdf" },
+  { path: "/print/family-altar-liturgy", file: "Family_Altar_Liturgy.pdf" },
+  { path: "/print/standards-brief", file: "Standards_Brief.pdf" },
+  { path: "/print/principles-for-my-son", file: "Principles_for_My_Son.pdf" },
+  { path: "/print/a6/principles-for-my-son-two-up", file: "Principles_for_My_Son_Cue_Card.pdf" },
+  { path: "/print/a6/leaders-cue-card-two-up", file: "Leaders_Cue_Card.pdf" },
+  { path: "/print/a6/brotherhood-cue-card-two-up", file: "Brotherhood_Cue_Card.pdf" },
+  { path: "/print/scripture-track-john14", file: "Scripture_Track_John14.pdf" },
+  { path: "/print/fathering-without-fear-teaser", file: "Fathering_Without_Fear_Teaser_A4.pdf" },
+  { path: "/print/fathering-without-fear-teaser-mobile", file: "Fathering_Without_Fear_Teaser_Mobile.pdf" },
+  // NOTE: If you need to include the old "fathering-without-fear-teaser-mobile" as well, 
+  // you'll need to update the source path to match the old filename, or confirm which path is correct.
 ];
 
 async function ensureDir(dir) {
