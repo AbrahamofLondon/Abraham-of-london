@@ -16,7 +16,6 @@ type Props = {
   heroImage?: string;
   resources?: { downloads?: ResItem[]; reads?: ResItem[] } | null;
 };
-
 const lower = (v: unknown) => (typeof v === "string" ? v.toLowerCase() : "");
 
 // Per-event visual overrides (aspect/fit/position)

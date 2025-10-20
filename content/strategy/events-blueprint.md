@@ -1,4 +1,26 @@
-title: "Events Blueprint"
+---
+title: Event Strategy Blueprint
+type: Strategy
+description: A high-level blueprint for planning and executing multi-city events for audience engagement and community building.
+ogTitle: Event Strategy Blueprint
+ogDescription: The high-level blueprint for effective community-building event execution.
+socialCaption: Run events that build community and deliver value. #Events #Strategy #Leadership
+slug: event-strategy-blueprint
+date: '2025-11-01'
+author: Abraham of London
+excerpt: A blueprint for planning and executing multi-city events for audience engagement and community building.
+readTime: 5 min read
+category: Strategy
+tags:
+  - strategy
+  - events
+  - leadership
+coverImage: /assets/images/strategy/events-blueprint.jpg
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+draft: false 
+---
 
 # Abraham of London — Events Blueprint (Rolling 1–5 Year Plan)
 

@@ -1,6 +1,7 @@
 // contentlayer.config.ts
 
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
+import remarkGfm from 'remark-gfm'; // 💡 FIX 1: Import the necessary plugin for GFM (tables, etc.)
 
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -24,7 +25,7 @@ export const Post = defineDocumentType(() => ({
     coverAspect: { type: "string" },
     coverFit: { type: "string" },
     coverPosition: { type: "string" },
-    draft: { type: "boolean" }, // Ensure this is boolean, not string
+    draft: { type: "boolean" },
   },
   computedFields: {
     url: { type: "string", resolve: (post) => `/blog/${post.slug}` },
@@ -42,16 +43,16 @@ export const Download = defineDocumentType(() => ({
     author: { type: "string", required: true },
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
-    type: { type: "string", required: true }, // Added type
+    type: { type: "string", required: true },
     
     // Non-required fields for Downloads
     coverImage: { type: "string" },
     pdfPath: { type: "string" },
-    excerpt: { type: "string" }, // Added extra field from error logs
-    tags: { type: "list", of: { type: "string" } }, // Added extra field from error logs
-    coverAspect: { type: "string" }, // Added extra field from error logs
-    coverFit: { type: "string" }, // Added extra field from error logs
-    coverPosition: { type: "string" }, // Added extra field from error logs
+    excerpt: { type: "string" }, 
+    tags: { type: "list", of: { type: "string" } }, 
+    coverAspect: { type: "string" }, 
+    coverFit: { type: "string" }, 
+    coverPosition: { type: "string" }, 
   },
 }));
 
@@ -71,7 +72,7 @@ export const Event = defineDocumentType(() => ({
     chatham: { type: "boolean" },
     related: { type: "list", of: { type: "string" } },
     resources: {
-      type: "json", // Changed from 'of' to 'json' for complex object
+      type: "json", 
       of: {
         downloads: { type: "list", of: { type: "json", fields: { href: { type: "string" }, label: { type: "string" } } } },
         reads: { type: "list", of: { type: "json", fields: { href: { type: "string" }, label: { type: "string" } } } },
@@ -92,16 +93,29 @@ export const Book = defineDocumentType(() => ({
     category: { type: "string", required: true },
     type: { type: "string", required: true },
     coverImage: { type: "string" },
+    description: { type: "string" },
+    ogDescription: { type: "string" },
   },
 }));
 
-// Added new types for files outside standard folders
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/**/*.md",
   fields: {
     title: { type: "string", required: true },
     type: { type: "string", required: true },
+    
+    slug: { type: "string" },
+    date: { type: "string" },
+    author: { type: "string" },
+    excerpt: { type: "string" },
+    readTime: { type: "string" },
+    category: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    coverImage: { type: "string" },
+    coverAspect: { type: "string" },
+    coverFit: { type: "string" },
+    coverPosition: { type: "string" },
   },
 }));
 
@@ -111,12 +125,36 @@ export const Strategy = defineDocumentType(() => ({
   fields: {
     title: { type: "string", required: true },
     type: { type: "string", required: true },
+    
+    description: { type: "string" },
+    ogTitle: { type: "string" },
+    ogDescription: { type: "string" },
+    socialCaption: { type: "string" },
+    slug: { type: "string" },
+    date: { type: "string" },
+    author: { type: "string" },
+    excerpt: { type: "string" },
+    readTime: { type: "string" },
+    category: { type: "string" },
+    tags: { type: "list", of: { type: "string" } },
+    coverImage: { type: "string" },
+    coverAspect: { type: "string" },
+    coverFit: { type: "string" },
+    coverPosition: { type: "string" },
+    draft: { type: "boolean" },
   },
 }));
 
 export default makeSource({
   contentDirPath: 'content',
   documentTypes: [Post, Download, Event, Book, Resource, Strategy],
-  // Ignore specific files that cause parsing errors, like the registry file
-  exclude: ['content/_downloads-registry.md'], 
+  
+  // 💡 FIX 2: Add MDX configuration block with remarkGfm
+  mdx: {
+    remarkPlugins: [
+      remarkGfm, // Enables table parsing
+      // Add other remark plugins here if needed
+    ],
+    // Add rehype plugins here if needed
+  },
 });

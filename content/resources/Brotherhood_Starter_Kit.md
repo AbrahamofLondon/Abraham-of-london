@@ -1,6 +1,23 @@
-title: "The Brotherhood Code — Starter Kit (One-Page Covenant)"
+---
+type: Resource 
+title: Brotherhood Starter Kit (The Code)
+slug: brotherhood-code-starter-kit
+date: '2025-10-13'
+author: Abraham of London
+excerpt: "A one-page code and rhythm for small accountability groups based on presence, truth, and protection."
+readTime: 4 min read
+category: Faith
+tags:
+  - brotherhood
+  - discipleship
+  - covenant
+coverImage: /assets/images/resources/brotherhood-code.jpg
+coverAspect: book
+coverFit: cover
+coverPosition: center
+---
 
-# The Brotherhood Code — Starter Kit (One-Page Covenant)"
+# The Brotherhood Code — Starter Kit (One-Page Covenant)
 
 **Purpose:** Break cycles of absence by a covenant of presence and integrity.
 
@@ -31,8 +48,8 @@ title: "The Brotherhood Code — Starter Kit (One-Page Covenant)"
 ---
 
 ## Accountability Stack
-1) **Facts first:** what/when/impact (no adjectives)  
-2) **Heart next:** feelings & beliefs in the moment  
+1) **Facts first:** what/when/impact (no adjectives)
+2) **Heart next:** feelings & beliefs in the moment
 3) **Hope last:** next right step by Friday + partner
 
 ---
@@ -43,8 +60,9 @@ Chronic lateness w/o ownership, secrecy, triangulation, spiritual one‑upmanshi
 ---
 
 ## Signatures (90-Day Pilot)
-We commit to weekly presence, truth, confidentiality, service, and family protection.  
+We commit to weekly presence, truth, confidentiality, service, and family protection.
 We will correct in love and receive correction with humility.
 
-Names & Signatures: ____________________  ____________________  ____________________  ____________________  
+Names & Signatures: ____________________ ____________________ ____________________ ____________________
+
 Date: ____ / ____ / ______

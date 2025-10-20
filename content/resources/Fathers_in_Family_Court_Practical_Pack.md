@@ -1,4 +1,21 @@
-title: "Fathers in Family Court — Practical Pack"
+---
+type: Resource # ADDED (Was missing but required)
+title: Fathers in Family Court (Practical Pack)
+slug: fathers-in-family-court-practical-pack
+date: '2025-10-13'
+author: Abraham of London
+excerpt: "A practical, non-legal guide for fathers navigating family court, focusing on evidence, communication, and integrity."
+readTime: 7 min read
+category: Family
+tags:
+  - fatherhood
+  - family
+  - legal
+coverImage: /assets/images/resources/family-court-pack.jpg
+coverAspect: wide
+coverFit: cover
+coverPosition: center
+---
 
 # Fathers in Family Court — Practical Pack
 
@@ -32,8 +49,8 @@ title: "Fathers in Family Court — Practical Pack"
 - **Factual** — who/what/when/where; a single clear *ask* with deadline.
 
 **Template (after missed contact):**
-> “At 18:40 on 12/10, pick-up at Elm Street did not occur. I waited until 19:05.  
-> I propose alternatives this week: Wed 18:00 or Fri 18:00 at the same location.  
+> “At 18:40 on 12/10, pick-up at Elm Street did not occur. I waited until 19:05.
+> I propose alternatives this week: Wed 18:00 or Fri 18:00 at the same location.
 > Please confirm by 12:00 tomorrow which you prefer.”
 
 ---
@@ -53,9 +70,9 @@ title: "Fathers in Family Court — Practical Pack"
 ---
 
 ## 6) Day-of-Court Grounding (5 minutes)
-- Box breathing 4×4×4×4 for 1 minute.
-- Prayer (choose one):  
-  - “Jesus, carry me — I choose trust.”  
+- Box breathing $4\times4\times4\times4$ for 1 minute.
+- Prayer (choose one):
+  - “Jesus, carry me — I choose trust.”
   - “Set a guard over my mouth; give me mercy and steel.”
 - Repeat your **3 headline points** out loud.
 - Decide your “one ask” today (specific, child-focused).
@@ -72,11 +89,11 @@ I am the father of [Child’s Name, DOB]. I am writing to provide a brief factua
 - Contact has occurred on [X of Y scheduled occasions] over the last [period].
 - On [dates], contact did not occur due to [brief factual reason if known].
 
-**Request:** I propose the following contact pattern in the child’s best interests:  
-- [e.g., Wednesday 17:00–19:00 handover at X; Saturday 10:00–14:00 at Y]  
+**Request:** I propose the following contact pattern in the child’s best interests:
+- [e.g., Wednesday 17:00–19:00 handover at X; Saturday 10:00–14:00 at Y]
 I am available to adjust logistics to support schooling, rest, and routine.
 
-Sincerely,  
+Sincerely,
 [Name] — [Phone] — [Email]
 
 ---
