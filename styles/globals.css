@@ -1,188 +1,94 @@
-/* ---------- Tailwind layers ---------- */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/** @type {import('tailwindcss').Config} */
+const colors = require("tailwindcss/colors");
 
-/* ---------- Theme variables (LIGHT) ---------- */
-:root {
-  --color-primary: #0b2e1f;     /* forest */
-  --color-primary-hover: #047857;
-  --color-on-primary: #f5f5f0;  /* cream */
-
-  --color-secondary: #f5f5f0;   /* page bg */
-  --color-on-secondary: #1e1e1e;
-
-  --color-accent: #d4af37;      /* softGold */
-  --color-accent-hover: #b89b2f;
-  --color-on-accent: #ffffff;
-
-  --color-lightGrey: #e6e6e6;
-  --color-warmWhite: #fafaf5;
-  --color-midGreen: #4b8b6b;
-
-  /* Fluid type scale */
-  --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
-  --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
-  --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
-  --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
-  --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
-}
-
-/* ---------- Dark tokens follow Tailwind's .dark class ---------- */
-.dark {
-  /* tuned for contrast in dark */
-  --color-primary: #10b981;          /* emerald-500 */
-  --color-primary-hover: #34d399;    /* emerald-400 */
-  --color-on-primary: #ffffff;
-
-  --color-secondary: #0f172a;        /* slate-900 background */
-  --color-on-secondary: #e5e7eb;     /* gray-200 text */
-
-  --color-lightGrey: #334155;        /* slate-700 borders */
-  --color-warmWhite: #111827;        /* slate-900-ish surfaces */
-  --color-midGreen: #86efac;         /* emerald-200 accents */
-}
-
-/* ---------- Base / reset ---------- */
-html {
-  color-scheme: light dark; /* lets UA choose form controls, etc. */
-  hanging-punctuation: first allow-end;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-body {
-  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial);
-  font-size: var(--step-0);
-  line-height: 1.7;
-  color: var(--color-on-secondary);
-  background-color: var(--color-secondary);
-  transition: background-color .3s ease, color .3s ease;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif, Georgia, Cambria, "Times New Roman", Times, serif);
-  color: var(--color-primary);
-  text-wrap: balance;
-}
-
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color .25s ease;
-}
-a:hover {
-  color: var(--color-accent);
-}
-
-::selection {
-  background: #e9d79a;
-  color: #1a1a1a;
-}
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-img, video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-/* Reduce motion: disable non-essential animation */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ---------- Cards / buttons ---------- */
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 28px;
-  box-shadow: 0 10px 30px rgba(27,67,50,.10);
-  transition: transform .25s ease, box-shadow .25s ease;
-  background-color: #fff;
-}
-.dark .card { background-color: #111; }
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27,67,50,.15);
-}
-
-/* ---------- Tailwind component shortcuts ---------- */
-@layer components {
-  .aol-btn {
-    @apply inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white
-           focus:outline-none focus-visible:ring-2;
-    background-color: var(--color-primary);
-    --tw-ring-color: rgba(11,46,31,.35);
-  }
-  .aol-btn:hover { filter: brightness(0.98); }
-
-  .pattern-bg {
-    background-image: radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
-    background-size: 18px 18px;
-  }
-}
-
-/* ---------- Typography polish (prose) ---------- */
-.prose {
-  --tw-prose-body: var(--color-on-secondary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-primary);
-  --tw-prose-bold: var(--color-primary);
-  --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
-}
-.dark .prose {
-  --tw-prose-body: var(--color-on-primary);
-  --tw-prose-headings: var(--color-on-primary);
-  --tw-prose-links: var(--color-accent);
-  --tw-prose-bold: var(--color-on-primary);
-  --tw-prose-quotes: var(--color-on-primary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
-}
-
-.prose h1 {
-  font-size: var(--step-4);
-  line-height: 1.1;
-  letter-spacing: -.01em;
-  margin-bottom: .5rem;
-}
-.prose h2 {
-  font-size: var(--step-3);
-  line-height: 1.15;
-  letter-spacing: -.01em;
-  margin: 2.2rem 0 .6rem;
-}
-.prose h3 {
-  font-size: var(--step-2);
-  line-height: 1.2;
-  margin: 1.8rem 0 .4rem;
-}
-.prose p,
-.prose li {
-  font-size: var(--step-0);
-  line-height: 1.75;
-  margin-block: .75rem;
-}
-.prose blockquote {
-  font-style: italic;
-  font-size: var(--step-1);
-  line-height: 1.55;
-  padding-left: 1rem;
-  border-left: 3px solid var(--color-lightGrey);
-  color: #2d2d2d;
-}
+module.exports = {
+  darkMode: "class",
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./content/**/*.{md,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx}",
+    "./styles/**/*.css",
+  ],
+  theme: {
+    container: {
+      center: true,
+      padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
+      screens: { "2xl": "1400px" },
+    },
+    extend: {
+      colors: {
+        primary: "var(--color-primary)",
+        "primary-hover": "var(--color-primary-hover)",
+        "on-primary": "var(--color-on-primary)",
+        "on-primary-hover": "var(--color-on-primary-hover)",
+        secondary: "var(--color-secondary)",
+        "on-secondary": "var(--color-on-secondary)",
+        accent: "var(--color-accent)",
+        "accent-hover": "var(--color-accent-hover)",
+        "on-accent": "var(--color-on-accent)",
+        forest: "var(--color-primary)",
+        deepCharcoal: "var(--color-on-secondary)",
+        cream: "var(--color-on-primary)",
+        lightGrey: "#e5e5e5",
+        warmWhite: "#fafaf5",
+        midGreen: "#4b8b6b",
+        softGold: "#d4af37",
+        emerald: { ...colors.emerald, 700: "#047857" },
+      },
+      ringColor: { forest: "var(--color-primary)" },
+      borderColor: { forest: "var(--color-primary)", lightGrey: "#e5e5e5" },
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        cursive: ["var(--font-cursive)", "cursive"],
+      },
+      letterSpacing: { brand: "0.05em", widebrand: "0.1em" },
+      boxShadow: {
+        card: "0 10px 30px rgba(27, 67, 50, 0.10)",
+        cardHover: "0 16px 42px rgba(27, 67, 50, 0.15)",
+        header: "0 2px 8px rgba(0,0,0,0.05)",
+      },
+      keyframes: {
+        fadeIn: { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
+        fadeUp: { "0%": { opacity: 0, transform: "translateY(12px)" }, "100%": { opacity: 1, transform: "translateY(0)" } },
+        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+      },
+      animation: { fadeIn: "fadeIn .6s ease both", fadeUp: "fadeUp .6s ease both", shimmer: "shimmer 3s linear infinite" },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            "--tw-prose-body": theme("colors.deepCharcoal"),
+            "--tw-prose-headings": theme("colors.forest"),
+            "--tw-prose-links": theme("colors.forest"),
+            "--tw-prose-bullets": theme("colors.midGreen"),
+            "--tw-prose-counters": theme("colors.midGreen"),
+            "--tw-prose-hr": theme("colors.lightGrey"),
+            p: { lineHeight: "1.85" },
+            a: { textDecoration: "none", fontWeight: "500", transition: "color .15s ease", "&:hover": { color: theme("colors.softGold") } },
+            h1: { letterSpacing: "-0.015em", lineHeight: "1.1", marginBottom: "0.6rem" },
+            h2: { letterSpacing: "-0.01em", lineHeight: "1.2", marginTop: "2.2rem", marginBottom: "0.6rem" },
+            strong: { fontWeight: "600" },
+            blockquote: { borderLeftColor: theme("colors.lightGrey"), fontStyle: "italic", color: theme("colors.deepCharcoal") },
+            hr: { borderColor: theme("colors.lightGrey") },
+            ul: { paddingLeft: "1.1rem" },
+            "ul > li::marker": { color: theme("colors.midGreen") },
+          },
+        },
+        invert: {
+          css: {
+            "--tw-prose-body": theme("colors.cream"),
+            "--tw-prose-headings": theme("colors.cream"),
+            "--tw-prose-links": theme("colors.softGold"),
+            "--tw-prose-bullets": theme("colors.midGreen"),
+            "--tw-prose-hr": theme("colors.lightGrey"),
+            blockquote: { borderLeftColor: theme("colors.lightGrey"), color: theme("colors.cream") },
+          },
+        },
+      }),
+    },
+  },
+  plugins: [require("@tailwindcss/typography")],
+};
