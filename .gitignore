@@ -71,3 +71,5 @@ scripts/output/
 
 # Personal/Sensitive
 github-recovery-codes.txt
+* text=auto eol=lf
+

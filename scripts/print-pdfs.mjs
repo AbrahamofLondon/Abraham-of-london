@@ -1,86 +1,83 @@
 // scripts/print-pdfs.mjs
-import { spawn } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import path from "node:path";
-import http from "node:http";
+import { spawn } from 'node:child_process';
+import http from 'node:http';
+import { fileURLToPath } from 'node:url';
 
-const PORT = 4010; // avoid 3000 in case busy
-const BASE = `http://localhost:${PORT}`;
+const isWin = process.platform === 'win32';
+const npmCmd = isWin ? 'npm.cmd' : 'npm';
+const renderScript = fileURLToPath(new URL('render-pdfs.mjs', import.meta.url));
 
-const targets = [
-  { route: "/print/family-altar-liturgy", out: "family-altar-liturgy.pdf", format: "A4", landscape: false },
-  { route: "/print/fathering-without-fear-teaser", out: "fathering-without-fear-teaser-a4.pdf", format: "A4", landscape: false },
-  { route: "/print/fathering-without-fear-teaser-mobile", out: "fathering-without-fear-teaser-mobile.pdf", format: "A4", landscape: false },
-
-  { route: "/print/principles-for-my-son", out: "principles-for-my-son.pdf", format: "A4", landscape: false },
-  { route: "/print/principles-for-my-son-cue-card", out: "principles-for-my-son-cue-card.pdf", format: "A4", landscape: false },
-  { route: "/print/scripture-track-john14", out: "scripture-track-john14.pdf", format: "A4", landscape: false },
-  { route: "/print/a6/brotherhood-cue-card-two-up", out: "brotherhood-cue-card-two-up.pdf", format: "A4", landscape: false },
-
-  // New pages we add below:
-  { route: "/print/fatherhood-guide", out: "fatherhood-guide.pdf", format: "A4", landscape: false },
-  { route: "/print/household-rhythm-starter", out: "household-rhythm-starter.pdf", format: "A4", landscape: false },
-];
-
-function waitForServer(url, timeoutMs = 30000) {
+/**
+ * Waits for the HTTP server to respond.
+ * @param {string} url - The URL to check.
+ * @param {number} [timeoutMs=20000] - Timeout in milliseconds.
+ * @returns {Promise<void>}
+ */
+function waitForServer(url, timeoutMs = 20000) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
-    (function ping() {
-      http.get(url, res => {
-        res.resume();
-        resolve();
-      }).on("error", () => {
-        if (Date.now() - start > timeoutMs) reject(new Error("Server not up"));
-        else setTimeout(ping, 500);
+    const tick = () => {
+      const req = http.get(url, () => { req.destroy(); resolve(); });
+      req.on('error', () => {
+        if (Date.now() - start > timeoutMs) {
+          req.destroy(); // Ensure request is destroyed before rejecting
+          reject(new Error(`Server did not start in time: ${url}`));
+        } else {
+          setTimeout(tick, 500);
+        }
       });
-    })();
+      // Handle response timeout as well
+      req.setTimeout(5000, () => {
+          req.destroy();
+      });
+    };
+    tick();
   });
 }
 
 async function main() {
-  // Ensure playwright browser is present (your prepare script already does this)
-  const downloadsDir = path.join(process.cwd(), "public", "downloads");
-  if (!existsSync(downloadsDir)) await mkdir(downloadsDir, { recursive: true });
-
-  // Start Next in prod mode (assumes you've run `next build`)
-  const srv = spawn(process.platform === "win32" ? "npx.cmd" : "npx",
-    ["next", "start", "-p", String(PORT)],
-    { stdio: "inherit" }
-  );
-
+  let srv;
   try {
-    await waitForServer(`${BASE}/`);
-    const { chromium } = await import("playwright"); // uses devDependency
-    const browser = await chromium.launch();
-    const ctx = await browser.newContext({ deviceScaleFactor: 2 });
+    // 1) Start print server (print:serve needs to be defined in package.json)
+    console.log('Starting print server...');
+    srv = spawn(npmCmd, ['run', 'print:serve'], { stdio: 'inherit', shell: false });
 
-    for (const t of targets) {
-      const url = `${BASE}${t.route}`;
-      const page = await ctx.newPage();
-      console.log(`→ printing ${url}`);
-      await page.goto(url, { waitUntil: "networkidle" });
-      await page.emulateMedia({ media: "print" });
-      await page.pdf({
-        path: path.join(downloadsDir, t.out),
-        format: t.format,
-        landscape: t.landscape,
-        printBackground: true,
-        margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
+    // Ensure server process is terminated on script exit
+    process.on('SIGINT', () => srv.kill('SIGTERM'));
+
+    // 2) Wait for server to become available
+    const serverUrl = 'http://localhost:5555/';
+    console.log(`Waiting for server at ${serverUrl}...`);
+    await waitForServer(serverUrl);
+
+    // 3) Render PDFs using the separate script
+    console.log('Server running. Starting PDF rendering...');
+    const renderArgs = [renderScript, '--base', serverUrl.slice(0, -1), '--out', 'public/downloads'];
+    const render = spawn(process.execPath, renderArgs, { stdio: 'inherit' });
+
+    await new Promise((resolve, reject) => {
+      render.on('exit', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`PDF renderer exited with code ${code}`));
+        }
       });
-      await page.close();
-    }
+    });
 
-    await ctx.close();
-    await browser.close();
-    console.log("✅ PDFs written to /public/downloads");
-  } catch (e) {
-    console.error("PDF export failed:", e);
-    // Write a marker so CI logs are obvious
-    await writeFile(".pdf-export-error.txt", String(e));
-    process.exitCode = 1;
+    console.log('PDF rendering complete.');
+
+  } catch (err) {
+    console.error(`\n--- Error in print-pdfs.mjs ---\n`, err.message);
+    process.exit(1);
   } finally {
-    if (srv && !srv.killed) srv.kill();
+    // 4) Stop server
+    if (srv) {
+      console.log('Stopping print server...');
+      srv.kill('SIGTERM');
+      // Wait a moment for the server to actually exit
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
 }
 
