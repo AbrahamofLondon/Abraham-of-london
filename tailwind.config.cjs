@@ -20,7 +20,6 @@ module.exports = {
     },
     extend: {
       colors: {
-        /* CSS var mappings */
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
@@ -31,18 +30,15 @@ module.exports = {
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
 
-        /* Named brand tokens */
         forest: "var(--color-primary)",
         deepCharcoal: "var(--color-on-secondary)",
         cream: "var(--color-on-primary)",
 
-        /* Static palette */
         lightGrey: "#e5e5e5",
         warmWhite: "#fafaf5",
         midGreen: "#4b8b6b",
         softGold: "#d4af37",
 
-        /* Keep Tailwind emerald available; tweak 700 to brand hue */
         emerald: { ...colors.emerald, 700: "#047857" },
       },
 
@@ -56,26 +52,6 @@ module.exports = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
         cursive: ["var(--font-cursive)", "cursive"],
-      },
-
-      letterSpacing: { brand: "0.05em", widebrand: "0.1em" },
-
-      boxShadow: {
-        card: "0 10px 30px rgba(27, 67, 50, 0.10)",
-        cardHover: "0 16px 42px rgba(27, 67, 50, 0.15)",
-        header: "0 2px 8px rgba(0,0,0,0.05)",
-      },
-
-      keyframes: {
-        fadeIn: { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
-        fadeUp: { "0%": { opacity: 0, transform: "translateY(12px)" }, "100%": { opacity: 1, transform: "translateY(0)" } },
-        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
-      },
-
-      animation: {
-        fadeIn: "fadeIn .6s ease both",
-        fadeUp: "fadeUp .6s ease both",
-        shimmer: "shimmer 3s linear infinite",
       },
 
       typography: (theme) => ({
