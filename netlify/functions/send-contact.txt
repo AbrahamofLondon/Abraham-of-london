@@ -1,3 +1,4 @@
+// netlify/functions/contact.ts
 import type { Handler } from "@netlify/functions";
 
 type Body = {
@@ -6,16 +7,48 @@ type Body = {
   message?: string;
 };
 
+// Allow CORS from your site (set ALLOWED_ORIGIN in Netlify → Env vars if needed)
 const ORIGIN =
   process.env.ALLOWED_ORIGIN ??
-  "https://www.abrahamoflondon.org"; // set this in Netlify → Env vars
+  "https://www.abrahamoflondon.org";
 
+// Email provider env
 const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const MAIL_FROM = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
 const MAIL_TO = process.env.MAIL_TO || "info@abrahamoflondon.org";
 
-// ---------- helpers ----------
+/* ------------------------- helpers ------------------------- */
+const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+const sanitize = (input: string, max = 2000) =>
+  input.replace(/<[^>]*>/g, "").trim().slice(0, max);
+
+const escapeHTML = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// parse JSON or x-www-form-urlencoded
+function parseBody(eventBody: string | null, contentType = ""): Body {
+  if (!eventBody) return {};
+  try {
+    if (contentType.includes("application/json")) {
+      return JSON.parse(eventBody);
+    }
+    if (contentType.includes("application/x-www-form-urlencoded")) {
+      const p = new URLSearchParams(eventBody);
+      return {
+        name: p.get("name") || undefined,
+        email: p.get("email") || undefined,
+        message: p.get("message") || undefined,
+      };
+    }
+    // best-effort JSON
+    return JSON.parse(eventBody);
+  } catch {
+    return {};
+  }
+}
+
 function cors(status = 200, body?: unknown) {
   return {
     statusCode: status,
@@ -30,61 +63,32 @@ function cors(status = 200, body?: unknown) {
   };
 }
 
-function isEmail(s: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-}
-
-function sanitize(input: string, max = 2000) {
-  return input.replace(/<[^>]*>/g, "").trim().slice(0, max);
-}
-
-function parseBody(eventBody: string | null, contentType = ""): Body {
-  if (!eventBody) return {};
-  try {
-    if (contentType.includes("application/json")) {
-      return JSON.parse(eventBody);
-    }
-    if (contentType.includes("application/x-www-form-urlencoded")) {
-      const params = new URLSearchParams(eventBody);
-      return {
-        name: params.get("name") || undefined,
-        email: params.get("email") || undefined,
-        message: params.get("message") || undefined,
-      };
-    }
-    // best-effort JSON
-    return JSON.parse(eventBody);
-  } catch {
-    return {};
-  }
-}
-
-// ---------- email sender (Resend) ----------
+/* ------------------------- provider: Resend ------------------------- */
 async function sendViaResend({ name, email, message }: Required<Body>) {
   const { Resend } = await import("resend");
   const client = new Resend(RESEND_API_KEY);
-  const subject = `New contact: ${name}`;
-  const html =
-    `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">
-      <h2>New message from ${name}</h2>
-      <p><strong>Email:</strong> ${email}</p>
-      <p style="white-space:pre-wrap">${message.replace(/</g, "&lt;")}</p>
-    </div>`;
 
-  const res = await client.emails.send({
+  const subject = `New contact: ${name.slice(0, 120)}`;
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">
+      <h2>New message from ${escapeHTML(name)}</h2>
+      <p><strong>Email:</strong> ${escapeHTML(email)}</p>
+      <p style="white-space:pre-wrap">${escapeHTML(message)}</p>
+    </div>
+  `;
+
+  const { error } = await client.emails.send({
     from: MAIL_FROM,
     to: MAIL_TO,
     subject,
-    reply_to: email,
     html,
+    replyTo: email, // ✅ correct key for Resend
   });
 
-  if (res.error) {
-    throw new Error(res.error.message || "Resend error");
-  }
+  if (error) throw new Error(error.message || "Resend error");
 }
 
-// ---------- handler ----------
+/* ------------------------- handler ------------------------- */
 export const handler: Handler = async (event) => {
   // CORS preflight
   if (event.httpMethod === "OPTIONS") return cors(204);
@@ -93,7 +97,7 @@ export const handler: Handler = async (event) => {
     return cors(405, { ok: false, error: "Method Not Allowed" });
   }
 
-  const contentType = event.headers["content-type"]?.toLowerCase() || "";
+  const contentType = (event.headers["content-type"] || event.headers["Content-Type"] || "").toLowerCase();
   const body = parseBody(event.body, contentType);
 
   const name = sanitize(body.name || "", 200);
@@ -101,15 +105,9 @@ export const handler: Handler = async (event) => {
   const message = sanitize(body.message || "", 5000);
 
   // validation
-  if (!name || !email || !message) {
-    return cors(400, { ok: false, error: "Missing required field(s)." });
-  }
-  if (!isEmail(email)) {
-    return cors(400, { ok: false, error: "Invalid email." });
-  }
-  if (message.length < 10) {
-    return cors(400, { ok: false, error: "Message too short." });
-  }
+  if (!name || !email || !message) return cors(400, { ok: false, error: "Missing required field(s)." });
+  if (!isEmail(email)) return cors(400, { ok: false, error: "Invalid email." });
+  if (message.length < 10) return cors(400, { ok: false, error: "Message too short." });
 
   try {
     if (EMAIL_PROVIDER !== "resend") {
@@ -123,11 +121,7 @@ export const handler: Handler = async (event) => {
     return cors(200, { ok: true });
   } catch (err: any) {
     console.error("send-contact error:", err?.message || err);
-    // common Resend issues:
-    // - domain/sender not verified
-    // - from address not allowed
-    // - invalid API key
+    // common Resend issues: unverified domain/sender, invalid API key
     return cors(502, { ok: false, error: "Email send failed." });
   }
 };
-export default handler;

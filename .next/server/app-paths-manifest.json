@@ -1,1 +1,6 @@
-{}
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/downloads/page": "app/downloads/page.js",
+  "/api/downloads/route": "app/api/downloads/route.js",
+  "/api/health/route": "app/api/health/route.js"
+}
