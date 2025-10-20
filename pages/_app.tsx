@@ -32,9 +32,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        {/* Performance hints */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        {/* Inline preconnect for GA if enabled */}
         {gaEnabled && process.env.NODE_ENV === "production" && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -49,7 +47,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <Script id="ga-init" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
+              function gtag(){ dataLayer.push(arguments); }
               gtag('js', new Date());
               gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });
             `}
@@ -60,12 +58,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <AnalyticsRouterTracker />
         <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
-
-        {/* If your Header already shows a ThemeToggle, remove this */}
         <div className="fixed right-4 top-4 z-50 md:hidden">
           <ThemeToggle />
         </div>
-
         <Component {...pageProps} />
       </ThemeProvider>
     </>
@@ -75,6 +70,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (!gaEnabled || process.env.NODE_ENV !== "production") return;
   const value = metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
+  try {
+    gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
+  } catch {}
+}
+.value * 1000) : Math.round(metric.value);
   try {
     gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
   } catch {}

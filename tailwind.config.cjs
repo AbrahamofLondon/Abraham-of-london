@@ -7,7 +7,7 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}", // fixed closing quote
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
     "./styles/**/*.css",
@@ -20,15 +20,13 @@ module.exports = {
     },
     extend: {
       colors: {
-        /* CSS var mappings (keeps dark/light parity) */
+        /* CSS var mappings */
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
         "on-primary-hover": "var(--color-on-primary-hover)",
-
         secondary: "var(--color-secondary)",
         "on-secondary": "var(--color-on-secondary)",
-
         accent: "var(--color-accent)",
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
@@ -70,14 +68,8 @@ module.exports = {
 
       keyframes: {
         fadeIn: { "0%": { opacity: 0 }, "100%": { opacity: 1 } },
-        fadeUp: {
-          "0%": { opacity: 0, transform: "translateY(12px)" },
-          "100%": { opacity: 1, transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
+        fadeUp: { "0%": { opacity: 0, transform: "translateY(12px)" }, "100%": { opacity: 1, transform: "translateY(0)" } },
+        shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
       },
 
       animation: {
@@ -86,7 +78,6 @@ module.exports = {
         shimmer: "shimmer 3s linear infinite",
       },
 
-      // IMPORTANT: use (theme) => ..., not ({ theme }) => ...
       typography: (theme) => ({
         DEFAULT: {
           css: {
