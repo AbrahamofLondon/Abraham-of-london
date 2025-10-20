@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "es5", // From remote
     "lib": [
@@ -55,5 +55,5 @@
     "tests/**/*.tsx",
     ".contentlayer/generated/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next"] // Exclude .next from local, keep exclude node_modules
+  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"] // Exclude .next from local, keep exclude node_modules
 }
