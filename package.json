@@ -35,6 +35,7 @@
     "covers:events": "node scripts/covers/make-event-covers.mjs",
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
     "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write"
+    "downloads:export": "node scripts/print-pdfs.mjs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
