@@ -10,13 +10,13 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css",
+    "./styles/**/*.css"
   ],
   theme: {
     container: {
       center: true,
       padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
-      screens: { "2xl": "1400px" },
+      screens: { "2xl": "1400px" }
     },
     extend: {
       colors: {
@@ -39,17 +39,17 @@ module.exports = {
         midGreen: "#4b8b6b",
         softGold: "#d4af37",
 
-        emerald: { ...colors.emerald, 700: "#047857" },
+        emerald: { ...colors.emerald, 700: "#047857" }
       },
       ringColor: { forest: "var(--color-primary)" },
       borderColor: {
         forest: "var(--color-primary)",
-        lightGrey: "#e5e5e5",
+        lightGrey: "#e5e5e5"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
-        cursive: ["var(--font-cursive)", "cursive"],
+        cursive: ["var(--font-cursive)", "cursive"]
       },
       typography: (theme) => ({
         DEFAULT: {
@@ -65,7 +65,7 @@ module.exports = {
               textDecoration: "none",
               fontWeight: "500",
               transition: "color .15s ease",
-              "&:hover": { color: theme("colors.softGold") },
+              "&:hover": { color: theme("colors.softGold") }
             },
             h1: { letterSpacing: "-0.015em", lineHeight: "1.1", marginBottom: "0.6rem" },
             h2: { letterSpacing: "-0.01em", lineHeight: "1.2", marginTop: "2.2rem", marginBottom: "0.6rem" },
@@ -73,12 +73,12 @@ module.exports = {
             blockquote: {
               borderLeftColor: theme("colors.lightGrey"),
               fontStyle: "italic",
-              color: theme("colors.deepCharcoal"),
+              color: theme("colors.deepCharcoal")
             },
             hr: { borderColor: theme("colors.lightGrey") },
             ul: { paddingLeft: "1.1rem" },
-            "ul > li::marker": { color: theme("colors.midGreen") },
-          },
+            "ul > li::marker": { color: theme("colors.midGreen") }
+          }
         },
         invert: {
           css: {
@@ -89,12 +89,12 @@ module.exports = {
             "--tw-prose-hr": theme("colors.lightGrey"),
             blockquote: {
               borderLeftColor: theme("colors.lightGrey"),
-              color: theme("colors.cream"),
-            },
-          },
-        },
-      }),
-    },
+              color: theme("colors.cream")
+            }
+          }
+        }
+      })
+    }
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("@tailwindcss/typography")]
 };
