@@ -41,19 +41,16 @@ module.exports = {
 
         emerald: { ...colors.emerald, 700: "#047857" },
       },
-
       ringColor: { forest: "var(--color-primary)" },
       borderColor: {
         forest: "var(--color-primary)",
         lightGrey: "#e5e5e5",
       },
-
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
         cursive: ["var(--font-cursive)", "cursive"],
       },
-
       typography: (theme) => ({
         DEFAULT: {
           css: {
