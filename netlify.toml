@@ -1,3 +1,6 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Build
+# ─────────────────────────────────────────────────────────────────────────────
 [build]
   command = "npm run build"
   publish = ".next"
@@ -10,18 +13,45 @@
     NO_SLASH_OPACITY_MODE = "fix"
     DOWNLOADS_STRICT = "0"
 
+# On production, also run PDF placeholder + validation step before the build.
 [context.production]
   command = "npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build"
 
   [context.production.environment]
     NODE_ENV = "production"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Functions
+# IMPORTANT:
+# - Only actual function entry files should live in `netlify/functions/`
+#   (e.g., subscribe.js, send-teaser.js, subscribe-launch.js, test-email.js).
+# - Move any folders like `emails/` and `_utils/` OUT of `netlify/functions/`.
+#   Suggested:
+#     netlify/functions/*.js     <-- handlers
+#     netlify/emails/**          <-- templates (scoped below)
+#     src/utils/functions/**     <-- shared helpers (not in functions dir)
+# - DO NOT include .env files in bundles; set secrets in Netlify UI env vars.
+# ─────────────────────────────────────────────────────────────────────────────
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
   external_node_modules = ["resend"]
+
+# Scope email templates ONLY to the handlers that need them.
+[functions."send-teaser"]
   included_files = ["netlify/emails/**"]
 
+[functions."subscribe"]
+  included_files = ["netlify/emails/**"]
+
+[functions."subscribe-launch"]
+  included_files = ["netlify/emails/**"]
+
+# Do NOT add a wildcard included_files at [functions]; that balloons every bundle.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Plugins
+# ─────────────────────────────────────────────────────────────────────────────
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
@@ -55,6 +85,9 @@
   [context.production.plugins.inputs]
     fail_deploy_on_score_thresholds = false
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Redirects
+# ─────────────────────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/downloads/leaders-cue-card"
   to = "/downloads/leaders-cue-card.pdf"
@@ -90,6 +123,7 @@
   to = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
   status = 200
 
+# Endureluxe host routing
 [[redirects]]
   from = "/"
   to = "https://www.abrahamoflondon.org/ventures?brand=endureluxe"
@@ -103,6 +137,7 @@
   force = true
   conditions = { Host = ["endureluxe.com", "www.endureluxe.com"] }
 
+# Alomarada host routing
 [[redirects]]
   from = "/"
   to = "https://www.abrahamoflondon.org/ventures?brand=alomarada"
@@ -116,6 +151,7 @@
   force = true
   conditions = { Host = ["alomarada.com", "www.alomarada.com"] }
 
+# Force apex to canonical host
 [[redirects]]
   from = "/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -123,6 +159,9 @@
   force = true
   conditions = { Host = ["abrahamoflondon.org"] }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Headers
+# ─────────────────────────────────────────────────────────────────────────────
 [[headers]]
   for = "/"
   [headers.values]

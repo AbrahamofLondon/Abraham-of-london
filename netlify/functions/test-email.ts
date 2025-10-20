@@ -1,9 +1,8 @@
+// netlify/functions/test-email.ts
 import type { Handler } from "@netlify/functions";
 import { Resend } from "resend";
 
-function bool(v?: string) {
-  return Boolean(v && v.trim().length > 0);
-}
+const bool = (v?: string) => Boolean(v && v.trim().length > 0);
 
 export const handler: Handler = async (event) => {
   try {
@@ -17,7 +16,7 @@ export const handler: Handler = async (event) => {
     if (isHealth) {
       return {
         statusCode: 200,
-        headers: { "content-type": "application/json" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
           ok: true,
           env: {
@@ -30,30 +29,20 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    if (event.httpMethod !== "POST") {
-      return { statusCode: 405, body: "Method Not Allowed" };
-    }
+    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
     if (GUARD) {
       const header = event.headers["x-task-token"] || event.headers["X-Task-Token"];
-      if (!header || header !== GUARD) {
-        return { statusCode: 401, body: "Unauthorized" };
-      }
+      if (!header || header !== GUARD) return { statusCode: 401, body: "Unauthorized" };
     }
 
     if (!resendKey || !FROM || !TO) {
       return {
         statusCode: 500,
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          ok: false,
-          error: "Missing RESEND_API_KEY, MAIL_FROM or MAIL_TO",
-        }),
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ ok: false, error: "Missing RESEND_API_KEY, MAIL_FROM or MAIL_TO" }),
       };
     }
-
-    // Only instantiate once we know we have a key
-    const resend = new Resend(resendKey);
 
     const payload = event.body ? JSON.parse(event.body) : {};
     const subject = String(payload.subject || "Resend smoke test");
@@ -65,6 +54,7 @@ export const handler: Handler = async (event) => {
          <small>Sent from Netlify Function “test-email”.</small>
        </p>`;
 
+    const resend = new Resend(resendKey);
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: [TO],
@@ -77,25 +67,22 @@ export const handler: Handler = async (event) => {
       console.error("Resend error:", error);
       return {
         statusCode: 502,
-        headers: { "content-type": "application/json" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({ ok: false, error }),
       };
     }
 
     return {
       statusCode: 200,
-      headers: { "content-type": "application/json" },
+      headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify({ ok: true, id: data?.id || null }),
     };
   } catch (err: any) {
     console.error("Function error:", err);
     return {
       statusCode: 500,
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        ok: false,
-        error: { message: err?.message || "Unknown error", stack: err?.stack || null },
-      }),
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ ok: false, error: { message: err?.message || "Unknown error" } }),
     };
   }
 };
