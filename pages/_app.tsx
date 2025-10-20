@@ -59,12 +59,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <AnalyticsRouterTracker />
         <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
-
-        {/* If your Header already shows a ThemeToggle, remove this */}
         <div className="fixed right-4 top-4 z-50 md:hidden">
           <ThemeToggle />
         </div>
-
         <Component {...pageProps} />
       </ThemeProvider>
     </>
@@ -86,8 +83,5 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
       label: metric.label,
       value,
     });
-  } catch {}
-}
-e });
   } catch {}
 }
