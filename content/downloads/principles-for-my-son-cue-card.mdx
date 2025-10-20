@@ -1,52 +1,62 @@
----
-type: Download
-title: Principles For My Son Cue Card
-slug: principles-for-my-son-cue-card
-date: '2025-10-13'
-author: Abraham of London
-excerpt: >
-  Pocket summary of the 12 standards. Two per A4 sheet—cut, carry, review daily.
-readTime: 1 min read
-category: Family
-tags:
-  - fatherhood
-  - family
-  - formation
-coverImage: /assets/images/downloads/principles-for-my-son-cue-card.jpg
-coverAspect: book
-coverFit: cover
-coverPosition: center
-pdfPath: /downloads/Principles_For_My_Son_Cue_Card.pdf
----
+// pages/print/a6/principles-for-my-son-cue-card-two-up.tsx
 
-<BrandFrame
-  title="Principles for My Son — Cue Card"
-  subtitle="Two-up A6: cut, carry, and read a line a day."
->
-  <h2>Front — The Six</h2>
-  <ol>
-    <li><strong>Presence:</strong> Show up—on time, eyes up.</li>
-    <li><strong>Truth:</strong> Confess fast; no spin.</li>
-    <li><strong>Work:</strong> Finish one thing daily.</li>
-    <li><strong>Steward:</strong> Budget, save, give.</li>
-    <li><strong>Honor:</strong> Dignify women & elders.</li>
-    <li><strong>Courage:</strong> Do hard, right things.</li>
-  </ol>
+import BrandFrame from "../../../components/print/BrandFrame";
+import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; 
+import * as React from "react";
 
-  <h2>Back — The Six</h2>
-  <ol start={7}>
-    <li><strong>Speech:</strong> No gossip or slander.</li>
-    <li><strong>Learning:</strong> Read, ask, practice.</li>
-    <li><strong>Health:</strong> Sleep, train, simple food.</li>
-    <li><strong>Craft:</strong> Build things that last.</li>
-    <li><strong>Service:</strong> Lift burdens at home first.</li>
-    <li><strong>Faith:</strong> Listen, obey, stay planted.</li>
-  </ol>
+const PrinciplesForMySonCueCard = () => {
+  return (
+    <BrandFrame
+      title="Principles for My Son — Cue Card"
+      subtitle="Two-up A6: cut, carry, and read a line a day."
+      pageSize="A6" // Crucial for cue card size
+      marginsMm={6}
+    >
+      <div className="flex flex-col h-full">
+        <div className="flex-grow">
+          <h2 className="text-lg mt-0">Front — The Six</h2>
+          <ol className="list-decimal pl-4 text-sm space-y-1">
+            <li><strong>Presence:</strong> Show up—on time, eyes up.</li>
+            <li><strong>Truth:</strong> Confess fast; no spin.</li>
+            <li><strong>Work:</strong> Finish one thing daily.</li>
+            <li><strong>Steward:</strong> Budget, save, give.</li>
+            <li><strong>Honor:</strong> Dignify women &amp; elders.</li>
+            <li><strong>Courage:</strong> Do hard, right things.</li>
+          </ol>
 
-  <h3>Micro-Prompt</h3>
-  <p><em>“Which standard will I live in one small way before noon?”</em></p>
+          <h2 className="text-lg mt-6">Back — The Six</h2>
+          <ol start={7} className="list-decimal pl-4 text-sm space-y-1">
+            <li><strong>Speech:</strong> No gossip or slander.</li>
+            <li><strong>Learning:</strong> Read, ask, practice.</li>
+            <li><strong>Health:</strong> Sleep, train, simple food.</li>
+            <li><strong>Craft:</strong> Build things that last.</li>
+            <li><strong>Service:</strong> Lift burdens at home first.</li>
+            <li><strong>Faith:</strong> Listen, obey, stay planted.</li>
+          </ol>
 
-  <div className="not-prose mt-6 text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
-    Print: A4 • Two-up • Trim lines • Pocket-ready.
-  </div>
-</BrandFrame>
+          <h3 className="text-lg mt-6">Micro-Prompt</h3>
+          <p className="italic text-gray-700 text-sm">
+            “Which standard will I live in one small way before noon?”
+          </p>
+        </div>
+
+        <div className="mt-4 flex justify-between items-end">
+          <div className="not-prose text-[8px] text-[color:var(--color-on-secondary)/0.6] w-2/3 pr-2">
+            Print: A4 • Two-up • Trim lines • Pocket-ready.
+          </div>
+          <EmbossedBrandMark
+              src="/assets/images/abraham-logo.jpg"
+              alt="AOL Mark"
+              width={30}
+              height={30}
+              effect="emboss"
+              className="inline-block"
+              baseColor="transparent"
+          />
+        </div>
+      </div>
+    </BrandFrame>
+  );
+};
+
+export default PrinciplesForMySonCueCard;

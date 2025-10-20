@@ -1,57 +1,81 @@
----
-type: Download
-title: Mentorship Starter Kit — 90-Day Covenant
-slug: mentorship-starter-kit
-date: '2025-10-13'
-author: Abraham of London
-excerpt: 'A simple, serious framework to make mentoring fruitful — not fuzzy.'
-readTime: 7–8 min read
-category: Leadership
-tags:
-  - mentorship
-  - discipleship
-  - formation
-coverImage: /assets/images/downloads/mentorship-starter.jpg
-coverAspect: book
-coverFit: cover
-coverPosition: center
-pdfPath: /downloads/Mentorship_Starter_Kit.pdf
----
+// pages/print/mentorship-starter-kit.tsx
 
-# Mentorship Starter Kit — 90-Day Covenant
+import BrandFrame from "../../components/print/BrandFrame";
+import EmbossedSign from "../../components/EmbossedSign"; // For the signature lines
+import { PullLine, Rule } from "../../components/utils"; 
+import * as React from "react";
 
-<PullLine subtle>Mentoring is intentional; not accidental. The Covenant frames the seriousness of the commitment.</PullLine>
+const MentorshipStarterKit = () => {
+  return (
+    <BrandFrame
+      title="Mentorship Starter Kit — 90-Day Covenant"
+      subtitle="A simple, serious framework to make mentoring fruitful — not fuzzy."
+      pageSize="A4"
+    >
+      <PullLine subtle>Mentoring is intentional; not accidental. The Covenant frames the seriousness of the commitment.</PullLine>
 
-## Frame the Relationship
-- **Purpose:** growth in character, craft, and calling.  
-- **Cadence:** 3×/month (45–60 mins), one in-person if possible.  
-- **Confidentiality:** stories stay in the room; safety exceptions.
+      <h2 className="mt-8">Frame the Relationship</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>**Purpose:** growth in character, craft, and calling.</li>
+        <li>**Cadence:** 3×/month (45–60 mins), one in-person if possible.</li>
+        <li>**Confidentiality:** stories stay in the room; safety exceptions.</li>
+      </ul>
 
-<Rule />
+      <Rule className="my-8" />
 
-## First 30 Days — Discovery
-- Story map: origins, strengths, wounds, non-negotiables.  
-- Assessment: 360° from 3 voices; pick 1 growth theme.  
-- Plan: 3 habits, 1 project, 1 relationship to repair.
+      <h2>First 30 Days — Discovery</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>Story map: origins, strengths, wounds, non-negotiables.</li>
+        <li>Assessment: 360° from 3 voices; pick 1 growth theme.</li>
+        <li>Plan: 3 habits, 1 project, 1 relationship to repair.</li>
+      </ul>
 
-<Rule />
+      <Rule className="my-8" />
 
-## Days 31–60 — Practice
-- Weekly reps tied to the theme (streak tracker).  
-- **Shadow / Show:** observe once; demonstrate once.  
-- Feedback: *facts → feelings → fixes*.
+      <h2>Days 31–60 — Practice</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>Weekly reps tied to the theme (streak tracker).</li>
+        <li>**Shadow / Show:** observe once; demonstrate once.</li>
+        <li>**Feedback:** *facts → feelings → fixes*.</li>
+      </ul>
 
-<Rule />
+      <Rule className="my-8" />
 
-## Days 61–90 — Stretch
-- Challenge: public commitment with a date.  
-- Teach-back: mentee teaches the principle to someone else.  
-- Review: renew, redefine, or release.
+      <h2>Days 61–90 — Stretch</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>Challenge: public commitment with a date.</li>
+        <li>Teach-back: mentee teaches the principle to someone else.</li>
+        <li>Review: renew, redefine, or release.</li>
+      </ul>
 
-<Rule />
+      <Rule className="my-8" />
 
-## One-Page Covenant (Template)
-We commit for 90 days to honesty, punctuality, preparation, and follow-through.  
-**Mentor:** presence, questions, introductions.  
-**Mentee:** agenda, notes, execution.  
-Signed: ____ ____ Date: ____
+      <h2>One-Page Covenant (Template)</h2>
+      <p className="mb-6">
+        We commit for 90 days to honesty, punctuality, preparation, and follow-through.
+        **Mentor:** presence, questions, introductions.
+        **Mentee:** agenda, notes, execution.
+      </p>
+      
+      {/* Signature lines using the EmbossedSign component */}
+      <div className="flex justify-between items-end mt-12 pt-4 border-t border-lightGrey/60">
+        <div className="w-5/12">
+            <div className="h-6 mb-1 border-b border-lightGrey">
+                <EmbossedSign src="/assets/images/signature/abraham-of-london-cursive.svg" alt="Signature line" width={150} height={30} effect="deboss" baseColor="transparent" className="block"/>
+            </div>
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Signed: Mentor</span>
+        </div>
+        <div className="w-5/12">
+            <div className="h-6 mb-1 border-b border-lightGrey" />
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Signed: Mentee</span>
+        </div>
+        <div className="w-1/12 text-center">
+            <div className="h-6 mb-1 border-b border-lightGrey" />
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Date</span>
+        </div>
+      </div>
+    </BrandFrame>
+  );
+};
+
+export default MentorshipStarterKit;

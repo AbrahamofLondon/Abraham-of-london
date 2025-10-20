@@ -1,12 +1,16 @@
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @next/next/no-img-element */ // <-- Added to silence the Next.js image warning
+/* eslint-disable @next/next/no-img-element */ 
 // pages/print/fathering-without-fear-teaser-mobile.tsx
+
 import Head from "next/head";
+import React from "react";
+import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
+import EmbossedSign from "../../components/EmbossedSign";       
 
 const COVER = "/assets/images/books/fathering-without-fear-cover.jpg";
-const BRAND = "© 2025 Abraham of London • abrahamoflondon.org";
 
 export default function FatheringWithoutFearTeaserA6() {
+  const currentYear = new Date().getFullYear();
   return (
     <>
       <Head>
@@ -16,15 +20,26 @@ export default function FatheringWithoutFearTeaserA6() {
 
       <main className="m-root">
         {/* Cover */}
-        <section className="m-page m-cover text-cream">
-          {/* The <img> that was triggering the warning */}
+        <section className="m-page m-cover text-cream relative">
+          {/* Branding: Logo Top Left on Cover */}
+          <div className="absolute top-[10mm] left-[10mm] z-10">
+            <EmbossedBrandMark
+                src="/assets/images/abraham-logo.jpg"
+                alt="Abraham of London Logo"
+                width={30}
+                height={30}
+                effect="emboss"
+                baseColor="transparent"
+            />
+          </div>
+
           <img src={COVER} alt="" className="m-bg" />
           <div className="m-veil" />
           <div className="m-pad">
             <p className="m-eyebrow">FATHERING WITHOUT FEAR</p>
             <h1 className="m-title">A Memoir That Defies Every Boundary</h1>
             <p className="m-tag">They thought they knew the story. He chose to stay.</p>
-            <p className="m-foot">{BRAND}</p>
+            <p className="m-foot">© {currentYear} Abraham of London</p>
           </div>
         </section>
 
@@ -77,7 +92,7 @@ export default function FatheringWithoutFearTeaserA6() {
           <p>He stayed by grace. Because something always happens—so does he.</p>
         </section>
 
-        <section className="m-page">
+        <section className="m-page relative">
           <h2 className="m-h">Excerpt — Ch. 18</h2>
           <p>Quiet suffering: delays and silence; nearly two years unable to work… He did not disappear.</p>
           <p>Good men must stop disappearing—even when systems want them to.</p>
@@ -93,22 +108,69 @@ export default function FatheringWithoutFearTeaserA6() {
             Read opening chapters • Share with a father under pressure • Join the launch list<br />
             Prefer offline? Get the print-ready teaser at <strong>abrahamoflondon.org/downloads</strong>
           </p>
+
+          {/* Branding: Signature Bottom Right on Last Page */}
+          <div className="absolute bottom-[10mm] right-[10mm]">
+              <EmbossedSign
+                  src="/assets/images/signature/abraham-of-london-cursive.svg"
+                  alt="Abraham of London Signature"
+                  width={90} 
+                  height={22} 
+                  effect="deboss"
+                  baseColor="transparent"
+              />
+          </div>
         </section>
       </main>
 
       <style jsx global>{`
+        /* Defining CSS variables for color consistency */
+        :root {
+          --color-primary: #0B2E1F; /* Dark Green */
+          --color-accent: #D4AF37; /* Gold/Brass accent */
+          --color-on-secondary: #fefefe; /* Creamy white */
+          --color-lightGrey: #e5e5e5;
+          --color-warmWhite: #fdfdfa;
+        }
+
         @page { size: A6; margin: 10mm; }
-        .m-root { font-family: var(--font-serif, Georgia, Cambria, Times, serif); color: var(--color-on-secondary); }
-        .m-page { page-break-after: always; min-height: calc(148mm - 20mm); }
-        .m-cover { position: relative; }
+        .m-root { font-family: var(--font-serif, Georgia, Cambria, Times, serif); color: #333; }
+        .m-page { 
+            page-break-after: always; 
+            min-height: calc(148mm - 20mm); 
+            padding: 0; /* Resetting padding for consistent margin */
+            position: relative;
+        }
+        
+        /* Cover specific styles */
+        .m-cover { 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end; 
+            align-items: flex-start;
+            text-align: left;
+        }
         .m-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .92; }
         .m-veil { position: absolute; inset: 0; background: radial-gradient(60% 60% at 50% 60%, rgba(212,175,55,.55), transparent 65%), rgba(0,0,0,.38); }
-        .m-pad { position: relative; padding: 14mm 10mm; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+        .m-pad { position: relative; padding: 14mm 10mm; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; width: 100%; }
         .m-eyebrow { letter-spacing: .14em; text-transform: uppercase; color: var(--color-accent); font-size: 9pt; margin-bottom: 2mm; }
-        .m-title { font-size: 20pt; line-height: 1.05; }
-        .m-tag { margin-top: 3mm; font-size: 9pt; opacity: .9; }
-        .m-foot { margin-top: 6mm; font-size: 8pt; opacity: .85; }
-        .m-h { font-size: 12pt; color: var(--color-primary); }
+        .m-title { font-size: 20pt; line-height: 1.05; color: var(--color-on-secondary); }
+        .m-tag { margin-top: 3mm; font-size: 9pt; opacity: .9; color: var(--color-on-secondary); }
+        .m-foot { margin-top: 6mm; font-size: 8pt; opacity: .85; color: var(--color-on-secondary); }
+        
+        /* General page styles */
+        .m-page h2.m-h { 
+            font-size: 12pt; 
+            color: var(--color-primary); 
+            margin-top: 5mm; 
+            margin-bottom: 3mm;
+        }
+        .m-page p {
+            font-size: 10pt;
+            line-height: 1.5;
+            margin-bottom: 2mm;
+        }
         .mt { margin-top: 4mm; }
         .m-lead { font-size: 10.5pt; line-height: 1.6; }
         .m-pull { border-left: 2px solid var(--color-accent); padding-left: 3mm; color: var(--color-primary); font-style: italic; }
@@ -117,8 +179,58 @@ export default function FatheringWithoutFearTeaserA6() {
         .m-card { border: 1px solid var(--color-lightGrey); background: var(--color-warmWhite); border-radius: 6px; padding: 4mm; margin-top: 3mm; }
         .m-card-h { font-weight: 700; color: var(--color-primary); margin-bottom: 1.5mm; letter-spacing: .02em; }
         .m-rule { border: none; height: 2px; background: linear-gradient(to right, color-mix(in oklab, var(--color-accent) 85%, #fff), transparent 65%); margin: 4mm 0; }
-        .m-call { border: 1px solid var(--color-accent); background: color-mix(in oklab, var(--color-accent) 7%, white); border-radius: 6px; padding: 3mm; margin-top: 3mm; }
+        .m-call { border: 1px solid var(--color-accent); background: color-mix(in oklab, var(--color-accent) 7%, white); border-radius: 6px; padding: 3mm; margin-top: 3mm; font-size: 10pt; }
         .m-cta { margin-top: 3mm; font-size: 9pt; }
+        
+        /* Media query for screen preview */
+        @media screen {
+            body { 
+                background: #f6f6f6; 
+                padding: 2rem; 
+                display: flex; 
+                justify-content: center; 
+                align-items: flex-start; 
+                min-height: 100vh;
+            }
+            .m-root {
+                display: flex;
+                flex-direction: column;
+                gap: 20mm; /* Space between A6 pages */
+                background: none;
+            }
+            .m-page {
+                background: #fff;
+                box-shadow: 0 5px 15px rgba(0,0,0,.1);
+                width: 105mm; /* A6 width */
+                height: 148mm; /* A6 height */
+                padding: 10mm; /* Simulate print margin */
+                page-break-after: unset; /* Disable page breaks for screen layout */
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+            .m-cover {
+                padding: 0; /* Cover handles its own internal padding */
+                justify-content: flex-start;
+            }
+            .m-cover .m-pad {
+                padding: 14mm 10mm;
+            }
+            .m-cover .absolute {
+                top: 10mm;
+                left: 10mm;
+                transform: none;
+            }
+            .m-page:last-of-type {
+                margin-bottom: 0;
+            }
+            /* Adjustments for signature on last page in screen view */
+            .m-page:last-of-type .absolute {
+                bottom: 10mm;
+                right: 10mm;
+                transform: none;
+            }
+        }
       `}</style>
     </>
   );

@@ -1,66 +1,76 @@
----
-type: Download 
-title: Scripture Track — John 14 
-slug: scripture-track-john14 
-date: '2025-09-30' # ADDED (Aligning with the John 14 post)
-author: Abraham of London 
-readTime: 2 min read 
-category: Devotional 
-excerpt: A focused, print-ready Scripture guide for meditating on John 14:1-6.
-tags:
-  - scripture
-  - john14
-  - download
-coverImage: /assets/images/downloads/scripture-track-john14.jpg
-pdfPath: /downloads/Scripture_Track_John14.pdf # Added for download consistency
----
-<BrandFrame
-  title="Scripture Track — John 14"
-  subtitle="Assurance • Obedience • The Helper • Peace"
->
-  <h2>How to Run</h2>
-  <ul>
-    <li><strong>Daily (10–15 min):</strong> Read the text; note one obedience step.</li>
-    <li><strong>Weekly (45 min):</strong> Share “truth, one win, one next step.” Pray names.</li>
-    <li><strong>Family:</strong> Read a verse aloud; one sentence prayer each.</li>
-  </ul>
+// pages/print/scripture-track-john14.tsx
 
-  <h3>Week 1 — Assurance (Jn 14:1–6)</h3>
-  <ul>
-    <li><strong>Memory:</strong> John 14:6</li>
-    <li><strong>Prompt:</strong> Where am I troubled? What would trust look like today?</li>
-    <li><strong>Practice:</strong> Name a fear; replace it with a promise.</li>
-  </ul>
+import * as React from 'react';
+import BrandFrame from "../../components/print/BrandFrame";
+import EmbossedSign from "../../components/EmbossedSign"; // Assuming this path is correct
+// You would also need to import other components like PullLine if used in the rest of the content
 
-  <h3>Week 2 — Obedience (Jn 14:15–21)</h3>
-  <ul>
-    <li><strong>Memory:</strong> John 14:15</li>
-    <li><strong>Prompt:</strong> Which instruction have I delayed?</li>
-    <li><strong>Practice:</strong> Same-day obedience on one small step.</li>
-  </ul>
+const ScriptureTrackJohn14 = () => {
 
-  <h3>Week 3 — The Helper (Jn 14:16–18,26) </h3>
-  <ul>
-    <li><strong>Memory:</strong> John 14:26</li>
-    <li><strong>Prompt:</strong> Where do I need wise help beyond my strength?</li>
-    <li><strong>Practice:</strong> Ask the Spirit for counsel; seek godly advice.</li>
-  </ul>
+  const content = (
+    <div className="text-deepCharcoal">
+      
+      <h2>How to Run</h2>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Daily (10–15 min):</strong> Read the text; note one obedience step.</li>
+        <li><strong>Weekly (45 min):</strong> Share “truth, one win, one next step.” Pray names.</li>
+        <li><strong>Family:</strong> Read a verse aloud; one sentence prayer each.</li>
+      </ul>
 
-  <h3>Week 4 — Peace Under Pressure (Jn 14:27,31)</h3>
-  <ul>
-    <li><strong>Memory:</strong> John 14:27</li>
-    <li><strong>Prompt:</strong> What robs my peace? What boundary restores it?</li>
-    <li><strong>Practice:</strong> Phone off for one hour; pray for someone anxious.</li>
-  </ul>
+      <h3 className="mt-8">Week 1 — Assurance (Jn 14:1–6)</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Memory:</strong> John 14:6</li>
+        <li><strong>Prompt:</strong> Where am I troubled? What would trust look like today?</li>
+        <li><strong>Practice:</strong> Name a fear; replace it with a promise.</li>
+      </ul>
 
-  <h3 className="mt-8">Family Reflection (10 min)</h3>
-  <ol>
-    <li>What did we hear? One sentence each.</li>
-    <li>What will we do? One step each.</li>
-    <li>Who will we serve this week? Name a person.</li>
-  </ol>
+      <h3 className="mt-8">Week 2 — Obedience (Jn 14:15–21)</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Memory:</strong> John 14:15</li>
+        <li><strong>Prompt:</strong> Which instruction have I delayed?</li>
+        <li><strong>Practice:</strong> Same-day obedience on one small step.</li>
+      </ul>
 
-  <div className="not-prose mt-6 text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
-    Track cadence: daily read • weekly share • one concrete step.
-  </div>
-</BrandFrame>
+      <h3 className="mt-8">Week 3 — The Helper (Jn 14:16–18,26) </h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Memory:</strong> John 14:26</li>
+        <li><strong>Prompt:</strong> Where do I need wise help beyond my strength?</li>
+        <li><strong>Practice:</strong> Ask the Spirit for counsel; seek godly advice.</li>
+      </ul>
+
+      <h3 className="mt-8">Week 4 — Peace Under Pressure (Jn 14:27,31)</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Memory:</strong> John 14:27</li>
+        <li><strong>Prompt:</strong> What robs my peace? What boundary restores it?</li>
+        <li><strong>Practice:</strong> Phone off for one hour; pray for someone anxious.</li>
+      </ul>
+      
+      {/* --- Signature Section with Debossed Mark --- */}
+      <div className="mt-12 pt-8 border-t border-lightGrey flex flex-col items-end">
+        <EmbossedSign
+          src="/assets/images/signature/abraham-of-london-cursive.svg"
+          alt="Abraham of London Signature"
+          width={200}
+          height={60}
+          effect="deboss" // Use a debossed (pressed-in) effect
+          baseColor="transparent" // Ensures the effect works over the paper color
+          className="mb-1"
+        />
+        <p className="text-sm font-serif text-forest">— Abraham of London</p>
+      </div>
+
+    </div>
+  );
+
+  return (
+    <BrandFrame
+      title="Scripture Track — John 14"
+      subtitle="Assurance • Obedience • The Helper • Peace"
+      pageSize="A4"
+    >
+      {content}
+    </BrandFrame>
+  );
+}
+
+export default ScriptureTrackJohn14;

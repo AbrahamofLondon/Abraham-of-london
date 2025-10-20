@@ -1,21 +1,12 @@
 // pages/print/brotherhood-covenant.tsx
 import * as React from "react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
-
-/**
- * Brotherhood Covenant — 1 page (A4), signable.
- * Designed for high-contrast printing on plain paper.
- *
- * Render to PDF via your existing script:
- *   npm run print:serve
- *   npm run print:pdfs
- *
- * Output should land at: public/downloads/brotherhood-covenant.pdf
- */
+import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
+import EmbossedSign from "../../components/EmbossedSign";       
 
 export default function BrotherhoodCovenant() {
+  const currentYear = new Date().getFullYear();
   return (
     <>
       <Head>
@@ -27,24 +18,18 @@ export default function BrotherhoodCovenant() {
         {/* Header */}
         <header className="header">
           <div className="brand">
+            {/* --- Branding: EmbossedBrandMark replaces the Image/Link/Fallback block --- */}
             <div className="logo">
-              {/* If the logo path changes, this will fall back to text */}
-              <Image
-                src="/assets/images/logo/abraham-of-london-logo.svg"
-                alt="Abraham of London"
-                width={180}
-                height={42}
-                onError={(e) => {
-                  const el = (e.target as HTMLImageElement);
-                  el.style.display = "none";
-                  const fallback = document.getElementById("brand-fallback");
-                  if (fallback) fallback.style.display = "block";
-                }}
-              />
-              <strong id="brand-fallback" style={{ display: "none" }}>
-                Abraham of London
-              </strong>
+                <EmbossedBrandMark
+                    src="/assets/images/abraham-logo.jpg" // Using the generic logo provided
+                    alt="Abraham of London"
+                    width={50} // Adjust size for better fit in header
+                    height={50}
+                    effect="emboss"
+                    baseColor="transparent"
+                />
             </div>
+            {/* -------------------------------------------------------------------------- */}
             <div className="brand-meta">
               <span className="eyebrow">Brotherhood Code</span>
               <h1>Brotherhood Covenant</h1>
@@ -152,25 +137,45 @@ export default function BrotherhoodCovenant() {
 
         {/* Footer */}
         <footer className="footer">
-          <div>© {new Date().getFullYear()} Abraham of London. All rights reserved.</div>
-          <div className="muted">
-            <Link href="https://www.abrahamoflondon.org" target="_blank" rel="noopener noreferrer">
-              abrahamoflondon.org
-            </Link>
-            <span aria-hidden> • </span>
-            <span>Brotherhood is a covenant of presence.</span>
+          <div className="copyright">© {currentYear} Abraham of London. All rights reserved.</div>
+          <div className="flex flex-col items-end">
+             {/* --- Branding: EmbossedSign replaces the second link/text block --- */}
+            <EmbossedSign
+                src="/assets/images/signature/abraham-of-london-cursive.svg"
+                alt="Abraham of London Signature"
+                width={120} 
+                height={25} 
+                effect="deboss"
+                baseColor="transparent"
+            />
+            <div className="muted text-right text-xs mt-0.5">
+                <Link href="https://www.abrahamoflondon.org" target="_blank" rel="noopener noreferrer">
+                    abrahamoflondon.org
+                </Link>
+                <span aria-hidden> • Brotherhood is a covenant of presence.</span>
+            </div>
           </div>
         </footer>
       </main>
 
       {/* Print styles (scoped) */}
-      <style jsx>{`
+      <style jsx global>{`
+        /* Global styles for print */
+        @page { size: A4; margin: 12mm 14mm; }
+        @media print {
+            html, body { background: #fff; }
+            .page { margin: 0; box-shadow: none; }
+            a { color: inherit; text-decoration: none; }
+        }
+
         :root {
           --ink: #111;
           --muted: #666;
           --rule: #dcdcdc;
           --brand: #bfa364; /* soft gold accent */
         }
+        
+        /* Screen styles */
         html, body { background: #f6f6f6; }
         .page {
           width: 210mm;
@@ -181,7 +186,12 @@ export default function BrotherhoodCovenant() {
           box-shadow: 0 2mm 6mm rgba(0,0,0,.06);
           padding: 14mm 16mm;
           font: 12.25pt/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
+
+        /* Header styles */
         .header {
           display: flex; align-items: flex-start; justify-content: space-between;
           border-bottom: 0.5pt solid var(--rule); padding-bottom: 6mm; margin-bottom: 6mm;
@@ -195,6 +205,8 @@ export default function BrotherhoodCovenant() {
         .brand-meta h1 { font-size: 20pt; line-height: 1.2; margin: 3mm 0 1mm; }
         .subtitle { color: var(--muted); margin: 0; }
         .doc-meta { text-align: right; font-size: 9pt; color: var(--muted); min-width: 42mm; }
+        
+        /* Section/Content styles */
         .section { margin: 6mm 0; }
         .lede { font-size: 12.75pt; }
         h2 { font-size: 14.5pt; margin: 0 0 2mm; }
@@ -206,6 +218,8 @@ export default function BrotherhoodCovenant() {
         .bullets { margin: 0; padding-left: 4.5mm; list-style: disc; }
         .bullets li { margin: .9mm 0; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 8mm; margin: 0; padding-left: 0; list-style: none; }
+        
+        /* Signature styles */
         .signatures h2 { margin-bottom: 1mm; }
         .micro { color: var(--muted); font-size: 9.5pt; margin-top: 0; }
         .sig-table { width: 100%; border-collapse: collapse; margin-top: 2mm; }
@@ -213,17 +227,14 @@ export default function BrotherhoodCovenant() {
         .sig-table td.line { width: 45%; }
         .sig-table td.line.narrow { width: 20%; }
         .sig-table .label { color: var(--muted); font-size: 8.5pt; }
+        
+        /* Footer styles */
         .footer {
           border-top: 0.5pt solid var(--rule); margin-top: 8mm; padding-top: 4mm;
           display: flex; align-items: center; justify-content: space-between; font-size: 9.75pt;
         }
+        .copyright { font-size: 9.75pt; }
         .muted { color: var(--muted); }
-        @media print {
-          html, body { background: #fff; }
-          .page { margin: 0; box-shadow: none; }
-          @page { size: A4; margin: 12mm 14mm; }
-          a { color: inherit; text-decoration: none; }
-        }
       `}</style>
     </>
   );
