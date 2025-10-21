@@ -17,7 +17,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
 
 export default function ResourcePrint({ doc }: { doc: any }) {
   const Component = useMDXComponent(document?.body.code)
-  if (!document) return null
+  if (!document) return <p>Loading...</p>;
   return (
     <BrandFrame
       title={doc.title}

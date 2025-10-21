@@ -40,7 +40,7 @@ export default function PostPrint({ doc }: PostPrintProps) {
 
   // Next-ContentLayer hook to render the MDX body
   const Component = useMDXComponent(document?.body.code)
-  if (!document) return null
+  if (!document) return <p>Loading...</p>;
   
   return (
     <BrandFrame
