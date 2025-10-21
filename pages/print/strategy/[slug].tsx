@@ -1,0 +1,37 @@
+pages/print/strategy/[slug].tsx
+import { allStrategys as allStrategies } from "contentlayer/generated"; // contentlayer pluralizes oddly
+import { useMDXComponent } from "next-contentlayer/hooks";
+import BrandFrame from "@/components/print/BrandFrame";
+
+export async function getStaticPaths() {
+  return {
+    paths: allStrategies.map((s) => ({ params: { slug: s.slug } })),
+    fallback: false,
+  };
+}
+
+export async function getStaticProps({ params }: { params: { slug: string } }) {
+  const doc = allStrategies.find((s) => s.slug === params.slug) || null;
+  return { props: { doc } };
+}
+
+export default function StrategyPrint({ doc }: { doc: any }) {
+  if (!doc) return null;
+  const MDX = useMDXComponent(doc.body.code);
+  return (
+    <BrandFrame
+      title={doc.title}
+      subtitle={doc.description || doc.ogDescription || ""}
+      author={doc.author || "Abraham of London"}
+      date={doc.date}
+      pageSize="A4"
+      marginsMm={18}
+    >
+      <article className="prose max-w-none mx-auto">
+        <h1 className="font-serif">{doc.title}</h1>
+        {doc.description && <p className="text-lg">{doc.description}</p>}
+        <MDX />
+      </article>
+    </BrandFrame>
+  );
+}

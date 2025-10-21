@@ -34,6 +34,9 @@ const Post = defineDocumentType(() => ({
 const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.mdx",
+  // ⚠️ FIX: This tells ContentLayer to expect metadata from an exported object (like 'metadata' in a .tsx file)
+  // instead of frontmatter, resolving the missing fields error.
+  isContent: false, 
   fields: {
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
@@ -65,7 +68,10 @@ const Event = defineDocumentType(() => ({
     tags: { type: 'list', of: { type: 'string' } },
     chatham: { type: 'boolean', default: false },
     resources: { type: 'json', required: false },
-+   time: { type: 'string', required: false }, // NEW
+    time: { type: 'string', required: false }, // NEW (as marked in original input)
+    // ⚠️ Added potential missing fields based on common project structure
+    coverImage: { type: 'string', required: false },
+    draft: { type: 'boolean', required: false },
   },
 }))
 
@@ -145,9 +151,9 @@ export default makeSource({
       // Next will resolve them at runtime. This fixes the “Could not resolve @/components/*” errors.
       options.external = [
         ...(options.external ?? []),
-        "@/components/*",
-        "@/components/*.*",
-        "@/*",
+         "@/components/*",
+         "@/components/*.*",
+         "@/*",
       ];
       return options;
     },

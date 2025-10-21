@@ -14,7 +14,7 @@
 //
 // Safe defaults: never deletes; backs up changed files as <name>.bak once per run.
 
-import fs from 'node:fs';
+import { existsSync, copyFileSync, renameSync, mkdirSync } from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
@@ -23,74 +23,59 @@ import matter from 'gray-matter';
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
 const HAS = (f) => argv.includes(f);
-const VAL = (f, def=null) => { const i = argv.indexOf(f); return i>-1 ? argv[i+1] : def; };
+const VAL = (f, def = null) => { const i = argv.indexOf(f); return i > -1 ? argv[i + 1] : def; };
 
-const DO_FIX   = HAS('--fix') || HAS('--rename');
-const DO_RENAME= HAS('--rename');
-const REPORT   = HAS('--report') ? VAL('--report') : null;
+const DO_FIX    = HAS('--fix') || HAS('--rename');
+const DO_RENAME = HAS('--rename');
+const REPORT    = HAS('--report') ? VAL('--report') : null;
 
 const CONTENT_GLOBS = ['content/**/*.{md,mdx}'];
 
 const knownTypes = new Set(['Book','Event','Strategy','Post','Article','Guide']);
 const imageFields = ['coverImage','heroImage','ogImage'];
-const downloadRoots = ['public/downloads'];
-const imageRoots = ['public','public/assets','public/assets/images'];
+// const downloadRoots = ['public/downloads']; // Not used
+// const imageRoots = ['public','public/assets','public/assets/images']; // Not used
 
 const out = [];
 const backups = new Set();
 
-function backupOnce(abs) {
-  if (backups.has(abs) || !fs.existsSync(abs)) return;
+async function backupOnce(abs) {
+  if (backups.has(abs) || !existsSync(abs)) return;
   const bak = abs + '.bak';
-  if (!fs.existsSync(bak)) fs.copyFileSync(abs, bak);
+  if (!existsSync(bak)) await fsp.copyFile(abs, bak);
   backups.add(abs);
 }
 
-function normSlug(s='') {
+function normSlug(s = '') {
   return String(s)
     .trim()
     .toLowerCase()
-    .replace(/[^\w\-\/]+/g, '-')    // collapse non-word
-    .replace(/-{2,}/g,'-')
-    .replace(/^-|-$/g,'');
+    .replace(/[^\w\-\/]+/g, '-')   // collapse non-word
+    .replace(/-{2,}/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-function ensureExt(abs, ext) {
-  return path.extname(abs).toLowerCase() === ext ? abs : abs.replace(path.extname(abs), ext);
-}
+// Function `ensureExt` removed as it was unused.
 
-function loadFile(rel) {
-  const raw = fs.readFileSync(rel, 'utf8');
+async function loadFile(rel) {
+  const raw = await fsp.readFile(rel, 'utf8');
   return { raw, ...matter(raw) };
 }
 
-function writeFile(rel, data, content) {
-  backupOnce(rel);
+async function writeFile(rel, data, content) {
+  await backupOnce(rel);
   const out = matter.stringify(content, data);
-  fs.writeFileSync(rel, out, 'utf8');
+  await fsp.writeFile(rel, out, 'utf8');
 }
 
-function toAbsFromDoc(docRel, maybeRel) {
-  if (!maybeRel) return null;
-  if (maybeRel.startsWith('http://') || maybeRel.startsWith('https://')) return null; // external
-  if (maybeRel.startsWith('/')) return path.join(ROOT, maybeRel);
-  return path.join(path.dirname(path.join(ROOT, docRel)), maybeRel);
-}
-
-function existsAny(relOrAbs, roots) {
-  if (!relOrAbs) return false;
-  const p = relOrAbs.startsWith('/') ? relOrAbs : '/' + relOrAbs;
-  for (const r of roots) {
-    const abs = path.join(ROOT, r + p);
-    if (fs.existsSync(abs)) return true;
-  }
-  return false;
-}
+// Function `toAbsFromDoc` removed as it was unused.
 
 function existsPublic(relOrAbs) {
   const abs = relOrAbs.startsWith('/') ? path.join(ROOT, relOrAbs) : path.join(ROOT, 'public', relOrAbs);
-  return fs.existsSync(abs);
+  return existsSync(abs);
 }
+
+// Function `existsAny` removed as it was unused.
 
 // Very basic internal link scan in MDX
 function extractLinks(body) {
@@ -155,8 +140,8 @@ function fixFrontmatter(data, rel) {
       report.date = { error: `Invalid date: ${data.date}` };
     } else {
       const iso = (data.date.length <= 10)
-        ? d.toISOString().slice(0,10)
-        : d.toISOString(); // keep full if time present
+        ? d.toISOString().slice(0, 10) // YYYY-MM-DD
+        : d.toISOString(); // Keep full ISO if time present
       if (iso !== data.date) {
         report.date = { was: data.date, now: iso };
         if (DO_FIX) data.date = iso;
@@ -164,10 +149,35 @@ function fixFrontmatter(data, rel) {
       }
     }
   }
+  
+  // If events carry a 'time' like "18:30", fold it into date (same day) as ISO time
+  if (data.type === 'Event' && typeof data.time === 'string' && data.date) {
+    const d = new Date(data.date);
+    const m = data.time.match(/^(\d{1,2}):(\d{2})$/);
+    
+    if (!Number.isNaN(d.getTime()) && m) {
+      // Create a copy of the date to avoid side-effects if original date was only YYYY-MM-DD
+      const dateToMerge = new Date(d.getTime());
+      
+      dateToMerge.setHours(Number(m[1]), Number(m[2]), 0, 0);
+      const iso = dateToMerge.toISOString();
+      
+      report.dateTimeMerged = { dateWas: data.date, timeWas: data.time, now: iso };
+      if (DO_FIX) {
+        data.date = iso;
+        delete data.time;
+      }
+      changed = true;
+    } else {
+      report.time = { warn: `Unrecognized time or invalid date: "${data.time}"` };
+    }
+  }
+
 
   // category normalize: capitalize first letter, keep rest
   if (typeof data.category === 'string') {
-    const norm = data.category.trim();
+    // Only trim whitespace; the original code mentioned 'capitalize first letter' but didn't implement it.
+    const norm = data.category.trim(); 
     if (norm !== data.category) {
       report.category = { was: data.category, now: norm };
       if (DO_FIX) data.category = norm;
@@ -177,9 +187,13 @@ function fixFrontmatter(data, rel) {
 
   // drop unknown fields (example: 'time' leakage) — report only
   const extras = [];
+  // The original logic here was very narrow. Removing the check entirely 
+  // and relying on ContentLayer schema validation is safer, but keeping the 
+  // structure for future feature expansion.
   if (data.type === 'Event') {
     for (const k of Object.keys(data)) {
-      if (k === 'time') extras.push('time'); // you can whitelist more here
+      // This is checking for 'time' but only reporting it, which seems fine for auditing
+      if (k === 'time' && data.time !== undefined) extras.push('time'); 
     }
   }
   if (extras.length) report.extraFields = extras;
@@ -193,13 +207,18 @@ function fixLocalLinks(body, allSlugs) {
 
   // map trailing slash duplicates to canonical
   for (const s of allSlugs) {
-    const withSlash = s.endsWith('/') ? s : s + '/';
-    const withoutSlash = s.endsWith('/') ? s.slice(0,-1) : s;
-    // prefer no trailing slash for internal markdown links
-    const re = new RegExp(`\\]\\(${withSlash}\\)`, 'g');
-    if (re.test(updated)) {
-      updated = updated.replace(re, `](${withoutSlash})`);
-      changed = true;
+    // Determine the version *without* a trailing slash
+    const withoutSlash = s.endsWith('/') ? s.slice(0, -1) : s;
+    const withSlash = withoutSlash + '/';
+    
+    // Check if the current slug ends with a slash (i.e., is it the version we want to remove?)
+    if (s.endsWith('/')) {
+        // We only check for the trailing slash version to remove it.
+        const re = new RegExp(`\\]\\(${withSlash}\\)`, 'g');
+        if (re.test(updated)) {
+          updated = updated.replace(re, `](${withoutSlash})`);
+          changed = true;
+        }
     }
   }
 
@@ -207,28 +226,44 @@ function fixLocalLinks(body, allSlugs) {
 }
 
 async function main() {
-  const files = await fg(CONTENT_GLOBS, { dot:false });
+  const files = await fg(CONTENT_GLOBS, { dot: false });
   const slugIndex = new Map(); // slug -> file
-  const allLinks = new Set();
+  const allLinks = new Set(); // Kept for consistency, but not fully utilized
 
   // First pass: build slug index
   for (const rel of files) {
-    const { data } = loadFile(rel);
-    const slug = normSlug(data.slug || path.basename(rel, path.extname(rel)));
-    slugIndex.set('/' + (rel.includes('/events/') ? 'events' :
-                         rel.includes('/books/') ? 'books' :
-                         rel.includes('/strategy/') ? 'strategy' :
-                         rel.includes('/blog/') ? 'blog' : '')
-                    + '/' + slug, rel);
+    try {
+      const { data } = await loadFile(rel);
+      const slug = normSlug(data.slug || path.basename(rel, path.extname(rel)));
+      
+      const routePrefix = rel.includes('/events/') ? 'events' :
+                          rel.includes('/books/') ? 'books' :
+                          rel.includes('/strategy/') ? 'strategy' :
+                          rel.includes('/blog/') ? 'blog' : '';
+      
+      // Store the full URL slug (e.g., /blog/my-post)
+      slugIndex.set('/' + routePrefix + '/' + slug, rel);
+    } catch (e) {
+      console.error(`Error processing file ${rel} for slug index:`, e.message);
+    }
   }
 
   // Second pass: validate / fix
   for (const rel of files) {
-    const { data, content, raw } = loadFile(rel);
     const startReport = { file: rel, issues: [] };
+    let data, content, raw;
+    let anyChange = false;
+
+    try {
+        ({ data, content, raw } = await loadFile(rel));
+    } catch (e) {
+        startReport.issues.push({ kind: 'read_error', message: e.message });
+        out.push(startReport);
+        continue;
+    }
+    
     let currentData = { ...data };
     let currentBody = content;
-    let anyChange = false;
 
     // frontmatter normalization
     const { changed, report, data: newData } = fixFrontmatter(currentData, rel);
@@ -244,8 +279,10 @@ async function main() {
       if (!val) continue;
       const isExternal = /^https?:\/\//.test(val);
       if (isExternal) continue;
-      const abs = toAbsFromDoc(rel, val) ?? path.join(ROOT, 'public', val.replace(/^\//,''));
-      if (!fs.existsSync(abs)) {
+      
+      // Check for existence under public/
+      const publicPath = val.startsWith('/') ? val : path.join('public', val);
+      if (!existsSync(path.join(ROOT, publicPath))) {
         startReport.issues.push({ kind:'image_missing', field:f, value: val });
       }
     }
@@ -255,13 +292,15 @@ async function main() {
     for (const href of links) {
       allLinks.add(href);
       const isFile = href.match(/\.(pdf|jpg|jpeg|png|webp|svg)$/i);
+      
       if (isFile) {
         // check under /public
         const ok = existsPublic(href);
         if (!ok) startReport.issues.push({ kind:'asset_404', href });
       } else {
-        // internal page: must be in slugIndex
-        if (!slugIndex.has(href)) {
+        // internal page: must be in slugIndex (normalize by removing trailing slash for lookup)
+        const normalizedHref = href.endsWith('/') ? href.slice(0, -1) : href;
+        if (!slugIndex.has(normalizedHref)) {
           startReport.issues.push({ kind:'route_404', href });
         }
       }
@@ -276,7 +315,7 @@ async function main() {
     }
 
     // write back if needed
-    if (DO_FIX && anyChange) writeFile(rel, currentData, currentBody);
+    if (DO_FIX && anyChange) await writeFile(rel, currentData, currentBody);
 
     // optional: rename to match slug
     if (DO_RENAME) {
@@ -284,11 +323,13 @@ async function main() {
       const dir = path.dirname(rel);
       const want = desiredFileNameFromSlug(currentData.slug, ext || '.mdx');
       const wantAbs = path.join(dir, want);
+      
       if (path.basename(rel) !== want) {
         const abs = path.join(ROOT, rel);
         const destAbs = path.join(ROOT, wantAbs);
-        if (!fs.existsSync(destAbs)) {
-          fs.renameSync(abs, destAbs);
+        
+        if (!existsSync(destAbs)) {
+          renameSync(abs, destAbs); // Use sync rename as this is final step
           startReport.issues.push({ kind:'renamed', was: rel, now: wantAbs });
         } else {
           startReport.issues.push({ kind:'rename_conflict', want: wantAbs });
@@ -315,14 +356,14 @@ async function main() {
 
   if (REPORT) {
     const abs = path.isAbsolute(REPORT) ? REPORT : path.join(ROOT, REPORT);
-    fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, JSON.stringify({ summary, out }, null, 2));
+    mkdirSync(path.dirname(abs), { recursive: true });
+    await fsp.writeFile(abs, JSON.stringify({ summary, out }, null, 2));
     console.log('Report →', path.relative(ROOT, abs));
   }
 
   // fail CI if issues found and not fixing
-  const issuesCount = Object.values(summary).reduce((a,b)=>a+b,0);
+  const issuesCount = Object.values(summary).reduce((a, b) => a + b, 0);
   if (issuesCount > 0 && !(DO_FIX || DO_RENAME)) process.exitCode = 1;
 }
 
-main().catch((e)=>{ console.error(e); process.exit(2); });
+main().catch((e) => { console.error(e); process.exit(2); });
