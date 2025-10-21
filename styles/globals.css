@@ -2,24 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- Theme variables (LIGHT) ---------- */
+/* ------------------------------------------------------------------- */
+/* ---------- Theme variables (LUXURY LIGHT MODE) -------------------- */
+/* ------------------------------------------------------------------- */
+
 :root {
-  --color-primary: #0b2e1f;     /* forest */
-  --color-primary-hover: #047857;
-  --color-on-primary: #f5f5f0;  /* cream */
+  /* UPGRADED COLORS (Deep Forest, Warm Cream, Muted Gold) */
+  --color-primary: #0B2E1F;          /* deep-forest */
+  --color-primary-hover: #16573D;    /* Slightly lighter deep forest for subtle hover */
+  --color-on-primary: #FAF7F2;      /* warm-cream */
 
-  --color-secondary: #f5f5f0;   /* page bg */
-  --color-on-secondary: #1e1e1e;
+  --color-secondary: #FAF7F2;        /* page bg: warm-cream */
+  --color-on-secondary: #333333;     /* soft-charcoal for main text */
 
-  --color-accent: #d4af37;      /* softGold */
-  --color-accent-hover: #b89b2f;
+  --color-accent: #C5A352;          /* muted-gold */
+  --color-accent-hover: #A0833F;    /* Darker muted-gold for contrast */
   --color-on-accent: #ffffff;
 
-  --color-lightGrey: #e6e6e6;
-  --color-warmWhite: #fafaf5;
-  --color-midGreen: #4b8b6b;
+  --color-lightGrey: #E5E5E5;        /* light-gray */
+  --color-warmWhite: #FAF7F2;        /* Alias for warm-cream */
+  --color-midGreen: #4B8B6B;        /* subtle-green (for bullets/accents) */
 
-  /* Fluid type scale */
+  /* Fluid type scale (remains the same) */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
   --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
   --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
@@ -28,26 +32,35 @@
   --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
 }
 
-/* ---------- Dark tokens follow Tailwind's .dark class ---------- */
+/* ------------------------------------------------------------------- */
+/* ---------- Dark tokens (Retuned for richer contrast) -------------- */
+/* ------------------------------------------------------------------- */
 .dark {
-  /* tuned for contrast in dark */
-  --color-primary: #10b981;          /* emerald-500 */
-  --color-primary-hover: #34d399;    /* emerald-400 */
-  --color-on-primary: #ffffff;
+  /* Tuned dark primary for better readability against dark surfaces */
+  --color-primary: #C5A352;          /* Primary in dark mode is now muted-gold (High contrast) */
+  --color-primary-hover: #E9D79A;    /* Lighter gold hover */
+  --color-on-primary: #0f172a;       /* Dark text on dark primary (not common) */
 
-  --color-secondary: #0f172a;        /* slate-900 background */
-  --color-on-secondary: #e5e7eb;     /* gray-200 text */
+  --color-secondary: #111827;        /* Deeper background (slate-900 equivalent) */
+  --color-on-secondary: #F8FAFC;     /* Near-white text (slate-50) */
 
-  --color-lightGrey: #334155;        /* slate-700 borders */
-  --color-warmWhite: #111827;        /* slate-900-ish surfaces */
-  --color-midGreen: #86efac;         /* emerald-200 accents */
+  --color-accent: #86efac;           /* Mid-green accent for subtle contrast */
+  --color-accent-hover: #4B8B6B;
+  --color-on-accent: #111827;
+
+  --color-lightGrey: #2D3748;        /* Darker border/divider (slate-800 equivalent) */
+  --color-warmWhite: #1F2937;        /* Dark surface/card backgrounds */
+  --color-midGreen: #86efac;         /* midGreen in dark mode */
 }
 
-/* ---------- Base / reset ---------- */
+/* ------------------------------------------------------------------- */
+/* ---------- Base / reset (Luxury Typography) ----------------------- */
+/* ------------------------------------------------------------------- */
 html {
-  color-scheme: light dark; /* lets UA choose form controls, etc. */
+  color-scheme: light dark;
   hanging-punctuation: first allow-end;
-  text-rendering: optimizeLegibility;
+  /* Enforce better rendering for serif fonts */
+  text-rendering: geometricPrecision; 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -58,18 +71,21 @@ html, body {
   overflow-x: hidden;
 }
 body {
-  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial);
+  /* UPGRADE: Use sans font for body */
+  font-family: var(--font-sans, 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial);
   font-size: var(--step-0);
-  line-height: 1.7;
+  line-height: 1.85; /* Increased line-height for luxury readability */
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   transition: background-color .3s ease, color .3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif, Georgia, Cambria, "Times New Roman", Times, serif);
+  /* UPGRADE: Use serif font for headings (Playfair Display) */
+  font-family: var(--font-serif, 'Playfair Display', Georgia, Cambria, "Times New Roman", Times, serif);
   color: var(--color-primary);
   text-wrap: balance;
+  font-weight: 700; /* Ensure strong visual hierarchy */
 }
 
 a {
@@ -77,13 +93,15 @@ a {
   text-decoration: none;
   transition: color .25s ease;
 }
+/* UPGRADE: Accent hover for links */
 a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent); 
 }
 
+/* UPGRADE: Selection color to be less harsh, using a subtle gold/cream blend */
 ::selection {
-  background: #e9d79a;
-  color: #1a1a1a;
+  background: #E9D79A; /* A lighter, subtle gold */
+  color: var(--color-primary);
 }
 :focus-visible {
   outline: 2px solid var(--color-accent);
@@ -106,37 +124,49 @@ img, video {
   }
 }
 
-/* ---------- Cards / buttons ---------- */
+/* ------------------------------------------------------------------- */
+/* ---------- Cards / buttons (Refined Visuals) ---------------------- */
+/* ------------------------------------------------------------------- */
 .card {
+  /* UPGRADE: Tighter shadow, using the primary color for a richer feel */
   border: 1px solid var(--color-lightGrey);
   padding: 28px;
-  box-shadow: 0 10px 30px rgba(27,67,50,.10);
+  box-shadow: 0 4px 18px rgba(11,46,31,.08); /* More subtle initial shadow */
   transition: transform .25s ease, box-shadow .25s ease;
   background-color: #fff;
+  border-radius: 12px; /* Slightly refined corner radius */
 }
-.dark .card { background-color: #111; }
+.dark .card { 
+  background-color: var(--color-warmWhite); /* Use new dark card background */
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 42px rgba(27,67,50,.15);
+  transform: translateY(-2px); /* Smaller lift */
+  box-shadow: 0 10px 30px rgba(11,46,31,.12); /* Richer hover shadow */
 }
 
-/* ---------- Tailwind component shortcuts ---------- */
+/* Tailwind component shortcuts (aol-btn updated for new colors) */
 @layer components {
   .aol-btn {
-    @apply inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white
+    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold text-white
            focus:outline-none focus-visible:ring-2;
     background-color: var(--color-primary);
-    --tw-ring-color: rgba(11,46,31,.35);
+    /* Tweak ring color to use primary color transparency */
+    --tw-ring-color: rgba(11,46,31,.35); 
   }
-  .aol-btn:hover { filter: brightness(0.98); }
+  .aol-btn:hover { 
+    background-color: var(--color-primary-hover); 
+  }
 
   .pattern-bg {
-    background-image: radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
-    background-size: 18px 18px;
+    background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px); /* Lighter pattern for subtlety */
+    background-size: 20px 20px; /* Slightly larger grid for space */
   }
 }
 
-/* ---------- Typography polish (prose) ---------- */
+/* ------------------------------------------------------------------- */
+/* ---------- Typography polish (prose) (Serif/Sans Consistency) --- */
+/* ------------------------------------------------------------------- */
 .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
@@ -146,45 +176,56 @@ img, video {
   --tw-prose-quote-borders: var(--color-lightGrey);
 }
 .dark .prose {
-  --tw-prose-body: var(--color-on-primary);
-  --tw-prose-headings: var(--color-on-primary);
+  --tw-prose-body: var(--color-on-secondary); /* Text color in dark mode */
+  --tw-prose-headings: var(--color-primary); /* Primary (gold) in dark mode */
   --tw-prose-links: var(--color-accent);
-  --tw-prose-bold: var(--color-on-primary);
-  --tw-prose-quotes: var(--color-on-primary);
+  --tw-prose-bold: var(--color-on-secondary);
+  --tw-prose-quotes: var(--color-on-secondary);
   --tw-prose-quote-borders: var(--color-lightGrey);
 }
 
+/* Use the serif font family defined in the general h1-h6 rules */
+.prose h1, .prose h2, .prose h3 {
+    font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+    font-weight: 700;
+}
 .prose h1 {
   font-size: var(--step-4);
   line-height: 1.1;
-  letter-spacing: -.01em;
-  margin-bottom: .5rem;
+  letter-spacing: -.02em; /* Tighter tracking for elegance */
+  margin-bottom: .6rem;
 }
 .prose h2 {
   font-size: var(--step-3);
   line-height: 1.15;
   letter-spacing: -.01em;
-  margin: 2.2rem 0 .6rem;
+  margin: 2.5rem 0 .8rem; /* Increased margin top/bottom for whitespace */
 }
 .prose h3 {
   font-size: var(--step-2);
   line-height: 1.2;
-  margin: 1.8rem 0 .4rem;
+  margin: 2rem 0 .6rem;
 }
 .prose p,
 .prose li {
+  font-family: var(--font-sans, 'Inter', ui-sans-serif, system-ui);
   font-size: var(--step-0);
-  line-height: 1.75;
-  margin-block: .75rem;
+  line-height: 1.85; /* Consistently generous line-height */
+  margin-block: 1rem; /* More space between paragraphs */
 }
 .prose blockquote {
   font-style: italic;
   font-size: var(--step-1);
-  line-height: 1.55;
-  padding-left: 1rem;
-  border-left: 3px solid var(--color-lightGrey);
-  color: #2d2d2d;
+  line-height: 1.6;
+  padding-left: 1.5rem;
+  /* UPGRADE: Gold accent border for quotes */
+  border-left: 3px solid var(--color-accent); 
+  color: var(--color-on-secondary);
+}
+
+/* UPGRADE: Use midGreen for list markers */
+.prose ul > li::marker {
+    color: var(--color-midGreen);
 }
 
 /* Add any project-specific utility overrides below */
-
