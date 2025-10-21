@@ -2,7 +2,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx"; // Added for cleaner class construction
+import clsx from "clsx"; 
 import { siteConfig } from "@/lib/siteConfig";
 
 /* ---------- types ---------- */
@@ -17,7 +17,7 @@ type BlogPostCardProps = {
   author?: AuthorType;
   readTime?: string | number;
   category?: string;
-  tags?: string[]; // Currently unused in the card, but kept for type completeness
+  tags?: string[];
   coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
   coverPosition?: "center" | "left" | "right";
@@ -26,7 +26,6 @@ type BlogPostCardProps = {
 /* ---------- constants ---------- */
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
-// We’ll try these default blog covers if everything else fails
 const DEFAULT_COVERS = [
   "/assets/images/blog/default.webp",
   "/assets/images/blog/default.jpg",
@@ -34,37 +33,29 @@ const DEFAULT_COVERS = [
 
 /* ---------- helpers ---------- */
 
-// quick, safe “strip tags / MDX components” for list cards
 function stripMarkup(input?: string | null): string {
   if (!input) return "";
-  // remove anything that looks like a tag or MDX component, then normalize whitespace
   return input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
-// Ensures a local path is correctly formatted, ignores external URLs
 function normalizeLocal(src?: string | null): string | undefined {
   if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return undefined; // Ignore external images
-  // Ensure path starts with a single slash
+  if (/^https?:\/\//i.test(src)) return undefined;
   return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
 }
 
-/** Build a strong list of candidates we can try in order */
 function buildCoverCandidates(slug: string, coverImage?: string | null) {
   const cleanSlug = String(slug).trim();
 
   const baseCandidates = [
-    normalizeLocal(coverImage), // 1. User-provided image
-    // 2. Slug-based fallbacks
+    normalizeLocal(coverImage),
     `/assets/images/blog/${cleanSlug}.webp`,
     `/assets/images/blog/${cleanSlug}.jpg`,
     `/assets/images/blog/${cleanSlug}.jpeg`,
     `/assets/images/blog/${cleanSlug}.png`,
-    // 3. Absolute defaults
     ...DEFAULT_COVERS,
   ].filter(Boolean) as string[];
 
-  // de-dup while preserving order
   return Array.from(new Set(baseCandidates));
 }
 
@@ -83,23 +74,18 @@ export default function BlogPostCard({
   coverPosition = "center",
 }: BlogPostCardProps) {
   
-  // --- Author Logic ---
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
   const preferredAvatar =
     (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
 
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  // --- Cover Image Fallback Logic ---
   const candidates = React.useMemo(
     () => buildCoverCandidates(slug, coverImage),
     [slug, coverImage]
   );
   
-  // idx tracks which candidate we are currently trying
   const [idx, setIdx] = React.useState(0);
-  
-  // coverFailed state is only set when all candidates are exhausted
   const [coverFailed, setCoverFailed] = React.useState(false);
 
   const coverSrc = !coverFailed ? candidates[idx] : undefined;
@@ -110,9 +96,8 @@ export default function BlogPostCard({
       if (next < candidates.length) {
         return next;
       }
-      // If we reach the end, mark as failed to show placeholder
       setCoverFailed(true); 
-      return i; // Return current index to stop trying
+      return i;
     });
   }, [candidates.length]);
 
@@ -131,14 +116,12 @@ export default function BlogPostCard({
 
   // --- Class Generation ---
   
-  // Aspect frame class
   const aspectClass = clsx({
     "aspect-[1/1]": coverAspect === "square",
     "aspect-[16/9]": coverAspect === "wide",
     "aspect-[2/3]": coverAspect === "book",
   });
 
-  // Fit and Position classes
   const imageClasses = clsx(
     coverFit === "contain" ? "object-contain" : "object-cover",
     {
@@ -148,20 +131,23 @@ export default function BlogPostCard({
     }
   );
 
-  // Frame classes (for contain background/padding)
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-t-2xl",
     aspectClass,
     coverFit === "contain" && "bg-warmWhite p-2 sm:p-3"
   );
 
-  // Initials for the placeholder
   const initials = React.useMemo(() => {
     const words = String(title || "").trim().split(/\s+/).slice(0, 3);
     return words.map((w) => w[0]?.toUpperCase() || "").join("") || "A•L";
   }, [title]);
 
   const safeExcerpt = stripMarkup(excerpt);
+
+  // FIX: Define the required arbitrary opacity once
+  const colorOnSecondary_07 = "text-[color:var(--color-on-secondary)]/[0.7]";
+  const colorOnSecondary_08 = "text-[color:var(--color-on-secondary)]/[0.8]";
+  const colorOnSecondary_07_bg = "bg-gradient-to-br from-olive/20 to-deepCharcoal/[0.10]";
 
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
@@ -180,8 +166,8 @@ export default function BlogPostCard({
             />
           ) : (
             // graceful placeholder when all images fail
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-deepCharcoal/10">
-              <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
+            <div className={clsx("absolute inset-0 flex items-center justify-center", colorOnSecondary_07_bg)}>
+              <span className={clsx("select-none font-serif text-4xl font-semibold", colorOnSecondary_07)}>
                 {initials}
               </span>
             </div>
@@ -202,7 +188,8 @@ export default function BlogPostCard({
           </div>
 
           {safeExcerpt && (
-            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{safeExcerpt}</p>
+            // Fix 1: Replaced 'text-[color:var(--color-on-secondary)/0.8]' with 'text-[color:var(--color-on-secondary)]/[0.8]'
+            <p className={clsx("mt-3 line-clamp-3 text-sm", colorOnSecondary_08)}>{safeExcerpt}</p>
           )}
 
           <div className="mt-4 flex items-center gap-3">
@@ -214,7 +201,7 @@ export default function BlogPostCard({
               className="rounded-full object-cover"
               onError={() => setAvatarSrc(FALLBACK_AVATAR)}
             />
-            <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
+            <div className={clsx("text-xs", colorOnSecondary_07)}>
               <p className="font-medium">{authorName}</p>
             </div>
           </div>
