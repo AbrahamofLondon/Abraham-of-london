@@ -36,7 +36,7 @@ interface BookPrintProps {
  * Component to render a book document in a print-friendly format.
  */
 export default function BookPrint({ doc }: BookPrintProps) {
-  if (!doc) return null;
+  if (!document) return <p>Loading...</p>;
   
   // Next-ContentLayer hook to render the MDX body
   const Component = useMDXComponent(document?.body.code)
