@@ -1,24 +1,28 @@
 // components/MdxComponents.tsx
+/* eslint-disable @next/next/no-img-element */
 import * as React from "react";
 import Link from "next/link";
 import Image, { ImageProps } from "next/image";
 
-// ------------------------------
-// Utilities
-// ------------------------------
-const slugify = (str: string) =>
-  (str || "")
+/* ------------------------------
+ * Utilities
+ * ------------------------------ */
+function slugify(str: string) {
+  return (str || "")
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+}
 
-const isExternal = (href: string) => /^https?:\/\//i.test(href) && !href.includes(process.env.NEXT_PUBLIC_SITE_URL ?? "");
+function isExternal(href: string) {
+  return /^https?:\/\//i.test(href) && !href.includes(process.env.NEXT_PUBLIC_SITE_URL ?? "");
+}
 
-// ------------------------------
-// SmartLink
-// ------------------------------
+/* ------------------------------
+ * SmartLink
+ * ------------------------------ */
 type AProps = React.ComponentPropsWithoutRef<"a"> & { href?: string };
 
 function SmartLink({ href = "", children, ...props }: AProps) {
@@ -27,15 +31,10 @@ function SmartLink({ href = "", children, ...props }: AProps) {
   // Mailto / Tel passthrough
   if (/^(mailto:|tel:)/.test(href)) return <a href={href} {...props}>{children}</a>;
 
-  // External links: open in new tab with rel
+  // External links
   if (isExternal(href)) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        {...props}
-      >
+      <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
         {children}
       </a>
     );
@@ -49,21 +48,19 @@ function SmartLink({ href = "", children, ...props }: AProps) {
   );
 }
 
-// ------------------------------
-// SmartImage
-// ------------------------------
+/* ------------------------------
+ * SmartImage
+ * ------------------------------ */
 type SmartImageProps = Omit<ImageProps, "src" | "alt"> & {
   src?: string;
   alt?: string;
 };
 
 function SmartImage({ src = "", alt = "", sizes = "100vw", ...rest }: SmartImageProps) {
-  // If it’s a local/static asset or begins with "/", prefer next/image
-  const isLocal = src.startsWith("/") || (!/^https?:\/\//i.test(src) && !!src);
   if (!src) return null;
+  const isLocal = src.startsWith("/") || (!/^https?:\/\//i.test(src) && !!src);
 
   if (isLocal) {
-    // Provide sane defaults; consumers can override via rest
     return (
       <Image
         src={src}
@@ -78,15 +75,23 @@ function SmartImage({ src = "", alt = "", sizes = "100vw", ...rest }: SmartImage
     );
   }
 
-  // Remote image fallback: use plain <img> for maximum safety without extra config
-  // This is where the linter warning is generated.
+  // Remote image fallback: plain <img>
   // @ts-ignore allow decoding on <img>
-  return <img src={src} alt={alt} decoding="async" loading="lazy" style={{ maxWidth: "100%", height: "auto" }} {...(rest as any)} />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      decoding="async"
+      loading="lazy"
+      style={{ maxWidth: "100%", height: "auto" }}
+      {...(rest as any)}
+    />
+  );
 }
 
-// ------------------------------
-// CodeBlock with copy button
-// ------------------------------
+/* ------------------------------
+ * CodeBlock with copy button
+ * ------------------------------ */
 function CopyButton({ getText }: { getText: () => string }) {
   const [copied, setCopied] = React.useState(false);
   return (
@@ -110,8 +115,8 @@ function CopyButton({ getText }: { getText: () => string }) {
 }
 
 type PreProps = React.ComponentPropsWithoutRef<"pre"> & { "data-language"?: string };
+
 function Pre({ children, ...props }: PreProps) {
-  // Extract raw code text for copy
   const codeRef = React.useRef<HTMLElement | null>(null);
   const getText = () => (codeRef.current?.textContent ?? "").trim();
 
@@ -130,19 +135,17 @@ function Pre({ children, ...props }: PreProps) {
   );
 }
 
-// Keep <code> simple and let <pre> wrap and handle copy
 function Code(props: React.ComponentPropsWithoutRef<"code">) {
   return <code {...props} />;
 }
 
-// ------------------------------
-// Headings with anchors
-// ------------------------------
+/* ------------------------------
+ * Headings with anchors
+ * ------------------------------ */
 type HeadingProps = React.ComponentPropsWithoutRef<"h1">;
 
-const makeHeading =
-  (Tag: "h1" | "h2" | "h3" | "h4") =>
-  ({ children, id, ...props }: HeadingProps) => {
+function makeHeading(Tag: "h1" | "h2" | "h3" | "h4") {
+  const Heading = ({ children, id, ...props }: HeadingProps) => {
     const text = React.Children.toArray(children).join(" ");
     const anchor = id || slugify(String(text));
     return (
@@ -153,22 +156,18 @@ const makeHeading =
       </Tag>
     );
   };
+  Heading.displayName = `MDXHeading(${Tag.toUpperCase()})`;
+  return Heading;
+}
 
-// FIX: The error "Component definition is missing display name" occurs because 
-// the components H1, H2, H3, and H4 are created by calling makeHeading, which returns 
-// an anonymous function component.
 const H1 = makeHeading("h1");
-H1.displayName = 'H1'; // <--- FIX APPLIED
 const H2 = makeHeading("h2");
-H2.displayName = 'H2'; // <--- FIX APPLIED
 const H3 = makeHeading("h3");
-H3.displayName = 'H3'; // <--- FIX APPLIED
 const H4 = makeHeading("h4");
-H4.displayName = 'H4'; // <--- FIX APPLIED
 
-// ------------------------------
-// Tables (responsive wrapper)
-// ------------------------------
+/* ------------------------------
+ * Tables / Blockquote
+ * ------------------------------ */
 function TableWrapper(props: React.ComponentPropsWithoutRef<"table">) {
   return (
     <div className="my-6 overflow-x-auto rounded-lg border border-lightGrey">
@@ -176,10 +175,8 @@ function TableWrapper(props: React.ComponentPropsWithoutRef<"table">) {
     </div>
   );
 }
+TableWrapper.displayName = "MDXTableWrapper";
 
-// ------------------------------
-// Blockquote (brand style)
-// ------------------------------
 function Blockquote(props: React.ComponentPropsWithoutRef<"blockquote">) {
   return (
     <blockquote
@@ -189,11 +186,11 @@ function Blockquote(props: React.ComponentPropsWithoutRef<"blockquote">) {
     />
   );
 }
+Blockquote.displayName = "MDXBlockquote";
 
-// ------------------------------
-// Callout (custom MDX component)
-// Usage: <Callout type="info" title="Heads up">...</Callout>
-// ------------------------------
+/* ------------------------------
+ * Callout
+ * ------------------------------ */
 type CalloutProps = {
   type?: "info" | "success" | "warning" | "danger";
   title?: string;
@@ -208,13 +205,9 @@ const tone = {
 };
 
 function Callout({ type = "info", title, children }: CalloutProps) {
-  const c = tone[type] ?? tone.info;
+  const c = (tone as any)[type] ?? tone.info;
   return (
-    <div
-      className="my-6 rounded-lg border p-4"
-      style={{ background: c.bg, borderColor: c.border }}
-      role="note"
-    >
+    <div className="my-6 rounded-lg border p-4" style={{ background: c.bg, borderColor: c.border }} role="note">
       {title && (
         <div className="mb-1 font-semibold" style={{ color: c.title }}>
           {title}
@@ -224,11 +217,11 @@ function Callout({ type = "info", title, children }: CalloutProps) {
     </div>
   );
 }
+Callout.displayName = "MDXCallout";
 
-// ------------------------------
-// YouTube (safe embed)
-// Usage: <YouTube id="dQw4w9WgXcQ" title="..." />
-// ------------------------------
+/* ------------------------------
+ * YouTube
+ * ------------------------------ */
 function YouTube({ id, title }: { id: string; title?: string }) {
   if (!id) return null;
   const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`;
@@ -246,10 +239,24 @@ function YouTube({ id, title }: { id: string; title?: string }) {
     </div>
   );
 }
+YouTube.displayName = "MDXYouTube";
 
-// ------------------------------
-// MDX Components Map
-// ------------------------------
+/* ------------------------------
+ * Figure helpers (named to satisfy display-name)
+ * ------------------------------ */
+function Figure(props: React.ComponentPropsWithoutRef<"figure">) {
+  return <figure className="my-6" {...props} />;
+}
+Figure.displayName = "MDXFigure";
+
+function Figcaption(props: React.ComponentPropsWithoutRef<"figcaption">) {
+  return <figcaption className="mt-2 text-sm text-gray-600" {...props} />;
+}
+Figcaption.displayName = "MDXFigcaption";
+
+/* ------------------------------
+ * MDX Components Map
+ * ------------------------------ */
 export const mdxComponents = {
   // HTML element overrides
   a: SmartLink,
@@ -267,32 +274,13 @@ export const mdxComponents = {
   Callout,
   YouTube,
 
-  // Optional helpers for figures
-  Figure: ({ children, ...p }: React.ComponentPropsWithoutRef<"figure">) => (
-    <figure className="my-6" {...p}>{children}</figure>
-  ),
-  Figcaption: ({ children, ...p }: React.ComponentPropsWithoutRef<"figcaption">) => (
-    <figcaption className="mt-2 text-sm text-gray-600" {...p}>{children}</figcaption>
-  ),
+  // Helpers
+  Figure,
+  Figcaption,
 };
 
 export type MdxComponents = typeof mdxComponents;
 
-// ------------------------------
-// Usage examples:
-//
-// With next-mdx-remote:
-//    <MDXRemote {...source} components={mdxComponents} />
-//
-// With Contentlayer (pages directory):
-//    import { useMDXComponent } from "next-contentlayer2/hooks";
-//    const MDX = useMDXComponent(code);
-//    return <MDX components={mdxComponents} />;
-//
-// Safety notes:
-// - External links open in new tab with rel=noopener.
-// - Remote <img> falls back to <img> (no Next/Image config needed).
-// - Code blocks have a copy button; no extra syntax highlighter dep required.
-// - Headings get stable, slugified anchors.
-// - All components are SSR-friendly (no window/document access during render).
-// ------------------------------
+// Export under multiple names so pages can import however they like.
+export const components = mdxComponents;
+export default mdxComponents;

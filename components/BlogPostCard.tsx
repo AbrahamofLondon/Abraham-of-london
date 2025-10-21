@@ -2,19 +2,22 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import clsx from "clsx"; // Added for cleaner class construction
 import { siteConfig } from "@/lib/siteConfig";
 
 /* ---------- types ---------- */
+type AuthorType = string | { name?: string; image?: string };
+
 type BlogPostCardProps = {
   slug: string;
   title: string;
   date?: string;
   excerpt?: string;
   coverImage?: string;
-  author?: string | { name?: string; image?: string };
+  author?: AuthorType;
   readTime?: string | number;
   category?: string;
-  tags?: string[];
+  tags?: string[]; // Currently unused in the card, but kept for type completeness
   coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
   coverPosition?: "center" | "left" | "right";
@@ -30,16 +33,19 @@ const DEFAULT_COVERS = [
 ] as const;
 
 /* ---------- helpers ---------- */
+
 // quick, safe “strip tags / MDX components” for list cards
-function stripMarkup(input?: string | null) {
+function stripMarkup(input?: string | null): string {
   if (!input) return "";
-  // remove anything that looks like a tag or MDX component
+  // remove anything that looks like a tag or MDX component, then normalize whitespace
   return input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+// Ensures a local path is correctly formatted, ignores external URLs
 function normalizeLocal(src?: string | null): string | undefined {
   if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return undefined; // external images not handled here
+  if (/^https?:\/\//i.test(src)) return undefined; // Ignore external images
+  // Ensure path starts with a single slash
   return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
 }
 
@@ -48,11 +54,13 @@ function buildCoverCandidates(slug: string, coverImage?: string | null) {
   const cleanSlug = String(slug).trim();
 
   const baseCandidates = [
-    normalizeLocal(coverImage),
+    normalizeLocal(coverImage), // 1. User-provided image
+    // 2. Slug-based fallbacks
     `/assets/images/blog/${cleanSlug}.webp`,
     `/assets/images/blog/${cleanSlug}.jpg`,
     `/assets/images/blog/${cleanSlug}.jpeg`,
     `/assets/images/blog/${cleanSlug}.png`,
+    // 3. Absolute defaults
     ...DEFAULT_COVERS,
   ].filter(Boolean) as string[];
 
@@ -60,7 +68,7 @@ function buildCoverCandidates(slug: string, coverImage?: string | null) {
   return Array.from(new Set(baseCandidates));
 }
 
-/* ---------- component ---------- */
+// --- Component ---
 export default function BlogPostCard({
   slug,
   title,
@@ -74,18 +82,24 @@ export default function BlogPostCard({
   coverFit = "cover",
   coverPosition = "center",
 }: BlogPostCardProps) {
+  
+  // --- Author Logic ---
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
   const preferredAvatar =
     (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
 
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  // cover candidates + failure handling
+  // --- Cover Image Fallback Logic ---
   const candidates = React.useMemo(
     () => buildCoverCandidates(slug, coverImage),
     [slug, coverImage]
   );
+  
+  // idx tracks which candidate we are currently trying
   const [idx, setIdx] = React.useState(0);
+  
+  // coverFailed state is only set when all candidates are exhausted
   const [coverFailed, setCoverFailed] = React.useState(false);
 
   const coverSrc = !coverFailed ? candidates[idx] : undefined;
@@ -93,44 +107,58 @@ export default function BlogPostCard({
   const onCoverError = React.useCallback(() => {
     setIdx((i) => {
       const next = i + 1;
-      if (next >= candidates.length) {
-        // exhausted all candidates → show placeholder
-        setCoverFailed(true);
-        return i;
+      if (next < candidates.length) {
+        return next;
       }
-      return next;
+      // If we reach the end, mark as failed to show placeholder
+      setCoverFailed(true); 
+      return i; // Return current index to stop trying
     });
   }, [candidates.length]);
 
-  // date label
+  // --- Date Formatting ---
   const dt = date ? new Date(date) : null;
-  const dateTime = dt && !Number.isNaN(+dt) ? dt.toISOString().slice(0, 10) : undefined;
-  const dateLabel =
-    dt && !Number.isNaN(+dt)
+  const isValidDate = dt && !Number.isNaN(+dt);
+  
+  const dateTime = isValidDate ? dt.toISOString().slice(0, 10) : undefined;
+  const dateLabel = isValidDate
       ? new Intl.DateTimeFormat("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
         }).format(dt)
       : undefined;
 
-  // aspect frame
-  const aspectClass =
-    coverAspect === "square" ? "aspect-[1/1]" : coverAspect === "wide" ? "aspect-[16/9]" : "aspect-[2/3]";
+  // --- Class Generation ---
+  
+  // Aspect frame class
+  const aspectClass = clsx({
+    "aspect-[1/1]": coverAspect === "square",
+    "aspect-[16/9]": coverAspect === "wide",
+    "aspect-[2/3]": coverAspect === "book",
+  });
 
-  // fit + position
-  const fitClass = coverFit === "contain" ? "object-contain" : "object-cover";
-  const posClass =
-    coverPosition === "left" ? "object-left" : coverPosition === "right" ? "object-right" : "object-center";
+  // Fit and Position classes
+  const imageClasses = clsx(
+    coverFit === "contain" ? "object-contain" : "object-cover",
+    {
+      "object-left": coverPosition === "left",
+      "object-right": coverPosition === "right",
+      "object-center": coverPosition === "center",
+    }
+  );
 
-  // background for letterboxing when using contain (prevents “kissing” look)
-  const framePadding = coverFit === "contain" ? "p-2 sm:p-3" : "";
-  const frameBg = coverFit === "contain" ? "bg-warmWhite" : "bg-transparent";
+  // Frame classes (for contain background/padding)
+  const frameClasses = clsx(
+    "relative w-full overflow-hidden rounded-t-2xl",
+    aspectClass,
+    coverFit === "contain" && "bg-warmWhite p-2 sm:p-3"
+  );
 
   // Initials for the placeholder
   const initials = React.useMemo(() => {
     const words = String(title || "").trim().split(/\s+/).slice(0, 3);
-    return words.map((w) => w[0]?.toUpperCase() || "").join("");
+    return words.map((w) => w[0]?.toUpperCase() || "").join("") || "A•L";
   }, [title]);
 
   const safeExcerpt = stripMarkup(excerpt);
@@ -139,22 +167,22 @@ export default function BlogPostCard({
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
         {/* Cover frame */}
-        <div className={`relative w-full overflow-hidden rounded-t-2xl ${aspectClass} ${frameBg} ${framePadding}`}>
+        <div className={frameClasses}>
           {!coverFailed && coverSrc ? (
             <Image
               src={coverSrc}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className={`${fitClass} ${posClass}`}
+              className={imageClasses}
               onError={onCoverError}
               priority={false}
             />
           ) : (
             // graceful placeholder when all images fail
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-[color:var(--color-primary)/0.3]">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive/20 to-deepCharcoal/10">
               <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
-                {initials || "A•L"}
+                {initials}
               </span>
             </div>
           )}
