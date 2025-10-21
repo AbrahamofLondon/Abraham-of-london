@@ -2,7 +2,7 @@
 # Build
 # ─────────────────────────────────────────────────────────────────────────────
 [build]
-  command = "npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build && npm run ci:downloads"
+  command = "npm run audit:images || true && npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build && npm run ci:downloads"
   publish = ".next"
   
 [build.environment]

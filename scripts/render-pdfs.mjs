@@ -1,94 +1,96 @@
 // scripts/render-pdfs.mjs
+#!/usr/bin/env node
 import { chromium } from "playwright";
-import path from "node:path";
-import fs from "node:fs/promises";
+import path from "path";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import { setTimeout as delay } from "timers/promises";
 
-const args = process.argv.slice(2);
-const baseArg = args.find((a) => a.startsWith("--base="));
-const outArg = args.find((a) => a.startsWith("--out="));
+const ROOT = process.cwd();
 
-const BASE = (baseArg ? baseArg.split("=")[1] : "http://localhost:5555").replace(/\/+$/, "");
-const OUT = outArg ? outArg.split("=")[1] : "public/downloads";
-
-// UPDATED TASKS LIST using the provided list for consistent naming
-const TASKS = [
-  { path: "/print/leadership-playbook", file: "Leadership_Playbook.pdf" },
-  { path: "/print/mentorship-starter-kit", file: "Mentorship_Starter_Kit.pdf" },
-  { path: "/print/family-altar-liturgy", file: "Family_Altar_Liturgy.pdf" },
-  { path: "/print/standards-brief", file: "Standards_Brief.pdf" },
-  { path: "/print/principles-for-my-son", file: "Principles_for_My_Son.pdf" },
-  { path: "/print/a6/principles-for-my-son-two-up", file: "Principles_for_My_Son_Cue_Card.pdf" },
-  { path: "/print/a6/leaders-cue-card-two-up", file: "Leaders_Cue_Card.pdf" },
-  { path: "/print/a6/brotherhood-cue-card-two-up", file: "Brotherhood_Cue_Card.pdf" },
-  { path: "/print/scripture-track-john14", file: "Scripture_Track_John14.pdf" },
-  { path: "/print/fathering-without-fear-teaser", file: "Fathering_Without_Fear_Teaser_A4.pdf" },
-  { path: "/print/fathering-without-fear-teaser-mobile", file: "Fathering_Without_Fear_Teaser_Mobile.pdf" },
-  // NOTE: If you need to include the old "fathering-without-fear-teaser-mobile" as well, 
-  // you'll need to update the source path to match the old filename, or confirm which path is correct.
-];
-
-async function ensureDir(dir) {
-  await fs.mkdir(dir, { recursive: true });
+function argval(flag, def) {
+  const i = process.argv.indexOf(flag);
+  return i >= 0 ? process.argv[i+1] : def;
 }
 
-(async () => {
-  console.log(`Base: ${BASE}`);
-  console.log(`Out : ${path.resolve(OUT)}`);
-  console.log("Paths:", TASKS.map((t) => t.path).join(", "));
-  await ensureDir(OUT);
+const BASE = argval("--base", "http://localhost:5555");
+const OUT  = argval("--out", path.join(ROOT, "public", "downloads"));
+const PROBE = path.join(ROOT, "scripts", "probe-print-routes.mjs");
 
-  const browser = await chromium.launch({
-    headless: true,
-    args: ["--font-render-hinting=none"],
-  });
-
-  try {
-    const context = await browser.newContext({
-      acceptDownloads: true,
-      deviceScaleFactor: 2,
+async function getRoutes() {
+  return new Promise((resolve, reject) => {
+    const isWin = process.platform === "win32";
+    const ps = spawn("node", [PROBE, "--json"], { shell: isWin });
+    let out = "", err = "";
+    ps.stdout.on("data", d => out += d.toString());
+    ps.stderr.on("data", d => err += d.toString());
+    ps.on("exit", code => {
+      if (code === 0) {
+        try { resolve(JSON.parse(out || "[]")); }
+        catch(e){ reject(e); }
+      } else reject(new Error(err || `probe exit ${code}`));
     });
+  });
+}
 
-    for (const t of TASKS) {
-      const url = `${BASE}${t.path}`;
-      const outFile = path.join(OUT, t.file);
-      process.stdout.write(`→ Rendering ${url} → ${outFile}\n`);
+// map route -> pretty PDF name
+function pdfNameFromRoute(route) {
+  // /print/leadership-playbook -> Leadership_Playbook.pdf
+  const leaf = route.split("/").filter(Boolean).slice(1).join("-"); // remove "print"
+  const title = leaf.replace(/[-_]+/g," ").replace(/\b\w/g,m=>m.toUpperCase()).replace(/\s+/g,"_");
+  return `${title}.pdf`;
+}
 
-      const page = await context.newPage();
-      try {
-        const resp = await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
-        if (!resp || !resp.ok()) {
-          console.log(`  ! Skipping (${resp ? resp.status() : "NO-RESPONSE"}) ${url}`);
-          await page.close();
-          continue;
-        }
+async function urlOk(page, url) {
+  try {
+    const res = await page.goto(url, { waitUntil: "networkidle", timeout: 20000 });
+    const status = res?.status() ?? 0;
+    return status >= 200 && status < 400;
+  } catch {
+    return false;
+  }
+}
 
-        // Wait for webfonts if present (pure JS; no TS assertions)
-        try {
-          await page.evaluate(() => {
-            if (document.fonts && document.fonts.ready) {
-              return document.fonts.ready;
-            }
-            return Promise.resolve();
-          });
-        } catch {
-          /* non-fatal */
-        }
+async function main() {
+  console.log(`Base: ${BASE}`);
+  console.log(`Out : ${OUT}`);
 
-        await page.pdf({
-          path: outFile,
-          printBackground: true,
-          preferCSSPageSize: true, // uses @page size from the print route
-        });
-        console.log(`  ✔ Saved ${outFile}`);
-      } catch (err) {
-        console.error(`  ✖ Failed ${url}\n${err}`);
-      } finally {
-        await page.close();
-      }
+  const routes = await getRoutes();
+  console.log(`Routes: ${routes.join(", ") || "(none found)"}`);
+
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
+
+  for (const route of routes) {
+    const url = `${BASE}${route}`;
+    const pdfName = pdfNameFromRoute(route);
+    const outPath = path.join(OUT, pdfName);
+
+    const ok = await urlOk(page, url);
+    if (!ok) {
+      console.log(`  ! Skipping (no 2xx/3xx) ${url}`);
+      continue;
     }
-  } finally {
-    await browser.close();
+
+    try {
+      await page.emulateMedia({ media: "print" });
+      await page.pdf({
+        path: outPath,
+        printBackground: true,
+        scale: 1,
+        format: "A4",
+        margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" }
+      });
+      console.log(`  ✔ Saved ${path.relative(ROOT, outPath)}`);
+    } catch (e) {
+      console.log(`  ✖ Failed ${url}\n${e.message}`);
+    }
+    // tiny pause so CI logs are readable
+    await delay(100);
   }
 
+  await browser.close();
   console.log("\nAll done.");
-})();
+}
+
+main().catch(e => { console.error(e); process.exit(1); });
