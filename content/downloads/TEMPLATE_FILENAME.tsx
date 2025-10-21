@@ -23,8 +23,7 @@ const TheComponentName = () => {
     <BrandFrame
       title={metadata.title}
       subtitle={metadata.subtitle}
-      pageSize="A4" 
-      {/* If your BrandFrame uses 'author' or 'date', pass them here: */}
+      pageSize="A4"
       {/* author={metadata.author} */}
       {/* date={metadata.date} */}
     >
