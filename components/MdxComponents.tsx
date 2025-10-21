@@ -289,3 +289,4 @@ export type MdxComponents = typeof mdxComponents;
 // - Headings get stable, slugified anchors.
 // - All components are SSR-friendly (no window/document access during render).
 // ------------------------------
+
