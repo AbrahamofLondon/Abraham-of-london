@@ -46,25 +46,25 @@ export default function BoardInvestorTemplate() {
 
       <table className="mt-4 w-full border-collapse">
         <thead>
-          <tr className="bg-forest/10 text-forest">
-            <th className="p-3 text-left border-b-2 border-forest/20">Category</th>
-            <th className="p-3 text-left border-b-2 border-forest/20">Item 1</th>
-            <th className="p-3 text-left border-b-2 border-forest/20">Item 2</th>
-            <th className="p-3 text-left border-b-2 border-forest/20">Item 3</th>
+          <tr className="bg-[color:var(--color-primary)/0.1] text-forest">
+            <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2]">Category</th>
+            <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2]">Item 1</th>
+            <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2]">Item 2</th>
+            <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2]">Item 3</th>
           </tr>
         </thead>
         <tbody>
           <tr className="border-b border-lightGrey/60">
             <td className="p-3 font-bold text-deepCharcoal">Highlights (Wins)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(Concrete, measurable success)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(Team or product milestone)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(Major risk mitigated)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(Concrete, measurable success)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(Team or product milestone)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(Major risk mitigated)</td>
           </tr>
           <tr className="bg-warmWhite/50">
             <td className="p-3 font-bold text-deepCharcoal">Lowlights (Concerns)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(Revenue/pipeline gap)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(Key hire missing/churn)</td>
-            <td className="p-3 text-sm text-deepCharcoal/80">(External market risk)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(Revenue/pipeline gap)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(Key hire missing/churn)</td>
+            <td className="p-3 text-sm text-[color:var(--color-on-secondary)/0.8]">(External market risk)</td>
           </tr>
         </tbody>
       </table>
