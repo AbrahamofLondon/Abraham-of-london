@@ -1,34 +1,22 @@
 // scripts/print-pdfs.mjs
-import { spawn } from 'node:child_process';
-import http from 'node:http';
-import { fileURLToPath } from 'node:url';
+import { spawn } from "node:child_process";
+import http from "node:http";
 
-const isWin = process.platform === 'win32';
-const npmCmd = isWin ? 'npm.cmd' : 'npm';
-const renderScript = fileURLToPath(new URL('render-pdfs.mjs', import.meta.url));
+const isWin = process.platform === "win32";
+const npmCmd = isWin ? "npm.cmd" : "npm";
 
-/**
- * Waits for the HTTP server to respond.
- * @param {string} url - The URL to check.
- * @param {number} [timeoutMs=20000] - Timeout in milliseconds.
- * @returns {Promise<void>}
- */
-function waitForServer(url, timeoutMs = 20000) {
+function waitFor(url, timeoutMs = 20000) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const tick = () => {
-      const req = http.get(url, () => { req.destroy(); resolve(); });
-      req.on('error', () => {
-        if (Date.now() - start > timeoutMs) {
-          req.destroy(); // Ensure request is destroyed before rejecting
-          reject(new Error(`Server did not start in time: ${url}`));
-        } else {
-          setTimeout(tick, 500);
-        }
+      const req = http.get(url, res => {
+        if (res.statusCode && res.statusCode < 500) return resolve();
+        if (Date.now() - start > timeoutMs) return reject(new Error("print server not ready"));
+        setTimeout(tick, 500);
       });
-      // Handle response timeout as well
-      req.setTimeout(5000, () => {
-          req.destroy();
+      req.on("error", () => {
+        if (Date.now() - start > timeoutMs) return reject(new Error("print server not ready"));
+        setTimeout(tick, 500);
       });
     };
     tick();
@@ -36,49 +24,33 @@ function waitForServer(url, timeoutMs = 20000) {
 }
 
 async function main() {
-  let srv;
-  try {
-    // 1) Start print server (print:serve needs to be defined in package.json)
-    console.log('Starting print server...');
-    srv = spawn(npmCmd, ['run', 'print:serve'], { stdio: 'inherit', shell: false });
+  console.log("Starting print server...");
+  const ps = spawn(npmCmd, ["run", "print:serve"], {
+    stdio: "inherit",
+    shell: false
+  });
 
-    // Ensure server process is terminated on script exit
-    process.on('SIGINT', () => srv.kill('SIGTERM'));
+  // ensure we kill the server when done
+  const cleanup = () => { try { ps.kill(); } catch {}
+  };
+  process.on("exit", cleanup);
+  process.on("SIGINT", () => { cleanup(); process.exit(1); });
 
-    // 2) Wait for server to become available
-    const serverUrl = 'http://localhost:5555/';
-    console.log(`Waiting for server at ${serverUrl}...`);
-    await waitForServer(serverUrl);
+  // wait for server to respond
+  await waitFor("http://localhost:5555/");
 
-    // 3) Render PDFs using the separate script
-    console.log('Server running. Starting PDF rendering...');
-    const renderArgs = [renderScript, '--base', serverUrl.slice(0, -1), '--out', 'public/downloads'];
-    const render = spawn(process.execPath, renderArgs, { stdio: 'inherit' });
+  // now render PDFs
+  const render = spawn(process.execPath, ["scripts/render-pdfs.mjs", "--base", "http://localhost:5555", "--out", "public/downloads"], {
+    stdio: "inherit",
+    shell: false
+  });
 
-    await new Promise((resolve, reject) => {
-      render.on('exit', (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`PDF renderer exited with code ${code}`));
-        }
-      });
-    });
-
-    console.log('PDF rendering complete.');
-
-  } catch (err) {
-    console.error(`\n--- Error in print-pdfs.mjs ---\n`, err.message);
-    process.exit(1);
-  } finally {
-    // 4) Stop server
-    if (srv) {
-      console.log('Stopping print server...');
-      srv.kill('SIGTERM');
-      // Wait a moment for the server to actually exit
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-  }
+  render.on("exit", (code) => {
+    cleanup();
+    if (code !== 0) process.exit(code);
+  });
 }
-
-main();
+main().catch((e) => {
+  console.error("\n--- Error in print-pdfs.mjs ---\n", e.message || e);
+  process.exit(1);
+});

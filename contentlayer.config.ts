@@ -53,22 +53,22 @@ const Download = defineDocumentType(() => ({
 }));
 
 const Event = defineDocumentType(() => ({
-  name: "Event",
-  filePathPattern: "events/**/*.mdx",
+  name: 'Event',
+  filePathPattern: `events/**/*.mdx`,
   fields: {
-    title: { type: "string", required: true },
-    slug: { type: "string", required: true },
-    date: { type: "string", required: true },
-    location: { type: "string" },
-    summary: { type: "string" },
-    heroImage: { type: "string" },
-    tags: { type: "list", of: { type: "string" } },
-    chatham: { type: "boolean" },
-    // Keep flexible: allow array, string, or object via raw JSON
-    resources: { type: "json" },
-    related: { type: "list", of: { type: "string" } },
+    title: { type: 'string', required: true },
+    slug: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    location: { type: 'string', required: true },
+    summary: { type: 'string', required: true },
+    heroImage: { type: 'string', required: true },
+    tags: { type: 'list', of: { type: 'string' } },
+    chatham: { type: 'boolean', default: false },
+    resources: { type: 'json', required: false },
++   time: { type: 'string', required: false }, // NEW
   },
-}));
+}))
+
 
 const Book = defineDocumentType(() => ({
   name: "Book",
@@ -103,6 +103,7 @@ const Resource = defineDocumentType(() => ({
     coverAspect: { type: "string" },
     coverFit: { type: "string" },
     coverPosition: { type: "string" },
+    time: { type: "string", required: false },
   },
 }));
 
