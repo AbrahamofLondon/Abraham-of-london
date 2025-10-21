@@ -2,28 +2,42 @@
 
 import Head from "next/head";
 import * as React from "react";
-// ⚡ FIX: Adjusted relative path depth based on successful compilation history
-import EmbossedBrandMark from "../../components/print/EmbossedBrandMark"; 
+// Assuming 'components' is at the project root or configured via jsconfig/tsconfig
+// If this path fails again, try: import EmbossedSign from "@/components/print/EmbossedSign";
+import EmbossedBrandMark from "../../components/print/EmbossedBrandMark"; 
 import EmbossedSign from "../../components/print/EmbossedSign";
-// NOTE: Assuming EmbossedBrandMark and EmbossedSign are located in components/print/
 
+/* --- Helper Components for Typography Styling --- */
 
-// Define simple components that were likely imported (PullLine, Rule, Note)
-const PullLine = ({ children, subtle }: { children: React.ReactNode, subtle?: boolean }) => (
+interface PullLineProps {
+    children: React.ReactNode;
+    subtle?: boolean;
+}
+const PullLine = ({ children, subtle }: PullLineProps) => (
     <p className={`pull-line ${subtle ? 'subtle' : ''}`}>{children}</p>
 );
-const Rule = ({ className }: { className?: string }) => <hr className={`rule ${className}`} />;
-const Note = ({ children, title }: { children: React.ReactNode, title?: string }) => (
+
+interface RuleProps {
+    className?: string;
+}
+const Rule = ({ className }: RuleProps) => <hr className={`rule ${className || ''}`} />;
+
+interface NoteProps {
+    children: React.ReactNode;
+    title?: string;
+}
+const Note = ({ children, title }: NoteProps) => (
     <div className="note-box">
         {title && <h3 className="note-title">{title}</h3>}
         {children}
     </div>
 );
 
+/* --- Main Component --- */
+
 const EntrepreneurSurvivalChecklist = () => {
     const currentYear = new Date().getFullYear();
     const title = "Entrepreneur Survival Checklist";
-    // ⚡ FIX: Escaped the apostrophe in "A 20-point checklist for founders in cash-conservation mode. Triage and prioritise the mission."
     const subtitle = "A 20-point checklist for founders in cash-conservation mode. Triage and prioritise the mission.";
 
     return (
@@ -52,7 +66,6 @@ const EntrepreneurSurvivalChecklist = () => {
                 </header>
                 
                 <section>
-                    {/* ⚡ FIX: The unescaped apostrophe was likely here: "C's" -> "C&apos;s" */}
                     <PullLine subtle>When the storm hits, focus on the three C&apos;s: Cash, Customers, Covenants. Everything else is secondary.</PullLine>
 
                     <h2 className="mt-8">Triage</h2>
@@ -113,27 +126,43 @@ const EntrepreneurSurvivalChecklist = () => {
                     --color-text-muted: #555;
                     --color-bg-note: #fffae0;
                     --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+                    /* Assuming --font-sans is defined globally or falls back to ui-sans-serif */
                 }
 
                 @page { size: A4; margin: 15mm; }
-                html, body { background: white; margin: 0; padding: 0; }
+                
+                /* Ensure exact colors for printing */
+                @media print {
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                }
+
+                html, body { 
+                    background: white; 
+                    margin: 0; 
+                    padding: 0; 
+                    /* Set base font for print consistency */
+                    font-family: ui-sans-serif, system-ui, sans-serif; 
+                }
 
                 .sheet { 
                     width: 210mm; 
                     min-height: 277mm; 
                     margin: 0 auto; 
-                    font-family: var(--font-sans, ui-sans-serif); 
                     color: var(--color-primary); 
-                    padding: 10mm; /* Internal padding */
+                    padding: 10mm;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
+                    box-sizing: border-box; /* Crucial for print layout */
                 }
                 
                 .title-area { 
                     text-align: center; 
                     margin-bottom: 8mm; 
-                    padding-top: 10mm; /* Space for the top-left logo */
+                    padding-top: 10mm;
                     position: relative;
                 }
                 
@@ -187,6 +216,7 @@ const EntrepreneurSurvivalChecklist = () => {
                 .checklist-ol, .checklist-ul {
                     font-size: 11pt;
                     line-height: 1.6;
+                    margin: 0;
                 }
                 .checklist-ol li, .checklist-ul li {
                     margin: 3mm 0;
@@ -231,8 +261,12 @@ const EntrepreneurSurvivalChecklist = () => {
                     margin-top: 2px;
                 }
 
+                /* Screen View Overrides */
                 @media screen { 
-                    body { background: #f6f6f6; padding: 2rem; } 
+                    body { 
+                        background: #f6f6f6; 
+                        padding: 2rem; 
+                    } 
                     .sheet { 
                         background: #fff; 
                         box-shadow: 0 10px 30px rgba(0,0,0,.08); 
