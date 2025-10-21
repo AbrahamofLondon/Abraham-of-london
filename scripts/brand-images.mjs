@@ -1,101 +1,128 @@
-// constants/brand-gates.mjs (Suggested file name)
+// scripts/audit-images.mjs
+#!/usr/bin/env node
+import path from "path";
+import fsp from "fs/promises";
+import glob from "fast-glob";
+import matter from "gray-matter";
+import sharp from "sharp";
+import { constants } from "fs";
 
-import sharp from 'sharp';
+const ROOT = process.cwd();
+const CONTENT = path.join(ROOT, "content");
+const PUBLIC_DIR = path.join(ROOT, "public");
+const DO_FIX = process.argv.includes("--fix");
 
-// ===== LUXURY BRAND GATES (Deep Forest / Warm Cream / Muted Gold) =====
-export const BRAND = {
-  // Palette anchors for ΔE checks (OKLab) — include light & dark tokens
-  palette: [
-    '#0B2E1F', // deep-forest (primary)
-    '#16573D', // deep-forest hover
-    '#FAF7F2', // warm-cream (bg, light surfaces)
-    '#333333', // soft-charcoal (body text)
-    '#C5A352', // muted-gold (accent)
-    '#A0833F', // muted-gold hover
-    '#4B8B6B', // subtle-green (bullets/accents)
-  ],
+const HERO_MIN_W = 1200;
+const HERO_MIN_B = 40 * 1024; // 40KB
+const IMG_MIN_W  = 800;
+const IMG_MIN_B  = 20 * 1024; // 20KB
 
-  // How strict the palette match should be:
-  // ΔE (OK) thresholds: lower = stricter. We use a two-tier check.
-  deltaE_primary: 14,  // headings, big brand surfaces
-  deltaE_secondary: 18, // images broadly should sit near palette range
+async function exists(p){ try{ await fsp.access(p, constants.F_OK); return true; } catch { return false; } }
 
-  // Resolution floor for “hero/cover” style assets
-  min: {
-    width:  1200,
-    height: 800,
-    ppi:    110,    // effective density (derived; heuristic)
-  },
-
-  // Aspect-ratio whitelists per placement
-  aspect: {
-    cover:  [1.3, 1.5, 1.6],  // ~4:3 → ~16:10
-    hero:   [1.6, 1.77],      // 16:10 → 16:9
-    card:   [1.3, 1.6],        // flexible cards
-    square: [1.0],            // icons/thumbs
-  },
-
-  // Compression targets (keeps crisp serif & soft paper feel)
-  jpeg: { quality: 86, mozjpeg: true },
-  webp: { quality: 82, effort: 5 },
-  png:  { compressionLevel: 9 },
-
-  // Auto-upgrade policy
-  // - only upscale ≤ 1.6x if we can sharpen safely
-  // - auto-generate tasteful fallback if file is missing/broken
-  upgrade: {
-    allowUpscaleFactor: 1.6,
-    sharpenSigma: 1.0,
-    vignette: 0.10,    // subtle edge falloff on generated fallback
-    paperNoise: 0.035,  // gentle texture on fallback
-  },
-
-  // File volume limits
-  maxKB: {
-    hero:  450,
-    cover: 380,
-    card:  220,
-    thumb: 80,
-  }
-};
-
-// Gentle forest→cream gradient with muted-gold title stripe
-export async function generateLuxuryFallback({ w = 1600, h = 1000, title = 'Abraham of London', subtitle = '' }) {
-  // Use constants from the BRAND object for consistency
-  const forest = BRAND.palette[0];
-  const cream = BRAND.palette[2];
-  const gold = BRAND.palette[4];
-
-  const svg = `
-  <svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stop-color="${cream}" />
-        <stop offset="100%" stop-color="${forest}" />
-      </linearGradient>
-      <filter id="grain">
-        <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" stitchTiles="stitch" />
-        <feColorMatrix type="saturate" values="0" />
-        <feComponentTransfer>
-          <feFuncA type="linear" slope="${BRAND.upgrade.paperNoise}"/> 
-        </feComponentTransfer>
-      </filter>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#bg)"/>
-    <rect width="100%" height="${Math.round(h * 0.18)}" y="${Math.round(h * 0.12)}" fill="${gold}" opacity="0.9" />
-    <g filter="url(#grain)">
-      <rect width="100%" height="100%" fill="rgba(0,0,0,0)"/>
-    </g>
-    <g font-family="'Playfair Display', Georgia, serif" fill="#111" text-anchor="middle">
-      <text x="${w / 2}" y="${Math.round(h * 0.21)}" font-size="${Math.round(h * 0.09)}" font-weight="700" fill="#0B2E1F">${title}</text>
-      ${subtitle ? `<text x="${w / 2}" y="${Math.round(h * 0.32)}" font-size="${Math.round(h * 0.045)}" fill="#333">${subtitle}</text>` : ''}
-    </g>
-  </svg>`;
-  
-  const buf = Buffer.from(svg);
-  
-  // Use quality settings from BRAND object
-  return sharp(buf)
-    .jpeg(BRAND.jpeg)
-    .toBuffer();
+function brandSVG(title = "Abraham of London", subtitle = "Signature Collection") {
+  return `
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0B2E1F"/><stop offset="1" stop-color="#16573D"/></linearGradient></defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <rect x="80" y="80" width="1440" height="740" rx="24" fill="#FAF7F2" fill-opacity=".08" stroke="#C5A352" stroke-opacity=".35"/>
+  <text x="800" y="445" text-anchor="middle" fill="#FAF7F2" font-family="Playfair Display, Georgia, serif" font-size="72" font-weight="700">${title}</text>
+  <text x="800" y="510" text-anchor="middle" fill="#E9D79A" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="500">${subtitle}</text>
+</svg>`.trim();
 }
+
+async function writePlaceholder(absPath, title) {
+  const svg = brandSVG(title);
+  await fsp.mkdir(path.dirname(absPath), { recursive: true });
+  // write SVG or a PNG—PNG is safer for <Image> defaults:
+  const png = await sharp(Buffer.from(svg)).png().toBuffer();
+  await fsp.writeFile(absPath, png);
+}
+
+async function imageMeta(abs) {
+  try {
+    const buf = await fsp.readFile(abs);
+    const meta = await sharp(buf).metadata();
+    return { width: meta.width || 0, size: buf.length };
+  } catch {
+    return { width: 0, size: 0 };
+  }
+}
+
+async function collectContentImages() {
+  const out = [];
+  const files = await glob([
+    "blog/**/*.mdx",
+    "books/**/*.mdx",
+    "events/**/*.mdx",
+    "downloads/**/*.mdx",
+    "resources/**/*.md",
+    "strategy/**/*.md",
+  ], { cwd: CONTENT });
+
+  for (const rel of files) {
+    const abs = path.join(CONTENT, rel);
+    const raw = await fsp.readFile(abs, "utf8");
+    const { data } = matter(raw);
+    const section = rel.split(path.sep)[0];
+    const title = data.title || rel;
+
+    const keys = section === "events" ? ["heroImage"] : ["coverImage"];
+    for (const k of keys) {
+      if (!data[k]) continue;
+      const p = String(data[k]);
+      if (!p.startsWith("/")) continue; // we only care about public/ paths
+      out.push({ file: rel, title, type: "cover", publicPath: p });
+    }
+  }
+  return out;
+}
+
+async function walkPublicImages() {
+  const files = await glob(["assets/images/**/*.{png,jpg,jpeg,webp,avif,svg}"], { cwd: PUBLIC_DIR });
+  return files.map(rel => ({ file: `public/${rel}`, type: "asset", publicPath: `/${rel.replace(/\\/g,"/")}` }));
+}
+
+async function main() {
+  const report = { checked: 0, upgraded: [], weak: [], missing: [], ok: [] };
+  const candidates = [
+    ...await collectContentImages(),
+    ...await walkPublicImages()
+  ];
+
+  for (const item of candidates) {
+    const { publicPath, type, title } = item;
+    const abs = path.join(PUBLIC_DIR, publicPath.replace(/^\//,""));
+    const present = await exists(abs);
+
+    if (!present) {
+      report.missing.push(item);
+      if (DO_FIX) {
+        await writePlaceholder(abs, title || "Abraham of London");
+        report.upgraded.push({ ...item, action: "created" });
+      }
+      continue;
+    }
+
+    const meta = await imageMeta(abs);
+    report.checked++;
+
+    const isHero = type === "cover";
+    const minW = isHero ? HERO_MIN_W : IMG_MIN_W;
+    const minB = isHero ? HERO_MIN_B : IMG_MIN_B;
+
+    if ((meta.width || 0) < minW || (meta.size || 0) < minB) {
+      report.weak.push({ ...item, width: meta.width, bytes: meta.size, minW, minB });
+      if (DO_FIX) {
+        await writePlaceholder(abs, title || "Abraham of London");
+        report.upgraded.push({ ...item, action: "replaced", before: { width: meta.width, bytes: meta.size } });
+      }
+    } else {
+      report.ok.push({ ...item, width: meta.width, bytes: meta.size });
+    }
+  }
+
+  console.log(JSON.stringify(report, null, 2));
+  if (report.weak.length || report.missing.length) process.exitCode = 1;
+}
+main().catch(e => { console.error(e); process.exit(1); });
