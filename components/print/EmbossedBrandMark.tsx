@@ -1,46 +1,43 @@
-<<<<<<< HEAD
-import * as React from "react";import Image from "next/image";const DEFAULT_LOGO = "/assets/images/logo/abraham-of-london-logo.svg";interface EmbossedBrandMarkProps {  logoSrc?: string;  size?: number; // width and height in pixels  opacity?: number; // 0.0 to 1.0}/** * Renders a subtle, embossed-style logo or brand mark, often used on cover pages or chapter breaks. */export default function EmbossedBrandMark({  logoSrc = DEFAULT_LOGO,  size = 150,  opacity = 0.2, // Subtle opacity for 'embossed' effect}: EmbossedBrandMarkProps) {  return (    <div      className="flex justify-center items-center w-full h-full p-10"      aria-hidden="true"    >      <Image        src={logoSrc}        alt="Brand Watermark"        width={size}        height={size}        className="object-contain"        style={{          width: `${size}px`,          height: `${size}px`,          opacity: opacity,          filter: 'grayscale(100%)', // Ensure it is grayscale for a clean print background          userSelect: 'none',          pointerEvents: 'none',        }}      />    </div>  );}
-=======
 import * as React from "react";
 import Image from "next/image";
 
-const DEFAULT_LOGO = "/assets/images/logo/abraham-of-london-logo.svg";
+export type EmbossedBrandMarkProps = {
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  effect?: "emboss" | "deboss";
+  baseColor?: string;
+};
 
-interface EmbossedBrandMarkProps {
-  logoSrc?: string;
-  size?: number; // width and height in pixels
-  opacity?: number; // 0.0 to 1.0
-}
-
-/**
- * Renders a subtle, embossed-style logo or brand mark, often used on cover pages or chapter breaks.
- */
 export default function EmbossedBrandMark({
-  logoSrc = DEFAULT_LOGO,
-  size = 150,
-  opacity = 0.2, // Subtle opacity for 'embossed' effect
+  src,
+  alt,
+  className,
+  width = 160,
+  height = 40,
+  effect = "emboss",
+  baseColor = "var(--color-primary, #0b2e1f)",
 }: EmbossedBrandMarkProps) {
+  const isEmboss = effect === "emboss";
+  const style: React.CSSProperties = {
+    filter: isEmboss
+      ? "drop-shadow(1px 1px 0 rgba(255,255,255,0.4)) drop-shadow(-1px -1px 0 rgba(0,0,0,0.2))"
+      : "drop-shadow(1px 1px 0 rgba(0,0,0,0.25)) drop-shadow(-1px -1px 0 rgba(255,255,255,0.35))",
+    color: baseColor,
+  };
   return (
-    <div
-      className="flex justify-center items-center w-full h-full p-10"
-      aria-hidden="true"
-    >
+    <div className={className} style={{ width, height }}>
       <Image
-        src={logoSrc}
-        alt="Brand Watermark"
-        width={size}
-        height={size}
-        className="object-contain"
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          opacity: opacity,
-          filter: 'grayscale(100%)', // Ensure it is grayscale for a clean print background
-          userSelect: 'none',
-          pointerEvents: 'none',
-        }}
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className="w-full h-full fill-current"
+        style={style}
+        priority
       />
     </div>
   );
 }
->>>>>>> ccf6052f (fix: remove stray header and normalize EmbossedBrandMark)
