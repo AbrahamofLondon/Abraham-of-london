@@ -39,7 +39,8 @@ export default function EventPrint({ doc }: EventPrintProps) {
   if (!doc) return null;
   
   // Next-ContentLayer hook to render the MDX body
-  const MDX = useMDXComponent(doc.body.code);
+  const Component = useMDXComponent(document?.body.code)
+  if (!document) return null
   
   // Format date and time for the print subtitle
   const when = doc.date 
