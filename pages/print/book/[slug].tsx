@@ -1,5 +1,5 @@
 // pages/print/book/[slug].tsx
-import { allBooks, Book } from "contentlayer2/generated"; // 1. Updated import path and imported 'Book' type
+import { allBooks } from "contentlayer/generated";
 import BrandFrame from "@/components/print/BrandFrame";
 import { GetStaticProps, GetStaticPaths } from "next"; // 2. Imported Next.js types
 
