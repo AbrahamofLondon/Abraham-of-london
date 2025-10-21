@@ -1,41 +1,41 @@
 // scripts/make-signature.mjs
 // Generates AbrahamOfLondon cursive signature as PNG (transparent) and JPG (white bg).
 // Uses an OFL/Apache-licensed script font you provide at:
-//   assets/fonts/Signature.ttf   (e.g. "Great Vibes", "Allura", "Dancing Script", etc.)
+//    assets/fonts/Signature.ttf
 //
 // Usage:
-//   node scripts/make-signature.mjs
+//    node scripts/make-signature.mjs
 //
 // Outputs:
-//   public/brand/signature/AbrahamOfLondon-signature.png
-//   public/brand/signature/AbrahamOfLondon-signature.jpg
+//    public/brand/signature/AbrahamOfLondon-signature.png
+//    public/brand/signature/AbrahamOfLondon-signature.jpg
 //
 // Tuning flags:
-//   --text "Abraham of London"    (default "Abraham of London")
-//   --size  840                   (font size px)
-//   --pad   80                    (padding px)
-//   --color "#0B1221"             (ink color)
-//   --bg "#FFFFFF"                (JPEG background, PNG stays transparent)
+//    --text "Abraham of London"     (default "Abraham of London")
+//    --size  880                    (font size px)
+//    --pad   100                    (padding px)
+//    --color "#0B2E1F"              (ink color)
+//    --bg    "#FAF7F2"              (JPEG background, PNG stays transparent)
 
-import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import { constants } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
 const argv = process.argv.slice(2);
-const VAL = (f, def=null) => { const i = argv.indexOf(f); return i>-1 ? argv[i+1] : def; };
+const VAL = (f, def = null) => { const i = argv.indexOf(f); return i > -1 ? argv[i + 1] : def; };
 
 const TEXT  = VAL('--text', 'Abraham of London');
-const SIZE  = Number(VAL('--size', '840'));
-const PAD   = Number(VAL('--pad', '80'));
-const COLOR = VAL('--color', '#0B1221');
-const BG    = VAL('--bg', '#FFFFFF');
+const SIZE  = Number(VAL('--size', '880'));      // slightly larger for luxe feel
+const PAD   = Number(VAL('--pad', '100'));       // more breathing room
+const COLOR = VAL('--color', '#0B2E1F');         // Deep Forest ink
+const BG    = VAL('--bg', '#FAF7F2');            // Warm Cream background for JPG
 
 const FONT_PATH = path.join(process.cwd(), 'assets/fonts/Signature.ttf');
 const OUT_DIR   = path.join(process.cwd(), 'public/brand/signature');
-fs.mkdirSync(OUT_DIR, { recursive: true });
 
 // SVG using embedded @font-face to ensure rendering with sharp
-const svg = (w,h) => `
+const svg = (w, h) => `
 <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
@@ -55,8 +55,19 @@ const svg = (w,h) => `
 </svg>
 `;
 
+async function fileExists(filePath) {
+  try {
+    await fsp.access(filePath, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function main() {
-  if (!fs.existsSync(FONT_PATH)) {
+  await fsp.mkdir(OUT_DIR, { recursive: true }); // Use async mkdir
+
+  if (!(await fileExists(FONT_PATH))) {
     console.error(`Font not found at ${FONT_PATH}
 Please add an open-licensed cursive TTF as assets/fonts/Signature.ttf (e.g., OFL: Great Vibes).`);
     process.exit(1);
@@ -79,16 +90,16 @@ Please add an open-licensed cursive TTF as assets/fonts/Signature.ttf (e.g., OFL
     .toBuffer();
 
   const outPng = path.join(OUT_DIR, 'AbrahamOfLondon-signature.png');
-  fs.writeFileSync(outPng, pngPadded);
+  await fsp.writeFile(outPng, pngPadded); // Use async writeFile
 
   // Also create a high-quality JPEG on white for places that need JPEG
   const outJpg = path.join(OUT_DIR, 'AbrahamOfLondon-signature.jpg');
   await sharp(pngPadded)
     .flatten({ background: BG })
     .jpeg({ quality: 96, mozjpeg: true })
-    .toFile(outJpg);
+    .toFile(outJpg); // sharp's toFile is already promise-based
 
   console.log('Signature saved:\n ', path.relative(process.cwd(), outPng), '\n ', path.relative(process.cwd(), outJpg));
 }
 
-main().catch((e)=>{ console.error(e); process.exit(2); });
+main().catch((e) => { console.error(e); process.exit(2); });

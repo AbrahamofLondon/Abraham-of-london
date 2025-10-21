@@ -4,13 +4,13 @@
 // typographic image where the field points to.
 //
 // Usage:
-//   node scripts/fix-images.mjs
-//   node scripts/fix-images.mjs --dry
+//    node scripts/fix-images.mjs
+//    node scripts/fix-images.mjs --dry
 //
 // Requires: sharp, gray-matter, fast-glob
-//   npm i -D sharp gray-matter fast-glob
 
-import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import { constants } from 'node:fs'; // Used for fsp.access checks
 import path from 'node:path';
 import sharp from 'sharp';
 import matter from 'gray-matter';
@@ -20,19 +20,38 @@ const ROOT = process.cwd();
 const DRY = process.argv.includes('--dry');
 
 const TARGET_FIELDS = [
-  { field: 'coverImage', w: 1200, h: 1600, ext: 'jpg' },   // book covers
-  { field: 'heroImage',  w: 1600, h: 900,  ext: 'jpg' },   // event/blog hero
-  // Optional: generate ogImage if you store it in fm as 'ogImage'
-  { field: 'ogImage',    w: 1200, h: 630,  ext: 'jpg' }    // social share
+  { field: 'coverImage', w: 1200, h: 1600, ext: 'jpg' },    // book covers
+  { field: 'heroImage',  w: 1600, h: 900,  ext: 'jpg' },    // event/blog hero
+  { field: 'ogImage',    w: 1200, h: 630,  ext: 'jpg' }     // social share
 ];
 
-function exists(p) { try { return fs.existsSync(p); } catch { return false; } }
-function ensureDir(d) { fs.mkdirSync(d, { recursive: true }); }
+/**
+ * Checks if a file exists using async fsp.access.
+ * @param {string} p - Absolute path.
+ * @returns {Promise<boolean>}
+ */
+async function exists(p) { 
+  try { 
+    // Check if file exists and is readable/writable
+    await fsp.access(p, constants.R_OK); 
+    return true; 
+  } catch { 
+    return false; 
+  } 
+}
+
+/**
+ * Ensures directory exists using async fsp.mkdir.
+ * @param {string} d - Directory path.
+ */
+async function ensureDir(d) { 
+  await fsp.mkdir(d, { recursive: true }); 
+}
 
 function pickPalette(kind) {
   // Simple palette selector; tweak to your brand
   if (kind === 'Book')    return ['#0B1221', '#2C3E94', '#A5B4FC']; // deep navy → indigo
-  if (kind === 'Event')   return ['#1B1B1B', '#444',    '#C0C0C0']; // neutral darks
+  if (kind === 'Event')   return ['#1B1B1B', '#444',     '#C0C0C0']; // neutral darks
   if (kind === 'Strategy')return ['#0C2411', '#1E7A46', '#B9E2C6']; // green
   if (kind === 'Post')    return ['#111827', '#374151', '#9CA3AF']; // gray scale
   return ['#111827', '#374151', '#9CA3AF'];
@@ -67,19 +86,27 @@ function svgFor({ w, h, title, subtitle, type }) {
 
 async function generateImage(absOut, w, h, title, subtitle, type) {
   const svg = svgFor({ w, h, title, subtitle, type });
-  ensureDir(path.dirname(absOut));
+  await ensureDir(path.dirname(absOut)); // Use async ensureDir
   if (DRY) {
     console.log(`[dry] would write: ${absOut}`);
     return;
   }
-  await sharp(Buffer.from(svg)).jpeg({ quality: 92 }).toFile(absOut);
+  // Sharp's .toFile is already promise-based
+  await sharp(Buffer.from(svg)).jpeg({ quality: 92 }).toFile(absOut); 
   console.log(`✔ wrote ${path.relative(ROOT, absOut)}`);
 }
 
 async function main() {
   const files = await fg(['content/**/*.{md,mdx}'], { dot: false });
   for (const rel of files) {
-    const raw = fs.readFileSync(rel, 'utf8');
+    let raw;
+    try {
+      raw = await fsp.readFile(rel, 'utf8'); // Use async readFile
+    } catch (e) {
+      console.error(`Error reading file ${rel}: ${e.message}`);
+      continue;
+    }
+    
     const { data: fm } = matter(raw);
     const type = fm.type || 'Post';
     const title = fm.title || path.basename(rel);
@@ -91,9 +118,14 @@ async function main() {
     for (const spec of TARGET_FIELDS) {
       const v = fm[spec.field];
       if (!v || typeof v !== 'string') continue;
+      
       // Only create if missing
-      const abs = v.startsWith('/') ? path.join(ROOT, v) : path.join(path.dirname(path.join(ROOT, rel)), v);
-      if (!exists(abs)) {
+      // Logic for determining absolute path is correct
+      const abs = v.startsWith('/') 
+        ? path.join(ROOT, v) 
+        : path.join(path.dirname(path.join(ROOT, rel)), v);
+      
+      if (!(await exists(abs))) { // Use async exists
         await generateImage(abs, spec.w, spec.h, title, subtitle, type);
       }
     }
