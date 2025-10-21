@@ -1,0 +1,54 @@
+// pages/resources/[slug].tsx
+import type { GetStaticPaths, GetStaticProps } from "next";
+// Assuming 'contentlayer/generated' provides the correct types and data
+import { allResources, type Resource } from "contentlayer/generated";
+import { makeContentPage } from "@/components/makeContentPage";
+// Import your central MDX component map
+import { mdxComponents } from "@/components/MdxComponents";
+
+// 1. Define the component's required props type
+type Props = { doc: Resource };
+
+// 2. Configure the wrapped page component
+// We pass the mdxComponents here so the wrapper can correctly render the content.
+const ResourceContentPage = makeContentPage<
+  // Fix the generic type: Contentlayer's 'Resource' is enough, 
+  // but we must map 'excerpt' to 'description' later.
+  Resource 
+>({ 
+    // Pass the MDX components map to the wrapper
+    components: mdxComponents 
+});
+
+// 3. The Page Component
+export default function ResourcePage({ doc }: Props) {
+  // Map Contentlayer's 'excerpt' to the generic 'description' prop expected by the wrapper
+  const docWithDescription = {
+    ...doc,
+    // Use a nullish coalescing check to ensure description is set if excerpt exists
+    description: doc.excerpt ?? doc.description, 
+  };
+  
+  // Render the wrapped component, passing the mapped document data
+  return <ResourceContentPage doc={docWithDescription} />;
+}
+
+// 4. Data Fetching (Static Generation)
+
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: allResources
+    .filter((r) => !!r.slug)
+    // TypeScript check: we already filtered for truthy slugs, so assert non-null
+    .map((r) => ({ params: { slug: r.slug! } })),
+  fallback: false,
+});
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.slug || "");
+  const resource = allResources.find((r) => r.slug === slug);
+  
+  if (!resource) return { notFound: true };
+  
+  // Prop name is 'doc' to match the ContentPage's expected prop
+  return { props: { doc: resource } };
+};

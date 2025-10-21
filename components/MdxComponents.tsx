@@ -79,7 +79,7 @@ function SmartImage({ src = "", alt = "", sizes = "100vw", ...rest }: SmartImage
   }
 
   // Remote image fallback: use plain <img> for maximum safety without extra config
-  // If you have remote patterns configured in next.config, you can also use <Image> here.
+  // This is where the linter warning is generated.
   // @ts-ignore allow decoding on <img>
   return <img src={src} alt={alt} decoding="async" loading="lazy" style={{ maxWidth: "100%", height: "auto" }} {...(rest as any)} />;
 }
@@ -154,10 +154,17 @@ const makeHeading =
     );
   };
 
+// FIX: The error "Component definition is missing display name" occurs because 
+// the components H1, H2, H3, and H4 are created by calling makeHeading, which returns 
+// an anonymous function component.
 const H1 = makeHeading("h1");
+H1.displayName = 'H1'; // <--- FIX APPLIED
 const H2 = makeHeading("h2");
+H2.displayName = 'H2'; // <--- FIX APPLIED
 const H3 = makeHeading("h3");
+H3.displayName = 'H3'; // <--- FIX APPLIED
 const H4 = makeHeading("h4");
+H4.displayName = 'H4'; // <--- FIX APPLIED
 
 // ------------------------------
 // Tables (responsive wrapper)
@@ -275,12 +282,12 @@ export type MdxComponents = typeof mdxComponents;
 // Usage examples:
 //
 // With next-mdx-remote:
-//   <MDXRemote {...source} components={mdxComponents} />
+//    <MDXRemote {...source} components={mdxComponents} />
 //
 // With Contentlayer (pages directory):
-//   import { useMDXComponent } from "next-contentlayer2/hooks";
-//   const MDX = useMDXComponent(code);
-//   return <MDX components={mdxComponents} />;
+//    import { useMDXComponent } from "next-contentlayer2/hooks";
+//    const MDX = useMDXComponent(code);
+//    return <MDX components={mdxComponents} />;
 //
 // Safety notes:
 // - External links open in new tab with rel=noopener.
@@ -289,4 +296,3 @@ export type MdxComponents = typeof mdxComponents;
 // - Headings get stable, slugified anchors.
 // - All components are SSR-friendly (no window/document access during render).
 // ------------------------------
-
