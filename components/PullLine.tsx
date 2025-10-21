@@ -1,4 +1,3 @@
-components/PullLine.tsx
 import * as React from "react";
 import { LineChart, LucideIcon } from "lucide-react"; // Using a default Lucide icon
 
