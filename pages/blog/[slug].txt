@@ -1,3 +1,4 @@
+// ./pages/blog/[slug].tsx
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -41,3 +42,4 @@ export default function BlogPost({ frontmatter, mdxSource }) {
     </article>
   );
 }
+
