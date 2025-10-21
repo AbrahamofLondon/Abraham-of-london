@@ -1,6 +1,5 @@
 // pages/print/event/[slug].tsx
 import { allEvents, Event } from "contentlayer2/generated"; // 1. Updated import path and imported 'Event' type
-import { useMDXComponent } from "next-contentlayer/hooks";
 import BrandFrame from "@/components/print/BrandFrame";
 import { GetStaticProps, GetStaticPaths } from "next"; // 2. Imported Next.js types
 

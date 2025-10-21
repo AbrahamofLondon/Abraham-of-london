@@ -1,6 +1,6 @@
 pages/print/strategy/[slug].tsx
 import { allStrategys as allStrategies } from "contentlayer/generated"; // contentlayer pluralizes oddly
-import { useMDXComponent } from "next-contentlayer/hooks";
+import { allPosts } from 'contentlayer2/generated'; // or similar
 import BrandFrame from "@/components/print/BrandFrame";
 
 export async function getStaticPaths() {

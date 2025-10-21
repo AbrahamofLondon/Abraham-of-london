@@ -1,6 +1,5 @@
 // pages/print/post/[slug].tsx
 import { allPosts, Post } from "contentlayer2/generated"; // 1. Corrected import & imported Post type
-import { useMDXComponent } from "next-contentlayer/hooks";
 import BrandFrame from "@/components/print/BrandFrame";
 import { GetStaticProps, GetStaticPaths } from "next"; // 2. Imported Next.js types
 
