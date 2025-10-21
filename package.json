@@ -32,17 +32,15 @@
     "validate:downloads": "node scripts/validate-downloads.mjs",
     "validate:downloads:strict": "node scripts/validate-downloads.mjs --strict",
     "run:downloads": "node scripts/run-validate-downloads.mjs",
-    "downloads:build-safe": "node scripts/ensure-download-aliases.mjs && npm run seed:downloads && npm run run:downloads || true",
+    "downloads:build-safe": "node scripts/ensure-download-aliases.mjs && npm run seed:downloads && (node scripts/run-validate-downloads.mjs || node -e \"process.exit(0)\")",
     "covers:events": "node scripts/covers/make-event-covers.mjs",
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
     "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
     "downloads:export": "node scripts/print-pdfs.mjs",
     "fix:downloads-frontmatter": "node scripts/fix-missing-download-frontmatter.mjs",
-    "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build",
+    "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (node scripts/run-validate-downloads.mjs || node -e \"process.exit(0)\") && npm run build",
     "ci:downloads": "node scripts/run-validate-downloads.mjs",
     "audit:images": "node scripts/audit-images.mjs"
-    "downloads:build-safe": "node scripts/ensure-download-aliases.mjs && npm run seed:downloads && (node scripts/run-validate-downloads.mjs || node -e \"process.exit(0)\")",
-    "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (node scripts/run-validate-downloads.mjs || node -e \"process.exit(0)\") && npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
