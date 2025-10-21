@@ -17,7 +17,8 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
 
 export default function StrategyPrint({ doc }: { doc: any }) {
   if (!doc) return null;
-  const MDX = useMDXComponent(doc.body.code);
+  const Component = useMDXComponent(document?.body.code)
+  if (!document) return null
   return (
     <BrandFrame
       title={doc.title}
