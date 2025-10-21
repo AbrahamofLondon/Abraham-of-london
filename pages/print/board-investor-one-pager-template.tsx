@@ -1,9 +1,9 @@
 // pages/print/board-investor-one-pager-template.tsx
 import * as React from "react";
-// FIX: Using '../../' to correctly resolve the path from pages/print/ to components/
-import BrandFrame from "../../components/print/BrandFrame";
-import PullLine from '../../components/PullLine';
-import EmbossedBrandMark from "../../components/print/EmbossedBrandMark";
+// FIX: Using '../../' AND adding the explicit '.tsx' file extension
+import BrandFrame from "../../components/print/BrandFrame.tsx";
+import PullLine from '../../components/PullLine.tsx';
+import EmbossedBrandMark from "../../components/print/EmbossedBrandMark.tsx";
 
 export default function BoardInvestorTemplate() {
   return (
@@ -98,8 +98,6 @@ export default function BoardInvestorTemplate() {
           alt="Abraham of London Brand Mark"
           width={80}
           height={80}
-          // These props might not exist in the simple component provided earlier,
-          // but keeping them here since they were in the original JSX.
           effect="deboss"
           className="inline-block"
           baseColor="transparent"
