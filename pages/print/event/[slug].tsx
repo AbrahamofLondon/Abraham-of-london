@@ -21,7 +21,7 @@ interface EventPrintProps {
 }
 
 export default function EventPrint({ doc }: EventPrintProps) {
-  // Always call the hook (even if doc is null) to keep hook order stable
+  // Keep hook order stable by calling it unconditionally
   const code = doc?.body?.code ?? "";
   const MDXContent = useMDXComponent(code);
 

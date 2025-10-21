@@ -1,49 +1,54 @@
-// components/EmbossedSign.tsx
-import * as React from "react";
 import Image from "next/image";
+import * as React from "react";
 
-type EmbossedSignProps = {
-  src: string; // Path to the SVG file (logo or signature)
-  alt: string;
-  className?: string;
-  width?: number;
-  height?: number;
-  /** 'emboss' (raised) or 'deboss' (pressed in) */
-  effect?: "emboss" | "deboss";
-  /** Base color for the effect (e.g., '#0b2e1f' for your forest color) */
-  baseColor?: string;
-};
+type Effect = "emboss" | "deboss" | "none";
 
 export default function EmbossedSign({
-  src,
-  alt,
-  className,
-  width = 150,
-  height = 30,
-  effect = "emboss",
-  baseColor = "var(--color-primary, #0b2e1f)",
-}: EmbossedSignProps) {
-  const isEmboss = effect === "emboss";
-  const shadowStyle = {
-    filter: isEmboss
-      ? `drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.4)) drop-shadow(-1px -1px 0 rgba(0, 0, 0, 0.2))`
-      : `drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.4))`,
-    // Applied to SVG via `fill-current` (if the SVG uses currentColor)
-    color: baseColor,
-  } as React.CSSProperties;
-
+  src = "/assets/images/signature/abraham-of-london-cursive.svg",
+  alt = "Abraham of London Signature",
+  width = 120,
+  height = 36,
+  effect = "deboss",
+  baseColor = "transparent",
+  className = "",
+}: {
+  src?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  effect?: Effect;
+  baseColor?: string;
+  className?: string;
+}) {
   return (
-    <div className={className} style={{ width, height }}>
+    <span className={`inline-block ${className}`} style={{ position: "relative" }}>
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 4,
+          background: baseColor,
+          boxShadow:
+            effect === "deboss"
+              ? "inset 1.5px 1.5px 3px rgba(0,0,0,.25), inset -1.5px -1.5px 3px rgba(255,255,255,.35)"
+              : effect === "emboss"
+              ? "1.5px 1.5px 2.5px rgba(0,0,0,.18), -1.5px -1.5px 2.5px rgba(255,255,255,.4)"
+              : "none",
+        }}
+      />
       <Image
         src={src}
         alt={alt}
         width={width}
         height={height}
-        className="w-full h-full fill-current"
-        style={shadowStyle}
-        loading="lazy"
-        decoding="async"
+        style={{
+          position: "relative",
+          display: "block",
+          filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))",
+        }}
+        priority
       />
-    </div>
+    </span>
   );
 }
