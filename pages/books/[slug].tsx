@@ -8,7 +8,7 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import Layout from "@/components/Layout";
 // ⬇️ use the named export
-import { MDXComponents } from "@/components/MDXComponents";
+import { components } from "@/components/MdxComponents";
 import { getBookBySlug, getBookSlugs } from "@/lib/books";
 
 const Comments = dynamic(() => import("@/components/Comments"), { ssr: false });
