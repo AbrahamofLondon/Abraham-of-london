@@ -1,3 +1,5 @@
+# Define the package.json content (Use the full, correct JSON from the clean snippet)
+$pkg = @'
 {
    "name": "codex-setup",
    "version": "1.0.0",
@@ -17,10 +19,12 @@
      "prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs",
      "fix:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs",
      "check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check",
+     "check:pkg": "node scripts/check-json.mjs",
      "guard:css": "node scripts/postcss-guard-dryrun.mjs",
      "fix:css-slash": "node scripts/postcss-guard-dryrun.mjs --write",
      "fix:classnames-slash": "node scripts/codemods/convert-classnames-slash-opacity.mjs",
      "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash && npm run fix:classnames-slash",
+     "fix:bom": "node scripts/strip-bom-lf.mjs"
      "check:mdx": "node scripts/check-mdx-for-html.js",
      "pdfs": "node scripts/make-pdfs.mjs",
      "print:serve": "next start -p 5555",
@@ -37,6 +41,7 @@
      "fix:downloads-frontmatter": "node scripts/fix-missing-download-frontmatter.mjs",
      "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build",
      "ci:downloads": "node scripts/run-validate-downloads.mjs"
+     "...": "...",
    },
    "dependencies": {
      "@emotion/is-prop-valid": "^1.4.0",
@@ -106,3 +111,8 @@
      "typescript": "5.5.4"
    }
 }
+'@
+[System.IO.File]::WriteAllText("$PWD\package.json", $pkg, [System.Text.UTF8Encoding]::new($false))
+
+# Quick JSON sanity check
+node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json is valid')"
