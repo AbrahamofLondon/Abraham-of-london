@@ -4,7 +4,6 @@ import Head from "next/head";
 import * as React from "react";
 import EmbossedBrandMark from "../../components/EmbossedBrandMark";
 import EmbossedSign from "../../components/EmbossedSign";
-
 /* --- Helper Components for Typography Styling --- */
 
 interface PullLineProps {

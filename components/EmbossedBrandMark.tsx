@@ -1,44 +1,46 @@
-// /components/print/EmbossedBrandMark.tsx
-
+// components/EmbossedBrandMark.tsx
 import * as React from "react";
-// Import the base component
-import EmbossedSign from "../EmbossedSign"; 
+import Image from "next/image";
+import clsx from "clsx";
 
-// Define the specific path for your brand mark/logo
-const BRAND_MARK_SRC = "/logos/brand-mark-logo.svg"; 
-
-type EmbossedBrandMarkProps = {
-  // Allow overriding specific props, while hardcoding the src and alt
+type EmbossedMarkProps = {
+  src: string;
+  alt: string;
   className?: string;
-  width?: number;
-  height?: number;
-  effect?: 'emboss' | 'deboss';
+  width: number;
+  height: number;
+  effect?: "emboss" | "deboss";
   baseColor?: string;
 };
 
-/**
- * A wrapper component that specifically renders the brand's logo 
- * using the EmbossedSign component with default brand settings.
- */
 export default function EmbossedBrandMark({
+  src,
+  alt,
   className,
-  width = 80, // Smaller default size, typical for a logo/mark
-  height = 80,
-  effect = 'deboss', // Often looks better for small logos
-  baseColor,
-}: EmbossedBrandMarkProps) {
+  width,
+  height,
+  effect = "emboss",
+  baseColor = "var(--color-warmWhite, #faf7f2)",
+}: EmbossedMarkProps) {
+  const isEmboss = effect === "emboss";
+  const shadowClasses = isEmboss
+    ? "shadow-[1px_1px_1px_rgba(255,255,255,0.7),-1px_-1px_1px_rgba(0,0,0,0.2)]"
+    : "shadow-[1px_1px_1px_rgba(0,0,0,0.2),-1px_-1px_1px_rgba(255,255,255,0.7)]";
+
   return (
-    <EmbossedSign
-      // Hardcoded brand details
-      src={BRAND_MARK_SRC}
-      alt="Abraham of London Brand Mark"
-      
-      // Inherited props
-      className={className}
-      width={width}
-      height={height}
-      effect={effect}
-      baseColor={baseColor}
-    />
+    <div
+      className={clsx("relative flex items-center justify-center p-2 rounded-lg", shadowClasses, className)}
+      style={{ width, height, backgroundColor: baseColor }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        width={Math.round(width * 0.8)}
+        height={Math.round(height * 0.8)}
+        className="object-contain"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
   );
 }
