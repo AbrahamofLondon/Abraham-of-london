@@ -10,13 +10,18 @@ function toKebabBase(name) {
   return name
     .replace(/\.pdf$/i, "")
     .replace(/[_\s]+/g, "-")
-    .replace(/[A-Z]+(?![a-z])/g, (m) => m.toLowerCase())
-    .replace(/[A-Z]/g, (m) => "-" + m.toLowerCase())
+    // split CamelCase → kebab-case (handles caps runs and singles)
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    .toLowerCase()
     .replace(/^-+/, "")
     .replace(/-+/g, "-");
 }
 
-async function exists(p) { try { await fsp.access(p, fs.constants.F_OK); return true; } catch { return false; } }
+async function exists(p) {
+  try { await fsp.access(p, fs.constants.F_OK); return true; }
+  catch { return false; }
+}
 
 async function copyIfMissing(srcAbs, destAbs) {
   if (!(await exists(srcAbs))) return false;
@@ -29,27 +34,29 @@ async function copyIfMissing(srcAbs, destAbs) {
 async function main() {
   await fsp.mkdir(DL_DIR, { recursive: true });
   const entries = await fsp.readdir(DL_DIR, { withFileTypes: true });
-  const pdfs = entries.filter(e => e.isFile() && e.name.toLowerCase().endsWith(".pdf")).map(e => e.name);
+  const pdfs = entries
+    .filter(e => e.isFile() && e.name.toLowerCase().endsWith(".pdf"))
+    .map(e => e.name);
 
   let created = 0;
 
   for (const name of pdfs) {
-    const abs = path.join(DL_DIR, name);
+    const srcAbs = path.join(DL_DIR, name);
     const kebab = `${toKebabBase(name)}.pdf`;
     const lower = name.toLowerCase();
 
-    // Specific validator expectation
+    // Specific alias needed by your validator
     if (name === "Leaders_Cue_Card.pdf") {
       const want = path.join(DL_DIR, "leaders-cue-card.pdf");
-      if (await copyIfMissing(abs, want)) created++;
+      if (await copyIfMissing(srcAbs, want)) created++;
     }
 
-    // Generic aliases
-    if (await copyIfMissing(abs, path.join(DL_DIR, kebab))) created++;
-    if (await copyIfMissing(abs, path.join(DL_DIR, lower))) created++;
+    // Generic helpful aliases
+    if (await copyIfMissing(srcAbs, path.join(DL_DIR, kebab))) created++;
+    if (await copyIfMissing(srcAbs, path.join(DL_DIR, lower))) created++;
   }
 
-  // Safety: ensure leaders-cue-card.pdf exists
+  // Ensure leaders-cue-card.pdf exists (as a tiny valid PDF if still missing)
   const expected = path.join(DL_DIR, "leaders-cue-card.pdf");
   if (!(await exists(expected))) {
     const minimalPdf = Buffer.from(
