@@ -2,7 +2,9 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=20 <21" },
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "prebuild": "npm run check:mdx && node scripts/postcss-guard-dryrun.mjs --write && node scripts/convert-tailwind-slash-opacity.mjs && npm run downloads:build-safe",
     "dev": "next dev",
