@@ -1,48 +1,50 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "es6"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": false,
-    "downlevelIteration": true,
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
-    "baseUrl": ".",
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "paths": {
-      "@/*": ["*"],
-      "@/lib/*": ["lib/*"],
-      "@/components/*": ["components/*"],
-      "@/styles/*": ["styles/*"],
-      "@/public/*": ["public/*"],
-      "@/config/*": ["config/*"],
-      "@netlify/functions": ["node_modules/@netlify/functions"],
-      "@netlify/emails": ["node_modules/@netlify/emails"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
-    },
-    "plugins": [{ "name": "next" }]
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts",
-    ".next/types/**/*.ts",
-    "netlify/**/*.ts",
-    "netlify/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    ".contentlayer/generated/**/*.ts"
-  ],
-  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"]
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": false,
+    "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "paths": {
+      // ⚡ FIX 1: Ensure root alias maps correctly from baseUrl
+      "@/*": ["./*"], 
+      // ⚡ FIX 2: Ensure all sub-aliases map correctly from baseUrl
+      "@/lib/*": ["./lib/*"],
+      "@/components/*": ["./components/*"],
+      "@/styles/*": ["./styles/*"],
+      "@/public/*": ["./public/*"],
+      "@/config/*": ["./config/*"],
+      "@netlify/functions": ["./node_modules/@netlify/functions"],
+      "@netlify/emails": ["./node_modules/@netlify/emails"],
+      "contentlayer/generated": ["./.contentlayer/generated"]
+    },
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts",
+    ".next/types/**/*.ts",
+    "netlify/**/*.ts",
+    "netlify/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    ".contentlayer/generated/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"]
 }
