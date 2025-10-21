@@ -1,10 +1,12 @@
 // pages/print/book/[slug].tsx
+
 import { allBooks, Book } from "contentlayer/generated";
 import BrandFrame from "@/components/print/BrandFrame";
 import { GetStaticProps, GetStaticPaths } from "next";
-import { useMDXComponent } from "next-contentlayer/hooks"; // ⚡ FIX: Added MDX hook import
-import { components } from "@/components/MdxComponents"; // ⚡ FIX: Added MDX component map import
-
+import { useMDXComponent } from "next-contentlayer2/hooks"; // Corrected MDX hook package name
+import { components } from "@/components/MdxComponents"; 
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; // Correct alias path
+import EmbossedSign from "@/components/print/EmbossedSign"; // Correct alias path
 /**
  * Generates the list of static paths for all book documents.
  */

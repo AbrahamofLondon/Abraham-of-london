@@ -2,10 +2,10 @@
 
 import Head from "next/head";
 import * as React from "react";
-// Assuming 'components' is at the project root or configured via jsconfig/tsconfig
-// If this path fails again, try: import EmbossedSign from "@/components/print/EmbossedSign";
-import EmbossedBrandMark from "../../components/print/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/print/EmbossedSign";
+// FIX: Changed relative path from '../../' to the most probable correct path '../'
+// This assumes the component is in 'components/print/', which is a sibling of 'pages/print/'s parent.
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 /* --- Helper Components for Typography Styling --- */
 
@@ -130,7 +130,7 @@ const EntrepreneurSurvivalChecklist = () => {
                 }
 
                 @page { size: A4; margin: 15mm; }
-                
+                
                 /* Ensure exact colors for printing */
                 @media print {
                     * {
@@ -139,12 +139,12 @@ const EntrepreneurSurvivalChecklist = () => {
                     }
                 }
 
-                html, body { 
-                    background: white; 
-                    margin: 0; 
-                    padding: 0; 
+                html, body { 
+                    background: white; 
+                    margin: 0; 
+                    padding: 0; 
                     /* Set base font for print consistency */
-                    font-family: ui-sans-serif, system-ui, sans-serif; 
+                    font-family: ui-sans-serif, system-ui, sans-serif; 
                 }
 
                 .sheet { 
@@ -263,9 +263,9 @@ const EntrepreneurSurvivalChecklist = () => {
 
                 /* Screen View Overrides */
                 @media screen { 
-                    body { 
-                        background: #f6f6f6; 
-                        padding: 2rem; 
+                    body { 
+                        background: #f6f6f6; 
+                        padding: 2rem; 
                     } 
                     .sheet { 
                         background: #fff; 
