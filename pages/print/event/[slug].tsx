@@ -2,17 +2,13 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { allEvents, type Event } from "contentlayer/generated";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from '@/components/MdxComponents';
+import { components } from "@/components/MdxComponents";
 import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allEvents.map((e) => ({ params: { slug: e.slug } })),
-    fallback: false,
-  };
-};
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: allEvents.map((e) => ({ params: { slug: e.slug } })),
+  fallback: false,
+});
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
@@ -25,9 +21,11 @@ interface EventPrintProps {
 }
 
 export default function EventPrint({ doc }: EventPrintProps) {
-  if (!doc) return null;
+  // Always call the hook (even if doc is null) to keep hook order stable
+  const code = doc?.body?.code ?? "";
+  const MDXContent = useMDXComponent(code);
 
-  const MDXContent = useMDXComponent(doc.body.code);
+  if (!doc) return <p>Loading…</p>;
 
   const when = doc.date
     ? new Date(doc.date).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })

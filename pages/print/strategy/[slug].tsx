@@ -1,10 +1,7 @@
-// pages/print/strategy/[slug].tsx
 import { allStrategies, type Strategy } from "contentlayer/generated";
+import BrandFrame from "@/components/print/BrandFrame";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 import { components } from "@/components/MdxComponents";
-import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign";
 
 export async function getStaticPaths() {
   return {
@@ -18,14 +15,13 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   return { props: { doc } };
 }
 
-interface StrategyPrintProps {
-  doc: Strategy | null;
-}
+interface Props { doc: Strategy | null }
 
-export default function StrategyPrint({ doc }: StrategyPrintProps) {
-  if (!doc) return null;
+export default function StrategyPrint({ doc }: Props) {
+  const code = doc?.body?.code ?? "";
+  const MDXContent = useMDXComponent(code);
 
-  const MDXContent = useMDXComponent(doc.body.code);
+  if (!doc) return <p>Loading…</p>;
 
   return (
     <BrandFrame
@@ -36,7 +32,7 @@ export default function StrategyPrint({ doc }: StrategyPrintProps) {
       pageSize="A4"
       marginsMm={18}
     >
-      <article className="prose max-w-none mx-auto">
+      <article className="prose mx-auto max-w-none">
         <h1 className="font-serif">{doc.title}</h1>
         {doc.description && <p className="text-lg">{doc.description}</p>}
         <MDXContent components={components as any} />

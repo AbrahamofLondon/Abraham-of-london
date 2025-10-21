@@ -1,18 +1,13 @@
-// pages/print/post/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
 import { allPosts, type Post } from "contentlayer/generated";
+import BrandFrame from "@/components/print/BrandFrame";
+import type { GetStaticProps, GetStaticPaths } from "next";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 import { components } from "@/components/MdxComponents";
-import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allPosts.map((p) => ({ params: { slug: p.slug } })),
-    fallback: false,
-  };
-};
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: allPosts.map((p) => ({ params: { slug: p.slug } })),
+  fallback: false,
+});
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
@@ -20,14 +15,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return { props: { doc } };
 };
 
-interface PostPrintProps {
-  doc: Post | null;
-}
+interface Props { doc: Post | null }
 
-export default function PostPrint({ doc }: PostPrintProps) {
-  if (!doc) return null;
+export default function PostPrint({ doc }: Props) {
+  const code = doc?.body?.code ?? "";
+  const MDXContent = useMDXComponent(code);
 
-  const MDXContent = useMDXComponent(doc.body.code);
+  if (!doc) return <p>Loading…</p>;
 
   return (
     <BrandFrame
@@ -38,7 +32,7 @@ export default function PostPrint({ doc }: PostPrintProps) {
       pageSize="A4"
       marginsMm={18}
     >
-      <article className="prose max-w-none mx-auto">
+      <article className="prose mx-auto max-w-none">
         <h1 className="font-serif">{doc.title}</h1>
         {doc.description && <p className="text-lg">{doc.description}</p>}
         <MDXContent components={components as any} />
