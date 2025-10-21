@@ -1,62 +1,49 @@
 // pages/print/book/[slug].tsx
-
-import { allBooks, Book } from "contentlayer/generated";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import { allBooks, type Book } from "contentlayer/generated";
+import { useMDXComponent } from "next-contentlayer2/hooks";
+import { components } from "@/components/MdxComponents";
 import BrandFrame from "@/components/print/BrandFrame";
-import { GetStaticProps, GetStaticPaths } from "next";
-import { useMDXComponent } from "next-contentlayer2/hooks"; // Corrected MDX hook package name
-import { components } from "@/components/MdxComponents"; 
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; // Correct alias path
-import EmbossedSign from "@/components/print/EmbossedSign"; // Correct alias path
-/**
- * Generates the list of static paths for all book documents.
- */
-export const getStaticPaths: GetStaticPaths = async () => {
-  return { 
-    paths: allBooks.map(b => ({ params: { slug: b.slug } })), 
-    fallback: false 
-  };
-}
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
 
-/**
- * Fetches the book data based on the slug.
- */
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: allBooks.map((b) => ({ params: { slug: b.slug } })),
+    fallback: false,
+  };
+};
+
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
-  const doc = allBooks.find(b => b.slug === slug) || null;
-  return { 
-    props: { doc } 
-  };
-}
+  const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
+  const doc = allBooks.find((b) => b.slug === slug) || null;
+  return { props: { doc } };
+};
 
 interface BookPrintProps {
-  doc: Book | null; 
+  doc: Book | null;
 }
 
-/**
- * Component to render a book document in a print-friendly format.
- */
 export default function BookPrint({ doc }: BookPrintProps) {
-  // ⚡ FIX 1: Initial check for missing doc
-  if (!doc) return <p>Loading...</p>;
-  
-  // ⚡ FIX 2: Call the hook UNCONDITIONALLY using 'doc'
-  const MDXContent = useMDXComponent(doc.body.code)
-  
-  return (
-    <BrandFrame
-      title={doc.title}
-      subtitle={doc.description || ""}
-      author={doc.author}
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={20}
-    >
-      <article className="prose max-w-none mx-auto">
-        <h1 className="font-serif">{doc.title}</h1>
-        {doc.description && <p className="text-lg">{doc.description}</p>}
-        {/* ⚡ FIX 3: Render the component returned by the hook */}
-        <MDXContent components={components as any} /> 
-      </article>
-    </BrandFrame>
-  );
+  if (!doc) return null; // early return before any hooks
+
+  // Hook called unconditionally for all non-null renders
+  const MDXContent = useMDXComponent(doc.body.code);
+
+  return (
+    <BrandFrame
+      title={doc.title}
+      subtitle={doc.description || ""}
+      author={doc.author}
+      date={doc.date}
+      pageSize="A4"
+      marginsMm={20}
+    >
+      <article className="prose max-w-none mx-auto">
+        <h1 className="font-serif">{doc.title}</h1>
+        {doc.description && <p className="text-lg">{doc.description}</p>}
+        <MDXContent components={components as any} />
+      </article>
+    </BrandFrame>
+  );
 }
