@@ -73,3 +73,11 @@ scripts/output/
 github-recovery-codes.txt
 * text=auto eol=lf
 
+# enforce text and LF for scripts and JSON
+*.mjs text eol=lf
+*.js  text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.tsx text eol=lf
+*.ts  text eol=lf
+
