@@ -7,7 +7,7 @@ import * as React from "react";
 
 import Layout from "@/components/Layout";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
-import MDXComponents from "@/components/MDXComponents";
+import components from "@/components/MdxComponents";
 import SEOHead from "@/components/SEOHead";
 import { absUrl } from "@/lib/siteConfig";
 

@@ -1,4 +1,4 @@
-﻿// pages/events/[slug].tsx
+// pages/events/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
 import Head from "next/head";
@@ -7,7 +7,7 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
-import { MDXComponents } from "@/components/MDXComponents";
+import { components } from "@/components/MdxComponents";
 import EventResources from "@/components/events/EventResources";
 // FIX: Use namespace import to prevent "Exported identifiers must be unique" error
 import * as EventsData from "@/lib/server/events-data";
