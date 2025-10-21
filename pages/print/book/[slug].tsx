@@ -2,7 +2,7 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { allBooks, type Book } from "contentlayer/generated";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import { components } from '@/components/MdxComponents';
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
