@@ -2,8 +2,8 @@
 import * as React from "react";
 // FIX: Changed alias @/ to relative path ../../ for correct Webpack resolution
 import BrandFrame from "../../components/print/BrandFrame";
-import PullLine from '../../components/PullLine';
-import EmbossedBrandMark from "../../components/print/EmbossedBrandMark";
+import PullLine from '../components/PullLine';
+import EmbossedBrandMark from '../components/print/EmbossedBrandMark';
 
 export default function BoardInvestorTemplate() {
   return (
