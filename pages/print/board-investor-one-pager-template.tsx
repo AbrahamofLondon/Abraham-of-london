@@ -1,9 +1,9 @@
 // pages/print/board-investor-one-pager-template.tsx
 import * as React from "react";
-// FIX: Changed alias @/ to relative path ../../ for correct Webpack resolution
+// FIX: Using '../../' to correctly resolve the path from pages/print/ to components/
 import BrandFrame from "../../components/print/BrandFrame";
-import PullLine from '../components/PullLine';
-import EmbossedBrandMark from '../components/print/EmbossedBrandMark';
+import PullLine from '../../components/PullLine';
+import EmbossedBrandMark from "../../components/print/EmbossedBrandMark";
 
 export default function BoardInvestorTemplate() {
   return (
@@ -98,6 +98,8 @@ export default function BoardInvestorTemplate() {
           alt="Abraham of London Brand Mark"
           width={80}
           height={80}
+          // These props might not exist in the simple component provided earlier,
+          // but keeping them here since they were in the original JSX.
           effect="deboss"
           className="inline-block"
           baseColor="transparent"
