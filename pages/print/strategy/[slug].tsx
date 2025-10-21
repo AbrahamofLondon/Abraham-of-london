@@ -3,11 +3,11 @@
 // Assuming Contentlayer type is 'Strategy' and all documents are 'allStrategies'
 import { allStrategies, Strategy } from "contentlayer/generated"; 
 import BrandFrame from "@/components/print/BrandFrame";
-import { useMDXComponent } from "next-contentlayer/hooks"; // ⚡ FIX: Import useMDXComponent
+import { useMDXComponent } from "next-contentlayer2/hooks"; // ⚡ FIX: Import useMDXComponent
 import { components } from "@/components/MdxComponents"; // ⚡ FIX: Import components map
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; // Correct alias path
+import EmbossedSign from "@/components/print/EmbossedSign"; // Correct alias path
 
-
-// NOTE: Replaced the redundant 'next-contentlayer2' imports with standard Contentlayer import from above.
 
 export async function getStaticPaths() {
   return {

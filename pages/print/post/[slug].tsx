@@ -2,8 +2,10 @@
 import { allPosts, Post } from "contentlayer/generated"; // ⚡ FIX: Added Post type
 import BrandFrame from "@/components/print/BrandFrame";
 import { GetStaticProps, GetStaticPaths } from "next";
-import { useMDXComponent } from "next-contentlayer/hooks"; // ⚡ FIX: Added MDX hook import
+import { useMDXComponent } from "next-contentlayer2/hooks"; // ⚡ FIX: Added MDX hook import
 import { components } from "@/components/MdxComponents"; // ⚡ FIX: Added MDX component map import
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; // Correct alias path
+import EmbossedSign from "@/components/print/EmbossedSign"; // Correct alias path
 
 /**
  * Generates the list of static paths for all posts.
