@@ -1,4 +1,4 @@
-// content/entrepreneur-operating-pack/
+// content/downloads/THE-FILE-SLUG.tsx
 
 import BrandFrame from "../../components/print/BrandFrame";
 import * as React from "react";

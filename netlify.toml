@@ -69,6 +69,26 @@
   from = "/downloads/fathering-without-fear-mobile.pdf"
   to = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
   status = 200
+  
+  [[redirects]]
+  from = "/downloads/Leadership_Playbook.pdf"
+  to = "/downloads/leadership-playbook.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Principles_for_My_Son.pdf"
+  to = "/downloads/principles-for-my-son.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Principles_for_My_Son_Cue_Card.pdf"
+  to = "/downloads/principles-for-my-son-cue-card.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Leaders_Cue_Card.pdf"
+  to = "/downloads/leaders-cue-card-two-up.pdf"
+  status = 200
 
 # Force apex to canonical host
 [[redirects]]
