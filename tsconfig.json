@@ -21,8 +21,8 @@
     "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       // ⚡ FIX 1: Ensure root alias maps correctly from baseUrl
-      "@/*": ["./*"], 
-      // ⚡ FIX 2: Ensure all sub-aliases map correctly from baseUrl
+      "@/*": ["./*"], 
+      // ⚡ FIX 2: Explicitly define all aliases for clarity and Webpack resolution
       "@/lib/*": ["./lib/*"],
       "@/components/*": ["./components/*"],
       "@/styles/*": ["./styles/*"],
