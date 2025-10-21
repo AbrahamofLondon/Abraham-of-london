@@ -3,7 +3,7 @@ import * as React from "react";
 // FIX: Using '../../' AND adding the explicit '.tsx' file extension
 import BrandFrame from "../../components/print/BrandFrame.tsx";
 import PullLine from '../../components/PullLine.tsx';
-import EmbossedBrandMark from "../../components/print/EmbossedBrandMark.tsx";
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 export default function BoardInvestorTemplate() {
   return (

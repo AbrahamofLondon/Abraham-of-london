@@ -1,3 +1,4 @@
+// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -29,11 +30,12 @@ function AnalyticsRouterTracker() {
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
+  const isProd = process.env.NODE_ENV === "production";
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        {gaEnabled && process.env.NODE_ENV === "production" && (
+        {gaEnabled && isProd && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />
             <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
@@ -41,7 +43,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         )}
       </Head>
 
-      {gaEnabled && process.env.NODE_ENV === "production" && (
+      {gaEnabled && isProd && (
         <>
           <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
           <Script id="ga-init" strategy="afterInteractive">
