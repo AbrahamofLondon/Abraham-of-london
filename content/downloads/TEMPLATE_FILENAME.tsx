@@ -24,19 +24,21 @@ const TheComponentName = () => {
       title={metadata.title}
       subtitle={metadata.subtitle}
       pageSize="A4"
-      {/* author={metadata.author} */}
-      {/* date={metadata.date} */}
+      // Note: The tag must close immediately after the last attribute.
+      // Comments are now placed inside as children.
     >
-      {/* All C-style comments (//) MUST be changed to JSX block comments ({/* ... * /}) */}
+      {/* author={metadata.author} */} {/* Temporary comments moved here */}
+      {/* date={metadata.date} */}
+      {/* All C-style comments (//) MUST be changed to JSX block comments ({/* ... */}) */}
       
       <div className="download-content-wrapper">
           
-          <h1 className="text-xl">{metadata.title}</h1>
-          <p className="italic">{metadata.subtitle}</p>
+        <h1 className="text-xl">{metadata.title}</h1>
+        <p className="italic">{metadata.subtitle}</p>
 
-          {/* Start of Download Content */}
-          <p>This is where the unique content for this download goes.</p>
-          {/* End of Download Content */}
+        {/* Start of Download Content */}
+        <p>This is where the unique content for this download goes.</p>
+        {/* End of Download Content */}
           
       </div>
       
