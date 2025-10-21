@@ -1,7 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-echo "⏳ Running Tailwind slash-opacity checks…"
+echo "â³ Running Tailwind slash-opacity checksâ€¦"
 node scripts/convert-tailwind-slash-opacity.mjs --check || exit 1
 node scripts/postcss-guard-dryrun.mjs || exit 1
-echo "✅ Checks passed."
+echo "âœ… Checks passed."
