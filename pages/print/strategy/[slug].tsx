@@ -1,5 +1,5 @@
 pages/print/strategy/[slug].tsx
-import { allStrategys as allStrategies } from "contentlayer/generated"; // contentlayer pluralizes oddly
+import { useLivePreview } from "next-contentlayer2/hooks";
 import { allPosts } from 'contentlayer2/generated'; // or similar
 import BrandFrame from "@/components/print/BrandFrame";
 
