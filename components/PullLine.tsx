@@ -1,4 +1,3 @@
-import * as React from "react";
 import { LineChart, LucideIcon } from "lucide-react"; // Using a default Lucide icon
 
 // Tailwind colors based on your BrandFrame
