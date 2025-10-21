@@ -1,67 +1,44 @@
-// components/EmbossedBrandMark.tsx
+// /components/print/EmbossedBrandMark.tsx
 
-import * as React from 'react';
-import Image from 'next/image';
-import clsx from 'clsx';
+import * as React from "react";
+// Import the base component
+import EmbossedSign from "../EmbossedSign"; 
 
-type EmbossedMarkProps = {
-  /** The path to the image file. We'll use: /assets/images/abraham-logo.jpg */
-  src: string; 
-  alt: string;
+// Define the specific path for your brand mark/logo
+const BRAND_MARK_SRC = "/logos/brand-mark-logo.svg"; 
+
+type EmbossedBrandMarkProps = {
+  // Allow overriding specific props, while hardcoding the src and alt
   className?: string;
-  width: number;
-  height: number;
-  /** 'emboss' (raised) or 'deboss' (pressed in) */
+  width?: number;
+  height?: number;
   effect?: 'emboss' | 'deboss';
-  /** Base color for the effect, usually a soft background color. */
   baseColor?: string;
 };
 
+/**
+ * A wrapper component that specifically renders the brand's logo 
+ * using the EmbossedSign component with default brand settings.
+ */
 export default function EmbossedBrandMark({
-  src,
-  alt,
   className,
-  width,
-  height,
-  effect = 'emboss',
-  baseColor = 'var(--color-warmWhite, #faf7f2)', // Light background color for contrast
-}: EmbossedMarkProps) {
-  const isEmboss = effect === 'emboss';
-  
-  // Defines the shadows for the 'raised' or 'recessed' effect.
-  // We apply these to the image or its container.
-  const shadowClasses = isEmboss
-    // Emboss (Raised): Light highlight top-left, dark shadow bottom-right
-    ? 'shadow-[1px_1px_1px_rgba(255,255,255,0.7),-1px_-1px_1px_rgba(0,0,0,0.2)]'
-    // Deboss (Pressed): Dark shadow top-left, light highlight bottom-right
-    : 'shadow-[1px_1px_1px_rgba(0,0,0,0.2),-1px_-1px_1px_rgba(255,255,255,0.7)]';
-  
-  // Note: For a JPG image, the effect will be subtle and applied to the Image
-  // container. For a true embossed look, using a **PNG with a transparent background**
-  // or an **SVG** is highly recommended, as the 'filter' property can be used directly on the non-transparent parts.
-
+  width = 80, // Smaller default size, typical for a logo/mark
+  height = 80,
+  effect = 'deboss', // Often looks better for small logos
+  baseColor,
+}: EmbossedBrandMarkProps) {
   return (
-    <div 
-      className={clsx(
-        "relative flex items-center justify-center p-2 rounded-lg", // Padding helps show the "debossed" background
-        shadowClasses, // Apply the core embossed/debossed shadows to the container
-        className
-      )}
-      style={{ 
-        width: width, 
-        height: height, 
-        backgroundColor: baseColor 
-      }}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={width * 0.8} // Make the image slightly smaller than the container
-        height={height * 0.8}
-        // This class is essential to ensure the image sits cleanly inside the embossed area
-        className="object-contain" 
-        priority={false}
-      />
-    </div>
+    <EmbossedSign
+      // Hardcoded brand details
+      src={BRAND_MARK_SRC}
+      alt="Abraham of London Brand Mark"
+      
+      // Inherited props
+      className={className}
+      width={width}
+      height={height}
+      effect={effect}
+      baseColor={baseColor}
+    />
   );
 }

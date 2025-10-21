@@ -1,8 +1,8 @@
-// next.config.mjs
 import createMDX from "@next/mdx";
 import remarkGfm from "remark-gfm";
 import { createRequire } from "node:module";
-import { withContentlayer } from "next-contentlayer2"; // <— v2
+import path from "node:path";
+import { withContentlayer } from "next-contentlayer2";
 
 const require = createRequire(import.meta.url);
 const relax = process.env.CI_LAX === "1";
@@ -32,11 +32,12 @@ const nextConfig = {
   },
   experimental: { optimizePackageImports: ["framer-motion"] },
   webpack(config, { dev }) {
+    // Normalize loader definitions (defensive)
     config.module.rules = config.module.rules
       .map((rule) => {
         if (!rule || !rule.use) return rule;
-        const asArray = Array.isArray(rule.use) ? rule.use : [rule.use];
-        const cleaned = asArray
+        const arr = Array.isArray(rule.use) ? rule.use : [rule.use];
+        const cleaned = arr
           .filter(Boolean)
           .map((u) => (typeof u === "string" ? { loader: u } : u))
           .filter((u) => u && typeof u.loader === "string");
@@ -44,6 +45,18 @@ const nextConfig = {
         return { ...rule, use: cleaned };
       })
       .filter(Boolean);
+
+    // Path aliases to satisfy "@/components/MdxComponents" and friends
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(process.cwd()),
+      "@/components": path.resolve(process.cwd(), "components"),
+      "@/lib": path.resolve(process.cwd(), "lib"),
+      "@/styles": path.resolve(process.cwd(), "styles"),
+      "@/config": path.resolve(process.cwd(), "config"),
+      "contentlayer/generated": path.resolve(process.cwd(), ".contentlayer/generated"),
+    };
+
     return config;
   },
 };
@@ -51,9 +64,7 @@ const nextConfig = {
 let withAnalyzer = (cfg) => cfg;
 if (isAnalyze) {
   try {
-    const analyzer =
-      require("@next/bundle-analyzer").default ??
-      require("@next/bundle-analyzer");
+    const analyzer = require("@next/bundle-analyzer").default ?? require("@next/bundle-analyzer");
     withAnalyzer = analyzer({ enabled: true });
   } catch {}
 }
