@@ -1,10 +1,7 @@
-// pages/print/resource/[slug].tsx
 import { allResources, type Resource } from "contentlayer/generated";
+import BrandFrame from "@/components/print/BrandFrame";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 import { components } from "@/components/MdxComponents";
-import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign";
 
 export async function getStaticPaths() {
   return {
@@ -20,14 +17,13 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   return { props: { doc } };
 }
 
-interface ResourcePrintProps {
-  doc: Resource | null;
-}
+interface Props { doc: Resource | null }
 
-export default function ResourcePrint({ doc }: ResourcePrintProps) {
-  if (!doc) return null;
+export default function ResourcePrint({ doc }: Props) {
+  const code = doc?.body?.code ?? "";
+  const MDXContent = useMDXComponent(code);
 
-  const MDXContent = useMDXComponent(doc.body.code);
+  if (!doc) return <p>Loading…</p>;
 
   return (
     <BrandFrame
@@ -38,7 +34,7 @@ export default function ResourcePrint({ doc }: ResourcePrintProps) {
       pageSize="A4"
       marginsMm={18}
     >
-      <article className="prose max-w-none mx-auto">
+      <article className="prose mx-auto max-w-none">
         <h1 className="font-serif">{doc.title}</h1>
         {doc.excerpt && <p className="text-lg">{doc.excerpt}</p>}
         <MDXContent components={components as any} />

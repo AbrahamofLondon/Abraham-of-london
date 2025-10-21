@@ -1,18 +1,13 @@
-// pages/print/book/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
 import { allBooks, type Book } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from '@/components/MdxComponents';
 import BrandFrame from "@/components/print/BrandFrame";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign";
+import type { GetStaticProps, GetStaticPaths } from "next";
+import { useMDXComponent } from "next-contentlayer2/hooks";
+import { components } from "@/components/MdxComponents";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allBooks.map((b) => ({ params: { slug: b.slug } })),
-    fallback: false,
-  };
-};
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: allBooks.map((b) => ({ params: { slug: b.slug } })),
+  fallback: false,
+});
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
@@ -20,15 +15,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return { props: { doc } };
 };
 
-interface BookPrintProps {
-  doc: Book | null;
-}
+interface Props { doc: Book | null }
 
-export default function BookPrint({ doc }: BookPrintProps) {
-  if (!doc) return null; // early return before any hooks
+export default function BookPrint({ doc }: Props) {
+  const code = doc?.body?.code ?? "";
+  const MDXContent = useMDXComponent(code);
 
-  // Hook called unconditionally for all non-null renders
-  const MDXContent = useMDXComponent(doc.body.code);
+  if (!doc) return <p>Loading…</p>;
 
   return (
     <BrandFrame
@@ -39,7 +32,7 @@ export default function BookPrint({ doc }: BookPrintProps) {
       pageSize="A4"
       marginsMm={20}
     >
-      <article className="prose max-w-none mx-auto">
+      <article className="prose mx-auto max-w-none">
         <h1 className="font-serif">{doc.title}</h1>
         {doc.description && <p className="text-lg">{doc.description}</p>}
         <MDXContent components={components as any} />
