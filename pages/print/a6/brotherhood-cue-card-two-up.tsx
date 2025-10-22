@@ -1,8 +1,8 @@
 // pages/print/a6/brotherhood-cue-card-two-up.tsx
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 const CardFront = () => (
   <section className="card card-front relative">
@@ -85,7 +85,7 @@ const CardBack = () => (
 export default function BrotherhoodCueCardTwoUp() {
   return (
     <>
-      <Head><title>Brotherhood Cue Card — A6 Two-Up (Print)</title></Head>
+      <Head><title>Brotherhood Cue Card â€” A6 Two-Up (Print)</title></Head>
       <main className="sheet">
         <CardFront />
         <CardBack />

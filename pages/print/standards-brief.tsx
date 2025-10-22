@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
 
 const Block = ({ n, title, items }: { n: number; title: string; items: string[] }) => (
   <section className="block">
@@ -14,7 +14,7 @@ const Block = ({ n, title, items }: { n: number; title: string; items: string[] 
 export default function Print_StandardsBrief() {
   return (
     <>
-      <Head><title>Standards Brief — Print</title></Head>
+      <Head><title>Standards Brief â€” Print</title></Head>
       <main className="sheet">
         <header className="title relative">
           {/* --- Branding: Logo Top Left --- */}
@@ -30,7 +30,7 @@ export default function Print_StandardsBrief() {
           </div>
           
           <h1>Standards Brief</h1>
-          <p className="sub">Protect people, work, and name—especially under pressure.</p>
+          <p className="sub">Protect people, work, and nameâ€”especially under pressure.</p>
         </header>
 
         <section className="grid">
@@ -67,7 +67,7 @@ export default function Print_StandardsBrief() {
         </section>
 
         <footer className="note flex justify-center items-center gap-3 border-t border-lightGrey/60 pt-4 mt-8">
-            <span className="text-sm">Use in onboarding • quarterly reviews • incident retros.</span>
+            <span className="text-sm">Use in onboarding â€¢ quarterly reviews â€¢ incident retros.</span>
             <EmbossedBrandMark
                 src="/assets/images/abraham-logo.jpg"
                 alt="Abraham of London Certified Mark"

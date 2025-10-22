@@ -2,8 +2,8 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 export default function MentorshipStarterKitPrint() {
   return (
@@ -32,7 +32,7 @@ export default function MentorshipStarterKitPrint() {
         
         {/* Branding: Standard Sigline */}
         <div className="sigline">
-            <span className="font-serif">Abraham of London</span> • abrahamoflondon.org
+            <span className="font-serif">Abraham of London</span> â€¢ abrahamoflondon.org
         </div>
       </section>
 
@@ -54,7 +54,7 @@ export default function MentorshipStarterKitPrint() {
         <ul className="list">
           <li><strong>We commit</strong> to show up, tell the truth, and do the work.</li>
           <li><strong>Confidentiality:</strong> Chatham rules.</li>
-          <li><strong>Cadence:</strong> Weekly/bi-weekly, 60–75 minutes.</li>
+          <li><strong>Cadence:</strong> Weekly/bi-weekly, 60â€“75 minutes.</li>
           <li><strong>Ends:</strong> When the mandate is met or either party withdraws with thanks.</li>
         </ul>
         
@@ -99,10 +99,10 @@ export default function MentorshipStarterKitPrint() {
         </div>
         <h2>12-Week Arc</h2>
         <ol className="list">
-          <li><strong>Weeks 1–3 — Clarity</strong>: mandate, constraints, standards.</li>
-          <li><strong>Weeks 4–6 — Craft</strong>: habits, reps, review loop.</li>
-          <li><strong>Weeks 7–9 — Proof</strong>: ship artifacts, gather evidence.</li>
-          <li><strong>Weeks 10–12 — Endurance</strong>: systems, hand-off, next horizon.</li>
+          <li><strong>Weeks 1â€“3 â€” Clarity</strong>: mandate, constraints, standards.</li>
+          <li><strong>Weeks 4â€“6 â€” Craft</strong>: habits, reps, review loop.</li>
+          <li><strong>Weeks 7â€“9 â€” Proof</strong>: ship artifacts, gather evidence.</li>
+          <li><strong>Weeks 10â€“12 â€” Endurance</strong>: systems, hand-off, next horizon.</li>
         </ol>
       </section>
 
@@ -188,9 +188,9 @@ export default function MentorshipStarterKitPrint() {
         </div>
         <h2>Question Bank</h2>
         <ul className="list">
-          <li>“If it were gone tomorrow, what would remain true?”</li>
-          <li>“What is the smallest proof that this works?”</li>
-          <li>“What constraint—if honoured—would raise quality?”</li>
+          <li>â€œIf it were gone tomorrow, what would remain true?â€</li>
+          <li>â€œWhat is the smallest proof that this works?â€</li>
+          <li>â€œWhat constraintâ€”if honouredâ€”would raise quality?â€</li>
         </ul>
       </section>
 
@@ -206,8 +206,8 @@ export default function MentorshipStarterKitPrint() {
               baseColor="transparent"
           />
         </div>
-        <h2>A6 Handouts — Two-Up</h2>
-        <p><strong>Mentor Card:</strong> cadence, red-flag list, “say no” script.</p>
+        <h2>A6 Handouts â€” Two-Up</h2>
+        <p><strong>Mentor Card:</strong> cadence, red-flag list, â€œsay noâ€ script.</p>
         <p><strong>Mentee Card:</strong> weekly checklist, submission format, review criteria.</p>
       </section>
 

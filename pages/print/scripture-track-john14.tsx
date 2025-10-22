@@ -2,8 +2,8 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 const Block = ({ title, items, isOrdered = false }: { title: string; items: string[]; isOrdered?: boolean }) => {
   const ListTag = isOrdered ? 'ol' : 'ul';
@@ -18,7 +18,7 @@ const Block = ({ title, items, isOrdered = false }: { title: string; items: stri
 export default function Print_ScriptureTrack_John14() {
   return (
     <>
-      <Head><title>Scripture Track — John 14 (Print)</title></Head>
+      <Head><title>Scripture Track â€” John 14 (Print)</title></Head>
       <main className="sheet">
         <header className="title relative">
           {/* --- Branding: Logo Top Left --- */}
@@ -33,36 +33,36 @@ export default function Print_ScriptureTrack_John14() {
               />
           </div>
           
-          <h1>Scripture Track — John 14</h1>
-          <p className="sub">Assurance • Obedience • The Helper • Peace</p>
+          <h1>Scripture Track â€” John 14</h1>
+          <p className="sub">Assurance â€¢ Obedience â€¢ The Helper â€¢ Peace</p>
         </header>
 
         <section className="grid">
           <Block title="How to Run" items={[
-            "<strong>Daily (10–15 min):</strong> Read the text; note one obedience step.",
+            "<strong>Daily (10â€“15 min):</strong> Read the text; note one obedience step.",
             "<strong>Weekly (45 min):</strong> Share truth, one win, one next step. Pray names.",
             "<strong>Family:</strong> Read a verse aloud; one sentence prayer each.",
           ]} />
 
-          <Block title="Week 1 — Assurance (Jn 14:1–6)" items={[
+          <Block title="Week 1 â€” Assurance (Jn 14:1â€“6)" items={[
             "<strong>Memory:</strong> John 14:6",
             "<strong>Prompt:</strong> Where am I troubled? What would trust look like today?",
             "<strong>Practice:</strong> Name a fear; replace it with a promise.",
           ]} />
 
-          <Block title="Week 2 — Obedience (Jn 14:15–21)" items={[
+          <Block title="Week 2 â€” Obedience (Jn 14:15â€“21)" items={[
             "<strong>Memory:</strong> John 14:15",
             "<strong>Prompt:</strong> Which instruction have I delayed?",
             "<strong>Practice:</strong> Same-day obedience on one small step.",
           ]} />
 
-          <Block title="Week 3 — The Helper (Jn 14:16–18,26)" items={[
+          <Block title="Week 3 â€” The Helper (Jn 14:16â€“18,26)" items={[
             "<strong>Memory:</strong> John 14:26",
             "<strong>Prompt:</strong> Where do I need wise help beyond my strength?",
             "<strong>Practice:</strong> Ask the Spirit for counsel; seek godly advice.",
           ]} />
 
-          <Block title="Week 4 — Peace Under Pressure (Jn 14:27,31)" items={[
+          <Block title="Week 4 â€” Peace Under Pressure (Jn 14:27,31)" items={[
             "<strong>Memory:</strong> John 14:27",
             "<strong>Prompt:</strong> What robs my peace? What boundary restores it?",
             "<strong>Practice:</strong> Phone off for one hour; pray for someone anxious.",
@@ -76,7 +76,7 @@ export default function Print_ScriptureTrack_John14() {
         </section>
 
         <footer className="note flex justify-between items-end border-t border-lightGrey/60 pt-4 mt-8">
-            <span>Cadence: daily read • weekly share • one concrete step.</span>
+            <span>Cadence: daily read â€¢ weekly share â€¢ one concrete step.</span>
             
             {/* --- Branding: Signature Bottom Right --- */}
             <div className="flex flex-col items-end">

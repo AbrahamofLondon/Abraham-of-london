@@ -1,18 +1,14 @@
-// components/print/EmbossedSign.tsx
 import * as React from "react";
 import Image from "next/image";
 
 type Effect = "emboss" | "deboss" | "none";
 
 export type EmbossedSignProps = {
-  /** Path to the signature SVG/PNG */
   src?: string;
   alt?: string;
   width?: number;
   height?: number;
-  /** Raised/depressed/none visual effect on the backing plate */
   effect?: Effect;
-  /** Backing plate color (use 'transparent' for no plate) */
   baseColor?: string;
   className?: string;
 };
@@ -35,7 +31,6 @@ function EmbossedSign({
 
   return (
     <span className={`inline-block ${className}`} style={{ position: "relative" }}>
-      {/* Backing plate that creates the emboss/deboss illusion */}
       <span
         aria-hidden="true"
         style={{
@@ -46,17 +41,13 @@ function EmbossedSign({
           boxShadow: plateShadow,
         }}
       />
-      {/* Signature image */}
       <Image
         src={src}
         alt={alt}
         width={width}
         height={height}
         className="block"
-        style={{
-          position: "relative",
-          filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))",
-        }}
+        style={{ position: "relative", filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))" }}
         priority
       />
     </span>
@@ -64,3 +55,4 @@ function EmbossedSign({
 }
 
 export default React.memo(EmbossedSign);
+export type { Effect };

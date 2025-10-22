@@ -1,8 +1,8 @@
 // pages/print/a6/principles-for-my-son-cue-card-two-up.tsx
 
 import Head from "next/head";
-import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; // Adjust path as needed
-import EmbossedSign from "../../../components/EmbossedSign";       // Adjust path as needed
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; // Adjust path as needed
+import EmbossedSign from "@/components/print/EmbossedSign";       // Adjust path as needed
 import * as React from 'react'; // Import React for functional components
 
 const Front = () => (
@@ -19,9 +19,9 @@ const Front = () => (
       />
     </div>
 
-    <h1>Principles — The Six (Front)</h1>
+    <h1>Principles â€” The Six (Front)</h1>
     <ol>
-      <li><strong>Presence:</strong> Show up—on time, eyes up.</li>
+      <li><strong>Presence:</strong> Show upâ€”on time, eyes up.</li>
       <li><strong>Truth:</strong> Confess fast; no spin.</li>
       <li><strong>Work:</strong> Finish one thing daily.</li>
       <li><strong>Steward:</strong> Budget, save, give.</li>
@@ -45,7 +45,7 @@ const Back = () => (
       />
     </div>
     
-    <h1>Principles — The Six (Back)</h1>
+    <h1>Principles â€” The Six (Back)</h1>
     <ol start={7}>
       <li><strong>Speech:</strong> No gossip or slander.</li>
       <li><strong>Learning:</strong> Read, ask, practice.</li>
@@ -55,7 +55,7 @@ const Back = () => (
       <li><strong>Faith:</strong> Listen, obey, stay planted.</li>
     </ol>
     <p className="micro-prompt">
-        <em className="text-xs">“Which standard will I live in one small way before noon?”</em>
+        <em className="text-xs">â€œWhich standard will I live in one small way before noon?â€</em>
     </p>
 
     {/* Signature Bottom Right */}
@@ -76,7 +76,7 @@ const Back = () => (
 export default function Print_PrinciplesCueCardTwoUp() {
   return (
     <>
-      <Head><title>Principles for My Son — Cue Card (A6 Two-Up)</title></Head>
+      <Head><title>Principles for My Son â€” Cue Card (A6 Two-Up)</title></Head>
       <main className="sheet">
         <Front /><Back /> 
       </main>
