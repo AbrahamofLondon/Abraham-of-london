@@ -16,7 +16,7 @@ export default function BoardInvestorTemplate() {
       // date={new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(new Date())}
     >
       <section aria-labelledby="topline">
-        <PullLine subtle>
+        <PullLine>
           Respect their time. Lead with the punchline. This one-pager forces clarity.
         </PullLine>
 
@@ -46,7 +46,7 @@ export default function BoardInvestorTemplate() {
 
       <section aria-labelledby="summary" className="mt-10">
         <h2 id="summary" className="font-serif text-2xl text-forest">
-          Performance Summary (The 3×3)
+          Performance Summary (The 3??3)
         </h2>
         <p className="text-sm italic opacity-80">Be brutally honest in this section. Facts, not optimism.</p>
 

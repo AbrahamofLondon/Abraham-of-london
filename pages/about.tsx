@@ -148,7 +148,7 @@ export default function AboutPage() {
         // allowed by the SEOHead component's interface. It assumes the developer has 
         // updated the SEOHead interface (e.g., in components/SEOHead.tsx) to include 'profile'.
         // If not, this must be changed to type="website" to compile.
-        type="profile" 
+        type="website" 
         description={pageDesc}
         slug="/about"
         coverImage={ogImageAbs || undefined}

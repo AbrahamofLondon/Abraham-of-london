@@ -3,13 +3,12 @@
 "use client";
 
 import * as React from "react";
-import Head from "next/head"; // For Pages Router, use Next/head for metadata
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type { GetStaticProps } from "next";
 
-// CORRECTED import path for Contentlayer and hooks (from prior conversation)
-import { allEvents, type Event } from "contentlayer/generated"; 
+import { allEvents, type Event } from "contentlayer/generated";
 
 // --- IMPORTS FOR CLIENT-SIDE FUNCTIONALITY (assuming these paths are correct) ---
 import clsx from "clsx";
@@ -18,23 +17,20 @@ import Layout from "@/components/Layout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import { OgHead } from "@/lib/seo";
-import { useDebounce } from "@/lib/hooks/useDebounce";
-import { isUpcoming } from "@/lib/events"; // Assuming this utility exists
-import type { EventMeta } from "@/lib/events"; // Assuming EventMeta is the correct structure
+import { isUpcoming } from "@/lib/events";
+import type { EventMeta } from "@/lib/events";
 
 // -----------------------------------------------------------------------------
-// TYPE DEFINITIONS (Using the Event type from contentlayer/generated)
+// TYPE DEFINITIONS
 // -----------------------------------------------------------------------------
-
-// Extend Contentlayer's Event type for the client-side component (using EventMeta for compatibility)
-type Props = { events: EventMeta[] }; 
+type Props = { events: EventMeta[] };
 
 // -----------------------------------------------------------------------------
 // HELPER COMPONENTS & UTILITIES
 // -----------------------------------------------------------------------------
 
 const normalize = (s = "") => s.toLowerCase();
-// Retained Chip component from the second file
+
 const Chip = ({
   label,
   active,
@@ -73,8 +69,32 @@ export default function EventsIndex({ events }: Props) {
     loc?: string;
   };
 
+  const [localQuery, setLocalQuery] = React.useState(q);
+
+  const updateSearchQuery = React.useCallback((value?: string) => {
+    const next = new URLSearchParams(router.query as Record<string, string>);
+    if (value && value.length) next.set("q", value);
+    else next.delete("q");
+
+    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
+      shallow: true,
+    });
+  }, [router.query, router]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localQuery.trim() !== q.trim()) {
+        updateSearchQuery(localQuery.trim() || undefined);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localQuery, q, updateSearchQuery]);
+
   const filteredEvents = React.useMemo(() => {
     let list = events.slice();
+
+    const currentQ = q;
 
     if (when === "upcoming") list = list.filter((e) => isUpcoming(e.date));
     else if (when === "past") list = list.filter((e) => !isUpcoming(e.date));
@@ -84,8 +104,8 @@ export default function EventsIndex({ events }: Props) {
       list = list.filter((e) => normalize(e.location || "").includes(needle));
     }
 
-    if (q.trim()) {
-      const needle = normalize(q);
+    if (currentQ.trim()) {
+      const needle = normalize(currentQ);
       list = list.filter((e) =>
         [e.title, e.summary || "", e.location || ""].some((field) =>
           normalize(field).includes(needle)
@@ -115,19 +135,24 @@ export default function EventsIndex({ events }: Props) {
     });
   };
 
-  const handleReset = () =>
+  const handleReset = () => {
+    setLocalQuery("");
     router.replace({ pathname: "/events" }, undefined, { shallow: true });
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setParam("q", e.target.value.trim() || undefined);
+    setLocalQuery(e.target.value);
   };
-  const debouncedSearchChange = useDebounce(handleSearchChange, 300);
+
+  React.useEffect(() => {
+    setLocalQuery(q);
+  }, [q]);
+
 
   return (
     <Layout pageTitle="Events">
-      {/* Replaced Next/head with OgHead component */}
       <OgHead
-        title="Events — Abraham of London"
+        title="Events ? Abraham of London"
         description="Talks, salons, and workshops. Select sessions run as Chatham Rooms (off the record)."
         path="/events"
       />
@@ -147,7 +172,7 @@ export default function EventsIndex({ events }: Props) {
               {q ? (
                 <>
                   <li aria-hidden="true">/</li>
-                  <li className="text-[color:var(--color-on-secondary)/0.6]">“{q}”</li>
+                  <li className="text-[color:var(--color-on-secondary)/0.6]">?{q}?</li>
                 </>
               ) : null}
             </ol>
@@ -175,9 +200,9 @@ export default function EventsIndex({ events }: Props) {
             <div className="flex gap-2">
               <input
                 aria-label="Search events"
-                placeholder="Search title, description, location…"
-                onChange={debouncedSearchChange}
-                defaultValue={q}
+                placeholder="Search title, description, location?"
+                onChange={handleSearchChange}
+                value={localQuery}
                 className="w-full md:w-80 rounded-lg border border-lightGrey px-3 py-2 text-sm"
               />
             </div>
@@ -227,7 +252,6 @@ export default function EventsIndex({ events }: Props) {
                   description={ev.summary}
                   tags={ev.tags ?? undefined}
                   heroImage={ev.heroImage ?? undefined}
-                  // Mapping the resources field
                   resources={ev.resources ? { downloads: ev.resources.downloads ?? [], reads: ev.resources.reads ?? [] } : null}
                 />
               ))}
@@ -240,14 +264,12 @@ export default function EventsIndex({ events }: Props) {
 }
 
 // -----------------------------------------------------------------------------
-// STATIC PROPS (Simplified data fetching from the second file)
+// STATIC PROPS
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // Use allEvents directly from contentlayer/generated, as it should contain all necessary fields.
   const events = allEvents
     .map((e) => ({
-      // Map Contentlayer Event to EventMeta structure expected by the client component
       slug: e.slug,
       title: e.title,
       date: e.date,
@@ -255,15 +277,14 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       summary: (e as any).summary ?? null,
       tags: (e as any).tags ?? null,
       heroImage: (e as any).heroImage ?? null,
-      resources: (e as any).resources ?? null, // Include resources for the EventCard
+      resources: (e as any).resources ?? null,
     }))
-    // Sort initially by date (soonest first)
     .sort((a, b) => +new Date(a.date as unknown as string) - +new Date(b.date as unknown as string));
   
-  return { 
-    props: { 
-      events: events as EventMeta[], // Cast for final type safety
-    }, 
-    revalidate: 60 // Revalidate the page every 60 seconds
+  return {
+    props: {
+      events: events as EventMeta[],
+    },
+    revalidate: 60
   };
 };

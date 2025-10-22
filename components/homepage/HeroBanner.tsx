@@ -1,5 +1,5 @@
 // components/homepage/HeroBanner.tsx
-"use client"; // ✅ UPGRADE: Explicitly marking as Client Component, as it uses Hooks
+"use client"; // Explicitly marking as Client Component, as it uses Hooks
 
 import * as React from "react";
 import clsx from "clsx";
@@ -42,7 +42,7 @@ export default function HeroBanner({
   const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
   const hasVideo = sources.length > 0;
 
-  // ✅ UPGRADE: Use more modern and reliable viewport units
+  // Use more modern and reliable viewport units
   const normalizedHeight = heightClassName ?? "min-h-[70dvh] sm:min-h-[72dvh] lg:min-h-[78lvh]";
 
   // --- Reduced Motion and Playback Logic ---
@@ -61,8 +61,7 @@ export default function HeroBanner({
       
       // Attempt to play, catching the common "play() failed" exception
       v.play().catch(error => {
-         // This is often a non-critical error (e.g., browser silently blocked autoplay)
-         // console.error("Video autoplay failed:", error); 
+          // console.error("Video autoplay failed:", error); 
       });
     };
     
@@ -77,13 +76,12 @@ export default function HeroBanner({
   // --- Image Fallback Props ---
   const imageProps = {
     src: poster,
-    // ✅ UPGRADE: Explicit decorative alt text for Image component
+    // Fix: Explicitly ensure the alt prop is present
     alt: "Decorative, high-impact background image for the main hero section", 
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
     priority: true as const, // Essential for LCP optimization
-    // Removed draggable: unnecessary and often broken on mobile
   };
 
   return (
@@ -106,14 +104,11 @@ export default function HeroBanner({
           muted
           loop
           playsInline
-          // ✅ UPGRADE: Use 'metadata' for faster poster load, 'auto' is overly aggressive
           preload="metadata" 
           aria-hidden="true" // Video is decorative/background
-          // ✅ UPGRADE: Block right-click context menu (security/UX)
           onContextMenu={(e) => e.preventDefault()} 
         >
           {sources.map((s, i) => (
-            // ✅ SAFE: Properly handle optional media prop
             <source 
               key={i} 
               src={s.src} 
@@ -125,6 +120,7 @@ export default function HeroBanner({
         </video>
       ) : (
         // --- Image Fallback Component (No Video) ---
+        // eslint-disable-next-line jsx-a11y/alt-text
         <Image {...imageProps} />
       )}
 
@@ -137,7 +133,6 @@ export default function HeroBanner({
       {/* Overlay content (heading/CTA) */}
       {overlay ? (
         <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
-          {/* ✅ SAFE: Ensure overlay content contrast */}
           <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}

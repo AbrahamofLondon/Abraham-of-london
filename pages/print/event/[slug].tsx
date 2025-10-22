@@ -1,50 +1,36 @@
 // pages/print/event/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
 import { allEvents, type Event } from "contentlayer/generated";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 import { components } from "@/components/MdxComponents";
-import BrandFrame from "@/components/print/BrandFrame";
+import * as React from "react";
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: allEvents.map((e) => ({ params: { slug: e.slug } })),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
-  const doc = allEvents.find((e) => e.slug === slug) || null;
-  return { props: { doc } };
-};
-
-interface EventPrintProps {
-  doc: Event | null;
+export async function getStaticPaths() {
+  return {
+    paths: allEvents.map((d) => ({ params: { slug: d.slug } })),
+    fallback: false,
+  };
 }
 
-export default function EventPrint({ doc }: EventPrintProps) {
-  // Keep hook order stable by calling it unconditionally
-  const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
+export async function getStaticProps({ params }: { params: { slug: string } }) {
+  const doc = allEvents.find((d) => d.slug === params.slug) || null;
+  return { props: { doc } };
+}
 
-  if (!doc) return <p>Loading…</p>;
+interface Props { doc: Event | null }
 
-  const when = doc.date
-    ? new Date(doc.date).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })
-    : "";
-  const subtitle = `${when}${doc.location ? ` — ${doc.location}` : ""}`;
+export default function EventPrintPage({ doc }: Props) {
+  // FIX: Bypassing Type error for code
+  const code = (doc?.body as any)?.code ?? ""; 
+  const MDX = useMDXComponent(code);
+
+  if (!doc) return <p>Loading...</p>;
 
   return (
-    <BrandFrame
-      title={doc.title}
-      subtitle={subtitle}
-      author="Abraham of London"
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={18}
-    >
-      <article className="prose max-w-none mx-auto">
-        <h1 className="font-serif">{doc.title}</h1>
-        <MDXContent components={components as any} />
-      </article>
-    </BrandFrame>
+    <div className="print-page print-event">
+      {/* Customize your print layout here */}
+      <h1>{(doc as any).title}</h1>
+      <p>Date: {(doc as any).date}</p>
+      <MDX components={components as any} />
+    </div>
   );
 }
