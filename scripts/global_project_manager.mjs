@@ -109,7 +109,7 @@ const DATA_EXTS = new Set([".md", ".mdx", ".yaml", ".yml"]);
 const JSON_EXTS = new Set([".json"]);
 
 // Invisible characters (NBSP, ZWSP, BOM, Thin Space)
-const INVIS_CHARS = /[\u00A0\u200B\uFEFF\u2009]/g; 
+const INVIS_CHARS = /[\u00A0\u200B\uFEFF\u2009]/g; 
 
 // Common Windows-1252 (mojibake) fixes
 const CP1252_FIXES = [
@@ -136,6 +136,10 @@ const DATA_LINE_FIXES = [
   [/[ \t]+$/gm, ""],
   [INVIS_CHARS, ""],
   ...CP1252_FIXES,
+  // Replace common emoji with Unicode escapes to avoid mojibake on Windows
+  [/📄/g, '\\uD83D\\uDCC4 '],
+  [/📚/g, '\\uD83D\\uDCDA '],
+  [/🔗/g, '\\uD83D\\uDD17 '],
 ];
 
 const REQUIRED_DL_FIELDS = ["title","slug","date","author","readTime","category","type"];
@@ -217,7 +221,7 @@ function normalizeFM(fmRaw, ctx) {
   fm = fm.replace(
       /^(\s*)(title|type|date|author|readTime|category|slug)\s*\r?\n/gim,
       (match, indent, key) => {
-          if (key.toLowerCase() === 'type') return `${indent}type: "guide"\n`; 
+          if (key.toLowerCase() === 'type') return `${indent}type: "guide"\n`; 
           return `${indent}${key}: ""\n`;
       }
   );
@@ -249,7 +253,7 @@ function normalizeFM(fmRaw, ctx) {
     /^(\s*)(title|subtitle|category|author|type|coverImage|excerpt|slug)\s*:\s*(.+)$/gm,
     (_m, i, key, val) => {
       let v = String(val).trim();
-      if (!/^("|'|true|false|\d|\{|\[)/i.test(v)) { 
+      if (!/^("|'|true|false|\d|\{|\[)/i.test(v)) { 
         v = `"${v.replace(/"/g, '\\"')}"`;
       }
       return `${i}${key}: ${v}`;
@@ -284,17 +288,17 @@ function passCleanFile(p) {
 
     // ❌ REMOVED: CRITICAL FIX: The specific API contact.ts fix for escaping quotes
     // if (norm(p).endsWith("/pages/api/contact.ts")) {
-    //   fixed = fixed.replace(
-    //       /(['"]|\\')"\s*:\s*("""|\\"""|"'")/, 
-    //       `'"': "&quot;"` 
-    //   );
+    //   fixed = fixed.replace(
+    //       /(['"]|\\')"\s*:\s*("""|\\"""|"'")/, 
+    //       `'"': "&quot;"` 
+    //   );
     // }
 
     fixed = applyPairs(fixed, CODE_FIXES);
     
     // ❌ REMOVED: Targeted Header framer-motion typing cast fix
     // if (norm(p).endsWith("/components/Header.tsx")) {
-    //   fixed = fixed.replace(/transition=\{motionTransition\}/, "transition={motionTransition as any}");
+    //   fixed = fixed.replace(/transition=\{motionTransition\}/, "transition={motionTransition as any}");
     // }
 
     if (fixed !== orig) {
@@ -390,18 +394,18 @@ function runFormatters() {
   } catch (e) {
     console.error(`❌ Failed to write full report due to serialization error: ${e.message}`);
     // Write a simplified report if the main one fails
-    const simpleReport = { 
-        ...reportData, 
-        codeFixed: Array.isArray(reportData.codeFixed) ? reportData.codeFixed.length : 0, 
-        dataFixed: Array.isArray(reportData.dataFixed) ? reportData.dataFixed.length : 0, 
+    const simpleReport = { 
+        ...reportData, 
+        codeFixed: Array.isArray(reportData.codeFixed) ? reportData.codeFixed.length : 0, 
+        dataFixed: Array.isArray(reportData.dataFixed) ? reportData.dataFixed.length : 0, 
     };
     write(REPORT_PATH, JSON.stringify(simpleReport, null, 2));
   }
 
   console.log("\n──────────── Summary ────────────");
-  console.log(`Scanned:    ${report.data.filesScanned}`);
-  console.log(`Modified:   ${report.data.filesModified}${DRY ? " (dry-run)" : ""}`);
-  console.log(`Report:     ${norm(REPORT_PATH)}`);
+  console.log(`Scanned:    ${report.data.filesScanned}`);
+  console.log(`Modified:   ${report.data.filesModified}${DRY ? " (dry-run)" : ""}`);
+  console.log(`Report:     ${norm(REPORT_PATH)}`);
   console.log("────────────────────────────────\n");
 
   if (STRICT && (report.data.linkErrors.length || report.data.fmMissingFields.length)) {
