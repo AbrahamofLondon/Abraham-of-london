@@ -29,7 +29,7 @@ contentDirs.forEach(dirName => {
 
         if (updatedContent !== content) {
           fs.writeFileSync(filePath, updatedContent);
-          console.log(`Å“¦ Updated path in: ${file}`);
+          console.log(`Å"¦ Updated path in: ${file}`);
         }
       });
   });

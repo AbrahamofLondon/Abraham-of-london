@@ -1,6 +1,6 @@
 Abraham of London
 
-The official website of Abraham of London â€” built with Next.js, TypeScript, and Tailwind CSS, designed to balance speed, scalability, and silent premium signals.
+The official website of Abraham of London â€" built with Next.js, TypeScript, and Tailwind CSS, designed to balance speed, scalability, and silent premium signals.
 
 This repository powers a personal brand ecosystem of books, blogs, events, and ventures.
 
