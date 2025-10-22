@@ -50,7 +50,7 @@ const DEFAULT_ITEMS: Testimonial[] = [
       "We stopped debating and started deciding. The team aligned on priorities and owners in one session.",
     name: "Lanre",
     role: "Consultant",
-    metric: "Clarity → ownership",
+    metric: "Clarity ÃƒÂ¢Ã¢â‚¬' ownership",
     verified: true,
   },
 ];
@@ -201,7 +201,7 @@ export default function TestimonialsSection({
                           )}
                         </div>
                         <div className={clsx("text-xs", subText)}>
-                          {[t.role, t.company].filter(Boolean).join(" · ")}
+                          {[t.role, t.company].filter(Boolean).join(" Ãƒâ€šÃ‚Â· ")}
                         </div>
                       </div>
                     </div>
@@ -214,9 +214,9 @@ export default function TestimonialsSection({
 
                   {/* Quote */}
                   <blockquote className="text-base leading-relaxed">
-                    <span aria-hidden className="sr-only">“</span>
+                    <span aria-hidden className="sr-only">"</span>
                     <span className="block line-clamp-6">{t.quote}</span>
-                    <span aria-hidden className="sr-only">”</span>
+                    <span aria-hidden className="sr-only">"</span>
                   </blockquote>
 
                   {/* Footer: metric chip + source */}

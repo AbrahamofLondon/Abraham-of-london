@@ -27,9 +27,7 @@ const PageMark = () => (
           alt="Abraham of London Logo"
           width={30}
           height={30}
-          effect="deboss"
-          baseColor="transparent"
-      />
+          effect="deboss"/>
     </div>
 );
 
@@ -37,7 +35,7 @@ export default function LeadershipPlaybookPrint() {
   return (
     <main className="print-wrap">
       <Head>
-        <title>Leadership Playbook â€” 30â€¢60â€¢90</title>
+        <title>Leadership Playbook — 30•60•90</title>
         <meta name="robots" content="noindex" />
       </Head>
 
@@ -51,13 +49,11 @@ export default function LeadershipPlaybookPrint() {
               alt="Abraham of London Logo"
               width={120}
               height={120}
-              effect="emboss"
-              baseColor="transparent"
-          />
+              effect="emboss"/>
         </div>
 
         <h1 className="title">Leadership Playbook</h1>
-        <p className="subtitle">30â€¢60â€¢90</p>
+        <p className="subtitle">30•60•90</p>
         <p className="lead">
           Win your week. Guard the standard. Build what lasts.
         </p>
@@ -69,9 +65,7 @@ export default function LeadershipPlaybookPrint() {
                 alt="Abraham of London Signature"
                 width={120} 
                 height={30} 
-                effect="deboss"
-                baseColor="transparent"
-            />
+                effect="deboss"/>
             <span className="text-xs text-[#666] mt-1">abrahamoflondon.org</span>
         </div>
       </section>
@@ -82,23 +76,23 @@ export default function LeadershipPlaybookPrint() {
         <h2>How to Use This</h2>
         <ul className="list">
           <li>Structure a first <strong>90-day push</strong> or any focused sprint.</li>
-          <li>Weekly loop: <em>Review â†’ Decide â†’ Schedule â†’ Ship â†’ Reflect</em>.</li>
+          <li>Weekly loop: <em>Review Ã¢â€' Decide Ã¢â€' Schedule Ã¢â€' Ship Ã¢â€' Reflect</em>.</li>
           <li>Use the A6 <strong>Cue Card</strong> for daily recall.</li>
         </ul>
         <h3>Who this is for</h3>
         <p>Leaders who choose presence over performance and proof over posture.</p>
       </section>
 
-      {/* --- 30â€¢60â€¢90 GRID (Page 3) --- */}
+      {/* --- 30•60•90 GRID (Page 3) --- */}
       <section className="page relative">
         <PageMark />
-        <h2>30â€¢60â€¢90</h2>
+        <h2>30•60•90</h2>
         <div className="grid">
           <div className="cell"><h4>Mandate</h4><p>Why we exist. One sentence.</p></div>
           <div className="cell"><h4>North Star (90d)</h4><p>One outcome that proves progress.</p></div>
-          <div className="cell"><h4>30 Days (Foundations)</h4><p>3â€“5 commitments.</p></div>
-          <div className="cell"><h4>60 Days (Proof)</h4><p>3â€“5 measurable proofs.</p></div>
-          <div className="cell"><h4>90 Days (Delivery)</h4><p>3â€“5 delivered assets.</p></div>
+          <div className="cell"><h4>30 Days (Foundations)</h4><p>3–5 commitments.</p></div>
+          <div className="cell"><h4>60 Days (Proof)</h4><p>3–5 measurable proofs.</p></div>
+          <div className="cell"><h4>90 Days (Delivery)</h4><p>3–5 delivered assets.</p></div>
           <div className="cell"><h4>Risks & Guards</h4><p>Top 3 risks + countermeasures.</p></div>
           <div className="cell"><h4>Success Evidence</h4><p>How we will know objectively.</p></div>
         </div>
@@ -109,11 +103,11 @@ export default function LeadershipPlaybookPrint() {
         <PageMark />
         <h2>Operating Rhythm</h2>
         <ul className="list tight">
-          <li><strong>Mon â€” Focus:</strong> choose 3 non-negotiables; clear blockers.</li>
-          <li><strong>Tue â€” Build:</strong> deep work; no meetings until 14:00.</li>
-          <li><strong>Wed â€” Review:</strong> metrics + midpoint decisions.</li>
-          <li><strong>Thu â€” Ship:</strong> release one increment, however small.</li>
-          <li><strong>Fri â€” Reflect:</strong> wins, misses, lessons; reset board.</li>
+          <li><strong>Mon — Focus:</strong> choose 3 non-negotiables; clear blockers.</li>
+          <li><strong>Tue — Build:</strong> deep work; no meetings until 14:00.</li>
+          <li><strong>Wed — Review:</strong> metrics + midpoint decisions.</li>
+          <li><strong>Thu — Ship:</strong> release one increment, however small.</li>
+          <li><strong>Fri — Reflect:</strong> wins, misses, lessons; reset board.</li>
         </ul>
       </section>
 
@@ -126,7 +120,7 @@ export default function LeadershipPlaybookPrint() {
           "Where did we slip the standard?",
           "One constraint to protect next week",
           "One thing to cut",
-          "Risks surfaced â†’ countermeasure",
+          "Risks surfaced Ã¢â€' countermeasure",
         ]}/>
       </section>
 
@@ -138,7 +132,7 @@ export default function LeadershipPlaybookPrint() {
           "Decision / Date / Owner",
           "Context (facts only)",
           "Options considered",
-          "Chosen becauseâ€¦",
+          "Chosen because…",
           "What would change my mind",
           "Outcome window / Follow-up on",
         ]}/>
@@ -158,8 +152,8 @@ export default function LeadershipPlaybookPrint() {
       {/* --- A6 CUE CARD (TWO-UP GUIDE PAGE) (Page 8) --- */}
       <section className="page relative">
         <PageMark />
-        <h2>A6 Cue Card â€” Two-Up</h2>
-        <p>Front: 30â€¢60â€¢90 pyramid. Back: â€œTodayâ€™s 3â€, â€œOne thing to cutâ€, â€œOne act of stewardshipâ€.</p>
+        <h2>A6 Cue Card — Two-Up</h2>
+        <p>Front: 30•60•90 pyramid. Back: "Today's 3", "One thing to cut", "One act of stewardship".</p>
         <p className="note">Print tip: A4 landscape, two-up, crop marks; 3 mm bleed if used.</p>
       </section>
 

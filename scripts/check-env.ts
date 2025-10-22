@@ -28,7 +28,7 @@ const RULES: Rule[] = [
     example: "G-XXXXXXXXXX",
   },
 
-  // Optional but useful fallbacks (don’t fail if missing)
+  // Optional but useful fallbacks (donâ€™t fail if missing)
   { key: "URL", required: false, pattern: /^https?:\/\/[^\s/]+/i, example: "https://abrahamoflondon.org" },
   { key: "DEPLOY_PRIME_URL", required: false, pattern: /^https?:\/\/[^\s/]+/i, example: "https://abraham-of-london.netlify.app" },
 ];
@@ -45,12 +45,12 @@ for (const rule of RULES) {
   const raw = process.env[rule.key];
 
   if (rule.required && isEmpty(raw)) {
-    errors.push(`• ${rule.key} is required but missing.`);
+    errors.push(`â€¢ ${rule.key} is required but missing.`);
     continue;
   }
   if (!isEmpty(raw) && rule.pattern && !rule.pattern.test(String(raw))) {
-    const msg = `• ${rule.key} is set but malformed: "${raw}". Expected like: ${rule.example ?? rule.pattern}`;
-    // required → error, optional → warning
+    const msg = `â€¢ ${rule.key} is set but malformed: "${raw}". Expected like: ${rule.example ?? rule.pattern}`;
+    // required â†’ error, optional â†’ warning
     (rule.required ? errors : warnings).push(msg);
   }
 }
@@ -78,4 +78,4 @@ DEPLOY_PRIME_URL=https://abraham-of-london.netlify.app`);
   process.exit(1);
 }
 
-console.log("\nAll required environment variables look good ✅");
+console.log("\nAll required environment variables look good âœ…");

@@ -20,7 +20,7 @@ function SvgBase({ title, children, ...props }: SvgProps & { children: React.Rea
 }
 
 /**
- * Monogram — a premium, quiet-luxury “A” crest mark.
+ * Monogram — a premium, quiet-luxury "A" crest mark.
  * Uses currentColor so it inherits text color (e.g., deepCharcoal).
  */
 export function LogoMonogram(props: SvgProps) {
@@ -43,7 +43,7 @@ export function LogoMonogram(props: SvgProps) {
 export function LogoWordmark(props: SvgProps) {
   return (
     <SvgBase title={props.title ?? "Abraham of London — Wordmark"} viewBox="0 0 320 64" {...props}>
-      {/* “ABRAHAM OF LONDON” as vector paths (clean, mono-solid look) */}
+      {/* "ABRAHAM OF LONDON" as vector paths (clean, mono-solid look) */}
       {/* ABRAHAM */}
       <path d="M18 46l8-28h6l8 28h-5.6l-1.6-6H25.2l-1.7 6H18zm8.5-11h8l-4-14-4 14zM45 46V18h5v10.4h.2c1.3-1.8 3.6-3.2 6.7-3.2 5 0 8.1 3.7 8.1 9.1V46h-5v-10c0-3.5-1.8-5.8-5-5.8-3.1 0-5 2.5-5 5.8V46h-5zM73 46V18h5v3.6h.2c1.2-2.4 3.7-4 7-4 5.6 0 9.2 4.5 9.2 10.4 0 6.2-3.7 10.7-9.3 10.7-3 0-5.4-1.3-6.7-3.6H78V46h-5zm16.1-17.9c0-3.4-2.2-5.9-5.2-5.9s-5.2 2.5-5.2 5.9 2.2 6 5.2 6c3 0 5.2-2.6 5.2-6zM102 46l8-28h6l8 28h-5.6l-1.6-6h-9.6l-1.7 6H102zm8.5-11h8l-4-14-4 14z" />
       {/* OF */}

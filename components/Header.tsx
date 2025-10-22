@@ -2,9 +2,17 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
-import ThemeToggle from "./ThemeToggle";
+import dynamic from "next/dynamic";
+import { motion, type Transition } from "framer-motion";
 import { siteConfig } from "@/lib/siteConfig";
+
+// Use a loading skeleton for ThemeToggle to maintain smooth layout during hydration
+const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+  ),
+});
 
 type HeaderProps = { variant?: "light" | "dark" };
 
@@ -63,48 +71,59 @@ export default function Header({ variant = "light" }: HeaderProps) {
     };
   }, [open]);
 
-  const lightShell = scrolled ? "bg-white/85 border-black/10 shadow-sm" : "bg-white/70 border-black/10";
-  const darkShell = scrolled ? "bg-black/60 border-white/10 shadow-sm" : "bg-black/50 border-white/10";
-  const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
+  // Shell
+  const lightShell = scrolled
+    ? "bg-white/95 border-gray-200 shadow-lg"
+    : "bg-white/90 border-transparent";
+  const darkShell = scrolled
+    ? "bg-black/95 border-gray-700 shadow-xl"
+    : "bg-black/90 border-transparent";
+  const shell =
+    variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
 
+  // Links
   const linkBase =
     variant === "dark"
-      ? "text-[color:var(--color-on-primary)/0.8] hover:text-cream"
-      : "text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal";
+      ? "text-[color:var(--color-on-primary)/0.9] hover:text-cream hover:tracking-wider transition-all duration-300"
+      : "text-[color:var(--color-on-secondary)/0.9] hover:text-deepCharcoal hover:tracking-wider transition-all duration-300";
 
-  const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
+  const underlineActive = variant === "dark" ? "bg-softGold" : "bg-deepCharcoal";
 
   const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
   const PHONE = (siteConfig as any)?.phone || "";
 
+  // Brand
   const brandClass = [
-    "font-serif font-bold transition-all duration-200",
-    scrolled ? "text-[1.35rem] md:text-[1.75rem]" : "text-2xl md:text-3xl",
-    variant === "dark" ? "text-cream" : "text-deepCharcoal",
+    "font-serif font-extrabold tracking-wider transition-all duration-300",
+    scrolled ? "text-xl md:text-2xl" : "text-2xl md:text-3xl",
+    variant === "dark" ? "text-cream hover:text-softGold" : "text-deepCharcoal hover:text-softGold",
   ].join(" ");
 
-  // CSS var for header height
+  // Header height var
   const headerStyle = React.useMemo(
     () =>
-      ({ ["--header-h"]: scrolled ? "4rem" : "5rem" } as React.CSSProperties & {
+      ({ ["--header-h"]: scrolled ? "4.5rem" : "6rem" } as React.CSSProperties & {
         ["--header-h"]?: string;
       }),
     [scrolled]
   );
 
+  // Framer Motion transition
+  const motionTransition: Transition = { type: "spring", stiffness: 100, damping: 24, mass: 0.5 };
+
   return (
     <motion.header
-      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur supports-[backdrop-filter]:bg-opacity-60 ${shell}`}
+      className={`supports-[backdrop-filter]:bg-opacity-60 fixed inset-x-0 top-0 z-50 border-b backdrop-blur ${shell}`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      transition={motionTransition as any}
       role="navigation"
       aria-label="Primary"
       style={headerStyle}
     >
       <nav
-        className="mx-auto flex max-w-7xl items-center justify-between px-4"
-        style={{ height: scrolled ? "3.75rem" : "5rem" }}
+        className="mx-auto flex max-w-7xl items-center justify-between px-6 transition-all duration-300"
+        style={{ height: scrolled ? "4rem" : "5rem" }}
       >
         {/* Brand */}
         <Link href="/" aria-label="Home" className={brandClass}>
@@ -112,20 +131,20 @@ export default function Header({ variant = "light" }: HeaderProps) {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-6 md:flex">
-          <ul className="flex items-center gap-6">
+        <div className="hidden items-center gap-10 md:flex">
+          <ul className="flex items-center gap-8">
             {NAV.map((item) => (
               <li key={item.href} className="relative">
                 <Link
                   href={item.href}
-                  className={`text-sm font-medium transition-colors ${linkBase}`}
+                  className={`text-base font-medium transition-colors ${linkBase}`}
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
                 <span
                   aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all ${
+                  className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all duration-300 ${
                     isActive(item.href) ? `w-full ${underlineActive}` : "w-0"
                   }`}
                 />
@@ -134,7 +153,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
           </ul>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 border-l border-current/20 pl-6">
             <a
               href={`mailto:${EMAIL}`}
               className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
@@ -151,10 +170,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 Call
               </a>
             )}
-            {/* Removed slash-opacity ring class to avoid guards */}
             <Link
               href="/contact"
-              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+              className="rounded-full bg-softGold px-6 py-2.5 text-sm font-semibold text-deepCharcoal transition hover:brightness-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/70"
               aria-label="Go to contact form"
             >
               Enquire
@@ -171,8 +189,10 @@ export default function Header({ variant = "light" }: HeaderProps) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-nav"
-            className={`inline-flex items-center justify-center rounded-md border p-2 ${
-              variant === "dark" ? "border-white/20 text-cream" : "border-black/20 text-deepCharcoal"
+            className={`inline-flex items-center justify-center rounded-md border p-2 transition-colors ${
+              variant === "dark"
+                ? "border-white/30 text-cream hover:bg-white/10"
+                : "border-black/30 text-deepCharcoal hover:bg-black/5"
             }`}
           >
             <span className="sr-only">Toggle navigation</span>
@@ -193,24 +213,24 @@ export default function Header({ variant = "light" }: HeaderProps) {
       <div
         id="mobile-nav"
         className={`md:hidden ${open ? "block" : "hidden"} ${
-          variant === "dark" ? "bg-black/80" : "bg-white/95"
-        } border-t ${variant === "dark" ? "border-white/10" : "border-black/10"} backdrop-blur`}
+          variant === "dark" ? "bg-black/95" : "bg-white/95"
+        } border-t ${variant === "dark" ? "border-white/20" : "border-black/20"} backdrop-blur`}
       >
-        <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile Primary">
-          <ul className="grid gap-2">
+        <nav className="mx-auto max-w-7xl px-6 py-6" aria-label="Mobile Primary">
+          <ul className="grid gap-4">
             {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`block rounded-md px-3 py-2 text-base font-medium ${
+                  className={`block rounded-lg px-4 py-3 text-lg font-medium transition-colors ${
                     isActive(item.href)
                       ? variant === "dark"
                         ? "bg-white/10 text-cream"
-                        : "bg-black/5 text-deepCharcoal"
+                        : "bg-black/10 text-deepCharcoal"
                       : variant === "dark"
-                      ? "text-[color:var(--color-on-primary)/0.8] hover:bg-white/10 hover:text-cream"
-                      : "text-[color:var(--color-on-secondary)/0.8] hover:bg-black/5 hover:text-deepCharcoal"
+                      ? "text-[color:var(--color-on-primary)/0.9] hover:bg-white/5 hover:text-cream"
+                      : "text-[color:var(--color-on-secondary)/0.9] hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
@@ -218,12 +238,14 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 </Link>
               </li>
             ))}
-            <li className="flex items-center gap-4 px-3 pt-3">
+            <li className="flex items-center gap-6 px-4 pt-4">
               <a
                 href={`mailto:${EMAIL}`}
                 onClick={() => setOpen(false)}
                 className={`text-base underline-offset-4 hover:underline ${
-                  variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+                  variant === "dark"
+                    ? "text-[color:var(--color-on-primary)/0.9]"
+                    : "text-[color:var(--color-on-secondary)/0.9]"
                 }`}
               >
                 Email
@@ -233,18 +255,20 @@ export default function Header({ variant = "light" }: HeaderProps) {
                   href={`tel:${PHONE.replace(/\s+/g, "")}`}
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
-                    variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+                    variant === "dark"
+                      ? "text-[color:var(--color-on-primary)/0.9]"
+                      : "text-[color:var(--color-on-secondary)/0.9]"
                   }`}
                 >
                   Call
                 </a>
               )}
             </li>
-            <li className="pt-2">
+            <li className="pt-4">
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+                className="block rounded-full bg-softGold px-5 py-3 text-center text-base font-semibold text-deepCharcoal transition hover:brightness-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/70"
               >
                 Enquire
               </Link>
@@ -256,14 +280,15 @@ export default function Header({ variant = "light" }: HeaderProps) {
       {/* Offset main by header height var */}
       <style jsx>{`
         :global(main) {
-          padding-top: var(--header-h, 5rem);
+          padding-top: var(--header-h, 6rem);
         }
         @media (max-width: 767px) {
           :global(header[role="navigation"]) {
-            --header-h: ${scrolled ? "3.5rem" : "4rem"};
+            --header-h: ${scrolled ? "4rem" : "5rem"};
           }
         }
       `}</style>
     </motion.header>
   );
 }
+

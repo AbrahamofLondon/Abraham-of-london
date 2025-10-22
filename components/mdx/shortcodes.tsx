@@ -89,7 +89,7 @@ export function Verse({ cite, children, className }: React.PropsWithChildren<{ c
   );
 }
 
-/* --- Note (alias of Callout with “key” default) --- */
+/* --- Note (alias of Callout with "key" default) --- */
 export function Note(props: React.ComponentProps<typeof Callout>) {
   return <Callout tone={props.tone ?? "key"} {...props} />;
 }
@@ -145,7 +145,7 @@ export const mdxComponents = {
   Callout,
   Badge,
 
-  // plus the others you’ve been using in posts
+  // plus the others you've been using in posts
   Rule,
   PullLine,
   Verse,

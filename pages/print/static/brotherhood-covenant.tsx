@@ -10,7 +10,7 @@ export default function BrotherhoodCovenant() {
   return (
     <>
       <Head>
-        <title>Brotherhood Covenant â€” Abraham of London (Print)</title>
+        <title>Brotherhood Covenant — Abraham of London (Print)</title>
         <meta name="robots" content="noindex" />
       </Head>
 
@@ -25,9 +25,7 @@ export default function BrotherhoodCovenant() {
                     alt="Abraham of London"
                     width={50} // Adjust size for better fit in header
                     height={50}
-                    effect="emboss"
-                    baseColor="transparent"
-                />
+                    effect="emboss"/>
             </div>
             {/* -------------------------------------------------------------------------- */}
             <div className="brand-meta">
@@ -57,18 +55,18 @@ export default function BrotherhoodCovenant() {
             <li><strong>Show up.</strong> Weekly touchpoints. <em>No ghosts.</em></li>
             <li><strong>Tell the truth.</strong> Confess struggles <em>before</em> collapse.</li>
             <li><strong>Carry weight.</strong> Pray, call, turn up at the door.</li>
-            <li><strong>Protect families.</strong> No gossip; no shortcuts. <em>Cover, donâ€™t expose.</em></li>
-            <li><strong>Build together.</strong> Study, train, serve. <em>Produceâ€”not just post.</em></li>
+            <li><strong>Protect families.</strong> No gossip; no shortcuts. <em>Cover, don't expose.</em></li>
+            <li><strong>Build together.</strong> Study, train, serve. <em>Produce—not just post.</em></li>
           </ol>
         </section>
 
         {/* Rhythm */}
         <section className="section">
-          <h3 className="h3">Weekly Rhythm (60â€“90 minutes)</h3>
+          <h3 className="h3">Weekly Rhythm (60–90 minutes)</h3>
           <ul className="bullets">
-            <li><strong>Scripture (â‰ˆ45m):</strong> Read &amp; discuss for grounding.</li>
-            <li><strong>Formation (â‰ˆ30m):</strong> Habits, money, marriage, parenting.</li>
-            <li><strong>Intercession (â‰ˆ15m):</strong> Names, needs, next steps.</li>
+            <li><strong>Scripture (Ã¢â€°Ë†45m):</strong> Read &amp; discuss for grounding.</li>
+            <li><strong>Formation (Ã¢â€°Ë†30m):</strong> Habits, money, marriage, parenting.</li>
+            <li><strong>Intercession (Ã¢â€°Ë†15m):</strong> Names, needs, next steps.</li>
           </ul>
         </section>
 
@@ -76,9 +74,9 @@ export default function BrotherhoodCovenant() {
         <section className="section">
           <h3 className="h3">Accountability that Builds</h3>
           <ol className="list-tight">
-            <li><strong>Facts first</strong> â€” What happened? When? What did I do / not do?</li>
-            <li><strong>Heart next</strong> â€” What was I feeling? What did I believe?</li>
-            <li><strong>Hope last</strong> â€” Next right step. Whoâ€™s my accountability partner?</li>
+            <li><strong>Facts first</strong> — What happened? When? What did I do / not do?</li>
+            <li><strong>Heart next</strong> — What was I feeling? What did I believe?</li>
+            <li><strong>Hope last</strong> — Next right step. Who's my accountability partner?</li>
           </ol>
         </section>
 
@@ -97,10 +95,10 @@ export default function BrotherhoodCovenant() {
         <section className="section">
           <h3 className="h3">Monthly Roles (Rotate)</h3>
           <ul className="grid2">
-            <li><strong>Convener</strong> â€” books space, sends reminders.</li>
-            <li><strong>Timekeeper</strong> â€” lands content, avoids drift.</li>
-            <li><strong>Scribe</strong> â€” 1â€“3 actions per man, checks progress.</li>
-            <li><strong>Chaplain</strong> â€” opens/closes in prayer, coordinates care.</li>
+            <li><strong>Convener</strong> — books space, sends reminders.</li>
+            <li><strong>Timekeeper</strong> — lands content, avoids drift.</li>
+            <li><strong>Scribe</strong> — 1–3 actions per man, checks progress.</li>
+            <li><strong>Chaplain</strong> — opens/closes in prayer, coordinates care.</li>
           </ul>
         </section>
 
@@ -137,7 +135,7 @@ export default function BrotherhoodCovenant() {
 
         {/* Footer */}
         <footer className="footer">
-          <div className="copyright">Â© {currentYear} Abraham of London. All rights reserved.</div>
+          <div className="copyright">© {currentYear} Abraham of London. All rights reserved.</div>
           <div className="flex flex-col items-end">
              {/* --- Branding: EmbossedSign replaces the second link/text block --- */}
             <EmbossedSign
@@ -145,14 +143,12 @@ export default function BrotherhoodCovenant() {
                 alt="Abraham of London Signature"
                 width={120} 
                 height={25} 
-                effect="deboss"
-                baseColor="transparent"
-            />
+                effect="deboss"/>
             <div className="muted text-right text-xs mt-0.5">
                 <Link href="https://www.abrahamoflondon.org" target="_blank" rel="noopener noreferrer">
                     abrahamoflondon.org
                 </Link>
-                <span aria-hidden> â€¢ Brotherhood is a covenant of presence.</span>
+                <span aria-hidden> • Brotherhood is a covenant of presence.</span>
             </div>
           </div>
         </footer>

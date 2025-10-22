@@ -59,7 +59,7 @@ export function getDownloads(): DownloadItem[] {
       if (!e.isFile()) continue;
       const file = e.name;
       const ext = path.extname(file).toLowerCase();
-      
+
       // Only include PDFs
       if (ext !== ".pdf") continue;
 
@@ -109,7 +109,7 @@ export const DOWNLOADS = {
     pdf: "/downloads/Brotherhood_Covenant_Printable.pdf",
   },
   leadersCueCard: {
-    label: "Leader’s Cue Card (A6, Two-Up)",
+    label: "LeaderÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s Cue Card (A6, Two-Up)",
     page: "/downloads/leaders-cue-card",
     pdf: "/downloads/Leaders_Cue_Card_A6_Two-Up.pdf",
   },
@@ -122,7 +122,7 @@ export type DownloadKey = keyof typeof DOWNLOADS;
 // ------------------------------------
 
 // NEW TYPE: Define the union of possible "pill" item types
-type PillItem = 
+type PillItem =
   | { kind: "notes", label: string, href: string }
   | { kind: "pdf", label: string, href: string, download: true };
 
@@ -131,14 +131,14 @@ export function buildNotesAndPdfPills(keys: DownloadKey[]): PillItem[] {
   return keys.flatMap((key) => {
     const d = DOWNLOADS[key];
     if (!d) return [];
-    
+
     // Explicitly type the items array as PillItem[]
-    const items: PillItem[] = [ 
+    const items: PillItem[] = [
       { kind: "notes" as const, label: "Notes", href: d.page },
     ];
     // Use the PDF field if present
     if (d.pdf) items.push({ kind: "pdf" as const, label: "PDF", href: d.pdf, download: true });
-    
+
     return items;
   });
 }

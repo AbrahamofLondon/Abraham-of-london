@@ -91,7 +91,7 @@ function formatRange(start?: string | null, end?: string | null) {
     year: "numeric",
   }).format(e);
 
-  return `${dayStr}, ${timeStart} → ${dayEnd}, ${timeEnd}`;
+  return `${dayStr}, ${timeStart} ÃƒÂ¢Ã¢â‚¬' ${dayEnd}, ${timeEnd}`;
 }
 
 export default function EventHero({

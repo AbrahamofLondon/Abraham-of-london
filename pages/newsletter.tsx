@@ -28,7 +28,7 @@ export default function NewsletterPage() {
     try {
       const res = await subscribe(trimmed);
       if (res.ok) {
-        setStatus({ state: "success", message: res.message || "You’re subscribed. Welcome!" });
+        setStatus({ state: "success", message: res.message || "You're subscribed. Welcome!" });
         setEmail("");
       } else {
         setStatus({ state: "error", message: res.message || "Something went wrong. Please try again." });

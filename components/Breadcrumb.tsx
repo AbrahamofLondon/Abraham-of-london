@@ -7,7 +7,7 @@ export type Crumb = { href?: string; label: string };
 type Props = {
   items: Crumb[];
   className?: string;
-  separator?: React.ReactNode; // e.g. "›"
+  separator?: React.ReactNode; // e.g. "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº"
   ariaLabel?: string;
 };
 

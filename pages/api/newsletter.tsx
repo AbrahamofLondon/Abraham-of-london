@@ -99,14 +99,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       }
 
       if (r.ok || r.status === 201) {
-        return res.status(200).json({ ok: true, message: "You’re subscribed. Welcome!" });
+        return res.status(200).json({ ok: true, message: "You're subscribed. Welcome!" });
       }
 
       // Friendly already-subscribed
       const txt = JSON.stringify(resp || {}).toLowerCase();
       if (r.status === 400 || r.status === 422) {
         if (txt.includes("already") || txt.includes("exists")) {
-          return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+          return res.status(200).json({ ok: true, message: "You're already subscribed." });
         }
       }
       if (r.status === 401) {
@@ -159,13 +159,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           ok: true,
           message: doubleOpt
             ? "Check your email to confirm your subscription."
-            : "You’re subscribed. Welcome!",
+            : "You're subscribed. Welcome!",
         });
       }
 
       const detail = String(resp?.title || resp?.detail || "");
       if (/exists|already/i.test(detail)) {
-        return res.status(200).json({ ok: true, message: "You’re already subscribed." });
+        return res.status(200).json({ ok: true, message: "You're already subscribed." });
       }
       return res.status(r.status || 500).json({ ok: false, message: detail || "Mailchimp error" });
     }

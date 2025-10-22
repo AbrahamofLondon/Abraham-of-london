@@ -44,7 +44,7 @@ const PRESETS: Record<PresetKey, PresetData> = {
     ],
   },
   founders: {
-    title: "Founder’s Toolkit",
+    title: "Founder's Toolkit",
     reads: [
       { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Signal over noise" },
       { href: "/blog/out-of-context-truth", label: "Out of Context Truth", sub: "Clarity under fire" },

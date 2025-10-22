@@ -1,43 +1,17 @@
-﻿---
+---
+type: "Download"
+title: "Board Update One-Pager"
 slug: "board-update-onepager"
-kind: "Download"
-title: "Board Update Onepager"
-author: Abraham of London
+date: 2025-10-13
+author: "Abraham of London"
 readTime: 2 min read
-category: Resources
+category: "Resources"
+pdfPath: /downloads/Board_Update_Onepager.pdf
+coverImage: "/assets/images/downloads/board-update-onepager.jpg"
+tags:
+  - board
+  - update
 ---
 
-import * as React from "react";
-import BrandFrame from "../../components/print/BrandFrame";
-import { PullLine } from "../../components/PullLine";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark";
-
-{/* The actual component body uses the metadata retrieved from ContentLayer */}
-const BoardInvestorTemplate = ({ metadata }) => {
-    return (
-        <BrandFrame
-            title={metadata.title}
-            subtitle={metadata.subtitle}
-            author={metadata.author}
-            date={metadata.date}
-            pageSize="A4"
-        >
-            {/* The rest of the MDX/JSX content goes here */}
-            <h2>Executive Summary (Required)</h2>
-            <p>Use this space to provide the high-level update: Cash, Momentum, Risks.</p>
-            <div className="mt-12 text-center">
-                <EmbossedBrandMark
-                    src="/assets/images/abraham-logo.jpg"
-                    alt="Abraham of London Brand Mark"
-                    width={80}
-                    height={80}
-                    className="inline-block"
-                />
-            </div>
-        </BrandFrame>
-    );
-};
-
-{/* This line renders the component in the compiled MDX */}
-<BoardInvestorTemplate metadata={frontmatter} />
-
+# Board Update One-Pager
+Content for the board update one-pager goes here...

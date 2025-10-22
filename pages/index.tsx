@@ -22,7 +22,7 @@ import {
 } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 
-/* ── banner types ── */
+/* â”€â”€ banner types â”€â”€ */
 type BannerCTA = { label: string; href: string };
 type BannerOverlay =
     | { eyebrow?: string; title?: string; body?: string; cta?: BannerCTA }
@@ -39,7 +39,7 @@ type BannerConfig = {
 // client-only hero to avoid SSR media evaluation
 const HeroBanner = dynamic(() => import("@/components/homepage/HeroBanner"), { ssr: false });
 
-/* ── events teaser types ── */
+/* â”€â”€ events teaser types â”€â”€ */
 type ResourceLink = { href: string; label: string };
 type EventResources = {
     downloads?: ResourceLink[] | null;
@@ -118,7 +118,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
     const downloads = React.useMemo(
         () => [
             { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-            { href: "/downloads/leaders-cue-card",     title: "Leader’s Cue Card (A6, Two-Up)",     sub: "Pocket reference" },
+            { href: "/downloads/leaders-cue-card",  title: "Leader's Cue Card (A6, Two-Up)",  sub: "Pocket reference" },
             { href: "/downloads/brotherhood-cue-card", title: "Brotherhood Cue Card" },
         ],
         []
@@ -133,7 +133,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 />
                 <meta property="og:type" content="website" />
                 {/* LCP Optimization: Add fetchpriority="high" to the primary image preload */}
-                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" /> 
+                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" />
                 {banner.videoSources?.map((s, i) => (
                     <link key={i} rel="preload" as="video" href={s.src} type={s.type} />
                 ))}
@@ -156,7 +156,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                             <li><Link href="/" className="hover:text-deepCharcoal" prefetch={false}>Home</Link></li>
                             <li aria-hidden>/</li>
                             <li className="text-[color:var(--color-on-secondary)/0.8]">Overview</li>
-                            {incomingQ && (<><li aria-hidden>/</li><li className="text-[color:var(--color-on-secondary)/0.6]">“{incomingQ}”</li></>)}
+                            {incomingQ && (<><li aria-hidden>/</li><li className="text-[color:var(--color-on-secondary)/0.6]">"{incomingQ}"</li></>)}
                         </ol>
                     </nav>
 
@@ -189,7 +189,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                                 slug={p.slug}
                                 title={p.title}
                                 // Props passed directly from safePosts, which already handles null/undefined
-                                date={p.date ?? undefined} 
+                                date={p.date ?? undefined}
                                 excerpt={p.excerpt ?? undefined}
                                 coverImage={p.coverImage ?? undefined}
                                 author={p.author ?? undefined}
@@ -304,7 +304,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                         <Link href="/ventures?brand=alomarada" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
                             <div className="flex items-center justify-between">
                                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
-                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore â†’</span>
                             </div>
                             <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                                 Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
@@ -314,7 +314,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                         <Link href="/ventures?brand=endureluxe" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
                             <div className="flex items-center justify-between">
                                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
-                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore â†’</span>
                             </div>
                             <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                                 Essential goods and refined experiences—engineered to last, designed to serve.
@@ -324,7 +324,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                         <Link href="/about" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
                             <div className="flex items-center justify-between">
                                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
-                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore â†’</span>
                             </div>
                             <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                                 Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
@@ -337,13 +337,13 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             {/* Closing CTA */}
             <section className="relative isolate overflow-hidden bg-deepCharcoal">
                 <div className="absolute inset-0 -z-10">
-                    <Image 
-                        src="/assets/images/cta/cta-bg.jpg" 
-                        alt="" 
-                        fill 
-                        sizes="100vw" 
-                        quality={85} 
-                        className="object-cover opacity-20" 
+                    <Image
+                        src="/assets/images/cta/cta-bg.jpg"
+                        alt=""
+                        fill
+                        sizes="100vw"
+                        quality={85}
+                        className="object-cover opacity-20"
                         priority={false} // Since this is a closing CTA, set to false
                     />
                 </div>
@@ -366,7 +366,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
 
 Home.displayName = "Home";
 
-/* ── SSG + ISR ── */
+/* â”€â”€ SSG + ISR â”€â”€ */
 export async function getStaticProps() {
     const allPosts = getAllPosts();
     // Optimization: Slice the array to only process and pass the 3 featured posts
@@ -432,7 +432,7 @@ export async function getStaticProps() {
         })
         .sort((a, b) => +new Date(a.date) - +new Date(b.date));
 
-    // 👇 CORRECTED LOGIC: Use 'e.resources' directly from the deduped event object.
+    // ðŸ‘‡ CORRECTED LOGIC: Use 'e.resources' directly from the deduped event object.
     const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
         const baseForImage = String(e.slug).replace(/[–—].*$/, "");
         const heroImage = `/assets/images/events/${baseForImage}.jpg`;

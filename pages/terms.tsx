@@ -93,13 +93,13 @@ export default function Terms() {
 
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By accessing or using this website and any related services (the “Services”), you agree to be bound by these
-          Terms of Use (“Terms”). If you do not agree, do not use the Services.
+          By accessing or using this website and any related services (the "Services"), you agree to be bound by these
+          Terms of Use ("Terms"). If you do not agree, do not use the Services.
         </p>
 
         <h2>2. Use of the Services</h2>
         <ul>
-          <li>Do not attempt to interfere with the site’s security or availability.</li>
+          <li>Do not attempt to interfere with the site's security or availability.</li>
           <li>Do not copy, scrape, or redistribute content without permission.</li>
           <li>You must comply with applicable laws and regulations.</li>
         </ul>
@@ -126,7 +126,7 @@ export default function Terms() {
         </p>
 
         <h2>7. Changes</h2>
-        <p>We may update these Terms from time to time. Material changes will be reflected by updating the “Last updated” date above.</p>
+        <p>We may update these Terms from time to time. Material changes will be reflected by updating the "Last updated" date above.</p>
 
         <h2>8. Contact</h2>
         <p>

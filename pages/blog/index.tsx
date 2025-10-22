@@ -123,7 +123,7 @@ export default function BlogIndex({ posts }: Props) {
             </select>
           </div>
 
-          {/* Editorial “magazine” grid */}
+          {/* Editorial "magazine" grid */}
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
               <article
@@ -140,7 +140,7 @@ export default function BlogIndex({ posts }: Props) {
                   readTime={p.readTime ?? undefined}
                   category={p.category ?? undefined}
                   tags={p.tags ?? undefined}
-                  // Framing props → wide editorial cover by default
+                  // Framing props â†’ wide editorial cover by default
                   coverAspect={(p.coverAspect as any) ?? "wide"}
                   coverFit={(p.coverFit as any) ?? "cover"}
                   coverPosition={(p.coverPosition as any) ?? "center"}
@@ -162,7 +162,7 @@ export default function BlogIndex({ posts }: Props) {
 
 export async function getStaticProps() {
   const posts = getAllPosts();
-  // normalize undefined → null for JSON serialization
+  // normalize undefined â†’ null for JSON serialization
   const safe = posts.map((p) => ({
     ...p,
     excerpt: p.excerpt ?? null,

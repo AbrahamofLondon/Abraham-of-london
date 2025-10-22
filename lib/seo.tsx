@@ -5,7 +5,7 @@ export const SITE_NAME = "Abraham of London";
 export const ORIGIN =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 const DEFAULT_DESC =
-  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record.";
+  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms availableÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âoff the record.";
 const TWITTER_HANDLE = "@Abraham_of_LDN";
 
 function abs(path: string) {
