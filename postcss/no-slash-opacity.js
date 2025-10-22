@@ -49,7 +49,7 @@ module.exports = function noSlashOpacity(opts = {}) {
       if (!m) return;
 
       if (mode === "fix") {
-        // Don’t auto-rewrite in declarations; advise moving into @apply/className.
+        // Don't auto-rewrite in declarations; advise moving into @apply/className.
         throw decl.error(
           `Forbidden slash opacity token "${m[0].trim()}" in "${decl.prop}". ` +
           `Move it into @apply or a className so it can be rewritten.`
