@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Head from "next/head";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 const BrandedCard = ({ isBack = false }) => {
   return (
@@ -20,7 +20,7 @@ const BrandedCard = ({ isBack = false }) => {
         />
       </div>
 
-      <div className="eyebrow">Standards • A6</div>
+      <div className="eyebrow">Standards â€¢ A6</div>
       <h1>Principles for My Son</h1>
       <ol className="list">
         <li><strong>Seek wisdom daily.</strong></li>
@@ -64,7 +64,7 @@ export default function PrinciplesForMySonCueCard() {
   return (
     <>
       <Head>
-        <title>Principles for My Son — Cue Card • Print</title>
+        <title>Principles for My Son â€” Cue Card â€¢ Print</title>
         <meta name="robots" content="noindex" />
       </Head>
 

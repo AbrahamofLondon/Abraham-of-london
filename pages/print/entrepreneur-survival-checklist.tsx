@@ -2,8 +2,8 @@
 
 import Head from "next/head";
 import * as React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark";
-import EmbossedSign from "../../components/EmbossedSign";
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
 /* --- Helper Components for Typography Styling --- */
 
 interface PullLineProps {
@@ -41,7 +41,7 @@ const EntrepreneurSurvivalChecklist = () => {
   return (
     <>
       <Head>
-        <title>{title} — When the Week Turns</title>
+        <title>{title} â€” When the Week Turns</title>
         <meta name="robots" content="noindex" />
       </Head>
 
@@ -75,10 +75,10 @@ const EntrepreneurSurvivalChecklist = () => {
               <strong>Cash today / this month / next month</strong>.
             </li>
             <li>
-              <strong>Customers</strong> — who must not churn; call them.
+              <strong>Customers</strong> â€” who must not churn; call them.
             </li>
             <li>
-              <strong>Covenants</strong> — bank, board, suppliers: align the story.
+              <strong>Covenants</strong> â€” bank, board, suppliers: align the story.
             </li>
           </ol>
 
@@ -107,7 +107,7 @@ const EntrepreneurSurvivalChecklist = () => {
         </section>
 
         <footer className="footer-bar flex justify-between items-end">
-          <p className="copyright">© {currentYear} Abraham of London • abrahamoflondon.org</p>
+          <p className="copyright">Â© {currentYear} Abraham of London â€¢ abrahamoflondon.org</p>
 
           {/* --- Branding: Signature Bottom Right --- */}
           <div className="flex flex-col items-end">

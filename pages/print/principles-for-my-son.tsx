@@ -2,13 +2,13 @@
 
 import Head from "next/head";
 import * as React from "react"; // Explicitly include React import for TSX
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 export default function Print_PrinciplesForMySon() {
   return (
     <>
-      <Head><title>Principles for My Son — Print</title></Head>
+      <Head><title>Principles for My Son â€” Print</title></Head>
       <main className="sheet">
         <header className="title relative">
           {/* --- Branding: Logo Top Left --- */}
@@ -24,18 +24,18 @@ export default function Print_PrinciplesForMySon() {
           </div>
           
           <h1>Principles for My Son</h1>
-          <p className="sub">Twelve standards. One father–son pledge. Reviewed weekly, renewed quarterly.</p>
+          <p className="sub">Twelve standards. One fatherâ€“son pledge. Reviewed weekly, renewed quarterly.</p>
         </header>
 
         <section className="cols">
           <ol className="standards">
-            <li><strong>Presence.</strong> We show up—on time, prepared, attentive.</li>
+            <li><strong>Presence.</strong> We show upâ€”on time, prepared, attentive.</li>
             <li><strong>Truth.</strong> We tell the truth without spin; we confess fast, not last.</li>
             <li><strong>Work.</strong> We finish what we start and keep small promises.</li>
             <li><strong>Stewardship.</strong> We budget, save, give, and repair what we own.</li>
-            <li><strong>Courage.</strong> We do hard, right things—especially when unseen.</li>
+            <li><strong>Courage.</strong> We do hard, right thingsâ€”especially when unseen.</li>
             <li><strong>Honor.</strong> We dignify women, elders, and authorities; we protect the weak.</li>
-            <li><strong>Speech.</strong> We speak cleanly—no gossip, slander, or coarse talk.</li>
+            <li><strong>Speech.</strong> We speak cleanlyâ€”no gossip, slander, or coarse talk.</li>
             <li><strong>Learning.</strong> We read, ask, practice; we receive correction with humility.</li>
             <li><strong>Health.</strong> We sleep, train, eat simply, and keep our devices in their place.</li>
             <li><strong>Craft.</strong> We build things that work and are worth keeping.</li>
@@ -55,13 +55,13 @@ export default function Print_PrinciplesForMySon() {
             <ul>
               <li><strong>Sunday Check-in (20 min):</strong> Review standards; pick one focus.</li>
               <li><strong>Skill Block (60 min):</strong> Hands + head: a skill, a book, a task.</li>
-              <li><strong>Service (30–60 min):</strong> A small act beyond ourselves.</li>
+              <li><strong>Service (30â€“60 min):</strong> A small act beyond ourselves.</li>
             </ul>
           </div>
         </section>
 
         <section className="pledge">
-          <h2>Father–Son Pledge</h2>
+          <h2>Fatherâ€“Son Pledge</h2>
           <p>
             We commit to these standards with courage and joy. We will correct in love, receive correction with
             humility, and keep small promises over time. Our name will be known for presence, truth, and service.
@@ -70,7 +70,7 @@ export default function Print_PrinciplesForMySon() {
             {["Father", "Son"].map((role) => (
               <div key={role} className="sig relative">
                 <div className="line" />
-                <div className="label">{role} — Name</div>
+                <div className="label">{role} â€” Name</div>
                 
                 <div className="line" />
                 <div className="label">Signature</div>
@@ -94,7 +94,7 @@ export default function Print_PrinciplesForMySon() {
               </div>
             ))}
           </div>
-          <p className="footer-note">Review: quarterly • Small promises, kept.</p>
+          <p className="footer-note">Review: quarterly â€¢ Small promises, kept.</p>
         </section>
       </main>
 

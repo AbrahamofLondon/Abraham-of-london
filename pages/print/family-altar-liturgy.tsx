@@ -2,14 +2,14 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 export default function Print_FamilyAltarLiturgy() {
   const currentYear = new Date().getFullYear();
   return (
     <>
-      <Head><title>Family Altar Liturgy — 2-Page Print</title></Head>
+      <Head><title>Family Altar Liturgy â€” 2-Page Print</title></Head>
       <main className="sheet">
         <header className="title relative">
           {/* --- Branding: Logo Top Left --- */}
@@ -25,13 +25,13 @@ export default function Print_FamilyAltarLiturgy() {
           </div>
 
           <h1>Family Altar Liturgy</h1>
-          <p className="sub">Short. Kind. Repeatable. Suited for night or week’s beginning.</p>
+          <p className="sub">Short. Kind. Repeatable. Suited for night or weekâ€™s beginning.</p>
         </header>
 
         <section className="grid">
           <div className="block">
             <h2>Opening (Leader)</h2>
-            <p><em>We gather to remember God’s love, receive His peace, and commit to one good work.</em></p>
+            <p><em>We gather to remember Godâ€™s love, receive His peace, and commit to one good work.</em></p>
 
             <h3>Call & Response</h3>
             <ul>
@@ -41,11 +41,11 @@ export default function Print_FamilyAltarLiturgy() {
               <li><strong>All:</strong> We will walk in it.</li>
             </ul>
 
-            <h3>Scripture (1–3 verses)</h3>
-            <p>Read slowly. Pause. Ask: “What word or phrase stands out?” One sentence each.</p>
+            <h3>Scripture (1â€“3 verses)</h3>
+            <p>Read slowly. Pause. Ask: â€œWhat word or phrase stands out?â€ One sentence each.</p>
 
             <h3>Thanksgiving</h3>
-            <p>I thank God today for… (children first, then adults)</p>
+            <p>I thank God today forâ€¦ (children first, then adults)</p>
           </div>
 
           <div className="block">
@@ -56,14 +56,14 @@ export default function Print_FamilyAltarLiturgy() {
               <li>Leaders & church: courage, wisdom, integrity.</li>
             </ul>
 
-            <h3>The Lord’s Prayer</h3>
-            <p><em>Our Father in heaven…</em></p>
+            <h3>The Lordâ€™s Prayer</h3>
+            <p><em>Our Father in heavenâ€¦</em></p>
 
             <h2>Micro-Commitments</h2>
             <ul>
-              <li><strong>Truth:</strong> One honest action I will take tomorrow is…</li>
-              <li><strong>Service:</strong> One small burden I can lift is…</li>
-              <li><strong>Presence:</strong> One device boundary I will keep is…</li>
+              <li><strong>Truth:</strong> One honest action I will take tomorrow isâ€¦</li>
+              <li><strong>Service:</strong> One small burden I can lift isâ€¦</li>
+              <li><strong>Presence:</strong> One device boundary I will keep isâ€¦</li>
             </ul>
 
             <h3>Blessing (Leader)</h3>
@@ -73,8 +73,8 @@ export default function Print_FamilyAltarLiturgy() {
 
         <footer className="footer-bar flex justify-between items-end">
             <div className="note-box">
-                <p className="note-text">Keep under 12 minutes • Children go first • End with one concrete step.</p>
-                <p className="copyright-text">© {currentYear} Abraham of London • abrahamoflondon.org</p>
+                <p className="note-text">Keep under 12 minutes â€¢ Children go first â€¢ End with one concrete step.</p>
+                <p className="copyright-text">Â© {currentYear} Abraham of London â€¢ abrahamoflondon.org</p>
             </div>
             
             {/* --- Branding: Signature Bottom Right --- */}

@@ -2,15 +2,15 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 export default function FatherhoodGuide() {
   const currentYear = new Date().getFullYear();
   return (
     <>
       <Head>
-        <title>Fatherhood Guide — Print</title>
+        <title>Fatherhood Guide â€” Print</title>
       </Head>
 
       <main className="sheet relative">
@@ -37,7 +37,7 @@ export default function FatherhoodGuide() {
           <h2>1. Presence</h2>
           <ul>
             <li>Daily touchpoints: eye contact, listen, encourage.</li>
-            <li>Weekly one-on-one: 30–60 minutes minimum.</li>
+            <li>Weekly one-on-one: 30â€“60 minutes minimum.</li>
             <li>Monthly adventure: stretch, learn, celebrate.</li>
           </ul>
 
@@ -58,7 +58,7 @@ export default function FatherhoodGuide() {
 
         <footer className="footer-bar flex justify-between items-end">
             <p className="copyright">
-                © {currentYear} Abraham of London • abrahamoflondon.org
+                Â© {currentYear} Abraham of London â€¢ abrahamoflondon.org
             </p>
             
             {/* --- Branding: Signature Bottom Right --- */}

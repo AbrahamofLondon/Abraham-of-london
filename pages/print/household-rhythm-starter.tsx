@@ -2,15 +2,15 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 export default function HouseholdRhythmStarter() {
   const currentYear = new Date().getFullYear();
   return (
     <>
       <Head>
-        <title>Household Rhythm Starter — Print</title>
+        <title>Household Rhythm Starter â€” Print</title>
       </Head>
 
       <main className="sheet relative">
@@ -36,26 +36,26 @@ export default function HouseholdRhythmStarter() {
         <section>
           <h2>Weekly Rhythm</h2>
           <ul>
-            <li><strong>Sun PM:</strong> Family huddle — calendar, meals, highlights.</li>
-            <li><strong>Mon–Fri:</strong> Morning blessing + shared table.</li>
-            <li><strong>Wed:</strong> Mid-week reset — tidy + encouragement.</li>
+            <li><strong>Sun PM:</strong> Family huddle â€” calendar, meals, highlights.</li>
+            <li><strong>Monâ€“Fri:</strong> Morning blessing + shared table.</li>
+            <li><strong>Wed:</strong> Mid-week reset â€” tidy + encouragement.</li>
             <li><strong>Fri PM:</strong> Gratitude + fun night.</li>
             <li><strong>Sat:</strong> Adventure / rest / errands.</li>
           </ul>
         </section>
         
         <section className="mt-6">
-          <h2>30•60•90 Focus</h2>
+          <h2>30â€¢60â€¢90 Focus</h2>
           <ul>
-            <li>30: One habit we’ll shape this month.</li>
-            <li>60: One room or system we’ll improve.</li>
-            <li>90: One shared goal we’ll celebrate.</li>
+            <li>30: One habit weâ€™ll shape this month.</li>
+            <li>60: One room or system weâ€™ll improve.</li>
+            <li>90: One shared goal weâ€™ll celebrate.</li>
           </ul>
         </section>
 
         <footer className="footer-bar flex justify-between items-end">
             <p className="copyright">
-                © {currentYear} Abraham of London • abrahamoflondon.org
+                Â© {currentYear} Abraham of London â€¢ abrahamoflondon.org
             </p>
             
             {/* --- Branding: Signature Bottom Right --- */}

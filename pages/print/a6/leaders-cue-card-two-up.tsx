@@ -1,8 +1,8 @@
 // pages/print/a6/leaders-cue-card-two-up.tsx
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; 
-import EmbossedSign from "../../../components/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedSign from "@/components/print/EmbossedSign";       
 
 const CardFront = () => (
   <section className="card card-front relative">
@@ -18,7 +18,7 @@ const CardFront = () => (
       />
     </div>
     
-    <h1>Leader’s Cue Card</h1>
+    <h1>Leaderâ€™s Cue Card</h1>
     <h2>Mandate</h2>
     <ul>
       <li>Clarify the goal.</li>
@@ -51,7 +51,7 @@ const CardBack = () => (
       />
     </div>
     
-    <h1>Leader’s Cue Card</h1>
+    <h1>Leaderâ€™s Cue Card</h1>
     
     <h2>Cadence</h2>
     <ul>
@@ -85,7 +85,7 @@ const CardBack = () => (
 export default function LeadersCueCardTwoUp() {
   return (
     <>
-      <Head><title>Leader’s Cue Card — A6 Two-Up (Print)</title></Head>
+      <Head><title>Leaderâ€™s Cue Card â€” A6 Two-Up (Print)</title></Head>
       <main className="sheet">
         <CardFront />
         <CardBack />
