@@ -6,7 +6,8 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-export interface BookMeta {
+// Define an interface for the required frontmatter properties
+export interface BookRequiredMeta {
   slug: string;
   title: string;
   author: string;
@@ -14,10 +15,14 @@ export interface BookMeta {
   coverImage: string;
   buyLink: string;
   genre: string;
-  date?: string; 
+}
 
+// Define the full interface, extending the required fields
+export interface BookMeta extends BookRequiredMeta {
+  date?: string; // Kept as-is, but often used for sorting/display
+  
   // Optional extras used by pages/books.tsx
-  publishedDate?: string; // stored as ISO or original string
+  publishedDate?: string; // Always coerced to ISO string if possible
   isbn?: string;
   pages?: number;
   rating?: number;
@@ -35,16 +40,19 @@ const booksDir = path.join(process.cwd(), "content", "books");
 
 /* ------------ small helpers ------------ */
 
+/** Converts a slug to a PascalCase title (fallback). */
 function toTitle(slug: string) {
   return slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Coerces a value into an array of trimmed, non-empty strings. */
 function toStringArray(v: unknown): string[] {
   if (Array.isArray(v)) return v.map(String).map((s) => s.trim()).filter(Boolean);
   if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
   return [];
 }
 
+/** Coerces a value into a finite number, or undefined. */
 function toNumber(v: unknown): number | undefined {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v.trim() !== "") {
@@ -54,20 +62,25 @@ function toNumber(v: unknown): number | undefined {
   return undefined;
 }
 
+/**
+ * Coerces a value into an ISO date string, or undefined if not a valid date.
+ */
 function toDateString(v: unknown): string | undefined {
+  let date: Date;
+
   if (v instanceof Date) {
-    return isNaN(v.getTime()) ? undefined : v.toISOString();
-  }
-  if (typeof v === "number") {
-    const d = new Date(v);
-    return isNaN(d.getTime()) ? undefined : d.toISOString();
-  }
-  if (typeof v === "string") {
-    // Keep as-is if parseable; otherwise return original (lets you store "TBA" etc.)
+    date = v;
+  } else if (typeof v === "number") {
+    date = new Date(v);
+  } else if (typeof v === "string") {
     const t = Date.parse(v);
-    return Number.isNaN(t) ? v : new Date(t).toISOString();
+    if (Number.isNaN(t)) return undefined; // Fail if string cannot be parsed as a date
+    date = new Date(t);
+  } else {
+    return undefined;
   }
-  return undefined;
+
+  return isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
 /* ------------ public API ------------ */
@@ -95,7 +108,6 @@ export function getBookBySlug(
   const realSlug = slug.replace(/\.mdx?$/, "");
   const fullPath = resolveBookPath(realSlug);
 
-  // Minimal object if file not found
   if (!fullPath) {
     const minimal: Partial<BookMeta> = { slug: realSlug };
     if (fields.includes("title")) minimal.title = "Book Not Found";
@@ -115,11 +127,12 @@ export function getBookBySlug(
     }
 
     const raw = fm[field as string];
-
     if (typeof raw === "undefined") continue;
 
     switch (field) {
+      // --- Special Coercion Fields ---
       case "genre": {
+        // Handle genre as a special case for array/string conversion
         item.genre = Array.isArray(raw)
           ? toStringArray(raw).join(", ")
           : String(raw);
@@ -141,14 +154,33 @@ export function getBookBySlug(
         item.publishedDate = toDateString(raw);
         break;
       }
+
+      // --- REQUIRED & Simple String Fields (String validation) ---
+      case "title":
+      case "author":
+      case "excerpt":
+      case "coverImage":
+      case "buyLink":
+      case "isbn":
+      case "language":
+      case "publisher":
+      case "date": // date field from original type
+      case "downloadPdf":
+      case "downloadEpub": {
+        if (typeof raw === 'string') {
+          (item as Record<string, unknown>)[field] = raw.trim();
+        }
+        break;
+      }
+      
       default: {
-        // Pass-through for strings/links/etc.
+        // Fallback for any other valid but uncoerced field
         (item as Record<string, unknown>)[field] = raw;
       }
     }
   }
 
-  // Ensure useful fallbacks if requested but missing
+  // Ensure mandatory fields have safe fallbacks if requested but missing
   if (fields.includes("title") && !item.title) item.title = toTitle(realSlug);
 
   return item;

@@ -2,7 +2,7 @@
 export type SocialLink = {
   href: string;
   label: string;
-  icon?: string;
+  icon: string; // Made required
   kind?: "x" | "instagram" | "facebook" | "linkedin" | "youtube" | "whatsapp" | "mail" | "phone" | "tiktok";
   external?: boolean;
 };
@@ -63,16 +63,33 @@ export const siteConfig: SiteConfig = {
   authorImage: "/assets/images/profile-portrait.webp",
 };
 
-/** Safe absolute URL join (handles absolute inputs too). */
-export const absUrl = (path: string) =>
-  /^https?:\/\//i.test(path) ? path : `${siteConfig.siteUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+/** Simple external check for links/components. */
+export const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
 
 /** Normalise a local asset to a leading-slash path (or undefined if remote). */
 export const ensureLocal = (p?: string | null) =>
-  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
+  p && !isExternal(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
+
+/**
+ * Safe absolute URL join.
+ * Returns the path as-is if it's already absolute (http/https).
+ * Otherwise, prepends siteConfig.siteUrl, ensuring a single slash separator.
+ */
+export const absUrl = (path: string) => {
+  if (isExternal(path)) return path;
+  
+  // Ensure the path starts with a slash for clean joining
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+  return `${siteConfig.siteUrl}${cleanPath}`;
+};
 
 /** Absolute URL for a local `/public` asset path. */
-export const absAsset = (localPath: string) => absUrl(ensureLocal(localPath) || localPath);
-
-/** Simple external check for links/components. */
-export const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
+export const absAsset = (localPath: string) => {
+  // Use ensureLocal to guarantee a clean starting slash for local paths
+  const cleanLocalPath = ensureLocal(localPath);
+  
+  if (!cleanLocalPath) return localPath; // Should only happen if input was remote/null
+  
+  return absUrl(cleanLocalPath);
+};

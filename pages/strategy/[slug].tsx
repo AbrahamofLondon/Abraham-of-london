@@ -3,46 +3,51 @@ import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { allStrategies, type Strategy } from "contentlayer/generated";
-import MDXRenderer from "@/components/MDXRenderer";
+import { useMDXComponent } from "next-contentlayer2/hooks";
+import { mdxComponents as components } from "@/components/MdxComponents";
 
-type Props = { strategy: Strategy };
+type Props = { doc: Strategy };
 
-export default function StrategyPage({ strategy }: Props) {
+export default function StrategyPage({ doc }: Props) {
+  const MDX = useMDXComponent(doc.body.code);
+
   return (
     <>
       <Head>
-        <title>{strategy.title} — Abraham of London</title>
-        {strategy.description && <meta name="description" content={strategy.description} />}
-        {strategy.ogDescription && <meta property="og:description" content={strategy.ogDescription} />}
+        <title>{doc.title} — Abraham of London</title>
+        {doc.description && <meta name="description" content={doc.description} />}
+        {doc.ogDescription && <meta property="og:description" content={doc.ogDescription} />}
       </Head>
 
       <article className="prose lg:prose-lg mx-auto px-4 py-10">
-        <h1>{strategy.title}</h1>
+        <header className="mb-6">
+          <h1 className="mt-0">{doc.title}</h1>
+          {(doc.author || doc.date) && (
+            <p className="m-0 text-sm text-gray-600">
+              {doc.author ?? ""}{doc.author && doc.date ? " • " : ""}{doc.date ?? ""}
+            </p>
+          )}
+          {doc.description && <p className="mt-2 text-lg text-gray-700">{doc.description}</p>}
+        </header>
 
-        {(strategy.date || strategy.author) && (
-          <p className="text-sm text-gray-600">
-            {strategy.author ?? ""}
-            {strategy.author && strategy.date ? " • " : ""}
-            {strategy.date ?? ""}
-          </p>
-        )}
-
-        <MDXRenderer code={strategy.body?.code ?? ""} />
+        <MDX components={components} />
       </article>
     </>
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: allStrategies
-    .filter((s) => !!s.slug)
-    .map((s) => ({ params: { slug: s.slug } })),
-  fallback: false,
-});
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: allStrategies
+      .filter((s) => !!s.slug)
+      .map((s) => ({ params: { slug: s.slug } })),
+    fallback: false,
+  };
+};
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
-  const strategy = allStrategies.find((s) => s.slug === slug);
-  if (!strategy) return { notFound: true };
-  return { props: { strategy } };
+  const doc = allStrategies.find((s) => s.slug === slug);
+  if (!doc) return { notFound: true };
+  return { props: { doc } };
 };
