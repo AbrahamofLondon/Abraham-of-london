@@ -4,7 +4,14 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx"; // Added for cleaner class construction
+import clsx from "clsx";
+
+/** ──────────────────────────────────────────────────────────────────────────
+ * EventCard - UPGRADED
+ * - Encapsulated Tag/Resource Pills
+ * - Enhanced Accessibility for Resources
+ * - Consolidated logic and improved date handling
+ * ────────────────────────────────────────────────────────────────────────── */
 
 // --- Type Definitions ---
 type ResItem = { href: string; label: string };
@@ -21,61 +28,111 @@ type Props = {
   resources?: Resources | null;
 };
 
-// --- Utilities ---
+// NEW: explicit types so TS knows left/right are allowed
+type HeroFit = "cover" | "contain";
+type HeroPosition = "top" | "center" | "left" | "right";
+type Overrides = {
+  heroFit?: HeroFit;
+  heroAspect?: "3/1" | "21/9" | "16/9" | "2/3" | "1/1";
+  heroPosition?: HeroPosition;
+};
+
+// --- Constants & Utilities ---
 
 const DEFAULT_EVENT_IMAGE = "/assets/images/events/default.jpg";
+const FALLBACK_CANDIDATES = [DEFAULT_EVENT_IMAGE] as const;
 
-// Normalizes a string slug for comparison
-const normalizeSlug = (s: string) => 
+// Normalizes a string slug for comparison and URL generation
+const normalizeSlug = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
+// Helper to ensure relative URLs start with a slash
+function normalizeLocal(src?: string | null): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return undefined;
+  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
+}
+
 // Per-event visual overrides (aspect/fit/position)
-const HERO_OVERRIDES = {
-  "leadership-workshop": { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
-  "founders-salon": { heroFit: "contain", heroAspect: "16/9", heroPosition: "center" },
+const HERO_OVERRIDES: Record<string, Overrides> = {
+  'leadership-workshop': { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
+  'founders-salon': { heroFit: "contain", heroAspect: "16/9", heroPosition: "center" },
   // add more slugs here…
-} as const;
+};
 
 // Utility to generate the ordered list of candidate image URLs
 function generateImageCandidates(slug: string, heroImage?: string): string[] {
   const base = normalizeSlug(slug);
-  
-  const candidates: string[] = [];
 
-  // 1. Primary image from frontmatter (if provided and valid)
-  if (heroImage && heroImage.trim() !== "") {
-    // If it's a relative path, ensure it starts with a slash
-    const finalHeroImage = /^https?:\/\//i.test(heroImage) || heroImage.startsWith('/') 
-      ? heroImage 
-      : `/${heroImage}`;
-    candidates.push(finalHeroImage);
-  }
-
-  // 2. Slug-based fallbacks (standard naming convention)
-  candidates.push(
-    `/assets/images/events/${base}.webp`,
+  const candidates = [
+    normalizeLocal(heroImage), // 1. Primary image from frontmatter
+    `/assets/images/events/${base}.webp`, // 2. Slug-based fallbacks
     `/assets/images/events/${base}.jpg`,
     `/assets/images/events/${base}.jpeg`,
-    `/assets/images/events/${base}.png`
-  );
+    `/assets/images/events/${base}.png`,
+    ...FALLBACK_CANDIDATES, // 3. Absolute default fallback
+  ].filter(Boolean) as string[];
 
-  // 3. Absolute default fallback (always last)
-  candidates.push(DEFAULT_EVENT_IMAGE);
-
-  // Filter out duplicates and invalid entries (e.g., if heroImage was empty)
-  return Array.from(new Set(candidates)).filter(url => url.includes('/'));
+  // Filter out duplicates
+  return Array.from(new Set(candidates));
 }
 
 // Helper to determine Tailwind aspect ratio class
-function aspectClass(key?: string) {
+function aspectClass(key?: Overrides["heroAspect"]) {
   switch (key) {
     case "3/1": return "aspect-[3/1]";
     case "21/9": return "aspect-[21/9]";
     case "16/9": return "aspect-[16/9]";
     case "2/3": return "aspect-[2/3]";
-    default: return "aspect-[16/10]";
+    case "1/1": return "aspect-[1/1]";
+    default: return "aspect-[16/10]"; // Default if no override/invalid key
   }
 }
+
+// --- Sub-Components ---
+
+// Encapsulates the tag and resource pill logic and styling
+const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: boolean; href?: string }) => {
+  const isResource = !!href;
+  
+  let icon = "";
+  if (isResource) {
+    if (href?.includes(".pdf")) {
+      icon = "📄 "; // Document
+    } else if (href?.includes("article") || href?.includes("read")) {
+      icon = "📚 "; // Reading material
+    } else {
+      icon = "🔗 "; // Generic link
+    }
+  }
+
+  const baseClasses = "rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-200";
+  const content = (
+    <span className={clsx(
+        baseClasses,
+        // Tag styling
+        !isResource && "border border-lightGrey bg-warmWhite text-[color:var(--color-on-secondary)]/[0.8]",
+        // Resource styling
+        isResource && "border border-[color:var(--color-primary)]/[0.2] bg-[color:var(--color-primary)]/[0.05] text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/[0.1]"
+    )}>
+      {icon}
+      {label}
+    </span>
+  );
+
+  // If it's a resource (link), return a functional anchor tag for accessibility
+  if (isLink && href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex">
+        {content}
+      </a>
+    );
+  }
+
+  // If it's just a descriptive tag, return the span
+  return content;
+});
+TagPill.displayName = "TagPill";
 
 // --- Main Component ---
 
@@ -90,107 +147,132 @@ export default function EventCard({
   resources,
 }: Props) {
   const normalizedSlug = normalizeSlug(slug);
-  const ov = HERO_OVERRIDES[normalizedSlug as keyof typeof HERO_OVERRIDES];
+  const ov = HERO_OVERRIDES[normalizedSlug];
 
-  // Memoize the candidate list based on slug and frontmatter image
-  const candidates = React.useMemo(() => 
-    generateImageCandidates(slug, heroImage), 
-    [slug, heroImage]
-  );
-
-  // State to track the currently displayed image index (for fallback)
+  // --- Image Fallback Logic ---
+  const candidates = React.useMemo(() => generateImageCandidates(slug, heroImage), [slug, heroImage]);
   const [idx, setIdx] = React.useState(0);
   const currentHeroSrc = candidates[idx];
 
-  // Callback to advance to the next candidate on image load failure
   const onHeroError = React.useCallback(() => {
-    // Only increment if there is a next candidate AND the current candidate is not the final default
+    // Advance to the next candidate if available
     if (idx + 1 < candidates.length) {
       setIdx((i) => i + 1);
     }
   }, [candidates.length, idx]);
 
-  // --- Formatting ---
-  const dt = date ? new Date(date) : null;
-  const dateLabel =
-    dt && !Number.isNaN(+dt)
-      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt)
-      : date;
+  // --- Formatting & Date Handling (UPGRADE) ---
+  const dt = React.useMemo(() => (date ? new Date(date) : null), [date]);
+  const isValidDate = dt && !Number.isNaN(+dt);
 
-  const pillDownloads = resources?.downloads || [];
-  const pillReads = resources?.reads || [];
+  const dateLabel = isValidDate
+    // ✅ UPGRADE: Used `Intl.DateTimeFormat` with a consistent options object
+    ? new Intl.DateTimeFormat("en-US", { 
+        day: "numeric", 
+        month: "short", 
+        year: "numeric" 
+      }).format(dt!)
+    : date;
+
+  const allPills = React.useMemo(() => {
+    const downloads = resources?.downloads || [];
+    const reads = resources?.reads || [];
+    // Combine and limit resources to max 4 total (2 downloads + 2 reads)
+    return [...downloads.slice(0, 2), ...reads.slice(0, 2)];
+  }, [resources]);
+
 
   // --- Dynamic Class Generation ---
   const imageClasses = clsx(
-    "transition-transform duration-300 group-hover:scale-[1.02]", // Added hover effect
+    "transition-transform duration-300 group-hover:scale-[1.02]",
+    (ov?.heroFit ?? "cover") === "contain" ? "object-contain" : "object-cover",
     {
-      "object-contain": ov?.heroFit?.toLowerCase() === "contain",
-      "object-cover": ov?.heroFit?.toLowerCase() !== "contain",
-    },
-    {
-      "object-top": ov?.heroPosition?.toLowerCase() === "top",
-      "object-left": ov?.heroPosition?.toLowerCase() === "left",
-      "object-right": ov?.heroPosition?.toLowerCase() === "right",
-      "object-center": ov?.heroPosition?.toLowerCase() === "center" || !ov?.heroPosition,
+      "object-top": ov?.heroPosition === "top",
+      "object-left": ov?.heroPosition === "left",
+      "object-right": ov?.heroPosition === "right",
+      "object-center": ov?.heroPosition === "center" || !ov?.heroPosition,
     }
   );
-  
-  // Ensure slug is properly encoded for the URL
+
+  const frameClasses = clsx(
+    "relative w-full overflow-hidden rounded-t-2xl",
+    aspectClass(ov?.heroAspect),
+    // Ensure padding/background for contain fit or missing image
+    ((ov?.heroFit ?? "cover") === "contain" || !currentHeroSrc) && "bg-warmWhite p-2" 
+  );
+
+  // Fallback initials for the image container if all sources fail
+  const initials = React.useMemo(() => {
+    const words = String(title || "").trim().split(/\s+/).slice(0, 3);
+    return words.map((w) => w[0]?.toUpperCase() || "").join("") || "E•V";
+  }, [title]);
+
   const detailHref = `/events/${encodeURIComponent(slug)}`;
+  // Consolidated Tailwind opacity variables
+  const textSecondaryLight = "text-[color:var(--color-on-secondary)]/[0.7]";
+  const textSecondaryNormal = "text-[color:var(--color-on-secondary)]/[0.85]";
 
   return (
     <article className="group rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link href={detailHref} prefetch={false} className="block">
+      <Link href={detailHref} prefetch={false} className="block" aria-label={`View event details for: ${title}`}>
         {/* Hero image container */}
-        <div 
-          className={clsx(
-            "relative w-full overflow-hidden rounded-t-2xl bg-warmWhite p-2",
-            aspectClass(ov?.heroAspect)
-          )}
-        >
-          {/* Only render Image component if a candidate source is available */}
-          {currentHeroSrc && (
-            <Image 
-              src={currentHeroSrc} 
-              alt={title ? `${title} event illustration` : "Event illustration"} 
-              fill 
-              sizes="(max-width: 768px) 100vw, 33vw" 
-              className={imageClasses} 
-              onError={onHeroError} 
+        <div className={frameClasses}>
+          {currentHeroSrc ? (
+            <Image
+              src={currentHeroSrc}
+              alt={title ? `${title} event illustration` : "Event illustration"}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className={imageClasses}
+              onError={onHeroError}
+              priority={false}
+              placeholder="blur" // Add placeholder for better loading UX
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0EQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" 
             />
+          ) : (
+            // Graceful placeholder when all image candidates fail
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[color:var(--color-primary)]/[0.1] to-[color:var(--color-on-secondary)]/[0.1]">
+              <span className={clsx("select-none font-serif text-4xl font-semibold", textSecondaryLight)}>
+                {initials}
+              </span>
+            </div>
           )}
         </div>
 
         <div className="p-5">
           <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
-          <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">
+
+          {/* Date and Location */}
+          <div className={clsx("mt-1 text-sm", textSecondaryLight)}>
             <span>{dateLabel}</span>
             {location && <span className="ml-2">• {location}</span>}
           </div>
-          {description && <p className="mt-3 text-sm text-[color:var(--color-on-secondary)/0.85] line-clamp-3">{description}</p>}
 
-          {/* Resource pills */}
-          {(pillDownloads.length > 0 || pillReads.length > 0) && (
+          {/* Description */}
+          {description && <p className={clsx("mt-3 text-sm line-clamp-3", textSecondaryNormal)}>{description}</p>}
+
+          {/* Resource pills (UPGRADE: uses TagPill component) */}
+          {allPills.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {[...pillDownloads.slice(0, 2), ...pillReads.slice(0, 2)].map((item, index) => (
-                <span 
-                  key={`${item.href}-${index}`} 
-                  className="inline-flex rounded-full border border-lightGrey px-2 py-0.5 text-xs text-[color:var(--color-on-secondary)/0.7]"
-                >
-                  {item.href.includes(".pdf") ? "📄 " : item.href.includes("article") ? "📚 " : ""} 
-                  {item.label}
-                </span>
+              {allPills.map((item, index) => (
+                <TagPill
+                  key={`${item.href}-${index}`}
+                  label={item.label}
+                  isLink={true}
+                  href={item.href}
+                />
               ))}
             </div>
           )}
 
-          {/* tags */}
+          {/* Tags (UPGRADE: uses TagPill component) */}
           {Array.isArray(tags) && tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1">
               {tags.slice(0, 3).map((t, i) => (
-                <span key={`${t}-${i}`} className="rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs text-[color:var(--color-on-secondary)/0.7]">
-                  {t}
-                </span>
+                <TagPill
+                  key={`${t}-${i}`}
+                  label={t}
+                />
               ))}
             </div>
           )}

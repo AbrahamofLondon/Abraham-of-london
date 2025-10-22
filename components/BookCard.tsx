@@ -1,18 +1,24 @@
-// components/BookCard.tsx
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
 import * as React from "react";
 
-// --- Type Definitions ---
+/** ──────────────────────────────────────────────────────────────────────────
+ * BookCard
+ * - Accepts string | StaticImageData | null for coverImage
+ * - Graceful fallback to DEFAULT_COVER on load error
+ * - Accessible, keyboard-friendly (primary focus on title link)
+ * - Brand-consistent tokens (softGold/forest/cream/lightGrey)
+ * ────────────────────────────────────────────────────────────────────────── */
+
 export type BookCardProps = {
-  slug: string;
+  slug: string;                // "my-book" or "/books/my-book"
   title: string;
   author: string;
   excerpt: string;
-  coverImage?: string | StaticImageData | null; 
-  buyLink?: string | null; 
+  coverImage?: string | StaticImageData | null;
+  buyLink?: string | null;
   genre: string;
   downloadPdf?: string | null;
   downloadEpub?: string | null;
@@ -21,14 +27,10 @@ export type BookCardProps = {
   motionProps?: MotionProps;
 };
 
-// --- Constants & Helpers ---
+const DEFAULT_COVER = "/assets/images/default-book.jpg";
 
-const DEFAULT_COVER: string = "/assets/images/default-book.jpg";
-
-const isValidLink = (link?: string | null): link is string => 
+const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
-
-// --- Component ---
 
 export default function BookCard({
   slug,
@@ -44,12 +46,14 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  
+  // Canonical detail URL
   const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
 
+  // Initial cover choice (prefer provided)
   const initialSrc: string | StaticImageData =
     (coverImage && (typeof coverImage === "string" ? coverImage.trim() : coverImage)) || DEFAULT_COVER;
 
+  // Runtime cover fallback on error
   const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(initialSrc);
 
   return (
@@ -62,13 +66,9 @@ export default function BookCard({
         className
       )}
     >
-      <Link 
-        href={detailHref} 
-        className="block relative w-full" 
-        prefetch={false}
-        tabIndex={-1} 
-        aria-hidden="true" 
-      >
+      {/* Image wrapper link is aria-hidden so the title link remains primary focus target */}
+      <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
+        {/* 2:3 cover frame */}
         <div className="relative w-full aspect-[2/3]">
           <Image
             src={imgSrc}
@@ -77,13 +77,12 @@ export default function BookCard({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             onError={() => {
-              if (typeof imgSrc === "string" && imgSrc !== DEFAULT_COVER) {
-                setImgSrc(DEFAULT_COVER);
-              }
+              if (typeof imgSrc === "string" && imgSrc !== DEFAULT_COVER) setImgSrc(DEFAULT_COVER);
             }}
             priority={featured}
           />
         </div>
+
         {featured && (
           <span className="absolute top-4 left-4 rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-deepCharcoal shadow">
             Featured<span className="sr-only"> book</span>
@@ -101,16 +100,20 @@ export default function BookCard({
             {title}
           </Link>
         </h3>
+
         <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">By {author}</p>
-        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">{excerpt}</p>
+
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">
+          {excerpt}
+        </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          {/* Genre Pill */}
+          {/* Genre chip */}
           <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {genre || "Uncategorized"}
           </span>
 
-          {/* Learn More Link */}
+          {/* Primary: Learn more */}
           <Link
             href={detailHref}
             prefetch={false}
@@ -119,14 +122,12 @@ export default function BookCard({
             Learn more
           </Link>
 
-          {/* Buy Link - FIX: border color opacity syntax (2 occurrences) */}
+          {/* Secondary: Buy */}
           {isValidLink(buyLink) && (
             <a
               href={buyLink}
               target="_blank"
               rel="noopener noreferrer"
-              // Fix 1 & 2: Replaced 'border-[color:var(--color-primary)/0.25]' with 'border-[color:var(--color-primary)]/[0.25]' 
-              // for arbitrary opacity, but using 'border-[color:var(--color-primary)/0.25]' as it's cleaner and likely mapped.
               className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.25] px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream"
               aria-label={`Buy ${title} (opens in new tab)`}
             >
@@ -135,7 +136,7 @@ export default function BookCard({
           )}
         </div>
 
-        {/* Download Links - uses isValidLink helper */}
+        {/* Tertiary: Downloads */}
         {(isValidLink(downloadPdf) || isValidLink(downloadEpub)) && (
           <div className="mt-3 flex flex-wrap gap-4 text-xs">
             {isValidLink(downloadPdf) && (

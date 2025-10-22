@@ -1,11 +1,16 @@
-// components/BlogPostCard.tsx
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx"; 
+import clsx from "clsx";
 import { siteConfig } from "@/lib/siteConfig";
 
-/* ---------- types ---------- */
+/** ──────────────────────────────────────────────────────────────────────────
+ * BlogPostCard
+ * - Resilient cover fallbacks (slug-based, then defaults)
+ * - Safe excerpt stripping
+ * - Accessible date formatting + avatars with fallback
+ * ────────────────────────────────────────────────────────────────────────── */
+
 type AuthorType = string | { name?: string; image?: string };
 
 type BlogPostCardProps = {
@@ -23,15 +28,8 @@ type BlogPostCardProps = {
   coverPosition?: "center" | "left" | "right";
 };
 
-/* ---------- constants ---------- */
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
-
-const DEFAULT_COVERS = [
-  "/assets/images/blog/default.webp",
-  "/assets/images/blog/default.jpg",
-] as const;
-
-/* ---------- helpers ---------- */
+const DEFAULT_COVERS = ["/assets/images/blog/default.webp", "/assets/images/blog/default.jpg"] as const;
 
 function stripMarkup(input?: string | null): string {
   if (!input) return "";
@@ -45,21 +43,18 @@ function normalizeLocal(src?: string | null): string | undefined {
 }
 
 function buildCoverCandidates(slug: string, coverImage?: string | null) {
-  const cleanSlug = String(slug).trim();
-
-  const baseCandidates = [
+  const s = String(slug).trim();
+  const base = [
     normalizeLocal(coverImage),
-    `/assets/images/blog/${cleanSlug}.webp`,
-    `/assets/images/blog/${cleanSlug}.jpg`,
-    `/assets/images/blog/${cleanSlug}.jpeg`,
-    `/assets/images/blog/${cleanSlug}.png`,
+    `/assets/images/blog/${s}.webp`,
+    `/assets/images/blog/${s}.jpg`,
+    `/assets/images/blog/${s}.jpeg`,
+    `/assets/images/blog/${s}.png`,
     ...DEFAULT_COVERS,
   ].filter(Boolean) as string[];
-
-  return Array.from(new Set(baseCandidates));
+  return Array.from(new Set(base));
 }
 
-// --- Component ---
 export default function BlogPostCard({
   slug,
   title,
@@ -73,63 +68,46 @@ export default function BlogPostCard({
   coverFit = "cover",
   coverPosition = "center",
 }: BlogPostCardProps) {
-  
+  // Author data
   const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
-  const preferredAvatar =
-    (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
-
+  const preferredAvatar = (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
-  const candidates = React.useMemo(
-    () => buildCoverCandidates(slug, coverImage),
-    [slug, coverImage]
-  );
-  
+  // Cover fallback chain
+  const candidates = React.useMemo(() => buildCoverCandidates(slug, coverImage), [slug, coverImage]);
   const [idx, setIdx] = React.useState(0);
   const [coverFailed, setCoverFailed] = React.useState(false);
-
   const coverSrc = !coverFailed ? candidates[idx] : undefined;
 
   const onCoverError = React.useCallback(() => {
     setIdx((i) => {
       const next = i + 1;
-      if (next < candidates.length) {
-        return next;
-      }
-      setCoverFailed(true); 
+      if (next < candidates.length) return next;
+      setCoverFailed(true);
       return i;
     });
   }, [candidates.length]);
 
-  // --- Date Formatting ---
+  // Date formatting
   const dt = date ? new Date(date) : null;
-  const isValidDate = dt && !Number.isNaN(+dt);
-  
-  const dateTime = isValidDate ? dt.toISOString().slice(0, 10) : undefined;
-  const dateLabel = isValidDate
-      ? new Intl.DateTimeFormat("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-        }).format(dt)
-      : undefined;
+  const valid = dt && !Number.isNaN(+dt);
+  const dateTime = valid ? dt!.toISOString().slice(0, 10) : undefined;
+  const dateLabel = valid
+    ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt!)
+    : undefined;
 
-  // --- Class Generation ---
-  
+  // Class helpers
   const aspectClass = clsx({
     "aspect-[1/1]": coverAspect === "square",
     "aspect-[16/9]": coverAspect === "wide",
     "aspect-[2/3]": coverAspect === "book",
   });
 
-  const imageClasses = clsx(
-    coverFit === "contain" ? "object-contain" : "object-cover",
-    {
-      "object-left": coverPosition === "left",
-      "object-right": coverPosition === "right",
-      "object-center": coverPosition === "center",
-    }
-  );
+  const imageClasses = clsx(coverFit === "contain" ? "object-contain" : "object-cover", {
+    "object-left": coverPosition === "left",
+    "object-right": coverPosition === "right",
+    "object-center": coverPosition === "center",
+  });
 
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-t-2xl",
@@ -144,15 +122,10 @@ export default function BlogPostCard({
 
   const safeExcerpt = stripMarkup(excerpt);
 
-  // FIX: Define the required arbitrary opacity once
-  const colorOnSecondary_07 = "text-[color:var(--color-on-secondary)]/[0.7]";
-  const colorOnSecondary_08 = "text-[color:var(--color-on-secondary)]/[0.8]";
-  const colorOnSecondary_07_bg = "bg-gradient-to-br from-olive/20 to-deepCharcoal/[0.10]";
-
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
       <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
-        {/* Cover frame */}
+        {/* Cover */}
         <div className={frameClasses}>
           {!coverFailed && coverSrc ? (
             <Image
@@ -165,9 +138,8 @@ export default function BlogPostCard({
               priority={false}
             />
           ) : (
-            // graceful placeholder when all images fail
-            <div className={clsx("absolute inset-0 flex items-center justify-center", colorOnSecondary_07_bg)}>
-              <span className={clsx("select-none font-serif text-4xl font-semibold", colorOnSecondary_07)}>
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[color:var(--color-primary)/0.1] to-[color:var(--color-on-secondary)/0.1]">
+              <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
                 {initials}
               </span>
             </div>
@@ -181,15 +153,12 @@ export default function BlogPostCard({
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
             {readTime && <span aria-label="Estimated reading time">{readTime} min read</span>}
-            {category && (
-              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>
-            )}
+            {category && <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>}
             <span className="luxury-link">Discuss</span>
           </div>
 
           {safeExcerpt && (
-            // Fix 1: Replaced 'text-[color:var(--color-on-secondary)/0.8]' with 'text-[color:var(--color-on-secondary)]/[0.8]'
-            <p className={clsx("mt-3 line-clamp-3 text-sm", colorOnSecondary_08)}>{safeExcerpt}</p>
+            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{safeExcerpt}</p>
           )}
 
           <div className="mt-4 flex items-center gap-3">
@@ -201,7 +170,7 @@ export default function BlogPostCard({
               className="rounded-full object-cover"
               onError={() => setAvatarSrc(FALLBACK_AVATAR)}
             />
-            <div className={clsx("text-xs", colorOnSecondary_07)}>
+            <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
               <p className="font-medium">{authorName}</p>
             </div>
           </div>
