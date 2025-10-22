@@ -1,1 +1,28 @@
-﻿// content/entrepreneur-operating-pack/ import BrandFrame from "../../components/print/BrandFrame"; import * as React from "react"; {/* Add any other imports needed here */} // --- Metadata Definition (REQUIRED for ContentLayer) --- export const metadata = { // ⚠️ YOU MUST CUSTOMIZE THESE VALUES FOR EACH FILE ⚠️ title: "The Correct Title for This Download", slug: "the-file-slug", date: "2025-10-21", author: "Abraham of London", readTime: "X min", category: "Correct Category", type: "download", subtitle: "A concise description of the download." }; const TheComponentName = () => { return ( <BrandFrame title={metadata.title} subtitle={metadata.subtitle} pageSize="A4" > {/* Ensure ALL existing C-style comments (//) inside this return block are changed to JSX block comments ({/* ... * /}) */} {/* Start of Download Content */} <p>This is the content of the download.</p> {/* End of Download Content */} </BrandFrame> ); }; export default TheComponentName;
+﻿---
+slug: "entrepreneur-operating-pack"
+kind: "Download"
+title: "Entrepreneur Operating Pack"
+date: 2025-10-13
+author: Abraham of London
+readTime: 2 min read
+category: Resources
+---
+
+import BrandFrame from "../../components/print/BrandFrame";
+import * as React from "react";
+
+{/* Define the component that uses the extracted frontmatter */}
+const TheComponentName = ({ metadata }) => {
+    // metadata will be passed via Next.js dynamic page props
+    return (
+        <BrandFrame title={metadata.title} subtitle={metadata.subtitle} pageSize="A4" >
+            {/* Start of Download Content */}
+            <p>This is the content of the download.</p>
+            {/* End of Download Content */}
+        </BrandFrame>
+    );
+};
+
+// Render the component with placeholder data
+<TheComponentName metadata={{ title: "The Correct Title for This Download", subtitle: "A concise description of the download." }} />
+

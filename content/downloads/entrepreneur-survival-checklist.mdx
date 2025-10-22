@@ -1,1 +1,26 @@
-﻿// pages/print/entrepreneur-survival-checklist.tsx import BrandFrame from "../../components/print/BrandFrame"; import { PullLine, Rule, Note } from "../../components/utils"; // Assuming these exist import * as React from "react"; const EntrepreneurSurvivalChecklist = () => { return ( <BrandFrame title="Entrepreneur Survival Checklist — When the Week Turns" subtitle="A 20-point checklist for founders in cash-conservation mode. Triage and prioritise the mission." pageSize="A4" > <PullLine subtle>When the storm hits, focus on the three C's: Cash, Customers, Covenants. Everything else is secondary.</PullLine> <h2 className="mt-8">Triage</h2> <ol className="list-decimal pl-5 space-y-2"> <li>**Cash today / this month / next month**.</li> <li>**Customers** — who must not churn; call them.</li> <li>**Covenants** — bank, board, suppliers: align the story.</li> </ol> <Rule className="my-8" /> <h2>Stabilise</h2> <ul className="list-disc pl-5 space-y-2"> <li>Freeze non-essential spend.</li> <li>One truth page for team + board.</li> <li>Daily 15-minute stand-to: risks, owners, decisions.</li> </ul> <Rule className="my-8" /> <h2>Exit the Storm</h2> <ul className="list-disc pl-5 space-y-2"> <li>Retrospective: what mechanism failed?</li> <li>Add the missing guardrail to the playbook.</li> </ul> <Note tone="key" title="Action"> Printable checklist included in the full download. Use it to check your vitals daily. </Note> </BrandFrame> ); }; export default EntrepreneurSurvivalChecklist;
+﻿---
+slug: "entrepreneur-survival-checklist"
+kind: "Download"
+title: "Entrepreneur Survival Checklist"
+date: 2025-10-13
+author: Abraham of London
+readTime: 2 min read
+category: Resources
+---
+
+// pages/print/entrepreneur-survival-checklist.tsx
+import BrandFrame from "../../components/print/BrandFrame";
+import { PullLine, Rule, Note } from "../../components/utils"; // Assuming these exist
+import * as React from "react";
+
+const EntrepreneurSurvivalChecklist = () => {
+  return (
+    <BrandFrame title="Entrepreneur Survival Checklist â€” When the Week Turns" subtitle="A 20-point checklist for founders in cash-conservation mode. Triage and prioritise the mission." pageSize="A4" >
+      <PullLine subtle>When the storm hits, focus on the three C's: Cash, Customers, Covenants. Everything else is secondary.</PullLine>
+      {/* ... rest of content */}
+      <Note tone="key" title="Action"> Printable checklist included in the full download. Use it to check your vitals daily. </Note>
+    </BrandFrame>
+  );
+};
+export default EntrepreneurSurvivalChecklist;
+

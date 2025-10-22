@@ -1,46 +1,26 @@
-{
+﻿{
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "es6"],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": false,
-    "downlevelIteration": true,
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
+    "incremental": true,
     "baseUrl": ".",
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       "@/*": ["./*"],
-      "@/lib/*": ["./lib/*"],
-      "@/components/*": ["./components/*"],
-      "@/styles/*": ["./styles/*"],
-      "@/public/*": ["./public/*"],
-      "@/config/*": ["./config/*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
-    },
-    "plugins": [{ "name": "next" }]
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"]
+    }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts",
-    ".next/types/**/*.ts",
-    "netlify/**/*.ts",
-    "netlify/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    ".contentlayer/generated/**/*.ts"
-  ],
-  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mdx"],
+  "exclude": ["node_modules", ".next", "out"]
 }

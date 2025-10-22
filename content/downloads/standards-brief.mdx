@@ -1,1 +1,29 @@
-﻿// pages/print/standards-brief.tsx import BrandFrame from "../../components/print/BrandFrame"; import EmbossedBrandMark from "../../components/EmbossedBrandMark"; import * as React from "react"; const StandardsBrief = () => { return ( <BrandFrame title="Standards Brief" subtitle="Protect people, work, and name—especially under pressure." pageSize="A4" > <h2>1) Decisions</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Facts first:</strong> single source of truth; date every number.</li> <li><strong>Owner &amp; deadline:</strong> one accountable person; one explicit date.</li> <li><strong>Reversible vs. irreversible:</strong> bias to speed on reversible calls.</li> </ul> <h2>2) Cadence</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Daily:</strong> status, blockers, risks (15m).</li> <li><strong>Weekly:</strong> outcomes scored, lessons captured, next 3 (45m).</li> <li><strong>Monthly:</strong> standards review, debt burn-down, runway check.</li> </ul> <h2>3) Communication</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Write it down:</strong> decisions, assumptions, follow-ups.</li> <li><strong>No triangulation:</strong> speak to, not about.</li> <li><strong>Plain English:</strong> short, dated, action-oriented notes.</li> </ul> <h2>4) Workmanship</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Definition of done:</strong> clear acceptance criteria, demoable.</li> <li><strong>Durability:</strong> simple, testable, documented.</li> <li><strong>Name:</strong> work that carries your name must be worth keeping.</li> </ul> <h2>5) Security</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Least privilege:</strong> access by role; revoke on exit same day.</li> <li><strong>Keys &amp; secrets:</strong> rotate quarterly; never in chat or code.</li> <li><strong>Incident drill:</strong> who calls whom; first hour playbook.</li> </ul> <h2>6) Release Discipline</h2> <ul className="list-disc pl-5 space-y-2"> <li><strong>Branch, test, tag:</strong> no ad-hoc deploys; rollback ready.</li> <li><strong>Notes:</strong> concise change log with risks and smoke checks.</li> <li><strong>Post-mortems:</strong> blameless, dated, with two preventions.</li> </ul> <div className="not-prose mt-8 text-[11.5px] text-[color:var(--color-on-secondary)/0.6] pt-6 border-t border-lightGrey/80 flex justify-between items-center"> <span>Use in onboarding • quarterly reviews • incident retros.</span> <EmbossedBrandMark src="/assets/images/abraham-logo.jpg" alt="Abraham of London Standard Mark" width={40} height={40} effect="emboss" baseColor="transparent" /> </div> </BrandFrame> ); }; export default StandardsBrief;
+﻿---
+slug: "standards-brief"
+kind: "Download"
+title: "Standards Brief"
+date: 2025-10-13
+author: Abraham of London
+readTime: 2 min read
+category: Resources
+---
+
+// pages/print/standards-brief.tsx
+import BrandFrame from "../../components/print/BrandFrame";
+import EmbossedBrandMark from "../../components/EmbossedBrandMark";
+import * as React from "react";
+
+const StandardsBrief = () => {
+  return (
+    <BrandFrame title="Standards Brief" subtitle="Protect people, work, and nameâ€”especially under pressure." pageSize="A4" >
+      <h2>1) Decisions</h2>
+      {/* ... rest of content */}
+      <div className="not-prose mt-8 text-[11.5px] text-[color:var(--color-on-secondary)/0.6] pt-6 border-t border-lightGrey/80 flex justify-between items-center">
+        <span>Use in onboarding â€¢ quarterly reviews â€¢ incident retros.</span>
+        <EmbossedBrandMark src="/assets/images/abraham-logo.jpg" alt="Abraham of London Standard Mark" width={40} height={40} effect="emboss" baseColor="transparent" />
+      </div>
+    </BrandFrame>
+  );
+};
+export default StandardsBrief;
+
