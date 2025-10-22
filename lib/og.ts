@@ -5,7 +5,7 @@ const LOCAL_FALLBACK = "/assets/images/blog/default-blog-cover.jpg";
 const DEFAULT_FALLBACK = siteConfig.ogImage || LOCAL_FALLBACK;
 
 function truncate(s: string, max = 120) {
-  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+  return s.length > max ? `${s.slice(0, max - 1)}ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦` : s;
 }
 
 /**

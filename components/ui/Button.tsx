@@ -57,7 +57,7 @@ export default function Button({
         </a>
       );
     }
-    // Internal route → Next Link
+    // Internal route ÃƒÂ¢Ã¢â‚¬' Next Link
     return (
       <Link href={href} className={classes} {...(rest as any)}>
         {children}

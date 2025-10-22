@@ -15,7 +15,7 @@ function FeatureCard({
   href,
   title,
   sub,
-  icon = "📚", // Added an optional icon prop
+  icon = "ðŸ“š", // Added an optional icon prop
 }: {
   href: string;
   title: string;
@@ -36,7 +36,7 @@ function FeatureCard({
             {title}
           </h3>
           <span className="shrink-0 ml-4 mt-1 text-sm font-medium text-[color:var(--color-primary)/0.7] group-hover:text-forest">
-            View →
+            View â†’
           </span>
         </div>
         {sub && (
@@ -110,9 +110,9 @@ export default function AboutPage() {
     ? absUrl(siteConfig.twitterImage)
     : siteConfig.twitterImage;
 
-  const pageTitle = "About Abraham of London"; // ✅ UPGRADE: Richer page title
+  const pageTitle = "About Abraham of London"; // âœ… UPGRADE: Richer page title
   const pageDesc =
-    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history."; // ✅ UPGRADE: Richer page description
+    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history."; // âœ… UPGRADE: Richer page description
 
   // JSON-LD (web page + person)
   const webPageSchema = {
@@ -251,24 +251,24 @@ export default function AboutPage() {
                 href="/blog/leadership-begins-at-home"
                 title="Leadership Begins at Home"
                 sub="Govern self, then household."
-                icon="🏡"
+                icon="ðŸ¡"
               />
               <FeatureCard
                 href="/blog/reclaiming-the-narrative"
                 title="Reclaiming the Narrative"
                 sub="Court-season clarity under pressure."
-                icon="🖋️"
+                icon="ðŸ–‹ï¸"
               />
               <FeatureCard
                 href="/blog/the-brotherhood-code"
                 title="The Brotherhood Code"
                 sub="Covenant of presence, not performance."
-                icon="🤝"
+                icon="ðŸ¤"
               />
             </ul>
             <div className="mt-6 text-center">
                 <Link href="/blog" className="text-sm font-medium text-forest hover:underline underline-offset-2">
-                  View All Writing →
+                  View All Writing â†’
                 </Link>
             </div>
           </section>
@@ -290,7 +290,7 @@ export default function AboutPage() {
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >
-                  📄 Leadership Playbook (30•60•90)
+                  ðŸ“„ Leadership Playbook (30•60•90)
                 </Link>
               </li>
               <li>
@@ -299,7 +299,7 @@ export default function AboutPage() {
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >
-                  📝 Mentorship Starter Kit
+                  ðŸ“ Mentorship Starter Kit
                 </Link>
               </li>
               <li>
@@ -308,7 +308,7 @@ export default function AboutPage() {
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >
-                  ⚙️ Entrepreneur Operating Pack
+                  âš™ï¸ Entrepreneur Operating Pack
                 </Link>
               </li>
             </ul>

@@ -1,0 +1,36 @@
+---
+title: "Scripture Track — John 14"
+slug: "scripture-track-john14"
+date: "2025-10-22"
+author: "Abraham of London"
+readTime: "X min"
+category: "Scripture"
+type: "download"
+subtitle: "Assurance • Obedience • The Helper • Peace"
+---
+
+import * as React from 'react';
+import BrandFrame from "../../components/print/BrandFrame";
+import EmbossedSign from "../../components/EmbossedSign";
+
+{/* Define the component body (or use markdown here) */}
+const ScriptureTrackJohn14Content = () => {
+  const content = (
+    <div className="text-deepCharcoal">
+      <h2>How to Run</h2>
+      <p>Content for running the track goes here...</p>
+      {/* --- Signature Section with Debossed Mark --- */}
+      <div className="mt-12 pt-8 border-t border-lightGrey flex flex-col items-end">
+        <EmbossedSign src="/assets/images/signature/abraham-of-london-cursive.svg" alt="Abraham of London Signature" width={200} height={60} effect="deboss" baseColor="transparent" className="mb-1" />
+        <p className="text-sm font-serif text-forest">— Abraham of London</p>
+      </div>
+    </div>
+  );
+  return (
+    <BrandFrame title="Scripture Track — John 14" subtitle="Assurance • Obedience • The Helper • Peace" pageSize="A4" >
+      {content}
+    </BrandFrame>
+  );
+}
+
+<ScriptureTrackJohn14Content />

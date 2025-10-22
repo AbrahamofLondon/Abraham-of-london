@@ -1,24 +1,35 @@
-// scripts/render-pdfs.mjs  (ESM, no BOM)
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+#!/usr/bin/env node
 import puppeteer from "puppeteer";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/* ───────────────────────────────────────────────────────────────────
+   CLI
+   ─────────────────────────────────────────────────────────────────── */
+const args = Object.fromEntries(
+  process.argv.slice(2).map((s) => {
+    const [k, v] = s.replace(/^-+/, "").split("=");
+    return [k, v === undefined ? true : v];
+  })
+);
+const BASE = args.base || "http://localhost:3000";
+const OUT_DIRS = ["public/downloads", "public/resources"];
+OUT_DIRS.forEach((d) => fs.mkdirSync(d, { recursive: true }));
 
-function arg(k, def = undefined) {
-  const idx = process.argv.indexOf(k);
-  if (idx >= 0 && process.argv[idx + 1]) return process.argv[idx + 1];
-  return def;
-}
+/* ───────────────────────────────────────────────────────────────────
+   ROUTES (primary + fallbacks you asked for)
+   ─────────────────────────────────────────────────────────────────── */
+const PRINT_ROUTES = [
+  "/print/board-investor-one-pager-template",
+  "/print/entrepreneur-survival-checklist",
+  "/print/brotherhood-covenant",
+  "/print/a6/leaders-cue-card-two-up",
+  "/print/a6/brotherhood-cue-card-two-up",
+  "/print/a6/principles-for-my-son-cue-card-two-up",
+];
 
-const BASE = arg("--base", "http://localhost:5555");
-const OUT = arg("--out", path.join(process.cwd(), "public", "downloads"));
-const TIMEOUT = parseInt(arg("--timeout", "120000"), 10);
-
-// You can expand this list or import from a probe script / API
-const ROUTES = [
+const FALLBACK_ROUTES = [
   "/print/leadership-playbook",
   "/print/mentorship-starter-kit",
   "/print/family-altar-liturgy",
@@ -27,12 +38,12 @@ const ROUTES = [
   "/print/scripture-track-john14",
   "/print/fathering-without-fear-teaser",
   "/print/fathering-without-fear-teaser-mobile",
-  // "/print/a6/principles-for-my-son-two-up", // example, only if exists
   "/print/a6/leaders-cue-card-two-up",
   "/print/a6/brotherhood-cue-card-two-up",
 ];
 
-const MAP = {
+// exact file names to also emit (in addition to standard variants)
+const FALLBACK_FILEMAP = {
   "/print/leadership-playbook": "Leadership_Playbook.pdf",
   "/print/mentorship-starter-kit": "Mentorship_Starter_Kit.pdf",
   "/print/family-altar-liturgy": "Family_Altar_Liturgy.pdf",
@@ -45,76 +56,82 @@ const MAP = {
   "/print/a6/brotherhood-cue-card-two-up": "Brotherhood_Cue_Card.pdf",
 };
 
-async function ensureDir(dir) {
-  await fs.mkdir(dir, { recursive: true });
+// final set to render
+const ROUTES = Array.from(new Set([...PRINT_ROUTES, ...FALLBACK_ROUTES]));
+
+/* ───────────────────────────────────────────────────────────────────
+   Helpers
+   ─────────────────────────────────────────────────────────────────── */
+const toTitleCase = (slug) =>
+  slug
+    .replace(/[-_/]+/g, " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .trim();
+
+const titleCasePdf = (slug) => `${toTitleCase(slug).replace(/\s+/g, "_")}.pdf`;
+const kebabPdf = (slug) => `${slug}.pdf`;
+
+function routeToSlug(route) {
+  const parts = route.split("/").filter(Boolean);
+  return parts[parts.length - 1] || "index";
 }
 
-async function main() {
-  console.log(`Base: ${BASE}`);
-  console.log(`Out : ${OUT}`);
+function saveAllVariants(pdfBuffer, route) {
+  const slug = routeToSlug(route);
 
-  await ensureDir(OUT);
+  // standard variants
+  const titleCaseName = titleCasePdf(slug);         // e.g. Leaders_Cue_Card.pdf
+  const kebabName = kebabPdf(slug);                 // e.g. leaders-cue-card-two-up.pdf
 
-  // headless:new (Puppeteer 22), no-sandbox for CI
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=full"],
-  });
+  // explicit fallback (if any)
+  const mappedName = FALLBACK_FILEMAP[route];
 
-  try {
-    for (const route of ROUTES) {
-      const url = `${BASE}${route}`;
-      const filename = MAP[route] || route.replace(/[^\w/.-]+/g, "_").split("/").filter(Boolean).slice(-1)[0] + ".pdf";
-      const outPath = path.join(OUT, filename);
+  for (const dir of OUT_DIRS) {
+    fs.writeFileSync(path.join(dir, titleCaseName), pdfBuffer);
+    fs.writeFileSync(path.join(dir, kebabName), pdfBuffer);
+    if (mappedName) fs.writeFileSync(path.join(dir, mappedName), pdfBuffer);
 
-      process.stdout.write(`→ Rendering ${url} → ${path.relative(process.cwd(), outPath)}\n`);
-
-      const page = await browser.newPage();
-
-      // If PDFs are produced on CI, prefer local fonts by disabling remote font CSS
-      // (Your page CSS already declares @font-face for local files)
-      const useLocalFonts = process.env.PDF_ON_CI === "1" || process.env.PDF_ON_CI === "true";
-      if (useLocalFonts) {
-        await page.setRequestInterception(true);
-        page.on("request", (req) => {
-          const u = req.url();
-          if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(u)) {
-            return req.abort();
-          }
-          req.continue();
-        });
-      }
-
-      await page.goto(url, { waitUntil: "networkidle2", timeout: TIMEOUT });
-
-      // Use print stylesheet
-      await page.emulateMediaType("print");
-
-      // Ensure webfonts and images are settled
-      if (page.evaluateHandle) {
-        try { await page.evaluate(() => (document.fonts?.ready ?? Promise.resolve())); } catch {}
-      }
-      await page.waitForTimeout(300); // tiny settle time for layout
-
-      await page.pdf({
-        path: outPath,
-        printBackground: true,
-        preferCSSPageSize: true,
-        // You can force A4 if a page forgot @page size:
-        // format: "A4",
-      });
-
-      await page.close();
-      console.log(`  ✔ Saved ${path.relative(process.cwd(), outPath)}`);
+    // special case: validator expects /downloads/leaders-cue-card.pdf (singular)
+    // when the route is the two-up, also provide the simplified kebab
+    if (route === "/print/a6/leaders-cue-card-two-up") {
+      fs.writeFileSync(path.join(dir, "leaders-cue-card.pdf"), pdfBuffer);
     }
-  } finally {
-    await browser.close();
   }
 
-  console.log("\nAll done.");
+  const written = [titleCaseName, kebabName].concat(mappedName ? [mappedName] : []);
+  console.log(`📝 ${route} → ${written.join(", ")}`);
 }
 
-main().catch((e) => {
-  console.error("\n--- Error in render-pdfs.mjs ---\n", e);
+/* ───────────────────────────────────────────────────────────────────
+   Main
+   ─────────────────────────────────────────────────────────────────── */
+(async () => {
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+  const page = await browser.newPage();
+  await page.emulateMediaType("print");
+
+  for (const route of ROUTES) {
+    const full = new url.URL(route, BASE).toString();
+    const res = await page.goto(full, { waitUntil: "networkidle2", timeout: 60000 });
+    if (!res || !res.ok()) {
+      throw new Error(`Failed to open ${full} → ${res?.status?.() || "no response"}`);
+    }
+
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
+    });
+
+    saveAllVariants(pdf, route);
+  }
+
+  await browser.close();
+  console.log("✅ PDF render complete.");
+})().catch((e) => {
+  console.error("❌ PDF render failed:", e);
   process.exit(1);
 });

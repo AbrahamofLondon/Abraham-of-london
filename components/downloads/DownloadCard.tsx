@@ -199,7 +199,7 @@ export default function EventCard({
           </time>
           {location?.trim() && (
             <>
-              <span aria-hidden="true">·</span>
+              <span aria-hidden="true">Ãƒâ€šÃ‚Â·</span>
               <span className="rounded-full bg-warmWhite px-2 py-0.5 text-[color:var(--color-on-secondary)/0.8]" itemProp="location">
                 {location}
               </span>

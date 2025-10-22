@@ -28,18 +28,18 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
 
   return (
     <div style={{ fontFamily: "ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial", color: "#111827", lineHeight: 1.6 }}>
-      <p>Friends{ name ? ` — ${name}` : ""},</p>
+      <p>Friends{ name ? ` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${name}` : ""},</p>
       <p>
-        I’m releasing <strong>Fathering Without Fear</strong>, a memoir forged in loss, legal storms,
-        and a father’s stubborn hope.
+        IÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢m releasing <strong>Fathering Without Fear</strong>, a memoir forged in loss, legal storms,
+        and a fatherÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s stubborn hope.
       </p>
-      <p>Here’s a free, brand-styled teaser you can read and share:</p>
+      <p>HereÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s a free, brand-styled teaser you can read and share:</p>
       <ul>
         <li>Teaser PDF (A4/Letter): {link(A4, "Download A4/Letter")}</li>
         <li>Teaser PDF (Mobile): {link(Mobile, "Download Mobile")}</li>
       </ul>
       <p>
-        Want chapter drops and launch dates? Reply <em>“keep me posted”</em> or join the list:{" "}
+        Want chapter drops and launch dates? Reply <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œkeep me postedÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em> or join the list:{" "}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
       <p>
@@ -47,8 +47,8 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
       </p>
       <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        You’re receiving this because you requested the teaser or asked to be notified. Unsubscribe:
-        reply with <em>“stop”</em>.
+        YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re receiving this because you requested the teaser or asked to be notified. Unsubscribe:
+        reply with <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œstopÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em>.
       </p>
     </div>
   );
@@ -94,7 +94,7 @@ export const handler = async (event: HandlerEvent): Promise<HandlerResponse> => 
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: "Fathering Without Fear — Teaser PDFs",
+      subject: "Fathering Without Fear ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Teaser PDFs",
       html,
       replyTo: "info@abrahamoflondon.org",
     });

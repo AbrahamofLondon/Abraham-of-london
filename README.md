@@ -1,10 +1,10 @@
 Abraham of London
 
-The official website of Abraham of London — built with Next.js, TypeScript, and Tailwind CSS, designed to balance speed, scalability, and silent premium signals.
+The official website of Abraham of London â€” built with Next.js, TypeScript, and Tailwind CSS, designed to balance speed, scalability, and silent premium signals.
 
 This repository powers a personal brand ecosystem of books, blogs, events, and ventures.
 
-🚀 Project Status
+ðŸš€ Project Status
 
 Current State: Locally stable, type-safe, and production-ready.
 
@@ -12,7 +12,7 @@ Focus: Final polish of assets (images, banners, CTAs) and validation of forms an
 
 Last Updated: August 28, 2025
 
-✨ Features
+âœ¨ Features
 
 Static Site Generation (SSG): Next.js getStaticProps + MDX for SEO-optimized, fast pages.
 
@@ -32,6 +32,6 @@ Redirect Management: Canonical domain handling (https://www.abrahamoflondon.org)
 
 Analytics: Google Analytics 4 (GA4) integrated via env variable NEXT_PUBLIC_GA_MEASUREMENT_ID.
 
-🛠 Local Development
+ðŸ› Local Development
 
 Clone, install, and run:

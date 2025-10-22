@@ -1,11 +1,11 @@
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @next/next/no-img-element */ 
+/* eslint-disable @next/next/no-img-element */
 // pages/print/fathering-without-fear-teaser-mobile.tsx
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
-import EmbossedSign from "@/components/print/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";   
 
 const COVER = "/assets/images/books/fathering-without-fear-cover.jpg";
 
@@ -14,7 +14,7 @@ export default function FatheringWithoutFearTeaserA6() {
   return (
     <>
       <Head>
-        <title>Fathering Without Fear â€” Teaser (A6 Mobile)</title>
+        <title>Fathering Without Fear — Teaser (A6 Mobile)</title>
         <meta name="robots" content="noindex" />
       </Head>
 
@@ -24,12 +24,12 @@ export default function FatheringWithoutFearTeaserA6() {
           {/* Branding: Logo Top Left on Cover */}
           <div className="absolute top-[10mm] left-[10mm] z-10">
             <EmbossedBrandMark
-                src="/assets/images/abraham-logo.jpg"
-                alt="Abraham of London Logo"
-                width={30}
-                height={30}
-                effect="emboss"
-                baseColor="transparent"
+              src="/assets/images/abraham-logo.jpg"
+              alt="Abraham of London Logo"
+              width={30}
+              height={30}
+              effect="emboss"
+              // The problematic block comment was here. It is now REMOVED.
             />
           </div>
 
@@ -39,30 +39,30 @@ export default function FatheringWithoutFearTeaserA6() {
             <p className="m-eyebrow">FATHERING WITHOUT FEAR</p>
             <h1 className="m-title">A Memoir That Defies Every Boundary</h1>
             <p className="m-tag">They thought they knew the story. He chose to stay.</p>
-            <p className="m-foot">Â© {currentYear} Abraham of London</p>
+            <p className="m-foot">© {currentYear} Abraham of London</p>
           </div>
         </section>
 
         {/* Condensed pages */}
         <section className="m-page">
-          <h2 className="m-h">Authorâ€™s Reflection</h2>
-          <p>I may not know your painâ€¦ something always happens.</p>
+          <h2 className="m-h">Author's Reflection</h2>
+          <p>I may not know your pain… something always happens.</p>
           <h2 className="m-h mt">Dedication</h2>
-          <p>To the memory of my fatherâ€¦ make something happen for one another.</p>
+          <p>To the memory of my father… make something happen for one another.</p>
         </section>
 
         <section className="m-page">
           <h2 className="m-h">Back Cover</h2>
-          <p className="m-pull">â€œIf You give me my life back, Iâ€™ll serve You until Iâ€™m seventy-five.â€</p>
-          <p>The prayer of an eight-year-oldâ€¦ Some promises cost more than you know.</p>
+          <p className="m-pull">"If You give me my life back, I'll serve You until I'm seventy-five."</p>
+          <p>The prayer of an eight-year-old… Some promises cost more than you know.</p>
           <ul className="m-list">
-            <li><strong>Miracle triplets.</strong> Born at 27 weeksâ€¦ legend has a price.</li>
+            <li><strong>Miracle triplets.</strong> Born at 27 weeks… legend has a price.</li>
             <li><strong>Lagos. Akure. London.</strong> Three fires; not everyone survived.</li>
-            <li>â€œSomething always happens.â€ A brotherâ€™s words became prophecy.</li>
+            <li>"Something always happens." A brother's words became prophecy.</li>
           </ul>
           <ul className="m-dash">
             <li>Grandmother who spoke to spirits.</li>
-            <li>Sisterâ€™s death that opened visions.</li>
+            <li>Sister's death that opened visions.</li>
             <li>Romance that nearly killed him.</li>
             <li>Marriage that tried to erase him.</li>
             <li>A son he still fights to father.</li>
@@ -71,8 +71,8 @@ export default function FatheringWithoutFearTeaserA6() {
         </section>
 
         <section className="m-page">
-          <p className="m-lead">â€œWhere was God when David died?â€ â€¦ system designed to make fathers disappear.</p>
-          <p>This isnâ€™t survival. Itâ€™s resurrection. When the world says â€œfinished,â€ grace says, â€œSomething always happens.â€</p>
+          <p className="m-lead">"Where was God when David died?" … system designed to make fathers disappear.</p>
+          <p>This isn't survival. It's resurrection. When the world says "finished," grace says, "Something always happens."</p>
           <div className="m-card">
             <p className="m-card-h">ABRAHAM OF LONDON</p>
             <p>Miracle child. Marked man. Devoted father. The brother who remembers. The father who refuses to disappear.</p>
@@ -81,44 +81,44 @@ export default function FatheringWithoutFearTeaserA6() {
 
         <section className="m-page">
           <h2 className="m-h">Retailer Description</h2>
-          <p>True story spanning Lagos, Akure, Londonâ€¦ blueprint for men under pressure. Documentation, boundaries, legacy over litigation.</p>
-          <p>If youâ€™ve been told to disappear, this is your brother at the doorâ€¦ grace is louder.</p>
+          <p>True story spanning Lagos, Akure, London… blueprint for men under pressure. Documentation, boundaries, legacy over litigation.</p>
+          <p>If you've been told to disappear, this is your brother at the door… grace is louder.</p>
         </section>
 
         <section className="m-page">
           <h2 className="m-h">One-Page Synopsis</h2>
           <p>Miracle child â†’ strategist and father; denied work; legal maze; fighting to father.</p>
           <p>Chooses structure over spectacle; presence over performance; strategy for legacy.</p>
-          <p>He stayed by grace. Because something always happensâ€”so does he.</p>
+          <p>He stayed by grace. Because something always happens—so does he.</p>
         </section>
 
         <section className="m-page relative">
-          <h2 className="m-h">Excerpt â€” Ch. 18</h2>
-          <p>Quiet suffering: delays and silence; nearly two years unable to workâ€¦ He did not disappear.</p>
-          <p>Good men must stop disappearingâ€”even when systems want them to.</p>
+          <h2 className="m-h">Excerpt — Ch. 18</h2>
+          <p>Quiet suffering: delays and silence; nearly two years unable to work… He did not disappear.</p>
+          <p>Good men must stop disappearing—even when systems want them to.</p>
           <hr className="m-rule" />
           <h2 className="m-h">Reader Promise</h2>
           <ul className="m-list">
             <li>Language for pain.</li>
-            <li>A fatherâ€™s blueprint.</li>
+            <li>A father's blueprint.</li>
             <li>A stubborn, earned hope.</li>
           </ul>
-          <div className="m-call">You are not a case number. When fear says â€œstop,â€ grace says, â€œSomething always happens.â€</div>
+          <div className="m-call">You are not a case number. When fear says "stop," grace says, "Something always happens."</div>
           <p className="m-cta">
-            Read opening chapters â€¢ Share with a father under pressure â€¢ Join the launch list<br />
+            Read opening chapters • Share with a father under pressure • Join the launch list<br />
             Prefer offline? Get the print-ready teaser at <strong>abrahamoflondon.org/downloads</strong>
           </p>
 
           {/* Branding: Signature Bottom Right on Last Page */}
           <div className="absolute bottom-[10mm] right-[10mm]">
-              <EmbossedSign
-                  src="/assets/images/signature/abraham-of-london-cursive.svg"
-                  alt="Abraham of London Signature"
-                  width={90} 
-                  height={22} 
-                  effect="deboss"
-                  baseColor="transparent"
-              />
+            <EmbossedSign
+              src="/assets/images/signature/abraham-of-london-cursive.svg"
+              alt="Abraham of London Signature"
+              width={90} 
+              height={22} 
+              effect="deboss"
+              // The problematic block comment was here. It is now REMOVED.
+            />
           </div>
         </section>
       </main>
@@ -175,7 +175,7 @@ export default function FatheringWithoutFearTeaserA6() {
         .m-lead { font-size: 10.5pt; line-height: 1.6; }
         .m-pull { border-left: 2px solid var(--color-accent); padding-left: 3mm; color: var(--color-primary); font-style: italic; }
         .m-list { margin: 3mm 0; padding-left: 4.5mm; }
-        .m-dash { margin: 2mm 0; padding-left: 3.5mm; list-style: "â€” "; }
+        .m-dash { margin: 2mm 0; padding-left: 3.5mm; list-style: "— "; }
         .m-card { border: 1px solid var(--color-lightGrey); background: var(--color-warmWhite); border-radius: 6px; padding: 4mm; margin-top: 3mm; }
         .m-card-h { font-weight: 700; color: var(--color-primary); margin-bottom: 1.5mm; letter-spacing: .02em; }
         .m-rule { border: none; height: 2px; background: linear-gradient(to right, color-mix(in oklab, var(--color-accent) 85%, #fff), transparent 65%); margin: 4mm 0; }

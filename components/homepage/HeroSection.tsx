@@ -1,11 +1,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx"; // ✅ UPGRADE: Use clsx for cleaner class string concatenation
+import clsx from "clsx"; // ÃƒÂ¢Ã…"… UPGRADE: Use clsx for cleaner class string concatenation
 
 // --- Utility Components ---
 
-/** Small “eyebrow” pill used above the H1 */
+/** Small "eyebrow" pill used above the H1 */
 function Eyebrow({
   children,
   className,
@@ -15,7 +15,7 @@ function Eyebrow({
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
         "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
-        "text-xs uppercase tracking-wide font-semibold", // ✅ UPGRADE: Added font-semibold
+        "text-xs uppercase tracking-wide font-semibold", // ÃƒÂ¢Ã…"… UPGRADE: Added font-semibold
         "text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]",
         className
       )}
@@ -29,7 +29,7 @@ function Eyebrow({
 
 type Cta = { href: string; label: string; ariaLabel?: string };
 type VideoSource = { src: string; type: string };
-type AspectRatio = "book" | "wide" | "square" | "cover-wide"; // ✅ UPGRADE: Added 'cover-wide' (21/9)
+type AspectRatio = "book" | "wide" | "square" | "cover-wide"; // ÃƒÂ¢Ã…"… UPGRADE: Added 'cover-wide' (21/9)
 
 type HeroProps = {
   title?: string;
@@ -44,7 +44,7 @@ type HeroProps = {
   /** 'contain' (book covers) or 'cover' (edge-to-edge) */
   coverFit?: "contain" | "cover";
   /** object position for Image/Video */
-  coverPosition?: "left" | "center" | "right" | "top"; // ✅ UPGRADE: Added 'top'
+  coverPosition?: "left" | "center" | "right" | "top"; // ÃƒÂ¢Ã…"… UPGRADE: Added 'top'
 
   /** Optional autoplaying looped background video */
   videoSources?: VideoSource[] | null;
@@ -75,7 +75,7 @@ function getAspectClass(aspect: AspectRatio): string {
   switch (aspect) {
     case "square": return "aspect-[1/1]";
     case "wide": return "aspect-[16/9]";
-    case "cover-wide": return "aspect-[21/9]"; // ✅ UPGRADE: New aspect ratio
+    case "cover-wide": return "aspect-[21/9]"; // ÃƒÂ¢Ã…"… UPGRADE: New aspect ratio
     case "book":
     default: return "aspect-[2/3]";
   }
@@ -90,7 +90,7 @@ export default function HeroSection({
   primaryCta = {
     href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
     label: "Get the free teaser",
-    ariaLabel: "Download the Fathering Without Fear Teaser PDF", // ✅ UPGRADE: More explicit default ARIA
+    ariaLabel: "Download the Fathering Without Fear Teaser PDF", // ÃƒÂ¢Ã…"… UPGRADE: More explicit default ARIA
   },
   secondaryCta = { href: "/blog", label: "Read the latest insights" },
 
@@ -102,7 +102,7 @@ export default function HeroSection({
   videoSources = [],
   poster = null,
 }: HeroProps) {
-  
+
   // 1. --- Core Data and Fallbacks ---
   const defaultImage = "/assets/images/abraham-of-london-banner.webp";
   const imgSrc = normalizeLocal(coverImage) || normalizeLocal(defaultImage)!;
@@ -110,7 +110,7 @@ export default function HeroSection({
   const posterSrc = normalizeLocal(poster) || imgSrc;
 
   // 2. --- Dynamic Class Generation (Consolidated using clsx) ---
-  
+
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-2xl shadow-card",
     getAspectClass(coverAspect),
@@ -126,7 +126,7 @@ export default function HeroSection({
     {
       "object-left": coverPosition === "left",
       "object-right": coverPosition === "right",
-      "object-top": coverPosition === "top", // ✅ UPGRADE: Added top position
+      "object-top": coverPosition === "top", // ÃƒÂ¢Ã…"… UPGRADE: Added top position
       "object-center": coverPosition === "center", // Default position
     }
   );
@@ -140,12 +140,12 @@ export default function HeroSection({
         "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
         "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
       )}
-      // ✅ UPGRADE: Added explicit ARIA role for semantic context
+      // ÃƒÂ¢Ã…"… UPGRADE: Added explicit ARIA role for semantic context
       role="region"
-      aria-label="Featured content section" 
+      aria-label="Featured content section"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-16">
-        
+
         {/* LEFT: copy */}
         <div className="relative z-[1]">
           {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
@@ -165,13 +165,13 @@ export default function HeroSection({
             {primaryCta && (
               <Link
                 href={primaryCta.href}
-                aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`} // ✅ UPGRADE: Fallback ARIA label
+                aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`} // ÃƒÂ¢Ã…"… UPGRADE: Fallback ARIA label
                 className="aol-btn"
               >
                 {primaryCta.label}
               </Link>
             )}
-            
+
             {/* Secondary CTA */}
             {secondaryCta && (
               <Link
@@ -187,7 +187,7 @@ export default function HeroSection({
 
         {/* RIGHT: visual media container */}
         <div className={frameClasses}>
-          
+
           {/* Gradient veil for cover-fit visuals (retained) */}
           {coverFit === "cover" && (
             <div
@@ -209,8 +209,8 @@ export default function HeroSection({
               playsInline
               preload="metadata"
               poster={posterSrc}
-              aria-describedby="hero-title" // ✅ UPGRADE: Accessibility link to the main content
-              // ✅ UPGRADE: Added onContextMenu to prevent right-click downloads
+              aria-describedby="hero-title" // ÃƒÂ¢Ã…"… UPGRADE: Accessibility link to the main content
+              // ÃƒÂ¢Ã…"… UPGRADE: Added onContextMenu to prevent right-click downloads
               onContextMenu={(e) => e.preventDefault()}
             >
               {videoSources!.map((s) => (
@@ -222,7 +222,7 @@ export default function HeroSection({
             // Image (default or if no video sources provided)
             <Image
               src={imgSrc}
-              alt={title || "Hero image illustrating the page content"} // ✅ UPGRADE: Alt text based on title
+              alt={title || "Hero image illustrating the page content"} // ÃƒÂ¢Ã…"… UPGRADE: Alt text based on title
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"

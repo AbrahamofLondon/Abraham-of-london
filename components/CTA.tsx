@@ -55,7 +55,7 @@ export default function CTA({ floatingOnMobile = true }: Props) {
         <div className="mx-auto max-w-5xl rounded-2xl border border-black/5 bg-white/80 px-6 py-4 backdrop-blur shadow ring-1 ring-black/5">
           <div className="flex items-center justify-between gap-6">
             <p className="text-slate-800 font-medium">
-              Let’s build something enduring.
+              Let's build something enduring.
             </p>
             {Pill}
           </div>

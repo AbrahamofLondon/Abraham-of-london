@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import ScrollProgress from "./ScrollProgress"; // ← import
+import ScrollProgress from "./ScrollProgress"; // ÃƒÂ¢Ã¢â‚¬Ã‚Â import
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

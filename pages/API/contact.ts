@@ -151,6 +151,8 @@ function safeParse(s: string) {
 /** Escapes HTML special characters for safe email template injection. */
 function escapeHtml(str: string) {
     return String(str).replace(/[&<>"']/g, (m) =>
+        // ðŸŒŸ THIS IS THE CORRECTED LINE ðŸŒŸ
+        // Fixes the syntax error and uses correct HTML entities for robust escaping
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m
     );
 }
@@ -182,13 +184,13 @@ function teaserAutoReplyHtml(args: { teaserA4Url: string; teaserMobUrl: string; 
     return `
     <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;color:#222">
       <p>Friends—</p>
-      <p>I’m releasing <em>Fathering Without Fear</em>, a memoir forged in the middle of loss, legal storms, and a father’s stubborn hope.</p>
-      <p>Here’s your free, brand-styled teaser (A4 + Mobile) to read and share:</p>
+      <p>I'm releasing <em>Fathering Without Fear</em>, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.</p>
+      <p>Here's your free, brand-styled teaser (A4 + Mobile) to read and share:</p>
       <ul>
         <li><a href="${teaserA4Url}">Teaser PDF (A4/Letter)</a></li>
         <li><a href="${teaserMobUrl}">Teaser PDF (Mobile)</a></li>
       </ul>
-      <p>If you want chapter drops and launch dates, reply “keep me posted” or join the list here:
+      <p>If you want chapter drops and launch dates, reply "keep me posted" or join the list here:
         <a href="${siteUrl}/contact">${siteUrl}/contact</a></p>
       <p>Grace and courage,<br/>Abraham of London</p>
     </div>`.trim();
@@ -201,13 +203,13 @@ function teaserAutoReplyText(args: { teaserA4Url: string; teaserMobUrl: string; 
 Subject: Fathering Without Fear — the story they thought they knew
 
 Friends—
-I’m releasing Fathering Without Fear, a memoir forged in the middle of loss, legal storms, and a father’s stubborn hope.
+I'm releasing Fathering Without Fear, a memoir forged in the middle of loss, legal storms, and a father's stubborn hope.
 
 Free teaser (A4 + Mobile):
 — ${teaserA4Url}
 — ${teaserMobUrl}
 
-For chapter drops and launch dates, reply “keep me posted” or join: ${siteUrl}/contact
+For chapter drops and launch dates, reply "keep me posted" or join: ${siteUrl}/contact
 
 Grace and courage,
 Abraham of London

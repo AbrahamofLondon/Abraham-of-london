@@ -28,7 +28,7 @@ export default function ContentShowcase({
   linkAriaLabel = "View all items",
   className,
 }: ContentShowcaseProps) {
-  // ✅ Hooks must be unconditionally called
+  // ÃƒÂ¢Ã…"… Hooks must be unconditionally called
   const headingId = React.useId();
   const sectionId = React.useId();
 

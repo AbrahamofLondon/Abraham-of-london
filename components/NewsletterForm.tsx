@@ -32,7 +32,7 @@ export default function NewsletterForm() {
     // If the honeypot is filled, act like success to mislead bots.
     if (hp) {
       setStatus("ok");
-      setMsg("You’re subscribed. Welcome!");
+      setMsg("You're subscribed. Welcome!");
       setEmail("");
       return;
     }
@@ -62,7 +62,7 @@ export default function NewsletterForm() {
         typeof data?.message === "string"
           ? data.message
           : r.ok
-          ? "You’re subscribed. Welcome!"
+          ? "You're subscribed. Welcome!"
           : "Something went wrong. Please try again.";
 
       if (r.ok) {

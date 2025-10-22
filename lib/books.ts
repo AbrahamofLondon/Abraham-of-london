@@ -20,7 +20,7 @@ export interface BookRequiredMeta {
 // Define the full interface, extending the required fields
 export interface BookMeta extends BookRequiredMeta {
   date?: string; // Kept as-is, but often used for sorting/display
-  
+
   // Optional extras used by pages/books.tsx
   publishedDate?: string; // Always coerced to ISO string if possible
   isbn?: string;
@@ -172,7 +172,7 @@ export function getBookBySlug(
         }
         break;
       }
-      
+
       default: {
         // Fallback for any other valid but uncoerced field
         (item as Record<string, unknown>)[field] = raw;

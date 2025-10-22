@@ -34,7 +34,7 @@ export default function DownloadsGrid({ items, columns = 2, className = "" }: Pr
                 <div className="font-serif text-xl font-semibold text-deepCharcoal">{it.title}</div>
                 {it.sub && <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">{it.sub}</div>}
               </div>
-              <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">↗</span>
+              <span aria-hidden className="text-softGold transition group-hover:translate-x-0.5">ÃƒÂ¢Ã¢â‚¬—</span>
             </div>
           </Link>
         </li>

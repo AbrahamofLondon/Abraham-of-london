@@ -16,7 +16,7 @@ type Props = {
   className?: string;
   /** Animate on mount (default) or only when in view */
   inView?: boolean;
-  /** Optional aria-label if you don’t use a title */
+  /** Optional aria-label if you don't use a title */
   ariaLabel?: string;
   children?: React.ReactNode;
 };

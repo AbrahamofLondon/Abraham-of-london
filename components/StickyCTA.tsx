@@ -162,7 +162,7 @@ export default function StickyCTA({
           title="Dismiss"
           className="absolute -right-2 -top-2 rounded-full bg-black/70 px-1 text-[11px] leading-none text-white hover:bg-black/80 dark:bg-white/20 dark:hover:bg-white/30"
         >
-          ×
+          ÃƒÆ’—
         </button>
 
         {isInternal(primaryHref) ? (
@@ -224,7 +224,7 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
         title="Dismiss"
         className={clsx("absolute right-2 top-2 rounded-md p-1 text-[color:var(--color-on-secondary)/0.6] hover:bg-black/5", "dark:text-[color:var(--color-on-primary)/0.7] dark:hover:bg-white/10")}
       >
-        <span aria-hidden>×</span>
+        <span aria-hidden>ÃƒÆ’—</span>
       </button>
 
       <div className={clsx("flex items-center gap-3 sm:gap-4", collapsed && "gap-2")}>
@@ -242,7 +242,7 @@ const DockedCard = React.forwardRef<HTMLDivElement, DockedProps>(function Docked
         </a>
 
         <div className="min-w-0 flex-1">
-          {!collapsed && <p className="truncate text-sm font-medium text-forest dark:text-cream">Let’s build something enduring.</p>}
+          {!collapsed && <p className="truncate text-sm font-medium text-forest dark:text-cream">Let's build something enduring.</p>}
 
           <div className={clsx("mt-2 flex flex-wrap gap-2", collapsed && "mt-0")}>
             {isInternal(primaryHref) ? (

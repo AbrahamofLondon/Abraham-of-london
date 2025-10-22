@@ -154,7 +154,7 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps) {
           )}
         </ul>
         <div className="flex items-center justify-between border-t border-neutral-200 px-3 py-2 text-xs text-neutral-500 dark:border-neutral-800">
-          <span>Tip: Use ↑ ↓ and Enter</span>
+          <span>Tip: Use ÃƒÂ¢Ã¢â‚¬' ÃƒÂ¢Ã¢â‚¬" and Enter</span>
           <span>Esc to close</span>
         </div>
       </div>

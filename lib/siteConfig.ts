@@ -39,7 +39,7 @@ export const siteConfig: SiteConfig = {
   title: "Abraham of London",
   author: "Abraham of London",
   description:
-    "Official site of Abraham of London — author, strategist, and fatherhood advocate.",
+    "Official site of Abraham of London ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â author, strategist, and fatherhood advocate.",
   siteUrl: SITE_ORIGIN,
 
   socialLinks: [
@@ -77,10 +77,10 @@ export const ensureLocal = (p?: string | null) =>
  */
 export const absUrl = (path: string) => {
   if (isExternal(path)) return path;
-  
+
   // Ensure the path starts with a slash for clean joining
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  
+
   return `${siteConfig.siteUrl}${cleanPath}`;
 };
 
@@ -88,8 +88,8 @@ export const absUrl = (path: string) => {
 export const absAsset = (localPath: string) => {
   // Use ensureLocal to guarantee a clean starting slash for local paths
   const cleanLocalPath = ensureLocal(localPath);
-  
+
   if (!cleanLocalPath) return localPath; // Should only happen if input was remote/null
-  
+
   return absUrl(cleanLocalPath);
 };

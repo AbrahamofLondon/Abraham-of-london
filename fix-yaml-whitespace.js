@@ -51,7 +51,7 @@ function processFile(filePath) {
             // Set delimiters for frontmatter block (necessary for Contentlayer compatibility)
             delimiters: '---',
         });
-        
+
         // Check if content changed before writing
         if (newContent !== content) {
             fs.writeFileSync(filePath, newContent);

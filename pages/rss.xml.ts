@@ -6,7 +6,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const SITE_NAME = "Abraham of London";
   const DESC = "Featured insights by Abraham of London — fatherhood, enterprise, society.";
 
-  // 👇 server-only import (pulls in fs) — safe here
+  // ðŸ‘‡ server-only import (pulls in fs) — safe here
   const { getAllPosts } = await import("@/lib/mdx");
 
   const posts = getAllPosts()

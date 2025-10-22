@@ -11,7 +11,7 @@ class WebhookUpdater {
     this.autoDeploy = options.autoDeploy !== false;
     this.filesToCheck = [
       'deploy.js',
-      'deploy-script-no-deps.js', 
+      'deploy-script-no-deps.js',
       'codex-auto-setup.bat',
       '.env',
       'package.json'
@@ -20,17 +20,17 @@ class WebhookUpdater {
 
   async run() {
     console.log('🎯 Webhook Updater & Deployer Starting...');
-    
+
     try {
       const updatedCount = await this.updateAllFiles();
-      
+
       if (this.autoDeploy && (updatedCount > 0 || process.argv.includes('--force-deploy'))) {
         await this.deployAfterUpdate();
       } else if (updatedCount === 0) {
         console.log('\n📋 No files needed updating. Run with --force-deploy to deploy anyway.');
         console.log('💡 Or manually run: npm run deploy-safe');
       }
-      
+
     } catch (error) {
       console.error('❌ Process failed:', error.message);
       process.exit(1);
@@ -40,9 +40,9 @@ class WebhookUpdater {
   async updateAllFiles() {
     console.log('🔄 Starting webhook URL update...');
     console.log('📎 New URL: ' + this.newWebhookUrl);
-    
+
     let updatedCount = 0;
-    
+
     for (const filename of this.filesToCheck) {
       try {
         const updated = await this.updateFile(filename);
@@ -56,7 +56,7 @@ class WebhookUpdater {
         console.log('⚠️  Warning: Could not process ' + filename + ' - ' + error.message);
       }
     }
-    
+
     console.log('\n🎉 Update complete! Updated ' + updatedCount + ' files.');
     return updatedCount;
   }
@@ -64,17 +64,17 @@ class WebhookUpdater {
   async deployAfterUpdate() {
     console.log('\n🚀 Auto-deploying with updated webhook...');
     console.log('📡 Running: npm run deploy-safe');
-    
+
     try {
       const { stdout, stderr } = await execAsync('npm run deploy-safe', {
         cwd: process.cwd(),
         timeout: 30000
       });
-      
+
       if (stdout.includes('Status: 200') || stdout.includes('successfully')) {
         console.log('\n✅ DEPLOYMENT SUCCESS!');
         console.log('🎯 Netlify build triggered successfully');
-        
+
         const lines = stdout.split('\n');
         lines.forEach(line => {
           if (line.includes('Status:') || line.includes('success') || line.includes('triggered')) {
@@ -85,11 +85,11 @@ class WebhookUpdater {
         console.log('\n⚠️  Deployment completed, but status unclear:');
         console.log(stdout);
       }
-      
+
       if (stderr && !stderr.includes('npm WARN')) {
         console.log('⚠️  Warnings/Errors:', stderr);
       }
-      
+
     } catch (error) {
       console.error('\n❌ Deployment failed:', error.message);
       console.log('💡 Try running manually: npm run deploy-safe');
@@ -99,7 +99,7 @@ class WebhookUpdater {
 
   async updateFile(filename) {
     const filePath = path.join(process.cwd(), filename);
-    
+
     try {
       await fs.access(filePath);
     } catch {
@@ -108,9 +108,9 @@ class WebhookUpdater {
 
     const content = await fs.readFile(filePath, 'utf8');
     const originalContent = content;
-    
+
     let updatedContent;
-    
+
     if (filename.endsWith('.js')) {
       updatedContent = this.updateJavaScriptFile(content);
     } else if (filename.endsWith('.bat')) {
@@ -122,12 +122,12 @@ class WebhookUpdater {
     } else {
       updatedContent = this.updateGenericFile(content);
     }
-    
+
     if (updatedContent !== originalContent) {
       await fs.writeFile(filePath, updatedContent, 'utf8');
       return true;
     }
-    
+
     return false;
   }
 
@@ -156,17 +156,17 @@ class WebhookUpdater {
     try {
       const data = JSON.parse(content);
       let changed = false;
-      
+
       if (!data.scripts) {
         data.scripts = {};
       }
-      
+
       if (!data.scripts.build) {
         data.scripts.build = "echo 'Build completed successfully!' && exit 0";
         changed = true;
         console.log('📦 Added missing build script to package.json');
       }
-      
+
       Object.keys(data.scripts).forEach(key => {
         const original = data.scripts[key];
         const updated = original.replace(
@@ -178,7 +178,7 @@ class WebhookUpdater {
           changed = true;
         }
       });
-      
+
       return changed ? JSON.stringify(data, null, 2) : content;
     } catch {
       return this.updateGenericFile(content);
@@ -197,17 +197,17 @@ async function main() {
   const args = process.argv.slice(2);
   let newUrl = args.find(arg => !arg.startsWith('--'));
   const flags = args.filter(arg => arg.startsWith('--'));
-  
+
   const options = {
     autoDeploy: !flags.includes('--no-deploy'),
     forceDeploy: flags.includes('--force-deploy')
   };
-  
+
   if (!newUrl) {
     console.log('No URL provided, using default webhook URL...');
     newUrl = 'https://api.netlify.com/build_hooks/684c730862a2c482c589aa5e';
   }
-  
+
   if (!newUrl.includes('netlify.com/build_hooks/')) {
     console.log('❌ Error: URL does not look like a Netlify webhook URL');
     console.log('Expected format: https://api.netlify.com/build_hooks/YOUR_HOOK_ID');
@@ -218,7 +218,7 @@ async function main() {
     console.log('  node update-webhooks.js NEW_URL --no-deploy       # Update files only, do not deploy');
     process.exit(1);
   }
-  
+
   const updater = new WebhookUpdater(newUrl, options);
   await updater.run();
 }

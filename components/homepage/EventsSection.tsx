@@ -75,22 +75,22 @@ export default function EventsSection({
   locale = "en-GB",
   className,
 }: Props) {
-  
-  // ✅ UPGRADE: Centralized reference date for safety
+
+  // ÃƒÂ¢Ã…"… UPGRADE: Centralized reference date for safety
   const today = React.useMemo(() => {
     const t = new Date();
     // Normalize to start of day for accurate comparison
-    t.setHours(0, 0, 0, 0); 
+    t.setHours(0, 0, 0, 0);
     return t;
   }, []);
 
-  // ✅ UPGRADE: Robust Data Filtering and Sorting
+  // ÃƒÂ¢Ã…"… UPGRADE: Robust Data Filtering and Sorting
   const list = React.useMemo(() => {
     const normalized = (Array.isArray(events) ? events : [])
       .map((e) => {
         const date = parseDate(e.date);
         // Only return objects with valid Date
-        return date ? { ...e, date } : null; 
+        return date ? { ...e, date } : null;
       })
       .filter(Boolean) as (Omit<EventItem, "date"> & { date: Date })[];
 
@@ -100,7 +100,7 @@ export default function EventsSection({
 
     // Sort chronologically (earliest first)
     filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
-    
+
     // Apply max limit
     return typeof max === "number" ? filtered.slice(0, max) : filtered;
   }, [events, hidePast, max, today]);
@@ -108,7 +108,7 @@ export default function EventsSection({
   const hasEvents = list.length > 0;
   const headingId = React.useId();
 
-  // ✅ UPGRADE: Cleaned up variant styling definition
+  // ÃƒÂ¢Ã…"… UPGRADE: Cleaned up variant styling definition
   const isDark = variant === "dark";
 
   const styles = React.useMemo(() => ({
@@ -183,17 +183,17 @@ export default function EventsSection({
                 transition={{ duration: 0.45, delay: i * 0.08 }}
               >
                 <div className={styles.subText}>
-                  {/* ✅ UPGRADE: Time component and strong semantic structure */}
+                  {/* ÃƒÂ¢Ã…"… UPGRADE: Time component and strong semantic structure */}
                   <time dateTime={isoDate(ev.date)} className="font-semibold tracking-wide">
                     {dateLabel}
                   </time>
                 </div>
-                
+
                 <h3 className="text-xl font-semibold mt-2">
-                    {/* ✅ UPGRADE: Wrap title in link if href exists for a larger click target */}
+                    {/* ÃƒÂ¢Ã…"… UPGRADE: Wrap title in link if href exists for a larger click target */}
                     {ev.href ? (
-                        <Link 
-                            href={linkHref} 
+                        <Link
+                            href={linkHref}
                             className="hover:underline decoration-softGold/60 underline-offset-4"
                         >
                             {ev.title}
@@ -202,19 +202,19 @@ export default function EventsSection({
                         ev.title
                     )}
                 </h3>
-                
+
                 {ev.location && (
                   <p className={styles.locationText}>
-                    <span aria-hidden="true">📍 </span>
+                    <span aria-hidden="true">ÃƒÂ°Ã…Â¸"Ã‚Â </span>
                     {ev.location}
                   </p>
                 )}
-                
+
                 {ev.href && (
                   <Link
                     href={linkHref}
                     className={styles.button}
-                    aria-label={`View details for the event: ${ev.title} on ${dateLabel}`} // ✅ UPGRADE: Rich ARIA label
+                    aria-label={`View details for the event: ${ev.title} on ${dateLabel}`} // ÃƒÂ¢Ã…"… UPGRADE: Rich ARIA label
                   >
                     Details
                     {/* SVG Arrow for visual cue */}

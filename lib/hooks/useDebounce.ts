@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 /**
- * Custom hook to debounce a value, returning the value only after a specified delay 
+ * Custom hook to debounce a value, returning the value only after a specified delay
  * since the last update to the input value. This is the standard pattern for search inputs.
  *
  * @param value The value to be debounced (e.g., a search string).

@@ -1,5 +1,4 @@
 // pages/events/index.tsx
-
 "use client";
 
 import * as React from "react";
@@ -8,9 +7,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { GetStaticProps } from "next";
 
-import { allEvents, type Event } from "contentlayer/generated";
+import { allEvents } from "contentlayer/generated";
+import type { Event } from "contentlayer/generated";
 
-// --- IMPORTS FOR CLIENT-SIDE FUNCTIONALITY (assuming these paths are correct) ---
 import clsx from "clsx";
 import EventCard from "@/components/events/EventCard";
 import Layout from "@/components/Layout";
@@ -20,14 +19,7 @@ import { OgHead } from "@/lib/seo";
 import { isUpcoming } from "@/lib/events";
 import type { EventMeta } from "@/lib/events";
 
-// -----------------------------------------------------------------------------
-// TYPE DEFINITIONS
-// -----------------------------------------------------------------------------
 type Props = { events: EventMeta[] };
-
-// -----------------------------------------------------------------------------
-// HELPER COMPONENTS & UTILITIES
-// -----------------------------------------------------------------------------
 
 const normalize = (s = "") => s.toLowerCase();
 
@@ -54,11 +46,6 @@ const Chip = ({
   </button>
 );
 
-
-// -----------------------------------------------------------------------------
-// MAIN COMPONENT
-// -----------------------------------------------------------------------------
-
 export default function EventsIndex({ events }: Props) {
   const router = useRouter();
 
@@ -71,15 +58,19 @@ export default function EventsIndex({ events }: Props) {
 
   const [localQuery, setLocalQuery] = React.useState(q);
 
-  const updateSearchQuery = React.useCallback((value?: string) => {
-    const next = new URLSearchParams(router.query as Record<string, string>);
-    if (value && value.length) next.set("q", value);
-    else next.delete("q");
+  const updateSearchQuery = React.useCallback(
+    (value?: string) => {
+      const next = new URLSearchParams(router.query as Record<string, string>);
+      if (value && value.length) next.set("q", value);
+      else next.delete("q");
 
-    router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
-      shallow: true,
-    });
-  }, [router.query, router]);
+      router.replace({ pathname: "/events", query: Object.fromEntries(next) }, undefined, {
+        shallow: true,
+      });
+    },
+    // âœ… only depend on `router`
+    [router]
+  );
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,14 +78,11 @@ export default function EventsIndex({ events }: Props) {
         updateSearchQuery(localQuery.trim() || undefined);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [localQuery, q, updateSearchQuery]);
 
   const filteredEvents = React.useMemo(() => {
     let list = events.slice();
-
-    const currentQ = q;
 
     if (when === "upcoming") list = list.filter((e) => isUpcoming(e.date));
     else if (when === "past") list = list.filter((e) => !isUpcoming(e.date));
@@ -104,8 +92,8 @@ export default function EventsIndex({ events }: Props) {
       list = list.filter((e) => normalize(e.location || "").includes(needle));
     }
 
-    if (currentQ.trim()) {
-      const needle = normalize(currentQ);
+    if (q.trim()) {
+      const needle = normalize(q);
       list = list.filter((e) =>
         [e.title, e.summary || "", e.location || ""].some((field) =>
           normalize(field).includes(needle)
@@ -138,7 +126,7 @@ export default function EventsIndex({ events }: Props) {
   const handleReset = () => {
     setLocalQuery("");
     router.replace({ pathname: "/events" }, undefined, { shallow: true });
-  }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalQuery(e.target.value);
@@ -148,11 +136,10 @@ export default function EventsIndex({ events }: Props) {
     setLocalQuery(q);
   }, [q]);
 
-
   return (
     <Layout pageTitle="Events">
       <OgHead
-        title="Events ? Abraham of London"
+        title="Events Â· Abraham of London"
         description="Talks, salons, and workshops. Select sessions run as Chatham Rooms (off the record)."
         path="/events"
       />
@@ -172,7 +159,7 @@ export default function EventsIndex({ events }: Props) {
               {q ? (
                 <>
                   <li aria-hidden="true">/</li>
-                  <li className="text-[color:var(--color-on-secondary)/0.6]">?{q}?</li>
+                  <li className="text-[color:var(--color-on-secondary)/0.6]">"{q}"</li>
                 </>
               ) : null}
             </ol>
@@ -200,7 +187,7 @@ export default function EventsIndex({ events }: Props) {
             <div className="flex gap-2">
               <input
                 aria-label="Search events"
-                placeholder="Search title, description, location?"
+                placeholder="Search title, description, location…"
                 onChange={handleSearchChange}
                 value={localQuery}
                 className="w-full md:w-80 rounded-lg border border-lightGrey px-3 py-2 text-sm"
@@ -252,7 +239,9 @@ export default function EventsIndex({ events }: Props) {
                   description={ev.summary}
                   tags={ev.tags ?? undefined}
                   heroImage={ev.heroImage ?? undefined}
-                  resources={ev.resources ? { downloads: ev.resources.downloads ?? [], reads: ev.resources.reads ?? [] } : null}
+                  resources={
+                    ev.resources ? { downloads: ev.resources.downloads ?? [], reads: ev.resources.reads ?? [] } : null
+                  }
                 />
               ))}
             </ul>
@@ -262,10 +251,6 @@ export default function EventsIndex({ events }: Props) {
     </Layout>
   );
 }
-
-// -----------------------------------------------------------------------------
-// STATIC PROPS
-// -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const events = allEvents
@@ -280,11 +265,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       resources: (e as any).resources ?? null,
     }))
     .sort((a, b) => +new Date(a.date as unknown as string) - +new Date(b.date as unknown as string));
-  
-  return {
-    props: {
-      events: events as EventMeta[],
-    },
-    revalidate: 60
-  };
+
+  return { props: { events: events as EventMeta[] }, revalidate: 60 };
 };

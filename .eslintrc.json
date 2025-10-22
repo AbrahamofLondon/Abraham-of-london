@@ -1,35 +1,20 @@
 ﻿{
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
+  "root": true,
+  "extends": ["next", "next/core-web-vitals"],
   "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
   "parserOptions": {
-    "ecmaVersion": 12,
+    "ecmaVersion": 2022,
     "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "ecmaFeatures": { "jsx": true }
   },
-  "plugins": [
-    "@typescript-eslint",
-    "react"
-  ],
-  "rules": {
-    "react/prop-types": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "no-unused-vars": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
+  "env": { "browser": true, "es2022": true, "node": true },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "public/",
+    "content/**/*.md",
+    "content/**/*.mdx",
+    "scripts/**"
+  ]
 }

@@ -24,7 +24,7 @@ const ICONS: Record<NonNullable<SocialItem["kind"]>, string> = {
   whatsapp: "/assets/images/social/whatsapp.svg",
   mail: "/assets/images/social/email.svg",
   phone: "/assets/images/social/phone.svg",
-  tiktok: "/assets/images/social/tiktok.svg", // ✅ new
+  tiktok: "/assets/images/social/tiktok.svg", // ÃƒÂ¢Ã…"… new
 };
 
 export default function SocialFollowStrip({
@@ -63,7 +63,7 @@ export default function SocialFollowStrip({
                 const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
                 const external = it.external ?? (isExternalHttp(href) && !isUtility);
 
-                // Stronger a11y label: “Follow Abraham of London on TikTok”, etc.
+                // Stronger a11y label: "Follow Abraham of London on TikTok", etc.
                 const aria =
                   it.kind === "mail"
                     ? `Email ${siteConfig.title}`
