@@ -1,110 +1,128 @@
-// scripts/orchestrate.mjs (ESM; Windows-safe; NO BOM)
+#!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { setTimeout as sleep } from "node:timers/promises";
-import fs from "node:fs/promises";
-import fssync from "node:fs";
+import getPort from "get-port";
 import path from "node:path";
-import os from "node:os";
+import fs from "node:fs";
 
-// ───────────────────────────────────────────────────────────
-// Config / args
-// ───────────────────────────────────────────────────────────
-const ROOT = process.cwd();
-const OUT_DIR     = getArg("--outDir", path.join(ROOT, "public", "downloads"));
-const MIRROR_DIR  = getArg("--mirrorDir", path.join(ROOT, "public", "resources"));
-const STRICT      = getBool("--strict", false);
-const DRY_RUN     = getBool("--dry-run", true);               // safe default
-const REBUILD     = getBool("--rebuild", false);
-const FIX_REDIRECTS = getBool("--fix-redirects", true);
-const PORT_OPT    = parseInt(getArg("--port", ""), 10) || 0;  // 0 → auto
-const PDF_ON_CI   = getBool("--pdf-on-ci", process.env.PDF_ON_CI === "1");
-const MANIFEST    = getArg("--manifest", path.join(ROOT, ".orchestrate-manifest.json"));
-const REVERT_FROM = getArg("--revert-manifest", "");
-const RENDER      = getBool("--render", true);
-const VALIDATE    = getBool("--validate", true);
+const isWin = process.platform === "win32";
+const npx = isWin ? "npx.cmd" : "npx";
+const nodeBin = process.execPath;
+const root = process.cwd();
+const outDir = "scripts/_reports";
+fs.mkdirSync(outDir, { recursive: true });
 
-const SCRIPTS = {
-  probe: path.join(ROOT, "scripts", "probe-print-routes.mjs"),
-  render: path.join(ROOT, "scripts", "render-pdfs.mjs"),
-  validate: path.join(ROOT, "scripts", "validate-downloads.mjs"),
-  auditDownloads: path.join(ROOT, "scripts", "audit-downloads.mjs"),
-};
+function run(cmd, args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
+  });
+}
 
-const FALLBACK_ROUTES = [
-  "/print/leadership-playbook",
-  "/print/mentorship-starter-kit",
-  "/print/family-altar-liturgy",
-  "/print/standards-brief",
-  "/print/principles-for-my-son",
-  "/print/scripture-track-john14",
-  "/print/fathering-without-fear-teaser",
-  "/print/fathering-without-fear-teaser-mobile",
-  "/print/a6/leaders-cue-card-two-up",
-  "/print/a6/brotherhood-cue-card-two-up",
-];
-const FALLBACK_FILEMAP = {
-  "/print/leadership-playbook": "Leadership_Playbook.pdf",
-  "/print/mentorship-starter-kit": "Mentorship_Starter_Kit.pdf",
-  "/print/family-altar-liturgy": "Family_Altar_Liturgy.pdf",
-  "/print/standards-brief": "Standards_Brief.pdf",
-  "/print/principles-for-my-son": "Principles_for_My_Son.pdf",
-  "/print/scripture-track-john14": "Scripture_Track_John14.pdf",
-  "/print/fathering-without-fear-teaser": "Fathering_Without_Fear_Teaser_A4.pdf",
-  "/print/fathering-without-fear-teaser-mobile": "Fathering_Without_Fear_Teaser_Mobile.pdf",
-  "/print/a6/leaders-cue-card-two-up": "Leaders_Cue_Card.pdf",
-  "/print/a6/brotherhood-cue-card-two-up": "Brotherhood_Cue_Card.pdf",
-};
+(async function main() {
+  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
+  const BASE_URL = `http://localhost:${PORT}`;
 
-// ───────────────────────────────────────────────────────────
-// Main Orchestration
-// ───────────────────────────────────────────────────────────
-(async () => {
-  if (REVERT_FROM) return await revertFromManifest(REVERT_FROM);
+  // 0) Global manager (cleaner + link/asset checks + fallback creation)
+  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
 
-  // 1) Build if needed
-  const hasBuild = fssync.existsSync(path.join(ROOT, ".next", "BUILD_ID"));
-  if (REBUILD || !hasBuild) {
-    console.log("[orchestrate] Building project...");
-    await run("npm", ["run", "build"], { env: envPlus({ PDF_ON_CI: PDF_ON_CI ? "1" : undefined }) });
-  }
+  // 1) Build
+  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
+  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
+  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
 
-  // 2) Start server on a free port
-  const port = PORT_OPT || (await pickPort(5555));
-  const base = `http://localhost:${port}`;
-  const server = await startNext(port);
-  // Wait for health check (tolerate missing endpoint)
-  await waitFor(`${base}/api/health`, 15000).catch(() => {});
+  // 2) Start server (prod) on free port
+  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
+    stdio: "inherit",
+    env: { ...process.env, PORT, BASE_URL },
+  });
 
-  // 3) Discover routes (probe > fallback)
-  const { routes, fileMap } = await determinePrintRoutes(base);
-  console.log(`[orchestrate] Discovered ${routes.length} print routes.`);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  // simple readiness wait
+  await wait(2500);
 
-  // 4) Render PDFs
-  await ensureDir(OUT_DIR);
-  if (RENDER) {
-    if (exists(SCRIPTS.render)) {
-      console.log(`[orchestrate] Rendering PDFs to ${rel(OUT_DIR)}...`);
-      await run("node", [SCRIPTS.render, "--base", base, "--out", OUT_DIR], {
-        env: envPlus({ PDF_ON_CI: PDF_ON_CI ? "1" : undefined }),
-      });
-    } else {
-      console.warn("[orchestrate] render-pdfs.mjs missing → skip render");
-    }
-  }
+  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
+  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
+  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
+  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
 
-  // 5) Validate downloads
-  if (VALIDATE && exists(SCRIPTS.validate)) {
-    console.log("[orchestrate] Validating downloads...");
-    await run("node", [SCRIPTS.validate, ...(STRICT ? ["--strict"] : [])], {
-      env: envPlus({ DOWNLOADS_STRICT: STRICT ? "1" : "0" }),
-      ignoreFail: !STRICT,
-    });
-  }
+  // 4) Crawl important routes + check links (internal 200) + basic a11y
+  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
+    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
+    "--output", path.join(outDir, "link-report.json")]);
 
-  // 6) Normalize names + guarded redirects
-  if (FIX_REDIRECTS && exists(SCRIPTS.auditDownloads)) {
-    console.log("[orchestrate] Auditing downloads/fixing redirects...");
-    await run("node", [SCRIPTS.auditDownloads, "--fix", "--rename"], { env: envPlus() });
+  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
+  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
+
+  // 5) Stop server
+  server.kill("SIGINT");
+
+  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
+})().catch((err) => {
+  console.error("\n❌ Orchestration failed:", err.message);
+  process.exit(1);
+});#!/usr/bin/env node
+import { spawn } from "node:child_process";
+import getPort from "get-port";
+import path from "node:path";
+import fs from "node:fs";
+
+const isWin = process.platform === "win32";
+const npx = isWin ? "npx.cmd" : "npx";
+const nodeBin = process.execPath;
+const root = process.cwd();
+const outDir = "scripts/_reports";
+fs.mkdirSync(outDir, { recursive: true });
+
+function run(cmd, args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
+  });
+}
+
+(async function main() {
+  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
+  const BASE_URL = `http://localhost:${PORT}`;
+
+  // 0) Global manager (cleaner + link/asset checks + fallback creation)
+  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
+
+  // 1) Build
+  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
+  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
+  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
+
+  // 2) Start server (prod) on free port
+  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
+    stdio: "inherit",
+    env: { ...process.env, PORT, BASE_URL },
+  });
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  // simple readiness wait
+  await wait(2500);
+
+  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
+  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
+  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
+  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
+
+  // 4) Crawl important routes + check links (internal 200) + basic a11y
+  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
+    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
+    "--output", path.join(outDir, "link-report.json")]);
+
+  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
+  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
+
+  // 5) Stop server
+  server.kill("SIGINT");
+
+  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
+})().catch((err) => {
+  console.error("\n❌ Orchestration failed:", err.message);
+  process.exit(1);
+});wnloads, "--fix", "--rename"], { env: envPlus() });
   }
 
   // 7) Mirror to secondary (revertable)
