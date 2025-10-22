@@ -1,30 +1,31 @@
-// lib/hooks/useDebounce.ts
+// @/lib/hooks/useDebounce.ts
 
-import { useRef } from 'react';
+import * as React from 'react';
 
-type DebouncedFunction<T extends any[]> = (...args: T) => void;
+/**
+ * Custom hook to debounce a value, returning the value only after a specified delay 
+ * since the last update to the input value. This is the standard pattern for search inputs.
+ *
+ * @param value The value to be debounced (e.g., a search string).
+ * @param delay The delay in milliseconds.
+ * @returns The debounced value.
+ */
+export function useDebounce<T>(value: T, delay: number): T {
+  // State to store the debounced value
+  const [debouncedValue, setDebouncedValue] = React.useState(value);
 
-export function useDebounce<T extends any[]>(func: DebouncedFunction<T>, delay: number): DebouncedFunction<T> {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const debouncedFunc = (...args: T) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      func(...args);
+  React.useEffect(() => {
+    // Set a timeout to update the debounced value after the specified delay
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
     }, delay);
-  };
 
-  // Clean up the timer when the component unmounts
-  // This is a good practice to prevent memory leaks
-  // React.useEffect(() => {
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //   };
-  // }, []);
+    // This cleanup function runs if 'value' or 'delay' changes (cancels the previous timeout).
+    // This is the "debouncing" mechanism.
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]); // Re-run only if value or delay changes
 
-  return debouncedFunc;
+  return debouncedValue;
 }

@@ -1,5 +1,9 @@
 // pages/print/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
+import dynamic from 'next/dynamic'; // <-- 1. Import dynamic
+import * as React from "react";
+
+// Import all document sources
 import {
   allPosts,
   allBooks,
@@ -8,9 +12,27 @@ import {
   allStrategies,
 } from "contentlayer/generated";
 import type { Post, Book, Event, Resource, Strategy } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+// ⚠️ Remove the following two lines:
+// import { useMDXComponent } from "next-contentlayer2/hooks";
+// import { components } from "@/components/MdxComponents";
+
 import BrandFrame from "@/components/print/BrandFrame";
+
+// 2. Dynamically import the MDX rendering component, disabling SSR
+const PrintMDXContent = dynamic(
+  () => import('@/components/print/PrintMDXContent'),
+  { 
+    ssr: false, // <-- CRITICAL: Prevents 'undefined (reading default)' error
+    loading: () => (
+        <article className="prose max-w-none mx-auto">
+            <p>Compiling document...</p>
+        </article>
+    )
+  }
+);
+
+
+// ... (rest of your imports, type definitions, and getStaticPaths/getStaticProps remain the same) ...
 
 // Union type for any document that has MDX body + common fields
 type AnyDoc = (Post | Book | Event | Resource | Strategy) & {
@@ -45,9 +67,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export default function PrintPage({ doc }: { doc: AnyDoc | null }) {
-  // Always call the hook
   const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
 
   if (!doc) return <p>Loading…</p>;
 
@@ -67,11 +87,12 @@ export default function PrintPage({ doc }: { doc: AnyDoc | null }) {
       pageSize="A4"
       marginsMm={18}
     >
-      <article className="prose max-w-none mx-auto">
-        <h1 className="font-serif">{doc.title}</h1>
-        {desc && <p className="text-lg">{desc}</p>}
-        <MDXContent components={components as any} />
-      </article>
+      {/* 3. Pass props to the dynamically loaded component */}
+      <PrintMDXContent 
+          code={code} 
+          title={doc.title} 
+          description={desc} 
+      />
     </BrandFrame>
   );
 }

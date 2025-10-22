@@ -7,7 +7,7 @@ import * as React from "react";
 
 import Layout from "@/components/Layout";
 import MDXProviderWrapper from "@/components/MDXProviderWrapper";
-import components from "@/components/MdxComponents";
+import components from "@/components/MdxComponents"; // Correctly imported as 'components'
 import SEOHead from "@/components/SEOHead";
 import { absUrl } from "@/lib/siteConfig";
 
@@ -143,10 +143,10 @@ export default function DownloadPage({ meta, content }: Props) {
             <span>By {authorName}</span>
             {date && (
               <>
-                {" "}· <time dateTime={date}>{formattedDate}</time>
+                {" "}? <time dateTime={date}>{formattedDate}</time>
               </>
             )}
-            {readTime && <> · {readTime}</>}
+            {readTime && <> ? {readTime}</>}
             {category && (
               <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
                 {category}
@@ -155,7 +155,7 @@ export default function DownloadPage({ meta, content }: Props) {
           </div>
 
           <div className="prose prose-lg max-w-none text-deepCharcoal">
-            <MDXRemote {...content} components={MDXComponents} />
+            <MDXRemote {...content} components={components} />
           </div>
 
           {pdfPath && (
