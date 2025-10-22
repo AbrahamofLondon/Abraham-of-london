@@ -1,186 +1,231 @@
-const fs = require('fs');
-const path = require('path');
+#!/usr/bin/env node
+/**
+ * Ultra-hardening mojibake + invisible-char fixer.
+ * - Byte-level replacement for deeply corrupted sequences
+ * - Text-level replacement for 'â€™' 'â€œ' 'â€¦' etc.
+ * - Strips BOM/ZWSP/NBSP and other invisibles
+ * - Repeats passes until stable (no more changes)
+ * - Backs up each changed file once: <file>.bak
+ * - Skips typical binary files and heavy directories
+ */
 
-// --- Configuration (USING RAW HEX BYTES FOR SAFETY) ---
-// Representing the corrupted byte sequences as hex arrays prevents your code editor 
-// from corrupting the find/replace strings when you save the file.
+import fs from "node:fs";
+import path from "node:path";
 
-const CORRUPTED_SEQUENCES = [
-    // Corrupted sequence for the apostrophe/right single quote (') - The extremely deep corruption
-    {
-        // Hex representation of 'ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢...'
-        corrupt: Buffer.from([0xC3, 0x83, 0xC6, 0x92, 0xC3, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xBD, 0xCB, 0x9C, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xBD, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xCB, 0x9C, 0xC3, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xA1, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xE2, 0x80, 0xA0, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xE2, 0x80, 0xA0, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xE2, 0x80, 0xA0, 0xC3, 0x82, 0xC2, 0xAC]),
-        correct: Buffer.from("'", 'utf8')
-    },
-    // The specific sequence 'ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ'Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ'Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã...Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ'Ã¢â‚¬Â¦'
-    {
-        corrupt: Buffer.from([0xC3, 0x83, 0xC6, 0x92, 0xC3, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xBD, 0xCB, 0x9C, 0xC3, 0x83, 0xC6, 0x92, 0xC3, 0x82, 0xC2, 0xA2, 0xC3, 0x83, 0xE2, 0x80, 0xA0, 0xC3, 0x82, 0xC2, 0xAC, 0xC3, 0x85, 0xC2, 0xA6]),
-        correct: Buffer.from("", 'utf8') // Replace with nothing (garbage cleanup)
-    },
-    // Common double-encoding for apostrophe/smart quote ('â€™')
-    {
-        corrupt: Buffer.from([0xE2, 0x80, 0x99]),
-        correct: Buffer.from("'", 'utf8')
-    },
-    // Common double-encoding for left double quote ('â€œ')
-    {
-        corrupt: Buffer.from([0xE2, 0x80, 0x9C]),
-        correct: Buffer.from('"', 'utf8')
-    },
-    // Common double-encoding for right double quote ('â€')
-    {
-        corrupt: Buffer.from([0xE2, 0x80, 0x9D]),
-        correct: Buffer.from('"', 'utf8')
-    },
-    // Common double-encoding for ellipsis ('â€¦')
-    {
-        corrupt: Buffer.from([0xE2, 0x80, 0xA6]),
-        correct: Buffer.from('...', 'utf8')
-    },
-    // ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬
-    {
-        corrupt: Buffer.from([0xC3, 0x83, 0xC2, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xA1, 0xC3, 0x82, 0xC2, 0xAC]),
-        correct: Buffer.from("", 'utf8')
-    },
-    // ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢
-    {
-        corrupt: Buffer.from([0xC3, 0x83, 0xC6, 0x92, 0xC3, 0xA2, 0xE2, 0x82, 0xAC, 0xC5, 0xBD, 0xCB, 0x9C, 0xC3, 0x83, 0xC2, 0xA2]),
-        correct: Buffer.from("", 'utf8')
-    }
+/* --------------------------- Configuration --------------------------- */
+
+const ROOT = process.argv[2] || ".";
+const DRY_RUN = process.argv.includes("--dry-run");
+const MAX_PASSES = 5;
+
+// Directories to skip entirely
+const SKIP_DIRS = new Set(["node_modules", ".git", ".next", ".turbo", "dist", "out", ".contentlayer"]);
+
+// Binary / large-file extensions to skip (we don’t ‘fix’ these)
+const SKIP_EXTS = new Set([
+  ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif",
+  ".zip", ".gz", ".bz2", ".7z", ".mp4", ".mp3", ".mov", ".ico",
+  ".woff", ".woff2", ".ttf", ".eot"
+]);
+
+// Only touch these extensions (code + content)
+const TARGET_EXTS = new Set([
+  ".ts",".tsx",".js",".jsx",".mjs",".cjs",
+  ".md",".mdx",".yml",".yaml",".json",".toml",
+  ".css",".scss",".txt",".html"
+]);
+
+// Byte-level corrupted sequences (latin1 interpreted junk -> UTF-8 intended)
+const BYTE_SEQS = [
+  // Provided sequences
+  { corrupt: Buffer.from('ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢', 'latin1'), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from('ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦', 'latin1'), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("â€™", "latin1"), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from("â€œ", "latin1"), correct: Buffer.from('"', "utf8") },
+  { corrupt: Buffer.from("â€\x9d", "latin1"), correct: Buffer.from('"', "utf8") },
+  { corrupt: Buffer.from("â€¦", "latin1"), correct: Buffer.from("…", "utf8") },
+  { corrupt: Buffer.from("ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬", "latin1"), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢", "latin1"), correct: Buffer.from("", "utf8") },
 ];
 
-/**
- * Replaces all occurrences of the corrupted buffer sequence with the correct buffer.
- * Operates on raw byte Buffers for safety.
- * @param {Buffer} data - The raw file data (Buffer)
- * @param {Buffer} find - The corrupted byte sequence to find
- * @param {Buffer} replace - The correct byte sequence to replace it with
- * @returns {Buffer} The modified data buffer
- */
-function bufferReplaceAll(data, find, replace) {
-    let parts = [];
-    let current = 0;
-    let index = data.indexOf(find, current);
+// Text-level mojibake & invisibles (run after byte pass)
+const TEXT_SWEEPS = [
+  // Invisibles / BOM / ZWSP / NBSP
+  [/\uFEFF/g, ""],    // BOM
+  [/\u200B/g, ""],    // ZWSP
+  [/\u00A0/g, " "],   // NBSP -> space
 
-    while (index !== -1) {
-        parts.push(data.slice(current, index));
-        parts.push(replace);
-        current = index + find.length;
-        index = data.indexOf(find, current);
-    }
+  // Common double-encoded punctuation
+  [/â€™/g, "'"],
+  [/â€˜/g, "'"],
+  [/â€œ|â€/g, '"'],
+  [/â€¢/g, "•"],
+  [/â€¦/g, "…"],
+  [/â€“/g, "–"],
+  [/â€”/g, "—"],
+  [/Â©/g, "©"],
+  [/Â®/g, "®"],
+  [/Â·/g, "·"],
+  [/Â·/g, "·"],
+  [/Â/g, ""], // stray A-circumflex
 
-    parts.push(data.slice(current));
-    return Buffer.concat(parts);
+  // Over-encoded Latin (best-effort, safe chars)
+  [/Ã©/g, "é"], [/Ã¨/g, "è"], [/Ã€/g, "à"], [/Ãª/g,"ê"], [/Ã«/g,"ë"],
+  [/Ã¼/g, "ü"], [/Ã¶/g, "ö"], [/Ã¤/g, "ä"], [/Ã±/g, "ñ"],
+
+  // Rare leftovers
+  [/Ã‘/g, "Ñ"], [/Ã„/g,"Ä"], [/Ã–/g,"Ö"], [/Ãœ/g,"Ü"],
+];
+
+// Print-only: if icon text got corrupted inside TSX/JSX strings (e.g., EventCard)
+const ICON_RESCUES = [
+  // Replace garbled document/book emoji runs with sane ones
+  [/["'`]Ã°Å¸.*?["'`]/g, '"📄"'],
+  [/["'`]Ã°Å¸.*?["'`]/g, '"📖"'],
+];
+
+/* ------------------------------ Helpers ------------------------------ */
+
+function isBinaryLikely(buf) {
+  // Quick binary sniff: NUL in first 4096 bytes or >5% control chars
+  const len = Math.min(buf.length, 4096);
+  let ctrl = 0;
+  for (let i = 0; i < len; i++) {
+    const b = buf[i];
+    if (b === 0) return true;
+    if (b < 7 || (b > 13 && b < 32)) ctrl++;
+  }
+  return ctrl / (len || 1) > 0.05;
 }
 
-/**
- * Processes a single file to check for and fix corruption.
- * @param {string} filepath - The path to the file.
- * @param {boolean} dryRun - If true, only report fixes, don't save.
- */
-function processFile(filepath, dryRun) {
-    try {
-        // 1. Read the file as a raw binary buffer
-        let data = fs.readFileSync(filepath);
-        const originalDataLength = data.length;
-        let fixedCount = 0;
-
-        // 2. Iterate and apply all corruption fixes
-        for (const seq of CORRUPTED_SEQUENCES) {
-            const beforeLength = data.length;
-            data = bufferReplaceAll(data, seq.corrupt, seq.correct);
-            
-            // Simple check to see if any change actually occurred
-            if (data.length !== beforeLength || data.indexOf(seq.correct) !== -1) {
-                fixedCount++;
-            }
-        }
-        
-        // 3. Audit and save
-        if (fixedCount > 0 || data.length !== originalDataLength) {
-            console.log(`🛠️ FIXED (Count: ${fixedCount} changes) - ${filepath}`);
-            
-            if (!dryRun) {
-                // Write the fixed buffer back to the file
-                fs.writeFileSync(filepath, data);
-            }
-            return true;
-        }
-
-    } catch (error) {
-        if (error.code === 'EISDIR') return false; // Ignore directories
-        console.error(`❌ Error processing ${filepath}: ${error.message}`);
-        return false;
-    }
-    return false;
+function bufferReplaceAll(data, find, repl) {
+  let out = [];
+  let idx = 0;
+  for (;;) {
+    const at = data.indexOf(find, idx);
+    if (at === -1) break;
+    out.push(data.slice(idx, at), repl);
+    idx = at + find.length;
+  }
+  out.push(data.slice(idx));
+  return out.length === 1 ? data : Buffer.concat(out);
 }
 
-/**
- * Recursively walks a directory to find and fix files.
- * @param {string} dirPath - The root directory to scan.
- * @param {boolean} dryRun - If true, only audit and report.
- */
-function auditAndFixRepo(dirPath, dryRun) {
-    if (!fs.existsSync(dirPath)) {
-        console.error(`\nError: Directory not found at ${dirPath}`);
-        return;
+function passBytes(buf) {
+  let changed = false;
+  for (const { corrupt, correct } of BYTE_SEQS) {
+    const next = bufferReplaceAll(buf, corrupt, correct);
+    if (next !== buf && !next.equals(buf)) {
+      buf = next;
+      changed = true;
     }
-
-    console.log(`\n--- Starting Node.js File Audit and Repair in: ${dirPath} ---`);
-    if (dryRun) {
-        console.log("!!! DRY RUN MODE: No files will be permanently modified. !!!");
-    }
-
-    let filesFixed = 0;
-    let filesChecked = 0;
-
-    const walk = (currentPath) => {
-        try {
-            const items = fs.readdirSync(currentPath);
-            for (const item of items) {
-                const fullPath = path.join(currentPath, item);
-                const stat = fs.statSync(fullPath);
-
-                if (stat.isDirectory()) {
-                    // Skip node_modules and hidden folders for speed/safety
-                    if (item === 'node_modules' || item.startsWith('.')) {
-                        continue;
-                    }
-                    walk(fullPath);
-                } else if (stat.isFile()) {
-                    filesChecked++;
-                    
-                    // Recommended extension filtering for safety:
-                    const ext = path.extname(fullPath).toLowerCase();
-                    if (['.html', '.md', '.css', '.js', '.json', '.xml', '.txt'].includes(ext) || ext === '') {
-                        if (processFile(fullPath, dryRun)) {
-                            filesFixed++;
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.error(`Error walking directory ${currentPath}: ${e.message}`);
-        }
-    };
-
-    walk(dirPath);
-
-    console.log("\n--- Audit and Repair Complete ---");
-    console.log(`Files checked: ${filesChecked}`);
-    console.log(`Files flagged/fixed: ${filesFixed}`);
-    
-    if (dryRun) {
-        console.log("\n✅ Run the script again *without* the `--dry-run` argument to apply the fixes.");
-    } else {
-        console.log("\n✅ ALL CLEANED AND RESTORED. Remember to commit your changes!");
-    }
+  }
+  return { buf, changed };
 }
 
-// --- Execution ---
+function passText(str, fileExt) {
+  let changed = false;
+  const before = str;
+  for (const [re, rep] of TEXT_SWEEPS) str = str.replace(re, rep);
+  // Icon rescues only for code-ish files
+  if ([".ts",".tsx",".js",".jsx",".mjs",".cjs"].includes(fileExt)) {
+    for (const re of ICON_RESCUES) str = str.replace(re, (m) => {
+      // Heuristic: swap to 📄 unless looks like book context
+      return m.includes("book") ? '"📖"' : '"📄"';
+    });
+  }
+  if (str !== before) changed = true;
+  return { str, changed };
+}
 
-const args = process.argv.slice(2);
-const repoPath = args[0] || '.'; // Default to current directory
-const dryRun = args.includes('--dry-run');
+function backupOnce(p) {
+  const bak = p + ".bak";
+  if (!fs.existsSync(bak)) {
+    try { fs.copyFileSync(p, bak); } catch {}
+  }
+}
 
-auditAndFixRepo(repoPath, dryRun);
+function shouldSkipFile(p) {
+  const ext = path.extname(p).toLowerCase();
+  if (SKIP_EXTS.has(ext)) return true;
+  if (TARGET_EXTS.size && !TARGET_EXTS.has(ext)) return true;
+  return false;
+}
+
+/* ------------------------------- Walker ------------------------------ */
+
+let filesChecked = 0;
+let filesChanged = 0;
+
+function walk(dir) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      if (SKIP_DIRS.has(e.name)) continue;
+      walk(p);
+      continue;
+    }
+    if (!e.isFile()) continue;
+    processFile(p);
+  }
+}
+
+function processFile(p) {
+  const ext = path.extname(p).toLowerCase();
+  if (shouldSkipFile(p)) return;
+
+  let data;
+  try { data = fs.readFileSync(p); } catch { return; }
+
+  if (isBinaryLikely(data)) return; // safety
+
+  filesChecked++;
+
+  let changed = false;
+  let buf = data;
+
+  // Up to MAX_PASSES until stable (byte + text passes)
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    // Byte pass
+    const b = passBytes(buf);
+    buf = b.buf;
+    changed ||= b.changed;
+
+    // Text pass
+    let txt = buf.toString("utf8");
+    const t = passText(txt, ext);
+    txt = t.str;
+    changed ||= t.changed;
+
+    const after = Buffer.from(txt, "utf8");
+    if (after.equals(buf)) {
+      // no further change this cycle; break if no byte changes too
+      if (!b.changed && !t.changed) break;
+    }
+    buf = after;
+  }
+
+  if (changed && !buf.equals(data)) {
+    console.log(`✔ cleaned: ${p}`);
+    filesChanged++;
+    if (!DRY_RUN) {
+      backupOnce(p);
+      try { fs.writeFileSync(p, buf); } catch (e) {
+        console.warn(`⚠️ Could not write ${p}: ${e.message}`);
+      }
+    }
+  }
+}
+
+/* --------------------------------- Run -------------------------------- */
+
+if (!fs.existsSync(ROOT) || !fs.statSync(ROOT).isDirectory()) {
+  console.error(`Path not found or not a directory: ${ROOT}`);
+  process.exit(1);
+}
+
+console.log(`\n🚀 Mojibake & Invisible-Char Repair (root="${ROOT}", dry=${DRY_RUN})`);
+walk(ROOT);
+console.log(`\nSummary: checked=${filesChecked} | changed=${filesChanged} | passes<=${MAX_PASSES}`);
+if (DRY_RUN) console.log("Dry-run only. No files were written.");
