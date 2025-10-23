@@ -109,7 +109,7 @@ export const DOWNLOADS = {
     pdf: "/downloads/Brotherhood_Covenant_Printable.pdf",
   },
   leadersCueCard: {
-    label: "LeaderÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s Cue Card (A6, Two-Up)",
+    label: "LeaderÃƒ¢Ã¢â€š¬Ã¢â€ž¢s Cue Card (A6, Two-Up)",
     page: "/downloads/leaders-cue-card",
     pdf: "/downloads/Leaders_Cue_Card_A6_Two-Up.pdf",
   },

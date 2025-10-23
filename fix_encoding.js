@@ -2,7 +2,7 @@
 /**
  * Ultra-hardening mojibake + invisible-char fixer.
  * - Byte-level replacement for deeply corrupted sequences
- * - Text-level replacement for 'â€™' 'â€œ' 'â€¦' etc.
+ * - Text-level replacement for ''' '"' '…' etc.
  * - Strips BOM/ZWSP/NBSP and other invisibles
  * - Repeats passes until stable (no more changes)
  * - Backs up each changed file once: <file>.bak
@@ -38,14 +38,14 @@ const TARGET_EXTS = new Set([
 // Byte-level corrupted sequences (latin1 interpreted junk -> UTF-8 intended)
 const BYTE_SEQS = [
   // Provided sequences
-  { corrupt: Buffer.from('ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢', 'latin1'), correct: Buffer.from("'", "utf8") },
-  { corrupt: Buffer.from('ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦', 'latin1'), correct: Buffer.from("", "utf8") },
-  { corrupt: Buffer.from("â€™", "latin1"), correct: Buffer.from("'", "utf8") },
-  { corrupt: Buffer.from("â€œ", "latin1"), correct: Buffer.from('"', "utf8") },
+  { corrupt: Buffer.from('ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Ãƒ¢Ã¢â€š¬Ã¢â€ž¢ÃƒÆ’Ã†'Ãƒâ€šÃ‚¢ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â€š¬Ã…¡Ãƒâ€šÃ‚¬ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â€š¬Ã…¾Ãƒâ€šÃ‚¢ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Ãƒ¢Ã¢â€š¬Ã¢â€ž¢ÃƒÆ’Ã†'Ãƒ¢Ã¢â€š¬Ã‚ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒ¢Ã¢â‚¬Å¾Ã‚¢ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã†'Ãƒâ€šÃ‚¢ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â€š¬Ã…¡Ãƒâ€šÃ‚¬ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â€š¬Ã…¾Ãƒâ€šÃ‚¢', 'latin1'), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from('ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Ãƒ¢Ã¢â€š¬Ã¢â€ž¢ÃƒÆ’Ã†'Ãƒâ€šÃ‚¢ÃƒÆ’Ã‚¢Ãƒ¢Ã¢â€š¬Ã…¡Ãƒâ€šÃ‚¬ÃƒÆ’Ã¢â‚¬¦', 'latin1'), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("'", "latin1"), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from(""", "latin1"), correct: Buffer.from('"', "utf8") },
   { corrupt: Buffer.from("â€\x9d", "latin1"), correct: Buffer.from('"', "utf8") },
-  { corrupt: Buffer.from("â€¦", "latin1"), correct: Buffer.from("…", "utf8") },
-  { corrupt: Buffer.from("ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬", "latin1"), correct: Buffer.from("", "utf8") },
-  { corrupt: Buffer.from("ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢", "latin1"), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("…", "latin1"), correct: Buffer.from("…", "utf8") },
+  { corrupt: Buffer.from("ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚¬", "latin1"), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚¢", "latin1"), correct: Buffer.from("", "utf8") },
 ];
 
 // Text-level mojibake & invisibles (run after byte pass)
@@ -56,25 +56,25 @@ const TEXT_SWEEPS = [
   [/\u00A0/g, " "],   // NBSP -> space
 
   // Common double-encoded punctuation
-  [/â€™/g, "'"],
-  [/â€˜/g, "'"],
-  [/â€œ|â€/g, '"'],
-  [/â€¢/g, "•"],
-  [/â€¦/g, "…"],
-  [/â€“/g, "–"],
-  [/â€”/g, "—"],
-  [/Â©/g, "©"],
-  [/Â®/g, "®"],
-  [/Â·/g, "·"],
-  [/Â·/g, "·"],
-  [/Â/g, ""], // stray A-circumflex
+  [/'/g, "'"],
+  [/'/g, "'"],
+  [/"|"/g, '"'],
+  [/•/g, "•"],
+  [/…/g, "…"],
+  [/–/g, "–"],
+  [/—/g, "—"],
+  [/©/g, "©"],
+  [/®/g, "®"],
+  [/·/g, "·"],
+  [/·/g, "·"],
+  [//g, ""], // stray A-circumflex
 
   // Over-encoded Latin (best-effort, safe chars)
-  [/Ã©/g, "é"], [/Ã¨/g, "è"], [/Ã€/g, "à"], [/Ãª/g,"ê"], [/Ã«/g,"ë"],
-  [/Ã¼/g, "ü"], [/Ã¶/g, "ö"], [/Ã¤/g, "ä"], [/Ã±/g, "ñ"],
+  [/é/g, "é"], [/è/g, "è"], [/à/g, "à"], [/ê/g,"ê"], [/ë/g,"ë"],
+  [/ü/g, "ü"], [/ö/g, "ö"], [/ä/g, "ä"], [/ñ/g, "ñ"],
 
   // Rare leftovers
-  [/Ã‘/g, "Ñ"], [/Ã„/g,"Ä"], [/Ã–/g,"Ö"], [/Ãœ/g,"Ü"],
+  [/Ñ/g, "Ñ"], [/Ä/g,"Ä"], [/Ö/g,"Ö"], [/Ü/g,"Ü"],
 ];
 
 // Print-only: if icon text got corrupted inside TSX/JSX strings (e.g., EventCard)

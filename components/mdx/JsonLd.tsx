@@ -1,18 +1,1 @@
-// components/mdx/JsonLd.tsx
-import * as React from "react";
-
-type JsonLdProps = {
-  data: unknown;
-  type?: string; // default: application/ld+json
-} & React.HTMLAttributes<HTMLScriptElement>;
-
-export default function JsonLd({ data, type = "application/ld+json", ...rest }: JsonLdProps) {
-  return (
-    <script
-      type={type}
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-      {...rest}
-    />
-  );
-}
+//components/mdx/JsonLd.tsximport*asReactfrom"react";typeJsonLdProps={data:unknown;type?:string;//default:application/ld+json}&React.HTMLAttributes<HTMLScriptElement>;exportdefaultfunctionJsonLd({data,type="application/ld+json",...rest}:JsonLdProps){return(<scripttype={type}//eslint-disable-next-linereact/no-dangerdangerouslySetInnerHTML={{__html:JSON.stringify(data)}}{...rest}/>);}

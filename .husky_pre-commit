@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+echo "Running Tailwind slash-opacity checks…"
+npm run fix:tw-opacity --silent
+npm run guard:css --silent
+
+# run lint-staged if you use it, otherwise skip
+# npx lint-staged || true

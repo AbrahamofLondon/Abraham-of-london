@@ -1,3 +1,1 @@
-export default function Rule() {
-  return <hr className="my-10 border-t border-zinc-200" />;
-}
+exportdefaultfunctionRule(){return<hrclassName="my-10border-tborder-zinc-200"/>;}

@@ -1,5 +1,5 @@
 ## Summary
-<!-- WhatÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s changing and why. Keep it tight. -->
+<!-- WhatÃƒ¢Ã¢â€š¬Ã¢â€ž¢s changing and why. Keep it tight. -->
 
 ## Type
 - [ ] Feature

@@ -1,15 +1,172 @@
 {
-  "startedAt": "2025-10-22T23:48:52.930Z",
+  "startedAt": "2025-10-23T00:50:56.204Z",
   "dryRun": false,
   "applyFixes": true,
   "strict": false,
   "filesScanned": 186,
-  "filesModified": 0,
-  "codeFixed": [],
-  "dataFixed": [],
-  "jsonFixed": [],
-  "fmMissingFields": [],
+  "filesModified": 27,
+  "codeFixed": [
+    "C:/Abraham-of-london/components/EmbossedBrandMark.tsx"
+  ],
+  "dataFixed": [
+    "C:/Abraham-of-london/content/strategy/events-blueprint.md",
+    "C:/Abraham-of-london/content/resources/brotherhood-emergency-call-tree.mdx",
+    "C:/Abraham-of-london/content/resources/brotherhood-leader-guide-4-weeks.mdx",
+    "C:/Abraham-of-london/content/resources/brotherhood-starter-kit.mdx",
+    "C:/Abraham-of-london/content/resources/conflict-resolution-24h.mdx",
+    "C:/Abraham-of-london/content/resources/family-budget-one-sheet.mdx",
+    "C:/Abraham-of-london/content/resources/fathers-in-family-court-practical-pack.mdx",
+    "C:/Abraham-of-london/content/resources/household-device-standards.mdx",
+    "C:/Abraham-of-london/content/resources/scripture-reading-starter-30-days.mdx",
+    "C:/Abraham-of-london/content/resources/weekly-review-one-pager.mdx",
+    "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
+    "C:/Abraham-of-london/content/downloads/brotherhood-covenant.mdx",
+    "C:/Abraham-of-london/content/downloads/communication-script-bpf.mdx",
+    "C:/Abraham-of-london/content/downloads/entrepreneur-operating-pack.mdx",
+    "C:/Abraham-of-london/content/downloads/entrepreneur-survival-checklist.mdx",
+    "C:/Abraham-of-london/content/downloads/family-altar-liturgy.mdx",
+    "C:/Abraham-of-london/content/downloads/leaders-cue-card-two-up.mdx",
+    "C:/Abraham-of-london/content/downloads/leadership-playbook.mdx",
+    "C:/Abraham-of-london/content/downloads/mentorship-starter-kit.mdx",
+    "C:/Abraham-of-london/content/downloads/principles-for-my-son-cue-card.mdx",
+    "C:/Abraham-of-london/content/downloads/principles-for-my-son.mdx",
+    "C:/Abraham-of-london/content/downloads/scripture-track-john14.mdx",
+    "C:/Abraham-of-london/content/downloads/standards-brief.mdx",
+    "C:/Abraham-of-london/content/downloads/weekly-operating-rhythm.mdx",
+    "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx"
+  ],
+  "jsonFixed": [
+    "C:/Abraham-of-london/package.json"
+  ],
+  "fmMissingFields": [
+    {
+      "file": "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/brotherhood-covenant.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/communication-script-bpf.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/entrepreneur-operating-pack.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/entrepreneur-survival-checklist.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/family-altar-liturgy.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/leaders-cue-card-two-up.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/leadership-playbook.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/mentorship-starter-kit.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son-cue-card.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/scripture-track-john14.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/standards-brief.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    },
+    {
+      "file": "C:/Abraham-of-london/content/downloads/weekly-operating-rhythm.mdx",
+      "missing": [
+        "date",
+        "author",
+        "readTime",
+        "category"
+      ]
+    }
+  ],
   "linkErrors": [],
   "notes": [],
-  "endedAt": "2025-10-22T23:48:53.020Z"
+  "endedAt": "2025-10-23T00:50:56.463Z"
 }

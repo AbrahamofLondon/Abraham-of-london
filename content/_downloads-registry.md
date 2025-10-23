@@ -182,10 +182,10 @@ export default function BlogPost({ post }: Props) {
             <span>By {authorName}</span>
             {date && (
               <>
-                {" "}ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ'Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã...Â¡ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· <time dateTime={date}>{formattedDate}</time>
+                {" "}ÃƒÆ'Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã‚¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒ…Ã‚¡ÃƒÆ'Ã†'Ãƒ¢Ã¢â€š¬Ã...¡ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚· <time dateTime={date}>{formattedDate}</time>
               </>
             )}
-            {readTime && <> ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ'Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã...Â¡ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {readTime}</>}
+            {readTime && <> ÃƒÆ'Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã‚¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒ…Ã‚¡ÃƒÆ'Ã†'Ãƒ¢Ã¢â€š¬Ã...¡ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚· {readTime}</>}
             {category && (
               <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
                 {category}
@@ -201,7 +201,7 @@ export default function BlogPost({ post }: Props) {
 
           <div className="mt-12">
             <a href="#comments" className="luxury-link text-sm">
-              Join the discussion ÃƒÆ'Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ'Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ'Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã...Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ'Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ'Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã...Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ'Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã...â€œ
+              Join the discussion ÃƒÆ'Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ'Ã¢â‚¬Å¡Ãƒâ€šÃ‚¢ÃƒÆ'Ã†'Ãƒâ€šÃ‚¢ÃƒÆ'Ã‚¢Ãƒ¢Ã¢â€š¬Ã...¡Ãƒâ€šÃ‚¬ÃƒÆ'Ã†'Ãƒâ€šÃ‚¢ÃƒÆ'Ã‚¢Ãƒ¢Ã¢â€š¬Ã...¡Ãƒâ€šÃ‚¬ÃƒÆ'Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã..."
             </a>
           </div>
 

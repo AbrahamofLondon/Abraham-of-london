@@ -11,17 +11,17 @@ const FIXES = [
   [/\s*baseColor="transparent"\s*/g, ""],
 
   // 2) Unicode fixes commonly seen after bad encoding passes
-  [/â€”/g, "—"], // em dash
-  [/â€“/g, "–"], // en dash
-  [/â€™/g, "'"], // right single quote
-  [/â€˜/g, "'"], // left single quote
-  [/â€œ/g, '"'], // left double quote
+  [/—/g, "—"], // em dash
+  [/–/g, "–"], // en dash
+  [/'/g, "'"], // right single quote
+  [/'/g, "'"], // left single quote
+  [/"/g, '"'], // left double quote
   [/â€\x9d/g, '"'], // right double quote (guarded)
   [/â€\x9D/g, '"'], // alt right double quote
-  [/â€/g, '"'],    // right double quote (explicit)
-  [/Â©/g, "©"],     // copyright
-  [/â€¢/g, "•"],    // bullet
-  [/â€¦/g, "…"],    // ellipsis
+  [/"/g, '"'],    // right double quote (explicit)
+  [/©/g, "©"],     // copyright
+  [/•/g, "•"],    // bullet
+  [/…/g, "…"],    // ellipsis
 ];
 
 let filesProcessed = 0;

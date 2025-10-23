@@ -1,266 +1,372 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
-import getPort from "get-port";
+/**
+ * Abraham of London – PDF Renderer (World-Class Quality)
+ * ---------------------------------------------------------
+ * Goals:
+ * - Generate PDFs from MDX content in content/downloads.
+ * - Use standard YAML parser (gray-matter) for robust front-matter handling.
+ * - Apply professional-grade print settings (margins, scale, headers/footers).
+ * - Validate front-matter and assets (e.g., coverImage).
+ *
+ * Usage:
+ * node scripts/render-pdfs.mjs [--base=http://localhost:5555] [--out=public/downloads] [--dry=false] [--strict=false]
+ * [--report=scripts/_reports/pdf-report.json]
+ */
+import puppeteer from "puppeteer";
+import fs from "node:fs/promises";
 import path from "node:path";
-import fs from "node:fs";
+import { URL } from "node:url";
+import matter from "gray-matter"; // Using a proper YAML parser
+import { spawnSync } from "node:child_process";
 
-const isWin = process.platform === "win32";
-const npx = isWin ? "npx.cmd" : "npx";
-const nodeBin = process.execPath;
-const root = process.cwd();
-const outDir = "scripts/_reports";
-fs.mkdirSync(outDir, { recursive: true });
+const args = Object.fromEntries(
+  process.argv.slice(2).map((s) => {
+    const [k, v] = s.replace(/^-+/, "").split("=");
+    return [k, v === undefined ? true : v];
+  })
+);
+const DRY = String(args.dry ?? "false").toLowerCase() === "true";
+const STRICT = String(args.strict ?? "false").toLowerCase() === "true";
+const BASE_URL = args.base ?? "http://localhost:5555";
+const OUT_DIR = path.resolve(args.out ?? "public/downloads");
+const REPORT_PATH = args.report || "scripts/_reports/pdf-report.json";
+const ROOT = process.cwd();
+const CONTENT_DIR = path.join(ROOT, "content/downloads");
+const PUBLIC_ASSETS = path.join(ROOT, "public/assets/images");
+const norm = (p) => p.replaceAll("\\", "/");
 
-function run(cmd, args, opts = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
-    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
-  });
+/* ───────────────────── Report Class ───────────────────── */
+
+class Report {
+  constructor() {
+    this.data = {
+      startedAt: new Date().toISOString(),
+      dryRun: DRY,
+      strict: STRICT,
+      baseUrl: BASE_URL,
+      outDir: norm(OUT_DIR),
+      pagesProcessed: 0,
+      pagesGenerated: 0,
+      errors: [],
+      missingAssets: [],
+      invalidFrontMatter: [],
+      brandFrameUsage: [],
+      notes: [],
+      endedAt: null,
+    };
+  }
+  record(key, value) {
+    if (Array.isArray(this.data[key])) this.data[key].push(value);
+    else this.data[key] = value;
+  }
+  increment(key) {
+    this.data[key]++;
+  }
+  finalize() {
+    this.data.endedAt = new Date().toISOString();
+  }
+  get() {
+    try {
+      return JSON.parse(JSON.stringify(this.data));
+    } catch {
+      return { ...this.data, errors: [], notes: [] };
+    }
+  }
 }
 
-(async function main() {
-  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
-  const BASE_URL = `http://localhost:${PORT}`;
+const report = new Report();
 
-  // 0) Global manager (cleaner + link/asset checks + fallback creation)
-  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
+/* ───────────────────── Utilities ──────────────────────── */
 
-  // 1) Build
-  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
-  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
-  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
-
-  // 2) Start server (prod) on free port
-  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
-    stdio: "inherit",
-    env: { ...process.env, PORT, BASE_URL },
-  });
-
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  // simple readiness wait
-  await wait(2500);
-
-  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
-  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
-  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
-  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
-
-  // 4) Crawl important routes + check links (internal 200) + basic a11y
-  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
-    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
-    "--output", path.join(outDir, "link-report.json")]);
-
-  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
-  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
-
-  // 5) Stop server
-  server.kill("SIGINT");
-
-  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
-})().catch((err) => {
-  console.error("\n❌ Orchestration failed:", err.message);
-  process.exit(1);
-});#!/usr/bin/env node
-import { spawn } from "node:child_process";
-import getPort from "get-port";
-import path from "node:path";
-import fs from "node:fs";
-
-const isWin = process.platform === "win32";
-const npx = isWin ? "npx.cmd" : "npx";
-const nodeBin = process.execPath;
-const root = process.cwd();
-const outDir = "scripts/_reports";
-fs.mkdirSync(outDir, { recursive: true });
-
-function run(cmd, args, opts = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
-    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
-  });
+async function exists(p) {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-(async function main() {
-  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
-  const BASE_URL = `http://localhost:${PORT}`;
-
-  // 0) Global manager (cleaner + link/asset checks + fallback creation)
-  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
-
-  // 1) Build
-  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
-  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
-  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
-
-  // 2) Start server (prod) on free port
-  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
-    stdio: "inherit",
-    env: { ...process.env, PORT, BASE_URL },
-  });
-
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  // simple readiness wait
-  await wait(2500);
-
-  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
-  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
-  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
-  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
-
-  // 4) Crawl important routes + check links (internal 200) + basic a11y
-  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
-    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
-    "--output", path.join(outDir, "link-report.json")]);
-
-  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
-  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
-
-  // 5) Stop server
-  server.kill("SIGINT");
-
-  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
-})().catch((err) => {
-  console.error("\n❌ Orchestration failed:", err.message);
-  process.exit(1);
-});wnloads, "--fix", "--rename"], { env: envPlus() });
-  }
-
-  // 7) Mirror to secondary (revertable)
-  console.log(`[orchestrate] Mirroring PDFs to ${rel(MIRROR_DIR)} (Dry Run: ${DRY_RUN})...`);
-  const mirrorOps = await mirror(OUT_DIR, MIRROR_DIR, { dry: DRY_RUN });
-  
-  // 8) Write manifest
-  await fs.writeFile(
-    MANIFEST,
-    JSON.stringify(
-      {
-        createdAt: new Date().toISOString(),
-        system: os.platform(),
-        base,
-        outDir: OUT_DIR,
-        mirrorDir: MIRROR_DIR,
-        dryRun: DRY_RUN,
-        pdfOnCi: PDF_ON_CI,
-        routes,
-        mirrorOps,
-      },
-      null,
-      2
-    )
-  );
-
-  // 9) Stop server and summarize
-  await stop(server);
-  console.log("\n──────── Orchestrate summary ────────");
-  console.log(`Base     : ${base}`);
-  console.log(`Downloads: ${rel(OUT_DIR)}`);
-  console.log(`Mirror   : ${rel(MIRROR_DIR)} (${mirrorOps.copied.length} files ${DRY_RUN ? "simulated" : "copied"})`);
-  console.log(`Manifest : ${rel(MANIFEST)}`);
-  console.log(`Dry-run  : ${DRY_RUN ? "YES" : "NO"}`);
-  console.log("Done.");
-
-})().catch(async (e) => {
-  console.error("\n[orchestrate] FATAL:", e);
-  process.exit(1);
-});
-
-// ───────────────────────────────────────────────────────────
-// Helpers
-// ───────────────────────────────────────────────────────────
-function getArg(k, d) { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i+1] : d; }
-function getBool(k, d) {
-  if (!process.argv.includes(k)) return d;
-  const v = getArg(k, "");
-  if (v === "" || v === undefined) return true;
-  return ["1","true","yes","on"].includes(String(v).toLowerCase());
-}
-function envPlus(extra = {}) { return Object.fromEntries(Object.entries({ ...process.env, ...extra }).filter(([,v]) => v !== undefined)); }
-function exists(p) { return fssync.existsSync(p); }
-function rel(p) { return path.relative(ROOT, p); }
-async function ensureDir(d) { await fs.mkdir(d, { recursive: true }); }
-
-async function run(cmd, args, { env, cwd = ROOT, ignoreFail = false } = {}) {
-  return new Promise((resolve, reject) => {
-    const ps = spawn(cmd, args, { cwd, env, stdio: "inherit", shell: process.platform === "win32" });
-    ps.on("exit", (code) => (code === 0 || ignoreFail ? resolve(code) : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
-    ps.on("error", reject);
-  });
+async function write(p, content) {
+  if (DRY) return;
+  await fs.mkdir(path.dirname(p), { recursive: true });
+  await fs.writeFile(p, content, "utf8");
 }
 
-async function pickPort(start = 5555) {
-  for (let p = start; p < start + 100; p++) if (await isFree(p)) return p;
-  return start;
+function kebab(s) {
+  return s
+    .replace(/\.[^.]+$/, "")
+    .replace(/[_\s]+/g, "-")
+    .replace(/[^a-zA-Z0-9-]/g, "")
+    .replace(/-{2,}/g, "-")
+    .toLowerCase();
 }
-async function isFree(port) {
-  const net = await import("node:net"); // Dynamic import is safe in this async function
-  return new Promise((res) => {
-    const srv = net.default.createServer().once("error", () => res(false)).once("listening", () => srv.close(() => res(true)));
-    srv.listen(port, "0.0.0.0");
-  });
+
+async function validateAsset(assetPath) {
+  const absPath = path.join(ROOT, "public", assetPath);
+  if (!(await exists(absPath))) {
+    report.record("missingAssets", norm(assetPath));
+    return false;
+  }
+  return true;
 }
-async function startNext(port) {
-  console.log(`[orchestrate] Starting Next on :${port}…`);
-  const ps = spawn("npm", ["run", "print:serve", "--", "-p", String(port)], {
-    cwd: ROOT, env: envPlus(), stdio: "inherit", shell: process.platform === "win32",
-  });
-  await sleep(1200);
-  return ps;
+
+/* ───────────────── Front-Matter & Page Coordination ───── */
+
+// REMOVED: extractFM and parseFM (replaced by gray-matter)
+
+async function ensureDownloadPage() {
+  const pagePath = path.join(ROOT, "pages/downloads/[slug].tsx");
+  if (!(await exists(pagePath))) {
+    // NOTE: Added 'matter' import for completeness, though it's likely installed.
+    const pageContent = `
+import { GetStaticPaths, GetStaticProps } from "next";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import matter from "gray-matter";
+import path from "path";
+import fs from "fs";
+import Head from "next/head";
+
+// World-class PDF pages must not be indexable by search engines
+// and must include proper PDF/Print styling hooks.
+export default function DownloadPage({ source, frontMatter }) {
+  const { title, pdfPath, coverImage, description } = frontMatter;
+  return (
+    <>
+      <Head>
+        <title>{title} | Abraham of London</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="description" content={description || title} />
+        {/* Print Stylesheet Hook */}
+        <style dangerouslySetInnerHTML={{ __html: \`
+          @page { size: A4; margin: 20mm; }
+          .pdf-container { 
+            font-family: serif; 
+            color: #000; 
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            page-break-after: auto;
+          }
+          .pdf-container h1, .pdf-container h2, .pdf-container h3 {
+            page-break-after: avoid;
+          }
+          .pdf-container img {
+            max-width: 100%;
+            height: auto;
+          }
+          .no-print { display: none !important; }
+        \`}} />
+      </Head>
+      <div id="pdf-container" className="pdf-container no-print">
+        {/* This content is only for Puppeteer/Print view */}
+        <MDXRemote {...source} />
+      </div>
+    </>
+  );
 }
-async function stop(ps) {
-  if (!ps || ps.killed) return;
-  console.log("[orchestrate] Stopping Next…");
-  return new Promise((resolve) => {
-    ps.on("exit", resolve);
-    if (process.platform === "win32") spawn("taskkill", ["/pid", String(ps.pid), "/T", "/F"], { stdio: "ignore" }).on("exit", resolve);
-    else { ps.kill("SIGTERM"); setTimeout(() => ps.kill("SIGKILL"), 3000); }
-  });
+
+// ... (getStaticPaths and getStaticProps remain the same as they are standard)
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const files = fs.readdirSync(path.join(process.cwd(), "content/downloads"));
+  const paths = files
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => ({ params: { slug: f.replace(/\\.mdx$/, "") } }));
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const filePath = path.join(process.cwd(), "content/downloads", \`\${params.slug}.mdx\`);
+  const { content, data } = matter(fs.readFileSync(filePath, "utf8"));
+  const source = await serialize(content, { scope: data });
+  return { props: { source, frontMatter: data } };
+};
+`;
+    await write(pagePath, pageContent);
+    report.record("notes", `Created dynamic download page: ${norm(pagePath)}`);
+  }
 }
-async function waitFor(url, timeout = 20000) {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    try { const r = await fetch(url, { redirect: "manual" }); if (r.ok || r.status === 200) return true; } catch {}
-    await sleep(500);
-  }
-  return false;
+
+/* ───────────────── PDF Rendering ──────────────────────── */
+
+async function renderPDF(browser, url, outPath, frontMatter) {
+  const page = await browser.newPage();
+  try {
+    await page.goto(url, { waitUntil: "networkidle0", timeout: 45000 }); // Increased timeout
+    await page.waitForSelector("#pdf-container", { timeout: 15000 }); // Wait for the specific container
+
+    // Apply high-quality print settings
+    await page.emulateMediaType("print");
+
+    // Optional: Add a simple header/footer for world-class branding
+    const headerTemplate = `<div style="font-size: 8pt; width: 100%; text-align: right; padding-right: 20mm;">${frontMatter.title}</div>`;
+    const footerTemplate = `<div style="font-size: 8pt; width: 100%; text-align: center; border-top: 1px solid #ccc;"><span class="pageNumber"></span> / <span class="totalPages"></span> | Abraham of London</div>`;
+
+    await page.pdf({
+      path: DRY ? undefined : outPath,
+      format: "A4",
+      margin: {
+        top: "25mm", // More space for header
+        right: "20mm",
+        bottom: "25mm", // More space for footer
+        left: "20mm",
+      },
+      scale: 1, // Ensures perfect scale (1 is default)
+      printBackground: true,
+      displayHeaderFooter: true,
+      headerTemplate,
+      footerTemplate,
+    });
+    report.increment("pagesGenerated");
+    return { status: "success" };
+  } catch (e) {
+    report.record("errors", { url, outPath: norm(outPath), error: e.message, slug: frontMatter.slug });
+    return { status: "failed", error: e.message };
+  } finally {
+    await page.close();
+  }
 }
-async function determinePrintRoutes(base) {
-  if (exists(SCRIPTS.probe)) {
-    try {
-      const { pathToFileURL } = await import("node:url");
-      const mod = await import(pathToFileURL(SCRIPTS.probe).href);
-      if (typeof mod.probeRoutes === "function") {
-        const data = await mod.probeRoutes(base);
-        return {
-          routes: data.routes?.length ? data.routes : FALLBACK_ROUTES,
-          fileMap: { ...FALLBACK_FILEMAP, ...(data.fileMap || {}) },
-        };
-      }
-    } catch (e) { console.warn("[orchestrate] probe failed → fallback.", e?.message || e); }
-  }
-  return { routes: FALLBACK_ROUTES, fileMap: FALLBACK_FILEMAP };
+
+/* ───────────────── Check BrandFrame Usage ─────────────── */
+
+async function checkBrandFrame(filePath, content) {
+  const matches = content.match(/<BrandFrame\b[^>]*>/g);
+  if (matches) {
+    report.record("brandFrameUsage", { file: norm(filePath), brandFrameCount: matches.length });
+  }
 }
-async function mirror(fromDir, toDir, { dry = true } = {}) {
-  if (!exists(fromDir)) return { copied: [], skipped: [], notes: ["source missing"] };
-  await fs.mkdir(toDir, { recursive: true });
-  const entries = await fs.readdir(fromDir);
-  const copied = [], skipped = [];
-  for (const f of entries) {
-    if (!/\.pdf$/i.test(f)) continue;
-    const src = path.join(fromDir, f);
-    const dst = path.join(toDir, f);
-    // Check if destination exists AND is newer than source
-    const needs = !(exists(dst) && fssync.statSync(dst).mtimeMs >= fssync.statSync(src).mtimeMs);
-    if (!needs) { skipped.push({ src, dst, reason: "up-to-date" }); continue; }
-    if (!dry) await fs.copyFile(src, dst);
-    copied.push({ src, dst, dryRun: dry });
-  }
-  return { copied, skipped };
-}
-async function revertFromManifest(file) {
-  if (!exists(file)) { console.error(`[orchestrate] Manifest not found: ${file}`); process.exit(1); }
-  const data = JSON.parse(await fs.readFile(file, "utf8"));
-  const ops = data?.mirrorOps?.copied || [];
-  let removed = 0;
-  for (const op of ops) { try { if (op.dst && exists(op.dst)) { await fs.unlink(op.dst); removed++; } } catch {} }
-  console.log(`[orchestrate] Reverted ${removed} files from ${rel(file)}`);
-}
+
+/* ───────────────── Main Rendering Logic ──────────────── */
+
+(async () => {
+  console.log(`\n🚀 PDF Renderer (dry=${DRY}, strict=${STRICT})`);
+  console.log(`    base=${BASE_URL}, out=${norm(OUT_DIR)}`);
+  console.log(`    report=${norm(REPORT_PATH)}`);
+
+  await fs.mkdir(path.dirname(REPORT_PATH), { recursive: true });
+  await fs.mkdir(OUT_DIR, { recursive: true });
+
+  // Validate package.json (kept this check for environment robustness)
+  try {
+    await fs.readFile(path.join(ROOT, "package.json")).then(JSON.parse);
+  } catch (e) {
+    report.record("errors", { task: "validate-package-json", error: `Invalid package.json: ${e.message}` });
+    if (STRICT) throw new Error(`Invalid package.json: ${e.message}`);
+  }
+
+  // Ensure dynamic download page (with enhanced print/SEO settings)
+  await ensureDownloadPage();
+
+  // Collect MDX files
+  const files = (await fs.readdir(CONTENT_DIR))
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => path.join(CONTENT_DIR, f));
+
+  if (!files.length) {
+    report.record("errors", { task: "collect-files", error: "No MDX files found in content/downloads" });
+    if (STRICT) throw new Error("No MDX files found in content/downloads");
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox'] }); // Added safety args
+
+    for (const filePath of files) {
+      let fmContent = null;
+      try {
+        report.increment("pagesProcessed");
+        fmContent = await fs.readFile(filePath, "utf8");
+        const { content, data: frontMatter } = matter(fmContent);
+
+        // 1. Check for BrandFrame usage
+        await checkBrandFrame(filePath, content);
+
+        // 2. Validate and Auto-Fix Front-Matter
+        const requiredFields = ["title", "slug", "pdfPath"];
+        const missingFields = requiredFields.filter((k) => !frontMatter[k]);
+        
+        if (missingFields.length) {
+          report.record("invalidFrontMatter", { file: norm(filePath), missing: missingFields });
+          if (STRICT) continue;
+
+          // --- Auto-Fix Logic (Enhanced to maintain proper YAML structure) ---
+          let title = frontMatter.title;
+          let slug = frontMatter.slug;
+          let pdfPath = frontMatter.pdfPath;
+          
+          if (!slug) {
+            slug = kebab(path.basename(filePath));
+            report.record("notes", `Auto-slug: ${slug} in ${norm(filePath)}`);
+          }
+          if (!title) {
+            title = slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+            report.record("notes", `Auto-title: ${title} in ${norm(filePath)}`);
+          }
+          if (!pdfPath) {
+            pdfPath = `/downloads/${slug}.pdf`;
+            report.record("notes", `Auto-pdfPath: ${pdfPath} in ${norm(filePath)}`);
+          }
+          
+          const newFrontMatter = matter.stringify(content, { ...frontMatter, title, slug, pdfPath });
+          
+          if (!DRY) {
+            await write(filePath, newFrontMatter);
+            report.record("notes", `Fixed and wrote front-matter for ${norm(filePath)}`);
+          }
+        }
+
+        // 3. Asset Validation
+        if (frontMatter.coverImage && !(await validateAsset(frontMatter.coverImage))) {
+          if (STRICT) continue;
+        }
+
+        // 4. PDF Rendering
+        const url = new URL(`/downloads/${frontMatter.slug}`, BASE_URL).toString();
+        const outPath = path.join(OUT_DIR, `${frontMatter.slug}.pdf`);
+        const result = await renderPDF(browser, url, outPath, frontMatter);
+        
+        if (result.status === "success") {
+          report.record("notes", `Generated PDF: ${norm(outPath)} for ${url}`);
+        } else if (STRICT) {
+          throw new Error(`PDF generation failed for ${frontMatter.slug}: ${result.error}`);
+        }
+
+      } catch (e) {
+        report.record("errors", { file: norm(filePath), error: e.message });
+        if (STRICT) throw e;
+      }
+    }
+
+  } catch (fatalError) {
+    report.record("errors", { task: "FATAL", error: fatalError.message });
+    console.error(`\n❌ FATAL ERROR in PDF generation: ${fatalError.message}`);
+    // If browser exists, ensure it is closed on fatal error
+    if (browser) await browser.close();
+    
+    report.finalize();
+    await write(REPORT_PATH, JSON.stringify(report.get(), null, 2));
+    process.exit(1);
+  } finally {
+    // Ensure browser closes even if the loop completes
+    if (browser) await browser.close();
+  }
+
+
+  // Final Report Generation
+  report.finalize();
+  await write(REPORT_PATH, JSON.stringify(report.get(), null, 2));
+  console.log(`\n✅ PDF rendering completed. See report: ${norm(REPORT_PATH)}\n`);
+  console.log(`Pages processed: ${report.data.pagesProcessed}`);
+  console.log(`Pages generated: ${report.data.pagesGenerated}`);
+  console.log(`Errors: ${report.data.errors.length}`);
+  console.log(`Missing assets: ${report.data.missingAssets.length}`);
+  console.log(`Invalid front-matter: ${report.data.invalidFrontMatter.length}`);
+
+  if (STRICT && (report.data.errors.length || report.data.invalidFrontMatter.length)) {
+    console.error("❌ Strict mode: failing due to errors.");
+    process.exit(1);
+  }
+  process.exit(0);
+})();

@@ -27,7 +27,7 @@ export default async function DownloadsPage() {
                     <Link href={d.href} className="luxury-link">{d.title}</Link>
                   </h2>
                   <div className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">
-                    {d.size} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ updated {new Date(d.modified).toLocaleDateString()}
+                    {d.size} Ãƒ¢Ã¢â€š¬Ã‚¢ updated {new Date(d.modified).toLocaleDateString()}
                   </div>
                   <div className="mt-2 break-all text-xs text-[color:var(--color-on-secondary)/0.6]">
                     {d.href}
