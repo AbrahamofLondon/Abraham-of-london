@@ -6,12 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 
-/** ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬
+/** ──────────────────────────────────────────────────────────────────────────
  * EventCard - UPGRADED
  * - Encapsulated Tag/Resource Pills
  * - Enhanced Accessibility for Resources
  * - Consolidated logic and improved date handling
- * ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ÃƒÂ¢"Ã¢â€šÂ¬ */
+ * ────────────────────────────────────────────────────────────────────────── */
 
 // --- Type Definitions ---
 type ResItem = { href: string; label: string };
@@ -95,17 +95,14 @@ function aspectClass(key?: Overrides["heroAspect"]) {
 const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: boolean; href?: string }) => {
   const isResource = !!href;
 
-  let icon = "";
-  if (isResource) {
-    if (href?.includes(".pdf")) {
-      icon = "ÃƒÂ°Ã…Â¸"Ã¢â‚¬Å¾ "; // Document
+  if (href?.includes(".pdf")) {
+      icon = "D: "; // Document
     } else if (href?.includes("article") || href?.includes("read")) {
-      icon = "ÃƒÂ°Ã…Â¸"Ã…Â¡ "; // Reading material
+      icon = "R: "; // Reading material
     } else {
-      icon = "ÃƒÂ°Ã…Â¸"— "; // Generic link
+      icon = "L: "; // Generic link
     }
-  }
-
+    
   const baseClasses = "rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-200";
   const content = (
     <span className={clsx(
@@ -166,7 +163,7 @@ export default function EventCard({
   const isValidDate = dt && !Number.isNaN(+dt);
 
   const dateLabel = isValidDate
-    // ÃƒÂ¢Ã…"… UPGRADE: Used `Intl.DateTimeFormat` with a consistent options object
+    // ✅ UPGRADE: Used `Intl.DateTimeFormat` with a consistent options object
     ? new Intl.DateTimeFormat("en-US", {
         day: "numeric",
         month: "short",
@@ -202,6 +199,85 @@ export default function EventCard({
   );
 
   // Fallback initials for the image container if all sources fail
+  const initials = React.useMemo(() => {
+    const words = String(title || "").trim().split(/\s+/).slice(0, 3);
+    return words.map((w) => w[0]?.toUpperCase() || "").join("") || "E•V";
+  }, [title]);
+
+  const detailHref = `/events/${encodeURIComponent(slug)}`;
+  // Consolidated Tailwind opacity variables
+  const textSecondaryLight = "text-[color:var(--color-on-secondary)]/[0.7]";
+  const textSecondaryNormal = "text-[color:var(--color-on-secondary)]/[0.85]";
+
+  return (
+    <article className="group rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
+      <Link href={detailHref} prefetch={false} className="block" aria-label={`View event details for: ${title}`}>
+        {/* Hero image container */}
+        <div className={frameClasses}>
+          {currentHeroSrc ? (
+            <Image
+              src={currentHeroSrc}
+              alt={title ? `${title} event illustration` : "Event illustration"}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className={imageClasses}
+              onError={onHeroError}
+              priority={false}
+              placeholder="blur" // Add placeholder for better loading UX
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0EQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+            />
+          ) : (
+            // Graceful placeholder when all image candidates fail
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[color:var(--color-primary)]/[0.1] to-[color:var(--color-on-secondary)]/[0.1]">
+              <span className={clsx("select-none font-serif text-4xl font-semibold", textSecondaryLight)}>
+                {initials}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-5">
+          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
+
+          {/* Date and Location */}
+          <div className={clsx("mt-1 text-sm", textSecondaryLight)}>
+            <span>{dateLabel}</span>
+            {location && <span className="ml-2">• {location}</span>}
+          </div>
+
+          {/* Description */}
+          {description && <p className={clsx("mt-3 text-sm line-clamp-3", textSecondaryNormal)}>{description}</p>}
+
+          {/* Resource pills (UPGRADE: uses TagPill component) */}
+          {allPills.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {allPills.map((item, index) => (
+                <TagPill
+                  key={`${item.href}-${index}`}
+                  label={item.label}
+                  isLink={true}
+                  href={item.href}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Tags (UPGRADE: uses TagPill component) */}
+          {Array.isArray(tags) && tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1">
+              {tags.slice(0, 3).map((t, i) => (
+                <TagPill
+                  key={`${t}-${i}`}
+                  label={t}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </Link>
+    </article>
+  );
+}ontainer if all sources fail
   const initials = React.useMemo(() => {
     const words = String(title || "").trim().split(/\s+/).slice(0, 3);
     return words.map((w) => w[0]?.toUpperCase() || "").join("") || "E•V";
