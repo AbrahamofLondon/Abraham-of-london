@@ -29,7 +29,7 @@ function smartExcerpt(source: string, max = 180) {
   if (plain.length <= max) return plain;
   const cut = plain.slice(0, max + 1);
   const at = cut.lastIndexOf(" ");
-  return (at > 80 ? cut.slice(0, at) : plain.slice(0, max)).trim() + "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
+  return (at > 80 ? cut.slice(0, at) : plain.slice(0, max)).trim() + "Ãƒ¢Ã¢â€š¬Ã‚¦";
 }
 
 function isLocalPath(src?: unknown): src is string {

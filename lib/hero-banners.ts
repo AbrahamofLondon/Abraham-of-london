@@ -51,7 +51,7 @@ export function getActiveBanner(): BannerConfig {
       { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
       { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
     ],
-    // ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ¢â‚¬Â¡ shift view so the *left* of the frame is prioritized (crops the right edge)
+    // Ãƒ°Ã…¸Ã¢â‚¬ËœÃ¢â‚¬¡ shift view so the *left* of the frame is prioritized (crops the right edge)
     mobileObjectPositionClass: "object-left md:object-[30%_center] lg:object-[40%_center]",
     heightClassName: "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]",
   } as const;

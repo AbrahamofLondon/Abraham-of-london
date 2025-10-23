@@ -39,7 +39,7 @@ export const siteConfig: SiteConfig = {
   title: "Abraham of London",
   author: "Abraham of London",
   description:
-    "Official site of Abraham of London ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â author, strategist, and fatherhood advocate.",
+    "Official site of Abraham of London Ãƒ¢Ã¢â€š¬Ã¢â‚¬ author, strategist, and fatherhood advocate.",
   siteUrl: SITE_ORIGIN,
 
   socialLinks: [

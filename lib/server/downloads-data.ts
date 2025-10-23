@@ -91,7 +91,7 @@ export function getDownloadSlugs(): string[] {
 
 /**
  * Read a single download by slug and return a partial object containing requested fields.
- * - Never throws on missing files; returns a minimal ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œNot FoundÃƒÂ¢Ã¢â€šÂ¬Ã‚Â entry instead.
+ * - Never throws on missing files; returns a minimal Ãƒ¢Ã¢â€š¬Ã…"Not FoundÃƒ¢Ã¢â€š¬Ã‚ entry instead.
  * - Normalizes strings (trim), asset paths, and avoids `undefined` in fields (uses null instead).
  */
 export function getDownloadBySlug(
@@ -103,7 +103,7 @@ export function getDownloadBySlug(
   const fullPath = resolveDownloadPath(real);
 
   if (!fullPath) {
-    // Safe fallback: wonÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢t break build if a download MD is missing
+    // Safe fallback: wonÃƒ¢Ã¢â€š¬Ã¢â€ž¢t break build if a download MD is missing
     const base: DownloadMeta = {
       slug: real,
       title: "Download Not Found",

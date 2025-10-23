@@ -7,7 +7,7 @@ type Body = {
   message?: string;
 };
 
-// Allow CORS from your site (set ALLOWED_ORIGIN in Netlify ÃƒÂ¢Ã¢â‚¬Ã¢â‚¬â„¢ Env vars if needed)
+// Allow CORS from your site (set ALLOWED_ORIGIN in Netlify Ãƒ¢Ã¢â‚¬Ã¢â‚¬â„¢ Env vars if needed)
 const ORIGIN =
   process.env.ALLOWED_ORIGIN ??
   "https://www.abrahamoflondon.org";
@@ -82,7 +82,7 @@ async function sendViaResend({ name, email, message }: Required<Body>) {
     to: MAIL_TO,
     subject,
     html,
-    replyTo: email, // ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ correct key for Resend
+    replyTo: email, // Ãƒ¢Ã…"Ã¢â‚¬¦ correct key for Resend
   });
 
   if (error) throw new Error(error.message || "Resend error");

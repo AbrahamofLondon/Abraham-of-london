@@ -20,9 +20,9 @@ const IGNORE_DIRS = new Set(["node_modules", ".next", ".git", ".turbo", "dist"])
 /* GLOBAL FIXES */
 const INVIS = /[\u00A0\u200B\uFEFF\u2009]/g; // NBSP, ZWSP, BOM, thin space
 const CP1252 = [
-  [/â€”/g, "—"], [/â€“/g, "–"], [/â€™/g, "'"], [/â€˜/g, "'"], [/â€œ/g, '"'],
-  [/â€\x9d/g, '"'], [/â€/g, '"'], [/Â©/g, "©"], [/â€¢/g, "•"], [/â€¦/g, "…"],
-  [/Â\s/g, ""],
+  [/—/g, "—"], [/–/g, "–"], [/'/g, "'"], [/'/g, "'"], [/"/g, '"'],
+  [/â€\x9d/g, '"'], [/"/g, '"'], [/©/g, "©"], [/•/g, "•"], [/…/g, "…"],
+  [/\s/g, ""],
 ];
 const GLOBAL_TEXT_FIXES = [[INVIS, ""], ...CP1252];
 
