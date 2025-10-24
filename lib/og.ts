@@ -5,7 +5,8 @@ const LOCAL_FALLBACK = "/assets/images/blog/default-blog-cover.jpg";
 const DEFAULT_FALLBACK = siteConfig.ogImage || LOCAL_FALLBACK;
 
 function truncate(s: string, max = 120) {
-  return s.length > max ? `${s.slice(0, max - 1)}Ãƒ¢Ã¢â€š¬Ã‚¦` : s;
+  // FIX: Added closing backtick and correctly added '...' to end of string
+  return s.length > max ? `${s.slice(0, max - 3)}...` : s;
 }
 
 /**

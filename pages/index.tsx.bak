@@ -70,7 +70,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
     // FIX APPLIED HERE: Ensure raw is an object by using the nullish coalescing operator (?? {})
     // This prevents the error if getActiveBanner() returns null or undefined.
     const raw = React.useMemo<BannerConfig>(() => (getActiveBanner() ?? {}) as unknown as BannerConfig, []);
-    
+
     const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
         poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
         videoSources:
@@ -118,7 +118,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
     const downloads = React.useMemo(
         () => [
             { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-            { href: "/downloads/leaders-cue-card",     title: "Leader’s Cue Card (A6, Two-Up)",     sub: "Pocket reference" },
+            { href: "/downloads/leaders-cue-card",  title: "Leader’s Cue Card (A6, Two-Up)",  sub: "Pocket reference" },
             { href: "/downloads/brotherhood-cue-card", title: "Brotherhood Cue Card" },
         ],
         []
@@ -133,7 +133,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 />
                 <meta property="og:type" content="website" />
                 {/* LCP Optimization: Add fetchpriority="high" to the primary image preload */}
-                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" /> 
+                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" />
                 {banner.videoSources?.map((s, i) => (
                     <link key={i} rel="preload" as="video" href={s.src} type={s.type} />
                 ))}
@@ -189,7 +189,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                                 slug={p.slug}
                                 title={p.title}
                                 // Props passed directly from safePosts, which already handles null/undefined
-                                date={p.date ?? undefined} 
+                                date={p.date ?? undefined}
                                 excerpt={p.excerpt ?? undefined}
                                 coverImage={p.coverImage ?? undefined}
                                 author={p.author ?? undefined}
@@ -337,13 +337,13 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             {/* Closing CTA */}
             <section className="relative isolate overflow-hidden bg-deepCharcoal">
                 <div className="absolute inset-0 -z-10">
-                    <Image 
-                        src="/assets/images/cta/cta-bg.jpg" 
-                        alt="" 
-                        fill 
-                        sizes="100vw" 
-                        quality={85} 
-                        className="object-cover opacity-20" 
+                    <Image
+                        src="/assets/images/cta/cta-bg.jpg"
+                        alt=""
+                        fill
+                        sizes="100vw"
+                        quality={85}
+                        className="object-cover opacity-20"
                         priority={false} // Since this is a closing CTA, set to false
                     />
                 </div>
@@ -392,7 +392,7 @@ export async function getStaticProps() {
     type MinimalEvent = { slug: string; title: string; date: string; location?: string; summary?: string; tags?: string[] };
     // Request the 'resources' field
     const rawEvents = await getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources"]);
-    
+
     // Map the raw events into a deduplicated structure, including resources
     const deduped = dedupeEventsByTitleAndDay(
         rawEvents
@@ -405,7 +405,7 @@ export async function getStaticProps() {
                 summary: e.summary ?? null,
                 tags: Array.isArray(e.tags) ? e.tags : null,
                 // Include the raw resources object here, which contains the array of links
-                resources: e.resources ?? null, 
+                resources: e.resources ?? null,
             }))
     );
 
@@ -436,11 +436,11 @@ export async function getStaticProps() {
     const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
         const baseForImage = String(e.slug).replace(/[–—].*$/, "");
         const heroImage = `/assets/images/events/${baseForImage}.jpg`;
-        
-        // e.resources now holds the array of ResourceLink objects (or null) because 
+
+        // e.resources now holds the array of ResourceLink objects (or null) because
         // it was included in the map inside the 'deduped' variable construction above.
         const resources = (e.resources ?? null) as EventResources | null;
-        
+
         const safeResources = resources ? {
             // Use nullish coalescing to convert any nested 'undefined' properties to 'null'
             downloads: resources.downloads ?? null,

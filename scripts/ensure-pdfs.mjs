@@ -62,18 +62,18 @@ async function startNext(port) {
     stdio: "inherit",
     env: process.env,
   });
-  
+
   // wait until server responds
   await new Promise((res, rej) => {
     const t = setTimeout(() => {
       child.kill("SIGTERM"); // Kill the child process on timeout
       rej(new Error("server start timeout"));
     }, 20000);
-    
+
     (function ping() {
-      http.get({ host: "localhost", port, path: "/" }, (response) => { 
-        clearTimeout(t); 
-        res(null); 
+      http.get({ host: "localhost", port, path: "/" }, (response) => {
+        clearTimeout(t);
+        res(null);
         response.resume(); // Consume the response data
       })
       .on("error", () => setTimeout(ping, 300));
@@ -89,7 +89,7 @@ async function renderPDF(base, route, outFile) {
   try {
     const page = await browser.newPage();
     // Allow more time for complex print layouts
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 90000 }); 
+    await page.goto(url, { waitUntil: "networkidle0", timeout: 90000 });
     await page.pdf({
       path: outFile,
       format: "A4",
@@ -111,13 +111,13 @@ async function main() {
   const port = await getPort({ port: 5555 });
   const base = `http://localhost:${port}`;
   const report = { created: [], upgraded: [], skipped: [], errors: [] };
-  
+
   if (!(await exists(OUT))) await fsp.mkdir(OUT, { recursive: true }); // Async mkdir
 
   // Collect all contentlayer documents once (FIXED: simplified data collection)
   const docs = [];
   const contentlayerFiles = await glob([`.contentlayer/**/*.json`], { cwd: ROOT, absolute: true });
-  
+
   for (const f of contentlayerFiles) {
     try {
       const raw = await fsp.readFile(f, "utf8");
@@ -139,7 +139,7 @@ async function main() {
       const nice = toTitleCaseUnderscore(title);
       // default filename (Title_Case_With_Underscores.pdf)
       const outFile = path.join(OUT, `${nice}.pdf`);
-      
+
       // Skip if file exists and size is reasonable (avoid regenerating large, complex PDFs)
       if ((await exists(outFile))) { // Use async exists
         try {
@@ -161,7 +161,7 @@ async function main() {
       } else if (PRINT_ROUTES[doc.type]) {
         route = PRINT_ROUTES[doc.type] + doc.slug;
       } else if (doc.type === "Download" && doc.pdfPath) {
-        // already a dedicated print path exists for downloads sometimes – normalize by removing .pdf
+        // already a dedicated print path exists for downloads sometimes - normalize by removing .pdf
         const bare = doc.pdfPath.replace(/^\/+/, "").replace(/\.pdf$/i, "");
         route = "/" + bare;
       }
@@ -175,7 +175,7 @@ async function main() {
         await renderPDF(base, route, outFile);
         const kb = await sizeKB(outFile); // Use async sizeKB
         if (kb < 40) throw new Error(`suspiciously small: ${kb}KB`);
-        
+
         const action = (await exists(outFile)) ? "upgraded" : "created";
         report[action].push({ slug: doc.slug, route, file: path.basename(outFile), sizeKB: kb });
       } catch (e) {

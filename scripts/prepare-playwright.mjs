@@ -4,7 +4,7 @@
 // - Only installs locally when you run `npm i` on your dev machine
 
 import { execSync } from "node:child_process";
-import os from "node:os";
+import os from "os";
 
 const isCI = !!process.env.CI || !!process.env.NETLIFY;
 const skip = process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === "1";

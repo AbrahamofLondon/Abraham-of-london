@@ -1,4 +1,4 @@
-import path from "node:path";
+import path from "path";
 import fsp from "node:fs/promises";
 import { constants } from "node:fs";
 import glob from "fast-glob";

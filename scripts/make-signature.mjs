@@ -19,7 +19,7 @@
 
 import fsp from 'node:fs/promises';
 import { constants } from 'node:fs';
-import path from 'node:path';
+import path from "path";
 import sharp from 'sharp';
 
 const argv = process.argv.slice(2);

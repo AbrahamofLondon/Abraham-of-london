@@ -1,172 +1,1271 @@
 {
-  "startedAt": "2025-10-23T00:50:56.204Z",
+  "startedAt": "2025-10-23T08:28:15.913Z",
   "dryRun": false,
   "applyFixes": true,
   "strict": false,
-  "filesScanned": 186,
-  "filesModified": 27,
+  "fixLineEndings": true,
+  "fixWhitespace": true,
+  "restoreFiles": true,
+  "removeContentlayer": true,
+  "filesScanned": 456,
+  "filesModified": 208,
   "codeFixed": [
-    "C:/Abraham-of-london/components/EmbossedBrandMark.tsx"
-  ],
-  "dataFixed": [
-    "C:/Abraham-of-london/content/strategy/events-blueprint.md",
-    "C:/Abraham-of-london/content/resources/brotherhood-emergency-call-tree.mdx",
-    "C:/Abraham-of-london/content/resources/brotherhood-leader-guide-4-weeks.mdx",
-    "C:/Abraham-of-london/content/resources/brotherhood-starter-kit.mdx",
-    "C:/Abraham-of-london/content/resources/conflict-resolution-24h.mdx",
-    "C:/Abraham-of-london/content/resources/family-budget-one-sheet.mdx",
-    "C:/Abraham-of-london/content/resources/fathers-in-family-court-practical-pack.mdx",
-    "C:/Abraham-of-london/content/resources/household-device-standards.mdx",
-    "C:/Abraham-of-london/content/resources/scripture-reading-starter-30-days.mdx",
-    "C:/Abraham-of-london/content/resources/weekly-review-one-pager.mdx",
-    "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
-    "C:/Abraham-of-london/content/downloads/brotherhood-covenant.mdx",
-    "C:/Abraham-of-london/content/downloads/communication-script-bpf.mdx",
-    "C:/Abraham-of-london/content/downloads/entrepreneur-operating-pack.mdx",
-    "C:/Abraham-of-london/content/downloads/entrepreneur-survival-checklist.mdx",
-    "C:/Abraham-of-london/content/downloads/family-altar-liturgy.mdx",
-    "C:/Abraham-of-london/content/downloads/leaders-cue-card-two-up.mdx",
-    "C:/Abraham-of-london/content/downloads/leadership-playbook.mdx",
-    "C:/Abraham-of-london/content/downloads/mentorship-starter-kit.mdx",
-    "C:/Abraham-of-london/content/downloads/principles-for-my-son-cue-card.mdx",
-    "C:/Abraham-of-london/content/downloads/principles-for-my-son.mdx",
-    "C:/Abraham-of-london/content/downloads/scripture-track-john14.mdx",
-    "C:/Abraham-of-london/content/downloads/standards-brief.mdx",
-    "C:/Abraham-of-london/content/downloads/weekly-operating-rhythm.mdx",
-    "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx"
-  ],
-  "jsonFixed": [
-    "C:/Abraham-of-london/package.json"
-  ],
-  "fmMissingFields": [
     {
-      "file": "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "pages/events/index.tsx",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/brotherhood-covenant.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "pages/books/index.tsx",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/communication-script-bpf.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/add-doctor-to-package.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/entrepreneur-operating-pack.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/alias-leaders-cue-card.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/entrepreneur-survival-checklist.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/audit-downloads.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/family-altar-liturgy.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/audit-site.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/leaders-cue-card-two-up.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/build-download-manifest.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/leadership-playbook.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/check-bom.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/mentorship-starter-kit.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/audit-images.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son-cue-card.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/check-json.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/brand-images.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/scripture-track-john14.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/check-mdx-for-html.js",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/standards-brief.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/check-merge-markers.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     },
     {
-      "file": "C:/Abraham-of-london/content/downloads/weekly-operating-rhythm.mdx",
-      "missing": [
-        "date",
-        "author",
-        "readTime",
-        "category"
+      "file": "scripts/convert-tailwind-slash-opacity.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/ensure-download-aliases.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/fix-missing-download-frontmatter.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/fix-images.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/ensure-pdfs.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/fix-unescaped-entities.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/fm-quick-fix.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/generate-covers.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/generate-download-stubs.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/generate-og.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/generate-placeholder-downloads.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/global_project_cleaner.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/global_project_manager.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/make-pdfs.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/make-signature.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/normalize-download-filenames.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/postcss-guard-dryrun.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/orchestrate.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/prepare-playwright.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/print-all.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/render-pdfs.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/probe-print-routes.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/print-manifest.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/repair-encoding.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/print-pdfs.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/run-validate-downloads.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/scaffold-download-sources.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/scan-and-fill-downloads.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/setup-husky.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/snapshot-assets.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/strip-bom-lf.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/strip-bom-package.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/validate-downloads.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/validate-post-images.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/covers/make-event-covers.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
+      ]
+    },
+    {
+      "file": "scripts/codemods/replace-jsonld-in-mdx.mjs",
+      "changes": [
+        "mojibake/contentlayer/eol"
       ]
     }
   ],
-  "linkErrors": [],
-  "notes": [],
-  "endedAt": "2025-10-23T00:50:56.463Z"
+  "dataFixed": [
+    {
+      "file": "pages/dynamic.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/410.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/brands.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/about.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/index.js.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/index.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/robots.txt.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/rss.xml.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/sitemap.xml.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/strategy/index.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/strategy/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/entrepreneur-operating-p.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/_app.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/resources/index.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/board-investor-one-pager-template.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/entrepreneur-survival-checklist.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/family-altar-liturgy.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/fathering-without-fear-teaser-mobile.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/fatherhood-guide.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/household-rhythm-starter.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/leadership-playbook.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/principles-for-my-son-cue-card.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/mentorship-starter-kit.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/scripture-track-john14.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/standards-brief.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/strategy/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/static/brotherhood-covenant.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/static/fathering-without-fear-teaser.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/static/principles-for-my-son.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/post/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/event/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/book/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/resource/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/a6/leaders-cue-card-two-up.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/a6/principles-for-my-son-cue-card-two-up.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/print/a6/brotherhood-cue-card-two-up.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/downloads/brotherhood-cue-card.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/downloads/[slug].tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/events/index.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/books/index.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/blog/[slug].txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/api/hello.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/api/hello.js.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/api/contact.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "pages/api/search-index.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/HighQImage.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/Header.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/LaunchSubscribe.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/makeContentPage.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/Layout.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/MDXContentRenderer.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/MdxComponents.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/PostProse.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/PrintMDXContent.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/ReadingProgress.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/SearchPalette.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/TeaserRequest.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/seo/BookJsonLd.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/print/BrandFrame.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/print/PrintMDXContent.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/cta-presets.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/ctas.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/Note.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/PullLine.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/Rule.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/mdx/Verse.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/layout/Header.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/homepage/HeroBanner.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/emails/WelcomeLaunchEmail.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/events/EventHero.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/events/EventResources.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/downloads/downloadsSafeDownloadLin.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/emails/TeaserEmail.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/_partials/authoring-rules.txt",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/downloads/DownloadCard.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/strategy/events-blueprint.md",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "components/downloads/DownloadsGrid.tsx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/_downloads-registry.md.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/strategy/events-blueprint.md.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-emergency-call-tree.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-leader-guide-4-weeks.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-starter-kit.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/conflict-resolution-24h.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-emergency-call-tree.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-leader-guide-4-weeks.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/family-budget-one-sheet.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/conflict-resolution-24h.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/brotherhood-starter-kit.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/fathers-in-family-court-practical-pack.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/family-budget-one-sheet.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/household-device-standards.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/scripture-reading-starter-30-days.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/fathers-in-family-court-practical-pack.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/household-device-standards.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/weekly-review-one-pager.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/scripture-reading-starter-30-days.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/resources/weekly-review-one-pager.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/board-update-onepager.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/brotherhood-covenant.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/events/founders-salon.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/communication-script-bpf.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/events/leadership-workshop.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/brotherhood-covenant.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/board-update-onepager.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/entrepreneur-operating-pack.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/entrepreneur-survival-checklist.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/family-altar-liturgy.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/communication-script-bpf.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/leaders-cue-card-two-up.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/entrepreneur-operating-pack.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/family-altar-liturgy.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/entrepreneur-survival-checklist.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/leadership-playbook.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/mentorship-starter-kit.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/leaders-cue-card-two-up.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/leadership-playbook.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/principles-for-my-son-cue-card.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/principles-for-my-son.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/mentorship-starter-kit.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/scripture-track-john14.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/principles-for-my-son.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/principles-for-my-son-cue-card.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/standards-brief.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/scripture-track-john14.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/weekly-operating-rhythm.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/standards-brief.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/weekly-operating-rhythm.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/downloads/[slug].mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/christianity-not-extremism.mdx",
+      "changes": [
+        "front-matter/mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/books/the-fiction-adaptation.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/books/fathering-without-fear.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/christianity-not-extremism.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/fathering-principles.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/fathering-without-fear.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/fathering-without-fear-teaser.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/in-my-fathers-house.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/kingdom-strategies-for-a-loving-legacy.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/leadership-begins-at-home.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/principles-for-my-son.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/out-of-context-truth.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/reclaiming-the-narrative.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/the-brotherhood-code.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/when-gods-sovereignty-collides-with-our-pain.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/when-the-system-breaks-you.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "content/blog/_lessons-from-noah.mdx.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/check-bom.mjs.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/check-env.ts.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/encode-banner.ps1",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/clean-mdx.ps1",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/fm-quick-fix.mjs.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/global_project_manager.mjs.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/global_project_cleaner.mjs.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/orchestrate.mjs.bak",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/pdfs/brand.css",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/pdfs/template.html",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/video/videoencode-hero.sh",
+      "changes": [
+        "mojibake/eol"
+      ]
+    },
+    {
+      "file": "scripts/data/downloads-manifest.json",
+      "changes": [
+        "mojibake/eol"
+      ]
+    }
+  ],
+  "jsonFixed": [
+    {
+      "file": "package.json",
+      "changes": [
+        "reformatted/mojibake/eol"
+      ]
+    }
+  ],
+  "fmMissingFields": [],
+  "notes": [
+    "repair-encoding.mjs exited with 134"
+  ],
+  "endedAt": "2025-10-23T08:28:53.297Z"
 }

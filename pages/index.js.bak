@@ -58,7 +58,7 @@ export default function Home() {
               >
                 Explore the Practice →
               </Link>
-              
+
               {/* Secondary Call to Action */}
               <Link
                 href="/contact"
@@ -69,7 +69,7 @@ export default function Home() {
               </Link>
             </div>
           </section>
-          
+
           {/* Placeholder for Ventures/Highlights (optional) */}
           <div className={styles.highlights}>
             <p>
@@ -78,7 +78,7 @@ export default function Home() {
           </div>
 
         </main>
-        
+
         {/* Simplified Footer */}
         <footer className={styles.footer}>
           <nav aria-label="Quick links">

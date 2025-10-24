@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-import fs from 'node:fs';
+import fs from "fs";
 import fsp from 'node:fs/promises';
-import path from 'node:path';
+import path from "path";
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
@@ -85,7 +85,7 @@ async function ensureDir(p){ await fsp.mkdir(p,{recursive:true}); }
 async function writePdfIfMissing(name, force) {
   const p = path.join(DL_DIR, name);
   if (!force && fs.existsSync(p)) return false;
-  const buf = makePdfBuffer('Abraham of London', `Placeholder — ${name}`);
+  const buf = makePdfBuffer('Abraham of London', `Placeholder - ${name}`);
   await fsp.writeFile(p, buf);
   return true;
 }
@@ -103,8 +103,8 @@ async function writeCoverIfMissing(name, force) {
     <text x="80" y="140" fill="#d9c8a1" font-family="Georgia, serif" font-size="42">Abraham of London</text>
     <text x="80" y="240" fill="#eae6df" font-family="Georgia, serif" font-size="64" font-weight="700">${escapeXml(title)}</text>
     <rect x="80" y="280" width="720" height="6" fill="#c9a552"/>
-    <text x="80" y="360" fill="#c7c7c7" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif" font-size="28">Download — ${escapeXml(name)}</text>
-    <text x="80" y="820" fill="#9aa3aa" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif" font-size="22">Placeholder artwork — will be replaced</text>
+    <text x="80" y="360" fill="#c7c7c7" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif" font-size="28">Download - ${escapeXml(name)}</text>
+    <text x="80" y="820" fill="#9aa3aa" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif" font-size="22">Placeholder artwork - will be replaced</text>
   </svg>`.trim();
   await sharp(Buffer.from(svg)).jpeg({quality:86}).toFile(dest);
   return true;

@@ -4,7 +4,7 @@
  * - Strips mojibake & invisible chars
  * - Normalizes YAML front-matter (fixes: key value → key: value, kind→type)
  * - Ensures sane defaults for slug/type (by folder)
- * - Removes invalid trailing junk after quoted values (fixes “Unexpected scalar at node end”)
+ * - Removes invalid trailing junk after quoted values (fixes "Unexpected scalar at node end")
  * - Removes invalid baseColor prop in code
  */
 
@@ -20,8 +20,8 @@ const IGNORE_DIRS = new Set(["node_modules", ".next", ".git", ".turbo", "dist"])
 /* GLOBAL FIXES */
 const INVIS = /[\u00A0\u200B\uFEFF\u2009]/g; // NBSP, ZWSP, BOM, thin space
 const CP1252 = [
-  [/—/g, "—"], [/–/g, "–"], [/'/g, "'"], [/'/g, "'"], [/"/g, '"'],
-  [/â€\x9d/g, '"'], [/"/g, '"'], [/©/g, "©"], [/•/g, "•"], [/…/g, "…"],
+  [/-/g, "-"], [/-/g, "-"], [/'/g, "'"], [/'/g, "'"], [/"/g, '"'],
+  [/€\x9d/g, '"'], [/"/g, '"'], [/©/g, "©"], [/•/g, "•"], [/.../g, "..."],
   [/\s/g, ""],
 ];
 const GLOBAL_TEXT_FIXES = [[INVIS, ""], ...CP1252];

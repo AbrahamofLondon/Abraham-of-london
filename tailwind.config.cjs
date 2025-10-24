@@ -4,7 +4,7 @@ const colors = require("tailwindcss/colors");
 module.exports = {
   // Enables dark mode based on the 'class' selector, necessary for Next-Themes
   darkMode: "class",
-  
+
   // Configure files to scan for utility classes
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -15,14 +15,14 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx}",
     "./styles/**/*.css"
   ],
-  
+
   theme: {
     container: {
       center: true,
       padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
       screens: { "2xl": "1400px" }
     },
-    
+
     extend: {
       colors: {
         // --- LUXURY PALETTE DEFINITIONS (Single Source of Truth) ---
@@ -54,18 +54,18 @@ module.exports = {
         // Removed: 'forest', 'deepCharcoal', 'cream', 'softGold', 'warmWhite', 'midGreen'
         // These are now replaced by their clear, single-source names above ('deep-forest', 'soft-charcoal', etc.)
         lightGrey: '#E5E5E5', // Duplicates 'light-gray', kept for existing code
-        
+
         // Custom emerald shade override
         emerald: { ...colors.emerald, 700: "#047857" }
       },
-      
+
       // Use new clear names for border/ring colors
       ringColor: { 'deep-forest': "var(--color-primary)" },
       borderColor: {
         'deep-forest': "var(--color-primary)",
         lightGrey: "#e5e5e5"
       },
-      
+
       fontFamily: {
         // UPGRADE: Playfair Display for Serifs (Authority/Elegance)
         serif: ["var(--font-serif)", '"Playfair Display"', "Georgia", "serif"],
@@ -73,7 +73,7 @@ module.exports = {
         sans: ["var(--font-sans)", '"Inter"', "system-ui", "sans-serif"],
         cursive: ["var(--font-cursive)", "cursive"]
       },
-      
+
       typography: (theme) => ({
         DEFAULT: {
           css: {
@@ -83,42 +83,42 @@ module.exports = {
             "--tw-prose-links": theme("colors.deep-forest"),
             "--tw-prose-bullets": theme("colors.subtle-green"),
             "--tw-prose-counters": theme("colors.subtle-green"),
-            
+
             // Increased Paragraph Spacing for Luxury Readability
             p: { lineHeight: "1.85" },
-            
+
             a: {
               textDecoration: "none",
               fontWeight: "500",
               transition: "color .15s ease",
               "&:hover": { color: theme("colors.muted-gold") } // Muted Gold hover
             },
-            
+
             // Tighter, elegant heading spacing
             h1: {
               letterSpacing: "-0.015em",
               lineHeight: "1.1",
-              marginBottom: "0.8rem", 
+              marginBottom: "0.8rem",
               fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Headings
             },
             h2: {
               letterSpacing: "-0.01em",
               lineHeight: "1.2",
-              marginTop: "2.5rem", 
+              marginTop: "2.5rem",
               marginBottom: "0.8rem",
               fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Subheadings
             },
-            
+
             strong: { fontWeight: "700" }, // Bolder strong text
-            
+
             blockquote: {
               borderLeftColor: theme("colors.muted-gold"), // Gold accent on quotes
               fontStyle: "italic",
               color: theme("colors.soft-charcoal")
             },
-            
+
             hr: { borderColor: theme("colors.light-gray") }, // Use clear name
-            ul: { paddingLeft: "1.5rem" }, 
+            ul: { paddingLeft: "1.5rem" },
             "ul > li::marker": { color: theme("colors.subtle-green") }
           }
         },
@@ -128,7 +128,7 @@ module.exports = {
             "--tw-prose-body": theme("colors.warm-cream"),
             "--tw-prose-headings": theme("colors.warm-cream"),
             "--tw-prose-links": theme("colors.muted-gold"),
-            
+
             blockquote: {
               borderLeftColor: theme("colors.muted-gold"),
               color: theme("colors.warm-cream")
@@ -138,6 +138,6 @@ module.exports = {
       })
     }
   },
-  
+
   plugins: [require("@tailwindcss/typography")]
 };

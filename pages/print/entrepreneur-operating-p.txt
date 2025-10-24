@@ -1,8 +1,8 @@
 // pages/print/entrepreneur-operating-pack.tsx
 
 import BrandFrame from "../../components/print/BrandFrame";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; 
-import { PullLine, Rule } from "../../components/utils"; 
+import EmbossedBrandMark from "../../components/EmbossedBrandMark";
+import { PullLine, Rule } from "../../components/utils";
 import * as React from "react";
 
 const EntrepreneurOperatingPack = () => {
@@ -17,9 +17,9 @@ const EntrepreneurOperatingPack = () => {
           <EmbossedBrandMark
               src="/assets/images/abraham-logo.jpg"
               alt="Abraham of London Logo"
-              width={40} 
-              height={40} 
-              effect="emboss" 
+              width={40}
+              height={40}
+              effect="emboss"
               baseColor="transparent"
           />
       </div>

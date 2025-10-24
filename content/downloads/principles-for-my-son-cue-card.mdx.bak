@@ -1,4 +1,4 @@
-﻿// pages/print/principles-for-my-son.tsx
+// pages/print/principles-for-my-son.tsx
 import BrandFrame from "../../components/print/BrandFrame";
 import EmbossedSign from "../../components/EmbossedSign";
 import * as React from "react";

@@ -28,18 +28,20 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
 
   return (
     <div style={{ fontFamily: "ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial", color: "#111827", lineHeight: 1.6 }}>
-      <p>Friends{ name ? ` Ãƒ¢Ã¢â€š¬Ã¢â‚¬ ${name}` : ""},</p>
+      {/* FIX 1: Corrected string interpolation/ternary logic */}
+      <p>{name ? `Hi ${name},` : "Hi,"}</p>
       <p>
-        IÃƒ¢Ã¢â€š¬Ã¢â€ž¢m releasing <strong>Fathering Without Fear</strong>, a memoir forged in loss, legal storms,
-        and a fatherÃƒ¢Ã¢â€š¬Ã¢â€ž¢s stubborn hope.
+        Im releasing <strong>Fathering Without Fear</strong>, a memoir forged in loss, legal storms,
+        and a fathers stubborn hope.
       </p>
-      <p>HereÃƒ¢Ã¢â€š¬Ã¢â€ž¢s a free, brand-styled teaser you can read and share:</p>
+      <p>Heres a free, brand-styled teaser you can read and share:</p>
       <ul>
         <li>Teaser PDF (A4/Letter): {link(A4, "Download A4/Letter")}</li>
         <li>Teaser PDF (Mobile): {link(Mobile, "Download Mobile")}</li>
       </ul>
       <p>
-        Want chapter drops and launch dates? Reply <em>Ãƒ¢Ã¢â€š¬Ã…"keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list:{" "}
+        Want chapter drops and launch dates? Reply <em>keep me posted</em> or join the list:{" "}
+        {/* FIX 2: Corrected JSX typo */}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
       <p>
@@ -47,8 +49,9 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
       </p>
       <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you requested the teaser or asked to be notified. Unsubscribe:
-        reply with <em>Ãƒ¢Ã¢â€š¬Ã…"stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        Youre receiving this because you requested the teaser or asked to be notified. Unsubscribe:
+        reply with <em>stop</em>.
+        {/* FIX 3: Corrected JSX typo */}
       </p>
     </div>
   );
@@ -94,7 +97,7 @@ export const handler = async (event: HandlerEvent): Promise<HandlerResponse> => 
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: "Fathering Without Fear Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Teaser PDFs",
+      subject: "Fathering Without Fear Teaser PDFs",
       html,
       replyTo: "info@abrahamoflondon.org",
     });

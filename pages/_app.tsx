@@ -1,1 +1,80 @@
-//pages/_app.tsximporttype{AppProps,NextWebVitalsMetric}from"next/app";import{useEffect}from"react";import{useRouter}from"next/router";importdynamicfrom"next/dynamic";importScriptfrom"next/script";importHeadfrom"next/head";import{ThemeProvider}from"@/lib/ThemeContext";import{pageview,gaEnabled,gaEvent,GA_ID}from"@/lib/gtag";import"@/styles/globals.css";//AssumingThemeTogglepathbasedonstandardstructureimportThemeTogglefrom"@/components/ThemeToggle";constScrollProgress=dynamic(()=>import("@/components/ScrollProgress"),{ssr:false});functionAnalyticsRouterTracker(){constrouter=useRouter();useEffect(()=>{if(!gaEnabled||process.env.NODE_ENV!=="production")return;consthandle=(url:string)=>pageview(url);pageview(router.asPath);router.events.on("routeChangeComplete",handle);router.events.on("hashChangeComplete",handle);return()=>{router.events.off("routeChangeComplete",handle);router.events.off("hashChangeComplete",handle);};},[router]);returnnull;}exportdefaultfunctionMyApp({Component,pageProps}:AppProps){constisProd=process.env.NODE_ENV==="production";return(<><Head><metaname="viewport"content="width=device-width,initial-scale=1,viewport-fit=cover"/>{gaEnabled&&isProd&&(<><linkrel="preconnect"href="https://www.googletagmanager.com"/><linkrel="preconnect"href="https://www.google-analytics.com"crossOrigin=""/></>)}</Head>{gaEnabled&&isProd&&(<><Scriptsrc={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}strategy="afterInteractive"/><Scriptid="ga-init"strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];functiongtag(){dataLayer.push(arguments);}gtag('js',newDate());gtag('config','${GA_ID}',{anonymize_ip:true,transport_type:'beacon',page_path:window.location.pathname});`}</Script></>)}<ThemeProvider><AnalyticsRouterTracker/>{/*KeepThemeTogglevisiblebutpreventitfromblockingheaderhit-testingThisistheincorporatedmobile-onlyThemeTogglefromtheprompt.*/}<divclassName="fixedright-4top-20z-[60]md:hiddenpointer-events-auto"><ThemeToggle/></div><ScrollProgresszIndexClass="z-50"colorClass="bg-emerald-600"heightClass="h-1"/>{/*HeaderrenderstheThemeToggleinternally*/}{/*Mostpagesalreadyincludetheirown<Layout/>thatmounts<Header/>.IfanypagedoesnotuseLayout,add<Header/>atthatpage'stop.*/}<Component{...pageProps}/></ThemeProvider></>);}exportfunctionreportWebVitals(metric:NextWebVitalsMetric){if(!gaEnabled||process.env.NODE_ENV!=="production")return;constvalue=metric.name==="CLS"?Math.round(metric.value*1000):Math.round(metric.value);try{gaEvent("web-vital",{id:metric.id,name:metric.name,label:metric.label,value});}catch{}}
+// pages/_app.tsx
+import Head from "next/head";
+// FIX 1: Add missing Next.js imports
+import dynamic from "next/dynamic";
+import Script from "next/script";
+import { AppProps } from "next/app";
+import { useRouter } from "next/router";
+// FIX 2: Add missing React imports
+import { useEffect } from "react";
+
+import { ThemeProvider } from "@/lib/ThemeContext";
+import { pageview, gaEnabled, GA_ID } from "@/lib/gtag";
+import "@/styles/globals.css";
+
+import ThemeToggle from "@/components/ThemeToggle";
+
+// dynamic and ssr:false must be imported from 'next/dynamic'
+const ScrollProgress = dynamic(() => import("@/components/ScrollProgress").then(m => m.default), {
+  ssr: false,
+});
+
+// useRouter and useEffect must be imported from 'next/router' and 'react'
+function AnalyticsRouterTracker() {
+  const router = useRouter();
+  useEffect(() => {
+    if (!gaEnabled || process.env.NODE_ENV !== "production") return;
+    const handle = (url: string) => pageview(url);
+    pageview(router.asPath);
+    router.events.on("routeChangeComplete", handle);
+    router.events.on("hashChangeComplete", handle);
+    return () => {
+      router.events.off("routeChangeComplete", handle);
+      router.events.off("hashChangeComplete", handle);
+    };
+  }, [router]);
+  return null;
+}
+
+// AppProps must be imported from 'next/app'
+export default function MyApp({ Component, pageProps }: AppProps) {
+  const isProd = process.env.NODE_ENV === "production";
+  return (
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+        {gaEnabled && isProd && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+          </>
+        )}
+      </Head>
+
+      {/* Script must be imported from 'next/script' */}
+      {gaEnabled && isProd && (
+        <>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+          <Script id="ga-init" strategy="afterInteractive">{
+            `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });`
+          }</Script>
+        </>
+      )}
+
+      <ThemeProvider>
+        <AnalyticsRouterTracker />
+
+        {/* Keep ThemeToggle visible but prevent it from blocking header hit-testing */}
+        <div className="fixed right-4 top-20 z-[60] md:hidden pointer-events-auto">
+          <ThemeToggle />
+        </div>
+
+        <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </>
+  );
+}

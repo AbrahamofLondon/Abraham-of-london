@@ -28,6 +28,12 @@
       ],
       "@/lib/*": [
         "lib/*"
+      ],
+      "contentlayer/generated": [
+        "stubs/contentlayer/generated"
+      ],
+      "contentlayer2/generated": [
+        "stubs/contentlayer/generated"
       ]
     },
     "plugins": [
@@ -41,11 +47,16 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.mdx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next\\dev/types/**/*.ts",
+    ".next\\dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next",
-    "out"
+    "dist",
+    "out",
+    ".git",
+    "scripts/_backups"
   ]
 }

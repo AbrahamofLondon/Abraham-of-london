@@ -9,8 +9,8 @@
  *
  * Scans common content folders; adjust FOLDERS as needed.
  */
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const ROOT = process.cwd();
 const FOLDERS = ["content", "posts", "data/blog", "blog", "pages/blog", "app/blog"].map(p => path.join(ROOT, p));

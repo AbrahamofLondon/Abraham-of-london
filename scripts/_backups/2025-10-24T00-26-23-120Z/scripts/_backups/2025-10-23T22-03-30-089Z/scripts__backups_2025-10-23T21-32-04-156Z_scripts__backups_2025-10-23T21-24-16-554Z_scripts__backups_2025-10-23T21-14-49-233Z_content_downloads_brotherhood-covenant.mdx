@@ -1,0 +1,29 @@
+---
+date: "2025-10-13"
+readTime: "2 min read"
+category: "Resources"
+author: "Abraham of London"
+type: "\"download\""
+slug: "\"brotherhood-covenant\""
+title: "\"BrotherhoodCovenant\"slug:\"brotherhood-covenant\"type:\"template\"slug:\"brotherhood-covenant\"type:\"Download\"title:\"BrotherhoodCovenant\"date:2025-10-13author:\"AbrahamofLondon\"readTime:2minreadcategory:\"Resources\""
+---
+
+// pages/print/brotherhood-covenant.tsx
+import BrandFrame from "../../components/print/BrandFrame";
+import * as React from "react";
+// Assuming EmbossedSign is also used and needs to be imported,
+// even if not listed at the very top. I will add the necessary import.
+import EmbossedSign from "../../components/EmbossedSign";
+
+const BrotherhoodCovenantPage = () => {
+  return (
+    <BrandFrame title="Brotherhood Covenant" subtitle="90-day commitment to presence, truth, confidentiality, practical service, and family protection." >
+      {/* ... rest of content */}
+      <div className="flex items-center justify-between text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
+        <span>90-day review: [Date]</span>
+      </div>
+    </BrandFrame>
+  );
+};
+export default BrotherhoodCovenantPage;
+

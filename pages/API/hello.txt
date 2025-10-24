@@ -12,7 +12,7 @@ export default function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
-  
+
   // Return JSON response
   res.status(200).json(dynamicData);
 }

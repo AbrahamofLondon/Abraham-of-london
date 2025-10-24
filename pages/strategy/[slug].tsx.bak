@@ -22,7 +22,7 @@ export default function StrategyPage({ doc }: Props) {
   // 1. UNCONDITIONAL HOOK CALL SETUP:
   // Define 'code' with a safe fallback to satisfy the unconditional hook rule.
   // @ts-ignore: Suppress error for "code" property not found on type 'Markdown'.
-  const code = doc?.body?.code ?? ""; 
+  const code = doc?.body?.code ?? "";
   // Call hook unconditionally at the top level.
   const MDX = useMDXComponent(code);
 

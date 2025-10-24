@@ -1,9 +1,9 @@
 // scripts/check-bom.mjs (ESM utility to check for BOM and valid JSON)
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 // List of files to check (add more files if needed, e.g., 'next.config.js')
-const files = ["package.json"]; 
+const files = ["package.json"];
 let bad = 0;
 const ROOT = process.cwd();
 
@@ -15,10 +15,10 @@ for (const f of files) {
     console.warn(`? ${f}: file not found. Skipping.`);
     continue;
   }
-  
+
   try {
     const buf = fs.readFileSync(fullPath);
-    
+
     // Check for UTF-8 BOM: EF BB BF
     if (buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
       console.error(`✖ ${f}: has UTF-8 BOM (Byte Order Mark). This should be removed!`);
@@ -31,9 +31,9 @@ for (const f of files) {
       JSON.parse(buf.toString("utf8"));
     }
   }
-  catch (e) { 
-    console.error(`✖ ${f}: invalid JSON or read error → ${e.message}`); 
-    bad++; 
+  catch (e) {
+    console.error(`✖ ${f}: invalid JSON or read error → ${e.message}`);
+    bad++;
   }
 }
 

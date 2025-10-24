@@ -2,6 +2,7 @@
 import type { Handler } from "@netlify/functions";
 
 type Json = Record<string, unknown>;
+
 const json = (status: number, body: Json) => ({
   statusCode: status,
   headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -19,7 +20,9 @@ export const handler: Handler = async (evt) => {
 
   try {
     const { email } = JSON.parse(evt.body || "{}");
-    if (typeof email !== "string" || !EMAIL_RE.test(email.trim())) return bad("Please enter a valid email address.");
+    if (typeof email !== "string" || !EMAIL_RE.test(email.trim())) {
+      return bad("Please enter a valid email address.");
+    }
 
     const provider = String(process.env.EMAIL_PROVIDER || "buttondown").toLowerCase();
 
@@ -43,9 +46,11 @@ export const handler: Handler = async (evt) => {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
+      if (res.ok) return ok("Thanks—check your inbox to confirm.");
       const text = await res.text();
-      if (res.status === 400 && /already.*subscribed/i.test(text)) return ok("YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re already subscribed. Ãƒ°Ã…¸Ã…½Ã¢â‚¬°");
+      if (res.status === 400 && /already.*subscribed/i.test(text)) {
+        return ok("You’re already subscribed.");
+      }
       return oops(`Buttondown error (${res.status}): ${text}`);
     }
 
@@ -65,9 +70,9 @@ export const handler: Handler = async (evt) => {
       });
 
       const body = await res.json().catch(() => ({}));
-      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
+      if (res.ok) return ok("Thanks—check your inbox to confirm.");
       if (res.status === 400 && String((body as any)?.title).toLowerCase().includes("member exists")) {
-        return ok("YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re already subscribed. Ãƒ°Ã…¸Ã…½Ã¢â‚¬°");
+        return ok("You’re already subscribed.");
       }
       return oops(`Mailchimp error (${res.status}): ${(body as any)?.detail || "unknown"}`);
     }
@@ -77,5 +82,3 @@ export const handler: Handler = async (evt) => {
     return oops(err?.message || "Failed to subscribe");
   }
 };
-
-export default { handler };

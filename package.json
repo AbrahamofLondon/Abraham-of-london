@@ -2,35 +2,31 @@
   "name": "codex-setup",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=20 <21" },
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "node -e \"console.log('>>> starting next build')\" && next build && node -e \"console.log('>>> finished next build')\"",
     "start": "next start",
-
-    "content:build": "contentlayer build",
-
-    "prebuild": "npm run content:build && npm run fix:global && npm run check:mdx && npm run fix:css-slash && npm run fix:tw-opacity && npm run downloads:build-safe && npm run downloads:manifest",
+    "prebuild": "npm run fix:global && npm run check:mdx && npm run fix:css-slash && npm run fix:tw-opacity && npm run downloads:build-safe && npm run downloads:manifest",
     "analyze": "cross-env ANALYZE=true next build",
     "orchestrate": "node scripts/orchestrate.mjs",
     "project:manage": "node scripts/global_project_manager.mjs --dry=false --fix=true --strict=false",
     "project:check": "node scripts/global_project_manager.mjs --dry=true --fix=false --strict=true",
     "fix:global": "npm run project:manage",
     "clean:global": "node scripts/global_project_manager.mjs",
-
-    "fix:encoding": "node scripts/repair-encoding.mjs . --fix-line-endings --fix-whitespace",
-    "fix:encoding:dry": "node scripts/repair-encoding.mjs . --dry-run",
-    "fix:repo-all": "node scripts/repair-encoding.mjs . --restore-files --remove-contentlayer --fix-line-endings --fix-whitespace",
-
+    "repair:encoding": "node scripts/repair-encoding.mjs . --fix-line-endings --fix-whitespace",
+    "repair:encoding:dry": "node scripts/repair-encoding.mjs . --dry-run",
+    "repair:repo-all": "node scripts/repair-encoding.mjs . --restore-files --remove-contentlayer --fix-line-endings --fix-whitespace",
+    "repair:all": "node scripts/repair-encoding.mjs . --fix-line-endings --fix-whitespace --remove-contentlayer --restore-files --report=scripts/_reports/repair-report.json",
     "fix:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs",
     "fix:css-slash": "node scripts/postcss-guard-dryrun.mjs --write",
     "fix:bom": "node scripts/strip-bom-lf.mjs",
     "fix:downloads-frontmatter": "node scripts/fix-missing-download-frontmatter.mjs",
     "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash",
-
-    "clean:mdx:dry": "C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\\\scripts\\\\clean-mdx.ps1 -WhatIfRun -SkipFrontMatter",
-    "clean:mdx": "C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\\\scripts\\\\clean-mdx.ps1 -SkipFrontMatter",
-
+    "clean:mdx:dry": "node scripts/clean-mdx.js --what-if --skip-front-matter",
+    "clean:mdx": "node scripts/clean-mdx.js --skip-front-matter",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "guard:css": "node scripts/postcss-guard-dryrun.mjs",
@@ -39,18 +35,14 @@
     "check:pkg": "node scripts/check-json.mjs",
     "audit:images": "node scripts/audit-images.mjs",
     "lint:css:badchars": "node -e \"const fs=require('fs');const p='styles/globals.css';const t=fs.readFileSync(p,'utf8');if(/[\\u00A0\\u200B\\uFEFF\\u2009]/.test(t)){console.error('Invisible chars found in',p);process.exit(1)}\"",
-
     "test": "echo \"No tests configured yet. Skipping.\" && exit 0",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-
     "pdfs": "node scripts/make-pdfs.mjs",
     "print:serve": "next start -p 5555",
     "print:pdfs": "node scripts/render-pdfs.mjs --base http://localhost:5555 --out public/downloads",
-
     "covers:events": "node scripts/covers/make-event-covers.mjs",
-
     "seed:downloads": "node scripts/generate-placeholder-downloads.mjs",
     "validate:downloads": "node scripts/validate-downloads.mjs",
     "validate:downloads:strict": "node scripts/validate-downloads.mjs --strict",
@@ -61,11 +53,10 @@
     "downloads:export": "node scripts/print-pdfs.mjs",
     "downloads:manifest": "node scripts/build-download-manifest.mjs",
     "downloads:normalize:fix": "node scripts/normalize-downloads.mjs",
-
     "ci:downloads": "node scripts/run-validate-downloads.mjs",
     "ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (npm run ci:downloads || node -e \"process.exit(0)\") && npm run build",
-
-    "prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs"
+    "prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs",
+    "grand-master": "node scripts/grand-master.mjs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -80,11 +71,13 @@
     "chokidar": "^3.6.0",
     "clsx": "2.1.1",
     "contentlayer": "^0.3.4",
+    "contentlayer2": "^0.5.8",
     "cross-env": "10.0.0",
     "date-fns": "4.1.0",
     "fast-glob": "^3.3.2",
     "framer-motion": "12.23.12",
     "fuse.js": "7.1.0",
+    "get-port": "7.1.0",
     "gray-matter": "4.0.3",
     "lucide-react": "0.542.0",
     "markdown-it": "^14.1.0",
@@ -117,12 +110,11 @@
     "@next/bundle-analyzer": "14.2.32",
     "@playwright/test": "^1.48.2",
     "@types/mdx": "2.0.13",
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.26",
-    "@types/react-dom": "18.3.7",
+    "@types/node": "^20.19.23",
+    "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
-    "contentlayer2": "^0.5.8",
     "esbuild-plugin-tsconfig-paths": "^1.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.32",

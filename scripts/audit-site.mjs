@@ -16,7 +16,7 @@
 
 import { existsSync, copyFileSync, renameSync, mkdirSync } from 'node:fs';
 import fsp from 'node:fs/promises';
-import path from 'node:path';
+import path from "path";
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 
@@ -123,7 +123,7 @@ function fixFrontmatter(data, rel) {
     changed = true;
   }
 
-  // title: keep user’s, but trim whitespace
+  // title: keep user's, but trim whitespace
   if (typeof data.title === 'string') {
     const t = data.title.trim();
     if (t !== data.title) {
@@ -149,19 +149,19 @@ function fixFrontmatter(data, rel) {
       }
     }
   }
-  
+
   // If events carry a 'time' like "18:30", fold it into date (same day) as ISO time
   if (data.type === 'Event' && typeof data.time === 'string' && data.date) {
     const d = new Date(data.date);
     const m = data.time.match(/^(\d{1,2}):(\d{2})$/);
-    
+
     if (!Number.isNaN(d.getTime()) && m) {
       // Create a copy of the date to avoid side-effects if original date was only YYYY-MM-DD
       const dateToMerge = new Date(d.getTime());
-      
+
       dateToMerge.setHours(Number(m[1]), Number(m[2]), 0, 0);
       const iso = dateToMerge.toISOString();
-      
+
       report.dateTimeMerged = { dateWas: data.date, timeWas: data.time, now: iso };
       if (DO_FIX) {
         data.date = iso;
@@ -177,7 +177,7 @@ function fixFrontmatter(data, rel) {
   // category normalize: capitalize first letter, keep rest
   if (typeof data.category === 'string') {
     // Only trim whitespace; the original code mentioned 'capitalize first letter' but didn't implement it.
-    const norm = data.category.trim(); 
+    const norm = data.category.trim();
     if (norm !== data.category) {
       report.category = { was: data.category, now: norm };
       if (DO_FIX) data.category = norm;
@@ -185,15 +185,15 @@ function fixFrontmatter(data, rel) {
     }
   }
 
-  // drop unknown fields (example: 'time' leakage) — report only
+  // drop unknown fields (example: 'time' leakage) - report only
   const extras = [];
-  // The original logic here was very narrow. Removing the check entirely 
-  // and relying on ContentLayer schema validation is safer, but keeping the 
+  // The original logic here was very narrow. Removing the check entirely
+  // and relying on ContentLayer schema validation is safer, but keeping the
   // structure for future feature expansion.
   if (data.type === 'Event') {
     for (const k of Object.keys(data)) {
       // This is checking for 'time' but only reporting it, which seems fine for auditing
-      if (k === 'time' && data.time !== undefined) extras.push('time'); 
+      if (k === 'time' && data.time !== undefined) extras.push('time');
     }
   }
   if (extras.length) report.extraFields = extras;
@@ -210,7 +210,7 @@ function fixLocalLinks(body, allSlugs) {
     // Determine the version *without* a trailing slash
     const withoutSlash = s.endsWith('/') ? s.slice(0, -1) : s;
     const withSlash = withoutSlash + '/';
-    
+
     // Check if the current slug ends with a slash (i.e., is it the version we want to remove?)
     if (s.endsWith('/')) {
         // We only check for the trailing slash version to remove it.
@@ -235,12 +235,12 @@ async function main() {
     try {
       const { data } = await loadFile(rel);
       const slug = normSlug(data.slug || path.basename(rel, path.extname(rel)));
-      
+
       const routePrefix = rel.includes('/events/') ? 'events' :
                           rel.includes('/books/') ? 'books' :
                           rel.includes('/strategy/') ? 'strategy' :
                           rel.includes('/blog/') ? 'blog' : '';
-      
+
       // Store the full URL slug (e.g., /blog/my-post)
       slugIndex.set('/' + routePrefix + '/' + slug, rel);
     } catch (e) {
@@ -261,7 +261,7 @@ async function main() {
         out.push(startReport);
         continue;
     }
-    
+
     let currentData = { ...data };
     let currentBody = content;
 
@@ -279,7 +279,7 @@ async function main() {
       if (!val) continue;
       const isExternal = /^https?:\/\//.test(val);
       if (isExternal) continue;
-      
+
       // Check for existence under public/
       const publicPath = val.startsWith('/') ? val : path.join('public', val);
       if (!existsSync(path.join(ROOT, publicPath))) {
@@ -292,7 +292,7 @@ async function main() {
     for (const href of links) {
       allLinks.add(href);
       const isFile = href.match(/\.(pdf|jpg|jpeg|png|webp|svg)$/i);
-      
+
       if (isFile) {
         // check under /public
         const ok = existsPublic(href);
@@ -323,11 +323,11 @@ async function main() {
       const dir = path.dirname(rel);
       const want = desiredFileNameFromSlug(currentData.slug, ext || '.mdx');
       const wantAbs = path.join(dir, want);
-      
+
       if (path.basename(rel) !== want) {
         const abs = path.join(ROOT, rel);
         const destAbs = path.join(ROOT, wantAbs);
-        
+
         if (!existsSync(destAbs)) {
           renameSync(abs, destAbs); // Use sync rename as this is final step
           startReport.issues.push({ kind:'renamed', was: rel, now: wantAbs });

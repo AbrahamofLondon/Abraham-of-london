@@ -1,4 +1,4 @@
-﻿param(
+param(
   [switch]$WhatIfRun,        # dry-run toggle
   [switch]$SkipFrontMatter   # if set, don't touch YAML front matter
 )

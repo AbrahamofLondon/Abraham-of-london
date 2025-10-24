@@ -20,7 +20,7 @@ interface Props { doc: Post | null }
 
 export default function PostPrintPage({ doc }: Props) {
   // FIX: Bypassing Type error for code
-  const code = (doc?.body as any)?.code ?? ""; 
+  const code = (doc?.body as any)?.code ?? "";
   const MDX = useMDXComponent(code);
 
   if (!doc) return <p>Loading...</p>;

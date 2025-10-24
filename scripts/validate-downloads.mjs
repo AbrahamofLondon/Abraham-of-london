@@ -3,8 +3,8 @@
 // Fails (exit 1) only when --strict is passed AND there are errors.
 
 import fs from "node:fs/promises";
-import fssync from "node:fs";
-import path from "node:path";
+import fssync from "fs";
+import path from "path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);

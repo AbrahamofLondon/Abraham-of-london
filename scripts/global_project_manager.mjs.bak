@@ -109,12 +109,12 @@ const DATA_EXTS = new Set([".md", ".mdx", ".yaml", ".yml"]);
 const JSON_EXTS = new Set([".json"]);
 
 // Invisible characters (NBSP, ZWSP, BOM, Thin Space)
-const INVIS_CHARS = /[\u00A0\u200B\uFEFF\u2009]/g; 
+const INVIS_CHARS = /[\u00A0\u200B\uFEFF\u2009]/g;
 
 // Common Windows-1252 (mojibake) fixes
 const CP1252_FIXES = [
-  [/â€”/g, "—"], [/â€“/g, "–"], [/â€™/g, "'"], [/â€˜/g, "'"], [/â€œ/g, '"'],
-  [/â€\x9d/g, '"'], [/â€/g, '"'], [/Â©/g, "©"], [/â€¢/g, "•"], [/â€¦/g, "…"],
+  [/—/g, "—"], [/–/g, "–"], [/'/g, "'"], [/'/g, "'"], [/"/g, '"'],
+  [/â€\x9d/g, '"'], [/"/g, '"'], [/©/g, "©"], [/•/g, "•"], [/…/g, "…"],
   [/Â\s/g, ""],
 ];
 
@@ -181,7 +181,7 @@ function sanitizeJsonFile(p) {
       [INVIS_CHARS, ""],
       ...CP1252_FIXES
   ]);
-  
+
   let parsed = null;
   try {
     // Remove BOM if present before parsing
@@ -190,7 +190,7 @@ function sanitizeJsonFile(p) {
     report.record("notes", `JSON parse error in ${norm(p)}: ${e.message}`);
     return;
   }
-  
+
   // Check if content changed OR if JSON structure needs re-formatting
   if (orig !== raw || JSON.stringify(parsed, null, 2) + "\n" !== orig) {
     report.record("jsonFixed", norm(p));
@@ -221,7 +221,7 @@ function normalizeFM(fmRaw, ctx) {
   fm = fm.replace(
       /^(\s*)(title|type|date|author|readTime|category|slug)\s*\r?\n/gim,
       (match, indent, key) => {
-          if (key.toLowerCase() === 'type') return `${indent}type: "guide"\n`; 
+          if (key.toLowerCase() === 'type') return `${indent}type: "guide"\n`;
           return `${indent}${key}: ""\n`;
       }
   );
@@ -241,7 +241,7 @@ function normalizeFM(fmRaw, ctx) {
   const slugLine = new RegExp(`^\\s*slug\\s*:`, "m");
   if (!slugLine.test(fm)) fm = `slug: "${ctx.filenameSlug}"\n` + fm;
   fm = fm.replace(/^(\s*)slug\s*:\s*"?fixme"?\s*$/m, `$1slug: "${ctx.filenameSlug}"`);
-  
+
   // 5. Set type default by folder if missing
   if (!/^(\s*)type\s*:/m.test(fm)) {
     if (ctx.isDownload) fm = `type: "download"\n` + fm;
@@ -253,7 +253,7 @@ function normalizeFM(fmRaw, ctx) {
     /^(\s*)(title|subtitle|category|author|type|coverImage|excerpt|slug)\s*:\s*(.+)$/gm,
     (_m, i, key, val) => {
       let v = String(val).trim();
-      if (!/^("|'|true|false|\d|\{|\[)/i.test(v)) { 
+      if (!/^("|'|true|false|\d|\{|\[)/i.test(v)) {
         v = `"${v.replace(/"/g, '\\"')}"`;
       }
       return `${i}${key}: ${v}`;
@@ -282,23 +282,23 @@ function passCleanFile(p) {
   if (CODE_EXTS.has(ext)) {
     const orig = read(p);
     let fixed = orig;
-    
+
     // ❌ REMOVED: CRITICAL ONE-TIME FIX: Reverse the incorrect HTML entity replacement
     // fixed = fixed.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
     // ❌ REMOVED: CRITICAL FIX: The specific API contact.ts fix for escaping quotes
     // if (norm(p).endsWith("/pages/api/contact.ts")) {
-    //   fixed = fixed.replace(
-    //       /(['"]|\\')"\s*:\s*("""|\\"""|"'")/, 
-    //       `'"': "&quot;"` 
-    //   );
+    // fixed = fixed.replace(
+    //   /(['"]|\\')"\s*:\s*("""|\\"""|"'")/,
+    //   `'"': "&quot;"`
+    // );
     // }
 
     fixed = applyPairs(fixed, CODE_FIXES);
-    
+
     // ❌ REMOVED: Targeted Header framer-motion typing cast fix
     // if (norm(p).endsWith("/components/Header.tsx")) {
-    //   fixed = fixed.replace(/transition=\{motionTransition\}/, "transition={motionTransition as any}");
+    // fixed = fixed.replace(/transition=\{motionTransition\}/, "transition={motionTransition as any}");
     // }
 
     if (fixed !== orig) {
@@ -378,34 +378,34 @@ function runFormatters() {
         }
     }
   }
-  
+
   // Final sanitation of package.json to catch any last-minute issues
   sanitizeJsonFile(r("package.json"));
-  
+
   // Run formatters to tidy up any applied fixes
   runFormatters();
-  
+
   report.finalize();
 
   const reportData = safeClone(report.get());
-  
+
   try {
     write(REPORT_PATH, JSON.stringify(reportData, null, 2));
   } catch (e) {
     console.error(`❌ Failed to write full report due to serialization error: ${e.message}`);
     // Write a simplified report if the main one fails
-    const simpleReport = { 
-        ...reportData, 
-        codeFixed: Array.isArray(reportData.codeFixed) ? reportData.codeFixed.length : 0, 
-        dataFixed: Array.isArray(reportData.dataFixed) ? reportData.dataFixed.length : 0, 
+    const simpleReport = {
+        ...reportData,
+        codeFixed: Array.isArray(reportData.codeFixed) ? reportData.codeFixed.length : 0,
+        dataFixed: Array.isArray(reportData.dataFixed) ? reportData.dataFixed.length : 0,
     };
     write(REPORT_PATH, JSON.stringify(simpleReport, null, 2));
   }
 
   console.log("\n──────────── Summary ────────────");
-  console.log(`Scanned:    ${report.data.filesScanned}`);
-  console.log(`Modified:   ${report.data.filesModified}${DRY ? " (dry-run)" : ""}`);
-  console.log(`Report:     ${norm(REPORT_PATH)}`);
+  console.log(`Scanned:  ${report.data.filesScanned}`);
+  console.log(`Modified: ${report.data.filesModified}${DRY ? " (dry-run)" : ""}`);
+  console.log(`Report:  ${norm(REPORT_PATH)}`);
   console.log("────────────────────────────────\n");
 
   if (STRICT && (report.data.linkErrors.length || report.data.fmMissingFields.length)) {

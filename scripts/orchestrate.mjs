@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Abraham of London – PDF Renderer (World-Class Quality)
+ * Abraham of London - PDF Renderer (World-Class Quality)
  * ---------------------------------------------------------
  * Goals:
  * - Generate PDFs from MDX content in content/downloads.
@@ -14,7 +14,7 @@
  */
 import puppeteer from "puppeteer";
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import { URL } from "node:url";
 import matter from "gray-matter"; // Using a proper YAML parser
 import { spawnSync } from "node:child_process";
@@ -141,9 +141,9 @@ export default function DownloadPage({ source, frontMatter }) {
         {/* Print Stylesheet Hook */}
         <style dangerouslySetInnerHTML={{ __html: \`
           @page { size: A4; margin: 20mm; }
-          .pdf-container { 
-            font-family: serif; 
-            color: #000; 
+          .pdf-container {
+            font-family: serif;
+            color: #000;
             line-height: 1.5;
             padding: 0;
             margin: 0;
@@ -286,7 +286,7 @@ async function checkBrandFrame(filePath, content) {
         // 2. Validate and Auto-Fix Front-Matter
         const requiredFields = ["title", "slug", "pdfPath"];
         const missingFields = requiredFields.filter((k) => !frontMatter[k]);
-        
+
         if (missingFields.length) {
           report.record("invalidFrontMatter", { file: norm(filePath), missing: missingFields });
           if (STRICT) continue;
@@ -295,7 +295,7 @@ async function checkBrandFrame(filePath, content) {
           let title = frontMatter.title;
           let slug = frontMatter.slug;
           let pdfPath = frontMatter.pdfPath;
-          
+
           if (!slug) {
             slug = kebab(path.basename(filePath));
             report.record("notes", `Auto-slug: ${slug} in ${norm(filePath)}`);
@@ -308,9 +308,9 @@ async function checkBrandFrame(filePath, content) {
             pdfPath = `/downloads/${slug}.pdf`;
             report.record("notes", `Auto-pdfPath: ${pdfPath} in ${norm(filePath)}`);
           }
-          
+
           const newFrontMatter = matter.stringify(content, { ...frontMatter, title, slug, pdfPath });
-          
+
           if (!DRY) {
             await write(filePath, newFrontMatter);
             report.record("notes", `Fixed and wrote front-matter for ${norm(filePath)}`);
@@ -326,7 +326,7 @@ async function checkBrandFrame(filePath, content) {
         const url = new URL(`/downloads/${frontMatter.slug}`, BASE_URL).toString();
         const outPath = path.join(OUT_DIR, `${frontMatter.slug}.pdf`);
         const result = await renderPDF(browser, url, outPath, frontMatter);
-        
+
         if (result.status === "success") {
           report.record("notes", `Generated PDF: ${norm(outPath)} for ${url}`);
         } else if (STRICT) {
@@ -344,7 +344,7 @@ async function checkBrandFrame(filePath, content) {
     console.error(`\n❌ FATAL ERROR in PDF generation: ${fatalError.message}`);
     // If browser exists, ensure it is closed on fatal error
     if (browser) await browser.close();
-    
+
     report.finalize();
     await write(REPORT_PATH, JSON.stringify(report.get(), null, 2));
     process.exit(1);

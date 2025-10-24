@@ -13,7 +13,7 @@ function parseDateSafe(input: string | number | Date): Date | null {
     return isNaN(d.getTime()) ? null : d;
   }
   if (typeof input === "string") {
-    // ISO date-only (YYYY-MM-DD) Ãƒ¢Ã¢â‚¬Ã¢â‚¬â„¢ construct as UTC midnight to avoid TZ shifts
+    // ISO date-only (YYYY-MM-DD) construct as UTC midnight to avoid TZ shifts
     const m = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m) {
       const [_, y, mo, d] = m;

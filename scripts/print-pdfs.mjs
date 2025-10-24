@@ -1,6 +1,6 @@
 // scripts/print-pdfs.mjs
 import { spawn } from "node:child_process";
-import http from "node:http";
+import http from "http";
 
 const isWin = process.platform === "win32";
 const npmCmd = isWin ? "npm.cmd" : "npm";

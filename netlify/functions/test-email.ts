@@ -51,7 +51,7 @@ export const handler: Handler = async (event) => {
       payload.html ||
       `<p style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
          If you see this, the Resend setup works.<br/>
-         <small>Sent from Netlify Function Ãƒ¢Ã¢â€š¬Ã…"test-emailÃƒ¢Ã¢â€š¬Ã‚.</small>
+         <small>Sent from Netlify Function test-emailsmall>
        </p>`;
 
     const resend = new Resend(resendKey);

@@ -3,9 +3,9 @@
 // Usage: node scripts/scaffold-download-sources.mjs [--force]
 
 import fs from "node:fs/promises";
-import fss from "node:fs";
-import path from "node:path";
-import crypto from "node:crypto";
+import fss from "fs";
+import path from "path";
+import crypto from "crypto";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const PUB = path.join(ROOT, "public", "downloads");
@@ -81,7 +81,7 @@ async function main() {
     const mdPath = path.join(OUT, `${slug}.md`);
     const prettyTitle = titleCase(slug);
     const suggested = kebab(it.name);
-    const excerpt = `${prettyTitle} — a concise, practical resource.`;
+    const excerpt = `${prettyTitle} - a concise, practical resource.`;
 
     if (!FORCE && fss.existsSync(mdPath)) {
       console.log("• exists, skipping:", path.relative(ROOT, mdPath));
@@ -105,7 +105,7 @@ main().catch((e) => {
 // Creates first-pass branded HTML sources for missing downloads.
 // Re-run safely; existing files won't be overwritten.
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 
 const ROOT = process.cwd();
 const SRC_DIR = path.join(ROOT, "scripts", "pdfs", "static");
@@ -114,54 +114,54 @@ const OUT_DIR = path.join(ROOT, "public", "downloads");
 // Map of pdf filename → { title, blurb }
 const DOCS = {
   "Brotherhood_Leader_Guide_4_Weeks.pdf": {
-    title: "Brotherhood Leader Guide — 4 Weeks",
+    title: "Brotherhood Leader Guide - 4 Weeks",
     blurb:
       "A short cycle to set standards, build trust, and reduce drama. Designed for small brotherhood cohorts.",
   },
   "downloadsBoard_Update_OnePager.pdf": {
-    title: "Board Update — One Pager",
+    title: "Board Update - One Pager",
     blurb:
-      "A crisp template for high-signal board communication—clear decisions, risks, and next actions.",
+      "A crisp template for high-signal board communication-clear decisions, risks, and next actions.",
   },
   "Fathering_Without_Fear_Teaser-Mobile.pdf": {
-    title: "Fathering Without Fear — Mobile Teaser",
+    title: "Fathering Without Fear - Mobile Teaser",
     blurb:
-      "A mobile-formatted teaser—fatherhood reclaimed through clarity, conviction, and standards that endure.",
+      "A mobile-formatted teaser-fatherhood reclaimed through clarity, conviction, and standards that endure.",
   },
   "Fathers_in_Family_Court_Practical_Pack.pdf": {
-    title: "Fathers in Family Court — Practical Pack",
+    title: "Fathers in Family Court - Practical Pack",
     blurb:
       "Straightforward guidance and scripts to help fathers navigate process, paperwork, and hearings.",
   },
   "The_Fiction_Adaptation_OnePager.pdf": {
-    title: "The Fiction Adaptation — One Pager",
+    title: "The Fiction Adaptation - One Pager",
     blurb:
       "A cinematic précis: conviction dramatized. Vision, themes, and adaptation direction.",
   },
   "Family_Altar_Liturgy.pdf": {
-    title: "Family Altar — Liturgy",
+    title: "Family Altar - Liturgy",
     blurb:
       "A simple household liturgy to re-center the week around Scripture, prayer, and gratitude.",
   },
   "Scripture_Track_John14.pdf": {
-    title: "Scripture Track — John 14",
+    title: "Scripture Track - John 14",
     blurb:
-      "A focused Scripture track through John 14—readings, reflection prompts, and prayer notes.",
+      "A focused Scripture track through John 14-readings, reflection prompts, and prayer notes.",
   },
   "Household_Rhythm_Starter.pdf": {
-    title: "Household Rhythm — Starter",
+    title: "Household Rhythm - Starter",
     blurb:
-      "A 30·60·90 rhythm to stabilize your household—weekly cadence, reviews, and decision hygiene.",
+      "A 30·60·90 rhythm to stabilize your household-weekly cadence, reviews, and decision hygiene.",
   },
   "Principles_for_My_Son.pdf": {
     title: "Principles for My Son",
     blurb:
-      "A letter of standards—clarity, courage, craftsmanship, and stewardship for the long arc.",
+      "A letter of standards-clarity, courage, craftsmanship, and stewardship for the long arc.",
   },
   "Principles_for_My_Son_Cue_Card.pdf": {
-    title: "Principles for My Son — Cue Card",
+    title: "Principles for My Son - Cue Card",
     blurb:
-      "A compact card of non-negotiables—calm prompts for high-pressure decisions.",
+      "A compact card of non-negotiables-calm prompts for high-pressure decisions.",
   },
   "brotherhood-covenant.pdf": {
     title: "Brotherhood Covenant",
@@ -171,7 +171,7 @@ const DOCS = {
   "brotherhood-cue-card.pdf": {
     title: "Brotherhood Cue Card",
     blurb:
-      "A pocket guide for leaders: what to say when it matters—clear, brief, kind.",
+      "A pocket guide for leaders: what to say when it matters-clear, brief, kind.",
   },
   "fathering-without-fear.pdf": {
     title: "Fathering Without Fear",
@@ -179,14 +179,14 @@ const DOCS = {
       "A bold memoir reclaiming fatherhood with standards that endure beyond our lifetime.",
   },
   "fathering-without-fear-mobile.pdf": {
-    title: "Fathering Without Fear — Mobile Teaser",
+    title: "Fathering Without Fear - Mobile Teaser",
     blurb:
-      "Mobile-formatted sampler—fatherhood, courage, and the work of building a home.",
+      "Mobile-formatted sampler-fatherhood, courage, and the work of building a home.",
   },
   "standards-brief.pdf": {
     title: "Standards Brief",
     blurb:
-      "A one-page brief on standards—how to set them, keep them, and teach them without theatrics.",
+      "A one-page brief on standards-how to set them, keep them, and teach them without theatrics.",
   },
   "Fatherhood_Guide.pdf": {
     title: "Fatherhood Guide",
@@ -194,27 +194,27 @@ const DOCS = {
       "Practical notes, scripts, and weekly rhythms for steadier fatherhood.",
   },
   "Fathering_Without_Fear_Teaser_A4.pdf": {
-    title: "Fathering Without Fear — A4 Teaser",
+    title: "Fathering Without Fear - A4 Teaser",
     blurb:
-      "A4 formatted teaser—clarity, discipline, and the calm resolve of fathers.",
+      "A4 formatted teaser-clarity, discipline, and the calm resolve of fathers.",
   },
   "Fathering_Without_Fear_Teaser-A4.pdf": {
-    title: "Fathering Without Fear — A4 Teaser (alt)",
+    title: "Fathering Without Fear - A4 Teaser (alt)",
     blurb:
       "Alias copy of the A4 teaser to satisfy legacy links. Content identical.",
   },
   "Fathering_Without_Fear_Teaser_Mobile.pdf": {
-    title: "Fathering Without Fear — Mobile Teaser (alt)",
+    title: "Fathering Without Fear - Mobile Teaser (alt)",
     blurb:
       "Alias copy of the mobile teaser to satisfy legacy links. Content identical.",
   },
   "leaders-cue-card.pdf": {
-    title: "Leader’s Cue Card",
+    title: "Leader's Cue Card",
     blurb:
-      "A6 cue card for leaders—calm prompts and checklists for pressure moments.",
+      "A6 cue card for leaders-calm prompts and checklists for pressure moments.",
   },
   "Leaders_Cue_Card.pdf": {
-    title: "Leader’s Cue Card (Title Case)",
+    title: "Leader's Cue Card (Title Case)",
     blurb:
       "Alias PDF in Title_Case to satisfy legacy/bookmark variants.",
   }
@@ -242,7 +242,7 @@ hr{border:0;border-top:1px solid #e5e7eb;margin:16px 0}
     <p>${blurb}</p>
     <p style="color:#6B7280">Draft auto-generated. Replace this HTML with final copy when ready.</p>
   </div>
-  <div class="footer">A/L — ${title}</div>
+  <div class="footer">A/L - ${title}</div>
 </body></html>`;
 
 async function ensureDir(dir) { await fs.mkdir(dir, { recursive: true }); }
@@ -257,7 +257,7 @@ async function main() {
     const htmlPath = path.join(SRC_DIR, `${base}.html`);
     try {
       await fs.stat(htmlPath);
-      // exists — skip
+      // exists - skip
     } catch {
       await fs.writeFile(htmlPath, TEMPLATE(meta.title, meta.blurb), "utf8");
       console.log("✍️  Scaffolded", path.relative(process.cwd(), htmlPath));

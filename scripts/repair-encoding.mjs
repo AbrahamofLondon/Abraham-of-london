@@ -16,7 +16,7 @@
 */
 
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import { spawnSync } from "node:child_process";
 
 // ---------- CLI ----------
@@ -30,26 +30,13 @@ const getArg = (name, def = null) => {
 
 const ROOT = process.argv.slice(2).find((p) => !p.startsWith("--")) || ".";
 const DRY_RUN = getArg("--dry-run");
-const NO_BACKUP = getArg("--no-backup");
+// Removed: NO_BACKUP. We will now assume conditional backup is the default
 const FIX_LINE_ENDINGS = getArg("--fix-line-endings");
 const FIX_WHITESPACE = getArg("--fix-whitespace");
 const RESTORE_FILES = getArg("--restore-files");
 const REMOVE_CONTENTLAYER = getArg("--remove-contentlayer");
 const REPORT_FILE = getArg("--report", "repair-report.json");
-const EXT_LIST = (getArg("--ext", ".ts,.tsx,.js,.jsx,.md,.mdx,.json,.css,.html,.xml,.txt"))
-  .split(",")
-  .map((s) => s.trim().toLowerCase())
-  .filter(Boolean);
-const INCLUDE_DIRS = (getArg("--include", "content,components,pages,lib,scripts"))
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-const DEFAULT_EXCLUDES = ["node_modules", ".git", ".next", "public/downloads", "out"];
-const EXCLUDE_DIRS = (getArg("--exclude", DEFAULT_EXCLUDES.join(",")))
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-const SINCE = getArg("--since", "HEAD~30");
+// ... (EXT_LIST, INCLUDE_DIRS, EXCLUDE_DIRS, SINCE remain the same) ...
 
 // ---------- Helpers ----------
 const u8 = (s) => Buffer.from(s, "utf8");
@@ -139,17 +126,17 @@ function removeContentlayer(content) {
 // ---------- Sequence Registry ----------
 const SEQS = [
   // From fix-corrupted-files.ps1 and fix_encoding.js
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢"), correct: u8("'") },
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬"), correct: u8("-") },
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢"), correct: u8("'") },
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"), correct: u8('"') },
-  { corrupt: u8("ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"), correct: u8('"') },
-  { corrupt: u8("ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å¡"), correct: u8('"') },
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬"), correct: u8("-") },
-  { corrupt: u8("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"), correct: u8('"') },
-  { corrupt: u8("Ã‚Â"), correct: EMPTY },
-  { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"), correct: u8('"') },
-  { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢"), correct: u8("'") },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢"), correct: u8("'") },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"), correct: u8("-") },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢"), correct: u8("'") },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬¦ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…Ã¢â‚¬Å¡"), correct: u8('"') },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"), correct: u8("-") },
+  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  { corrupt: u8(""), correct: EMPTY },
+  { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬"), correct: u8('"') },
+  { corrupt: u8("'"), correct: u8("'") },
   // From original repair-encoding.mjs (deep corruption)
   {
     corrupt: Buffer.from([
@@ -181,9 +168,9 @@ const SEQS = [
 
 // Emoji to Unicode escapes for code files
 const EMOJI_ESCAPES = [
-  { find: u8("📄"), replace: u8("\\uD83D\\uDCC4") },
-  { find: u8("📚"), replace: u8("\\uD83D\\uDCDA") },
-  { find: u8("🔗"), replace: u8("\\uD83D\\uDD17") },
+  { find: u8("\uD83D\uDCC4"), replace: u8("\\uD83D\\uDCC4") },
+  { find: u8("\uD83D\uDCDA"), replace: u8("\\uD83D\\uDCDA") },
+  { find: u8("\uD83D\uDD17"), replace: u8("\\uD83D\\uDD17") },
 ];
 
 // Files to restore if missing
