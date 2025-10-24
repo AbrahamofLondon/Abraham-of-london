@@ -32,6 +32,6 @@ try {
     process.exit(0);
   }
   console.error("⚠️ Could not run git grep:", e?.message || e);
-  // Don’t fail hard in odd environments; default to success
+  // Don't fail hard in odd environments; default to success
   process.exit(0);
 }

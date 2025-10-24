@@ -150,7 +150,7 @@ const nowStamp = () => {
 
 // ---------------- main ----------------
 (async () => {
-  console.log("— normalize-download-filenames —");
+  console.log("- normalize-download-filenames -");
   console.log(`root: ${ROOT}`);
   console.log(`dir : ${DL_DIR}`);
   console.log(`mode: ${WRITE ? "WRITE" : "DRY-RUN"}${USE_GIT ? " (git mv)" : ""}${FIX_REFS ? " + FIX-REFS" : ""}`);
@@ -163,7 +163,7 @@ const nowStamp = () => {
   files = files.filter(isPdf);
 
   if (files.length === 0) {
-    console.log("No PDFs found in public/downloads — nothing to do.");
+    console.log("No PDFs found in public/downloads - nothing to do.");
     process.exit(0);
   }
 
@@ -190,7 +190,7 @@ const nowStamp = () => {
   }
 
   if (plan.length === 0) {
-    console.log("All filenames already kebab-case — nothing to rename.");
+    console.log("All filenames already kebab-case - nothing to rename.");
   } else {
     console.log("Planned renames:");
     for (const { from, to } of plan) {
@@ -214,7 +214,7 @@ const nowStamp = () => {
   // 4) emit redirects snippet
   const stamp = nowStamp();
   const redirects = [
-    `# Generated ${stamp} — paste into netlify.toml`,
+    `# Generated ${stamp} - paste into netlify.toml`,
     `# Old Title_Case → new kebab-case (200 rewrites keep old links working)`,
     ...plan.map(
       ({ from, to }) =>
@@ -241,7 +241,7 @@ const nowStamp = () => {
 
   // 5) optionally fix references
   if (FIX_REFS && plan.length > 0) {
-    console.log("\nScanning repository for references…");
+    console.log("\nScanning repository for references...");
 
     // Build simple string replacers
     // replace "/downloads/Old_Name.pdf" → "/downloads/new-name.pdf"

@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     try {
         const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
-        
+
         // Input sanitization and limits
         const name = String((body as any).name || "").trim().slice(0, 100);
         const email = String((body as any).email || "").trim().toLowerCase();
@@ -229,7 +229,7 @@ async function sendViaResend(args: {
     const { apiKey, from, to, subject, html, text, replyTo } = args;
     const payload: any = { from, to, subject, html };
     if (text) payload.text = text;
-    
+
     // Resend's API accepts a single email string for reply_to
     if (replyTo?.email) {
         // Create the string format: "Name <email@example.com>"

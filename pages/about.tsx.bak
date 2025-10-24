@@ -145,10 +145,10 @@ export default function AboutPage() {
       <SEOHead
         title={pageTitle}
         // NOTE ON FIX: This line previously caused a Type Error because 'profile' was not
-        // allowed by the SEOHead component's interface. It assumes the developer has 
+        // allowed by the SEOHead component's interface. It assumes the developer has
         // updated the SEOHead interface (e.g., in components/SEOHead.tsx) to include 'profile'.
         // If not, this must be changed to type="website" to compile.
-        type="website" 
+        type="website"
         description={pageDesc}
         slug="/about"
         coverImage={ogImageAbs || undefined}
@@ -170,10 +170,10 @@ export default function AboutPage() {
 
       {/* Main Content Grid: Two columns on desktop */}
       <div className="container mx-auto max-w-6xl px-4 pt-10 pb-20 md:grid md:grid-cols-[1fr,280px] md:gap-12">
-        
+
         {/* === LEFT COLUMN: Narrative Sections & Resources === */}
         <div className="md:order-2 space-y-16">
-          
+
           {/* Hero/About Section (Left Column) */}
           {/* Note: AboutSection component handles its own layout, so we just wrap it. */}
           <AboutSection
@@ -237,7 +237,7 @@ export default function AboutPage() {
 
         {/* --- RIGHT COLUMN: Featured/Quick Links (Fixed Width Sidebar) --- */}
         <div className="md:order-3 md:col-start-2 space-y-12 pt-16 md:pt-0">
-          
+
           {/* Featured Writing */}
           <section aria-labelledby="featured-writing" className="mt-12 md:mt-0">
             <h2
@@ -274,7 +274,7 @@ export default function AboutPage() {
           </section>
 
           <hr className="border-t border-lightGrey" />
-          
+
           {/* Quick Downloads */}
           <section aria-labelledby="quick-downloads">
             <h2
@@ -315,7 +315,7 @@ export default function AboutPage() {
           </section>
 
           <hr className="border-t border-lightGrey" />
-          
+
           {/* House standards (Elevated Sidebar Style) */}
           <aside
             className="rounded-2xl border border-lightGrey bg-warmWhite p-6 text-sm text-[color:var(--color-on-secondary)/0.8] shadow-card"
@@ -334,7 +334,7 @@ export default function AboutPage() {
               Private rooms available for sensitive, long-term work.
             </p>
           </aside>
-          
+
           {/* Final Sidebar CTA */}
           <Link
             href="/contact"

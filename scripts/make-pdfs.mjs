@@ -17,8 +17,8 @@
 // - Skips by default when CI/NETLIFY is set, unless PDF_ON_CI=1 is present.
 
 import fs from "node:fs/promises";
-import path from "node:path";
-import crypto from "node:crypto";
+import path from "path";
+import crypto from "crypto";
 import { fileURLToPath } from "node:url";
 import chokidar from "chokidar";
 import matter from "gray-matter";
@@ -32,7 +32,7 @@ import fg from "fast-glob";
 // CI guard
 // ───────────────────────────────────────────────────────────
 if ((process.env.CI || process.env.NETLIFY) && process.env.PDF_ON_CI !== "1") {
-  console.log("[pdfs] CI detected and PDF_ON_CI != '1' — skipping.");
+  console.log("[pdfs] CI detected and PDF_ON_CI != '1' - skipping.");
   process.exit(0);
 }
 
@@ -122,13 +122,13 @@ const FALLBACK_TEMPLATE = (payload, baseHref) => `<!doctype html>
     <div class="brand">Abraham of London</div>
     <div class="title">${payload.title}</div>
     ${payload.excerpt ? `<div class="meta">${payload.excerpt}</div>` : ""}
-    <div class="meta">${[payload.author, payload.prettyDate].filter(Boolean).join(" — ")}</div>
+    <div class="meta">${[payload.author, payload.prettyDate].filter(Boolean).join(" - ")}</div>
     ${payload.coverImage ? `<div class="cover"><img src="${payload.coverImage}" style="width:100%; margin-top:8mm;"/></div>` : ""}
   </div>
   <div class="page">
     ${payload.html}
   </div>
-  <div class="footer"><span class="brand">A/L</span> — ${payload.title}</div>
+  <div class="footer"><span class="brand">A/L</span> - ${payload.title}</div>
 </body>
 </html>`;
 
@@ -296,7 +296,7 @@ async function buildOne(browser, item) {
 async function buildAll() {
   const items = await discover();
   if (items.length === 0) {
-    log("No sources found — add MD/MDX/HTML to content/downloads or scripts/pdfs/static.");
+    log("No sources found - add MD/MDX/HTML to content/downloads or scripts/pdfs/static.");
     return [];
   }
   const browser = puppeteer.launch({ headless: "new" });
@@ -328,7 +328,7 @@ async function main() {
   }
 
   if (WATCH) {
-    log("watching for changes…");
+    log("watching for changes...");
     const watcher = chokidar.watch(CONTENT_DIRS, { cwd: ROOT, ignoreInitial: true });
     watcher.on("all", async () => {
       try {

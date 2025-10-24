@@ -1,6 +1,6 @@
 // scripts/generate-og.mjs
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";

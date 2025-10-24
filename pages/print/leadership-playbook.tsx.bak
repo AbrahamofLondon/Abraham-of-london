@@ -2,8 +2,8 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
-import EmbossedSign from "@/components/print/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 function FormList({ fields }: { fields: string[] }) {
   return (
@@ -41,7 +41,7 @@ export default function LeadershipPlaybookPrint() {
 
       {/* --- COVER (Page 1) --- */}
       <section className="page cover-page relative">
-        
+
         {/* Branding: Large Logo on Cover */}
         <div className="cover-logo">
           <EmbossedBrandMark
@@ -57,14 +57,14 @@ export default function LeadershipPlaybookPrint() {
         <p className="lead">
           Win your week. Guard the standard. Build what lasts.
         </p>
-        
+
         {/* Branding: Signature/Sigline */}
         <div className="sigline flex flex-col items-center">
             <EmbossedSign
                 src="/assets/images/signature/abraham-of-london-cursive.svg"
                 alt="Abraham of London Signature"
-                width={120} 
-                height={30} 
+                width={120}
+                height={30}
                 effect="deboss"/>
             <span className="text-xs text-[#666] mt-1">abrahamoflondon.org</span>
         </div>
@@ -166,85 +166,85 @@ export default function LeadershipPlaybookPrint() {
 
         @page { size: A4; margin: 18mm; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        
-        .print-wrap { 
-          font: 11.5pt/1.55 var(--font-sans, Inter, system-ui); 
-          color: #333; 
+
+        .print-wrap {
+          font: 11.5pt/1.55 var(--font-sans, Inter, system-ui);
+          color: #333;
         }
-        
-        .page { 
-          break-after: page; 
+
+        .page {
+          break-after: page;
           padding-top: 5mm; /* Add global top padding for internal pages */
           position: relative;
         }
 
         /* --- Cover Page Styles --- */
-        .cover-page { 
-          display: flex; 
-          flex-direction: column; 
-          justify-content: center; 
-          align-items: center; 
-          height: 250mm; 
+        .cover-page {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 250mm;
           padding: 0;
         }
         .cover-logo {
             margin-bottom: 25mm;
         }
-        .title { 
-          font: 700 28pt var(--font-serif, Georgia); 
-          color: var(--color-primary); 
-          margin: 0 0 4mm; 
+        .title {
+          font: 700 28pt var(--font-serif, Georgia);
+          color: var(--color-primary);
+          margin: 0 0 4mm;
           text-align: center;
         }
-        .subtitle { 
-            font: 600 14pt var(--font-serif, Georgia); 
-            color: var(--color-primary); 
-            margin: 0 0 2mm; 
+        .subtitle {
+            font: 600 14pt var(--font-serif, Georgia);
+            color: var(--color-primary);
+            margin: 0 0 2mm;
             text-align: center;
         }
-        .lead { 
-          font: 400 12.5pt/1.7 var(--font-sans, Inter); 
-          max-width: 70ch; 
+        .lead {
+          font: 400 12.5pt/1.7 var(--font-sans, Inter);
+          max-width: 70ch;
           text-align: center;
         }
-        .sigline { 
-          position: absolute; 
-          bottom: 18mm; 
+        .sigline {
+          position: absolute;
+          bottom: 18mm;
           left: 50%;
           transform: translateX(-50%);
-          font-size: 9pt; 
-          color: #666; 
+          font-size: 9pt;
+          color: #666;
           border-top: 1px solid #ddd;
           padding-top: 4px;
           min-width: 150px;
         }
-        
+
         /* --- Internal Page Styles --- */
         .page-mark {
             position: absolute;
             top: 0;
             left: 0;
         }
-        h2 { 
-          font: 700 16pt var(--font-serif, Georgia); 
-          color: var(--color-primary); 
-          margin: 0 0 6mm; 
+        h2 {
+          font: 700 16pt var(--font-serif, Georgia);
+          color: var(--color-primary);
+          margin: 0 0 6mm;
           padding-top: 10mm; /* Space for logo */
         }
-        h3 { 
-          font: 600 12pt var(--font-serif, Georgia); 
-          margin: 6mm 0 3mm; 
-          color: var(--color-primary); 
+        h3 {
+          font: 600 12pt var(--font-serif, Georgia);
+          margin: 6mm 0 3mm;
+          color: var(--color-primary);
         }
-        h4 { 
-          font: 600 10.5pt var(--font-serif, Georgia); 
-          margin: 0 0 2mm; 
-          color: var(--color-primary); 
+        h4 {
+          font: 600 10.5pt var(--font-serif, Georgia);
+          margin: 0 0 2mm;
+          color: var(--color-primary);
         }
         .list { padding-left: 4.5mm; }
         .list li { margin: 2.5mm 0; }
         .list.tight li { margin: 1.8mm 0; }
-        
+
         /* --- Grid/Form Styles --- */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
         .cell { border: 0.4pt solid #e5e5e5; border-radius: 4mm; padding: 4mm; min-height: 28mm; }
@@ -254,17 +254,17 @@ export default function LeadershipPlaybookPrint() {
         .label { font: 600 10pt var(--font-sans, Inter); color: var(--color-primary); margin-bottom: 2mm; }
         .lines { border: 0.4pt solid #e5e5e5; border-radius: 3mm; height: 22mm; }
 
-        @media screen { 
-            body { background: #f6f6f6; padding: 2rem; } 
-            .print-wrap { background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 15mm; } 
+        @media screen {
+            body { background: #f6f6f6; padding: 2rem; }
+            .print-wrap { background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 15mm; }
             /* Adjustments for screen preview */
-            .page { 
+            .page {
                 border: 1px solid #eee;
                 margin-bottom: 15mm;
                 padding: 15mm;
             }
             .page-mark {
-                top: 15mm; 
+                top: 15mm;
                 left: 15mm;
             }
             .cover-page {

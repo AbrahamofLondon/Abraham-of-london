@@ -11,7 +11,7 @@
 
 import fsp from 'node:fs/promises';
 import { constants } from 'node:fs'; // Used for fsp.access checks
-import path from 'node:path';
+import path from "path";
 import sharp from 'sharp';
 import matter from 'gray-matter';
 import fg from 'fast-glob';
@@ -30,22 +30,22 @@ const TARGET_FIELDS = [
  * @param {string} p - Absolute path.
  * @returns {Promise<boolean>}
  */
-async function exists(p) { 
-  try { 
+async function exists(p) {
+  try {
     // Check if file exists and is readable/writable
-    await fsp.access(p, constants.R_OK); 
-    return true; 
-  } catch { 
-    return false; 
-  } 
+    await fsp.access(p, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Ensures directory exists using async fsp.mkdir.
  * @param {string} d - Directory path.
  */
-async function ensureDir(d) { 
-  await fsp.mkdir(d, { recursive: true }); 
+async function ensureDir(d) {
+  await fsp.mkdir(d, { recursive: true });
 }
 
 function pickPalette(kind) {
@@ -92,7 +92,7 @@ async function generateImage(absOut, w, h, title, subtitle, type) {
     return;
   }
   // Sharp's .toFile is already promise-based
-  await sharp(Buffer.from(svg)).jpeg({ quality: 92 }).toFile(absOut); 
+  await sharp(Buffer.from(svg)).jpeg({ quality: 92 }).toFile(absOut);
   console.log(`✔ wrote ${path.relative(ROOT, absOut)}`);
 }
 
@@ -106,7 +106,7 @@ async function main() {
       console.error(`Error reading file ${rel}: ${e.message}`);
       continue;
     }
-    
+
     const { data: fm } = matter(raw);
     const type = fm.type || 'Post';
     const title = fm.title || path.basename(rel);
@@ -118,13 +118,13 @@ async function main() {
     for (const spec of TARGET_FIELDS) {
       const v = fm[spec.field];
       if (!v || typeof v !== 'string') continue;
-      
+
       // Only create if missing
       // Logic for determining absolute path is correct
-      const abs = v.startsWith('/') 
-        ? path.join(ROOT, v) 
+      const abs = v.startsWith('/')
+        ? path.join(ROOT, v)
         : path.join(path.dirname(path.join(ROOT, rel)), v);
-      
+
       if (!(await exists(abs))) { // Use async exists
         await generateImage(abs, spec.w, spec.h, title, subtitle, type);
       }

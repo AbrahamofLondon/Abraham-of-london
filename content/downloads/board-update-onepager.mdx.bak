@@ -1,4 +1,4 @@
-﻿// content/downloads/board-investor-one-pager-template.tsx
+// content/downloads/board-investor-one-pager-template.tsx
 import * as React from "react";
 import BrandFrame from "../../components/print/BrandFrame";
 import { PullLine } from "../../components/PullLine"; // keep if you'll use it below

@@ -30,7 +30,7 @@ export default function StrategyPrint({ doc }: Props) {
     <BrandFrame
       title={doc.title}
       // FIXED: Removed inconsistent/unsupported properties (description/ogDescription)
-      subtitle={undefined} 
+      subtitle={undefined}
       // FIXED: Removed doc.author which caused a Type error in similar files
       author={undefined}
       date={doc.date}

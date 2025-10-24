@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import path from "node:path";
+import path from "path";
 import { constants } from "node:fs";
 import fsp from "node:fs/promises";
 import glob from "fast-glob";

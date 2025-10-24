@@ -146,7 +146,7 @@ const listExisting = async (dir) => {
 };
 
 (async () => {
-  console.log("— scan-and-fill-downloads —");
+  console.log("- scan-and-fill-downloads -");
   console.log(`root : ${ROOT}`);
   console.log(`dir  : ${DL_DIR}`);
   console.log(`mode : ${WRITE ? "WRITE (will create placeholders)" : "DRY-RUN"}`);
@@ -203,7 +203,7 @@ const listExisting = async (dir) => {
 
   // 5) Create placeholders for missing
   if (WRITE && missing.length) {
-    console.log("\nCreating placeholders…");
+    console.log("\nCreating placeholders...");
     for (const m of missing) {
       const outPath = path.join(DL_DIR, m);
       const buf = makePlaceholderPdfBuffer(m);

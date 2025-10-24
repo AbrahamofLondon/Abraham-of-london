@@ -6,10 +6,10 @@ on:
     # Rebuild PDFs when content or the PDF script changes
     paths:
       - 'content/**'
-      - 'scripts/make-pdfs.mjs'
+      - 'scripts/grand-master.mjs' # Assuming this is your main script
       - 'package.json'
       - 'package-lock.json'
-      - 'public/downloads/**'     # allow manual edits to retrigger
+      - 'public/downloads/**'      # allow manual edits to retrigger
   workflow_dispatch: {}
 
 permissions:
@@ -21,22 +21,24 @@ concurrency:
 
 jobs:
   pdfs:
-    if: github.repository_owner == github.actor || github.actor != 'github-actions'
+    # Restrict execution to the repository owner or outside of the bot itself
+    if: github.repository_owner == github.actor || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-22.04
 
     env:
       NODE_ENV: production
       PUPPETEER_CACHE_DIR: ${{ runner.tool_cache }}/puppeteer
-      # Force your script to run even if it has a "skip on CI" guard.
-      PDF_ON_CI: "1"
+      # Flag for the Grand Master script to indicate it's running in CI
+      CI_ENVIRONMENT: '1' 
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          # Fetch full history needed for the git commit/diff steps
           fetch-depth: 0
 
-      - name: Use Node.js 20.x
+      - name: Use Node.js 20 (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -50,26 +52,41 @@ jobs:
           restore-keys: |
             puppeteer-${{ runner.os }}-
 
-      - name: Install dependencies (prod)
-        run: npm ci --omit=optional
+      - name: Install dependencies (prod-optimized)
+        # Use npm ci for clean installs on CI
+        run: npm ci --omit=dev
 
       - name: Install Chrome for Puppeteer
+        # Use npx to ensure the correct version of Puppeteer is installed
         run: npx puppeteer browsers install chrome
 
-      - name: Generate PDFs
-        run: npm run pdfs
-        # If your script used to bail on CI, ensure it respects PDF_ON_CI.
-        # (See script patch below.)
+      - name: 1️⃣ Execute Content Healing & Build
+        # We run the Grand Master script to perform the following:
+        # 1. Content/Encoding/Front-Matter fixes (writes directly to files)
+        # 2. Dependency Audit/Fix
+        # 3. Next.js Production Build (required before starting the server)
+        # We skip PDF/Deploy here as the next step will handle PDF generation.
+        run: npm run grand-master -- --skip-pdf --skip-deploy --strict=false
+
+      - name: 2️⃣ Generate PDFs
+        # Now that the content is clean and the site is built, we only run the PDF generation.
+        # This step starts the ephemeral server, renders PDFs via Puppeteer, and saves them to /public/downloads.
+        # This assumes 'npm run pdfs' is an alias for 'npm run grand-master -- --skip-deploy --skip-pdf=false'
+        run: npm run grand-master -- --skip-deploy --strict=false
 
       - name: Commit changes (if any)
+        # Commits the healed source files and the newly generated PDFs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Prevent looped builds
+          
+          # Add all potentially changed files (source fixes + new PDFs)
           git add -A
+          
           if ! git diff --cached --quiet; then
-            git commit -m "chore(pdfs): auto-generate PDFs [skip ci]"
+            # The [skip ci] prevents this commit from restarting the workflow, avoiding loops.
+            git commit -m "chore(pdfs): auto-generate PDFs and commit source fixes [skip ci]"
             git push
           else
-            echo "No PDF changes to commit."
+            echo "No changes (PDFs or source fixes) to commit."
           fi

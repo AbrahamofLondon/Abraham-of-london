@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { GetStaticProps } from "next";
 
 // 1. CORRECTED Contentlayer import path
-import { allBooks, type Book } from "contentlayer/generated"; 
+import { allBooks, type Book } from "contentlayer/generated";
 
 // 2. Import useDebounce hook (assuming path is correct)
 import { useDebounce } from "@/lib/hooks/useDebounce";
@@ -93,7 +93,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       slug: b.slug,
       title: b.title,
       // Use explicit type cast only if necessary, otherwise rely on Contentlayer's generated type
-      author: (b as any).author ?? null, 
+      author: (b as any).author ?? null,
       date: (b as any).date ?? null,
       description: (b as any).description ?? null,
       coverImage: (b as any).coverImage ?? null,

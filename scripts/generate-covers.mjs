@@ -1,6 +1,6 @@
 // scripts/generate-covers.mjs
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import { glob } from "glob";
 import matter from "gray-matter";
 import sharp from "sharp";

@@ -2,7 +2,7 @@
 // CI-safe runner: generate placeholders, then validate (strict in CI).
 
 import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path from "path";
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 

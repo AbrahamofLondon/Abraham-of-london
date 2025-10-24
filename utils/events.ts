@@ -40,7 +40,7 @@ export function dedupeEventsByTitleAndDay<T extends EventLite>(
         if (aMid && !bMid) {
           map.set(key, ev);
         } else if (!aMid && !bMid) {
-          // both non-midnight â†’ earlier time wins
+          // both non-midnight †' earlier time wins
           const aMin = localMinutes(existing.date, tz);
           const bMin = localMinutes(ev.date, tz);
           if (bMin < aMin) map.set(key, ev);
@@ -53,7 +53,7 @@ export function dedupeEventsByTitleAndDay<T extends EventLite>(
   // Also remove exact slug duplicates across different groups
   const seenSlugs = new Set<string>();
   const out: T[] = [];
-  // âœ… Avoid downlevel iteration issue
+  // œ... Avoid downlevel iteration issue
   Array.from(map.values()).forEach((ev) => {
     if (seenSlugs.has(ev.slug)) return;
     seenSlugs.add(ev.slug);

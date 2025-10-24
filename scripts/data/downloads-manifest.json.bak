@@ -1,0 +1,97 @@
+[
+  {
+    "slug": "family-altar-liturgy",
+    "out": "public/downloads/family-altar-liturgy.pdf",
+    "route": "/print/family-altar-liturgy",
+    "cover": "/assets/images/downloads/family-altar-liturgy.jpg",
+    "aliases": ["/downloads/Family_Altar_Liturgy.pdf"],
+    "status": "ready"  // route+mdx provided
+  },
+  {
+    "slug": "leaders-cue-card-two-up",
+    "out": "public/downloads/leaders-cue-card-two-up.pdf",
+    "route": "/print/a6/leaders-cue-card-two-up",
+    "cover": "/assets/images/downloads/leaders-cue-card.jpg",
+    "aliases": ["/downloads/leaders-cue-card-a6-two-up.pdf"],
+    "status": "ready"  // route provided
+  },
+  {
+    "slug": "brotherhood-covenant",
+    "out": "public/downloads/brotherhood-covenant.pdf",
+    "route": "/print/brotherhood-covenant",
+    "cover": "/assets/images/downloads/brotherhood-covenant.jpg",
+    "aliases": ["/downloads/brotherhood-covenant-printable.pdf"],
+    "status": "todo"
+  },
+  {
+    "slug": "brotherhood-cue-card",
+    "out": "public/downloads/brotherhood-cue-card.pdf",
+    "route": "/print/a6/brotherhood-cue-card-two-up",
+    "cover": "/assets/images/downloads/brotherhood-cue-card.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "fatherhood-guide",
+    "out": "public/downloads/fatherhood-guide.pdf",
+    "route": "/print/fatherhood-guide",
+    "cover": "/assets/images/downloads/fatherhood-guide.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "principles-for-my-son",
+    "out": "public/downloads/principles-for-my-son.pdf",
+    "route": "/print/principles-for-my-son",
+    "cover": "/assets/images/downloads/principles-for-my-son.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "principles-for-my-son-cue-card",
+    "out": "public/downloads/principles-for-my-son-cue-card.pdf",
+    "route": "/print/a6/principles-for-my-son-card",
+    "cover": "/assets/images/downloads/principles-for-my-son-card.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "household-rhythm-starter",
+    "out": "public/downloads/household-rhythm-starter.pdf",
+    "route": "/print/household-rhythm-starter",
+    "cover": "/assets/images/downloads/household-rhythm-starter.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "scripture-track-john14",
+    "out": "public/downloads/scripture-track-john14.pdf",
+    "route": "/print/scripture-track-john14",
+    "cover": "/assets/images/downloads/scripture-track-john14.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "standards-brief",
+    "out": "public/downloads/standards-brief.pdf",
+    "route": "/print/standards-brief",
+    "cover": "/assets/images/downloads/standards-brief.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "fathering-without-fear-teaser-a4",
+    "out": "public/downloads/fathering-without-fear-teaser-a4.pdf",
+    "route": "/print/fathering-without-fear-teaser",
+    "cover": "/assets/images/downloads/fathering-without-fear-teaser.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "fathering-without-fear-mobile",
+    "out": "public/downloads/fathering-without-fear-mobile.pdf",
+    "route": "/print/fathering-without-fear-teaser-mobile",
+    "cover": "/assets/images/downloads/fathering-without-fear-mobile.jpg",
+    "status": "todo"
+  },
+  {
+    "slug": "fathering-without-fear-epub",
+    "out": "public/downloads/fathering-without-fear.epub",
+    "route": null,
+    "cover": "/assets/images/downloads/fathering-without-fear.jpg",
+    "status": "decide", 
+    "note": "Prefer real .epub excerpt. If staying PDF, rename to fathering-without-fear-teaser.pdf"
+  }
+]

@@ -4,7 +4,7 @@ import { siteConfig } from "./siteConfig";
 export const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || siteConfig.gaMeasurementId || "";
 
-/* Ãƒ°Ã…¸Ã¢â‚¬ËœÃ¢â‚¬¡ add this line to keep _app.tsx happy */
+/* add this line to keep _app.tsx happy */
 export const GA_ID = GA_MEASUREMENT_ID;
 
 const IS_PROD = process.env.NODE_ENV === "production";

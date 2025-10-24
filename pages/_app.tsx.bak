@@ -11,7 +11,7 @@ import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 import "@/styles/globals.css";
 
 // Assuming ThemeToggle path based on standard structure
-import ThemeToggle from "@/components/ThemeToggle"; 
+import ThemeToggle from "@/components/ThemeToggle";
 
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 
@@ -61,7 +61,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
       <ThemeProvider>
         <AnalyticsRouterTracker />
-        
+
         {/*
           Keep ThemeToggle visible but prevent it from blocking header hit-testing
           This is the incorporated mobile-only ThemeToggle from the prompt.

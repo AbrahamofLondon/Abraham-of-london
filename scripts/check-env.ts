@@ -50,7 +50,7 @@ for (const rule of RULES) {
   }
   if (!isEmpty(raw) && rule.pattern && !rule.pattern.test(String(raw))) {
     const msg = `• ${rule.key} is set but malformed: "${raw}". Expected like: ${rule.example ?? rule.pattern}`;
-    // required â†’ error, optional â†’ warning
+    // required †' error, optional †' warning
     (rule.required ? errors : warnings).push(msg);
   }
 }
@@ -78,4 +78,4 @@ DEPLOY_PRIME_URL=https://abraham-of-london.netlify.app`);
   process.exit(1);
 }
 
-console.log("\nAll required environment variables look good âœ…");
+console.log("\nAll required environment variables look good œ...");

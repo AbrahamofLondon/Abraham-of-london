@@ -21,13 +21,13 @@ interface StockData {
  */
 async function fetchRealtimeStock(ticker: string): Promise<StockData | null> {
   const mockApiUrl = `https://api.example-finance.com/realtime/${ticker}`;
-  
+
   // 💡 In a real-world scenario, you would use a secured endpoint here.
   // For demonstration, we'll return mock data on a successful fetch to illustrate the structure.
-  
+
   try {
     // ⚠️ IMPORTANT: 'cache: 'no-store'' forces a fresh fetch on every request.
-    const res = await fetch(mockApiUrl, { cache: 'no-store' }); 
+    const res = await fetch(mockApiUrl, { cache: 'no-store' });
 
     if (!res.ok) {
       // Simulate an API error response for a non-200 status
@@ -36,7 +36,7 @@ async function fetchRealtimeStock(ticker: string): Promise<StockData | null> {
     }
 
     // Simulate successful JSON response
-    // const data = await res.json(); 
+    // const data = await res.json();
     const mockData: StockData = {
         symbol: ticker,
         price: Math.floor(Math.random() * (2000 - 1000 + 1) + 1000) / 100, // $10.00 to $20.00
@@ -55,16 +55,16 @@ export default async function RealtimeStockPage() {
   const TICKER = 'TSLA'; // Target stock ticker
   const data = await fetchRealtimeStock(TICKER);
 
-  const priceColor = data 
-    ? data.changePercent >= 0 
-      ? 'text-green-500' 
-      : 'text-red-500' 
+  const priceColor = data
+    ? data.changePercent >= 0
+      ? 'text-green-500'
+      : 'text-red-500'
     : 'text-gray-500';
 
   const changeSign = data && data.changePercent >= 0 ? '+' : '';
 
   // --- Rendering Logic ---
-  
+
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] bg-gray-50 p-6 rounded-lg shadow-md">

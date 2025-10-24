@@ -21,7 +21,7 @@ import BrandFrame from "@/components/print/BrandFrame";
 // 2. Dynamically import the MDX rendering component, disabling SSR
 const PrintMDXContent = dynamic(
   () => import('@/components/print/PrintMDXContent'),
-  { 
+  {
     ssr: false, // <-- CRITICAL: Prevents 'undefined (reading default)' error
     loading: () => (
         <article className="prose max-w-none mx-auto">
@@ -88,10 +88,10 @@ export default function PrintPage({ doc }: { doc: AnyDoc | null }) {
       marginsMm={18}
     >
       {/* 3. Pass props to the dynamically loaded component */}
-      <PrintMDXContent 
-          code={code} 
-          title={doc.title} 
-          description={desc} 
+      <PrintMDXContent
+          code={code}
+          title={doc.title}
+          description={desc}
       />
     </BrandFrame>
   );

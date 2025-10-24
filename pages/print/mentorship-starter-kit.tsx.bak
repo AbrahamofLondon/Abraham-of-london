@@ -2,8 +2,8 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
-import EmbossedSign from "@/components/print/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 export default function MentorshipStarterKitPrint() {
   return (
@@ -27,7 +27,7 @@ export default function MentorshipStarterKitPrint() {
 
         <h1 className="title">Mentorship Starter Kit</h1>
         <p className="lead">Presence over performance. Craft over clout.</p>
-        
+
         {/* Branding: Standard Sigline */}
         <div className="sigline">
             <span className="font-serif">Abraham of London</span> • abrahamoflondon.org
@@ -53,7 +53,7 @@ export default function MentorshipStarterKitPrint() {
           <li><strong>Cadence:</strong> Weekly/bi-weekly, 60–75 minutes.</li>
           <li><strong>Ends:</strong> When the mandate is met or either party withdraws with thanks.</li>
         </ul>
-        
+
         {/* Signature Section */}
         <div className="sign-area mt-10 grid grid-cols-2 gap-8">
             {["Mentor", "Mentee"].map((role) => (
@@ -64,8 +64,8 @@ export default function MentorshipStarterKitPrint() {
                              <EmbossedSign
                                 src="/assets/images/signature/abraham-of-london-cursive.svg"
                                 alt="Abraham of London Signature"
-                                width={100} 
-                                height={25} 
+                                width={100}
+                                height={25}
                                 effect="deboss"/>
                         )}
                     </div>
@@ -199,50 +199,50 @@ export default function MentorshipStarterKitPrint() {
           --color-primary: #0B2E1F; /* Dark Green */
           --color-secondary: #D4AF37; /* Gold/Brass accent */
         }
-        
+
         @page { size: A4; margin: 18mm; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        
-        .print-wrap { 
-          font: 11.5pt/1.55 var(--font-sans, Inter, system-ui); 
-          color: #333; 
+
+        .print-wrap {
+          font: 11.5pt/1.55 var(--font-sans, Inter, system-ui);
+          color: #333;
         }
-        
-        .page { 
-          break-after: page; 
+
+        .page {
+          break-after: page;
           padding: 0 0 10mm 0; /* Ensures content isn't flush with the bottom of the print margin */
           position: relative;
         }
 
         /* --- Cover Page Styles --- */
-        .cover-page { 
-          display: flex; 
-          flex-direction: column; 
-          justify-content: center; 
-          align-items: center; 
+        .cover-page {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
           height: 250mm; /* Effectively centers content on the A4 page height */
         }
         .cover-logo {
             margin-bottom: 25mm;
         }
-        .title { 
-          font: 700 28pt var(--font-serif, Georgia); 
-          color: var(--color-primary); 
-          margin: 0 0 4mm; 
+        .title {
+          font: 700 28pt var(--font-serif, Georgia);
+          color: var(--color-primary);
+          margin: 0 0 4mm;
           text-align: center;
         }
-        .lead { 
-          font: 400 12.5pt/1.7 var(--font-sans, Inter); 
-          max-width: 70ch; 
+        .lead {
+          font: 400 12.5pt/1.7 var(--font-sans, Inter);
+          max-width: 70ch;
           text-align: center;
         }
-        .sigline { 
-          position: absolute; 
-          bottom: 18mm; 
+        .sigline {
+          position: absolute;
+          bottom: 18mm;
           left: 50%;
           transform: translateX(-50%);
-          font-size: 9pt; 
-          color: #666; 
+          font-size: 9pt;
+          color: #666;
           border-top: 1px solid #ddd;
           padding-top: 4px;
         }
@@ -253,20 +253,20 @@ export default function MentorshipStarterKitPrint() {
             top: 0;
             left: 0;
         }
-        h2 { 
-          font: 700 16pt var(--font-serif, Georgia); 
-          color: var(--color-primary); 
-          margin: 0 0 6mm; 
+        h2 {
+          font: 700 16pt var(--font-serif, Georgia);
+          color: var(--color-primary);
+          margin: 0 0 6mm;
           padding-top: 10mm; /* Space for logo */
         }
-        h3 { 
-          font: 600 12pt var(--font-serif, Georgia); 
-          margin: 5mm 0 3mm; 
-          color: var(--color-primary); 
+        h3 {
+          font: 600 12pt var(--font-serif, Georgia);
+          margin: 5mm 0 3mm;
+          color: var(--color-primary);
         }
         .list { padding-left: 4.5mm; }
         .list li { margin: 2.5mm 0; }
-        
+
         /* --- Covenant Signature Styles --- */
         .sign-area {
             max-width: 80%;
@@ -279,22 +279,22 @@ export default function MentorshipStarterKitPrint() {
             font-size: 10pt;
             color: #555;
         }
-        
+
         /* --- Table Styles --- */
-        .table { 
-          width: 100%; 
-          border-collapse: collapse; 
-          font-size: 10pt; 
+        .table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 10pt;
         }
-        .table th, .table td { 
-          border: 0.4pt solid #e5e5e5; 
-          padding: 3mm; 
+        .table th, .table td {
+          border: 0.4pt solid #e5e5e5;
+          padding: 3mm;
           height: 10mm; /* Enforce row height for the log */
         }
-        .table th { 
-          text-align: left; 
-          background: #fafaf5; 
-          color: var(--color-primary); 
+        .table th {
+          text-align: left;
+          background: #fafaf5;
+          color: var(--color-primary);
         }
         .table-line-fill { height: 100%; } /* Placeholder for content */
       `}</style>

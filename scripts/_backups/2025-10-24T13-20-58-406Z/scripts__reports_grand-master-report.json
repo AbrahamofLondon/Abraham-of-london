@@ -1,0 +1,62 @@
+{
+  "startedAt": "2025-10-24T13:18:38.916Z",
+  "dryRun": false,
+  "strict": true,
+  "skipPdf": false,
+  "skipDeploy": false,
+  "rollback": false,
+  "port": null,
+  "tasks": [
+    {
+      "task": "npm-install",
+      "status": "running"
+    },
+    {
+      "task": "npm-install",
+      "status": "success",
+      "duration": 1649
+    },
+    {
+      "task": "npm-audit-fix",
+      "status": "running"
+    },
+    {
+      "task": "npm-audit-fix",
+      "status": "success",
+      "duration": 3050,
+      "vulnsFound": 0
+    },
+    {
+      "task": "content-scan",
+      "status": "running"
+    }
+  ],
+  "brandFrameUsage": [
+    {
+      "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
+      "count": 1
+    }
+  ],
+  "corruptedFiles": [],
+  "missingFiles": [],
+  "invalidFrontMatter": [
+    {
+      "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
+      "issues": [
+        "FM: malformed line \"Christianity isn't extremism. It's the way of the Crucified-truth with tenderness, power through service, light for every neighbour. #JesusIsLord #Apologetics #Fatherhood\"",
+        "FM: malformed line \"- christianity\"",
+        "FM: malformed line \"- faith\"",
+        "FM: malformed line \"- fathers\"",
+        "FM: malformed line \"- apologetics\"",
+        "FM: malformed line \"- culture\""
+      ]
+    }
+  ],
+  "missingAssets": [],
+  "pdfsGenerated": 0,
+  "vulnerabilities": 0,
+  "notes": [
+    "Found 44 content files."
+  ],
+  "endedAt": "2025-10-24T13:18:43.629Z"
+}

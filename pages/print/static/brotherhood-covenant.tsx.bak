@@ -2,8 +2,8 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
-import EmbossedSign from "@/components/print/EmbossedSign";       
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 export default function BrotherhoodCovenant() {
   const currentYear = new Date().getFullYear();
@@ -141,8 +141,8 @@ export default function BrotherhoodCovenant() {
             <EmbossedSign
                 src="/assets/images/signature/abraham-of-london-cursive.svg"
                 alt="Abraham of London Signature"
-                width={120} 
-                height={25} 
+                width={120}
+                height={25}
                 effect="deboss"/>
             <div className="muted text-right text-xs mt-0.5">
                 <Link href="https://www.abrahamoflondon.org" target="_blank" rel="noopener noreferrer">
@@ -170,7 +170,7 @@ export default function BrotherhoodCovenant() {
           --rule: #dcdcdc;
           --brand: #bfa364; /* soft gold accent */
         }
-        
+
         /* Screen styles */
         html, body { background: #f6f6f6; }
         .page {
@@ -201,7 +201,7 @@ export default function BrotherhoodCovenant() {
         .brand-meta h1 { font-size: 20pt; line-height: 1.2; margin: 3mm 0 1mm; }
         .subtitle { color: var(--muted); margin: 0; }
         .doc-meta { text-align: right; font-size: 9pt; color: var(--muted); min-width: 42mm; }
-        
+
         /* Section/Content styles */
         .section { margin: 6mm 0; }
         .lede { font-size: 12.75pt; }
@@ -214,7 +214,7 @@ export default function BrotherhoodCovenant() {
         .bullets { margin: 0; padding-left: 4.5mm; list-style: disc; }
         .bullets li { margin: .9mm 0; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 8mm; margin: 0; padding-left: 0; list-style: none; }
-        
+
         /* Signature styles */
         .signatures h2 { margin-bottom: 1mm; }
         .micro { color: var(--muted); font-size: 9.5pt; margin-top: 0; }
@@ -223,7 +223,7 @@ export default function BrotherhoodCovenant() {
         .sig-table td.line { width: 45%; }
         .sig-table td.line.narrow { width: 20%; }
         .sig-table .label { color: var(--muted); font-size: 8.5pt; }
-        
+
         /* Footer styles */
         .footer {
           border-top: 0.5pt solid var(--rule); margin-top: 8mm; padding-top: 4mm;

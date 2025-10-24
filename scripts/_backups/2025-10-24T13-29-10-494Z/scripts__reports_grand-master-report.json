@@ -1,0 +1,61 @@
+{
+  "startedAt": "2025-10-24T13:27:34.781Z",
+  "dryRun": false,
+  "strict": true,
+  "skipPdf": false,
+  "skipDeploy": false,
+  "rollback": false,
+  "port": null,
+  "tasks": [
+    {
+      "task": "npm-install",
+      "status": "running"
+    },
+    {
+      "task": "npm-install",
+      "status": "success",
+      "duration": 1728
+    },
+    {
+      "task": "npm-audit-fix",
+      "status": "running"
+    },
+    {
+      "task": "npm-audit-fix",
+      "status": "success",
+      "duration": 2560,
+      "vulnsFound": 0
+    },
+    {
+      "task": "content-scan",
+      "status": "running"
+    }
+  ],
+  "brandFrameUsage": [
+    {
+      "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
+      "count": 1
+    }
+  ],
+  "corruptedFiles": [],
+  "missingFiles": [],
+  "invalidFrontMatter": [
+    {
+      "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
+      "issues": [
+        "FM: malformed line \"- christianity\"",
+        "FM: malformed line \"- faith\"",
+        "FM: malformed line \"- fathers\"",
+        "FM: malformed line \"- apologetics\"",
+        "FM: malformed line \"- culture\""
+      ]
+    }
+  ],
+  "missingAssets": [],
+  "pdfsGenerated": 0,
+  "vulnerabilities": 0,
+  "notes": [
+    "Found 44 content files."
+  ],
+  "endedAt": "2025-10-24T13:27:39.109Z"
+}

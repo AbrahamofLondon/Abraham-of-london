@@ -1,0 +1,266 @@
+#!/usr/bin/env node
+import { spawn } from "node:child_process";
+import getPort from "get-port";
+import path from "node:path";
+import fs from "node:fs";
+
+const isWin = process.platform === "win32";
+const npx = isWin ? "npx.cmd" : "npx";
+const nodeBin = process.execPath;
+const root = process.cwd();
+const outDir = "scripts/_reports";
+fs.mkdirSync(outDir, { recursive: true });
+
+function run(cmd, args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
+  });
+}
+
+(async function main() {
+  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
+  const BASE_URL = `http://localhost:${PORT}`;
+
+  // 0) Global manager (cleaner + link/asset checks + fallback creation)
+  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
+
+  // 1) Build
+  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
+  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
+  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
+
+  // 2) Start server (prod) on free port
+  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
+    stdio: "inherit",
+    env: { ...process.env, PORT, BASE_URL },
+  });
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  // simple readiness wait
+  await wait(2500);
+
+  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
+  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
+  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
+  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
+
+  // 4) Crawl important routes + check links (internal 200) + basic a11y
+  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
+    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
+    "--output", path.join(outDir, "link-report.json")]);
+
+  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
+  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
+
+  // 5) Stop server
+  server.kill("SIGINT");
+
+  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
+})().catch((err) => {
+  console.error("\n❌ Orchestration failed:", err.message);
+  process.exit(1);
+});#!/usr/bin/env node
+import { spawn } from "node:child_process";
+import getPort from "get-port";
+import path from "node:path";
+import fs from "node:fs";
+
+const isWin = process.platform === "win32";
+const npx = isWin ? "npx.cmd" : "npx";
+const nodeBin = process.execPath;
+const root = process.cwd();
+const outDir = "scripts/_reports";
+fs.mkdirSync(outDir, { recursive: true });
+
+function run(cmd, args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "inherit", ...opts });
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
+  });
+}
+
+(async function main() {
+  const PORT = await getPort({ port: getPort.makeRange(3100, 3999) });
+  const BASE_URL = `http://localhost:${PORT}`;
+
+  // 0) Global manager (cleaner + link/asset checks + fallback creation)
+  await run(nodeBin, ["scripts/global_project_manager.mjs", "--dry=false", "--fix=true", "--strict=false"]);
+
+  // 1) Build
+  await run(nodeBin, ["-e", "console.log('>>> starting next build')"]);
+  await run(isWin ? "npm.cmd" : "npm", ["run", "build"]);
+  await run(nodeBin, ["-e", "console.log('>>> finished next build')"]);
+
+  // 2) Start server (prod) on free port
+  const server = spawn(isWin ? "npm.cmd" : "npm", ["run", "start", "--", "-p", String(PORT)], {
+    stdio: "inherit",
+    env: { ...process.env, PORT, BASE_URL },
+  });
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  // simple readiness wait
+  await wait(2500);
+
+  // 3) Render PDFs (headless), validate downloads, then add redirects snapshot
+  await run(nodeBin, ["scripts/render-pdfs.mjs", `--base=${BASE_URL}`, "--strict=true"]);
+  await run(nodeBin, ["scripts/run-validate-downloads.mjs", "--strict=true"]);
+  await run(nodeBin, ["scripts/snapshot-assets.mjs"]);
+
+  // 4) Crawl important routes + check links (internal 200) + basic a11y
+  await run(npx, ["--yes", "linkinator", BASE_URL, "--recurse", "--skip", ".*(\\.(png|jpg|webp|svg|pdf))$",
+    "--format", "json", "--silent", "--redirect", "--concurrency", "6", "--timeout", "15s",
+    "--output", path.join(outDir, "link-report.json")]);
+
+  // OPTIONAL: Axe core quick a11y smoke (home + key hubs)
+  await run(npx, ["--yes", "playwright", "test", "tests/a11y-smoke.spec.ts"], { env: { ...process.env, BASE_URL } });
+
+  // 5) Stop server
+  server.kill("SIGINT");
+
+  console.log("\n✅ Orchestration completed. See reports in scripts/_reports\n");
+})().catch((err) => {
+  console.error("\n❌ Orchestration failed:", err.message);
+  process.exit(1);
+});wnloads, "--fix", "--rename"], { env: envPlus() });
+  }
+
+  // 7) Mirror to secondary (revertable)
+  console.log(`[orchestrate] Mirroring PDFs to ${rel(MIRROR_DIR)} (Dry Run: ${DRY_RUN})...`);
+  const mirrorOps = await mirror(OUT_DIR, MIRROR_DIR, { dry: DRY_RUN });
+  
+  // 8) Write manifest
+  await fs.writeFile(
+    MANIFEST,
+    JSON.stringify(
+      {
+        createdAt: new Date().toISOString(),
+        system: os.platform(),
+        base,
+        outDir: OUT_DIR,
+        mirrorDir: MIRROR_DIR,
+        dryRun: DRY_RUN,
+        pdfOnCi: PDF_ON_CI,
+        routes,
+        mirrorOps,
+      },
+      null,
+      2
+    )
+  );
+
+  // 9) Stop server and summarize
+  await stop(server);
+  console.log("\n──────── Orchestrate summary ────────");
+  console.log(`Base     : ${base}`);
+  console.log(`Downloads: ${rel(OUT_DIR)}`);
+  console.log(`Mirror   : ${rel(MIRROR_DIR)} (${mirrorOps.copied.length} files ${DRY_RUN ? "simulated" : "copied"})`);
+  console.log(`Manifest : ${rel(MANIFEST)}`);
+  console.log(`Dry-run  : ${DRY_RUN ? "YES" : "NO"}`);
+  console.log("Done.");
+
+})().catch(async (e) => {
+  console.error("\n[orchestrate] FATAL:", e);
+  process.exit(1);
+});
+
+// ───────────────────────────────────────────────────────────
+// Helpers
+// ───────────────────────────────────────────────────────────
+function getArg(k, d) { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i+1] : d; }
+function getBool(k, d) {
+  if (!process.argv.includes(k)) return d;
+  const v = getArg(k, "");
+  if (v === "" || v === undefined) return true;
+  return ["1","true","yes","on"].includes(String(v).toLowerCase());
+}
+function envPlus(extra = {}) { return Object.fromEntries(Object.entries({ ...process.env, ...extra }).filter(([,v]) => v !== undefined)); }
+function exists(p) { return fssync.existsSync(p); }
+function rel(p) { return path.relative(ROOT, p); }
+async function ensureDir(d) { await fs.mkdir(d, { recursive: true }); }
+
+async function run(cmd, args, { env, cwd = ROOT, ignoreFail = false } = {}) {
+  return new Promise((resolve, reject) => {
+    const ps = spawn(cmd, args, { cwd, env, stdio: "inherit", shell: process.platform === "win32" });
+    ps.on("exit", (code) => (code === 0 || ignoreFail ? resolve(code) : reject(new Error(`${cmd} ${args.join(" ")} → ${code}`))));
+    ps.on("error", reject);
+  });
+}
+
+async function pickPort(start = 5555) {
+  for (let p = start; p < start + 100; p++) if (await isFree(p)) return p;
+  return start;
+}
+async function isFree(port) {
+  const net = await import("node:net"); // Dynamic import is safe in this async function
+  return new Promise((res) => {
+    const srv = net.default.createServer().once("error", () => res(false)).once("listening", () => srv.close(() => res(true)));
+    srv.listen(port, "0.0.0.0");
+  });
+}
+async function startNext(port) {
+  console.log(`[orchestrate] Starting Next on :${port}…`);
+  const ps = spawn("npm", ["run", "print:serve", "--", "-p", String(port)], {
+    cwd: ROOT, env: envPlus(), stdio: "inherit", shell: process.platform === "win32",
+  });
+  await sleep(1200);
+  return ps;
+}
+async function stop(ps) {
+  if (!ps || ps.killed) return;
+  console.log("[orchestrate] Stopping Next…");
+  return new Promise((resolve) => {
+    ps.on("exit", resolve);
+    if (process.platform === "win32") spawn("taskkill", ["/pid", String(ps.pid), "/T", "/F"], { stdio: "ignore" }).on("exit", resolve);
+    else { ps.kill("SIGTERM"); setTimeout(() => ps.kill("SIGKILL"), 3000); }
+  });
+}
+async function waitFor(url, timeout = 20000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try { const r = await fetch(url, { redirect: "manual" }); if (r.ok || r.status === 200) return true; } catch {}
+    await sleep(500);
+  }
+  return false;
+}
+async function determinePrintRoutes(base) {
+  if (exists(SCRIPTS.probe)) {
+    try {
+      const { pathToFileURL } = await import("node:url");
+      const mod = await import(pathToFileURL(SCRIPTS.probe).href);
+      if (typeof mod.probeRoutes === "function") {
+        const data = await mod.probeRoutes(base);
+        return {
+          routes: data.routes?.length ? data.routes : FALLBACK_ROUTES,
+          fileMap: { ...FALLBACK_FILEMAP, ...(data.fileMap || {}) },
+        };
+      }
+    } catch (e) { console.warn("[orchestrate] probe failed → fallback.", e?.message || e); }
+  }
+  return { routes: FALLBACK_ROUTES, fileMap: FALLBACK_FILEMAP };
+}
+async function mirror(fromDir, toDir, { dry = true } = {}) {
+  if (!exists(fromDir)) return { copied: [], skipped: [], notes: ["source missing"] };
+  await fs.mkdir(toDir, { recursive: true });
+  const entries = await fs.readdir(fromDir);
+  const copied = [], skipped = [];
+  for (const f of entries) {
+    if (!/\.pdf$/i.test(f)) continue;
+    const src = path.join(fromDir, f);
+    const dst = path.join(toDir, f);
+    // Check if destination exists AND is newer than source
+    const needs = !(exists(dst) && fssync.statSync(dst).mtimeMs >= fssync.statSync(src).mtimeMs);
+    if (!needs) { skipped.push({ src, dst, reason: "up-to-date" }); continue; }
+    if (!dry) await fs.copyFile(src, dst);
+    copied.push({ src, dst, dryRun: dry });
+  }
+  return { copied, skipped };
+}
+async function revertFromManifest(file) {
+  if (!exists(file)) { console.error(`[orchestrate] Manifest not found: ${file}`); process.exit(1); }
+  const data = JSON.parse(await fs.readFile(file, "utf8"));
+  const ops = data?.mirrorOps?.copied || [];
+  let removed = 0;
+  for (const op of ops) { try { if (op.dst && exists(op.dst)) { await fs.unlink(op.dst); removed++; } } catch {} }
+  console.log(`[orchestrate] Reverted ${removed} files from ${rel(file)}`);
+}

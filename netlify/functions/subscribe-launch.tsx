@@ -20,7 +20,7 @@ const WelcomeLaunchEmail: React.FC<WelcomeProps> = ({ name, siteUrl }) => {
     <div style={{ fontFamily: "ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial", color: "#111827", lineHeight: 1.6 }}>
       <p>{name ? `Hi ${name},` : "Hi,"}</p>
       <p>
-        Thanks for joining the <strong>Fathering Without Fear</strong> launch list. YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢ll get early
+        Thanks for joining the <strong>Fathering Without Fear</strong> launch list. Youll get early
         chapter drops, release dates, and practical resources for fathers under pressure.
       </p>
       <p>While you wait, grab the free teaser PDFs:</p>
@@ -43,7 +43,7 @@ const WelcomeLaunchEmail: React.FC<WelcomeProps> = ({ name, siteUrl }) => {
       <p>Grace and courage,<br />Abraham of London</p>
       <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you asked to be notified about the launch. Unsubscribe: reply with <em>Ãƒ¢Ã¢â€š¬Ã…"stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        Youre receiving this because you asked to be notified about the launch. Unsubscribe: reply with <em>stopem>.
       </p>
     </div>
   );
@@ -89,7 +89,7 @@ export const handler = async (event: HandlerEvent): Promise<HandlerResponse> => 
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: "Welcome Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Fathering Without Fear",
+      subject: "Welcome Fathering Without Fear",
       html,
       replyTo: "info@abrahamoflondon.org",
     });

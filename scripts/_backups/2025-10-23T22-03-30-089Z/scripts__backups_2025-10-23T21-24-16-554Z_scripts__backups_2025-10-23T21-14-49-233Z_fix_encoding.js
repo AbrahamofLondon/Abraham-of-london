@@ -1,0 +1,231 @@
+#!/usr/bin/env node
+/**
+ * Ultra-hardening mojibake + invisible-char fixer.
+ * - Byte-level replacement for deeply corrupted sequences
+ * - Text-level replacement for ''' '"' '...' etc.
+ * - Strips BOM/ZWSP/NBSP and other invisibles
+ * - Repeats passes until stable (no more changes)
+ * - Backs up each changed file once: <file>.bak
+ * - Skips typical binary files and heavy directories
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+
+/* --------------------------- Configuration --------------------------- */
+
+const ROOT = process.argv[2] || ".";
+const DRY_RUN = process.argv.includes("--dry-run");
+const MAX_PASSES = 5;
+
+// Directories to skip entirely
+const SKIP_DIRS = new Set(["node_modules", ".git", ".next", ".turbo", "dist", "out", ".contentlayer"]);
+
+// Binary / large-file extensions to skip (we don't ‘fix' these)
+const SKIP_EXTS = new Set([
+  ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif",
+  ".zip", ".gz", ".bz2", ".7z", ".mp4", ".mp3", ".mov", ".ico",
+  ".woff", ".woff2", ".ttf", ".eot"
+]);
+
+// Only touch these extensions (code + content)
+const TARGET_EXTS = new Set([
+  ".ts",".tsx",".js",".jsx",".mjs",".cjs",
+  ".md",".mdx",".yml",".yaml",".json",".toml",
+  ".css",".scss",".txt",".html"
+]);
+
+// Byte-level corrupted sequences (latin1 interpreted junk -> UTF-8 intended)
+const BYTE_SEQS = [
+  // Provided sequences
+  { corrupt: Buffer.from('latin1'), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from('latin1'), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("'", "latin1"), correct: Buffer.from("'", "utf8") },
+  { corrupt: Buffer.from(""", "latin1"), correct: Buffer.from('"', "utf8") },
+  { corrupt: Buffer.from("â€\x9d", "latin1"), correct: Buffer.from('"', "utf8") },
+  { corrupt: Buffer.from("...", "latin1"), correct: Buffer.from("...", "utf8") },
+  { corrupt: Buffer.from("latin1"), correct: Buffer.from("", "utf8") },
+  { corrupt: Buffer.from("latin1"), correct: Buffer.from("", "utf8") },
+];
+
+// Text-level mojibake & invisibles (run after byte pass)
+const TEXT_SWEEPS = [
+  // Invisibles / BOM / ZWSP / NBSP
+  [/\uFEFF/g, ""],    // BOM
+  [/\u200B/g, ""],    // ZWSP
+  [/\u00A0/g, " "],   // NBSP -> space
+
+  // Common double-encoded punctuation
+  [/'/g, "'"],
+  [/'/g, "'"],
+  [/"|"/g, '"'],
+  [/•/g, "•"],
+  [/.../g, "..."],
+  [/–/g, "–"],
+  [/—/g, "—"],
+  [/©/g, "©"],
+  [/®/g, "®"],
+  [/·/g, "·"],
+  [/·/g, "·"],
+  [//g, ""], // stray A-circumflex
+
+  // Over-encoded Latin (best-effort, safe chars)
+  [/é/g, "é"], [/è/g, "è"], [/à/g, "à"], [/ê/g,"ê"], [/ë/g,"ë"],
+  [/ü/g, "ü"], [/ö/g, "ö"], [/ä/g, "ä"], [/ñ/g, "ñ"],
+
+  // Rare leftovers
+  [/Ñ/g, "Ñ"], [/Ä/g,"Ä"], [/Ö/g,"Ö"], [/Ü/g,"Ü"],
+];
+
+// Print-only: if icon text got corrupted inside TSX/JSX strings (e.g., EventCard)
+const ICON_RESCUES = [
+  // Replace garbled document/book emoji runs with sane ones
+  [/["'`]Ã°Å¸.*?["'`]/g, '"\uD83D\uDCC4"'],
+  [/["'`]Ã°Å¸.*?["'`]/g, '"📖"'],
+];
+
+/* ------------------------------ Helpers ------------------------------ */
+
+function isBinaryLikely(buf) {
+  // Quick binary sniff: NUL in first 4096 bytes or >5% control chars
+  const len = Math.min(buf.length, 4096);
+  let ctrl = 0;
+  for (let i = 0; i < len; i++) {
+    const b = buf[i];
+    if (b === 0) return true;
+    if (b < 7 || (b > 13 && b < 32)) ctrl++;
+  }
+  return ctrl / (len || 1) > 0.05;
+}
+
+function bufferReplaceAll(data, find, repl) {
+  let out = [];
+  let idx = 0;
+  for (;;) {
+    const at = data.indexOf(find, idx);
+    if (at === -1) break;
+    out.push(data.slice(idx, at), repl);
+    idx = at + find.length;
+  }
+  out.push(data.slice(idx));
+  return out.length === 1 ? data : Buffer.concat(out);
+}
+
+function passBytes(buf) {
+  let changed = false;
+  for (const { corrupt, correct } of BYTE_SEQS) {
+    const next = bufferReplaceAll(buf, corrupt, correct);
+    if (next !== buf && !next.equals(buf)) {
+      buf = next;
+      changed = true;
+    }
+  }
+  return { buf, changed };
+}
+
+function passText(str, fileExt) {
+  let changed = false;
+  const before = str;
+  for (const [re, rep] of TEXT_SWEEPS) str = str.replace(re, rep);
+  // Icon rescues only for code-ish files
+  if ([".ts",".tsx",".js",".jsx",".mjs",".cjs"].includes(fileExt)) {
+    for (const re of ICON_RESCUES) str = str.replace(re, (m) => {
+      // Heuristic: swap to \uD83D\uDCC4 unless looks like book context
+      return m.includes("book") ? '"📖"' : '"\uD83D\uDCC4"';
+    });
+  }
+  if (str !== before) changed = true;
+  return { str, changed };
+}
+
+function backupOnce(p) {
+  const bak = p + ".bak";
+  if (!fs.existsSync(bak)) {
+    try { fs.copyFileSync(p, bak); } catch {}
+  }
+}
+
+function shouldSkipFile(p) {
+  const ext = path.extname(p).toLowerCase();
+  if (SKIP_EXTS.has(ext)) return true;
+  if (TARGET_EXTS.size && !TARGET_EXTS.has(ext)) return true;
+  return false;
+}
+
+/* ------------------------------- Walker ------------------------------ */
+
+let filesChecked = 0;
+let filesChanged = 0;
+
+function walk(dir) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      if (SKIP_DIRS.has(e.name)) continue;
+      walk(p);
+      continue;
+    }
+    if (!e.isFile()) continue;
+    processFile(p);
+  }
+}
+
+function processFile(p) {
+  const ext = path.extname(p).toLowerCase();
+  if (shouldSkipFile(p)) return;
+
+  let data;
+  try { data = fs.readFileSync(p); } catch { return; }
+
+  if (isBinaryLikely(data)) return; // safety
+
+  filesChecked++;
+
+  let changed = false;
+  let buf = data;
+
+  // Up to MAX_PASSES until stable (byte + text passes)
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    // Byte pass
+    const b = passBytes(buf);
+    buf = b.buf;
+    changed ||= b.changed;
+
+    // Text pass
+    let txt = buf.toString("utf8");
+    const t = passText(txt, ext);
+    txt = t.str;
+    changed ||= t.changed;
+
+    const after = Buffer.from(txt, "utf8");
+    if (after.equals(buf)) {
+      // no further change this cycle; break if no byte changes too
+      if (!b.changed && !t.changed) break;
+    }
+    buf = after;
+  }
+
+  if (changed && !buf.equals(data)) {
+    console.log(`✔ cleaned: ${p}`);
+    filesChanged++;
+    if (!DRY_RUN) {
+      backupOnce(p);
+      try { fs.writeFileSync(p, buf); } catch (e) {
+        console.warn(`⚠️ Could not write ${p}: ${e.message}`);
+      }
+    }
+  }
+}
+
+/* --------------------------------- Run -------------------------------- */
+
+if (!fs.existsSync(ROOT) || !fs.statSync(ROOT).isDirectory()) {
+  console.error(`Path not found or not a directory: ${ROOT}`);
+  process.exit(1);
+}
+
+console.log(`\n🚀 Mojibake & Invisible-Char Repair (root="${ROOT}", dry=${DRY_RUN})`);
+walk(ROOT);
+console.log(`\nSummary: checked=${filesChecked} | changed=${filesChanged} | passes<=${MAX_PASSES}`);
+if (DRY_RUN) console.log("Dry-run only. No files were written.");

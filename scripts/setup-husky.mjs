@@ -1,7 +1,7 @@
 // scripts/setup-husky.mjs
 // Creates a Husky pre-commit hook that blocks bad slash-opacity before commit.
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "fs";
+import path from "path";
 
 const root = process.cwd();
 const huskyDir = path.join(root, '.husky');
@@ -13,7 +13,7 @@ if (!fs.existsSync(huskyDir)) fs.mkdirSync(huskyDir, { recursive: true });
 const script = `#!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "⏳ Running Tailwind slash-opacity checks…"
+echo "⏳ Running Tailwind slash-opacity checks..."
 node scripts/convert-tailwind-slash-opacity.mjs --check || exit 1
 node scripts/postcss-guard-dryrun.mjs || exit 1
 echo "✅ Checks passed."

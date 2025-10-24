@@ -1,6 +1,6 @@
 // scripts/covers/make-event-covers.mjs
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import sharp from "sharp";
 import { getAllEvents } from "../../lib/server/events-data.js";
 
@@ -41,7 +41,7 @@ function svgCover({ title, subtitle }) {
 
 function deriveSubtitle(title) {
   // optional helper; keep it simple
-  return title.includes("Founders’ Salon") ? "Clarity, Capital, and Character" : "Standards that Endure";
+  return title.includes("Founders' Salon") ? "Clarity, Capital, and Character" : "Standards that Endure";
 }
 
 const events = getAllEvents(["slug","title","heroImage"]);

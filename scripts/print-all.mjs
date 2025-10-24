@@ -1,6 +1,6 @@
 // scripts/print-all.mjs
 import { spawn } from "node:child_process";
-import process from "node:process";
+import process from "process";
 
 const PORT = Number(process.env.PRINT_PORT || 5555);
 const BASE = `http://localhost:${PORT}`;
@@ -23,14 +23,14 @@ function waitForHealth(url, timeoutMs = 40_000) {
 }
 
 (async () => {
-  console.log("— print-all —");
+  console.log("- print-all -");
   console.log("Port:", PORT);
 
   const server = spawn(npmCmd, ["run", "print:serve"], { stdio: "inherit", env: { ...process.env, PORT: String(PORT) } });
 
   try {
     await waitForHealth(BASE);
-    console.log("Next is ready. Rendering PDFs…");
+    console.log("Next is ready. Rendering PDFs...");
     const renderer = spawn(
       "node",
       ["scripts/render-pdfs.mjs", "--base", BASE, "--out", "public/downloads"],
@@ -38,7 +38,7 @@ function waitForHealth(url, timeoutMs = 40_000) {
     );
     await new Promise((res, rej) => renderer.on("close", (code) => (code === 0 ? res() : rej(new Error(`renderer exit ${code}`)))));
   } finally {
-    console.log("Shutting down Next…");
+    console.log("Shutting down Next...");
     server.kill("SIGINT");
   }
 
