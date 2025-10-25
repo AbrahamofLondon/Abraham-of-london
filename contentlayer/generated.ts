@@ -1,6 +1,6 @@
-// contentlayer/generated.ts
+﻿// contentlayer/generated.ts
 // Temporary compatibility shim to unblock pages that still import Contentlayer.
-// We export empty (but typed) collections so pages render gracefully (0 items)
+// We export empty (but type d) collections so pages render gracefully (0 items)
 // instead of failing at build time. We can replace usage page-by-page later.
 
 export type GenericDoc = {

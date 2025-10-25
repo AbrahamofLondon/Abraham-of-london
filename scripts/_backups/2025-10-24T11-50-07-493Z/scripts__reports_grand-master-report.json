@@ -159,129 +159,87 @@
   "corruptedFiles": [
     {
       "file": "C:/Abraham-of-london/content/downloads/brotherhood-covenant.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/communication-script-bpf.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/entrepreneur-operating-pack.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/entrepreneur-survival-checklist.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/family-altar-liturgy.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/leaders-cue-card-two-up.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/leadership-playbook.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/mentorship-starter-kit.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son-cue-card.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/principles-for-my-son.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/scripture-track-john14.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/standards-brief.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/weekly-operating-rhythm.mdx",
-      "changes": [
-        "FM:quoted:title"
-      ]
+      "changes": ["FM:quoted:title"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/brotherhood-leader-guide-4-weeks.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/brotherhood-starter-kit.mdx",
-      "changes": [
-        "FM:quoted:type"
-      ]
+      "changes": ["FM:quoted:type"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/conflict-resolution-24h.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/family-budget-one-sheet.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/fathers-in-family-court-practical-pack.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/household-device-standards.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/scripture-reading-starter-30-days.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/weekly-review-one-pager.mdx",
-      "changes": [
-        "FM:quoted:slug"
-      ]
+      "changes": ["FM:quoted:slug"]
     }
   ],
   "missingFiles": [],

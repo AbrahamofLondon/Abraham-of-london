@@ -18,10 +18,10 @@ const FIXES = [
   [/"/g, '"'], // left double quote
   [/€\x9d/g, '"'], // right double quote (guarded)
   [/€\x9D/g, '"'], // alt right double quote
-  [/"/g, '"'],    // right double quote (explicit)
-  [/©/g, "©"],     // copyright
-  [/•/g, "•"],    // bullet
-  [/.../g, "..."],    // ellipsis
+  [/"/g, '"'], // right double quote (explicit)
+  [/©/g, "©"], // copyright
+  [/•/g, "•"], // bullet
+  [/.../g, "..."], // ellipsis
 ];
 
 let filesProcessed = 0;

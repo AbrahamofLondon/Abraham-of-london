@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 
 const Bullet = ({ children }: { children: React.ReactNode }) => (
@@ -30,12 +30,16 @@ function Card() {
       </ol>
       <div className="mt-auto border-t border-lightGrey pt-2 text-[11.5px] leading-snug">
         <p className="mb-1">
-          <strong>Roles:</strong> Convener - Timekeeper - Scribe - Chaplain (rotate monthly)
+          <strong>Roles:</strong> Convener - Timekeeper - Scribe - Chaplain
+          (rotate monthly)
         </p>
         <p className="mb-1">
-          <strong>Red flags:</strong> lateness w/o accountability - secrets - triangulation - one-upmanship
+          <strong>Red flags:</strong> lateness w/o accountability - secrets -
+          triangulation - one-upmanship
         </p>
-        <p className="italic text-[11px]">"As iron sharpens iron..." - Proverbs 27:17</p>
+        <p className="italic text-[11px]">
+          "As iron sharpens iron..." - Proverbs 27:17
+        </p>
       </div>
     </div>
   );
@@ -51,8 +55,8 @@ export default function CueCard() {
       <div className="not-prose">
         {/* two-up grid; on print we preserve exact dimensions */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 print:gap-6">
-          <Card />
-          <Card />
+          <Car d />
+          <Car d />
         </div>
       </div>
       <style jsx global>{`
@@ -63,7 +67,7 @@ export default function CueCard() {
           }
           /* ensure the physical size of each card matches A6 (105x148mm) */
           .print\\:gap-6 {
-            gap: 12mm !important;
+            gap: 12mm !import ant;
           }
         }
       `}</style>

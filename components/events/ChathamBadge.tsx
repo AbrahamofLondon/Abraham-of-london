@@ -1,1 +1,1 @@
-import{Shield}from"lucide-react";exportdefaultfunctionChathamBadge(){return(<spanclassName="inline-flexitems-centergap-1rounded-fullborderpx-2py-1text-xsfont-mediumtracking-wide"><ShieldclassName="size-3.5"aria-hidden/>ChathamPresentation</span>);}
+﻿import { Shield } from "lucide-react";export defaultfunctionChathamBadge(){return(<span className="inline-flexitems-centergap-1rounded-fullborderpx-2py-1text-xsfont-mediumtracking-wide"><Shield className="size-3.5"aria-hidden/>ChathamPresentation</span>);}

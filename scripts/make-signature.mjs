@@ -17,22 +17,25 @@
 //    --color "#0B2E1F"              (ink color)
 //    --bg    "#FAF7F2"              (JPEG background, PNG stays transparent)
 
-import fsp from 'node:fs/promises';
-import { constants } from 'node:fs';
+import fsp from "node:fs/promises";
+import { constants } from "node:fs";
 import path from "path";
-import sharp from 'sharp';
+import sharp from "sharp";
 
 const argv = process.argv.slice(2);
-const VAL = (f, def = null) => { const i = argv.indexOf(f); return i > -1 ? argv[i + 1] : def; };
+const VAL = (f, def = null) => {
+  const i = argv.indexOf(f);
+  return i > -1 ? argv[i + 1] : def;
+};
 
-const TEXT  = VAL('--text', 'Abraham of London');
-const SIZE  = Number(VAL('--size', '880'));      // slightly larger for luxe feel
-const PAD   = Number(VAL('--pad', '100'));       // more breathing room
-const COLOR = VAL('--color', '#0B2E1F');         // Deep Forest ink
-const BG    = VAL('--bg', '#FAF7F2');            // Warm Cream background for JPG
+const TEXT = VAL("--text", "Abraham of London");
+const SIZE = Number(VAL("--size", "880")); // slightly larger for luxe feel
+const PAD = Number(VAL("--pad", "100")); // more breathing room
+const COLOR = VAL("--color", "#0B2E1F"); // Deep Forest ink
+const BG = VAL("--bg", "#FAF7F2"); // Warm Cream background for JPG
 
-const FONT_PATH = path.join(process.cwd(), 'assets/fonts/Signature.ttf');
-const OUT_DIR   = path.join(process.cwd(), 'public/brand/signature');
+const FONT_PATH = path.join(process.cwd(), "assets/fonts/Signature.ttf");
+const OUT_DIR = path.join(process.cwd(), "public/brand/signature");
 
 // SVG using embedded @font-face to ensure rendering with sharp
 const svg = (w, h) => `
@@ -85,21 +88,35 @@ Please add an open-licensed cursive TTF as assets/fonts/Signature.ttf (e.g., OFL
 
   // Add padding on all sides
   const pngPadded = await sharp(trimmed)
-    .extend({ top: PAD, bottom: PAD, left: PAD, right: PAD, background: { r:0, g:0, b:0, alpha:0 } })
+    .extend({
+      top: PAD,
+      bottom: PAD,
+      left: PAD,
+      right: PAD,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .png({ compressionLevel: 9 })
     .toBuffer();
 
-  const outPng = path.join(OUT_DIR, 'AbrahamOfLondon-signature.png');
+  const outPng = path.join(OUT_DIR, "AbrahamOfLondon-signature.png");
   await fsp.writeFile(outPng, pngPadded); // Use async writeFile
 
   // Also create a high-quality JPEG on white for places that need JPEG
-  const outJpg = path.join(OUT_DIR, 'AbrahamOfLondon-signature.jpg');
+  const outJpg = path.join(OUT_DIR, "AbrahamOfLondon-signature.jpg");
   await sharp(pngPadded)
     .flatten({ background: BG })
     .jpeg({ quality: 96, mozjpeg: true })
     .toFile(outJpg); // sharp's toFile is already promise-based
 
-  console.log('Signature saved:\n ', path.relative(process.cwd(), outPng), '\n ', path.relative(process.cwd(), outJpg));
+  console.log(
+    "Signature saved:\n ",
+    path.relative(process.cwd(), outPng),
+    "\n ",
+    path.relative(process.cwd(), outJpg),
+  );
 }
 
-main().catch((e) => { console.error(e); process.exit(2); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(2);
+});

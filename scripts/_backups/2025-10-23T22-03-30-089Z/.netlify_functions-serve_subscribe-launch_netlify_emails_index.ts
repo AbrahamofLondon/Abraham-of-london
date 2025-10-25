@@ -1,4 +1,4 @@
-// netlify/emails/index.ts
+﻿// netlify/emails/index.ts
 // Pure string builders for emails Ãƒ¢Ã¢â€š¬Ã¢â‚¬ safe for Netlify function bundling.
 
 type Common = { siteUrl: string; name?: string };
@@ -73,7 +73,17 @@ export function renderTeaserHtml({ name, siteUrl }: Common): string {
 }
 
 function escapeHtml(str: string) {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m
+  return String(str).replace(
+    /[&<>"']/g,
+    (m) =>
+      (
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }) as const
+      )[m] || m,
   );
 }

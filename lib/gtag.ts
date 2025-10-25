@@ -1,10 +1,10 @@
-// lib/gtag.ts
+﻿// lib/gtag.ts
 import { siteConfig } from "./siteConfig";
 
 export const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || siteConfig.gaMeasurementId || "";
 
-/* add this line to keep _app.tsx happy */
+/* Ãƒ°Ã...¸Ã¢â‚¬ËœÃ¢â‚¬¡ add this line to keep _app.tsx happy */
 export const GA_ID = GA_MEASUREMENT_ID;
 
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -26,7 +26,10 @@ export const pageview = (url: string) => {
   gtagSafe("config", GA_MEASUREMENT_ID, { page_path: url });
 };
 
-export const gaEvent = (action: string, params: Record<string, unknown> = {}) => {
+export const gaEvent = (
+  action: string,
+  params: Record<string, unknown> = {},
+) => {
   gtagSafe("event", action, params);
 };
 

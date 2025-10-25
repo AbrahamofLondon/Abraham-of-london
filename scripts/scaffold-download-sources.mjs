@@ -15,7 +15,8 @@ const FORCE = process.argv.includes("--force");
 const SMALL_BYTES = 10 * 1024;
 
 const titleCase = (s) =>
-  s.replace(/[-_]+/g, " ")
+  s
+    .replace(/[-_]+/g, " ")
     .replace(/\b[a-z]/g, (m) => m.toUpperCase())
     .replace(/\bA4\b/gi, "A4")
     .replace(/\bA6\b/gi, "A6");
@@ -38,10 +39,10 @@ const kebab = (file) =>
 const TEMPLATE = (title, file, excerpt) => `---
 title: ${title}
 author: Abraham of London
-date: ${new Date().toISOString().slice(0,10)}
+date: ${new Date().toISOString().slice(0, 10)}
 excerpt: ${excerpt}
 pdfFileName: ${file}
-coverImage: /assets/images/downloads/${file.replace(/\.pdf$/i,"")}.jpg
+coverImage: /assets/images/downloads/${file.replace(/\.pdf$/i, "")}.jpg
 ---
 
 # ${title}
@@ -68,7 +69,8 @@ async function main() {
     if (!stat) continue;
     const isSmall = stat.size < SMALL_BYTES;
     const styleBad = BAD_STYLE(f);
-    if (isSmall || styleBad) picks.push({ name: f, size: stat.size, isSmall, styleBad });
+    if (isSmall || styleBad)
+      picks.push({ name: f, size: stat.size, isSmall, styleBad });
   }
 
   if (picks.length === 0) {
@@ -88,14 +90,26 @@ async function main() {
       continue;
     }
 
-    await fs.writeFile(mdPath, TEMPLATE(prettyTitle, suggested, excerpt), "utf8");
+    await fs.writeFile(
+      mdPath,
+      TEMPLATE(prettyTitle, suggested, excerpt),
+      "utf8",
+    );
     console.log("✍️  scaffolded:", path.relative(ROOT, mdPath));
   }
 
   // Optional: emit a manifest hash to track changes
   const manifest = JSON.stringify(picks, null, 2);
-  const hash = crypto.createHash("sha1").update(manifest).digest("hex").slice(0, 8);
-  await fs.writeFile(path.join(OUT, `.scaffold-manifest-${hash}.json`), manifest, "utf8");
+  const hash = crypto
+    .createHash("sha1")
+    .update(manifest)
+    .digest("hex")
+    .slice(0, 8);
+  await fs.writeFile(
+    path.join(OUT, `.scaffold-manifest-${hash}.json`),
+    manifest,
+    "utf8",
+  );
 }
 
 main().catch((e) => {
@@ -215,9 +229,8 @@ const DOCS = {
   },
   "Leaders_Cue_Card.pdf": {
     title: "Leader's Cue Card (Title Case)",
-    blurb:
-      "Alias PDF in Title_Case to satisfy legacy/bookmark variants.",
-  }
+    blurb: "Alias PDF in Title_Case to satisfy legacy/bookmark variants.",
+  },
 };
 
 const TEMPLATE = (title, blurb) => `<!doctype html>
@@ -245,7 +258,9 @@ hr{border:0;border-top:1px solid #e5e7eb;margin:16px 0}
   <div class="footer">A/L - ${title}</div>
 </body></html>`;
 
-async function ensureDir(dir) { await fs.mkdir(dir, { recursive: true }); }
+async function ensureDir(dir) {
+  await fs.mkdir(dir, { recursive: true });
+}
 
 async function main() {
   await ensureDir(SRC_DIR);
@@ -267,4 +282,7 @@ async function main() {
   console.log("\nNext: run `npm run pdfs` to render → public/downloads/*.pdf");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

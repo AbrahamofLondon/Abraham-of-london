@@ -1,2 +1,2 @@
-declare const anything: any;
+﻿declare const anything: any;
 export = anything;

@@ -1,4 +1,4 @@
-// lib/hero-banners.ts
+﻿// lib/hero-banners.ts
 export type VideoSource = {
   src: string;
   type: "video/webm" | "video/mp4";
@@ -20,13 +20,29 @@ export type BannerConfig = {
  */
 const BRAND_REEL_SOURCES: VideoSource[] = [
   // --- WEB M / VP9 (Best quality/compression on modern browsers) ---
-  { src: "/assets/video/brand-reel-2160p.webm", type: "video/webm", media: "(min-width: 1600px)" },
-  { src: "/assets/video/brand-reel-1440p.webm", type: "video/webm", media: "(min-width: 1200px)" },
+  {
+    src: "/assets/video/brand-reel-2160p.webm",
+    type: "video/webm",
+    media: "(min-width: 1600px)",
+  },
+  {
+    src: "/assets/video/brand-reel-1440p.webm",
+    type: "video/webm",
+    media: "(min-width: 1200px)",
+  },
   { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" }, // Default WebM
 
   // --- MP4 / H.264 (Fallback for Safari/older browsers) ---
-  { src: "/assets/video/brand-reel-2160p.mp4", type: "video/mp4", media: "(min-width: 1600px)" },
-  { src: "/assets/video/brand-reel-1440p.mp4", type: "video/mp4", media: "(min-width: 1200px)" },
+  {
+    src: "/assets/video/brand-reel-2160p.mp4",
+    type: "video/mp4",
+    media: "(min-width: 1600px)",
+  },
+  {
+    src: "/assets/video/brand-reel-1440p.mp4",
+    type: "video/mp4",
+    media: "(min-width: 1200px)",
+  },
   { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" }, // Default MP4/Final Fallback
 ];
 
@@ -51,8 +67,9 @@ export function getActiveBanner(): BannerConfig {
       { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
       { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
     ],
-    // shift view so the *left* of the frame is prioritized (crops the right edge)
-    mobileObjectPositionClass: "object-left md:object-[30%_center] lg:object-[40%_center]",
+    // Ãƒ°Ã...¸Ã¢â‚¬ËœÃ¢â‚¬¡ shift view so the *left* of the frame is prioritized (crops the right edge)
+    mobileObjectPositionClass:
+      "object-left md:object-[30%_center] lg:object-[40%_center]",
     heightClassName: "min-h-[70svh] sm:min-h-[72svh] lg:min-h-[78svh]",
   } as const;
 }

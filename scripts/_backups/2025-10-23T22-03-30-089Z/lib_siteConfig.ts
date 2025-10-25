@@ -1,9 +1,18 @@
-// lib/siteConfig.ts
+﻿// lib/siteConfig.ts
 export type SocialLink = {
   href: string;
   label: string;
   icon: string; // Made required
-  kind?: "x" | "instagram" | "facebook" | "linkedin" | "youtube" | "whatsapp" | "mail" | "phone" | "tiktok";
+  kind?:
+    | "x"
+    | "instagram"
+    | "facebook"
+    | "linkedin"
+    | "youtube"
+    | "whatsapp"
+    | "mail"
+    | "phone"
+    | "tiktok";
   external?: boolean;
 };
 
@@ -16,9 +25,9 @@ export type SiteConfig = {
   socialLinks: SocialLink[];
   gaMeasurementId?: string | null;
   email: string;
-  ogImage: string;      // path under /public
+  ogImage: string; // path under /public
   twitterImage: string; // path under /public
-  authorImage: string;  // path under /public
+  authorImage: string; // path under /public
 };
 
 /** Normalise an origin string (trim + strip trailing slash). */
@@ -32,7 +41,7 @@ function cleanOrigin(s: string) {
  * (Avoid preview URLs for canonicals/JSON-LD.)
  */
 const SITE_ORIGIN = cleanOrigin(
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
 );
 
 export const siteConfig: SiteConfig = {
@@ -43,15 +52,67 @@ export const siteConfig: SiteConfig = {
   siteUrl: SITE_ORIGIN,
 
   socialLinks: [
-    { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "mail", icon: "/assets/images/social/email.svg" },
-    { href: "tel:+442086225909", label: "Phone", kind: "phone", icon: "/assets/images/social/phone.svg" },
-    { href: "https://x.com/AbrahamAda48634", label: "X", kind: "x", icon: "/assets/images/social/twitter.svg", external: true },
-    { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", kind: "instagram", icon: "/assets/images/social/instagram.svg", external: true },
-    { href: "https://www.facebook.com/share/16tvsnTgRG/", label: "Facebook", kind: "facebook", icon: "/assets/images/social/facebook.svg", external: true },
-    { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", label: "LinkedIn", kind: "linkedin", icon: "/assets/images/social/linkedin.svg", external: true },
-    { href: "https://www.youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube", icon: "/assets/images/social/youtube.svg", external: true },
-    { href: "https://wa.me/447496334022", label: "WhatsApp", kind: "whatsapp", icon: "/assets/images/social/whatsapp.svg", external: true },
-    { href: "https://www.tiktok.com/@abrahamoflondon", label: "TikTok", kind: "tiktok", icon: "/assets/images/social/tiktok.svg", external: true },
+    {
+      href: "mailto:info@abrahamoflondon.org",
+      label: "Email",
+      kind: "mail",
+      icon: "/assets/images/social/email.svg",
+    },
+    {
+      href: "tel:+442086225909",
+      label: "Phone",
+      kind: "phone",
+      icon: "/assets/images/social/phone.svg",
+    },
+    {
+      href: "https://x.com/AbrahamAda48634",
+      label: "X",
+      kind: "x",
+      icon: "/assets/images/social/twitter.svg",
+      external: true,
+    },
+    {
+      href: "https://www.instagram.com/abraham_of_london_/",
+      label: "Instagram",
+      kind: "instagram",
+      icon: "/assets/images/social/instagram.svg",
+      external: true,
+    },
+    {
+      href: "https://www.facebook.com/share/16tvsnTgRG/",
+      label: "Facebook",
+      kind: "facebook",
+      icon: "/assets/images/social/facebook.svg",
+      external: true,
+    },
+    {
+      href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+      label: "LinkedIn",
+      kind: "linkedin",
+      icon: "/assets/images/social/linkedin.svg",
+      external: true,
+    },
+    {
+      href: "https://www.youtube.com/@abrahamoflondon",
+      label: "YouTube",
+      kind: "youtube",
+      icon: "/assets/images/social/youtube.svg",
+      external: true,
+    },
+    {
+      href: "https://wa.me/447496334022",
+      label: "WhatsApp",
+      kind: "whatsapp",
+      icon: "/assets/images/social/whatsapp.svg",
+      external: true,
+    },
+    {
+      href: "https://www.tiktok.com/@abrahamoflondon",
+      label: "TikTok",
+      kind: "tiktok",
+      icon: "/assets/images/social/tiktok.svg",
+      external: true,
+    },
   ],
 
   gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || null,
@@ -64,11 +125,18 @@ export const siteConfig: SiteConfig = {
 };
 
 /** Simple external check for links/components. */
-export const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
+export const isExternal = (href: string) =>
+  /^https?:\/\//i.test(href) ||
+  href.startsWith("mailto:") ||
+  href.startsWith("tel:");
 
 /** Normalise a local asset to a leading-slash path (or undefined if remote). */
 export const ensureLocal = (p?: string | null) =>
-  p && !isExternal(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
+  p && !isExternal(p)
+    ? p.startsWith("/")
+      ? p
+      : `/${p.replace(/^\/+/, "")}`
+    : undefined;
 
 /**
  * Safe absolute URL join.

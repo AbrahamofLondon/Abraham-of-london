@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 
@@ -38,7 +38,10 @@ export default function ScrollProgress({
   }, []);
 
   return (
-    <div className={`fixed left-0 top-0 w-full ${zIndexClass}`} aria-hidden="true">
+    <div
+      className={`fixed left-0 top-0 w-full ${zIndexClass}`}
+      aria-hidden="true"
+    >
       <div
         className={`${heightClass} ${colorClass}`}
         style={{ width: `${progress}%`, transition: "width 120ms linear" }}

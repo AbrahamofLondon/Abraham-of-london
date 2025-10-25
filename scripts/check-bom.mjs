@@ -21,7 +21,9 @@ for (const f of files) {
 
     // Check for UTF-8 BOM: EF BB BF
     if (buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
-      console.error(`✖ ${f}: has UTF-8 BOM (Byte Order Mark). This should be removed!`);
+      console.error(
+        `✖ ${f}: has UTF-8 BOM (Byte Order Mark). This should be removed!`,
+      );
       bad++;
       continue;
     }
@@ -30,8 +32,7 @@ for (const f of files) {
     if (f.toLowerCase().endsWith(".json")) {
       JSON.parse(buf.toString("utf8"));
     }
-  }
-  catch (e) {
+  } catch (e) {
     console.error(`✖ ${f}: invalid JSON or read error → ${e.message}`);
     bad++;
   }

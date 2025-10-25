@@ -1,4 +1,4 @@
-// types/book.ts
+﻿// type s/book.ts
 
 export type BookMeta = {
   slug: string;

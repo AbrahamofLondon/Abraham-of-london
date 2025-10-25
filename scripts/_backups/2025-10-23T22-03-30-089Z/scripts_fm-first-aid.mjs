@@ -19,12 +19,31 @@ const TARGET_DIRS = [
 const norm = (p) => p.replaceAll("\\", "/");
 const INVIS = /[\u00A0\u200B\uFEFF\u2009]/g;
 const CP1252 = [
-  [/—/g, "—"], [/–/g, "–"], [/'/g, "'"], [/'/g, "'"],
-  [/"/g, '"'], [/"/g, '"'], [/â€¢/g, "•"], [/…/g, "…"],
-  [/\s/g, ""], [/Ã‚/g, ""],
+  [/—/g, "—"],
+  [/–/g, "–"],
+  [/'/g, "'"],
+  [/'/g, "'"],
+  [/"/g, '"'],
+  [/"/g, '"'],
+  [/â€¢/g, "•"],
+  [/…/g, "…"],
+  [/\s/g, ""],
+  [/Ã‚/g, ""],
 ];
 
-const KEYS = ["title","type","kind","slug","date","author","readTime","category","excerpt","pdfPath","coverImage"];
+const KEYS = [
+  "title",
+  "type",
+  "kind",
+  "slug",
+  "date",
+  "author",
+  "readTime",
+  "category",
+  "excerpt",
+  "pdfPath",
+  "coverImage",
+];
 
 function demojibake(s) {
   if (!s) return s;
@@ -47,11 +66,11 @@ function rescueFrontMatterText(fmRaw) {
   // Insert newlines before any known key that isn't already at line start.
   fm = fm.replace(
     new RegExp(`(?!^)\\s*(${KEYS.join("|")})\\s*:`, "g"),
-    (m) => `\n${m.trim()}`
+    (m) => `\n${m.trim()}`,
   );
 
   // Collapse accidental repeats like  'kind:' -> 'type:'
-  fm = fm.replace(/^(\s*)kind(\s*):/gmi, "$1type$2:");
+  fm = fm.replace(/^(\s*)kind(\s*):/gim, "$1type$2:");
 
   // Unwrap over-escaped values:  "\"guide\"" -> "guide"
   fm = fm.replace(/:\s*"\\"([^"]+)\\""\s*$/gm, ': "$1"');
@@ -59,11 +78,15 @@ function rescueFrontMatterText(fmRaw) {
   // If value looks like it swallowed other key/value text, split it.
   fm = fm.replace(
     /:\s*"([^"]*?)(?=title:|type:|slug:|date:|author:|readTime:|category:|excerpt:|pdfPath:|coverImage:)/g,
-    ': "$1"'
+    ': "$1"',
   );
 
   // Ensure each key:value is on its own line
-  fm = fm.split(/\r?\n/).map(l => l.trim()).filter(Boolean).join("\n");
+  fm = fm
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .join("\n");
 
   return fm.trim() + "\n";
 }
@@ -71,9 +94,9 @@ function rescueFrontMatterText(fmRaw) {
 function quoteIfNeeded(val) {
   if (val === undefined || val === null) return val;
   const s = String(val);
-  if (/^(true|false|\d+)$/.test(s)) return s;        // allow booleans/ints
-  if (/^".*"$/.test(s)) return s;                    // already quoted
-  if (/^[A-Za-z0-9._/-]+$/.test(s)) return s;        // simple tokens
+  if (/^(true|false|\d+)$/.test(s)) return s; // allow booleans/ints
+  if (/^".*"$/.test(s)) return s; // already quoted
+  if (/^[A-Za-z0-9._/-]+$/.test(s)) return s; // simple tokens
   return `"${s.replace(/"/g, '\\"')}"`;
 }
 
@@ -87,10 +110,15 @@ function normalizeFrontMatterData(data, filename) {
   // common auto-fills
   if (!safe.slug) {
     const base = path.basename(filename).replace(/\.[^.]+$/, "");
-    safe.slug = base.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-");
+    safe.slug = base
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/-+/g, "-");
   }
   if (!safe.title) {
-    safe.title = safe.slug.replace(/[-_]+/g, " ").replace(/\b\w/g, m => m.toUpperCase());
+    safe.title = safe.slug
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\w/g, (m) => m.toUpperCase());
   }
 
   // demojibake stringy fields
@@ -137,8 +165,13 @@ async function processFile(fp) {
         const base = path.basename(fp).replace(/\.[^.]+$/, "");
         const data = {
           type: "guide",
-          slug: base.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-"),
-          title: base.replace(/[-_]+/g, " ").replace(/\b\w/g, m => m.toUpperCase()),
+          slug: base
+            .toLowerCase()
+            .replace(/[^a-z0-9-]+/g, "-")
+            .replace(/-+/g, "-"),
+          title: base
+            .replace(/[-_]+/g, " ")
+            .replace(/\b\w/g, (m) => m.toUpperCase()),
         };
         outText = matter.stringify(body, data);
       }
@@ -165,7 +198,9 @@ async function processFile(fp) {
 }
 
 async function walk(dir) {
-  const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
+  const entries = await fs
+    .readdir(dir, { withFileTypes: true })
+    .catch(() => []);
   for (const e of entries) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) {

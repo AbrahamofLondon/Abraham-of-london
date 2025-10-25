@@ -1,4 +1,4 @@
-// lib/downloads.ts
+﻿// lib/downloads.ts
 
 import fs from "node:fs";
 import path from "node:path";
@@ -7,13 +7,13 @@ import path from "node:path";
 
 /** Represents a dynamically discovered file in the /public/downloads directory. */
 export type DownloadItem = {
-  file: string;           // file name (e.g. "Mentorship_Starter_Kit.pdf")
-  href: string;           // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
-  title: string;          // pretty title (e.g. "Mentorship Starter Kit")
-  bytes: number;          // raw size
-  size: string;           // human size (e.g. "45 KB")
-  modified: string;       // ISO mtime
-  ext: string;            // ".pdf"
+  file: string; // file name (e.g. "Mentorship_Starter_Kit.pdf")
+  href: string; // public URL (e.g. "/downloads/Mentorship_Starter_Kit.pdf")
+  title: string; // pretty title (e.g. "Mentorship Starter Kit")
+  bytes: number; // raw size
+  size: string; // human size (e.g. "45 KB")
+  modified: string; // ISO mtime
+  ext: string; // ".pdf"
 };
 
 const ROOT = process.cwd();
@@ -37,9 +37,7 @@ function human(bytes: number): string {
 function toTitle(file: string) {
   const base = file.replace(/\.[^.]+$/, "");
   // Replace underscores/hyphens with space, and capitalize first letter of each word
-  return base
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return base.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -121,10 +119,10 @@ export type DownloadKey = keyof typeof DOWNLOADS;
 // --- DISPLAY UTILITIES ---
 // ------------------------------------
 
-// NEW TYPE: Define the union of possible "pill" item types
+// NEW TYPE: Define the union of possible "pill" item type s
 type PillItem =
-  | { kind: "notes", label: string, href: string }
-  | { kind: "pdf", label: string, href: string, download: true };
+  | { kind: "notes"; label: string; href: string }
+  | { kind: "pdf"; label: string; href: string; download: true };
 
 /** Utility to produce pill items for Notes + PDF */
 export function buildNotesAndPdfPills(keys: DownloadKey[]): PillItem[] {
@@ -137,7 +135,13 @@ export function buildNotesAndPdfPills(keys: DownloadKey[]): PillItem[] {
       { kind: "notes" as const, label: "Notes", href: d.page },
     ];
     // Use the PDF field if present
-    if (d.pdf) items.push({ kind: "pdf" as const, label: "PDF", href: d.pdf, download: true });
+    if (d.pdf)
+      items.push({
+        kind: "pdf" as const,
+        label: "PDF",
+        href: d.pdf,
+        download: true,
+      });
 
     return items;
   });

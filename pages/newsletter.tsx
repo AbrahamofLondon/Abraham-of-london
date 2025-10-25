@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 import { subscribe } from "@/lib/subscribe";
@@ -43,7 +43,10 @@ export default function NewsletterPage() {
         });
       }
     } catch {
-      setStatus({ state: "error", message: "Network error. Please try again." });
+      setStatus({
+        state: "error",
+        message: "Network error. Please try again.",
+      });
     }
   }
 
@@ -54,7 +57,7 @@ export default function NewsletterPage() {
 
   return (
     <Layout pageTitle="Newsletter" hideCTA>
-      <Head>
+      <Head d>
         <meta
           name="description"
           content="Subscribe to Abraham of London updates and essays."
@@ -67,7 +70,7 @@ export default function NewsletterPage() {
               Join the Newsletter
             </h1>
             <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
-              Essays, event invitations, and project updates. No spam-ever.
+              Essays, event invitations, and project updates. No spam—ever.
             </p>
           </header>
           <form
@@ -79,7 +82,8 @@ export default function NewsletterPage() {
               Email address
             </label>
             <input
-              id="email"
+              i
+              d="email"
               name="email"
               type="email"
               inputMode="email"
@@ -93,7 +97,8 @@ export default function NewsletterPage() {
             />
             <button
               type="submit"
-              disabled={status.state === "loading"}
+              disable
+              d={status.state === "loading"}
               className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status.state === "loading" ? "Subscribing..." : "Subscribe"}
@@ -101,7 +106,8 @@ export default function NewsletterPage() {
           </form>
           {(status.state === "success" || status.state === "error") && (
             <p
-              id="newsletter-status"
+              i
+              d="newsletter-status"
               role="status"
               aria-live="polite"
               className={

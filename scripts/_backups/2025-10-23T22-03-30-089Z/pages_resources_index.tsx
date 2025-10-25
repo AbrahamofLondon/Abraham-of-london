@@ -1,7 +1,7 @@
-import * as React from "react";
+﻿import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
- // <-- FIXED
+// <-- FIXED
 
 export default function ResourcesIndex() {
   const resources = [...allResources]
@@ -10,7 +10,7 @@ export default function ResourcesIndex() {
 
   return (
     <>
-      <Head>
+      <Head d>
         <title>Resources</title>
       </Head>
       <main className="mx-auto max-w-5xl px-4 py-10">
@@ -27,13 +27,14 @@ export default function ResourcesIndex() {
               <div className="mt-2 flex gap-2 text-xs text-gray-500">
                 {r.category && <span>{r.category}</span>}
                 {r.date && (
-                  <span>
-                    â€¢{new Date(r.date).toLocaleDateString()}
-                  </span>
+                  <span>â€¢{new Date(r.date).toLocaleDateString()}</span>
                 )}
               </div>
               <div className="mt-3">
-                <Link href={`/print/resource/${r.slug}`} className="text-sm underline">
+                <Link
+                  href={`/print/resource/${r.slug}`}
+                  className="text-sm underline"
+                >
                   Print version â†'
                 </Link>
               </div>

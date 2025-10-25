@@ -1,4 +1,4 @@
-// lib/server/downloads-data.ts
+﻿// lib/server/downloads-data.ts
 // Server-only module: read front-matter for downloads (MD/MDX) safely.
 
 import fs from "fs";
@@ -13,12 +13,12 @@ export type DownloadMeta = {
   slug: string;
   title?: string | null;
   excerpt?: string | null;
-  coverImage?: string | null;   // e.g. /assets/images/downloads/foo.jpg
-  file?: string | null;         // e.g. /downloads/foo.pdf
+  coverImage?: string | null; // e.g. /assets/images/downloads/foo.jpg
+  file?: string | null; // e.g. /downloads/foo.pdf
   coverAspect?: "book" | "square" | "16/9" | string | null;
   coverFit?: "contain" | "cover" | string | null;
   coverPosition?: "center" | "top" | "left" | "right" | string | null;
-  content?: string;             // optional full MD/MDX content
+  content?: string; // optional full MD/MDX content
 };
 
 type FieldKey = keyof DownloadMeta;
@@ -61,7 +61,11 @@ function normalizeCoverImage(v: unknown): string | undefined {
   const raw = ensureLocal(typeof v === "string" ? v : undefined);
   if (!raw) return undefined;
   // If user just wrote a filename, assume downloads images folder
-  if (!raw.startsWith("/assets/") && !raw.startsWith("/_next/") && !/^https?:\/\//i.test(raw)) {
+  if (
+    !raw.startsWith("/assets/") &&
+    !raw.startsWith("/_next/") &&
+    !/^https?:\/\//i.test(raw)
+  ) {
     return `/assets/images/downloads/${raw.replace(/^\/+/, "")}`;
   }
   return raw;
@@ -91,19 +95,19 @@ export function getDownloadSlugs(): string[] {
 
 /**
  * Read a single download by slug and return a partial object containing requested fields.
- * - Never throws on missing files; returns a minimal Not Foundentry instead.
+ * - Never throws on missing files; returns a minimal Ãƒ¢Ã¢â€š¬Ã..."Not FoundÃƒ¢Ã¢â€š¬Ã‚ entry instead.
  * - Normalizes strings (trim), asset paths, and avoids `undefined` in fields (uses null instead).
  */
 export function getDownloadBySlug(
   slug: string,
   fields: FieldKey[] = DEFAULT_FIELDS,
-  includeContent = false
+  includeContent = false,
 ): DownloadMeta {
   const real = slug.replace(/\.mdx?$/i, "");
   const fullPath = resolveDownloadPath(real);
 
   if (!fullPath) {
-    // Safe fallback: wont break build if a download MD is missing
+    // Safe fallback: wonÃƒ¢Ã¢â€š¬Ã¢â€ž¢t break build if a download MD is missing
     const base: DownloadMeta = {
       slug: real,
       title: "Download Not Found",
@@ -140,7 +144,8 @@ export function getDownloadBySlug(
         break;
       }
       case "excerpt": {
-        const v = typeof fm.excerpt === "string" ? fm.excerpt.trim() : undefined;
+        const v =
+          typeof fm.excerpt === "string" ? fm.excerpt.trim() : undefined;
         out.excerpt = v ?? null;
         break;
       }
@@ -155,17 +160,24 @@ export function getDownloadBySlug(
         break;
       }
       case "coverAspect": {
-        const v = typeof fm.coverAspect === "string" ? fm.coverAspect.trim() : undefined;
+        const v =
+          typeof fm.coverAspect === "string"
+            ? fm.coverAspect.trim()
+            : undefined;
         out.coverAspect = v ?? null;
         break;
       }
       case "coverFit": {
-        const v = typeof fm.coverFit === "string" ? fm.coverFit.trim() : undefined;
+        const v =
+          typeof fm.coverFit === "string" ? fm.coverFit.trim() : undefined;
         out.coverFit = v ?? null;
         break;
       }
       case "coverPosition": {
-        const v = typeof fm.coverPosition === "string" ? fm.coverPosition.trim() : undefined;
+        const v =
+          typeof fm.coverPosition === "string"
+            ? fm.coverPosition.trim()
+            : undefined;
         out.coverPosition = v ?? null;
         break;
       }
@@ -192,7 +204,7 @@ export function getDownloadBySlug(
  */
 export function getDownloadsBySlugs(
   slugs: string[],
-  fields: FieldKey[] = DEFAULT_FIELDS
+  fields: FieldKey[] = DEFAULT_FIELDS,
 ): DownloadMeta[] {
   return slugs.map((s) => getDownloadBySlug(s, fields));
 }
@@ -202,7 +214,7 @@ export function getDownloadsBySlugs(
  * Sorted alphabetically by title (fallback to slug).
  */
 export function getAllDownloads(
-  fields: FieldKey[] = DEFAULT_FIELDS
+  fields: FieldKey[] = DEFAULT_FIELDS,
 ): DownloadMeta[] {
   const slugs = getDownloadSlugs();
   const items = slugs.map((s) => getDownloadBySlug(s, fields));

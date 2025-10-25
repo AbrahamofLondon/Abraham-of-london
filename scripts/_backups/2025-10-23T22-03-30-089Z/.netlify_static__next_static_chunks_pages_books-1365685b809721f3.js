@@ -1,1 +1,893 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4672],{3021:function(e,r,o){(window.__NEXT_P=window.__NEXT_P||[]).push(["/books",function(){return o(7178)}])},1523:function(e,r,o){"use strict";o.d(r,{Z:function(){return u}});var l=o(5893),t=o(1664),s=o.n(t),a=o(5675),n=o.n(a),i=o(2053),d=o(512),c=o(7294);let h="/assets/images/default-book.jpg";function u(e){let{slug:r,title:o,author:t,excerpt:a,coverImage:u,buyLink:x,genre:m,downloadPdf:f,downloadEpub:p,featured:b=!1,className:g="",motionProps:v={}}=e,y=r.startsWith("/")?r:"/books/".concat(r),j="object"==typeof u?u:u&&u.trim()||h,[w,N]=c.useState(j);return(0,l.jsxs)(i.E.article,{...v,className:(0,d.Z)("group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all hover:shadow-cardHover","focus-within:ring-1 focus-within:ring-[color:var(--color-primary)/0.3]",b&&"ring-1 ring-softGold/30",g),children:[(0,l.jsxs)(s(),{href:y,className:"block relative w-full",prefetch:!1,children:[(0,l.jsx)("div",{className:"relative w-full aspect-[2/3]",children:(0,l.jsx)(n(),{src:w,alt:"".concat(o," book cover"),fill:!0,sizes:"(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px",className:"object-cover transition-transform duration-500 group-hover:scale-[1.02]",onError:()=>"string"==typeof w&&w!==h&&N(h),priority:b})}),b&&(0,l.jsxs)("span",{className:"absolute top-4 left-4 rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-deepCharcoal shadow",children:["Featured",(0,l.jsx)("span",{className:"sr-only",children:" book"})]})]}),(0,l.jsxs)("div",{className:"p-6",children:[(0,l.jsx)("h3",{className:"font-serif text-xl font-semibold text-deepCharcoal",children:(0,l.jsx)(s(),{href:y,prefetch:!1,className:"underline decoration-softGold/0 underline-offset-[6px] transition hover:decoration-softGold/70",children:o})}),(0,l.jsxs)("p",{className:"mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]",children:["By ",t]}),(0,l.jsx)("p",{className:"mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]",children:a}),(0,l.jsxs)("div",{className:"mt-4 flex flex-wrap items-center gap-3",children:[(0,l.jsx)("span",{className:"inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]",children:m||"Uncategorized"}),(0,l.jsx)(s(),{href:y,prefetch:!1,className:"ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9]",children:"Learn more"}),x&&"#"!==x&&(0,l.jsx)("a",{href:x,target:"_blank",rel:"noopener noreferrer",className:"inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.25] px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream","aria-label":"Buy ".concat(o," (opens in new tab)"),children:"Buy"})]}),(f||p)&&(0,l.jsxs)("div",{className:"mt-3 flex flex-wrap gap-4 text-xs",children:[f&&(0,l.jsx)("a",{href:f,target:"_blank",rel:"noopener noreferrer",className:"luxury-link",children:"PDF"}),p&&(0,l.jsx)("a",{href:p,target:"_blank",rel:"noopener noreferrer",className:"luxury-link",children:"EPUB"})]})]})]})}},9033:function(e,r,o){"use strict";o.d(r,{Z:function(){return a}});var l=o(5893),t=o(1664),s=o.n(t);function a(e){let{items:r,className:o="",separator:t="/",ariaLabel:a="Breadcrumb"}=e;return(null==r?void 0:r.length)?(0,l.jsx)("nav",{"aria-label":a,className:o,children:(0,l.jsx)("ol",{className:"flex flex-wrap items-center gap-2 text-sm text-[color:var(--color-on-secondary)/0.7]",children:r.map((e,o)=>{let a=o===r.length-1,n="".concat(e.label,"-").concat(o);return(0,l.jsxs)("li",{className:"flex items-center gap-2 min-w-0",children:[e.href&&!a?(0,l.jsx)(s(),{href:e.href,className:"hover:text-deepCharcoal max-w-[18ch] truncate",children:e.label}):(0,l.jsx)("span",{className:"text-[color:var(--color-on-secondary)/0.7] max-w-[22ch] truncate","aria-current":a?"page":void 0,title:e.label,children:e.label}),!a&&(0,l.jsx)("span",{"aria-hidden":"true",children:t})]},n)})})}):null}o(7294)},1041:function(e,r,o){"use strict";o.d(r,{Z:function(){return d}});var l=o(5893),t=o(1664),s=o.n(t);let a={fatherhood:{title:"Explore Fatherhood Resources",reads:[{href:"/blog/leadership-begins-at-home",label:"Leadership Begins at Home",sub:"Lead from the inside out"},{href:"/blog/the-brotherhood-code",label:"The Brotherhood Code",sub:"Build your band of brothers"},{href:"/blog/reclaiming-the-narrative",label:"Reclaiming the Narrative",sub:"Court-season clarity"}],downloads:[{href:"/downloads/Fatherhood_Guide.pdf",label:"Fatherhood Guide"},{href:"/downloads/Mentorship_Starter_Kit.pdf",label:"Mentorship Starter Kit"}]}},n=[{href:"/blog/reclaiming-the-narrative",label:"Reclaiming the Narrative",sub:"Court-season clarity"},{href:"/blog/the-brotherhood-code",label:"The Brotherhood Code",sub:"Build your band of brothers"},{href:"/blog/leadership-begins-at-home",label:"Leadership Begins at Home",sub:"Lead from the inside out"}],i=[{href:"/downloads/Mentorship_Starter_Kit.pdf",label:"Mentorship Starter Kit"},{href:"/downloads/Leadership_Playbook.pdf",label:"Leadership Playbook (30•60•90)"},{href:"/downloads/Entrepreneur_Operating_Pack.pdf",label:"Entrepreneur Operating Pack"}];function d(e){var r,o,t,d;let c="preset"in e?e.preset:void 0,h=(c&&(t=String(c))&&null!==(d=a[String(t).trim().toLowerCase()])&&void 0!==d?d:null)||{title:"title"in e&&e.title||"Further Reading & Tools",reads:"reads"in e&&e.reads||n,downloads:"downloads"in e&&e.downloads||i};if(!h)return null;let u=(null!==(r=h.reads)&&void 0!==r?r:[]).filter(Boolean),x=(null!==(o=h.downloads)&&void 0!==o?o:[]).filter(Boolean);return(0,l.jsxs)("section",{className:"mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ".concat("className"in e&&e.className||""),"aria-labelledby":"resources-cta-title",children:[(0,l.jsx)("h3",{id:"resources-cta-title",className:"mb-4 font-serif text-2xl text-forest",children:h.title}),(0,l.jsxs)("div",{className:"grid gap-6 md:grid-cols-2",children:[!!u.length&&(0,l.jsxs)("div",{children:[(0,l.jsx)("h4",{className:"mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase",children:"Further Reading"}),(0,l.jsx)("ul",{className:"space-y-2",children:u.map(e=>(0,l.jsxs)("li",{children:[!function(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"";return e.startsWith("/")&&!e.endsWith(".pdf")}(e.href)?(0,l.jsx)("a",{href:e.href,className:"luxury-link text-forest",target:"_blank",rel:"noopener noreferrer",children:e.label}):(0,l.jsx)(s(),{href:e.href,className:"luxury-link text-forest",prefetch:!1,children:e.label}),e.sub&&(0,l.jsxs)("span",{className:"ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]",children:["— ",e.sub]})]},e.href))})]}),!!x.length&&(0,l.jsxs)("div",{children:[(0,l.jsx)("h4",{className:"mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase",children:"Downloads"}),(0,l.jsx)("ul",{className:"space-y-2",children:x.map(e=>(0,l.jsx)("li",{children:(0,l.jsx)("a",{href:e.href,className:"luxury-link text-forest",rel:"noopener",download:!0,children:e.label})},e.href))})]})]})]})}},7178:function(e,r,o){"use strict";o.r(r),o.d(r,{__N_SSG:function(){return p},default:function(){return b}});var l=o(5893),t=o(7294),s=o(9008),a=o.n(s),n=o(1664),i=o.n(n),d=o(1163),c=o(4750),h=o(9033),u=o(1523),x=o(1041);let m=["the-fiction-adaptation"];function f(e){let{books:r,active:o,onSelect:s}=e,a=t.useMemo(()=>{let e=new Map;for(let o of r){let r=o.genre||"Uncategorized";e.set(r,(e.get(r)||0)+1)}return Array.from(e.entries()).sort((e,r)=>r[1]!==e[1]?r[1]-e[1]:e[0].localeCompare(r[0]))},[r]),n=r.length,i=e=>{let{label:r,count:o,selected:t,onClick:s}=e;return(0,l.jsxs)("button",{type:"button",onClick:s,className:t?"whitespace-nowrap rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream":"whitespace-nowrap rounded-full border border-lightGrey bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.85] hover:bg-warmWhite","aria-pressed":t,children:[r," ",(0,l.jsxs)("span",{className:"ml-1.5 opacity-70",children:["(",o,")"]})]})};return(0,l.jsx)("div",{"aria-label":"Series shelves by genre",className:"not-prose mb-4 overflow-x-auto rounded-xl border border-lightGrey bg-warmWhite/60 p-3",children:(0,l.jsxs)("div",{className:"flex min-w-max items-center gap-6 px-1",children:[(0,l.jsx)(i,{label:"All",count:n,selected:"All"===o,onClick:()=>s("All")}),a.map(e=>{let[r,t]=e;return(0,l.jsx)(i,{label:r,count:t,selected:o===r,onClick:()=>s(r)},r)})]})})}var p=!0;function b(e){var r;let{books:o}=e,s=(0,d.useRouter)(),n=t.useMemo(()=>{let e=new Set;return o.forEach(r=>r.genre&&e.add(r.genre)),["All",...Array.from(e).sort((e,r)=>e.localeCompare(r))]},[o]),p="string"==typeof s.query.q?s.query.q:"",b="string"==typeof s.query.genre&&n.includes(s.query.genre)?s.query.genre:"All",[g,v]=t.useState(p),[y,j]=t.useState(b),w=""!==g||"All"!==y;t.useEffect(()=>{let e=new URLSearchParams;g&&e.set("q",g),y&&"All"!==y&&e.set("genre",y),s.replace(e.toString()?"/books?".concat(e):"/books",void 0,{shallow:!0})},[g,y]);let N=t.useMemo(()=>o.filter(e=>{var r,o,l;let t="All"===y||e.genre===y,s=g.trim().toLowerCase(),a=!s||(null!==(r=e.title)&&void 0!==r?r:"").toLowerCase().includes(s)||(null!==(o=e.excerpt)&&void 0!==o?o:"").toLowerCase().includes(s)||(null!==(l=e.author)&&void 0!==l?l:"").toLowerCase().includes(s);return t&&a}),[o,g,y]),k=t.useMemo(()=>m.map(e=>N.find(r=>r.slug===e)).find(Boolean)||N[0]||null,[N]),_=()=>{v(""),j("All")},C=N.map((e,r)=>{var o;return{"@type":"ListItem",position:r+1,url:"/books/".concat(e.slug),name:null!==(o=e.title)&&void 0!==o?o:"Untitled"}});return(0,l.jsxs)(c.Z,{pageTitle:"Books",children:[(0,l.jsxs)(a(),{children:[(0,l.jsx)("title",{children:"Books | Abraham of London"}),(0,l.jsx)("meta",{name:"description",content:"Books by Abraham of London — clarity, conviction, endurance."}),(0,l.jsx)("script",{type:"application/ld+json",dangerouslySetInnerHTML:{__html:JSON.stringify({"@context":"https://schema.org","@type":"ItemList",name:"Books",itemListElement:C})}})]}),(0,l.jsx)("section",{className:"bg-white",children:(0,l.jsxs)("div",{className:"mx-auto max-w-7xl px-4 py-12",children:[(0,l.jsxs)("div",{className:"mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center",children:[(0,l.jsx)(h.Z,{items:[{href:"/",label:"Home"},{label:"Books"}]}),(0,l.jsxs)("p",{className:"text-xs text-[color:var(--color-on-secondary)/0.6]",children:[o.length," ",1===o.length?"book":"books"]})]}),(0,l.jsxs)("header",{className:"mb-6 md:mb-8",children:[(0,l.jsx)("h1",{className:"font-serif text-4xl font-semibold text-deepCharcoal",children:"Books"}),(0,l.jsx)("p",{className:"mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]",children:"Works of memoir, conviction, and craftsmanship. Written to endure."})]}),k&&(0,l.jsxs)("section",{"aria-labelledby":"featured-book",className:"mb-10 overflow-hidden rounded-2xl border border-lightGrey bg-warmWhite p-5 shadow-card",children:[(0,l.jsx)("h2",{id:"featured-book",className:"mb-3 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]",children:"Featured"}),(0,l.jsxs)("div",{className:"grid gap-5 md:grid-cols-3",children:[(0,l.jsxs)("div",{className:"md:col-span-2",children:[(0,l.jsx)("h3",{className:"font-serif text-2xl text-forest",children:(0,l.jsx)(i(),{href:"/books/".concat(k.slug),className:"luxury-link",children:null!==(r=k.title)&&void 0!==r?r:"Untitled"})}),k.excerpt&&(0,l.jsx)("p",{className:"mt-2 text-[color:var(--color-on-secondary)/0.8]",children:k.excerpt}),(0,l.jsxs)("div",{className:"mt-4 flex flex-wrap gap-3 text-sm",children:[(0,l.jsx)(i(),{href:"/books/".concat(k.slug),className:"aol-btn rounded-full px-4 py-2",children:"Read overview"}),k.buyLink&&(0,l.jsx)("a",{href:k.buyLink,className:"rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",target:"_blank",rel:"noopener noreferrer",children:"Buy"}),k.downloadPdf&&(0,l.jsx)("a",{href:k.downloadPdf,className:"rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",children:"PDF"}),k.downloadEpub&&(0,l.jsx)("a",{href:k.downloadEpub,className:"rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",children:"EPUB"})]})]}),(0,l.jsxs)("div",{className:"rounded-xl bg-white p-4 text-sm text-[color:var(--color-on-secondary)/0.8]",children:[(0,l.jsx)("p",{className:"mb-2 font-semibold",children:"Why this book"}),(0,l.jsx)("p",{children:"A distilled entry point into the themes readers ask for most: principled love, pressure-tested faith, and the craft of staying."})]})]})]}),(0,l.jsxs)("div",{className:"mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",children:[(0,l.jsx)("div",{className:"flex-1",children:(0,l.jsx)("input",{value:g,onChange:e=>v(e.target.value),placeholder:"Search books...",className:"w-full rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none","aria-label":"Search books"})}),(0,l.jsx)("div",{className:"flex flex-wrap gap-2",children:n.map(e=>{let r=y===e;return(0,l.jsx)("button",{type:"button",onClick:()=>j(e),className:r?"rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream":"rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite","aria-pressed":r,children:e},e)})})]}),(0,l.jsx)(f,{books:o,active:y,onSelect:e=>{j(e)}}),(0,l.jsxs)("div",{className:"mb-3 flex items-center justify-between",children:[(0,l.jsxs)("span",{className:"text-xs text-[color:var(--color-on-secondary)/0.6]",children:["Showing ",N.length," of ",o.length]}),w&&(0,l.jsx)("button",{type:"button",onClick:_,className:"rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite",children:"Clear filters"})]}),(0,l.jsx)("div",{className:"grid gap-8 sm:grid-cols-2 lg:grid-cols-3",children:N.map((e,r)=>{var o,t,s,a,n,i,d,c;return(0,l.jsx)(u.Z,{slug:e.slug,title:null!==(o=e.title)&&void 0!==o?o:"Untitled",author:null!==(t=e.author)&&void 0!==t?t:"Abraham of London",excerpt:null!==(s=e.excerpt)&&void 0!==s?s:"",coverImage:null!==(a=e.coverImage)&&void 0!==a?a:void 0,buyLink:null!==(n=e.buyLink)&&void 0!==n?n:void 0,downloadPdf:null!==(i=e.downloadPdf)&&void 0!==i?i:void 0,downloadEpub:null!==(d=e.downloadEpub)&&void 0!==d?d:void 0,genre:null!==(c=e.genre)&&void 0!==c?c:"Uncategorized",featured:!1,motionProps:{initial:{opacity:0,y:14},whileInView:{opacity:1,y:0},viewport:{once:!0,amount:.25},transition:{duration:.5,delay:.03*r}}},e.slug)})}),0===N.length&&(0,l.jsxs)("div",{className:"mt-10 rounded-xl border border-lightGrey bg-warmWhite p-6 text-center text-sm text-[color:var(--color-on-secondary)/0.8]",children:[(0,l.jsx)("p",{className:"mb-2 font-medium",children:"No books match your filters yet."}),(0,l.jsxs)("p",{children:["Try"," ",(0,l.jsx)("button",{onClick:_,className:"luxury-link",children:"clearing filters"})," ","or start with"," ",(0,l.jsx)(i(),{href:"/books/the-fiction-adaptation",className:"luxury-link",children:"The Fiction Adaptation"}),"."]})]}),(0,l.jsx)("section",{className:"mx-auto mt-12 max-w-3xl",children:(0,l.jsx)(x.Z,{preset:"leadership"})})]})})]})}}},function(e){e.O(0,[1664,5675,4648,4750,2888,9774,179],function(){return e(e.s=3021)}),_N_E=e.O()}]);
+(self.webpackChunk_N_E = self.webpackChunk_N_E || []).push([
+  [4672],
+  {
+    3021: function (e, r, o) {
+      (window.__NEXT_P = window.__NEXT_P || []).push([
+        "/books",
+        function () {
+          return o(7178);
+        },
+      ]);
+    },
+    1523: function (e, r, o) {
+      "use strict";
+      o.d(r, {
+        Z: function () {
+          return u;
+        },
+      });
+      var l = o(5893),
+        t = o(1664),
+        s = o.n(t),
+        a = o(5675),
+        n = o.n(a),
+        i = o(2053),
+        d = o(512),
+        c = o(7294);
+      let h = "/assets/images/default-book.jpg";
+      function u(e) {
+        let {
+            slug: r,
+            title: o,
+            author: t,
+            excerpt: a,
+            coverImage: u,
+            buyLink: x,
+            genre: m,
+            downloadPdf: f,
+            downloadEpub: p,
+            featured: b = !1,
+            className: g = "",
+            motionProps: v = {},
+          } = e,
+          y = r.startsWith("/") ? r : "/books/".concat(r),
+          j = "object" == typeof u ? u : (u && u.trim()) || h,
+          [w, N] = c.useState(j);
+        return (0, l.jsxs)(i.E.article, {
+          ...v,
+          className: (0, d.Z)(
+            "group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all hover:shadow-cardHover",
+            "focus-within:ring-1 focus-within:ring-[color:var(--color-primary)/0.3]",
+            b && "ring-1 ring-softGold/30",
+            g,
+          ),
+          children: [
+            (0, l.jsxs)(s(), {
+              href: y,
+              className: "block relative w-full",
+              prefetch: !1,
+              children: [
+                (0, l.jsx)("div", {
+                  className: "relative w-full aspect-[2/3]",
+                  children: (0, l.jsx)(n(), {
+                    src: w,
+                    alt: "".concat(o, " book cover"),
+                    fill: !0,
+                    sizes:
+                      "(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px",
+                    className:
+                      "object-cover transition-transform duration-500 group-hover:scale-[1.02]",
+                    onError: () => "string" == typeof w && w !== h && N(h),
+                    priority: b,
+                  }),
+                }),
+                b &&
+                  (0, l.jsxs)("span", {
+                    className:
+                      "absolute top-4 left-4 rounded-full bg-softGold px-3 py-1 text-xs font-semibold text-deepCharcoal shadow",
+                    children: [
+                      "Featured",
+                      (0, l.jsx)("span", {
+                        className: "sr-only",
+                        children: " book",
+                      }),
+                    ],
+                  }),
+              ],
+            }),
+            (0, l.jsxs)("div", {
+              className: "p-6",
+              children: [
+                (0, l.jsx)("h3", {
+                  className:
+                    "font-serif text-xl font-semibold text-deepCharcoal",
+                  children: (0, l.jsx)(s(), {
+                    href: y,
+                    prefetch: !1,
+                    className:
+                      "underline decoration-softGold/0 underline-offset-[6px] transition hover:decoration-softGold/70",
+                    children: o,
+                  }),
+                }),
+                (0, l.jsxs)("p", {
+                  className:
+                    "mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]",
+                  children: ["By ", t],
+                }),
+                (0, l.jsx)("p", {
+                  className:
+                    "mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]",
+                  children: a,
+                }),
+                (0, l.jsxs)("div", {
+                  className: "mt-4 flex flex-wrap items-center gap-3",
+                  children: [
+                    (0, l.jsx)("span", {
+                      className:
+                        "inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]",
+                      children: m || "Uncategorized",
+                    }),
+                    (0, l.jsx)(s(), {
+                      href: y,
+                      prefetch: !1,
+                      className:
+                        "ml-auto inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9]",
+                      children: "Learn more",
+                    }),
+                    x &&
+                      "#" !== x &&
+                      (0, l.jsx)("a", {
+                        href: x,
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        className:
+                          "inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.25] px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest hover:text-cream",
+                        "aria-label": "Buy ".concat(o, " (opens in new tab)"),
+                        children: "Buy",
+                      }),
+                  ],
+                }),
+                (f || p) &&
+                  (0, l.jsxs)("div", {
+                    className: "mt-3 flex flex-wrap gap-4 text-xs",
+                    children: [
+                      f &&
+                        (0, l.jsx)("a", {
+                          href: f,
+                          target: "_blank",
+                          rel: "noopener noreferrer",
+                          className: "luxury-link",
+                          children: "PDF",
+                        }),
+                      p &&
+                        (0, l.jsx)("a", {
+                          href: p,
+                          target: "_blank",
+                          rel: "noopener noreferrer",
+                          className: "luxury-link",
+                          children: "EPUB",
+                        }),
+                    ],
+                  }),
+              ],
+            }),
+          ],
+        });
+      }
+    },
+    9033: function (e, r, o) {
+      "use strict";
+      o.d(r, {
+        Z: function () {
+          return a;
+        },
+      });
+      var l = o(5893),
+        t = o(1664),
+        s = o.n(t);
+      function a(e) {
+        let {
+          items: r,
+          className: o = "",
+          separator: t = "/",
+          ariaLabel: a = "Breadcrumb",
+        } = e;
+        return (null == r ? void 0 : r.length)
+          ? (0, l.jsx)("nav", {
+              "aria-label": a,
+              className: o,
+              children: (0, l.jsx)("ol", {
+                className:
+                  "flex flex-wrap items-center gap-2 text-sm text-[color:var(--color-on-secondary)/0.7]",
+                children: r.map((e, o) => {
+                  let a = o === r.length - 1,
+                    n = "".concat(e.label, "-").concat(o);
+                  return (0, l.jsxs)(
+                    "li",
+                    {
+                      className: "flex items-center gap-2 min-w-0",
+                      children: [
+                        e.href && !a
+                          ? (0, l.jsx)(s(), {
+                              href: e.href,
+                              className:
+                                "hover:text-deepCharcoal max-w-[18ch] truncate",
+                              children: e.label,
+                            })
+                          : (0, l.jsx)("span", {
+                              className:
+                                "text-[color:var(--color-on-secondary)/0.7] max-w-[22ch] truncate",
+                              "aria-current": a ? "page" : void 0,
+                              title: e.label,
+                              children: e.label,
+                            }),
+                        !a &&
+                          (0, l.jsx)("span", {
+                            "aria-hidden": "true",
+                            children: t,
+                          }),
+                      ],
+                    },
+                    n,
+                  );
+                }),
+              }),
+            })
+          : null;
+      }
+      o(7294);
+    },
+    1041: function (e, r, o) {
+      "use strict";
+      o.d(r, {
+        Z: function () {
+          return d;
+        },
+      });
+      var l = o(5893),
+        t = o(1664),
+        s = o.n(t);
+      let a = {
+          fatherhood: {
+            title: "Explore Fatherhood Resources",
+            reads: [
+              {
+                href: "/blog/leadership-begins-at-home",
+                label: "Leadership Begins at Home",
+                sub: "Lead from the inside out",
+              },
+              {
+                href: "/blog/the-brotherhood-code",
+                label: "The Brotherhood Code",
+                sub: "Build your band of brothers",
+              },
+              {
+                href: "/blog/reclaiming-the-narrative",
+                label: "Reclaiming the Narrative",
+                sub: "Court-season clarity",
+              },
+            ],
+            downloads: [
+              {
+                href: "/downloads/Fatherhood_Guide.pdf",
+                label: "Fatherhood Guide",
+              },
+              {
+                href: "/downloads/Mentorship_Starter_Kit.pdf",
+                label: "Mentorship Starter Kit",
+              },
+            ],
+          },
+        },
+        n = [
+          {
+            href: "/blog/reclaiming-the-narrative",
+            label: "Reclaiming the Narrative",
+            sub: "Court-season clarity",
+          },
+          {
+            href: "/blog/the-brotherhood-code",
+            label: "The Brotherhood Code",
+            sub: "Build your band of brothers",
+          },
+          {
+            href: "/blog/leadership-begins-at-home",
+            label: "Leadership Begins at Home",
+            sub: "Lead from the inside out",
+          },
+        ],
+        i = [
+          {
+            href: "/downloads/Mentorship_Starter_Kit.pdf",
+            label: "Mentorship Starter Kit",
+          },
+          {
+            href: "/downloads/Leadership_Playbook.pdf",
+            label: "Leadership Playbook (30•60•90)",
+          },
+          {
+            href: "/downloads/Entrepreneur_Operating_Pack.pdf",
+            label: "Entrepreneur Operating Pack",
+          },
+        ];
+      function d(e) {
+        var r, o, t, d;
+        let c = "preset" in e ? e.preset : void 0,
+          h = (c &&
+          (t = String(c)) &&
+          null !== (d = a[String(t).trim().toLowerCase()]) &&
+          void 0 !== d
+            ? d
+            : null) || {
+            title: ("title" in e && e.title) || "Further Reading & Tools",
+            reads: ("reads" in e && e.reads) || n,
+            downloads: ("downloads" in e && e.downloads) || i,
+          };
+        if (!h) return null;
+        let u = (null !== (r = h.reads) && void 0 !== r ? r : []).filter(
+            Boolean,
+          ),
+          x = (null !== (o = h.downloads) && void 0 !== o ? o : []).filter(
+            Boolean,
+          );
+        return (0, l.jsxs)("section", {
+          className:
+            "mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ".concat(
+              ("className" in e && e.className) || "",
+            ),
+          "aria-labelledby": "resources-cta-title",
+          children: [
+            (0, l.jsx)("h3", {
+              id: "resources-cta-title",
+              className: "mb-4 font-serif text-2xl text-forest",
+              children: h.title,
+            }),
+            (0, l.jsxs)("div", {
+              className: "grid gap-6 md:grid-cols-2",
+              children: [
+                !!u.length &&
+                  (0, l.jsxs)("div", {
+                    children: [
+                      (0, l.jsx)("h4", {
+                        className:
+                          "mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase",
+                        children: "Further Reading",
+                      }),
+                      (0, l.jsx)("ul", {
+                        className: "space-y-2",
+                        children: u.map((e) =>
+                          (0, l.jsxs)(
+                            "li",
+                            {
+                              children: [
+                                !(function () {
+                                  let e =
+                                    arguments.length > 0 &&
+                                    void 0 !== arguments[0]
+                                      ? arguments[0]
+                                      : "";
+                                  return (
+                                    e.startsWith("/") && !e.endsWith(".pdf")
+                                  );
+                                })(e.href)
+                                  ? (0, l.jsx)("a", {
+                                      href: e.href,
+                                      className: "luxury-link text-forest",
+                                      target: "_blank",
+                                      rel: "noopener noreferrer",
+                                      children: e.label,
+                                    })
+                                  : (0, l.jsx)(s(), {
+                                      href: e.href,
+                                      className: "luxury-link text-forest",
+                                      prefetch: !1,
+                                      children: e.label,
+                                    }),
+                                e.sub &&
+                                  (0, l.jsxs)("span", {
+                                    className:
+                                      "ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]",
+                                    children: ["— ", e.sub],
+                                  }),
+                              ],
+                            },
+                            e.href,
+                          ),
+                        ),
+                      }),
+                    ],
+                  }),
+                !!x.length &&
+                  (0, l.jsxs)("div", {
+                    children: [
+                      (0, l.jsx)("h4", {
+                        className:
+                          "mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase",
+                        children: "Downloads",
+                      }),
+                      (0, l.jsx)("ul", {
+                        className: "space-y-2",
+                        children: x.map((e) =>
+                          (0, l.jsx)(
+                            "li",
+                            {
+                              children: (0, l.jsx)("a", {
+                                href: e.href,
+                                className: "luxury-link text-forest",
+                                rel: "noopener",
+                                download: !0,
+                                children: e.label,
+                              }),
+                            },
+                            e.href,
+                          ),
+                        ),
+                      }),
+                    ],
+                  }),
+              ],
+            }),
+          ],
+        });
+      }
+    },
+    7178: function (e, r, o) {
+      "use strict";
+      (o.r(r),
+        o.d(r, {
+          __N_SSG: function () {
+            return p;
+          },
+          default: function () {
+            return b;
+          },
+        }));
+      var l = o(5893),
+        t = o(7294),
+        s = o(9008),
+        a = o.n(s),
+        n = o(1664),
+        i = o.n(n),
+        d = o(1163),
+        c = o(4750),
+        h = o(9033),
+        u = o(1523),
+        x = o(1041);
+      let m = ["the-fiction-adaptation"];
+      function f(e) {
+        let { books: r, active: o, onSelect: s } = e,
+          a = t.useMemo(() => {
+            let e = new Map();
+            for (let o of r) {
+              let r = o.genre || "Uncategorized";
+              e.set(r, (e.get(r) || 0) + 1);
+            }
+            return Array.from(e.entries()).sort((e, r) =>
+              r[1] !== e[1] ? r[1] - e[1] : e[0].localeCompare(r[0]),
+            );
+          }, [r]),
+          n = r.length,
+          i = (e) => {
+            let { label: r, count: o, selected: t, onClick: s } = e;
+            return (0, l.jsxs)("button", {
+              type: "button",
+              onClick: s,
+              className: t
+                ? "whitespace-nowrap rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream"
+                : "whitespace-nowrap rounded-full border border-lightGrey bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.85] hover:bg-warmWhite",
+              "aria-pressed": t,
+              children: [
+                r,
+                " ",
+                (0, l.jsxs)("span", {
+                  className: "ml-1.5 opacity-70",
+                  children: ["(", o, ")"],
+                }),
+              ],
+            });
+          };
+        return (0, l.jsx)("div", {
+          "aria-label": "Series shelves by genre",
+          className:
+            "not-prose mb-4 overflow-x-auto rounded-xl border border-lightGrey bg-warmWhite/60 p-3",
+          children: (0, l.jsxs)("div", {
+            className: "flex min-w-max items-center gap-6 px-1",
+            children: [
+              (0, l.jsx)(i, {
+                label: "All",
+                count: n,
+                selected: "All" === o,
+                onClick: () => s("All"),
+              }),
+              a.map((e) => {
+                let [r, t] = e;
+                return (0, l.jsx)(
+                  i,
+                  {
+                    label: r,
+                    count: t,
+                    selected: o === r,
+                    onClick: () => s(r),
+                  },
+                  r,
+                );
+              }),
+            ],
+          }),
+        });
+      }
+      var p = !0;
+      function b(e) {
+        var r;
+        let { books: o } = e,
+          s = (0, d.useRouter)(),
+          n = t.useMemo(() => {
+            let e = new Set();
+            return (
+              o.forEach((r) => r.genre && e.add(r.genre)),
+              ["All", ...Array.from(e).sort((e, r) => e.localeCompare(r))]
+            );
+          }, [o]),
+          p = "string" == typeof s.query.q ? s.query.q : "",
+          b =
+            "string" == typeof s.query.genre && n.includes(s.query.genre)
+              ? s.query.genre
+              : "All",
+          [g, v] = t.useState(p),
+          [y, j] = t.useState(b),
+          w = "" !== g || "All" !== y;
+        t.useEffect(() => {
+          let e = new URLSearchParams();
+          (g && e.set("q", g),
+            y && "All" !== y && e.set("genre", y),
+            s.replace(e.toString() ? "/books?".concat(e) : "/books", void 0, {
+              shallow: !0,
+            }));
+        }, [g, y]);
+        let N = t.useMemo(
+            () =>
+              o.filter((e) => {
+                var r, o, l;
+                let t = "All" === y || e.genre === y,
+                  s = g.trim().toLowerCase(),
+                  a =
+                    !s ||
+                    (null !== (r = e.title) && void 0 !== r ? r : "")
+                      .toLowerCase()
+                      .includes(s) ||
+                    (null !== (o = e.excerpt) && void 0 !== o ? o : "")
+                      .toLowerCase()
+                      .includes(s) ||
+                    (null !== (l = e.author) && void 0 !== l ? l : "")
+                      .toLowerCase()
+                      .includes(s);
+                return t && a;
+              }),
+            [o, g, y],
+          ),
+          k = t.useMemo(
+            () =>
+              m.map((e) => N.find((r) => r.slug === e)).find(Boolean) ||
+              N[0] ||
+              null,
+            [N],
+          ),
+          _ = () => {
+            (v(""), j("All"));
+          },
+          C = N.map((e, r) => {
+            var o;
+            return {
+              "@type": "ListItem",
+              position: r + 1,
+              url: "/books/".concat(e.slug),
+              name: null !== (o = e.title) && void 0 !== o ? o : "Untitled",
+            };
+          });
+        return (0, l.jsxs)(c.Z, {
+          pageTitle: "Books",
+          children: [
+            (0, l.jsxs)(a(), {
+              children: [
+                (0, l.jsx)("title", { children: "Books | Abraham of London" }),
+                (0, l.jsx)("meta", {
+                  name: "description",
+                  content:
+                    "Books by Abraham of London — clarity, conviction, endurance.",
+                }),
+                (0, l.jsx)("script", {
+                  type: "application/ld+json",
+                  dangerouslySetInnerHTML: {
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "ItemList",
+                      name: "Books",
+                      itemListElement: C,
+                    }),
+                  },
+                }),
+              ],
+            }),
+            (0, l.jsx)("section", {
+              className: "bg-white",
+              children: (0, l.jsxs)("div", {
+                className: "mx-auto max-w-7xl px-4 py-12",
+                children: [
+                  (0, l.jsxs)("div", {
+                    className:
+                      "mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center",
+                    children: [
+                      (0, l.jsx)(h.Z, {
+                        items: [
+                          { href: "/", label: "Home" },
+                          { label: "Books" },
+                        ],
+                      }),
+                      (0, l.jsxs)("p", {
+                        className:
+                          "text-xs text-[color:var(--color-on-secondary)/0.6]",
+                        children: [
+                          o.length,
+                          " ",
+                          1 === o.length ? "book" : "books",
+                        ],
+                      }),
+                    ],
+                  }),
+                  (0, l.jsxs)("header", {
+                    className: "mb-6 md:mb-8",
+                    children: [
+                      (0, l.jsx)("h1", {
+                        className:
+                          "font-serif text-4xl font-semibold text-deepCharcoal",
+                        children: "Books",
+                      }),
+                      (0, l.jsx)("p", {
+                        className:
+                          "mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]",
+                        children:
+                          "Works of memoir, conviction, and craftsmanship. Written to endure.",
+                      }),
+                    ],
+                  }),
+                  k &&
+                    (0, l.jsxs)("section", {
+                      "aria-labelledby": "featured-book",
+                      className:
+                        "mb-10 overflow-hidden rounded-2xl border border-lightGrey bg-warmWhite p-5 shadow-card",
+                      children: [
+                        (0, l.jsx)("h2", {
+                          id: "featured-book",
+                          className:
+                            "mb-3 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-on-secondary)/0.7]",
+                          children: "Featured",
+                        }),
+                        (0, l.jsxs)("div", {
+                          className: "grid gap-5 md:grid-cols-3",
+                          children: [
+                            (0, l.jsxs)("div", {
+                              className: "md:col-span-2",
+                              children: [
+                                (0, l.jsx)("h3", {
+                                  className: "font-serif text-2xl text-forest",
+                                  children: (0, l.jsx)(i(), {
+                                    href: "/books/".concat(k.slug),
+                                    className: "luxury-link",
+                                    children:
+                                      null !== (r = k.title) && void 0 !== r
+                                        ? r
+                                        : "Untitled",
+                                  }),
+                                }),
+                                k.excerpt &&
+                                  (0, l.jsx)("p", {
+                                    className:
+                                      "mt-2 text-[color:var(--color-on-secondary)/0.8]",
+                                    children: k.excerpt,
+                                  }),
+                                (0, l.jsxs)("div", {
+                                  className:
+                                    "mt-4 flex flex-wrap gap-3 text-sm",
+                                  children: [
+                                    (0, l.jsx)(i(), {
+                                      href: "/books/".concat(k.slug),
+                                      className:
+                                        "aol-btn rounded-full px-4 py-2",
+                                      children: "Read overview",
+                                    }),
+                                    k.buyLink &&
+                                      (0, l.jsx)("a", {
+                                        href: k.buyLink,
+                                        className:
+                                          "rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",
+                                        target: "_blank",
+                                        rel: "noopener noreferrer",
+                                        children: "Buy",
+                                      }),
+                                    k.downloadPdf &&
+                                      (0, l.jsx)("a", {
+                                        href: k.downloadPdf,
+                                        className:
+                                          "rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",
+                                        children: "PDF",
+                                      }),
+                                    k.downloadEpub &&
+                                      (0, l.jsx)("a", {
+                                        href: k.downloadEpub,
+                                        className:
+                                          "rounded-full border border-lightGrey px-4 py-2 hover:bg-warmWhite",
+                                        children: "EPUB",
+                                      }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            (0, l.jsxs)("div", {
+                              className:
+                                "rounded-xl bg-white p-4 text-sm text-[color:var(--color-on-secondary)/0.8]",
+                              children: [
+                                (0, l.jsx)("p", {
+                                  className: "mb-2 font-semibold",
+                                  children: "Why this book",
+                                }),
+                                (0, l.jsx)("p", {
+                                  children:
+                                    "A distilled entry point into the themes readers ask for most: principled love, pressure-tested faith, and the craft of staying.",
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  (0, l.jsxs)("div", {
+                    className:
+                      "mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+                    children: [
+                      (0, l.jsx)("div", {
+                        className: "flex-1",
+                        children: (0, l.jsx)("input", {
+                          value: g,
+                          onChange: (e) => v(e.target.value),
+                          placeholder: "Search books...",
+                          className:
+                            "w-full rounded-lg border border-lightGrey px-3 py-2 text-sm focus:border-deepCharcoal focus:outline-none",
+                          "aria-label": "Search books",
+                        }),
+                      }),
+                      (0, l.jsx)("div", {
+                        className: "flex flex-wrap gap-2",
+                        children: n.map((e) => {
+                          let r = y === e;
+                          return (0, l.jsx)(
+                            "button",
+                            {
+                              type: "button",
+                              onClick: () => j(e),
+                              className: r
+                                ? "rounded-full bg-forest px-3 py-1.5 text-xs font-medium text-cream"
+                                : "rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite",
+                              "aria-pressed": r,
+                              children: e,
+                            },
+                            e,
+                          );
+                        }),
+                      }),
+                    ],
+                  }),
+                  (0, l.jsx)(f, {
+                    books: o,
+                    active: y,
+                    onSelect: (e) => {
+                      j(e);
+                    },
+                  }),
+                  (0, l.jsxs)("div", {
+                    className: "mb-3 flex items-center justify-between",
+                    children: [
+                      (0, l.jsxs)("span", {
+                        className:
+                          "text-xs text-[color:var(--color-on-secondary)/0.6]",
+                        children: ["Showing ", N.length, " of ", o.length],
+                      }),
+                      w &&
+                        (0, l.jsx)("button", {
+                          type: "button",
+                          onClick: _,
+                          className:
+                            "rounded-full border border-lightGrey px-3 py-1.5 text-xs font-medium text-[color:var(--color-on-secondary)/0.8] hover:bg-warmWhite",
+                          children: "Clear filters",
+                        }),
+                    ],
+                  }),
+                  (0, l.jsx)("div", {
+                    className: "grid gap-8 sm:grid-cols-2 lg:grid-cols-3",
+                    children: N.map((e, r) => {
+                      var o, t, s, a, n, i, d, c;
+                      return (0, l.jsx)(
+                        u.Z,
+                        {
+                          slug: e.slug,
+                          title:
+                            null !== (o = e.title) && void 0 !== o
+                              ? o
+                              : "Untitled",
+                          author:
+                            null !== (t = e.author) && void 0 !== t
+                              ? t
+                              : "Abraham of London",
+                          excerpt:
+                            null !== (s = e.excerpt) && void 0 !== s ? s : "",
+                          coverImage:
+                            null !== (a = e.coverImage) && void 0 !== a
+                              ? a
+                              : void 0,
+                          buyLink:
+                            null !== (n = e.buyLink) && void 0 !== n
+                              ? n
+                              : void 0,
+                          downloadPdf:
+                            null !== (i = e.downloadPdf) && void 0 !== i
+                              ? i
+                              : void 0,
+                          downloadEpub:
+                            null !== (d = e.downloadEpub) && void 0 !== d
+                              ? d
+                              : void 0,
+                          genre:
+                            null !== (c = e.genre) && void 0 !== c
+                              ? c
+                              : "Uncategorized",
+                          featured: !1,
+                          motionProps: {
+                            initial: { opacity: 0, y: 14 },
+                            whileInView: { opacity: 1, y: 0 },
+                            viewport: { once: !0, amount: 0.25 },
+                            transition: { duration: 0.5, delay: 0.03 * r },
+                          },
+                        },
+                        e.slug,
+                      );
+                    }),
+                  }),
+                  0 === N.length &&
+                    (0, l.jsxs)("div", {
+                      className:
+                        "mt-10 rounded-xl border border-lightGrey bg-warmWhite p-6 text-center text-sm text-[color:var(--color-on-secondary)/0.8]",
+                      children: [
+                        (0, l.jsx)("p", {
+                          className: "mb-2 font-medium",
+                          children: "No books match your filters yet.",
+                        }),
+                        (0, l.jsxs)("p", {
+                          children: [
+                            "Try",
+                            " ",
+                            (0, l.jsx)("button", {
+                              onClick: _,
+                              className: "luxury-link",
+                              children: "clearing filters",
+                            }),
+                            " ",
+                            "or start with",
+                            " ",
+                            (0, l.jsx)(i(), {
+                              href: "/books/the-fiction-adaptation",
+                              className: "luxury-link",
+                              children: "The Fiction Adaptation",
+                            }),
+                            ".",
+                          ],
+                        }),
+                      ],
+                    }),
+                  (0, l.jsx)("section", {
+                    className: "mx-auto mt-12 max-w-3xl",
+                    children: (0, l.jsx)(x.Z, { preset: "leadership" }),
+                  }),
+                ],
+              }),
+            }),
+          ],
+        });
+      }
+    },
+  },
+  function (e) {
+    (e.O(0, [1664, 5675, 4648, 4750, 2888, 9774, 179], function () {
+      return e((e.s = 3021));
+    }),
+      (_N_E = e.O()));
+  },
+]);

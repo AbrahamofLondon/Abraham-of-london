@@ -17,9 +17,9 @@ function fix(p) {
   const orig = s;
   // Escape only quotes between JSX text nodes (very lightweight heuristic)
   s = s.replace(/>([^<]*?)</g, (_m, txt) => {
-    return ">" + txt
-      .replace(/(?<!&)"/g, "&quot;")
-      .replace(/(?<!&)'/g, "&#39;") + "<";
+    return (
+      ">" + txt.replace(/(?<!&)"/g, "&quot;").replace(/(?<!&)'/g, "&#39;") + "<"
+    );
   });
   if (s !== orig) {
     fs.writeFileSync(p, s, "utf8");

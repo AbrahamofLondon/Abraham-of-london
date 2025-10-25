@@ -1,14 +1,14 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Create folder structure
 const folders = [
-  'alomarada-site',
-  'alomarada-site/images',
-  'alomarada-site/styles'
+  "alomarada-site",
+  "alomarada-site/images",
+  "alomarada-site/styles",
 ];
 
-folders.forEach(dir => {
+folders.forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
@@ -77,16 +77,22 @@ const htmlContent = `<!DOCTYPE html>
 </html>`;
 
 // Write HTML
-fs.writeFileSync('alomarada-site/index.html', htmlContent);
+fs.writeFileSync("alomarada-site/index.html", htmlContent);
 
 // Copy images from root (assumed uploaded in current directory)
-fs.copyFileSync('alomarada-logo.jpg', 'alomarada-site/images/alomarada-logo.jpg');
-fs.copyFileSync('endureluxe.jpg', 'alomarada-site/images/endureluxe.jpg');
-fs.copyFileSync('fatehring-without-fear.jpg', 'alomarada-site/images/fatehring-without-fear.jpg');
+fs.copyFileSync(
+  "alomarada-logo.jpg",
+  "alomarada-site/images/alomarada-logo.jpg",
+);
+fs.copyFileSync("endureluxe.jpg", "alomarada-site/images/endureluxe.jpg");
+fs.copyFileSync(
+  "fatehring-without-fear.jpg",
+  "alomarada-site/images/fatehring-without-fear.jpg",
+);
 
 // CSS from your last message
-const cssContent = fs.readFileSync('alomarada.css', 'utf-8'); // Paste your entire CSS into 'alomarada.css' first
-fs.writeFileSync('alomarada-site/styles/main.css', cssContent);
+const cssContent = fs.readFileSync("alomarada.css", "utf-8"); // Paste your entire CSS into 'alomarada.css' first
+fs.writeFileSync("alomarada-site/styles/main.css", cssContent);
 
 // Create deploy.js
 const deployScript = `require('dotenv').config();
@@ -107,25 +113,28 @@ axios.post(hookURL)
     process.exit(1);
   });`;
 
-fs.writeFileSync('alomarada-site/deploy.js', deployScript);
+fs.writeFileSync("alomarada-site/deploy.js", deployScript);
 
 // Create .env (you must replace with your real hook)
-fs.writeFileSync('alomarada-site/.env', 'NETLIFY_DEPLOY_HOOK=https://api.netlify.com/build_hooks/684c730862a2c482c589aa5e');
+fs.writeFileSync(
+  "alomarada-site/.env",
+  "NETLIFY_DEPLOY_HOOK=https://api.netlify.com/build_hooks/684c730862a2c482c589aa5e",
+);
 
 // Create package.json
 const pkg = {
   name: "alomarada-site",
   version: "1.0.0",
   scripts: {
-    deploy: "node deploy.js"
+    deploy: "node deploy.js",
   },
   dependencies: {
     axios: "^1.5.1",
-    dotenv: "^16.3.1"
-  }
+    dotenv: "^16.3.1",
+  },
 };
 
-fs.writeFileSync('alomarada-site/package.json', JSON.stringify(pkg, null, 2));
+fs.writeFileSync("alomarada-site/package.json", JSON.stringify(pkg, null, 2));
 
 console.log("✅ Setup complete. Run:");
 console.log("cd alomarada-site");

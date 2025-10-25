@@ -1,4 +1,4 @@
-// lib/mdx-components.ts
+﻿// lib/mdx-components.ts
 import PullLine from "@/components/mdx/PullLine";
 import Verse from "@/components/mdx/Verse";
 import Rule from "@/components/mdx/Rule";

@@ -1,4 +1,4 @@
-// lib/date.ts
+﻿// lib/date.ts
 export type FormatDateOptions = {
   locale?: string;
   timeZone?: string; // e.g. "Europe/London"
@@ -39,9 +39,11 @@ export function formatDate(
   const d = parseDateSafe(dateInput);
   if (!d) return typeof dateInput === "string" ? dateInput : invalidFallback;
 
-  const opts: Intl.DateTimeFormatOptions =
-    format ??
-    { year: "numeric", month: "long", day: "numeric" };
+  const opts: Intl.DateTimeFormatOptions = format ?? {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
 
   if (timeZone) opts.timeZone = timeZone;
 

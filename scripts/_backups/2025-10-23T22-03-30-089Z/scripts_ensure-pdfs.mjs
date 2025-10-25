@@ -10,15 +10,20 @@ import puppeteer from "puppeteer";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "public", "downloads");
-const REPORT = path.join(ROOT, "public", "downloads", "_ensure-pdfs-report.json");
+const REPORT = path.join(
+  ROOT,
+  "public",
+  "downloads",
+  "_ensure-pdfs-report.json",
+);
 
 // map content types -> generic print route prefix
 const PRINT_ROUTES = {
-  Post:  "/print/post/",
-  Book:  "/print/book/",
+  Post: "/print/post/",
+  Book: "/print/book/",
   Event: "/print/event/",
-  Strategy: "/print/strategy/",   // ✅ NEW
-  Resource: "/print/resource/",   // ✅ NEW
+  Strategy: "/print/strategy/", // ✅ NEW
+  Resource: "/print/resource/", // ✅ NEW
 };
 
 // extra bespoke pages you already have
@@ -28,7 +33,8 @@ const PAGE_ALIASES = {
   "standards-brief": "/print/standards-brief",
   "principles-for-my-son": "/print/principles-for-my-son",
   "fathering-without-fear-teaser": "/print/fathering-without-fear-teaser",
-  "fathering-without-fear-teaser-mobile": "/print/fathering-without-fear-teaser-mobile",
+  "fathering-without-fear-teaser-mobile":
+    "/print/fathering-without-fear-teaser-mobile",
   "scripture-track-john14": "/print/scripture-track-john14",
   "mentorship-starter-kit": "/print/mentorship-starter-kit",
   "leadership-playbook": "/print/leadership-playbook",
@@ -58,10 +64,14 @@ async function exists(file) {
 }
 
 async function startNext(port) {
-  const child = spawn(process.platform === "win32" ? "npx.cmd" : "npx", ["next", "start", "-p", String(port)], {
-    stdio: "inherit",
-    env: process.env,
-  });
+  const child = spawn(
+    process.platform === "win32" ? "npx.cmd" : "npx",
+    ["next", "start", "-p", String(port)],
+    {
+      stdio: "inherit",
+      env: process.env,
+    },
+  );
 
   // wait until server responds
   await new Promise((res, rej) => {
@@ -71,12 +81,13 @@ async function startNext(port) {
     }, 20000);
 
     (function ping() {
-      http.get({ host: "localhost", port, path: "/" }, (response) => {
-        clearTimeout(t);
-        res(null);
-        response.resume(); // Consume the response data
-      })
-      .on("error", () => setTimeout(ping, 300));
+      http
+        .get({ host: "localhost", port, path: "/" }, (response) => {
+          clearTimeout(t);
+          res(null);
+          response.resume(); // Consume the response data
+        })
+        .on("error", () => setTimeout(ping, 300));
     })();
   });
   return child;
@@ -85,7 +96,10 @@ async function startNext(port) {
 async function renderPDF(base, route, outFile) {
   const url = new URL(route, base).toString();
   // Using 'new' for headless option is recommended for modern puppeteer
-  const browser = await puppeteer.launch({ args: ["--no-sandbox"], headless: "new" });
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox"],
+    headless: "new",
+  });
   try {
     const page = await browser.newPage();
     // Allow more time for complex print layouts
@@ -116,18 +130,28 @@ async function main() {
 
   // Collect all contentlayer documents once (FIXED: simplified data collection)
   const docs = [];
-  const contentlayerFiles = await glob([`.contentlayer/**/*.json`], { cwd: ROOT, absolute: true });
+  const contentlayerFiles = await glob([`.contentlayer/**/*.json`], {
+    cwd: ROOT,
+    absolute: true,
+  });
 
   for (const f of contentlayerFiles) {
     try {
       const raw = await fsp.readFile(f, "utf8");
       const doc = JSON.parse(raw);
       // Only include documents from relevant types
-      if (PRINT_ROUTES[doc.type] || doc.type === "Download" || doc.type === "Resource" || doc.type === "Strategy") {
-          docs.push(doc);
+      if (
+        PRINT_ROUTES[doc.type] ||
+        doc.type === "Download" ||
+        doc.type === "Resource" ||
+        doc.type === "Strategy"
+      ) {
+        docs.push(doc);
       }
     } catch (e) {
-      console.error(`Error reading or parsing contentlayer file ${f}: ${e.message}`);
+      console.error(
+        `Error reading or parsing contentlayer file ${f}: ${e.message}`,
+      );
     }
   }
 
@@ -141,16 +165,24 @@ async function main() {
       const outFile = path.join(OUT, `${nice}.pdf`);
 
       // Skip if file exists and size is reasonable (avoid regenerating large, complex PDFs)
-      if ((await exists(outFile))) { // Use async exists
+      if (await exists(outFile)) {
+        // Use async exists
         try {
           const kb = await sizeKB(outFile); // Use async sizeKB
           if (kb > 40) {
-            report.skipped.push({ slug: doc.slug, reason: "ok-size", file: path.basename(outFile), sizeKB: kb });
+            report.skipped.push({
+              slug: doc.slug,
+              reason: "ok-size",
+              file: path.basename(outFile),
+              sizeKB: kb,
+            });
             continue;
           }
         } catch (e) {
           // If stat fails, continue to regenerate
-          console.warn(`Warning: Could not stat file ${outFile}. Regenerating.`);
+          console.warn(
+            `Warning: Could not stat file ${outFile}. Regenerating.`,
+          );
         }
       }
 
@@ -177,9 +209,18 @@ async function main() {
         if (kb < 40) throw new Error(`suspiciously small: ${kb}KB`);
 
         const action = (await exists(outFile)) ? "upgraded" : "created";
-        report[action].push({ slug: doc.slug, route, file: path.basename(outFile), sizeKB: kb });
+        report[action].push({
+          slug: doc.slug,
+          route,
+          file: path.basename(outFile),
+          sizeKB: kb,
+        });
       } catch (e) {
-        report.errors.push({ slug: doc.slug, route, error: String(e?.message || e) });
+        report.errors.push({
+          slug: doc.slug,
+          route,
+          error: String(e?.message || e),
+        });
       }
     }
   } finally {
@@ -189,11 +230,16 @@ async function main() {
 
   // surface hard errors
   if (report.errors.length) {
-    console.error(`\nPDF ensure completed with ${report.errors.length} errors. See: ${REPORT}`);
+    console.error(
+      `\nPDF ensure completed with ${report.errors.length} errors. See: ${REPORT}`,
+    );
     process.exitCode = 1;
   } else {
     console.log(`\nPDF ensure completed. Report: ${REPORT}`);
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

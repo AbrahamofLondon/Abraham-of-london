@@ -1,4 +1,4 @@
-// lib/posts.ts
+﻿// lib/posts.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -72,16 +72,3 @@ export function getAllPosts(
       return ad > bd ? -1 : 1;
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
-// @/lib/hooks/useDebounce.ts
+﻿// @/lib/hooks/useDebounce.ts
 
-import * as React from 'react';
+import * as React from "react";
 
 /**
  * Custom hook to debounce a value, returning the value only after a specified delay

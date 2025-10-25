@@ -1,6 +1,6 @@
-// types/next-mdx-remote.d.ts
+﻿// type s/next-mdx-remote.d.ts
 
-declare module 'next-mdx-remote/serialize' {
+declare module "next-mdx-remote/serialize" {
   export interface SerializeOptions {
     mdxOptions?: Record<string, unknown>;
     scope?: Record<string, unknown>;
@@ -8,12 +8,12 @@ declare module 'next-mdx-remote/serialize' {
   }
   export function serialize(
     source: string,
-    options?: SerializeOptions
+    options?: SerializeOptions,
   ): Promise<any>;
 }
 
-declare module 'next-mdx-remote' {
-  import * as React from 'react';
+declare module "next-mdx-remote" {
+  import * as React from "react";
 
   export type MDXRemoteSerializeResult = any;
 
@@ -27,8 +27,3 @@ declare module 'next-mdx-remote' {
 
   export const MDXRemote: React.ComponentType<MDXRemoteProps>;
 }
-
-
-
-
-

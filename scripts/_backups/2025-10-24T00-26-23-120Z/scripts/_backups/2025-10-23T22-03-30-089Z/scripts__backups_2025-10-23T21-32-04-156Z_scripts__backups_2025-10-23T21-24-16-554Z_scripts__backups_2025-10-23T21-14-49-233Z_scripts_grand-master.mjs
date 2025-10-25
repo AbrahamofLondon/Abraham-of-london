@@ -33,13 +33,15 @@ const args = Object.fromEntries(
   process.argv.slice(2).map((s) => {
     const [k, v] = s.replace(/^-+/, "").split("=");
     return [k, v === undefined ? true : v];
-  })
+  }),
 );
 
-const DRY = String(args.dry ?? args["dry-run"] ?? "false").toLowerCase() === "true";
+const DRY =
+  String(args.dry ?? args["dry-run"] ?? "false").toLowerCase() === "true";
 const STRICT = String(args.strict ?? "false").toLowerCase() === "true";
 const SKIP_PDF = String(args["skip-pdf"] ?? "false").toLowerCase() === "true";
-const SKIP_DEPLOY = String(args["skip-deploy"] ?? "false").toLowerCase() === "true";
+const SKIP_DEPLOY =
+  String(args["skip-deploy"] ?? "false").toLowerCase() === "true";
 const ROLLBACK = String(args.rollback ?? "false").toLowerCase() === "true";
 const PORT_RANGE = (args["port-range"] ?? "3100-3999").split("-").map(Number);
 
@@ -47,7 +49,8 @@ const outDir = path.join(root, "scripts/_reports");
 const logDir = path.join(root, "scripts/_logs");
 const backupBatch = new Date().toISOString().replace(/[:.]/g, "-");
 const backupDir = path.join(root, `scripts/_backups/${backupBatch}`);
-const REPORT_PATH = args.report || path.join(outDir, "grand-master-report.json");
+const REPORT_PATH =
+  args.report || path.join(outDir, "grand-master-report.json");
 const LOG_PATH = path.join(logDir, "grand-master.log");
 
 const CONTENT_DIR = path.join(root, "content");
@@ -63,7 +66,14 @@ await fs.mkdir(backupDir, { recursive: true });
 
 const norm = (p) => p.replaceAll("\\", "/");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
+async function exists(p) {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function log(message) {
   const line = `[${new Date().toISOString()}] ${message}\n`;
@@ -72,10 +82,28 @@ async function log(message) {
 }
 
 const childProcs = new Set();
-function track(child) { childProcs.add(child); child.on("close", () => childProcs.delete(child)); return child; }
-async function shutdown() { for (const c of childProcs) { try { c.kill("SIGINT"); } catch {} } }
-process.on("SIGINT", async () => { await log("SIGINT received. Shutting down..."); await shutdown(); process.exit(1); });
-process.on("SIGTERM", async () => { await log("SIGTERM received. Shutting down..."); await shutdown(); process.exit(1); });
+function track(child) {
+  childProcs.add(child);
+  child.on("close", () => childProcs.delete(child));
+  return child;
+}
+async function shutdown() {
+  for (const c of childProcs) {
+    try {
+      c.kill("SIGINT");
+    } catch {}
+  }
+}
+process.on("SIGINT", async () => {
+  await log("SIGINT received. Shutting down...");
+  await shutdown();
+  process.exit(1);
+});
+process.on("SIGTERM", async () => {
+  await log("SIGTERM received. Shutting down...");
+  await shutdown();
+  process.exit(1);
+});
 
 async function writeFileSafe(p, content, { binary = false } = {}) {
   if (DRY || ROLLBACK) return;
@@ -85,17 +113,35 @@ async function writeFileSafe(p, content, { binary = false } = {}) {
   const backupPath = path.join(backupDir, relativePath);
 
   if (await exists(p)) {
-    try { await fs.copyFile(p, backupPath); } catch (e) { await log(`WARN: Could not backup ${norm(p)}: ${e.message}`); }
+    try {
+      await fs.copyFile(p, backupPath);
+    } catch (e) {
+      await log(`WARN: Could not backup ${norm(p)}: ${e.message}`);
+    }
     report.recordNote(`Backed up ${norm(p)}`);
   }
 
   const tmp = `${p}.tmp`;
-  await fs.writeFile(tmp, content, binary ? undefined : { encoding: "utf8", flag: "w" });
+  await fs.writeFile(
+    tmp,
+    content,
+    binary ? undefined : { encoding: "utf8", flag: "w" },
+  );
   await fs.rename(tmp, p);
   await log(`Wrote ${norm(p)}`);
 }
 
-function run(cmd, argv = [], { cwd = root, env = {}, timeoutMs = 15 * 60_000, allowFail = false, inherit = false } = {}) {
+function run(
+  cmd,
+  argv = [],
+  {
+    cwd = root,
+    env = {},
+    timeoutMs = 15 * 60_000,
+    allowFail = false,
+    inherit = false,
+  } = {},
+) {
   return new Promise((resolve, reject) => {
     if (DRY && !cmd.includes("playwright")) {
       log(`DRY-RUN: ${cmd} ${argv.join(" ")}`);
@@ -103,21 +149,31 @@ function run(cmd, argv = [], { cwd = root, env = {}, timeoutMs = 15 * 60_000, al
     }
 
     const start = Date.now();
-    const child = track(spawn(cmd, argv, {
-      cwd,
-      env: { ...process.env, ...env },
-      stdio: inherit ? "inherit" : "pipe",
-      shell: isWin,
-    }));
+    const child = track(
+      spawn(cmd, argv, {
+        cwd,
+        env: { ...process.env, ...env },
+        stdio: inherit ? "inherit" : "pipe",
+        shell: isWin,
+      }),
+    );
 
     let stdout = "";
     let stderr = "";
     let killedByTimeout = false;
-    const t = setTimeout(() => { killedByTimeout = true; child.kill("SIGINT"); }, timeoutMs);
+    const t = setTimeout(() => {
+      killedByTimeout = true;
+      child.kill("SIGINT");
+    }, timeoutMs);
 
     if (!inherit) {
-      child.stdout?.on("data", (d) => { stdout += d.toString(); });
-      child.stderr?.on("data", (d) => { stderr += d.toString(); log(`[STDERR] ${d.toString().trim().slice(0, 150)}...`); });
+      child.stdout?.on("data", (d) => {
+        stdout += d.toString();
+      });
+      child.stderr?.on("data", (d) => {
+        stderr += d.toString();
+        log(`[STDERR] ${d.toString().trim().slice(0, 150)}...`);
+      });
     }
 
     child.on("close", async (code) => {
@@ -131,14 +187,25 @@ function run(cmd, argv = [], { cwd = root, env = {}, timeoutMs = 15 * 60_000, al
         if (stderr) await log(`stderr tail: ${stderr.slice(-1000).trim()}`);
       }
 
-      if (code === 0) return resolve({ code, stdout, stderr, killedByTimeout, duration });
-      if (allowFail) return resolve({ code, stdout, stderr, killedByTimeout, duration });
-      return reject(new Error(killedByTimeout ? `Timeout: ${tag}` : `Non-zero exit (${code}): ${tag}\n${stderr || stdout}`));
+      if (code === 0)
+        return resolve({ code, stdout, stderr, killedByTimeout, duration });
+      if (allowFail)
+        return resolve({ code, stdout, stderr, killedByTimeout, duration });
+      return reject(
+        new Error(
+          killedByTimeout
+            ? `Timeout: ${tag}`
+            : `Non-zero exit (${code}): ${tag}\n${stderr || stdout}`,
+        ),
+      );
     });
   });
 }
 
-async function waitForServer(url, { path = "/", retries = 50, delayMs = 400 } = {}) {
+async function waitForServer(
+  url,
+  { path = "/", retries = 50, delayMs = 400 } = {},
+) {
   const target = new URL(path, url);
   for (let i = 0; i < retries; i++) {
     try {
@@ -149,10 +216,14 @@ async function waitForServer(url, { path = "/", retries = 50, delayMs = 400 } = 
           res.resume();
         });
         req.on("error", reject);
-        req.setTimeout(5000, () => { req.destroy(new Error("Timeout")); });
+        req.setTimeout(5000, () => {
+          req.destroy(new Error("Timeout"));
+        });
       });
       return true;
-    } catch { await sleep(delayMs); }
+    } catch {
+      await sleep(delayMs);
+    }
   }
   return false;
 }
@@ -186,33 +257,69 @@ class Report {
       endedAt: null,
     };
   }
-  recordTask(task, status, details = {}) { this.data.tasks.push({ task, status, ...details }); log(`Task: ${task} - ${status} ${JSON.stringify(details)}`); }
-  recordBrandFrame(file, count) { this.data.brandFrameUsage.push({ file: norm(file), count }); }
-  recordCorrupted(file, changes) { this.data.corruptedFiles.push({ file: norm(file), changes }); }
-  recordMissing(file) { this.data.missingFiles.push(norm(file)); }
-  recordInvalidFrontMatter(file, issues) { this.data.invalidFrontMatter.push({ file: norm(file), issues }); }
-  recordMissingAsset(asset) { this.data.missingAssets.push(norm(asset)); }
-  recordNote(note) { this.data.notes.push(note); log(`Note: ${note}`); }
-  increment(key) { this.data[key]++; }
-  finalize() { this.data.endedAt = new Date().toISOString(); }
-  get() { return JSON.parse(JSON.stringify(this.data)); }
+  recordTask(task, status, details = {}) {
+    this.data.tasks.push({ task, status, ...details });
+    log(`Task: ${task} - ${status} ${JSON.stringify(details)}`);
+  }
+  recordBrandFrame(file, count) {
+    this.data.brandFrameUsage.push({ file: norm(file), count });
+  }
+  recordCorrupted(file, changes) {
+    this.data.corruptedFiles.push({ file: norm(file), changes });
+  }
+  recordMissing(file) {
+    this.data.missingFiles.push(norm(file));
+  }
+  recordInvalidFrontMatter(file, issues) {
+    this.data.invalidFrontMatter.push({ file: norm(file), issues });
+  }
+  recordMissingAsset(asset) {
+    this.data.missingAssets.push(norm(asset));
+  }
+  recordNote(note) {
+    this.data.notes.push(note);
+    log(`Note: ${note}`);
+  }
+  increment(key) {
+    this.data[key]++;
+  }
+  finalize() {
+    this.data.endedAt = new Date().toISOString();
+  }
+  get() {
+    return JSON.parse(JSON.stringify(this.data));
+  }
   async writeHtml() {
-    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    const escapeHtml = (s) =>
+      String(s).replace(
+        /[&<>"']/g,
+        (m) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[m],
+      );
     const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Grand Master Report</title>
 <style>body{font-family:system-ui,Arial;margin:20px}table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f2f2f2}pre{white-space:pre-wrap}</style></head><body>
 <h1>Grand Master Report</h1>
 <p>Started: ${this.data.startedAt} | Ended: ${this.data.endedAt || "N/A"}</p>
 <p>Config: dry=${this.data.dryRun}, strict=${this.data.strict}, skipPdf=${this.data.skipPdf}, skipDeploy=${this.data.skipDeploy}, rollback=${this.data.rollback}, port=${this.data.port}</p>
-<h2>Tasks</h2><table><tr><th>Task</th><th>Status</th><th>Details</th></tr>${
-      this.data.tasks.map(t => `<tr><td>${t.task}</td><td>${t.status}</td><td><pre>${escapeHtml(JSON.stringify(t, null, 2))}</pre></td></tr>`).join("")
-    }</table>
-<h2>BrandFrame Usage</h2><ul>${this.data.brandFrameUsage.map(u => `<li>${u.file}: ${u.count}</li>`).join("")}</ul>
-<h2>Corrupted Files Fixed</h2><ul>${this.data.corruptedFiles.map(f => `<li>${f.file}: ${escapeHtml((f.changes||[]).join(", "))}</li>`).join("")}</ul>
-<h2>Missing Files Restored</h2><ul>${this.data.missingFiles.map(f => `<li>${f}</li>`).join("")}</ul>
-<h2>Invalid Front-Matter</h2><ul>${this.data.invalidFrontMatter.map(f => `<li>${f.file}: ${escapeHtml((f.issues||[]).join(", "))}</li>`).join("")}</ul>
-<h2>Missing Assets</h2><ul>${this.data.missingAssets.map(a => `<li>${a}</li>`).join("")}</ul>
-<h2>Notes</h2><ul>${this.data.notes.map(n => `<li>${escapeHtml(n)}</li>`).join("")}</ul>
+<h2>Tasks</h2><table><tr><th>Task</th><th>Status</th><th>Details</th></tr>${this.data.tasks
+      .map(
+        (t) =>
+          `<tr><td>${t.task}</td><td>${t.status}</td><td><pre>${escapeHtml(JSON.stringify(t, null, 2))}</pre></td></tr>`,
+      )
+      .join("")}</table>
+<h2>BrandFrame Usage</h2><ul>${this.data.brandFrameUsage.map((u) => `<li>${u.file}: ${u.count}</li>`).join("")}</ul>
+<h2>Corrupted Files Fixed</h2><ul>${this.data.corruptedFiles.map((f) => `<li>${f.file}: ${escapeHtml((f.changes || []).join(", "))}</li>`).join("")}</ul>
+<h2>Missing Files Restored</h2><ul>${this.data.missingFiles.map((f) => `<li>${f}</li>`).join("")}</ul>
+<h2>Invalid Front-Matter</h2><ul>${this.data.invalidFrontMatter.map((f) => `<li>${f.file}: ${escapeHtml((f.issues || []).join(", "))}</li>`).join("")}</ul>
+<h2>Missing Assets</h2><ul>${this.data.missingAssets.map((a) => `<li>${a}</li>`).join("")}</ul>
+<h2>Notes</h2><ul>${this.data.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("")}</ul>
 </body></html>`;
     await writeFileSafe(path.join(outDir, "grand-master-report.html"), html);
   }
@@ -222,7 +329,11 @@ const report = new Report();
 /* ───────────── Mojibake + FM healing ───────────── */
 
 function isMojibake(text) {
-  return /Ãƒ[Æ’â€][\w\W]{1,10}Ã¢â€/.test(text) || text.includes("\uFEFF") || /â€¦|â€”|â€œ|â€|â€“|â€™|Â./.test(text);
+  return (
+    /Ãƒ[Æ’â€][\w\W]{1,10}Ã¢â€/.test(text) ||
+    text.includes("\uFEFF") ||
+    /â€¦|â€”|â€œ|â€|â€“|â€™|Â./.test(text)
+  );
 }
 
 function fixMojibake(text) {
@@ -231,27 +342,44 @@ function fixMojibake(text) {
     { from: /\r\n|\r/g, to: "\n" }, // CRLF→LF
     { from: /[ \t]+$/gm, to: "" }, // trailing spaces
     // CP-1252 artifacts
-    { from: /â€”/g, to: "—" }, { from: /â€“/g, to: "–" },
-    { from: /â€¦/g, to: "…" }, { from: /â€˜|Ã¢â‚¬Ëœ/g, to: "'" }, { from: /â€™|Ã¢â‚¬â„¢/g, to: "'" },
-    { from: /â€œ|Ã¢â‚¬Å“|ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/g, to: '"' }, { from: /â€|Ã¢â‚¬Â/g, to: '"' },
-    { from: /Â©/g, to: "©" }, { from: /Â/g, to: "" },
+    { from: /â€”/g, to: "—" },
+    { from: /â€“/g, to: "–" },
+    { from: /â€¦/g, to: "…" },
+    { from: /â€˜|Ã¢â‚¬Ëœ/g, to: "'" },
+    { from: /â€™|Ã¢â‚¬â„¢/g, to: "'" },
+    { from: /â€œ|Ã¢â‚¬Å“|ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/g, to: '"' },
+    { from: /â€|Ã¢â‚¬Â/g, to: '"' },
+    { from: /Â©/g, to: "©" },
+    { from: /Â/g, to: "" },
     // project-specific junk bursts -> strip
     { from: /ÃƒÆ’[^A-Za-z0-9]+/g, to: "" },
   ];
   let result = text;
   const changes = [];
   for (const { from, to } of replacements) {
-    if (from.test(result)) { result = result.replace(from, to); changes.push(`replace:${from.source}`); }
+    if (from.test(result)) {
+      result = result.replace(from, to);
+      changes.push(`replace:${from.source}`);
+    }
   }
   // kill contentlayer imports
-  const CL = /import\s+\{[^}]*\}\s+from\s+['"]contentlayer\/generated['"];?\n?/g;
-  if (CL.test(result)) { result = result.replace(CL, ""); changes.push("remove:contentlayer-imports"); }
+  const CL =
+    /import\s+\{[^}]*\}\s+from\s+['"]contentlayer\/generated['"];?\n?/g;
+  if (CL.test(result)) {
+    result = result.replace(CL, "");
+    changes.push("remove:contentlayer-imports");
+  }
   return { fixed: result, changes: Array.from(new Set(changes)) };
 }
 
 function processFrontMatter(content, filePath) {
   const m = content.match(/^\s*---\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
-  if (!m) return { fixedContent: content, changes: [], issues: ["Missing front-matter block"] };
+  if (!m)
+    return {
+      fixedContent: content,
+      changes: [],
+      issues: ["Missing front-matter block"],
+    };
 
   let [_, fm, body] = m;
   const lines = fm.split("\n");
@@ -261,18 +389,31 @@ function processFrontMatter(content, filePath) {
 
   for (let line of lines) {
     const t = line.trim();
-    if (!t) { out.push(line); continue; }
+    if (!t) {
+      out.push(line);
+      continue;
+    }
     const idx = t.indexOf(":");
-    if (idx < 0) { out.push(line); issues.push(`FM: malformed line "${t}"`); continue; }
+    if (idx < 0) {
+      out.push(line);
+      issues.push(`FM: malformed line "${t}"`);
+      continue;
+    }
     let key = t.slice(0, idx).trim();
     let value = t.slice(idx + 1).trim();
 
-    if (key.toLowerCase() === "kind") { key = "type"; changes.push("FM:kind->type"); }
+    if (key.toLowerCase() === "kind") {
+      key = "type";
+      changes.push("FM:kind->type");
+    }
     const bare = value.replace(/^['"]|['"]$/g, "");
 
     // quote strings with spaces/specials
-    if (bare && !/^(['"]|true|false|null|\d|[\[{])/.test(value) &&
-        (/\s/.test(bare) || /[:#-]/.test(bare))) {
+    if (
+      bare &&
+      !/^(['"]|true|false|null|\d|[\[{])/.test(value) &&
+      (/\s/.test(bare) || /[:#-]/.test(bare))
+    ) {
       value = `"${bare.replace(/"/g, '\\"')}"`;
       changes.push(`FM:quote:${key}`);
     }
@@ -287,21 +428,45 @@ function processFrontMatter(content, filePath) {
 
 async function fixAndValidateFiles() {
   report.recordTask("content-scan", "running");
-  const EXT = [".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs", ".md", ".mdx", ".json", ".css", ".html"];
-  const IGNORE = new Set(["node_modules", ".git", ".next", "out", ".turbo", "dist", "scripts/_backups"]);
+  const EXT = [
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+    ".md",
+    ".mdx",
+    ".json",
+    ".css",
+    ".html",
+  ];
+  const IGNORE = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    "out",
+    ".turbo",
+    "dist",
+    "scripts/_backups",
+  ]);
   const files = [];
 
   const stack = [root];
   while (stack.length) {
     const d = stack.pop();
     let ents = [];
-    try { ents = await fs.readdir(d, { withFileTypes: true }); } catch { continue; }
+    try {
+      ents = await fs.readdir(d, { withFileTypes: true });
+    } catch {
+      continue;
+    }
     for (const e of ents) {
       const p = path.join(d, e.name);
       if (e.isDirectory()) {
-        if ([...IGNORE].some(x => p.includes(x))) continue;
+        if ([...IGNORE].some((x) => p.includes(x))) continue;
         stack.push(p);
-      } else if (EXT.some(ext => p.endsWith(ext))) {
+      } else if (EXT.some((ext) => p.endsWith(ext))) {
         files.push(p);
       }
     }
@@ -316,12 +481,16 @@ async function fixAndValidateFiles() {
       // Mojibake
       if (isMojibake(content)) {
         const { fixed, changes } = fixMojibake(content);
-        content = fixed; fileChanges.push(...changes);
+        content = fixed;
+        fileChanges.push(...changes);
       }
 
       // FM normalization
       if (file.endsWith(".mdx") || file.endsWith(".md")) {
-        const { fixedContent, changes, issues } = processFrontMatter(content, file);
+        const { fixedContent, changes, issues } = processFrontMatter(
+          content,
+          file,
+        );
         content = fixedContent;
         fileChanges.push(...changes);
         if (issues.length) report.recordInvalidFrontMatter(file, issues);
@@ -330,7 +499,10 @@ async function fixAndValidateFiles() {
       if (content.includes("<BrandFrame")) {
         const count = (content.match(/<BrandFrame\b[^>]*>/g) || []).length;
         report.recordBrandFrame(file, count);
-        if (STRICT) throw new Error(`STRICT FAILURE: Deprecated <BrandFrame> in ${norm(file)}`);
+        if (STRICT)
+          throw new Error(
+            `STRICT FAILURE: Deprecated <BrandFrame> in ${norm(file)}`,
+          );
       }
 
       if (content !== orig) {
@@ -339,10 +511,15 @@ async function fixAndValidateFiles() {
       }
 
       if (isMojibake(content) && STRICT) {
-        throw new Error(`STRICT FAILURE: Mojibake persisted in ${norm(file)} after fix.`);
+        throw new Error(
+          `STRICT FAILURE: Mojibake persisted in ${norm(file)} after fix.`,
+        );
       }
     } catch (e) {
-      report.recordTask("fix-encoding", "fatal-error", { error: e.message, file: norm(file) });
+      report.recordTask("fix-encoding", "fatal-error", {
+        error: e.message,
+        file: norm(file),
+      });
       if (STRICT) throw e;
     }
   }
@@ -424,7 +601,7 @@ tags:
   - society
 ---
 Content here...
-`
+`,
     },
     {
       path: "content/strategy/events-blueprint.md",
@@ -441,7 +618,7 @@ tags:
   - strategy
 ---
 Content here...
-`
+`,
     },
     {
       path: "content/downloads/board-update-onepager.mdx",
@@ -461,7 +638,7 @@ tags:
 ---
 # Board Update One-Pager
 Content here...
-`
+`,
     },
     {
       path: "content/downloads/brotherhood-emergency-call-tree.mdx",
@@ -496,7 +673,7 @@ tags:
 > **FORWARD:** Where to meet / what to bring / ETA.
 
 **Example:** Brief: Tom's car accident, A&E St. Mary's. Point: Kids need pickup. Forward: Mark grabs kids 3:45, Sarah meets at house 4:15.
-`
+`,
     },
     {
       path: "content/books/fathering-without-fear.mdx",
@@ -519,7 +696,7 @@ tags:
 "Not a plea, a standard." *Fathering Without Fear* is a memoir of clarity under pressure—faith lived in the open, a father's stubborn refusal to surrender the future that bears his name.
 
 <aside>Content here...</aside>
-`
+`,
     },
     {
       path: "components/BlogPostCard.tsx",
@@ -610,7 +787,7 @@ export default function BlogPostCard(props: BlogPostCardProps) {
     </article>
   );
 }
-`
+`,
     },
   ];
 
@@ -631,20 +808,30 @@ export default function BlogPostCard(props: BlogPostCardProps) {
 
 function requireEnvironment(minNodeMajor = 18) {
   const major = parseInt(process.versions.node.split(".")[0], 10);
-  if (Number.isNaN(major) || major < minNodeMajor) throw new Error(`Node ${minNodeMajor}+ required. Current: ${process.versions.node}`);
+  if (Number.isNaN(major) || major < minNodeMajor)
+    throw new Error(
+      `Node ${minNodeMajor}+ required. Current: ${process.versions.node}`,
+    );
   const required = ["git", npm, npx];
-  for (const cmd of required) if (!cmdExists(cmd)) throw new Error(`Required command not found: ${cmd}`);
+  for (const cmd of required)
+    if (!cmdExists(cmd)) throw new Error(`Required command not found: ${cmd}`);
 }
 
 async function auditDependencies() {
   let vulnCount = 0;
   try {
     report.recordTask("npm-install", "running");
-    await run(npm, ["install", "--legacy-peer-deps"], { inherit: true, timeoutMs: 10 * 60_000 });
+    await run(npm, ["install", "--legacy-peer-deps"], {
+      inherit: true,
+      timeoutMs: 10 * 60_000,
+    });
     report.recordTask("npm-install", "success");
 
     report.recordTask("npm-audit-fix", "running");
-    await run(npm, ["audit", "fix", "--force", "--fund=false"], { inherit: true, allowFail: true });
+    await run(npm, ["audit", "fix", "--force", "--fund=false"], {
+      inherit: true,
+      allowFail: true,
+    });
     report.recordTask("npm-audit-fix", "success");
 
     const audit = spawnSync(npm, ["audit", "--json"], { encoding: "utf8" });
@@ -652,9 +839,13 @@ async function auditDependencies() {
       const parsed = JSON.parse(audit.stdout || "{}");
       vulnCount = parsed?.metadata?.vulnerabilities?.total ?? 0;
       report.data.vulnerabilities = vulnCount;
-      report.recordTask("final-audit", vulnCount > 0 ? "warning" : "success", { vulnerabilities: vulnCount });
+      report.recordTask("final-audit", vulnCount > 0 ? "warning" : "success", {
+        vulnerabilities: vulnCount,
+      });
     } else {
-      report.recordTask("final-audit", "failed", { error: "Audit command failed." });
+      report.recordTask("final-audit", "failed", {
+        error: "Audit command failed.",
+      });
     }
   } catch (e) {
     report.recordTask("dependency-audit", "fatal-error", { error: e.message });
@@ -668,18 +859,26 @@ async function auditDependencies() {
 async function runSmokeTests(baseUrl) {
   const testPath = path.join(root, "tests/a11y-smoke.spec.ts");
   if (!(await exists(testPath))) {
-    report.recordNote("Skipping smoke tests: tests/a11y-smoke.spec.ts not found.");
+    report.recordNote(
+      "Skipping smoke tests: tests/a11y-smoke.spec.ts not found.",
+    );
     return;
   }
 
   report.recordTask("e2e-smoke-test", "running");
   try {
-    const result = await run(npx, ["playwright", "test", "--workers=2", "--reporter=list"], {
-      env: { BASE_URL: baseUrl, PWDEBUG: "0" },
-      timeoutMs: 5 * 60_000,
-      inherit: true,
+    const result = await run(
+      npx,
+      ["playwright", "test", "--workers=2", "--reporter=list"],
+      {
+        env: { BASE_URL: baseUrl, PWDEBUG: "0" },
+        timeoutMs: 5 * 60_000,
+        inherit: true,
+      },
+    );
+    report.recordTask("e2e-smoke-test", "success", {
+      duration: result.duration,
     });
-    report.recordTask("e2e-smoke-test", "success", { duration: result.duration });
   } catch (e) {
     report.recordTask("e2e-smoke-test", "failed", { error: e.message });
     if (STRICT) throw e;
@@ -692,7 +891,9 @@ async function renderPDF(browser, url, outPath, frontMatter) {
   const page = await browser.newPage();
   try {
     await page.goto(url, { waitUntil: "networkidle0", timeout: 60_000 });
-    await page.waitForSelector("#pdf-container, main[role='main']", { timeout: 15_000 });
+    await page.waitForSelector("#pdf-container, main[role='main']", {
+      timeout: 15_000,
+    });
     await page.emulateMediaType("print");
     const headerTemplate = `<div style="font-size:8pt; width:100%; text-align:right; padding-right:20mm;">${frontMatter?.title ?? ""}</div>`;
     const footerTemplate = `<div style="font-size:8pt; width:100%; text-align:center; border-top:1px solid #ccc;"><span class="pageNumber"></span>/<span class="totalPages"></span> | Abraham of London</div>`;
@@ -710,17 +911,24 @@ async function renderPDF(browser, url, outPath, frontMatter) {
   } catch (e) {
     report.recordNote(`PDF failed for ${url}: ${e.message}`);
     return { ok: false, error: e.message };
-  } finally { await page.close(); }
+  } finally {
+    await page.close();
+  }
 }
 
 async function generatePDFs(baseUrl) {
   const dir = path.join(CONTENT_DIR, "downloads");
-  if (!(await exists(dir))) return report.recordNote("No content/downloads directory");
+  if (!(await exists(dir)))
+    return report.recordNote("No content/downloads directory");
 
-  const files = (await fs.readdir(dir)).filter(f => f.endsWith(".mdx"));
-  if (!files.length) return report.recordNote("No MDX files in content/downloads");
+  const files = (await fs.readdir(dir)).filter((f) => f.endsWith(".mdx"));
+  if (!files.length)
+    return report.recordNote("No MDX files in content/downloads");
 
-  const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   try {
     const CONCURRENCY = 4;
     const tasks = files.map((f) => async () => {
@@ -735,10 +943,19 @@ async function generatePDFs(baseUrl) {
       if (mm) {
         mm[1].split("\n").forEach((line) => {
           const i = line.indexOf(":");
-          if (i > -1) fm[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^['"]|['"]$/g, "");
+          if (i > -1)
+            fm[line.slice(0, i).trim()] = line
+              .slice(i + 1)
+              .trim()
+              .replace(/^['"]|['"]$/g, "");
         });
       }
-      fm.slug = fm.slug || path.basename(f, ".mdx").toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+      fm.slug =
+        fm.slug ||
+        path
+          .basename(f, ".mdx")
+          .toLowerCase()
+          .replace(/[^a-z0-9-]+/g, "-");
       fm.title = fm.title || fm.slug;
 
       if (fm.coverImage) {
@@ -751,31 +968,49 @@ async function generatePDFs(baseUrl) {
       await fs.mkdir(path.dirname(outPath), { recursive: true });
 
       const res = await renderPDF(browser, url, outPath, fm);
-      if (!res.ok && STRICT) throw new Error(`PDF generation failed for ${fm.slug}: ${res.error || "unknown"}`);
+      if (!res.ok && STRICT)
+        throw new Error(
+          `PDF generation failed for ${fm.slug}: ${res.error || "unknown"}`,
+        );
     });
 
     // simple concurrency runner
     const queue = [...tasks];
-    const runners = Array(CONCURRENCY).fill(0).map(async () => {
-      while (queue.length) {
-        const t = queue.shift();
-        if (!t) break;
-        try { await t(); } catch (e) { report.recordNote(`Parallel PDF task failed: ${e.message}`); if (STRICT) throw e; }
-      }
-    });
+    const runners = Array(CONCURRENCY)
+      .fill(0)
+      .map(async () => {
+        while (queue.length) {
+          const t = queue.shift();
+          if (!t) break;
+          try {
+            await t();
+          } catch (e) {
+            report.recordNote(`Parallel PDF task failed: ${e.message}`);
+            if (STRICT) throw e;
+          }
+        }
+      });
     await Promise.all(runners);
-
-  } finally { await browser.close(); }
+  } finally {
+    await browser.close();
+  }
 }
 
 /* ───────────── Main ───────────── */
 
 (async function main() {
-  await log(`Starting Apex Grand Master (dry=${DRY}, strict=${STRICT}, rollback=${ROLLBACK})`);
+  await log(
+    `Starting Apex Grand Master (dry=${DRY}, strict=${STRICT}, rollback=${ROLLBACK})`,
+  );
 
   // 0) Preflight & rollback
-  try { requireEnvironment(18); report.recordTask("environment-lock", "success"); }
-  catch (e) { report.recordTask("environment-lock", "failed", { error: e.message }); throw e; }
+  try {
+    requireEnvironment(18);
+    report.recordTask("environment-lock", "success");
+  } catch (e) {
+    report.recordTask("environment-lock", "failed", { error: e.message });
+    throw e;
+  }
 
   if (ROLLBACK) {
     const backups = await fs.readdir(backupDir).catch(() => []);
@@ -809,7 +1044,8 @@ async function generatePDFs(baseUrl) {
 
     report.recordTask("nextjs-build", "running");
     await run(npm, ["run", "build"], { timeoutMs: 15 * 60_000, inherit: true });
-    if (!(await exists(BUILD_OUTPUT_DIR))) throw new Error("Build failed: .next directory is missing.");
+    if (!(await exists(BUILD_OUTPUT_DIR)))
+      throw new Error("Build failed: .next directory is missing.");
     report.recordTask("nextjs-build", "success");
   } catch (e) {
     report.recordTask("build-and-deps", "failed", { error: e.message });
@@ -822,42 +1058,71 @@ async function generatePDFs(baseUrl) {
 
   if (!SKIP_PDF || !SKIP_DEPLOY) {
     try {
-      const port = await getPort({ port: getPort.makeRange(PORT_RANGE[0], PORT_RANGE[1]) });
+      const port = await getPort({
+        port: getPort.makeRange(PORT_RANGE[0], PORT_RANGE[1]),
+      });
       BASE_URL = `http://localhost:${port}`;
-      serverProcess = track(spawn(npm, ["run", "start", "--", "-p", String(port)], { cwd: root, stdio: "pipe", shell: isWin }));
-      if (!(await waitForServer(BASE_URL))) throw new Error("Next.js server failed to respond.");
+      serverProcess = track(
+        spawn(npm, ["run", "start", "--", "-p", String(port)], {
+          cwd: root,
+          stdio: "pipe",
+          shell: isWin,
+        }),
+      );
+      if (!(await waitForServer(BASE_URL)))
+        throw new Error("Next.js server failed to respond.");
       report.data.port = port;
       report.recordTask("start-server", "success", { port });
 
       await runSmokeTests(BASE_URL);
 
       if (!SKIP_PDF) {
-        if (vulnerabilities > 0 && STRICT) report.recordNote("Skipping PDF in STRICT mode due to unresolved vulnerabilities.");
+        if (vulnerabilities > 0 && STRICT)
+          report.recordNote(
+            "Skipping PDF in STRICT mode due to unresolved vulnerabilities.",
+          );
         else await generatePDFs(BASE_URL);
-        report.recordTask("pdf-generation", "success", { count: report.data.pdfsGenerated });
+        report.recordTask("pdf-generation", "success", {
+          count: report.data.pdfsGenerated,
+        });
       }
     } catch (e) {
       report.recordTask("runtime-checks", "failed", { error: e.message });
       if (STRICT) throw e;
     } finally {
-      if (serverProcess) { serverProcess.kill("SIGINT"); report.recordNote("Stopped Next.js server."); }
+      if (serverProcess) {
+        serverProcess.kill("SIGINT");
+        report.recordNote("Stopped Next.js server.");
+      }
     }
   }
 
   // 4) Export + Deploy
   if (!SKIP_DEPLOY) {
     if (vulnerabilities > 0 && STRICT) {
-      report.recordNote("Skipping deployment in STRICT mode due to vulnerabilities.");
-    } else if (report.data.tasks.find(t => t.task === "e2e-smoke-test" && t.status === "failed")) {
+      report.recordNote(
+        "Skipping deployment in STRICT mode due to vulnerabilities.",
+      );
+    } else if (
+      report.data.tasks.find(
+        (t) => t.task === "e2e-smoke-test" && t.status === "failed",
+      )
+    ) {
       report.recordNote("Skipping deployment due to failed E2E smoke test.");
     } else {
       try {
         report.recordTask("export", "running");
-        await run(npm, ["run", "export"], { timeoutMs: 10 * 60_000, inherit: true });
+        await run(npm, ["run", "export"], {
+          timeoutMs: 10 * 60_000,
+          inherit: true,
+        });
         report.recordTask("export", "success");
 
         report.recordTask("deployment", "running");
-        await run(npm, ["run", "deploy"], { timeoutMs: 10 * 60_000, inherit: true });
+        await run(npm, ["run", "deploy"], {
+          timeoutMs: 10 * 60_000,
+          inherit: true,
+        });
         report.recordTask("deployment", "success");
       } catch (e) {
         report.recordTask("deployment", "failed", { error: e.message });
@@ -873,7 +1138,10 @@ async function generatePDFs(baseUrl) {
   await log("Orchestra Grand Master: Apex Edition finished.");
 })().catch(async (e) => {
   await shutdown();
-  report.recordTask("fatal-error", "failed", { error: e.message, stack: e.stack });
+  report.recordTask("fatal-error", "failed", {
+    error: e.message,
+    stack: e.stack,
+  });
   report.finalize();
   await writeFileSafe(REPORT_PATH, JSON.stringify(report.get(), null, 2));
   await report.writeHtml();

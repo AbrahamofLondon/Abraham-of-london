@@ -15,16 +15,22 @@ if (isCI || skip) {
 }
 
 try {
-  console.log("[prepare-playwright] Installing Playwright browsers (chromium only)...");
+  console.log(
+    "[prepare-playwright] Installing Playwright browsers (chromium only)...",
+  );
   // Keep it lightweight for developers; no sudo, no system deps.
   execSync("npx --yes playwright install chromium", { stdio: "inherit" });
 
   // Optional: install OS deps only when NOT in CI and on Linux desktop
   if (os.platform() === "linux" && !isCI) {
     try {
-      execSync("npx --yes playwright install-deps chromium", { stdio: "inherit" });
+      execSync("npx --yes playwright install-deps chromium", {
+        stdio: "inherit",
+      });
     } catch {
-      console.log("[prepare-playwright] Skipped install-deps (not required or insufficient permissions).");
+      console.log(
+        "[prepare-playwright] Skipped install-deps (not required or insufficient permissions).",
+      );
     }
   }
 

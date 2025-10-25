@@ -23,12 +23,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const args = Object.fromEntries(
-  process.argv.slice(2)
-    .filter(a => a.startsWith("--"))
-    .map(a => {
+  process.argv
+    .slice(2)
+    .filter((a) => a.startsWith("--"))
+    .map((a) => {
       const [k, v] = a.replace(/^--/, "").split("=");
       return [k, v === undefined ? true : v];
-    })
+    }),
 );
 
 const WRITE = Boolean(args.write);
@@ -38,7 +39,19 @@ const OUT_DIR = path.resolve(ROOT, args.out || "scripts/output");
 const MIN_BYTES = Math.max(1024, Number(args["min-bytes"] || 12000));
 
 const TEXT_EXTS = new Set([
-  ".md",".mdx",".txt",".js",".jsx",".ts",".tsx",".json",".toml",".yaml",".yml",".css",".html"
+  ".md",
+  ".mdx",
+  ".txt",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".css",
+  ".html",
 ]);
 
 const shouldScan = (file) => {
@@ -51,12 +64,22 @@ const shouldScan = (file) => {
   return true;
 };
 
-const walkFiles = async (dir, out=[]) => {
+const walkFiles = async (dir, out = []) => {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const e of entries) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) {
-      if ([".next","node_modules","dist",".git",".vercel",".netlify"].includes(e.name)) continue;
+      if (
+        [
+          ".next",
+          "node_modules",
+          "dist",
+          ".git",
+          ".vercel",
+          ".netlify",
+        ].includes(e.name)
+      )
+        continue;
       await walkFiles(p, out);
     } else if (shouldScan(p)) {
       out.push(p);
@@ -103,13 +126,13 @@ const readText = async (p) => fs.readFile(p, "utf8");
 const nowStamp = () => {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 };
 
 /** Tiny PDF with one line of text, then padded to MIN_BYTES */
 const makePlaceholderPdfBuffer = (label) => {
   const text = `Placeholder: ${label}`;
-  const content = `BT /F1 24 Tf 50 780 Td (${text.replace(/[()\\]/g, m => "\\"+m)}) Tj ET`;
+  const content = `BT /F1 24 Tf 50 780 Td (${text.replace(/[()\\]/g, (m) => "\\" + m)}) Tj ET`;
   const stream = `<< /Length ${Buffer.byteLength(content)} >>\nstream\n${content}\nendstream`;
   const pdf = [
     "%PDF-1.4",
@@ -149,7 +172,9 @@ const listExisting = async (dir) => {
   console.log("— scan-and-fill-downloads —");
   console.log(`root : ${ROOT}`);
   console.log(`dir  : ${DL_DIR}`);
-  console.log(`mode : ${WRITE ? "WRITE (will create placeholders)" : "DRY-RUN"}`);
+  console.log(
+    `mode : ${WRITE ? "WRITE (will create placeholders)" : "DRY-RUN"}`,
+  );
   console.log("");
 
   await ensureDir(OUT_DIR);
@@ -170,7 +195,9 @@ const listExisting = async (dir) => {
   const existingLC = new Set(existing.map((f) => f.toLowerCase()));
 
   // 3) Resolve missing (case-insensitive compare)
-  const missing = Array.from(expected).filter((e) => !existingLC.has(e.toLowerCase()));
+  const missing = Array.from(expected).filter(
+    (e) => !existingLC.has(e.toLowerCase()),
+  );
 
   // 4) Report
   const stamp = nowStamp();
@@ -213,6 +240,8 @@ const listExisting = async (dir) => {
     }
     console.log("\nDone creating placeholders.");
   } else if (!WRITE && missing.length) {
-    console.log("\n(DRY-RUN) No files were created. Re-run with --write to create placeholders.");
+    console.log(
+      "\n(DRY-RUN) No files were created. Re-run with --write to create placeholders.",
+    );
   }
 })();

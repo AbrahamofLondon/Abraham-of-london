@@ -12,10 +12,13 @@ function waitForHealth(url, timeoutMs = 40_000) {
   return new Promise((resolve, reject) => {
     const tick = async () => {
       try {
-        const res = await fetch(`${url}/api/health?ts=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch(`${url}/api/health?ts=${Date.now()}`, {
+          cache: "no-store",
+        });
         if (res.ok) return resolve(true);
       } catch {}
-      if (Date.now() - started > timeoutMs) return reject(new Error("Timeout waiting for Next server"));
+      if (Date.now() - started > timeoutMs)
+        return reject(new Error("Timeout waiting for Next server"));
       setTimeout(tick, 600);
     };
     tick();
@@ -26,7 +29,10 @@ function waitForHealth(url, timeoutMs = 40_000) {
   console.log("- print-all -");
   console.log("Port:", PORT);
 
-  const server = spawn(npmCmd, ["run", "print:serve"], { stdio: "inherit", env: { ...process.env, PORT: String(PORT) } });
+  const server = spawn(npmCmd, ["run", "print:serve"], {
+    stdio: "inherit",
+    env: { ...process.env, PORT: String(PORT) },
+  });
 
   try {
     await waitForHealth(BASE);
@@ -34,9 +40,13 @@ function waitForHealth(url, timeoutMs = 40_000) {
     const renderer = spawn(
       "node",
       ["scripts/render-pdfs.mjs", "--base", BASE, "--out", "public/downloads"],
-      { stdio: "inherit" }
+      { stdio: "inherit" },
     );
-    await new Promise((res, rej) => renderer.on("close", (code) => (code === 0 ? res() : rej(new Error(`renderer exit ${code}`)))));
+    await new Promise((res, rej) =>
+      renderer.on("close", (code) =>
+        code === 0 ? res() : rej(new Error(`renderer exit ${code}`)),
+      ),
+    );
   } finally {
     console.log("Shutting down Next...");
     server.kill("SIGINT");

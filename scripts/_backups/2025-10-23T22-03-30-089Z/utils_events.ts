@@ -1,4 +1,4 @@
-// utils/events.ts
+﻿// utils/events.ts
 import { dayKey, isMidnightLocal, localMinutes } from "./dates";
 
 export type EventLite = {
@@ -22,7 +22,7 @@ function normTitle(s: string): string {
  */
 export function dedupeEventsByTitleAndDay<T extends EventLite>(
   items: T[],
-  tz = "Europe/London"
+  tz = "Europe/London",
 ): T[] {
   const map = new Map<string, T>();
 

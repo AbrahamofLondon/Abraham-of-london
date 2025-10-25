@@ -18,20 +18,23 @@ const STRICT = argv.has("--strict");
 const MIN_BYTES = 10 * 1024; // warn if <10KB
 
 // Allow either kebab-case.pdf OR Title_Case_With_Underscores.pdf
-const BAD_NAME = /^(?![a-z0-9]+(?:-[a-z0-9]+)*\.pdf$)(?![A-Z][A-Za-z0-9]*(?:_[A-Z][A-Za-z0-9]*)*\.pdf$).+/;
+const BAD_NAME =
+  /^(?![a-z0-9]+(?:-[a-z0-9]+)*\.pdf$)(?![A-Z][A-Za-z0-9]*(?:_[A-Z][A-Za-z0-9]*)*\.pdf$).+/;
 
 // Provide expected filenames via env (comma separated)
 const EXPECTED = new Set(
   (process.env.EXPECTED_DOWNLOADS || "")
     .split(",")
     .map((s) => s.trim())
-    .filter(Boolean)
+    .filter(Boolean),
 );
 
 // Always check these common ones
-["leaders-cue-card.pdf", "brotherhood-covenant.pdf", "brotherhood-cue-card.pdf"].forEach((f) =>
-  EXPECTED.add(f)
-);
+[
+  "leaders-cue-card.pdf",
+  "brotherhood-covenant.pdf",
+  "brotherhood-cue-card.pdf",
+].forEach((f) => EXPECTED.add(f));
 
 // Canonical Title_Case files that are OK to be served via redirect
 const CANONICAL_ALIASES = new Set([
@@ -67,7 +70,7 @@ async function main() {
     }
     if (BAD_NAME.test(name)) {
       warnings.push(
-        `Filename style should be Title_Case_With_Underscores.pdf or kebab-case.pdf: ${name}`
+        `Filename style should be Title_Case_With_Underscores.pdf or kebab-case.pdf: ${name}`,
       );
     }
     if (stat.size < MIN_BYTES) {

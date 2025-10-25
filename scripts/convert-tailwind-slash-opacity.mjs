@@ -1,1 +1,1 @@
-console.log('convert-tailwind-slash-opacity.mjs is running!');
+console.log("convert-tailwind-slash-opacity.mjs is running!");

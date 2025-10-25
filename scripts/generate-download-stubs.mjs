@@ -1,4 +1,4 @@
-scripts/generate-download-stubs.mjs
+scripts / generate - download - stubs.mjs;
 import fs from "fs";
 import path from "path";
 

@@ -81,7 +81,8 @@ const toOutName = (fm, sourcePath) => {
   return slugify(path.parse(sourcePath).name) + ".pdf";
 };
 
-const readOr = async (p, orStr) => (await exists(p) ? fs.readFile(p, "utf8") : orStr);
+const readOr = async (p, orStr) =>
+  (await exists(p)) ? fs.readFile(p, "utf8") : orStr;
 
 // Markdown renderer
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
@@ -262,10 +263,12 @@ async function buildOne(browser, item) {
       srcBuf || Buffer.from(""),
       Buffer.from(payload.brandCss),
       Buffer.from(templateHtml),
-    ])
+    ]),
   );
   const cacheKey = path.join(CACHE_DIR, outName + ".sha");
-  const oldHash = (await exists(cacheKey)) ? (await fs.readFile(cacheKey, "utf8")).trim() : "";
+  const oldHash = (await exists(cacheKey))
+    ? (await fs.readFile(cacheKey, "utf8")).trim()
+    : "";
   if (!FORCE_ALL && oldHash === hash && (await exists(outPath))) {
     dbg("cache hit:", outName);
     return outPath;
@@ -296,7 +299,9 @@ async function buildOne(browser, item) {
 async function buildAll() {
   const items = await discover();
   if (items.length === 0) {
-    log("No sources found - add MD/MDX/HTML to content/downloads or scripts/pdfs/static.");
+    log(
+      "No sources found - add MD/MDX/HTML to content/downloads or scripts/pdfs/static.",
+    );
     return [];
   }
   const browser = puppeteer.launch({ headless: "new" });
@@ -322,14 +327,21 @@ async function main() {
 
   if (OPEN && outs.length) {
     const opener =
-      process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+      process.platform === "darwin"
+        ? "open"
+        : process.platform === "win32"
+          ? "start"
+          : "xdg-open";
     const { exec } = await import("node:child_process");
     for (const o of outs) exec(`${opener} "${o}"`);
   }
 
   if (WATCH) {
     log("watching for changes...");
-    const watcher = chokidar.watch(CONTENT_DIRS, { cwd: ROOT, ignoreInitial: true });
+    const watcher = chokidar.watch(CONTENT_DIRS, {
+      cwd: ROOT,
+      ignoreInitial: true,
+    });
     watcher.on("all", async () => {
       try {
         await buildAll();

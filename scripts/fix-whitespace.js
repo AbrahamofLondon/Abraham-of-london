@@ -10,7 +10,7 @@ async function* walk(dir) {
   for (const d of await fs.readdir(dir, { withFileTypes: true })) {
     const entry = path.join(dir, d.name);
     if (d.isDirectory()) yield* walk(entry);
-    else if (toClean.some(ext => d.name.endsWith(ext))) yield entry;
+    else if (toClean.some((ext) => d.name.endsWith(ext))) yield entry;
   }
 }
 
