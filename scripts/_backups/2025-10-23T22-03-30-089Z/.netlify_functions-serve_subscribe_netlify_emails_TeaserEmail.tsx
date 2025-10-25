@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 
 type Props = { name?: string; siteUrl: string };
 
@@ -26,7 +26,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
         lineHeight: 1.6,
       }}
     >
-      <p>FriendsÃƒ¢Ã¢â€š¬Ã¢â‚¬{name ? ` ${name},` : ""}</p>
+      <p>FriendsÃƒ¢Ã¢â€š¬Ã¢â‚¬{name ? ` ${name},` : ""}</p>
 
       <p>
         IÃƒ¢Ã¢â€š¬Ã¢â€ž¢m releasing <strong>Fathering Without Fear</strong>, a
@@ -47,7 +47,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
 
       <p>
         Want chapter drops and launch dates? Reply{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list here:{" "}
+        <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list here:{" "}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
 
@@ -63,7 +63,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
       <p style={{ fontSize: 12, color: "#6b7280" }}>
         YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you requested the teaser or
         asked to be notified. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
       </p>
     </div>
   );

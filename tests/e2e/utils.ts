@@ -1,4 +1,4 @@
-﻿import { Page } from "@playwright/test";
+import { Page } from "@playwright/test";
 export async function stabilizeForSnapshot(page: Page) {
   await page.addStyleTag({
     content: `*{animation:none!import ant;transition:none!import ant;caret-color:transparent!import ant}html,body{scroll-behavior:auto!import ant}`,

@@ -1,4 +1,4 @@
-﻿// type s/post.ts
+// type s/post.ts
 export type PostMeta = {
   slug: string;
   title: string;

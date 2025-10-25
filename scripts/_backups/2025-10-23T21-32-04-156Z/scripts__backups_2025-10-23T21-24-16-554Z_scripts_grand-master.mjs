@@ -224,7 +224,7 @@ const report = new Report();
 /* ───────────── Mojibake + FM healing ───────────── */
 
 function isMojibake(text) {
-	return /w\W]{1,10}¢€/.test(text) || text.includes("\uFEFF") || /€¦|€"|€œ|€|€"|€™|./.test(text);
+	return /w\W]{1,10}¢€/.test(text) || text.includes("\uFEFF") || /€¦|€"|€œ|€|€"|€™|./.test(text);
 }
 
 function fixMojibake(text) {
@@ -235,7 +235,7 @@ function fixMojibake(text) {
 		// CP-1252 artifacts
 		{ from: /€"/g, to: "-" }, { from: /€"/g, to: "-" },
 		{ from: /€¦/g, to: "..." }, { from: /€˜|¢‚¬Ëœ/g, to: "'" }, { from: /€™|¢‚¬„¢/g, to: "'" },
-		{ from: /€œ|¢‚¬Å"|g, to: '"' }, { from: /€|¢‚¬/g, to: '"' },
+		{ from: /€œ|¢‚¬Å"|g, to: '"' }, { from: /€|¢‚¬/g, to: '"' },
 		{ from: /©/g, to: "©" }, { from: //g, to: "" },
 		// project-specific junk bursts -> strip
 		{ from: /A-Za-z0-9]+/g, to: "" },

@@ -81,7 +81,7 @@ const TEXT_SWEEPS = [
 const ICON_RESCUES = [
   // Replace garbled document/book emoji runs with sane ones
   [/["'`]Ã°Å¸.*?["'`]/g, '"\uD83D\uDCC4"'],
-  [/["'`]Ã°Å¸.*?["'`]/g, '"📖"'],
+  [/["'`]Ã°Å¸.*?["'`]/g, '""'],
 ];
 
 /* ------------------------------ Helpers ------------------------------ */
@@ -131,7 +131,7 @@ function passText(str, fileExt) {
   if ([".ts",".tsx",".js",".jsx",".mjs",".cjs"].includes(fileExt)) {
     for (const re of ICON_RESCUES) str = str.replace(re, (m) => {
       // Heuristic: swap to \uD83D\uDCC4 unless looks like book context
-      return m.includes("book") ? '"📖"' : '"\uD83D\uDCC4"';
+      return m.includes("book") ? '""' : '"\uD83D\uDCC4"';
     });
   }
   if (str !== before) changed = true;
@@ -225,7 +225,7 @@ if (!fs.existsSync(ROOT) || !fs.statSync(ROOT).isDirectory()) {
   process.exit(1);
 }
 
-console.log(`\n🚀 Mojibake & Invisible-Char Repair (root="${ROOT}", dry=${DRY_RUN})`);
+console.log(`\n Mojibake & Invisible-Char Repair (root="${ROOT}", dry=${DRY_RUN})`);
 walk(ROOT);
 console.log(`\nSummary: checked=${filesChecked} | changed=${filesChanged} | passes<=${MAX_PASSES}`);
 if (DRY_RUN) console.log("Dry-run only. No files were written.");

@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 
 type Props = { name?: string; siteUrl: string };
 
@@ -63,7 +63,7 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
       <p style={{ fontSize: 12, color: "#6b7280" }}>
         YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you asked to be notified
         about the launch. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
       </p>
     </div>
   );

@@ -1,4 +1,4 @@
-﻿// lib/server/books-data.ts
+// lib/server/books-data.ts
 export type Book = {
   slug: string;
   title: string;

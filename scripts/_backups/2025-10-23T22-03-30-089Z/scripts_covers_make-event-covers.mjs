@@ -86,5 +86,5 @@ for (const ev of events) {
   const svg = svgCover({ title: ev.title, subtitle: deriveSubtitle(ev.title) });
   const buf = await sharp(Buffer.from(svg)).jpeg({ quality: 90 }).toBuffer();
   await fs.writeFile(outPath, buf);
-  console.log("🖼️  cover created:", path.relative(process.cwd(), outPath));
+  console.log("️  cover created:", path.relative(process.cwd(), outPath));
 }

@@ -1,4 +1,4 @@
-﻿// netlify/function s/subscribe-launch.tsx
+// netlify/function s/subscribe-launch.tsx
 import type { HandlerEvent, HandlerResponse } from "@netlify/function s";
 import { Resend } from "resend";
 import * as React from "react";
@@ -69,7 +69,7 @@ const WelcomeLaunchEmail: React.FC<WelcomeProps> = ({ name, siteUrl }) => {
       <p style={{ fontSize: 12, color: "#6b7280" }}>
         YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you asked to be notified
         about the launch. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
       </p>
     </div>
   );
@@ -135,7 +135,7 @@ export const handler = async (
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: "Welcome Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Fathering Without Fear",
+      subject: "Welcome Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Fathering Without Fear",
       html,
       replyTo: "info@abrahamoflondon.org",
     });

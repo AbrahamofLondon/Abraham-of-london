@@ -361,7 +361,7 @@ function fixMojibake(text) {
     // CP1252 / UTF8 double-encoding artifacts
     { from: /â€™/g, to: "'" }, // right single quote
     { from: /â€˜/g, to: "'" }, // left single quote
-    { from: /â€œ|â€/g, to: '"' }, // double quotes
+    { from: /â€œ|â€/g, to: '"' }, // double quotes
     { from: /â€“/g, to: "–" }, // en dash (normalize)
     { from: /â€”/g, to: "—" }, // em dash (normalize)
     { from: /â€¦/g, to: "..." }, // ellipsis

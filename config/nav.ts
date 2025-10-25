@@ -1,1 +1,1 @@
-﻿//config/nav.tsexporttypeNavItem={href:string;label:string};export constNAV:NavItem[]=[{href:"/books",label:"Books"},{href:"/blog",label:"Insights"},{href:"/ventures",label:"Ventures"},{href:"/about",label:"About"},{href:"/contact",label:"Contact"},];
+//config/nav.tsexporttypeNavItem={href:string;label:string};export constNAV:NavItem[]=[{href:"/books",label:"Books"},{href:"/blog",label:"Insights"},{href:"/ventures",label:"Ventures"},{href:"/about",label:"About"},{href:"/contact",label:"Contact"},];

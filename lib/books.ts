@@ -1,4 +1,4 @@
-﻿if (typeof window !== "undefined") {
+if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
 // lib/books.ts

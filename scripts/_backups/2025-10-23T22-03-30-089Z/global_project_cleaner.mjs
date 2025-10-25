@@ -223,7 +223,7 @@ function walk(dir) {
 
 /* MAIN */
 (function main() {
-  console.log(`🚀 Global cleanup across: ${TARGET_DIRS.join(", ")}`);
+  console.log(` Global cleanup across: ${TARGET_DIRS.join(", ")}`);
   for (const dir of TARGET_DIRS) {
     if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) walk(dir);
     else console.log(`⚠️ Skip missing: ${dir}`);

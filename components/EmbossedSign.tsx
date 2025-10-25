@@ -1,1 +1,1 @@
-﻿export { default } from "./print/EmbossedSign";
+export { default } from "./print/EmbossedSign";

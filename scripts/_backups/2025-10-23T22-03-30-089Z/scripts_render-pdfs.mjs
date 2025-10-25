@@ -238,7 +238,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 /* ───────────── Main ───────────── */
 (async () => {
-  console.log(`\n🚀 PDF Renderer v2 (dry=${DRY}, strict=${STRICT})`);
+  console.log(`\n PDF Renderer v2 (dry=${DRY}, strict=${STRICT})`);
   console.log(`   base=${BASE_URL}, out=${norm(OUT_DIR)}, conc=${CONCURRENCY}, retries=${RETRIES}`);
   await ensureDir(path.dirname(REPORT_PATH));
   await ensureDir(OUT_DIR);

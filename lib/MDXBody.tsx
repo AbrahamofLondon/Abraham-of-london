@@ -1,4 +1,4 @@
-﻿// lib/MDXBody.tsx
+// lib/MDXBody.tsx
 import { useMDXComponent } from "next-contentlayer2/hooks";
 
 export function MDXBody({ code }: { code?: string }) {

@@ -1,4 +1,4 @@
-﻿// data/achievements.ts
+// data/achievements.ts
 export interface Achievement {
   title: string;
   description: string;

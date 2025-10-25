@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import Head from "next/head";
 import type { GetStaticProps } from "next"; // <-- FIXED
 import Link from "next/link";

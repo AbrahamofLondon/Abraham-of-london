@@ -1,4 +1,4 @@
-﻿// lib/subscribe.ts
+// lib/subscribe.ts
 export async function subscribe(
   email: string,
 ): Promise<{ ok: boolean; message: string }> {

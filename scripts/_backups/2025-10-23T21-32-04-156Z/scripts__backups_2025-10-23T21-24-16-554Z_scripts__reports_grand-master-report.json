@@ -238,7 +238,7 @@
         "replace:€¦",
         "replace:€˜|¢‚¬Ëœ",
         "replace:€™|¢‚¬„¢",
-        "replace:€œ|¢‚¬Å"|replace:€|¢‚¬",
+        "replace:€œ|¢‚¬Å"|replace:€|¢‚¬",
         "replace:"
       ]
     },
@@ -251,7 +251,7 @@
         "replace:€¦",
         "replace:€˜|¢‚¬Ëœ",
         "replace:€™|¢‚¬„¢",
-        "replace:€œ|¢‚¬Å"|replace:€|¢‚¬",
+        "replace:€œ|¢‚¬Å"|replace:€|¢‚¬",
         "replace:©",
         "replace:",
         "replace:A-Za-z0-9]+"

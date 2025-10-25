@@ -1,4 +1,4 @@
-﻿// tests/e2e/axe-helpers.ts
+// tests/e2e/axe-helpers.ts
 import { Page, test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 

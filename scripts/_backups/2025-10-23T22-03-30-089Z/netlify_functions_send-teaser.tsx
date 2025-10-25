@@ -1,4 +1,4 @@
-﻿// netlify/function s/send-teaser.tsx
+// netlify/function s/send-teaser.tsx
 import type { HandlerEvent, HandlerResponse } from "@netlify/function s";
 import { Resend } from "resend";
 import * as React from "react";
@@ -39,7 +39,7 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
         lineHeight: 1.6,
       }}
     >
-      <p>Friends{name ? ` Ãƒ¢Ã¢â€š¬Ã¢â‚¬ ${name}` : ""},</p>
+      <p>Friends{name ? ` Ãƒ¢Ã¢â€š¬Ã¢â‚¬ ${name}` : ""},</p>
       <p>
         IÃƒ¢Ã¢â€š¬Ã¢â€ž¢m releasing <strong>Fathering Without Fear</strong>, a
         memoir forged in loss, legal storms, and a fatherÃƒ¢Ã¢â€š¬Ã¢â€ž¢s
@@ -54,7 +54,7 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
       </ul>
       <p>
         Want chapter drops and launch dates? Reply{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list:{" "}
+        <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list:{" "}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
       <p>
@@ -68,7 +68,7 @@ const TeaserEmail: React.FC<TeaserProps> = ({ name, siteUrl }) => {
       <p style={{ fontSize: 12, color: "#6b7280" }}>
         YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you requested the teaser or
         asked to be notified. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
       </p>
     </div>
   );
@@ -134,7 +134,7 @@ export const handler = async (
     await resend.emails.send({
       from: MAIL_FROM,
       to: email,
-      subject: "Fathering Without Fear Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Teaser PDFs",
+      subject: "Fathering Without Fear Ãƒ¢Ã¢â€š¬Ã¢â‚¬ Teaser PDFs",
       html,
       replyTo: "info@abrahamoflondon.org",
     });

@@ -1,4 +1,4 @@
-﻿// netlify/function s/_utils.ts
+// netlify/function s/_utils.ts
 import type { HandlerResponse } from "@netlify/function s";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

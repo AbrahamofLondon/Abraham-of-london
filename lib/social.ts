@@ -1,4 +1,4 @@
-﻿// lib/social.ts
+// lib/social.ts
 import type { SocialLink } from "@/lib/siteConfig";
 
 export const X_HANDLE = process.env.NEXT_PUBLIC_X_HANDLE || "AbrahamAda48634";

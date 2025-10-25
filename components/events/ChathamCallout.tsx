@@ -1,4 +1,4 @@
-﻿export function ChathamCallout() {
+export function ChathamCallout() {
   return (
     <aside className="my-6rounded-2xlborderbg-neutral-50p-5">
       <h3 className="mb-2text-smfont-semibolduppercasetracking-widest">

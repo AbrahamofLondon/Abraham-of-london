@@ -150,12 +150,12 @@ async function main() {
   for (const name of MUST_HAVE) {
     if (await writePdfIfMissing(name, FORCE)) {
       created++;
-      console.log(`📝 Created placeholder PDF: ${name}`);
+      console.log(` Created placeholder PDF: ${name}`);
     }
     if (MAKE_COVERS && (await writeCoverIfMissing(name, FORCE))) {
       covered++;
       console.log(
-        `🖼️  Created cover: assets/images/downloads/${toKebab(name)}.jpg`,
+        `️  Created cover: assets/images/downloads/${toKebab(name)}.jpg`,
       );
     }
   }
@@ -168,7 +168,7 @@ async function main() {
       if (await writeCoverIfMissing(f, false)) {
         covered++;
         console.log(
-          `🖼️  Created cover: assets/images/downloads/${toKebab(f)}.jpg`,
+          `️  Created cover: assets/images/downloads/${toKebab(f)}.jpg`,
         );
       }
     }
@@ -180,6 +180,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error(`\n🚨 FATAL: ${e.stack || e.message}`);
+  console.error(`\n FATAL: ${e.stack || e.message}`);
   process.exit(1);
 });

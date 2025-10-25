@@ -1,4 +1,4 @@
-﻿// contentlayer.config.ts
+// contentlayer.config.ts
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 

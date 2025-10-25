@@ -1,4 +1,4 @@
-﻿// lib/server/downloads-data.ts
+// lib/server/downloads-data.ts
 // Server-only module: read front-matter for downloads (MD/MDX) safely.
 
 import fs from "fs";
@@ -95,7 +95,7 @@ export function getDownloadSlugs(): string[] {
 
 /**
  * Read a single download by slug and return a partial object containing requested fields.
- * - Never throws on missing files; returns a minimal Ãƒ¢Ã¢â€š¬Ã..."Not FoundÃƒ¢Ã¢â€š¬Ã‚ entry instead.
+ * - Never throws on missing files; returns a minimal Ãƒ¢Ã¢â€š¬Ã..."Not FoundÃƒ¢Ã¢â€š¬Ã‚ entry instead.
  * - Normalizes strings (trim), asset paths, and avoids `undefined` in fields (uses null instead).
  */
 export function getDownloadBySlug(

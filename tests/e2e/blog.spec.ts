@@ -1,4 +1,4 @@
-﻿import { test, expect } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 test("blog page loads (kingdom strategies)", async ({ page }) => {
   await page.goto("/blog/kingdom-strategies-for-a-loving-legacy");

@@ -21,7 +21,7 @@ class WebhookUpdater {
   }
 
   async run() {
-    console.log("🎯 Webhook Updater & Deployer Starting...");
+    console.log(" Webhook Updater & Deployer Starting...");
 
     try {
       const updatedCount = await this.updateAllFiles();
@@ -33,9 +33,9 @@ class WebhookUpdater {
         await this.deployAfterUpdate();
       } else if (updatedCount === 0) {
         console.log(
-          "\n📋 No files needed updating. Run with --force-deploy to deploy anyway.",
+          "\n No files needed updating. Run with --force-deploy to deploy anyway.",
         );
-        console.log("💡 Or manually run: npm run deploy-safe");
+        console.log(" Or manually run: npm run deploy-safe");
       }
     } catch (error) {
       console.error("❌ Process failed:", error.message);
@@ -44,8 +44,8 @@ class WebhookUpdater {
   }
 
   async updateAllFiles() {
-    console.log("🔄 Starting webhook URL update...");
-    console.log("📎 New URL: " + this.newWebhookUrl);
+    console.log(" Starting webhook URL update...");
+    console.log(" New URL: " + this.newWebhookUrl);
 
     let updatedCount = 0;
 
@@ -69,13 +69,13 @@ class WebhookUpdater {
       }
     }
 
-    console.log("\n🎉 Update complete! Updated " + updatedCount + " files.");
+    console.log("\n Update complete! Updated " + updatedCount + " files.");
     return updatedCount;
   }
 
   async deployAfterUpdate() {
-    console.log("\n🚀 Auto-deploying with updated webhook...");
-    console.log("📡 Running: npm run deploy-safe");
+    console.log("\n Auto-deploying with updated webhook...");
+    console.log(" Running: npm run deploy-safe");
 
     try {
       const { stdout, stderr } = await execAsync("npm run deploy-safe", {
@@ -85,7 +85,7 @@ class WebhookUpdater {
 
       if (stdout.includes("Status: 200") || stdout.includes("successfully")) {
         console.log("\n✅ DEPLOYMENT SUCCESS!");
-        console.log("🎯 Netlify build triggered successfully");
+        console.log(" Netlify build triggered successfully");
 
         const lines = stdout.split("\n");
         lines.forEach((line) => {
@@ -94,7 +94,7 @@ class WebhookUpdater {
             line.includes("success") ||
             line.includes("triggered")
           ) {
-            console.log("📋 " + line.trim());
+            console.log(" " + line.trim());
           }
         });
       } else {
@@ -107,7 +107,7 @@ class WebhookUpdater {
       }
     } catch (error) {
       console.error("\n❌ Deployment failed:", error.message);
-      console.log("💡 Try running manually: npm run deploy-safe");
+      console.log(" Try running manually: npm run deploy-safe");
       throw error;
     }
   }
@@ -179,7 +179,7 @@ class WebhookUpdater {
       if (!data.scripts.build) {
         data.scripts.build = "echo 'Build completed successfully!' && exit 0";
         changed = true;
-        console.log("📦 Added missing build script to package.json");
+        console.log(" Added missing build script to package.json");
       }
 
       Object.keys(data.scripts).forEach((key) => {
@@ -252,7 +252,7 @@ module.exports = WebhookUpdater;
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error("💥 Fatal error:", error.message);
+    console.error(" Fatal error:", error.message);
     process.exit(1);
   });
 }

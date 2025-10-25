@@ -1,4 +1,4 @@
-﻿// File: tests/e2e/a11y.spec.ts
+// File: tests/e2e/a11y.spec.ts
 import { test } from "@playwright/test";
 import { runAxe } from "./axe-helpers";
 

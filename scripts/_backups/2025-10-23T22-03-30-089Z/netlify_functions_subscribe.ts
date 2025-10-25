@@ -1,4 +1,4 @@
-﻿// netlify/function s/subscribe.ts
+// netlify/function s/subscribe.ts
 import type { Handler } from "@netlify/function s";
 
 type Json = Record<string, unknown>;
@@ -54,7 +54,7 @@ export const handler: Handler = async (evt) => {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
+      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
       const text = await res.text();
       if (res.status === 400 && /already.*subscribed/i.test(text))
         return ok(
@@ -84,7 +84,7 @@ export const handler: Handler = async (evt) => {
       });
 
       const body = await res.json().catch(() => ({}));
-      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
+      if (res.ok) return ok("ThanksÃƒ¢Ã¢â€š¬Ã¢â‚¬check your inbox to confirm.");
       if (
         res.status === 400 &&
         String((body as any)?.title)

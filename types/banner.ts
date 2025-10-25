@@ -1,4 +1,4 @@
-﻿// type s/banner.ts
+// type s/banner.ts
 export type BannerOverlay = {
   eyebrow?: string;
   title?: string;
