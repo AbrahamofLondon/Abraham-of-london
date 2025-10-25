@@ -380,7 +380,7 @@ function isMojibake(text) {
   return (
     /Ãƒ[Æ’â€][\w\W]{1,10}Ã¢â€/.test(text) ||
     text.includes("\uFEFF") ||
-    /â€¦|â€”|â€œ|â€|â€“|â€™|Â./.test(text)
+    /â€¦|â€”|â€œ|â€|â€“|â€™|Â./.test(text)
   );
 }
 
@@ -396,7 +396,7 @@ function fixMojibake(text) {
     { from: /â€˜|Ã¢â‚¬Ëœ/g, to: "'" },
     { from: /â€™|Ã¢â‚¬â„¢/g, to: "'" },
     { from: /â€œ|Ã¢â‚¬Å“|ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ/g, to: '"' },
-    { from: /â€|Ã¢â‚¬Â/g, to: '"' },
+    { from: /â€|Ã¢â‚¬Â/g, to: '"' },
     { from: /Â©/g, to: "©" },
     { from: /Â/g, to: "" },
     // bursty junk

@@ -1,4 +1,4 @@
-﻿// app/(site)/downloads/page.tsx
+// app/(site)/downloads/page.tsx
 import Link from "next/link";
 import { getDownloads } from "@/lib/downloads";
 

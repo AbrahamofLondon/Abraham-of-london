@@ -140,11 +140,11 @@ const SEQS = [
   },
   {
     corrupt: u8(
-      "ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š",
+      "ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š",
     ),
     correct: u8('"'),
   },
-  { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
   {
     corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬¦ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…Ã¢â‚¬Å¡"),
     correct: u8('"'),
@@ -154,11 +154,11 @@ const SEQS = [
     correct: u8("-"),
   },
   {
-    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"),
+    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"),
     correct: u8('"'),
   },
   { corrupt: u8(""), correct: EMPTY },
-  { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬"), correct: u8('"') },
+  { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬"), correct: u8('"') },
   { corrupt: u8("'"), correct: u8("'") },
   // From original repair-encoding.mjs (deep corruption)
   {
@@ -391,7 +391,7 @@ async function ensureBackup(pathAbs) {
         .catch(() => false))
     ) {
       await fs.copyFile(pathAbs, bak);
-      console.log(`📂 Created backup: ${bak}`);
+      console.log(` Created backup: ${bak}`);
     }
   } catch (e) {
     console.error(`❌ Error creating backup for ${pathAbs}: ${e.message}`);
@@ -411,7 +411,7 @@ async function restoreFiles() {
       ) {
         await fs.mkdir(path.dirname(absPath), { recursive: true });
         await fs.writeFile(absPath, content);
-        console.log(`🗄️ Restored missing file: ${filePath}`);
+        console.log(`️ Restored missing file: ${filePath}`);
       }
     } catch (e) {
       console.error(`❌ Error restoring ${filePath}: ${e.message}`);
@@ -498,7 +498,7 @@ async function processFile(pathAbs) {
 async function writeReport(report) {
   try {
     await fs.writeFile(REPORT_FILE, JSON.stringify(report, null, 2));
-    console.log(`📊 Report written to: ${REPORT_FILE}`);
+    console.log(` Report written to: ${REPORT_FILE}`);
   } catch (e) {
     console.error(`❌ Error writing report: ${e.message}`);
   }
@@ -506,7 +506,7 @@ async function writeReport(report) {
 
 // ---------- Run ----------
 (async () => {
-  console.log(`\n🧽 Starting audit in: ${path.resolve(ROOT)}`);
+  console.log(`\n Starting audit in: ${path.resolve(ROOT)}`);
   console.log(`  dry-run: ${DRY_RUN ? "yes" : "no"}`);
   console.log(`  ext: ${EXT_LIST.join(", ")}`);
   if (INCLUDE_DIRS.length) console.log(`  include: ${INCLUDE_DIRS.join(", ")}`);
@@ -550,7 +550,7 @@ async function writeReport(report) {
         filesChanged++;
         totalMatches += r.matches;
         console.log(
-          `🛠  ${DRY_RUN ? "Would fix" : "Fixed"}: ${path.relative(ROOT, fp)} (matches: ${r.matches}, Δ: ${r.sizeDelta})`,
+          `  ${DRY_RUN ? "Would fix" : "Fixed"}: ${path.relative(ROOT, fp)} (matches: ${r.matches}, Δ: ${r.sizeDelta})`,
         );
         // if (r.matchDetails.length) { // Too verbose
         //   console.log(`  Details: ${JSON.stringify(r.matchDetails, null, 2)}`);

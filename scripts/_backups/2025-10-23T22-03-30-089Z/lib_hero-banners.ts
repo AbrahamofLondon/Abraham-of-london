@@ -1,4 +1,4 @@
-﻿// lib/hero-banners.ts
+// lib/hero-banners.ts
 export type VideoSource = {
   src: string;
   type: "video/webm" | "video/mp4";

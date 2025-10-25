@@ -1,4 +1,4 @@
-﻿// scripts/check-env.ts
+// scripts/check-env.ts
 /* eslint-disable no-console */
 
 type Rule = {

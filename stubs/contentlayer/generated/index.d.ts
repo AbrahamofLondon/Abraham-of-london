@@ -1,4 +1,4 @@
-﻿// Minimal Contentlayer stubs to satisfy import s
+// Minimal Contentlayer stubs to satisfy import s
 export type Post = Record<string, any>;
 export type DocumentTypes = any;
 export const allPosts: Post[];

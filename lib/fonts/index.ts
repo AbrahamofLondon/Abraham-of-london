@@ -1,4 +1,4 @@
-﻿// lib/fonts/index.ts
+// lib/fonts/index.ts
 import localFont from "next/font/local";
 
 export const sans = localFont({

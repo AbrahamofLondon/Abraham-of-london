@@ -1,4 +1,4 @@
-﻿"use client"; // Required for interactivity in static export
+"use client"; // Required for interactivity in static export
 import { useEffect } from "react";
 
 export default function MobileMenu() {

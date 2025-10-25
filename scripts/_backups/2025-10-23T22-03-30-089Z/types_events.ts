@@ -1,4 +1,4 @@
-﻿// ./lib/events.ts
+// ./lib/events.ts
 
 // Define the core type s needed for EventMeta
 export type ResourceLink = { href: string; label: string };

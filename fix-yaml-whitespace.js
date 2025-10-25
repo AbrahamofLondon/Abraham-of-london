@@ -76,11 +76,11 @@ try {
 
   if (filesFixedCount > 0) {
     console.log(
-      `\n🎉 Successfully fixed whitespace in ${filesFixedCount} files.`,
+      `\n Successfully fixed whitespace in ${filesFixedCount} files.`,
     );
     console.log("Run 'npm run build' now to check for other errors.");
   } else {
-    console.log("\n🔍 No frontmatter changes were needed.");
+    console.log("\n No frontmatter changes were needed.");
   }
 } catch (error) {
   console.error(

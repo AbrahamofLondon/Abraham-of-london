@@ -1,4 +1,4 @@
-﻿// lib/date.ts
+// lib/date.ts
 export type FormatDateOptions = {
   locale?: string;
   timeZone?: string; // e.g. "Europe/London"

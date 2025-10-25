@@ -1,4 +1,4 @@
-﻿// components/VideoComponent.tsx
+// components/VideoComponent.tsx
 import * as React from "react";
 import clsx from "clsx";
 
@@ -112,4 +112,3 @@ const VideoComponent = React.forwardRef<HTMLVideoElement, VideoComponentProps>(
 
 VideoComponent.displayName = "VideoComponent";
 export default VideoComponent;
-

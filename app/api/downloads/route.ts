@@ -1,4 +1,4 @@
-﻿// app/api/downloads/route.ts
+// app/api/downloads/route.ts
 import { NextResponse } from "next/server";
 import { getDownloads } from "@/lib/downloads";
 

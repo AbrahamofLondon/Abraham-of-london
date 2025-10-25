@@ -104,7 +104,7 @@ const timestamp = new Date().toISOString();
 
 axios.post(hookURL)
   .then(() => {
-    console.log("🚀 Netlify build triggered successfully.");
+    console.log(" Netlify build triggered successfully.");
     fs.appendFileSync('codex-log.txt', \`[\${timestamp}] ✅ Build triggered\\n\`);
   })
   .catch(err => {

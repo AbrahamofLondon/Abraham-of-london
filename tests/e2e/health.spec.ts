@@ -1,4 +1,4 @@
-﻿// File: tests/e2e/health.spec.ts
+// File: tests/e2e/health.spec.ts
 import { test, expect } from "@playwright/test";
 
 test("GET /api/health returns ok + no-store", async ({ request, baseURL }) => {

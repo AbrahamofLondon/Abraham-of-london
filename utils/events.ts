@@ -1,4 +1,4 @@
-﻿// utils/events.ts
+// utils/events.ts
 import { dayKey, isMidnightLocal, localMinutes } from "./dates";
 
 export type EventLite = {

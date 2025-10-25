@@ -1,4 +1,4 @@
-﻿// type s/next-mdx-remote.d.ts
+// type s/next-mdx-remote.d.ts
 
 declare module "next-mdx-remote/serialize" {
   export interface SerializeOptions {

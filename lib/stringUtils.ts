@@ -1,4 +1,4 @@
-﻿// lib/stringUtils.ts
+// lib/stringUtils.ts
 
 /** Safely converts any value to a trimmed string, or empty string if not a string */
 export function safeString(value: unknown): string {

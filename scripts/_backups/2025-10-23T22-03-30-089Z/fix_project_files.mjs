@@ -58,7 +58,7 @@ function main() {
     console.error(`❌ Target directory not found: ${TARGET_DIR}`);
     process.exit(1);
   }
-  console.log(`🚀 Starting script to fix files in: ${TARGET_DIR}`);
+  console.log(` Starting script to fix files in: ${TARGET_DIR}`);
   walk(TARGET_DIR);
   console.log("\n-------------------------------------------");
   console.log("✨ Script complete.");

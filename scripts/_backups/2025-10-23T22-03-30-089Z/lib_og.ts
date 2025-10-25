@@ -1,4 +1,4 @@
-﻿// lib/og.ts
+// lib/og.ts
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const LOCAL_FALLBACK = "/assets/images/blog/default-blog-cover.jpg";

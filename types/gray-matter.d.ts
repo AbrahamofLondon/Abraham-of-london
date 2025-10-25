@@ -1,4 +1,4 @@
-﻿declare module "gray-matter" {
+declare module "gray-matter" {
   export interface GrayMatterFile<
     T extends Record<string, unknown> = Record<string, unknown>,
   > {

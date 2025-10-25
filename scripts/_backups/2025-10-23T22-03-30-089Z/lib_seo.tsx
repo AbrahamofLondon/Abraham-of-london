@@ -1,11 +1,11 @@
-﻿// lib/seo.tsx
+// lib/seo.tsx
 import Head from "next/head";
 
 export const SITE_NAME = "Abraham of London";
 export const ORIGIN =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 const DEFAULT_DESC =
-  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms availableÃƒ¢Ã¢â€š¬Ã¢â‚¬off the record.";
+  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms availableÃƒ¢Ã¢â€š¬Ã¢â‚¬off the record.";
 const TWITTER_HANDLE = "@Abraham_of_LDN";
 
 function abs(path: string) {

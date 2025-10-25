@@ -1,4 +1,4 @@
-﻿// File containing EventMeta definition (e.g., ./lib/events.ts)
+// File containing EventMeta definition (e.g., ./lib/events.ts)
 
 export interface EventMeta {
   slug: string;

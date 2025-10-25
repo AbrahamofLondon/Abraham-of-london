@@ -29,4 +29,4 @@ for (const f of folders) {
 }
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(inv, null, 2));
-console.log("📦 Asset snapshot →", out);
+console.log(" Asset snapshot →", out);

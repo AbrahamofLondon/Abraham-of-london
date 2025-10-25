@@ -224,7 +224,7 @@ const listExisting = async (dir) => {
     console.log("\nMissing list:");
     for (const m of report.missing) console.log(`  • ${m}`);
   } else {
-    console.log("\nNo missing downloads detected 🎉");
+    console.log("\nNo missing downloads detected ");
   }
   console.log(`\nWrote report → ${path.relative(ROOT, reportPath)}`);
 

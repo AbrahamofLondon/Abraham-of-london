@@ -249,7 +249,7 @@ async function checkBrandFrame(filePath, content) {
 /* ───────────────── Main Rendering Logic ──────────────── */
 
 (async () => {
-  console.log(`\n🚀 PDF Renderer (dry=${DRY}, strict=${STRICT})`);
+  console.log(`\n PDF Renderer (dry=${DRY}, strict=${STRICT})`);
   console.log(`    base=${BASE_URL}, out=${norm(OUT_DIR)}`);
   console.log(`    report=${norm(REPORT_PATH)}`);
 

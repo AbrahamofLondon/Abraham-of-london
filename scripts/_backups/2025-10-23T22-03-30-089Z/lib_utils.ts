@@ -1,4 +1,4 @@
-﻿// lib/utils.ts
+// lib/utils.ts
 export function escapeHtml(str: string) {
   return String(str).replace(
     /[&<>"']/g,

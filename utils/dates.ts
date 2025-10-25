@@ -1,4 +1,4 @@
-﻿// utils/dates.ts
+// utils/dates.ts
 
 // "YYYY-MM-DD" for a given ISO and TZ (default London)
 export function dayKey(iso: string, tz = "Europe/London"): string {

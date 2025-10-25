@@ -1,4 +1,4 @@
-﻿// ./lib/server/events-data.ts
+// ./lib/server/events-data.ts
 
 import type { EventMeta } from "@/lib/events";
 

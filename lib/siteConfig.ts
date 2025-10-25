@@ -1,4 +1,4 @@
-﻿// lib/siteConfig.ts
+// lib/siteConfig.ts
 export type SocialLink = {
   href: string;
   label: string;
@@ -48,7 +48,7 @@ export const siteConfig: SiteConfig = {
   title: "Abraham of London",
   author: "Abraham of London",
   description:
-    "Official site of Abraham of London Ãƒ¢Ã¢â€š¬Ã¢â‚¬ author, strategist, and fatherhood advocate.",
+    "Official site of Abraham of London Ãƒ¢Ã¢â€š¬Ã¢â‚¬ author, strategist, and fatherhood advocate.",
   siteUrl: SITE_ORIGIN,
 
   socialLinks: [

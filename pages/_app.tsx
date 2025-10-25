@@ -1,4 +1,4 @@
-﻿// pages/_app.tsx
+// pages/_app.tsx
 import Head from "next/head";
 // FIX 1: Add missing Next.js import s
 import dynamic from "next/dynamic";

@@ -1,4 +1,4 @@
-﻿import { test, expect } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 test("asset ok", async ({ page }) => {
   const resp = await page.goto("/assets/sample.txt", {

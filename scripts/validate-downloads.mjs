@@ -54,7 +54,7 @@ async function listPdfs(dir) {
 }
 
 async function main() {
-  console.log(`🔍 Validating downloads in: ${DOWNLOADS_DIR}`);
+  console.log(` Validating downloads in: ${DOWNLOADS_DIR}`);
   const pdfs = await listPdfs(DOWNLOADS_DIR);
   console.log(`✅ Found ${pdfs.length} PDF(s).`);
 

@@ -1,4 +1,4 @@
-﻿// tests/e2e/a11y-blog-crawl.spec.ts
+// tests/e2e/a11y-blog-crawl.spec.ts
 import { test, expect } from "@playwright/test";
 import { runAxe } from "./axe-helpers";
 

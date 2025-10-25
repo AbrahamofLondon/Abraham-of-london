@@ -1,4 +1,4 @@
-﻿// netlify/function s/contact.ts
+// netlify/function s/contact.ts
 import type { Handler } from "@netlify/function s";
 
 type Body = {
