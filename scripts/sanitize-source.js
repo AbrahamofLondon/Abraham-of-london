@@ -10,9 +10,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
 
 // Files to scan & sanitize
-const PATTERNS = [
-  "**/*.{ts,tsx,js,jsx,md,mdx,css,scss,json,html}"
-];
+const PATTERNS = ["**/*.{ts,tsx,js,jsx,md,mdx,css,scss,json,html}"];
 
 const IGNORE = [
   "node_modules/**",
@@ -21,7 +19,7 @@ const IGNORE = [
   "public/**",
   "out/**",
   ".vercel/**",
-  ".netlify/**"
+  ".netlify/**",
 ];
 
 // Character fixes
@@ -37,7 +35,7 @@ const replacements = [
   // Remove zero-width joiners/non-joiners & word joiner
   [/[\u200C\u200D\u2060]/g, ""],
   // Normalize line separators to newline
-  [/\u2028|\u2029/g, "\n"]
+  [/\u2028|\u2029/g, "\n"],
 ];
 
 // Optional: collapse sequences of the common mojibake characters into a single quote or dash.
@@ -45,7 +43,7 @@ const replacements = [
 // Common patterns from double-decoded UTF-8 for quotes/dashes:
 const mojibakeFixes = [
   // weird apostrophe clusters → '
-  [/(?:||||||||||||||){1,}/g, ""]
+  [/(?:||||||||||||||){1,}/g, ""],
 ];
 
 function sanitizeContents(input) {
@@ -61,7 +59,12 @@ function sanitizeContents(input) {
 }
 
 async function run() {
-  const files = await glob(PATTERNS, { cwd: ROOT, ignore: IGNORE, dot: true, nodir: true });
+  const files = await glob(PATTERNS, {
+    cwd: ROOT,
+    ignore: IGNORE,
+    dot: true,
+    nodir: true,
+  });
   let changed = 0;
 
   await Promise.all(
@@ -77,10 +80,12 @@ async function run() {
       } catch (e) {
         // ignore read errors
       }
-    })
+    }),
   );
 
-  console.log(`sanitize-source: processed ${files.length} files, changed ${changed}`);
+  console.log(
+    `sanitize-source: processed ${files.length} files, changed ${changed}`,
+  );
 }
 
 run().catch((e) => {

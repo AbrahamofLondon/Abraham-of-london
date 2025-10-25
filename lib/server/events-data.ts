@@ -1,4 +1,4 @@
-// ./lib/server/events-data.ts
+﻿// ./lib/server/events-data.ts
 
 import type { EventMeta } from "@/lib/events";
 
@@ -29,7 +29,10 @@ export async function getAllEvents(fields: string[]): Promise<EventMeta[]> {
       summary: "A workshop on leadership.",
       heroImage: "/assets/images/events/leadership-workshop.jpg",
       tags: ["workshop", "leadership"],
-      related: ["/blog/leadership-begins-at-home", "/blog/kingdom-strategies-for-a-loving-legacy"],
+      related: [
+        "/blog/leadership-begins-at-home",
+        "/blog/kingdom-strategies-for-a-loving-legacy",
+      ],
     },
   ];
 }
@@ -54,12 +57,15 @@ export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
   });
 }
 
-export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
+export function getEventResourcesSummary(events: EventMeta[]): {
+  downloads: number;
+  reads: number;
+} {
   return events.reduce(
     (acc, event) => ({
       downloads: acc.downloads + (event.resources?.downloads?.length || 0),
       reads: acc.reads + (event.resources?.reads?.length || 0),
     }),
-    { downloads: 0, reads: 0 }
+    { downloads: 0, reads: 0 },
   );
 }

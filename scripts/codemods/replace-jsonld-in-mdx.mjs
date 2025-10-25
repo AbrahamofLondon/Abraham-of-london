@@ -13,7 +13,14 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const FOLDERS = ["content", "posts", "data/blog", "blog", "pages/blog", "app/blog"].map(p => path.join(ROOT, p));
+const FOLDERS = [
+  "content",
+  "posts",
+  "data/blog",
+  "blog",
+  "pages/blog",
+  "app/blog",
+].map((p) => path.join(ROOT, p));
 const exts = new Set([".mdx", ".md"]);
 
 const WRITE = process.argv.includes("--write");
@@ -28,10 +35,11 @@ function walk(dir, out = []) {
   return out;
 }
 
-const files = FOLDERS.flatMap(d => walk(d));
+const files = FOLDERS.flatMap((d) => walk(d));
 let changed = 0;
 
-const BLOCK_RX = /<script\s+type=["']application\/ld\+json["']\s*>\s*([\s\S]*?)\s*<\/script>/gi;
+const BLOCK_RX =
+  /<script\s+type=["']application\/ld\+json["']\s*>\s*([\s\S]*?)\s*<\/script>/gi;
 
 for (const file of files) {
   let src = fs.readFileSync(file, "utf8");
@@ -51,9 +59,15 @@ for (const file of files) {
   if (next !== src) {
     changed++;
     if (WRITE) fs.writeFileSync(file, next, "utf8");
-    console.log(`${WRITE ? "✔ fixed" : "→ would fix"}: ${path.relative(ROOT, file)}`);
+    console.log(
+      `${WRITE ? "✔ fixed" : "→ would fix"}: ${path.relative(ROOT, file)}`,
+    );
   }
 }
 
-console.log(changed ? `${WRITE ? "Updated" : "Would update"} ${changed} file(s).` : "No JSON-LD <script> blocks found.");
+console.log(
+  changed
+    ? `${WRITE ? "Updated" : "Would update"} ${changed} file(s).`
+    : "No JSON-LD <script> blocks found.",
+);
 if (!WRITE && changed) process.exitCode = 1;

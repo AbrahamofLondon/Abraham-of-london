@@ -21,7 +21,9 @@ function runNode(scriptPath, args = []) {
       env: process.env,
       cwd: ROOT,
     });
-    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`exit ${code}`))));
+    child.on("exit", (code) =>
+      code === 0 ? resolve() : reject(new Error(`exit ${code}`)),
+    );
     child.on("error", reject);
   });
 }
@@ -40,7 +42,9 @@ async function main() {
   }
 
   if (!hasValidator) {
-    console.warn(`[downloads:warn] Missing validator at ${VAL}. Skipping validation (deploy continues).`);
+    console.warn(
+      `[downloads:warn] Missing validator at ${VAL}. Skipping validation (deploy continues).`,
+    );
     console.log("[downloads:ok] downloads look good (validator unavailable).");
     return;
   }
@@ -54,7 +58,9 @@ async function main() {
       console.error("[downloads:fail] strict mode ON → failing build.");
       throw err;
     } else {
-      console.warn("[downloads:warn] validator reported errors, but strict mode OFF → continuing.");
+      console.warn(
+        "[downloads:warn] validator reported errors, but strict mode OFF → continuing.",
+      );
       console.warn(String(err?.message || err));
     }
   }

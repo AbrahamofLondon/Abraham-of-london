@@ -29,32 +29,35 @@
 
 :root {
   /* Fonts */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-serif:
+    "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
 
   /* Palette */
-  --color-primary: #0b2e1f;          /* deep-forest */
-  --color-primary-hover: #16573d;    /* lighter deep forest */
-  --color-on-primary: #faf7f2;       /* warm-cream */
+  --color-primary: #0b2e1f; /* deep-forest */
+  --color-primary-hover: #16573d; /* lighter deep forest */
+  --color-on-primary: #faf7f2; /* warm-cream */
 
-  --color-secondary: #faf7f2;        /* page bg: warm-cream */
-  --color-on-secondary: #333333;     /* soft charcoal text */
+  --color-secondary: #faf7f2; /* page bg: warm-cream */
+  --color-on-secondary: #333333; /* soft charcoal text */
 
-  --color-accent: #c5a352;           /* muted gold */
+  --color-accent: #c5a352; /* muted gold */
   --color-accent-hover: #a0833f;
   --color-on-accent: #ffffff;
 
   --color-lightGrey: #e5e5e5;
-  --color-warmWhite: #faf7f2;        /* alias */
+  --color-warmWhite: #faf7f2; /* alias */
   --color-midGreen: #4b8b6b;
 
   /* Fluid type scale */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
   --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
-  --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
-  --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
-  --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.45rem);
+  --step-2: clamp(1.55rem, 1.3rem + 0.95vw, 1.85rem);
+  --step-3: clamp(1.95rem, 1.6rem + 1.3vw, 2.4rem);
+  --step-4: clamp(2.35rem, 1.92rem + 1.8vw, 3rem);
 }
 
 /* ------------------------------------------------------------------- */
@@ -68,8 +71,8 @@
   --color-on-primary: #0f172a;
 
   /* Background/Surface */
-  --color-secondary: #111827;        /* slate-900-ish */
-  --color-on-secondary: #f8fafc;     /* slate-50-ish */
+  --color-secondary: #111827; /* slate-900-ish */
+  --color-on-secondary: #f8fafc; /* slate-50-ish */
 
   /* Accent */
   --color-accent: #86efac;
@@ -77,8 +80,8 @@
   --color-on-accent: #111827;
 
   /* UI */
-  --color-lightGrey: #2d3748;        /* divider */
-  --color-warmWhite: #1f2937;        /* card surface */
+  --color-lightGrey: #2d3748; /* divider */
+  --color-warmWhite: #1f2937; /* card surface */
   --color-midGreen: #86efac;
 }
 
@@ -106,7 +109,9 @@ body {
   line-height: 1.85;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 h1,
@@ -186,7 +191,9 @@ video {
     border: 1px solid var(--color-lightGrey);
     padding: 28px;
     box-shadow: 0 4px 18px rgba(11, 46, 31, 0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
     background-color: #ffffff;
     border-radius: 12px;
   }

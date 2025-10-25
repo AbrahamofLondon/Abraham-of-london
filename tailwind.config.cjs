@@ -13,30 +13,30 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css"
+    "./styles/**/*.css",
   ],
 
   theme: {
     container: {
       center: true,
       padding: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", "2xl": "4rem" },
-      screens: { "2xl": "1400px" }
+      screens: { "2xl": "1400px" },
     },
 
     extend: {
       colors: {
         // --- LUXURY PALETTE DEFINITIONS (Single Source of Truth) ---
         // Primary: Deep Forest Green (Rich, Classic)
-        'deep-forest': '#0B2E1F',
+        "deep-forest": "#0B2E1F",
         // Cream/Background: Warm Ivory (Luxury Paper Feel)
-        'warm-cream': '#FAF7F2',
+        "warm-cream": "#FAF7F2",
         // Accent: Muted Gold (Classic Opulence)
-        'muted-gold': '#C5A352',
+        "muted-gold": "#C5A352",
         // Text: Charcoal (Soft, highly readable black)
-        'soft-charcoal': '#333333',
+        "soft-charcoal": "#333333",
         // Supporting Colors
-        'light-gray': '#E5E5E5',
-        'subtle-green': '#4B8B6B', // Retained for bullets/links
+        "light-gray": "#E5E5E5",
+        "subtle-green": "#4B8B6B", // Retained for bullets/links
 
         // --- CSS VARIABLE MAPPING (Necessary for dynamic theming) ---
         // These map to variables defined in your global CSS for light/dark mode switching.
@@ -53,17 +53,17 @@ module.exports = {
         // --- MISC ALIASES (Cleaned and retained only if absolutely necessary) ---
         // Removed: 'forest', 'deepCharcoal', 'cream', 'softGold', 'warmWhite', 'midGreen'
         // These are now replaced by their clear, single-source names above ('deep-forest', 'soft-charcoal', etc.)
-        lightGrey: '#E5E5E5', // Duplicates 'light-gray', kept for existing code
+        lightGrey: "#E5E5E5", // Duplicates 'light-gray', kept for existing code
 
         // Custom emerald shade override
-        emerald: { ...colors.emerald, 700: "#047857" }
+        emerald: { ...colors.emerald, 700: "#047857" },
       },
 
       // Use new clear names for border/ring colors
-      ringColor: { 'deep-forest': "var(--color-primary)" },
+      ringColor: { "deep-forest": "var(--color-primary)" },
       borderColor: {
-        'deep-forest': "var(--color-primary)",
-        lightGrey: "#e5e5e5"
+        "deep-forest": "var(--color-primary)",
+        lightGrey: "#e5e5e5",
       },
 
       fontFamily: {
@@ -71,7 +71,7 @@ module.exports = {
         serif: ["var(--font-serif)", '"Playfair Display"', "Georgia", "serif"],
         // UPGRADE: Inter or a clean font for Sans (Modern Readability)
         sans: ["var(--font-sans)", '"Inter"', "system-ui", "sans-serif"],
-        cursive: ["var(--font-cursive)", "cursive"]
+        cursive: ["var(--font-cursive)", "cursive"],
       },
 
       typography: (theme) => ({
@@ -91,7 +91,7 @@ module.exports = {
               textDecoration: "none",
               fontWeight: "500",
               transition: "color .15s ease",
-              "&:hover": { color: theme("colors.muted-gold") } // Muted Gold hover
+              "&:hover": { color: theme("colors.muted-gold") }, // Muted Gold hover
             },
 
             // Tighter, elegant heading spacing
@@ -99,14 +99,14 @@ module.exports = {
               letterSpacing: "-0.015em",
               lineHeight: "1.1",
               marginBottom: "0.8rem",
-              fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Headings
+              fontFamily: theme("fontFamily.serif").join(", "), // Use Serif for Headings
             },
             h2: {
               letterSpacing: "-0.01em",
               lineHeight: "1.2",
               marginTop: "2.5rem",
               marginBottom: "0.8rem",
-              fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Subheadings
+              fontFamily: theme("fontFamily.serif").join(", "), // Use Serif for Subheadings
             },
 
             strong: { fontWeight: "700" }, // Bolder strong text
@@ -114,13 +114,13 @@ module.exports = {
             blockquote: {
               borderLeftColor: theme("colors.muted-gold"), // Gold accent on quotes
               fontStyle: "italic",
-              color: theme("colors.soft-charcoal")
+              color: theme("colors.soft-charcoal"),
             },
 
             hr: { borderColor: theme("colors.light-gray") }, // Use clear name
             ul: { paddingLeft: "1.5rem" },
-            "ul > li::marker": { color: theme("colors.subtle-green") }
-          }
+            "ul > li::marker": { color: theme("colors.subtle-green") },
+          },
         },
         invert: {
           css: {
@@ -131,13 +131,13 @@ module.exports = {
 
             blockquote: {
               borderLeftColor: theme("colors.muted-gold"),
-              color: theme("colors.warm-cream")
-            }
-          }
-        }
-      })
-    }
+              color: theme("colors.warm-cream"),
+            },
+          },
+        },
+      }),
+    },
   },
 
-  plugins: [require("@tailwindcss/typography")]
+  plugins: [require("@tailwindcss/typography")],
 };

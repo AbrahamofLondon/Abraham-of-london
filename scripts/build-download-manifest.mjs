@@ -6,6 +6,11 @@ const DL = path.join(ROOT, "public", "downloads");
 const OUT = path.join(DL, "manifest.json");
 
 const exts = new Set([".pdf", ".epub", ".zip"]);
-const files = (await fsp.readdir(DL)).filter(f => exts.has(path.extname(f).toLowerCase()));
-await fsp.writeFile(OUT, JSON.stringify({ generatedAt: new Date().toISOString(), files }, null, 2));
+const files = (await fsp.readdir(DL)).filter((f) =>
+  exts.has(path.extname(f).toLowerCase()),
+);
+await fsp.writeFile(
+  OUT,
+  JSON.stringify({ generatedAt: new Date().toISOString(), files }, null, 2),
+);
 console.log(`[manifest] wrote ${OUT} (${files.length} items)`);

@@ -25,10 +25,10 @@ async function loadFont(url) {
 
 const fonts = {
   playfairBold: await loadFont(
-    "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXDTzYhcncM3M.ttf"
+    "https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXDTzYhcncM3M.ttf",
   ),
   interSemi: await loadFont(
-    "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnM-ZuL7xw.ttf"
+    "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnM-ZuL7xw.ttf",
   ),
 };
 
@@ -37,7 +37,12 @@ async function renderPNG(width, height, jsx) {
     width,
     height,
     fonts: [
-      { name: "Playfair", data: fonts.playfairBold, weight: 700, style: "normal" },
+      {
+        name: "Playfair",
+        data: fonts.playfairBold,
+        weight: 700,
+        style: "normal",
+      },
       { name: "Inter", data: fonts.interSemi, weight: 600, style: "normal" },
     ],
   });
@@ -115,7 +120,9 @@ function Card({ title, subtitle, tag, dark = true }) {
         }}
       >
         <span>abrahamoflondon.org</span>
-        <span style={{ color: BRAND.gold }}>Leadership • Fatherhood • Legacy</span>
+        <span style={{ color: BRAND.gold }}>
+          Leadership • Fatherhood • Legacy
+        </span>
       </div>
     </div>
   );
@@ -134,11 +141,15 @@ async function saveSocialDefaults() {
         "Global Strategist, Author, and Visionary Leader. Join a movement shaping family, leadership, and legacy.",
       tag: "Official",
       dark: true,
-    })
+    }),
   );
 
-  await sharp(png).jpeg({ quality: 90 }).toFile(out("/assets/images/social/og-image.jpg"));
-  await sharp(png).webp({ quality: 92 }).toFile(out("/assets/images/social/twitter-image.webp"));
+  await sharp(png)
+    .jpeg({ quality: 90 })
+    .toFile(out("/assets/images/social/og-image.jpg"));
+  await sharp(png)
+    .webp({ quality: 92 })
+    .toFile(out("/assets/images/social/twitter-image.webp"));
 }
 
 async function saveHeroBanner() {
@@ -152,10 +163,12 @@ async function saveHeroBanner() {
       subtitle: "Strategy. Fatherhood. Legacy.",
       tag: "Welcome",
       dark: true,
-    })
+    }),
   );
 
-  await sharp(png).webp({ quality: 92 }).toFile(out("/assets/images/abraham-of-london-banner.webp"));
+  await sharp(png)
+    .webp({ quality: 92 })
+    .toFile(out("/assets/images/abraham-of-london-banner.webp"));
 }
 
 function guessPosts() {
@@ -167,7 +180,9 @@ function guessPosts() {
     "_posts/**/*.{md,mdx}",
     "blog/**/*.{md,mdx}",
   ];
-  const files = patterns.flatMap((p) => glob.sync(p, { cwd: ROOT, nodir: true }));
+  const files = patterns.flatMap((p) =>
+    glob.sync(p, { cwd: ROOT, nodir: true }),
+  );
   return Array.from(new Set(files));
 }
 
@@ -188,7 +203,9 @@ async function saveBlogCovers() {
     const fm = matter(src);
     const title = (fm.data?.title || fileToSlug(file)).toString().trim();
     const slug = (fm.data?.slug || fileToSlug(file)).toString().trim();
-    const hasCover = typeof fm.data?.coverImage === "string" && fm.data.coverImage.trim() !== "";
+    const hasCover =
+      typeof fm.data?.coverImage === "string" &&
+      fm.data.coverImage.trim() !== "";
     if (hasCover) continue;
 
     const png = await renderPNG(
@@ -199,10 +216,12 @@ async function saveBlogCovers() {
         subtitle: "Read the full story",
         tag: fm.data?.category || "Blog",
         dark: true,
-      })
+      }),
     );
 
-    await sharp(png).jpeg({ quality: 88 }).toFile(path.join(dir, `${slug}.jpg`));
+    await sharp(png)
+      .jpeg({ quality: 88 })
+      .toFile(path.join(dir, `${slug}.jpg`));
   }
 }
 

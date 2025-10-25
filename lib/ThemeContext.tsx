@@ -1,4 +1,4 @@
-// lib/ThemeContext.tsx
+﻿// lib/ThemeContext.tsx
 "use client";
 
 import * as React from "react";
@@ -6,8 +6,8 @@ import * as React from "react";
 export type Theme = "light" | "dark" | "system";
 
 type Ctx = {
-  theme: Theme;                 // user preference
-  resolvedTheme: "light" | "dark";  // actual in-use theme
+  theme: Theme; // user preference
+  resolvedTheme: "light" | "dark"; // actual in-use theme
   setThemePref: (t: Theme) => void;
   toggle: () => void;
   mounted: boolean;
@@ -35,11 +35,15 @@ function getInitialPref(): Theme {
   try {
     // 1. Check localStorage for user preference
     const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? null;
-    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    if (stored === "light" || stored === "dark" || stored === "system")
+      return stored;
 
     // 2. Check DOM for SSR hint (if passed via Next.js initial render)
-    const hinted = document.documentElement.getAttribute("data-user-theme") as Theme | null;
-    if (hinted === "light" || hinted === "dark" || hinted === "system") return hinted;
+    const hinted = document.documentElement.getAttribute(
+      "data-user-theme",
+    ) as Theme | null;
+    if (hinted === "light" || hinted === "dark" || hinted === "system")
+      return hinted;
   } catch {}
   return "system";
 }
@@ -47,7 +51,9 @@ function getInitialPref(): Theme {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = React.useState(false);
   const [theme, setTheme] = React.useState<Theme>(getInitialPref);
-  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">("light");
+  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">(
+    "light",
+  );
 
   // --- 1. Initial Mount & System Listener Setup ---
   React.useEffect(() => {
@@ -102,12 +108,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const sysDark = hasMM ? window.matchMedia(DARK_QUERY).matches : false;
 
     const nextResolved: "light" | "dark" =
-      theme === "dark" ? "dark" : theme === "light" ? "light" : sysDark ? "dark" : "light";
+      theme === "dark"
+        ? "dark"
+        : theme === "light"
+          ? "light"
+          : sysDark
+            ? "dark"
+            : "light";
 
     // 3. Apply and update state
     setResolvedTheme(nextResolved);
     applyThemeToDom(nextResolved, theme);
-
   }, [theme, mounted]); // Dependency: Re-run whenever theme preference or mounted state changes
 
   const setThemePref = React.useCallback((t: Theme) => setTheme(t), []);
@@ -125,7 +136,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const value: Ctx = { theme, resolvedTheme, setThemePref, toggle, mounted };
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme(): Ctx {

@@ -1,4 +1,3 @@
-
 // JS runtime stub for contentlayer on Windows / no-build scenarios
 module.exports = new Proxy(
   {},
@@ -13,10 +12,11 @@ module.exports = new Proxy(
           "allPrints",
           "allStrategies",
           "allStrategy",
-          "allDownloads"
+          "allDownloads",
         ].includes(prop)
-      ) return [];
+      )
+        return [];
       return [];
-    }
-  }
+    },
+  },
 );

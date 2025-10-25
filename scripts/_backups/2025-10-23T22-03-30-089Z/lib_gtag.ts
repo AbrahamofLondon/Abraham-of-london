@@ -1,4 +1,4 @@
-// lib/gtag.ts
+﻿// lib/gtag.ts
 import { siteConfig } from "./siteConfig";
 
 export const GA_MEASUREMENT_ID =
@@ -26,7 +26,10 @@ export const pageview = (url: string) => {
   gtagSafe("config", GA_MEASUREMENT_ID, { page_path: url });
 };
 
-export const gaEvent = (action: string, params: Record<string, unknown> = {}) => {
+export const gaEvent = (
+  action: string,
+  params: Record<string, unknown> = {},
+) => {
   gtagSafe("event", action, params);
 };
 

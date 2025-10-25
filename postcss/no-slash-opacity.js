@@ -17,7 +17,9 @@ function rewriteToken(sample) {
 }
 
 module.exports = function noSlashOpacity(opts = {}) {
-  const mode = String(opts.mode || process.env.NO_SLASH_OPACITY_MODE || "error").toLowerCase();
+  const mode = String(
+    opts.mode || process.env.NO_SLASH_OPACITY_MODE || "error",
+  ).toLowerCase();
 
   return {
     postcssPlugin: "no-slash-opacity",
@@ -39,7 +41,7 @@ module.exports = function noSlashOpacity(opts = {}) {
       const suggestion = rewriteToken(sample);
       throw at.error(
         `Forbidden slash opacity token "${sample}" in @apply. ` +
-        `Use a non-slash form instead (e.g. "${suggestion}") or set NO_SLASH_OPACITY_MODE=fix to auto-rewrite.`
+          `Use a non-slash form instead (e.g. "${suggestion}") or set NO_SLASH_OPACITY_MODE=fix to auto-rewrite.`,
       );
     },
 
@@ -52,12 +54,12 @@ module.exports = function noSlashOpacity(opts = {}) {
         // Don't auto-rewrite in declarations; advise moving into @apply/className.
         throw decl.error(
           `Forbidden slash opacity token "${m[0].trim()}" in "${decl.prop}". ` +
-          `Move it into @apply or a className so it can be rewritten.`
+            `Move it into @apply or a className so it can be rewritten.`,
         );
       }
 
       throw decl.error(
-        `Forbidden slash opacity token "${m[0].trim()}" in "${decl.prop}".`
+        `Forbidden slash opacity token "${m[0].trim()}" in "${decl.prop}".`,
       );
     },
   };

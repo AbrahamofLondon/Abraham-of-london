@@ -532,15 +532,11 @@
   "corruptedFiles": [
     {
       "file": "C:/Abraham-of-london/.eslintrc.json",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/fix-yaml-whitespace.js",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/fix_encoding.js",
@@ -581,27 +577,19 @@
     },
     {
       "file": "C:/Abraham-of-london/lighthouserc.json",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/README.md",
-      "changes": [
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/tailwind.config.cjs",
-      "changes": [
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/tsconfig.base.json",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/utils/events.ts",
@@ -613,46 +601,31 @@
     },
     {
       "file": "C:/Abraham-of-london/types/events.ts",
-      "changes": [
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/styles/Home.module.css",
-      "changes": [
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/src/public/index.html",
-      "changes": [
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/src/components/Debug.tsx",
-      "changes": [
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/src/components/InteractiveElements.tsx",
-      "changes": [
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/add-doctor-to-package.mjs",
-      "changes": [
-        "replace:[\\u2018\\u2019]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/audit-site.mjs",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/check-env.ts",
@@ -664,9 +637,7 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/check-merge-markers.mjs",
-      "changes": [
-        "replace:[\\u2018\\u2019]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/ensure-download-aliases.mjs",
@@ -678,9 +649,7 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/ensure-pdfs.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/fm-first-aid.mjs",
@@ -692,15 +661,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/generate-download-stubs.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/generate-placeholder-downloads.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/global_project_cleaner.mjs",
@@ -721,68 +686,43 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/make-pdfs.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/normalize-download-filenames.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/orchestrate.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/print-all.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/print-manifest.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/render-pdfs.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/repair-encoding.mjs",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/scaffold-download-sources.mjs",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/scan-and-fill-downloads.mjs",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/setup-husky.mjs",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_reports/grand-master-report.html",
@@ -1165,10 +1105,7 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content__downloads-registry.md",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_fix_encoding.js",
@@ -1235,11 +1172,7 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_scripts_package.json",
-      "changes": [
-        "replace:\\uFEFF",
-        "replace:\\r\\n|\\r",
-        "replace:[ \\t]+$"
-      ]
+      "changes": ["replace:\\uFEFF", "replace:\\r\\n|\\r", "replace:[ \\t]+$"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_scripts_repair-encoding.mjs",
@@ -1251,17 +1184,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_stubs_contentlayer_generated.d.ts",
-      "changes": [
-        "replace:\\uFEFF",
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\uFEFF", "replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_stubs_contentlayer_generated.js",
-      "changes": [
-        "replace:\\uFEFF",
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\uFEFF", "replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__reports_grand-master-report.json",
@@ -1314,17 +1241,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog__lessons-from-noah.mdx",
-      "changes": [
-        "replace:[ \\t]+$",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[ \\t]+$", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content__downloads-registry.md",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_fix_encoding.js",
@@ -1346,16 +1267,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_pages_resources_index.tsx",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_pages_strategy_index.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_scripts_fm-first-aid.mjs",
@@ -1377,9 +1293,7 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_scripts_repair-encoding.mjs",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__reports_grand-master-report.html",
@@ -1408,17 +1322,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog__lessons-from-noah.mdx",
-      "changes": [
-        "replace:[ \\t]+$",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[ \\t]+$", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content__downloads-registry.md",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/fix_encoding.js",
@@ -1440,16 +1348,11 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/pages_resources_index.tsx",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/pages_strategy_index.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/scripts_fm-first-aid.mjs",
@@ -1471,27 +1374,19 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/scripts_repair-encoding.mjs",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/pdfs/brand.css",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/pdfs/template.html",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/covers/make-event-covers.mjs",
-      "changes": [
-        "replace:[\\u2018\\u2019]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]"]
     },
     {
       "file": "C:/Abraham-of-london/public/410.html",
@@ -1503,28 +1398,19 @@
     },
     {
       "file": "C:/Abraham-of-london/public/downloads/fathering-without-fear-teaser.mdx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/public/blog/fathering-without-fear.json",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/playwright-report/index.html",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/410.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/about.tsx",
@@ -1564,74 +1450,47 @@
     },
     {
       "file": "C:/Abraham-of-london/pages/privacy.tsx",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/pages/rss.xml.ts",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/sitemap.xml.ts",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/ventures.tsx",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/pages/_document.tsx",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/pages/strategy/index.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/resources/index.tsx",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/board-investor-one-pager-template.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/entrepreneur-survival-checklist.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/family-altar-liturgy.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/fatherhood-guide.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/fathering-without-fear-teaser-mobile.tsx",
@@ -1644,9 +1503,7 @@
     },
     {
       "file": "C:/Abraham-of-london/pages/print/household-rhythm-starter.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/leadership-playbook.tsx",
@@ -1658,85 +1515,55 @@
     },
     {
       "file": "C:/Abraham-of-london/pages/print/mentorship-starter-kit.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/principles-for-my-son-cue-card.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/scripture-track-john14.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/standards-brief.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/static/brotherhood-covenant.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/static/fathering-without-fear-teaser.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/static/principles-for-my-son.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/a6/brotherhood-cue-card-two-up.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/a6/leaders-cue-card-two-up.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/print/a6/principles-for-my-son-cue-card-two-up.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/events/index.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Â|â|Ã"
-      ]
+      "changes": ["replace:\\u2026", "replace:Â|â|Ã"]
     },
     {
       "file": "C:/Abraham-of-london/pages/downloads/brotherhood-cue-card.tsx",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/pages/books/index.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/pages/blog/index.tsx",
@@ -1749,159 +1576,99 @@
     },
     {
       "file": "C:/Abraham-of-london/pages/api/contact.ts",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/pages/api/search-index.ts",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/functions/contact.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/functions/send-teaser.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/functions/subscribe-launch.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/functions/subscribe.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/functions/test-email.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/emails/index.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/emails/TeaserEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/netlify/emails/WelcomeLaunchEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/date.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/downloads.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/gtag.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/hero-banners.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/mdx.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/og.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/seo.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/siteConfig.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/subscribe.ts",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/lib/utils.ts",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/lib/server/books-data.ts",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/lib/server/downloads-data.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/contentlayer/generated.ts",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/content/_downloads-registry.md",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/brotherhood-emergency-call-tree.mdx",
@@ -1914,9 +1681,7 @@
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
-      "changes": [
-        "replace:\\r\\n|\\r"
-      ]
+      "changes": ["replace:\\r\\n|\\r"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
@@ -1929,120 +1694,79 @@
     },
     {
       "file": "C:/Abraham-of-london/content/blog/_lessons-from-noah.mdx",
-      "changes": [
-        "replace:[ \\t]+$",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[ \\t]+$", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/config/site.ts",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/BlogPostCard.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/BookCard.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/Breadcrumb.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/Comments.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/components/ContactForm.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/EventCard.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/FeaturedBook.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/FloatingTeaserCTA.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/LaunchSubscribe.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/Layout.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/Loader.tsx",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/components/LogoTile.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/makeContentPage.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/Navbar.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/NewsletterForm.tsx",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/components/SearchPalette.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/SocialFollowStrip.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/SocialLinks.tsx",
@@ -2062,66 +1786,43 @@
     },
     {
       "file": "C:/Abraham-of-london/components/TeaserRequest.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/components/ui/Button.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/mdx/ctas.ts",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/mdx/ResourcesCTA.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/mdx/shortcodes.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/mdx/Verse.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/icons/BrandLogo.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/icons/SocialIcons/BrandLogo.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/homepage/ContentShowcase.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/homepage/EventsSection.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/homepage/HeroSection.tsx",
@@ -2133,78 +1834,51 @@
     },
     {
       "file": "C:/Abraham-of-london/components/homepage/TestimonialsSection.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/homepage/VenturesSection.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/events/EventCard.tsx",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/components/events/EventHero.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/events/EventMeta.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/events/EventPageHeader.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/events/EventResources.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/emails/TeaserEmail.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/components/downloads/DownloadCard.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/components/downloads/DownloadsGrid.tsx",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/app/downloads/page.tsx",
-      "changes": [
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/4359-9e7e57e824779c14.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/4750-92da6f8b1e682195.js",
@@ -2216,54 +1890,35 @@
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/6482.19ca72559025a2a5.js",
-      "changes": [
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/404-8017e2d01e2e9610.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/410-aaa608a7ca9b1081.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/about-1ddb019449b3f2af.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/blog-cb93a960343c2827.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/books-1365685b809721f3.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]",
-        "replace:\\u2026"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]", "replace:\\u2026"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/brands-98f47f2ab8a5769f.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/contact-bfe91f8b07ddf8b9.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/events-6dd4d55560bc9f9c.js",
@@ -2291,23 +1946,15 @@
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/terms-8edb787cc3e2abe6.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u201C\\u201D]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u201C\\u201D]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/_app-211dbecba604d9af.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/brotherhood-covenant-44cf207886394dee.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/family-altar-liturgy-746a642adc525145.js",
@@ -2347,60 +1994,39 @@
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/mentorship-starter-kit-d41cb1591ab08347.js",
-      "changes": [
-        "replace:[\\u201C\\u201D]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u201C\\u201D]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/principles-for-my-son-cue-card-3dd6a911d70d7984.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/principles-for-my-son-f6e73f2048fa982a.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/scripture-track-john14-0441f2c54a172480.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/standards-brief-70c96722618100db.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/a6/brotherhood-cue-card-two-up-786f65b62585f519.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/a6/leaders-cue-card-two-up-39e1eaa08e9cfd8b.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/print/a6/principles-for-my-son-cue-card-two-up-a3461a67d63182b2.js",
-      "changes": [
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/events/[slug]-b4bd269aa5a132f5.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/downloads/brotherhood-cue-card-a9c1bdc103d4be6c.js",
@@ -2413,82 +2039,50 @@
     },
     {
       "file": "C:/Abraham-of-london/.netlify/static/_next/static/chunks/pages/blog/[slug]-5fc870faff298051.js",
-      "changes": [
-        "replace:[\\u2018\\u2019]",
-        "replace:[\\u2013\\u2014]"
-      ]
+      "changes": ["replace:[\\u2018\\u2019]", "replace:[\\u2013\\u2014]"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe-launch/netlify/emails/index.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe-launch/netlify/emails/TeaserEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe-launch/netlify/emails/WelcomeLaunchEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe/netlify/emails/index.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe/netlify/emails/TeaserEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/subscribe/netlify/emails/WelcomeLaunchEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/send-teaser/netlify/emails/index.ts",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/send-teaser/netlify/emails/TeaserEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     },
     {
       "file": "C:/Abraham-of-london/.netlify/functions-serve/send-teaser/netlify/emails/WelcomeLaunchEmail.tsx",
-      "changes": [
-        "replace:\\u2026",
-        "replace:Ãƒ[^A-Za-z0-9]+"
-      ]
+      "changes": ["replace:\\u2026", "replace:Ãƒ[^A-Za-z0-9]+"]
     }
   ],
   "missingFiles": [],
   "invalidFrontMatter": [
     {
       "file": "C:/Abraham-of-london/README.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_content_downloads_brotherhood-emergency-call-tree.mdx",
@@ -2510,75 +2104,51 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-principles.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-without-fear-teaser.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_in-my-fathers-house.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_kingdom-strategies-for-a-loving-legacy.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_leadership-begins-at-home.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_out-of-context-truth.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_principles-for-my-son.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_reclaiming-the-narrative.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_the-brotherhood-code.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_when-gods-sovereignty-collides-with-our-pain.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog_when-the-system-breaks-you.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_blog__lessons-from-noah.mdx",
@@ -2593,33 +2163,23 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_books_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_books_the-fiction-adaptation.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_events_founders-salon.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content_events_leadership-workshop.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-32-04-156Z/scripts__backups_2025-10-23T21-24-16-554Z_scripts__backups_2025-10-23T21-14-49-233Z_content__downloads-registry.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/content_downloads_brotherhood-emergency-call-tree.mdx",
@@ -2641,75 +2201,51 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-principles.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-without-fear-teaser.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_in-my-fathers-house.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_kingdom-strategies-for-a-loving-legacy.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_leadership-begins-at-home.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_out-of-context-truth.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_principles-for-my-son.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_reclaiming-the-narrative.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_the-brotherhood-code.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_when-gods-sovereignty-collides-with-our-pain.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog_when-the-system-breaks-you.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_blog__lessons-from-noah.mdx",
@@ -2724,33 +2260,23 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_books_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_books_the-fiction-adaptation.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_events_founders-salon.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content_events_leadership-workshop.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-24-16-554Z/scripts__backups_2025-10-23T21-14-49-233Z_content__downloads-registry.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_christianity-not-extremism.mdx",
@@ -2765,75 +2291,51 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_fathering-principles.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_fathering-without-fear-teaser.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_in-my-fathers-house.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_kingdom-strategies-for-a-loving-legacy.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_leadership-begins-at-home.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_out-of-context-truth.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_principles-for-my-son.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_reclaiming-the-narrative.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_the-brotherhood-code.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_when-gods-sovereignty-collides-with-our-pain.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog_when-the-system-breaks-you.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_blog__lessons-from-noah.mdx",
@@ -2848,75 +2350,51 @@
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_books_fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_books_the-fiction-adaptation.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_events_founders-salon.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content_events_leadership-workshop.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/scripts/_backups/2025-10-23T21-14-49-233Z/content__downloads-registry.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/public/downloads/fathering-without-fear-teaser.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/_downloads-registry.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/strategy/events-blueprint.md",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/resources/brotherhood-emergency-call-tree.mdx",
-      "issues": [
-        "FM: malformed line \"kind \"template\"\""
-      ]
+      "issues": ["FM: malformed line \"kind \"template\"\""]
     },
     {
       "file": "C:/Abraham-of-london/content/events/founders-salon.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/events/leadership-workshop.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/board-update-onepager.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/downloads/brotherhood-emergency-call-tree.mdx",
@@ -2927,15 +2405,11 @@
     },
     {
       "file": "C:/Abraham-of-london/content/books/fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/books/the-fiction-adaptation.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/christianity-not-extremism.mdx",
@@ -2950,75 +2424,51 @@
     },
     {
       "file": "C:/Abraham-of-london/content/blog/fathering-principles.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/fathering-without-fear-teaser.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/fathering-without-fear.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/in-my-fathers-house.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/kingdom-strategies-for-a-loving-legacy.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/leadership-begins-at-home.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/out-of-context-truth.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/principles-for-my-son.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/reclaiming-the-narrative.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/the-brotherhood-code.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/when-gods-sovereignty-collides-with-our-pain.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/when-the-system-breaks-you.mdx",
-      "issues": [
-        "Missing front-matter block"
-      ]
+      "issues": ["Missing front-matter block"]
     },
     {
       "file": "C:/Abraham-of-london/content/blog/_lessons-from-noah.mdx",

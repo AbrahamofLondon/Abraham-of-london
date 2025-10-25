@@ -5,7 +5,7 @@ category: Resources
 author: Abraham of London
 type: \"download\"
 slug: \"leaders-cue-card-two-up\"
-title: "\"LeadersCueCardTwoUp\"slug:\"leaders-cue-card-two-up\"type:\"template\"slug:\"leaders-cue-card-two-up\"type:\"Download\"title:\"LeadersCueCardTwoUp\"date:2025-10-13author:\"AbrahamofLondon\"readTime:2minreadcategory:\"Resources\""
+title: '"LeadersCueCardTwoUp"slug:"leaders-cue-card-two-up"type:"template"slug:"leaders-cue-card-two-up"type:"Download"title:"LeadersCueCardTwoUp"date:2025-10-13author:"AbrahamofLondon"readTime:2minreadcategory:"Resources"'
 ---
 
 import BrandFrame from "../../../components/print/BrandFrame";
@@ -14,15 +14,14 @@ import * as React from "react";
 
 {/* Define the component that uses the extracted frontmatter via your Next.js page logic */}
 const LeadersCueCardTwoUp = ({ metadata }) => {
-    // metadata will be passed via ContentLayer/Next.js dynamic page props
-    return (
-        <BrandFrame title={metadata.title} subtitle={metadata.subtitle} pageSize="A6" marginsMm={6} >
-            <div className="flex flex-col h-full">
-                {/* ... (rest of cue card content) ... */}
-            </div>
-        </BrandFrame>
-    );
-};
+// metadata will be passed via ContentLayer/Next.js dynamic page props
+return (
+
+<BrandFrame title={metadata.title} subtitle={metadata.subtitle} pageSize="A6" marginsMm={6}>
+  <div className="flex flex-col h-full">{/* ... (rest of cue card content) ... */}</div>
+</BrandFrame>
+); };
 
 // Render the component with placeholder data (your dynamic page will pass the actual metadata)
+
 <LeadersCueCardTwoUp metadata={{ title: "Leader's Cue Card (Two Up)", subtitle: "Weekly cadence, essential prompts, and crisis guardrails." }} />

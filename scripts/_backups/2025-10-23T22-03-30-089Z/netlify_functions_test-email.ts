@@ -1,5 +1,5 @@
-// netlify/functions/test-email.ts
-import type { Handler } from "@netlify/functions";
+﻿// netlify/function s/test-email.ts
+import type { Handler } from "@netlify/function s";
 import { Resend } from "resend";
 
 const bool = (v?: string) => Boolean(v && v.trim().length > 0);
@@ -7,7 +7,9 @@ const bool = (v?: string) => Boolean(v && v.trim().length > 0);
 export const handler: Handler = async (event) => {
   try {
     // Health probe
-    const isHealth = event.httpMethod === "GET" && /(^|[?&])health=1($|&)/.test(event.rawQuery || "");
+    const isHealth =
+      event.httpMethod === "GET" &&
+      /(^|[?&])health=1($|&)/.test(event.rawQuery || "");
     const resendKey = process.env.RESEND_API_KEY || "";
     const FROM = process.env.MAIL_FROM || "";
     const TO = process.env.MAIL_TO || "";
@@ -29,24 +31,32 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
+    if (event.httpMethod !== "POST")
+      return { statusCode: 405, body: "Method Not Allowed" };
 
     if (GUARD) {
-      const header = event.headers["x-task-token"] || event.headers["X-Task-Token"];
-      if (!header || header !== GUARD) return { statusCode: 401, body: "Unauthorized" };
+      const header =
+        event.headers["x-task-token"] || event.headers["X-Task-Token"];
+      if (!header || header !== GUARD)
+        return { statusCode: 401, body: "Unauthorized" };
     }
 
     if (!resendKey || !FROM || !TO) {
       return {
         statusCode: 500,
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ ok: false, error: "Missing RESEND_API_KEY, MAIL_FROM or MAIL_TO" }),
+        body: JSON.stringify({
+          ok: false,
+          error: "Missing RESEND_API_KEY, MAIL_FROM or MAIL_TO",
+        }),
       };
     }
 
     const payload = event.body ? JSON.parse(event.body) : {};
     const subject = String(payload.subject || "Resend smoke test");
-    const text = String(payload.text || "If you see this, the Resend setup works.");
+    const text = String(
+      payload.text || "If you see this, the Resend setup works.",
+    );
     const html =
       payload.html ||
       `<p style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
@@ -82,7 +92,10 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 500,
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ ok: false, error: { message: err?.message || "Unknown error" } }),
+      body: JSON.stringify({
+        ok: false,
+        error: { message: err?.message || "Unknown error" },
+      }),
     };
   }
 };

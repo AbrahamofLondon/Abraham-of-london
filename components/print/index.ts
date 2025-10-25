@@ -1,1 +1,2 @@
-export{defaultasEmbossedSign}from"./EmbossedSign";export{defaultasEmbossedBrandMark}from"./EmbossedBrandMark";
+﻿export { defaultasEmbossedSign } from "./EmbossedSign";
+export { defaultasEmbossedBrandMark } from "./EmbossedBrandMark";

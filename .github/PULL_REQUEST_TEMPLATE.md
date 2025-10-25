@@ -1,7 +1,9 @@
 ## Summary
+
 <!-- WhatÃƒ¢Ã¢â€š¬Ã¢â€ž¢s changing and why. Keep it tight. -->
 
 ## Type
+
 - [ ] Feature
 - [ ] Fix
 - [ ] Refactor
@@ -10,6 +12,7 @@
 - [ ] Infra/CI
 
 ## Checklist
+
 - [ ] `npm run build` passes
 - [ ] `npm run typecheck` (if present) passes
 - [ ] `npm run lint` (if present) passes
@@ -19,9 +22,11 @@
 - [ ] Redirects/canonicals updated (if domain/URL behavior changed)
 
 ## Testing Notes
+
 <!-- How you tested this locally or in preview. -->
 
 ## Risk & Rollback
+
 <!-- Risk level, and exactly how to revert if needed. -->
 
 Closes #

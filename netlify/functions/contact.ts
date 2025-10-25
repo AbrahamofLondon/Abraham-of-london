@@ -1,5 +1,5 @@
-// netlify/functions/contact.ts
-import type { Handler } from "@netlify/functions";
+﻿// netlify/function s/contact.ts
+import type { Handler } from "@netlify/function s";
 
 type Body = {
   name?: string;
@@ -7,22 +7,24 @@ type Body = {
   message?: string;
 };
 
-// Allow CORS from your site (set ALLOWED_ORIGIN in Netlify Env vars if needed)
-const ORIGIN =
-  process.env.ALLOWED_ORIGIN ??
-  "https://www.abrahamoflondon.org";
+// Allow CORS from your site (set ALLOWED_ORIGIN in Netlify Ãƒ¢Ã¢â‚¬Ã¢â‚¬â„¢ Env vars if needed)
+const ORIGIN = process.env.ALLOWED_ORIGIN ?? "https://www.abrahamoflondon.org";
 
 // Email provider env
 const EMAIL_PROVIDER = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const MAIL_FROM = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
+const MAIL_FROM =
+  process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
 const MAIL_TO = process.env.MAIL_TO || "info@abrahamoflondon.org";
 
 /* ------------------------- helpers ------------------------- */
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 const sanitize = (input: string, max = 2000) =>
-  input.replace(/<[^>]*>/g, "").trim().slice(0, max);
+  input
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .slice(0, max);
 
 const escapeHTML = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -82,7 +84,7 @@ async function sendViaResend({ name, email, message }: Required<Body>) {
     to: MAIL_TO,
     subject,
     html,
-    replyTo: email, // correct key for Resend
+    replyTo: email, // Ãƒ¢Ã..."Ã¢â‚¬¦ correct key for Resend
   });
 
   if (error) throw new Error(error.message || "Resend error");
@@ -97,7 +99,11 @@ export const handler: Handler = async (event) => {
     return cors(405, { ok: false, error: "Method Not Allowed" });
   }
 
-  const contentType = (event.headers["content-type"] || event.headers["Content-Type"] || "").toLowerCase();
+  const contentType = (
+    event.headers["content-type"] ||
+    event.headers["Content-Type"] ||
+    ""
+  ).toLowerCase();
   const body = parseBody(event.body, contentType);
 
   const name = sanitize(body.name || "", 200);
@@ -105,9 +111,11 @@ export const handler: Handler = async (event) => {
   const message = sanitize(body.message || "", 5000);
 
   // validation
-  if (!name || !email || !message) return cors(400, { ok: false, error: "Missing required field(s)." });
+  if (!name || !email || !message)
+    return cors(400, { ok: false, error: "Missing required field(s)." });
   if (!isEmail(email)) return cors(400, { ok: false, error: "Invalid email." });
-  if (message.length < 10) return cors(400, { ok: false, error: "Message too short." });
+  if (message.length < 10)
+    return cors(400, { ok: false, error: "Message too short." });
 
   try {
     if (EMAIL_PROVIDER !== "resend") {

@@ -15,13 +15,27 @@ import path from "path";
 const TARGET_DIRS = ["./pages", "./components", "./content", "./config"];
 const CODE_EXTS = new Set([".tsx", ".jsx", ".ts", ".js", ".mjs", ".cjs"]);
 const DATA_EXTS = new Set([".md", ".mdx", ".yaml", ".yml"]);
-const IGNORE_DIRS = new Set(["node_modules", ".next", ".git", ".turbo", "dist"]);
+const IGNORE_DIRS = new Set([
+  "node_modules",
+  ".next",
+  ".git",
+  ".turbo",
+  "dist",
+]);
 
 /* GLOBAL FIXES */
 const INVIS = /[\u00A0\u200B\uFEFF\u2009]/g; // NBSP, ZWSP, BOM, thin space
 const CP1252 = [
-  [/-/g, "-"], [/-/g, "-"], [/'/g, "'"], [/'/g, "'"], [/"/g, '"'],
-  [/€\x9d/g, '"'], [/"/g, '"'], [/©/g, "©"], [/•/g, "•"], [/.../g, "..."],
+  [/-/g, "-"],
+  [/-/g, "-"],
+  [/'/g, "'"],
+  [/'/g, "'"],
+  [/"/g, '"'],
+  [/€\x9d/g, '"'],
+  [/"/g, '"'],
+  [/©/g, "©"],
+  [/•/g, "•"],
+  [/.../g, "..."],
   [/\s/g, ""],
 ];
 const GLOBAL_TEXT_FIXES = [[INVIS, ""], ...CP1252];
@@ -32,12 +46,13 @@ const CODE_FIXES = [
 ];
 
 const FM_LINE_FIXES = [
-  [/^\s*\/\/.*$/gm, ""],                   // drop full-line // comments
-  [/^(.*?)(\s+\/\/.*)$/gm, (_m, a) => a],  // strip inline // comments
-  [/[ \t]+$/gm, ""],                       // trim EOL spaces
+  [/^\s*\/\/.*$/gm, ""], // drop full-line // comments
+  [/^(.*?)(\s+\/\/.*)$/gm, (_m, a) => a], // strip inline // comments
+  [/[ \t]+$/gm, ""], // trim EOL spaces
 ];
 
-const TRIM_AFTER_QUOTED = /^(\s*[A-Za-z_][\w-]*\s*:\s*"(?:[^"\\]|\\.)*")\s.*$/gm; // keep after closing quote clean
+const TRIM_AFTER_QUOTED =
+  /^(\s*[A-Za-z_][\w-]*\s*:\s*"(?:[^"\\]|\\.)*")\s.*$/gm; // keep after closing quote clean
 
 /* UTIL */
 let filesProcessed = 0;
@@ -50,7 +65,11 @@ function writeWithBackup(p, txt) {
   if (!fs.existsSync(bak) && fs.existsSync(p)) fs.copyFileSync(p, bak);
   fs.writeFileSync(p, txt, "utf8");
 }
-function applyPairs(s, pairs) { let t = s; for (const [re, rep] of pairs) t = t.replace(re, rep); return t; }
+function applyPairs(s, pairs) {
+  let t = s;
+  for (const [re, rep] of pairs) t = t.replace(re, rep);
+  return t;
+}
 function list(dir) {
   const out = [];
   const st = [dir];
@@ -58,8 +77,9 @@ function list(dir) {
     const d = st.pop();
     for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
       const p = path.join(d, ent.name);
-      if (ent.isDirectory()) { if (!IGNORE_DIRS.has(ent.name)) st.push(p); }
-      else out.push(p);
+      if (ent.isDirectory()) {
+        if (!IGNORE_DIRS.has(ent.name)) st.push(p);
+      } else out.push(p);
     }
   }
   return out;
@@ -70,7 +90,8 @@ function extractFM(raw) {
   return { fm: m[1], body: m[2] ?? "" };
 }
 const kebab = (s) =>
-  s.replace(/\.[^.]+$/, "")
+  s
+    .replace(/\.[^.]+$/, "")
     .replace(/[_\s]+/g, "-")
     .replace(/[^a-zA-Z0-9-]/g, "")
     .replace(/-{2,}/g, "-")
@@ -87,11 +108,14 @@ function normalizeFM(fmRaw, ctx) {
   // key value  → key: value  (handles: kind "template", kind template, kind Resource)
   fm = fm.replace(
     /^(\s*[A-Za-z_][\w-]*)\s+("[^"\r\n]+"|'[^'\r\n]+'|[^:\s#][^\r\n#]*)\s*$/gm,
-    (_m, k, v) => `${k.trim()}: ${String(v).trim()}`
+    (_m, k, v) => `${k.trim()}: ${String(v).trim()}`,
   );
 
   // orphan bare keys to empty values
-  fm = fm.split(/\r?\n/).map((l) => (/^\s*[A-Za-z_][\w-]*\s*$/.test(l) ? `${l.trim()}: ""` : l)).join("\n");
+  fm = fm
+    .split(/\r?\n/)
+    .map((l) => (/^\s*[A-Za-z_][\w-]*\s*$/.test(l) ? `${l.trim()}: ""` : l))
+    .join("\n");
 
   // kind → type
   fm = fm.replace(/^(?<i>\s*)kind(\s*):/gm, "$<i>type$2:");
@@ -100,12 +124,15 @@ function normalizeFM(fmRaw, ctx) {
   fm = fm.replace(TRIM_AFTER_QUOTED, "$1");
 
   // coerce a few type variants
-  fm = fm.replace(/^(\s*)type\s*:\s*Resource\s*$/gmi, `$1type: "guide"`);
-  fm = fm.replace(/^(\s*)type\s*:\s*template\s*$/gmi, `$1type: "template"`);
+  fm = fm.replace(/^(\s*)type\s*:\s*Resource\s*$/gim, `$1type: "guide"`);
+  fm = fm.replace(/^(\s*)type\s*:\s*template\s*$/gim, `$1type: "template"`);
 
   // slug defaults / fixme
   if (!/^(\s*)slug\s*:/m.test(fm)) fm = `slug: "${ctx.filenameSlug}"\n` + fm;
-  fm = fm.replace(/^(\s*)slug\s*:\s*"?fixme"?\s*$/m, `$1slug: "${ctx.filenameSlug}"`);
+  fm = fm.replace(
+    /^(\s*)slug\s*:\s*"?fixme"?\s*$/m,
+    `$1slug: "${ctx.filenameSlug}"`,
+  );
 
   // type defaults by folder
   if (!/^(\s*)type\s*:/m.test(fm)) {
@@ -113,7 +140,12 @@ function normalizeFM(fmRaw, ctx) {
   }
 
   // final tidy
-  fm = fm.split(/\r?\n/).filter(Boolean).map((l) => l.replace(/[ \t]+$/g, "")).join("\n").trimEnd();
+  fm = fm
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((l) => l.replace(/[ \t]+$/g, ""))
+    .join("\n")
+    .trimEnd();
   return fm;
 }
 
@@ -126,9 +158,14 @@ function processDataFile(p) {
   const posix = norm(p);
   const filenameSlug = kebab(path.basename(p));
   const isResource = posix.includes("/content/resources/");
-  const isDownload = posix.includes("/content/downloads/") || posix.includes("/downloads/");
+  const isDownload =
+    posix.includes("/content/downloads/") || posix.includes("/downloads/");
 
-  const fmFixed = normalizeFM(fmObj.fm, { isResource, isDownload, filenameSlug });
+  const fmFixed = normalizeFM(fmObj.fm, {
+    isResource,
+    isDownload,
+    filenameSlug,
+  });
   const rebuilt = `---\n${fmFixed}\n---\n\n${fmObj.body}`;
 
   if (rebuilt !== orig) {
@@ -145,7 +182,10 @@ function processCodeFile(p) {
 
   // Patch known framer-motion typing hiccup (safe cast)
   if (norm(p).endsWith("/components/Header.tsx")) {
-    fixed = fixed.replace(/transition=\{motionTransition\}/, "transition={motionTransition as any}");
+    fixed = fixed.replace(
+      /transition=\{motionTransition\}/,
+      "transition={motionTransition as any}",
+    );
   }
 
   if (fixed !== orig) {
@@ -160,15 +200,21 @@ function processCodeFile(p) {
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, entry.name);
-    if (entry.isDirectory()) { if (!IGNORE_DIRS.has(entry.name)) walk(p); continue; }
+    if (entry.isDirectory()) {
+      if (!IGNORE_DIRS.has(entry.name)) walk(p);
+      continue;
+    }
 
     const ext = path.extname(entry.name).toLowerCase();
     if (!CODE_EXTS.has(ext) && !DATA_EXTS.has(ext)) continue;
 
     filesProcessed++;
     try {
-      if (DATA_EXTS.has(ext)) { if (processDataFile(p)) filesModified++; }
-      else { if (processCodeFile(p)) filesModified++; }
+      if (DATA_EXTS.has(ext)) {
+        if (processDataFile(p)) filesModified++;
+      } else {
+        if (processCodeFile(p)) filesModified++;
+      }
     } catch (e) {
       console.error(`❌ Error processing ${p}: ${e.message}`);
     }

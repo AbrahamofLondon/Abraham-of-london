@@ -162,8 +162,6 @@
   "missingAssets": [],
   "pdfsGenerated": 0,
   "vulnerabilities": 0,
-  "notes": [
-    "Found 44 content files."
-  ],
+  "notes": ["Found 44 content files."],
   "endedAt": "2025-10-24T12:59:38.590Z"
 }

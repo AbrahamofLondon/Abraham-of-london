@@ -45,14 +45,17 @@ const EMPTY = Buffer.alloc(0);
 // Heuristic: probably binary if NUL present or high non-text byte ratio
 function isProbablyBinary(buf, sample = 2048) {
   const len = Math.min(buf.length, sample);
-  let nul = 0, weird = 0;
+  let nul = 0,
+    weird = 0;
   for (let i = 0; i < len; i++) {
     const b = buf[i];
     if (b === 0x00) nul++;
     const isTextish =
-      b === 0x09 || b === 0x0a || b === 0x0d || // tab/lf/cr
-      (b >= 0x20 && b <= 0x7E) || // ASCII printable
-      (b >= 0x80); // UTF-8/extended
+      b === 0x09 ||
+      b === 0x0a ||
+      b === 0x0d || // tab/lf/cr
+      (b >= 0x20 && b <= 0x7e) || // ASCII printable
+      b >= 0x80; // UTF-8/extended
     if (!isTextish) weird++;
   }
   if (nul > 0) return true;
@@ -62,12 +65,12 @@ function isProbablyBinary(buf, sample = 2048) {
 // Normalize encoding: Convert UTF-16LE/BE to UTF-8, strip UTF-8 BOM
 function normalizeEncodingForWrite(buf) {
   if (buf.length >= 2) {
-    if (buf[0] === 0xFF && buf[1] === 0xFE) {
+    if (buf[0] === 0xff && buf[1] === 0xfe) {
       // UTF-16 LE BOM
       const asU16 = buf.slice(2).toString("utf16le");
       return Buffer.from(asU16, "utf8");
     }
-    if (buf[0] === 0xFE && buf[1] === 0xFF) {
+    if (buf[0] === 0xfe && buf[1] === 0xff) {
       // UTF-16 BE BOM
       const tmp = Buffer.alloc(buf.length - 2);
       for (let i = 2; i < buf.length; i += 2) {
@@ -77,7 +80,7 @@ function normalizeEncodingForWrite(buf) {
       const asU16 = tmp.toString("utf16le");
       return Buffer.from(asU16, "utf8");
     }
-    if (buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF) {
+    if (buf[0] === 0xef && buf[1] === 0xbb && buf[2] === 0xbf) {
       // UTF-8 BOM
       return buf.slice(3);
     }
@@ -127,43 +130,83 @@ function removeContentlayer(content) {
 const SEQS = [
   // From fix-corrupted-files.ps1 and fix_encoding.js
   { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢"), correct: u8("'") },
-  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"), correct: u8("-") },
-  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢"), correct: u8("'") },
-  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  {
+    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"),
+    correct: u8("-"),
+  },
+  {
+    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢"),
+    correct: u8("'"),
+  },
+  {
+    corrupt: u8(
+      "ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¢ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š",
+    ),
+    correct: u8('"'),
+  },
   { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
-  { corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬¦ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…Ã¢â‚¬Å¡"), correct: u8('"') },
-  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"), correct: u8("-") },
-  { corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"), correct: u8('"') },
+  {
+    corrupt: u8("ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬¦ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…Ã¢â‚¬Å¡"),
+    correct: u8('"'),
+  },
+  {
+    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€Ã¢â‚¬â„¢ÃƒÆ’¢ÃƒÂ¢Ã¢â‚¬Å¡¬Ãƒ…¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š¬"),
+    correct: u8("-"),
+  },
+  {
+    corrupt: u8("ÃƒÆ’Ã†'Ãƒâ€š¢ÃƒÆ’¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€š¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š"),
+    correct: u8('"'),
+  },
   { corrupt: u8(""), correct: EMPTY },
   { corrupt: u8("ÃƒÂ¢Ã¢â€šÂ¬"), correct: u8('"') },
   { corrupt: u8("'"), correct: u8("'") },
   // From original repair-encoding.mjs (deep corruption)
   {
     corrupt: Buffer.from([
-      0xC3,0x83,0xC6,0x92,0xC3,0xA2,0xE2,0x82,0xAC,0xC5,0xBD,0xCB,0x9C,0xC3,0x83,0xC6,0x92,0xC3,0xA2,
-      0xE2,0x82,0xAC,0xC5,0xBD,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xA2,0xC3,0x83,0xCB,0x9C,0xC3,0xA2,
-      0xE2,0x82,0xAC,0xC5,0xA1,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xA2,0xC3,0x83,
-      0xE2,0x80,0xA0,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,
-      0xC3,0x82,0xC2,0xA2,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,
-      0xA2,0xC3,0x83,0xE2,0x80,0xA0,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xA2,0xC3,
-      0x83,0xC6,0x92,0xC3,0x82,0xC2,0xAC,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xA2,0xC3,0x83,0xE2,0x80,
-      0xA0,0xC3,0x82,0xC2,0xAC
+      0xc3, 0x83, 0xc6, 0x92, 0xc3, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xbd, 0xcb,
+      0x9c, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xbd,
+      0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xcb, 0x9c,
+      0xc3, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xa1, 0xc3, 0x82, 0xc2, 0xac, 0xc3,
+      0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xe2, 0x80, 0xa0,
+      0xc3, 0x82, 0xc2, 0xac, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xac,
+      0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xc6, 0x92,
+      0xc3, 0x82, 0xc2, 0xac, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2,
+      0xc3, 0x83, 0xe2, 0x80, 0xa0, 0xc3, 0x82, 0xc2, 0xac, 0xc3, 0x83, 0xc6,
+      0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2,
+      0xac, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xe2,
+      0x80, 0xa0, 0xc3, 0x82, 0xc2, 0xac,
     ]),
-    correct: u8("'")
+    correct: u8("'"),
   },
   {
-    corrupt: Buffer.from([0xC3,0x83,0xC6,0x92,0xC3,0xA2,0xE2,0x82,0xAC,0xC5,0xBD,0xCB,0x9C,0xC3,0x83,0xC6,0x92,0xC3,0x82,0xC2,0xA2,0xC3,0x83,0xE2,0x80,0xA0,0xC3,0x82,0xC2,0xAC,0xC3,0x85,0xC2,0xA6]),
-    correct: EMPTY
+    corrupt: Buffer.from([
+      0xc3, 0x83, 0xc6, 0x92, 0xc3, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xbd, 0xcb,
+      0x9c, 0xc3, 0x83, 0xc6, 0x92, 0xc3, 0x82, 0xc2, 0xa2, 0xc3, 0x83, 0xe2,
+      0x80, 0xa0, 0xc3, 0x82, 0xc2, 0xac, 0xc3, 0x85, 0xc2, 0xa6,
+    ]),
+    correct: EMPTY,
   },
-  { corrupt: Buffer.from([0xE2,0x80,0x99]), correct: u8("'") },
-  { corrupt: Buffer.from([0xE2,0x80,0x9C]), correct: u8('"') },
-  { corrupt: Buffer.from([0xE2,0x80,0x9D]), correct: u8('"') },
-  { corrupt: Buffer.from([0xE2,0x80,0xA6]), correct: u8("...") },
-  { corrupt: Buffer.from([0xC2,0xA0]), correct: EMPTY }, // NBSP
-  { corrupt: Buffer.from([0xE2,0x80,0x8B]), correct: EMPTY }, // ZWSP
-  { corrupt: Buffer.from([0xEF,0xBB,0xBF]), correct: EMPTY }, // UTF-8 BOM
-  { corrupt: Buffer.from([0xC3,0x83,0xC2,0xA2,0xE2,0x82,0xAC,0xC5,0xA1,0xC3,0x82,0xC2,0xAC]), correct: EMPTY },
-  { corrupt: Buffer.from([0xC3,0x83,0xC6,0x92,0xC3,0xA2,0xE2,0x82,0xAC,0xC5,0xBD,0xCB,0x9C,0xC3,0x83,0xC2,0xA2]), correct: EMPTY }
+  { corrupt: Buffer.from([0xe2, 0x80, 0x99]), correct: u8("'") },
+  { corrupt: Buffer.from([0xe2, 0x80, 0x9c]), correct: u8('"') },
+  { corrupt: Buffer.from([0xe2, 0x80, 0x9d]), correct: u8('"') },
+  { corrupt: Buffer.from([0xe2, 0x80, 0xa6]), correct: u8("...") },
+  { corrupt: Buffer.from([0xc2, 0xa0]), correct: EMPTY }, // NBSP
+  { corrupt: Buffer.from([0xe2, 0x80, 0x8b]), correct: EMPTY }, // ZWSP
+  { corrupt: Buffer.from([0xef, 0xbb, 0xbf]), correct: EMPTY }, // UTF-8 BOM
+  {
+    corrupt: Buffer.from([
+      0xc3, 0x83, 0xc2, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xa1, 0xc3, 0x82, 0xc2,
+      0xac,
+    ]),
+    correct: EMPTY,
+  },
+  {
+    corrupt: Buffer.from([
+      0xc3, 0x83, 0xc6, 0x92, 0xc3, 0xa2, 0xe2, 0x82, 0xac, 0xc5, 0xbd, 0xcb,
+      0x9c, 0xc3, 0x83, 0xc2, 0xa2,
+    ]),
+    correct: EMPTY,
+  },
 ];
 
 // Emoji to Unicode escapes for code files
@@ -206,7 +249,7 @@ When denied the right to work, he built strategy. When stripped of funds, he fou
 He didn't survive by chance. He stayed by grace. And because something always happens-so does he.
 
 Read it, and you will ache when it ends, beg for more, and never forget the man who refused to disappear.
-`
+`,
   },
   {
     path: "content/blog/christianity-not-extremism.mdx",
@@ -224,7 +267,7 @@ tags:
   - society
 ---
 Content here...
-`
+`,
   },
   {
     path: "content/strategy/events-blueprint.md",
@@ -241,7 +284,7 @@ tags:
   - strategy
 ---
 Content here...
-`
+`,
   },
   {
     path: "content/downloads/board-update-onepager.mdx",
@@ -261,8 +304,8 @@ tags:
 ---
 # Board Update One-Pager
 Content for the board update one-pager goes here...
-`
-  }
+`,
+  },
 ];
 
 // ---------- Core ----------
@@ -286,7 +329,9 @@ async function listChangedSince(root, since) {
       encoding: "utf8",
     });
     if (out.status !== 0) {
-      console.warn(`⚠️ Git diff failed for ${since}, falling back to full scan`);
+      console.warn(
+        `⚠️ Git diff failed for ${since}, falling back to full scan`,
+      );
       return null;
     }
     return out.stdout
@@ -295,7 +340,9 @@ async function listChangedSince(root, since) {
       .filter(Boolean)
       .map((p) => path.join(root, p));
   } catch (e) {
-    console.warn(`⚠️ Error running git diff: ${e.message}, falling back to full scan`);
+    console.warn(
+      `⚠️ Error running git diff: ${e.message}, falling back to full scan`,
+    );
     return null;
   }
 }
@@ -337,7 +384,12 @@ async function ensureBackup(pathAbs) {
   if (NO_BACKUP) return;
   const bak = `${pathAbs}.bak`;
   try {
-    if (!(await fs.access(bak).then(() => true).catch(() => false))) {
+    if (
+      !(await fs
+        .access(bak)
+        .then(() => true)
+        .catch(() => false))
+    ) {
       await fs.copyFile(pathAbs, bak);
       console.log(`📂 Created backup: ${bak}`);
     }
@@ -351,7 +403,12 @@ async function restoreFiles() {
   for (const { path: filePath, content } of FILES_TO_RESTORE) {
     const absPath = path.join(ROOT, filePath);
     try {
-      if (!(await fs.access(absPath).then(() => true).catch(() => false))) {
+      if (
+        !(await fs
+          .access(absPath)
+          .then(() => true)
+          .catch(() => false))
+      ) {
         await fs.mkdir(path.dirname(absPath), { recursive: true });
         await fs.writeFile(absPath, content);
         console.log(`🗄️ Restored missing file: ${filePath}`);
@@ -473,7 +530,12 @@ async function writeReport(report) {
 
   for (const fp of candidates) {
     try {
-      if (!(await fs.access(fp).then(() => true).catch(() => false))) {
+      if (
+        !(await fs
+          .access(fp)
+          .then(() => true)
+          .catch(() => false))
+      ) {
         console.warn(`⚠️ Skipping missing file: ${fp}`);
         continue;
       }
@@ -488,7 +550,7 @@ async function writeReport(report) {
         filesChanged++;
         totalMatches += r.matches;
         console.log(
-          `🛠  ${DRY_RUN ? "Would fix" : "Fixed"}: ${path.relative(ROOT, fp)} (matches: ${r.matches}, Δ: ${r.sizeDelta})`
+          `🛠  ${DRY_RUN ? "Would fix" : "Fixed"}: ${path.relative(ROOT, fp)} (matches: ${r.matches}, Δ: ${r.sizeDelta})`,
         );
         // if (r.matchDetails.length) { // Too verbose
         //   console.log(`  Details: ${JSON.stringify(r.matchDetails, null, 2)}`);

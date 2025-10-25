@@ -59,3 +59,4 @@ Logs → scripts/_logs/grand-master.log
 Backups (mirrors repo paths) → scripts/_backups/<ISO-timestamp>/...
 
 If anything trips, the report/logs still write so you can diagnose.
+```

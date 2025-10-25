@@ -1,4 +1,4 @@
-if (typeof window !== "undefined") {
+﻿if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
 // lib/books.ts
@@ -47,8 +47,16 @@ function toTitle(slug: string) {
 
 /** Coerces a value into an array of trimmed, non-empty strings. */
 function toStringArray(v: unknown): string[] {
-  if (Array.isArray(v)) return v.map(String).map((s) => s.trim()).filter(Boolean);
-  if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
+  if (Array.isArray(v))
+    return v
+      .map(String)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  if (typeof v === "string")
+    return v
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   return [];
 }
 
@@ -167,7 +175,7 @@ export function getBookBySlug(
       case "date": // date field from original type
       case "downloadPdf":
       case "downloadEpub": {
-        if (typeof raw === 'string') {
+        if (typeof raw === "string") {
           (item as Record<string, unknown>)[field] = raw.trim();
         }
         break;

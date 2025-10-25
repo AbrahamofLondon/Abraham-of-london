@@ -1,8 +1,8 @@
-// contentlayer.config.ts
+﻿// contentlayer.config.ts
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 
-/** ---------- Document Types ---------- */
+/** ---------- Document type s ---------- */
 
 const Post = defineDocumentType(() => ({
   name: "Post",
@@ -153,4 +153,3 @@ export default makeSource({
     },
   },
 });
-

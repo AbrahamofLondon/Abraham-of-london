@@ -23,7 +23,7 @@ const args = Object.fromEntries(
   process.argv.slice(2).map((s) => {
     const [k, v] = s.replace(/^-+/, "").split("=");
     return [k, v === undefined ? true : v];
-  })
+  }),
 );
 const DRY = String(args.dry ?? "false").toLowerCase() === "true";
 const STRICT = String(args.strict ?? "false").toLowerCase() === "true";
@@ -222,7 +222,12 @@ async function renderPDF(browser, url, outPath, frontMatter) {
     report.increment("pagesGenerated");
     return { status: "success" };
   } catch (e) {
-    report.record("errors", { url, outPath: norm(outPath), error: e.message, slug: frontMatter.slug });
+    report.record("errors", {
+      url,
+      outPath: norm(outPath),
+      error: e.message,
+      slug: frontMatter.slug,
+    });
     return { status: "failed", error: e.message };
   } finally {
     await page.close();
@@ -234,7 +239,10 @@ async function renderPDF(browser, url, outPath, frontMatter) {
 async function checkBrandFrame(filePath, content) {
   const matches = content.match(/<BrandFrame\b[^>]*>/g);
   if (matches) {
-    report.record("brandFrameUsage", { file: norm(filePath), brandFrameCount: matches.length });
+    report.record("brandFrameUsage", {
+      file: norm(filePath),
+      brandFrameCount: matches.length,
+    });
   }
 }
 
@@ -252,7 +260,10 @@ async function checkBrandFrame(filePath, content) {
   try {
     await fs.readFile(path.join(ROOT, "package.json")).then(JSON.parse);
   } catch (e) {
-    report.record("errors", { task: "validate-package-json", error: `Invalid package.json: ${e.message}` });
+    report.record("errors", {
+      task: "validate-package-json",
+      error: `Invalid package.json: ${e.message}`,
+    });
     if (STRICT) throw new Error(`Invalid package.json: ${e.message}`);
   }
 
@@ -265,13 +276,19 @@ async function checkBrandFrame(filePath, content) {
     .map((f) => path.join(CONTENT_DIR, f));
 
   if (!files.length) {
-    report.record("errors", { task: "collect-files", error: "No MDX files found in content/downloads" });
+    report.record("errors", {
+      task: "collect-files",
+      error: "No MDX files found in content/downloads",
+    });
     if (STRICT) throw new Error("No MDX files found in content/downloads");
   }
 
   let browser;
   try {
-    browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox'] }); // Added safety args
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    }); // Added safety args
 
     for (const filePath of files) {
       let fmContent = null;
@@ -288,7 +305,10 @@ async function checkBrandFrame(filePath, content) {
         const missingFields = requiredFields.filter((k) => !frontMatter[k]);
 
         if (missingFields.length) {
-          report.record("invalidFrontMatter", { file: norm(filePath), missing: missingFields });
+          report.record("invalidFrontMatter", {
+            file: norm(filePath),
+            missing: missingFields,
+          });
           if (STRICT) continue;
 
           // --- Auto-Fix Logic (Enhanced to maintain proper YAML structure) ---
@@ -301,44 +321,63 @@ async function checkBrandFrame(filePath, content) {
             report.record("notes", `Auto-slug: ${slug} in ${norm(filePath)}`);
           }
           if (!title) {
-            title = slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+            title = slug
+              .replace(/[-_]+/g, " ")
+              .replace(/\b\w/g, (m) => m.toUpperCase());
             report.record("notes", `Auto-title: ${title} in ${norm(filePath)}`);
           }
           if (!pdfPath) {
             pdfPath = `/downloads/${slug}.pdf`;
-            report.record("notes", `Auto-pdfPath: ${pdfPath} in ${norm(filePath)}`);
+            report.record(
+              "notes",
+              `Auto-pdfPath: ${pdfPath} in ${norm(filePath)}`,
+            );
           }
 
-          const newFrontMatter = matter.stringify(content, { ...frontMatter, title, slug, pdfPath });
+          const newFrontMatter = matter.stringify(content, {
+            ...frontMatter,
+            title,
+            slug,
+            pdfPath,
+          });
 
           if (!DRY) {
             await write(filePath, newFrontMatter);
-            report.record("notes", `Fixed and wrote front-matter for ${norm(filePath)}`);
+            report.record(
+              "notes",
+              `Fixed and wrote front-matter for ${norm(filePath)}`,
+            );
           }
         }
 
         // 3. Asset Validation
-        if (frontMatter.coverImage && !(await validateAsset(frontMatter.coverImage))) {
+        if (
+          frontMatter.coverImage &&
+          !(await validateAsset(frontMatter.coverImage))
+        ) {
           if (STRICT) continue;
         }
 
         // 4. PDF Rendering
-        const url = new URL(`/downloads/${frontMatter.slug}`, BASE_URL).toString();
+        const url = new URL(
+          `/downloads/${frontMatter.slug}`,
+          BASE_URL,
+        ).toString();
         const outPath = path.join(OUT_DIR, `${frontMatter.slug}.pdf`);
         const result = await renderPDF(browser, url, outPath, frontMatter);
 
         if (result.status === "success") {
           report.record("notes", `Generated PDF: ${norm(outPath)} for ${url}`);
         } else if (STRICT) {
-          throw new Error(`PDF generation failed for ${frontMatter.slug}: ${result.error}`);
+          throw new Error(
+            `PDF generation failed for ${frontMatter.slug}: ${result.error}`,
+          );
         }
-
       } catch (e) {
         report.record("errors", { file: norm(filePath), error: e.message });
         if (STRICT) throw e;
       }
     }
-
   } catch (fatalError) {
     report.record("errors", { task: "FATAL", error: fatalError.message });
     console.error(`\n❌ FATAL ERROR in PDF generation: ${fatalError.message}`);
@@ -353,18 +392,22 @@ async function checkBrandFrame(filePath, content) {
     if (browser) await browser.close();
   }
 
-
   // Final Report Generation
   report.finalize();
   await write(REPORT_PATH, JSON.stringify(report.get(), null, 2));
-  console.log(`\n✅ PDF rendering completed. See report: ${norm(REPORT_PATH)}\n`);
+  console.log(
+    `\n✅ PDF rendering completed. See report: ${norm(REPORT_PATH)}\n`,
+  );
   console.log(`Pages processed: ${report.data.pagesProcessed}`);
   console.log(`Pages generated: ${report.data.pagesGenerated}`);
   console.log(`Errors: ${report.data.errors.length}`);
   console.log(`Missing assets: ${report.data.missingAssets.length}`);
   console.log(`Invalid front-matter: ${report.data.invalidFrontMatter.length}`);
 
-  if (STRICT && (report.data.errors.length || report.data.invalidFrontMatter.length)) {
+  if (
+    STRICT &&
+    (report.data.errors.length || report.data.invalidFrontMatter.length)
+  ) {
     console.error("❌ Strict mode: failing due to errors.");
     process.exit(1);
   }

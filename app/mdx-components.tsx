@@ -1,5 +1,5 @@
-// app/mdx-components.tsx
-import type { MDXComponents } from "mdx/types";
+﻿// app/mdx-components.tsx
+import type { MDXComponents } from "mdx/type s";
 import PullLine from "@/components/mdx/PullLine";
 import Verse from "@/components/mdx/Verse";
 import Rule from "@/components/mdx/Rule";

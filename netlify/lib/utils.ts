@@ -1,5 +1,5 @@
-// netlify/functions/_utils.ts
-import type { HandlerResponse } from "@netlify/functions";
+﻿// netlify/function s/_utils.ts
+import type { HandlerResponse } from "@netlify/function s";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,10 +12,16 @@ export function getSiteUrl(): string {
   return String(raw).replace(/\/$/, "");
 }
 
-export async function readJson<T = Record<string, unknown>>(req: Request): Promise<T> {
+export async function readJson<T = Record<string, unknown>>(
+  req: Request,
+): Promise<T> {
   const ct = req.headers.get("content-type") || "";
   if (ct.includes("application/json")) {
-    try { return (await req.json()) as T; } catch { /* fall through */ }
+    try {
+      return (await req.json()) as T;
+    } catch {
+      /* fall through */
+    }
   }
   return {} as T;
 }
@@ -38,7 +44,10 @@ export function bad(message = "Bad Request", status = 400): HandlerResponse {
   return json({ ok: false, message }, status);
 }
 
-export function ok(message = "OK", extra: Record<string, unknown> = {}): HandlerResponse {
+export function ok(
+  message = "OK",
+  extra: Record<string, unknown> = {},
+): HandlerResponse {
   return json({ ok: true, message, ...extra }, 200);
 }
 
@@ -59,7 +68,17 @@ export function handleOptions(): HandlerResponse {
 }
 
 export function escapeHtml(str: string) {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m
+  return String(str).replace(
+    /[&<>"']/g,
+    (m) =>
+      (
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }) as const
+      )[m] || m,
   );
 }

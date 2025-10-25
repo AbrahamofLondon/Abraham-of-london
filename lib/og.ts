@@ -1,12 +1,11 @@
-// lib/og.ts
+﻿// lib/og.ts
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const LOCAL_FALLBACK = "/assets/images/blog/default-blog-cover.jpg";
 const DEFAULT_FALLBACK = siteConfig.ogImage || LOCAL_FALLBACK;
 
 function truncate(s: string, max = 120) {
-  // FIX: Added closing backtick and correctly added '...' to end of string
-  return s.length > max ? `${s.slice(0, max - 3)}...` : s;
+  return s.length > max ? `${s.slice(0, max - 1)}Ãƒ¢Ã¢â€š¬Ã‚¦` : s;
 }
 
 /**
@@ -42,7 +41,9 @@ export function generatedCover(
 
   // Fallback if no title/slug provided
   const fallback = DEFAULT_FALLBACK.startsWith("/")
-    ? (absolute ? absUrl(DEFAULT_FALLBACK) : DEFAULT_FALLBACK)
+    ? absolute
+      ? absUrl(DEFAULT_FALLBACK)
+      : DEFAULT_FALLBACK
     : DEFAULT_FALLBACK;
 
   return fallback;

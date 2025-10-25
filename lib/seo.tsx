@@ -1,11 +1,11 @@
-// lib/seo.tsx
+﻿// lib/seo.tsx
 import Head from "next/head";
 
 export const SITE_NAME = "Abraham of London";
 export const ORIGIN =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 const DEFAULT_DESC =
-  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms availableoff the record.";
+  "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms availableÃƒ¢Ã¢â€š¬Ã¢â‚¬off the record.";
 const TWITTER_HANDLE = "@Abraham_of_LDN";
 
 function abs(path: string) {
@@ -37,7 +37,7 @@ export function OgHead({
     : `${ORIGIN}/api/og?title=${encodeURIComponent(title)}`;
 
   return (
-    <Head>
+    <Head d>
       {/* Primary */}
       <title>{title}</title>
       <meta name="description" content={description} />
@@ -111,7 +111,7 @@ export function ArticleJsonLd({
     },
   };
 
-  return <JsonLd data={data} />;
+  return <JsonL d data={data} />;
 }
 
 export function EventJsonLd({
@@ -157,7 +157,7 @@ export function EventJsonLd({
       address: location.address,
     };
   }
-  return <JsonLd data={data} />;
+  return <JsonL d data={data} />;
 }
 
 export function BookJsonLd({
@@ -183,7 +183,7 @@ export function BookJsonLd({
     description,
     publisher: { "@type": "Organization", name: SITE_NAME },
   };
-  return <JsonLd data={data} />;
+  return <JsonL d data={data} />;
 }
 
 export function BreadcrumbJsonLd({
@@ -201,5 +201,5 @@ export function BreadcrumbJsonLd({
       item: it.item,
     })),
   };
-  return <JsonLd data={data} />;
+  return <JsonL d data={data} />;
 }

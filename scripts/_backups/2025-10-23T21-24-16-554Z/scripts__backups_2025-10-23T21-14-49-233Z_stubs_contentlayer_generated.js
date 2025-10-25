@@ -1,9 +1,21 @@
-module.exports = new Proxy({}, {
-  get: (_, prop) => {
-    if ([
-      "allResources","allEvents","allBooks","allPosts",
-      "allPrints","allStrategies","allStrategy","allDownloads"
-    ].includes(prop)) return [];
-    return [];
-  }
-});
+module.exports = new Proxy(
+  {},
+  {
+    get: (_, prop) => {
+      if (
+        [
+          "allResources",
+          "allEvents",
+          "allBooks",
+          "allPosts",
+          "allPrints",
+          "allStrategies",
+          "allStrategy",
+          "allDownloads",
+        ].includes(prop)
+      )
+        return [];
+      return [];
+    },
+  },
+);

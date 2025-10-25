@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { promises as fs } from "fs";
 import path from "path";
 import matter from "gray-matter";
-import * as React from "react";
+import \* as React from "react";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
@@ -24,42 +24,41 @@ import { absUrl } from "@/lib/siteConfig";
 // Dynamically import the Comments component (e.g., Giscus)
 const Comments = dynamic(() => import('@giscus/react'), { ssr: false });
 
-
 type PageMeta = {
-  slug: string;
-  title: string;
-  date?: string;
-  excerpt?: string;
-  coverImage?: string;
-  author?: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
-  coverPosition?: "left" | "center" | "right";
-  description?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  socialCaption?: string;
-  draft?: boolean;
+slug: string;
+title: string;
+date?: string;
+excerpt?: string;
+coverImage?: string;
+author?: string;
+readTime?: string;
+category?: string;
+tags?: string[];
+coverAspect?: "book" | "wide" | "square";
+coverFit?: "cover" | "contain";
+coverPosition?: "left" | "center" | "right";
+description?: string;
+ogTitle?: string;
+ogDescription?: string;
+socialCaption?: string;
+draft?: boolean;
 };
 
 type Props = {
-  post: {
-    meta: PageMeta;
-    content: MDXRemoteSerializeResult;
-  };
+post: {
+meta: PageMeta;
+content: MDXRemoteSerializeResult;
+};
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const postsDir = path.join(process.cwd(), "content/blog");
-  const filePath = path.join(postsDir, `${slug}.mdx`);
+const slug = String(params?.slug || "");
+const postsDir = path.join(process.cwd(), "content/blog");
+const filePath = path.join(postsDir, `${slug}.mdx`);
 
-  try {
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    const { data: frontMatter, content } = matter(fileContent);
+try {
+const fileContent = await fs.readFile(filePath, "utf-8");
+const { data: frontMatter, content } = matter(fileContent);
 
     // FIX 1: Add a runtime check and safe fallback for required string fields (slug and title)
     const slug = String(frontMatter.slug || "").trim();
@@ -100,70 +99,71 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     });
 
     return { props: { post: { meta, content: mdx } }, revalidate: 60 };
-  } catch (error) {
-    console.error(`Error processing ${slug}.mdx:`, error);
-    return { notFound: true };
-  }
+
+} catch (error) {
+console.error(`Error processing ${slug}.mdx:`, error);
+return { notFound: true };
+}
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const postsDir = path.join(process.cwd(), "content/blog");
-  const filenames = await fs.readdir(postsDir);
-  const paths = filenames
-    .filter((file) => file.endsWith(".mdx"))
-    .map((file) => ({
-      params: { slug: file.replace(/\.mdx$/, "") },
-    }));
+const postsDir = path.join(process.cwd(), "content/blog");
+const filenames = await fs.readdir(postsDir);
+const paths = filenames
+.filter((file) => file.endsWith(".mdx"))
+.map((file) => ({
+params: { slug: file.replace(/\.mdx$/, "") },
+}));
 
-  return { paths, fallback: "blocking" };
+return { paths, fallback: "blocking" };
 };
 
 export default function BlogPost({ post }: Props) {
-  const {
-    slug,
-    title,
-    date,
-    excerpt,
-    coverImage,
-    author,
-    readTime,
-    category,
-    tags,
-    coverAspect,
-    coverFit,
-    coverPosition,
-    description,
-    ogTitle,
-    ogDescription,
-    draft,
-  } = post.meta;
+const {
+slug,
+title,
+date,
+excerpt,
+coverImage,
+author,
+readTime,
+category,
+tags,
+coverAspect,
+coverFit,
+coverPosition,
+description,
+ogTitle,
+ogDescription,
+draft,
+} = post.meta;
 
-  if (draft) {
-    return <Layout pageTitle="Draft Post">This post is a draft and not publicly available.</Layout>;
-  }
+if (draft) {
+return <Layout pageTitle="Draft Post">This post is a draft and not publicly available.</Layout>;
+}
 
-  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = coverImage
-    ? absUrl(coverImage)
-    : absUrl("/assets/images/social/og-image.jpg");
-  const authorName = author || "Abraham of London";
+const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
+const coverForMeta = coverImage
+? absUrl(coverImage)
+: absUrl("/assets/images/social/og-image.jpg");
+const authorName = author || "Abraham of London";
 
-  const isFatherhood =
-    category === "Fatherhood" ||
-    (Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
+const isFatherhood =
+category === "Fatherhood" ||
+(Array.isArray(tags) && tags.map((t) => t.toLowerCase()).includes("fatherhood"));
 
-  return (
-    <Layout pageTitle={title} hideSocialStrip hideCTA>
-      <SEOHead
-        title={ogTitle || title}
-        description={description || excerpt || ""}
-        slug={`/blog/${slug}`}
-        coverImage={coverForMeta}
-        publishedTime={date}
-        modifiedTime={date}
-        authorName={authorName}
-        tags={tags || []}
-      />
+return (
+<Layout pageTitle={title} hideSocialStrip hideCTA>
+<SEOHead
+title={ogTitle || title}
+description={description || excerpt || ""}
+slug={`/blog/${slug}`}
+coverImage={coverForMeta}
+publishedTime={date}
+modifiedTime={date}
+authorName={authorName}
+tags={tags || []}
+/>
 
       <MDXProviderWrapper>
         <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
@@ -215,8 +215,6 @@ export default function BlogPost({ post }: Props) {
         </article>
       </MDXProviderWrapper>
     </Layout>
-  );
+
+);
 }
-
-
-

@@ -3,12 +3,12 @@ import path from "path";
 
 const ROOT = process.cwd();
 const MAP = [
-  { dir: "content/blog",       type: "Post" },
-  { dir: "content/books",      type: "Book" },
-  { dir: "content/events",     type: "Event" },
-  { dir: "content/resources",  type: "Resource" },
-  { dir: "content/strategy",   type: "Strategy" },
-  { dir: "content/downloads",  type: "Download" },
+  { dir: "content/blog", type: "Post" },
+  { dir: "content/books", type: "Book" },
+  { dir: "content/events", type: "Event" },
+  { dir: "content/resources", type: "Resource" },
+  { dir: "content/strategy", type: "Strategy" },
+  { dir: "content/downloads", type: "Download" },
 ];
 
 const MDLIKE = new Set([".md", ".mdx", ".markdown"]);
@@ -42,7 +42,10 @@ function fixFile(p, wantedType, ensureKind) {
   if (!/^type\s*:/m.test(fm)) {
     fm = `type: "${wantedType}"\n${fm}`;
   } else {
-    fm = fm.replace(/^(\s*)type\s*:\s*"?([A-Za-z]+)"?/m, (_,$1) => `${$1}type: "${wantedType}"`);
+    fm = fm.replace(
+      /^(\s*)type\s*:\s*"?([A-Za-z]+)"?/m,
+      (_, $1) => `${$1}type: "${wantedType}"`,
+    );
   }
 
   // Downloads also need a `kind` string; add if missing

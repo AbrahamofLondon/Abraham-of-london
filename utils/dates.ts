@@ -1,4 +1,4 @@
-// utils/dates.ts
+﻿// utils/dates.ts
 
 // "YYYY-MM-DD" for a given ISO and TZ (default London)
 export function dayKey(iso: string, tz = "Europe/London"): string {
@@ -17,10 +17,17 @@ export function isMidnightLocal(iso: string, tz = "Europe/London"): boolean {
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return false;
   const hh = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      hour: "2-digit",
+      hour12: false,
+    }).format(d),
   );
   const mm = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      minute: "2-digit",
+    }).format(d),
   );
   return hh === 0 && mm === 0;
 }
@@ -29,10 +36,17 @@ export function localMinutes(iso: string, tz = "Europe/London"): number {
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return Number.POSITIVE_INFINITY;
   const hh = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      hour: "2-digit",
+      hour12: false,
+    }).format(d),
   );
   const mm = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      minute: "2-digit",
+    }).format(d),
   );
   return hh * 60 + mm;
 }
@@ -50,10 +64,17 @@ export function formatPretty(iso: string, tz = "Europe/London"): string {
   }).format(d);
 
   const hh = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      hour: "2-digit",
+      hour12: false,
+    }).format(d),
   );
   const mm = Number(
-    new Intl.DateTimeFormat("en-GB", { timeZone: tz, minute: "2-digit" }).format(d)
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      minute: "2-digit",
+    }).format(d),
   );
 
   if (hh === 0 && mm === 0) return date;

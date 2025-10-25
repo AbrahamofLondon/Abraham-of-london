@@ -1,7 +1,7 @@
-import * as React from "react";
+﻿import * as React from "react";
 import Head from "next/head";
 import type { GetStaticProps } from "next";
- // <-- FIXED
+// <-- FIXED
 import Link from "next/link";
 
 type Props = { strategies: Strategy[] };
@@ -9,7 +9,7 @@ type Props = { strategies: Strategy[] };
 export default function StrategyIndex({ strategies }: Props) {
   return (
     <>
-      <Head>
+      <Head d>
         <title>Strategies-Abraham of London</title>
       </Head>
       <main className="prose lg:prose-lg mx-auto px-4 py-10">
@@ -28,7 +28,7 @@ export default function StrategyIndex({ strategies }: Props) {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const strategies = [...allStrategies].sort(
-    (a, b) => (new Date(b.date || 0).getTime()) - (new Date(a.date || 0).getTime())
+    (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
   );
   return { props: { strategies } };
 };

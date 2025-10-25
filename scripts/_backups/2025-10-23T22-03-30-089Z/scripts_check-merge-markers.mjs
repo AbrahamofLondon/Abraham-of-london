@@ -19,7 +19,9 @@ const globs = [
 const pat = String.raw`^[<=>]{7}`;
 try {
   const cmd = `git grep -n "${pat}" -- ${globs.join(" ")}`;
-  const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
+  const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] })
+    .toString()
+    .trim();
   if (out) {
     console.error("❌ Merge conflict markers found:\n" + out);
     process.exit(1);

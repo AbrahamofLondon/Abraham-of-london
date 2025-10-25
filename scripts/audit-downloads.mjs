@@ -8,12 +8,16 @@ const ROOT = process.cwd();
 const DL = path.join(ROOT, "public", "downloads");
 const TOML = path.join(ROOT, "netlify.toml");
 
-const DO_FIX = process.argv.includes("--fix") || process.argv.includes("--rename");
+const DO_FIX =
+  process.argv.includes("--fix") || process.argv.includes("--rename");
 
 function toTitleCaseUnderscore(basename) {
   const noExt = basename.replace(/\.pdf$/i, "");
   const title = noExt.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
-  const tc = title.replace(/\b\w/g, (m) => m.toUpperCase()).replace(/[^\w\s]/g, "").replace(/\s/g, "_");
+  const tc = title
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s/g, "_");
   return `${tc}.pdf`;
 }
 
@@ -37,13 +41,20 @@ async function writeToml(next) {
 }
 
 async function main() {
-  if (!(await exists(DL))) { // Use async exists
+  if (!(await exists(DL))) {
+    // Use async exists
     console.error("downloads dir missing");
     process.exit(1);
   }
 
   const files = await glob(["*.pdf"], { cwd: DL });
-  const report = { renamed: [], small: [], ok: [], missing: [], redirectsAdded: 0 };
+  const report = {
+    renamed: [],
+    small: [],
+    ok: [],
+    missing: [],
+    redirectsAdded: 0,
+  };
 
   let toml = await loadToml();
   let tomlNext = toml;
@@ -99,4 +110,7 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

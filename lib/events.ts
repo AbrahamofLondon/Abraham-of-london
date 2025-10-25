@@ -1,4 +1,4 @@
-// File containing EventMeta definition (e.g., ./lib/events.ts)
+﻿// File containing EventMeta definition (e.g., ./lib/events.ts)
 
 export interface EventMeta {
   slug: string;
@@ -16,7 +16,10 @@ export interface EventMeta {
   ctaLabel?: string;
   tags?: string[];
   content?: string;
-  resources?: { downloads?: { href: string; label: string }[]; reads?: { href: string; label: string }[] } | null;
+  resources?: {
+    downloads?: { href: string; label: string }[];
+    reads?: { href: string; label: string }[];
+  } | null;
   chatham?: boolean;
   related?: string[];
 }
@@ -33,7 +36,11 @@ export function isUpcoming(dateStr?: string): boolean {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return false;
   const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const start = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
   return d >= start;
 }
 

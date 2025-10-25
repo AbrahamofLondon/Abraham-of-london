@@ -1,25 +1,27 @@
-// pages/_app.tsx
+﻿// pages/_app.tsx
 import Head from "next/head";
-// FIX 1: Add missing Next.js imports
+// FIX 1: Add missing Next.js import s
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import { AppProps } from "next/app";
 import { useRouter } from "next/router";
-// FIX 2: Add missing React imports
+// FIX 2: Add missing React import s
 import { useEffect } from "react";
-
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { pageview, gaEnabled, GA_ID } from "@/lib/gtag";
 import "@/styles/globals.css";
 
 import ThemeToggle from "@/components/ThemeToggle";
 
-// dynamic and ssr:false must be imported from 'next/dynamic'
-const ScrollProgress = dynamic(() => import("@/components/ScrollProgress").then(m => m.default), {
-  ssr: false,
-});
+// dynamic and ssr:false must be import ed from 'next/dynamic'
+const ScrollProgress = dynamic(
+  () => import("@/components/ScrollProgress").then((m) => m.default),
+  {
+    ssr: false,
+  },
+);
 
-// useRouter and useEffect must be imported from 'next/router' and 'react'
+// useRouter and useEffect must be import ed from 'next/router' and 'react'
 function AnalyticsRouterTracker() {
   const router = useRouter();
   useEffect(() => {
@@ -36,31 +38,43 @@ function AnalyticsRouterTracker() {
   return null;
 }
 
-// AppProps must be imported from 'next/app'
+// AppProps must be import ed from 'next/app'
 export default function MyApp({ Component, pageProps }: AppProps) {
   const isProd = process.env.NODE_ENV === "production";
   return (
     <>
-      <Head>
-        <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+      <Head d>
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1,viewport-fit=cover"
+        />
         {gaEnabled && isProd && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />
-            <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
+            <link
+              rel="preconnect"
+              href="https://www.google-analytics.com"
+              crossOrigin=""
+            />
           </>
         )}
       </Head>
 
-      {/* Script must be imported from 'next/script' */}
+      {/* Script must be import ed from 'next/script' */}
       {gaEnabled && isProd && (
         <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-          <Script id="ga-init" strategy="afterInteractive">{
-            `window.dataLayer = window.dataLayer || [];
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?i d=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script
+            i
+            d="ga-init"
+            strategy="afterInteractive"
+          >{`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });`
-          }</Script>
+gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });`}</Script>
         </>
       )}
 
@@ -72,7 +86,11 @@ gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_
           <ThemeToggle />
         </div>
 
-        <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
+        <ScrollProgress
+          zIndexClass="z-50"
+          colorClass="bg-emerald-600"
+          heightClass="h-1"
+        />
         <Component {...pageProps} />
       </ThemeProvider>
     </>

@@ -1,4 +1,4 @@
-// lib/fonts/index.ts
+﻿// lib/fonts/index.ts
 import localFont from "next/font/local";
 
 export const sans = localFont({
@@ -9,7 +9,13 @@ export const sans = localFont({
 });
 
 export const serif = localFont({
-  src: [{ path: "./PlayfairDisplay-Variable.woff2", style: "normal", weight: "400 900" }],
+  src: [
+    {
+      path: "./PlayfairDisplay-Variable.woff2",
+      style: "normal",
+      weight: "400 900",
+    },
+  ],
   variable: "--font-serif",
   display: "swap",
   preload: false,

@@ -149,11 +149,16 @@ a.secondary {
 
 a:focus-visible {
   /* ✅ UPGRADE: Custom focus ring for accessibility */
-  box-shadow: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
+  box-shadow:
+    0 0 0 3px var(--color-background),
+    0 0 0 5px var(--color-primary);
   border-color: transparent;
 }
-.page.dark a:focus-visible { /* Adjust focus ring for dark mode */
-    box-shadow: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary-light);
+.page.dark a:focus-visible {
+  /* Adjust focus ring for dark mode */
+  box-shadow:
+    0 0 0 3px var(--color-background),
+    0 0 0 5px var(--color-primary-light);
 }
 
 /*
@@ -210,16 +215,16 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
-    /* Center main content on smaller screens */
-    .page {
-        padding: 40px 20px;
-        align-items: flex-start; /* Stop stretching vertically */
-        grid-template-rows: auto auto auto;
-    }
-    .main {
-        max-width: 100%;
-        margin: 0 auto;
-    }
+  /* Center main content on smaller screens */
+  .page {
+    padding: 40px 20px;
+    align-items: flex-start; /* Stop stretching vertically */
+    grid-template-rows: auto auto auto;
+  }
+  .main {
+    max-width: 100%;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 600px) {

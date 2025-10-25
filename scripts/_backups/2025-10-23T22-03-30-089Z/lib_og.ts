@@ -1,4 +1,4 @@
-// lib/og.ts
+﻿// lib/og.ts
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 
 const LOCAL_FALLBACK = "/assets/images/blog/default-blog-cover.jpg";
@@ -41,7 +41,9 @@ export function generatedCover(
 
   // Fallback if no title/slug provided
   const fallback = DEFAULT_FALLBACK.startsWith("/")
-    ? (absolute ? absUrl(DEFAULT_FALLBACK) : DEFAULT_FALLBACK)
+    ? absolute
+      ? absUrl(DEFAULT_FALLBACK)
+      : DEFAULT_FALLBACK
     : DEFAULT_FALLBACK;
 
   return fallback;

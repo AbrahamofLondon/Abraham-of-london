@@ -66,10 +66,10 @@ const kebabize = (base) => {
   const name = base.replace(/\.pdf$/i, "");
   return (
     name
-      .replace(/[\s_]+/g, "-")          // spaces/underscores → hyphen
-      .replace(/[^a-zA-Z0-9-]+/g, "-")  // strip other punctuation
-      .replace(/-+/g, "-")              // collapse dup hyphens
-      .replace(/(^-|-$)/g, "")          // trim hyphens
+      .replace(/[\s_]+/g, "-") // spaces/underscores → hyphen
+      .replace(/[^a-zA-Z0-9-]+/g, "-") // strip other punctuation
+      .replace(/-+/g, "-") // collapse dup hyphens
+      .replace(/(^-|-$)/g, "") // trim hyphens
       .toLowerCase() + ".pdf"
   );
 };
@@ -109,10 +109,19 @@ const writeText = async (p, s) => fs.writeFile(p, s, "utf8");
 
 // Walk repo for text files (fallback if glob not present)
 const TEXT_EXTS = new Set([
-  ".md", ".mdx", ".txt",
-  ".js", ".jsx", ".ts", ".tsx",
-  ".json", ".toml", ".yaml", ".yml",
-  ".css", ".html"
+  ".md",
+  ".mdx",
+  ".txt",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".json",
+  ".toml",
+  ".yaml",
+  ".yml",
+  ".css",
+  ".html",
 ]);
 
 const shouldScan = (file) => {
@@ -153,7 +162,9 @@ const nowStamp = () => {
   console.log("— normalize-download-filenames —");
   console.log(`root: ${ROOT}`);
   console.log(`dir : ${DL_DIR}`);
-  console.log(`mode: ${WRITE ? "WRITE" : "DRY-RUN"}${USE_GIT ? " (git mv)" : ""}${FIX_REFS ? " + FIX-REFS" : ""}`);
+  console.log(
+    `mode: ${WRITE ? "WRITE" : "DRY-RUN"}${USE_GIT ? " (git mv)" : ""}${FIX_REFS ? " + FIX-REFS" : ""}`,
+  );
   console.log("");
 
   await ensureDir(OUT_DIR);
@@ -177,7 +188,10 @@ const nowStamp = () => {
     let idx = 2;
 
     // resolve collisions (case-insensitive file systems or duplicates)
-    while (taken.has(candidate.toLowerCase()) && candidate.toLowerCase() !== oldName.toLowerCase()) {
+    while (
+      taken.has(candidate.toLowerCase()) &&
+      candidate.toLowerCase() !== oldName.toLowerCase()
+    ) {
       const stem = newNameBase.replace(/\.pdf$/i, "");
       candidate = `${stem}-${idx}.pdf`;
       idx++;
@@ -208,7 +222,9 @@ const nowStamp = () => {
       console.log(`  mv ${from} → ${to}`);
     }
   } else if (!WRITE && plan.length > 0) {
-    console.log("\n(DRY-RUN) No files were changed. Re-run with --write to apply.");
+    console.log(
+      "\n(DRY-RUN) No files were changed. Re-run with --write to apply.",
+    );
   }
 
   // 4) emit redirects snippet
@@ -216,19 +232,22 @@ const nowStamp = () => {
   const redirects = [
     `# Generated ${stamp} — paste into netlify.toml`,
     `# Old Title_Case → new kebab-case (200 rewrites keep old links working)`,
-    ...plan.map(
-      ({ from, to }) =>
-        [
-          `[[redirects]]`,
-          `  from   = "/downloads/${from}"`,
-          `  to     = "/downloads/${to}"`,
-          `  status = 200`,
-          ``
-        ].join("\n")
+    ...plan.map(({ from, to }) =>
+      [
+        `[[redirects]]`,
+        `  from   = "/downloads/${from}"`,
+        `  to     = "/downloads/${to}"`,
+        `  status = 200`,
+        ``,
+      ].join("\n"),
     ),
   ].join("\n");
 
-  const mapJson = JSON.stringify({ generatedAt: stamp, dir: path.relative(ROOT, DL_DIR), renames: plan }, null, 2);
+  const mapJson = JSON.stringify(
+    { generatedAt: stamp, dir: path.relative(ROOT, DL_DIR), renames: plan },
+    null,
+    2,
+  );
 
   await ensureDir(OUT_DIR);
   const redirPath = path.join(OUT_DIR, `downloads-redirects-${stamp}.toml`);
@@ -280,7 +299,7 @@ const nowStamp = () => {
     }
 
     console.log(
-      `\n${WRITE ? "Updated" : "Would update"} ${changedFiles} file(s) with new kebab-case links.`
+      `\n${WRITE ? "Updated" : "Would update"} ${changedFiles} file(s) with new kebab-case links.`,
     );
   }
 
