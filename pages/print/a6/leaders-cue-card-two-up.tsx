@@ -1,1 +1,173 @@
-//pages/print/a6/leaders-cue-card-two-up.tsximportHeadfrom"next/head";import Reactfrom"react";import EmbossedBrandMarkfrom"@/components/print/EmbossedBrandMark";import EmbossedSignfrom"@/components/print/EmbossedSign";constCardFront=()=>(<section className="cardcard-frontrelative">{/*Branding:LogoTopLeft*/}<div className="absolutetop-3left-3"><EmbossedBrandMark src="/assets/images/abraham-logo.jpg"alt="AbrahamofLondonLogo"width={25}height={25}effect="emboss"//<---REMOVED:FixesTypeerror/></div><h1>Leader'sCueCard</h1><h2>Mandate</h2><ul><li>Clarifythegoal.</li><li>Guardthestandard.</li><li>Removefriction.</li></ul><h2>Check</h2><ul><li>Whoisaccountable?</li><li>Nextirreversiblestep?</li><li>Whatmustwestop?</li></ul><div className="h-6"></div>{/*Spacerforlayoutbalance*/}</section>);constCardBack=()=>(<section className="cardcard-backrelative">{/*Branding:LogoTopLeft*/}<div className="absolutetop-3left-3"><EmbossedBrandMark src="/assets/images/abraham-logo.jpg"alt="AbrahamofLondonLogo"width={25}height={25}effect="emboss"//<---REMOVED:FixesTypeerror/></div><h1>Leader'sCueCard</h1><h2>Cadence</h2><ul><li>Daily:status,blockers,risks.</li><li>Weekly:outcomes&lessons.</li><li>Monthly:standardsreview.</li></ul><h2>Record</h2><ul><li>Decisionlog</li><li>Assumptions&tests</li><li>Follow-upsdue</li></ul>{/*Branding:SignatureBottomRight*/}<div className="absolutebottom-3right-3flexflex-colitems-end"><EmbossedSign src="/assets/images/signature/abraham-of-london-cursive.svg"alt="AbrahamofLondonSignature"width={70}height={20}effect="deboss"//<---REMOVED:FixesTypeerror/><span className="text-[8px]text-[color:var(--color-on-secondary)/0.6]mt-0.5">A.o.L.</span></div></section>);export defaultfunctionLeadersCueCardTwoUp(){return(<><Head d><title>Leader'sCueCard—A6Two-Up(Print)</title></Head><main className="sheet"><CardFront/><CardBack/></main><stylejsxglobal>{`/*---StandardA4PrintSetup---*/@page{size:A4;margin:10mm;}html,body{background:white;margin:0;padding:0;}/*---A6Two-UpLayoutonA4Sheet---*/.sheet{width:210mm;height:297mm;display:grid;/*TwocolumnsfortwoA6cards(approx105mmwide)withmargins*/grid-template-columns:calc(105mm-10mm)calc(105mm-10mm);/*OnerowforA6height(approx148.5mmtall)withmargins*/grid-template-rows:calc(148.5mm-10mm);gap:20mm;/*SpacebetweenthetwoA6cards*/place-content:center;/*CentersthegridontheA4page*/}/*---CardStyles(A6size)---*/.card{box-sizing:border-box;width:100%;height:100%;border:.6ptsolid#dadada;border-radius:6pt;padding:8mm;/*Usingthefontpropertyfromtheoriginalcode*/font:10pt/1.45var(--font-sans,"ui-sans-serif");display:flex;flex-direction:column;justify-content:space-between;}h1{/*Pushingcontentdowntomakespaceforthetop-leftlogo*/padding-top:5mm;font:70012pt/1.2var(--font-serif,"Georgia");margin:004mm;color:var(--color-primary,#1a1a1a);text-align:center;}h2{font:60010pt/1.2var(--font-serif,"Georgia");margin:3mm02mm;color:var(--color-primary,#1a1a1a);}ul{margin:0;padding-left:4mm;list-style:disc;/*Ensurebulletpointsarevisible*/}li{margin:.8mm0;}/*Screen-onlystylesforpreview*/@mediascreen{body{padding:2rem;background:#f6f6f6;}.sheet{background:#fff;box-shadow:010px30pxrgba(0,0,0,.09);margin:0auto;height:fit-content;}.card{height:calc(148.5mm-10mm);}}`}</style></>);}
+// pages/print/a6/leaders-cue-card-two-up.tsx
+import Head from "next/head";
+import React from "react";
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign";
+
+const CardFront = () => (
+ <section className="card card-front relative">
+  {/* Branding: Logo Top Left */}
+  <div className="absolute top-3 left-3">
+   <EmbossedBrandMark
+    src="/assets/images/abraham-logo.jpg"
+    alt="Abraham of London Logo"
+    width={25}
+    height={25}
+    effect="emboss"
+    //<--- REMOVED: Fixes Type error
+   />
+  </div>
+
+  <h1>Leader's Cue Card</h1>
+  <h2>Mandate</h2>
+  <ul>
+   <li>Clarify the goal.</li>
+   <li>Guard the standard.</li>
+   <li>Remove friction.</li>
+  </ul>
+
+  <h2>Check</h2>
+  <ul>
+   <li>Who is accountable?</li>
+   <li>Next irreversible step?</li>
+   <li>What must we stop?</li>
+  </ul>
+
+  <div className="h-6"></div> {/* Spacer for layout balance */}
+ </section>
+);
+
+const CardBack = () => (
+ <section className="card card-back relative">
+  {/* Branding: Logo Top Left */}
+  <div className="absolute top-3 left-3">
+   <EmbossedBrandMark
+    src="/assets/images/abraham-logo.jpg"
+    alt="Abraham of London Logo"
+    width={25}
+    height={25}
+    effect="emboss"
+    //<--- REMOVED: Fixes Type error
+   />
+  </div>
+
+  <h1>Leader's Cue Card</h1>
+
+  <h2>Cadence</h2>
+  <ul>
+   <li>Daily: status, blockers, risks.</li>
+   <li>Weekly: outcomes & lessons.</li>
+   <li>Monthly: standards review.</li>
+  </ul>
+
+  <h2>Record</h2>
+  <ul>
+   <li>Decision log</li>
+   <li>Assumptions & tests</li>
+   <li>Follow-ups due</li>
+  </ul>
+
+  {/* Branding: Signature Bottom Right */}
+  <div className="absolute bottom-3 right-3 flex flex-col items-end">
+    <EmbossedSign
+      src="/assets/images/signature/abraham-of-london-cursive.svg"
+      alt="Abraham of London Signature"
+      width={70}
+      height={20}
+      effect="deboss"
+      //<--- REMOVED: Fixes Type error
+    />
+    <span className="text-[8px] text-[color:var(--color-on-secondary)/0.6] mt-0.5">A.o.L.</span>
+  </div>
+ </section>
+);
+
+export default function LeadersCueCardTwoUp() {
+ return (
+  <>
+   <Head><title>Leader's Cue Card — A6 Two-Up (Print)</title></Head>
+   <main className="sheet">
+    <CardFront />
+    <CardBack />
+   </main>
+
+   <style jsx global>{`
+    /* --- Standard A4 Print Setup --- */
+    @page { size: A4; margin: 10mm; }
+    html, body { background: white; margin: 0; padding: 0; }
+
+    /* --- A6 Two-Up Layout on A4 Sheet --- */
+    .sheet {
+     width: 210mm;
+     height: 297mm;
+     display: grid;
+     /* Two columns for two A6 cards (approx 105mm wide) with margins */
+     grid-template-columns: calc(105mm - 10mm) calc(105mm - 10mm);
+     /* One row for A6 height (approx 148.5mm tall) with margins */
+     grid-template-rows: calc(148.5mm - 10mm);
+     gap: 20mm; /* Space between the two A6 cards */
+     place-content: center; /* Centers the grid on the A4 page */
+    }
+
+    /* --- Card Styles (A6 size) --- */
+    .card {
+     box-sizing: border-box;
+     width: 100%;
+     height: 100%;
+     border: .6pt solid #dadada;
+     border-radius: 6pt;
+     padding: 8mm;
+
+     /* Using the font property from the original code */
+     font: 10pt/1.45 var(--font-sans, "ui-sans-serif");
+
+     display: flex;
+     flex-direction: column;
+     justify-content: space-between;
+    }
+
+    h1 {
+     /* Pushing content down to make space for the top-left logo */
+     padding-top: 5mm;
+     font: 700 12pt/1.2 var(--font-serif, "Georgia");
+     margin: 0 0 4mm;
+     color: var(--color-primary, #1a1a1a);
+     text-align: center;
+    }
+
+    h2 {
+     font: 600 10pt/1.2 var(--font-serif, "Georgia");
+     margin: 3mm 0 2mm;
+     color: var(--color-primary, #1a1a1a);
+    }
+
+    ul {
+     margin: 0;
+     padding-left: 4mm;
+     list-style: disc; /* Ensure bullet points are visible */
+    }
+
+    li {
+     margin: .8mm 0;
+    }
+
+    /* Screen-only styles for preview */
+    @media screen {
+     body {
+      padding: 2rem;
+      background: #f6f6f6;
+     }
+     .sheet {
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,.09);
+      margin: 0 auto;
+      height: fit-content;
+     }
+     .card {
+      height: calc(148.5mm - 10mm);
+     }
+    }
+   `}</style>
+  </>
+ );
+}

@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 // <-- FIXED
@@ -14,7 +14,8 @@ export default function ResourcesIndex() {
         <title>Resources</title>
       </Head>
       <main className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="text-3xl font-serif mb-6">Resources</h1>
+        {/* TODO: restore real content */}
+<h1 className="text-3xl font-serif mb-6">Resources</h1>
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {resources.map((r) => (
             <li key={r._id} className="rounded-xl border p-4">
@@ -27,7 +28,7 @@ export default function ResourcesIndex() {
               <div className="mt-2 flex gap-2 text-xs text-gray-500">
                 {r.category && <span>{r.category}</span>}
                 {r.date && (
-                  <span>€¢{new Date(r.date).toLocaleDateString()}</span>
+                  <span>â‚¬Â¢{new Date(r.date).toLocaleDateString()}</span>
                 )}
               </div>
               <div className="mt-3">
@@ -35,7 +36,7 @@ export default function ResourcesIndex() {
                   href={`/print/resource/${r.slug}`}
                   className="text-sm underline"
                 >
-                  Print version †'
+                  Print version â€ '
                 </Link>
               </div>
             </li>
@@ -45,3 +46,5 @@ export default function ResourcesIndex() {
     </>
   );
 }
+
+

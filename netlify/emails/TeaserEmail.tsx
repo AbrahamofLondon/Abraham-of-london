@@ -26,19 +26,15 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
         lineHeight: 1.6,
       }}
     >
-      <p>FriendsÃƒ¢Ã¢â€š¬Ã¢â‚¬{name ? ` ${name},` : ""}</p>
+      <p>FriendsÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â{name ? ` ${name},` : ""}</p>
 
       <p>
-        IÃƒ¢Ã¢â€š¬Ã¢â€ž¢m releasing <strong>Fathering Without Fear</strong>, a
-        memoir forged in the middle of loss, legal storms, and a
-        fatherÃƒ¢Ã¢â€š¬Ã¢â€ž¢s stubborn hope. ItÃƒ¢Ã¢â€š¬Ã¢â€ž¢s for the men who
-        keep showing up, the sons looking for language, and anyone
-        whoÃƒ¢Ã¢â€š¬Ã¢â€ž¢s wrestled with God and grief at the same time.
+        IÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢m releasing <strong>Fathering Without Fear</strong>, a memoir forged in the middle of
+        loss, legal storms, and a fatherÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s stubborn hope. ItÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s for the men who keep showing up,
+        the sons looking for language, and anyone whoÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s wrestled with God and grief at the same time.
       </p>
 
-      <p>
-        HereÃƒ¢Ã¢â€š¬Ã¢â€ž¢s a free, brand-styled teaser you can read and share:
-      </p>
+      <p>HereÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s a free, brand-styled teaser you can read and share:</p>
 
       <ul>
         <li>Teaser PDF (A4/Letter): {link(A4, "Download A4/Letter")}</li>
@@ -46,8 +42,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
       </ul>
 
       <p>
-        Want chapter drops and launch dates? Reply{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list here:{" "}
+        Want chapter drops and launch dates? Reply <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œkeep me postedÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em> or join the list here:{" "}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
 
@@ -57,13 +52,10 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
         Abraham of London
       </p>
 
-      <hr
-        style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }}
-      />
+      <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you requested the teaser or
-        asked to be notified. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re receiving this because you requested the teaser or asked to be notified.
+        Unsubscribe: reply with <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œstopÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em>.
       </p>
     </div>
   );

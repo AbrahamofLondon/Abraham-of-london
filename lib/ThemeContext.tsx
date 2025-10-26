@@ -1,4 +1,4 @@
-// lib/ThemeContext.tsx
+﻿// lib/ThemeContext.tsx
 "use client";
 
 import * as React from "react";
@@ -146,3 +146,5 @@ export function useTheme(): Ctx {
   if (!ctx) throw new Error("useTheme must be used within <ThemeProvider>");
   return ctx;
 }
+
+

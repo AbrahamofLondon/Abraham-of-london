@@ -1,1 +1,119 @@
-import Reactfrom"react";import Imagefrom"next/image";import Linkfrom"next/link";type Props={title:string;author:string;slug:string;coverImage:string;//preferalocal/publicpathexcerpt?:string;pdf?:string|null;//local/publicpathrecommendedepub?:string|null;//local/publicpathrecommendedclassName?:string;priority?:boolean;//optional;trueonlyifabove-the-fold};constDEFAULT_COVER="/assets/images/default-book.jpg";constisExternal=(u?:string|null)=>!!u&&/^https?:\/\//i.test(u);consttoLocalOrFallback=(src?:string)=>src&&src.startsWith("/")?src:DEFAULT_COVER;export defaultfunctionFeaturedBook({title,author,slug,coverImage,excerpt,pdf,epub,className="",priority=false,}:Props){const[imgSrc,setImgSrc]=React.useState(toLocalOrFallback(coverImage));constheadingI d=React.useId();return(<section aria-labelledby={headingId}className={`rounded-2xlbg-warmWhiteborderborder-lightGrey/70shadow-cardoverflow-hiddenmb-14${className}`}itemScopeitemType="https://schema.org/Book"><metaitemProp="name"content={title}/><metaitemProp="author"content={author}/><div className="gridmd:grid-cols-2"><figure className="relativeh-72md:h-fullm-0"><Image src={imgSrc}alt={`${title}—bookcover`}fill className="object-cover"sizes="(max-width:768px)100vw,50vw"priority={priority}onError={()=>setImgSrc(DEFAULT_COVER)}/><metaitemProp="image"content={imgSrc}/></figure><div className="p-6md:p-8flexflex-coljustify-center"><h2i d={headingId}className="font-seriftext-3xltext-forestmb-2">FeaturedBook</h2><h3 className="text-2xlfont-semiboldmb-1"itemProp="name">{title}</h3><p className="text-smtext-[color:var(--color-on-secondary)/0.8]mb-4">By<spanitemProp="author">{author}</span></p>{excerpt&&(<p className="text-deepCharcoalmb-6"itemProp="description">{excerpt}</p>)}<div className="flexflex-wrapgap-3"><Link href={`/books/${slug}`}prefetch={false}className="bg-foresttext-creampx-4py-2rounded-[6px]hover:bg-softGoldhover:text-foresttransition"aria-labelledby={headingId}>Learnmore</Link>{pdf&&(<a href={pdf}{...(isExternal(pdf)?{target:"_blank",rel:"noopenernoreferrer"}:{download:""})}className="border-2border-foresttext-forestpx-4py-2rounded-[6px]hover:bg-foresthover:text-creamtransition"itemProp="workExample">DownloadPDF</a>)}{epub&&(<a href={epub}{...(isExternal(epub)?{target:"_blank",rel:"noopenernoreferrer"}:{download:""})}className="border-2border-foresttext-forestpx-4py-2rounded-[6px]hover:bg-foresthover:text-creamtransition"itemProp="workExample">DownloadEPUB</a>)}</div></div></div></section>);}
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+
+type Props = {
+  title: string;
+  author: string;
+  slug: string;
+  coverImage: string;          // prefer a local /public path
+  excerpt?: string;
+  pdf?: string | null;         // local /public path recommended
+  epub?: string | null;        // local /public path recommended
+  className?: string;
+  priority?: boolean;          // optional; true only if above-the-fold
+};
+
+const DEFAULT_COVER = "/assets/images/default-book.jpg";
+const isExternal = (u?: string | null) => !!u && /^https?:\/\//i.test(u);
+const toLocalOrFallback = (src?: string) =>
+  src && src.startsWith("/") ? src : DEFAULT_COVER;
+
+export default function FeaturedBook({
+  title,
+  author,
+  slug,
+  coverImage,
+  excerpt,
+  pdf,
+  epub,
+  className = "",
+  priority = false,
+}: Props) {
+  const [imgSrc, setImgSrc] = React.useState(toLocalOrFallback(coverImage));
+  const headingId = React.useId();
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className={`rounded-2xl bg-warmWhite border border-lightGrey/70 shadow-card overflow-hidden mb-14 ${className}`}
+      itemScope
+      itemType="https://schema.org/Book"
+    >
+      <meta itemProp="name" content={title} />
+      <meta itemProp="author" content={author} />
+
+      <div className="grid md:grid-cols-2">
+        <figure className="relative h-72 md:h-full m-0">
+          <Image
+            src={imgSrc}
+            alt={`${title} — book cover`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority={priority}
+            onError={() => setImgSrc(DEFAULT_COVER)}
+          />
+          <meta itemProp="image" content={imgSrc} />
+        </figure>
+
+        <div className="p-6 md:p-8 flex flex-col justify-center">
+          <h2 id={headingId} className="font-serif text-3xl text-forest mb-2">
+            Featured Book
+          </h2>
+
+          <h3 className="text-2xl font-semibold mb-1" itemProp="name">
+            {title}
+          </h3>
+
+          <p className="text-sm text-[color:var(--color-on-secondary)/0.8] mb-4">
+            By <span itemProp="author">{author}</span>
+          </p>
+
+          {excerpt && (
+            <p className="text-deepCharcoal mb-6" itemProp="description">
+              {excerpt}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/books/${slug}`}
+              prefetch={false}
+              className="bg-forest text-cream px-4 py-2 rounded-[6px] hover:bg-softGold hover:text-forest transition"
+              aria-labelledby={headingId}
+            >
+              Learn more
+            </Link>
+
+            {pdf && (
+              <a
+                href={pdf}
+                {...(isExternal(pdf)
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : { download: "" })}
+                className="border-2 border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition"
+                itemProp="workExample"
+              >
+                Download PDF
+              </a>
+            )}
+
+            {epub && (
+              <a
+                href={epub}
+                {...(isExternal(epub)
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : { download: "" })}
+                className="border-2 border-forest text-forest px-4 py-2 rounded-[6px] hover:bg-forest hover:text-cream transition"
+                itemProp="workExample"
+              >
+                Download EPUB
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -5,7 +5,7 @@ if (typeof window !== "undefined") {
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import type { PostMeta } from "@/type s/post";
+import type { PostMeta } from "@/types/post";
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
@@ -18,8 +18,8 @@ function toTitle(slug: string) {
 function stripMd(s: string) {
   return s
     .replace(/!\[[^\]]*]\([^)]+\)/g, "") // images
-    .replace(/\[[^\]]*]\([^)]+\)/g, "") // links
-    .replace(/[`#>*_~\-]+/g, " ") // md tokens
+    .replace(/\[[^\]]*]\([^)]+\)/g, "")  // links
+    .replace(/[`#>*_~\-]+/g, " ")        // md tokens
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -29,9 +29,7 @@ function smartExcerpt(source: string, max = 180) {
   if (plain.length <= max) return plain;
   const cut = plain.slice(0, max + 1);
   const at = cut.lastIndexOf(" ");
-  return (
-    (at > 80 ? cut.slice(0, at) : plain.slice(0, max)).trim() + "Ãƒ¢Ã¢â€š¬Ã‚¦"
-  );
+  return (at > 80 ? cut.slice(0, at) : plain.slice(0, max)).trim() + "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
 }
 
 function isLocalPath(src?: unknown): src is string {
@@ -44,29 +42,19 @@ function safeDate(input: unknown): string | undefined {
 }
 
 function normalizeTags(v: unknown): string[] | undefined {
-  if (Array.isArray(v))
-    return v
-      .map(String)
-      .map((s) => s.trim())
-      .filter(Boolean);
-  if (typeof v === "string")
-    return v
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  if (Array.isArray(v)) return v.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
   return undefined;
 }
 
-// framing pickers (keeps type s tight)
+// framing pickers (keeps types tight)
 function pickCoverAspect(v: unknown): "book" | "wide" | "square" | undefined {
   return v === "book" || v === "wide" || v === "square" ? v : undefined;
 }
 function pickCoverFit(v: unknown): "cover" | "contain" | undefined {
   return v === "cover" || v === "contain" ? v : undefined;
 }
-function pickCoverPosition(
-  v: unknown,
-): "left" | "center" | "right" | undefined {
+function pickCoverPosition(v: unknown): "left" | "center" | "right" | undefined {
   return v === "left" || v === "center" || v === "right" ? v : undefined;
 }
 
@@ -92,39 +80,30 @@ export function getPostBySlug(
   const fullPath = fs.existsSync(mdx) ? mdx : fs.existsSync(md) ? md : null;
 
   if (!fullPath) {
-    return {
-      slug: realSlug,
-      title: toTitle(realSlug),
-      date: new Date().toISOString(),
-    };
+    return { slug: realSlug, title: toTitle(realSlug), date: new Date().toISOString() };
   }
 
   const raw = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(raw);
   const fm = data as Record<string, unknown>;
 
-  const title =
-    (typeof fm.title === "string" && fm.title.trim()) || toTitle(realSlug);
+  const title = (typeof fm.title === "string" && fm.title.trim()) || toTitle(realSlug);
   const firstPara = (content || "").split(/\r?\n\r?\n/).find(Boolean) ?? "";
-  const excerpt =
-    (typeof fm.excerpt === "string" && fm.excerpt.trim()) ||
-    smartExcerpt(firstPara, 180);
+  const excerpt = (typeof fm.excerpt === "string" && fm.excerpt.trim()) || smartExcerpt(firstPara, 180);
 
   const author =
     typeof fm.author === "string"
       ? fm.author
       : fm && typeof fm.author === "object" && fm.author !== null
-        ? ((fm as any).author?.name ?? undefined)
-        : undefined;
+      ? (fm as any).author?.name ?? undefined
+      : undefined;
 
   const post: Partial<PostMeta> & { content?: string } = {
     slug: realSlug,
     title,
     excerpt,
     date: safeDate(fm.date),
-    coverImage: isLocalPath(fm.coverImage)
-      ? (fm.coverImage as string)
-      : undefined,
+    coverImage: isLocalPath(fm.coverImage) ? (fm.coverImage as string) : undefined,
     readTime: typeof fm.readTime === "string" ? fm.readTime : undefined,
     category: typeof fm.category === "string" ? fm.category : undefined,
     author,
@@ -158,28 +137,23 @@ export function getAllPosts(options: GetAllOptions = {}): PostMeta[] {
 
       if (!includeDrafts && fm.draft === true) return null;
 
-      const title =
-        (typeof fm.title === "string" && fm.title.trim()) || toTitle(slug);
+      const title = (typeof fm.title === "string" && fm.title.trim()) || toTitle(slug);
       const firstPara = (content || "").split(/\r?\n\r?\n/).find(Boolean) ?? "";
-      const excerpt =
-        (typeof fm.excerpt === "string" && fm.excerpt.trim()) ||
-        smartExcerpt(firstPara, 180);
+      const excerpt = (typeof fm.excerpt === "string" && fm.excerpt.trim()) || smartExcerpt(firstPara, 180);
 
       const author =
         typeof fm.author === "string"
           ? fm.author
           : fm && typeof fm.author === "object" && fm.author !== null
-            ? ((fm as any).author?.name ?? undefined)
-            : undefined;
+          ? (fm as any).author?.name ?? undefined
+          : undefined;
 
       const meta: PostMeta = {
         slug,
         title,
         excerpt,
         date: safeDate(fm.date),
-        coverImage: isLocalPath(fm.coverImage)
-          ? (fm.coverImage as string)
-          : undefined,
+        coverImage: isLocalPath(fm.coverImage) ? (fm.coverImage as string) : undefined,
         readTime: typeof fm.readTime === "string" ? fm.readTime : undefined,
         category: typeof fm.category === "string" ? fm.category : undefined,
         author,

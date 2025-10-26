@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import Head from "next/head";
 import type { GetStaticProps } from "next";
 // <-- FIXED
@@ -13,7 +13,8 @@ export default function StrategyIndex({ strategies }: Props) {
         <title>Strategies-Abraham of London</title>
       </Head>
       <main className="prose lg:prose-lg mx-auto px-4 py-10">
-        <h1>Strategies</h1>
+        {/* TODO: restore real content */}
+<h1>Strategies</h1>
         <ul>
           {strategies.map((s) => (
             <li key={s._id}>
@@ -32,3 +33,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   );
   return { props: { strategies } };
 };
+
+

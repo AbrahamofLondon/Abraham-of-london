@@ -15,19 +15,14 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
       <p>{name ? `Hi ${name},` : "Hi,"}</p>
 
       <p>
-        Thank you for joining the <strong>Fathering Without Fear</strong> launch
-        list. YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢ll get early chapter drops, release dates, and
-        practical resources for fathers under pressure.
+        Thank you for joining the <strong>Fathering Without Fear</strong> launch list. YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ll get
+        early chapter drops, release dates, and practical resources for fathers under pressure.
       </p>
 
       <p>While you wait, grab the free teaser PDFs:</p>
       <ul>
         <li>
-          <a
-            href={`${base}/downloads/Fathering_Without_Fear.pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={`${base}/downloads/Fathering_Without_Fear.pdf`} target="_blank" rel="noopener noreferrer">
             Teaser PDF (A4/Letter)
           </a>
         </li>
@@ -43,12 +38,10 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
       </ul>
 
       <p>
-        If you ever want to reach me directly, reply to this email or use the
-        contact page:{" "}
+        If you ever want to reach me directly, reply to this email or use the contact page:{" "}
         <a href={`${base}/contact`} target="_blank" rel="noopener noreferrer">
           {base}/contact
-        </a>
-        .
+        </a>.
       </p>
 
       <p>
@@ -57,13 +50,10 @@ export default function WelcomeLaunchEmail({ name, siteUrl }: Props) {
         Abraham of London
       </p>
 
-      <hr
-        style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }}
-      />
+      <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you asked to be notified
-        about the launch. Unsubscribe: reply with{" "}
-        <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+        YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re receiving this because you asked to be notified about the launch. Unsubscribe: reply
+        with <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œstopÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em>.
       </p>
     </div>
   );

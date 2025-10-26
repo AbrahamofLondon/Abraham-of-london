@@ -1,1 +1,82 @@
-//components/CTA.tsximportLinkfrom"next/link";import { useEffect,useState } from "react";type Props={/**showthepillonsmallscreens(defaulttrue)*/floatingOnMobile?:boolean;};export defaultfunctionCTA({floatingOnMobile=true}:Props){const[hasSafeArea,setHasSafeArea]=useState(false);useEffect(()=>{//crudefeature-detectforiOSsafeareaif(typeofwindow!=="undefined"){consttest=getComputedStyle(document.documentElement).getPropertyValue("--satest");setHasSafeArea(!!test);}},[]);constPill=(<div className="flexitems-centergap-3"><a href="tel:+442086225909"aria-label="Call"className="gridh-12w-12place-items-centerrounded-fullborderborder-black/10bg-whitetext-emerald-700shadowring-1ring-black/5"><svg width="20"height="20"viewBox="002424"fill="none"aria-hidden="true"><path d="M2216.92v3a22001-2.18219.7919.79001-8.63-3.0719.519.5001-6-6A19.7919.790012.084.18220014.062h3a2200121.72c.12.9.31.77.552.61a22001-.452.11L89a161600077l.56-1.16a220012.11-.45c.84.251.71.432.61.55A220012216.92Z"stroke="currentColor"strokeWidth="2"/></svg></a><Link href="/contact"className="rounded-fullbg-emerald-600px-5py-3text-smfont-semiboldtext-whiteshadowhover:bg-emerald-700focus:outline-nonefocus-visible:ring-2focus-visible:ring-emerald-400">WorkWithMe</Link><Link href="/#newsletter"className="rounded-fullborderborder-black/10bg-whitepx-5py-3text-smfont-semiboldtext-slate-800shadowhover:bg-slate-50focus:outline-nonefocus-visible:ring-2focus-visible:ring-emerald-400">Subscribe</Link></div>);return(<>{/*Desktopinline*/}<div className="hiddenmd:block"><div className="mx-automax-w-5xlrounded-2xlborderborder-black/5bg-white/80px-6py-4backdrop-blurshadowring-1ring-black/5"><div className="flexitems-centerjustify-betweengap-6"><p className="text-slate-800font-medium">Let'sbuildsomethingenduring.</p>{Pill}</div></div></div>{/*Mobilefloatingpill*/}{floatingOnMobile&&(<div className="fixedinset-x-4bottom-4z-40md:hidden"style={hasSafeArea?{paddingBottom:"max(env(safe-area-inset-bottom),0px)"}:undefined}><div className="rounded-2xlborderborder-black/10bg-white/95p-3shadow-xlring-1ring-black/5backdrop-blur">{Pill}</div></div>)}</>);}
+// components/CTA.tsx
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type Props = {
+  /** show the pill on small screens (default true) */
+  floatingOnMobile?: boolean;
+};
+
+export default function CTA({ floatingOnMobile = true }: Props) {
+  const [hasSafeArea, setHasSafeArea] = useState(false);
+
+  useEffect(() => {
+    // crude feature-detect for iOS safe area
+    if (typeof window !== "undefined") {
+      const test = getComputedStyle(document.documentElement).getPropertyValue(
+        "--satest"
+      );
+      setHasSafeArea(!!test);
+    }
+  }, []);
+
+  const Pill = (
+    <div className="flex items-center gap-3">
+      <a
+        href="tel:+442086225909"
+        aria-label="Call"
+        className="grid h-12 w-12 place-items-center rounded-full border border-black/10 bg-white text-emerald-700 shadow ring-1 ring-black/5"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.55 2.61a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 7 7l.56-1.16a2 2 0 0 1 2.11-.45c.84.25 1.71.43 2.61.55A2 2 0 0 1 22 16.92Z" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+      </a>
+
+      <Link
+        href="/contact"
+        className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+      >
+        Work With Me
+      </Link>
+
+      <Link
+        href="/#newsletter"
+        className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+      >
+        Subscribe
+      </Link>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop inline */}
+      <div className="hidden md:block">
+        <div className="mx-auto max-w-5xl rounded-2xl border border-black/5 bg-white/80 px-6 py-4 backdrop-blur shadow ring-1 ring-black/5">
+          <div className="flex items-center justify-between gap-6">
+            <p className="text-slate-800 font-medium">
+              Let’s build something enduring.
+            </p>
+            {Pill}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile floating pill */}
+      {floatingOnMobile && (
+        <div
+          className="fixed inset-x-4 bottom-4 z-40 md:hidden"
+          style={
+            hasSafeArea
+              ? { paddingBottom: "max(env(safe-area-inset-bottom), 0px)" }
+              : undefined
+          }
+        >
+          <div className="rounded-2xl border border-black/10 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur">
+            {Pill}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

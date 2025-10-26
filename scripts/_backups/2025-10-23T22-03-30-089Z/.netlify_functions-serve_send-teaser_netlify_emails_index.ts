@@ -1,5 +1,5 @@
 // netlify/emails/index.ts
-// Pure string builders for emails Ãƒ¢Ã¢â€š¬Ã¢â‚¬ safe for Netlify function bundling.
+// Pure string builders for emails Ãƒ¢Ã¢â€š¬Ã¢â‚¬ safe for Netlify function bundling.
 
 type Common = { siteUrl: string; name?: string };
 
@@ -32,7 +32,7 @@ export function renderWelcomeLaunchHtml({ name, siteUrl }: Common): string {
   <hr style="border:0; border-top:1px solid #e5e7eb; margin:20px 0" />
   <p style="font-size:12px; color:#6b7280">
     YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you asked to be notified about the launch.
-    Unsubscribe: reply with <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+    Unsubscribe: reply with <em>Ãƒ¢Ã¢â€š¬Ã…"stopÃƒ¢Ã¢â€š¬Ã‚</em>.
   </p>
 </div>`.trim();
 }
@@ -43,7 +43,7 @@ export function renderTeaserHtml({ name, siteUrl }: Common): string {
 
   return `
 <div style="font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial; color:#1b1f1a; line-height:1.6">
-  <p>FriendsÃƒ¢Ã¢â€š¬Ã¢â‚¬${name ? " " + escapeHtml(name) + "," : ""}</p>
+  <p>FriendsÃƒ¢Ã¢â€š¬Ã¢â‚¬${name ? " " + escapeHtml(name) + "," : ""}</p>
 
   <p>
     IÃƒ¢Ã¢â€š¬Ã¢â€ž¢m releasing <strong>Fathering Without Fear</strong>, a memoir forged in the middle of loss,
@@ -58,7 +58,7 @@ export function renderTeaserHtml({ name, siteUrl }: Common): string {
   </ul>
 
   <p>
-    Want chapter drops and launch dates? Reply <em>Ãƒ¢Ã¢â€š¬Ã..."keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list here:
+    Want chapter drops and launch dates? Reply <em>Ãƒ¢Ã¢â€š¬Ã…"keep me postedÃƒ¢Ã¢â€š¬Ã‚</em> or join the list here:
     <a href="${siteUrl}/contact" target="_blank" rel="noopener noreferrer">${siteUrl}/contact</a>.
   </p>
 
@@ -67,23 +67,13 @@ export function renderTeaserHtml({ name, siteUrl }: Common): string {
   <hr style="border:0; border-top:1px solid #e5e7eb; margin:20px 0" />
   <p style="font-size:12px; color:#6b7280">
     YouÃƒ¢Ã¢â€š¬Ã¢â€ž¢re receiving this because you requested the teaser or asked to be notified.
-    Unsubscribe: reply with <em>Ãƒ¢Ã¢â€š¬Ã..."stopÃƒ¢Ã¢â€š¬Ã‚</em>.
+    Unsubscribe: reply with <em>Ãƒ¢Ã¢â€š¬Ã…"stopÃƒ¢Ã¢â€š¬Ã‚</em>.
   </p>
 </div>`.trim();
 }
 
 function escapeHtml(str: string) {
-  return String(str).replace(
-    /[&<>"']/g,
-    (m) =>
-      (
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;",
-        }) as const
-      )[m] || m,
+  return String(str).replace(/[&<>"']/g, (m) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m
   );
 }

@@ -17,13 +17,10 @@ export default function NewsletterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const trimmed = email.trim().toLowerCase();
 
+    const trimmed = email.trim().toLowerCase();
     if (!EMAIL_RE.test(trimmed)) {
-      setStatus({
-        state: "error",
-        message: "Please enter a valid email address.",
-      });
+      setStatus({ state: "error", message: "Please enter a valid email address." });
       return;
     }
 
@@ -31,38 +28,25 @@ export default function NewsletterPage() {
     try {
       const res = await subscribe(trimmed);
       if (res.ok) {
-        setStatus({
-          state: "success",
-          message: res.message || "You're subscribed. Welcome!",
-        });
+        setStatus({ state: "success", message: res.message || "You’re subscribed. Welcome!" });
         setEmail("");
       } else {
-        setStatus({
-          state: "error",
-          message: res.message || "Something went wrong. Please try again.",
-        });
+        setStatus({ state: "error", message: res.message || "Something went wrong. Please try again." });
       }
     } catch {
-      setStatus({
-        state: "error",
-        message: "Network error. Please try again.",
-      });
+      setStatus({ state: "error", message: "Network error. Please try again." });
     }
   }
 
   const message =
-    status.state === "success" || status.state === "error"
-      ? String(status.message)
-      : "";
+    status.state === "success" || status.state === "error" ? String(status.message) : "";
 
   return (
     <Layout pageTitle="Newsletter" hideCTA>
-      <Head d>
-        <meta
-          name="description"
-          content="Subscribe to Abraham of London updates and essays."
-        />
+      <Head>
+        <meta name="description" content="Subscribe to Abraham of London updates and essays." />
       </Head>
+
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-4 py-16">
           <header className="mb-6 text-center">
@@ -70,20 +54,18 @@ export default function NewsletterPage() {
               Join the Newsletter
             </h1>
             <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
-              Essays, event invitations, and project updates. No spam—ever.
+              Essays, event invitations, and project updates. No spam — ever.
             </p>
           </header>
+
           <form
             onSubmit={onSubmit}
             className="mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
             noValidate
           >
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
+            <label htmlFor="email" className="sr-only">Email address</label>
             <input
-              i
-              d="email"
+              id="email"
               name="email"
               type="email"
               inputMode="email"
@@ -97,17 +79,16 @@ export default function NewsletterPage() {
             />
             <button
               type="submit"
-              disable
-              d={status.state === "loading"}
+              disabled={status.state === "loading"}
               className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status.state === "loading" ? "Subscribing..." : "Subscribe"}
+              {status.state === "loading" ? "Subscribing…" : "Subscribe"}
             </button>
           </form>
+
           {(status.state === "success" || status.state === "error") && (
             <p
-              i
-              d="newsletter-status"
+              id="newsletter-status"
               role="status"
               aria-live="polite"
               className={

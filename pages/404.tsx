@@ -1,1 +1,46 @@
-//pages/404.tsximportHeadfrom"next/head";import Linkfrom"next/link";import SiteLayoutfrom"@/components/Layout";export defaultfunctionNotFoundPage(){return(<SiteLayoutpageTitle="PageNotFound"><Head d>{/*Letthelayoutcontrol<title>;weonlyaddrobotshere*/}<metaname="robots"content="noindex"/></Head><main className="containerpx-4py-20text-center"role="main"aria-labelledby="notfound-title"><h1i d="notfound-title"className="font-seriftext-4xltext-forestmb-3">PageNotFound</h1><p className="text-[color:var(--color-on-secondary)/0.8]mb-8">Sorry,thepageyou&rsquo;relookingfordoesn&rsquo;texist.</p><div className="flexitems-centerjustify-centergap-4"><Link href="/"className="bg-foresttext-creampx-5py-2rounded-mdhover:bg-softGoldhover:text-foresttransition"aria-label="Gobackhome">&larr;Gobackhome</Link><a href="mailto:info@abrahamoflondon.org?subject=Broken%20link%20report"className="text-forestunderlineunderline-offset-4hover:text-softGold">Reportabrokenlink</a></div></main></SiteLayout>);}
+// pages/404.tsx
+import Head from "next/head";
+import Link from "next/link";
+import SiteLayout from "@/components/Layout";
+
+export default function NotFoundPage() {
+  return (
+    <SiteLayout pageTitle="Page Not Found">
+      <Head>
+        {/* Let the layout control <title>; we only add robots here */}
+        <meta name="robots" content="noindex" />
+      </Head>
+
+      <main
+        className="container px-4 py-20 text-center"
+        role="main"
+        aria-labelledby="notfound-title"
+      >
+        <h1 id="notfound-title" className="font-serif text-4xl text-forest mb-3">
+          Page Not Found
+        </h1>
+
+        <p className="text-[color:var(--color-on-secondary)/0.8] mb-8">
+          Sorry, the page you&rsquo;re looking for doesn&rsquo;t exist.
+        </p>
+
+        <div className="flex items-center justify-center gap-4">
+          <Link
+            href="/"
+            className="bg-forest text-cream px-5 py-2 rounded-md hover:bg-softGold hover:text-forest transition"
+            aria-label="Go back home"
+          >
+            &larr; Go back home
+          </Link>
+
+          <a
+            href="mailto:info@abrahamoflondon.org?subject=Broken%20link%20report"
+            className="text-forest underline underline-offset-4 hover:text-softGold"
+          >
+            Report a broken link
+          </a>
+        </div>
+      </main>
+    </SiteLayout>
+  );
+}

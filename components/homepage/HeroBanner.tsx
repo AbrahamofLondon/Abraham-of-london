@@ -1,1 +1,152 @@
-//components/homepage/HeroBanner.tsx"useclient";//ExplicitlymarkingasClientComponent,asitusesHooksimport*asReactfrom"react";import clsxfrom"clsx";import Imagefrom"next/image";//---type Definitions---type VideoSource={src:string;type:"video/webm"|"video/mp4";/**Optionalmediaqueryforconditionalloading(e.g.,mobilevideo)*/media?:string;};type Props={poster:string;videoSources?:ReadonlyArray<VideoSource>|null;/**Acceptsnull;willbenormalized*/heightClassName?:string|null;/**Tailwindclassforobject-position(e.g.,'object-top','object-center')*/mobileObjectPositionClass?:string;/**Contenttodisplayoverthebanner(e.g.,title,CTA)*/overlay?:React.ReactNode;className?:string;};//---Component---export defaultfunctionHeroBanner({poster,videoSources,heightClassName,mobileObjectPositi onClass="object-center",overlay,className,}:Props){constvideoRef=React.useRef<HTMLVideoElement|null>(null);//SafelycoercevideoSourcesintoanarrayconstsources:ReadonlyArray<VideoSource>=Array.isArray(videoSources)?videoSources:[];consthasVideo=sources.length>0;//UsemoremodernandreliableviewportunitsconstnormalizedHeight=heightClassName??"min-h-[70dvh]sm:min-h-[72dvh]lg:min-h-[78lvh]";//---ReducedMotionandPlaybackLogic---React.useEffect(()=>{constv=videoRef.current;if(!v||typeofwindow==='undefined'||!("matchMedia"inwindow))return;constmql=window.matchMedia("(prefers-reduced-motion:reduce)");consthandlePlayback=()=>{//Ifreducedmotionispreferred,ensurevideoispausedif(mql.matches){v.pause();return;}//Attempttoplay,catchingthecommon"play()failed"exceptionv.play().catch(error=>{//console.error("Videoautoplayfailed:",error);});};//InitialcheckandsetuplistenerhandlePlayback();mql.addEventListener("change",handlePlayback);//Cleanuplisteneroncomponentunmountreturn()=>mql.removeEventListener("change",handlePlayback);},[hasVideo]);//Onlyre-runifvideopresencechanges//---ImageFallbackProps---constimageProps={src:poster,//Fix:Explicitlyensurethealtpropispresentalt:"Decorative,high-impactbackgroundimageforthemainherosection",className:clsx("h-fullw-fullobject-cover",mobileObjectPositionClass),fill:trueasconst,sizes:"100vw",priority:trueasconst,//EssentialforLCPoptimization};return(<section//Use role="banner"forsemanticmeaninginherosections role="banner"className={clsx("relativeisolatew-fulloverflow-hiddenbg-black",normalizedHeight,className)}>{hasVideo?(//---VideoComponent---<videoref={videoRef}className={clsx("absoluteinset-0h-fullw-fullobject-cover",mobileObjectPositionClass)}poster={poster}autoPlaymutedloopplaysInlinepreloa d="metadata"aria-hidden="true"//Videoisdecorative/background onContextMenu={(e)=>e.preventDefault()}>{sources.map((s,i)=>(<sourcekey={i}src={s.src}type={s.type}{...(s.media?{media:s.media}:{})}/>))}{/*Fallback:ifvideofailscompletely,theposterimagedefinedbelowwillshow*/}</video>):(//---ImageFallbackComponent(NoVideo)---//eslint-disable-next-linejsx-a11y/alt-text<Image{...imageProps}/>)}{/*Subtletop/bottomgradientforlegibility(Overlay)*/}<div aria-hidden="true"className="pointer-events-noneabsoluteinset-0bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"/>{/*Overlaycontent(heading/CTA)*/}{overlay?(<div className="relativez-[1]mx-autoflexh-fullmax-w-7xlitems-endpx-4pb-10"><div className="text-creamdrop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div></div>):null}{/*Noscriptfallbackforposter(essentialfornon-JS/server-siderendering)*/}<noscript>{/*eslint-disable-next-line@next/next/no-img-element*/}<img alt="Decorativefallbackimageforherosection."src={poster}className={clsx("absoluteinset-0h-fullw-fullobject-cover",mobileObjectPositionClass)}loading="lazy"/></noscript></section>);}
+// components/homepage/HeroBanner.tsx
+"use client"; // Explicitly marking as Client Component, as it uses Hooks
+
+import * as React from "react";
+import clsx from "clsx";
+import Image from "next/image";
+
+// --- Type Definitions ---
+
+type VideoSource = {
+  src: string;
+  type: "video/webm" | "video/mp4";
+  /** Optional media query for conditional loading (e.g., mobile video) */
+  media?: string;
+};
+
+type Props = {
+  poster: string;
+  videoSources?: ReadonlyArray<VideoSource> | null;
+  /** Accepts null; will be normalized */
+  heightClassName?: string | null;
+  /** Tailwind class for object-position (e.g., 'object-top', 'object-center') */
+  mobileObjectPositionClass?: string;
+  /** Content to display over the banner (e.g., title, CTA) */
+  overlay?: React.ReactNode;
+  className?: string;
+};
+
+// --- Component ---
+
+export default function HeroBanner({
+  poster,
+  videoSources,
+  heightClassName,
+  mobileObjectPositionClass = "object-center",
+  overlay,
+  className,
+}: Props) {
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+  // Safely coerce videoSources into an array
+  const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
+  const hasVideo = sources.length > 0;
+
+  // Use more modern and reliable viewport units
+  const normalizedHeight = heightClassName ?? "min-h-[70dvh] sm:min-h-[72dvh] lg:min-h-[78lvh]";
+
+  // --- Reduced Motion and Playback Logic ---
+  React.useEffect(() => {
+    const v = videoRef.current;
+    if (!v || typeof window === 'undefined' || !("matchMedia" in window)) return;
+
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const handlePlayback = () => {
+      // If reduced motion is preferred, ensure video is paused
+      if (mql.matches) {
+        v.pause();
+        return;
+      }
+
+      // Attempt to play, catching the common "play() failed" exception
+      v.play().catch(error => {
+          // console.error("Video autoplay failed:", error);
+      });
+    };
+
+    // Initial check and setup listener
+    handlePlayback();
+    mql.addEventListener("change", handlePlayback);
+
+    // Cleanup listener on component unmount
+    return () => mql.removeEventListener("change", handlePlayback);
+  }, [hasVideo]); // Only re-run if video presence changes
+
+  // --- Image Fallback Props ---
+  const imageProps = {
+    src: poster,
+    // Fix: Explicitly ensure the alt prop is present
+    alt: "Decorative, high-impact background image for the main hero section",
+    className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
+    fill: true as const,
+    sizes: "100vw",
+    priority: true as const, // Essential for LCP optimization
+  };
+
+  return (
+    <section
+      // Use role="banner" for semantic meaning in hero sections
+      role="banner"
+      className={clsx(
+        "relative isolate w-full overflow-hidden bg-black",
+        normalizedHeight,
+        className
+      )}
+    >
+      {hasVideo ? (
+        // --- Video Component ---
+        <video
+          ref={videoRef}
+          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
+          poster={poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true" // Video is decorative/background
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          {sources.map((s, i) => (
+            <source
+              key={i}
+              src={s.src}
+              type={s.type}
+              {...(s.media ? { media: s.media } : {})}
+            />
+          ))}
+          {/* Fallback: if video fails completely, the poster image defined below will show */}
+        </video>
+      ) : (
+        // --- Image Fallback Component (No Video) ---
+        // eslint-disable-next-line jsx-a11y/alt-text
+        <Image {...imageProps} />
+      )}
+
+      {/* Subtle top/bottom gradient for legibility (Overlay) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
+      />
+
+      {/* Overlay content (heading/CTA) */}
+      {overlay ? (
+        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
+          <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
+        </div>
+      ) : null}
+
+      {/* Noscript fallback for poster (essential for non-JS/server-side rendering) */}
+      <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          alt="Decorative fallback image for hero section."
+          src={poster}
+          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
+          loading="lazy"
+        />
+      </noscript>
+    </section>
+  );
+}

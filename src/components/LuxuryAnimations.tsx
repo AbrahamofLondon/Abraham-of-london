@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
 
 export default function AnimatedSection() {
@@ -13,3 +13,5 @@ export default function AnimatedSection() {
     </motion.section>
   );
 }
+
+

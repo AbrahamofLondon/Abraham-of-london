@@ -1,1 +1,6 @@
-//pages/api/hello.js//Next.jsAPIroutesupport:https://nextjs.org/docs/api-routes/introductionexportdefaultfunctionhandler(req,res){res.status(200).json({ok:true,name:'AbrahamofLondonAPI'});}
+// pages/api/hello.js
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+
+export default function handler(req, res) {
+ res.status(200).json({ ok: true, name: 'Abraham of London API' });
+}

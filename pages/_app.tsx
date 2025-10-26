@@ -1,27 +1,20 @@
-// pages/_app.tsx
-import Head from "next/head";
-// FIX 1: Add missing Next.js import s
+﻿// pages/_app.tsx
+import type { AppProps, NextWebVitalsMetric } from "next/app";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Script from "next/script";
-import { AppProps } from "next/app";
-import { useRouter } from "next/router";
-// FIX 2: Add missing React import s
-import { useEffect } from "react";
+import Head from "next/head";
+
 import { ThemeProvider } from "@/lib/ThemeContext";
-import { pageview, gaEnabled, GA_ID } from "@/lib/gtag";
+import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 import "@/styles/globals.css";
 
+// Assuming ThemeToggle path based on standard structure
 import ThemeToggle from "@/components/ThemeToggle";
 
-// dynamic and ssr:false must be import ed from 'next/dynamic'
-const ScrollProgress = dynamic(
-  () => import("@/components/ScrollProgress").then((m) => m.default),
-  {
-    ssr: false,
-  },
-);
+const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 
-// useRouter and useEffect must be import ed from 'next/router' and 'react'
 function AnalyticsRouterTracker() {
   const router = useRouter();
   useEffect(() => {
@@ -38,61 +31,61 @@ function AnalyticsRouterTracker() {
   return null;
 }
 
-// AppProps must be import ed from 'next/app'
 export default function MyApp({ Component, pageProps }: AppProps) {
   const isProd = process.env.NODE_ENV === "production";
   return (
     <>
-      <Head d>
-        <meta
-          name="viewport"
-          content="width=device-width,initial-scale=1,viewport-fit=cover"
-        />
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         {gaEnabled && isProd && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />
-            <link
-              rel="preconnect"
-              href="https://www.google-analytics.com"
-              crossOrigin=""
-            />
+            <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="" />
           </>
         )}
       </Head>
 
-      {/* Script must be import ed from 'next/script' */}
       {gaEnabled && isProd && (
         <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?i d=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script
-            i
-            d="ga-init"
-            strategy="afterInteractive"
-          >{`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });`}</Script>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+          <Script id="ga-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon', page_path: window.location.pathname });
+            `}
+          </Script>
         </>
       )}
 
       <ThemeProvider>
         <AnalyticsRouterTracker />
 
-        {/* Keep ThemeToggle visible but prevent it from blocking header hit-testing */}
+        {/*
+          Keep ThemeToggle visible but prevent it from blocking header hit-testing
+          This is the incorporated mobile-only ThemeToggle from the prompt.
+        */}
         <div className="fixed right-4 top-20 z-[60] md:hidden pointer-events-auto">
           <ThemeToggle />
         </div>
 
-        <ScrollProgress
-          zIndexClass="z-50"
-          colorClass="bg-emerald-600"
-          heightClass="h-1"
-        />
+        <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
+        {/* Header renders the ThemeToggle internally */}
+        {/* Most pages already include their own <Layout/> that mounts <Header/>.
+            If any page does not use Layout, add <Header/> at that page's top. */}
         <Component {...pageProps} />
       </ThemeProvider>
     </>
   );
 }
+
+export function reportWebVitals(metric: NextWebVitalsMetric) {
+  if (!gaEnabled || process.env.NODE_ENV !== "production") return;
+  const value = metric.name === "CLS" ? Math.round(metric.value * 1000) : Math.round(metric.value);
+  try {
+    gaEvent("web-vital", { id: metric.id, name: metric.name, label: metric.label, value });
+  } catch {}
+}
+
+
