@@ -1,1 +1,284 @@
-//components/Header.tsximport*asReactfrom"react";import Linkfrom"next/link";import { useRouter } from "next/router";import dynamicfrom"next/dynamic";import { motion,type Transition } from "framer-motion";import { siteConfig } from "@/lib/siteConfig";//UsealoadingskeletonforThemeToggletomaintainsmoothlayoutduringhydrationconstThemeToggle=dynamic(()=>import("./ThemeToggle"),{ssr:false,loading:()=>(<div className="h-8w-8animate-pulserounded-fullbg-gray-200dark:bg-gray-700"/>),});type HeaderProps={variant?:"light"|"dark"};constNAV=[{href:"/books",label:"Books"},{href:"/blog",label:"Insights"},{href:"/ventures",label:"Ventures"},{href:"/about",label:"About"},{href:"/contact",label:"Contact"},];export defaultfunctionHeader({variant="light"}:HeaderProps){const[open,setOpen]=React.useState(false);const[scrolled,setScrolled]=React.useState(false);constrouter=useRouter();constisActive=(href:string)=>{constp=router.asPath||router.pathname||"";if(href==="/")returnp==="/";returnp===href||p.startsWith(href+"/");};React.useEffect(()=>{constclose=()=>setOpen(false);router.events?.on("routeChangeComplete",close);router.events?.on("hashChangeComplete",close);return()=>{router.events?.off("routeChangeComplete",close);router.events?.off("hashChangeComplete",close);};},[router.events]);React.useEffect(()=>{const onScroll=()=>setScrolled(window.scrollY>8);onScroll();window.addEventListener("scroll",onScroll,{passive:true});return()=>window.removeEventListener("scroll",onScroll);},[]);React.useEffect(()=>{if(!open)return;consty=window.scrollY;const{style}=document.documentElement;style.position="fixed";style.top=`-${y}px`;style.left="0";style.right="0";style.width="100%";return()=>{style.position="";style.top="";style.left="";style.right="";style.width="";window.scrollTo(0,y);};},[open]);//ShellconstlightShell=scrolled?"bg-white/95border-gray-200shadow-lg":"bg-white/90border-transparent";constdarkShell=scrolled?"bg-black/95border-gray-700shadow-xl":"bg-black/90border-transparent";constshell=variant==="dark"?`${darkShell}text-cream`:`${lightShell}text-deepCharcoal`;//LinksconstlinkBase=variant==="dark"?"text-[color:var(--color-on-primary)/0.9]hover:text-creamhover:tracking-widertransition-allduration-300":"text-[color:var(--color-on-secondary)/0.9]hover:text-deepCharcoalhover:tracking-widertransition-allduration-300";constunderlineActive=variant==="dark"?"bg-softGold":"bg-deepCharcoal";constEMAIL=siteConfig?.email||"info@abrahamoflondon.org";constPHONE=(siteConfigasany)?.phone||"";//BrandconstbrandClass=["font-seriffont-extraboldtracking-widertransition-allduration-300",scrolled?"text-xlmd:text-2xl":"text-2xlmd:text-3xl",variant==="dark"?"text-creamhover:text-softGold":"text-deepCharcoalhover:text-softGold",].join("");//HeaderheightvarconstheaderStyle=React.useMemo(()=>({["--header-h"]:scrolled?"4.5rem":"6rem"}asReact.CSSProperties&{["--header-h"]?:string;}),[scrolled]);//FramerMotiontransitionconstmotionTransition:Transition={type:"spring",stiffness:100,damping:24,mass:0.5};return(<motion.header className={`supports-[backdrop-filter]:bg-opacity-60fixedinset-x-0top-0z-50border-bbackdrop-blur${shell}`}initial={{y:-100,opacity:0}}animate={{y:0,opacity:1}}transition={motionTransitionasany}role="navigation"aria-label="Primary"style={headerStyle}><nav className="mx-autoflexmax-w-7xlitems-centerjustify-betweenpx-6transition-allduration-300"style={{height:scrolled?"4rem":"5rem"}}>{/*Brand*/}<Link href="/"aria-label="Home"className={brandClass}>AbrahamofLondon</Link>{/*Desktopnav*/}<div className="hiddenitems-centergap-10md:flex"><ul className="flexitems-centergap-8">{NAV.map((item)=>(<likey={item.href}className="relative"><Link href={item.href}className={`text-basefont-mediumtransition-colors${linkBase}`}aria-current={isActive(item.href)?"page":undefined}>{item.label}</Link><span aria-hidden="true"className={`pointer-events-noneabsolute-bottom-1left-0blockh-[2px]transition-allduration-300${isActive(item.href)?`w-full${underlineActive}`:"w-0"}`}/></li>))}</ul>{/*Actions*/}<div className="flexitems-centergap-4border-lborder-current/20pl-6"><a href={`mailto:${EMAIL}`}className={`text-smunderline-offset-4hover:underline${linkBase}`}aria-label="EmailAbraham">Email</a>{PHONE&&(<a href={`tel:${PHONE.replace(/\s+/g,"")}`}className={`text-smunderline-offset-4hover:underline${linkBase}`}aria-label="CallAbraham">Call</a>)}<Link href="/contact"className="rounded-fullbg-softGoldpx-6py-2.5text-smfont-semiboldtext-deepCharcoaltransitionhover:brightness-90focus:outline-nonefocus-visible:ring-2focus-visible:ring-softGold/70"aria-label="Gotocontactform">Enquire</Link><ThemeToggle/></div></div>{/*Mobilecontrols*/}<div className="flexitems-centergap-2md:hidden"><ThemeToggle/><buttontype="button"onClick={()=>setOpen((v)=>!v)}aria-expande d={open}aria-controls="mobile-nav"className={`inline-flexitems-centerjustify-centerrounded-mdborderp-2transition-colors${variant==="dark"?"border-white/30text-creamhover:bg-white/10":"border-black/30text-deepCharcoalhover:bg-black/5"}`}><span className="sr-only">Togglenavigation</span>{!open?(<svg width="22"height="22"viewBox="002424"fill="none"aria-hidden="true"><path d="M46h16M412h16M418h16"stroke="currentColor"strokeWidth="2"/></svg>):(<svg width="22"height="22"viewBox="002424"fill="none"aria-hidden="true"><path d="M66l1212M186L618"stroke="currentColor"strokeWidth="2"/></svg>)}</button></div></nav>{/*Mobiledrawer*/}<divi d="mobile-nav"className={`md:hidden${open?"block":"hidden"}${variant==="dark"?"bg-black/95":"bg-white/95"}border-t${variant==="dark"?"border-white/20":"border-black/20"}backdrop-blur`}><nav className="mx-automax-w-7xlpx-6py-6"aria-label="MobilePrimary"><ul className="gridgap-4">{NAV.map((item)=>(<likey={item.href}><Link href={item.href}onClick={()=>setOpen(false)}className={`blockrounded-lgpx-4py-3text-lgfont-mediumtransition-colors${isActive(item.href)?variant==="dark"?"bg-white/10text-cream":"bg-black/10text-deepCharcoal":variant==="dark"?"text-[color:var(--color-on-primary)/0.9]hover:bg-white/5hover:text-cream":"text-[color:var(--color-on-secondary)/0.9]hover:bg-black/5hover:text-deepCharcoal"}`}aria-current={isActive(item.href)?"page":undefined}>{item.label}</Link></li>))}<li className="flexitems-centergap-6px-4pt-4"><a href={`mailto:${EMAIL}`}onClick={()=>setOpen(false)}className={`text-baseunderline-offset-4hover:underline${variant==="dark"?"text-[color:var(--color-on-primary)/0.9]":"text-[color:var(--color-on-secondary)/0.9]"}`}>Email</a>{PHONE&&(<a href={`tel:${PHONE.replace(/\s+/g,"")}`}onClick={()=>setOpen(false)}className={`text-baseunderline-offset-4hover:underline${variant==="dark"?"text-[color:var(--color-on-primary)/0.9]":"text-[color:var(--color-on-secondary)/0.9]"}`}>Call</a>)}</li><li className="pt-4"><Link href="/contact"onClick={()=>setOpen(false)}className="blockrounded-fullbg-softGoldpx-5py-3text-centertext-basefont-semiboldtext-deepCharcoaltransitionhover:brightness-90focus:outline-nonefocus-visible:ring-2focus-visible:ring-softGold/70">Enquire</Link></li></ul></nav></div>{/*Offsetmainbyheaderheightvar*/}<style jsx>{`:global(main){padding-top:var(--header-h,6rem);}@media(max-width:767px){:global(header[role="navigation"]){--header-h:${scrolled?"4rem":"5rem"};}}`}</style></motion.header>);}
+// components/Header.tsx
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+import { motion, Transition } from "framer-motion"; // <-- FIXED: Added Transition import
+import { siteConfig } from "@/lib/siteConfig";
+
+// Use a loading skeleton for ThemeToggle to maintain smooth layout during hydration
+const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
+  ssr: false,
+  loading: () => <div className="w-8 h-8 rounded-full animate-pulse bg-gray-200 dark:bg-gray-700" />
+});
+
+type HeaderProps = { variant?: "light" | "dark" };
+
+const NAV = [
+ { href: "/books", label: "Books" },
+ { href: "/blog", label: "Insights" },
+ { href: "/ventures", label: "Ventures" },
+ { href: "/about", label: "About" },
+ { href: "/contact", label: "Contact" },
+];
+
+export default function Header({ variant = "light" }: HeaderProps) {
+ const [open, setOpen] = React.useState(false);
+ const [scrolled, setScrolled] = React.useState(false);
+ const router = useRouter();
+
+ const isActive = (href: string) => {
+  const p = router.asPath || router.pathname || "";
+  if (href === "/") return p === "/";
+  return p === href || p.startsWith(href + "/");
+ };
+
+ // Hooks (keeping original functionality for route change, scroll, and body lock)
+ React.useEffect(() => {
+  const close = () => setOpen(false);
+  router.events?.on("routeChangeComplete", close);
+  router.events?.on("hashChangeComplete", close);
+  return () => {
+   router.events?.off("routeChangeComplete", close);
+   router.events?.off("hashChangeComplete", close);
+  };
+ }, [router.events]);
+
+ React.useEffect(() => {
+  const onScroll = () => setScrolled(window.scrollY > 8);
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  return () => window.removeEventListener("scroll", onScroll);
+ }, []);
+
+ React.useEffect(() => {
+  if (!open) return;
+  const y = window.scrollY;
+  const { style } = document.documentElement;
+  style.position = "fixed";
+  style.top = `-${y}px`;
+  style.left = "0";
+  style.right = "0";
+  style.width = "100%";
+  return () => {
+   style.position = "";
+   style.top = "";
+   style.left = "";
+   style.right = "";
+   style.width = "";
+   window.scrollTo(0, y);
+  };
+ }, [open]);
+
+ // --- LUXURY AESTHETIC REFINEMENTS ---
+
+ // 1. Shell: Reduced transparency, high-contrast border
+ const lightShell = scrolled ? "bg-white/95 border-gray-200 shadow-lg" : "bg-white/90 border-transparent";
+ const darkShell = scrolled ? "bg-black/95 border-gray-700 shadow-xl" : "bg-black/90 border-transparent";
+ const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
+
+ // 2. Link Base: Slightly higher base opacity, refined hover
+ const linkBase =
+  variant === "dark"
+   ? "text-[color:var(--color-on-primary)/0.9] hover:text-cream hover:tracking-wider transition-all duration-300"
+   : "text-[color:var(--color-on-secondary)/0.9] hover:text-deepCharcoal hover:tracking-wider transition-all duration-300";
+
+ const underlineActive = variant === "dark" ? "bg-softGold" : "bg-deepCharcoal"; // Gold accent for luxury
+
+ const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
+ const PHONE = (siteConfig as any)?.phone || "";
+
+ // 3. Brand: Subtler color, higher font weight (if supported by font, or just bold)
+ const brandClass = [
+  "font-serif font-extrabold transition-all duration-300 tracking-wider", // Added tracking-wider
+  scrolled ? "text-xl md:text-2xl" : "text-2xl md:text-3xl", // Slightly smaller jump on scroll
+  variant === "dark" ? "text-cream hover:text-softGold" : "text-deepCharcoal hover:text-softGold",
+ ].join(" ");
+
+ // 4. Header Height/Style: Use a slightly less aggressive spring transition
+ const headerStyle = React.useMemo(
+  () =>
+   ({ ["--header-h"]: scrolled ? "4.5rem" : "6rem" } as React.CSSProperties & {
+    ["--header-h"]?: string;
+   }),
+  [scrolled]
+ );
+
+ // 5. Framer Motion: Smoother spring transition
+ const motionTransition: Transition = { type: "spring", stiffness: 100, damping: 24, mass: 0.5 }; // <-- FIXED
+
+ return (
+  <motion.header
+   className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur supports-[backdrop-filter]:bg-opacity-60 ${shell}`}
+   initial={{ y: -100, opacity: 0 }}
+   animate={{ y: 0, opacity: 1 }}
+   transition={motionTransition} // Using the refined transition
+   role="navigation"
+   aria-label="Primary"
+   style={headerStyle}
+  >
+   <nav
+    className="mx-auto flex max-w-7xl items-center justify-between px-6 transition-all duration-300" // Increased horizontal padding
+    style={{ height: scrolled ? "4rem" : "5rem" }} // Tighter height transition
+   >
+    {/* Brand */}
+    <Link href="/" aria-label="Home" className={brandClass}>
+     Abraham of London
+    </Link>
+
+    {/* Desktop nav */}
+    <div className="hidden items-center gap-10 md:flex"> {/* Increased gap for premium spacing */}
+     <ul className="flex items-center gap-8">
+      {NAV.map((item) => (
+       <li key={item.href} className="relative">
+        <Link
+         href={item.href}
+         className={`text-base font-medium transition-colors ${linkBase}`} // Larger font size
+         aria-current={isActive(item.href) ? "page" : undefined}
+        >
+         {item.label}
+        </Link>
+        <span
+         aria-hidden="true"
+         className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all duration-300 ${
+          isActive(item.href) ? `w-full ${underlineActive}` : "w-0"
+         }`}
+        />
+       </li>
+      ))}
+     </ul>
+
+     {/* Actions */}
+     <div className="flex items-center gap-4 border-l border-current/20 pl-6"> {/* Added divider line */}
+      <a
+       href={`mailto:${EMAIL}`}
+       className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+       aria-label="Email Abraham"
+      >
+       Email
+      </a>
+      {PHONE && (
+       <a
+        href={`tel:${PHONE.replace(/\s+/g, "")}`}
+        className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+        aria-label="Call Abraham"
+       >
+        Call
+       </a>
+      )}
+      {/* Primary CTA: Subtle focus for luxury */}
+      <Link
+       href="/contact"
+       className="rounded-full bg-softGold px-6 py-2.5 text-sm font-semibold text-deepCharcoal transition hover:brightness-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/70"
+       aria-label="Go to contact form"
+      >
+       Enquire
+      </Link>
+      <ThemeToggle />
+     </div>
+    </div>
+
+    {/* Mobile controls */}
+    <div className="flex items-center gap-2 md:hidden">
+     <ThemeToggle />
+     <button
+      type="button"
+      onClick={() => setOpen((v) => !v)}
+      aria-expanded={open}
+      aria-controls="mobile-nav"
+      className={`inline-flex items-center justify-center rounded-md border p-2 transition-colors ${
+       variant === "dark" ? "border-white/30 text-cream hover:bg-white/10" : "border-black/30 text-deepCharcoal hover:bg-black/5"
+      }`}
+     >
+      <span className="sr-only">Toggle navigation</span>
+      {!open ? (
+       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" />
+       </svg>
+      ) : (
+       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" />
+       </svg>
+      )}
+     </button>
+    </div>
+   </nav>
+
+   {/* Mobile drawer */}
+   <div
+    id="mobile-nav"
+    className={`md:hidden ${open ? "block" : "hidden"} ${
+     variant === "dark" ? "bg-black/95" : "bg-white/95" // Increased opacity for depth
+    } border-t ${variant === "dark" ? "border-white/20" : "border-black/20"} backdrop-blur`}
+   >
+    <nav className="mx-auto max-w-7xl px-6 py-6" aria-label="Mobile Primary">
+     <ul className="grid gap-4"> {/* Increased gap for premium spacing */}
+      {NAV.map((item) => (
+       <li key={item.href}>
+        <Link
+         href={item.href}
+         onClick={() => setOpen(false)}
+         className={`block rounded-lg px-4 py-3 text-lg font-medium transition-colors ${ // Larger, rounded buttons
+          isActive(item.href)
+           ? variant === "dark"
+            ? "bg-white/10 text-cream"
+            : "bg-black/10 text-deepCharcoal"
+           : variant === "dark"
+           ? "text-[color:var(--color-on-primary)/0.9] hover:bg-white/5 hover:text-cream"
+           : "text-[color:var(--color-on-secondary)/0.9] hover:bg-black/5 hover:text-deepCharcoal"
+         }`}
+         aria-current={isActive(item.href) ? "page" : undefined}
+        >
+         {item.label}
+        </Link>
+       </li>
+      ))}
+      <li className="flex items-center gap-6 px-4 pt-4"> {/* Increased gap */}
+       <a
+        href={`mailto:${EMAIL}`}
+        onClick={() => setOpen(false)}
+        className={`text-base underline-offset-4 hover:underline ${
+         variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+        }`}
+       >
+        Email
+       </a>
+       {PHONE && (
+        <a
+         href={`tel:${PHONE.replace(/\s+/g, "")}`}
+         onClick={() => setOpen(false)}
+         className={`text-base underline-offset-4 hover:underline ${
+          variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+         }`}
+        >
+         Call
+        </a>
+       )}
+      </li>
+      <li className="pt-4">
+       <Link
+        href="/contact"
+        onClick={() => setOpen(false)}
+        className="block rounded-full bg-softGold px-5 py-3 text-center text-base font-semibold text-deepCharcoal transition hover:brightness-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/70"
+       >
+        Enquire
+       </Link>
+      </li>
+     </ul>
+    </nav>
+   </div>
+
+   {/* Offset main by header height var */}
+   <style jsx>{`
+    :global(main) {
+     padding-top: var(--header-h, 6rem);
+    }
+    @media (max-width: 767px) {
+     :global(header[role="navigation"]) {
+      --header-h: ${scrolled ? "4rem" : "5rem"};
+     }
+    }
+   `}</style>
+  </motion.header>
+ );
+}

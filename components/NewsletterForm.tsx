@@ -1,1 +1,145 @@
-//components/NewsletterForm.tsx"useclient";import * as React from "react";constEMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;export defaultfunctionNewsletterForm(){const[email,setEmail]=React.useState("");const[status,setStatus]=React.useState<"idle"|"loading"|"ok"|"err">("idle");const[msg,setMsg]=React.useState("");const[hp,setHp]=React.useState("");//honeypotconstabortRef=React.useRef<AbortController|null>(null);conststatusRef=React.useRef<HTMLParagraphElement|null>(null);React.useEffect(()=>{if(status!=="idle"&&statusRef.current)statusRef.current.focus();},[status,msg]);asyncfunctiononSubmit(e:React.FormEvent){e.preventDefault();if(status==="loading")return;constvalue=email.trim().toLowerCase();if(!EMAIL_RE.test(value)){setStatus("err");setMsg("Pleaseenteravalidemailaddress.");return;}//Ifthehoneypotisfilled,actlikesuccesstomisleadbots.if(hp){setStatus("ok");setMsg("You'resubscribed.Welcome!");setEmail("");return;}setStatus("loading");setMsg("");abortRef.current?.abort();constcontroller=newAbortController();abortRef.current=controller;try{//HOT-FIX:sendbothshapessoeitherbackendcontractissatisfiedconstr=awaitfetch("/api/newsletter",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({email:value,payload:{email_address:value,email:value},}),cache:"no-store",signal:controller.signal,});constdata=awaitr.json().catch(()=>({}asany));constmessage=typeofdata?.message==="string"?data.message:r.ok?"You'resubscribed.Welcome!":"Somethingwentwrong.Pleasetryagain.";if(r.ok){setStatus("ok");setMsg(message);setEmail("");}else{setStatus("err");setMsg(message);}}catch(err:any){if(err?.name==="AbortError")return;setStatus("err");setMsg("Networkerror.Pleasetryagain.");}}constisLoading=status==="loading";constisError=status==="err";return(<form onSubmit={onSubmit}className="mx-autoflexw-fullmax-w-xlflex-colgap-3rounded-2xlborderborder-lightGreybg-warmWhitep-4sm:flex-rowsm:items-centersm:p-5"noValidate>{/*Honeypot(hidden)*/}<label className="sr-only"htmlFor="newsletter-company">Company</label><inputi d="newsletter-company"name="company"tabIndex={-1}autoComplete="off"value={hp}onChange={(e)=>setHp(e.target.value)}className="hidden"/><labelhtmlFor="newsletter-email"className="sr-only">Emailaddress</label><inputi d="newsletter-email"type="email"name="email"inputMode="email"autoComplete="email"requiredplaceholder="you@example.com"value={email}onChange={(e)=>setEmail(e.target.value)}className="flex-1rounded-lgborderborder-lightGreybg-whitepx-3py-2text-smtext-deepCharcoalplaceholder:text-[color:var(--color-on-secondary)/0.5]focus:border-deepCharcoalfocus:outline-none"aria-describedby="newsletter-status"aria-inval i d={isError||undefined}disable d={isLoading}/><buttontype="submit"disable d={isLoading}className="rounded-fullbg-forestpx-5py-2text-smfont-semiboldtext-creamtransitionhover:bg-[color:var(--color-primary)/0.9]disabled:cursor-not-alloweddisabled:opacity-60">{isLoading?"Subscribing...":"Subscribe"}</button><pi d="newsletter-status"role="status"aria-live="polite"tabIndex={-1}ref={statusRef}className={`sm:ml-2text-sm${status==="ok"?"text-forest":status==="err"?"text-red-600":"text-transparent"}`}>{msg||""}</p></form>);}
+// components/NewsletterForm.tsx
+"use client";
+
+import * as React from "react";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function NewsletterForm() {
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [msg, setMsg] = React.useState("");
+  const [hp, setHp] = React.useState(""); // honeypot
+  const abortRef = React.useRef<AbortController | null>(null);
+  const statusRef = React.useRef<HTMLParagraphElement | null>(null);
+
+  React.useEffect(() => {
+    if (status !== "idle" && statusRef.current) statusRef.current.focus();
+  }, [status, msg]);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "loading") return;
+
+    const value = email.trim().toLowerCase();
+
+    if (!EMAIL_RE.test(value)) {
+      setStatus("err");
+      setMsg("Please enter a valid email address.");
+      return;
+    }
+
+    // If the honeypot is filled, act like success to mislead bots.
+    if (hp) {
+      setStatus("ok");
+      setMsg("You’re subscribed. Welcome!");
+      setEmail("");
+      return;
+    }
+
+    setStatus("loading");
+    setMsg("");
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      // HOT-FIX: send both shapes so either backend contract is satisfied
+      const r = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          email: value,
+          payload: { email_address: value, email: value },
+        }),
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+      const data = await r.json().catch(() => ({} as any));
+      const message =
+        typeof data?.message === "string"
+          ? data.message
+          : r.ok
+          ? "You’re subscribed. Welcome!"
+          : "Something went wrong. Please try again.";
+
+      if (r.ok) {
+        setStatus("ok");
+        setMsg(message);
+        setEmail("");
+      } else {
+        setStatus("err");
+        setMsg(message);
+      }
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+      setStatus("err");
+      setMsg("Network error. Please try again.");
+    }
+  }
+
+  const isLoading = status === "loading";
+  const isError = status === "err";
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
+      noValidate
+    >
+      {/* Honeypot (hidden) */}
+      <label className="sr-only" htmlFor="newsletter-company">Company</label>
+      <input
+        id="newsletter-company"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        value={hp}
+        onChange={(e) => setHp(e.target.value)}
+        className="hidden"
+      />
+
+      <label htmlFor="newsletter-email" className="sr-only">
+        Email address
+      </label>
+      <input
+        id="newsletter-email"
+        type="email"
+        name="email"
+        inputMode="email"
+        autoComplete="email"
+        required
+        placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal focus:outline-none"
+        aria-describedby="newsletter-status"
+        aria-invalid={isError || undefined}
+        disabled={isLoading}
+      />
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isLoading ? "Subscribing…" : "Subscribe"}
+      </button>
+
+      <p
+        id="newsletter-status"
+        role="status"
+        aria-live="polite"
+        tabIndex={-1}
+        ref={statusRef}
+        className={`sm:ml-2 text-sm ${
+          status === "ok" ? "text-forest" : status === "err" ? "text-red-600" : "text-transparent"
+        }`}
+      >
+        {msg || " "}
+      </p>
+    </form>
+  );
+}

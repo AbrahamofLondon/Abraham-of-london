@@ -4,16 +4,16 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 
-/*----type s----*/
+/* ---- Types ---- */
 type Brand = {
   name: string;
   desc: string;
-  logo: string; // local/public path
-  href: string; // internal or external URL
+  logo: string;   // local /public path
+  href: string;   // internal or external URL
   badge?: string; // optional badge
 };
 
-/*----Data----*/
+/* ---- Data ---- */
 const brands: Brand[] = [
   {
     name: "Abraham of London",
@@ -28,13 +28,13 @@ const brands: Brand[] = [
     href: "https://alomarada.com",
   },
   {
-    name: "Endure Luxe",
+    name: "EndureLuxe",
     desc: "Premium, sustainable fitness partnerships that promote wellbeing through community and thoughtful tech.",
     logo: "/assets/images/endureluxe-ltd.webp",
     href: "https://endureluxe.com",
   },
   {
-    name: "Innovate Hub",
+    name: "InnovateHub",
     desc: "Strategy, playbooks, and hands-on product support to ship durable products rooted in ethics and excellent craft.",
     logo: "/assets/images/innovatehub.svg",
     href:
@@ -58,20 +58,19 @@ const item = {
 export default function VenturesPage() {
   return (
     <Layout pageTitle="Ventures">
-      <Head d>
-        <meta name="robots" content="index, follow" />
+      <Head>
+        <meta name="robots" content="index,follow" />
       </Head>
+
       <section className="px-4 py-10 md:py-14">
         <div className="mx-auto max-w-6xl">
           <header className="mb-8 md:mb-10 text-center">
-            <h1 className="text-3xl md:text-5xl font-serif font-bold">
-              Ventures & Brands
-            </h1>
+            <h1 className="text-3xl md:text-5xl font-serif font-bold">Ventures & Brands</h1>
             <p className="mt-3 text-[color:var(--color-on-secondary)/0.8]">
-              A portfolio at the intersection of strategy, sustainability, and
-              impact.
+              A portfolio at the intersection of strategy, sustainability, and impact.
             </p>
           </header>
+
           <motion.div
             initial="hidden"
             animate="visible"
@@ -95,17 +94,17 @@ export default function VenturesPage() {
                       className="object-contain"
                     />
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900 text-center">
-                    {b.name}
-                  </h2>
+
+                  <h2 className="text-xl font-semibold text-gray-900 text-center">{b.name}</h2>
+
                   {b.badge ? (
                     <span className="mt-2 self-center rounded-full border border-black/10 bg-cream px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.8]">
                       {b.badge}
                     </span>
                   ) : null}
-                  <p className="mt-3 text-center text-[color:var(--color-on-secondary)/0.8]">
-                    {b.desc}
-                  </p>
+
+                  <p className="mt-3 text-center text-[color:var(--color-on-secondary)/0.8]">{b.desc}</p>
+
                   <span className="mt-5 inline-flex justify-center">
                     <span className="rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream">
                       Learn more
@@ -113,6 +112,7 @@ export default function VenturesPage() {
                   </span>
                 </motion.article>
               );
+
               return internal ? (
                 <Link
                   key={b.name}

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 import { useEffect } from "react";
 
 export default function Debug() {
   useEffect(() => {
-    console.group("â„¹ï¸ Debug Information");
+    console.group("Ã¢â€žÂ¹Ã¯Â¸ Debug Information");
     console.log(
       "Mobile Menu Button:",
       document.querySelector(".mobile-menu-button"),
@@ -25,3 +25,5 @@ export default function Debug() {
 
   return null;
 }
+
+

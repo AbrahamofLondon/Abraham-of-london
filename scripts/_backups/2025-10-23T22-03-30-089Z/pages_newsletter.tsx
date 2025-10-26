@@ -43,10 +43,7 @@ export default function NewsletterPage() {
         });
       }
     } catch {
-      setStatus({
-        state: "error",
-        message: "Network error. Please try again.",
-      });
+      setStatus({ state: "error", message: "Network error. Please try again." });
     }
   }
 
@@ -57,7 +54,7 @@ export default function NewsletterPage() {
 
   return (
     <Layout pageTitle="Newsletter" hideCTA>
-      <Head d>
+      <Head>
         <meta
           name="description"
           content="Subscribe to Abraham of London updates and essays."
@@ -82,8 +79,7 @@ export default function NewsletterPage() {
               Email address
             </label>
             <input
-              i
-              d="email"
+              id="email"
               name="email"
               type="email"
               inputMode="email"
@@ -97,17 +93,15 @@ export default function NewsletterPage() {
             />
             <button
               type="submit"
-              disable
-              d={status.state === "loading"}
+              disabled={status.state === "loading"}
               className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status.state === "loading" ? "Subscribing..." : "Subscribe"}
+              {status.state === "loading" ? "Subscribing…" : "Subscribe"}
             </button>
           </form>
           {(status.state === "success" || status.state === "error") && (
             <p
-              i
-              d="newsletter-status"
+              id="newsletter-status"
               role="status"
               aria-live="polite"
               className={

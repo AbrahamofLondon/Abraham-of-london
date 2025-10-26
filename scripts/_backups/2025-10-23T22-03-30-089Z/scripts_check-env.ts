@@ -4,8 +4,8 @@
 type Rule = {
   key: string;
   required?: boolean;
-  pattern?: RegExp; // optional format check
-  example?: string; // shown in error help
+  pattern?: RegExp;      // optional format check
+  example?: string;      // shown in error help
 };
 
 const RULES: Rule[] = [
@@ -29,18 +29,8 @@ const RULES: Rule[] = [
   },
 
   // Optional but useful fallbacks (don't fail if missing)
-  {
-    key: "URL",
-    required: false,
-    pattern: /^https?:\/\/[^\s/]+/i,
-    example: "https://abrahamoflondon.org",
-  },
-  {
-    key: "DEPLOY_PRIME_URL",
-    required: false,
-    pattern: /^https?:\/\/[^\s/]+/i,
-    example: "https://abraham-of-london.netlify.app",
-  },
+  { key: "URL", required: false, pattern: /^https?:\/\/[^\s/]+/i, example: "https://abrahamoflondon.org" },
+  { key: "DEPLOY_PRIME_URL", required: false, pattern: /^https?:\/\/[^\s/]+/i, example: "https://abraham-of-london.netlify.app" },
 ];
 
 function isEmpty(v: unknown) {
@@ -60,7 +50,7 @@ for (const rule of RULES) {
   }
   if (!isEmpty(raw) && rule.pattern && !rule.pattern.test(String(raw))) {
     const msg = `• ${rule.key} is set but malformed: "${raw}". Expected like: ${rule.example ?? rule.pattern}`;
-    // required â†' error, optional â†' warning
+    // required â†’ error, optional â†’ warning
     (rule.required ? errors : warnings).push(msg);
   }
 }
@@ -88,4 +78,4 @@ DEPLOY_PRIME_URL=https://abraham-of-london.netlify.app`);
   process.exit(1);
 }
 
-console.log("\nAll required environment variables look good âœ...");
+console.log("\nAll required environment variables look good âœ…");

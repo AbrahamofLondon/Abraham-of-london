@@ -1,1 +1,76 @@
-//components/homepage/ContentShowcase.tsx"useclient";import Reactfrom"react";import Linkfrom"next/link";import clsxfrom"clsx";import BlogPostCardfrom"@/components/BlogPostCard";import BookCardfrom"@/components/BookCard";type ContentShowcaseProps={title:string;subtitle?:string;items:any[];type:"post"|"book";link:string;linkText?:string;linkAriaLabel?:string;className?:string;};export defaultfunctionContentShowcase({title,subtitle,items,type,link,linkText="Viewall",linkAriaLabel="Viewallitems",className,}:ContentShowcaseProps){//Ãƒ¢Ã..."...HooksmustbeunconditionallycalledconstheadingI d=React.useId();constsecti onI d=React.useId();if(!items||items.length===0)returnnull;return(<sectioni d={sectionId}aria-labelledby={headingId}className={clsx("py-12px-4",className)}><div className="containermx-automax-w-6xl"><div className="bg-whitetext-deepCharcoalrounded-3xlshadow-2xlring-1ring-black/5p-6md:p-10"><div className="mb-8flexflex-colsm:flex-rowsm:items-endsm:justify-betweengap-4"><div><h2i d={headingId}className="text-3xlmd:text-4xlfont-seriffont-boldtracking-tight">{title}</h2>{subtitle&&(<p className="mt-2text-basetext-[color:var(--color-on-secondary)/0.8]">{subtitle}</p>)}</div><Link href={link}className="inline-flexitems-centerjustify-centerpx-5py-2rounded-fullbg-foresttext-creamhover:bg-[color:var(--color-primary)/0.9]transition"aria-label={linkAriaLabel}>{linkText}</Link></div><div className="gridgap-8sm:grid-cols-2lg:grid-cols-3">{items.map((item:any)=>type==="post"?(<BlogPostCardkey={item.slug}{...item}/>):(<BookCardkey={item.slug}{...item}/>),)}</div></div></div></section>);}
+// components/homepage/ContentShowcase.tsx
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import clsx from "clsx";
+import BlogPostCard from "@/components/BlogPostCard";
+import BookCard from "@/components/BookCard";
+
+type ContentShowcaseProps = {
+  title: string;
+  subtitle?: string;
+  items: any[];
+  type: "post" | "book";
+  link: string;
+  linkText?: string;
+  linkAriaLabel?: string;
+  className?: string;
+};
+
+export default function ContentShowcase({
+  title,
+  subtitle,
+  items,
+  type,
+  link,
+  linkText = "View all",
+  linkAriaLabel = "View all items",
+  className,
+}: ContentShowcaseProps) {
+  // ✅ Hooks must be unconditionally called
+  const headingId = React.useId();
+  const sectionId = React.useId();
+
+  if (!items || items.length === 0) return null;
+
+  return (
+    <section
+      id={sectionId}
+      aria-labelledby={headingId}
+      className={clsx("py-12 px-4", className)}
+    >
+      <div className="container mx-auto max-w-6xl">
+        <div className="bg-white text-deepCharcoal rounded-3xl shadow-2xl ring-1 ring-black/5 p-6 md:p-10">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h2 id={headingId} className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
+                {title}
+              </h2>
+              {subtitle && (
+                <p className="mt-2 text-base text-[color:var(--color-on-secondary)/0.8]">{subtitle}</p>
+              )}
+            </div>
+            <Link
+              href={link}
+              className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-forest text-cream hover:bg-[color:var(--color-primary)/0.9] transition"
+              aria-label={linkAriaLabel}
+            >
+              {linkText}
+            </Link>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item: any) =>
+              type === "post" ? (
+                <BlogPostCard key={item.slug} {...item} />
+              ) : (
+                <BookCard key={item.slug} {...item} />
+              ),
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

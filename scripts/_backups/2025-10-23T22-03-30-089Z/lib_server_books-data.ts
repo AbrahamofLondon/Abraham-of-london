@@ -14,9 +14,7 @@ export type Book = {
 // TODO: replace with real loader from /content/books or a JSON registry.
 const BOOKS: Book[] = [];
 
-export function getAllBooks(): Book[] {
-  return BOOKS;
-}
+export function getAllBooks(): Book[] { return BOOKS; }
 export function getBookBySlug(slug: string): Book | undefined {
-  return BOOKS.find((b) => b.slug === slug);
+  return BOOKS.find(b => b.slug === slug);
 }

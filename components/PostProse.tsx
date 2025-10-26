@@ -1,1 +1,13 @@
-//components/PostProse.tsximport{ReactNode}from "react";export defaultfunctionPostProse({children}:{children:ReactNode}){return(<article className="proseprose-neutralmd:prose-lglg:prose-xlprose-h1:mb-3prose-h2:mt-10prose-h2:mb-3prose-p:leading-relaxedprose-blockquote:border-l-2prose-blockquote:italicprose-strong:font-semiboldmx-automax-w-3xl">{children}</article>);}
+// components/PostProse.tsx
+import { ReactNode } from "react";
+
+export default function PostProse({ children }: { children: ReactNode }) {
+  return (
+    <article className="prose prose-neutral md:prose-lg lg:prose-xl
+      prose-h1:mb-3 prose-h2:mt-10 prose-h2:mb-3 prose-p:leading-relaxed
+      prose-blockquote:border-l-2 prose-blockquote:italic
+      prose-strong:font-semibold mx-auto max-w-3xl">
+      {children}
+    </article>
+  );
+}
