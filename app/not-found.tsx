@@ -1,4 +1,4 @@
-﻿export default function NotFound() {
+export default function NotFound() {
   return (
     <main style={{padding:16,fontFamily:"system-ui,Segoe UI,Roboto"}}>
       {/* TODO: restore real content */}

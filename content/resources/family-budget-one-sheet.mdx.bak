@@ -1,14 +1,14 @@
 ---
 title: "Family Budget — One Sheet"
-kind "template"
+type "Template"
 slug: "family-budget-one-sheet"
 date: "2025-10-22"
 author: "Abraham of London"
 excerpt: "Monthly plan on one page: inflows, must-haves, goals, and a cash calendar."
-readTime: ""
+readTime: "4 min"
 category: "Family"
 tags: ["budget", "family", "finance"]
-coverImage: ""
+coverImage: "family-budget-one-sheet.jpg"
 ---
 
 ## Inflows (net)

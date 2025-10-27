@@ -1,131 +1,243 @@
-{
-"name": "codex-setup",
-"version": "1.0.0",
-"private": true,
-"engines": {
-"node": ">=20 <21"
-},
-"scripts": {
-"dev": "next dev",
-"build": "node -e \"console.log('>>> starting next build')\" && next build && node -e \"console.log('>>> finished next build')\"",
-"start": "next start",
-"prebuild": "npm run fix:global && npm run check:mdx && npm run fix:css-slash && npm run fix:tw-opacity && npm run downloads:build-safe && npm run downloads:manifest",
-"analyze": "cross-env ANALYZE=true next build",
-"orchestrate": "node scripts/orchestrate.mjs",
-"project:manage": "node scripts/global_project_manager.mjs --dry=false --fix=true --strict=false",
-"project:check": "node scripts/global_project_manager.mjs --dry=true --fix=false --strict=true",
-"fix:global": "npm run project:manage",
-"clean:global": "node scripts/global_project_manager.mjs",
-"fix:encoding": "node scripts/repair-encoding.mjs . --fix-line-endings --fix-whitespace",
-"fix:encoding:dry": "node scripts/repair-encoding.mjs . --dry-run",
-"fix:repo-all": "node scripts/repair-encoding.mjs . --restore-files --remove-contentlayer --fix-line-endings --fix-whitespace",
-"fix:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs",
-"fix:css-slash": "node scripts/postcss-guard-dryrun.mjs --write",
-"fix:bom": "node scripts/strip-bom-lf.mjs",
-"fix:downloads-frontmatter": "node scripts/fix-missing-download-frontmatter.mjs",
-"fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash",
-"clean:mdx:dry": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\clean-mdx.ps1 -WhatIfRun -SkipFrontMatter",
-"clean:mdx": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\clean-mdx.ps1 -SkipFrontMatter",
-"lint": "next lint",
-"typecheck": "tsc --noEmit",
-"guard:css": "node scripts/postcss-guard-dryrun.mjs",
-"check:mdx": "node scripts/check-mdx-for-html.js",
-"check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check",
-"check:pkg": "node scripts/check-json.mjs",
-"audit:images": "node scripts/audit-images.mjs",
-"lint:css:badchars": "node -e \"const fs=require('fs');const p='styles/globals.css';const t=fs.readFileSync(p,'utf8');if(/[\\ \\u200B\\\\u2009]/.test(t)){console.error('Invisible chars found in',p);process.exit(1)}\"",
-"test": "echo \"No tests configured yet. Skipping.\" && exit 0",
-"test:e2e": "playwright test",
-"test:e2e:headed": "playwright test --headed",
-"test:e2e:report": "playwright show-report",
-"pdfs": "node scripts/make-pdfs.mjs",
-"print:serve": "next start -p 5555",
-"print:pdfs": "node scripts/render-pdfs.mjs --base http://localhost:5555 --out public/downloads",
-"covers:events": "node scripts/covers/make-event-covers.mjs",
-"seed:downloads": "node scripts/generate-placeholder-downloads.mjs",
-"validate:downloads": "node scripts/validate-downloads.mjs",
-"validate:downloads:strict": "node scripts/validate-downloads.mjs --strict",
-"run:downloads": "node scripts/run-validate-downloads.mjs",
-"downloads:build-safe": "node scripts/ensure-download-aliases.mjs && npm run seed:downloads && (npm run run:downloads || node -e \"process.exit(0)\")",
-"downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
-"downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
-"downloads:export": "node scripts/print-pdfs.mjs",
-"downloads:manifest": "node scripts/build-download-manifest.mjs",
-"downloads:normalize:fix": "node scripts/normalize-downloads.mjs",
-"ci:downloads": "node scripts/run-validate-downloads.mjs",
-"ci:build": "cross-env PDF_ON_CI=1 npm run pdfs && (npm run ci:downloads || node -e \"process.exit(0)\") && npm run build",
-"prepare": "node scripts/prepare-playwright.mjs && node scripts/setup-husky.mjs"
-},
-"dependencies": {
-"@emotion/is-prop-valid": "^1.4.0",
-"@mdx-js/loader": "^3.0.1",
-"@mdx-js/react": "3.0.1",
-"@netlify/functions": "4.2.1",
-"@next/mdx": "14.2.32",
-"@react-email/components": "0.5.0",
-"@react-email/render": "1.2.1",
-"@tailwindcss/typography": "0.5.19",
-"autoprefixer": "10.4.21",
-"chokidar": "^3.6.0",
-"clsx": "2.1.1",
-"contentlayer": "^0.3.4",
-"cross-env": "10.0.0",
-"date-fns": "4.1.0",
-"fast-glob": "^3.3.2",
-"framer-motion": "12.23.12",
-"fuse.js": "7.1.0",
-"gray-matter": "4.0.3",
-"lucide-react": "0.542.0",
-"markdown-it": "^14.1.0",
-"markdown-it-anchor": "^9.2.0",
-"markdown-it-link-attributes": "^4.0.1",
-"next": "14.2.32",
-"next-contentlayer2": "^0.5.8",
-"next-mdx-remote": "4.4.1",
-"next-themes": "0.4.6",
-"nprogress": "0.2.0",
-"postcss": "8.5.6",
-"postcss-flexbugs-fixes": "^5.0.2",
-"postcss-preset-env": "^10.4.0",
-"puppeteer": "22.1.0",
-"react": "18.3.1",
-"react-dom": "18.3.1",
-"react-icons": "5.5.0",
-"remark": "15.0.1",
-"remark-html": "16.0.1",
-"remark-parse": "11.0.0",
-"resend": "6.1.2",
-"section-matter": "^1.0.0",
-"sharp": "0.34.3",
-"tailwindcss": "3.4.0"
-},
-"devDependencies": {
-"@axe-core/playwright": "^4.10.0",
-"@lhci/cli": "^0.13.0",
-"@netlify/plugin-nextjs": "5.14.2",
-"@next/bundle-analyzer": "14.2.32",
-"@playwright/test": "^1.48.2",
-"@types/mdx": "2.0.13",
-"@types/node": "20.14.10",
-"@types/react": "18.3.26",
-"@types/react-dom": "18.3.7",
-"@typescript-eslint/eslint-plugin": "7.18.0",
-"@typescript-eslint/parser": "7.18.0",
-"contentlayer2": "^0.5.8",
-"esbuild-plugin-tsconfig-paths": "^1.0.1",
-"eslint": "8.57.1",
-"eslint-config-next": "14.2.32",
-"glob": "^11.0.3",
-"husky": "^9.1.6",
-"rehype-raw": "^7.0.0",
-"rehype-stringify": "^10.0.1",
-"remark-gfm": "^4.0.1",
-"remark-rehype": "^11.1.2",
-"simple-icons": "15.14.0",
-"typescript": "5.5.4"
-}
-}
-"15.14.0",
-"typescript": "5.5.4"
-}
-}
+---
+title: "Event Strategy Blueprint"
+type: Strategy
+description: "A high-level blueprint for planning and executing multi-city events for audience engagement and community building."
+ogTitle: "Event Strategy Blueprint"
+ogDescription: "The high-level blueprint for effective community-building event execution."
+socialCaption: "Run events that build community and deliver value. #Events #Strategy #Leadership"
+slug: "event-strategy-blueprint"
+date: "2025-11-01"
+author: "Abraham of London"
+excerpt: "A blueprint for planning and executing multi-city events for audience engagement and community building."
+readTime: "5 min read"
+category: "Strategy"
+tags:
+  - "strategy"
+  - "events"
+  - "leadership"
+coverImage: "/assets/images/strategy/events-blueprint.jpg"
+coverAspect: "wide"
+coverFit: "cover"
+coverPosition: "center"
+draft: false
+---
+
+# Abraham of London — Events Blueprint (Rolling 1–5 Year Plan)
+
+**Principle:** Clarity, Capital, Character
+**Room standard:** Chatham (off the record)
+**Design:** Small rooms, high trust, practical standards
+
+---
+
+## Pillars (Event Types)
+
+1. **Salon** — curated conversation; 12–16 seats; 90 minutes
+2. **Workshop** — working session; 12–16 seats; 2–3 hours
+3. **Briefing** — principal update; 30–45 minutes; remote or in-room
+4. **Retreat** — 1–2 day deep work; 8–12 principals
+5. **Community** — invite-only dinners, stewardship forums
+
+---
+
+## Definition of Success
+
+> **The Abraham Standard:** A Principal leaves the room and implements **one structural decision within 7 days** that generates non-negotiable capital (financial, relational, or spiritual), increasing internal clarity and external credibility.
+
+---
+
+## Annual Themes & Quarterly Arcs
+
+* **Standards Council (Curatorial Board):** 1–2 named principals approve the **Annual Theme** and curatorial standards.
+* **Yearly theme (1)** sets tone (e.g., *Enduring Enterprise*).
+* **Quarter arcs (4)**: *Clarity → Capital → Cadence → Character*.
+* **IP Development Map (replaces "Library alignment"):** Each quarter produces **2–3 assets** (pre-reads, notes, frameworks, or white papers) that compound into durable IP.
+
+---
+
+## Segmentation & Access (Solve the HNW Tradeoff)
+
+**Two Financial Tracks**
+
+* **Principal Track:** Access bundled in an **Annual Advisory Retainer**.
+* **Guest Track:** Paid, tiered access *(guide rails)*
+
+  * Workshop: **£500–£1,500**
+  * Briefing: **£0–£200**
+  * Retreat: **£5,000+**
+
+**Fellowship Seats (1–2 per room)**
+
+* **Invite-only, fully subsidised**, nominated by a Principal/Partner.
+* Signals potential, not status; protects the room while developing up-and-comers.
+* **Conversion KPI:** Fellowship → **Paid Advisory Pilot**.
+
+**Social Contract (beyond Chatham)**
+
+* **No cold pitches.** Purpose is peer learning + collaboration.
+* **Device policy:** silent; no photos or posts.
+* **No sponsorship logos in room.** Co-hosts by Principal approval only.
+
+---
+
+## Capacity & Cadence
+
+* **Quarterly minimum:** 1 Salon, 1 Workshop, 1 Briefing
+* **Seat guardrails:** 12–16 seats; **85%+ attendance** target
+* **Quality bar:** **NPS ≥ 9.0**, **80% "actionable within 7 days"**
+
+---
+
+## Governance (RACI)
+
+**Roles**
+
+* **Principal (A):** Approves themes, standards, guests
+* **Program Director (R/A):** Calendar, OKRs, budget, QA
+* **Content Lead (R)::** Briefs, MDX, frameworks, run-of-show
+* **Ops Lead (R):** Venue, invites, comms, hospitality
+* **Partnerships (C):** Co-hosts, tightly guardrailed
+* **Stewardship (R):** Post-room follow-up, advisory pipeline
+
+**Decisions**
+
+* Themes & pillars — *Principal, Director*
+* Room list — *Principal & Director*, privacy check by *Ops*
+* Budget, venues — *Director*
+* Standards (Chatham, devices, social contract) — *Principal*
+
+---
+
+## Cadences (Elevated)
+
+* **Annual (Q4):** **Executive Readiness Briefing**; theme, budget, pillar targets (board pack)
+* **Quarterly (Q-1):** Room selection; **IP Development Map**; outreach plan
+* **Monthly:** **Portfolio Risk Assessment**; stewardship pipeline; run-sheet QA
+* **Weekly (8-week runway):** Checklist burn-down; confirmations
+* **48–72 hrs pre:** **Final Vetting & Room Orchestration**; Principal-specific **Briefing Pack**; seating chart
+* **<24 hrs:** Principal brief; **Ops Pack**; materials printed
+* **+24 hrs post:** **Chatham Post-Mortem (de-identified)**; NPS; stewardship activations; repo updates
+
+---
+
+## Guardrails (Budget & Quality)
+
+* **Cost per seat (target / ceiling):**
+
+  * **Workshop:** £90 / £140
+  * **Salon:** £60 / £100
+* **Net margin:** Breakeven on room; **margin from advisory/follow-on**
+* **No sponsorship logos** in room; co-hosts by Principal approval only
+
+---
+
+## KPIs (per quarter)
+
+* Attendance rate ≥ **85%**
+* NPS ≥ **9.0**
+* "Actionable within 7 days" ≥ **80%**
+* **Fellowship Conversion:** ≥ **X%** move to **Paid Advisory Pilot**
+* Materials: **≥ 3** new PDFs shipped; **≥ 500** downloads
+* List growth: **+7–10%**
+* Press: **0** (by design); Referrals: **≥ 2** principal introductions
+
+---
+
+## 1–5 Year Milestones (Rolling)
+
+**Year 1 — Pilot & Proof**
+
+* 4 salons, 4 workshops, 4 briefings
+* Library v1: 10 core PDFs (cadence, comms, stewardship, decision)
+
+**Year 2 — Scale & Systemise**
+
+* Each pillar runs quarterly with rhythm
+* Stewardship CRM, referral flywheel, materials index/search
+
+**Year 3 — Syndicate & Partners**
+
+* 2–3 **aligned co-hosts** (carefully curated)
+* **Fellowship cohort** (6–8 leaders; 6-month cadence)
+
+**Year 4 — Institute**
+
+* "**Standards & Stewardship Institute**" brand; curriculum map
+* Signature retreat; **de-identified case compendium**
+
+**Year 5 — Legacy**
+
+* Annual impact report (standards, alumni)
+* **Endowed Institute of Standards**; curation of **Global Chapter Principals**
+
+---
+
+## Tools & Technology (Seamless, discreet)
+
+* **CRM:** All guest history, NPS, advisory pipeline (Salesforce/HubSpot/custom)
+* **Comms/Invites:** White-label via **Resend**; encrypted list management; no Mailchimp
+* **RSVP/Seating:** Internal tool or lightweight CMS + protected forms
+* **Post-Room Archive:** Password/token-gated (Netlify Edge / middleware) for attendees only
+* **Analytics:** Minimal, privacy-respecting; event-level KPIs only
+* **Repo automation:** Build hooks generate PDFs; validation scripts enforce naming & covers
+
+---
+
+## IP & Materials (Authoritative)
+
+* **Pre-Read:** Standardised **2-page Foundational Brief** (terms, frames, debate scope)
+* **In-Room:** One-page **Run-of-Show**; printable cue sheets
+* **Post-Room:** **Chatham Post-Mortem (de-identified)** + **Action Standards** one-pager
+* **Library:** `/public/downloads/*.pdf` with cover images under `/assets/images/downloads/`
+
+---
+
+## Risk & Controls
+
+* **Privacy breach:** Guest NDA; Chatham brief; device policy; small rooms
+* **Quality drift:** Peer review; content checklist; post-mortems
+* **Over-extension:** Fixed cadence; **no ad-hoc rooms** without Director approval
+* **Partner misfit:** Values screen; **Principal veto** right
+
+---
+
+## Event Brief Template (single page)
+
+* **Title, Pillar, Date, Location, Seats (target / cap)**
+* **Purpose (3 lines)**, **Desired Outcomes (bullets)**
+* **20-min arc** (timeline), **Roles & RACI**
+* **Guest list v1 (owner)**; **Fellowship nominees (sponsor/principal)**
+* **Pre-read (links)**; **Materials** (notes + PDF filenames)
+* **Social Contract highlights:** Chatham, **No Cold Pitch**, device policy
+* **Stewardship plan:** who calls whom by when
+
+---
+
+## Repo Conventions
+
+Content lives in `content/events/<slug>.mdx`. **Front matter:**
+
+```yaml
+title: "Leadership Workshop — Standards that Endure"
+slug: "leadership-workshop"
+pillar: "workshop"                    # salon | workshop | briefing | retreat | community
+date: "2026-09-12T10:00:00+01:00"
+location: "London, UK"
+summary: "Standards, stewardship, decision-making."
+tags: ["leadership","stewardship","chatham"]
+inviteOnly: true
+chatham: true
+fellowshipSeats: 1                    # 0–2 typical
+preread:
+  title: "Standards that Endure — 2-Page Brief"
+  href: "/downloads/standards-brief.pdf"
+pdf: true                             # render a PDF of the notes
+pdfFileName: "Leadership_Workshop_Notes.pdf"
+coverImage: "/assets/images/events/leadership-workshop.jpg"
+assets:
+  - "/downloads/Weekly_Operating_Rhythm.pdf"
+  - "/downloads/Communication_Script_BPF.pdf"
+archive:
+  enabled: true
+  token: "generated-or-env-ref"       # use Edge/middleware to gate
+

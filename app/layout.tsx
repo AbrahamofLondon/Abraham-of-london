@@ -1,4 +1,4 @@
-﻿export const metadata = { title: "Abraham of London" };
+export const metadata = { title: "Abraham of London" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
