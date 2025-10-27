@@ -1,4 +1,4 @@
-﻿// components/VideoComponent.tsx
+// components/VideoComponent.tsx
 import * as React from "react";
 import clsx from "clsx";
 

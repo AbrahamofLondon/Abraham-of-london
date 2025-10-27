@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 export default function Error() {
   return (
     <main style={{padding:16,fontFamily:"system-ui,Segoe UI,Roboto"}}>

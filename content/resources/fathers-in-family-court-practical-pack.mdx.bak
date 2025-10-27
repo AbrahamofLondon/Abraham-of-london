@@ -1,6 +1,5 @@
 ---
 title: "Fathers in Family Court — Practical Pack"
-type: "pack"
 slug: "fathers-in-family-court-practical-pack"
 date: "2025-10-19"
 author: "Abraham of London"
@@ -10,7 +9,7 @@ readTime: "10 min"
 ---
 
 ---
-type: Resource # ADDED (Was missing but required)
+type: "Resource"
 title: Fathers in Family Court (Practical Pack)
 slug: fathers-in-family-court-practical-pack
 date: '2025-10-13'

@@ -1,4 +1,4 @@
-﻿// lib/ThemeContext.tsx
+// lib/ThemeContext.tsx
 "use client";
 
 import * as React from "react";
