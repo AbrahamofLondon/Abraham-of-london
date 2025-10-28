@@ -9,18 +9,22 @@ if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
 
+// --- Type Definitions ---
+
+// Define the core set of fields that will be present *if* requested
 export type DownloadMeta = {
   slug: string;
-  title?: string | null;
-  excerpt?: string | null;
-  coverImage?: string | null;   // e.g. /assets/images/downloads/foo.jpg
-  file?: string | null;         // e.g. /downloads/foo.pdf
-  coverAspect?: "book" | "square" | "16/9" | string | null;
-  coverFit?: "contain" | "cover" | string | null;
-  coverPosition?: "center" | "top" | "left" | "right" | string | null;
-  content?: string;             // optional full MD/MDX content
+  title: string | null;
+  excerpt: string | null;
+  coverImage: string | null;     // e.g. /assets/images/downloads/foo.jpg
+  file: string | null;           // e.g. /downloads/foo.pdf
+  coverAspect: "book" | "square" | "16/9" | string | null;
+  coverFit: "contain" | "cover" | string | null;
+  coverPosition: "center" | "top" | "left" | "right" | string | null;
+  content?: string;              // optional full MD/MDX content
 };
 
+type DownloadFrontmatter = { [K in keyof Omit<DownloadMeta, "slug" | "content">]: unknown };
 type FieldKey = keyof DownloadMeta;
 
 const downloadsDir = path.join(process.cwd(), "content", "downloads");
@@ -37,6 +41,9 @@ const DEFAULT_FIELDS: FieldKey[] = [
   "coverPosition",
 ];
 
+// --- Private Helpers ---
+
+/** Finds the full path to a download file, supporting .mdx and .md. */
 function resolveDownloadPath(slug: string): string | null {
   const real = slug.replace(/\.mdx?$/i, "");
   for (const ext of exts) {
@@ -46,39 +53,49 @@ function resolveDownloadPath(slug: string): string | null {
   return null;
 }
 
-function ensureLocal(p?: string | null): string | undefined {
-  if (!p) return undefined;
-  const s = String(p).trim();
-  if (!s) return undefined;
-  // Leave absolute URLs alone
-  if (/^https?:\/\//i.test(s)) return s;
-  // Make sure we always return a root-based path for Next/Image, etc.
-  return s.startsWith("/") ? s : `/${s.replace(/^\/+/, "")}`;
+/** Safely converts unknown to a trimmed string, or undefined if null/empty. */
+function safeTrimmedString(v: unknown): string | undefined {
+  const s = typeof v === "string" ? v.trim() : undefined;
+  return s || undefined;
 }
 
-/** Try to normalize likely locations for assets */
-function normalizeCoverImage(v: unknown): string | undefined {
-  const raw = ensureLocal(typeof v === "string" ? v : undefined);
-  if (!raw) return undefined;
-  // If user just wrote a filename, assume downloads images folder
-  if (!raw.startsWith("/assets/") && !raw.startsWith("/_next/") && !/^https?:\/\//i.test(raw)) {
-    return `/assets/images/downloads/${raw.replace(/^\/+/, "")}`;
-  }
-  return raw;
+/** Ensures a local path starts with a slash, or returns absolute URLs as-is. */
+function ensureLocalRoot(p: string): string {
+  // Assuming isExternalUrl utility is available, otherwise use the local regex
+  const isExternal = /^https?:\/\//i.test(p); 
+  if (isExternal) return p;
+  
+  const s = p.replace(/^\/+/, "");
+  return `/${s}`;
 }
 
-function normalizePdfFile(v: unknown): string | undefined {
-  const raw = ensureLocal(typeof v === "string" ? v : undefined);
+/**
+ * Normalizes an asset path, assuming common fallback locations if a bare filename is provided.
+ * @param v Raw frontmatter value.
+ * @param defaultPrefix The default prefix to prepend if a bare filename is used.
+ */
+function normalizeAssetPath(v: unknown, defaultPrefix: string): string | undefined {
+  const raw = safeTrimmedString(v);
   if (!raw) return undefined;
-  // If user wrote a bare filename, assume /downloads/
-  if (!raw.startsWith("/downloads/") && !/^https?:\/\//i.test(raw)) {
-    return `/downloads/${raw.replace(/^\/+/, "")}`;
+  
+  // If it's already an absolute URL, return it as-is (e.g., CDN link)
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  const cleanRooted = ensureLocalRoot(raw);
+  
+  // Check if it looks like a pre-rooted path (e.g., /assets/images/...)
+  if (cleanRooted.startsWith("/assets/") || cleanRooted.startsWith("/downloads/") || cleanRooted.startsWith("/_next/")) {
+      return cleanRooted;
   }
-  return raw;
+  
+  // If it's a bare filename, prepend the default prefix
+  // Ensure the default prefix itself is clean (ends with a single slash)
+  const cleanPrefix = defaultPrefix.endsWith('/') ? defaultPrefix : `${defaultPrefix}/`;
+  return ensureLocalRoot(`${cleanPrefix}${cleanRooted.replace(/^\/+/, "")}`);
 }
 
 /* ------------------------
-   Slug + single loader
+    Slug + single loader
 ------------------------- */
 
 export function getDownloadSlugs(): string[] {
@@ -90,9 +107,7 @@ export function getDownloadSlugs(): string[] {
 }
 
 /**
- * Read a single download by slug and return a partial object containing requested fields.
- * - Never throws on missing files; returns a minimal ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œNot FoundÃƒÂ¢Ã¢â€šÂ¬Ã‚Â entry instead.
- * - Normalizes strings (trim), asset paths, and avoids `undefined` in fields (uses null instead).
+ * Reads a single download by slug and returns a partial object containing requested fields.
  */
 export function getDownloadBySlug(
   slug: string,
@@ -101,94 +116,78 @@ export function getDownloadBySlug(
 ): DownloadMeta {
   const real = slug.replace(/\.mdx?$/i, "");
   const fullPath = resolveDownloadPath(real);
+  const out: Partial<DownloadMeta> = { slug: real };
 
   if (!fullPath) {
-    // Safe fallback: wonÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢t break build if a download MD is missing
-    const base: DownloadMeta = {
-      slug: real,
-      title: "Download Not Found",
-      excerpt: null,
-      coverImage: null,
-      file: null,
-      coverAspect: null,
-      coverFit: null,
-      coverPosition: null,
-      content: includeContent ? "" : undefined,
-    };
-    // Only keep requested fields
-    const out: any = { slug: base.slug };
-    for (const f of fields) out[f] = base[f] ?? null;
-    if (includeContent) out.content = base.content ?? "";
+    // Safe fallback for "Not Found"
+    out.title = "Download Not Found";
+    // We only include requested fields, defaulting to null/empty string
+    for (const f of fields) {
+      if (f !== "slug" && f !== "content") (out as any)[f] = null;
+    }
+    if (includeContent) out.content = "";
     return out as DownloadMeta;
   }
 
   const raw = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(raw);
-  const fm = (data || {}) as Record<string, unknown>;
+  const fm = data as DownloadFrontmatter;
 
-  // Construct output and normalize
-  const out: any = { slug: real };
-
-  for (const f of fields) {
+  // Function to map and normalize frontmatter fields
+  const getField = (f: FieldKey): string | null | undefined => {
+    const rawValue = fm[f as keyof DownloadFrontmatter];
+    
     switch (f) {
-      case "slug":
-        out.slug = real;
-        break;
-      case "title": {
-        const v = typeof fm.title === "string" ? fm.title.trim() : undefined;
-        out.title = v ?? null;
-        break;
-      }
-      case "excerpt": {
-        const v = typeof fm.excerpt === "string" ? fm.excerpt.trim() : undefined;
-        out.excerpt = v ?? null;
-        break;
-      }
-      case "coverImage": {
-        const v = normalizeCoverImage(fm.coverImage);
-        out.coverImage = v ?? null;
-        break;
-      }
-      case "file": {
-        const v = normalizePdfFile(fm.file);
-        out.file = v ?? null;
-        break;
-      }
-      case "coverAspect": {
-        const v = typeof fm.coverAspect === "string" ? fm.coverAspect.trim() : undefined;
-        out.coverAspect = v ?? null;
-        break;
-      }
-      case "coverFit": {
-        const v = typeof fm.coverFit === "string" ? fm.coverFit.trim() : undefined;
-        out.coverFit = v ?? null;
-        break;
-      }
-      case "coverPosition": {
-        const v = typeof fm.coverPosition === "string" ? fm.coverPosition.trim() : undefined;
-        out.coverPosition = v ?? null;
-        break;
-      }
-      case "content": {
-        // not usually requested; gated by `includeContent` param below
-        break;
-      }
+      case "title":
+      case "excerpt":
+      case "coverAspect":
+      case "coverFit":
+      case "coverPosition":
+        return safeTrimmedString(rawValue) ?? null;
+      
+      case "coverImage":
+        // Assets are typically stored under /assets/images/downloads/
+        return normalizeAssetPath(rawValue, "/assets/images/downloads") ?? null; 
+      
+      case "file":
+        // Files are typically stored under /downloads/
+        return normalizeAssetPath(rawValue, "/downloads") ?? null;
+      
       default:
-        // ignore unknowns
-        break;
+        // Should only be slug/content, handled outside
+        return undefined;
     }
+  };
+
+  // Populate output object with requested fields
+  for (const f of fields) {
+    if (f === "slug") {
+      out.slug = real;
+      continue;
+    }
+    if (f === "content") {
+      if (includeContent) out.content = content || "";
+      continue;
+    }
+    
+    // Get and assign the normalized value
+    (out as any)[f] = getField(f);
   }
 
-  if (includeContent) {
-    out.content = content || "";
+  // Ensure 'title' is never null if content exists (for sorting fallback)
+  if (out.title === null) {
+      out.title = real.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   return out as DownloadMeta;
 }
 
+/* ------------------------
+    Collection Loaders
+------------------------- */
+
 /**
- * Convenience: load several slugs at once.
- * Uses sane defaults for the typical card display fields.
+ * Convenience: load several downloads at once.
  */
 export function getDownloadsBySlugs(
   slugs: string[],
@@ -206,10 +205,14 @@ export function getAllDownloads(
 ): DownloadMeta[] {
   const slugs = getDownloadSlugs();
   const items = slugs.map((s) => getDownloadBySlug(s, fields));
+  
+  // Sort alphabetically by title (fallback to slug)
   items.sort((a, b) => {
     const at = (a.title || a.slug || "").toLowerCase();
     const bt = (b.title || b.slug || "").toLowerCase();
     return at.localeCompare(bt);
   });
-  return items;
+  
+  // Filter out any "Not Found" entries, though they shouldn't occur if slugs are correct
+  return items.filter(d => d.title !== "Download Not Found");
 }

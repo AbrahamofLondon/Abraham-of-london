@@ -1,34 +1,57 @@
 ---
-date: 2025-10-13
+kind: "template"
+type: "Download"
+title: "Family Altar Liturgy"
+slug: family-altar-liturgy
+date: '2025-10-13'
+author: Abraham of London
 readTime: 2 min read
 category: Resources
-author: Abraham of London
-type: \"Download\
-slug: \"family-altar-liturgy\
-title: '"FamilyAltarLiturgy"slug:"family-altar-liturgy"type:"template"slug:"family-altar-liturgy"type:"Download"title:"FamilyAltarLiturgy"date:2025-10-13author:"AbrahamofLondon"readTime:2minreadcategory:"Resources"'
+description: "A short, repeatable liturgy for daily or weekly family devotion (the 'Family Altar')."
+draft: false
 ---
 
-// pages/print/family-altar-liturgy.tsx
-import BrandFrame from "../../components/print/BrandFrame";
-import \* as React from "react";
 
-const FamilyAltarLiturgy = () => {
-return (
+    <BrandFrame
+      title="Family Altar Liturgy"
+      subtitle="Short. Kind. Repeatable. Suited for night or week's beginning."
+      pageSize="A4"
 
-<BrandFrame title="Family Altar Liturgy" subtitle="Short. Kind. Repeatable. Suited for night or weeks beginning.">
-  {/* ... rest of content */}
-  <div className="not-prose mt-8 text-[11.5px] text-[color:var(--color-on-secondary)/0.6]"> Keep it under 12 minutes Children go first End with one concrete step. </div>
-</BrandFrame>
-); }; export default FamilyAltarLiturgy;
+> 
+      <div className="space-y-6">
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h2 className="text-lg font-bold mb-2">I. Acknowledgment (2 min)</h2>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>**Leader:** "God is with us. What is one thing you're grateful for today?" (Everyone answers, children first.)</li>
+            <li>**All:** (Read a short verse like Psalm 118:24)</li>
+          </ol>
+        </div>
 
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h2 className="text-lg font-bold mb-2">II. Scripture & Reflection (5 min)</h2>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>**Leader:** Read 3-5 verses (e.g., from a Gospel or Proverbs).</li>
+            <li>**Leader:** Ask one open question: "What does this passage tell us about God/Jesus?"</li>
+            <li>**All:** Share a 1-sentence answer.</li>
+          </ol>
+        </div>
 
-
-
-
-
-
-
-
-
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h2 className="text-lg font-bold mb-2">III. Action & Intercession (5 min)</h2>
+          <ol className="list-decimal list-inside space-y-1 text-sm">
+            <li>**Leader:** "What is one specific thing we can do better tomorrow?" (The **concrete step**.)</li>
+            <li>**All:** Share one name/need to pray for (e.g., a friend, a struggle).</li>
+            <li>**Leader:** Close in prayer, lifting up the names and the concrete step.</li>
+          </ol>
+        </div>
+      </div>
+      
+      <Rule />
+      
+      <div className="not-prose mt-8 text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
+        Keep it under **12 minutes**. Children go first. End with one **concrete step**.
+      </div>
+    </BrandFrame>
+  );
 
 

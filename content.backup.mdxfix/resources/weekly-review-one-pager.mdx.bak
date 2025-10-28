@@ -1,0 +1,35 @@
+---
+# 🛑 CRITICAL FIX: Changed 'kind "Template"' to 'type: Template' (capitalized, no quotes)
+type: Template
+title: "Weekly Review — One Pager"
+slug: weekly-review-one-pager
+date: "2025-10-22"
+author: "Abraham of London"
+excerpt: "A one-pager to score outcomes 0–1, capture lessons, and set the next 3."
+readTime: "3 min"
+category: "Operations"
+tags: ["weekly", "review", "ops"]
+coverImage: "weekly-review-one-pager.jpg"
+---
+
+## Score (0-1)
+
+- Outcome 1: ___ /1
+- Outcome 2: ___ /1
+- Outcome 3: ___ /1
+
+## Lessons (facts & fixes)
+
+- What slipped? Why? One prevention next week.
+
+## Debt burn-down (top 3)
+
+- 1. ***
+- 2. ***
+- 3. ***
+
+## Next week Top 3 outcomes
+
+1. **_** 2) **_** 3) ___
+
+> **Rule of 3:** if you hit the three, you had a good week.

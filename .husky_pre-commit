@@ -1,8 +1,8 @@
-#!/usr/bin/env sh
+# Husky v10: no shebang, no sourcing
+echo "⏳ Running Tailwind slash-opacity checks..."
+node scripts/convert-tailwind-slash-opacity.mjs
+node scripts/postcss-guard-dryrun.mjs
 
-echo "Running Tailwind slash-opacity checks…"
-npm run fix:tw-opacity --silent
-npm run guard:css --silent
-
-# run lint-staged if you use it, otherwise skip
-# npx lint-staged || true
+# Optional gates (keep fast)
+npm run -s lint || exit 1
+npm run -s typecheck || true

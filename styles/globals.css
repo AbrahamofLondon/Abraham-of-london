@@ -2,21 +2,10 @@
 /* ---------- Global Styles & Optimization --------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* 1) Local self-hosted fonts (consistent render incl. print) */
-@font-face {
-  font-family: "Inter";
-  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Playfair Display";
-  src: url("/fonts/PlayfairDisplay-Variable.woff2") format("woff2-variations");
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-}
+/* 1) Local self-hosted fonts 
+   NOTE: The @font-face declarations are REMOVED. 
+   They are now injected and optimized via next/font/local in the Next.js layout. 
+*/
 
 /* 2) Tailwind base/components/utilities */
 @tailwind base;
@@ -28,14 +17,17 @@
 /* ------------------------------------------------------------------- */
 
 :root {
-  /* Fonts */
-  --font-sans:
-    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  /* Fonts: These variables now use the output from next/font/local (e.g., in lib/fonts/index.ts).
+     The fallback stack is still included for maximum safety, but the custom font
+     is linked via the injected CSS variable.
+  */
+  --font-family-sans: var(--font-family-sans),
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
-  --font-serif:
-    "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-family-serif: var(--font-family-serif),
+    Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* Palette */
+  /* Palette - Light Mode */
   --color-primary: #0b2e1f; /* deep-forest */
   --color-primary-hover: #16573d; /* lighter deep forest */
   --color-on-primary: #faf7f2; /* warm-cream */
@@ -47,11 +39,12 @@
   --color-accent-hover: #a0833f;
   --color-on-accent: #ffffff;
 
-  --color-lightGrey: #e5e5e5;
-  --color-warmWhite: #faf7f2; /* alias */
-  --color-midGreen: #4b8b6b;
+  /* UI/Generic Colors */
+  --color-lightGrey: #e5e5e5; /* divider/border */
+  --color-warmWhite: #ffffff; /* surface/card background */
+  --color-midGreen: #4b8b6b; /* list marker/utility */
 
-  /* Fluid type scale */
+  /* Fluid type scale - kept as-is */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
   --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
   --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.45rem);
@@ -65,24 +58,24 @@
 /* ------------------------------------------------------------------- */
 
 .dark {
-  /* Primary/Text */
-  --color-primary: #c5a352;
-  --color-primary-hover: #e9d79a;
-  --color-on-primary: #0f172a;
+  /* Primary/Text (Invert primary/accent for dark backgrounds) */
+  --color-primary: #e9d79a; /* light gold/accent as main color */
+  --color-primary-hover: #c5a352;
+  --color-on-primary: #0f172a; /* dark slate */
 
   /* Background/Surface */
-  --color-secondary: #111827; /* slate-900-ish */
-  --color-on-secondary: #f8fafc; /* slate-50-ish */
+  --color-secondary: #111827; /* slate-900-ish dark bg */
+  --color-on-secondary: #f8fafc; /* slate-50-ish light text */
 
-  /* Accent */
-  --color-accent: #86efac;
+  /* Accent (A more vibrant color for contrast) */
+  --color-accent: #86efac; /* bright light green */
   --color-accent-hover: #4b8b6b;
   --color-on-accent: #111827;
 
   /* UI */
-  --color-lightGrey: #2d3748; /* divider */
+  --color-lightGrey: #2d3748; /* dark divider */
   --color-warmWhite: #1f2937; /* card surface */
-  --color-midGreen: #86efac;
+  --color-midGreen: #86efac; /* list marker/utility */
 }
 
 /* ------------------------------------------------------------------- */
@@ -104,7 +97,8 @@ body {
   overflow-x: hidden;
 }
 body {
-  font-family: var(--font-sans);
+  /* Use the updated CSS variable name */
+  font-family: var(--font-family-sans); 
   font-size: var(--step-0);
   line-height: 1.85;
   color: var(--color-on-secondary);
@@ -120,7 +114,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif);
+  /* Use the updated CSS variable name */
+  font-family: var(--font-family-serif);
   color: var(--color-primary);
   text-wrap: balance;
   font-weight: 700;
@@ -137,8 +132,9 @@ a:hover {
 
 /* Selection & Focus */
 ::selection {
-  background: #e9d79a;
-  color: var(--color-primary);
+  /* Use color variable for consistency */
+  background: var(--color-accent); 
+  color: var(--color-on-accent); 
 }
 :focus-visible {
   outline: 2px solid var(--color-accent);
@@ -176,40 +172,70 @@ video {
 /* ------------------------------------------------------------------- */
 
 @layer components {
-  /* Buttons */
-  .aol-btn {
-    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold text-white focus:outline-none focus-visible:ring-2;
+  /* Primary Button */
+  .aol-btn-primary {
+    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold focus:outline-none focus-visible:ring-2;
     background-color: var(--color-primary);
-    --tw-ring-color: rgba(11, 46, 31, 0.35);
+    color: var(--color-on-primary);
+    /* Use a derived color for focus ring */
+    --tw-ring-color: color-mix(in srgb, var(--color-primary) 35%, transparent); 
   }
-  .aol-btn:hover {
+  .aol-btn-primary:hover {
     background-color: var(--color-primary-hover);
   }
 
-  /* Card */
+  /* Secondary/Accent Button (New, for better design flexibility) */
+  .aol-btn-accent {
+    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold focus:outline-none focus-visible:ring-2;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    /* Use a derived color for focus ring */
+    --tw-ring-color: color-mix(in srgb, var(--color-accent) 35%, transparent); 
+  }
+  .aol-btn-accent:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  /* Card Component */
   .card {
     border: 1px solid var(--color-lightGrey);
     padding: 28px;
-    box-shadow: 0 4px 18px rgba(11, 46, 31, 0.08);
+    background-color: var(--color-warmWhite); /* Use warmWhite variable */
+    border-radius: 12px;
+    
+    /* Dynamic Shadow (Primary color based for light mode) */
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--color-primary) 8%, transparent);
+    
     transition:
       transform 0.25s ease,
-      box-shadow 0.25s ease;
-    background-color: #ffffff;
-    border-radius: 12px;
+      box-shadow 0.25s ease,
+      background-color 0.3s ease;
   }
+  
   .dark .card {
-    background-color: var(--color-warmWhite);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    /* Dynamic Shadow (Black based for dark mode) */
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35); 
   }
+  
   .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(11, 46, 31, 0.12);
+    /* Hover shadow is slightly more visible */
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--color-primary) 12%, transparent);
   }
+  
+  .dark .card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
 
   /* Background pattern */
   .pattern-bg {
     background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
     background-size: 20px 20px;
+  }
+  .dark .pattern-bg {
+    /* Adjusted for dark mode visibility */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   }
 }
 
@@ -217,6 +243,7 @@ video {
 /* ---------- Typography Polish (Prose Overrides) -------------------- */
 /* ------------------------------------------------------------------- */
 
+/* Base Prose Colors (Light Mode) */
 .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
@@ -224,25 +251,29 @@ video {
   --tw-prose-bold: var(--color-primary);
   --tw-prose-quotes: var(--color-on-secondary);
   --tw-prose-quote-borders: var(--color-lightGrey);
+  --tw-prose-code: var(--color-primary);
 }
+
+/* Dark Mode Prose Colors */
 .dark .prose {
-  --tw-prose-body: var(--color-on-secondary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-accent);
+  --tw-prose-body: var(--color-on-secondary); /* light text */
+  --tw-prose-headings: var(--color-primary); /* light primary/gold */
+  --tw-prose-links: var(--color-accent); /* bright green */
   --tw-prose-bold: var(--color-on-secondary);
   --tw-prose-quotes: var(--color-on-secondary);
   --tw-prose-quote-borders: var(--color-lightGrey);
+  --tw-prose-code: var(--color-primary);
 }
 
 /* Serif headings */
 .prose h1,
 .prose h2,
 .prose h3 {
-  font-family: var(--font-serif);
+  font-family: var(--font-family-serif);
   font-weight: 700;
 }
 
-/* Heading sizes */
+/* Heading sizes - kept as-is */
 .prose h1 {
   font-size: var(--step-4);
   line-height: 1.1;
@@ -261,10 +292,10 @@ video {
   margin: 2rem 0 0.6rem;
 }
 
-/* Body text */
+/* Body text - kept as-is */
 .prose p,
 .prose li {
-  font-family: var(--font-sans);
+  font-family: var(--font-family-sans);
   font-size: var(--step-0);
   line-height: 1.85;
   margin-block: 1rem;

@@ -1,32 +1,33 @@
 // ./pages/about.tsx
 
+import React, { useMemo } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import SEOHead from "@/components/SEOHead";
 import AboutSection, { type Achievement } from "@/components/homepage/AboutSection";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
-import { sanitizeSocialLinks } from "@/lib/social";
-import clsx from "clsx"; // Added clsx for cleaner class strings
+import { sanitizeSocialLinks, type SocialLink } from "@/lib/social";
+import clsx from "clsx";
 
-// --- Component: FeatureCard (Refined Styling) ---
-/** Simple card for featured links, refined for the new grid layout */
-function FeatureCard({
-  href,
-  title,
-  sub,
-  icon = "📚", // Added an optional icon prop
-}: {
+// --- Type Definitions ---
+
+/** Props for the FeatureCard component */
+interface FeatureCardProps {
   href: string;
   title: string;
   sub?: string;
   icon?: string;
-}) {
+}
+
+// --- Component: FeatureCard (Refined Styling & Type Safety) ---
+/** Simple card for featured links, refined for the new grid layout */
+function FeatureCard({ href, title, sub, icon = "📚" }: FeatureCardProps) {
   return (
-    <li className="list-none"> {/* Removes default list styling */}
+    <li className="list-none">
       <Link
         href={href}
-        className="block rounded-xl border border-lightGrey bg-white p-4 shadow-sm transition hover:shadow-md hover:border-[color:var(--color-primary)/0.3] focus:outline-none focus-visible:ring-2 focus-visible:ring-forest"
+        className="block rounded-xl border border-lightGrey bg-white p-4 shadow-sm transition hover:shadow-md hover:border-[color:var(--color-primary)/0.3] focus:outline-none focus-visible:ring-2 focus-visible:ring-forest group"
         prefetch={false}
         aria-label={sub ? `${title} — ${sub}` : title}
       >
@@ -52,11 +53,44 @@ function FeatureCard({
 export default function AboutPage() {
   const CANONICAL = absUrl("/about");
 
-  const portrait = siteConfig.authorImage;
-  const portraitAbs = absUrl(
-    portrait?.startsWith("/") ? portrait : siteConfig.authorImage
-  );
+  // --- Data & Memoization for Derived Values ---
 
+  const {
+    author,
+    authorImage,
+    siteUrl,
+    ogImage,
+    twitterImage,
+    socialLinks,
+  } = siteConfig;
+
+  const portrait = authorImage;
+  const portraitAbs = useMemo(() => absUrl(portrait?.startsWith("/") ? portrait : authorImage), [portrait, authorImage]);
+
+  const ogImageAbs = useMemo(() => (
+    ogImage?.startsWith("/") ? absUrl(ogImage) : ogImage
+  ), [ogImage]);
+
+  const twitterImageAbs = useMemo(() => (
+    twitterImage?.startsWith("/") ? absUrl(twitterImage) : twitterImage
+  ), [twitterImage]);
+
+  const sameAs: string[] = useMemo(() => (
+    Array.from(
+      new Set(
+        (sanitizeSocialLinks(socialLinks || []) as SocialLink[])
+          .map((l) => l.href)
+          .filter((href) => /^https?:\/\//i.test(href))
+      )
+    )
+  ), [socialLinks]);
+  
+  // --- Constant Content ---
+
+  const pageTitle = "About Abraham of London";
+  const pageDesc =
+    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history.";
+  
   const bio =
     "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help fathers, young founders, and enterprise leaders build durable brands and products with clear thinking, principled execution, and a long view.";
 
@@ -93,62 +127,44 @@ export default function AboutPage() {
     },
   ];
 
-  // Social sameAs (JSON-LD)
-  const sameAs = Array.from(
-    new Set(
-      (sanitizeSocialLinks(siteConfig.socialLinks || []) || [])
-        .map((l) => l.href)
-        .filter((href) => /^https?:\/\//i.test(href))
-    )
-  );
+  // --- JSON-LD Schema (Memoized) ---
+  const jsonLdSchema = useMemo(() => {
+    const webPageSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: pageTitle,
+      url: CANONICAL,
+      inLanguage: "en-GB",
+      description: pageDesc,
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "About", item: CANONICAL },
+        ],
+      },
+    };
 
-  const ogImageAbs = siteConfig.ogImage?.startsWith("/")
-    ? absUrl(siteConfig.ogImage)
-    : siteConfig.ogImage;
+    const personSchema = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: author,
+      url: siteUrl,
+      image: portraitAbs,
+      ...(sameAs.length ? { sameAs } : {}),
+    };
 
-  const twitterImageAbs = siteConfig.twitterImage?.startsWith("/")
-    ? absUrl(siteConfig.twitterImage)
-    : siteConfig.twitterImage;
+    return { webPageSchema, personSchema };
+  }, [CANONICAL, pageTitle, pageDesc, siteUrl, author, portraitAbs, sameAs]);
 
-  const pageTitle = "About Abraham of London"; // ✅ UPGRADE: Richer page title
-  const pageDesc =
-    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history."; // ✅ UPGRADE: Richer page description
-
-  // JSON-LD (web page + person)
-  const webPageSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: pageTitle,
-    url: CANONICAL,
-    inLanguage: "en-GB",
-    description: pageDesc,
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.siteUrl },
-        { "@type": "ListItem", position: 2, name: "About", item: CANONICAL },
-      ],
-    },
-  };
-
-  const personSchema: Record<string, any> = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: siteConfig.author,
-    url: siteConfig.siteUrl,
-    image: portraitAbs,
-    ...(sameAs.length ? { sameAs } : {}),
-  };
+  // --- Render ---
 
   return (
     <Layout pageTitle={pageTitle}>
       <SEOHead
         title={pageTitle}
-        // NOTE ON FIX: This line previously caused a Type Error because 'profile' was not
-        // allowed by the SEOHead component's interface. It assumes the developer has
-        // updated the SEOHead interface (e.g., in components/SEOHead.tsx) to include 'profile'.
-        // If not, this must be changed to type="website" to compile.
-        type="website"
+        // Assuming SEOHead interface has been updated to accept 'website'
+        type="website" 
         description={pageDesc}
         slug="/about"
         coverImage={ogImageAbs || undefined}
@@ -160,30 +176,27 @@ export default function AboutPage() {
         {/* JSON-LD */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema.webPageSchema) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema.personSchema) }}
         />
       </SEOHead>
 
       {/* Main Content Grid: Two columns on desktop */}
       <div className="container mx-auto max-w-6xl px-4 pt-10 pb-20 md:grid md:grid-cols-[1fr,280px] md:gap-12">
-
         {/* === LEFT COLUMN: Narrative Sections & Resources === */}
         <div className="md:order-2 space-y-16">
-
-          {/* Hero/About Section (Left Column) */}
-          {/* Note: AboutSection component handles its own layout, so we just wrap it. */}
+          {/* Hero/About Section */}
           <AboutSection
             id="about"
             bio={bio}
             achievements={achievements}
             portraitSrc={portrait}
-            portraitAlt="Abraham of London portrait" // Added missing alt text to satisfy ESLint warning (hypothetical fix)
-            priority // Keep priority on the LCP image
-            className="!px-0 !py-0" // Remove padding/margin from AboutSection itself
+            portraitAlt={`${author} portrait`} // Dynamically set alt text
+            priority
+            className="!px-0 !py-0"
           />
 
           <hr className="border-t border-lightGrey mx-auto max-w-lg" />
@@ -237,7 +250,6 @@ export default function AboutPage() {
 
         {/* --- RIGHT COLUMN: Featured/Quick Links (Fixed Width Sidebar) --- */}
         <div className="md:order-3 md:col-start-2 space-y-12 pt-16 md:pt-0">
-
           {/* Featured Writing */}
           <section aria-labelledby="featured-writing" className="mt-12 md:mt-0">
             <h2
@@ -267,9 +279,9 @@ export default function AboutPage() {
               />
             </ul>
             <div className="mt-6 text-center">
-                <Link href="/blog" className="text-sm font-medium text-forest hover:underline underline-offset-2">
-                  View All Writing →
-                </Link>
+              <Link href="/blog" className="text-sm font-medium text-forest hover:underline underline-offset-2">
+                View All Writing →
+              </Link>
             </div>
           </section>
 
@@ -339,8 +351,8 @@ export default function AboutPage() {
           <Link
             href="/contact"
             className={clsx(
-                "aol-btn aol-btn-primary w-full justify-center text-lg mt-8 mb-12",
-                "bg-forest text-cream hover:brightness-90 focus:ring-forest"
+              "aol-btn aol-btn-primary w-full justify-center text-lg mt-8 mb-12",
+              "bg-forest text-cream hover:brightness-90 focus:ring-forest"
             )}
             prefetch={false}
           >
