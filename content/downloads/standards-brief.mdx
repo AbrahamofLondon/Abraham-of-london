@@ -1,40 +1,57 @@
 ---
-type:"template"
-slug:"standards-brief"
-type:Download
-title:"StandardsBrief"
-date:2025-10-13
-author:"AbrahamofLondon"
-readTime:2min
-readcategory:"Resources"'
+kind: "template"
+type: "Download"
+title: "Standards Brief"
+slug: "standards-brief"
+readTime: "1 min read"
+date: 2025-10-13
+author: "Abraham of London"
+category: Resources
+pdfPath: "/downloads/standards-brief.pdf"
+coverImage: "/assets/images/downloads/standards-brief.jpg"
+tags:
+  - standards
+  - checklist
+  - self-governance
 ---
 
-// pages/print/standards-brief.tsx
-import BrandFrame from "../../components/print/BrandFrame";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark";
-import \* as React from "react";
 
-const StandardsBrief = () => {
-return (
+  return (
+    <>
+      <ResourcesCTA title="Standards Pack" downloads={[
+        { href: "/downloads/standards-brief.pdf", label: "Standards Brief (PDF)" },
+        { href: "/downloads/leaders-cue-card-two-up.pdf", label: "Cue Card (Wallet Size)" },
+      ]} />
 
-<BrandFrame title="Standards Brief" subtitle="Protect people, work, and nameespecially under pressure." pageSize="A4">
-  <h2>1) Decisions</h2>
-  {/* ... rest of content */}
-  <div className="not-prose mt-8 text-[11.5px] text-[color:var(--color-on-secondary)/0.6] pt-6 border-t border-lightGrey/80 flex justify-between items-center">
-    <span>Use in onboarding quarterly reviews incident retros.</span>
-    <EmbossedBrandMark src="/assets/images/abraham-logo.jpg" alt="Abraham of London Standard Mark" width={40} height={40} effect="emboss" baseColor="transparent" />
-  </div>
-</BrandFrame>
-); }; export default StandardsBrief;
+      <Rule />
 
+      ## The 5 Standards That Endure
 
+      This is a 1-page summary for rapid self-governance.
 
+      ### Daily Non-Negotiables (24/7)
 
+      * **Altar:** 10 minutes of Scripture & Prayer.
+      * **Order:** Zero inbox, clear desk, made bed.
+      * **Tone:** Speak no contempt. No sarcasm, no excuses.
+      * **Focus:** Complete the most difficult task by 11 AM.
 
+      ### Weekly Rhythm (Review)
 
+      * **Sabbath:** 24 hours without hustling or buying.
+      * **Council:** Review week with spouse/partner.
+      * **Service:** Serve someone who cannot repay you.
 
+      ### Quarterly Audit (Strategy)
 
+      * **Walk the House:** Where is chaos winning?
+      * **Walk the Calendar:** Does time reflect mission?
+      * **Walk the Statement:** Is spending aligned with standards?
+      
+      <Rule />
 
-
-
+      <p>This standard is for building legacy, not chasing influence.</p>
+    </>
+  );
+}
 

@@ -1,96 +1,97 @@
-import Head from "next/head";
-import Link from "next/link"; // Use Link for internal navigation
-import { Geist, Geist_Mono } from "next/font/google";
-import styles from "@/styles/Home.module.css"; // Assuming this path for CSS Modules
+// ./pages/index.js
+import React from "react";
+import Link from "next/link";
+import Image from "next/image"; // Next.js Image component for performance
+import Layout from "@/components/Layout"; // Assuming a shared Layout component
+import SEOHead from "@/components/SEOHead"; // Assuming a shared SEOHead component
 
-// --- Font Setup ---
-// Keeping the Geist fonts as they are a modern best practice
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// NOTE: Font variables should typically be handled in the main Layout or _app.tsx file.
+// We will assume the Geist fonts are applied globally or via the Layout component.
 
 // --- Component ---
 
 export default function Home() {
   const siteName = "Abraham of London";
   const tagline = "Principled Strategy. Durable Execution.";
+  const pageTitle = `${siteName} | ${tagline}`;
+  const pageDesc = "Quiet counsel and durable execution for leaders committed to the long view: fathers, young founders, and enterprise teams.";
 
   return (
-    <>
-      <Head>
-        <title>{siteName} | {tagline}</title> {/* ✅ OVERHAUL: Changed Title */}
-        <meta name="description" content="Quiet counsel and durable execution for fathers, young founders, and enterprise teams." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <Layout pageTitle={siteName}>
+      <SEOHead
+        title={pageTitle}
+        description={pageDesc}
+        slug="/"
+        // Assuming siteConfig is available to populate social/OG tags in Layout/SEOHead
+      />
 
-      <div
-        className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
-      >
-        <main className={styles.main}>
-          {/* Main Hero Content */}
-          <header className={styles.header}>
-            <h1 className={styles.headline}>
-              {siteName}
-            </h1>
-            <p className={styles.tagline}>
-              {tagline}
-            </p>
-          </header>
+      {/* Main Content: Centered Hero Section with Tailwind */}
+      <main className="flex min-h-[calc(100vh-80px)] w-full flex-col items-center justify-center p-4 text-center md:p-10">
+        
+        {/* Logo/Icon (Placeholder for LCP optimization) */}
+        <div className="mb-8">
+            {/* NOTE: Replace with actual logo path and size. Assuming a stylized 'A' or symbol. */}
+            <Image 
+                src="/logo-symbol.svg"
+                alt={siteName}
+                width={80}
+                height={80}
+                priority 
+                className="mx-auto h-20 w-20"
+            />
+        </div>
 
-          <section className={styles.heroContent}>
-            <p className={styles.intro}>
-              I provide **quiet counsel** and durable execution for leaders committed to the long view: **fathers**, **young founders**, and **enterprise teams**. My focus is on clarity, stewardship, and enduring impact over fleeting noise.
-            </p>
+        {/* Header/Headline */}
+        <header className="mb-10 max-w-4xl">
+          <h1 className="font-serif text-5xl font-extrabold tracking-tight text-deepCharcoal sm:text-7xl md:text-8xl">
+            {siteName}
+          </h1>
+          <p className="mt-4 font-sans text-xl font-medium text-[color:var(--color-primary)] sm:text-2xl">
+            {tagline}
+          </p>
+        </header>
 
-            <div className={styles.ctas}>
-              {/* Primary Call to Action */}
-              <Link
-                href="/about"
-                className={styles.primary}
-                aria-label="Learn more about Abraham of London's principles and practice"
-              >
-                Explore the Practice →
-              </Link>
+        {/* Hero Content / Introduction */}
+        <section className="max-w-2xl">
+          <p className="text-lg font-light leading-relaxed text-[color:var(--color-on-secondary)/0.9] md:text-xl">
+            I provide **quiet counsel** and durable execution for leaders committed to the long view: **fathers**, **young founders**, and **enterprise teams**. My focus is on clarity, stewardship, and enduring impact over fleeting noise.
+          </p>
+        </section>
 
-              {/* Secondary Call to Action */}
-              <Link
-                href="/contact"
-                className={styles.secondary}
-                aria-label="Contact Abraham of London for counsel or partnership"
-              >
-                Contact for Counsel
-              </Link>
-            </div>
-          </section>
+        {/* Call to Actions */}
+        <div className="mt-10 flex flex-col justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+          {/* Primary CTA: Explore */}
+          <Link
+            href="/about"
+            className="aol-btn aol-btn-primary group inline-flex items-center justify-center bg-forest text-cream hover:bg-forest/90"
+            aria-label="Learn more about Abraham of London's principles and practice"
+            prefetch={false}
+          >
+            Explore the Practice
+            <span aria-hidden="true" className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+          </Link>
 
-          {/* Placeholder for Ventures/Highlights (optional) */}
-          <div className={styles.highlights}>
-            <p>
-              Featured in: *HBR*, *The Wall Street Journal*, *The Federalist*
-            </p>
-          </div>
+          {/* Secondary CTA: Contact */}
+          <Link
+            href="/contact"
+            className="aol-btn aol-btn-secondary inline-flex items-center justify-center border-deepCharcoal text-deepCharcoal hover:border-forest hover:text-forest"
+            aria-label="Contact Abraham of London for counsel or partnership"
+            prefetch={false}
+          >
+            Contact for Counsel
+          </Link>
+        </div>
 
-        </main>
+        {/* Highlights / Social Proof (Discreet) */}
+        <div className="mt-16 max-w-md">
+          <p className="text-sm font-sans font-light italic text-[color:var(--color-on-secondary)/0.7]">
+            Quietly serving leaders featured in: *HBR*, *The Wall Street Journal*, *The Federalist*
+          </p>
+        </div>
 
-        {/* Simplified Footer */}
-        <footer className={styles.footer}>
-          <nav aria-label="Quick links">
-            <Link href="/blog">Writing</Link>
-            <Link href="/ventures">Ventures</Link>
-            <Link href="/contact">Contact</Link>
-            <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer">
-              Built with Next.js
-            </a>
-          </nav>
-        </footer>
-      </div>
-    </>
+      </main>
+
+      {/* Footer is now assumed to be part of the shared Layout component */}
+    </Layout>
   );
 }

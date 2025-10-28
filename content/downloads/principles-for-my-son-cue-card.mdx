@@ -1,6 +1,7 @@
 ---
+kind: "template"
 readTime: "2 min read"
-type: Download
+type: "Download"
 title: "Principles For My Son Cue Card"
 slug: principles-for-my-son-cue-card
 date: 2025-10-13
@@ -12,44 +13,37 @@ coverImage: ''
 draft: false
 ---
 
-// This file is used for content extraction only. The logic for the printable page is in:
-// pages/print/principles-for-my-son-cue-card.tsx
-import BrandFrame from "../../../components/print/BrandFrame";
-import EmbossedBrandMark from "../../../components/EmbossedBrandMark";
-import * as React from "react";
 
-const PrinciplesForMySonCueCard = () => {
-return (
+    <BrandFrame
+      title="Principles for My Son Cue Card"
+      subtitle="Two-up A6: cut, carry, and read a line a day."
+      pageSize="A6"
+      marginsMm={6}
 
-<BrandFrame
-  title="Principles for My Son Cue Card"
-  subtitle="Two-up A6: cut, carry, and read a line a day."
-  pageSize="A6" 
-  marginsMm={6}
->
-  <div className="flex flex-col h-full text-[8pt] p-1">
-    {/* ACTUAL CUE CARD CONTENT GOES HERE */}
+> 
+      <div className="flex flex-col h-full text-[8pt] p-1">
+        {/* ACTUAL CUE CARD CONTENT GOES HERE */}
 
-    <div className="text-center font-bold text-[9pt] border-b pb-1 mb-1">
-      The Covenant of Character
-    </div>
+        <div className="text-center font-bold text-[9pt] border-b pb-1 mb-1">
+          The Covenant of Character
+        </div>
 
-    <ol className="list-decimal list-inside space-y-1">
-      <li className="font-semibold">Govern your tongue. Say less, mean more.</li>
-      <li>Do the hard work that no one will see.</li>
-      <li>Own your sin immediately, without excuse.</li>
-      <li>Serve the weak and never ask for thanks.</li>
-      <li>Build a legacy, not a reputation.</li>
-      <li>Keep your word; your 'yes' is your bond.</li>
-      <li>Master a craft; reject mediocrity.</li>
-      <li>Worship Christ alone; reject all idols.</li>
-    </ol>
+        <ol className="list-decimal list-inside space-y-1">
+          <li className="font-semibold">Govern your tongue. Say less, mean more.</li>
+          <li>Do the hard work that no one will see.</li>
+          <li>Own your sin immediately, without excuse.</li>
+          <li>Serve the weak and never ask for thanks.</li>
+          <li>Build a legacy, not a reputation.</li>
+          <li>Keep your word; your 'yes' is your bond.</li>
+          <li>Master a craft; reject mediocrity.</li>
+          <li>Worship Christ alone; reject all idols.</li>
+        </ol>
 
-    <div className="mt-auto pt-2 text-center text-[7pt] text-gray-500">
-      <EmbossedBrandMark /> | A Father's Principle.
-    </div>
+        <div className="mt-auto pt-2 text-center text-[7pt] text-gray-500">
+          <EmbossedBrandMark /> | A Father's Principle.
+        </div>
+      </div>
+    </BrandFrame>
+  );
 
-  </div>
-</BrandFrame>
-); }; export default PrinciplesForMySonCueCard;
 

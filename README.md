@@ -1,3 +1,7 @@
+---
+title: "Abraham of London — Orchestra Grand Master (Apex Edition)"
+---
+
 Abraham of London
 
 The official website of Abraham of London €" built with Next.js, TypeScript, and Tailwind CSS, designed to balance speed, scalability, and silent premium signals.

@@ -1,37 +1,50 @@
-﻿// pages/print/post/[slug].tsx
-import { allPosts, type Post } from "contentlayer/generated"; // Assuming 'allPosts' is the collection
+// pages/print/post/[slug].tsx
+import type { GetStaticPaths, GetStaticProps } from "next";
+import Head from "next/head";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
-import * as React from "react";
+import { mdxComponents } from "@/lib/mdx-components";
 
-export async function getStaticPaths() {
-  return {
-    paths: allPosts.map((d) => ({ params: { slug: d.slug } })),
-    fallback: false,
-  };
-}
+type Doc = { title?: string; slug: string; body?: { code: string } };
 
-export async function getStaticProps({ params }: { params: { slug: string } }) {
-  const doc = allPosts.find((d) => d.slug === params.slug) || null;
-  return { props: { doc } };
-}
-
-interface Props { doc: Post | null }
-
-export default function PostPrintPage({ doc }: Props) {
-  // FIX: Bypassing Type error for code
-  const code = (doc?.body as any)?.code ?? "";
-  const MDX = useMDXComponent(code);
-
-  if (!doc) return <p>Loading...</p>;
+export default function PrintPost({ doc }: { doc: Doc | null }) {
+  const code = doc?.body?.code ?? "";
+  const Component = useMDXComponent(code || "export default () => null");
 
   return (
-    <div className="print-page print-post">
-      {/* Customize your print layout here */}
-      <h1>{(doc as any).title}</h1>
-      <p>By {(doc as any).author}</p>
-      <MDX components={components as any} />
-    </div>
+    <>
+      <Head>
+        <title>{doc?.title ? `${doc.title} | Print` : "Print"}</title>
+        <meta name="robots" content="noindex" />
+      </Head>
+      <main style={{ padding: 24 }}>
+        {code ? (
+          // @ts-expect-error MDX types are permissive in print context
+          <Component components={mdxComponents} />
+        ) : (
+          <p>Nothing to render.</p>
+        )}
+      </main>
+    </>
   );
 }
 
+export const getStaticPaths: GetStaticPaths = async () => {
+  let CL: any = {};
+  try { CL = await import("contentlayer/generated"); } catch {}
+  const posts: Doc[] = (CL.allPosts ?? CL.allDocuments ?? []).filter(
+    (p: any) => p?.slug && p?.body?.code
+  );
+  const paths = posts.map((p) => ({ params: { slug: p.slug } }));
+  return { paths, fallback: "blocking" };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = String(params?.slug ?? "");
+  let CL: any = {};
+  try { CL = await import("contentlayer/generated"); } catch {}
+  const pool: Doc[] = (CL.allPosts ?? CL.allDocuments ?? []).filter(Boolean);
+  const doc = pool.find((d) => d.slug === slug) ?? null;
+
+  if (!doc?.body?.code) return { notFound: true, revalidate: 60 };
+  return { props: { doc }, revalidate: 60 };
+};

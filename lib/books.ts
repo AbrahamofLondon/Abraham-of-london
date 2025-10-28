@@ -1,12 +1,16 @@
-if (typeof window !== "undefined") {
-  throw new Error("This module is server-only");
-}
 // lib/books.ts
+
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-// Define an interface for the required frontmatter properties
+// Enforce server-side usage for file system operations
+if (typeof window !== "undefined") {
+  throw new Error("This module is server-only and cannot be imported by client components.");
+}
+
+// --- Type Definitions ---
+
 export interface BookRequiredMeta {
   slug: string;
   title: string;
@@ -14,65 +18,74 @@ export interface BookRequiredMeta {
   excerpt: string;
   coverImage: string;
   buyLink: string;
-  genre: string;
+  genre: string; // Typically a single string, but coerced for safety
 }
 
-// Define the full interface, extending the required fields
 export interface BookMeta extends BookRequiredMeta {
-  date?: string; // Kept as-is, but often used for sorting/display
-
-  // Optional extras used by pages/books.tsx
-  publishedDate?: string; // Always coerced to ISO string if possible
+  date?: string; // Original post date (if applicable)
+  publishedDate?: string; // Date of book publication (ISO string)
   isbn?: string;
   pages?: number;
-  rating?: number;
+  rating?: number; // 1-5 scale
   language?: string;
   publisher?: string;
-  tags?: string[];
-
+  tags?: string[]; // Array of strings
   downloadPdf?: string;
   downloadEpub?: string;
-
   content?: string;
 }
 
-const booksDir = path.join(process.cwd(), "content", "books");
+// Type alias for all possible frontmatter fields we might request
+export type BookField = keyof BookMeta;
 
-/* ------------ small helpers ------------ */
+const BOOKS_CONTENT_DIR = path.join(process.cwd(), "content", "books");
+
+// --- Private Helpers for Data Coercion ---
 
 /** Converts a slug to a PascalCase title (fallback). */
-function toTitle(slug: string) {
+function toTitle(slug: string): string {
   return slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /** Coerces a value into an array of trimmed, non-empty strings. */
 function toStringArray(v: unknown): string[] {
-  if (Array.isArray(v))
-    return v
-      .map(String)
-      .map((s) => s.trim())
-      .filter(Boolean);
-  if (typeof v === "string")
-    return v
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  return [];
+  let values: unknown[] = [];
+
+  if (Array.isArray(v)) {
+    values = v;
+  } else if (typeof v === "string") {
+    values = v.split(",");
+  }
+  
+  return values
+    .map(String)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
-/** Coerces a value into a finite number, or undefined. */
-function toNumber(v: unknown): number | undefined {
-  if (typeof v === "number" && Number.isFinite(v)) return v;
+/** Coerces a value into a finite number (integer), or undefined. */
+function toInteger(v: unknown): number | undefined {
+  if (typeof v === "number" && Number.isInteger(v) && Number.isFinite(v)) return v;
+  
   if (typeof v === "string" && v.trim() !== "") {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : undefined;
+    const n = Number.parseInt(v.trim(), 10);
+    return Number.isInteger(n) && Number.isFinite(n) ? n : undefined;
   }
   return undefined;
 }
 
-/**
- * Coerces a value into an ISO date string, or undefined if not a valid date.
- */
+/** Coerces a value into a safe rating number (0.0 to 5.0), or undefined. */
+function toRating(v: unknown): number | undefined {
+  if (typeof v === "number" && v >= 0 && v <= 5) return v;
+  
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v.trim());
+    return Number.isFinite(n) && n >= 0 && n <= 5 ? n : undefined;
+  }
+  return undefined;
+}
+
+/** Coerces a value into an ISO date string, or undefined if not a valid date. */
 function toDateString(v: unknown): string | undefined {
   let date: Date;
 
@@ -82,7 +95,7 @@ function toDateString(v: unknown): string | undefined {
     date = new Date(v);
   } else if (typeof v === "string") {
     const t = Date.parse(v);
-    if (Number.isNaN(t)) return undefined; // Fail if string cannot be parsed as a date
+    if (Number.isNaN(t)) return undefined;
     date = new Date(t);
   } else {
     return undefined;
@@ -91,35 +104,44 @@ function toDateString(v: unknown): string | undefined {
   return isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
-/* ------------ public API ------------ */
+// --- Public API ---
 
+/** Retrieves all valid book slugs (filenames without extension). */
 export function getBookSlugs(): string[] {
-  if (!fs.existsSync(booksDir)) return [];
+  if (!fs.existsSync(BOOKS_CONTENT_DIR)) return [];
+  
   return fs
-    .readdirSync(booksDir)
+    .readdirSync(BOOKS_CONTENT_DIR)
     .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"))
     .map((f) => f.replace(/\.mdx?$/, ""));
 }
 
+/** Finds the full path to a book file, supporting .mdx and .md. */
 function resolveBookPath(slug: string): string | null {
-  const mdx = path.join(booksDir, `${slug}.mdx`);
-  const md = path.join(booksDir, `${slug}.md`);
+  const mdx = path.join(BOOKS_CONTENT_DIR, `${slug}.mdx`);
+  const md = path.join(BOOKS_CONTENT_DIR, `${slug}.md`);
+  
   if (fs.existsSync(mdx)) return mdx;
   if (fs.existsSync(md)) return md;
+  
   return null;
 }
 
-export function getBookBySlug(
+/**
+ * Retrieves a single book's metadata and optional content by slug.
+ * @param slug The filename of the book.
+ * @param fields The subset of fields to retrieve.
+ */
+export function getBookBySlug<T extends BookField | "content">(
   slug: string,
-  fields: (keyof BookMeta | "content")[] = [],
-): Partial<BookMeta> & { content?: string } {
+  fields: T[] = [] as T[],
+): Partial<Pick<BookMeta, Exclude<T, "content">>> & { content?: string } & Pick<BookRequiredMeta, "slug"> {
+  
   const realSlug = slug.replace(/\.mdx?$/, "");
   const fullPath = resolveBookPath(realSlug);
 
   if (!fullPath) {
-    const minimal: Partial<BookMeta> = { slug: realSlug };
-    if (fields.includes("title")) minimal.title = "Book Not Found";
-    return minimal;
+    return { slug: realSlug } as any;
   }
 
   const file = fs.readFileSync(fullPath, "utf8");
@@ -135,35 +157,37 @@ export function getBookBySlug(
     }
 
     const raw = fm[field as string];
-    if (typeof raw === "undefined") continue;
+    // Skip if the field wasn't requested or isn't present in frontmatter
+    if (typeof raw === "undefined") continue; 
 
-    switch (field) {
-      // --- Special Coercion Fields ---
-      case "genre": {
-        // Handle genre as a special case for array/string conversion
-        item.genre = Array.isArray(raw)
-          ? toStringArray(raw).join(", ")
-          : String(raw);
-        break;
-      }
+    // Explicitly coerce types for safety and consistency
+    switch (field as BookField) {
       case "tags": {
         item.tags = toStringArray(raw);
         break;
       }
+      case "genre": {
+        // Genre is treated as a single string, converting array to a comma-separated string
+        item.genre = Array.isArray(raw) ? toStringArray(raw).join(", ") : String(raw).trim();
+        break;
+      }
       case "pages": {
-        item.pages = toNumber(raw);
+        // Ensure pages is an integer
+        item.pages = toInteger(raw);
         break;
       }
       case "rating": {
-        item.rating = toNumber(raw);
+        // Ensure rating is a safe number
+        item.rating = toRating(raw);
         break;
       }
-      case "publishedDate": {
-        item.publishedDate = toDateString(raw);
+      case "publishedDate": 
+      case "date": {
+        // Consistent ISO date strings for all date fields
+        item[field] = toDateString(raw);
         break;
       }
-
-      // --- REQUIRED & Simple String Fields (String validation) ---
+      // Simple string fields (including all required fields)
       case "title":
       case "author":
       case "excerpt":
@@ -172,41 +196,54 @@ export function getBookBySlug(
       case "isbn":
       case "language":
       case "publisher":
-      case "date": // date field from original type
       case "downloadPdf":
       case "downloadEpub": {
         if (typeof raw === "string") {
-          (item as Record<string, unknown>)[field] = raw.trim();
+          item[field] = raw.trim();
         }
         break;
       }
-
       default: {
-        // Fallback for any other valid but uncoerced field
+        // Fallback for any unexpected field requested
+        // This is usually safe but strict type checking above reduces its necessity
         (item as Record<string, unknown>)[field] = raw;
       }
     }
   }
 
-  // Ensure mandatory fields have safe fallbacks if requested but missing
-  if (fields.includes("title") && !item.title) item.title = toTitle(realSlug);
+  // Final mandatory field validation and fallback assignment
+  if (fields.includes('title' as T) && !item.title) item.title = toTitle(realSlug);
+  // NOTE: It is recommended that the caller/page check for the presence of all BookRequiredMeta fields 
+  // and handle errors/fallbacks explicitly, rather than relying on this library to guess.
 
-  return item;
+  return item as any; // Cast required due to complex generic return type
 }
 
-export function getAllBooks(
-  fields: (keyof BookMeta | "content")[] = [],
-): Partial<BookMeta>[] {
-  const books = getBookSlugs().map((s) => getBookBySlug(s, fields));
+/**
+ * Retrieves all books with the specified fields.
+ * @param fields The subset of fields to retrieve.
+ */
+export function getAllBooks<T extends BookField | "content">(
+  fields: T[] = [] as T[],
+): (Partial<Pick<BookMeta, Exclude<T, "content">>> & { content?: string } & Pick<BookRequiredMeta, "slug">)[] {
+  
+  // Ensure required fields are always included for basic listing/sorting
+  const requiredFields = Array.from(new Set<BookField | "content">([...fields, "title", "slug"])) as (BookField | "content")[];
+
+  const books = getBookSlugs()
+    .map((s) => getBookBySlug(s, requiredFields))
+    // Filter out any books that couldn't be retrieved (shouldn't happen if getBookSlugs is correct)
+    .filter(book => book.slug); 
 
   // Sort alphabetically by title (fallback to slug)
-  books.sort((a, b) =>
-    (a.title || a.slug || "")
-      .toString()
-      .localeCompare((b.title || b.slug || "").toString(), undefined, {
-        sensitivity: "base",
-      }),
-  );
+  books.sort((a, b) => {
+    const titleA = (a.title || a.slug || "").toString();
+    const titleB = (b.title || b.slug || "").toString();
+    
+    return titleA.localeCompare(titleB, undefined, {
+      sensitivity: "base", // Case and accent insensitive comparison
+    });
+  });
 
-  return books;
+  return books as any; // Cast required due to complex generic return type
 }
