@@ -4,6 +4,16 @@ import * as React from "react";
 import Head from "next/head";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
+---
+title: "Principles-For-My-Son-Cue-Card"
+slug: "principles-for-my-son-cue-card"
+date: "2024-10-22"
+author: "AbrahamofLondon"
+readTime: "6 min"
+category: "Family"
+type: "Download"
+---
+
 
 const BrandedCard = ({ isBack = false }) => {
   return (

@@ -5,6 +5,16 @@ import PullLine from "@/components/PullLine";
 import EmbossedSign from "@/components/print/EmbossedSign";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 
+---
+title: "Weekly Operating Rhythm"
+slug: "weekly-operating-rhythm"
+date: "2024-10-01"
+author: "AbrahamogLondon"
+readTime: "5 min"
+category: "Operations"
+type: "Download"
+---
+
 export default function BoardInvestorTemplate() {
  return (
   <BrandFrame
