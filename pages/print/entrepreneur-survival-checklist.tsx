@@ -6,16 +6,16 @@ import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 /* --- Helper Components for Typography Styling --- */
 
----
-title: "Entrepreneur Survival Checklist"
-slug: "entreprenuer-survival-checklist"
-date: "2024-10-22"
-author: "AbrahamofLondon"
-readTime: "5-7 min"
-category: "Operations"
-type: "Download"
----
 
+export const frontmatter = {
+  title: "Entrepreneur Survival Checklist"
+  slug: "entreprenuer-survival-checklist"
+  date: "2024-10-22"
+  author: "AbrahamofLondon"
+  readTime: "5-7 min"
+  category: "Operations"
+  type: "Download"
+};
 
 interface PullLineProps {
  children: React.ReactNode;
