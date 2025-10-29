@@ -12,15 +12,17 @@ on:
       - "public/downloads/**" # allow manual edits to retrigger
   workflow_dispatch: {}
 
-permissions:
-  contents: write
-
+# 🔑 MOVED: Removed top-level permissions for better security, now defined in the job
 concurrency:
   group: pdfs-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   pdfs:
+    # 🔑 NEW: Restricting 'contents: write' permission to only this job for security
+    permissions:
+      contents: write 
+      
     # Restrict execution to the repository owner or outside of the bot itself
     if: github.repository_owner == github.actor || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-22.04
@@ -53,29 +55,20 @@ jobs:
             puppeteer-${{ runner.os }}-
 
       - name: Install dependencies (prod-optimized)
-        # Use npm ci for clean installs on CI
         run: npm ci --omit=dev
 
       - name: Install Chrome for Puppeteer
-        # Use npx to ensure the correct version of Puppeteer is installed
         run: npx puppeteer browsers install chrome
 
-      - name: 1️⃣ Execute Content Healing & Build
-        # We run the Grand Master script to perform the following:
-        # 1. Content/Encoding/Front-Matter fixes (writes directly to files)
-        # 2. Dependency Audit/Fix
-        # 3. Next.js Production Build (required before starting the server)
-        # We skip PDF/Deploy here as the next step will handle PDF generation.
-        run: npm run grand-master -- --skip-pdf --skip-deploy --strict=false
+      - name: 1️⃣ Execute Content Healing & Build (Prepares the site)
+        # 🔑 UPDATED: Using the new descriptive script 'content:heal' from package.json
+        run: npm run content:heal
 
       - name: 2️⃣ Generate PDFs
-        # Now that the content is clean and the site is built, we only run the PDF generation.
-        # This step starts the ephemeral server, renders PDFs via Puppeteer, and saves them to /public/downloads.
-        # This assumes 'npm run pdfs' is an alias for 'npm run grand-master -- --skip-deploy --skip-pdf=false'
-        run: npm run grand-master -- --skip-deploy --strict=false
+        # 🔑 UPDATED: Using the new descriptive script 'pdfs:generate' from package.json
+        run: npm run pdfs:generate
 
       - name: Commit changes (if any)
-        # Commits the healed source files and the newly generated PDFs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
