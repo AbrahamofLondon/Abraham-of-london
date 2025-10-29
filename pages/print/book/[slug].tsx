@@ -6,7 +6,6 @@ import fs from 'fs';
 import matter from "gray-matter"; // 🔑 ADDED: Import gray-matter for frontmatter parsing
 import { serialize } from "next-mdx-remote/serialize"; // 🔑 ADDED: Import serialize for MDX processing
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { useMDXComponent } from 'next-contentlayer/hooks'; // 🚨 FIX: useMDXComponent is likely from next-contentlayer, replacing it with MDXRemote/useMDXComponent from next-mdx-remote is needed. Assuming you use next-mdx-remote for this fix.
 import { MDXComponents } from '@/components/mdx-components'; // 🔑 ADDED: Import your component map
 
 // Define the content directory for book print pages
