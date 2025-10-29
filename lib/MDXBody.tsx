@@ -1,10 +1,18 @@
 // lib/MDXBody.tsx
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import * as React from "react";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { mdxComponents } from "@/lib/mdx-components";
 
-export function MDXBody({ code }: { code?: string }) {
-  const safe = code ?? "export default function Empty(){ return null }";
-  const Component = useMDXComponent(safe);
-  return <Component />;
+export type MDXBodyProps = {
+  mdxSource: MDXRemoteSerializeResult;
+  className?: string;
+};
+
+export function MDXBody({ mdxSource, className }: MDXBodyProps) {
+  if (!mdxSource) return null;
+  return (
+    <div className={className ?? "prose lg:prose-lg dark:prose-invert"}>
+      <MDXRemote {...mdxSource} components={mdxComponents} />
+    </div>
+  );
 }
-
-

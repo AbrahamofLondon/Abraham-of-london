@@ -1,16 +1,18 @@
 // components/MDXContentRenderer.tsx
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
 import * as React from "react";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { mdxComponents } from "@/lib/mdx-components";
 
-interface MDXContentRendererProps {
-  code: string;
-}
+export type MDXContentRendererProps = {
+  mdxSource: MDXRemoteSerializeResult;
+  className?: string;
+};
 
-export default function MDXContentRenderer({ code }: MDXContentRendererProps) {
-  // Fix: Ensure code is never null/undefined when passed to the hook
-  const validCode = code ?? "";
-  const MDX = useMDXComponent(validCode);
-
-  return <MDX components={components as any} />;
+export default function MDXContentRenderer({ mdxSource, className }: MDXContentRendererProps) {
+  if (!mdxSource) return null;
+  return (
+    <div className={className ?? "prose lg:prose-lg dark:prose-invert"}>
+      <MDXRemote {...mdxSource} components={mdxComponents} />
+    </div>
+  );
 }

@@ -1,6 +1,9 @@
 // pages/print/book/[slug].tsx
+
+import fs from 'fs';
 import * as React from "react";
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import { useMDXComponent } from "next-contentlayer/hooks";
+import { allResources } from 'contentlayer/generated';
 
 export async function getStaticPaths() {
   // Avoid build-time dependency on a specific collection

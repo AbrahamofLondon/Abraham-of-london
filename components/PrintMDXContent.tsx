@@ -1,23 +1,20 @@
-// components/print/PrintMDXContent.tsx
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+// components/PrintMDXContent.tsx
 import * as React from "react";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { mdxComponents } from "@/lib/mdx-components";
+import BrandFrame from "@/components/print/BrandFrame";
 
-interface PrintMDXContentProps {
-  code: string;
-  title: string;
-  description: string;
-}
+type Props = {
+  mdxSource: MDXRemoteSerializeResult;
+  title?: string;
+};
 
-export default function PrintMDXContent({ code, title, description }: PrintMDXContentProps) {
-  // Directly use the MDX hook inside this client component
-  const MDXContent = useMDXComponent(code ?? "");
-
+export default function PrintMDXContent({ mdxSource, title }: Props) {
   return (
-    <article className="prose max-w-none mx-auto">
-      <h1 className="font-serif">{title}</h1>
-      {description && <p className="text-lg">{description}</p>}
-      <MDXContent components={components as any} />
-    </article>
+    <BrandFrame title={title}>
+      <div className="prose lg:prose-lg dark:prose-invert mx-auto">
+        <MDXRemote {...mdxSource} components={mdxComponents} />
+      </div>
+    </BrandFrame>
   );
 }

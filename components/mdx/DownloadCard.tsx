@@ -1,4 +1,7 @@
 // components/mdx/DownloadCard.tsx (FIXED to prevent final TypeError)
+
+'use client';
+
 import * as React from "react";
 import Link from "next/link";
 import clsx from "clsx";

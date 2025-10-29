@@ -1,47 +1,50 @@
-// pages/print/post/[slug].tsx (Restored Original Code)
+// pages/print/[slug].tsx
+
 import * as React from "react";
-import { allPosts, Post } from "contentlayer/generated";
-import { GetStaticPaths, GetStaticProps } from "next";
-import { useMDXComponent } from "next-contentlayer/hooks";
-import { MDXComponents } from "@/components/mdx"; // Your custom component map
+import type { GetStaticPaths, GetStaticProps } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import path from "path";
+import { listSlugs, loadMdxBySlug } from "@/lib/mdx-file";
 
-// 1. Fetching Paths (getStaticPaths)
+// 🏆 DEFINITIVE FIX: Import the default export and alias it to resolve compilation issues.
+import mdxComponentMap from '@/components/mdx-components';
+const MDXComponents = mdxComponentMap;
+
+// 🔑 CRITICAL FIX: Re-import BrandFrame because it is used directly in the JSX as a wrapper.
+import BrandFrame from "@/components/print/BrandFrame";
+
+const DIR = path.join(process.cwd(), "content", "print");
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    // Generate paths for all your posts
-    paths: allPosts.map((post) => ({ params: { slug: post.slug } })),
-    fallback: false, // Set to 'blocking' or true if you use Incremental Static Regeneration (ISR)
-  };
+  const slugs = listSlugs(DIR);
+  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: false };
 };
 
-// 2. Fetching Data (getStaticProps)
-export const getStaticProps: GetStaticProps<{ post: Post }> = async ({ params }) => {
-  const post = allPosts.find((post) => post.slug === params?.slug);
-
-  if (!post) {
-    // This should ideally not happen if getStaticPaths is correct
-    return { notFound: true };
-  }
-
-  return { 
-    props: { post },
-    // If you use ISR, uncomment the revalidate line:
-    // revalidate: 60, 
-  };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = String(params?.slug);
+  // NOTE: This function (loadMdxBySlug) must handle the Date serialization internally or the error will return.
+  const { frontmatter, mdxSource } = await loadMdxBySlug(DIR, slug);
+  return { props: { slug, frontmatter, mdxSource } };
 };
 
-// 3. Rendering
-export default function PostPage({ post }: { post: Post }) {
-  // Post will contain all frontmatter and the compiled MDX code (post.body.code)
-  const MDXContent = useMDXComponent(post.body.code);
+type Props = { slug: string; frontmatter: any; mdxSource: any };
 
-  return (
-    <main>
-      <article>
-        <h1>{post.title}</h1>
-        {/* Render the full content using the component map */}
-        <MDXContent components={MDXComponents} />
-      </article>
-    </main>
-  );
+export default function PrintDoc({ slug, frontmatter, mdxSource }: Props) {
+  return (
+    <>
+      <Head>
+        <title>{frontmatter?.title ? `${frontmatter.title} | Print` : `Print | ${slug}`}</title>
+        <meta name="robots" content="noindex,follow" />
+      </Head>
+      
+      {/* This usage requires the component to be imported directly above */}
+      <BrandFrame>
+        <article className="prose lg:prose-lg dark:prose-invert mx-auto">
+          {/* Passing the fixed MDX component map */}
+          <MDXRemote {...mdxSource} components={MDXComponents} />
+        </article>
+      </BrandFrame>
+    </>
+  );
 }

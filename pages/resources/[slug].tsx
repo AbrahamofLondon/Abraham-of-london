@@ -1,13 +1,14 @@
-// pages/resources/[slug].tsx (Corrected route name)
+// pages/resources/[slug].tsx
 
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { MDXRemote } from 'next-mdx-remote';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { serialize } from 'next-mdx-remote/serialize';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Head from 'next/head'; 
-import { MDXComponents } from '@/components/mdx'; 
+import Head from 'next/head'; 
+import { MDXComponents } from '@/components/mdx-components';
+// import { allResources } from 'contentlayer/generated';
 
 // Using the corrected plural directory name
 const RESOURCES_DIR = path.join(process.cwd(), 'content', 'resources');
@@ -17,7 +18,7 @@ const RESOURCES_DIR = path.join(process.cwd(), 'content', 'resources');
 // 1. Get Static Paths
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const files = fs.readdirSync(RESOURCES_DIR); 
+    const files = fs.readdirSync(RESOURCES_DIR); 
     const paths = files
       .filter(filename => filename.endsWith('.mdx'))
       .map((filename) => ({
@@ -36,37 +37,48 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   
   try {
     // CRITICAL: Read from 'content/resources'
-    const markdownWithMeta = fs.readFileSync(path.join(RESOURCES_DIR, slug + '.mdx'), 'utf-8'); 
+    const markdownWithMeta = fs.readFileSync(path.join(RESOURCES_DIR, slug + '.mdx'), 'utf-8'); 
     const { data: frontmatter, content } = matter(markdownWithMeta);
     
-    const mdxSource = await serialize(content, { scope: frontmatter });
+    // FIX FOR CONSISTENCY: Ensure Date objects are serialized correctly for Next.js props
+    const serializedFrontmatter = Object.fromEntries(
+        Object.entries(frontmatter).map(([key, value]) => [
+            key, 
+            value instanceof Date ? value.toISOString() : value
+        ])
+    );
+    
+    // Serialize the content, allowing for custom components
+    const mdxSource = await serialize(content, { scope: serializedFrontmatter });
 
     return {
       props: {
-        frontmatter,
-        mdxSource
+        frontmatter: serializedFrontmatter, // <-- Pass the serialized object
+        mdxSource,
+        revalidate: 60, // Added revalidate for production consistency
       }
     };
   } catch (error) {
-      console.error(`Error reading or serializing MDX file for resource slug: ${slug}`, error);
-      return { notFound: true };
+    console.error(`Error reading or serializing MDX file for resource slug: ${slug}`, error);
+    return { notFound: true };
   }
 }
 
 /* -------------------- Component Rendering -------------------- */
 
 interface ResourcePostProps {
+    mdxSource: MDXRemoteSerializeResult; // Use the correct type
     frontmatter: {
         title: string;
         category: string;
+        [key: string]: any; // Allow for other frontmatter fields
     };
-    mdxSource: any; 
 }
 
 export default function ResourcePost({ frontmatter, mdxSource }: ResourcePostProps) {
   
   if (!mdxSource) {
-    return <h1>Resource Not Found</h1>; 
+    return <h1>Resource Not Found</h1>; 
   }
 
   return (
@@ -84,9 +96,9 @@ export default function ResourcePost({ frontmatter, mdxSource }: ResourcePostPro
 
         {/* MDX Content Section */}
         <div className="prose max-w-none">
-          <MDXRemote 
-            {...mdxSource} 
-            components={MDXComponents} // Pass the custom components map
+          <MDXRemote 
+            {...mdxSource} 
+            components={MDXComponents} // PASSING THE FIXED COMPONENT MAP - CORRECT
           />
         </div>
 

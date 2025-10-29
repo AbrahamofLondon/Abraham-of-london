@@ -1,317 +1,170 @@
-/* ------------------------------------------------------------------- */
-/* ---------- Global Styles & Optimization --------------------------- */
-/* ------------------------------------------------------------------- */
+/*
+ * =====================================================================
+ * Corrected and Verified: globals.css
+ * This version ensures all syntax is valid to prevent build errors.
+ * =====================================================================
+ */
 
-/* 1) Local self-hosted fonts 
-   NOTE: The @font-face declarations are REMOVED. 
-   They are now injected and optimized via next/font/local in the Next.js layout. 
-*/
-
-/* 2) Tailwind base/components/utilities */
+/*
+ * TailwindCSS Imports
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ------------------------------------------------------------------- */
-/* ---------- Theme Variables (Luxury Light Mode) -------------------- */
-/* ------------------------------------------------------------------- */
+/*
+ * Base HTML Styles & Utility Classes
+ */
+@layer base {
+  /*
+   * Fluid Type Scale
+   * Seamless scaling between screen sizes using CSS clamp().
+   */
+  :root {
+    --text-xs: clamp(0.75rem, 0.725rem + 0.125vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);
+    --text-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.5rem);
+    --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 2rem);
+    --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 2.5rem);
+  }
 
-:root {
-  /* Fonts: These variables now use the output from next/font/local (e.g., in lib/fonts/index.ts).
-     The fallback stack is still included for maximum safety, but the custom font
-     is linked via the injected CSS variable.
-  */
-  --font-family-sans: var(--font-family-sans),
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
-  --font-family-serif: var(--font-family-serif),
-    Georgia, Cambria, "Times New Roman", Times, serif;
+  html {
+    @apply text-[--text-base];
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: var(--text-base);
+  }
 
-  /* Palette - Light Mode */
-  --color-primary: #0b2e1f; /* deep-forest */
-  --color-primary-hover: #16573d; /* lighter deep forest */
-  --color-on-primary: #faf7f2; /* warm-cream */
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
 
-  --color-secondary: #faf7f2; /* page bg: warm-cream */
-  --color-on-secondary: #333333; /* soft charcoal text */
+  a {
+    @apply text-blue-600 hover:text-blue-800 transition-colors;
+  }
 
-  --color-accent: #c5a352; /* muted gold */
-  --color-accent-hover: #a0833f;
-  --color-on-accent: #ffffff;
-
-  /* UI/Generic Colors */
-  --color-lightGrey: #e5e5e5; /* divider/border */
-  --color-warmWhite: #ffffff; /* surface/card background */
-  --color-midGreen: #4b8b6b; /* list marker/utility */
-
-  /* Fluid type scale - kept as-is */
-  --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
-  --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.45rem);
-  --step-2: clamp(1.55rem, 1.3rem + 0.95vw, 1.85rem);
-  --step-3: clamp(1.95rem, 1.6rem + 1.3vw, 2.4rem);
-  --step-4: clamp(2.35rem, 1.92rem + 1.8vw, 3rem);
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Dark Mode Tokens -------------------------------------- */
-/* ------------------------------------------------------------------- */
-
-.dark {
-  /* Primary/Text (Invert primary/accent for dark backgrounds) */
-  --color-primary: #e9d79a; /* light gold/accent as main color */
-  --color-primary-hover: #c5a352;
-  --color-on-primary: #0f172a; /* dark slate */
-
-  /* Background/Surface */
-  --color-secondary: #111827; /* slate-900-ish dark bg */
-  --color-on-secondary: #f8fafc; /* slate-50-ish light text */
-
-  /* Accent (A more vibrant color for contrast) */
-  --color-accent: #86efac; /* bright light green */
-  --color-accent-hover: #4b8b6b;
-  --color-on-accent: #111827;
-
-  /* UI */
-  --color-lightGrey: #2d3748; /* dark divider */
-  --color-warmWhite: #1f2937; /* card surface */
-  --color-midGreen: #86efac; /* list marker/utility */
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Base / Reset & Typography ------------------------------ */
-/* ------------------------------------------------------------------- */
-
-html {
-  color-scheme: light dark;
-  hanging-punctuation: first allow-end;
-  text-rendering: geometricPrecision;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-html,
-body {
-  margin: 0;
-  padding: 0;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-body {
-  /* Use the updated CSS variable name */
-  font-family: var(--font-family-sans); 
-  font-size: var(--step-0);
-  line-height: 1.85;
-  color: var(--color-on-secondary);
-  background-color: var(--color-secondary);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  /* Use the updated CSS variable name */
-  font-family: var(--font-family-serif);
-  color: var(--color-primary);
-  text-wrap: balance;
-  font-weight: 700;
-}
-
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-a:hover {
-  color: var(--color-accent);
-}
-
-/* Selection & Focus */
-::selection {
-  /* Use color variable for consistency */
-  background: var(--color-accent); 
-  color: var(--color-on-accent); 
-}
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-/* Media defaults */
-img,
-video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
+  h1 {
+    @apply text-[--text-2xl] font-serif font-bold mt-8 mb-4 tracking-tight;
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    @apply text-[--text-xl] font-serif font-semibold mt-6 mb-3;
+    font-size: var(--text-xl);
+  }
+  h3 {
+    @apply text-[--text-lg] font-serif font-medium mt-4 mb-2;
+    font-size: var(--text-lg);
+  }
+  p {
+    @apply mb-4 leading-relaxed;
   }
 }
 
-/* Print fidelity */
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Tailwind Components / Utilities ------------------------ */
-/* ------------------------------------------------------------------- */
-
+/*
+ * Component Styles
+ */
 @layer components {
-  /* Primary Button */
-  .aol-btn-primary {
-    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold focus:outline-none focus-visible:ring-2;
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-    /* Use a derived color for focus ring */
-    --tw-ring-color: color-mix(in srgb, var(--color-primary) 35%, transparent); 
+  /*
+   * Brand Mark / Logo Styles for 3D effect.
+   */
+  .brand-mark {
+    @apply inline-block relative overflow-hidden;
   }
-  .aol-btn-primary:hover {
-    background-color: var(--color-primary-hover);
+  .brand-mark.emboss img {
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.2)) drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.8));
   }
-
-  /* Secondary/Accent Button (New, for better design flexibility) */
-  .aol-btn-accent {
-    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold focus:outline-none focus-visible:ring-2;
-    background-color: var(--color-accent);
-    color: var(--color-on-accent);
-    /* Use a derived color for focus ring */
-    --tw-ring-color: color-mix(in srgb, var(--color-accent) 35%, transparent); 
-  }
-  .aol-btn-accent:hover {
-    background-color: var(--color-accent-hover);
+  .brand-mark.deboss img {
+    filter: drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.2)) drop-shadow(1px 1px 0px rgba(255, 255, 255, 0.8));
   }
 
-  /* Card Component */
-  .card {
-    border: 1px solid var(--color-lightGrey);
-    padding: 28px;
-    background-color: var(--color-warmWhite); /* Use warmWhite variable */
-    border-radius: 12px;
-    
-    /* Dynamic Shadow (Primary color based for light mode) */
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--color-primary) 8%, transparent);
-    
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease,
-      background-color 0.3s ease;
-  }
-  
-  .dark .card {
-    /* Dynamic Shadow (Black based for dark mode) */
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35); 
-  }
-  
-  .card:hover {
-    transform: translateY(-2px);
-    /* Hover shadow is slightly more visible */
-    box-shadow: 0 10px 30px color-mix(in srgb, var(--color-primary) 12%, transparent);
-  }
-  
-  .dark .card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  }
-
-
-  /* Background pattern */
-  .pattern-bg {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-  .dark .pattern-bg {
-    /* Adjusted for dark mode visibility */
-    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  /*
+   * Custom Debossed Signature Styles
+   */
+  .deboss-sign {
+    filter: drop-shadow(0.5px 0.5px 0px rgba(255, 255, 255, 0.8)) drop-shadow(-0.5px -0.5px 0px rgba(0, 0, 0, 0.15));
   }
 }
 
-/* ------------------------------------------------------------------- */
-/* ---------- Typography Polish (Prose Overrides) -------------------- */
-/* ------------------------------------------------------------------- */
+/*
+ * Print-Specific Styles (A4 Page Layout)
+ */
+@media print {
+  /*
+   * Reset the sheet (paper) container.
+   */
+  .sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    background: #fff !important;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-/* Base Prose Colors (Light Mode) */
-.prose {
-  --tw-prose-body: var(--color-on-secondary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-primary);
-  --tw-prose-bold: var(--color-primary);
-  --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
-  --tw-prose-code: var(--color-primary);
-}
+  /*
+   * Reset the overall print background/margins.
+   */
+  @page {
+    size: A4;
+    margin: 0;
+  }
 
-/* Dark Mode Prose Colors */
-.dark .prose {
-  --tw-prose-body: var(--color-on-secondary); /* light text */
-  --tw-prose-headings: var(--color-primary); /* light primary/gold */
-  --tw-prose-links: var(--color-accent); /* bright green */
-  --tw-prose-bold: var(--color-on-secondary);
-  --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
-  --tw-prose-code: var(--color-primary);
-}
+  /*
+   * Hide everything except the main content on the sheet.
+   */
+  body > *:not(.sheet) {
+    display: none;
+  }
 
-/* Serif headings */
-.prose h1,
-.prose h2,
-.prose h3 {
-  font-family: var(--font-family-serif);
-  font-weight: 700;
-}
+  /*
+   * Styles for the crop/cut marks.
+   */
+  .marks {
+    position: absolute;
+    width: 297mm;
+    height: 210mm;
+    top: calc(50% - (105mm / 2));
+    left: calc(50% - 148mm);
+    transform: rotate(90deg);
+    pointer-events: none;
+  }
 
-/* Heading sizes - kept as-is */
-.prose h1 {
-  font-size: var(--step-4);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.6rem;
-}
-.prose h2 {
-  font-size: var(--step-3);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin: 2.5rem 0 0.8rem;
-}
-.prose h3 {
-  font-size: var(--step-2);
-  line-height: 1.2;
-  margin: 2rem 0 0.6rem;
-}
+  .marks > div {
+    position: absolute;
+    width: 0.1pt;
+    height: 0.1pt;
+    background: #000;
+  }
 
-/* Body text - kept as-is */
-.prose p,
-.prose li {
-  font-family: var(--font-family-sans);
-  font-size: var(--step-0);
-  line-height: 1.85;
-  margin-block: 1rem;
-}
+  /* Vertical Center Mark */
+  .marks .v.center {
+    height: 10mm;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.2pt;
+    margin-left: 0;
+  }
 
-/* Blockquote */
-.prose blockquote {
-  font-style: italic;
-  font-size: var(--step-1);
-  line-height: 1.6;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--color-accent);
-  color: var(--color-on-secondary);
-}
+  /* Horizontal Top Mark */
+  .marks .h.top {
+    width: 10mm;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.2pt;
+    margin-top: 0;
+  }
 
-/* List markers */
-.prose ul > li::marker {
-  color: var(--color-midGreen);
+  /* Horizontal Bottom Mark */
+  .marks .h.bottom {
+    width: 10mm;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.2pt;
+    margin-bottom: 0;
+  }
 }

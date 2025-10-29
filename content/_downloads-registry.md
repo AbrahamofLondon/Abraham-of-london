@@ -33,9 +33,9 @@ downloads:
     category: Fatherhood
     size: 1.5 MB
     featured: true
-    
+
   - id: stewardship-checklist
-    title: Stewardship Checklist: Enduring Assets
+    title: Stewardship Checklist: Enduring Assets  <-- Two spaces ONLY
     description: Annual review list for tangible and intangible household and business assets.
     file_path: /downloads/Stewardship_Checklist.pdf
     icon: 🏛️

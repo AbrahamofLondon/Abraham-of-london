@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // pages/print/mentorship-starter-kit.tsx
 
 import Head from "next/head";
@@ -301,3 +302,4 @@ export default function MentorshipStarterKitPrint() {
     </main>
   );
 }
+

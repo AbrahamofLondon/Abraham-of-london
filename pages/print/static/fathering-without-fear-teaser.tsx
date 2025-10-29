@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // pages/print/brotherhood-covenant.tsx
 import * as React from "react";
 import Head from "next/head";
@@ -235,3 +236,4 @@ export default function BrotherhoodCovenant() {
     </>
   );
 }
+

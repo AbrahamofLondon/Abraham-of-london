@@ -1,50 +1,101 @@
 // pages/print/post/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
+
+import * as React from "react";
+import fs from 'fs'; // Retained, though not used in the final logic, helpful for context
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { mdxComponents } from "@/lib/mdx-components";
+import path from "path";
 
-type Doc = { title?: string; slug: string; body?: { code: string } };
+// 💡 UPGRADE: Use the specific type for MDX serialization result
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote"; 
 
-export default function PrintPost({ doc }: { doc: Doc | null }) {
-  const code = doc?.body?.code ?? "";
-  const Component = useMDXComponent(code || "export default () => null");
+// 🔑 CRITICAL: The required data loading logic
+import { listSlugs, loadMdxBySlug } from "@/lib/mdx-file";
 
-  return (
-    <>
-      <Head>
-        <title>{doc?.title ? `${doc.title} | Print` : "Print"}</title>
-        <meta name="robots" content="noindex" />
-      </Head>
-      <main style={{ padding: 24 }}>
-        {code ? (
-          // @ts-expect-error MDX types are permissive in print context
-          <Component components={mdxComponents} />
-        ) : (
-          <p>Nothing to render.</p>
-        )}
-      </main>
-    </>
-  );
-}
+// 🚨 CRITICAL FIX: Replace the ambiguous map with the central, fixed MDXComponents map
+import { MDXComponents } from '@/components/mdx-components'; 
+
+import BrandFrame from "@/components/print/BrandFrame";
+
+// 💡 UPGRADE: Remove unused import 'allResources' and 'mdxComponents'
+// import { allResources } from 'contentlayer/generated'; 
+// import { mdxComponents } from "@/lib/mdx-components"; 
+
+const DIR = path.join(process.cwd(), "content", "print", "post");
+
+// --- [ GetStaticPaths ] ---
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  let CL: any = {};
-  try { CL = await import("contentlayer/generated"); } catch {}
-  const posts: Doc[] = (CL.allPosts ?? CL.allDocuments ?? []).filter(
-    (p: any) => p?.slug && p?.body?.code
-  );
-  const paths = posts.map((p) => ({ params: { slug: p.slug } }));
-  return { paths, fallback: "blocking" };
+    // 💡 UPGRADE: Pass the DIR constant directly to listSlugs if it expects the absolute path
+    const slugs = listSlugs(DIR); 
+    const paths = slugs.map((slug) => ({ params: { slug } }));
+    
+    return { paths, fallback: false };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
-  let CL: any = {};
-  try { CL = await import("contentlayer/generated"); } catch {}
-  const pool: Doc[] = (CL.allPosts ?? CL.allDocuments ?? []).filter(Boolean);
-  const doc = pool.find((d) => d.slug === slug) ?? null;
+// --- [ GetStaticProps ] ---
 
-  if (!doc?.body?.code) return { notFound: true, revalidate: 60 };
-  return { props: { doc }, revalidate: 60 };
+// 💡 UPGRADE: Explicitly define the Props type for safety
+type PrintPostProps = { 
+    slug: string; 
+    frontmatter: Record<string, any>; 
+    mdxSource: MDXRemoteSerializeResult; 
 };
+
+export const getStaticProps: GetStaticProps<PrintPostProps> = async ({ params }) => {
+    // 💡 UPGRADE: Safely check and cast slug
+    const slug = String(params?.slug);
+    
+    // CRITICAL: Ensure loadMdxBySlug can handle both directory and slug arguments correctly
+    const data = await loadMdxBySlug(DIR, slug);
+    
+    if (!data || !data.mdxSource) {
+         return { notFound: true };
+    }
+    
+    // 💡 UPGRADE: Ensure date objects are serialized before passing to props (Best Practice)
+    const serializedFrontmatter = Object.fromEntries(
+        Object.entries(data.frontmatter).map(([key, value]) => [
+            key, 
+            value instanceof Date ? value.toISOString() : value
+        ])
+    );
+
+    return { 
+        props: { 
+            slug, 
+            frontmatter: serializedFrontmatter, 
+            mdxSource: data.mdxSource 
+        },
+        revalidate: 60, // Added revalidate for production consistency
+    };
+};
+
+// --- [ Component Rendering ] ---
+
+const PrintPost: NextPage<PrintPostProps> = ({ slug, frontmatter, mdxSource }) => {
+    
+    if (!mdxSource) {
+        return <h1>Error: Content data is missing.</h1>;
+    }
+
+    return (
+        <>
+            <Head>
+                {/* 💡 UPGRADE: Cleaned up title construction using template literals */}
+                <title>{`${frontmatter?.title ? frontmatter.title : 'Print Post'} | Print`}</title>
+            </Head>
+            <BrandFrame>
+                <article className="prose lg:prose-lg dark:prose-invert mx-auto">
+                    {/* 🔑 CRITICAL FIX: Pass the centralized, fixed MDXComponents map */}
+                    <MDXRemote 
+                        {...mdxSource} 
+                        components={MDXComponents} 
+                    />
+                </article>
+            </BrandFrame>
+        </>
+    );
+}
+
+export default PrintPost;

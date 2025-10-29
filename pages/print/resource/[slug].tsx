@@ -1,72 +1,110 @@
 ﻿// pages/print/resource/[slug].tsx
+
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { allResources } from "contentlayer/generated";
-import BrandFrame from "@/components/print/BrandFrame";
+import path from "path";
 
-type Props = {
-  title: string;
-  subtitle?: string | null;
-  author?: string | null;
-  date?: string | null;
-  bodyCode: string;
-};
+// 💡 Correct Import: Use the primary component and type from next-mdx-remote
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 
-export default function PrintResourcePage({
-  title,
-  subtitle,
-  author,
-  date,
-  bodyCode,
-}: Props) {
-  const MDX = useMDXComponent(
-    bodyCode || "export default function X(){return null}"
-  );
+// 🏆 DEFINITIVE FIX: Import the default export and alias it to resolve compilation issues (replaces the named import).
+import mdxComponentMap from '@/components/mdx-components';
+const MDXComponents = mdxComponentMap;
 
-  return (
-    <>
-      <Head>
-        <title>{title} â€” Print</title>
-        <meta name="robots" content="noindex" />
-      </Head>
-      <BrandFrame
-        title={title}
-        subtitle={subtitle ?? ""}
-        author={author ?? ""}
-        date={date ?? ""}
-        pageSize="A4"
-      >
-        <article className="prose max-w-none">
-          <MDX />
-        </article>
-      </BrandFrame>
-    </>
-  );
+// 🔑 CRITICAL: Your custom data loading logic
+import { listSlugs, loadMdxBySlug } from "@/lib/mdx-file";
+
+// 🔑 CRITICAL: The component map required by MDXRemote
+import BrandFrame from "@/components/print/BrandFrame"; // Custom print-specific component
+
+// --- [ Interface Definitions ] ---
+
+interface Frontmatter {
+  title: string;
+  // Define other expected frontmatter fields here for type safety
+  [key: string]: any;
 }
 
+// 💡 CLEANUP: Define the expected return structure from loadMdxBySlug
+interface MDXData {
+  mdxSource: MDXRemoteSerializeResult;
+  frontmatter: Frontmatter;
+}
+
+// 💡 UPGRADE: Use the specific type for the page component props
+interface PrintResourceProps extends MDXData {}
+
+// --- [ GetStaticPaths ] ---
+
+// Ensures all resource slugs are generated as static paths at build time
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = allResources
-    .filter((r) => !!r.slug)
-    .map((r) => ({ params: { slug: r.slug! } }));
-  return { paths, fallback: false };
+  // CRITICAL: Ensure the directory path passed to listSlugs matches your content structure
+  const contentDir = "print/resource";
+  const slugs = listSlugs(contentDir);
+
+  // Map slugs to the required Next.js params structure
+  const paths = slugs.map((slug) => ({ params: { slug } }));
+
+  return {
+    paths,
+    fallback: false, // Next.js will return 404 for unlisted paths
+  };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const doc = allResources.find((r) => r.slug === slug);
-  if (!doc) return { notFound: true };
+// --- [ GetStaticProps ] ---
 
-  return {
-    props: {
-      title: doc.title,
-      subtitle: (doc as any).excerpt ?? (doc as any).description ?? null,
-      author: (doc as any).author ?? null,
-      date: (doc as any).date ?? null,
-      bodyCode: (doc as any).body?.code ?? "",
-    },
-    revalidate: 60,
-  };
+// Fetches the data (frontmatter and serialized MDX content) for the specific slug
+export const getStaticProps: GetStaticProps<PrintResourceProps> = async ({ params }) => {
+  // 💡 UPGRADE: Safely check for params and cast to string
+  const slug = params?.slug as string;
+
+  if (!slug) {
+    return { notFound: true };
+  }
+
+  // CRITICAL: Construct the full content path
+  const fullPath = path.join("print", "resource", slug);
+
+  // 💡 CLEANUP: Ensure loadMdxBySlug is correctly typed to return MDXData
+  // NOTE: We rely on loadMdxBySlug handling the full process.cwd() path or relative paths correctly internally.
+  const data = await loadMdxBySlug(fullPath) as MDXData;
+
+  if (!data || !data.mdxSource) {
+    // 🚨 FIX: Explicitly check for mdxSource existence as well
+    return { notFound: true };
+  }
+
+  // 💡 UPGRADE: Return the data
+  return {
+    props: data,
+  };
 };
 
+// --- [ Component Rendering ] ---
+
+const PrintResourcePage: NextPage<PrintResourceProps> = ({ frontmatter, mdxSource }) => {
+  const pageTitle = frontmatter?.title || "Print Resource";
+
+  return (
+    <>
+      <Head>
+        {/* 💡 UPGRADE: Cleaned up title construction */}
+        <title>{`${pageTitle} | Print`}</title>
+        {/* Add print-specific meta tags or styling links here if necessary */}
+      </Head>
+      <main>
+        {/* CRITICAL: Use MDXRemote and pass both mdxSource (via spread) and the components map */}
+        <MDXRemote
+          {...mdxSource}
+          components={MDXComponents} // Pass the centralized component map
+        />
+
+        {/* Include the branding frame, often at the end for print-specific layouts */}
+        <BrandFrame />
+      </main>
+    </>
+  );
+};
+
+export default PrintResourcePage;
