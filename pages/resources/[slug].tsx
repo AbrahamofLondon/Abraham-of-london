@@ -8,7 +8,6 @@ import { serialize } from 'next-mdx-remote/serialize';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head'; 
 import { MDXComponents } from '@/components/mdx-components';
-// import { allResources } from 'contentlayer/generated';
 
 // Using the corrected plural directory name
 const RESOURCES_DIR = path.join(process.cwd(), 'content', 'resources');

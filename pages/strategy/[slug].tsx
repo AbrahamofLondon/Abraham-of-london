@@ -8,7 +8,6 @@ import { serialize } from 'next-mdx-remote/serialize';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head'; 
 import { MDXComponents } from '@/components/mdx-components';
-import { allResources } from 'contentlayer/generated';
 
 // Assuming your content is in 'content/startegy'
 const STRATEGY_DIR = path.join(process.cwd(), 'content', 'startegy');
