@@ -1,15 +1,11 @@
-// next.config.js
-// REMOVE: const { withContentlayer } = require('contentlayer/next');
-// REMOVE: const withMDX = require('@next/mdx')();
+// next.config.mjs (Working)
+// All necessary imports should use 'import'
+// e.g., import withContentlayer from '@contentlayer/next';
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // Ensure this extension setup handles your MDX files directly (required after Contentlayer removal)
-  pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
+  // ... your existing configuration ...
+  // Ensure any dynamic paths/modules use 'import()' or are adjusted for ESM syntax.
 };
 
-// Use the clean, unwrapped export
-module.exports = nextConfig;
+// Use 'export default' for the configuration object
+export default nextConfig; // ✅ Correct ESM export
