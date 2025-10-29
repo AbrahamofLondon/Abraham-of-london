@@ -1,22 +1,31 @@
-'use client';
-
-import { HTMLAttributes } from "react";
+"use client";
+import * as React from "react";
 import clsx from "clsx";
 
-type Props = HTMLAttributes<HTMLParagraphElement> & {
-  subtle?: boolean; // lighter tone
+type Props = {
+  children: React.ReactNode;
+  align?: "left" | "center" | "right";
+  note?: string;           // optional small caption
+  className?: string;
 };
 
-export default function PullLine({ className, subtle, ...props }: Props) {
+export default function PullLine({ children, align = "center", note, className }: Props) {
+  const alignClass =
+    align === "left" ? "text-left items-start" :
+    align === "right" ? "text-right items-end" : "text-center items-center";
+
   return (
-    <p
-      {...props}
+    <figure
       className={clsx(
-        "my-6 text-lg md:text-xl leading-snug",
-        subtle ? "font-medium text-zinc-600" : "font-semibold text-zinc-800",
-        "border-l-2 pl-4 border-zinc-200",
+        "my-8 flex flex-col gap-3",
+        alignClass,
         className
       )}
-    />
+    >
+      <blockquote className="text-xl md:text-2xl leading-snug font-medium">
+        {children}
+      </blockquote>
+      {note ? <figcaption className="text-sm opacity-70">{note}</figcaption> : null}
+    </figure>
   );
 }

@@ -7,6 +7,16 @@ import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
+
+export const frontmatter = {
+ title:"Fathering-Without-Fear-Teaser"
+ slug: "fathering-without-fear-teaser"
+ date: "2025-08-25" 
+ author: "AbrahamofLondon"
+ category: "Notes"
+ type: "Download"
+};
+
 const COVER = "/assets/images/books/fathering-without-fear-cover.jpg";
 
 export default function FatheringWithoutFearTeaserA6() {

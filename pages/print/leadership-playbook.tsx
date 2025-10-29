@@ -4,17 +4,18 @@ import Head from "next/head";
 import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
----
-title: "Leadership-Playbook"
-slug: "leadership-playbook"
-date: "2024-10-22"
-author: "AbrahamofLondon"
-readTime: "5 min"
-category: "Leadership"
-type: "Download"
----
 
 
+
+export const frontmatter = {
+ title: "Leadership-Playbook"
+ slug: "leadership-playbook"
+ date: "2024-10-22"
+ author: "AbrahamofLondon"
+ readTime: "5 min"
+ category: "Leadership"
+ type: "Download"
+};
 
 function FormList({ fields }: { fields: string[] }) {
   return (

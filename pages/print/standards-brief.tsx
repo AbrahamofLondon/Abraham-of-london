@@ -4,15 +4,16 @@ import Head from "next/head";
 import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 
----
-title: "Standards-Brief"
-slug: "standards-brief"
-date: "2024-07-01"
-author: "AbrahamofLondon"
-readTime: "3 min"
-category: "Leadership"
-type: "Download"
----
+
+export const frontmatter = {
+ title: "Standards-Brief"
+ slug: "standards-brief"
+ date: "2024-07-01"
+ author: "AbrahamofLondon"
+ readTime: "3 min"
+ category: "Leadership"
+ type: "Download"
+};
 
 const Block = ({ n, title, items }: { n: number; title: string; items: string[] }) => (
   <section className="block">

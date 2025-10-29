@@ -5,15 +5,18 @@ import EmbossedBrandMark from "../../components/EmbossedBrandMark";
 import { PullLine, Rule } from "../../components/utils";
 import * as React from "react";
 
----
-title: "Entrepreneur Operating Pack"
-slug: "entreprenuer-operating-pack"
-date: "2024-10-22"
-author: "AbrahamofLondon"
-readTime: "5 min"
-category: "Operations"
-type: "Download"
----
+
+
+export const frontmatter = {
+ export const frontmatter = {
+ title: "Entrepreneur Operating Pack"
+ slug: "entreprenuer-operating-pack"
+ date: "2024-10-22"
+ author: "AbrahamofLondon"
+ readTime: "5 min"
+ category: "Operations"
+ type: "Download"
+};
 
 const EntrepreneurOperatingPack = () => {
   return (
