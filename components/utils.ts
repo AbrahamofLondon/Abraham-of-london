@@ -1,3 +1,5 @@
+'use client';
+
 export {
   Rule, Note, PullLine, Verse, Caption, ShareRow, JsonLd, CTA, Quote,
   Badge, BadgeRow, Grid, DownloadCard, HeroEyebrow, Callout

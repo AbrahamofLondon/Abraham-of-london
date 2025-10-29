@@ -2,40 +2,35 @@
 kind: "template"
 type: "Download"
 title: "Scripture Track — John 14"
+subtilte: "family devotional"
 slug: "scripture-track-john14"
 date: "2025-11-01"
 author: "Abraham of London"
 draft: false
 ---
 
+// 🏆 FIX: Remove the 'const content =' wrapper and the extra 'return'.
+// The MDX file's top-level JSX is automatically the default export's return.
 
-  // Define the inner content structure using a local variable for clarity
-  const content = (
-    <div className="text-deepCharcoal">
-      <h2>How to Run the Track</h2>
-      <p>Content for running the track goes here, focusing on 5 days of reading John 14 and daily reflection prompts.</p>
-      
-      {/* Example Daily Prompts */}
-      <ol className="list-decimal list-inside mt-4 space-y-2">
-        <li>**Day 1 (Assurance):** Read John 14:1–6. What is the promise and what is the path?</li>
-        <li>**Day 2 (The Father):** Read John 14:7–14. How does Jesus reveal the Father? What is the ask?</li>
-        <li>**Day 3 (Obedience):** Read John 14:15–21. What is the link between love and keeping His commands?</li>
-        <li>**Day 4 (The Helper):** Read John 14:22–26. What does the Holy Spirit do for the believer?</li>
-        <li>**Day 5 (Peace):** Read John 14:27–31. What is the nature of the peace Christ gives, and why is it distinct?</li>
-      </ol>
+<BrandFrame title="Scripture Track — John 14" subtitle="Assurance • Obedience • The Helper • Peace" pageSize="A4" >
+  <div className="text-deepCharcoal">
+    <h2>How to Run the Track</h2>
+    <p>Content for running the track goes here, focusing on 5 days of reading John 14 and daily reflection prompts.</p>
+    
+    {/* Example Daily Prompts */}
+    <ol className="list-decimal list-inside mt-4 space-y-2">
+      <li>**Day 1 (Assurance):** Read John 14:1–6. What is the promise and what is the path?</li>
+      <li>**Day 2 (The Father):** Read John 14:7–14. How does Jesus reveal the Father? What is the ask?</li>
+      <li>**Day 3 (Obedience):** Read John 14:15–21. What is the link between love and keeping His commands?</li>
+      <li>**Day 4 (The Helper):** Read John 14:22–26. What does the Holy Spirit do for the believer?</li>
+      <li>**Day 5 (Peace):** Read John 14:27–31. What is the nature of the peace Christ gives, and why is it distinct?</li>
+    </ol>
 
-      {/* --- Signature Section with Debossed Mark --- */}
-      <div className="mt-12 pt-8 border-t border-gray-300 flex flex-col items-end">
-        <EmbossedSign src="/assets/images/signature/abraham-of-london-cursive.svg" alt="Abraham of London Signature" width={200} height={60} effect="deboss" baseColor="transparent" className="mb-1" />
-        <p className="text-sm font-serif text-gray-700">— Abraham of London</p>
-      </div>
+    {/* --- Signature Section with Debossed Mark --- */}
+    <div className="mt-12 pt-8 border-t border-gray-300 flex flex-col items-end">
+      {/* Assuming EmbossedSign is correctly imported in mdx-components */}
+      <EmbossedSign src="/assets/images/signature/abraham-of-london-cursive.svg" alt="Abraham of London Signature" width={200} height={60} effect="deboss" baseColor="transparent" className="mb-1" />
+      <p className="text-sm font-serif text-gray-700">— Abraham of London</p>
     </div>
-  );
-
-  // The main component must return the final JSX/BrandFrame
-    <BrandFrame title="Scripture Track — John 14" subtitle="Assurance • Obedience • The Helper • Peace" pageSize="A4" >
-      {content}
-    </BrandFrame>
-  );
-
-
+  </div>
+</BrandFrame>

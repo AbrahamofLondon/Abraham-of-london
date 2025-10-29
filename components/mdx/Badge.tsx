@@ -1,4 +1,7 @@
 // components/mdx/Badge.tsx (FIXED to prevent TypeError)
+
+'use client';
+
 import * as React from "react";
 import clsx from "clsx";
 

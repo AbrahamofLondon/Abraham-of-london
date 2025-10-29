@@ -1,102 +1,85 @@
-// pages/books/index.tsx (Restored Book Listing Page)
+// pages/blog/index.tsx
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import Link from "next/link";
+import Head from "next/head";
 
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import { GetServerSideProps } from 'next';
-import React from 'react';
-import Link from 'next/link';
-
-// Define the shape of your book data for type safety
-interface BookMeta {
-  slug: string;
+type PostMeta = {
   title: string;
-  author: string;
-  image?: string;
-  summary?: string;
-  // Add any other frontmatter fields you need to display on the list
-}
-
-interface BooksPageProps {
-  books: BookMeta[];
-}
-
-/* -------------------- Data Fetching (getServerSideProps) -------------------- */
-
-// This page uses getServerSideProps to fetch all book data for the list
-export const getServerSideProps: GetServerSideProps<BooksPageProps> = async () => {
-  const booksDirectory = path.join(process.cwd(), 'content', 'books');
-  let books: BookMeta[] = [];
-
-  try {
-    // Read all filenames from the 'content/books' directory
-    const filenames = fs.readdirSync(booksDirectory);
-
-    // Process each .mdx file to extract just the frontmatter
-    books = filenames
-      .filter(filename => filename.endsWith('.mdx'))
-      .map(filename => {
-        const filePath = path.join(booksDirectory, filename);
-        const markdownWithMeta = fs.readFileSync(filePath, 'utf-8');
-        const { data: frontmatter } = matter(markdownWithMeta);
-        
-        // Return only the necessary metadata for the listing page
-        return {
-          slug: filename.replace('.mdx', ''),
-          title: frontmatter.title || 'Untitled Book',
-          author: frontmatter.author || 'Unknown Author',
-          image: frontmatter.image || null,
-          summary: frontmatter.summary || null,
-        } as BookMeta;
-      })
-      // Optional: Sort the books if you have a date or other sorting field
-      // .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  } catch (error) {
-    console.error("Error fetching book list for index page:", error);
-    // If the file system operation fails, return an empty array gracefully
-    books = []; 
-  }
-
-  return {
-    props: {
-      books,
-    },
-  };
+  date: string | null; // Corrected for null serialization
+  excerpt: string | null; // Corrected for null serialization
+  coverImage: string | null; // Corrected for null serialization
+  slug: string;
 };
 
-/* -------------------- Component Rendering -------------------- */
+const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
-export default function BooksPage({ books }: BooksPageProps) {
+export async function getStaticProps() {
+  // Defensive check for directory existence
+  const files = fs.existsSync(BLOG_DIR)
+    ? fs.readdirSync(BLOG_DIR).filter(f => f.endsWith(".mdx"))
+    : [];
+
+  const posts: PostMeta[] = files.map((filename) => {
+    const slug = filename.replace(/\.mdx$/, "");
+    const raw = fs.readFileSync(path.join(BLOG_DIR, filename), "utf-8");
+    const { data } = matter(raw);
+    return {
+      title: String(data.title ?? slug),
+      // FINAL FIX: Assign null instead of undefined for all optional properties
+      date: data.date ? String(data.date) : null, 
+      excerpt: data.excerpt ? String(data.excerpt) : null,
+      coverImage: data.coverImage ? String(data.coverImage) : null,
+      slug,
+    };
+  })
+  // newest first if date present
+  .sort((a, b) => +new Date(b.date ?? 0) - +new Date(a.date ?? 0));
+
+  return { props: { posts } };
+}
+
+type Props = { posts: PostMeta[] };
+
+function BlogIndex({ posts }: Props) {
   return (
-    <main className="max-w-6xl mx-auto py-12 px-4">
-      <h1 className="text-4xl font-extrabold mb-10 border-b pb-4">All Books</h1>
+    <>
+      <Head>
+        <title>Blog | Abraham of London</title>
+        <meta name="robots" content="index,follow" />
+      </Head>
 
-      {books.length === 0 ? (
-        <p className="text-gray-600">No books found or an error occurred while loading them.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {books.map((book) => (
-            <Link key={book.slug} href={`/books/${book.slug}`} className="block border rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                {book.image && (
-                  <img
-                    src={book.image}
-                    alt={`Cover for ${book.title}`}
-                    className="w-full h-48 object-cover"
-                  />
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        <h1 className="mb-8 text-4xl font-extrabold tracking-tight">Blog</h1>
+        {posts.length === 0 ? (
+          <p>No posts yet.</p>
+        ) : (
+          <ul className="space-y-6">
+            {posts.map((p) => (
+              <li key={p.slug} className="card">
+                <h2 className="text-2xl font-bold">
+                  <Link href={`/blog/${p.slug}`} className="hover:underline">
+                    {p.title}
+                  </Link>
+                </h2>
+                {p.date && (
+                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                    {new Date(p.date).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
                 )}
-                <div className="p-6">
-                  <h2 className="text-xl font-bold mb-1">{book.title}</h2>
-                  <p className="text-sm text-gray-500 mb-3">By: {book.author}</p>
-                  {book.summary && (
-                    <p className="text-gray-700 text-sm line-clamp-3">{book.summary}</p>
-                  )}
-                  <span className="mt-4 inline-block text-blue-600 font-semibold">Read More &rarr;</span>
-                </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </main>
+                {p.excerpt && <p className="mt-3">{p.excerpt}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
+    </>
   );
 }
+
+export default BlogIndex;

@@ -1,7 +1,9 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import clsx from "clsx";
 
+// --- Configuration ---
 const AOF_URL = process.env.NEXT_PUBLIC_AOF_URL || "https://abrahamoflondon.org";
 const INNOVATE_HUB_URL =
   process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
@@ -20,6 +22,8 @@ const socials = [
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:");
 
+// --- SmartLink Component ---
+
 function SmartLink({
   href,
   children,
@@ -31,16 +35,19 @@ function SmartLink({
   className?: string;
   ariaLabel?: string;
 }) {
-  const base =
-    className ||
-    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-sm";
+  const baseClass = clsx(
+    "text-sm font-medium transition-colors duration-200 py-1 px-2 -mx-2 rounded-md", 
+    "hover:text-softGold dark:hover:text-softGold", 
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-softGold focus-visible:ring-opacity-50",
+    className
+  );
 
   if (isExternal(href)) {
     const isHttp = href.startsWith("http");
     return (
       <a
         href={href}
-        className={base}
+        className={baseClass}
         aria-label={ariaLabel}
         {...(isHttp ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
@@ -50,21 +57,31 @@ function SmartLink({
   }
 
   return (
-    <Link href={href} prefetch={false} className={base} aria-label={ariaLabel}>
+    <Link href={href} prefetch={false} className={baseClass} aria-label={ariaLabel}>
       {children}
     </Link>
   );
 }
 
+// --- Footer Component ---
+
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-cream border-t border-black/10">
-      <div className="container mx-auto max-w-7xl px-4 py-10">
-        <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-deepCharcoal">
+    <footer className="bg-cream dark:bg-black border-t border-black/10 dark:border-white/10">
+      <div className="container mx-auto max-w-7xl px-4 py-12 md:py-16">
+        
+        {/* --- 1. Primary Navigation --- */}
+        <nav
+          aria-label="Footer"
+          className={clsx(
+            "flex flex-wrap justify-center gap-x-8 gap-y-3",
+            "text-deepCharcoal dark:text-cream"
+          )}
+        >
           <SmartLink href="/about">About</SmartLink>
-          <SmartLink href="/blog">Blog</SmartLink>
+          <SmartLink href="/blog">Insights</SmartLink>
           <SmartLink href="/books">Books</SmartLink>
           <SmartLink href="/ventures">Ventures</SmartLink>
           <SmartLink href="/contact">Contact</SmartLink>
@@ -73,14 +90,25 @@ const Footer: React.FC = () => {
           <SmartLink href="/terms">Terms</SmartLink>
         </nav>
 
-        <nav aria-label="Brand family" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[color:var(--color-on-secondary)/0.9]">
-          <SmartLink href={AOF_URL}>Abraham of London</SmartLink>
+        {/* --- 2. Brand Family (Differentiated Styling) --- */}
+        <nav
+          aria-label="Brand family"
+          className={clsx(
+            "mt-8 pt-4 border-t border-black/10 dark:border-white/10",
+            "flex flex-wrap justify-center gap-x-6 gap-y-3",
+            "text-deepCharcoal/70 dark:text-cream/70"
+          )}
+        >
+          <SmartLink href={AOF_URL} className="font-semibold">
+            Abraham of London
+          </SmartLink>
           <SmartLink href={INNOVATE_HUB_URL}>InnovateHub</SmartLink>
           <SmartLink href={ALOMARADA_URL}>Alomarada</SmartLink>
           <SmartLink href={ENDURELUXE_URL}>Endureluxe</SmartLink>
         </nav>
 
-        <div className="mt-6 flex justify-center gap-4">
+        {/* --- 3. Social Icons --- */}
+        <div className="mt-8 flex justify-center gap-5">
           {socials.map((s) => (
             <a
               key={s.label}
@@ -88,16 +116,34 @@ const Footer: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={s.label}
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40"
+              className="rounded transition hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-softGold focus-visible:ring-opacity-60"
             >
-              <Image src={s.icon} alt={s.label} width={24} height={24} loading="lazy" decoding="async" />
+              <Image 
+                src={s.icon} 
+                alt={s.label} 
+                width={28}
+                height={28} 
+                loading="lazy" 
+                decoding="async" 
+                // Apply dark mode filter for social icons 
+                className="dark:invert dark:opacity-85"
+              />
             </a>
           ))}
         </div>
 
-        <p className="mt-6 text-center text-sm text-[color:var(--color-on-secondary)/0.6]">
+        {/* --- 4. Copyright & Credits --- */}
+        <p 
+          className={clsx(
+            "mt-10 text-center text-sm",
+            "text-deepCharcoal/60 dark:text-white/40"
+          )}
+        >
           © {year}{" "}
-          <a href={AOF_URL} className="underline decoration-forest hover:decoration-forest">
+          <a 
+            href={AOF_URL} 
+            className="underline decoration-softGold/70 hover:decoration-softGold transition-colors"
+          >
             Abraham of London
           </a>
           . All rights reserved.

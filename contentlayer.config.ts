@@ -1,4 +1,4 @@
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files'
+import { defineDocumentType, makeSource } from 'contentlayer/source-files'
 import remarkGfm from "remark-gfm";
 import { visit } from 'unist-util-visit';
 
@@ -14,28 +14,9 @@ function remarkFixMdxRelativeImports() {
     };
 }
 
-// --- NEW Plugin to Fix Acorn Parsing Errors in Blockquotes and Headers ---
-// This addresses errors like '90:7: Could not parse import/exports with acorn'
-function remarkFixAcornBlockquotes() {
-    return (tree) => {
-        visit(tree, 'paragraph', (node, index, parent) => {
-            // Check if the paragraph starts with a blockquote marker '>'
-            const isBlockquoteSyntax = node.children.some(
-                (child) => child.type === 'text' && child.value.trim().startsWith('>')
-            );
-
-            if (isBlockquoteSyntax) {
-                // Replace the paragraph node with a raw text node that the MDX compiler can process cleanly
-                const cleanValue = node.children.map(c => c.value).join('');
-                const newNode = {
-                    type: 'text',
-                    value: cleanValue.replace(/^>\s*/, ''), // Remove the '>' and leading space
-                };
-                parent.children[index] = newNode;
-            }
-        });
-    };
-}
+// --- REMOVED: DANGEROUS Plugin to Fix Acorn Parsing Errors in Blockquotes ---
+// The original logic could lead to data loss. Remove this function.
+// function remarkFixAcornBlockquotes() { ... }
 
 // ------------------------------------------------
 
@@ -71,7 +52,6 @@ export const Post = defineDocumentType(() => ({
     },
 }));
 
-// --- DEFINITION ADDED TO FIX ReferenceError: Book is not defined ---
 export const Book = defineDocumentType(() => ({
     name: "Book",
     filePathPattern: "books/**/*.mdx",
@@ -82,7 +62,6 @@ export const Book = defineDocumentType(() => ({
     },
 }));
 
-// --- DEFINITIONS ADDED FOR ALL MISSING DOCUMENT TYPES ---
 export const Resource = defineDocumentType(() => ({
     name: "Resource",
     filePathPattern: "resources/**/*.mdx",
@@ -165,7 +144,7 @@ export const Download = defineDocumentType(() => ({
         slug: { type: "string" },
         subtitle: { type: "string" },
         pdfPath: { type: "string" },
-        kind: { type: "string" }, 
+        kind: { type: "string" },
         ...commonMeta,
     },
 }));
@@ -196,20 +175,38 @@ export const Registry = defineDocumentType(() => ({
     },
 }));
 
+/**
+ * 🆕 ADDED: Definition for the Print document type.
+ * This resolves the Contentlayer error when building print-related pages.
+ */
+export const Print = defineDocumentType(() => ({
+    name: "Print",
+    filePathPattern: "print/**/*.mdx", // Assuming your print content is in content/print
+    contentType: "mdx",
+    fields: {
+        title: { type: "string" },
+        ...commonMeta,
+    },
+}));
+
 // --- FINAL makeSource CONFIGURATION ---
 export default makeSource({
     contentDirPath: "content",
     documentTypes: [
         Post, Book, Resource, Strategy, Download, Event,
-        Template, Guide, Pack, Checklist, Brief, Plan, Registry
+        Template, Guide, Pack, Checklist, Brief, Plan, Registry,
+        Print // 🥳 INCLUDED THE NEW PRINT DOCUMENT TYPE
     ],
     mdx: {
-        remarkPlugins: [remarkGfm, remarkFixMdxRelativeImports, remarkFixAcornBlockquotes],
+        // REMARKFIXACORNBLOCKQUOTES REMOVED FROM THIS ARRAY
+        remarkPlugins: [remarkGfm, remarkFixMdxRelativeImports],
         rehypePlugins: [],
         esbuildOptions: (opts) => {
             // Broadly exclude all project components/utilities via the alias to prevent bundling issues
             opts.external = [
                 ...(opts.external ?? []),
+                "next-contentlayer", // Ensure next-contentlayer itself is externally excluded
+                "next-contentlayer/*",
                 "@/components/*",
                 "@/lib/*",
                 "@/utils/*",

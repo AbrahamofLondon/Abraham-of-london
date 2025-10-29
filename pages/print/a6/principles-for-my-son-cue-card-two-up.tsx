@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // pages/print/a6/principles-for-my-son-cue-card-two-up.tsx
 
 import Head from "next/head";

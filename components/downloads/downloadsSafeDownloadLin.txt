@@ -1,40 +1,68 @@
 // components/downloads/SafeDownloadLink.tsx
+
 import * as React from "react";
 import Link from "next/link";
 
 type Props = React.PropsWithChildren<{ href: string; className?: string; fallbackHref?: string; }>;
 
-let manifest: Set<string> | null = null;
+// 1. Module-scoped promise to ensure fetch runs only once
+let manifestPromise: Promise<Set<string>> | null = null;
+
+// 2. Safe function to fetch and cache the manifest
+const getManifest = async (): Promise<Set<string>> => {
+  if (manifestPromise) {
+    return manifestPromise;
+  }
+  
+  // Create the promise and store it
+  manifestPromise = (async () => {
+    try {
+      // NOTE: Relative URLs like this MUST be safe to fetch during the Next.js build process.
+      // If manifest.json is NOT in your /public directory, this path will fail on the server.
+      const res = await fetch("/downloads/manifest.json", { cache: "no-store" });
+      
+      if (res.ok) {
+        const json = await res.json();
+        return new Set<string>(json.files || []);
+      }
+      console.error("Failed to fetch /downloads/manifest.json. Status:", res.status);
+      return new Set<string>();
+    } catch (error) {
+      console.error("Error fetching manifest:", error);
+      return new Set<string>();
+    }
+  })();
+  
+  return manifestPromise;
+};
+
+// 3. Custom hook to manage the state
 function useManifest() {
-  const [ok, setOk] = React.useState(false);
+  const [manifest, setManifest] = React.useState<Set<string> | null>(null);
+  const [ready, setReady] = React.useState(false);
+  
   React.useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        if (!manifest) {
-          const res = await fetch("/downloads/manifest.json", { cache: "no-store" });
-          if (res.ok) {
-            const json = await res.json();
-            manifest = new Set<string>(json.files || []);
-          } else {
-            manifest = new Set();
-          }
-        }
-        if (!cancelled) setOk(true);
-      } catch {
-        manifest = new Set();
-        if (!cancelled) setOk(true);
+    getManifest().then((data) => {
+      if (!cancelled) {
+        setManifest(data);
+        setReady(true);
       }
-    })();
+    });
     return () => { cancelled = true; };
   }, []);
-  return { ready: ok, has: (file: string) => manifest?.has(file.replace(/^\/?downloads\//, "")) ?? false };
+
+  return { ready, has: (file: string) => manifest?.has(file.replace(/^\/?downloads\//, "")) ?? false };
 }
 
 export default function SafeDownloadLink({ href, children, fallbackHref, className }: Props) {
   const { ready, has } = useManifest();
   const file = href.replace(/^\/+/, "");
-  const good = ready ? has(file) || has(file.replace(/^downloads\//, "")) : true; // optimistic until ready
+  
+  // NOTE: If using this component in pages that are statically rendered (SSG), 
+  // 'ready' will be false on the server, forcing an optimistic 'good = true'.
+  // This is inherent to client-side data fetching in SSG.
+  const good = ready ? has(file) || has(file.replace(/^downloads\//, "")) : true; 
   const finalHref = good ? href : (fallbackHref ?? "#");
 
   return (

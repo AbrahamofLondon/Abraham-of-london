@@ -281,6 +281,9 @@ export const mdxComponents = {
 
 export type MdxComponents = typeof mdxComponents;
 
+// FIX: Add MDXComponents export to satisfy imports across all pages
+export const MDXComponents = mdxComponents; // <--- NEW LINE ADDED HERE
+
 // Export under multiple names so pages can import however they like.
 export const components = mdxComponents;
 export default mdxComponents;
