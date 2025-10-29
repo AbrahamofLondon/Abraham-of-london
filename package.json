@@ -9,11 +9,12 @@
     "dev": "next dev",
     "build": "cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "next start",
-    "content:build": "contentlayer build --verbose",
+    "content:build_DISABLED": "contentlayer build --verbose",
+    "content:build": "echo 'Contentlayer temporarily disabled'", 
     "downloads:manifest": "node scripts/build-download-manifest.mjs",
     "orchestrate": "node scripts/orchestrate-fallback.mjs",
     "fix:bom": "node scripts/strip-bom-lf.mjs",
-    "prod:build": "npm run fix:bom && npm run content:build && npm run downloads:manifest && next build"
+    "prod:build": "npm run fix:bom && npm run downloads:manifest && next build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
