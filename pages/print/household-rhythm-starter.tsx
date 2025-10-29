@@ -5,6 +5,17 @@ import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
+---
+title: "Household-Rythm-Guide"
+slug: "household-rythm-guid"
+date: "2024-10-22"
+author: "AbrahamofLondon"
+readTime: "7 min"
+category: "Family"
+type: "Download"
+---
+
+
 export default function HouseholdRhythmStarter() {
   const currentYear = new Date().getFullYear();
   return (

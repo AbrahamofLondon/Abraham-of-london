@@ -5,6 +5,16 @@ import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
+---
+title: "Scripture-Track-John14"
+slug: "scripture-track-john14"
+date: "2024-02-01"
+author: "AbrahamofLondon"
+readTime: "7 min"
+category: "Devotional"
+type: "Download"
+---
+
 const Block = ({ title, items, isOrdered = false }: { title: string; items: string[]; isOrdered?: boolean }) => {
   const ListTag = isOrdered ? 'ol' : 'ul';
   return (

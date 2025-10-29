@@ -5,6 +5,17 @@ import React from "react";
 import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
+---
+title: "Fatherhood-Guide"
+slug: "fatherhood-guide"
+date: "2024-10-22"
+author: "AbrahamofLondon"
+readTime: "8 min"
+category: "Family"
+type: "Download"
+---
+
+
 export default function FatherhoodGuide() {
  const currentYear = new Date().getFullYear();
 
