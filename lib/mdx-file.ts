@@ -1,51 +1,53 @@
 // lib/mdx-file.ts
-
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-export type AnyFrontmatter = Record<string, unknown>;
+const isMDX = (f: string) => f.toLowerCase().endsWith(".mdx");
+const toSlug = (filename: string) => filename.replace(/\.mdx$/i, "");
+const isPublic = (f: string) => !f.startsWith("_") && !f.startsWith(".");
 
-export function listSlugs(dir: string, ext = ".mdx") {
+export function listSlugs(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir).filter((f) => f.endsWith(ext)).map((f) => f.replace(ext, ""));
+  const files = fs.readdirSync(dir);
+  const slugs = files
+    .filter(isPublic)
+    .filter(isMDX)
+    .map(toSlug);
+
+  // de-dupe defensively to avoid SSG conflicts
+  return Array.from(new Set(slugs));
 }
 
-/**
- * Recursively replaces all 'undefined' values in an object with 'null'.
- * This is necessary because Next.js/JSON cannot serialize 'undefined'.
- */
-function replaceUndefinedWithNull(obj: AnyFrontmatter): AnyFrontmatter {
-  const cleanObj: AnyFrontmatter = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key];
-      if (typeof value === 'object' && value !== null) {
-        // Recurse for nested objects (though frontmatter is usually flat)
-        cleanObj[key] = replaceUndefinedWithNull(value as AnyFrontmatter);
-      } else {
-        // Replace undefined with null
-        cleanObj[key] = value === undefined ? null : value;
-      }
-    }
-  }
-  return cleanObj;
-}
-
-export async function loadMdxBySlug<T extends AnyFrontmatter = AnyFrontmatter>(
-  dir: string,
-  slug: string,
-) {
+export async function loadMdxBySlug(dir: string, slug: string) {
   const file = path.join(dir, `${slug}.mdx`);
-  const raw = fs.readFileSync(file, "utf-8");
-  const { data, content } = matter(raw);
-  
-  // FINAL FIX: Ensure all frontmatter properties are JSON serializable
-  const cleanData = replaceUndefinedWithNull(data);
-  
-  // Use the cleaned data for serialization and return
-  const mdxSource = await serialize(content, { scope: cleanData });
-  
-  return { frontmatter: cleanData as T, mdxSource };
+  if (!fs.existsSync(file)) {
+    throw new Error(`MDX not found for slug: ${slug} at ${file}`);
+  }
+
+  const raw = fs.readFileSync(file, "utf8");
+  const { content, data } = matter(raw);
+
+  // MDX serialization (no Date objects leak)
+  const mdxSource = await serialize(content, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm, remarkBreaks],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, { behavior: "wrap" }],
+      ],
+      format: "mdx",
+    },
+    scope: data ?? {},
+  });
+
+  // Normalize frontmatter; ensure plain JSON (no Date instances)
+  const frontmatter = JSON.parse(JSON.stringify(data ?? {}));
+
+  return { frontmatter, mdxSource };
 }
