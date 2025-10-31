@@ -1,46 +1,74 @@
 // pages/print/[slug].tsx
+
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
-import path from "path";
-import { listSlugs, loadMdxBySlug } from "@/lib/mdx-file";
+import { serialize } from "next-mdx-remote/serialize";
 
-// definitive: alias the default map
-import mdxComponentMap from "@/components/mdx-components";
-const MDXComponents = mdxComponentMap;
+// ✅ FIX: Use the new unified content library for consistency and reliability
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 
-// wrapper used directly in JSX
+// ✅ FIX: Use a named import for the component map
+import { mdxComponents } from "@/components/mdx-components";
 import BrandFrame from "@/components/print/BrandFrame";
+import type { PostMeta } from "@/types/post";
 
-const DIR = path.join(process.cwd(), "content", "print");
+// Define the content type for this page (e.g., 'print', 'downloads', etc.)
+const CONTENT_TYPE = "print"; 
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = listSlugs(DIR);
-  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: false };
-};
+// --- [ Component Rendering ] ---
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = String(params?.slug);
-  const { frontmatter, mdxSource } = await loadMdxBySlug(DIR, slug);
-  return { props: { slug, frontmatter, mdxSource } };
-};
-
-type Props = { slug: string; frontmatter: any; mdxSource: any };
-
-export default function PrintDoc({ slug, frontmatter, mdxSource }: Props) {
+export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
       <Head>
-        <title>{frontmatter?.title ? `${frontmatter.title} | Print` : `Print | ${slug}`}</title>
-        <meta name="robots" content="noindex,follow" />
+        <title>{`${frontmatter.title} | Print View`}</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <BrandFrame>
-        <article className="prose lg:prose-lg dark:prose-invert mx-auto">
-          <MDXRemote {...mdxSource} components={MDXComponents} />
+      {/* Pass frontmatter props to BrandFrame for the header/footer */}
+      <BrandFrame
+        title={frontmatter.title}
+        subtitle={frontmatter.subtitle}
+        author={frontmatter.author}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined}
+      >
+        <article className="prose prose-lg dark:prose-invert mx-auto">
+          {/* Pass the correctly imported component map */}
+          <MDXRemote {...source} components={mdxComponents} />
         </article>
       </BrandFrame>
     </>
   );
 }
+
+// --- [ Data Fetching ] ---
+
+export const getStaticProps: GetStaticProps<{
+  source: any;
+  frontmatter: PostMeta;
+}> = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+
+  // Ensure all frontmatter properties are serializable (null instead of undefined)
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+
+  const mdxSource = await serialize(content || '');
+
+  return {
+    props: {
+      source: mdxSource,
+      frontmatter: finalFrontmatter,
+    },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};
