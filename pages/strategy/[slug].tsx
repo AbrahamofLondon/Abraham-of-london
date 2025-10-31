@@ -7,7 +7,6 @@ import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
-
 import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
 const CONTENT_TYPE = "strategy";
@@ -38,11 +37,13 @@ export default function StrategyPage({ source, frontmatter }: InferGetStaticProp
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
-  const { content, ...frontmatter }_ = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
   // ✅ FIX: Pass frontmatter data into the 'scope'
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
 
   return { 
     props: { source: mdxSource, frontmatter: finalFrontmatter },

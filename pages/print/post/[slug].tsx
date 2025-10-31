@@ -4,7 +4,6 @@ import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "ne
 import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 import BrandFrame from "@/components/print/BrandFrame";
@@ -40,7 +39,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
 
   // ✅ FIX: Pass frontmatter data into the 'scope'
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
   
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };
