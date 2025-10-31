@@ -59,7 +59,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
-  // ✅ FIX: Pass frontmatter data into the 'scope'
   const mdxSource = await serialize(content || '', { 
     scope: finalFrontmatter 
   });
