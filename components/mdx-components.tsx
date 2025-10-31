@@ -1,55 +1,32 @@
 // components/mdx-components.tsx
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
+import * as React from "react";
 
-// --- Import all custom components used in your MDX files ---
-// NOTE: Ensure these paths are correct for your project structure.
-const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
-const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
-const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
-const Rule = dynamic(() => import('@/components/mdx/Rule'), { ssr: false });
-const PullLine = dynamic(() => import('@/components/mdx/PullLine'), { ssr: false });
-const Note = dynamic(() => import('@/components/mdx/Note'), { ssr: false });
-const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
-const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
-const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
-const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
-const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
-const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
-const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
-const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
-const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
-const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
-const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
-const Grid = dynamic(() => import('@/components/mdx/Grid'), { ssr: false });
+// ——— Core passthroughs you actually use in MDX ———
+export const Grid: React.FC<React.PropsWithChildren<{ cols?: string; className?: string }>> = ({
+  cols = "grid-cols-2",
+  className = "",
+  children,
+}) => <div className={`grid ${cols} gap-6 ${className}`}>{children}</div>;
 
-const mdxComponents = {
-  // Standard HTML tags
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
-  ),
-  hr: Rule,
+// If your MDX uses a Title component, define it here (safer than bare {title} vars)
+export const Title: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">{children}</h1>
+);
 
-  // All custom components
-  BrandFrame,
-  BadgeRow,
-  EmbossedBrandMark,
-  EmbossedSign,
-  Rule,
-  PullLine,
-  Note,
-  Callout,
-  ResourcesCTA,
-  HeroEyebrow,
-  ShareRow,
-  Verse,
-  Badge,
-  Caption,
-  JsonLd,
-  CTA,
-  DownloadCard,
+// Add any other MDX-only components you reference in posts (Card, Note, Rule, etc.)
+export const Card: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className="", children }) => (
+  <div className={`rounded-2xl border p-4 md:p-6 ${className}`}>{children}</div>
+);
+
+// Map for next-mdx-remote
+const mdxComponentMap = {
   Grid,
+  Title,
+  Card,
 };
 
-// ✅ FIX: Use a DEFAULT EXPORT to standardize all imports
-export default mdxComponents;
+export type MdxComponentMap = typeof mdxComponentMap;
+
+// Export BOTH default and named for flexibility
+export default mdxComponentMap;
+export const MDXComponents = mdxComponentMap;
