@@ -1,4 +1,3 @@
-// components/print/BrandFrame.tsx
 "use client"; // REQUIRED: This component uses client-side hooks (useCallback, useMemo)
 
 import * as React from "react";
@@ -126,7 +125,6 @@ export default function BrandFrame({
       {/* Print rules + brand fallbacks */}
       <style jsx global>{`
         @media print {
-          /* CLEANUP: Removed duplicate @page and color-adjust rules */
           @page {
             size: ${pageSize};
             margin: ${marginsMm}mm;
@@ -140,7 +138,6 @@ export default function BrandFrame({
             print-color-adjust: exact !important;
           }
 
-          /* Font Overrides for Print Quality */
           h1, h2, h3, h4, .font-serif {
             font-family: var(--font-serif, 'Playfair Display', Georgia, serif) !important;
           }
@@ -148,8 +145,7 @@ export default function BrandFrame({
             font-family: var(--font-sans, 'Inter', ui-sans-serif, system-ui) !important;
           }
 
-          /* Hides screen button/chrome when printing */
-          .screen\\:block { display: none !important; }
+          .print\\:hidden { display: none !important; }
           .print\\:block { display: block !important; }
 
           header, footer {
@@ -158,17 +154,14 @@ export default function BrandFrame({
             background-color: ${BG_COLOR} !important;
           }
 
-          /* Minimalistic link display */
           a[href^="http"]:after {
             content: " [" attr(href) "]";
             font-size: .8em;
-            color: var(--color-on-secondary);
             text-decoration: none;
           }
-
-          /* Remove shadows and excessive border-radius on print */
-          .shadow-card, .shadow-cardHover, .shadow-xl { box-shadow: none !important; }
-          .rounded-xl, .rounded-lg, .rounded-md, .rounded { border-radius: 0 !important; }
+          
+          .shadow-xl { box-shadow: none !important; }
+          .rounded-lg { border-radius: 0 !important; }
 
           /* Cover page logic */
           .print-firstpage-cover .brand-chrome { display: block; }
@@ -178,9 +171,4 @@ export default function BrandFrame({
       `}</style>
     </>
   );
-}bal(.cover-page) + .brand-chrome { display: none !important; }
-    }
-   `}</style>
-  </>
- );
 }
