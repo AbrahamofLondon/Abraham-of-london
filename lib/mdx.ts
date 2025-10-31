@@ -89,7 +89,7 @@ export function getContentBySlug(
     summary: typeof fm.summary === "string" ? fm.summary : undefined,
     location: typeof fm.location === "string" ? fm.location : undefined,
     
-    // ✅ FIX: Added subtitle
+    // ✅✅✅ THIS IS THE FIX ✅✅✅
     subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
   };
 
