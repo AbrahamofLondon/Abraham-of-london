@@ -1,17 +1,19 @@
-// pages/blog/[slug].tsx
+// Example: pages/blog/[slug].tsx
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
+import { serialize } from 'next-mdx-remote/serialize'; // This is next-mdx-remote/serialize
 import Head from 'next/head';
 import Image from 'next/image';
 import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
 import type { PostMeta } from '@/types/post';
 import Layout from '@/components/Layout';
+import mdxComponents from '@/components/mdx-components'; // Correct default import
 
-// ✅ FIX: Use a DEFAULT IMPORT
-import mdxComponents from '@/components/mdx-components';
-
-const CONTENT_TYPE = 'blog';
+// -----------------------------------------------------------------
+// ⬇️⬇️ CHANGE THIS LINE FOR EACH TEMPLATE ⬇️⬇️
+// -----------------------------------------------------------------
+const CONTENT_TYPE = 'blog'; // Use 'downloads', 'events', 'print', etc.
+// -----------------------------------------------------------------
 
 interface PostPageProps {
   source: MDXRemoteSerializeResult;
@@ -19,8 +21,11 @@ interface PostPageProps {
 }
 
 export default function PostPage({ source, frontmatter }: PostPageProps) {
+  // Use a simple layout wrapper
+  const Wrapper = frontmatter.layout === 'print' ? React.Fragment : Layout;
+  
   return (
-    <Layout>
+    <Wrapper>
       <Head>
         <title>{frontmatter.title} | Abraham of London</title>
         <meta name="description" content={frontmatter.excerpt} />
@@ -53,15 +58,23 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
           <MDXRemote {...source} components={mdxComponents} />
         </div>
       </article>
-    </Layout>
+    </Wrapper>
   );
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); // Ensures no 'undefined'
-  const mdxSource = await serialize(content || '');
+  
+  // Ensures no 'undefined' values are passed, which breaks serialization
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); 
+
+  // ✅ FIX: Pass the frontmatter data into the 'scope'
+  // This makes variables like 'title' available inside your MDX files.
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };
 
