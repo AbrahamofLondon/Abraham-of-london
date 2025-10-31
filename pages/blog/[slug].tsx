@@ -7,7 +7,9 @@ import Image from 'next/image';
 import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
 import type { PostMeta } from '@/types/post';
 import Layout from '@/components/Layout';
-import mdxComponents from '@/components/mdx-components'; // Correct default import
+
+// ✅ FIX: Use a DEFAULT IMPORT
+import mdxComponents from '@/components/mdx-components';
 
 // -----------------------------------------------------------------
 // ⬇️⬇️ CHANGE THIS LINE FOR EACH TEMPLATE ⬇️⬇️
@@ -55,6 +57,7 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
         )}
 
         <div className="prose prose-lg max-w-none">
+          {/* ✅ FIX: Pass the correctly imported components map */}
           <MDXRemote {...source} components={mdxComponents} />
         </div>
       </article>

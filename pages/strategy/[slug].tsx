@@ -8,8 +8,7 @@ import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-// ✅ FIX: Use a DEFAULT IMPORT
-import mdxComponents from "@/components/mdx-components";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
 const CONTENT_TYPE = "strategy";
 
@@ -39,7 +38,7 @@ export default function StrategyPage({ source, frontmatter }: InferGetStaticProp
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
-  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const { content, ...frontmatter }_ = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
   // ✅ FIX: Pass frontmatter data into the 'scope'
