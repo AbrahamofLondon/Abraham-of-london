@@ -7,12 +7,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
 export const frontmatter = {
- title: "Scripture-Track-John14"
- slug: "scripture-track-john14"
- date: "2024-02-01"
- author: "AbrahamofLondon"
- readTime: "7 min"
- category: "Devotional"
+ title: "Scripture-Track-John14",
+ slug: "scripture-track-john14",
+ date: "2024-02-01",
+ author: "AbrahamofLondon",
+ readTime: "7 min",
+ category: "Devotional",
  type: "Download"
 };
 

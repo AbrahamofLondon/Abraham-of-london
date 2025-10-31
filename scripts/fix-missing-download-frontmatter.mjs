@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 import path from "path";
 import fsp from "fs/promises";
 import glob from "fast-glob";

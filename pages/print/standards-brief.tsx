@@ -6,12 +6,12 @@ import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 
 
 export const frontmatter = {
- title: "Standards-Brief"
- slug: "standards-brief"
- date: "2024-07-01"
- author: "AbrahamofLondon"
- readTime: "3 min"
- category: "Leadership"
+ title: "Standards-Brief",
+ slug: "standards-brief",
+ date: "2024-07-01",
+ author: "AbrahamofLondon",
+ readTime: "5 min",
+ category: "Leadership",
  type: "Download"
 };
 

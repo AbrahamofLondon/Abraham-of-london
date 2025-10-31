@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
+    "@heroicons/react": "^2.2.0",
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "3.0.1",
     "@netlify/functions": "4.2.1",

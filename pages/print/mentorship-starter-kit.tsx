@@ -8,12 +8,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
 export const frontmatter = {
- title: "Mentorship-Starter-Kit"
- slug: "mentorship-stater-kit"
- date: "2024-10-22"
- author: "AbrahamofLondon"
- readTime: "10 min"
- category: "Operations"
+ title: "Mentorship-Starter-Kit",
+ slug: "mentorship-stater-kit",
+ date: "2024-10-22",
+ author: "AbrahamofLondon",
+ readTime: "10 min",
+ category: "Operations",
  type: "Download"
 };
 

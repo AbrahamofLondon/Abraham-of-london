@@ -7,13 +7,13 @@ import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 
 
 export const frontmatter = {
-  title: "Board-Investor-One-Pager-Template"
-  slug: "board-investor-one-pager-template"
-  date: "2024-10-01"
-  author: "AbrahamofLondon"
-  readTime: "5 min"
-  category: "Operations"
-  type: "Download
+  title: "Board-Investor-One-Pager-Template",
+  slug: "board-investor-one-pager-template",
+  date: "2024-10-01",
+  author: "AbrahamofLondon",
+  readTime: "5 min",
+  category: "Operations",
+  type: "Download"
 };
 
 export default function BoardInvestorTemplate() {

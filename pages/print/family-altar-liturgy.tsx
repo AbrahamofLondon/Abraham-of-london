@@ -5,12 +5,12 @@ import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
 export const frontmatter = {
-  title: "Family-Altar-Lithurgy"
-  slug: "family-altar-lithurgy"
-  date: "2024-10-22"
-  author: "AbrahamofLondon"
-  readTime: "7 min"
-  category: "Family"
+  title: "Family-Altar-Lithurgy",
+  slug: "family-altar-lithurgy",
+  date: "2024-10-22",
+  author: "AbrahamofLondon",
+  readTime: "7 min",
+  category: "Family",
   type: "Download"
 };
 
