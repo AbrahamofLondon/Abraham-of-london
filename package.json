@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "npm run audit:images || true && npm run pdfs:generate || true && npm run ci:downloads || true && cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "next start",
+    "lint": "next lint",
     "downloads:manifest": "node scripts/build-download-manifest.mjs",
     "orchestrate": "node scripts/orchestrate-fallback.mjs",
     "fix:bom": "node scripts/strip-bom-lf.mjs",

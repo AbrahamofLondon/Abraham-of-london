@@ -11,7 +11,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "allowJs": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
