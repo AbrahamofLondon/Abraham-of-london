@@ -1,71 +1,43 @@
-// Example: pages/blog/[slug].tsx
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
-import Head from 'next/head';
-import Image from 'next/image';
-import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
-import type { PostMeta } from '@/types/post';
+// pages/print/[slug].tsx
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 
-// ✅ FIX: Use a NAMED IMPORT { mdxComponents }
-import { mdxComponents } from '@/components/mdx-components';
-import Layout from '@/components/Layout'; // Or your specific layout
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx"; 
+import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
+import BrandFrame from "@/components/print/BrandFrame";
+import type { PostMeta } from "@/types/post";
 
-// -----------------------------------------------------------------
-// ⬇️⬇️ CHANGE THIS LINE FOR EACH TEMPLATE ⬇️⬇️
-// -----------------------------------------------------------------
-const CONTENT_TYPE = 'blog'; // Use 'downloads', 'events', 'resources', etc.
-// -----------------------------------------------------------------
+const CONTENT_TYPE = "print"; 
 
-interface PostPageProps {
-  source: MDXRemoteSerializeResult;
-  frontmatter: PostMeta;
-}
-
-export default function PostPage({ source, frontmatter }: PostPageProps) {
+export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout>
+    <>
       <Head>
-        <title>{frontmatter.title} | Abraham of London</title>
-        <meta name="description" content={frontmatter.excerpt} />
+        <title>{`${frontmatter.title} | Print View`}</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
-      <article className="container mx-auto px-4 py-12">
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
-          {frontmatter.date && (
-            <p className="mt-2 text-soft-charcoal">
-              {new Date(frontmatter.date).toLocaleDateString('en-GB', {
-                year: 'numeric', month: 'long', day: 'numeric',
-              })}
-            </p>
-          )}
-        </header>
-
-        {frontmatter.coverImage && (
-          <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
-            <Image
-              src={frontmatter.coverImage}
-              alt={`Cover image for ${frontmatter.title}`}
-              layout="fill"
-              className="object-cover"
-              priority
-            />
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none">
-          {/* ✅ FIX: Pass the correctly imported components map */}
+      
+      <BrandFrame
+        title={frontmatter.title}
+        subtitle={frontmatter.subtitle}
+        author={frontmatter.author}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined}
+      >
+        <article className="prose prose-lg dark:prose-invert mx-auto">
           <MDXRemote {...source} components={mdxComponents} />
-        </div>
-      </article>
-    </Layout>
+        </article>
+      </BrandFrame>
+    </>
   );
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); // Ensures no 'undefined'
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   const mdxSource = await serialize(content || '');
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };

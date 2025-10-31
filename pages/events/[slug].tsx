@@ -6,9 +6,9 @@ import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
-import Layout from "@/components/Layout"; // Standard layout for styling
+import Layout from "@/components/Layout";
 import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
-import { getContentSlugs, getContentBySlug } from "@/lib/mdx"; // ✅ Centralized data fetching
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
 const CONTENT_TYPE = "events";
@@ -62,7 +62,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const mdxSource = await serialize(content || '');
   return { 
     props: { source: mdxSource, frontmatter: finalFrontmatter },
-    revalidate: 60, // Rebuild every minute as events can change
+    revalidate: 60,
   };
 };
 
