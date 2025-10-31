@@ -5,7 +5,7 @@
     "route": "/print/family-altar-liturgy",
     "cover": "/assets/images/downloads/family-altar-liturgy.jpg",
     "aliases": ["/downloads/Family_Altar_Liturgy.pdf"],
-    "status": "ready"  // route+mdx provided
+    "status": "ready" // route+mdx provided
   },
   {
     "slug": "leaders-cue-card-two-up",
@@ -13,7 +13,7 @@
     "route": "/print/a6/leaders-cue-card-two-up",
     "cover": "/assets/images/downloads/leaders-cue-card.jpg",
     "aliases": ["/downloads/leaders-cue-card-a6-two-up.pdf"],
-    "status": "ready"  // route provided
+    "status": "ready" // route provided
   },
   {
     "slug": "brotherhood-covenant",
@@ -91,7 +91,7 @@
     "out": "public/downloads/fathering-without-fear.epub",
     "route": null,
     "cover": "/assets/images/downloads/fathering-without-fear.jpg",
-    "status": "decide", 
+    "status": "decide",
     "note": "Prefer real .epub excerpt. If staying PDF, rename to fathering-without-fear-teaser.pdf"
   }
 ]

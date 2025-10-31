@@ -1,8 +1,8 @@
 scripts/alias-leaders-cue-card.mjs
 #!/usr/bin/env node
 import fs from "node:fs/promises";
-import fss from "node:fs";
-import path from "node:path";
+import fss from "fs";
+import path from "path";
 
 const DL = path.join(process.cwd(), "public", "downloads");
 const src = path.join(DL, "Leaders_Cue_Card.pdf");

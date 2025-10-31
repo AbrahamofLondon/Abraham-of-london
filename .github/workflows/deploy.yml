@@ -1,0 +1,49 @@
+.github/workflows/deploy.yml
+name: Build & Render PDFs
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Project Manager (fixes)
+        run: npm run project:manage
+
+      - name: Build Next
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+      - name: Start Next (5555)
+        run: npx serve .next -l 5555 &
+      
+      - name: Render PDFs (strict)
+        run: node scripts/render-pdfs.mjs --base=http://localhost:5555 --out=public/downloads --strict=true --concurrency=2 --retries=2
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloads
+          path: public/downloads/*.pdf
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: scripts/_reports/*.json

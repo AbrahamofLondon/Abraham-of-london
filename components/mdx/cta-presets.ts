@@ -1,5 +1,7 @@
 // components/mdx/cta-presets.ts
 
+'use client';
+
 export type LinkItem = { href: string; label: string; sub?: string };
 
 export const CTA_PRESETS: Record<

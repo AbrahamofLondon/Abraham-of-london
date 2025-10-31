@@ -1,17 +1,12 @@
 // scripts/generate-covers.mjs
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import { glob } from "glob";
 import matter from "gray-matter";
 import sharp from "sharp";
 
 const ROOT = process.cwd();
-const CONTENT_DIRS = [
-  "content/posts",
-  "_posts",
-  "posts",
-  "data/posts"
-];
+const CONTENT_DIRS = ["content/posts", "_posts", "posts", "data/posts"];
 
 const BLOG_OUT = path.join(ROOT, "public/assets/images/blog");
 const SOCIAL_OUT = path.join(ROOT, "public/assets/images/social");
@@ -20,11 +15,17 @@ const SOCIAL_OUT = path.join(ROOT, "public/assets/images/social");
 function toSlug(fp, fm) {
   if (fm?.slug) return String(fm.slug).trim();
   const base = path.basename(fp).replace(/\.(md|mdx)$/i, "");
-  return base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return base
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function esc(text) {
-  return String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function svgForTitle({ title, subtitle = "Abraham of London", w, h }) {
@@ -112,21 +113,29 @@ async function run() {
       title,
       subtitle: "Blog • Abraham of London",
       w: 1600,
-      h: 900
+      h: 900,
     });
     const svgOG = svgForTitle({
       title,
       subtitle: "abrahamoflondon.org",
       w: 1200,
-      h: 630
+      h: 630,
     });
 
     if (!(await exists(blogOut))) {
-      await writeJpgFromSvg(svgBlog, blogOut, { width: 1600, height: 900, quality: 90 });
+      await writeJpgFromSvg(svgBlog, blogOut, {
+        width: 1600,
+        height: 900,
+        quality: 90,
+      });
       made++;
     }
     if (!(await exists(ogOut))) {
-      await writeJpgFromSvg(svgOG, ogOut, { width: 1200, height: 630, quality: 92 });
+      await writeJpgFromSvg(svgOG, ogOut, {
+        width: 1200,
+        height: 630,
+        quality: 92,
+      });
       made++;
     }
   }
@@ -139,9 +148,13 @@ async function run() {
       title: "Abraham of London",
       subtitle: "Leadership • Fatherhood • Strategy",
       w: 1200,
-      h: 630
+      h: 630,
     });
-    await writeJpgFromSvg(svg, siteOg, { width: 1200, height: 630, quality: 92 });
+    await writeJpgFromSvg(svg, siteOg, {
+      width: 1200,
+      height: 630,
+      quality: 92,
+    });
     made++;
   }
   if (!(await exists(siteTw))) {
@@ -149,9 +162,13 @@ async function run() {
       title: "Abraham of London",
       subtitle: "Leadership • Fatherhood • Strategy",
       w: 1600,
-      h: 900
+      h: 900,
     });
-    await writeWebpFromSvg(svg, siteTw, { width: 1600, height: 900, quality: 92 });
+    await writeWebpFromSvg(svg, siteTw, {
+      width: 1600,
+      height: 900,
+      quality: 92,
+    });
     made++;
   }
 

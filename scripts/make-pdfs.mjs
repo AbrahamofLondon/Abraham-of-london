@@ -17,8 +17,8 @@
 // - Skips by default when CI/NETLIFY is set, unless PDF_ON_CI=1 is present.
 
 import fs from "node:fs/promises";
-import path from "node:path";
-import crypto from "node:crypto";
+import path from "path";
+import crypto from "crypto";
 import { fileURLToPath } from "node:url";
 import chokidar from "chokidar";
 import matter from "gray-matter";
@@ -32,7 +32,7 @@ import fg from "fast-glob";
 // CI guard
 // ───────────────────────────────────────────────────────────
 if ((process.env.CI || process.env.NETLIFY) && process.env.PDF_ON_CI !== "1") {
-  console.log("[pdfs] CI detected and PDF_ON_CI != '1' — skipping.");
+  console.log("[pdfs] CI detected and PDF_ON_CI != '1' - skipping.");
   process.exit(0);
 }
 
@@ -81,7 +81,8 @@ const toOutName = (fm, sourcePath) => {
   return slugify(path.parse(sourcePath).name) + ".pdf";
 };
 
-const readOr = async (p, orStr) => (await exists(p) ? fs.readFile(p, "utf8") : orStr);
+const readOr = async (p, orStr) =>
+  (await exists(p)) ? fs.readFile(p, "utf8") : orStr;
 
 // Markdown renderer
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
@@ -122,13 +123,13 @@ const FALLBACK_TEMPLATE = (payload, baseHref) => `<!doctype html>
     <div class="brand">Abraham of London</div>
     <div class="title">${payload.title}</div>
     ${payload.excerpt ? `<div class="meta">${payload.excerpt}</div>` : ""}
-    <div class="meta">${[payload.author, payload.prettyDate].filter(Boolean).join(" — ")}</div>
+    <div class="meta">${[payload.author, payload.prettyDate].filter(Boolean).join(" - ")}</div>
     ${payload.coverImage ? `<div class="cover"><img src="${payload.coverImage}" style="width:100%; margin-top:8mm;"/></div>` : ""}
   </div>
   <div class="page">
     ${payload.html}
   </div>
-  <div class="footer"><span class="brand">A/L</span> — ${payload.title}</div>
+  <div class="footer"><span class="brand">A/L</span> - ${payload.title}</div>
 </body>
 </html>`;
 
@@ -262,10 +263,12 @@ async function buildOne(browser, item) {
       srcBuf || Buffer.from(""),
       Buffer.from(payload.brandCss),
       Buffer.from(templateHtml),
-    ])
+    ]),
   );
   const cacheKey = path.join(CACHE_DIR, outName + ".sha");
-  const oldHash = (await exists(cacheKey)) ? (await fs.readFile(cacheKey, "utf8")).trim() : "";
+  const oldHash = (await exists(cacheKey))
+    ? (await fs.readFile(cacheKey, "utf8")).trim()
+    : "";
   if (!FORCE_ALL && oldHash === hash && (await exists(outPath))) {
     dbg("cache hit:", outName);
     return outPath;
@@ -296,7 +299,9 @@ async function buildOne(browser, item) {
 async function buildAll() {
   const items = await discover();
   if (items.length === 0) {
-    log("No sources found — add MD/MDX/HTML to content/downloads or scripts/pdfs/static.");
+    log(
+      "No sources found - add MD/MDX/HTML to content/downloads or scripts/pdfs/static.",
+    );
     return [];
   }
   const browser = puppeteer.launch({ headless: "new" });
@@ -322,14 +327,21 @@ async function main() {
 
   if (OPEN && outs.length) {
     const opener =
-      process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+      process.platform === "darwin"
+        ? "open"
+        : process.platform === "win32"
+          ? "start"
+          : "xdg-open";
     const { exec } = await import("node:child_process");
     for (const o of outs) exec(`${opener} "${o}"`);
   }
 
   if (WATCH) {
-    log("watching for changes…");
-    const watcher = chokidar.watch(CONTENT_DIRS, { cwd: ROOT, ignoreInitial: true });
+    log("watching for changes...");
+    const watcher = chokidar.watch(CONTENT_DIRS, {
+      cwd: ROOT,
+      ignoreInitial: true,
+    });
     watcher.on("all", async () => {
       try {
         await buildAll();

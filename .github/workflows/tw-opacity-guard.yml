@@ -4,18 +4,18 @@ name: Tailwind Slash-Opacity Guard
 on:
   pull_request:
     paths:
-      - 'app/**'
-      - 'src/**'
-      - 'pages/**'
-      - 'components/**'
-      - 'content/**'
-      - 'styles/**'
-      - 'postcss/**'
-      - 'scripts/convert-tailwind-slash-opacity.mjs'
-      - 'scripts/postcss-guard-dryrun.mjs'
-      - 'postcss.config.js'
-      - 'tailwind.config.*'
-      - 'package.json'
+      - "app/**"
+      - "src/**"
+      - "pages/**"
+      - "components/**"
+      - "content/**"
+      - "styles/**"
+      - "postcss/**"
+      - "scripts/convert-tailwind-slash-opacity.mjs"
+      - "scripts/postcss-guard-dryrun.mjs"
+      - "postcss.config.js"
+      - "tailwind.config.*"
+      - "package.json"
   workflow_dispatch: {}
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - run: npm ci
 

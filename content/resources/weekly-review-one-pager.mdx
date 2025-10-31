@@ -1,0 +1,71 @@
+<BrandFrame
+  title="Weekly Operating Rhythm & Daily Blocks"
+  subtitle="A template for high-leverage allocation of time and focus across the week."
+  pageSize="A4"
+>
+  <PullLine subtle>Your calendar reflects your priorities. Guard your focus blocks ruthlessly.</PullLine>
+
+  ## The Weekly Cadence
+
+  {/* Re-implementing the table with Tailwind classes for better print control */}
+  <table className="mt-4 w-full border-collapse">
+    <thead>
+      <tr className="bg-[color:var(--color-primary)/0.1] text-forest">
+        <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2] w-1/4">Day</th>
+        <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2] w-1/4">Focus Activity</th>
+        <th className="p-3 text-left border-b-2 border-[color:var(--color-primary)/0.2] w-1/2">Output/Goal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-lightGrey/60">
+        <td className="p-3 font-bold text-deepCharcoal">Monday</td>
+        <td className="p-3 text-sm text-gray-700">Planning &amp; Audit</td>
+        <td className="p-3 text-sm text-gray-700">Top 3 Outcomes set. Calendar is clean.</td>
+      </tr>
+      <tr className="bg-warmWhite/50 border-b border-lightGrey/60">
+        <td className="p-3 font-bold text-deepCharcoal">Tuesday–Thursday</td>
+        <td className="p-3 text-sm text-gray-700">Execution &amp; Focus</td>
+        <td className="p-3 text-sm text-gray-700">Deep work blocks completed. Progress on Top 3.</td>
+      </tr>
+      <tr>
+        <td className="p-3 font-bold text-deepCharcoal">Friday</td>
+        <td className="p-3 text-sm text-gray-700">Review &amp; Preview</td>
+        <td className="p-3 text-sm text-gray-700">Outcomes scored (0–1). Learnings captured. Next week blocked.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr className="my-8 border-t border-lightGrey" />
+
+  ## The Daily Time Blocks (Template)
+
+  <p className="mb-4 text-gray-700">
+    Use these time blocks to structure your most productive 4-hour window (e.g., 9:00–13:00).
+  </p>
+
+  <ul className="list-disc pl-5 space-y-3">
+    <li><strong>Focus (90m):</strong> Deep, high-leverage work toward Top 3 outcomes. Zero distractions.</li>
+    <li><strong>Admin (45m):</strong> Email, quick comms, expenses. Batch here.</li>
+    <li><strong>People (45m):</strong> Meetings, calls, coaching, check-ins.</li>
+    <li><strong>Buffer (30m):</strong> Rest, transitions, fires, or prep.</li>
+  </ul>
+
+  <Note tone="key" title="Rule of 3" className="mt-8">
+    Start every Monday by writing down your <strong>Top 3 Outcomes</strong> for the week. If you hit those 3, the week was a success.
+  </Note>
+
+  {/* Brand Mark in the footer area */}
+  <div className="mt-12 text-center pt-6 border-t border-lightGrey/80">
+    <EmbossedBrandMark
+      src="/assets/images/abraham-logo.jpg"
+      alt="Abraham of London Operating System Mark"
+      width={80}
+      height={80}
+      effect="deboss"
+      className="inline-block"
+      baseColor="transparent"
+    />
+  </div>
+</BrandFrame>
+
+

@@ -1,39 +1,50 @@
-// content/entrepreneur-operating-pack/
+---
+type: "Download"
+title: "Entrepreneur Operating Pack"
+slug: "entrepreneur-operating-pack"
+date: "2025-09-22"
+author: "Abraham of London"
+readTime: "2 min read"
+category: "Resources"
+excerpt: "A comprehensive pack containing a 30-60-90 plan, a financial triage checklist, and key decision-making frameworks."
+subtitle: "The one-pager to keep you honest"
+draft: false
+---
 
-import BrandFrame from "../../components/print/BrandFrame";
-import * as React from "react";
-{/* Add any other imports needed here */}
+  const title = "Entrepreneur Operating Pack";
+  const subtitle = "30-60-90 Plan, Triage Checklist, and Decision Frameworks.";
 
-// --- Metadata Definition (REQUIRED for ContentLayer) ---
-export const metadata = {
-  // ⚠️ YOU MUST CUSTOMIZE THESE VALUES FOR EACH FILE ⚠️
-  title: "The Correct Title for This Download",
-  slug: "the-file-slug",
-  date: "2025-10-21",
-  author: "Abraham of London",
-  readTime: "X min",
-  category: "Correct Category",
-  type: "download",
-  subtitle: "A concise description of the download."
-};
-
-const TheComponentName = () => {
-  return (
     <BrandFrame
-      title={metadata.title}
-      subtitle={metadata.subtitle}
+      title={title}
+      subtitle={subtitle}
       pageSize="A4"
-    >
-      {/* Ensure ALL existing C-style comments (//) inside this
-        return block are changed to JSX block comments ({/* ... * /})
-      */}
-      
-      {/* Start of Download Content */}
-      <p>This is the content of the download.</p>
-      
-      {/* End of Download Content */}
+
+> 
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold">I. 30-60-90 Strategy Template</h2>
+        <p className="text-sm">Use this to define short-term mission focus:</p>
+        <ul className="list-disc list-inside space-y-1 text-sm pl-4">
+          <li>**30 Days (Triage):** Stabilize cash flow. Cut 1 non-essential cost.</li>
+          <li>**60 Days (Focus):** Secure 1 major client/win. Refine core product/service.</li>
+          <li>**90 Days (Build):** Document one repeatable process. Train one successor/apprentice.</li>
+        </ul>
+        
+        <Rule />
+
+        <h2 className="text-xl font-bold">II. Decision-Making Framework (T.R.U.T.H.)</h2>
+        <ol className="list-decimal list-inside space-y-1 text-sm pl-4">
+          <li>**T - Truth:** What are the undeniable facts? (No feelings.)</li>
+          <li>**R - Risk:** What are the three worst-case outcomes?</li>
+          <li>**U - Utility:** What is the best use of our current resources (cash/time)?</li>
+          <li>**T - Timeline:** What is the drop-dead date for decision/action?</li>
+          <li>**H - House:** Does this choice honour my family/covenants?</li>
+        </ol>
+        
+        <Note tone="key" title="Download Action">
+          The full pack includes printable sheets for each framework. Print and write.
+        </Note>
+      </div>
     </BrandFrame>
   );
-};
 
-export default TheComponentName;
+

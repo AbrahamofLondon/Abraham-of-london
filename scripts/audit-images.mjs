@@ -1,4 +1,4 @@
-import path from "node:path";
+import path from "path";
 import fsp from "node:fs/promises";
 import { constants } from "node:fs";
 import glob from "fast-glob";
@@ -12,12 +12,22 @@ const DO_FIX = process.argv.includes("--fix");
 
 const HERO_MIN_W = 1200;
 const HERO_MIN_B = 40 * 1024; // 40KB
-const IMG_MIN_W  = 800;
-const IMG_MIN_B  = 20 * 1024; // 20KB
+const IMG_MIN_W = 800;
+const IMG_MIN_B = 20 * 1024; // 20KB
 
-async function exists(p){ try{ await fsp.access(p, constants.F_OK); return true; } catch { return false; } }
+async function exists(p) {
+  try {
+    await fsp.access(p, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-function brandSVG(title = "Abraham of London", subtitle = "Signature Collection") {
+function brandSVG(
+  title = "Abraham of London",
+  subtitle = "Signature Collection",
+) {
   return `
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -49,8 +59,15 @@ async function imageMeta(abs) {
 async function collectContentImages() {
   const out = [];
   const files = await glob(
-    ["blog/**/*.mdx","books/**/*.mdx","events/**/*.mdx","downloads/**/*.mdx","resources/**/*.md","strategy/**/*.md"],
-    { cwd: CONTENT }
+    [
+      "blog/**/*.mdx",
+      "books/**/*.mdx",
+      "events/**/*.mdx",
+      "downloads/**/*.mdx",
+      "resources/**/*.md",
+      "strategy/**/*.md",
+    ],
+    { cwd: CONTENT },
   );
 
   for (const rel of files) {
@@ -72,17 +89,27 @@ async function collectContentImages() {
 }
 
 async function walkPublicImages() {
-  const files = await glob(["assets/images/**/*.{png,jpg,jpeg,webp,avif,svg}"], { cwd: PUBLIC_DIR });
-  return files.map(rel => ({ file: `public/${rel}`, type: "asset", publicPath: `/${rel.replace(/\\/g,"/")}` }));
+  const files = await glob(
+    ["assets/images/**/*.{png,jpg,jpeg,webp,avif,svg}"],
+    { cwd: PUBLIC_DIR },
+  );
+  return files.map((rel) => ({
+    file: `public/${rel}`,
+    type: "asset",
+    publicPath: `/${rel.replace(/\\/g, "/")}`,
+  }));
 }
 
 async function main() {
   const report = { checked: 0, upgraded: [], weak: [], missing: [], ok: [] };
-  const candidates = [...await collectContentImages(), ...await walkPublicImages()];
+  const candidates = [
+    ...(await collectContentImages()),
+    ...(await walkPublicImages()),
+  ];
 
   for (const item of candidates) {
     const { publicPath, type, title } = item;
-    const abs = path.join(PUBLIC_DIR, publicPath.replace(/^\//,""));
+    const abs = path.join(PUBLIC_DIR, publicPath.replace(/^\//, ""));
     const present = await exists(abs);
 
     if (!present) {
@@ -102,10 +129,20 @@ async function main() {
     const minB = isHero ? HERO_MIN_B : IMG_MIN_B;
 
     if ((meta.width || 0) < minW || (meta.size || 0) < minB) {
-      report.weak.push({ ...item, width: meta.width, bytes: meta.size, minW, minB });
+      report.weak.push({
+        ...item,
+        width: meta.width,
+        bytes: meta.size,
+        minW,
+        minB,
+      });
       if (DO_FIX) {
         await writePlaceholder(abs, title || "Abraham of London");
-        report.upgraded.push({ ...item, action: "replaced", before: { width: meta.width, bytes: meta.size } });
+        report.upgraded.push({
+          ...item,
+          action: "replaced",
+          before: { width: meta.width, bytes: meta.size },
+        });
       }
     } else {
       report.ok.push({ ...item, width: meta.width, bytes: meta.size });
@@ -115,4 +152,7 @@ async function main() {
   console.log(JSON.stringify(report, null, 2));
   if (report.weak.length || report.missing.length) process.exitCode = 1;
 }
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

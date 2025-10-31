@@ -1,5 +1,3 @@
-scripts/strip-bom-lf.mjs
-#!/usr/bin/env node
 import { promises as fsp } from "fs";
 import fg from "fast-glob";
 

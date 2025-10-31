@@ -1,0 +1,7 @@
+echo "⏳ Running Tailwind slash-opacity checks..."
+node scripts/convert-tailwind-slash-opacity.mjs
+node scripts/postcss-guard-dryrun.mjs
+
+# Optional gates (keep fast)
+npm run -s lint || exit 1
+npm run -s typecheck || true

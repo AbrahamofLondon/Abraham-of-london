@@ -1,74 +1,74 @@
 Folder PATH listing
 Volume serial number is 00000086 24C1:C7AA
 C:\CODEX-SETUP\ABRAHAM-OF-LONDON\PUBLIC
-³   forms.html
-³   memoir.html
-³   robots.txt
-³   sitemap-0.xml
-³   sitemap.xml
-³   style.css
-³   _headers.txt
-³   _redirects
-³   
-ÃÄÄÄassets
-³   ÀÄÄÄimages
-³       ³   abraham-logo.jpg
-³       ³   abraham-of-london-banner.webp
-³       ³   alomarada-ltd.webp
-³       ³   default-book.jpg
-³       ³   endureluxe-ltd.webp
-³       ³   fathering-principles.jpg
-³       ³   fathering-without-fear-teaser.jpg
-³       ³   fathering-without-fear.jpg
-³       ³   fathering-without-fear.webp
-³       ³   profile-portrait .webp
-³       ³   
-³       ÃÄÄÄblog
-³       ³       default-blog-cover.jpg
-³       ³       fathering-principles.jpg
-³       ³       fathering-without-fear-teaser.jpg
-³       ³       leadership-begins-at-home.jpg
-³       ³       principles-for-my-son.jpg
-³       ³       reclaiming-the-narrative.jpg
-³       ³       the-brotherhood-code.jpg
-³       ³       when-the-system-breaks-you.jpg
-³       ³       
-³       ÃÄÄÄbooks
-³       ³       fatherhood-cover.webp
-³       ³       fathering-without-fear.jpg
-³       ³       fathering-without-fear1.jpg
-³       ³       
-³       ÃÄÄÄlogo
-³       ³       abraham-of-london-logo.svg
-³       ³       alomarada.svg
-³       ³       endureluxe.svg
-³       ³       
-³       ÀÄÄÄsocial
-³               email.svg
-³               facebook.svg
-³               instagram.svg
-³               linkedin.svg
-³               og-image.jpg
-³               phone.svg
-³               twitter-image.jpg
-³               twitter-image.webp
-³               twitter.svg
-³               whatsapp.svg
-³               
-ÃÄÄÄdownloads
-³       fathering-without-fear.epub
-³       fathering-without-fear.pdf
-³       
-ÃÄÄÄfavicon
-³       apple-icon.png
-³       favicon.ico
-³       icon0.svg
-³       icon1.png
-³       manifest.json
-³       web-app-manifest-192x192.png
-³       web-app-manifest-512x512.png
-³       
-ÀÄÄÄfonts
+ï¿½   forms.html
+ï¿½   memoir.html
+ï¿½   robots.txt
+ï¿½   sitemap-0.xml
+ï¿½   sitemap.xml
+ï¿½   style.css
+ï¿½   _headers.txt
+ï¿½   _redirects
+ï¿½
+ï¿½ï¿½ï¿½ï¿½assets
+ï¿½   ï¿½ï¿½ï¿½ï¿½images
+ï¿½       ï¿½   abraham-logo.jpg
+ï¿½       ï¿½   abraham-of-london-banner.webp
+ï¿½       ï¿½   alomarada-ltd.webp
+ï¿½       ï¿½   default-book.jpg
+ï¿½       ï¿½   endureluxe-ltd.webp
+ï¿½       ï¿½   fathering-principles.jpg
+ï¿½       ï¿½   fathering-without-fear-teaser.jpg
+ï¿½       ï¿½   fathering-without-fear.jpg
+ï¿½       ï¿½   fathering-without-fear.webp
+ï¿½       ï¿½   profile-portrait .webp
+ï¿½       ï¿½
+ï¿½       ï¿½ï¿½ï¿½ï¿½blog
+ï¿½       ï¿½       default-blog-cover.jpg
+ï¿½       ï¿½       fathering-principles.jpg
+ï¿½       ï¿½       fathering-without-fear-teaser.jpg
+ï¿½       ï¿½       leadership-begins-at-home.jpg
+ï¿½       ï¿½       principles-for-my-son.jpg
+ï¿½       ï¿½       reclaiming-the-narrative.jpg
+ï¿½       ï¿½       the-brotherhood-code.jpg
+ï¿½       ï¿½       when-the-system-breaks-you.jpg
+ï¿½       ï¿½
+ï¿½       ï¿½ï¿½ï¿½ï¿½books
+ï¿½       ï¿½       fatherhood-cover.webp
+ï¿½       ï¿½       fathering-without-fear.jpg
+ï¿½       ï¿½       fathering-without-fear1.jpg
+ï¿½       ï¿½
+ï¿½       ï¿½ï¿½ï¿½ï¿½logo
+ï¿½       ï¿½       abraham-of-london-logo.svg
+ï¿½       ï¿½       alomarada.svg
+ï¿½       ï¿½       endureluxe.svg
+ï¿½       ï¿½
+ï¿½       ï¿½ï¿½ï¿½ï¿½social
+ï¿½               email.svg
+ï¿½               facebook.svg
+ï¿½               instagram.svg
+ï¿½               linkedin.svg
+ï¿½               og-image.jpg
+ï¿½               phone.svg
+ï¿½               twitter-image.jpg
+ï¿½               twitter-image.webp
+ï¿½               twitter.svg
+ï¿½               whatsapp.svg
+ï¿½
+ï¿½ï¿½ï¿½ï¿½downloads
+ï¿½       fathering-without-fear.epub
+ï¿½       fathering-without-fear.pdf
+ï¿½
+ï¿½ï¿½ï¿½ï¿½favicon
+ï¿½       apple-icon.png
+ï¿½       favicon.ico
+ï¿½       icon0.svg
+ï¿½       icon1.png
+ï¿½       manifest.json
+ï¿½       web-app-manifest-192x192.png
+ï¿½       web-app-manifest-512x512.png
+ï¿½
+ï¿½ï¿½ï¿½ï¿½fonts
         geist-black.woff2
         GeistMono-Regular.woff2
-        
+

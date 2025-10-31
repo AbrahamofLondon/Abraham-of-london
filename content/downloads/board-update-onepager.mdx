@@ -1,50 +1,54 @@
-// content/downloads/board-investor-one-pager-template.tsx
+---
+type: "Download"
+title: "Standards Brief: Standards That Endure"
+slug: "standards-brief"
+readTime: "2 min read"
+date: "2025-10-13"
+author: "Abraham of London"
+category: "Resources"
+pdfPath: "/downloads/standards-brief.pdf"
+coverImage: "/assets/images/downloads/standards-brief.jpg"
+---
 
-import BrandFrame from "../../components/print/BrandFrame";
-import { PullLine } from "../../components/PullLine"; // Assuming this component exists
-import * as React from "react";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; // Must be imported
-import Image from "next/image"; // Needed by EmbossedBrandMark if it wraps Image
 
-// --- Metadata Definition ---
-export const metadata = {
-  title: "Board Investor One-Pager Template",
-  slug: "board-investor-one-pager",
-  date: "2025-10-21",
-  author: "Abraham of London",
-  readTime: "3 min",
-  category: "Business",
-  type: "download",
-  subtitle: "Communicate clearly, concisely, and consistently with your board and investors."
-};
+    <>
+      <ResourcesCTA title="Standards Pack" downloads={[
+        { href: "/downloads/standards-brief.pdf", label: "Standards Brief (PDF)" },
+        { href: "/downloads/leaders-cue-card-two-up.pdf", label: "Cue Card (Wallet Size)" },
+      ]} />
 
-const BoardInvestorTemplate = () => {
-  return (
-    <BrandFrame
-      title={metadata.title}
-      subtitle={metadata.subtitle}
-      author={metadata.author} {/* Pass metadata to BrandFrame */}
-      date={metadata.date}     {/* Pass metadata to BrandFrame */}
-      pageSize="A4"
-    >
-      {/* ... (rest of content) ... */}
-      
-      <div className="mt-12 text-center">
-          {/* Placeholder for the embossed logo, using the component we created */}
-          <EmbossedBrandMark
-              src="/assets/images/abraham-logo.jpg"
-              alt="Abraham of London Brand Mark"
-              width={80}
-              height={80}
-              effect="deboss"
-              className="inline-block"
-              {/* Use transparent background on print page */}
-              baseColor="transparent"
-          />
-      </div>
+      <Rule />
 
-    </BrandFrame>
+      ## The 5 Standards That Endure
+
+      **1. Sovereignty**
+    <blockquote>
+     Own your outcomes. Blame is weakness. The fight is won or lost in your internal
+    </blockquote>
+
+      **2. Discipline**
+
+> Master your time, your space, and your word. Chaos is costly. Non-negotiable daily rhythm.
+
+      **3. Truth**
+
+> Speak plainly. Do not lie, excuse, or equivocate. Truth with tenderness is the only form of courage.
+
+      **4. Presence**
+
+> Be here now. Listen with your eyes, not just your ears. If you must be present, be present *on purpose*.
+
+      **5. Legacy**
+
+> Build what lasts. The measure of a man is his son's character, not his quarterly results.
+
+      <Rule />
+
+      ## The Charge
+
+      The world does not reward principles; it rewards performance. But performance without principles does not endure. Choose endurance.
+
+    </>
   );
-};
 
-export default BoardInvestorTemplate;
+

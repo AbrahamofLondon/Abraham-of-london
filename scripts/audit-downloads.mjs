@@ -8,12 +8,16 @@ const ROOT = process.cwd();
 const DL = path.join(ROOT, "public", "downloads");
 const TOML = path.join(ROOT, "netlify.toml");
 
-const DO_FIX = process.argv.includes("--fix") || process.argv.includes("--rename");
+const DO_FIX =
+  process.argv.includes("--fix") || process.argv.includes("--rename");
 
 function toTitleCaseUnderscore(basename) {
   const noExt = basename.replace(/\.pdf$/i, "");
   const title = noExt.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
-  const tc = title.replace(/\b\w/g, (m) => m.toUpperCase()).replace(/[^\w\s]/g, "").replace(/\s/g, "_");
+  const tc = title
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s/g, "_");
   return `${tc}.pdf`;
 }
 
@@ -37,20 +41,27 @@ async function writeToml(next) {
 }
 
 async function main() {
-  if (!(await exists(DL))) { // Use async exists
+  if (!(await exists(DL))) {
+    // Use async exists
     console.error("downloads dir missing");
     process.exit(1);
   }
-  
+
   const files = await glob(["*.pdf"], { cwd: DL });
-  const report = { renamed: [], small: [], ok: [], missing: [], redirectsAdded: 0 };
+  const report = {
+    renamed: [],
+    small: [],
+    ok: [],
+    missing: [],
+    redirectsAdded: 0,
+  };
 
   let toml = await loadToml();
   let tomlNext = toml;
 
   for (const f of files) {
     const abs = path.join(DL, f);
-    
+
     let kb;
     try {
       const stats = await fsp.stat(abs); // Use async stat
@@ -60,17 +71,17 @@ async function main() {
       console.warn(`Could not stat file ${f}. Skipping.`);
       continue;
     }
-    
+
     const want = toTitleCaseUnderscore(f);
 
     if (kb < 40) report.small.push({ file: f, sizeKB: kb });
-    
+
     if (f !== want) {
       report.renamed.push({ from: f, to: want });
-      
+
       if (DO_FIX) {
         await fsp.rename(abs, path.join(DL, want)); // Use async rename
-        
+
         // add/update redirect to preserve old link
         if (toml && !toml.includes(`/downloads/${f}`)) {
           const block = `
@@ -91,12 +102,15 @@ async function main() {
   if (DO_FIX && toml && tomlNext !== toml) {
     await writeToml(tomlNext); // Use async writeToml
   }
-  
+
   console.log(JSON.stringify(report, null, 2));
-  
+
   if (report.small.length) {
     process.exitCode = 1;
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

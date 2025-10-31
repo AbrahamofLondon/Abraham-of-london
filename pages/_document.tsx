@@ -1,4 +1,4 @@
-// pages/_document.tsx
+﻿// pages/_document.tsx
 import Document, { Html, Head, Main, NextScript, DocumentContext } from "next/document";
 
 const USE_LOCAL_FONTS =
@@ -17,7 +17,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* meta/theme/etc… */}
+          {/* meta/theme/etcâ€¦ */}
 
           {!USE_LOCAL_FONTS ? (
             <>
@@ -55,3 +55,6 @@ export default class MyDocument extends Document {
     );
   }
 }
+
+
+

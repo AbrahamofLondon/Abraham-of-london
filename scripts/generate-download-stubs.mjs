@@ -1,6 +1,6 @@
-scripts/generate-download-stubs.mjs
-import fs from "node:fs";
-import path from "node:path";
+scripts / generate - download - stubs.mjs;
+import fs from "fs";
+import path from "path";
 
 const PUBLIC_DIR = path.join(process.cwd(), "public", "downloads");
 const OUT_DIR = path.join(process.cwd(), "content", "downloads");
@@ -33,7 +33,7 @@ category: "Library"
 tags: []
 ---
 
-<!-- Add a 1–2-line description here. -->
+<!-- Add a 1-2-line description here. -->
 `;
 
   fs.writeFileSync(outPath, mdx, "utf8");

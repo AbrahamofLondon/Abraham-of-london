@@ -1,53 +1,60 @@
 // pages/strategy/[slug].tsx
 import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import { allStrategies, type Strategy } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { mdxComponents as components } from "@/components/MdxComponents";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import Layout from "@/components/Layout";
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
-type Props = { doc: Strategy };
+const CONTENT_TYPE = "strategy";
 
-export default function StrategyPage({ doc }: Props) {
-  const MDX = useMDXComponent(doc.body.code);
-
+export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <>
+    <Layout>
       <Head>
-        <title>{doc.title} — Abraham of London</title>
-        {doc.description && <meta name="description" content={doc.description} />}
-        {doc.ogDescription && <meta property="og:description" content={doc.ogDescription} />}
+        <title>{frontmatter.title} | Strategy</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
-
-      <article className="prose lg:prose-lg mx-auto px-4 py-10">
-        <header className="mb-6">
-          <h1 className="mt-0">{doc.title}</h1>
-          {(doc.author || doc.date) && (
-            <p className="m-0 text-sm text-gray-600">
-              {doc.author ?? ""}{doc.author && doc.date ? " • " : ""}{doc.date ?? ""}
+      <main className="container mx-auto px-4 py-12">
+        <div className="border-b pb-4 mb-8">
+          <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
+          {frontmatter.date && (
+            <p className="text-lg text-gray-600">
+              Date: {new Date(frontmatter.date).toLocaleDateString('en-GB')}
             </p>
           )}
-          {doc.description && <p className="mt-2 text-lg text-gray-700">{doc.description}</p>}
-        </header>
-
-        <MDX components={components} />
-      </article>
-    </>
+        </div>
+        <div className="prose prose-lg max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </div>
+      </main>
+    </Layout>
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allStrategies
-      .filter((s) => !!s.slug)
-      .map((s) => ({ params: { slug: s.slug } })),
-    fallback: false,
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  
+  // ✅ FIX: Pass frontmatter data into the 'scope'
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+
+  return { 
+    props: { source: mdxSource, frontmatter: finalFrontmatter },
+    revalidate: 3600,
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const doc = allStrategies.find((s) => s.slug === slug);
-  if (!doc) return { notFound: true };
-  return { props: { doc } };
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
 };

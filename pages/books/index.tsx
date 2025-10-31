@@ -1,105 +1,85 @@
-// pages/books/index.tsx
-import * as React from "react";
-import Head from "next/head";
+// pages/blog/index.tsx
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
 import Link from "next/link";
-import type { GetStaticProps } from "next";
+import Head from "next/head";
 
-// 1. CORRECTED Contentlayer import path
-import { allBooks, type Book } from "contentlayer/generated"; 
+type PostMeta = {
+  title: string;
+  date: string | null; // Corrected for null serialization
+  excerpt: string | null; // Corrected for null serialization
+  coverImage: string | null; // Corrected for null serialization
+  slug: string;
+};
 
-// 2. Import useDebounce hook (assuming path is correct)
-import { useDebounce } from "@/lib/hooks/useDebounce";
+const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
-// --- Type Definitions ---
-type ItemRow = Pick<Book, "slug" | "title" | "author" | "date" | "description" | "coverImage">;
-type Props = { items: ItemRow[] };
+export async function getStaticProps() {
+  // Defensive check for directory existence
+  const files = fs.existsSync(BLOG_DIR)
+    ? fs.readdirSync(BLOG_DIR).filter(f => f.endsWith(".mdx"))
+    : [];
 
-// --- Component ---
-export default function BooksIndex({ items }: Props) {
-  const [query, setQuery] = React.useState("");
-  const debouncedQuery = useDebounce(query, 300); // Debounce the query state
+  const posts: PostMeta[] = files.map((filename) => {
+    const slug = filename.replace(/\.mdx$/, "");
+    const raw = fs.readFileSync(path.join(BLOG_DIR, filename), "utf-8");
+    const { data } = matter(raw);
+    return {
+      title: String(data.title ?? slug),
+      // FINAL FIX: Assign null instead of undefined for all optional properties
+      date: data.date ? String(data.date) : null, 
+      excerpt: data.excerpt ? String(data.excerpt) : null,
+      coverImage: data.coverImage ? String(data.coverImage) : null,
+      slug,
+    };
+  })
+  // newest first if date present
+  .sort((a, b) => +new Date(b.date ?? 0) - +new Date(a.date ?? 0));
 
-  const filtered = React.useMemo(
-    () => {
-      const q = debouncedQuery.toLowerCase().trim();
-      if (!q) return items;
+  return { props: { posts } };
+}
 
-      return items.filter((b) => {
-        // Concatenate and normalize all searchable fields
-        const hay = `${b.title} ${b.author ?? ""} ${b.description ?? ""}`.toLowerCase();
-        return hay.includes(q);
-      });
-    },
-    [items, debouncedQuery] // Depend on the debounced query
-  );
+type Props = { posts: PostMeta[] };
 
+function BlogIndex({ posts }: Props) {
   return (
     <>
       <Head>
-        <title>Books — Abraham of London</title>
-        <meta name="description" content="Books and long-form work from Abraham of London." />
+        <title>Blog | Abraham of London</title>
+        <meta name="robots" content="index,follow" />
       </Head>
 
-      <main className="mx-auto max-w-7xl px-4 py-10">
-        <header className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-deepCharcoal">Books</h1>
-            <p className="text-sm text-[color:var(--color-on-secondary)/0.75]">
-              {filtered.length} of {items.length} shown
-            </p>
-          </div>
-          <input
-            value={query} // Bind input value to immediate 'query' state
-            onChange={(e) => setQuery(e.target.value)} // Update 'query' immediately
-            placeholder="Search books…"
-            className="w-full rounded-full border border-lightGrey bg-white px-4 py-2 text-sm sm:w-80"
-            aria-label="Search books"
-          />
-        </header>
-
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((b) => (
-            <li key={b.slug} className="rounded-2xl border border-lightGrey bg-white p-5 shadow-card hover:shadow-cardHover">
-              {b.coverImage && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={b.coverImage}
-                  alt={b.title} // 3. Cleaned up alt text
-                  className="mb-3 aspect-[3/4] w-full rounded-xl object-cover"
-                  loading="lazy"
-                />
-              )}
-              <h2 className="font-serif text-xl font-semibold text-deepCharcoal">
-                <Link href={`/books/${b.slug}`} className="hover:underline decoration-softGold/60 underline-offset-4">
-                  {b.title}
-                </Link>
-              </h2>
-              <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.75]">
-                {b.author ?? "—"} {b.date ? `• ${b.date}` : ""}
-              </p>
-              {b.description && <p className="mt-3 text-sm text-[color:var(--color-on-secondary)/0.85]">{b.description}</p>}
-            </li>
-          ))}
-        </ul>
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        <h1 className="mb-8 text-4xl font-extrabold tracking-tight">Blog</h1>
+        {posts.length === 0 ? (
+          <p>No posts yet.</p>
+        ) : (
+          <ul className="space-y-6">
+            {posts.map((p) => (
+              <li key={p.slug} className="card">
+                <h2 className="text-2xl font-bold">
+                  <Link href={`/blog/${p.slug}`} className="hover:underline">
+                    {p.title}
+                  </Link>
+                </h2>
+                {p.date && (
+                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                    {new Date(p.date).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                )}
+                {p.excerpt && <p className="mt-3">{p.excerpt}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </>
   );
 }
 
-// --- Data Fetching ---
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const items = allBooks
-    .map((b) => ({
-      slug: b.slug,
-      title: b.title,
-      // Use explicit type cast only if necessary, otherwise rely on Contentlayer's generated type
-      author: (b as any).author ?? null, 
-      date: (b as any).date ?? null,
-      description: (b as any).description ?? null,
-      coverImage: (b as any).coverImage ?? null,
-    }))
-    // Sort by date descending (latest first)
-    .sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
-
-  return { props: { items: items as ItemRow[] } };
-};
+export default BlogIndex;

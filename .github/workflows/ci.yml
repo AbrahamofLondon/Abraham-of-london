@@ -1,16 +1,31 @@
-# .github/workflows/ci.yml
-name: CI
-on: [push, pull_request]
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+        with: { node-version: "20" }
       - run: npm ci
-      - run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
+      - name: Orchestrate (strict on PRs)
+        run: |
+          node scripts/global_project_manager.mjs --dry=false --fix=false --strict=true
+          npm run build
+      - name: Start server
+        run: npm run start -- -p 3000 &
+      - name: Render PDFs + Validate + Link check
+        run: |
+          node scripts/render-pdfs.mjs --base=http://localhost:3000
+          node scripts/run-validate-downloads.mjs --strict=true
+          npx linkinator http://localhost:3000 --recurse --skip ".*(\\.(png|jpg|webp|svg|pdf))$" --silent --format json > scripts/_reports/link-report.json
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: scripts/_reports

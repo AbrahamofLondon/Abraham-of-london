@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    <!-- The build script injects <base href="file://.../public/"> -->
+    <style>
+      {{ brandCss }}
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="brand">Abraham of London</div>
+      <div class="title">{{ title }}</div>
+      {{#if excerpt}}
+      <div class="meta">{{ excerpt }}</div>
+      {{/if}}
+      <div class="meta">{{ author }}{{#if date}} — {{ date }}{{/if}}</div>
+      {{#if coverImage}}
+      <div class="cover">
+        <img
+          src="{{ coverImage }}"
+          alt=""
+          style="width: 100%; margin-top: 8mm"
+        />
+      </div>
+      {{/if}}
+    </div>
+
+    <div class="page">{{ content }}</div>
+
+    <div class="footer"><span class="brand">A/L</span> — {{ title }}</div>
+  </body>
+</html>

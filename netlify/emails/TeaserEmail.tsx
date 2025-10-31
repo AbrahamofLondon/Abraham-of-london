@@ -26,15 +26,15 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
         lineHeight: 1.6,
       }}
     >
-      <p>Friends—{name ? ` ${name},` : ""}</p>
+      <p>FriendsÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â{name ? ` ${name},` : ""}</p>
 
       <p>
-        I’m releasing <strong>Fathering Without Fear</strong>, a memoir forged in the middle of
-        loss, legal storms, and a father’s stubborn hope. It’s for the men who keep showing up,
-        the sons looking for language, and anyone who’s wrestled with God and grief at the same time.
+        IÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢m releasing <strong>Fathering Without Fear</strong>, a memoir forged in the middle of
+        loss, legal storms, and a fatherÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s stubborn hope. ItÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s for the men who keep showing up,
+        the sons looking for language, and anyone whoÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s wrestled with God and grief at the same time.
       </p>
 
-      <p>Here’s a free, brand-styled teaser you can read and share:</p>
+      <p>HereÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s a free, brand-styled teaser you can read and share:</p>
 
       <ul>
         <li>Teaser PDF (A4/Letter): {link(A4, "Download A4/Letter")}</li>
@@ -42,7 +42,7 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
       </ul>
 
       <p>
-        Want chapter drops and launch dates? Reply <em>“keep me posted”</em> or join the list here:{" "}
+        Want chapter drops and launch dates? Reply <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œkeep me postedÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em> or join the list here:{" "}
         {link(`${base}/contact`, `${base}/contact`)}.
       </p>
 
@@ -54,8 +54,8 @@ export default function TeaserEmail({ name, siteUrl }: Props) {
 
       <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "20px 0" }} />
       <p style={{ fontSize: 12, color: "#6b7280" }}>
-        You’re receiving this because you requested the teaser or asked to be notified.
-        Unsubscribe: reply with <em>“stop”</em>.
+        YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re receiving this because you requested the teaser or asked to be notified.
+        Unsubscribe: reply with <em>ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œstopÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</em>.
       </p>
     </div>
   );

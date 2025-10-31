@@ -6,10 +6,12 @@ export const handler = async (event) => {
 
     // Only handle your contact form
     const formName =
-      payload.form_name || payload.payload?.form_name || payload.data?.form_name;
+      payload.form_name ||
+      payload.payload?.form_name ||
+      payload.data?.form_name;
     if (formName !== "contact-form") {
       return { statusCode: 200, body: "Ignored (not contact-form)" };
-     }
+    }
 
     // Field data
     const data = payload.payload?.data || payload.data || {};
@@ -31,8 +33,8 @@ export const handler = async (event) => {
     `;
 
     await resend.emails.send({
-      from: process.env.MAIL_FROM,           // e.g. "Abraham of London <no-reply@abrahamoflondon.org>"
-      to: process.env.MAIL_TO,               // e.g. "info@abrahamoflondon.org"
+      from: process.env.MAIL_FROM, // e.g. "Abraham of London <no-reply@abrahamoflondon.org>"
+      to: process.env.MAIL_TO, // e.g. "info@abrahamoflondon.org"
       reply_to: email || undefined,
       subject,
       html,

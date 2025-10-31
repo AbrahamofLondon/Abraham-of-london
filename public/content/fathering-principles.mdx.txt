@@ -1,7 +1,7 @@
 ---
-title: "Fathering Without Fear: Principles I’m Teaching My Son"
+title: "Fathering Without Fear: Principles I'm Teaching My Son"
 date: "2025-09-02"
-excerpt: "What I’m intentionally passing on to O.J.A-Y..."
+excerpt: "What I'm intentionally passing on to O.J.A-Y..."
 slug: "principles-for-my-son"
 image: "/images/blog/placeholder-blog-3.jpg"
 tags: ["fatherhood", "mentorship", "discipleship"]

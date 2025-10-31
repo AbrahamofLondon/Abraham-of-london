@@ -1,9 +1,41 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx"; // ✅ UPGRADE: Use clsx for cleaner class string concatenation
+import clsx from "clsx";
 
-// --- Utility Components ---
+// --- Utility Hook ---
+
+/**
+ * Handles video playback logic, specifically respecting the 'prefers-reduced-motion' setting.
+ */
+const useReducedMotionVideo = (
+  videoRef: React.RefObject<HTMLVideoElement>, 
+  hasVideo: boolean
+) => {
+  React.useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !hasVideo || typeof window === 'undefined' || !("matchMedia" in window)) return;
+
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const handlePlayback = () => {
+      if (mql.matches) {
+        v.pause();
+        v.currentTime = 0; // Reset video to frame 0
+      } else {
+        // Attempt to play, catching errors which are common with autoplay policies
+        v.play().catch(() => { /* Silent fail is acceptable here */ });
+      }
+    };
+
+    handlePlayback();
+    mql.addEventListener("change", handlePlayback);
+
+    return () => mql.removeEventListener("change", handlePlayback);
+  }, [hasVideo, videoRef]);
+};
+
+// --- Utility Components & Types ---
 
 /** Small “eyebrow” pill used above the H1 */
 function Eyebrow({
@@ -15,7 +47,7 @@ function Eyebrow({
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
         "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
-        "text-xs uppercase tracking-wide font-semibold", // ✅ UPGRADE: Added font-semibold
+        "text-xs uppercase tracking-wide font-semibold",
         "text-[color:var(--color-on-secondary)/0.7] dark:text-[color:var(--color-on-primary)/0.8]",
         className
       )}
@@ -25,42 +57,26 @@ function Eyebrow({
   );
 }
 
-// --- Type Definitions ---
-
 type Cta = { href: string; label: string; ariaLabel?: string };
 type VideoSource = { src: string; type: string };
-type AspectRatio = "book" | "wide" | "square" | "cover-wide"; // ✅ UPGRADE: Added 'cover-wide' (21/9)
+type AspectRatio = "book" | "wide" | "square" | "cover-wide";
 
 type HeroProps = {
   title?: string;
   subtitle?: string;
   primaryCta?: Cta;
   secondaryCta?: Cta;
-
-  /** Image shown when no video or as poster fallback */
   coverImage?: string | null;
-  /** Aspect ratio: 'book' (2/3), 'wide' (16/9), 'square' (1/1), 'cover-wide' (21/9) */
   coverAspect?: AspectRatio;
-  /** 'contain' (book covers) or 'cover' (edge-to-edge) */
   coverFit?: "contain" | "cover";
-  /** object position for Image/Video */
-  coverPosition?: "left" | "center" | "right" | "top"; // ✅ UPGRADE: Added 'top'
-
-  /** Optional autoplaying looped background video */
+  coverPosition?: "left" | "center" | "right" | "top" | "bottom";
   videoSources?: VideoSource[] | null;
-  /** Poster image for the video (defaults to coverImage) */
   poster?: string | null;
-
   eyebrow?: string;
 };
 
 // --- Utilities ---
 
-/**
- * Normalizes a URL path: ensures relative paths start with a slash.
- * @param src The source string.
- * @returns Normalized URL string or undefined.
- */
 function normalizeLocal(src?: string | null): string | undefined {
   if (!src) return undefined;
   if (/^https?:\/\//i.test(src)) return src;
@@ -68,14 +84,11 @@ function normalizeLocal(src?: string | null): string | undefined {
   return `/${cleanSrc}`;
 }
 
-/**
- * Maps the AspectRatio prop to the corresponding Tailwind class.
- */
 function getAspectClass(aspect: AspectRatio): string {
   switch (aspect) {
     case "square": return "aspect-[1/1]";
     case "wide": return "aspect-[16/9]";
-    case "cover-wide": return "aspect-[21/9]"; // ✅ UPGRADE: New aspect ratio
+    case "cover-wide": return "aspect-[21/9]";
     case "book":
     default: return "aspect-[2/3]";
   }
@@ -90,7 +103,7 @@ export default function HeroSection({
   primaryCta = {
     href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
     label: "Get the free teaser",
-    ariaLabel: "Download the Fathering Without Fear Teaser PDF", // ✅ UPGRADE: More explicit default ARIA
+    ariaLabel: "Download the Fathering Without Fear Teaser PDF",
   },
   secondaryCta = { href: "/blog", label: "Read the latest insights" },
 
@@ -102,15 +115,19 @@ export default function HeroSection({
   videoSources = [],
   poster = null,
 }: HeroProps) {
-  
+
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
   // 1. --- Core Data and Fallbacks ---
   const defaultImage = "/assets/images/abraham-of-london-banner.webp";
   const imgSrc = normalizeLocal(coverImage) || normalizeLocal(defaultImage)!;
   const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
   const posterSrc = normalizeLocal(poster) || imgSrc;
 
-  // 2. --- Dynamic Class Generation (Consolidated using clsx) ---
-  
+  useReducedMotionVideo(videoRef, hasVideo);
+
+  // 2. --- Dynamic Class Generation ---
+
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-2xl shadow-card",
     getAspectClass(coverAspect),
@@ -126,8 +143,9 @@ export default function HeroSection({
     {
       "object-left": coverPosition === "left",
       "object-right": coverPosition === "right",
-      "object-top": coverPosition === "top", // ✅ UPGRADE: Added top position
-      "object-center": coverPosition === "center", // Default position
+      "object-top": coverPosition === "top",
+      "object-bottom": coverPosition === "bottom",
+      "object-center": coverPosition === "center",
     }
   );
 
@@ -140,17 +158,19 @@ export default function HeroSection({
         "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
         "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
       )}
-      // ✅ UPGRADE: Added explicit ARIA role for semantic context
       role="region"
-      aria-label="Featured content section" 
+      aria-label="Featured content section"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-16">
-        
+
         {/* LEFT: copy */}
         <div className="relative z-[1]">
           {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
 
-          <h1 className="font-serif text-[clamp(2rem,3.6vw,3.25rem)] font-semibold leading-[1.08] text-deepCharcoal dark:text-cream [text-wrap:balance]">
+          <h1 
+            id="hero-title"
+            className="font-serif text-[clamp(2rem,3.6vw,3.25rem)] font-semibold leading-[1.08] text-deepCharcoal dark:text-cream [text-wrap:balance]"
+          >
             {title}
           </h1>
 
@@ -161,17 +181,17 @@ export default function HeroSection({
           )}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            {/* Primary CTA (using aol-btn, assumed to be robustly styled) */}
+            {/* Primary CTA */}
             {primaryCta && (
               <Link
                 href={primaryCta.href}
-                aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`} // ✅ UPGRADE: Fallback ARIA label
+                aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`}
                 className="aol-btn"
               >
                 {primaryCta.label}
               </Link>
             )}
-            
+
             {/* Secondary CTA */}
             {secondaryCta && (
               <Link
@@ -187,8 +207,8 @@ export default function HeroSection({
 
         {/* RIGHT: visual media container */}
         <div className={frameClasses}>
-          
-          {/* Gradient veil for cover-fit visuals (retained) */}
+
+          {/* Gradient veil for cover-fit visuals */}
           {coverFit === "cover" && (
             <div
               aria-hidden
@@ -202,27 +222,26 @@ export default function HeroSection({
           {hasVideo ? (
             // Video (if sources are provided)
             <video
+              ref={videoRef}
               className={mediaClasses}
-              autoPlay
+              // autoPlay managed by the hook
               muted
               loop
               playsInline
               preload="metadata"
               poster={posterSrc}
-              aria-describedby="hero-title" // ✅ UPGRADE: Accessibility link to the main content
-              // ✅ UPGRADE: Added onContextMenu to prevent right-click downloads
+              aria-describedby="hero-title"
               onContextMenu={(e) => e.preventDefault()}
             >
               {videoSources!.map((s) => (
                 <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
               ))}
-              {/* Image poster will serve as the final fallback if video playback fails */}
             </video>
           ) : (
             // Image (default or if no video sources provided)
             <Image
               src={imgSrc}
-              alt={title || "Hero image illustrating the page content"} // ✅ UPGRADE: Alt text based on title
+              alt={title || "Hero image illustrating the page content"}
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -232,7 +251,7 @@ export default function HeroSection({
         </div>
       </div>
 
-      {/* Decorative grid dots (retained) */}
+      {/* Decorative grid dots */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(rgba(0,0,0,0.06)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-30"

@@ -15,7 +15,9 @@ const blobs = [
 const missing = [];
 for (const f of blobs) {
   const text = fs.readFileSync(f, "utf8");
-  for (const m of text.matchAll(/(coverImage|heroImage)\s*:\s*["']([^"']+)["']/g)) {
+  for (const m of text.matchAll(
+    /(coverImage|heroImage)\s*:\s*["']([^"']+)["']/g,
+  )) {
     const p = m[2].replace(/\\/g, "/");
     if (!p.startsWith("/")) continue; // remote URLs are fine
     const full = path.join(publicDir, p);

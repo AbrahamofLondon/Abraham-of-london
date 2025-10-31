@@ -1,42 +1,23 @@
-import { allStrategies, type Strategy } from "contentlayer/generated";
-import BrandFrame from "@/components/print/BrandFrame";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import * as React from "react";
 
-export async function getStaticPaths() {
-  return {
-    paths: allStrategies.map((s) => ({ params: { slug: s.slug } })),
-    fallback: false,
-  };
-}
+type StrategyDoc = { title?: string; summary?: string; body?: { code?: string } };
+interface Props { doc: StrategyDoc | null }
 
-export async function getStaticProps({ params }: { params: { slug: string } }) {
-  const doc = allStrategies.find((s) => s.slug === params.slug) || null;
-  return { props: { doc } };
-}
-
-interface Props { doc: Strategy | null }
-
-export default function StrategyPrint({ doc }: Props) {
-  const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
-
-  if (!doc) return <p>Loading…</p>;
-
+export default function StrategyPrintPage({ doc }: Props){
   return (
-    <BrandFrame
-      title={doc.title}
-      subtitle={doc.description || doc.ogDescription || ""}
-      author={doc.author || "Abraham of London"}
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={18}
-    >
-      <article className="prose mx-auto max-w-none">
-        <h1 className="font-serif">{doc.title}</h1>
-        {doc.description && <p className="text-lg">{doc.description}</p>}
-        <MDXContent components={components as any} />
-      </article>
-    </BrandFrame>
+    <div className="print-page">
+      <h1>{doc?.title ?? "Strategy (print view)"}</h1>
+      <p>{doc?.summary ?? "Content will be restored later."}</p>
+    </div>
   );
+}
+
+// Required for dynamic SSG route
+export async function getStaticPaths(){
+  return { paths: [], fallback: false };
+}
+
+// Simple props so the page renders
+export async function getStaticProps(){
+  return { props: { doc: null } };
 }

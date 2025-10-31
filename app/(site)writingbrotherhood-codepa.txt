@@ -92,7 +92,7 @@ export default function Page() {
           </p>
 
           <blockquote>
-            <p><strong>“As iron sharpens iron, so one man sharpens another.”</strong> — <em>Proverbs 27:17</em></p>
+            <p><strong>"As iron sharpens iron, so one man sharpens another."</strong> — <em>Proverbs 27:17</em></p>
           </blockquote>
 
           <p><strong>Brotherhood is not a chat thread. It is a covenant of presence.</strong></p>
@@ -109,20 +109,20 @@ export default function Page() {
           </ul>
 
           <h2>Why Brotherhood?</h2>
-          <p>Men’s growth—both healing and hardening—happens in the company they keep. A righteous brotherhood:</p>
+          <p>Men's growth—both healing and hardening—happens in the company they keep. A righteous brotherhood:</p>
           <ul>
             <li><strong>Restores standards:</strong> Rekindles responsibility and honour.</li>
             <li><strong>Strengthens identity:</strong> Reinforces what it means to be a present man, father, and leader.</li>
             <li><strong>Disrupts generational drift:</strong> Breaks destructive cycles quietly passed through families.</li>
           </ul>
-          <p><em>What we’re fighting for:</em> Sons and daughters who see men show up, stay the course, and keep their word—at home, at work, and under pressure.</p>
+          <p><em>What we're fighting for:</em> Sons and daughters who see men show up, stay the course, and keep their word—at home, at work, and under pressure.</p>
 
           <h2>The Code (Covenant of Presence &amp; Integrity)</h2>
           <ol>
             <li><strong>Show up.</strong> Weekly touchpoints. <strong>No ghosts.</strong></li>
             <li><strong>Tell the truth.</strong> Confess struggles <strong>before</strong> you collapse.</li>
             <li><strong>Carry weight.</strong> Pray, call, turn up at the door.</li>
-            <li><strong>Protect families.</strong> No gossip; no shortcuts. <strong>Cover, don’t expose.</strong></li>
+            <li><strong>Protect families.</strong> No gossip; no shortcuts. <strong>Cover, don't expose.</strong></li>
             <li><strong>Build together.</strong> Study, train, serve. <strong>Produce—not just post.</strong></li>
           </ol>
           <p><strong>Red flags—deal fast:</strong> chronic lateness without accountability, secret-keeping, triangulation, and spiritual one-upmanship. Name them early; repair or release.</p>
@@ -133,7 +133,7 @@ export default function Page() {
             <li><strong>30 min:</strong> Formation (habits, money, marriage, parenting)</li>
             <li><strong>15 min:</strong> Intercession (names, needs, next steps)</li>
           </ul>
-          <p>Strong men aren’t found; they’re <strong>forged—together</strong>.</p>
+          <p>Strong men aren't found; they're <strong>forged—together</strong>.</p>
 
           <h2>Start a Group in 14 Days (Playbook)</h2>
           <p><strong>Week 1 — Seed</strong></p>
@@ -170,9 +170,9 @@ export default function Page() {
           <ol>
             <li><strong>Facts first:</strong> What happened? When? What did you do—or not do?</li>
             <li><strong>Heart next:</strong> What were you feeling? What did you believe in the moment?</li>
-            <li><strong>Hope last:</strong> What’s the next right step? Who’s your accountability partner?</li>
+            <li><strong>Hope last:</strong> What's the next right step? Who's your accountability partner?</li>
           </ol>
-          <p>Accountability is not surveillance. It’s <strong>shared courage</strong>.</p>
+          <p>Accountability is not surveillance. It's <strong>shared courage</strong>.</p>
 
           <h2>A 60-Minute Starter Agenda (Week 1)</h2>
           <ul>
@@ -184,7 +184,7 @@ export default function Page() {
           </ul>
 
           <blockquote>
-            <p><strong>“Two are better than one… If either falls, one helps the other up.”</strong> — <em>Ecclesiastes 4:9–10</em></p>
+            <p><strong>"Two are better than one... If either falls, one helps the other up."</strong> — <em>Ecclesiastes 4:9–10</em></p>
           </blockquote>
 
           <h2>Guardrails that Make Brotherhood Last</h2>
@@ -196,7 +196,7 @@ export default function Page() {
           </ul>
           <p><strong>If conflict arises:</strong> address within 48 hours directly; bring one other brother if unresolved; pause leadership roles until peace is made.</p>
 
-          <h2>Outcomes We’re After</h2>
+          <h2>Outcomes We're After</h2>
           <ul>
             <li>Fathers present at home and in community.</li>
             <li>Marriages strengthened by truth and tenderness.</li>
@@ -210,11 +210,11 @@ export default function Page() {
             <li><a href="/downloads/Brotherhood_Starter_Kit.pdf">Brotherhood Starter Kit (PDF)</a></li>
             <li><a href="/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf">Brotherhood Leader Guide — First 4 Weeks (PDF)</a></li>
             <li><a href="/downloads/brotherhood-covenant">Brotherhood Covenant (Printable PDF)</a></li>
-            <li><a href="/downloads/brotherhood-cue-card">Leader’s Cue Card (A6, Two-Up)</a></li>
+            <li><a href="/downloads/brotherhood-cue-card">Leader's Cue Card (A6, Two-Up)</a></li>
           </ul>
 
           <p>
-            Want a printable covenant, first-month plan, and leader prompts? <a href="/contact"><strong>Ask for it here</strong></a>. We’ll email a PDF you can run with this weekend!
+            Want a printable covenant, first-month plan, and leader prompts? <a href="/contact"><strong>Ask for it here</strong></a>. We'll email a PDF you can run with this weekend!
           </p>
         </div>
 

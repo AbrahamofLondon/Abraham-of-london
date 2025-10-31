@@ -19,7 +19,9 @@ const globs = [
 const pat = String.raw`^[<=>]{7}`;
 try {
   const cmd = `git grep -n "${pat}" -- ${globs.join(" ")}`;
-  const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
+  const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] })
+    .toString()
+    .trim();
   if (out) {
     console.error("❌ Merge conflict markers found:\n" + out);
     process.exit(1);
@@ -32,6 +34,6 @@ try {
     process.exit(0);
   }
   console.error("⚠️ Could not run git grep:", e?.message || e);
-  // Don’t fail hard in odd environments; default to success
+  // Don't fail hard in odd environments; default to success
   process.exit(0);
 }

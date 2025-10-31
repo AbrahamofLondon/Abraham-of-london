@@ -5,7 +5,9 @@ import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
 import rehypeStringify from "rehype-stringify";
 
-export default async function markdownToHtml(markdown: string): Promise<string> {
+export default async function markdownToHtml(
+  markdown: string,
+): Promise<string> {
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)

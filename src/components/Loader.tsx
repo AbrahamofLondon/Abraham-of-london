@@ -1,6 +1,5 @@
-'use client';
-
-import { motion } from 'framer-motion';
+﻿"use client";
+import { motion } from "framer-motion";
 
 export default function LuxuryLoader() {
   return (
@@ -12,9 +11,11 @@ export default function LuxuryLoader() {
     >
       <motion.div
         animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
         className="w-16 h-16 border-4 border-platinum border-t-gold rounded-full"
       />
     </motion.div>
   );
 }
+
+

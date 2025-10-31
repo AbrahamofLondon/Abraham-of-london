@@ -1,0 +1,62 @@
+---
+kind: "template"
+type: "Download"
+title: "Entrepreneur Survival Checklist"
+slug: entrepreneur-survival-checklist
+date: '2025-10-13'
+author: Abraham of London
+readTime: 2 min read
+category: Resources
+description: "A 20-point checklist for founders in cash-conservation mode to triage and prioritize the mission."
+draft: false
+---
+
+import * as React from "react";
+import BrandFrame from "@/components/print/BrandFrame";
+import { PullLine, Rule, Note } from "@/components/utils";
+
+    <BrandFrame
+      title="Entrepreneur Survival Checklist: When the Week Turns"
+      subtitle="A 20-point checklist for founders in cash-conservation mode. Triage and prioritise the mission."
+      pageSize="A4"
+
+> 
+      <PullLine subtle>
+        When the storm hits, focus on the three C's: Cash, Customers, Covenants. Everything else is secondary.
+      </PullLine>
+
+      <Rule />
+      
+      {/* Actual Checklist Content Starts Here (Example structure added) */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-bold">Phase 1: Cash Triage</h2>
+        <ul className="list-disc list-inside space-y-2">
+          <li>Check cash-in-hand and burn rate (daily).</li>
+          <li>Stop all non-essential spending (immediate).</li>
+          <li>Call top 3 debtors for payment updates.</li>
+        </ul>
+        
+        <h2 className="text-lg font-bold">Phase 2: Customer Focus</h2>
+        <ul className="list-disc list-inside space-y-2">
+          <li>Identify top 5 revenue-generating clients.</li>
+          <li>Call them. Ask how you can serve them better.</li>
+          <li>Stop chasing low-value prospects.</li>
+        </ul>
+        
+        <h2 className="text-lg font-bold">Phase 3: Covenant Integrity</h2>
+        <ul className="list-disc list-inside space-y-2">
+          <li>Pray for your family and partners (daily).</li>
+          <li>Be honest about the reality with your spouse/team.</li>
+          <li>Keep your word, even if it hurts the bottom line (long-term).</li>
+        </ul>
+      </div>
+      {/* Checklist Content Ends Here */}
+      <Rule />
+      
+      <Note tone="key" title="Action">
+        {" "}
+        Printable checklist included in the full download. Use it to check your vitals daily.{" "}
+      </Note>
+    </BrandFrame>
+  );
+

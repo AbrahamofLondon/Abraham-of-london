@@ -1,31 +1,18 @@
 // components/MDXRenderer.tsx
 import * as React from "react";
-// Import the default components map and its type
-import { mdxComponents, MdxComponents } from "./MdxComponents";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { mdxComponents } from "@/lib/mdx-components";
 
-// IMPORTANT: the correct hook import for contentlayer2:
-import { useMDXComponent } from "next-contentlayer2/hooks";
-
-type MDXRendererProps = {
-  /** MDX code from Contentlayer's computed .body.code */
-  code: string;
-  /** Optional: extra component overrides provided by the consuming page */
-  components?: Partial<MdxComponents>;
+type Props = {
+  mdxSource: MDXRemoteSerializeResult;
+  wrapperClassName?: string;
 };
 
-export default function MDXRenderer({ code, components }: MDXRendererProps) {
-  // Compiles the MDX code string into a React component
-  const MDX = useMDXComponent(code);
-
-  // Merge the default components with any overrides provided by the page
-  const mergedComponents = {
-    ...mdxComponents,
-    ...components,
-  };
-
-  // Render the compiled MDX content with the merged components map
-  return <MDX components={mergedComponents} />;
+export default function MDXRenderer({ mdxSource, wrapperClassName }: Props) {
+  if (!mdxSource) return null;
+  return (
+    <article className={wrapperClassName ?? "prose lg:prose-lg dark:prose-invert"}>
+      <MDXRemote {...mdxSource} components={mdxComponents} />
+    </article>
+  );
 }
-
-// Add display name to satisfy the 'react/display-name' rule
-MDXRenderer.displayName = 'MDXRenderer';

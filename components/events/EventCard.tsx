@@ -94,7 +94,7 @@ function aspectClass(key?: Overrides["heroAspect"]) {
 // Encapsulates the tag and resource pill logic and styling
 const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: boolean; href?: string }) => {
   const isResource = !!href;
-  
+
   let icon = "";
   if (isResource) {
     if (href?.includes(".pdf")) {
@@ -167,10 +167,10 @@ export default function EventCard({
 
   const dateLabel = isValidDate
     // ✅ UPGRADE: Used `Intl.DateTimeFormat` with a consistent options object
-    ? new Intl.DateTimeFormat("en-US", { 
-        day: "numeric", 
-        month: "short", 
-        year: "numeric" 
+    ? new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
       }).format(dt!)
     : date;
 
@@ -198,7 +198,7 @@ export default function EventCard({
     "relative w-full overflow-hidden rounded-t-2xl",
     aspectClass(ov?.heroAspect),
     // Ensure padding/background for contain fit or missing image
-    ((ov?.heroFit ?? "cover") === "contain" || !currentHeroSrc) && "bg-warmWhite p-2" 
+    ((ov?.heroFit ?? "cover") === "contain" || !currentHeroSrc) && "bg-warmWhite p-2"
   );
 
   // Fallback initials for the image container if all sources fail
@@ -227,7 +227,7 @@ export default function EventCard({
               onError={onHeroError}
               priority={false}
               placeholder="blur" // Add placeholder for better loading UX
-              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0EQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" 
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0EQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
             />
           ) : (
             // Graceful placeholder when all image candidates fail
