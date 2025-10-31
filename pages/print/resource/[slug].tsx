@@ -6,12 +6,11 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-// ✅ FIX: Use a DEFAULT import to match your mdx-components file
-import mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "resources";
+const CONTENT_TYPE = "resources"; // Set for this page
 
 export default function PrintResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (

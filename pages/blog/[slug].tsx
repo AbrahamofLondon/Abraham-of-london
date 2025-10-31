@@ -6,10 +6,10 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
 import type { PostMeta } from '@/types/post';
-import Layout from '@/components/Layout'; // Or your specific layout
 
-// ✅ FIX: Use a DEFAULT IMPORT
-import mdxComponents from '@/components/mdx-components';
+// ✅ FIX: Use a NAMED IMPORT { mdxComponents }
+import { mdxComponents } from '@/components/mdx-components';
+import Layout from '@/components/Layout'; // Or your specific layout
 
 // -----------------------------------------------------------------
 // ⬇️⬇️ CHANGE THIS LINE FOR EACH TEMPLATE ⬇️⬇️
@@ -45,7 +45,7 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
           <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
             <Image
               src={frontmatter.coverImage}
-              alt={`Cover image for ${frontmodel.title}`}
+              alt={`Cover image for ${frontmatter.title}`}
               layout="fill"
               className="object-cover"
               priority

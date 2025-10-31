@@ -4,6 +4,8 @@ import Image from 'next/image';
 
 // --- Import all custom components used in your MDX files ---
 // NOTE: Ensure these paths are correct for your project structure.
+// If a component is not found, you MUST correct the path.
+
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -21,14 +23,15 @@ const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false }
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 
-const mdxComponents = {
-  // ✅ FIX: Use props.src directly. The assetPath helper was server-side.
+// ✅ FIX: Use a NAMED EXPORT to match what your pages are importing.
+export const mdxComponents = {
+  // Standard HTML tags
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
   ),
   hr: Rule,
 
-  // Map all custom components
+  // ✅ FIX: Mapped all custom components, including the ones that were missing.
   BrandFrame,
   BadgeRow,
   EmbossedBrandMark,
@@ -47,5 +50,4 @@ const mdxComponents = {
   CTA,
 };
 
-// ✅ FIX: Use a DEFAULT EXPORT to solve the import mismatch
-export default mdxComponents;
+// ❌ DO NOT include a 'export default' line.

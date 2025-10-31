@@ -10,7 +10,7 @@ import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct name
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "resources";
+const CONTENT_TYPE = "resources"; // Set for this page
 
 export default function ResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
