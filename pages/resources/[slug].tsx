@@ -1,0 +1,55 @@
+// pages/resources/[slug].tsx
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import Layout from "@/components/Layout";
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
+
+const CONTENT_TYPE = "resources";
+
+export default function ResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+  return (
+    <Layout>
+      <Head>
+        <title>{frontmatter.title} | Resource</title>
+      </Head>
+      <main className="container mx-auto px-4 py-12">
+        <div className="border-b pb-4 mb-8">
+          <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
+          <p className="text-lg text-gray-600">Category: {frontmatter.category || 'Resource'}</p>
+        </div>
+        <div className="prose prose-lg max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </div>
+      </main>
+    </Layout>
+  );
+}
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  
+  // ✅ FIX: Pass frontmatter data into the 'scope'
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+
+  return { 
+    props: { source: mdxSource, frontmatter: finalFrontmatter },
+    revalidate: 3600,
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};

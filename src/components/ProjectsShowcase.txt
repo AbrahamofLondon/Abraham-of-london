@@ -8,14 +8,14 @@ import { Project, featuredProjects, allProjects } from '@/data/projects'
 export default function ProjectsShowcase() {
   const [showAll, setShowAll] = useState(false)
   const [activeFilter, setActiveFilter] = useState('All')
-  
+
   // Get unique categories
   const categories = ['All', ...new Set(allProjects.map(p => p.category))]
 
   // Filter projects
   const displayedProjects = showAll ? allProjects : featuredProjects
-  const filteredProjects = activeFilter === 'All' 
-    ? displayedProjects 
+  const filteredProjects = activeFilter === 'All'
+    ? displayedProjects
     : displayedProjects.filter(p => p.category === activeFilter)
 
   return (
@@ -37,7 +37,7 @@ export default function ProjectsShowcase() {
           <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
             Premium projects delivering exceptional results for luxury brands worldwide
           </p>
-          
+
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {categories.map(category => (
@@ -110,13 +110,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             {project.year}
           </span>
         </div>
-        
+
         <p className="text-gray-300 mb-4 line-clamp-2">{project.description}</p>
-        
+
         <div className="flex flex-wrap gap-2 mb-4">
           {project.tags.map(tag => (
-            <span 
-              key={tag} 
+            <span
+              key={tag}
               className="text-xs px-2 py-1 bg-white/5 rounded-full text-gray-300"
             >
               {tag}
@@ -125,8 +125,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         </div>
 
         {project.projectUrl && (
-          <a 
-            href={project.projectUrl} 
+          <a
+            href={project.projectUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="absolute inset-0 z-10"

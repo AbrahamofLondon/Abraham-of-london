@@ -2,9 +2,9 @@
 #!/usr/bin/env node
 /**
  * Safely adds "doctor" script and prepends it to "prebuild".
- * - Idempotent: re-runs won’t duplicate entries.
+ * - Idempotent: re-runs won't duplicate entries.
  */
-import fs from 'node:fs';
+import fs from "fs";
 
 const file = 'package.json';
 const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));

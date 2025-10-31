@@ -1,0 +1,19 @@
+// Example: In getStaticProps of a page that lists downloads
+
+import fs from 'fs';
+import path from 'path';
+import yaml from 'js-yaml'; // You would need to install this package: npm install js-yaml
+
+export async function getStaticProps() {
+  const filePath = path.join(process.cwd(), 'path/to/your/downloads.yml');
+  const fileContents = fs.readFileSync(filePath, 'utf8');
+  
+  // Load the YAML data
+  const data = yaml.load(fileContents) as { downloads: any[] };
+  
+  return {
+    props: {
+      downloads: data.downloads,
+    },
+  };
+}

@@ -2,7 +2,18 @@
 
 import Head from "next/head";
 import React from "react";
-import EmbossedBrandMark from "@/components/print/EmbossedBrandMark"; 
+import EmbossedBrandMark from "@/components/print/EmbossedBrandMark";
+
+
+export const frontmatter = {
+ title: "Standards-Brief",
+ slug: "standards-brief",
+ date: "2024-07-01",
+ author: "AbrahamofLondon",
+ readTime: "5 min",
+ category: "Leadership",
+ type: "Download"
+};
 
 const Block = ({ n, title, items }: { n: number; title: string; items: string[] }) => (
   <section className="block">
@@ -14,7 +25,7 @@ const Block = ({ n, title, items }: { n: number; title: string; items: string[] 
 export default function Print_StandardsBrief() {
   return (
     <>
-      <Head><title>Standards Brief â€” Print</title></Head>
+      <Head><title>Standards Brief — Print</title></Head>
       <main className="sheet">
         <header className="title relative">
           {/* --- Branding: Logo Top Left --- */}
@@ -24,13 +35,11 @@ export default function Print_StandardsBrief() {
                   alt="Abraham of London Logo"
                   width={35}
                   height={35}
-                  effect="emboss"
-                  baseColor="transparent"
-              />
+                  effect="emboss"/>
           </div>
-          
+
           <h1>Standards Brief</h1>
-          <p className="sub">Protect people, work, and nameâ€”especially under pressure.</p>
+          <p className="sub">Protect people, work, and name—especially under pressure.</p>
         </header>
 
         <section className="grid">
@@ -67,15 +76,13 @@ export default function Print_StandardsBrief() {
         </section>
 
         <footer className="note flex justify-center items-center gap-3 border-t border-lightGrey/60 pt-4 mt-8">
-            <span className="text-sm">Use in onboarding â€¢ quarterly reviews â€¢ incident retros.</span>
+            <span className="text-sm">Use in onboarding • quarterly reviews • incident retros.</span>
             <EmbossedBrandMark
                 src="/assets/images/abraham-logo.jpg"
                 alt="Abraham of London Certified Mark"
                 width={25}
                 height={25}
-                effect="deboss"
-                baseColor="transparent"
-            />
+                effect="deboss"/>
         </footer>
       </main>
 
@@ -89,77 +96,77 @@ export default function Print_StandardsBrief() {
 
         @page { size: A4; margin: 12mm; }
         html, body { background: white; }
-        
-        .sheet { 
-            width: 210mm; 
-            min-height: 273mm; 
-            margin: 0 auto; 
-            font-family: var(--font-sans, ui-sans-serif); 
-            color: var(--color-primary); 
+
+        .sheet {
+            width: 210mm;
+            min-height: 273mm;
+            margin: 0 auto;
+            font-family: var(--font-sans, ui-sans-serif);
+            color: var(--color-primary);
             padding: 10mm; /* Added padding for better content spacing */
         }
-        
-        .title { 
-            text-align: center; 
-            margin-bottom: 6mm; 
+
+        .title {
+            text-align: center;
+            margin-bottom: 6mm;
             padding-top: 10mm; /* Space for the top-left logo */
         }
-        
-        h1 { 
-            font-family: var(--font-serif, Georgia); 
-            font-weight: 700; 
-            font-size: 20pt; 
-            margin: 0 0 2mm; 
+
+        h1 {
+            font-family: var(--font-serif, Georgia);
+            font-weight: 700;
+            font-size: 20pt;
+            margin: 0 0 2mm;
         }
-        
-        .sub { 
-            color: #555; 
-            font-size: 10pt; 
-            margin: 0; 
+
+        .sub {
+            color: #555;
+            font-size: 10pt;
+            margin: 0;
         }
-        
-        .grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 7mm; 
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7mm;
         }
-        
-        .block h2 { 
-            font-family: var(--font-serif, Georgia); 
-            font-weight: 700; 
-            font-size: 12pt; 
-            margin: 0 0 2mm; 
+
+        .block h2 {
+            font-family: var(--font-serif, Georgia);
+            font-weight: 700;
+            font-size: 12pt;
+            margin: 0 0 2mm;
             color: var(--color-secondary); /* Styling h2 with the primary/secondary color */
         }
-        
-        .block ul { 
-            margin: 0; 
-            padding-left: 4mm; 
-            font-size: 10.5pt; 
-            line-height: 1.5; 
+
+        .block ul {
+            margin: 0;
+            padding-left: 4mm;
+            font-size: 10.5pt;
+            line-height: 1.5;
         }
-        
+
         /* Updated footer styles to use flexbox for better alignment */
-        .note { 
-            color: #667; 
-            font-size: 9.5pt; 
-            text-align: center; 
+        .note {
+            color: #667;
+            font-size: 9.5pt;
+            text-align: center;
             /* The flex properties are added inline in the component, but these base styles remain */
         }
-        
-        @media screen { 
-            body { 
-                background: #f6f6f6; 
-                padding: 2rem; 
-            } 
-            .sheet { 
-                background: #fff; 
-                box-shadow: 0 10px 30px rgba(0,0,0,.08); 
-                padding: 15mm; 
-            } 
+
+        @media screen {
+            body {
+                background: #f6f6f6;
+                padding: 2rem;
+            }
+            .sheet {
+                background: #fff;
+                box-shadow: 0 10px 30px rgba(0,0,0,.08);
+                padding: 15mm;
+            }
             /* Correcting logo placement in screen view */
             .title .absolute {
-                top: 15mm; 
+                top: 15mm;
                 left: 15mm;
                 transform: none;
             }

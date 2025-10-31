@@ -43,9 +43,9 @@ export const handler: Handler = async (evt) => {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) return ok("Thanks—check your inbox to confirm.");
+      if (res.ok) return ok("ThanksÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âcheck your inbox to confirm.");
       const text = await res.text();
-      if (res.status === 400 && /already.*subscribed/i.test(text)) return ok("You’re already subscribed. 🎉");
+      if (res.status === 400 && /already.*subscribed/i.test(text)) return ok("YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re already subscribed. ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â°");
       return oops(`Buttondown error (${res.status}): ${text}`);
     }
 
@@ -65,9 +65,9 @@ export const handler: Handler = async (evt) => {
       });
 
       const body = await res.json().catch(() => ({}));
-      if (res.ok) return ok("Thanks—check your inbox to confirm.");
+      if (res.ok) return ok("ThanksÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âcheck your inbox to confirm.");
       if (res.status === 400 && String((body as any)?.title).toLowerCase().includes("member exists")) {
-        return ok("You’re already subscribed. 🎉");
+        return ok("YouÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢re already subscribed. ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â°");
       }
       return oops(`Mailchimp error (${res.status}): ${(body as any)?.detail || "unknown"}`);
     }

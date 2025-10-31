@@ -1,50 +1,55 @@
 // pages/print/event/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
-import { allEvents, type Event } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 import BrandFrame from "@/components/print/BrandFrame";
+import type { PostMeta } from "@/types/post";
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: allEvents.map((e) => ({ params: { slug: e.slug } })),
-  fallback: false,
-});
+const CONTENT_TYPE = "events";
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
-  const doc = allEvents.find((e) => e.slug === slug) || null;
-  return { props: { doc } };
-};
-
-interface EventPrintProps {
-  doc: Event | null;
-}
-
-export default function EventPrint({ doc }: EventPrintProps) {
-  // Keep hook order stable by calling it unconditionally
-  const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
-
-  if (!doc) return <p>Loading…</p>;
-
-  const when = doc.date
-    ? new Date(doc.date).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })
-    : "";
-  const subtitle = `${when}${doc.location ? ` — ${doc.location}` : ""}`;
-
+export default function PrintEventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <BrandFrame
-      title={doc.title}
-      subtitle={subtitle}
-      author="Abraham of London"
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={18}
-    >
-      <article className="prose max-w-none mx-auto">
-        <h1 className="font-serif">{doc.title}</h1>
-        <MDXContent components={components as any} />
-      </article>
-    </BrandFrame>
+    <>
+      <Head>
+        <title>{`${frontmatter.title} | Print View`}</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      
+      <BrandFrame
+        title={frontmatter.title}
+        subtitle={frontmatter.location}
+        author={frontmatter.author}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB') : undefined}
+      >
+        <article className="prose prose-lg dark:prose-invert mx-auto">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </BrandFrame>
+    </>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+
+  // ✅ FIX: Pass frontmatter data into the 'scope'
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+  
+  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};

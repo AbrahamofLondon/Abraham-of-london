@@ -21,7 +21,7 @@ export interface ContentDocument {
 export interface MakeContentPageOptions {
   titleSuffix?: string;
   // Option to pass through a default set of MDX components
-  components?: MdxComponents; 
+  components?: MdxComponents;
 }
 
 // ------------------------------
@@ -29,7 +29,7 @@ export interface MakeContentPageOptions {
 // ------------------------------
 
 /**
- * A utility function (Higher-Order Component) to wrap content data 
+ * A utility function (Higher-Order Component) to wrap content data
  * into a standard page layout with SEO metadata.
  * * @param opts Options for the wrapper, such as title suffix and default MDX components.
  * @returns A React functional component (the Content Page) ready to be exported from a Next.js page file.
@@ -37,9 +37,9 @@ export interface MakeContentPageOptions {
 export function makeContentPage<T extends ContentDocument>(
   opts: MakeContentPageOptions = {} // Set default empty object for opts
 ) {
-  const { 
-    titleSuffix = "Abraham of London", 
-    components 
+  const {
+    titleSuffix = "Abraham of London",
+    components
   } = opts;
 
   const ContentPage = ({ doc }: { doc: T }) => {
@@ -52,10 +52,10 @@ export function makeContentPage<T extends ContentDocument>(
           <title>{doc.title} — {titleSuffix}</title>
           {metaDescription && <meta name="description" content={metaDescription} />}
         </Head>
-        
+
         <article className="prose lg:prose-lg mx-auto px-4 py-10">
           <h1>{doc.title}</h1>
-          {/* Pass components to the MDXRenderer so custom MDX elements 
+          {/* Pass components to the MDXRenderer so custom MDX elements
             (like <Callout>) are rendered correctly.
           */}
           {doc.body?.code && <MDXRenderer code={doc.body.code} components={components} />}
@@ -63,7 +63,7 @@ export function makeContentPage<T extends ContentDocument>(
       </>
     );
   };
-  
+
   // FIX: Add display name to satisfy the 'react/display-name' rule
   ContentPage.displayName = 'ContentPageWrapper';
 

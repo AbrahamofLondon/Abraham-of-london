@@ -1,0 +1,53 @@
+---
+kind: "template"
+type: "Download"
+title: "Entrepreneur Operating Pack"
+slug: entrepreneur-operating-pack
+date: '2025-10-13'
+author: Abraham of London
+readTime: 2 min read
+category: Resources
+description: "A comprehensive pack containing a 30-60-90 plan, a financial triage checklist, and key decision-making frameworks."
+draft: false
+---
+
+import * as React from "react";
+import BrandFrame from "@/components/print/BrandFrame";
+import { Rule, Note } from "@/components/utils"; // Assuming utils component exists
+
+  const title = "Entrepreneur Operating Pack";
+  const subtitle = "30-60-90 Plan, Triage Checklist, and Decision Frameworks.";
+
+    <BrandFrame
+      title={title}
+      subtitle={subtitle}
+      pageSize="A4"
+
+> 
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold">I. 30-60-90 Strategy Template</h2>
+        <p className="text-sm">Use this to define short-term mission focus:</p>
+        <ul className="list-disc list-inside space-y-1 text-sm pl-4">
+          <li>**30 Days (Triage):** Stabilize cash flow. Cut 1 non-essential cost.</li>
+          <li>**60 Days (Focus):** Secure 1 major client/win. Refine core product/service.</li>
+          <li>**90 Days (Build):** Document one repeatable process. Train one successor/apprentice.</li>
+        </ul>
+        
+        <Rule />
+
+        <h2 className="text-xl font-bold">II. Decision-Making Framework (T.R.U.T.H.)</h2>
+        <ol className="list-decimal list-inside space-y-1 text-sm pl-4">
+          <li>**T - Truth:** What are the undeniable facts? (No feelings.)</li>
+          <li>**R - Risk:** What are the three worst-case outcomes?</li>
+          <li>**U - Utility:** What is the best use of our current resources (cash/time)?</li>
+          <li>**T - Timeline:** What is the drop-dead date for decision/action?</li>
+          <li>**H - House:** Does this choice honour my family/covenants?</li>
+        </ol>
+        
+        <Note tone="key" title="Download Action">
+          The full pack includes printable sheets for each framework. Print and write.
+        </Note>
+      </div>
+    </BrandFrame>
+  );
+

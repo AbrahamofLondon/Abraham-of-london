@@ -2,7 +2,7 @@
 @"
 const hookUrl = "https://api.netlify.com/build_hooks/6846264d915f250cf80d92";
 
-console.log("🚀 Deploying with hook:", hookUrl);
+console.log(" Deploying with hook:", hookUrl);
 
 fetch(hookUrl, { method: 'POST' })
   .then(response => {

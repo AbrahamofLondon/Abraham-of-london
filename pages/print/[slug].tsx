@@ -1,77 +1,55 @@
 // pages/print/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
-import {
-  allPosts,
-  allBooks,
-  allEvents,
-  allResources,
-  allStrategies,
-} from "contentlayer/generated";
-import type { Post, Book, Event, Resource, Strategy } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 import BrandFrame from "@/components/print/BrandFrame";
+import type { PostMeta } from "@/types/post";
 
-// Union type for any document that has MDX body + common fields
-type AnyDoc = (Post | Book | Event | Resource | Strategy) & {
-  body: { code: string };
-  slug: string;
-  title: string;
-  date?: string;
-  author?: string;
-  description?: string;
-  excerpt?: string;
-  ogDescription?: string;
-  location?: string;
-};
+const CONTENT_TYPE = "print"; 
 
-const ALL: AnyDoc[] = [
-  ...(allPosts as AnyDoc[]),
-  ...(allBooks as AnyDoc[]),
-  ...(allEvents as AnyDoc[]),
-  ...(allResources as AnyDoc[]),
-  ...(allStrategies as AnyDoc[]),
-];
-
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: ALL.map((d) => ({ params: { slug: d.slug } })),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
-  const doc = ALL.find((d) => d.slug === slug) || null;
-  return { props: { doc } };
-};
-
-export default function PrintPage({ doc }: { doc: AnyDoc | null }) {
-  // Always call the hook
-  const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
-
-  if (!doc) return <p>Loading…</p>;
-
-  // Choose a subtitle heuristic
-  const when =
-    doc.date ? new Date(doc.date).toLocaleDateString(undefined, { dateStyle: "long" }) : "";
-  const desc = doc.description || (doc as any).ogDescription || doc.excerpt || "";
-  const loc = (doc as any).location ? ` — ${(doc as any).location}` : "";
-  const subtitle = [when, desc].filter(Boolean).join(" · ") + loc;
-
+export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <BrandFrame
-      title={doc.title}
-      subtitle={subtitle}
-      author={doc.author || "Abraham of London"}
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={18}
-    >
-      <article className="prose max-w-none mx-auto">
-        <h1 className="font-serif">{doc.title}</h1>
-        {desc && <p className="text-lg">{desc}</p>}
-        <MDXContent components={components as any} />
-      </article>
-    </BrandFrame>
+    <>
+      <Head>
+        <title>{`${frontmatter.title} | Print View`}</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      
+      <BrandFrame
+        title={frontmatter.title}
+        subtitle={frontmatter.subtitle}
+        author={frontmatter.author}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined}
+      >
+        <article className="prose prose-lg dark:prose-invert mx-auto">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
+      </BrandFrame>
+    </>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  
+  // ✅ FIX: Pass frontmatter data into the 'scope'
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+  
+  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};

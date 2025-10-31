@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import path from "node:path";
+import path from "path";
 import { constants } from "node:fs";
 import fsp from "node:fs/promises";
 import glob from "fast-glob";
@@ -25,7 +25,10 @@ async function exists(p) {
   }
 }
 
-function brandSVG(title = "Abraham of London", subtitle = "Signature Collection") {
+function brandSVG(
+  title = "Abraham of London",
+  subtitle = "Signature Collection",
+) {
   return `
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -70,7 +73,7 @@ async function collectContentImages() {
       "resources/**/*.md",
       "strategy/**/*.md",
     ],
-    { cwd: CONTENT }
+    { cwd: CONTENT },
   );
 
   for (const rel of files) {
@@ -93,7 +96,10 @@ async function collectContentImages() {
 
 async function walkPublicImages() {
   if (!(await exists(PUBLIC_DIR))) return [];
-  const files = await glob(["assets/images/**/*.{png,jpg,jpeg,webp,avif,svg}"], { cwd: PUBLIC_DIR });
+  const files = await glob(
+    ["assets/images/**/*.{png,jpg,jpeg,webp,avif,svg}"],
+    { cwd: PUBLIC_DIR },
+  );
   return files.map((rel) => ({
     file: `public/${rel}`,
     type: "asset",
@@ -103,7 +109,10 @@ async function walkPublicImages() {
 
 async function main() {
   const report = { checked: 0, upgraded: [], weak: [], missing: [], ok: [] };
-  const candidates = [...(await collectContentImages()), ...(await walkPublicImages())];
+  const candidates = [
+    ...(await collectContentImages()),
+    ...(await walkPublicImages()),
+  ];
 
   for (const item of candidates) {
     const { publicPath, type, title } = item;
@@ -127,7 +136,13 @@ async function main() {
     const minB = isHero ? HERO_MIN_B : IMG_MIN_B;
 
     if ((meta.width || 0) < minW || (meta.size || 0) < minB) {
-      report.weak.push({ ...item, width: meta.width, bytes: meta.size, minW, minB });
+      report.weak.push({
+        ...item,
+        width: meta.width,
+        bytes: meta.size,
+        minW,
+        minB,
+      });
       if (DO_FIX) {
         await writePlaceholder(abs, title || "Abraham of London");
         report.upgraded.push({

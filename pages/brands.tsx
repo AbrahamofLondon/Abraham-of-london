@@ -7,7 +7,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform, useSpring, type Variants } from "framer-motion";
 import Layout from "@/components/Layout";
 // ✅ Using SEOHead for cleaner metadata management
-import SEOHead from "@/components/SEOHead"; 
+import SEOHead from "@/components/SEOHead";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import { sanitizeSocialLinks } from "@/lib/social";
 import ScrollProgress from "@/components/ScrollProgress";
@@ -65,7 +65,7 @@ function useParallax() {
   const { scrollYProgress } = useScroll();
   const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
   // Increased effect: 0% to 35% movement
-  const yBg = useTransform(smooth, [0, 1], ["0%", "35%"]); 
+  const yBg = useTransform(smooth, [0, 1], ["0%", "35%"]);
   return { yBg };
 }
 
@@ -97,19 +97,19 @@ export default function BrandsPage() {
       name: siteConfig.title,
       url: siteConfig.siteUrl,
       // Assuming asset name for core logo
-      logo: absUrl("/assets/images/logo/abraham-of-london-logo.svg"), 
+      logo: absUrl("/assets/images/logo/abraham-of-london-logo.svg"),
       description:
         "The core brand representing personal work, vision, and philosophy—foundation for thought leadership, strategic advisory, and creative ventures.",
       ...(sameAs.length ? { sameAs } : {}),
       // Use 'brand' only for consumer facing sub-brands
-      brand: BRANDS.filter(b => !b.featured).map((b) => ({ 
+      brand: BRANDS.filter(b => !b.featured).map((b) => ({
         "@type": "Brand",
         name: b.name,
         url: b.url,
         logo: absUrl(b.logo),
       })),
       // Use 'owns' for all owned entities (including the studio)
-      owns: BRANDS.map((b) => ({ 
+      owns: BRANDS.map((b) => ({
         "@type": "Organization",
         name: b.name,
         url: b.url,
@@ -160,7 +160,7 @@ export default function BrandsPage() {
           <motion.section
             id="abraham-of-london"
             // ✅ UPGRADE: Using theme colors: text-deepCharcoal, bg-white, shadow-xl
-            className="relative mb-16 overflow-hidden rounded-3xl bg-white p-8 shadow-xl md:p-12" 
+            className="relative mb-16 overflow-hidden rounded-3xl bg-white p-8 shadow-xl md:p-12"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -228,12 +228,12 @@ export default function BrandsPage() {
                   variants={itemVariants}
                   whileHover={{ scale: 1.03 }} // Reduced hover scale slightly for less distraction
                   // ✅ UPGRADE: Using theme colors and border for a polished look
-                  className="relative transform rounded-3xl border border-lightGrey bg-white p-8 shadow-card transition-all duration-300 hover:shadow-cardHover" 
+                  className="relative transform rounded-3xl border border-lightGrey bg-white p-8 shadow-card transition-all duration-300 hover:shadow-cardHover"
                 >
                   <a
                     href={brand.url}
                     // Use target=_blank only if not an internal link
-                    target={brand.url.startsWith("/") ? "_self" : "_blank"} 
+                    target={brand.url.startsWith("/") ? "_self" : "_blank"}
                     rel={brand.url.startsWith("/") ? undefined : "noopener noreferrer"}
                     className="block"
                     aria-label={`Visit ${brand.name}`}
@@ -276,7 +276,7 @@ export default function BrandsPage() {
           {/* Call to action */}
           <motion.section
             // ✅ UPGRADE: Using theme colors (bg-forest, text-cream)
-            className="rounded-3xl bg-forest p-8 text-center text-cream shadow-xl md:p-12" 
+            className="rounded-3xl bg-forest p-8 text-center text-cream shadow-xl md:p-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
@@ -290,7 +290,7 @@ export default function BrandsPage() {
             <Link
               href="/contact"
               // ✅ UPGRADE: Using theme colors for reverse button (bg-cream, text-forest)
-              className="aol-btn aol-btn-secondary inline-block rounded-full bg-cream px-8 py-3 font-bold text-forest shadow-lg transition-colors duration-300 hover:bg-lightGrey" 
+              className="aol-btn aol-btn-secondary inline-block rounded-full bg-cream px-8 py-3 font-bold text-forest shadow-lg transition-colors duration-300 hover:bg-lightGrey"
               prefetch={false}
             >
               Get in Touch

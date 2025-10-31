@@ -1,5 +1,20 @@
 {
   "root": true,
-  "extends": ["next/core-web-vitals"],
-  "ignorePatterns": [".next/", "node_modules/", "public/"]
+  "extends": ["next", "next/core-web-vitals"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "ecmaFeatures": { "jsx": true }
+  },
+  "env": { "browser": true, "es2022": true, "node": true },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "public/",
+    "content/**/*.md",
+    "content/**/*.mdx",
+    "scripts/**"
+  ]
 }

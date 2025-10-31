@@ -75,12 +75,12 @@ export default function EventsSection({
   locale = "en-GB",
   className,
 }: Props) {
-  
+
   // ✅ UPGRADE: Centralized reference date for safety
   const today = React.useMemo(() => {
     const t = new Date();
     // Normalize to start of day for accurate comparison
-    t.setHours(0, 0, 0, 0); 
+    t.setHours(0, 0, 0, 0);
     return t;
   }, []);
 
@@ -90,7 +90,7 @@ export default function EventsSection({
       .map((e) => {
         const date = parseDate(e.date);
         // Only return objects with valid Date
-        return date ? { ...e, date } : null; 
+        return date ? { ...e, date } : null;
       })
       .filter(Boolean) as (Omit<EventItem, "date"> & { date: Date })[];
 
@@ -100,7 +100,7 @@ export default function EventsSection({
 
     // Sort chronologically (earliest first)
     filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
-    
+
     // Apply max limit
     return typeof max === "number" ? filtered.slice(0, max) : filtered;
   }, [events, hidePast, max, today]);
@@ -188,12 +188,12 @@ export default function EventsSection({
                     {dateLabel}
                   </time>
                 </div>
-                
+
                 <h3 className="text-xl font-semibold mt-2">
                     {/* ✅ UPGRADE: Wrap title in link if href exists for a larger click target */}
                     {ev.href ? (
-                        <Link 
-                            href={linkHref} 
+                        <Link
+                            href={linkHref}
                             className="hover:underline decoration-softGold/60 underline-offset-4"
                         >
                             {ev.title}
@@ -202,14 +202,14 @@ export default function EventsSection({
                         ev.title
                     )}
                 </h3>
-                
+
                 {ev.location && (
                   <p className={styles.locationText}>
                     <span aria-hidden="true">📍 </span>
                     {ev.location}
                   </p>
                 )}
-                
+
                 {ev.href && (
                   <Link
                     href={linkHref}

@@ -30,9 +30,9 @@ type AboutSectionProps = {
 
 const container = {
     hidden: { opacity: 0 },
-    visible: { 
-        opacity: 1, 
-        transition: { when: "beforeChildren", staggerChildren: 0.1 } 
+    visible: {
+        opacity: 1,
+        transition: { when: "beforeChildren", staggerChildren: 0.1 }
     },
 } as const;
 
@@ -47,26 +47,26 @@ export default function AboutSection({
     id = "about",
     bio,
     // Safely default achievements to an empty array for robust rendering
-    achievements = [], 
+    achievements = [],
     portraitSrc = "/assets/images/portrait.jpg",
-    portraitAlt = "Portrait of the author, Abraham of London", 
+    portraitAlt = "Portrait of the author, Abraham of London",
     priority = false,
     className,
 }: AboutSectionProps) {
 
     // Sort achievements once and cache them
-    const sortedAchievements = React.useMemo(() => { 
+    const sortedAchievements = React.useMemo(() => {
         return achievements
             .slice()
             .sort((a, b) => b.year - a.year);
     }, [achievements]);
 
     return (
-        <section 
-            id={id} 
+        <section
+            id={id}
             className={clsx("container mx-auto max-w-6xl px-4 py-10 md:py-16", className)}
-            role="region" 
-            aria-labelledby="about-heading" 
+            role="region"
+            aria-labelledby="about-heading"
         >
             <motion.div
                 variants={container}
@@ -76,9 +76,9 @@ export default function AboutSection({
                 className="grid grid-cols-1 gap-12 md:grid-cols-[280px,1fr] items-start"
             >
                 {/* Portrait / Sidebar */}
-                <motion.aside 
-                    variants={item} 
-                    className="mx-auto md:mx-0 w-[240px] md:w-full md:max-w-[280px]" 
+                <motion.aside
+                    variants={item}
+                    className="mx-auto md:mx-0 w-[240px] md:w-full md:max-w-[280px]"
                     aria-label="Author profile and contact links"
                 >
                     <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-black/10 bg-warmWhite shadow-2xl">
@@ -86,7 +86,7 @@ export default function AboutSection({
                             src={portraitSrc}
                             alt={portraitAlt}
                             fill
-                            sizes="(max-width: 768px) 240px, 280px" 
+                            sizes="(max-width: 768px) 240px, 280px"
                             priority={priority}
                             className="object-cover transition-transform duration-500 hover:scale-[1.03]"
                         />
@@ -97,7 +97,7 @@ export default function AboutSection({
                         <Link
                             href="/contact"
                             prefetch={false}
-                            className="aol-btn w-full justify-center text-lg" 
+                            className="aol-btn w-full justify-center text-lg"
                             aria-label="Contact the author to get in touch"
                         >
                             Get In Touch
@@ -106,18 +106,18 @@ export default function AboutSection({
                 </motion.aside>
 
                 {/* Main content */}
-                <motion.div 
-                    variants={item} 
+                <motion.div
+                    variants={item}
                     className="prose md:prose-lg max-w-none text-[color:var(--color-on-secondary)/0.9] dark:prose-invert"
                 >
                     {/* Main Heading */}
-                    <h1 
-                        id="about-heading" 
+                    <h1
+                        id="about-heading"
                         className="font-serif text-3xl md:text-5xl font-bold !mb-4 !mt-0 text-forest"
                     >
                         About
                     </h1>
-                    
+
                     {/* Biography */}
                     <p className="!mt-0 text-lg leading-relaxed">{bio}</p>
 
@@ -127,17 +127,17 @@ export default function AboutSection({
                             <h2 className="font-serif text-2xl md:text-3xl font-semibold text-deepCharcoal dark:text-cream">
                                 Key Highlights & Achievements
                             </h2>
-                            
+
                             <ul className="mt-5 space-y-4">
                                 {sortedAchievements.map((a, i) => {
                                     const body = (
                                         <div className="flex items-start gap-4 rounded-xl border border-lightGrey bg-warmWhite p-4 shadow-sm hover:shadow-md transition">
-                                            
+
                                             {/* Year badge */}
                                             <div className="mt-0.5 shrink-0 rounded-full bg-[color:var(--color-primary)/0.1] px-3 py-1 text-sm font-semibold text-forest dark:bg-[color:var(--color-primary)/0.2]">
                                                 {a.year}
                                             </div>
-                                            
+
                                             {/* Title and Description */}
                                             <div className="min-w-0">
                                                 <h3 className="font-semibold text-deepCharcoal text-lg dark:text-cream leading-snug">
@@ -149,9 +149,9 @@ export default function AboutSection({
                                     );
 
                                     return (
-                                        <motion.li 
-                                            key={`${a.title}-${a.year}-${i}`} 
-                                            variants={item} 
+                                        <motion.li
+                                            key={`${a.title}-${a.year}-${i}`}
+                                            variants={item}
                                             aria-label={`${a.title} in ${a.year}`}
                                         >
                                             {a.href ? (
