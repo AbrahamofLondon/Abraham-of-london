@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    ignoreBuildErrors: true,
-  },
-  pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
+  // If you are deploying with Netlify’s Next runtime or doing static export,
+  // unoptimized avoids edge loaders breaking images.
+  images: { unoptimized: true },
+
+  // Make sure you don't have basePath or assetPrefix unless you *need* them.
+  // basePath: '',
+  // assetPrefix: '',
 };
 
-export default nextConfig;
+module.exports = nextConfig;
