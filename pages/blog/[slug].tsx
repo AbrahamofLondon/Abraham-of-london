@@ -1,77 +1,70 @@
---- a/pages/blog/[slug].tsx
-+++ b/pages/blog/[slug].tsx
-@@
--import { MDXRemote } from "next-mdx-remote";
--import { getAllPosts, getPostBySlug } from "@/lib/api";
--import MDXComponents from "@/components/mdx-components";
-+import { MDXRemote } from "next-mdx-remote";
-+import { getAllPosts, getPostBySlug } from "@/lib/api"; // assume these already exist
-+import { mdxToSource } from "@/lib/mdx";
-+import MDXComponents from "@/components/mdx-components";
-+import Image from "next/image";
-+import Head from "next/head";
- 
- export async function getStaticPaths() {
--  const posts = getAllPosts(["slug"]);
--  return { paths: posts.map((p) => ({ params: { slug: p.slug } })), fallback: false };
-+  const posts = getAllPosts(["slug", "date", "published"]);
-+  // IMPORTANT: same predicate as index page
-+  const visible = posts.filter((p: any) => (p.published ?? true) && new Date(p.date) <= new Date());
-+  return { paths: visible.map((p: any) => ({ params: { slug: p.slug } })), fallback: "blocking" };
- }
- 
- export async function getStaticProps({ params }: { params: { slug: string } }) {
--  const post = getPostBySlug(params.slug, [
--    "title", "date", "slug", "author", "content", "coverImage", "excerpt", "tags"
--  ]);
--  return { props: { post } };
-+  const { content, ...post } = getPostBySlug(params.slug, [
-+    "title",
-+    "subtitle",
-+    "date",
-+    "slug",
-+    "author",
-+    "content",
-+    "coverImage",
-+    "excerpt",
-+    "tags",
-+    "published",
-+  ]);
-+
-+  const source = await mdxToSource(content, {
-+    // expose front-matter safely to MDX
-+    title: post.title,
-+    subtitle: (post as any).subtitle ?? "",
-+    date: post.date,
-+    author: post.author,
-+  });
-+
-+  return {
-+    props: { post, source },
-+    revalidate: 60, // ISR
-+  };
- }
- 
--export default function BlogPost({ post }: any) {
--  return <article className="prose lg:prose-lg"><MDXRemote {...post.content} components={MDXComponents} /></article>;
-+export default function BlogPost({ post, source }: any) {
-+  return (
-+    <>
-+      <Head>
-+        <title>{post.title} | Abraham of London</title>
-+      </Head>
-+      <header className="mb-6">
-+        <h1 className="text-3xl md:text-4xl font-semibold">{post.title}</h1>
-+        {post.subtitle ? <p className="text-lg text-neutral-600 mt-1">{post.subtitle}</p> : null}
-+        {post.coverImage ? (
-+          <div className="relative w-full aspect-[16/9] mt-4 overflow-hidden rounded-xl">
-+            <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
-+          </div>
-+        ) : null}
-+      </header>
-+      <article className="prose lg:prose-lg max-w-none">
-+        <MDXRemote {...source} components={MDXComponents as any} />
-+      </article>
-+    </>
-+  );
- }
+// pages/blog/[slug].tsx
+import { GetStaticProps, GetStaticPaths } from 'next';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import Head from 'next/head';
+import Image from 'next/image';
+import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
+import type { PostMeta } from '@/types/post';
+import Layout from '@/components/Layout';
+import mdxComponents from '@/components/mdx-components'; // ✅ Correct default import
+
+const CONTENT_TYPE = 'blog';
+
+interface PostPageProps {
+  source: MDXRemoteSerializeResult;
+  frontmatter: PostMeta;
+}
+
+export default function PostPage({ source, frontmatter }: PostPageProps) {
+  return (
+    <Layout>
+      <Head>
+        <title>{frontmatter.title} | Abraham of London</title>
+        <meta name="description" content={frontmatter.excerpt} />
+      </Head>
+      <article className="container mx-auto px-4 py-12">
+        <header className="mb-8 text-center">
+          <h1 className="text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
+          {frontmatter.date && (
+            <p className="mt-2 text-soft-charcoal">
+              {new Date(frontmatter.date).toLocaleDateString('en-GB', {
+                year: 'numeric', month: 'long', day: 'numeric',
+              })}
+            </p>
+          )}
+        </header>
+        {frontmatter.coverImage && (
+          <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
+            <Image
+              src={frontmatter.coverImage}
+              alt={`Cover image for ${frontmatter.title}`}
+              layout="fill"
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+        <div className="prose prose-lg max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </div>
+      </article>
+    </Layout>
+  );
+}
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); 
+  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugs = getContentSlugs(CONTENT_TYPE);
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};
