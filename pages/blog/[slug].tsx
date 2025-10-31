@@ -34,7 +34,6 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
             </p>
           )}
         </header>
-
         {frontmatter.coverImage && (
           <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
             <Image
@@ -46,7 +45,6 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
             />
           </div>
         )}
-
         <div className="prose prose-lg max-w-none">
           <MDXRemote {...source} components={mdxComponents} />
         </div>
@@ -58,12 +56,8 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); 
-  
-  const mdxSource = await serialize(content || '', { 
-    scope: finalFrontmatter 
-  });
-
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };
 

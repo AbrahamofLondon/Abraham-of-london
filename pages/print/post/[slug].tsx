@@ -18,7 +18,6 @@ export default function PrintPostPage({ source, frontmatter }: InferGetStaticPro
         <title>{`${frontmatter.title} | Print View`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
-      
       <BrandFrame
         title={frontmatter.title}
         subtitle={frontmatter.excerpt}
@@ -37,11 +36,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
-
-  const mdxSource = await serialize(content || '', { 
-    scope: finalFrontmatter 
-  });
-  
+  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };
 
