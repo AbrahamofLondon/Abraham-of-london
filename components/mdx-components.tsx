@@ -21,10 +21,14 @@ const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false }
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
-const Grid = dynamic(() => import('@/components/mdx/Grid'), { ssr: false });
 
-// ✅ FIX: Added the 'Quote' component. 
-// This is a common pattern for a blockquote.
+// ✅ FIX: Added the 'Grid' and 'Quote' components.
+const Grid: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
+  <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+    {children}
+  </div>
+);
+
 const Quote: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
   <blockquote className={`border-l-4 border-muted-gold pl-4 italic text-gray-600 ${className}`}>
     {children}
@@ -37,7 +41,7 @@ const mdxComponents = {
     <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
   ),
   hr: Rule,
-  blockquote: Quote, // Map the standard blockquote tag to your new Quote component
+  blockquote: Quote, // Map the standard blockquote tag
 
   // All custom components
   BrandFrame,
@@ -57,8 +61,8 @@ const mdxComponents = {
   JsonLd,
   CTA,
   DownloadCard,
-  Grid,
-  Quote, // ✅ FIX: Added missing component
+  Grid, // Added Grid
+  Quote, // Added Quote
 };
 
 // Use a DEFAULT EXPORT to standardize all imports
