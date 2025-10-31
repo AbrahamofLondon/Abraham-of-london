@@ -33,9 +33,12 @@ export default function DownloadPage({ source, frontmatter }: InferGetStaticProp
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
-  // ✅ FIX: Pass frontmatter data into the 'scope'
+  // Ensures no 'undefined' values are passed, which breaks serialization
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); 
+
+  // ✅✅✅ THIS IS THE FIX ✅✅✅
+  // Pass the frontmatter data into the 'scope' so MDX can access it
   const mdxSource = await serialize(content || '', { 
     scope: finalFrontmatter 
   });
