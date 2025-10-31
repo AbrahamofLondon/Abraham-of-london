@@ -9,7 +9,6 @@
   "scripts": {
     "clean": "rimraf .next .contentlayer",
     "dev": "next dev",
-    "prebuild": "npm run audit:images || true && npm run pdfs:generate || true && npm run ci:downloads || true",
     "build": "cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
     "preprod:build": "npm run fix:bom && npm run downloads:manifest",
     "prod:build": "cross-env NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 next build",
