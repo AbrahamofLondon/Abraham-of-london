@@ -1,4 +1,3 @@
-# Husky v10: no shebang, no sourcing
 echo "⏳ Running Tailwind slash-opacity checks..."
 node scripts/convert-tailwind-slash-opacity.mjs
 node scripts/postcss-guard-dryrun.mjs
