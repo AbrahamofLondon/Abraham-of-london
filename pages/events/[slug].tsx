@@ -1,74 +1,61 @@
-// pages/events/[slug].tsx
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
-import Head from "next/head";
-import Image from "next/image";
-import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import Layout from "@/components/Layout";
-import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post";
-import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
-
-const CONTENT_TYPE = "events";
-
-export default function EventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
-      });
-    } catch (e) { return dateString; }
-  };
-
-  return (
-    <Layout>
-      <Head>
-        <title>{frontmatter.title} | Event Details</title>
-      </Head>
-      <main className="container mx-auto px-4 py-12">
-        {frontmatter.coverImage && (
-          <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
-            <Image
-              src={frontmatter.coverImage}
-              alt={`Cover image for ${frontmatter.title}`}
-              layout="fill"
-              className="object-cover"
-              priority
-            />
-          </div>
-        )}
-        <header className="border-b pb-6 mb-8">
-          <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
-          <div className="text-lg text-gray-600 space-y-1">
-            <p><strong>Date:</strong> {formatDate(frontmatter.date!)}</p>
-            <p><strong>Location:</strong> {frontmatter.location}</p>
-          </div>
-        </header>
-        <div className="prose prose-lg max-w-none">
-          <MDXRemote {...source} components={mdxComponents} />
-        </div>
-      </main>
-    </Layout>
-  );
-}
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params!.slug as string;
-  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
-  return { 
-    props: { source: mdxSource, frontmatter: finalFrontmatter },
-    revalidate: 60,
-  };
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getContentSlugs(CONTENT_TYPE);
-  return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
-};
+--- a/pages/events/[slug].tsx
++++ b/pages/events/[slug].tsx
+@@
+-import { MDXRemote } from "next-mdx-remote";
+-import { getAllEvents, getEventBySlug } from "@/lib/events";
+-import MDXComponents from "@/components/mdx-components";
++import { MDXRemote } from "next-mdx-remote";
++import { getAllEvents, getEventBySlug } from "@/lib/events";
++import { mdxToSource } from "@/lib/mdx";
++import MDXComponents from "@/components/mdx-components";
++import Image from "next/image";
+ 
+ export async function getStaticPaths() {
+-  const events = getAllEvents(["slug"]);
+-  return { paths: events.map((e) => ({ params: { slug: e.slug } })), fallback: false };
++  const events = getAllEvents(["slug", "date", "published"]);
++  const visible = events.filter((e: any) => (e.published ?? true));
++  return { paths: visible.map((e: any) => ({ params: { slug: e.slug } })), fallback: "blocking" };
+ }
+ 
+ export async function getStaticProps({ params }: { params: { slug: string } }) {
+-  const event = getEventBySlug(params.slug, ["title", "slug", "date", "content"]);
+-  return { props: { event } };
++  const { content, ...event } = getEventBySlug(params.slug, [
++    "title",
++    "subtitle",
++    "slug",
++    "date",
++    "location",
++    "coverImage",
++    "tags",
++    "content",
++    "published",
++  ]);
++  const source = await mdxToSource(content, {
++    title: event.title,
++    subtitle: (event as any).subtitle ?? "",
++    date: event.date,
++    location: event.location ?? "",
++  });
++  return { props: { event, source }, revalidate: 60 };
+ }
+ 
+-export default function EventPage({ event }: any) {
+-  return <article className="prose lg:prose-lg"><MDXRemote {...event.content} components={MDXComponents} /></article>;
++export default function EventPage({ event, source }: any) {
++  return (
++    <main>
++      <h1 className="text-3xl md:text-4xl font-semibold">{event.title}</h1>
++      {event.subtitle ? <p className="text-lg text-neutral-600 mt-1">{event.subtitle}</p> : null}
++      {event.coverImage ? (
++        <div className="relative w-full aspect-[16/9] mt-4 overflow-hidden rounded-xl">
++          <Image src={event.coverImage} alt={event.title} fill className="object-cover" priority />
++        </div>
++      ) : null}
++      <article className="prose lg:prose-lg max-w-none mt-6">
++        <MDXRemote {...source} components={MDXComponents as any} />
++      </article>
++    </main>
++  );
+ }
