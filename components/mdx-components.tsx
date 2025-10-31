@@ -4,7 +4,6 @@ import Image from 'next/image';
 
 // --- Import all custom components used in your MDX files ---
 // NOTE: Ensure these paths are correct for your project structure.
-
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -20,8 +19,7 @@ const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 
-// ✅ FIX: Added BadgeRow, assuming it's in the mdx components folder.
-// If it lives elsewhere (e.g., '@/components/BadgeRow'), you must correct the path.
+// ✅ FIX: Added BadgeRow. Adjust path if it's not in '@/components/mdx/BadgeRow'
 const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
 
 // ✅ FIX: Use a NAMED EXPORT to match what your pages are importing.
@@ -32,9 +30,9 @@ export const mdxComponents = {
   ),
   hr: Rule,
 
-  // ✅ FIX: Mapped all custom components, including the missing ones.
+  // ✅ FIX: Mapped all custom components, including the ones that were missing.
   BrandFrame,
-  BadgeRow, // Added this missing component
+  BadgeRow,
   EmbossedBrandMark,
   EmbossedSign,
   Rule,
@@ -50,4 +48,4 @@ export const mdxComponents = {
   JsonLd,
 };
 
-// ❌ REMOVE any `export default mdxComponents;` line if it exists.
+// ❌ DO NOT include a 'export default' line.
