@@ -1,4 +1,3 @@
-// components/FloatingTeaserCTA.tsx
 "use client";
 
 import * as React from "react";
@@ -6,27 +5,31 @@ import Link from "next/link";
 import clsx from "clsx";
 
 interface FloatingTeaserCTAProps {
-  delayMs?: number;         // delay before first show
-  hideAfterMs?: number;     // auto-hide after shown
-  snoozeHours?: number;     // snooze window after hide/dismiss
+  delayMs?: number;
+  hideAfterMs?: number;
+  snoozeHours?: number;
   className?: string;
   linkHref?: string;
   linkText?: string;
+  title?: string;
+  text?: string;
 }
 
 const STORAGE_KEY = "a_of_l_teaser_snooze";
 
 export default function FloatingTeaserCTA({
   delayMs = 5000,
-  hideAfterMs = 15000,
+  hideAfterMs = 20000,
   snoozeHours = 6,
   className,
-  linkHref = "/contact",
-  linkText = "Let's Talk",
+  linkHref = "/books/fathering-without-fear",
+  linkText = "Get the Teaser",
+  title = "Fathering Without Fear",
+  // THIS IS THE FIX: The apostrophe in "It's" is replaced with "&apos;"
+  text = "It&apos;s the field memoir for fathers in the arena.",
 }: FloatingTeaserCTAProps) {
   const [visible, setVisible] = React.useState(false);
 
-  // Initial show (respect snooze)
   React.useEffect(() => {
     const until = window.localStorage.getItem(STORAGE_KEY);
     const now = Date.now();
@@ -36,7 +39,6 @@ export default function FloatingTeaserCTA({
     return () => window.clearTimeout(t);
   }, [delayMs]);
 
-  // Auto-hide + light snooze
   React.useEffect(() => {
     if (!visible) return;
     const t = window.setTimeout(() => {
@@ -49,7 +51,6 @@ export default function FloatingTeaserCTA({
 
   const handleDismiss = () => {
     setVisible(false);
-    // Longer snooze when user explicitly closes
     const snoozeUntil = Date.now() + 24 * snoozeHours * 60 * 60 * 1000;
     window.localStorage.setItem(STORAGE_KEY, String(snoozeUntil));
   };
@@ -59,19 +60,17 @@ export default function FloatingTeaserCTA({
   return (
     <div
       className={clsx(
-        "fixed bottom-4 right-4 z-50 rounded-lg bg-softGold p-4 shadow-xl transition-all duration-300 ease-out md:bottom-8 md:right-8",
+        "fixed bottom-4 right-4 z-50 w-11/12 max-w-sm rounded-lg bg-warm-cream p-4 shadow-xl ring-1 ring-black/5 transition-all duration-300 ease-out md:bottom-8 md:right-8",
         "animate-in fade-in slide-in-from-bottom-1/2",
-        className
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-md font-semibold text-deepCharcoal md:text-lg">
-            Ready to build something great?
+          <h3 className="text-md font-semibold text-soft-charcoal md:text-lg">
+            {title}
           </h3>
-          <p className="mt-1 text-sm text-gray-700">
-            Let's discuss your project and how I can help.
-          </p>
+          <p className="mt-1 text-sm text-gray-700">{text}</p>
         </div>
         <button
           onClick={handleDismiss}
@@ -85,7 +84,7 @@ export default function FloatingTeaserCTA({
       </div>
       <Link
         href={linkHref}
-        className="mt-4 block rounded-full bg-deepCharcoal px-4 py-2 text-center text-sm font-medium text-warm-cream transition hover:bg-deepCharcoal/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-deepCharcoal/40"
+        className="mt-4 block rounded-full bg-deep-forest px-4 py-2 text-center text-sm font-medium text-warm-cream transition hover:bg-deep-forest/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-forest/40"
       >
         {linkText}
       </Link>
