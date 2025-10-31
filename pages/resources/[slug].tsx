@@ -7,7 +7,6 @@ import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
-
 import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
 const CONTENT_TYPE = "resources";
@@ -37,7 +36,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
   // ✅ FIX: Pass frontmatter data into the 'scope'
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
 
   return { 
     props: { source: mdxSource, frontmatter: finalFrontmatter },

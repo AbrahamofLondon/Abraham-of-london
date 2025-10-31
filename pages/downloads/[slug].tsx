@@ -4,13 +4,10 @@ import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "ne
 import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-
 import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
-
-// ✅ FIX: Use a DEFAULT IMPORT
-import mdxComponents from "@/components/mdx-components";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
 const CONTENT_TYPE = "downloads";
 
@@ -37,7 +34,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
-  const mdxSource = await serialize(content || '');
+  
+  // ✅ FIX: Pass frontmatter data into the 'scope'
+  const mdxSource = await serialize(content || '', { 
+    scope: finalFrontmatter 
+  });
+  
   return { 
     props: { source: mdxSource, frontmatter: finalFrontmatter },
     revalidate: 3600,
