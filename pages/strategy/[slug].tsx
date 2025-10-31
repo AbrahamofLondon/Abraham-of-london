@@ -5,12 +5,11 @@ import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
-import Layout from "@/components/Layout"; // Standard layout for styling
+import Layout from "@/components/Layout";
 import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
-import { getContentSlugs, getContentBySlug } from "@/lib/mdx"; // ✅ Centralized data fetching
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-// ✅ FIX: Corrected typo from 'startegy' to 'strategy'
 const CONTENT_TYPE = "strategy";
 
 export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
@@ -23,11 +22,11 @@ export default function StrategyPage({ source, frontmatter }: InferGetStaticProp
       <main className="container mx-auto px-4 py-12">
         <div className="border-b pb-4 mb-8">
           <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
-          <div className="text-lg text-gray-600 space-y-1">
-            {frontmatter.date && (
-              <p>Date: {new Date(frontmatter.date).toLocaleDateString('en-GB')}</p>
-            )}
-          </div>
+          {frontmatter.date && (
+            <p className="text-lg text-gray-600">
+              Date: {new Date(frontmatter.date).toLocaleDateString('en-GB')}
+            </p>
+          )}
         </div>
         <div className="prose prose-lg max-w-none">
           <MDXRemote {...source} components={mdxComponents} />

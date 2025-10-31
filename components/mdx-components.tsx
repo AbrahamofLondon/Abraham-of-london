@@ -4,6 +4,8 @@ import Image from 'next/image';
 
 // --- Import all custom components used in your MDX files ---
 // NOTE: Ensure these paths are correct for your project structure.
+// If a component is not found, you MUST correct the path.
+
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -16,13 +18,12 @@ const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr:
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
+const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
+const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 
-// ✅ FIX: Added BadgeRow. Adjust path if it's not in '@/components/mdx/BadgeRow'
-const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
-
-// ✅ FIX: Use a NAMED EXPORT to match what your pages are importing.
+// ✅ FIX: Use a NAMED EXPORT (lowercase 'm')
 export const mdxComponents = {
   // Standard HTML tags
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -30,7 +31,7 @@ export const mdxComponents = {
   ),
   hr: Rule,
 
-  // ✅ FIX: Mapped all custom components, including the ones that were missing.
+  // ✅ FIX: Mapped all custom components
   BrandFrame,
   BadgeRow,
   EmbossedBrandMark,
@@ -46,6 +47,7 @@ export const mdxComponents = {
   Badge,
   Caption,
   JsonLd,
+  CTA,
 };
 
-// ❌ DO NOT include a 'export default mdxComponents;' line.
+// ❌ DO NOT include a 'export default' line.

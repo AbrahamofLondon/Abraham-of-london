@@ -1,4 +1,4 @@
-// pages/print/event/[slug].tsx
+// pages/print/post/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -10,9 +10,9 @@ import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct name
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "events";
+const CONTENT_TYPE = "blog"; // Renders content from 'content/blog'
 
-export default function PrintEventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function PrintPostPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
       <Head>
@@ -22,7 +22,7 @@ export default function PrintEventPage({ source, frontmatter }: InferGetStaticPr
       
       <BrandFrame
         title={frontmatter.title}
-        subtitle={frontmatter.location}
+        subtitle={frontmatter.excerpt}
         author={frontmatter.author}
         date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB') : undefined}
       >

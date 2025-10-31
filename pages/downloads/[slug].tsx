@@ -5,9 +5,9 @@ import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
-import Layout from "@/components/Layout"; // Standard layout for styling
+import Layout from "@/components/Layout";
 import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
-import { getContentSlugs, getContentBySlug } from "@/lib/mdx"; // ✅ Centralized data fetching
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
 const CONTENT_TYPE = "downloads";
@@ -38,7 +38,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const mdxSource = await serialize(content || '');
   return { 
     props: { source: mdxSource, frontmatter: finalFrontmatter },
-    revalidate: 3600, // Rebuild every hour
+    revalidate: 3600,
   };
 };
 
