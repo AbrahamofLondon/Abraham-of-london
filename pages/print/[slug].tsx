@@ -1,4 +1,4 @@
-// pages/print/event/[slug].tsx
+// pages/print/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -6,14 +6,13 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-// ✅ FIX: Use a DEFAULT import to match your mdx-components file
-import mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "events";
+const CONTENT_TYPE = "print"; // Set for this page
 
-export default function PrintEventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
       <Head>
@@ -23,9 +22,9 @@ export default function PrintEventPage({ source, frontmatter }: InferGetStaticPr
       
       <BrandFrame
         title={frontmatter.title}
-        subtitle={frontmatter.location}
+        subtitle={frontmatter.subtitle}
         author={frontmatter.author}
-        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB') : undefined}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined}
       >
         <article className="prose prose-lg dark:prose-invert mx-auto">
           <MDXRemote {...source} components={mdxComponents} />

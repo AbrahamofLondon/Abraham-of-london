@@ -10,7 +10,7 @@ import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct name
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "events";
+const CONTENT_TYPE = "events"; // Set for this page
 
 export default function PrintEventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (

@@ -10,7 +10,7 @@ import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct name
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "strategy";
+const CONTENT_TYPE = "strategy"; // Set for this page
 
 export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
