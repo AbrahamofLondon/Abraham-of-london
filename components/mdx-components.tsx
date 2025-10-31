@@ -21,10 +21,10 @@ const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false }
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 
 // ✅ FIX: Added BadgeRow, assuming it's in the mdx components folder.
-// If it lives elsewhere, you must correct the path.
+// If it lives elsewhere (e.g., '@/components/BadgeRow'), you must correct the path.
 const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
 
-// ✅ FIX: Use a named export to match how your pages are importing it.
+// ✅ FIX: Use a NAMED EXPORT to match what your pages are importing.
 export const mdxComponents = {
   // Standard HTML tags
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -34,7 +34,7 @@ export const mdxComponents = {
 
   // ✅ FIX: Mapped all custom components, including the missing ones.
   BrandFrame,
-  BadgeRow,
+  BadgeRow, // Added this missing component
   EmbossedBrandMark,
   EmbossedSign,
   Rule,
@@ -49,3 +49,5 @@ export const mdxComponents = {
   Caption,
   JsonLd,
 };
+
+// ❌ REMOVE any `export default mdxComponents;` line if it exists.
