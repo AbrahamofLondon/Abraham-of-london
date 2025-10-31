@@ -2,9 +2,6 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
-// ✅ FIX: Import your custom assetPath helper
-import { assetPath } from "@/lib/assets";
-
 // --- Import all custom components used in your MDX files ---
 // NOTE: Ensure these paths are correct for your project structure.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
@@ -24,24 +21,14 @@ const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false }
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 
-// ✅ FIX: Use a NAMED EXPORT
-export const mdxComponents = {
-  // ✅ FIX: Use the assetPath helper for all images in MDX
+const mdxComponents = {
+  // ✅ FIX: Use props.src directly. The assetPath helper was server-side.
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <Image 
-      src={assetPath(String(props.src))} 
-      alt={props.alt ?? ''} 
-      width={1200} 
-      height={800} 
-      sizes="(max-width: 768px) 100vw, 50vw" 
-      loading="lazy" 
-      {...props} 
-      className="rounded-lg" 
-    />
+    <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
   ),
   hr: Rule,
 
-  // ✅ FIX: Mapped all custom components
+  // Map all custom components
   BrandFrame,
   BadgeRow,
   EmbossedBrandMark,
@@ -59,3 +46,6 @@ export const mdxComponents = {
   JsonLd,
   CTA,
 };
+
+// ✅ FIX: Use a DEFAULT EXPORT to solve the import mismatch
+export default mdxComponents;

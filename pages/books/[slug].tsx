@@ -6,7 +6,8 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
+// ✅ FIX: Use a DEFAULT import to match your mdx-components file
+import mdxComponents from "@/components/mdx-components";
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
