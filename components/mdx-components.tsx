@@ -4,6 +4,7 @@ import Image from 'next/image';
 import * as React from 'react';
 
 // --- Import all custom components used in your MDX files ---
+// NOTE: Ensure these paths are correct for your project structure.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -22,7 +23,8 @@ const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
 
-// ✅ FIX: Added the 'Grid' and 'Quote' components.
+// ✅ FIX: Added the 'Grid' and 'Quote' components as simple fallbacks.
+// You can style these components later, but this will make the build pass.
 const Grid: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
   <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
     {children}
@@ -61,8 +63,8 @@ const mdxComponents = {
   JsonLd,
   CTA,
   DownloadCard,
-  Grid, // Added Grid
-  Quote, // Added Quote
+  Grid, // ✅ FIX: Added Grid
+  Quote, // ✅ FIX: Added Quote
 };
 
 // Use a DEFAULT EXPORT to standardize all imports
