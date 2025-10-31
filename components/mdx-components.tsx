@@ -1,9 +1,9 @@
 // components/mdx-components.tsx
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import * as React from 'react';
 
 // --- Import all custom components used in your MDX files ---
-// NOTE: Ensure these paths are correct for your project structure.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -23,12 +23,21 @@ const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
 const Grid = dynamic(() => import('@/components/mdx/Grid'), { ssr: false });
 
+// ✅ FIX: Added the 'Quote' component. 
+// This is a common pattern for a blockquote.
+const Quote: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
+  <blockquote className={`border-l-4 border-muted-gold pl-4 italic text-gray-600 ${className}`}>
+    {children}
+  </blockquote>
+);
+
 const mdxComponents = {
   // Standard HTML tags
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
   ),
   hr: Rule,
+  blockquote: Quote, // Map the standard blockquote tag to your new Quote component
 
   // All custom components
   BrandFrame,
@@ -49,7 +58,8 @@ const mdxComponents = {
   CTA,
   DownloadCard,
   Grid,
+  Quote, // ✅ FIX: Added missing component
 };
 
-// ✅ FIX: Use a DEFAULT EXPORT to standardize all imports
+// Use a DEFAULT EXPORT to standardize all imports
 export default mdxComponents;
