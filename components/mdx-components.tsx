@@ -48,4 +48,4 @@ export const mdxComponents = {
   JsonLd,
 };
 
-// ❌ DO NOT include a 'export default' line.
+// ❌ DO NOT include a 'export default mdxComponents;' line.
