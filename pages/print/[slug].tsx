@@ -1,71 +1,71 @@
-// pages/blog/[slug].tsx
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
-import Head from 'next/head';
-import Image from 'next/image';
-import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
-import type { PostMeta } from '@/types/post';
+// pages/print/[slug].tsx
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 
-// ✅ FIX: Use a NAMED IMPORT { mdxComponents }
-import { mdxComponents } from '@/components/mdx-components';
-import Layout from '@/components/Layout'; // Or your specific layout
+// ✅ FIX: Use the new unified content library
+import { getContentSlugs, getContentBySlug } from "@/lib/mdx"; 
 
-interface PostPageProps {
-  source: MDXRemoteSerializeResult;
-  frontmatter: PostMeta;
-}
+// ✅ FIX: Use a named import for the component map
+import { mdxComponents } from "@/components/mdx-components";
+import BrandFrame from "@/components/print/BrandFrame";
+import type { PostMeta } from "@/types/post";
 
-export default function PostPage({ source, frontmatter }: PostPageProps) {
+// ✅ FIX: Set the correct content type for this page
+const CONTENT_TYPE = "print"; 
+
+export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout>
+    <>
       <Head>
-        <title>{frontmatter.title} | Abraham of London</title>
-        <meta name="description" content={frontmatter.excerpt} />
+        <title>{`${frontmatter.title} | Print View`}</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
-      <article className="container mx-auto px-4 py-12">
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
-          {frontmatter.date && (
-            <p className="mt-2 text-soft-charcoal">
-              {new Date(frontmatter.date).toLocaleDateString('en-GB', {
-                year: 'numeric', month: 'long', day: 'numeric',
-              })}
-            </p>
-          )}
-        </header>
-
-        {frontmatter.coverImage && (
-          <div className="mb-8 aspect-w-16 aspect-h-9 relative overflow-hidden rounded-lg shadow-lg">
-            <Image
-              src={frontmatter.coverImage}
-              alt={`Cover image for ${frontmatter.title}`}
-              layout="fill"
-              className="object-cover"
-              priority
-            />
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none">
+      
+      <BrandFrame
+        title={frontmatter.title}
+        subtitle={frontmatter.subtitle}
+        author={frontmatter.author}
+        date={frontmatter.date ? new Date(frontmatter.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined}
+      >
+        <article className="prose prose-lg dark:prose-invert mx-auto">
           {/* ✅ FIX: Pass the correctly imported components map */}
           <MDXRemote {...source} components={mdxComponents} />
-        </div>
-      </article>
-    </Layout>
+        </article>
+      </BrandFrame>
+    </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ params })D => {
+// --- [ Data Fetching ] ---
+
+export const getStaticProps: GetStaticProps<{
+  source: any;
+  frontmatter: PostMeta;
+// ✅ FIX: Removed the stray 'D' from this line
+}> = async ({ params }) => {
   const slug = params!.slug as string;
-  const { content, ...frontmatter } = getContentBySlug('blog', slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter)); // Ensures no 'undefined'
+  // ✅ FIX: Changed 'blog' to CONTENT_TYPE ('print')
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+
+  // Ensure all frontmatter properties are serializable (null instead of undefined)
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+
   const mdxSource = await serialize(content || '');
-  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
+
+  return {
+    props: {
+      source: mdxSource,
+      frontmatter: finalFrontmatter,
+    },
+  };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getContentSlugs('blog');
+  // ✅ FIX: Changed 'blog' to CONTENT_TYPE ('print')
+  const slugs = getContentSlugs(CONTENT_TYPE);
   return {
     paths: slugs.map((slug) => ({ params: { slug } })),
     fallback: false,
