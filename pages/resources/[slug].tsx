@@ -8,8 +8,7 @@ import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-// ✅ FIX: Use a DEFAULT IMPORT
-import mdxComponents from "@/components/mdx-components";
+import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
 const CONTENT_TYPE = "resources";
 

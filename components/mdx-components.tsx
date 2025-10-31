@@ -21,6 +21,7 @@ const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false }
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
+const Grid = dynamic(() => import('@/components/mdx/Grid'), { ssr: false });
 
 const mdxComponents = {
   // Standard HTML tags
@@ -47,6 +48,7 @@ const mdxComponents = {
   JsonLd,
   CTA,
   DownloadCard,
+  Grid,
 };
 
 // ✅ FIX: Use a DEFAULT EXPORT to standardize all imports
