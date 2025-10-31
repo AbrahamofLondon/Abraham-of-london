@@ -2,8 +2,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
-// ✅ FIX: Import all custom components used in your MDX content.
-// NOTE: Adjust these paths if your components are located elsewhere.
+// NOTE: Ensure the paths to these components are correct for your project.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -17,7 +16,8 @@ const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
-const JsonLd = dynamic(() => import('@/components/JsonLd'), { ssr: false });
+// ✅ FIX: Corrected the import path from '@/components/JsonLd' to '@/components/mdx/JsonLd'
+const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 
 const mdxComponents = {
   // Standard HTML tags
@@ -26,7 +26,7 @@ const mdxComponents = {
   ),
   hr: Rule,
 
-  // ✅ FIX: Map all custom components here so MDX knows what they are
+  // Custom components mapped for MDX
   BrandFrame,
   EmbossedBrandMark,
   EmbossedSign,
