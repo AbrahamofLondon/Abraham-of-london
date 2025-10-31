@@ -7,6 +7,7 @@
     "npm": ">=10"
   },
   "scripts": {
+    "clean": "rimraf .next .contentlayer",
     "dev": "next dev",
     "prebuild": "npm run audit:images || true && npm run pdfs:generate || true && npm run ci:downloads || true",
     "build": "cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
@@ -17,6 +18,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix || true",
     "typecheck": "tsc --noEmit",
+    "audit:assets": "node scripts/audit-assets.mjs",
     "downloads:manifest": "node scripts/build-download-manifest.mjs",
     "orchestrate": "node scripts/orchestrate-fallback.mjs",
     "fix:bom": "node scripts/strip-bom-lf.mjs",
