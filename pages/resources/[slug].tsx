@@ -1,4 +1,4 @@
-// pages/resources/[slug].tsx
+// pages/strategy/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -7,20 +7,26 @@ import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
+
 import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
 
-const CONTENT_TYPE = "resources";
+const CONTENT_TYPE = "strategy";
 
-export default function ResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <Layout>
       <Head>
-        <title>{frontmatter.title} | Resource</title>
+        <title>{frontmatter.title} | Strategy</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
       <main className="container mx-auto px-4 py-12">
         <div className="border-b pb-4 mb-8">
           <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
-          <p className="text-lg text-gray-600">Category: {frontmatter.category || 'Resource'}</p>
+          {frontmatter.date && (
+            <p className="text-lg text-gray-600">
+              Date: {new Date(frontmatter.date).toLocaleDateString('en-GB')}
+            </p>
+          )}
         </div>
         <div className="prose prose-lg max-w-none">
           <MDXRemote {...source} components={mdxComponents} />
@@ -32,10 +38,10 @@ export default function ResourcePage({ source, frontmatter }: InferGetStaticProp
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
+  // ✅ FIX: Removed the stray underscore from this line
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
   
-  // ✅ FIX: Pass frontmatter data into the 'scope'
   const mdxSource = await serialize(content || '', { 
     scope: finalFrontmatter 
   });
