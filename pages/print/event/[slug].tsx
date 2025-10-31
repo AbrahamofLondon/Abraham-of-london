@@ -6,11 +6,13 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "events"; // Set for this page
+// ✅ FIX: Use a DEFAULT IMPORT
+import mdxComponents from "@/components/mdx-components";
+
+const CONTENT_TYPE = "events";
 
 export default function PrintEventPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (

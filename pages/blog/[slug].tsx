@@ -1,4 +1,4 @@
-// Example: pages/blog/[slug].tsx
+// pages/blog/[slug].tsx
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { serialize } from 'next-mdx-remote/serialize';
@@ -6,16 +6,12 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { getContentSlugs, getContentBySlug } from '@/lib/mdx';
 import type { PostMeta } from '@/types/post';
+import Layout from '@/components/Layout';
 
-// ✅ FIX: Use a NAMED IMPORT { mdxComponents }
-import { mdxComponents } from '@/components/mdx-components';
-import Layout from '@/components/Layout'; // Or your specific layout
+// ✅ FIX: Use a DEFAULT IMPORT
+import mdxComponents from '@/components/mdx-components';
 
-// -----------------------------------------------------------------
-// ⬇️⬇️ CHANGE THIS LINE FOR EACH TEMPLATE ⬇️⬇️
-// -----------------------------------------------------------------
-const CONTENT_TYPE = 'blog'; // Use 'downloads', 'events', 'print', etc.
-// -----------------------------------------------------------------
+const CONTENT_TYPE = 'blog';
 
 interface PostPageProps {
   source: MDXRemoteSerializeResult;
@@ -54,7 +50,6 @@ export default function PostPage({ source, frontmatter }: PostPageProps) {
         )}
 
         <div className="prose prose-lg max-w-none">
-          {/* ✅ FIX: Pass the correctly imported components map */}
           <MDXRemote {...source} components={mdxComponents} />
         </div>
       </article>

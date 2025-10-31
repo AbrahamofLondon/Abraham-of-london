@@ -6,11 +6,13 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
-import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "strategy"; // Set for this page
+// ✅ FIX: Use a DEFAULT IMPORT
+import mdxComponents from "@/components/mdx-components";
+
+const CONTENT_TYPE = "strategy";
 
 export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
