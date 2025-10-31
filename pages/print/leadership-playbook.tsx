@@ -43,7 +43,8 @@ export default function LeadershipPlaybook() {
       pageSize="A4"
     >
       <PullLine subtle>
-        A leader's first responsibility is to define reality. The last is to say thank you.
+        {/* FIX 1: "leader's" changed to "leader&apos;s" */}
+        A leader&apos;s first responsibility is to define reality. The last is to say thank you.
       </PullLine>
 
       <h2 className="mt-8 text-xl font-serif">Core Principles</h2>
@@ -55,7 +56,8 @@ export default function LeadershipPlaybook() {
           <strong>Ownership:</strong> Take extreme ownership of outcomes, good and bad.
         </li>
         <li>
-          <strong>Discipline:</strong> Do the hard things, especially when you don't feel like it.
+          {/* FIX 2: "don't" changed to "don&apos;t" */}
+          <strong>Discipline:</strong> Do the hard things, especially when you don&apos;t feel like it.
         </li>
       </ul>
 
@@ -64,9 +66,9 @@ export default function LeadershipPlaybook() {
       <h2 className="text-xl font-serif">Board/Investor One-Pager (Template)</h2>
       <ul className="list-disc space-y-2 pl-5">
         <li>
-          <strong>Header:</strong> Month, Runway (months), MRR/Revenue, Gross Margin.
+          <strong>Header:</strong> Month, Runway (months), MRR/Revenue, Gross
+          Margin.
         </li>
-        {/* This is the corrected line that was causing the error */}
         <li>
           <strong>Highlights (3)</strong> &bull; <strong>Lowlights (3)</strong> &bull;{" "}
           <strong>Asks (3)</strong>.
