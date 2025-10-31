@@ -10,12 +10,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
  export const frontmatter = {
-  title: "Fathering-Without-Fear"
-  slug: "fathering-without-fear"
-  date: "2024-10-22"
-  author: "AbrahamofLondon"
-  readTime: "6 min"
-  category: "Note"
+  title: "Fathering-Without-Fear",
+  slug: "fathering-without-fear",
+  date: "2024-10-22",
+  author: "AbrahamofLondon",
+  readTime: "6 min",
+  category: "Note",
   type: "Download"
 };
 

@@ -7,12 +7,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
 export const frontmatter = {
- title: "Household-Rythm-Guide"
- slug: "household-rythm-guid"
- date: "2024-10-22"
- author: "AbrahamofLondon"
- readTime: "7 min"
- category: "Family"
+ title: "Household-Rythm-Guide",
+ slug: "household-rythm-guid",
+ date: "2024-10-22",
+ author: "AbrahamofLondon",
+ readTime: "7 min",
+ category: "Family",
  type: "Download"
 };
 

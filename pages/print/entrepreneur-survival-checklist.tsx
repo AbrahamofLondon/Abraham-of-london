@@ -8,12 +8,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
 export const frontmatter = {
-  title: "Entrepreneur Survival Checklist"
-  slug: "entreprenuer-survival-checklist"
-  date: "2024-10-22"
-  author: "AbrahamofLondon"
-  readTime: "5-7 min"
-  category: "Operations"
+  title: "Entrepreneur Survival Checklist",
+  slug: "entreprenuer-survival-checklist",
+  date: "2024-10-22",
+  author: "AbrahamofLondon",
+  readTime: "5-7 min",
+  category: "Operations",
   type: "Download"
 };
 

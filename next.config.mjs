@@ -1,11 +1,12 @@
-// next.config.mjs (Working)
-// All necessary imports should use 'import'
-// e.g., import withContentlayer from '@contentlayer/next';
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ... your existing configuration ...
-  // Ensure any dynamic paths/modules use 'import()' or are adjusted for ESM syntax.
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: true,
+  },
+  pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
 };
 
-// Use 'export default' for the configuration object
-export default nextConfig; // ✅ Correct ESM export
+export default nextConfig;

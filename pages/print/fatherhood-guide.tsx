@@ -7,12 +7,12 @@ import EmbossedSign from "@/components/print/EmbossedSign";
 
 
 export const frontmatter = {
-  title: "Fatherhood-Guide"
-  slug: "fatherhood-guide"
-  date: "2024-10-22"
-  author: "AbrahamofLondon"
-  readTime: "8 min"
-  category: "Family"
+  title: "Fatherhood-Guide",
+  slug: "fatherhood-guide",
+  date: "2024-10-22",
+  author: "AbrahamofLondon",
+  readTime: "8 min",
+  category: "Family",
   type: "Download"
 };
 
