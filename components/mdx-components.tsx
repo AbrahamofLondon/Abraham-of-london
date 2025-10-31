@@ -2,18 +2,22 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
-// ✅ FIX: Import all custom components used in your MDX files.
-// Adjust the paths to where these components are actually located.
+// ✅ FIX: Import all custom components used in your MDX content.
+// NOTE: Adjust these paths if your components are located elsewhere.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
+const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
 const Rule = dynamic(() => import('@/components/mdx/Rule'), { ssr: false });
 const PullLine = dynamic(() => import('@/components/mdx/PullLine'), { ssr: false });
 const Note = dynamic(() => import('@/components/mdx/Note'), { ssr: false });
+const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
+const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
+const JsonLd = dynamic(() => import('@/components/JsonLd'), { ssr: false });
 
 const mdxComponents = {
   // Standard HTML tags
@@ -22,17 +26,21 @@ const mdxComponents = {
   ),
   hr: Rule,
 
-  // ✅ FIX: Map all custom components here
+  // ✅ FIX: Map all custom components here so MDX knows what they are
   BrandFrame,
   EmbossedBrandMark,
+  EmbossedSign,
   Rule,
   PullLine,
   Note,
+  Callout,
+  ResourcesCTA,
   HeroEyebrow,
   ShareRow,
   Verse,
   Badge,
   Caption,
+  JsonLd,
 };
 
 export default mdxComponents;
