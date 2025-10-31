@@ -7,9 +7,11 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
-import { mdxComponents } from "@/components/mdx-components"; // ✅ Correct named import
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
+
+// ✅ FIX: Use a DEFAULT IMPORT
+import mdxComponents from "@/components/mdx-components";
 
 const CONTENT_TYPE = "events";
 
