@@ -47,24 +47,8 @@ const HERO_OVERRIDES: Record<string, Overrides> = {
   // Use lowercase slugs for keys
   'leadership-workshop': { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
   'founders-salon': { heroFit: "contain", heroAspect: "16/9", heroPosition: "center" },
+  // add more slugs here…
 };
-
-// Utility to generate the ordered list of candidate image URLs
-function generateImageCandidates(slug: string, coverImage?: string): string[] {
-  const base = normalizeSlug(slug);
-
-  const candidates = [
-    coverImage, // 1. Primary image from frontmatter (should be @1600.jpg from content fixes)
-    // 2. Look for optimized versions by slug
-    `/assets/images/events/${base}@1600.webp`,
-    `/assets/images/events/${base}@1600.jpg`,
-    // 3. Absolute default fallback
-    ...FALLBACK_CANDIDATES,
-  ].filter(Boolean) as string[];
-
-  // Filter out duplicates
-  return Array.from(new Set(candidates));
-}
 
 // Helper to determine Tailwind aspect ratio class
 function aspectClass(key?: Overrides["heroAspect"]) {
@@ -78,8 +62,23 @@ function aspectClass(key?: Overrides["heroAspect"]) {
   }
 }
 
-// --- Sub-Components ---
+// Utility to generate the ordered list of candidate image URLs
+function generateImageCandidates(slug: string, coverImage?: string): string[] {
+  const base = normalizeSlug(slug);
 
+  const candidates = [
+    coverImage, // 1. Primary image from frontmatter (should be @1600.jpg from content fixes)
+    // 2. Look for optimized versions by slug
+    `/assets/images/events/${base}@1600.webp`,
+    `/assets/images/events/${base}@1600.jpg`,
+    DEFAULT_EVENT_IMAGE, // 3. Absolute default fallback
+  ].filter(Boolean) as string[];
+
+  // Filter out duplicates
+  return Array.from(new Set(candidates));
+}
+
+// Encapsulates the tag and resource pill logic and styling
 const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: boolean; href?: string }) => {
   const isResource = !!href;
 
@@ -127,7 +126,7 @@ export default function EventCard({
   location,
   description,
   tags,
-  coverImage,
+  coverImage, // Using coverImage
   resources,
 }: Props) {
   // Use slug directly for overrides, ensuring it's lowercased once
@@ -188,7 +187,7 @@ export default function EventCard({
     return words.map((w) => w[0]?.toUpperCase() || "").join("") || "E•V";
   }, [title]);
 
-  // ✅ FIX: Ensure link is lowercase to match Netlify's static file system (Linux)
+  // ✅ FIX: Link to the correct slug path
   const detailHref = `/events/${normalizedSlug}`;
   const textSecondaryLight = "text-[color:var(--color-on-secondary)]/[0.7]";
   const textSecondaryNormal = "text-[color:var(--color-on-secondary)]/[0.85]";
