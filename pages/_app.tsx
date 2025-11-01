@@ -1,4 +1,4 @@
-import "@/styles/globals.css"; // MUST be the very first line of execution
+import "@/styles/globals.css"; // ✅ MUST be the very first line of execution
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
@@ -7,37 +7,30 @@ import Script from "next/script";
 import Head from "next/head";
 
 import { ThemeProvider } from "@/lib/ThemeContext";
-// 🔑 CRITICAL: Ensure gtag import path is correct and accessible
 import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 
-// Assuming ThemeToggle path based on standard structure
 import ThemeToggle from "@/components/ThemeToggle";
 
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 
 /**
  * Component to track Next.js router events for Google Analytics page views.
- * Runs only in production if GA is enabled.
  */
 function AnalyticsRouterTracker() {
   const router = useRouter();
   
   const handleRouteChange = useCallback((url: string) => {
-    // Only track if GA is enabled and we are in production
     if (gaEnabled && process.env.NODE_ENV === "production") {
       pageview(url);
     }
   }, [router.asPath]);
 
   useEffect(() => {
-    // Initial page view (since 'routeChangeComplete' doesn't fire on initial load)
     handleRouteChange(router.asPath);
     
-    // Attach event listeners
     router.events.on("routeChangeComplete", handleRouteChange);
     router.events.on("hashChangeComplete", handleRouteChange);
     
-    // Cleanup event listeners on component unmount
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
       router.events.off("hashChangeComplete", handleRouteChange);
@@ -49,14 +42,13 @@ function AnalyticsRouterTracker() {
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const isProd = process.env.NODE_ENV === "production";
-  const shouldLoadGa = gaEnabled && isProd; // Unified condition
+  const shouldLoadGa = gaEnabled && isProd;
 
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         
-        {/* 💡 UPGRADE: Unified preconnect links */}
         {shouldLoadGa && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -68,18 +60,15 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       {/* Google Analytics Scripts */}
       {shouldLoadGa && (
         <>
-          {/* Main GA script with afterInteractive strategy */}
           <Script 
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} 
             strategy="afterInteractive" 
           />
-          {/* Inline script for initialization */}
           <Script id="ga-init" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              // 💡 UPGRADE: Ensuring transport_type is consistent with recommended beacon usage
               gtag('config', '${GA_ID}', { anonymize_ip: true, transport_type: 'beacon' }); 
             `}
           </Script>
@@ -88,10 +77,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
       {/* Application Content and Global Context */}
       <ThemeProvider>
-        {/* 💡 UPGRADE: Call the tracker inside ThemeProvider but outside main content */}
         <AnalyticsRouterTracker />
 
-        {/* Mobile-only ThemeToggle, placed globally */}
         <div 
           className="fixed right-4 top-20 z-[60] md:hidden" 
           style={{ pointerEvents: 'auto' }}
@@ -99,10 +86,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <ThemeToggle />
         </div>
 
-        {/* Global UI Components */}
         <ScrollProgress zIndexClass="z-50" colorClass="bg-emerald-600" heightClass="h-1" />
         
-        {/* The main page component */}
         <Component {...pageProps} />
         
       </ThemeProvider>
@@ -114,9 +99,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
  * Web Vitals reporting to Google Analytics.
  */
 export function reportWebVitals(metric: NextWebVitalsMetric) {
-  if (!gaEnabled || process.env.NODE_ENV === "development") return; // Changed != to === for safety
+  if (!gaEnabled || process.env.NODE_ENV === "development") return;
   
-  // 💡 UPGRADE: Simplified value calculation for clarity
   const value = Math.round(metric.name === "CLS" ? metric.value * 1000 : metric.value);
   
   try {
