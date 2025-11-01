@@ -37,6 +37,7 @@
     "@netlify/functions": "4.2.1",
     "@react-email/components": "0.5.0",
     "@react-email/render": "1.2.1",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "0.5.19",
     "autoprefixer": "10.4.21",
     "chokidar": "^3.6.0",
