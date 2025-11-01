@@ -17,8 +17,10 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* meta/theme/etcâ€¦ */}
+          {/* ✅ FINAL FIX: Manually link the main CSS bundle for robust loading */}
+          <link rel="stylesheet" href="/_next/static/css/95cef10d687f0d9a.css" />
 
+          {/* External Google Fonts (Standard Web Build) */}
           {!USE_LOCAL_FONTS ? (
             <>
               <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,6 +31,7 @@ export default class MyDocument extends Document {
               />
             </>
           ) : (
+            // Local Fonts (PDF/CI Environment)
             <>
               <link
                 rel="preload"
@@ -55,6 +58,3 @@ export default class MyDocument extends Document {
     );
   }
 }
-
-
-
