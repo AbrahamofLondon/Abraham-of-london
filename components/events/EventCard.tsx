@@ -7,10 +7,7 @@ import Link from "next/link";
 import clsx from "clsx";
 
 /** ──────────────────────────────────────────────────────────────────────────
- * EventCard - UPGRADED
- * - Encapsulated Tag/Resource Pills
- * - Enhanced Accessibility for Resources
- * - Consolidated logic and improved date handling
+ * EventCard - DEFINITIVE FINAL VERSION
  * ────────────────────────────────────────────────────────────────────────── */
 
 // --- Type Definitions ---
@@ -24,11 +21,10 @@ type Props = {
   location?: string;
   description?: string;
   tags?: string[];
-  heroImage?: string;
+  coverImage?: string; // Standardized prop name
   resources?: Resources | null;
 };
 
-// NEW: explicit types so TS knows left/right are allowed
 type HeroFit = "cover" | "contain";
 type HeroPosition = "top" | "center" | "left" | "right";
 type Overrides = {
@@ -39,38 +35,31 @@ type Overrides = {
 
 // --- Constants & Utilities ---
 
-const DEFAULT_EVENT_IMAGE = "/assets/images/events/default.jpg";
+const DEFAULT_EVENT_IMAGE = "/assets/images/events/default@1600.jpg"; // Use high-res default
 const FALLBACK_CANDIDATES = [DEFAULT_EVENT_IMAGE] as const;
 
 // Normalizes a string slug for comparison and URL generation
 const normalizeSlug = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
-// Helper to ensure relative URLs start with a slash
-function normalizeLocal(src?: string | null): string | undefined {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return undefined;
-  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-}
-
 // Per-event visual overrides (aspect/fit/position)
 const HERO_OVERRIDES: Record<string, Overrides> = {
+  // Use lowercase slugs for keys
   'leadership-workshop': { heroFit: "contain", heroAspect: "3/1", heroPosition: "top" },
   'founders-salon': { heroFit: "contain", heroAspect: "16/9", heroPosition: "center" },
-  // add more slugs here…
 };
 
 // Utility to generate the ordered list of candidate image URLs
-function generateImageCandidates(slug: string, heroImage?: string): string[] {
+function generateImageCandidates(slug: string, coverImage?: string): string[] {
   const base = normalizeSlug(slug);
 
   const candidates = [
-    normalizeLocal(heroImage), // 1. Primary image from frontmatter
-    `/assets/images/events/${base}.webp`, // 2. Slug-based fallbacks
-    `/assets/images/events/${base}.jpg`,
-    `/assets/images/events/${base}.jpeg`,
-    `/assets/images/events/${base}.png`,
-    ...FALLBACK_CANDIDATES, // 3. Absolute default fallback
+    coverImage, // 1. Primary image from frontmatter (should be @1600.jpg from content fixes)
+    // 2. Look for optimized versions by slug
+    `/assets/images/events/${base}@1600.webp`,
+    `/assets/images/events/${base}@1600.jpg`,
+    // 3. Absolute default fallback
+    ...FALLBACK_CANDIDATES,
   ].filter(Boolean) as string[];
 
   // Filter out duplicates
@@ -85,42 +74,38 @@ function aspectClass(key?: Overrides["heroAspect"]) {
     case "16/9": return "aspect-[16/9]";
     case "2/3": return "aspect-[2/3]";
     case "1/1": return "aspect-[1/1]";
-    default: return "aspect-[16/10]"; // Default if no override/invalid key
+    default: return "aspect-[16/10]";
   }
 }
 
 // --- Sub-Components ---
 
-// Encapsulates the tag and resource pill logic and styling
 const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: boolean; href?: string }) => {
   const isResource = !!href;
 
   let icon = "";
   if (isResource) {
     if (href?.includes(".pdf")) {
-      icon = "📄 "; // Document
+      icon = "📄 ";
     } else if (href?.includes("article") || href?.includes("read")) {
-      icon = "📚 "; // Reading material
+      icon = "📚 ";
     } else {
-      icon = "🔗 "; // Generic link
+      icon = "🔗 ";
     }
   }
 
   const baseClasses = "rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-200";
   const content = (
     <span className={clsx(
-        baseClasses,
-        // Tag styling
-        !isResource && "border border-lightGrey bg-warmWhite text-[color:var(--color-on-secondary)]/[0.8]",
-        // Resource styling
-        isResource && "border border-[color:var(--color-primary)]/[0.2] bg-[color:var(--color-primary)]/[0.05] text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/[0.1]"
+      baseClasses,
+      !isResource && "border border-lightGrey bg-warmWhite text-[color:var(--color-on-secondary)]/[0.8]",
+      isResource && "border border-[color:var(--color-primary)]/[0.2] bg-[color:var(--color-primary)]/[0.05] text-[color:var(--color-primary)] hover:bg-[color:var(--color-primary)]/[0.1]"
     )}>
       {icon}
       {label}
     </span>
   );
 
-  // If it's a resource (link), return a functional anchor tag for accessibility
   if (isLink && href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex">
@@ -129,7 +114,6 @@ const TagPill = React.memo(({ label, isLink, href }: { label: string; isLink?: b
     );
   }
 
-  // If it's just a descriptive tag, return the span
   return content;
 });
 TagPill.displayName = "TagPill";
@@ -143,19 +127,19 @@ export default function EventCard({
   location,
   description,
   tags,
-  heroImage,
+  coverImage,
   resources,
 }: Props) {
+  // Use slug directly for overrides, ensuring it's lowercased once
   const normalizedSlug = normalizeSlug(slug);
   const ov = HERO_OVERRIDES[normalizedSlug];
 
   // --- Image Fallback Logic ---
-  const candidates = React.useMemo(() => generateImageCandidates(slug, heroImage), [slug, heroImage]);
+  const candidates = React.useMemo(() => generateImageCandidates(slug, coverImage), [slug, coverImage]);
   const [idx, setIdx] = React.useState(0);
   const currentHeroSrc = candidates[idx];
 
   const onHeroError = React.useCallback(() => {
-    // Advance to the next candidate if available
     if (idx + 1 < candidates.length) {
       setIdx((i) => i + 1);
     }
@@ -166,7 +150,6 @@ export default function EventCard({
   const isValidDate = dt && !Number.isNaN(+dt);
 
   const dateLabel = isValidDate
-    // ✅ UPGRADE: Used `Intl.DateTimeFormat` with a consistent options object
     ? new Intl.DateTimeFormat("en-US", {
         day: "numeric",
         month: "short",
@@ -177,7 +160,6 @@ export default function EventCard({
   const allPills = React.useMemo(() => {
     const downloads = resources?.downloads || [];
     const reads = resources?.reads || [];
-    // Combine and limit resources to max 4 total (2 downloads + 2 reads)
     return [...downloads.slice(0, 2), ...reads.slice(0, 2)];
   }, [resources]);
 
@@ -197,7 +179,6 @@ export default function EventCard({
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-t-2xl",
     aspectClass(ov?.heroAspect),
-    // Ensure padding/background for contain fit or missing image
     ((ov?.heroFit ?? "cover") === "contain" || !currentHeroSrc) && "bg-warmWhite p-2"
   );
 
@@ -207,8 +188,8 @@ export default function EventCard({
     return words.map((w) => w[0]?.toUpperCase() || "").join("") || "E•V";
   }, [title]);
 
-  const detailHref = `/events/${encodeURIComponent(slug)}`;
-  // Consolidated Tailwind opacity variables
+  // ✅ FIX: Ensure link is lowercase to match Netlify's static file system (Linux)
+  const detailHref = `/events/${normalizedSlug}`;
   const textSecondaryLight = "text-[color:var(--color-on-secondary)]/[0.7]";
   const textSecondaryNormal = "text-[color:var(--color-on-secondary)]/[0.85]";
 
@@ -226,7 +207,7 @@ export default function EventCard({
               className={imageClasses}
               onError={onHeroError}
               priority={false}
-              placeholder="blur" // Add placeholder for better loading UX
+              placeholder="blur"
               blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0EQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
             />
           ) : (

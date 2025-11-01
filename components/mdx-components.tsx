@@ -14,7 +14,6 @@ const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false }
 const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
-// ✅ FIX: Corrected the broken import path
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
@@ -66,5 +65,5 @@ const mdxComponents = {
   Quote,
 };
 
-// Use a DEFAULT EXPORT to standardize all imports
+// ✅ FIX: Use a DEFAULT EXPORT to standardize all imports
 export default mdxComponents;

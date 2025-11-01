@@ -10,7 +10,6 @@ type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allBooks = getAllContent('books');
-  // ✅ FIX: Sanitize data for serialization
   const books = allBooks.map(book => JSON.parse(JSON.stringify(book)));
 
   return {

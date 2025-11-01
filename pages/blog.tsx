@@ -10,7 +10,6 @@ type BlogProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allPosts = getAllContent('blog');
-  // ✅ FIX: Sanitize data for serialization
   const posts = allPosts.map(post => JSON.parse(JSON.stringify(post)));
 
   return {

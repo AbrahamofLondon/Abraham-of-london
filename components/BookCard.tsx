@@ -4,16 +4,11 @@ import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
 import * as React from "react";
 
-/** ──────────────────────────────────────────────────────────────────────────
- * BookCard
- * - Accepts string | StaticImageData | null for coverImage
- * - Graceful fallback to DEFAULT_COVER on load error
- * - Accessible, keyboard-friendly (primary focus on title link)
- * - Brand-consistent tokens (softGold/forest/cream/lightGrey)
- * ────────────────────────────────────────────────────────────────────────── */
+// ✅ FIX: Use the universal high-res default cover
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
 
 export type BookCardProps = {
-  slug: string;                // "my-book" or "/books/my-book"
+  slug: string;
   title: string;
   author: string;
   excerpt: string;
@@ -26,8 +21,6 @@ export type BookCardProps = {
   className?: string;
   motionProps?: MotionProps;
 };
-
-const DEFAULT_COVER = "/assets/images/default-book.jpg";
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -49,12 +42,20 @@ export default function BookCard({
   // Canonical detail URL
   const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
 
-  // Initial cover choice (prefer provided)
-  const initialSrc: string | StaticImageData =
-    (coverImage && (typeof coverImage === "string" ? coverImage.trim() : coverImage)) || DEFAULT_COVER;
+  // --- Image Source Logic ---
+  
+  // 1. Check if coverImage exists in frontmatter
+  const frontmatterSrc = typeof coverImage === "string" ? coverImage.trim() : null;
 
-  // Runtime cover fallback on error
-  const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(initialSrc);
+  // 2. Derive the OPTIMIZED path from the frontmatter path
+  const optimizedSrc = frontmatterSrc 
+    ? frontmatterSrc.replace(/\.(jpe?g|webp|png)$/i, "@1600.jpg") 
+    : DEFAULT_COVER;
+
+  // 3. Use optimized path as initial source
+  const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(optimizedSrc);
+  
+  // --- END Image Source Logic ---
 
   return (
     <motion.article
@@ -66,18 +67,18 @@ export default function BookCard({
         className
       )}
     >
-      {/* Image wrapper link is aria-hidden so the title link remains primary focus target */}
       <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
-        {/* 2:3 cover frame */}
         <div className="relative w-full aspect-[2/3]">
           <Image
+            // ✅ FIX: Use imgSrc (which is now guaranteed to be high-res)
             src={imgSrc}
             alt={`${title} book cover`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             onError={() => {
-              if (typeof imgSrc === "string" && imgSrc !== DEFAULT_COVER) setImgSrc(DEFAULT_COVER);
+              // ✅ FIX: If the high-res generated file is missing, fall back to the safe default
+              if (imgSrc !== DEFAULT_COVER) setImgSrc(DEFAULT_COVER);
             }}
             priority={featured}
           />

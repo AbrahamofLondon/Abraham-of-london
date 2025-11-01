@@ -2,10 +2,10 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import clsx from "clsx";
 import { siteConfig } from "@/lib/siteConfig";
-import type { PostMeta } from "@/types/post"; // Import PostMeta
+import type { PostMeta } from "@/types/post";
 
-// ✅ FIX: Use a shared default image
 const DEFAULT_BLOG_IMAGE = "/assets/images/blog/default-blog-cover.jpg";
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
 
@@ -18,16 +18,19 @@ export default function BlogPostCard(post: PostMeta) {
   const { slug, title, excerpt, date, coverImage } = post;
   const authorName = siteConfig.author;
   const [avatarSrc, setAvatarSrc] = React.useState(FALLBACK_AVATAR);
+  // We rely on the correct path being set during the initial fetch.
   const [imgSrc, setImgSrc] = React.useState(coverImage || DEFAULT_BLOG_IMAGE);
 
   const dt = date ? new Date(date) : null;
   const dateLabel = dt ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt) : null;
 
   const safeExcerpt = stripMarkup(excerpt);
+  // ✅ FIX: Ensure link is lowercase to match Netlify's static file system (Linux)
+  const detailHref = `/blog/${slug.toLowerCase()}`;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-lg">
-      <Link href={`/blog/${slug}`} aria-hidden="true" tabIndex={-1} className="block">
+      <Link href={detailHref} aria-hidden="true" tabIndex={-1} className="block">
         <div className="relative h-48 w-full overflow-hidden">
           <Image
             src={imgSrc}
@@ -42,7 +45,7 @@ export default function BlogPostCard(post: PostMeta) {
       <div className="flex flex-1 flex-col justify-between p-4">
         <div>
           <h3 className="text-xl font-semibold">
-            <Link href={`/blog/${slug}`} className="hover:underline">
+            <Link href={detailHref} className="hover:underline">
               {title}
             </Link>
           </h3>
