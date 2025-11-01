@@ -34,7 +34,8 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
   const banner: BannerConfig = React.useMemo(() => {
     const raw = getActiveBanner() ?? {};
     return {
-      poster: raw.poster || "/assets/images/abraham-of-london-banner@2560.webp",
+      // ? FIX: Use the optimized image path for the poster
+      poster: raw.poster || "/assets/images/abraham-of-london-banner@1600.webp",
       videoSources: raw.videoSources ?? [
         { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
         { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
@@ -77,7 +78,7 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
   const downloads = React.useMemo(
     () => [
       { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-      { href: "/downloads/leaders-cue-card", title: "Leaderís Cue Card (A6, Two-Up)", sub: "Pocket reference" },
+      { href: "/downloads/leaders-cue-card", title: "Leader’s Cue Card (A6, Two-Up)", sub: "Pocket reference" },
     ],
     []
   );
@@ -195,13 +196,11 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
 };
 export default Home;
 
-// --- [ SSG + ISR: Data Fetching ] ---
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const allPosts = getAllContent('blog');
   const allBooks = getAllContent('books');
   const allEvents = getAllContent('events');
 
-  // ? FIX: Sanitize all data to prevent JSON errors (removes 'undefined')
   const sanitize = (item: Partial<PostMeta>): PostMeta => {
     return JSON.parse(JSON.stringify(item));
   };
@@ -214,9 +213,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
   return {
     props: {
-      posts: allPosts.map(sanitize).slice(0, 3), // Pass only 3 posts
-      books: allBooks.map(sanitize), // Pass all books
-      events: upcomingEvents.map(sanitize).slice(0, 3), // Pass only 3 events
+      posts: allPosts.map(sanitize).slice(0, 3), 
+      books: allBooks.map(sanitize), 
+      events: upcomingEvents.map(sanitize).slice(0, 3),
     },
     revalidate: 3600, // Rebuild every hour
   };

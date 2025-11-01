@@ -88,8 +88,6 @@ export function getContentBySlug(
     tags: normalizeTags(fm.tags),
     summary: typeof fm.summary === "string" ? fm.summary : undefined,
     location: typeof fm.location === "string" ? fm.location : undefined,
-    
-    // ✅✅✅ THIS IS THE FIX ✅✅✅
     subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
   };
 
@@ -103,6 +101,7 @@ export function getAllContent(contentType: string, limit?: number): PostMeta[] {
   const items = slugs
     .map((slug) => getContentBySlug(contentType, slug) as PostMeta)
     .filter((item) => {
+      // ✅ FIX: This is the robust way to filter drafts
       // 1. Get the raw frontmatter
       const dir = getContentDir(contentType);
       const mdxPath = path.join(dir, `${item.slug}.mdx`);
@@ -114,7 +113,7 @@ export function getAllContent(contentType: string, limit?: number): PostMeta[] {
       const raw = fs.readFileSync(filePath, "utf8");
       const fm = matter(raw).data;
 
-      // 2. Filter out drafts (like _lessons-from-noah)
+      // 2. Filter out drafts and files starting with _
       return fm.draft !== true && !item.slug.startsWith('_');
     });
 
