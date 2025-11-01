@@ -1,15 +1,13 @@
 // components/BlogPostCard.tsx
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import Image from "next/image"; // Keep Image for the avatar, but remove fill
 import clsx from "clsx";
 import { siteConfig } from "@/lib/siteConfig";
-// ✅ FIX: Import the CoverImage component
-import CoverImage from "@/components/common/CoverImage"; 
-import type { PostMeta } from "@/types/post";
+import type { PostMeta } from "@/types/post"; 
 
+const DEFAULT_BLOG_IMAGE = "/assets/images/blog/default-blog-cover@1600.jpg";
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
-const DEFAULT_BLOG_IMAGE = "/assets/images/blog/default-blog-cover@1600.jpg"; // Use high-res default
 
 function stripMarkup(input?: string): string {
   if (!input) return "";
@@ -20,26 +18,37 @@ export default function BlogPostCard(post: PostMeta) {
   const { slug, title, excerpt, date, coverImage } = post;
   const authorName = siteConfig.author;
   const [avatarSrc, setAvatarSrc] = React.useState(FALLBACK_AVATAR);
+  const [imgSrc, setImgSrc] = React.useState(coverImage || DEFAULT_BLOG_IMAGE);
 
   const dt = date ? new Date(date) : null;
   const dateLabel = dt ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt) : null;
   const safeExcerpt = stripMarkup(excerpt);
-  const detailHref = `/blog/${slug}`; // Use original slug, as build is successful
-  const finalCoverImage = coverImage || DEFAULT_BLOG_IMAGE;
+  const detailHref = `/blog/${slug}`;
+
+  // Fallback initials (like 'LFN')
+  const initials = title.split(/\s+/).map(w => w[0]?.toUpperCase() || '').join('').slice(0, 3);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-lg">
-      {/* ✅ FIX: Use CoverImage component for consistent rendering */}
-      {finalCoverImage && (
-        <Link href={detailHref} aria-hidden="true" tabIndex={-1} className="block">
-          <CoverImage
-            src={finalCoverImage}
-            alt={`Cover image for ${title}`}
-            className="h-48" // Match old height
-            priority={false}
-          />
-        </Link>
-      )}
+      <Link href={detailHref} aria-hidden="true" tabIndex={-1} className="block">
+        <div className="relative h-48 w-full overflow-hidden">
+          {imgSrc ? (
+            <Image
+              src={imgSrc}
+              alt={`Cover image for ${title}`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              onError={() => setImgSrc(DEFAULT_BLOG_IMAGE)} 
+            />
+          ) : (
+            // ✅ FIX: Placeholder text to prevent container collapse when image is null/corrupt
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+              <span className="text-4xl font-serif font-bold text-gray-400">{initials}</span>
+            </div>
+          )}
+        </div>
+      </Link>
       <div className="flex flex-1 flex-col justify-between p-4">
         <div>
           <h3 className="text-xl font-semibold">

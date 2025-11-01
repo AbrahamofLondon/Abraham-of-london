@@ -4,12 +4,6 @@ import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
 import * as React from "react";
-// ✅ FIX: Import the CoverImage component
-import CoverImage from "@/components/common/CoverImage"; 
-
-/** ──────────────────────────────────────────────────────────────────────────
- * BookCard
- * ────────────────────────────────────────────────────────────────────────── */
 
 export type BookCardProps = {
   slug: string;
@@ -26,7 +20,7 @@ export type BookCardProps = {
   motionProps?: MotionProps;
 };
 
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg"; // Use high-res default
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -45,10 +39,9 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
-  
-  // Use the coverImage from props, falling back to the high-res default
-  const finalCoverImage = coverImage || DEFAULT_COVER; 
+  const detailHref = `/books/${slug}`;
+  // Use the image if provided; otherwise, use the high-res default
+  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER;
 
   return (
     <motion.article
@@ -62,15 +55,15 @@ export default function BookCard({
     >
       <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
         {/* 2:3 cover frame */}
-        {/* ✅ FIX: Use CoverImage component for consistent rendering */}
         <div className="relative w-full aspect-[2/3]">
           <Image
-            src={finalCoverImage}
+            src={finalImageSrc}
             alt={`${title} book cover`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             priority={featured}
+            // If the image path is correct, it will load. No need for runtime fallback.
           />
         </div>
 
@@ -97,7 +90,8 @@ export default function BookCard({
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">
           {excerpt}
         </p>
-
+        {/* ... (rest of the card content) ... */}
+        
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {/* Genre chip */}
           <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
