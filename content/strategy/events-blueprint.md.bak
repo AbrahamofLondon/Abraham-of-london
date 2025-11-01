@@ -1,8 +1,4 @@
 ---
-coverImage: "/assets/images/blog/default-blog-cover@1600.jpg"
----
-
----
 title: "Events Blueprint: Strategy & Execution"
 type: "Strategy"
 slug: events-blueprint
@@ -95,4 +91,3 @@ import { Rule, PullLine, Note } from '@/components/utils';
       </PullLine>
     </>
   );
-

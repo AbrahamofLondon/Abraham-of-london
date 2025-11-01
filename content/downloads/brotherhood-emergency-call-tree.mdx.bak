@@ -8,7 +8,7 @@ readTime: "2 min read"
 category: "Resources"
 excerpt: "A printable template for organizing an emergency contact list for your brotherhood."
 pdfPath: "/downloads/brotherhood-emergency-call-tree.pdf"
-coverImage: "/assets/images/resources/brotherhood-emergency-call-tree.jpg"
+coverImage: "/assets/images/downloads/brotherhood-emergency-call-tree@1600.jpg"
 draft: false
 ---
 
@@ -43,6 +43,5 @@ draft: false
       **Example:** Brief: Tom's car accident, A&E St. Mary's. Point: Kids need pickup. Forward: Mark grabs kids 3:45, Sarah meets at house 4:15.
     </>
   );
-
 
 
