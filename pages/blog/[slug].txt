@@ -1,45 +1,35 @@
-// ./pages/blog/[slug].tsx
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import { MDXRemote } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
+// pages/print/[slug].tsx - FINAL CONFLICT RESOLUTION
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { getAllContent } from '@/lib/mdx'; 
+import { useRouter } from 'next/router';
 
-export async function getStaticPaths() {
-  const files = fs.readdirSync(path.join('content', 'blog'));
-  const paths = files.map((filename) => ({
-    params: { slug: filename.replace('.mdx', '') }
-  }));
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params: { slug } }) {
-  const markdownWithMeta = fs.readFileSync(path.join('content', 'blog', slug + '.mdx'), 'utf-8');
-  const { data: frontmatter, content } = matter(markdownWithMeta);
-  const mdxSource = await serialize(content);
-  return {
-    props: {
-      frontmatter,
-      mdxSource
+// This component is now a redirecting placeholder to prevent the build crash.
+export default function PrintPlaceholder() {
+  const router = useRouter();
+  // We expect specialized templates (e.g., /print/book/[slug]) to handle rendering.
+  // If this fallback is hit, we return a simple 404 or redirect.
+  // Since you confirmed the file keeps reappearing, we must simplify its getStaticPaths.
+  
+  React.useEffect(() => {
+    if (router.isReady && router.asPath) {
+      // Direct the user to the base download page if the print version is not found
+      router.replace(router.asPath.replace('/print/', '/downloads/').toLowerCase());
     }
+  }, [router.isReady, router.asPath]);
+  
+  return null; // Render nothing here to avoid crashing the server component tree
+}
+
+// CRITICAL FIX: Ensure this dynamic page generates NO PATHS, forcing the router to use 
+// the specific paths defined in /pages/print/book/[slug].tsx, etc.
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: false, // Ensure no paths are built by this generic file
   };
-}
+};
 
-export default function BlogPost({ frontmatter, mdxSource }) {
-  return (
-    <article className="max-w-3xl mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-2">{frontmatter.title}</h1>
-      <p className="text-gray-500">{new Date(frontmatter.date).toLocaleDateString()}</p>
-      <img
-        src={frontmatter.image}
-        alt={frontmatter.title}
-        className="rounded-xl mt-4 mb-6 w-full object-cover"
-        loading="lazy"
-      />
-      <div className="prose">
-        <MDXRemote {...mdxSource} />
-      </div>
-    </article>
-  );
-}
-
+export const getStaticProps: GetStaticProps = async () => {
+  // We do not need to fetch content here; the logic is handled by the specific print pages.
+  return { props: {}, revalidate: 60 };
+};

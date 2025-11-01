@@ -1,7 +1,7 @@
 import { allStrategies, type Strategy } from "contentlayer/generated";
 import BrandFrame from "@/components/print/BrandFrame";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 
 export async function getStaticPaths() {
   return {

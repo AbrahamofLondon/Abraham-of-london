@@ -2,7 +2,7 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { allEvents, type Event } from "contentlayer/generated";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 import BrandFrame from "@/components/print/BrandFrame";
 
 export const getStaticPaths: GetStaticPaths = async () => ({

@@ -4,7 +4,7 @@ import type { GetStaticPaths, GetStaticProps } from "next";
 import { allResources, type Resource } from "contentlayer/generated";
 import { makeContentPage } from "@/components/makeContentPage";
 // Import your central MDX component map
-import { mdxComponents } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 
 // 1. Define the component's required props type
 type Props = { doc: Resource };

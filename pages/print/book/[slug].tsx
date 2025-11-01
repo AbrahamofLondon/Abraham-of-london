@@ -2,7 +2,7 @@ import { allBooks, type Book } from "contentlayer/generated";
 import BrandFrame from "@/components/print/BrandFrame";
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 
 export const getStaticPaths: GetStaticPaths = async () => ({
   paths: allBooks.map((b) => ({ params: { slug: b.slug } })),

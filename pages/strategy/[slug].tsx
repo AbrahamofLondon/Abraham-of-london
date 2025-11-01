@@ -4,7 +4,7 @@ import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import { allStrategies, type Strategy } from "contentlayer/generated";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { mdxComponents as components } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 
 type Props = { doc: Strategy };
 

@@ -2,7 +2,7 @@ import { allPosts, type Post } from "contentlayer/generated";
 import BrandFrame from "@/components/print/BrandFrame";
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import { components } from "@/components/MdxComponents";
+import MDXComponents from '@/components/MDXComponents';
 
 export const getStaticPaths: GetStaticPaths = async () => ({
   paths: allPosts.map((p) => ({ params: { slug: p.slug } })),
