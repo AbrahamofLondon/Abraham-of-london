@@ -81,15 +81,13 @@ export function getContentBySlug(
     title,
     excerpt,
     date: safeDate(fm.date),
-    coverImage: isLocalPath(fm.coverImage) ? (fm.coverImage as string) : undefined,
+    coverImage: isLocalPath(fm.coverImage) ? (fm.coverImage as string) : null,
     readTime: typeof fm.readTime === "string" ? fm.readTime : undefined,
     category: typeof fm.category === "string" ? fm.category : undefined,
     author: typeof fm.author === "string" ? fm.author : undefined,
     tags: normalizeTags(fm.tags),
     summary: typeof fm.summary === "string" ? fm.summary : undefined,
     location: typeof fm.location === "string" ? fm.location : undefined,
-    
-    // ✅✅✅ THIS IS THE FIX ✅✅✅
     subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
   };
 
@@ -103,8 +101,9 @@ export function getAllContent(contentType: string, limit?: number): PostMeta[] {
   const items = slugs
     .map((slug) => getContentBySlug(contentType, slug) as PostMeta)
     .filter((item) => {
+      // ✅ FIX: This is the robust way to filter drafts
+      // 1. Get the raw frontmatter
       const dir = getContentDir(contentType);
-      // Check for both .mdx and .md extensions
       const mdxPath = path.join(dir, `${item.slug}.mdx`);
       const mdPath = path.join(dir, `${item.slug}.md`);
       const filePath = fs.existsSync(mdxPath) ? mdxPath : fs.existsSync(mdPath) ? mdPath : null;
@@ -113,7 +112,9 @@ export function getAllContent(contentType: string, limit?: number): PostMeta[] {
       
       const raw = fs.readFileSync(filePath, "utf8");
       const fm = matter(raw).data;
-      return fm.draft !== true;
+
+      // 2. Filter out drafts and files starting with _
+      return fm.draft !== true && !item.slug.startsWith('_');
     });
 
   items.sort((a, b) => {
