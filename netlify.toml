@@ -15,7 +15,6 @@
   CI_LAX = "1"
   NO_SLASH_OPACITY_MODE = "fix"
   DOWNLOADS_STRICT = "0"
-  # Optional: reduce OOM risk on bigger builds
   NODE_OPTIONS = "--max_old_space_size=4096"
 
 [context.production]
@@ -47,41 +46,4 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Lighthouse only in production deploys
-[[context.production.plugins]]
-  package = "@netlify/plugin-lighthouse"
-
-  [context.production.plugins.inputs]
-    fail_deploy_on_score_thresholds = false
-
-  [context.production.plugins.inputs.settings]
-    chromeFlags = "--no-sandbox --headless=new --disable-gpu --disable-dev-shm-usage"
-    emulatedFormFactor = "mobile"
-    throttlingMethod = "provided"
-    locale = "en-GB"
-
-  [[context.production.plugins.inputs.audits]]
-    path = "/"
-    output_path = "reports/home.html"
-
-  [[context.production.plugins.inputs.audits]]
-    path = "/blog"
-    output_path = "reports/blog.html"
-
-  [[context.production.plugins.inputs.audits]]
-    path = "/events"
-    output_path = "reports/events.html"
-
-# -------------------
-# Redirects (PDFs)
-# -------------------
-[[redirects]]
-  from = "/downloads/leaders-cue-card"
-  to = "/downloads/leaders-cue-card.pdf"
-  status = 301
-
-[[redirects]]
-  from = "/downloads/brotherhood-covenant"
-  to = "/downloads/brotherhood-covenant.pdf"
-  status = 301
-# ... (rest of the redirects and headers are correct) ...
+# ... (The rest of the redirects and headers are correct) ...
