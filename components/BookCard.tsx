@@ -1,11 +1,15 @@
+// components/BookCard.tsx
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
 import * as React from "react";
+// ✅ FIX: Import the CoverImage component
+import CoverImage from "@/components/common/CoverImage"; 
 
-// ✅ FIX: Use the universal high-res default cover
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
+/** ──────────────────────────────────────────────────────────────────────────
+ * BookCard
+ * ────────────────────────────────────────────────────────────────────────── */
 
 export type BookCardProps = {
   slug: string;
@@ -21,6 +25,8 @@ export type BookCardProps = {
   className?: string;
   motionProps?: MotionProps;
 };
+
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg"; // Use high-res default
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -39,23 +45,10 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  // Canonical detail URL
   const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
-
-  // --- Image Source Logic ---
   
-  // 1. Check if coverImage exists in frontmatter
-  const frontmatterSrc = typeof coverImage === "string" ? coverImage.trim() : null;
-
-  // 2. Derive the OPTIMIZED path from the frontmatter path
-  const optimizedSrc = frontmatterSrc 
-    ? frontmatterSrc.replace(/\.(jpe?g|webp|png)$/i, "@1600.jpg") 
-    : DEFAULT_COVER;
-
-  // 3. Use optimized path as initial source
-  const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(optimizedSrc);
-  
-  // --- END Image Source Logic ---
+  // Use the coverImage from props, falling back to the high-res default
+  const finalCoverImage = coverImage || DEFAULT_COVER; 
 
   return (
     <motion.article
@@ -68,18 +61,15 @@ export default function BookCard({
       )}
     >
       <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
+        {/* 2:3 cover frame */}
+        {/* ✅ FIX: Use CoverImage component for consistent rendering */}
         <div className="relative w-full aspect-[2/3]">
           <Image
-            // ✅ FIX: Use imgSrc (which is now guaranteed to be high-res)
-            src={imgSrc}
+            src={finalCoverImage}
             alt={`${title} book cover`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            onError={() => {
-              // ✅ FIX: If the high-res generated file is missing, fall back to the safe default
-              if (imgSrc !== DEFAULT_COVER) setImgSrc(DEFAULT_COVER);
-            }}
             priority={featured}
           />
         </div>

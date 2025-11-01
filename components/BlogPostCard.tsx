@@ -1,13 +1,15 @@
 // components/BlogPostCard.tsx
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image"; // Keep Image for the avatar, but remove fill
 import clsx from "clsx";
 import { siteConfig } from "@/lib/siteConfig";
+// ✅ FIX: Import the CoverImage component
+import CoverImage from "@/components/common/CoverImage"; 
 import type { PostMeta } from "@/types/post";
 
-const DEFAULT_BLOG_IMAGE = "/assets/images/blog/default-blog-cover.jpg";
 const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+const DEFAULT_BLOG_IMAGE = "/assets/images/blog/default-blog-cover@1600.jpg"; // Use high-res default
 
 function stripMarkup(input?: string): string {
   if (!input) return "";
@@ -18,30 +20,26 @@ export default function BlogPostCard(post: PostMeta) {
   const { slug, title, excerpt, date, coverImage } = post;
   const authorName = siteConfig.author;
   const [avatarSrc, setAvatarSrc] = React.useState(FALLBACK_AVATAR);
-  // We rely on the correct path being set during the initial fetch.
-  const [imgSrc, setImgSrc] = React.useState(coverImage || DEFAULT_BLOG_IMAGE);
 
   const dt = date ? new Date(date) : null;
   const dateLabel = dt ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt) : null;
-
   const safeExcerpt = stripMarkup(excerpt);
-  // ✅ FIX: Ensure link is lowercase to match Netlify's static file system (Linux)
-  const detailHref = `/blog/${slug.toLowerCase()}`;
+  const detailHref = `/blog/${slug}`; // Use original slug, as build is successful
+  const finalCoverImage = coverImage || DEFAULT_BLOG_IMAGE;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-lg">
-      <Link href={detailHref} aria-hidden="true" tabIndex={-1} className="block">
-        <div className="relative h-48 w-full overflow-hidden">
-          <Image
-            src={imgSrc}
+      {/* ✅ FIX: Use CoverImage component for consistent rendering */}
+      {finalCoverImage && (
+        <Link href={detailHref} aria-hidden="true" tabIndex={-1} className="block">
+          <CoverImage
+            src={finalCoverImage}
             alt={`Cover image for ${title}`}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={() => setImgSrc(DEFAULT_BLOG_IMAGE)} // Fallback on error
+            className="h-48" // Match old height
+            priority={false}
           />
-        </div>
-      </Link>
+        </Link>
+      )}
       <div className="flex flex-1 flex-col justify-between p-4">
         <div>
           <h3 className="text-xl font-semibold">
