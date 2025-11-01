@@ -17,8 +17,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* meta/theme/etc… */}
-
+          {/* External Google Fonts (Standard Web Build) */}
           {!USE_LOCAL_FONTS ? (
             <>
               <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,6 +28,7 @@ export default class MyDocument extends Document {
               />
             </>
           ) : (
+            // Local Fonts (PDF/CI Environment)
             <>
               <link
                 rel="preload"

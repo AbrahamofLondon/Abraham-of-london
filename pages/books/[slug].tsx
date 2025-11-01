@@ -6,7 +6,7 @@ import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
+import MDXComponents from '@/components/MDXComponents';
 import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Use getAllContent
 import type { PostMeta } from "@/types/post";
 
