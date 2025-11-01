@@ -14,8 +14,8 @@ const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false }
 const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
-const Verse = dynamic(() => import('@Warning: The environment variable 'NODE_ENV' is set to 'production'. Any 'devDependencies' in package.json will not be installed
-/components/mdx/Verse'), { ssr: false });
+// ✅ FIX: Corrected the broken import path
+const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
@@ -66,5 +66,5 @@ const mdxComponents = {
   Quote,
 };
 
-// ✅ FIX: Use a DEFAULT EXPORT to standardize all imports
+// Use a DEFAULT EXPORT to standardize all imports
 export default mdxComponents;
