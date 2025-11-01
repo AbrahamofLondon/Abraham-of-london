@@ -8,9 +8,9 @@ export type CtaPreset = Readonly<{
 
 /**
  * All download links below currently exist:
- *   /downloads/Leadership_Playbook.pdf
- *   /downloads/Mentorship_Starter_Kit.pdf
- *   /downloads/Entrepreneur_Operating_Pack.pdf
+ *   /downloads/leadership-playbook\.pdf
+ *   /downloads/mentorship--starter--kit\.pdf
+ *   /downloads/entrepreneur-operating-pack\.pdf
  */
 export const CTA_PRESETS = {
   default: {
@@ -21,9 +21,9 @@ export const CTA_PRESETS = {
       { href: "/blog/fathering-principles", label: "Fathering Principles", sub: "A blueprint for men" },
     ],
     downloads: [
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
     ],
   },
 
@@ -35,9 +35,9 @@ export const CTA_PRESETS = {
       { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
     ],
     downloads: [
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
     ],
   },
 
@@ -49,9 +49,9 @@ export const CTA_PRESETS = {
       { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Accountability that builds" },
     ],
     downloads: [
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
     ],
   },
 
@@ -63,9 +63,9 @@ export const CTA_PRESETS = {
       { href: "/blog/fathering-principles", label: "Fathering Principles", sub: "Non-negotiables that scale" },
     ],
     downloads: [
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
     ],
   },
 
@@ -77,9 +77,9 @@ export const CTA_PRESETS = {
       { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Order over noise" },
     ],
     downloads: [
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
     ],
   },
 
@@ -91,9 +91,9 @@ export const CTA_PRESETS = {
       { href: "/blog/fathering-without-fear", label: "Fathering Without Fear — A Memoir", sub: "Movement, not just story" },
     ],
     downloads: [
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+      { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
     ],
   },
 } as const satisfies Record<string, CtaPreset>;
@@ -104,3 +104,4 @@ export function getCtaPreset(key?: string): CtaPreset {
   const k = (key ?? "default") as CtaPresetKey;
   return CTA_PRESETS[k] ?? CTA_PRESETS.default;
 }
+

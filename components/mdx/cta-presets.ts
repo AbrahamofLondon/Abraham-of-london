@@ -17,7 +17,7 @@ export const CTA_PRESETS: Record<
     ],
     downloads: [
       { href: "/downloads/Fatherhood_Guide.pdf", label: "Fatherhood Guide" },
-      { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
+      { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
     ],
   },
   // add more presets as needed
@@ -28,3 +28,4 @@ export function getCtaPreset(key?: string) {
   const k = String(key).trim().toLowerCase();
   return CTA_PRESETS[k] ?? null;
 }
+

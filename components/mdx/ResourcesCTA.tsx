@@ -29,9 +29,9 @@ const defaultReads: LinkItem[] = [
 
 // PDFs that exist today
 const defaultDownloads: LinkItem[] = [
-  { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-  { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-  { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
+  { href: "/downloads/mentorship--starter--kit\.pdf", label: "Mentorship Starter Kit" },
+  { href: "/downloads/leadership-playbook\.pdf", label: "Leadership Playbook (30•60•90)" },
+  { href: "/downloads/entrepreneur-operating-pack\.pdf", label: "Entrepreneur Operating Pack" },
 ];
 
 function isInternal(href = "") {
@@ -109,3 +109,4 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
     </section>
   );
 }
+

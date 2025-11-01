@@ -1,3 +1,11 @@
-
-// safelist for dynamic prose/card classes
-// safelist: [ 'prose', 'prose-lg', 'aspect-[16/9]' ]
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./content/**/*.{md,mdx}"
+  ],
+  theme: { extend: {} },
+  plugins: [require("@tailwindcss/typography")],
+};

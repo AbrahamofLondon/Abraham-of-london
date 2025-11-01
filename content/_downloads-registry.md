@@ -9,7 +9,7 @@ downloads:
   - id: leadership-playbook
     title: Leadership Playbook (30•60•90)
     description: A concise 30-day framework for new or transitioning leaders focused on clarity and stewardship.
-    file_path: /downloads/Leadership_Playbook.pdf
+    file_path: /downloads/leadership-playbook\.pdf
     icon: 📄
     category: Strategy
     size: 2.1 MB
@@ -18,7 +18,7 @@ downloads:
   - id: entrepreneur-operating-pack
     title: Entrepreneur Operating Pack
     description: Principles and templates for establishing cash discipline, product constraint, and long-term viability in early-stage ventures.
-    file_path: /downloads/Entrepreneur_Operating_Pack.pdf
+    file_path: /downloads/entrepreneur-operating-pack\.pdf
     icon: ⚙️
     category: Ventures
     size: 3.5 MB
@@ -28,7 +28,7 @@ downloads:
   - id: mentorship-starter-kit
     title: Mentorship Starter Kit
     description: A guide for fathers and mentors on cultivating presence, private order, and principled guidance.
-    file_path: /downloads/Mentorship_Starter_Kit.pdf
+    file_path: /downloads/mentorship--starter--kit\.pdf
     icon: 📝
     category: Fatherhood
     size: 1.5 MB

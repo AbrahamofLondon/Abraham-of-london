@@ -298,7 +298,7 @@ export default function AboutPage() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/downloads/Leadership_Playbook.pdf"
+                  href="/downloads/leadership-playbook\.pdf"
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >
@@ -307,7 +307,7 @@ export default function AboutPage() {
               </li>
               <li>
                 <Link
-                  href="/downloads/Mentorship_Starter_Kit.pdf"
+                  href="/downloads/mentorship--starter--kit\.pdf"
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >
@@ -316,7 +316,7 @@ export default function AboutPage() {
               </li>
               <li>
                 <Link
-                  href="/downloads/Entrepreneur_Operating_Pack.pdf"
+                  href="/downloads/entrepreneur-operating-pack\.pdf"
                   className="aol-btn aol-btn-secondary w-full justify-start !text-left text-sm"
                   prefetch={false}
                 >

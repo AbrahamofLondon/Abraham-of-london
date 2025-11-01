@@ -35,7 +35,7 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
     const raw = getActiveBanner() ?? {};
     return {
       // ? FIX: Use the highest quality, most reliable image path that exists in your public assets.
-      poster: raw.poster || "/assets/images/abraham-of-london-banner@1600.webp", // Assuming @1600 is the final generated path
+      poster: raw.poster || "/assets/images/abraham-of-london-banner@1600.webp", 
       videoSources: raw.videoSources ?? [
         { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
         { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },

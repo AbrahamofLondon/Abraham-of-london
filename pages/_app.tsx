@@ -1,4 +1,4 @@
-import "@/styles/globals.css"; // MUST be the very first line of execution
+import "@/styles/globals.css"; // ✅ Must be the very first line of execution
 import type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
@@ -51,7 +51,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         
         {shouldLoadGa && (
           <>
-            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
             <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" /> 
           </>
         )}
