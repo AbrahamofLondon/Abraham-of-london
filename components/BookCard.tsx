@@ -1,19 +1,12 @@
+// components/BookCard.tsx
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
 import * as React from "react";
 
-/** ──────────────────────────────────────────────────────────────────────────
- * BookCard
- * - Accepts string | StaticImageData | null for coverImage
- * - Graceful fallback to DEFAULT_COVER on load error
- * - Accessible, keyboard-friendly (primary focus on title link)
- * - Brand-consistent tokens (softGold/forest/cream/lightGrey)
- * ────────────────────────────────────────────────────────────────────────── */
-
 export type BookCardProps = {
-  slug: string;                // "my-book" or "/books/my-book"
+  slug: string;
   title: string;
   author: string;
   excerpt: string;
@@ -27,7 +20,7 @@ export type BookCardProps = {
   motionProps?: MotionProps;
 };
 
-const DEFAULT_COVER = "/assets/images/default-book.jpg";
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -46,15 +39,11 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  // Canonical detail URL
-  const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
-
-  // Initial cover choice (prefer provided)
-  const initialSrc: string | StaticImageData =
-    (coverImage && (typeof coverImage === "string" ? coverImage.trim() : coverImage)) || DEFAULT_COVER;
-
-  // Runtime cover fallback on error
-  const [imgSrc, setImgSrc] = React.useState<string | StaticImageData>(initialSrc);
+  // ✅ FIX: Force slug to lowercase for reliable Linux routing
+  const normalizedSlug = slug.toLowerCase();
+  const detailHref = `/books/${normalizedSlug}`;
+  
+  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER; 
 
   return (
     <motion.article
@@ -66,19 +55,14 @@ export default function BookCard({
         className
       )}
     >
-      {/* Image wrapper link is aria-hidden so the title link remains primary focus target */}
       <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
-        {/* 2:3 cover frame */}
         <div className="relative w-full aspect-[2/3]">
           <Image
-            src={imgSrc}
+            src={finalImageSrc}
             alt={`${title} book cover`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            onError={() => {
-              if (typeof imgSrc === "string" && imgSrc !== DEFAULT_COVER) setImgSrc(DEFAULT_COVER);
-            }}
             priority={featured}
           />
         </div>
@@ -106,7 +90,7 @@ export default function BookCard({
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">
           {excerpt}
         </p>
-
+        
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {/* Genre chip */}
           <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
