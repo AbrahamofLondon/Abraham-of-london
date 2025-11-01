@@ -1,5 +1,5 @@
 import "@/styles/globals.css"; // ✅ MUST be the very first line of execution
-import type { AppProps, NextWebVitalsMetric } from "next/app";
+import "@/styles/globals.css";`r`nimport type { AppProps, NextWebVitalsMetric } from "next/app";
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
