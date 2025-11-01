@@ -4,7 +4,6 @@ import Image from 'next/image';
 import * as React from 'react';
 
 // --- Import all custom components used in your MDX files ---
-// NOTE: Ensure these paths are correct for your project structure.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
