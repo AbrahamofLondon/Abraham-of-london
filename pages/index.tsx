@@ -34,8 +34,8 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
   const banner: BannerConfig = React.useMemo(() => {
     const raw = getActiveBanner() ?? {};
     return {
-      // ? FIX: Use the optimized image path for the poster
-      poster: raw.poster || "/assets/images/abraham-of-london-banner@1600.webp",
+      // ? FIX: Use the highest quality, most reliable image path that exists in your public assets.
+      poster: raw.poster || "/assets/images/abraham-of-london-banner@1600.webp", // Assuming @1600 is the final generated path
       videoSources: raw.videoSources ?? [
         { src: "/assets/video/brand-reel-1080p.webm", type: "video/webm" },
         { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
@@ -78,7 +78,7 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
   const downloads = React.useMemo(
     () => [
       { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-      { href: "/downloads/leaders-cue-card", title: "Leader’s Cue Card (A6, Two-Up)", sub: "Pocket reference" },
+      { href: "/downloads/leaders-cue-card", title: "Leader's Cue Card (A6, Two-Up)", sub: "Pocket reference" },
     ],
     []
   );
