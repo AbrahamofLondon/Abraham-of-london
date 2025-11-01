@@ -65,12 +65,11 @@ This is a story for the **faithful**, for the **underestimated**, and for anyone
   { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
   { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Lead from the inside out" }
 ]} downloads={[
-  { href: "/downloads/Fathering_Without_Fear_Teaser_A4.pdf", label: "Teaser PDF (A4/Letter)" },
-  { href: "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf", label: "Teaser PDF (Mobile)" },
+  { href: "/downloads/Fathering_Without_Fear_Teaser-A4.pdf", label: "Teaser PDF (A4/Letter)" },
+  { href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf", label: "Teaser PDF (Mobile)" },
   { href: "/downloads/Brotherhood_Starter_Kit.pdf", label: "Brotherhood Starter Kit" }
 ]} />
 
 <ShareRow text="Fathering Without Fear — a field-memoir forged in courtrooms and prayer rooms. Read the teaser & grab the PDFs." hashtags="Fatherhood,Faith,Legacy" />
-
 
 

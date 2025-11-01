@@ -78,10 +78,9 @@ A man's worth is not in the size of his kingdom, but the **quality of his commit
   { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
   { href: "/blog/legacy-over-litigation", label: "Legacy over Litigation", sub: "Strategy in hostile terrain" }
 ]} downloads={[
-  { href: "/downloads/Standards_Brief.pdf", label: "Self-Governance Standards Brief" },
+  { href: "/downloads/standards-brief.pdf", label: "Self-Governance Standards Brief" },
   { href: "/downloads/Weekly_Operating_Rhythm.pdf", label: "Weekly Operating Rhythm Guide" }
 ]} />
 
 <ShareRow text="The first nation you rule is your household. The first throne is your mindset." hashtags="Leadership,Fatherhood,Discipline" />
-
 
