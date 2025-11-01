@@ -41,6 +41,7 @@ export default function Books({ books }: BooksProps) {
               author={book.author}
               excerpt={book.excerpt}
               coverImage={book.coverImage}
+              genre={book.category} // Pass category as genre
             />
           ))}
         </div>
