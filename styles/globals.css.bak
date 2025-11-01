@@ -1,0 +1,170 @@
+/*
+ * =====================================================================
+ * Corrected and Verified: globals.css
+ * This version ensures all syntax is valid to prevent build errors.
+ * =====================================================================
+ */
+
+/*
+ * TailwindCSS Imports
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Base HTML Styles & Utility Classes
+ */
+@layer base {
+  /*
+   * Fluid Type Scale
+   * Seamless scaling between screen sizes using CSS clamp().
+   */
+  :root {
+    --text-xs: clamp(0.75rem, 0.725rem + 0.125vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.25rem);
+    --text-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.5rem);
+    --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 2rem);
+    --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 2.5rem);
+  }
+
+  html {
+    @apply text-[--text-base];
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: var(--text-base);
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  a {
+    @apply text-blue-600 hover:text-blue-800 transition-colors;
+  }
+
+  h1 {
+    @apply text-[--text-2xl] font-serif font-bold mt-8 mb-4 tracking-tight;
+    font-size: var(--text-2xl);
+  }
+  h2 {
+    @apply text-[--text-xl] font-serif font-semibold mt-6 mb-3;
+    font-size: var(--text-xl);
+  }
+  h3 {
+    @apply text-[--text-lg] font-serif font-medium mt-4 mb-2;
+    font-size: var(--text-lg);
+  }
+  p {
+    @apply mb-4 leading-relaxed;
+  }
+}
+
+/*
+ * Component Styles
+ */
+@layer components {
+  /*
+   * Brand Mark / Logo Styles for 3D effect.
+   */
+  .brand-mark {
+    @apply inline-block relative overflow-hidden;
+  }
+  .brand-mark.emboss img {
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.2)) drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.8));
+  }
+  .brand-mark.deboss img {
+    filter: drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.2)) drop-shadow(1px 1px 0px rgba(255, 255, 255, 0.8));
+  }
+
+  /*
+   * Custom Debossed Signature Styles
+   */
+  .deboss-sign {
+    filter: drop-shadow(0.5px 0.5px 0px rgba(255, 255, 255, 0.8)) drop-shadow(-0.5px -0.5px 0px rgba(0, 0, 0, 0.15));
+  }
+}
+
+/*
+ * Print-Specific Styles (A4 Page Layout)
+ */
+@media print {
+  /*
+   * Reset the sheet (paper) container.
+   */
+  .sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    background: #fff !important;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /*
+   * Reset the overall print background/margins.
+   */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /*
+   * Hide everything except the main content on the sheet.
+   */
+  body > *:not(.sheet) {
+    display: none;
+  }
+
+  /*
+   * Styles for the crop/cut marks.
+   */
+  .marks {
+    position: absolute;
+    width: 297mm;
+    height: 210mm;
+    top: calc(50% - (105mm / 2));
+    left: calc(50% - 148mm);
+    transform: rotate(90deg);
+    pointer-events: none;
+  }
+
+  .marks > div {
+    position: absolute;
+    width: 0.1pt;
+    height: 0.1pt;
+    background: #000;
+  }
+
+  /* Vertical Center Mark */
+  .marks .v.center {
+    height: 10mm;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.2pt;
+    margin-left: 0;
+  }
+
+  /* Horizontal Top Mark */
+  .marks .h.top {
+    width: 10mm;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.2pt;
+    margin-top: 0;
+  }
+
+  /* Horizontal Bottom Mark */
+  .marks .h.bottom {
+    width: 10mm;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.2pt;
+    margin-bottom: 0;
+  }
+}

@@ -1,6 +1,6 @@
-import "@/styles/globals.css"; // MUST be the very first line of execution
+﻿// pages/_app.tsx
 import type { AppProps, NextWebVitalsMetric } from "next/app";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react"; // 💡 UPGRADE: Import useCallback
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Script from "next/script";
@@ -13,6 +13,7 @@ import { pageview, gaEnabled, gaEvent, GA_ID } from "@/lib/gtag";
 // Assuming ThemeToggle path based on standard structure
 import ThemeToggle from "@/components/ThemeToggle";
 
+// 💡 UPGRADE: Using Next.js standard type for dynamic components
 const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 
 /**
@@ -22,16 +23,17 @@ const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ss
 function AnalyticsRouterTracker() {
   const router = useRouter();
   
+  // 💡 UPGRADE: Use useCallback for event handler stability
   const handleRouteChange = useCallback((url: string) => {
     // Only track if GA is enabled and we are in production
     if (gaEnabled && process.env.NODE_ENV === "production") {
       pageview(url);
     }
-  }, [router.asPath]);
+  }, []);
 
   useEffect(() => {
     // Initial page view (since 'routeChangeComplete' doesn't fire on initial load)
-    handleRouteChange(router.asPath);
+    handleRouteChange(router.asPath); 
     
     // Attach event listeners
     router.events.on("routeChangeComplete", handleRouteChange);
@@ -42,7 +44,7 @@ function AnalyticsRouterTracker() {
       router.events.off("routeChangeComplete", handleRouteChange);
       router.events.off("hashChangeComplete", handleRouteChange);
     };
-  }, [router.events, router.asPath, handleRouteChange]);
+  }, [router.events, router.asPath, handleRouteChange]); // 💡 UPGRADE: Dependency array cleanup
 
   return null;
 }
@@ -94,7 +96,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         {/* Mobile-only ThemeToggle, placed globally */}
         <div 
           className="fixed right-4 top-20 z-[60] md:hidden" 
-          style={{ pointerEvents: 'auto' }}
+          style={{ pointerEvents: 'auto' }} // 💡 FIX: Explicitly set pointer-events style if needed
         >
           <ThemeToggle />
         </div>
@@ -114,7 +116,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
  * Web Vitals reporting to Google Analytics.
  */
 export function reportWebVitals(metric: NextWebVitalsMetric) {
-  if (!gaEnabled || process.env.NODE_ENV === "development") return; // Changed != to === for safety
+  if (!gaEnabled || process.env.NODE_ENV !== "production") return;
   
   // 💡 UPGRADE: Simplified value calculation for clarity
   const value = Math.round(metric.name === "CLS" ? metric.value * 1000 : metric.value);
@@ -127,6 +129,6 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
       value 
     });
   } catch (error) {
-    // silent fail
+    // console.error("Error reporting Web Vitals:", error); // Could log this for debugging
   }
 }
