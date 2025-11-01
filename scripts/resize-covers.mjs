@@ -4,38 +4,35 @@ import path from "node:path";
 import sharp from "sharp";
 import { globSync } from "glob";
 
-// ✅ FIX: Helper function to convert Windows backslashes to forward slashes
 function normalizePath(p) {
   return p.replace(/\\/g, "/");
 }
 
 const IMAGE_DIR = path.join(process.cwd(), "public/assets/images");
 const TARGET_WIDTH = 1600;
+const SUFFIX = `@${TARGET_WIDTH}`;
 
 async function resizeImages() {
   console.log(`Starting image audit & resize for ${TARGET_WIDTH}px...`);
   
-  // ✅ FIX: Normalize the path and pattern for glob
-  const normalizedImageDir = normalizePath(IMAGE_DIR);
-  const pattern = `${normalizedImageDir}/**/*.{jpg,jpeg,png,webp}`;
+  const pattern = `${normalizePath(IMAGE_DIR)}/**/*.{jpg,jpeg,png,webp}`;
   
-  const files = globSync(pattern, {
-    ignore: [
-      `**/*@${TARGET_WIDTH}.jpg`,
-      `**/*@${TARGET_WIDTH}.webp`,
-    ],
-  });
+  // 1. Get ALL images
+  const allFiles = globSync(pattern);
 
-  if (files.length === 0) {
+  // 2. Filter out images that have ALREADY been processed
+  const filesToProcess = allFiles.filter(file => !file.includes(SUFFIX));
+  
+  if (filesToProcess.length === 0) {
     console.log("No new images to process. All assets are up-to-date.");
     return;
   }
 
-  console.log(`Found ${files.length} new images to process.`);
+  console.log(`Found ${filesToProcess.length} new images to process.`);
   let processed = 0;
   let skipped = 0;
 
-  for (const inPath of files) {
+  for (const inPath of filesToProcess) {
     try {
       if (inPath.endsWith(".svg")) {
         console.log(`- Skipping SVG: ${inPath}`);
@@ -44,24 +41,15 @@ async function resizeImages() {
       }
       
       const outPath = inPath.replace(/\.(jpe?g|png|webp)$/i, "");
-      const outWebp = `${outPath}@${TARGET_WIDTH}.webp`;
-      const outJpg  = `${outPath}@${TARGET_WIDTH}.jpg`;
+      const outWebp = `${outPath}${SUFFIX}.webp`;
+      const outJpg  = `${outPath}${SUFFIX}.jpg`;
 
       await fs.access(inPath, fs.constants.F_OK);
-
       const imageBuffer = await fs.readFile(inPath);
       const image = sharp(imageBuffer);
 
-      await image
-        .resize({ width: TARGET_WIDTH })
-        .webp({ quality: 72 })
-        .toFile(outWebp);
-
-      await image
-        .resize({ width: TARGET_WIDTH })
-        .flatten({ background: '#FFFFFF' }) // Add white background for PNG transparency
-        .jpeg({ quality: 80 })
-        .toFile(outJpg);
+      await image.resize({ width: TARGET_WIDTH }).webp({ quality: 72 }).toFile(outWebp);
+      await image.resize({ width: TARGET_WIDTH }).flatten({ background: '#FFFFFF' }).jpeg({ quality: 80 }).toFile(outJpg);
       
       console.log(`✔ Wrote: ${outJpg.replace(normalizePath(process.cwd()), "")}`);
       processed++;
