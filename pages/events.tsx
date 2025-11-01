@@ -10,11 +10,12 @@ type EventsProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allEvents = getAllContent('events');
+  // Sanitize data for serialization
   const events = allEvents.map(event => JSON.parse(JSON.stringify(event)));
 
   return {
     props: { events },
-    revalidate: 60, // Revalidate events page every minute
+    revalidate: 60,
   };
 };
 
@@ -48,8 +49,8 @@ export default function Events({ events }: EventsProps) {
                 <EventCard
                   key={event.slug}
                   {...event}
-                  // ✅ FIX: Explicitly map coverImage to heroImage for the component
-                  heroImage={event.coverImage} 
+                  // ✅ FIX: Ensure coverImage is passed for rendering
+                  coverImage={event.coverImage} 
                   description={event.summary}
                 />
               ))
@@ -67,8 +68,8 @@ export default function Events({ events }: EventsProps) {
                 <EventCard
                   key={event.slug}
                   {...event}
-                   // ✅ FIX: Explicitly map coverImage to heroImage for the component
-                  heroImage={event.coverImage}
+                  // ✅ FIX: Ensure coverImage is passed for rendering
+                  coverImage={event.coverImage}
                   description={event.summary}
                 />
               ))
