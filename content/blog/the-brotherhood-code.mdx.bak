@@ -235,8 +235,8 @@ draft: false
       <Grid columns="2">
         <DownloadCard title="Brotherhood Starter Kit" href="/downloads/Brotherhood_Starter_Kit.pdf" meta="Printable PDF A4/Letter" />
         <DownloadCard title="Leader Guide First 4 Weeks" href="/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf" meta="Printable PDF A4/Letter" />
-        <DownloadCard title="Brotherhood Covenant (Printable)" href="/downloads/Brotherhood_Covenant.pdf" meta="One-page Signable" />
-        <DownloadCard title="Leaders Cue Card (A6, Two-Up)" href="/downloads/Brotherhood_Cue_Card.pdf" meta="Cut-and-carry Weekly rhythm" />
+        <DownloadCard title="Brotherhood Covenant (Printable)" href="/downloads/brotherhood-covenant.pdf" meta="One-page Signable" />
+        <DownloadCard title="Leaders Cue Card (A6, Two-Up)" href="/downloads/brotherhood-cue-card.pdf" meta="Cut-and-carry Weekly rhythm" />
       </Grid>
 
       <CTA title="Ready to launch a 90-day pilot?" body="Ask for the printable covenant, first-month plan, and leader prompts. We'll email a PDF you can run with this weekend." href="/contact" label="Request the pack" />
@@ -250,6 +250,5 @@ draft: false
       />
     </>
   );
-
 
 
