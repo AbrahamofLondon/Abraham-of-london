@@ -18,6 +18,8 @@ export default function BlogPostCard(post: PostMeta) {
   const { slug, title, excerpt, date, coverImage } = post;
   const authorName = siteConfig.author;
   const [avatarSrc, setAvatarSrc] = React.useState(FALLBACK_AVATAR);
+  
+  // ✅ FIX: Rely on the high-res path passed directly from lib/mdx.ts
   const [imgSrc, setImgSrc] = React.useState(coverImage || DEFAULT_BLOG_IMAGE);
 
   const dt = date ? new Date(date) : null;
@@ -42,7 +44,7 @@ export default function BlogPostCard(post: PostMeta) {
               onError={() => setImgSrc(DEFAULT_BLOG_IMAGE)} 
             />
           ) : (
-            // ✅ FIX: Placeholder text to prevent container collapse when image is null/corrupt
+            // Placeholder text to prevent container collapse when image is null/corrupt
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
               <span className="text-4xl font-serif font-bold text-gray-400">{initials}</span>
             </div>

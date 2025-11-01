@@ -20,7 +20,7 @@ export type BookCardProps = {
   motionProps?: MotionProps;
 };
 
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg"; 
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -39,9 +39,9 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  const detailHref = `/books/${slug}`;
+  const detailHref = slug.startsWith("/") ? slug : `/books/${slug}`;
   // Use the image if provided; otherwise, use the high-res default
-  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER;
+  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER; 
 
   return (
     <motion.article
@@ -63,7 +63,6 @@ export default function BookCard({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             priority={featured}
-            // If the image path is correct, it will load. No need for runtime fallback.
           />
         </div>
 
@@ -90,7 +89,6 @@ export default function BookCard({
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">
           {excerpt}
         </p>
-        {/* ... (rest of the card content) ... */}
         
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {/* Genre chip */}
