@@ -10,6 +10,7 @@ type EventsProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allEvents = getAllContent('events');
+  // ✅ FIX: Sanitize data for serialization
   const events = allEvents.map(event => JSON.parse(JSON.stringify(event)));
 
   return {
