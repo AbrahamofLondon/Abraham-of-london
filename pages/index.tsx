@@ -77,7 +77,7 @@ const Home: NextPage<HomeProps> = ({ posts, books, events }) => {
   const downloads = React.useMemo(
     () => [
       { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-      { href: "/downloads/leaders-cue-card", title: "Leaderâ€™s Cue Card (A6, Two-Up)", sub: "Pocket reference" },
+      { href: "/downloads/leaders-cue-card", title: "Leader’s Cue Card (A6, Two-Up)", sub: "Pocket reference" },
     ],
     []
   );
@@ -201,6 +201,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const allBooks = getAllContent('books');
   const allEvents = getAllContent('events');
 
+  // ? FIX: Sanitize all data to prevent JSON errors (removes 'undefined')
   const sanitize = (item: Partial<PostMeta>): PostMeta => {
     return JSON.parse(JSON.stringify(item));
   };
@@ -213,9 +214,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
   return {
     props: {
-      posts: allPosts.map(sanitize).slice(0, 3), 
-      books: allBooks.map(sanitize), 
-      events: upcomingEvents.map(sanitize).slice(0, 3),
+      posts: allPosts.map(sanitize).slice(0, 3), // Pass only 3 posts
+      books: allBooks.map(sanitize), // Pass all books
+      events: upcomingEvents.map(sanitize).slice(0, 3), // Pass only 3 events
     },
     revalidate: 3600, // Rebuild every hour
   };
