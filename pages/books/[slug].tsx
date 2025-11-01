@@ -6,8 +6,9 @@ import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import MDXComponents from '@/components/MDXComponents';
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Use getAllContent
+// ✅ CRITICAL FIX: Use the correct lowercase import name
+import mdxComponents from "@/components/mdx-components"; 
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
 import type { PostMeta } from "@/types/post";
 
 const CONTENT_TYPE = "books";
@@ -48,6 +49,7 @@ export default function BookPage({ source, frontmatter }: InferGetStaticPropsTyp
           </div>
         </header>
         <section className="prose prose-lg max-w-none border-t border-gray-200 pt-8">
+          {/* ✅ FIX: Use lowercase mdxComponents */}
           <MDXRemote {...source} components={mdxComponents} />
         </section>
       </article>
