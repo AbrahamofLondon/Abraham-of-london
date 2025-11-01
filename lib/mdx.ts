@@ -88,6 +88,8 @@ export function getContentBySlug(
     tags: normalizeTags(fm.tags),
     summary: typeof fm.summary === "string" ? fm.summary : undefined,
     location: typeof fm.location === "string" ? fm.location : undefined,
+    
+    // ✅✅✅ THIS IS THE FIX ✅✅✅
     subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
   };
 
@@ -102,6 +104,7 @@ export function getAllContent(contentType: string, limit?: number): PostMeta[] {
     .map((slug) => getContentBySlug(contentType, slug) as PostMeta)
     .filter((item) => {
       const dir = getContentDir(contentType);
+      // Check for both .mdx and .md extensions
       const mdxPath = path.join(dir, `${item.slug}.mdx`);
       const mdPath = path.join(dir, `${item.slug}.md`);
       const filePath = fs.existsSync(mdxPath) ? mdxPath : fs.existsSync(mdPath) ? mdPath : null;
