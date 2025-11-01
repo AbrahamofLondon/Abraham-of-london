@@ -5,11 +5,11 @@ import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
-import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
+import mdxComponents from "@/components/mdx-components";
 import BrandFrame from "@/components/print/BrandFrame";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "print"; 
+const CONTENT_TYPE = "downloads"; // Assuming generic print is for downloads
 
 export default function PrintDocPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
@@ -18,6 +18,7 @@ export default function PrintDocPage({ source, frontmatter }: InferGetStaticProp
         <title>{`${frontmatter.title} | Print View`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
+      
       <BrandFrame
         title={frontmatter.title}
         subtitle={frontmatter.subtitle}
@@ -36,7 +37,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
   const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  
   const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  
   return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
 };
 

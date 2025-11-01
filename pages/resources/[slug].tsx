@@ -5,15 +5,15 @@ import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import { getContentSlugs, getContentBySlug } from "@/lib/mdx";
+import { getContentSlugs, getContentBySlug, getAllContent } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
-import mdxComponents from "@/components/mdx-components"; // ✅ Correct default import
+import mdxComponents from "@/components/mdx-components";
 
 const CONTENT_TYPE = "resources";
 
 export default function ResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout>
+    <Layout pageTitle={frontmatter.title}>
       <Head>
         <title>{frontmatter.title} | Resource</title>
       </Head>
@@ -42,7 +42,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getContentSlugs(CONTENT_TYPE);
+  const slugs = getAllContent(CONTENT_TYPE).map(item => item.slug);
   return {
     paths: slugs.map((slug) => ({ params: { slug } })),
     fallback: false,
