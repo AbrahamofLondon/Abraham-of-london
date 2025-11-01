@@ -9,8 +9,7 @@ import type { PostMeta } from "@/types/post";
 type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
-  // 100% CONFIRMING this calls 'books'
-  const allBooks = getAllContent('books'); 
+  const allBooks = getAllContent('books');
   const books = allBooks.map(book => JSON.parse(JSON.stringify(book)));
 
   return {
@@ -39,7 +38,8 @@ export default function Books({ books }: BooksProps) {
               author={book.author}
               excerpt={book.excerpt}
               coverImage={book.coverImage}
-              genre={book.category} 
+              // ✅ FIX: Ensure 'category' is passed. If undefined, default to null.
+              genre={book.category || null} 
             />
           ))}
         </div>
