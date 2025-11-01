@@ -10,13 +10,11 @@ type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allBooks = getAllContent('books');
-
-  // Sanitize data for serialization
   const books = allBooks.map(book => JSON.parse(JSON.stringify(book)));
 
   return {
     props: { books },
-    revalidate: 3600, // Rebuild every hour
+    revalidate: 3600,
   };
 };
 
@@ -32,7 +30,6 @@ export default function Books({ books }: BooksProps) {
           Books
         </h1>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {/* ✅ FIX: This now maps over your books and renders the full card */}
           {books.map((book) => (
             <BookCard
               key={book.slug}

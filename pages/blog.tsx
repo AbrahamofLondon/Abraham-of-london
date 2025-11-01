@@ -10,13 +10,11 @@ type BlogProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const getStaticProps: GetStaticProps = async () => {
   const allPosts = getAllContent('blog');
-  
-  // Sanitize data for serialization
   const posts = allPosts.map(post => JSON.parse(JSON.stringify(post)));
 
   return {
     props: { posts },
-    revalidate: 3600, // Rebuild every hour
+    revalidate: 3600,
   };
 };
 
@@ -32,7 +30,6 @@ export default function Blog({ posts }: BlogProps) {
           Insights
         </h1>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {/* ✅ FIX: This now maps over your posts and renders the full card */}
           {posts.map((post) => (
             <BlogPostCard key={post.slug} {...post} />
           ))}
