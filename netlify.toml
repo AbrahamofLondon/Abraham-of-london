@@ -1,5 +1,7 @@
+# netlify.toml (FINAL SANITIZED CONFIGURATION)
+
 [build]
-  # CRITICAL FIX: Explicitly runs npm install with the flag before executing the build chain
+  # CRITICAL FIX: Explicitly runs npm install with the necessary flag
   command = "npm install --legacy-peer-deps && npm run audit:images || true && npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build && npm run ci:downloads"
   publish = ".next"
 
@@ -19,13 +21,12 @@
 [functions.emails]
   included_files = ["emails/**"]
 
-  [[plugins]]
+[[plugins]]
   package = "@netlify/plugin-nextjs"
+  # Workaround: Locking plugin version to bypass potential build environment bugs
   version = "4.41.0"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Headers
-# ─────────────────────────────────────────────────────────────────────────────
+# --- HEADERS ---
 [[headers]]
   for = "/"
   [headers.values]
@@ -72,12 +73,17 @@
     Cache-Control = "public, max-age=600, must-revalidate"
     Content-Type = "application/pdf"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Redirects (Partial list for structure reference)
-# ─────────────────────────────────────────────────────────────────────────────
-
+# --- REDIRECTS ---
 [[redirects]]
   from = "/downloads/leaders-cue-card"
   to = "/downloads/leaders-cue-card.pdf"
   status = 301
-# ... (rest of the redirects should be validated and included here)
+# ... (NOTE: Include all remaining valid redirects here)
+
+# Force apex to canonical host
+[[redirects]]
+  from = "/*"
+  to = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force = true
+  conditions = { Host = ["abrahamoflondon.org"] }
