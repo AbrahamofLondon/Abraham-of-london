@@ -1,38 +1,38 @@
 // pages/blog/index.tsx
 import * as React from "react";
-import { GetStaticProps } from "next"; // Only need GetStaticProps here
+import { GetStaticProps } from "next"; 
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BlogPostCard from "@/components/BlogPostCard";
-// ✅ CRITICAL FIX: The imported function for posts should match the exported name from lib/mdx.ts
+// Imports the correct named functions for data fetching
 import { getAllPosts } from "@/lib/mdx"; 
 import type { PostMeta } from "@/types/post";
 
-// We use the same type from the unified lib/mdx.ts structure
 type PostData = PostMeta & { content?: string | null };
 type Props = { posts: PostData[] };
 
-// --- CRITICAL FIX: Data Serialization and Coalescing ---
+// CRITICAL FIX: Data Serialization and Coalescing in getStaticProps
 export async function getStaticProps() {
-  // Use the correctly exported function name
-  const posts = getAllPosts();
-  
-  const safe = posts.map((p) => {
-    // CRITICAL: Ensure ALL fields are explicitly checked and safely converted.
+  const allPosts = getAllPosts({});
+
+  const posts = allPosts.map(p => {
+    // Explicitly check and convert all serializable fields
     const safePost = {
         ...p,
-        // Serialization fix (undefined -> null) for all optional fields used in props
-        excerpt: p.excerpt ?? null,
+        // Replace undefined fields with null/safe defaults before passing to props
+        slug: p.slug ?? '',
+        title: p.title ?? 'Untitled Post',
+        excerpt: p.excerpt ?? '',
         date: p.date ?? null,
         coverImage: p.coverImage ?? null,
         readTime: p.readTime ?? null,
         category: p.category ?? null,
         author: p.author ?? null,
         tags: p.tags ?? null,
-        summary: (p as any).summary ?? null, // 🎯 FINAL FIX: Ensure 'summary' field is caught and serialized safely
+        summary: (p as any).summary ?? null, // Prevents serialization crash
         coverAspect: (p as any).coverAspect ?? null,
         coverFit: (p as any).coverFit ?? null,
         coverPosition: (p as any).coverPosition ?? null,
@@ -40,22 +40,22 @@ export async function getStaticProps() {
     return safePost;
   });
 
-  // Final JSON-safe operation. This is now fully safe because all undefineds have been converted to null.
-  return { props: { posts: JSON.parse(JSON.stringify(safe)) }, revalidate: 60 };
+  // Final JSON-safe operation. This ensures full data integrity for SSG.
+  return { props: { posts: JSON.parse(JSON.stringify(posts)) }, revalidate: 60 };
 }
 // --------------------------------------------------------
 
 export default function BlogIndex({ posts }: Props) {
   const router = useRouter();
 
-  // Categories extraction is safe because p.category is guaranteed null or string
   const categories = React.useMemo(() => {
     const set = new Set<string>();
-    posts.forEach((p) => p.category && set.add(p.category));
+    // Guarding p.category against null/undefined, which is done by getStaticProps, but retained for safety
+    posts.forEach((p) => (p.category && typeof p.category === 'string') && set.add(p.category));
     return ["All", ...Array.from(set)];
   }, [posts]);
 
-  // Initial values setup is safe due to proper type guards and defaults
+  // Initial values setup
   const initialQ = typeof router.query.q === "string" ? router.query.q : "";
   const initialCat =
     typeof router.query.cat === "string" && categories.includes(router.query.cat)
@@ -87,7 +87,7 @@ export default function BlogIndex({ posts }: Props) {
       const matchesCat = cat === "All" || p.category === cat;
       const needle = q.trim().toLowerCase();
       
-      // ✅ FIX: Ensure p.title and p.excerpt are always strings before calling .toLowerCase()
+      // ✅ FIX: Ensure properties are strings (guaranteed by getStaticProps) before calling toLowerCase()
       const postTitle = p.title || '';
       const postExcerpt = p.excerpt || '';
 
@@ -110,11 +110,8 @@ export default function BlogIndex({ posts }: Props) {
   return (
     <Layout pageTitle="Blog" hideCTA>
       <Head>
-        <meta
-          name="description"
-          content="Featured insights by Abraham of London — fatherhood, enterprise, society."
-        />
-        <link rel="canonical" href="https://www.abrahamoflondon.org/blog" />
+        <title>Blog | Abraham of London</title>
+        <meta name="description" content="Latest articles and thoughts on leadership, family, and faith." />
       </Head>
 
       <section className="bg-white">
@@ -174,7 +171,6 @@ export default function BlogIndex({ posts }: Props) {
                 <BlogPostCard
                   slug={p.slug}
                   title={p.title}
-                  // All properties below are guaranteed null or string/string[] due to getStaticProps fix
                   date={p.date ?? undefined}
                   excerpt={p.excerpt ?? undefined}
                   coverImage={p.coverImage ?? undefined}
