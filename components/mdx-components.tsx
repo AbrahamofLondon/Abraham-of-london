@@ -3,7 +3,9 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import * as React from 'react';
 
-// --- Components (Must exist in /components/mdx/ or /components/print/) ---
+// --- Fixing Module Not Found Errors (Defining Imports) ---
+// These dynamic imports MUST point to actual component files in your repository.
+
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -13,11 +15,11 @@ const Note = dynamic(() => import('@/components/mdx/Note'), { ssr: false });
 const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
+const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false }); // Needs to be defined
 
-// Components that were MISSING (now created as placeholders):
+// Components that were MISSING (must exist as files in /components/mdx/):
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
-const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
 const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
 const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
@@ -61,7 +63,7 @@ const mdxComponents = {
   Badge,
   BadgeRow,
   Caption,
-  JsonLd: JsonLd,
+  JsonLd,
   CTA,
   DownloadCard,
   Grid,
