@@ -1,65 +1,91 @@
-// ./lib/server/events-data.ts
+// ./lib/server/events-data.ts (FINAL ROBUST VERSION)
+import type { EventMeta } from "@/lib/events"; // Assuming EventMeta definition is correct
 
-import type { EventMeta } from "@/lib/events";
-
-export async function getAllEvents(fields: string[]): Promise<EventMeta[]> {
-  // In a real implementation, you would use 'fields' to filter the data 
-  // being fetched from Contentlayer, but for this placeholder, we return 
-  // the full list and ignore the argument.
-  return [
-    {
-      slug: "founders-salon",
-      title: "Founders Salon",
-      date: "2025-11-01",
-      location: "London",
-      summary: "A discussion for founders.",
-      heroImage: "/assets/images/events/founders-salon.jpg",
-      tags: ["salon", "leadership"],
-      chatham: true,
-      resources: {
-        downloads: [{ href: "/downloads/example.pdf", label: "Guide" }],
-        reads: [{ href: "/blog/example", label: "Article" }],
-      },
-    },
-    {
-      slug: "leadership-workshop",
-      title: "Leadership Workshop",
-      date: "2025-12-01",
-      location: "London",
-      summary: "A workshop on leadership.",
-      heroImage: "/assets/images/events/leadership-workshop.jpg",
-      tags: ["workshop", "leadership"],
-      related: ["/blog/leadership-begins-at-home", "/blog/kingdom-strategies-for-a-loving-legacy"],
-    },
-  ];
+// ----------------------------------------------------
+// ✅ FIX: getAllEvents (Guarantees array return for safety)
+// ----------------------------------------------------
+// NOTE: Since this is placeholder data, we make it synchronous and guarantee an array.
+export function getAllEvents(fields: string[]): EventMeta[] {
+  // Hardcoded data definition (replace with actual Contentlayer fetch if possible)
+  const events: EventMeta[] = [
+    {
+      slug: "founders-salon",
+      title: "Founders Salon",
+      date: "2025-11-01",
+      location: "London",
+      summary: "A discussion for founders.",
+      heroImage: "/assets/images/events/founders-salon.jpg",
+      tags: ["salon", "leadership"],
+      chatham: true,
+      resources: {
+        downloads: [{ href: "/downloads/example.pdf", label: "Guide" }],
+        reads: [{ href: "/blog/example", label: "Article" }],
+      },
+      // Ensure all event properties expected by the component are present, even if null
+      related: null,
+    },
+    {
+      slug: "leadership-workshop",
+      title: "Leadership Workshop",
+      date: "2025-12-01",
+      location: "London",
+      summary: "A workshop on leadership.",
+      heroImage: "/assets/images/events/leadership-workshop.jpg",
+      tags: ["workshop", "leadership"],
+      chatham: false,
+      resources: null,
+      related: ["/blog/leadership-begins-at-home", "/blog/kingdom-strategies-for-a-loving-legacy"],
+    },
+  ];
+  return events;
 }
 
-export async function getEventSlugs(): Promise<string[]> {
-  const events = await getAllEvents([]); 
-  return events.map((event) => event.slug);
+// ----------------------------------------------------
+// ✅ FIX: getEventSlugs (Synchronous and guaranteed Array.map operation)
+// ----------------------------------------------------
+// NOTE: Resolves the "map is not a function" crash.
+export function getEventSlugs(): string[] {
+  const events = getAllEvents([]); 
+  // Ensure events is an array before map (though getAllEvents guarantees it)
+  if (!Array.isArray(events)) return []; 
+  
+  return events.map((event) => event.slug);
 }
 
-export async function getEventBySlug(slug: string): Promise<EventMeta | null> {
-  const events = await getAllEvents([]); 
-  return events.find((event) => event.slug === slug) || null;
+// ----------------------------------------------------
+// getEventBySlug (Synchronous and guaranteed definition)
+// ----------------------------------------------------
+export function getEventBySlug(slug: string): EventMeta | null {
+  const events = getAllEvents([]);
+  return events.find((event) => event.slug === slug) || null;
 }
+
+// --- Other Utilities (Simplified to syncronous array operations) ---
 
 export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
-  const seen = new Set<string>();
-  return events.filter((event) => {
-    const key = `${event.title}-${event.date.split("T")[0]}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const seen = new Set<string>();
+  if (!Array.isArray(events)) return [];
+  
+  return events.filter((event) => {
+    // CRITICAL ROBUSTNESS: Ensure date exists and is a string before splitting
+    const datePart = typeof event.date === 'string' ? event.date.split("T")[0] : '';
+    const key = `${event.title}-${datePart}`;
+    
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
-  return events.reduce(
-    (acc, event) => ({
-      downloads: acc.downloads + (event.resources?.downloads?.length || 0),
-      reads: acc.reads + (event.resources?.reads?.length || 0),
-    }),
-    { downloads: 0, reads: 0 }
-  );
+  if (!Array.isArray(events)) return { downloads: 0, reads: 0 };
+
+  return events.reduce(
+    (acc, event) => ({
+      // ROBUSTNESS: Use optional chaining and null coalescing
+      downloads: acc.downloads + (event.resources?.downloads?.length || 0),
+      reads: acc.reads + (event.resources?.reads?.length || 0),
+    }),
+    { downloads: 0, reads: 0 }
+  );
 }

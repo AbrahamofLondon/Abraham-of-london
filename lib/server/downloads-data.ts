@@ -1,4 +1,4 @@
-// lib/server/downloads-data.ts
+// lib/server/downloads-data.ts (FINAL ROBUST VERSION)
 // Server-only module: read front-matter for downloads (MD/MDX) safely.
 
 import fs from "fs";
@@ -13,12 +13,12 @@ export type DownloadMeta = {
   slug: string;
   title?: string | null;
   excerpt?: string | null;
-  coverImage?: string | null;   // e.g. /assets/images/downloads/foo.jpg
-  file?: string | null;         // e.g. /downloads/foo.pdf
+  coverImage?: string | null; 
+  file?: string | null; 
   coverAspect?: "book" | "square" | "16/9" | string | null;
   coverFit?: "contain" | "cover" | string | null;
   coverPosition?: "center" | "top" | "left" | "right" | string | null;
-  content?: string;             // optional full MD/MDX content
+  content?: string;
 };
 
 type FieldKey = keyof DownloadMeta;
@@ -46,20 +46,19 @@ function resolveDownloadPath(slug: string): string | null {
   return null;
 }
 
-function ensureLocal(p?: string | null): string | undefined {
-  if (!p) return undefined;
+function ensureLocal(p?: string | null): string | null {
+  if (!p) return null;
   const s = String(p).trim();
-  if (!s) return undefined;
+  if (!s) return null;
   // Leave absolute URLs alone
   if (/^https?:\/\//i.test(s)) return s;
-  // Make sure we always return a root-based path for Next/Image, etc.
+  // Make sure we always return a root-based path
   return s.startsWith("/") ? s : `/${s.replace(/^\/+/, "")}`;
 }
 
-/** Try to normalize likely locations for assets */
-function normalizeCoverImage(v: unknown): string | undefined {
-  const raw = ensureLocal(typeof v === "string" ? v : undefined);
-  if (!raw) return undefined;
+function normalizeCoverImage(v: unknown): string | null {
+  const raw = ensureLocal(typeof v === "string" ? v : null);
+  if (!raw) return null;
   // If user just wrote a filename, assume downloads images folder
   if (!raw.startsWith("/assets/") && !raw.startsWith("/_next/") && !/^https?:\/\//i.test(raw)) {
     return `/assets/images/downloads/${raw.replace(/^\/+/, "")}`;
@@ -67,9 +66,9 @@ function normalizeCoverImage(v: unknown): string | undefined {
   return raw;
 }
 
-function normalizePdfFile(v: unknown): string | undefined {
-  const raw = ensureLocal(typeof v === "string" ? v : undefined);
-  if (!raw) return undefined;
+function normalizePdfFile(v: unknown): string | null {
+  const raw = ensureLocal(typeof v === "string" ? v : null);
+  if (!raw) return null;
   // If user wrote a bare filename, assume /downloads/
   if (!raw.startsWith("/downloads/") && !/^https?:\/\//i.test(raw)) {
     return `/downloads/${raw.replace(/^\/+/, "")}`;
@@ -78,7 +77,7 @@ function normalizePdfFile(v: unknown): string | undefined {
 }
 
 /* ------------------------
-   Slug + single loader
+    Slug + single loader
 ------------------------- */
 
 export function getDownloadSlugs(): string[] {
@@ -89,11 +88,6 @@ export function getDownloadSlugs(): string[] {
     .map((f) => f.replace(/\.mdx?$/i, ""));
 }
 
-/**
- * Read a single download by slug and return a partial object containing requested fields.
- * - Never throws on missing files; returns a minimal “Not Found” entry instead.
- * - Normalizes strings (trim), asset paths, and avoids `undefined` in fields (uses null instead).
- */
 export function getDownloadBySlug(
   slug: string,
   fields: FieldKey[] = DEFAULT_FIELDS,
@@ -103,7 +97,7 @@ export function getDownloadBySlug(
   const fullPath = resolveDownloadPath(real);
 
   if (!fullPath) {
-    // Safe fallback: won’t break build if a download MD is missing
+    // Guaranteed safe fallback (no undefined or crash risk)
     const base: DownloadMeta = {
       slug: real,
       title: "Download Not Found",
@@ -113,9 +107,8 @@ export function getDownloadBySlug(
       coverAspect: null,
       coverFit: null,
       coverPosition: null,
-      content: includeContent ? "" : undefined,
+      content: includeContent ? "" : null,
     };
-    // Only keep requested fields
     const out: any = { slug: base.slug };
     for (const f of fields) out[f] = base[f] ?? null;
     if (includeContent) out.content = base.content ?? "";
@@ -126,7 +119,6 @@ export function getDownloadBySlug(
   const { data, content } = matter(raw);
   const fm = (data || {}) as Record<string, unknown>;
 
-  // Construct output and normalize
   const out: any = { slug: real };
 
   for (const f of fields) {
@@ -135,77 +127,64 @@ export function getDownloadBySlug(
         out.slug = real;
         break;
       case "title": {
-        const v = typeof fm.title === "string" ? fm.title.trim() : undefined;
-        out.title = v ?? null;
+        const v = typeof fm.title === "string" ? fm.title.trim() : null;
+        out.title = v;
         break;
       }
       case "excerpt": {
-        const v = typeof fm.excerpt === "string" ? fm.excerpt.trim() : undefined;
-        out.excerpt = v ?? null;
+        const v = typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
+        out.excerpt = v;
         break;
       }
       case "coverImage": {
         const v = normalizeCoverImage(fm.coverImage);
-        out.coverImage = v ?? null;
+        out.coverImage = v;
         break;
       }
       case "file": {
         const v = normalizePdfFile(fm.file);
-        out.file = v ?? null;
+        out.file = v;
         break;
       }
-      case "coverAspect": {
-        const v = typeof fm.coverAspect === "string" ? fm.coverAspect.trim() : undefined;
-        out.coverAspect = v ?? null;
-        break;
-      }
-      case "coverFit": {
-        const v = typeof fm.coverFit === "string" ? fm.coverFit.trim() : undefined;
-        out.coverFit = v ?? null;
-        break;
-      }
+      case "coverAspect": 
+      case "coverFit": 
       case "coverPosition": {
-        const v = typeof fm.coverPosition === "string" ? fm.coverPosition.trim() : undefined;
-        out.coverPosition = v ?? null;
+        const v = typeof fm[f] === "string" ? fm[f].trim() : null;
+        out[f] = v;
         break;
       }
+      // CRITICAL FIX: Ensure 'content' is only set if requested
       case "content": {
-        // not usually requested; gated by `includeContent` param below
+        if (includeContent) {
+          out.content = content || "";
+        }
         break;
       }
       default:
-        // ignore unknowns
+        // Ignore unknown/unrequested fields
         break;
     }
-  }
-
-  if (includeContent) {
-    out.content = content || "";
   }
 
   return out as DownloadMeta;
 }
 
-/**
- * Convenience: load several slugs at once.
- * Uses sane defaults for the typical card display fields.
- */
 export function getDownloadsBySlugs(
   slugs: string[],
   fields: FieldKey[] = DEFAULT_FIELDS
 ): DownloadMeta[] {
-  return slugs.map((s) => getDownloadBySlug(s, fields));
+  // ROBUSTNESS: Ensure slugs is an array and filter out nulls
+  if (!Array.isArray(slugs)) return [];
+  return slugs.map((s) => getDownloadBySlug(s, fields)).filter(Boolean) as DownloadMeta[];
 }
 
-/**
- * All downloads present in /content/downloads, already normalized.
- * Sorted alphabetically by title (fallback to slug).
- */
 export function getAllDownloads(
   fields: FieldKey[] = DEFAULT_FIELDS
 ): DownloadMeta[] {
   const slugs = getDownloadSlugs();
   const items = slugs.map((s) => getDownloadBySlug(s, fields));
+  
+  // ROBUSTNESS: Use helper function to guarantee strings for comparison
   items.sort((a, b) => {
     const at = (a.title || a.slug || "").toLowerCase();
     const bt = (b.title || b.slug || "").toLowerCase();
