@@ -77,7 +77,7 @@ type HomeProps = {
 };
 
 // -----------------------------------------------------------------------------------
-// 1) getStaticProps - Feeds data into Homepage widgets (CLEAN AND CLOSED)
+// 1) getStaticProps - Feeds data into Homepage widgets (CLOSED CLEANLY)
 // -----------------------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     // Downloads and Resources
@@ -136,6 +136,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
     const booksCount = getAllBooks(["slug"]).length;
 
+    // CRITICAL: This is the final object return, ending the function block
     return { 
         props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
         revalidate: 3600 
@@ -436,10 +437,7 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
             </section>
         </Layout>
     );
-}            </div>
-                </div>
-            </section>
-        </Layout>
+}/Layout>
     );
 }{false}>
                             Connect with a Strategist
