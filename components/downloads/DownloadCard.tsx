@@ -73,7 +73,7 @@ export default function DownloadCard({
                     <Link
                         href={detailHref}
                         prefetch={false}
-                        className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-forest/30"
+                        className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)/0.3]"
                     >
                         {title}
                     </Link>
