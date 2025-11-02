@@ -8,22 +8,17 @@
   },
   "scripts": {
     "clean": "rimraf .next .next-dev .contentlayer",
-    
     "dev": "next dev",
-    
     "prebuild": "npm run audit:images || node -e \"process.exit(0)\" && npm run pdfs:generate || node -e \"process.exit(0)\" && npm run ci:downloads || node -e \"process.exit(0)\"",
     "build": "cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
     "build:full": "npm run audit:images && npm run pdfs:generate && npm run ci:downloads && next build",
     "preprod:build": "npm run fix:bom && npm run downloads:manifest",
     "prod:build": "cross-env NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 next build",
-    
     "start": "next start",
     "start:prod": "next start -p $PORT",
-    
     "lint": "next lint",
     "lint:fix": "next lint --fix || true",
     "typecheck": "tsc --noEmit",
-    
     "audit:assets": "node scripts/audit-assets.mjs",
     "downloads:manifest": "node scripts/build-download-manifest.mjs",
     "orchestrate": "node scripts/orchestrate-fallback.mjs",
@@ -34,12 +29,10 @@
     "audit:images": "node scripts/audit-images.mjs",
     "analyze": "cross-env ANALYZE=true NEXT_TELEMETRY_DISABLED=1 next build",
     "prepare": "husky install",
-
     "test": "echo \"No tests configured yet. Skipping.\" && exit 0",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-
     "guard:css": "node scripts/postcss-guard-dryrun.mjs",
     "check:mdx": "node scripts/check-mdx-for-html.js",
     "check:tw-opacity": "node scripts/convert-tailwind-slash-opacity.mjs --check",
@@ -49,7 +42,6 @@
     "fix:css-slash": "node scripts/postcss-guard-dryrun.mjs --write",
     "fix:downloads-frontmatter": "node scripts/fix-missing-download-frontmatter.mjs",
     "fix:tw-all": "npm run fix:tw-opacity && npm run fix:css-slash",
-    
     "pdfs": "node scripts/make-pdfs.mjs",
     "print:serve": "next start -p 5555",
     "print:pdfs": "node scripts/render-pdfs.mjs --base http://localhost:5555 --out public/downloads",
@@ -67,9 +59,7 @@
     "@emotion/is-prop-valid": "^1.4.0",
     "@heroicons/react": "^2.2.0",
     "@mdx-js/loader": "^3.0.1",
-    "@mdx-js/react": "3.0.1",
     "@netlify/functions": "4.2.1",
-    "@next/mdx": "14.2.32",
     "@react-email/components": "0.5.0",
     "@react-email/render": "1.2.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
@@ -110,8 +100,10 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
     "@lhci/cli": "^0.13.0",
+    "@mdx-js/react": "^3.1.1",
     "@netlify/plugin-nextjs": "5.14.4",
     "@next/bundle-analyzer": "14.2.32",
+    "@next/mdx": "^16.0.1",
     "@playwright/test": "^1.48.2",
     "@types/mdx": "2.0.13",
     "@types/node": "20.14.10",
