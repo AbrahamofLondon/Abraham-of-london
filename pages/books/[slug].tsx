@@ -1,76 +1,62 @@
-// pages/books/[slug].tsx
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+// pages/books.tsx
+import { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-// ✅ CRITICAL FIX: Use the correct lowercase import name
-import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import BookCard from "@/components/BookCard";
+import { getAllContent } from "@/lib/mdx"; // Import unified fetcher
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "books";
+type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
 
-export default function BookPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+export const getStaticProps: GetStaticProps = async () => {
+  const allBooks = getAllContent('books');
+  // Use a map to ensure all critical string/link fields are guaranteed strings/nulls
+  const books = allBooks.map(book => {
+    // Explicitly check and convert data to be JSON-safe and prevent toLowerCase() crash
+    const safeBook = {
+        ...book,
+        slug: book.slug ?? '',
+        title: book.title ?? 'Untitled Book',
+        author: book.author ?? 'Abraham of London',
+        excerpt: book.excerpt ?? '',
+        category: book.category ?? 'General',
+        summary: book.summary ?? null, // Ensure summary is null if missing (Serialization fix)
+    };
+    return safeBook;
+  });
+
+  // Final JSON-safe stringify/parse to catch lingering issues
+  return {
+    props: { books: JSON.parse(JSON.stringify(books)) },
+    revalidate: 3600,
+  };
+};
+
+export default function Books({ books }: BooksProps) {
   return (
-    <Layout>
+    <Layout pageTitle="Books">
       <Head>
-        <title>{frontmatter.title} by {frontmatter.author} | Abraham of London</title>
-        <meta name="description" content={frontmatter.excerpt} />
+        <title>Books | Abraham of London</title>
+        <meta name="description" content="Books, memoirs, and field guides by Abraham of London." />
       </Head>
-      <article className="container mx-auto px-4 py-12">
-        <header className="mb-10 flex flex-col items-start gap-6 md:flex-row">
-          {frontmatter.coverImage && (
-            <div className="relative w-full flex-shrink-0 overflow-hidden rounded-lg shadow-2xl md:w-80 aspect-[2/3]">
-              <Image
-                src={frontmatter.coverImage}
-                alt={`Cover of ${frontmatter.title}`}
-                width={1024}
-                height={1536}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
-          )}
-          <div className="flex-grow">
-            <h1 className="mb-2 text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
-            <p className="mb-4 text-xl text-soft-charcoal">
-              By {frontmatter.author}
-            </p>
-            {frontmatter.date && (
-              <p className="mb-2 text-sm text-gray-500">
-                Published: {new Date(frontmatter.date).toLocaleDateString("en-GB", {
-                  year: "numeric", month: "long", day: "numeric",
-                })}
-              </p>
-            )}
-          </div>
-        </header>
-        <section className="prose prose-lg max-w-none border-t border-gray-200 pt-8">
-          {/* ✅ FIX: Use lowercase mdxComponents */}
-          <MDXRemote {...source} components={mdxComponents} />
-        </section>
-      </article>
+      <main className="container mx-auto px-4 py-12">
+        <h1 className="text-4xl font-serif font-bold text-center mb-10">
+          Books
+        </h1>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {books.map((book) => (
+            <BookCard
+              key={book.slug}
+              slug={book.slug}
+              title={book.title}
+              author={book.author}
+              excerpt={book.excerpt}
+              coverImage={book.coverImage}
+              genre={book.category} // category is guaranteed a string by getStaticProps
+            />
+          ))}
+        </div>
+      </main>
     </Layout>
   );
 }
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params!.slug as string;
-  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
-  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const allContent = getAllContent(CONTENT_TYPE);
-  const slugs = allContent.map(item => item.slug.toLowerCase());
-
-  return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
-};
