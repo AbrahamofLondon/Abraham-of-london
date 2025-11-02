@@ -19,8 +19,9 @@
 [functions.emails]
   included_files = ["emails/**"]
 
-[[plugins]]
+  [[plugins]]
   package = "@netlify/plugin-nextjs"
+  version = "4.41.0"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Headers
