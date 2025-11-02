@@ -3,7 +3,7 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { MDXRemote } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components"; // The correct component map
@@ -45,16 +45,16 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   // Use the raw frontmatter to construct a JSON-safe object
   const frontmatter = {
     ...rawFrontmatter,
-    // Ensure critical fields are explicitly null if undefined (Serialization safety)
+    // Ensure critical string/optional fields are explicitly null if undefined (Serialization safety)
     title: rawFrontmatter.title ?? 'Untitled Book',
-    author: rawFrontmatter.author ?? 'Abraham of London',
+    author: rawFrontmatter.author ?? null,
     date: rawFrontmatter.date ?? null,
     excerpt: rawFrontmatter.excerpt ?? null,
     coverImage: rawFrontmatter.coverImage ?? null,
-    summary: rawFrontmatter.summary ?? null, // Ensure summary is handled safely
+    summary: rawFrontmatter.summary ?? null, 
     pdfPath: (rawFrontmatter as any).pdfPath ?? null,
     
-    // Clear any accidental undefineds with null for serialization integrity
+    // Clean any accidental undefineds for serialization integrity
     ...Object.fromEntries(
         Object.entries(rawFrontmatter).filter(([key, value]) => value !== undefined)
         .map(([key, value]) => [key, value === undefined ? null : value])
@@ -75,7 +75,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 // ----------------------------------------------------
-// Page Component (Assumed to be correct)
+// Page Component 
 // ----------------------------------------------------
 export default function BookPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
