@@ -435,13 +435,11 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                     </div>
                 </div>
             </section>
-        </Layout>
-    );
-};  </Layout>
-    );
-}/Layout>
-    );
-}{false}>
+        return (
+  <Layout>
+    {/* component content */}
+  </Layout>
+)>
                             Connect with a Strategist
                         </Link>
                     </div>
