@@ -21,7 +21,7 @@ import {
     getAllEvents, 
     dedupeEventsByTitleAndDay,
 } from "@/lib/server/events-data";
-import type { PostMeta } from "@/types/post";
+import type { PostMeta from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads"; 
 
 /* ── banner types ── */
@@ -136,7 +136,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
     const booksCount = getAllBooks(["slug"]).length;
 
-    // CRITICAL: This is the final object return, ending the function block
+    // CRITICAL: This entire block must close cleanly.
     return { 
         props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
         revalidate: 3600 
@@ -436,6 +436,8 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                 </div>
             </section>
         </Layout>
+    );
+}     </Layout>
     );
 }/Layout>
     );
