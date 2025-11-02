@@ -1,14 +1,14 @@
-// pages/print/book/[slug].tsx
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
-import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
+// pages/print/resource/[slug].tsx
+import * as React from 'react';
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
 import BrandFrame from "@/components/print/BrandFrame";
 import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "books"; // Target Content/books folder
+const CONTENT_TYPE = "resources"; // Target Content/resources folder
 
 type Props = { 
   source: Awaited<ReturnType<typeof serialize>>; 
@@ -16,7 +16,7 @@ type Props = {
 };
 
 // ----------------------------------------------------
-// CRITICAL FIX: Ensures paths are built for all book files
+// CRITICAL FIX: Ensures paths are built for all resource files
 // ----------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
   const allContent = getAllContent(CONTENT_TYPE);
@@ -46,7 +46,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 
-export default function PrintBookPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function PrintResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <BrandFrame
       title={frontmatter.title}
