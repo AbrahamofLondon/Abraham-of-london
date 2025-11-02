@@ -435,32 +435,57 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                     </div>
                 </div>
             </section>
-        return (
-  <Layout>
-    {/* component content */}
-  </Layout>
-)>
-                            Connect with a Strategist
-                        </Link>
-                    </div>
-                </div>
-            </section>
         </Layout>
     );
-}Image = String(e.slug).replace(/[–—].*$/, "");
-        const heroImage = `/assets/images/events/${baseForImage}.jpg`;
-        
-        // e.resources now holds the array of ResourceLink objects (or null) because 
-        // it was included in the map inside the 'deduped' variable construction above.
-        const resources = (e.resources ?? null) as EventResources | null;
+} // <--- The Home component definition closes here.
+
+// -----------------------------------------------------------------------------------
+// The rest of the file contains the successful getStaticProps export:
+// -----------------------------------------------------------------------------------
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+    // Downloads and Resources
+    const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 6) as DownloadItem[];
+    const resources = getAllContent("resources", { includeDrafts: false }).slice(0, 6) as PostMeta[];
+
+    // Posts: Fetch 3 featured posts
+    const allPosts = getAllPosts();
+    const limitedPosts = allPosts.slice(0, 3);
+    const safePosts = limitedPosts.map((p) => ({
+        ...p,
+        excerpt: p.excerpt ?? null,
+        date: p.date ?? null,
+        coverImage: p.coverImage ?? null,
+        readTime: p.readTime ?? null,
+        category: p.category ?? null,
+        author: p.author ?? null,
+        tags: p.tags ?? null,
+        coverAspect: p.coverAspect ?? null,
+        coverFit: p.coverFit ?? null,
+        coverPosition: p.coverPosition ?? null,
+    }));
+    const postsCount = allPosts.length;
+
+
+    // Events: Filter for upcoming, sort by date (soonest first), and limit to 3
+    const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources", "heroImage"]);
+    const deduped = dedupeEventsByTitleAndDay(rawEvents);
+
+    const upcomingSorted = deduped
+        .filter((e) => onlyUpcoming(e.date))
+        .sort((a, b) => (new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()));
+
+    // Construct EventsTeaser items using robust data mapping
+    const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
+        const baseForImage = String(e.slug).replace(/[–—].*$/, "");
+        const heroImage = e.heroImage ?? `/assets/images/events/${baseForImage}.jpg`;
+        const resources: EventResources | null = (e.resources ?? null);
         
         const safeResources = resources ? {
-            // Use nullish coalescing to convert any nested 'undefined' properties to 'null'
             downloads: resources.downloads ?? null,
             reads: resources.reads ?? null,
         } : null;
 
-        return {
+        return { 
             slug: e.slug,
             title: e.title,
             date: e.date,
@@ -468,10 +493,15 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
             description: e.summary ?? null,
             tags: Array.isArray(e.tags) ? e.tags : null,
             heroImage,
-            resources: safeResources, // Now passes the structure expected by EventCard
-        };
+            resources: safeResources, 
+        } as EventsTeaserItem; 
     });
 
-    // Note: postsCount in the component will reflect the length of safePosts (max 3)
-    return { props: { posts: safePosts, booksCount, eventsTeaser }, revalidate: 3600 };
-}
+    const booksCount = getAllBooks(["slug"]).length;
+
+    // This returns the final props object
+    return { 
+        props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
+        revalidate: 3600 
+    };
+};
