@@ -1,0 +1,38 @@
+// content/downloads/a6/leaders-cue-card-two-up.tsx
+
+import BrandFrame from "../../../components/print/BrandFrame";
+import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; 
+import * as React from "react";
+
+// --- Metadata Definition (Crucial: Must be present for ContentLayer) ---
+export const metadata = {
+  title: "Leader's Cue Card (Two Up)",
+  slug: "leaders-cue-card-two-up",
+  date: "2025-10-21",
+  author: "Abraham of London",
+  readTime: "1 min",
+  category: "Leadership",
+  type: "download",
+  subtitle: "Weekly cadence, essential prompts, and crisis guardrails."
+};
+
+const LeadersCueCardTwoUp = () => {
+  return (
+    {/* Note: The script will render this page twice on an A4 sheet if designed correctly, */}
+    {/* but the Next.js page itself must be a single component with A6 styling. */}
+    <BrandFrame
+      title={metadata.title}
+      subtitle={metadata.subtitle}
+      {/* Crucial for cue card size */}
+      pageSize="A6" 
+      {/* Smaller margins for a cue card */}
+      marginsMm={6}  
+    >
+      <div className="flex flex-col h-full">
+        {/* ... (rest of content) ... */}
+      </div>
+    </BrandFrame>
+  );
+};
+
+export default LeadersCueCardTwoUp;

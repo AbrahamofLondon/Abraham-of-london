@@ -1,0 +1,320 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Build
+# ─────────────────────────────────────────────────────────────────────────────
+[build]
+  command = "npm run audit:images || true && npm run pdfs && (node scripts/run-validate-downloads.mjs || true) && npm run build && npm run ci:downloads"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+  CI_LAX = "1"
+  NO_SLASH_OPACITY_MODE = "fix"
+  DOWNLOADS_STRICT = "0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Functions
+# ─────────────────────────────────────────────────────────────────────────────
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+  external_node_modules = ["resend"]
+
+[functions.emails]
+  included_files = ["emails/**"]
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Redirects
+# ─────────────────────────────────────────────────────────────────────────────
+# (Removed invalid "/.netlify/*" redirect)
+
+[[redirects]]
+  from = "/downloads/leaders-cue-card"
+  to = "/downloads/leaders-cue-card.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-covenant"
+  to = "/downloads/brotherhood-covenant.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-cue-card"
+  to = "/downloads/brotherhood-cue-card.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/leaders-cue-card.pdf"
+  to = "/downloads/Leaders_Cue_Card.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/brotherhood-starter-kit"
+  to = "/downloads/Brotherhood_Starter_Kit.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/fathering-without-fear.pdf"
+  to = "/downloads/Fathering_Without_Fear.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/fathering-without-fear-mobile.pdf"
+  to = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Leadership_Playbook.pdf"
+  to = "/downloads/leadership-playbook.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Principles_for_My_Son.pdf"
+  to = "/downloads/principles-for-my-son.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Principles_for_My_Son_Cue_Card.pdf"
+  to = "/downloads/principles-for-my-son-cue-card.pdf"
+  status = 200
+
+[[redirects]]
+  from = "/downloads/Leaders_Cue_Card.pdf"
+  to = "/downloads/leaders-cue-card-two-up.pdf"
+  status = 200
+
+# Force apex to canonical host
+[[redirects]]
+  from = "/*"
+  to = "https://www.abrahamoflondon.org/:splat"
+  status = 301
+  force = true
+  conditions = { Host = ["abrahamoflondon.org"] }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Headers
+# ─────────────────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/assets/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Accept-Ranges = "bytes"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/image*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/downloads/*.pdf"
+  [headers.values]
+    Cache-Control = "public, max-age=600, must-revalidate"
+    Content-Type = "application/pdf"
+
+[[redirects]]
+  from = "/downloads/board-update-onepager.pdf"
+  to = "/downloads/Board_Update_Onepager.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/board-update-template.pdf"
+  to = "/downloads/Board_Update_Template.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/boardinvestor-one-pager-template.pdf"
+  to = "/downloads/Boardinvestor_One_Pager_Template.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-cue-card-two-up.pdf"
+  to = "/downloads/Brotherhood_Cue_Card_Two_Up.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-leader-guide-4-weeks.pdf"
+  to = "/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/brotherhood-starter-kit.pdf"
+  to = "/downloads/Brotherhood_Starter_Kit.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/communication-script-bpf-2.pdf"
+  to = "/downloads/Communication_Script_Bpf_2.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/communication-script-bpf-3.pdf"
+  to = "/downloads/Communication_Script_Bpf_3.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/communication-script-bpf-jpg.pdf"
+  to = "/downloads/Communication_Script_Bpf_Jpg.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/communication-script-bpf.pdf"
+  to = "/downloads/Communication_Script_Bpf.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/communication-script-budget-plan-forecast.pdf"
+  to = "/downloads/Communication_Script_Budget_Plan_Forecast.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/downloadsboard-update-onepager.pdf"
+  to = "/downloads/Downloadsboard_Update_Onepager.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/downloadsgrid-tsx.pdf"
+  to = "/downloads/Downloadsgrid_Tsx.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-operating-pack-week-in-review-system.pdf"
+  to = "/downloads/Entrepreneur_Operating_Pack_Week_In_Review_System.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-operating-pack.pdf"
+  to = "/downloads/Entrepreneur_Operating_Pack.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-survival-checklist-2.pdf"
+  to = "/downloads/Entrepreneur_Survival_Checklist_2.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-survival-checklist-3.pdf"
+  to = "/downloads/Entrepreneur_Survival_Checklist_3.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-survival-checklist-jpg.pdf"
+  to = "/downloads/Entrepreneur_Survival_Checklist_Jpg.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/entrepreneur-survival-checklist.pdf"
+  to = "/downloads/Entrepreneur_Survival_Checklist.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/evidence-log-template.pdf"
+  to = "/downloads/Evidence_Log_Template.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/example.pdf"
+  to = "/downloads/Example.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/family-altar-liturgy-jpg.pdf"
+  to = "/downloads/Family_Altar_Liturgy_Jpg.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/family-altar-liturgy.pdf"
+  to = "/downloads/Family_Altar_Liturgy.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/fathering-without-fear-teaser-mobile.pdf"
+  to = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/fathering-without-fear-teaser.pdf"
+  to = "/downloads/Fathering_Without_Fear_Teaser.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf"
+  to = "/downloads/Fathering_Without_Fear_Teaser_A4.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/fathers-in-family-court-practical-pack.pdf"
+  to = "/downloads/Fathers_In_Family_Court_Practical_Pack.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/mentorship-starter-kit-90-day-covenant.pdf"
+  to = "/downloads/Mentorship_Starter_Kit_90_Day_Covenant.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/mentorship-starter-kit.pdf"
+  to = "/downloads/Mentorship_Starter_Kit.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/principles-for-my-son-12-standards.pdf"
+  to = "/downloads/Principles_For_My_Son_12_Standards.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/scripture-track-john-14.pdf"
+  to = "/downloads/Scripture_Track_John_14.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/scripture-track-john14.pdf"
+  to = "/downloads/Scripture_Track_John14.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/standards-brief.pdf"
+  to = "/downloads/Standards_Brief.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/weekly-operating-rhythm-daily-blocks.pdf"
+  to = "/downloads/Weekly_Operating_Rhythm_Daily_Blocks.pdf"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/weekly-operating-rhythm.pdf"
+  to = "/downloads/Weekly_Operating_Rhythm.pdf"
+  status = 301

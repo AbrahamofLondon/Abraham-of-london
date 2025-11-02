@@ -1,0 +1,88 @@
+// pages/print/principles-for-my-son.tsx
+
+import BrandFrame from "../../components/print/BrandFrame";
+import EmbossedSign from "../../components/EmbossedSign";
+import * as React from "react";
+
+const PrinciplesForMySon = () => {
+  return (
+    <BrandFrame
+      title="Principles for My Son"
+      subtitle="Twelve standards. One father–son pledge. Reviewed weekly, renewed quarterly."
+    >
+      <h2>The Twelve Standards</h2>
+      <ol className="list-decimal pl-5 space-y-3">
+        <li><strong>Presence.</strong> We show up—on time, prepared, attentive.</li>
+        <li><strong>Truth.</strong> We tell the truth without spin; we confess fast, not last.</li>
+        <li><strong>Work.</strong> We finish what we start and keep small promises.</li>
+        <li><strong>Stewardship.</strong> We budget, save, give, and repair what we own.</li>
+        <li><strong>Courage.</strong> We do hard, right things—especially when unseen.</li>
+        <li><strong>Honor.</strong> We dignify women, elders, and authorities; we protect the weak.</li>
+        <li><strong>Speech.</strong> We speak cleanly—no gossip, slander, or coarse talk.</li>
+        <li><strong>Learning.</strong> We read, ask, practice; we receive correction with humility.</li>
+        <li><strong>Health.</strong> We sleep, train, eat simply, and keep our devices in their place.</li>
+        <li><strong>Craft.</strong> We build things that work and are worth keeping.</li>
+        <li><strong>Service.</strong> We lift burdens at home first, then beyond the door.</li>
+        <li><strong>Faith.</strong> We listen for God, obey promptly, and stay planted in truth.</li>
+      </ol>
+
+      <h3 className="mt-8">Daily Rhythm</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Morning:</strong> Scripture + 5 min silent prayer; bed made; device parked.</li>
+        <li><strong>Work/School:</strong> One thing done to completion; one kindness given.</li>
+        <li><strong>Evening:</strong> Debrief: <em>truth, one win, one next step</em>. Read for 15 minutes.</li>
+      </ul>
+
+      <h3 className="mt-8">Weekly Touchpoints</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li><strong>Sunday Check-in (20 min):</strong> Review standards; pick one focus.</li>
+        <li><strong>Skill Block (60 min):</strong> Hands + head: a skill, a book, a task.</li>
+        <li><strong>Service (30–60 min):</strong> A small act beyond ourselves.</li>
+      </ul>
+
+      <h2 className="mt-8">Father–Son Pledge</h2>
+      <p className="italic text-gray-700">
+        We commit to these standards with courage and joy. We will correct in love, receive correction with humility,
+        and keep small promises over time. Our name will be known for presence, truth, and service.
+      </p>
+
+      {/* Signature Grid */}
+      <div className="not-prose mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {["Father", "Son"].map((role) => (
+          <div key={role} className="rounded-xl border border-lightGrey/90 p-4">
+            <div className="mb-4 border-b border-lightGrey pb-4">
+              <div className="h-6">
+                <EmbossedSign 
+                    src="/assets/images/signature/abraham-of-london-cursive.svg"
+                    alt={`${role} signature line`}
+                    width={180} height={30} effect="deboss" baseColor="transparent" className="block"
+                />
+              </div>
+              <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">{role} — Name</span>
+            </div>
+            <div className="mb-4 border-b border-lightGrey pb-4">
+              <div className="h-6" />
+              <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Signature</span>
+            </div>
+            <div className="border-b border-lightGrey pb-4">
+              <div className="h-6" />
+              <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">Date</span>
+            </div>
+            <div className="mt-4 text-[11.5px] text-[color:var(--color-on-secondary)/0.6]">
+              Review: quarterly • “Small promises, kept.”
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="mt-10">How to Use</h3>
+      <ul className="list-disc pl-5 space-y-2">
+        <li>Print and post; underline one standard to focus on this week.</li>
+        <li>Track one daily micro-habit; celebrate completion, not perfection.</li>
+        <li>Quarterly: re-sign the pledge and raise the standard 1%.</li>
+      </ul>
+    </BrandFrame>
+  );
+};
+
+export default PrinciplesForMySon;

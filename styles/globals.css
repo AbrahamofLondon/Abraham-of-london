@@ -1,0 +1,279 @@
+/* ------------------------------------------------------------------- */
+/* ---------- Global Styles & Optimization --------------------------- */
+/* ------------------------------------------------------------------- */
+
+/* 1) Local self-hosted fonts (consistent render incl. print) */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/PlayfairDisplay-Variable.woff2") format("woff2-variations");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2) Tailwind base/components/utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------- */
+/* ---------- Theme Variables (Luxury Light Mode) -------------------- */
+/* ------------------------------------------------------------------- */
+
+:root {
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* Palette */
+  --color-primary: #0b2e1f;          /* deep-forest */
+  --color-primary-hover: #16573d;    /* lighter deep forest */
+  --color-on-primary: #faf7f2;       /* warm-cream */
+
+  --color-secondary: #faf7f2;        /* page bg: warm-cream */
+  --color-on-secondary: #333333;     /* soft charcoal text */
+
+  --color-accent: #c5a352;           /* muted gold */
+  --color-accent-hover: #a0833f;
+  --color-on-accent: #ffffff;
+
+  --color-lightGrey: #e5e5e5;
+  --color-warmWhite: #faf7f2;        /* alias */
+  --color-midGreen: #4b8b6b;
+
+  /* Fluid type scale */
+  --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
+  --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
+  --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
+  --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
+  --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
+  --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Dark Mode Tokens -------------------------------------- */
+/* ------------------------------------------------------------------- */
+
+.dark {
+  /* Primary/Text */
+  --color-primary: #c5a352;
+  --color-primary-hover: #e9d79a;
+  --color-on-primary: #0f172a;
+
+  /* Background/Surface */
+  --color-secondary: #111827;        /* slate-900-ish */
+  --color-on-secondary: #f8fafc;     /* slate-50-ish */
+
+  /* Accent */
+  --color-accent: #86efac;
+  --color-accent-hover: #4b8b6b;
+  --color-on-accent: #111827;
+
+  /* UI */
+  --color-lightGrey: #2d3748;        /* divider */
+  --color-warmWhite: #1f2937;        /* card surface */
+  --color-midGreen: #86efac;
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Base / Reset & Typography ------------------------------ */
+/* ------------------------------------------------------------------- */
+
+html {
+  color-scheme: light dark;
+  hanging-punctuation: first allow-end;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.85;
+  color: var(--color-on-secondary);
+  background-color: var(--color-secondary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  color: var(--color-primary);
+  text-wrap: balance;
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+a:hover {
+  color: var(--color-accent);
+}
+
+/* Selection & Focus */
+::selection {
+  background: #e9d79a;
+  color: var(--color-primary);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Media defaults */
+img,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print fidelity */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Tailwind Components / Utilities ------------------------ */
+/* ------------------------------------------------------------------- */
+
+@layer components {
+  /* Buttons */
+  .aol-btn {
+    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold text-white focus:outline-none focus-visible:ring-2;
+    background-color: var(--color-primary);
+    --tw-ring-color: rgba(11, 46, 31, 0.35);
+  }
+  .aol-btn:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  /* Card */
+  .card {
+    border: 1px solid var(--color-lightGrey);
+    padding: 28px;
+    box-shadow: 0 4px 18px rgba(11, 46, 31, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    background-color: #ffffff;
+    border-radius: 12px;
+  }
+  .dark .card {
+    background-color: var(--color-warmWhite);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(11, 46, 31, 0.12);
+  }
+
+  /* Background pattern */
+  .pattern-bg {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Typography Polish (Prose Overrides) -------------------- */
+/* ------------------------------------------------------------------- */
+
+.prose {
+  --tw-prose-body: var(--color-on-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-primary);
+  --tw-prose-quotes: var(--color-on-secondary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+}
+.dark .prose {
+  --tw-prose-body: var(--color-on-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-on-secondary);
+  --tw-prose-quotes: var(--color-on-secondary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+}
+
+/* Serif headings */
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+}
+
+/* Heading sizes */
+.prose h1 {
+  font-size: var(--step-4);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.6rem;
+}
+.prose h2 {
+  font-size: var(--step-3);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 2.5rem 0 0.8rem;
+}
+.prose h3 {
+  font-size: var(--step-2);
+  line-height: 1.2;
+  margin: 2rem 0 0.6rem;
+}
+
+/* Body text */
+.prose p,
+.prose li {
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.85;
+  margin-block: 1rem;
+}
+
+/* Blockquote */
+.prose blockquote {
+  font-style: italic;
+  font-size: var(--step-1);
+  line-height: 1.6;
+  padding-left: 1.5rem;
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-on-secondary);
+}
+
+/* List markers */
+.prose ul > li::marker {
+  color: var(--color-midGreen);
+}

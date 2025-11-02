@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": false,
+    "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "paths": {
+      "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
+      "@/components/*": ["./components/*"],
+      "@/styles/*": ["./styles/*"],
+      "@/public/*": ["./public/*"],
+      "@/config/*": ["./config/*"],
+      "contentlayer/generated": ["./.contentlayer/generated"]
+    },
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts",
+    ".next/types/**/*.ts",
+    "netlify/**/*.ts",
+    "netlify/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    ".contentlayer/generated/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"]
+}
