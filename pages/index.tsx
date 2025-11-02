@@ -390,7 +390,7 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
 // NOTE: The previous SyntaxError was likely due to code outside of the function body.
 // The code below is the correct, fixed version of getStaticProps.
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-    // Downloads: Fetch 6 items
+    // Downloads and Resources
     const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 6) as DownloadItem[];
     const resources = getAllContent("resources", { includeDrafts: false }).slice(0, 6) as PostMeta[];
 
@@ -421,8 +421,9 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
         .filter((e) => onlyUpcoming(e.date))
         .sort((a, b) => (new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()));
 
-    // Construct EventsTeaser items using robust data mapping
+    // CRITICAL: Construct EventsTeaser using the return keyword inside the map callback.
     const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
+        // Calculations and variable assignment
         const baseForImage = String(e.slug).replace(/[–—].*$/, "");
         const heroImage = e.heroImage ?? `/assets/images/events/${baseForImage}.jpg`;
         const resources: EventResources | null = (e.resources ?? null);
@@ -432,7 +433,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
             reads: resources.reads ?? null,
         } : null;
 
-        return {
+        return { // <-- Explicit return statement is used here
             slug: e.slug,
             title: e.title,
             date: e.date,
@@ -441,23 +442,16 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
             tags: Array.isArray(e.tags) ? e.tags : null,
             heroImage,
             resources: safeResources, 
-        } as EventsTeaserItem;
-    });
+        } as EventsTeaserItem; // Ensure the returned object matches the final type
+    }); // <- Map function cleanly closes here
 
     const booksCount = getAllBooks(["slug"]).length;
 
-    return { 
+    return { // <- Final object returned by getStaticProps
         props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
         revalidate: 3600 
     };
-}oal">
-                <div className="absolute inset-0 -z-10">
-                    <Image 
-                        src="/assets/images/cta/cta-bg.jpg" 
-                        alt="" 
-                        fill 
-                        sizes="100vw" 
-                        quality={85} 
+};                  quality={85} 
                         className="object-cover opacity-20" 
                         priority={false} // Since this is a closing CTA, set to false
                     />
