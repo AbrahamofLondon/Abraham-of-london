@@ -1,42 +1,55 @@
-import { allPosts, type Post } from "contentlayer/generated";
-import BrandFrame from "@/components/print/BrandFrame";
-import type { GetStaticProps, GetStaticPaths } from "next";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import MDXComponents from '@/components/MDXComponents';
+// pages/print/post/[slug].tsx (Apply to all print/[slug] files)
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import mdxComponents from '@/components/mdx-components'; // The correct component map
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; // The core data functions
+import BrandFrame from "@/components/print/BrandFrame"; // Assuming this is correct
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: allPosts.map((p) => ({ params: { slug: p.slug } })),
-  fallback: false,
-});
+const CONTENT_TYPE = "blog"; // Change this for post/resource/book accordingly
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = Array.isArray(params?.slug) ? params?.slug[0] : params?.slug;
-  const doc = allPosts.find((p) => p.slug === slug) || null;
-  return { props: { doc } };
-};
+interface PrintPageProps {
+  source: MDXRemoteSerializeResult;
+  frontmatter: any;
+}
 
-interface Props { doc: Post | null }
-
-export default function PostPrint({ doc }: Props) {
-  const code = doc?.body?.code ?? "";
-  const MDXContent = useMDXComponent(code);
-
-  if (!doc) return <p>Loading…</p>;
-
+export default function PrintPage({ source, frontmatter }: PrintPageProps) {
+  // CRITICAL: The page component MUST NOT use Contentlayer hooks, only standard React and MDXRemote.
+  
   return (
     <BrandFrame
-      title={doc.title}
-      subtitle={doc.description || doc.excerpt || ""}
-      author={doc.author}
-      date={doc.date}
-      pageSize="A4"
-      marginsMm={18}
+      title={frontmatter.title}
+      subtitle={frontmatter.subtitle || frontmatter.excerpt}
+      pageSize="A4" 
     >
-      <article className="prose mx-auto max-w-none">
-        <h1 className="font-serif">{doc.title}</h1>
-        {doc.description && <p className="text-lg">{doc.description}</p>}
-        <MDXContent components={components as any} />
-      </article>
+      <div className="prose max-w-none print:text-black">
+        {/* CRITICAL FIX: Using standard MDXRemote rendering */}
+        <MDXRemote {...source} components={mdxComponents} />
+      </div>
     </BrandFrame>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  // Ensure 'summary' is null, not undefined, if missing (Fixes serialization crash)
+  if (finalFrontmatter.summary === undefined) finalFrontmatter.summary = null;
+
+  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  
+  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const allContent = getAllContent(CONTENT_TYPE);
+  const slugs = allContent.map(item => item.slug.toLowerCase());
+
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
+};
