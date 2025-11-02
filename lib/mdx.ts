@@ -1,13 +1,18 @@
+// lib/mdx.ts
 if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
-// lib/mdx.ts
+
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import type { PostMeta } from "@/types/post";
 
-const BLOG_DIR = path.join(process.cwd(), "content", "blog");
+// --- CRITICAL FIX: Base directory now handles all content types dynamically ---
+function getContentDir(contentType: string) {
+  // contentType will be 'blog', 'books', 'downloads', 'events', etc.
+  return path.join(process.cwd(), "content", contentType);
+}
 
 /* ------------ utils ------------ */
 
@@ -18,8 +23,8 @@ function toTitle(slug: string) {
 function stripMd(s: string) {
   return s
     .replace(/!\[[^\]]*]\([^)]+\)/g, "") // images
-    .replace(/\[[^\]]*]\([^)]+\)/g, "")  // links
-    .replace(/[`#>*_~\-]+/g, " ")        // md tokens
+    .replace(/\[[^\]]*]\([^)]+\)/g, "")  // links
+    .replace(/[`#>*_~\-]+/g, " ")        // md tokens
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -37,8 +42,9 @@ function isLocalPath(src?: unknown): src is string {
 }
 
 function safeDate(input: unknown): string | undefined {
-  if (typeof input !== "string") return undefined;
-  return Number.isNaN(Date.parse(input)) ? undefined : input;
+  if (!(input instanceof Date) && typeof input !== 'string' && typeof input !== 'number') return undefined;
+  const date = new Date(input);
+  return isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
 function normalizeTags(v: unknown): string[] | undefined {
@@ -60,23 +66,28 @@ function pickCoverPosition(v: unknown): "left" | "center" | "right" | undefined 
 
 /* ------------ public API ------------ */
 
-/** Return file names (no recursion) ending with .md or .mdx */
-export function getPostSlugs(): string[] {
-  if (!fs.existsSync(BLOG_DIR)) return [];
+/** Return file names (no recursion) ending with .md or .mdx for a given content type */
+// ✅ NEW: Generic function replacing getPostSlugs
+export function getContentSlugs(contentType: string): string[] {
+  const dir = getContentDir(contentType);
+  if (!fs.existsSync(dir)) return [];
   return fs
-    .readdirSync(BLOG_DIR)
+    .readdirSync(dir)
     .filter((f) => /\.mdx?$/i.test(f))
     .map((f) => f.replace(/\.mdx?$/i, ""));
 }
 
-/** Read one post by slug; set opts.withContent to include MDX content */
-export function getPostBySlug(
+/** Read one piece of content by slug and type; set opts.withContent to include MDX content */
+// ✅ NEW: Generic function replacing getPostBySlug
+export function getContentBySlug(
+  contentType: string,
   slug: string,
   opts: { withContent?: boolean } = {},
 ): Partial<PostMeta> & { content?: string } {
   const realSlug = slug.replace(/\.mdx?$/i, "");
-  const mdx = path.join(BLOG_DIR, `${realSlug}.mdx`);
-  const md = path.join(BLOG_DIR, `${realSlug}.md`);
+  const dir = getContentDir(contentType);
+  const mdx = path.join(dir, `${realSlug}.mdx`);
+  const md = path.join(dir, `${realSlug}.md`);
   const fullPath = fs.existsSync(mdx) ? mdx : fs.existsSync(md) ? md : null;
 
   if (!fullPath) {
@@ -97,8 +108,8 @@ export function getPostBySlug(
       : fm && typeof fm.author === "object" && fm.author !== null
       ? (fm as any).author?.name ?? undefined
       : undefined;
-
-  const post: Partial<PostMeta> & { content?: string } = {
+      
+  const item: Partial<PostMeta> & { content?: string } = {
     slug: realSlug,
     title,
     excerpt,
@@ -108,6 +119,9 @@ export function getPostBySlug(
     category: typeof fm.category === "string" ? fm.category : undefined,
     author,
     tags: normalizeTags(fm.tags),
+    summary: typeof fm.summary === "string" ? fm.summary : undefined,
+    location: typeof fm.location === "string" ? fm.location : undefined,
+    subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
 
     // framing hints
     coverAspect: pickCoverAspect(fm.coverAspect),
@@ -115,28 +129,31 @@ export function getPostBySlug(
     coverPosition: pickCoverPosition(fm.coverPosition),
   };
 
-  if (opts.withContent) post.content = content;
-  return post;
+  if (opts.withContent) item.content = content;
+  return item;
 }
 
 type GetAllOptions = { includeDrafts?: boolean; limit?: number };
 
-/** Read all posts (non-drafts by default), newest first */
-export function getAllPosts(options: GetAllOptions = {}): PostMeta[] {
+/** Read all content items (non-drafts by default) for a given type, newest first */
+// ✅ NEW: Generic function replacing getAllPosts
+export function getAllContent(contentType: string, options: GetAllOptions = {}): PostMeta[] {
   const { includeDrafts = false, limit } = options;
-  if (!fs.existsSync(BLOG_DIR)) return [];
+  const dir = getContentDir(contentType);
+  if (!fs.existsSync(dir)) return [];
 
-  const files = fs.readdirSync(BLOG_DIR).filter((f) => /\.mdx?$/i.test(f));
+  const files = fs.readdirSync(dir).filter((f) => /\.mdx?$/i.test(f));
 
   const items: PostMeta[] = files
     .map((file) => {
       const slug = file.replace(/\.mdx?$/i, "");
-      const raw = fs.readFileSync(path.join(BLOG_DIR, file), "utf8");
+      const raw = fs.readFileSync(path.join(dir, file), "utf8");
       const { data, content } = matter(raw);
       const fm = data as Record<string, unknown>;
 
-      if (!includeDrafts && fm.draft === true) return null;
-
+      // Filter out files starting with '_' (drafts) and files explicitly marked as draft
+      if (!includeDrafts && (fm.draft === true || slug.startsWith('_'))) return null;
+      
       const title = (typeof fm.title === "string" && fm.title.trim()) || toTitle(slug);
       const firstPara = (content || "").split(/\r?\n\r?\n/).find(Boolean) ?? "";
       const excerpt = (typeof fm.excerpt === "string" && fm.excerpt.trim()) || smartExcerpt(firstPara, 180);
@@ -158,6 +175,9 @@ export function getAllPosts(options: GetAllOptions = {}): PostMeta[] {
         category: typeof fm.category === "string" ? fm.category : undefined,
         author,
         tags: normalizeTags(fm.tags),
+        summary: typeof fm.summary === "string" ? fm.summary : undefined,
+        location: typeof fm.location === "string" ? fm.location : undefined,
+        subtitle: typeof fm.subtitle === "string" ? fm.subtitle : undefined,
 
         // framing hints
         coverAspect: pickCoverAspect(fm.coverAspect),
@@ -177,9 +197,4 @@ export function getAllPosts(options: GetAllOptions = {}): PostMeta[] {
   });
 
   return typeof limit === "number" && limit > 0 ? items.slice(0, limit) : items;
-}
-
-/** Convenience for feeds/landing pages */
-export function getLatestPosts(limit = 3): PostMeta[] {
-  return getAllPosts({ limit });
 }

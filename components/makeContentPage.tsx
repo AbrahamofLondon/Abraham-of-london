@@ -2,7 +2,7 @@
 import * as React from "react";
 import Head from "next/head";
 import MDXRenderer from "./MDXRenderer";
-import { MdxComponents } from "./MdxComponents"; // Assuming you have this type from MdxComponents.tsx
+import mdxComponents from "@/components/mdx-components";
 
 // ------------------------------
 // Type Definitions
