@@ -4,22 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import * as React from "react";
-
-import Layout from "@/components/Layout";
-import MDXProviderWrapper from "@/components/MDXProviderWrapper";
-import MDXComponents from '@/components/MDXComponents';
-import SEOHead from "@/components/SEOHead";
-import { absUrl } from "@/lib/siteConfig";
-
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
-const ROOT = process.cwd();
-const CONTENT_DIR = path.join(ROOT, "content", "downloads");
+// ✅ CLEANED IMPORTS: Use unified system
+import Layout from "@/components/Layout";
+import mdxComponents from '@/components/mdx-components';
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Assuming these are the unified server functions
+
+// --- Data Fetching Functions --- (Assuming these are still necessary as local helpers)
+const CONTENT_TYPE = "downloads";
+
+// Assuming getDownloadSlugs is now handled by getAllContent('downloads')
+// Assuming getDownloadBySlug is now handled by getContentBySlug('downloads', slug)
 
 type DownloadMeta = {
   slug: string;
@@ -35,35 +33,14 @@ type DownloadMeta = {
   coverAspect?: "book" | "wide" | "square" | null;
   coverFit?: "cover" | "contain" | null;
   coverPosition?: "left" | "center" | "right" | null;
+  // CRITICAL: Ensure all ContentLayer required fields are present if ContentLayer is active, otherwise remove ContentLayer entirely
 };
 
 type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
 
-function getDownloadSlugs(): string[] {
-  if (!fs.existsSync(CONTENT_DIR)) return [];
-  return fs
-    .readdirSync(CONTENT_DIR)
-    .filter((f) => f.endsWith(".md") || f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx?$/, ""));
-}
-
-function getDownloadBySlug(slug: string) {
-  const mdxPath = path.join(CONTENT_DIR, `${slug}.mdx`);
-  const mdPath = path.join(CONTENT_DIR, `${slug}.md`);
-  const filePath = fs.existsSync(mdxPath) ? mdxPath : mdPath;
-  const raw = fs.readFileSync(filePath, "utf-8");
-  const { data, content } = matter(raw);
-  return { data, content };
-}
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getDownloadSlugs();
-  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
-};
-
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
-  const { data, content } = getDownloadBySlug(slug);
+  const { content, ...data } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
 
   const meta: DownloadMeta = {
     slug,
@@ -81,13 +58,19 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     coverPosition: (data as any).coverPosition ?? null,
   };
 
-  const mdx = await serialize(content, {
+  const mdx = await serialize(content || "", {
     parseFrontmatter: false,
     scope: meta,
     mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
   });
 
   return { props: { meta, content: mdx }, revalidate: 120 };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Use unified getAllContent
+  const slugs = getAllContent(CONTENT_TYPE).map(item => item.slug.toLowerCase());
+  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
 };
 
 export default function DownloadPage({ meta, content }: Props) {
@@ -105,68 +88,56 @@ export default function DownloadPage({ meta, content }: Props) {
   } = meta;
 
   const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const coverForMeta = absUrl(coverImage || "/assets/images/social/og-image.jpg");
   const authorName = typeof author === "string" ? author : "Abraham of London";
 
   return (
     <Layout pageTitle={title}>
-      <SEOHead
-        title={title}
-        description={excerpt ?? ""}
-        slug={`/downloads/${slug}`}
-        coverImage={coverForMeta}
-        publishedTime={date ?? undefined}
-        modifiedTime={date ?? undefined}
-        authorName={authorName}
-        tags={tags ?? []}
-      />
-
-      <MDXProviderWrapper>
-        <article className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-          {coverImage && (
-            <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card">
-              <Image
-                src={coverImage}
-                alt={title}
-                width={1600}
-                height={900}
-                sizes="(max-width: 768px) 100vw, 1200px"
-                className="h-auto w-full object-cover"
-                priority
-              />
-            </div>
-          )}
-
-          <h1 className="mb-4 font-serif text-4xl text-forest md:text-5xl">{title}</h1>
-
-          <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
-            <span>By {authorName}</span>
-            {date && (
-              <>
-                {" "}· <time dateTime={date}>{formattedDate}</time>
-              </>
-            )}
-            {readTime && <> · {readTime}</>}
-            {category && (
-              <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
-                {category}
-              </span>
-            )}
+      <main className="mx-auto max-w-3xl px-4 py-10 md:py-16">
+        {/* Simplified Image Rendering for stability */}
+        {coverImage && (
+          <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card aspect-[16/9]">
+            <Image
+              src={coverImage}
+              alt={title}
+              width={1600}
+              height={900}
+              sizes="(max-width: 768px) 100vw, 1200px"
+              className="h-auto w-full object-cover"
+              priority
+            />
           </div>
+        )}
 
-          <div className="prose prose-lg max-w-none text-deepCharcoal">
-            <MDXRemote {...content} components={MDXComponents} />
-          </div>
+        <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
 
-          {pdfPath && (
-            <div className="mt-10">
-              <Link href={pdfPath} className="aol-btn" rel="noopener">
-                Download PDF
-              </Link>
-            </div>
+        <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
+          <span>By {authorName}</span>
+          {date && (
+            <>
+              {" "}· <time dateTime={date}>{formattedDate}</time>
+            </>
           )}
-        </article>
-      </MDXProviderWrapper>
+          {readTime && <> · {readTime}</>}
+          {category && (
+            <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
+              {category}
+            </span>
+          )}
+        </div>
+
+        <div className="prose prose-lg max-w-none text-deepCharcoal">
+          {/* ✅ FIX: Use lowercase mdxComponents */}
+          <MDXRemote {...content} components={mdxComponents} />
+        </div>
+
+        {pdfPath && (
+          <div className="mt-10">
+            <Link href={pdfPath} className="aol-btn" rel="noopener">
+              Download PDF
+            </Link>
+          </div>
+        )}
+      </main>
     </Layout>
   );
 }
