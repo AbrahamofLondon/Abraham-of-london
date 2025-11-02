@@ -5,6 +5,7 @@ import * as React from 'react';
 
 // --- Fixing Module Not Found Errors (Defining Imports) ---
 // These dynamic imports MUST point to actual component files in your repository.
+// The error confirms the build cannot resolve these paths.
 
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
@@ -17,7 +18,7 @@ const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false }); // Needs to be defined
 
-// Components that were MISSING (must exist as files in /components/mdx/):
+// Components that caused Fatal Module Not Found Errors:
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
