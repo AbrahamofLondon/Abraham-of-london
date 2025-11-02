@@ -437,7 +437,7 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
             </section>
         </Layout>
     );
-}   </Layout>
+};  </Layout>
     );
 }/Layout>
     );
