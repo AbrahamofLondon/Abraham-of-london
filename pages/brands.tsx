@@ -1,12 +1,10 @@
-// pages/brands.tsx
+// pages/brands.tsx (FINAL ROBUST VERSION)
 
 import React, { useMemo } from "react";
-// Removed Next/Head as we'll use the custom SEOHead component
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useSpring, type Variants } from "framer-motion";
 import Layout from "@/components/Layout";
-// ✅ Using SEOHead for cleaner metadata management
 import SEOHead from "@/components/SEOHead"; 
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import { sanitizeSocialLinks } from "@/lib/social";
@@ -46,7 +44,7 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.2 }, // Slightly longer stagger
+    transition: { staggerChildren: 0.15, delayChildren: 0.2 },
   },
 };
 
@@ -56,7 +54,7 @@ const itemVariants: Variants = {
     y: 0,
     opacity: 1,
     scale: 1,
-    transition: { type: "spring" as const, stiffness: 120, damping: 18 }, // Tighter spring
+    transition: { type: "spring" as const, stiffness: 120, damping: 18 },
   },
 };
 
@@ -64,7 +62,6 @@ const itemVariants: Variants = {
 function useParallax() {
   const { scrollYProgress } = useScroll();
   const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  // Increased effect: 0% to 35% movement
   const yBg = useTransform(smooth, [0, 1], ["0%", "35%"]); 
   return { yBg };
 }
@@ -76,6 +73,7 @@ export default function BrandsPage() {
 
   // Filter main ventures to display, putting featured one first
   const ventures = useMemo(() => {
+      // ✅ ROBUST FILTER: Ensure logic is clean
       const featured = BRANDS.filter(b => b.featured);
       const standard = BRANDS.filter(b => !b.featured);
       return [...featured, ...standard];
@@ -96,7 +94,6 @@ export default function BrandsPage() {
       "@id": `${siteConfig.siteUrl}/#organization`,
       name: siteConfig.title,
       url: siteConfig.siteUrl,
-      // Assuming asset name for core logo
       logo: absUrl("/assets/images/logo/abraham-of-london-logo.svg"), 
       description:
         "The core brand representing personal work, vision, and philosophy—foundation for thought leadership, strategic advisory, and creative ventures.",
@@ -136,7 +133,6 @@ export default function BrandsPage() {
 
   return (
     <Layout>
-      {/* ✅ UPGRADE: Using SEOHead component */}
       <SEOHead
         title={pageTitle}
         description={pageDesc}
@@ -159,7 +155,6 @@ export default function BrandsPage() {
           {/* Parent brand card (AOL) */}
           <motion.section
             id="abraham-of-london"
-            // ✅ UPGRADE: Using theme colors: text-deepCharcoal, bg-white, shadow-xl
             className="relative mb-16 overflow-hidden rounded-3xl bg-white p-8 shadow-xl md:p-12" 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -226,13 +221,11 @@ export default function BrandsPage() {
                 <motion.div
                   key={brand.name}
                   variants={itemVariants}
-                  whileHover={{ scale: 1.03 }} // Reduced hover scale slightly for less distraction
-                  // ✅ UPGRADE: Using theme colors and border for a polished look
+                  whileHover={{ scale: 1.03 }}
                   className="relative transform rounded-3xl border border-lightGrey bg-white p-8 shadow-card transition-all duration-300 hover:shadow-cardHover" 
                 >
                   <a
                     href={brand.url}
-                    // Use target=_blank only if not an internal link
                     target={brand.url.startsWith("/") ? "_self" : "_blank"} 
                     rel={brand.url.startsWith("/") ? undefined : "noopener noreferrer"}
                     className="block"
@@ -249,14 +242,11 @@ export default function BrandsPage() {
                     </div>
                     <div className="text-center">
                       <h3 className="mb-2 text-2xl font-bold text-deepCharcoal">{brand.name}</h3>
-                      {/* ❌ FIX: Explicitly wrap the opacity value in square brackets to pass Tailwind checks. */}
                       <p className="mb-4 text-[color:var(--color-on-secondary)]/[0.9]">{brand.description}</p>
                       <div className="flex flex-wrap justify-center gap-2">
                         {brand.tags.map((tag) => (
                           <span
                             key={tag}
-                            // ✅ UPGRADE: Using theme colors for tags
-                            // ❌ FIX: Explicitly wrap the opacity value in square brackets to pass Tailwind checks.
                             className="rounded-full bg-warmWhite px-3 py-1 text-sm font-medium text-[color:var(--color-on-secondary)]/[0.8]"
                           >
                             {tag}
@@ -275,7 +265,6 @@ export default function BrandsPage() {
 
           {/* Call to action */}
           <motion.section
-            // ✅ UPGRADE: Using theme colors (bg-forest, text-cream)
             className="rounded-3xl bg-forest p-8 text-center text-cream shadow-xl md:p-12" 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -289,7 +278,6 @@ export default function BrandsPage() {
             </p>
             <Link
               href="/contact"
-              // ✅ UPGRADE: Using theme colors for reverse button (bg-cream, text-forest)
               className="aol-btn aol-btn-secondary inline-block rounded-full bg-cream px-8 py-3 font-bold text-forest shadow-lg transition-colors duration-300 hover:bg-lightGrey" 
               prefetch={false}
             >
