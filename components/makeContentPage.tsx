@@ -1,8 +1,9 @@
-// components/makeContentPage.tsx
+// components/makeContentPage.tsx (ROBUST TYPE FIX)
 import * as React from "react";
 import Head from "next/head";
 import MDXRenderer from "./MDXRenderer";
-import mdxComponents from "@/components/mdx-components";
+// CRITICAL FIX: Import MDXRemoteProps to define the MdxComponents type
+import { MDXRemoteProps } from "next-mdx-remote"; 
 
 // ------------------------------
 // Type Definitions
@@ -16,6 +17,9 @@ export interface ContentDocument {
   body?: { code: string };
   // Extend this type with any other common metadata fields (e.g., date, author)
 }
+
+// 🎯 CRITICAL FIX: Define the missing MdxComponents type using MDXRemoteProps
+export type MdxComponents = MDXRemoteProps['components'];
 
 // Type for the options passed to the HOC function
 export interface MakeContentPageOptions {
@@ -55,9 +59,6 @@ export function makeContentPage<T extends ContentDocument>(
         
         <article className="prose lg:prose-lg mx-auto px-4 py-10">
           <h1>{doc.title}</h1>
-          {/* Pass components to the MDXRenderer so custom MDX elements 
-            (like <Callout>) are rendered correctly.
-          */}
           {doc.body?.code && <MDXRenderer code={doc.body.code} components={components} />}
         </article>
       </>
