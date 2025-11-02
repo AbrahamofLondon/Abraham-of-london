@@ -1,8 +1,8 @@
-// lib/server/events-data.ts (FINAL SYNCHRONIZED VERSION)
+// lib/server/events-data.ts (CRITICAL FINAL FIX - Removing Duplicates)
 
-import { allEvents } from "contentlayer/generated"; // Assuming successful Contentlayer integration
-import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
-
+// You must keep this import to use it in other files (like pages/events/[slug].tsx)
+import { getDownloadsBySlugs } from "@/lib/server/downloads-data"; 
+import { allEvents } from "contentlayer/generated";
 // NOTE: EventMeta and ResourceLink types must be defined in your separate types/event.ts file
 
 // ----------------------------------------------------
@@ -33,7 +33,6 @@ export function getEventSlugs(): string[] {
     const events = getAllEvents([]); 
     if (!Array.isArray(events)) return []; 
     
-    // Ensure slug is a string before using map
     return events.map((event) => event.slug).filter(Boolean);
 }
 
@@ -44,35 +43,12 @@ export function getEventBySlug(slug: string, fields: string[]): (EventMeta & { c
     const allEvents = getAllEvents(fields);
     const doc = allEvents.find((event) => event.slug === slug) || null;
     
-    // In a production app, content is usually attached by Contentlayer/MDX serialization.
-    // For local dev/testing, ensure content is available if needed.
-    // NOTE: This placeholder assumes 'content' is part of the Contentlayer structure or handled elsewhere.
-    if (doc) {
-        // Since we are inside the server-side utility, we can augment the document here if needed.
-        // For simplicity, we return the found document.
-        return doc; 
-    }
-
-    return null;
+    // NOTE: This assumes 'content' is attached by Contentlayer or ignored by this utility.
+    return doc; 
 }
 
-// --- Placeholder/Utility Functions (Keep these as separate imports in your actual file) ---
-
-export function getDownloadsBySlugs(
-  slugs: string[],
-  fields: string[]
-): DownloadMeta[] {
-  // NOTE: This function needs to be correctly implemented to read your downloads folder.
-  // Assuming this is imported from lib/server/downloads-data.ts
-  return []; // Placeholder return
-}
-
-export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
-  // NOTE: Keep your robust logic from the previous step here
-  return events; 
-}
-
-export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
-    // NOTE: Keep your robust logic from the previous step here
-    return { downloads: 0, reads: 0 };
-}
+// ----------------------------------------------------
+// DELETE all other utility functions (dedupeEventsByTitleAndDay, getEventResourcesSummary, 
+// and especially the duplicate getDownloadsBySlugs implementation) if they are 
+// defined later in this file. They belong in a separate utility file.
+// ----------------------------------------------------
