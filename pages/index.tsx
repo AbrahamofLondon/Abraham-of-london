@@ -1,4 +1,4 @@
-// pages/index.tsx (FINAL ABSOLUTELY ROBUST VERSION)
+// pages/index.tsx (ABSOLUTELY CLEAN SYNCHRONIZED VERSION)
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -15,7 +15,6 @@ import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
 import DownloadsGrid from "@/components/downloads/DownloadsGrid";
 import { getActiveBanner } from "@/lib/hero-banners";
-// Import unified data fetching functions
 import { getAllPosts, getAllContent } from "@/lib/mdx"; 
 import { getAllBooks } from "@/lib/books"; 
 import {
@@ -24,20 +23,6 @@ import {
 } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads"; 
-
-// --- DUMMY COMPONENTS (For robust rendering when live components are complex) ---
-// NOTE: These placeholder components ensure the JSX below is safe even if the actual component fails.
-const DownloadsGridPlaceholder = ({ items, columns, className }) => (
-    <ul className={`grid gap-6 grid-cols-1 sm:grid-cols-${columns}`}>
-        {items.map(item => (
-            <li key={item.slug} className="p-4 border rounded-lg bg-gray-50 text-sm">
-                {item.title} ({item.size})
-            </li>
-        ))}
-    </ul>
-);
-// -----------------------------------------------------------------------------------
-
 
 /* ── banner types ── */
 type BannerCTA = { label: string; href: string };
@@ -88,14 +73,14 @@ type HomeProps = {
     booksCount: number; 
     eventsTeaser: EventsTeaser;
     downloads: DownloadItem[]; 
-    resources: PostMeta[]; // Assuming generic content structure
+    resources: PostMeta[];
 };
 
 // -----------------------------------------------------------------------------------
-// 1) CRITICAL FIX: getStaticProps - Feeds data into Homepage widgets
+// 1) getStaticProps - Feeds data into Homepage widgets
 // -----------------------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-    // Downloads: Fetch 6-8 items for display
+    // Downloads and Resources
     const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 6) as DownloadItem[];
     const resources = getAllContent("resources", { includeDrafts: false }).slice(0, 6) as PostMeta[];
 
@@ -103,7 +88,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     const allPosts = getAllPosts();
     const limitedPosts = allPosts.slice(0, 3);
     const safePosts = limitedPosts.map((p) => ({
-        // Ensure all props are safe for SSR serialization
         ...p,
         excerpt: p.excerpt ?? null,
         date: p.date ?? null,
@@ -119,7 +103,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     const postsCount = allPosts.length;
 
 
-    // Events: Fetch, deduplicate, filter for upcoming, and sort
+    // Events: Filter for upcoming, sort by date (soonest first), and limit to 3
     const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources", "heroImage"]);
     const deduped = dedupeEventsByTitleAndDay(rawEvents);
 
@@ -138,7 +122,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
             reads: resources.reads ?? null,
         } : null;
 
-        return {
+        return { // <- Explicit return for object
             slug: e.slug,
             title: e.title,
             date: e.date,
@@ -146,13 +130,13 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
             description: e.summary ?? null,
             tags: Array.isArray(e.tags) ? e.tags : null,
             heroImage,
-            resources: safeResources,
-        } as EventsTeaserItem; // Type assertion for final safety
+            resources: safeResources, 
+        } as EventsTeaserItem; 
     });
 
     const booksCount = getAllBooks(["slug"]).length;
 
-    // CRITICAL: Ensure ALL props are returned and are JSON serializable
+    // CRITICAL: This entire block must close cleanly.
     return { 
         props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
         revalidate: 3600 
@@ -338,7 +322,6 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                     </header>
                     
                     {downloads.length > 0 ? (
-                        // Use the actual DownloadsGrid component
                         <DownloadsGrid items={downloads} columns={2} className="mt-2" />
                     ) : (
                          <p className="text-sm text-[color:var(--color-on-secondary)/0.7] mt-2">No downloads are currently available.</p>
@@ -383,77 +366,60 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
             </section>
 
             {/* Ventures and Closing CTA sections remain the same */}
-        </Layout>
-    );
-}
+            <section className="bg-white px-4 py-16">
+                <div className="mx-auto max-w-7xl">
+                    <header className="mb-8">
+                        <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
+                        <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
+                            A portfolio built on craftsmanship, stewardship, and endurance.
+                        </p>
+                    </header>
 
-// NOTE: The previous SyntaxError was likely due to code outside of the function body.
-// The code below is the correct, fixed version of getStaticProps.
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-    // Downloads and Resources
-    const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 6) as DownloadItem[];
-    const resources = getAllContent("resources", { includeDrafts: false }).slice(0, 6) as PostMeta[];
+                    <div className="grid gap-6 md:grid-cols-3">
+                        <Link href="/ventures?brand=alomarada" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+                            <div className="flex items-center justify-between">
+                                <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                            </div>
+                            <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                                Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
+                            </p>
+                        </Link>
 
-    // Posts: Fetch 3 featured posts
-    const allPosts = getAllPosts();
-    const limitedPosts = allPosts.slice(0, 3);
-    const safePosts = limitedPosts.map((p) => ({
-        ...p,
-        excerpt: p.excerpt ?? null,
-        date: p.date ?? null,
-        coverImage: p.coverImage ?? null,
-        readTime: p.readTime ?? null,
-        category: p.category ?? null,
-        author: p.author ?? null,
-        tags: p.tags ?? null,
-        coverAspect: p.coverAspect ?? null,
-        coverFit: p.coverFit ?? null,
-        coverPosition: p.coverPosition ?? null,
-    }));
-    const postsCount = allPosts.length;
+                        <Link href="/ventures?brand=endureluxe" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+                            <div className="flex items-center justify-between">
+                                <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                            </div>
+                            <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                                Essential goods and refined experiences—engineered to last, designed to serve.
+                            </p>
+                        </Link>
 
+                        <Link href="/about" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
+                            <div className="flex items-center justify-between">
+                                <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
+                                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                            </div>
+                            <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
+                                Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
+                            </p>
+                        </Link>
+                    </div>
+                </div>
+            </section>
 
-    // Events: Filter for upcoming, sort by date (soonest first), and limit to 3
-    const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources", "heroImage"]);
-    const deduped = dedupeEventsByTitleAndDay(rawEvents);
-
-    const upcomingSorted = deduped
-        .filter((e) => onlyUpcoming(e.date))
-        .sort((a, b) => (new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()));
-
-    // CRITICAL: Construct EventsTeaser using the return keyword inside the map callback.
-    const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-        // Calculations and variable assignment
-        const baseForImage = String(e.slug).replace(/[–—].*$/, "");
-        const heroImage = e.heroImage ?? `/assets/images/events/${baseForImage}.jpg`;
-        const resources: EventResources | null = (e.resources ?? null);
-        
-        const safeResources = resources ? {
-            downloads: resources.downloads ?? null,
-            reads: resources.reads ?? null,
-        } : null;
-
-        return { // <-- Explicit return statement is used here
-            slug: e.slug,
-            title: e.title,
-            date: e.date,
-            location: e.location ?? null,
-            description: e.summary ?? null,
-            tags: Array.isArray(e.tags) ? e.tags : null,
-            heroImage,
-            resources: safeResources, 
-        } as EventsTeaserItem; // Ensure the returned object matches the final type
-    }); // <- Map function cleanly closes here
-
-    const booksCount = getAllBooks(["slug"]).length;
-
-    return { // <- Final object returned by getStaticProps
-        props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
-        revalidate: 3600 
-    };
-};                  quality={85} 
+            {/* Closing CTA */}
+            <section className="relative isolate overflow-hidden bg-deepCharcoal">
+                <div className="absolute inset-0 -z-10">
+                    <Image 
+                        src="/assets/images/cta/cta-bg.jpg" 
+                        alt="" 
+                        fill 
+                        sizes="100vw" 
+                        quality={85} 
                         className="object-cover opacity-20" 
-                        priority={false} // Since this is a closing CTA, set to false
+                        priority={false} 
                     />
                 </div>
 
@@ -464,6 +430,14 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
                     </p>
                     <div className="mt-8">
                         <Link href="/contact" className="rounded-full bg-softGold px-7 py-3 text-sm font-semibold text-deepCharcoal transition hover:brightness-95" prefetch={false}>
+                            Connect with a Strategist
+                        </Link>
+                    </div>
+                </div>
+            </section>
+        </Layout>
+    );
+}{false}>
                             Connect with a Strategist
                         </Link>
                     </div>
