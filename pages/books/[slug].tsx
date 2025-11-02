@@ -1,62 +1,114 @@
-// pages/books.tsx
-import { GetStaticProps, InferGetStaticPropsType } from "next";
+// pages/books/[slug].tsx
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
+import Image from "next/image";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import BookCard from "@/components/BookCard";
-import { getAllContent } from "@/lib/mdx"; // Import unified fetcher
+import mdxComponents from "@/components/mdx-components"; // The correct component map
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; // The unified data functions
 import type { PostMeta } from "@/types/post";
 
-type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
+const CONTENT_TYPE = "books";
 
-export const getStaticProps: GetStaticProps = async () => {
-  const allBooks = getAllContent('books');
-  // Use a map to ensure all critical string/link fields are guaranteed strings/nulls
-  const books = allBooks.map(book => {
-    // Explicitly check and convert data to be JSON-safe and prevent toLowerCase() crash
-    const safeBook = {
-        ...book,
-        slug: book.slug ?? '',
-        title: book.title ?? 'Untitled Book',
-        author: book.author ?? 'Abraham of London',
-        excerpt: book.excerpt ?? '',
-        category: book.category ?? 'General',
-        summary: book.summary ?? null, // Ensure summary is null if missing (Serialization fix)
-    };
-    return safeBook;
-  });
+// Define the shape of the props returned by getStaticProps
+type Props = { 
+  source: Awaited<ReturnType<typeof serialize>>; 
+  frontmatter: PostMeta & { pdfPath?: string | null };
+};
 
-  // Final JSON-safe stringify/parse to catch lingering issues
+
+// ----------------------------------------------------
+// ✅ CRITICAL FIX 1: getStaticPaths (Resolves the Fatal Build Crash)
+// ----------------------------------------------------
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Use the unified content fetcher to get all slugs for the 'books' type
+  const allContent = getAllContent(CONTENT_TYPE);
+  const paths = allContent.map(item => ({ 
+      params: { slug: item.slug.toLowerCase() } 
+  }));
+
   return {
-    props: { books: JSON.parse(JSON.stringify(books)) },
-    revalidate: 3600,
+    paths: paths,
+    fallback: false, // Prevents loading dynamic pages that don't exist
   };
 };
 
-export default function Books({ books }: BooksProps) {
+// ----------------------------------------------------
+// ✅ CRITICAL FIX 2: getStaticProps (Ensures Data Fetching and Serialization)
+// ----------------------------------------------------
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...rawFrontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+
+  // Use the raw frontmatter to construct a JSON-safe object
+  const frontmatter = {
+    ...rawFrontmatter,
+    // Ensure critical fields are explicitly null if undefined (Serialization safety)
+    title: rawFrontmatter.title ?? 'Untitled Book',
+    author: rawFrontmatter.author ?? 'Abraham of London',
+    date: rawFrontmatter.date ?? null,
+    excerpt: rawFrontmatter.excerpt ?? null,
+    coverImage: rawFrontmatter.coverImage ?? null,
+    summary: rawFrontmatter.summary ?? null, // Ensure summary is handled safely
+    pdfPath: (rawFrontmatter as any).pdfPath ?? null,
+    
+    // Clear any accidental undefineds with null for serialization integrity
+    ...Object.fromEntries(
+        Object.entries(rawFrontmatter).filter(([key, value]) => value !== undefined)
+        .map(([key, value]) => [key, value === undefined ? null : value])
+    )
+  };
+
+
+  if (!content) {
+    return { notFound: true };
+  }
+
+  const mdxSource = await serialize(content, { scope: frontmatter });
+
+  return { 
+    props: { source: mdxSource, frontmatter: frontmatter },
+    revalidate: 3600, // Regenerate page every hour
+  };
+};
+
+// ----------------------------------------------------
+// Page Component (Assumed to be correct)
+// ----------------------------------------------------
+export default function BookPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout pageTitle="Books">
+    <Layout>
       <Head>
-        <title>Books | Abraham of London</title>
-        <meta name="description" content="Books, memoirs, and field guides by Abraham of London." />
+        <title>{frontmatter.title} by {frontmatter.author} | Abraham of London</title>
+        <meta name="description" content={frontmatter.excerpt || frontmatter.title} />
       </Head>
-      <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-serif font-bold text-center mb-10">
-          Books
-        </h1>
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {books.map((book) => (
-            <BookCard
-              key={book.slug}
-              slug={book.slug}
-              title={book.title}
-              author={book.author}
-              excerpt={book.excerpt}
-              coverImage={book.coverImage}
-              genre={book.category} // category is guaranteed a string by getStaticProps
-            />
-          ))}
-        </div>
-      </main>
+      <article className="container mx-auto px-4 py-12">
+        <header className="mb-10 flex flex-col items-start gap-6 md:flex-row">
+          {frontmatter.coverImage && (
+            <div className="relative w-full flex-shrink-0 overflow-hidden rounded-lg shadow-2xl md:w-80 aspect-[2/3]">
+              <Image
+                src={frontmatter.coverImage}
+                alt={`Cover of ${frontmatter.title}`}
+                width={1024}
+                height={1536}
+                className="h-full w-full object-cover"
+                priority
+              />
+            </div>
+          )}
+          <div className="flex-grow">
+            <h1 className="mb-2 text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
+            <p className="mb-4 text-xl text-soft-charcoal">
+              By {frontmatter.author}
+            </p>
+          </div>
+        </header>
+        <section className="prose prose-lg max-w-none border-t border-gray-200 pt-8">
+          <MDXRemote {...source} components={mdxComponents} />
+        </section>
+      </article>
     </Layout>
   );
 }
