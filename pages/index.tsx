@@ -1,4 +1,4 @@
-// pages/index.tsx (ABSOLUTELY CLEAN SYNCHRONIZED VERSION)
+// pages/index.tsx (ABSOLUTELY CLEAN, SYNCHRONIZED AND ERROR-FREE STRUCTURE)
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -77,7 +77,7 @@ type HomeProps = {
 };
 
 // -----------------------------------------------------------------------------------
-// 1) getStaticProps - Feeds data into Homepage widgets
+// 1) getStaticProps - Feeds data into Homepage widgets (CLEAN AND CLOSED)
 // -----------------------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     // Downloads and Resources
@@ -122,7 +122,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
             reads: resources.reads ?? null,
         } : null;
 
-        return { // <- Explicit return for object
+        return { 
             slug: e.slug,
             title: e.title,
             date: e.date,
@@ -136,7 +136,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 
     const booksCount = getAllBooks(["slug"]).length;
 
-    // CRITICAL: This entire block must close cleanly.
     return { 
         props: { posts: safePosts, booksCount, eventsTeaser, downloads, resources }, 
         revalidate: 3600 
@@ -365,7 +364,7 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                 </div>
             </section>
 
-            {/* Ventures and Closing CTA sections remain the same */}
+            {/* Ventures */}
             <section className="bg-white px-4 py-16">
                 <div className="mx-auto max-w-7xl">
                     <header className="mb-8">
@@ -433,6 +432,11 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
                             Connect with a Strategist
                         </Link>
                     </div>
+                </div>
+            </section>
+        </Layout>
+    );
+}            </div>
                 </div>
             </section>
         </Layout>
