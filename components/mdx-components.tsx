@@ -16,7 +16,7 @@ const Note = dynamic(() => import('@/components/mdx/Note'), { ssr: false });
 const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
-const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false }); // Needs to be defined
+const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false }); 
 
 // Components that caused Fatal Module Not Found Errors:
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
