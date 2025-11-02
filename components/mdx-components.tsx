@@ -1,12 +1,13 @@
-// components/mdx-components.tsx
+// components/mdx-components.tsx (FULLY ROBUST FINAL VERSION)
+
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import * as React from 'react';
+import type { MDXRemoteProps } from 'next-mdx-remote'; // Ensure this type is available locally for component consumers
 
-// --- Fixing Module Not Found Errors (Defining Imports) ---
-// These dynamic imports MUST point to actual component files in your repository.
-// The error confirms the build cannot resolve these paths.
-
+// --- Import All Dynamic Modules ---
+// CRITICAL: All these paths must resolve locally. If any path is wrong, 
+// the build will fail with 'Module not found'.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -17,8 +18,6 @@ const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ss
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
 const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false }); 
-
-// Components that caused Fatal Module Not Found Errors:
 const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
 const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
@@ -41,7 +40,11 @@ const Quote: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ clas
   </blockquote>
 );
 
-const mdxComponents = {
+/**
+ * The map of components used by the MDXRenderer.
+ * NOTE: The Image component uses hardcoded width/height for default MDX rendering.
+ */
+const mdxComponents: MDXRemoteProps['components'] = {
   // Standard HTML tags
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
@@ -71,4 +74,6 @@ const mdxComponents = {
   Quote,
 };
 
+// CRITICAL FIX: Export the map explicitly and as default.
+export { mdxComponents };
 export default mdxComponents;

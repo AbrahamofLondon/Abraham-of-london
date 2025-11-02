@@ -1,5 +1,5 @@
-// pages/index.tsx
-import type { GetStaticProps } from "next";
+// pages/index.tsx (FINAL VERSION: DATA WIRED AND ROBUST)
+import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -13,14 +13,16 @@ import BookCard from "@/components/BookCard";
 import EventCard from "@/components/events/EventCard";
 import DownloadsGrid from "@/components/downloads/DownloadsGrid";
 import { getActiveBanner } from "@/lib/hero-banners";
-import { getAllPosts } from "@/lib/mdx";
-import { getAllBooks } from "@/lib/books";
+// CRITICAL: Import unified data fetching functions
+import { getAllPosts, getAllContent } from "@/lib/mdx"; 
+import { getAllBooks } from "@/lib/books"; 
 import {
-    getAllEvents,
-    // Note: getEventResourcesSummary is no longer used in the map loop as it returns counts.
+    getAllEvents, // We use this internally for complexity, but rely on Contentlayer data structure
     dedupeEventsByTitleAndDay,
 } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
+import type { DownloadItem } from "@/lib/downloads"; // Import DownloadItem type
+import { format } from "date-fns"; // For date formatting display
 
 /* ── banner types ── */
 type BannerCTA = { label: string; href: string };
@@ -57,20 +59,105 @@ type EventsTeaserItem = {
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
-type HomeProps = { posts: PostMeta[]; booksCount: number; eventsTeaser: EventsTeaser };
+// --- Data Filtering Utility ---
+function onlyUpcoming(dateString: string | undefined | null): boolean {
+  if (!dateString) return false;
+  const dt = new Date(dateString);
+  if (Number.isNaN(+dt)) return false;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return dt >= today;
+}
+// ------------------------------
 
-export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
+
+type HomeProps = { 
+    posts: PostMeta[]; 
+    booksCount: number; 
+    eventsTeaser: EventsTeaser;
+    downloads: DownloadItem[]; // Use the dynamic downloads structure
+};
+
+// -----------------------------------------------------------------------------------
+// 1) CRITICAL FIX: getStaticProps - Feeds data into Homepage widgets
+// -----------------------------------------------------------------------------------
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+    // Downloads: Fetch 6-8 items for display
+    const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 6) as DownloadItem[];
+
+    // Posts: Fetch 3 featured posts
+    const allPosts = getAllPosts();
+    const limitedPosts = allPosts.slice(0, 3);
+    const safePosts = limitedPosts.map((p) => ({
+        ...p,
+        excerpt: p.excerpt ?? null,
+        date: p.date ?? null,
+        coverImage: p.coverImage ?? null,
+        readTime: p.readTime ?? null,
+        category: p.category ?? null,
+        author: p.author ?? null,
+        tags: p.tags ?? null,
+        coverAspect: p.coverAspect ?? null,
+        coverFit: p.coverFit ?? null,
+        coverPosition: p.coverPosition ?? null,
+    }));
+    const postsCount = allPosts.length;
+
+
+    // Events: Fetch, deduplicate, filter for upcoming, and sort
+    const rawEvents = getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources", "heroImage"]);
+    const deduped = dedupeEventsByTitleAndDay(rawEvents);
+
+    const upcomingSorted = deduped
+        .filter((e) => onlyUpcoming(e.date))
+        .sort((a, b) => (new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()));
+
+    // Construct EventsTeaser items using robust data mapping
+    const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
+        // Ensure image path is correctly derived
+        const baseForImage = String(e.slug).replace(/[–—].*$/, "");
+        const heroImage = e.heroImage ?? `/assets/images/events/${baseForImage}.jpg`;
+        
+        const resources: EventResources | null = (e.resources ?? null);
+        
+        const safeResources = resources ? {
+            downloads: resources.downloads ?? null,
+            reads: resources.reads ?? null,
+        } : null;
+
+        return {
+            slug: e.slug,
+            title: e.title,
+            date: e.date,
+            location: e.location ?? null,
+            description: e.summary ?? null,
+            tags: Array.isArray(e.tags) ? e.tags : null,
+            heroImage,
+            resources: safeResources,
+        };
+    });
+
+    const booksCount = getAllBooks(["slug"]).length;
+
+    return { 
+        props: { posts: safePosts, booksCount, eventsTeaser, downloads }, 
+        revalidate: 3600 
+    };
+};
+// -----------------------------------------------------------------------------------
+
+
+export default function Home({ posts, booksCount, eventsTeaser, downloads }: HomeProps) {
     const router = useRouter();
     const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
     const qSuffix = incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : "";
     const blogHref = `/blog?sort=newest${incomingQ ? `&q=${encodeURIComponent(incomingQ)}` : ""}`;
     const booksHref = `/books${qSuffix}`;
-    const postsCount = posts.length; // This is now the count of the *featured* posts (always 3 unless there are <3 total)
+    const postsCount = posts.length;
 
-    // FIX APPLIED HERE: Ensure raw is an object by using the nullish coalescing operator (?? {})
-    // This prevents the error if getActiveBanner() returns null or undefined.
     const raw = React.useMemo<BannerConfig>(() => (getActiveBanner() ?? {}) as unknown as BannerConfig, []);
     
+    // ... (Banner setup logic remains the same) ...
     const banner: Required<Pick<BannerConfig, "poster">> & Omit<BannerConfig, "poster"> = {
         poster: raw?.poster || "/assets/images/abraham-of-london-banner@2560.webp",
         videoSources:
@@ -80,12 +167,13 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                 { src: "/assets/video/brand-reel-1080p.mp4", type: "video/mp4" },
             ] as const),
         overlay: raw?.overlay ?? null,
-        mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-center",
+        mobileObjectPositionClass: raw?.mobileObjectPositionClass ?? "object-left md:object-[30%_center] lg:object-[40%_center]",
         heightClassName: raw?.heightClassName ?? "min-h-[65svh] sm:min-h-[70svh] lg:min-h-[78svh]",
     };
 
     const overlayNode: React.ReactNode =
         banner.overlay ? (
+             // ... (overlay rendering logic remains the same) ...
             <>
                 {banner.overlay.eyebrow && (
                     <span className="inline-block rounded-full border border-white/30 bg-black/30 px-3 py-1 text-[11px] uppercase tracking-[0.2em]">
@@ -114,15 +202,6 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             </>
         ) : undefined;
 
-    /* quick list for homepage downloads */
-    const downloads = React.useMemo(
-        () => [
-            { href: "/downloads/brotherhood-covenant", title: "Brotherhood Covenant (Printable)", sub: "A4 / US Letter" },
-            { href: "/downloads/leaders-cue-card",     title: "Leader’s Cue Card (A6, Two-Up)",     sub: "Pocket reference" },
-            { href: "/downloads/brotherhood-cue-card", title: "Brotherhood Cue Card" },
-        ],
-        []
-    );
 
     return (
         <Layout pageTitle="Home" hideCTA>
@@ -132,8 +211,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                     content="Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record."
                 />
                 <meta property="og:type" content="website" />
-                {/* LCP Optimization: Add fetchpriority="high" to the primary image preload */}
-                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" /> 
+                <link rel="preload" as="image" href={banner.poster} fetchPriority="high" /> 
                 {banner.videoSources?.map((s, i) => (
                     <link key={i} rel="preload" as="video" href={s.src} type={s.type} />
                 ))}
@@ -188,8 +266,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                                 key={p.slug}
                                 slug={p.slug}
                                 title={p.title}
-                                // Props passed directly from safePosts, which already handles null/undefined
-                                date={p.date ?? undefined} 
+                                date={p.date ?? undefined} 
                                 excerpt={p.excerpt ?? undefined}
                                 coverImage={p.coverImage ?? undefined}
                                 author={p.author ?? undefined}
@@ -246,8 +323,12 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                             Practical tools to help you lead with clarity.
                         </p>
                     </header>
-
-                    <DownloadsGrid items={downloads} columns={2} className="mt-2" />
+                    {/* CRITICAL FIX: Render dynamically fetched downloads */}
+                    {downloads.length > 0 ? (
+                        <DownloadsGrid items={downloads} columns={2} className="mt-2" />
+                    ) : (
+                         <p className="text-sm text-[color:var(--color-on-secondary)/0.7] mt-2">No downloads are currently available.</p>
+                    )}
                 </div>
             </section>
 
@@ -264,29 +345,27 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
                         Select sessions run as Chatham Rooms (off the record).
                     </p>
 
-                    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {eventsTeaser.map((ev) => (
-                            <li key={ev.slug}>
-                                <EventCard
-                                    slug={ev.slug}
-                                    title={ev.title}
-                                    date={ev.date}
-                                    location={ev.location ?? undefined}
-                                    description={ev.description ?? undefined}
-                                    tags={ev.tags ?? undefined}
-                                    heroImage={ev.heroImage ?? undefined}
-                                    resources={ // <-- This property structure is correct.
-                                        ev.resources
-                                            ? {
-                                                  downloads: ev.resources.downloads ?? undefined,
-                                                  reads: ev.resources.reads ?? undefined,
-                                              }
-                                            : undefined
-                                    }
-                                />
-                            </li>
-                        ))}
-                    </ul>
+                    {/* CRITICAL FIX: Render dynamically fetched events */}
+                    {eventsTeaser.length > 0 ? (
+                        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {eventsTeaser.map((ev) => (
+                                <li key={ev.slug}>
+                                    <EventCard
+                                        slug={ev.slug}
+                                        title={ev.title}
+                                        date={ev.date}
+                                        location={ev.location ?? undefined}
+                                        description={ev.summary ?? undefined}
+                                        tags={ev.tags ?? undefined}
+                                        heroImage={ev.heroImage ?? undefined}
+                                        resources={ev.resources ?? undefined}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                         <p className="text-sm text-[color:var(--color-on-secondary)/0.7]">No upcoming events scheduled at this time.</p>
+                    )}
                 </div>
             </section>
 
@@ -337,13 +416,13 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             {/* Closing CTA */}
             <section className="relative isolate overflow-hidden bg-deepCharcoal">
                 <div className="absolute inset-0 -z-10">
-                    <Image 
-                        src="/assets/images/cta/cta-bg.jpg" 
-                        alt="" 
-                        fill 
-                        sizes="100vw" 
-                        quality={85} 
-                        className="object-cover opacity-20" 
+                    <Image 
+                        src="/assets/images/cta/cta-bg.jpg" 
+                        alt="" 
+                        fill 
+                        sizes="100vw" 
+                        quality={85} 
+                        className="object-cover opacity-20" 
                         priority={false} // Since this is a closing CTA, set to false
                     />
                 </div>
@@ -362,79 +441,7 @@ export default function Home({ posts, booksCount, eventsTeaser }: HomeProps) {
             </section>
         </Layout>
     );
-}
-
-Home.displayName = "Home";
-
-/* ── SSG + ISR ── */
-export async function getStaticProps() {
-    const allPosts = getAllPosts();
-    // Optimization: Slice the array to only process and pass the 3 featured posts
-    const limitedPosts = allPosts.slice(0, 3);
-
-    // Map and sanitize ONLY the limited set of posts for serialization
-    const safePosts = limitedPosts.map((p) => ({
-        ...p,
-        excerpt: p.excerpt ?? null,
-        date: p.date ?? null,
-        coverImage: p.coverImage ?? null,
-        readTime: p.readTime ?? null,
-        category: p.category ?? null,
-        author: p.author ?? null,
-        tags: p.tags ?? null,
-        coverAspect: p.coverAspect ?? null,
-        coverFit: p.coverFit ?? null,
-        coverPosition: p.coverPosition ?? null,
-    }));
-
-    const booksCount = getAllBooks(["slug"]).length;
-
-    type MinimalEvent = { slug: string; title: string; date: string; location?: string; summary?: string; tags?: string[] };
-    // Request the 'resources' field
-    const rawEvents = await getAllEvents(["slug", "title", "date", "location", "summary", "tags", "resources"]);
-    
-    // Map the raw events into a deduplicated structure, including resources
-    const deduped = dedupeEventsByTitleAndDay(
-        rawEvents
-            .filter((e): e is MinimalEvent => Boolean((e as any)?.slug && (e as any)?.title && (e as any)?.date))
-            .map((e: any) => ({
-                slug: String(e.slug),
-                title: String(e.title),
-                date: String(e.date),
-                location: e.location ?? null,
-                summary: e.summary ?? null,
-                tags: Array.isArray(e.tags) ? e.tags : null,
-                // Include the raw resources object here, which contains the array of links
-                resources: e.resources ?? null, 
-            }))
-    );
-
-    const todayKey = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Europe/London",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-    }).format(new Date());
-
-    const upcomingSorted = deduped
-        .filter((e) => {
-            const only = /^\d{4}-\d{2}-\d{2}$/.test(e.date);
-            if (only) return e.date >= todayKey;
-            const d = new Date(e.date);
-            if (Number.isNaN(d.valueOf())) return false;
-            const key = new Intl.DateTimeFormat("en-CA", {
-                timeZone: "Europe/London",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            }).format(d);
-            return key >= todayKey;
-        })
-        .sort((a, b) => +new Date(a.date) - +new Date(b.date));
-
-    // 👇 CORRECTED LOGIC: Use 'e.resources' directly from the deduped event object.
-    const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
-        const baseForImage = String(e.slug).replace(/[–—].*$/, "");
+}Image = String(e.slug).replace(/[–—].*$/, "");
         const heroImage = `/assets/images/events/${baseForImage}.jpg`;
         
         // e.resources now holds the array of ResourceLink objects (or null) because 

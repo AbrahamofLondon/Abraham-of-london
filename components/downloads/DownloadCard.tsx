@@ -1,155 +1,127 @@
-import Image from "next/image";
+// components/downloads/DownloadCard.tsx
+import * as React from "react";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
-import React from "react";
 
-type Props = {
-  slug: string;
-  title: string;
-  date: string;
-  location?: string;
-  description?: string | null;
-  tags?: string[] | null;
-  chatham?: boolean;
-  heroImage?: string | null;
-  className?: string;
-  prefetch?: boolean;
-  timeZone?: string;
+// Import the necessary metadata structure
+import type { DownloadItem } from "@/lib/downloads";
 
-  heroFit?: "cover" | "contain";
-  heroAspect?: "16/9" | "21/9" | "3/1";
-  heroPosition?: "center" | "top" | "left" | "right";
-
-  resources?: {
-    downloads?: { href: string; label: string }[];
-    reads?: { href: string; label: string }[];
-  } | null;
+type DownloadCardProps = {
+    // These properties are required and guaranteed string/safe by getStaticProps
+    slug: string;
+    title: string;
+    excerpt: string | null;
+    coverImage: string | null;
+    fileHref: string | null; // The direct link to the actual PDF file (/downloads/file.pdf)
+    
+    // Optional metadata
+    category?: string | null;
+    size?: string; // e.g., "45 KB"
+    
+    className?: string;
 };
 
-/* ---------- per-slug presentation overrides ---------- */
-const HERO_OVERRIDES: Record<
-  string,
-  { heroFit?: Props["heroFit"]; heroAspect?: Props["heroAspect"]; heroPosition?: Props["heroPosition"] }
-> = {
-  "leadership-workshop": { heroFit: "contain", heroAspect: "3/1",  heroPosition: "top" },
-  "founders-salon":      { heroFit: "cover",   heroAspect: "21/9", heroPosition: "center" },
-};
+const DEFAULT_COVER = "/assets/images/downloads/default-download-cover.jpg";
 
-/* ---------- date helpers ---------- */
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-const isValidDate = (d: Date) => !Number.isNaN(d.valueOf());
+/**
+ * Renders a card component for a single downloadable resource (PDF/guide).
+ * Assumes data has been pre-coerced to string/null in getStaticProps.
+ */
+export default function DownloadCard({
+    slug,
+    title,
+    excerpt,
+    coverImage,
+    fileHref,
+    category,
+    size,
+    className,
+}: DownloadCardProps) {
+    
+    // The main link goes to the notes/detail page
+    const detailHref = `/downloads/${slug}`;
+    
+    // Fallback image source
+    const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER;
 
-function formatNiceDate(iso: string, tz = "Europe/London") {
-  if (isDateOnly(iso)) {
-    const [y, m, d] = iso.split("-").map(Number);
-    const dt = new Date(Date.UTC(y, m - 1, d));
-    if (!isValidDate(dt)) return iso;
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: "UTC",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(dt);
-  }
-  const dt = new Date(iso);
-  if (!isValidDate(dt)) return iso;
-  const dateStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(dt);
-  const timeStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(dt);
-  return /\b00:00\b/.test(timeStr) ? dateStr : `${dateStr}, ${timeStr}`;
-}
+    return (
+        <article
+            className={clsx(
+                "group relative overflow-hidden rounded-xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
+                "flex flex-col",
+                className
+            )}
+        >
+            {/* Image Link Block */}
+            <Link href={detailHref} prefetch={false} className="block relative w-full flex-shrink-0" tabIndex={-1}>
+                <div className="relative w-full aspect-[16/9]">
+                    <Image
+                        src={finalImageSrc}
+                        alt={`Cover image for ${title}`}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 300px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        priority={false}
+                    />
+                </div>
+            </Link>
 
-/* ---------- image helpers ---------- */
-const ensureLocal = (p?: string | null) =>
-  p && !/^https?:\/\//i.test(p) ? (p.startsWith("/") ? p : `/${p.replace(/^\/+/, "")}`) : undefined;
+            <div className="p-4 flex flex-col flex-grow">
+                {/* Title and Detail Link */}
+                <h3 className="font-serif text-lg font-semibold leading-snug text-deepCharcoal">
+                    <Link
+                        href={detailHref}
+                        prefetch={false}
+                        className="outline-none transition-colors hover:text-forest focus-visible:rounded focus-visible:ring-2 focus-visible:ring-forest/30"
+                    >
+                        {title}
+                    </Link>
+                </h3>
+                
+                {/* Metadata */}
+                <div className="mt-1 flex items-center text-xs text-gray-600 space-x-2">
+                    {category && (
+                        <span className="rounded-full bg-warmWhite px-2 py-0.5">{category}</span>
+                    )}
+                    {size && (
+                        <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">{size}</span>
+                    )}
+                </div>
 
-function useEventImageCandidates(slug: string, heroImage?: string | null) {
-  const { candidates } = React.useMemo(() => {
-    const explicit = ensureLocal(heroImage);
+                {/* Excerpt */}
+                {excerpt && (
+                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700 flex-grow">
+                        {excerpt}
+                    </p>
+                )}
 
-    const base = slug
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-    const short2 = base.split("-").slice(0, 2).join("-");
-    const short3 = base.split("-").slice(0, 3).join("-");
+                {/* CTA Buttons */}
+                <div className="mt-4 flex gap-3 flex-shrink-0">
+                    <Link
+                        href={detailHref}
+                        className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal transition-colors hover:bg-warmWhite"
+                        prefetch={false}
+                    >
+                        View Notes
+                    </Link>
 
-    const exts = ["webp", "jpg", "jpeg", "png"];
-    const from = (name: string) => exts.map((e) => `/assets/images/events/${name}.${e}`);
-
-    const list = [
-      explicit,
-      ...from(base),
-      ...from(short3),
-      ...from(short2),
-      "/assets/images/events/default.jpg",
-    ].filter(Boolean) as string[];
-
-    return { candidates: Array.from(new Set(list)) };
-  }, [slug, heroImage]);
-
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-  const onError = React.useCallback(
-    () => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i)),
-    [candidates.length]
-  );
-
-  return { src, hasAny: candidates.length > 0, onError };
-}
-
-/* ---------- component ---------- */
-export default function EventCard({
-  slug,
-  title,
-  date,
-  location,
-  description,
-  tags = null,
-  chatham,
-  className,
-  prefetch = false,
-  timeZone = "Europe/London",
-  heroImage = null,
-  heroFit,
-  heroAspect,
-  heroPosition,
-  resources = null,
-}: Props) {
-  // merge per-slug overrides first, then explicit props
-  const preset = HERO_OVERRIDES[slug] || {};
-  const _heroFit: NonNullable<Props["heroFit"]> = heroFit || preset.heroFit || "cover";
-  const _heroAspect: NonNullable<Props["heroAspect"]> = heroAspect || preset.heroAspect || "16/9";
-  const _heroPosition: NonNullable<Props["heroPosition"]> = heroPosition || preset.heroPosition || "center";
-
-  const nice = formatNiceDate(date, timeZone);
-  const titleId = React.useId();
-  const isChatham =
-    Boolean(chatham) || (Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham"));
-
-  const { src, hasAny, onError } = useEventImageCandidates(slug, heroImage);
-
-  const aspectClass =
-    _heroAspect === "21/9" ? "aspect-[21/9]" : _heroAspect === "3/1" ? "aspect-[3/1]" : "aspect-[16/9]";
-
-  const fitClass = _heroFit === "contain" ? "object-contain bg-warmWhite" : "object-cover";
-  const posClass =
-    _heroPosition === "top"
-      ? "object-top"
-      : _heroPosition === "left"
-      ? "object-left"
-      : _heroPosition === "right"
-      ? "object-right"
+                    {fileHref && (
+                        <a
+                            href={fileHref}
+                            download // Triggers browser download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream transition-colors hover:bg-deepCharcoal"
+                        >
+                            Download
+                        </a>
+                    )}
+                </div>
+            </div>
+        </article>
+    );
+}object-right"
       : "object-center";
 
   const pills: Array<{ href: string; label: string; kind: "download" | "read" }> = [];

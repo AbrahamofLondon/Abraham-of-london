@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import fsp from "fs/promises"; // Use promise-based fs
 import { constants } from "fs"; // Used for F_OK check
 import path from "path";
