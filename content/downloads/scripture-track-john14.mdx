@@ -1,44 +1,30 @@
-// content/downloads/scripture-track-john14.tsx
+---
+type: "Download"
+title: "Scripture Track — John 14"
+slug: "scripture-track-john14"
+date: "2025-10-21"
+author: "Abraham of London"
+readTime: "5 min"
+category: "Faith"
+coverImage: "/assets/images/downloads/scripture-track-john14.jpg"
+excerpt: "Assurance • Obedience • The Helper • Peace"
+subtitle: "Assurance • Obedience • The Helper • Peace"
+---
 
-import * as React from 'react';
-import BrandFrame from "../../components/print/BrandFrame";
-import EmbossedSign from "../../components/EmbossedSign"; // Assuming this path is correct
-// You would also need to import other components like PullLine if used in the rest of the content
+<h2>How to Run</h2>
+{/* Add content instructions here */}
 
-const ScriptureTrackJohn14 = () => {
+<PullLine subtle>Start with the heart, end with action.</PullLine>
 
-  const content = (
-    <div className="text-deepCharcoal">
-      
-      <h2>How to Run</h2>
-      {/* ... (rest of content) ... */}
-
-      {/* --- Signature Section with Debossed Mark --- */}
-      <div className="mt-12 pt-8 border-t border-lightGrey flex flex-col items-end">
-        <EmbossedSign
-          src="/assets/images/signature/abraham-of-london-cursive.svg"
-          alt="Abraham of London Signature"
-          width={200}
-          height={60}
-          effect="deboss"
-          baseColor="transparent"
-          className="mb-1"
-        />
-        <p className="text-sm font-serif text-forest">— Abraham of London</p>
-      </div>
-
-    </div>
-  );
-
-  return (
-    <BrandFrame
-      title="Scripture Track — John 14"
-      subtitle="Assurance • Obedience • The Helper • Peace"
-      pageSize="A4"
-    >
-      {content}
-    </BrandFrame>
-  );
-}
-
-export default ScriptureTrackJohn14;
+<div className="mt-12 pt-8 border-t border-lightGrey flex flex-col items-end">
+  <EmbossedSign
+    src="/assets/images/signature/abraham-of-london-cursive.svg"
+    alt="Abraham of London Signature"
+    width={200}
+    height={60}
+    effect="deboss"
+    baseColor="transparent"
+    className="mb-1"
+  />
+  <p className="text-sm font-serif text-deep-forest">— Abraham of London</p>
+</div>

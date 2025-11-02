@@ -1,60 +1,33 @@
-// pages/print/communication-script-bpf.tsx
+---
+type: "Download"
+title: "Communication Script — BPF"
+slug: "communication-script-bpf"
+date: "2025-10-21"
+author: "Abraham of London"
+readTime: "3 min"
+category: "Business"
+coverImage: "/assets/images/downloads/communication-script-bpf.jpg"
+excerpt: "The essential talking points for aligning a team on the plan, money, and targets for the next quarter."
+subtitle: "The essential talking points for aligning a team on the plan, money, and targets for the next quarter."
+---
 
-import BrandFrame from "../../components/print/BrandFrame";
-import EmbossedBrandMark from "../../components/EmbossedBrandMark"; // For the embossing mark
-import * as React from "react";
+<Callout title="The B-P-F Model" tone="key">
+  <ul className="list-disc pl-5">
+    <li>
+      <strong>Brief</strong> — the facts in two sentences.
+    </li>
+    <li>
+      <strong>Point</strong> — what matters and why it broke standard.
+    </li>
+    <li>
+      <strong>Forward</strong> — the decision, owner, and deadline.
+    </li>
+  </ul>
+</Callout>
 
-const CommunicationScriptBPF = () => {
-  return (
-    <BrandFrame
-      title="Communication Script — BPF"
-      subtitle="The essential talking points for aligning a team on the plan, money, and targets for the next quarter."
-      pageSize="A4"
-    >
-      <div className="mb-8 p-4 border-l-4 border-accent bg-warmWhite/70">
-        <h3 className="font-serif text-xl text-forest mb-2">The B-P-F Model</h3>
-        <p className="mb-1">
-          <strong>Brief</strong> — the facts in two sentences.
-        </p>
-        <p className="mb-1">
-          <strong>Point</strong> — what matters and why it broke standard.
-        </p>
-        <p>
-          <strong>Forward</strong> — the decision, owner, and deadline.
-        </p>
-      </div>
+## Usage Best Practices
+* Write it first, *then* say it.
+* Remove adjectives that add heat without light.
+* Finish with **Next Check-In** (date).
 
-      <h2 className="mt-8">Usage Best Practices</h2>
-      <ul className="list-disc pl-5 space-y-3">
-        <li>
-          Write it first, *then* say it.
-        </li>
-        <li>
-          Remove adjectives that add heat without light.
-        </li>
-        <li>
-          Finish with **Next Check-In** (date).
-        </li>
-      </ul>
-
-      <p className="mt-8 italic text-gray-700">
-        Includes printable sheets and examples for performance, risk, and board updates.
-      </p>
-      
-      {/* Visual Separation and Brand Mark */}
-      <div className="mt-12 text-center py-6 border-t border-b border-lightGrey/80">
-         <EmbossedBrandMark
-            src="/assets/images/abraham-logo.jpg"
-            alt="Abraham of London Official Mark"
-            width={100}
-            height={100}
-            effect="emboss"
-            className="inline-block"
-         />
-      </div>
-
-    </BrandFrame>
-  );
-};
-
-export default CommunicationScriptBPF;
+<PullLine subtle>Includes printable sheets and examples for performance, risk, and board updates.</PullLine>

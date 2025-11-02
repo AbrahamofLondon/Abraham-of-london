@@ -1,38 +1,48 @@
-// content/downloads/a6/leaders-cue-card-two-up.tsx
+---
+type: "Download"
+title: "Leader's Cue Card (Two Up)"
+slug: "leaders-cue-card-two-up"
+date: "2025-10-21"
+author: "Abraham of London"
+readTime: "1 min"
+category: "Leadership"
+coverImage: "/assets/images/downloads/leaders-cue-card-two-up.jpg"
+excerpt: "Weekly cadence, essential prompts, and crisis guardrails."
+subtitle: "Weekly cadence, essential prompts, and crisis guardrails."
+---
 
-import BrandFrame from "../../../components/print/BrandFrame";
-import EmbossedBrandMark from "../../../components/EmbossedBrandMark"; 
-import * as React from "react";
+{/* CRITICAL: The entire print content is wrapped in a BrandFrame in the print template */}
 
-// --- Metadata Definition (Crucial: Must be present for ContentLayer) ---
-export const metadata = {
-  title: "Leader's Cue Card (Two Up)",
-  slug: "leaders-cue-card-two-up",
-  date: "2025-10-21",
-  author: "Abraham of London",
-  readTime: "1 min",
-  category: "Leadership",
-  type: "download",
-  subtitle: "Weekly cadence, essential prompts, and crisis guardrails."
-};
+## Front — The Six
+<ol className="list-decimal pl-4 text-sm space-y-1">
+  <li>**Presence:** Show up—on time, eyes up.</li>
+  <li>**Truth:** Confess fast; no spin.</li>
+  <li>**Work:** Finish one thing daily.</li>
+  <li>**Steward:** Budget, save, give.</li>
+  <li>**Honor:** Dignify women & elders.</li>
+  <li>**Courage:** Do hard, right things.</li>
+</ol>
 
-const LeadersCueCardTwoUp = () => {
-  return (
-    {/* Note: The script will render this page twice on an A4 sheet if designed correctly, */}
-    {/* but the Next.js page itself must be a single component with A6 styling. */}
-    <BrandFrame
-      title={metadata.title}
-      subtitle={metadata.subtitle}
-      {/* Crucial for cue card size */}
-      pageSize="A6" 
-      {/* Smaller margins for a cue card */}
-      marginsMm={6}  
-    >
-      <div className="flex flex-col h-full">
-        {/* ... (rest of content) ... */}
-      </div>
-    </BrandFrame>
-  );
-};
+## Back — The Six
+<ol start={7} className="list-decimal pl-4 text-sm space-y-1">
+  <li>**Speech:** No gossip or slander.</li>
+  <li>**Learning:** Read, ask, practice.</li>
+  <li>**Health:** Sleep, train, simple food.</li>
+  <li>**Craft:** Build things that last.</li>
+  <li>**Service:** Lift burdens at home first.</li>
+  <li>**Faith:** Listen for God, obey promptly.</li>
+</ol>
 
-export default LeadersCueCardTwoUp;
+<div className="mt-4 flex justify-between items-end">
+  <Caption>
+    Review one standard daily. Recite the whole list weekly. A father-son pledge.
+  </Caption>
+  <EmbossedBrandMark
+    src="/assets/images/abraham-logo.jpg"
+    alt="AOL Mark"
+    width={30}
+    height={30}
+    effect="deboss"
+    baseColor="transparent"
+  />
+</div>
