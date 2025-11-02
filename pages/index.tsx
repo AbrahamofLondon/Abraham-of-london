@@ -21,7 +21,7 @@ import {
     getAllEvents, 
     dedupeEventsByTitleAndDay,
 } from "@/lib/server/events-data";
-import type { PostMeta from "@/types/post";
+import type { PostMeta } from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads"; 
 
 /* ── banner types ── */
@@ -437,7 +437,7 @@ export default function Home({ posts, booksCount, eventsTeaser, downloads, resou
             </section>
         </Layout>
     );
-}     </Layout>
+}   </Layout>
     );
 }/Layout>
     );
