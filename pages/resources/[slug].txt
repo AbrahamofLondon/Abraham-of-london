@@ -1,54 +1,62 @@
 // pages/resources/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
-// Assuming 'contentlayer/generated' provides the correct types and data
-import { allResources, type Resource } from "contentlayer/generated";
-import { makeContentPage } from "@/components/makeContentPage";
-// Import your central MDX component map
-<MDXRemote {...source} components={mdxComponents} />
+import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import Layout from "@/components/Layout";
+// ✅ CRITICAL FIX: Use the correct lowercase import name
+import mdxComponents from '@/components/mdx-components';
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
 
-// 1. Define the component's required props type
-type Props = { doc: Resource };
+const CONTENT_TYPE = "resources";
 
-// 2. Configure the wrapped page component
-// We pass the mdxComponents here so the wrapper can correctly render the content.
-const ResourceContentPage = makeContentPage<
-  // Fix the generic type: Contentlayer's 'Resource' is enough, 
-  // but we must map 'excerpt' to 'description' later.
-  Resource 
->({ 
-    // Pass the MDX components map to the wrapper
-    components: mdxComponents 
-});
-
-// 3. The Page Component
-export default function ResourcePage({ doc }: Props) {
-  // Map Contentlayer's 'excerpt' to the generic 'description' prop expected by the wrapper
-  const docWithDescription = {
-    ...doc,
-    // Use a nullish coalescing check to ensure description is set if excerpt exists
-    description: doc.excerpt ?? doc.description, 
-  };
-  
-  // Render the wrapped component, passing the mapped document data
-  return <ResourceContentPage doc={docWithDescription} />;
+interface ResourcePageProps {
+  source: MDXRemoteSerializeResult;
+  frontmatter: PostMeta;
 }
 
-// 4. Data Fetching (Static Generation)
+export default function ResourcePage({ source, frontmatter }: ResourcePageProps) {
+  return (
+    <Layout pageTitle={frontmatter.title}>
+      <Head>
+        <title>{frontmatter.title} | Resource</title>
+        <meta name="description" content={frontmatter.excerpt} />
+      </Head>
+      <main className="container mx-auto px-4 py-12">
+        <div className="border-b pb-4 mb-8">
+          <h1 className="text-4xl font-serif font-bold mb-2">{frontmatter.title}</h1>
+          <p className="text-lg text-gray-600">Category: {frontmatter.category || 'Resource'}</p>
+        </div>
+        <div className="prose prose-lg max-w-none">
+          {/* ✅ FIX: Use lowercase mdxComponents */}
+          <MDXRemote {...source} components={mdxComponents} />
+        </div>
+      </main>
+    </Layout>
+  );
+}
 
-export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: allResources
-    .filter((r) => !!r.slug)
-    // TypeScript check: we already filtered for truthy slugs, so assert non-null
-    .map((r) => ({ params: { slug: r.slug! } })),
-  fallback: false,
-});
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params!.slug as string;
+  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
+  
+  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
+  
+  return { 
+    props: { source: mdxSource, frontmatter: finalFrontmatter },
+    revalidate: 3600,
+  };
+};
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const resource = allResources.find((r) => r.slug === slug);
-  
-  if (!resource) return { notFound: true };
-  
-  // Prop name is 'doc' to match the ContentPage's expected prop
-  return { props: { doc: resource } };
+export const getStaticPaths: GetStaticPaths = async () => {
+  const allContent = getAllContent(CONTENT_TYPE);
+  const slugs = allContent.map(item => item.slug.toLowerCase());
+
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: false,
+  };
 };
