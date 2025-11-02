@@ -1,96 +1,112 @@
+// pages/index.tsx (FINAL ROBUST HOME PAGE DATA FEED)
+import * as React from "react";
+import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
-import Link from "next/link"; // Use Link for internal navigation
-import { Geist, Geist_Mono } from "next/font/google";
-import styles from "@/styles/Home.module.css"; // Assuming this path for CSS Modules
+// Assuming Layout, SEOHead, and your section components are imported correctly
+import Layout from "@/components/Layout";
+import { getAllContent } from "@/lib/mdx"; 
+import type { PostMeta } from "@/types/post"; // Assuming PostMeta is the base type
 
-// --- Font Setup ---
-// Keeping the Geist fonts as they are a modern best practice
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// --- Dummy Components for JSX Rendering (Replace with your actual components) ---
+// NOTE: Replace these with your actual imported components (e.g., DownloadsSection, EventsSection)
+const DownloadsSection = ({ items }) => (
+    <div className="my-10">
+        <h2 className="text-2xl font-bold mb-4">Downloads ({items.length})</h2>
+        <ul>{items.map(item => <li key={item.slug}>{item.title}</li>)}</ul>
+    </div>
+);
+const EventsSection = ({ items }) => (
+    <div className="my-10">
+        <h2 className="text-2xl font-bold mb-4">Upcoming Events ({items.length})</h2>
+        <ul>{items.map(item => <li key={item.slug}>{item.title} ({item.date})</li>)}</ul>
+    </div>
+);
+const ResourcesSection = ({ items }) => (
+    <div className="my-10">
+        <h2 className="text-2xl font-bold mb-4">Resources ({items.length})</h2>
+        <ul>{items.map(item => <li key={item.slug}>{item.title}</li>)}</ul>
+    </div>
+);
+const Empty = ({ blurb }) => <div className="my-10 p-5 bg-neutral-100 rounded text-center text-neutral-600">{blurb}</div>;
+// -----------------------------------------------------------------------------------
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
-// --- Component ---
+// --- Data Filtering Utility ---
+function onlyUpcoming(d: string | undefined): boolean {
+  if (!d) return false;
+  const dt = new Date(d);
+  if (Number.isNaN(+dt)) return false;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return dt >= today;
+}
 
-export default function Home() {
-  const siteName = "Abraham of London";
-  const tagline = "Principled Strategy. Durable Execution.";
+// -----------------------------------------------------------------------------------
+// 1) CRITICAL FIX: getStaticProps - Overcomes Under-feeding and Over-filtering
+// -----------------------------------------------------------------------------------
+export const getStaticProps: GetStaticProps = async () => {
+  // Downloads: Fetch up to 8 items
+  const downloads = getAllContent("downloads", { includeDrafts: false }).slice(0, 8);
+
+  // Events: Filter for upcoming, sort by date (soonest first), and limit to 6
+  const eventsAll = getAllContent("events", { includeDrafts: false });
+  const events = eventsAll
+    .filter(e => onlyUpcoming(e.date))
+    .sort((a,b) => (new Date(a.date||0).getTime() - new Date(b.date||0).getTime()))
+    .slice(0, 6);
+
+  // Resources: Fetch up to 6 resources
+  const resources = getAllContent("resources", { includeDrafts: false }).slice(0, 6);
+
+  // CRITICAL: Ensure props are JSON safe (handled by lib/mdx but added here for safety)
+  const props = { downloads, events, resources };
+
+  return { props: JSON.parse(JSON.stringify(props)), revalidate: 60 };
+};
+
+type HomeProps = InferGetStaticPropsType<typeof getStaticProps>;
+
+// -----------------------------------------------------------------------------------
+// 2) COMPONENT: Renders defensively based on fetched data
+// -----------------------------------------------------------------------------------
+export default function Home({ downloads, events, resources }: HomeProps) {
+  const pageTitle = "Abraham of London • Home";
+  const pageDesc = "Principled strategy, writing, and ventures—grounded in legacy and fatherhood.";
+
+  const showResources = resources && resources.length > 0;
 
   return (
-    <>
+    <Layout>
       <Head>
-        <title>{siteName} | {tagline}</title> {/* ✅ OVERHAUL: Changed Title */}
-        <meta name="description" content="Quiet counsel and durable execution for fathers, young founders, and enterprise teams." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
       </Head>
 
-      <div
-        className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
-      >
-        <main className={styles.main}>
-          {/* Main Hero Content */}
-          <header className={styles.header}>
-            <h1 className={styles.headline}>
-              {siteName}
-            </h1>
-            <p className={styles.tagline}>
-              {tagline}
-            </p>
-          </header>
+      <main className="container mx-auto px-4 py-12">
+        <h1 className="text-4xl font-serif font-bold mb-8">Welcome Home</h1>
 
-          <section className={styles.heroContent}>
-            <p className={styles.intro}>
-              I provide **quiet counsel** and durable execution for leaders committed to the long view: **fathers**, **young founders**, and **enterprise teams**. My focus is on clarity, stewardship, and enduring impact over fleeting noise.
-            </p>
+        {/* Downloads Section */}
+        {downloads && downloads.length > 0 ? (
+          <DownloadsSection items={downloads} />
+        ) : (
+          <Empty blurb="Downloads coming soon." />
+        )}
 
-            <div className={styles.ctas}>
-              {/* Primary Call to Action */}
-              <Link
-                href="/about"
-                className={styles.primary}
-                aria-label="Learn more about Abraham of London's principles and practice"
-              >
-                Explore the Practice →
-              </Link>
-              
-              {/* Secondary Call to Action */}
-              <Link
-                href="/contact"
-                className={styles.secondary}
-                aria-label="Contact Abraham of London for counsel or partnership"
-              >
-                Contact for Counsel
-              </Link>
-            </div>
-          </section>
-          
-          {/* Placeholder for Ventures/Highlights (optional) */}
-          <div className={styles.highlights}>
-            <p>
-              Featured in: *HBR*, *The Wall Street Journal*, *The Federalist*
-            </p>
-          </div>
+        {/* Events Section */}
+        {events && events.length > 0 ? (
+          <EventsSection items={events} />
+        ) : (
+          <Empty blurb="No upcoming events yet." />
+        )}
 
-        </main>
-        
-        {/* Simplified Footer */}
-        <footer className={styles.footer}>
-          <nav aria-label="Quick links">
-            <Link href="/blog">Writing</Link>
-            <Link href="/ventures">Ventures</Link>
-            <Link href="/contact">Contact</Link>
-            <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer">
-              Built with Next.js
-            </a>
-          </nav>
-        </footer>
-      </div>
-    </>
+        {/* Resources Section (Conditionally render based on existence) */}
+        {showResources && (
+            <ResourcesSection items={resources} />
+        )}
+
+        {/* Note: Links to /downloads/[slug] and /events/[slug] should now work because 
+            the slug is pulled from the content, not hardcoded, and the files exist. */}
+      </main>
+    </Layout>
   );
 }

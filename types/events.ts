@@ -1,66 +1,49 @@
-// ./lib/events.ts
+// types/event.ts
 
-// Define the core types needed for EventMeta
-export type ResourceLink = { href: string; label: string };
+// --- 1. Utility Type Definitions ---
+export type ResourceLink = { 
+    href: string; 
+    label: string; 
+    // Add optional fields if your data structure includes them (e.g., file size)
+};
+
 export type EventResources = {
-    downloads?: ResourceLink[] | null;
+    // FIX: Use ResourceLink type array, and allow null for serialization safety
+    downloads?: ResourceLink[] | null; 
     reads?: ResourceLink[] | null;
 };
 
-// Define the EventMeta interface
+// --- 2. Main Event Metadata Interface ---
+/**
+ * Defines the complete structure of an Event document, typically derived from 
+ * Contentlayer frontmatter and augmented by server-side fetching utilities.
+ * * NOTE: Fields are marked as optional (`?`) but explicitly allow `null` to prevent 
+ * compilation failures when data is missing during runtime serialization.
+ */
 export interface EventMeta {
+    // Required fields (enforced by Contentlayer, but marked safe by the code)
     slug: string;
     title: string;
-    date: string;
-    // Added based on previous context/sitemap requirement
+    date: string; // ISO string format (e.g., "YYYY-MM-DD")
+
+    // Optional fields (Allow null for robustness)
     endDate?: string | null; 
-    location?: string;
-    excerpt?: string;
-    summary?: string;
+    location?: string | null;
+    excerpt?: string | null;
+    summary?: string | null;
+    
+    // Image and Content Fields
     coverImage?: string | null;
     heroImage?: string | null;
-    ctaHref?: string;
-    ctaLabel?: string;
-    tags?: string[];
-    content?: string;
+    content?: string; // Raw MDX content is often included by slug fetcher
+
+    // Event Specific Fields
+    tags?: string[] | null;
     resources?: EventResources | null;
     chatham?: boolean; 
-    related?: string[];
-}
-
-export async function getAllEvents(fields?: string[]): Promise<EventMeta[]> {
-    // In a real implementation, you would use 'fields' to filter the data 
-    // being fetched from Contentlayer, but for this placeholder, we return 
-    // the full list.
-
-    // Note: The fields argument is included for compatibility with other functions
-    // like getEventBySlug, as seen in previous snippets.
-
-    return [
-        {
-            slug: "founders-salon",
-            title: "Founders Salon",
-            date: "2025-11-01",
-            location: "London",
-            summary: "A discussion for founders.",
-            heroImage: "/assets/images/events/founders-salon.jpg",
-            tags: ["salon", "leadership"],
-            chatham: true,
-            resources: {
-                downloads: [{ href: "/downloads/example.pdf", label: "Guide" }],
-                reads: [{ href: "/blog/example", label: "Article" }],
-            },
-        },
-        {
-            slug: "leadership-workshop",
-            title: "Leadership Workshop",
-            date: "2025-12-01",
-            location: "London",
-            summary: "A workshop on leadership.",
-            heroImage: "/assets/images/events/leadership-workshop.jpg",
-            tags: ["workshop", "leadership"],
-            related: ["/blog/leadership-begins-at-home", "/blog/kingdom-strategies-for-a-loving-legacy"],
-            // Note: If fields is provided, you might only return the requested fields
-        },
-    ];
+    related?: string[] | null;
+    
+    // CTA Fields
+    ctaHref?: string | null;
+    ctaLabel?: string | null;
 }
