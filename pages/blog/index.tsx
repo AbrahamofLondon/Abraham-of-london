@@ -1,25 +1,61 @@
 // pages/blog/index.tsx
 import * as React from "react";
+import { GetStaticProps } from "next"; // Only need GetStaticProps here
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 import Breadcrumb from "@/components/Breadcrumb";
 import BlogPostCard from "@/components/BlogPostCard";
-import { getAllPosts } from "@/lib/mdx";
+// ✅ CRITICAL FIX: The imported function for posts should match the exported name from lib/mdx.ts
+import { getAllPosts } from "@/lib/mdx"; 
 import type { PostMeta } from "@/types/post";
 
-type Props = { posts: PostMeta[] };
+// We use the same type from the unified lib/mdx.ts structure
+type PostData = PostMeta & { content?: string | null };
+type Props = { posts: PostData[] };
+
+// --- CRITICAL FIX: Data Serialization and Coalescing ---
+export async function getStaticProps() {
+  // Use the correctly exported function name
+  const posts = getAllPosts();
+  
+  const safe = posts.map((p) => {
+    // CRITICAL: Ensure ALL fields are explicitly checked and safely converted.
+    const safePost = {
+        ...p,
+        // Serialization fix (undefined -> null) for all optional fields used in props
+        excerpt: p.excerpt ?? null,
+        date: p.date ?? null,
+        coverImage: p.coverImage ?? null,
+        readTime: p.readTime ?? null,
+        category: p.category ?? null,
+        author: p.author ?? null,
+        tags: p.tags ?? null,
+        summary: (p as any).summary ?? null, // 🎯 FINAL FIX: Ensure 'summary' field is caught and serialized safely
+        coverAspect: (p as any).coverAspect ?? null,
+        coverFit: (p as any).coverFit ?? null,
+        coverPosition: (p as any).coverPosition ?? null,
+    };
+    return safePost;
+  });
+
+  // Final JSON-safe operation. This is now fully safe because all undefineds have been converted to null.
+  return { props: { posts: JSON.parse(JSON.stringify(safe)) }, revalidate: 60 };
+}
+// --------------------------------------------------------
 
 export default function BlogIndex({ posts }: Props) {
   const router = useRouter();
 
+  // Categories extraction is safe because p.category is guaranteed null or string
   const categories = React.useMemo(() => {
     const set = new Set<string>();
     posts.forEach((p) => p.category && set.add(p.category));
     return ["All", ...Array.from(set)];
   }, [posts]);
 
+  // Initial values setup is safe due to proper type guards and defaults
   const initialQ = typeof router.query.q === "string" ? router.query.q : "";
   const initialCat =
     typeof router.query.cat === "string" && categories.includes(router.query.cat)
@@ -50,10 +86,15 @@ export default function BlogIndex({ posts }: Props) {
     let list = posts.filter((p) => {
       const matchesCat = cat === "All" || p.category === cat;
       const needle = q.trim().toLowerCase();
+      
+      // ✅ FIX: Ensure p.title and p.excerpt are always strings before calling .toLowerCase()
+      const postTitle = p.title || '';
+      const postExcerpt = p.excerpt || '';
+
       const matchesQ =
         !needle ||
-        p.title.toLowerCase().includes(needle) ||
-        (p.excerpt ?? "").toLowerCase().includes(needle);
+        postTitle.toLowerCase().includes(needle) ||
+        postExcerpt.toLowerCase().includes(needle);
       return matchesCat && matchesQ;
     });
 
@@ -133,6 +174,7 @@ export default function BlogIndex({ posts }: Props) {
                 <BlogPostCard
                   slug={p.slug}
                   title={p.title}
+                  // All properties below are guaranteed null or string/string[] due to getStaticProps fix
                   date={p.date ?? undefined}
                   excerpt={p.excerpt ?? undefined}
                   coverImage={p.coverImage ?? undefined}
@@ -140,7 +182,6 @@ export default function BlogIndex({ posts }: Props) {
                   readTime={p.readTime ?? undefined}
                   category={p.category ?? undefined}
                   tags={p.tags ?? undefined}
-                  // Framing props → wide editorial cover by default
                   coverAspect={(p.coverAspect as any) ?? "wide"}
                   coverFit={(p.coverFit as any) ?? "cover"}
                   coverPosition={(p.coverPosition as any) ?? "center"}
@@ -158,24 +199,4 @@ export default function BlogIndex({ posts }: Props) {
       </section>
     </Layout>
   );
-}
-
-export async function getStaticProps() {
-  const posts = getAllPosts();
-  // normalize undefined → null for JSON serialization
-  const safe = posts.map((p) => ({
-    ...p,
-    excerpt: p.excerpt ?? null,
-    date: p.date ?? null,
-    coverImage: p.coverImage ?? null,
-    readTime: p.readTime ?? null,
-    category: p.category ?? null,
-    author: p.author ?? null,
-    tags: p.tags ?? null,
-    coverAspect: p.coverAspect ?? null,
-    coverFit: p.coverFit ?? null,
-    coverPosition: p.coverPosition ?? null,
-  }));
-
-  return { props: { posts: safe }, revalidate: 60 };
 }
