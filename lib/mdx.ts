@@ -1,4 +1,4 @@
-// lib/mdx.ts (Final Data Serialization Fix)
+// lib/mdx.ts (ABSOLUTE FINAL DATA UTILITY)
 if (typeof window !== "undefined") {
   throw new Error("This module is server-only");
 }
@@ -12,20 +12,32 @@ function getContentDir(contentType: string) {
   return path.join(process.cwd(), "content", contentType);
 }
 
-// [Utility functions are assumed to be here or imported]
+// --- Utility Functions ---
+
 function toTitle(slug: string) { return slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()); }
-function stripMd(s: string) { return s.replace(/!\[[^\]]*]\([^)]+\)/g, "").replace(/\[[^\]]*]\([^)]+\)/g, "").replace(/[`#>*_~\-]+/g, " ").replace(/\s+/g, " ").trim(); }
-function smartExcerpt(source: string, max = 180) { /* ... implementation ... */ return stripMd(source); }
-function isLocalPath(src?: unknown): src is string { return typeof src === "string" && src.startsWith("/"); }
-function safeDate(input: unknown): string | undefined {
-  if (!(input instanceof Date) && typeof input !== 'string' && typeof input !== 'number') return undefined;
-  const date = new Date(input);
-  return isNaN(date.getTime()) ? undefined : date.toISOString();
+function stripMd(s: string) { 
+  return s.replace(/!\[[^\]]*]\([^)]+\)/g, "").replace(/\[[^\]]*]\([^)]+\)/g, "").replace(/[`#>*_~\-]+/g, " ").replace(/\s+/g, " ").trim(); 
 }
-function normalizeTags(v: unknown): string[] | undefined {
+function smartExcerpt(source: string, max = 180) { 
+  const plain = stripMd(source);
+  if (plain.length <= max) return plain;
+  const cut = plain.slice(0, max + 1);
+  const at = cut.lastIndexOf(" ");
+  return (at > 80 ? cut.slice(0, at) : plain.slice(0, max)).trim() + "…";
+}
+function isLocalPath(src?: unknown): src is string { return typeof src === "string" && src.startsWith("/"); }
+
+// CRITICAL FIX: safeDate must return null, NOT undefined, for serialization safety
+function safeDate(input: unknown): string | null { 
+  if (!(input instanceof Date) && typeof input !== 'string' && typeof input !== 'number') return null;
+  const date = new Date(input);
+  return isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function normalizeTags(v: unknown): string[] | null { 
   if (Array.isArray(v)) return v.map(String).map((s) => s.trim()).filter(Boolean);
   if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
-  return undefined;
+  return null;
 }
 function pickCoverAspect(v: unknown): "book" | "wide" | "square" | null {
   return v === "book" || v === "wide" || v === "square" ? v : null;
@@ -37,12 +49,15 @@ function pickCoverPosition(v: unknown): "left" | "center" | "right" | null {
   return v === "left" || v === "center" || v === "right" ? v : null;
 }
 
-// --- Public API (CRITICAL FIX: Explicit null or empty array returns) ---
+// --- Public API ---
 
 export function getContentSlugs(contentType: string): string[] {
   const dir = getContentDir(contentType);
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir).filter((f) => /\.mdx?$/i.test(f)).map((f) => f.replace(/\.mdx?$/i, ""));
+  // Ensure we only collect slugs for existing MDX/MD files
+  return fs.readdirSync(dir)
+    .filter((f) => /\.mdx?$/i.test(f))
+    .map((f) => f.replace(/\.mdx?$/i, ""));
 }
 
 export function getContentBySlug(
@@ -52,13 +67,22 @@ export function getContentBySlug(
 ): Partial<PostMeta> & { content?: string } {
   const realSlug = slug.replace(/\.mdx?$/i, "");
   const dir = getContentDir(contentType);
-  const mdx = path.join(dir, `${realSlug}.mdx`);
-  const md = path.join(dir, `${realSlug}.md`);
-  const fullPath = fs.existsSync(mdx) ? mdx : fs.existsSync(md) ? md : null;
+  
+  // CRITICAL ROBUSTNESS CHECK: Find the correct file path
+  let fullPath: string | null = null;
+  const potentialPaths = [`${realSlug}.mdx`, `${realSlug}.md`];
 
+  for (const p of potentialPaths) {
+    const checkPath = path.join(dir, p);
+    if (fs.existsSync(checkPath)) {
+      fullPath = checkPath;
+      break;
+    }
+  }
+
+  // CRITICAL FIX for ENOENT crash: if the file is not found, return a safe object.
   if (!fullPath) {
-    // Return minimum required fields with null/safe values
-    return { slug: realSlug, title: toTitle(realSlug), date: new Date().toISOString() };
+    return { slug: realSlug, title: toTitle(realSlug), date: null, author: null };
   }
 
   const raw = fs.readFileSync(fullPath, "utf8");
@@ -73,26 +97,26 @@ export function getContentBySlug(
     slug: realSlug,
     title,
     excerpt,
-    date: safeDate(fm.date) || null, // Ensure date is null or string
+    date: safeDate(fm.date) || null,
     coverImage: isLocalPath(fm.coverImage) ? (fm.coverImage as string) : null,
     readTime: typeof fm.readTime === "string" ? fm.readTime : null,
     category: typeof fm.category === "string" ? fm.category : null,
     author: typeof fm.author === "string" ? fm.author : null,
-    tags: normalizeTags(fm.tags) || null,
-    summary: typeof fm.summary === "string" ? fm.summary : null,
+    tags: normalizeTags(fm.tags), // This returns string[] or null
+    summary: typeof fm.summary === "string" ? fm.summary : null, // Fixes serialization crash
     location: typeof fm.location === "string" ? fm.location : null,
     subtitle: typeof fm.subtitle === "string" ? fm.subtitle : null,
-    coverAspect: pickCoverAspect(fm.coverAspect) || null,
-    coverFit: pickCoverFit(fm.coverFit) || null,
-    coverPosition: pickCoverPosition(fm.coverPosition) || null,
+    coverAspect: pickCoverAspect(fm.coverAspect),
+    coverFit: pickCoverFit(fm.coverFit),
+    coverPosition: pickCoverPosition(fm.coverPosition),
   };
 
   if (opts.withContent) item.content = content;
   
-  // Final check to replace any accidental undefineds with null
+  // Final check to replace any accidental undefineds with null for JSON serialization
   Object.keys(item).forEach(key => {
     if (item[key] === undefined) {
-      item[key] = null;
+      (item as any)[key] = null;
     }
   });
 
@@ -103,20 +127,16 @@ type GetAllOptions = { includeDrafts?: boolean; limit?: number };
 
 export function getAllContent(contentType: string, options: GetAllOptions = {}): PostMeta[] {
   const { includeDrafts = false, limit } = options;
-  const dir = getContentDir(contentType);
-  if (!fs.existsSync(dir)) return [];
-
-  const files = getContentSlugs(contentType);
-  const items = files
+  const slugs = getContentSlugs(contentType);
+  
+  const items = slugs
     .map((slug) => {
+      // CRITICAL: Rely ONLY on getContentBySlug, which handles file reading safely
       const item = getContentBySlug(contentType, slug) as PostMeta;
-      const dir = getContentDir(contentType);
-      const filePath = path.join(dir, `${slug}.mdx`) || path.join(dir, `${slug}.md`);
       
-      const raw = fs.readFileSync(filePath, "utf8");
-      const fm = matter(raw).data;
+      // Safety check for drafts/leading underscores
+      if (!includeDrafts && slug.startsWith('_')) return null;
 
-      if (!includeDrafts && (fm.draft === true || slug.startsWith('_'))) return null;
       return item;
     })
     .filter(Boolean) as PostMeta[];

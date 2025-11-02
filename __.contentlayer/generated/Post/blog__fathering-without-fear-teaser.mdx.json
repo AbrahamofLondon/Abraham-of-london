@@ -1,0 +1,39 @@
+{
+  "title": "Fathering Without Fear — Teaser",
+  "slug": "fathering-without-fear-teaser",
+  "date": "2025-06-15",
+  "author": "Abraham of London",
+  "readTime": "4 min read",
+  "category": "Memoir",
+  "tags": [
+    "memoir",
+    "faith",
+    "fatherhood",
+    "purpose",
+    "legacy"
+  ],
+  "coverImage": "/assets/images/blog/fathering-without-fear-teaser.jpg",
+  "description": "A razor-sharp preview of the field-memoir forged in courts and prayer rooms—grace as a weapon, presence under pressure, and a father’s refusal to disappear.",
+  "ogTitle": "Fathering Without Fear — Teaser",
+  "ogDescription": "A father’s field-memoir for men who refuse to disappear. Read the teaser & grab the PDFs.",
+  "socialCaption": "A father’s fight through fire—grace as a weapon, presence under pressure. Read the teaser. #FatheringWithoutFear #Legacy #Faith",
+  "excerpt": "“If You give me my life back, I’ll serve You until I’m seventy-five…” Some promises demand a price greater than we imagine.",
+  "coverAspect": "book",
+  "coverFit": "cover",
+  "coverPosition": "center",
+  "draft": false,
+  "body": {
+    "raw": "import ResourcesCTA from '@/components/ResourcesCTA';\nimport BrandFrame from '@/components/BrandFrame';\n\n<ResourcesCTA pdfs={[{ href: \"/downloads/Fathering_Without_Fear.pdf\", title: \"Fathering Guide\" }]} />\n<BrandFrame title=\"Legacy Tips\" subtitle=\"Key Advice\">\n  Content here\n</BrandFrame>\n\n<HeroEyebrow>Teaser · Field Memoir</HeroEyebrow>\n\n# Fathering Without Fear — Teaser\n\n<div className=\"not-prose mt-4 mb-6 rounded-xl border border-lightGrey bg-warmWhite/70 p-4 shadow-card\">\n  <div className=\"flex flex-wrap items-center gap-3\">\n    <a href=\"/downloads/Fathering_Without_Fear_Teaser-A4.pdf\" className=\"aol-btn rounded-full px-4 py-2\">\n      Download Teaser (A4/Letter)\n    </a>\n    <a href=\"/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf\" className=\"rounded-full border border-lightGrey px-4 py-2 text-sm hover:bg-warmWhite\">\n      Mobile PDF\n    </a>\n    <a href=\"/contact\" className=\"rounded-full border border-lightGrey px-4 py-2 text-sm hover:bg-warmWhite\">\n      Join Launch List\n    </a>\n    <span className=\"text-xs text-[color:var(--color-on-secondary)/0.6]\">Free • Shareable • Brand-styled</span>\n  </div>\n</div>\n\n<PullLine>\n  “If You give me my life back, I’ll serve You until I’m seventy-five…”\n  <br />\n  Some promises demand a price far greater than one can imagine.\n</PullLine>\n\nFrom the miraculous birth of a celebrated triplet in Lagos to the silent heartbreak of a father fighting for his son in London, **_Fathering Without Fear_** is a memoir forged in fire.\n\nBorn in 1977, Abraham’s life tracks visionary highs and devastating losses: campus politics and spiritual entanglements, immigration dead ends, and legal labyrinths — a British son kept at a distance. Denied work. Barred from public funds. Opposed at every turn.\n\n**Every reason to quit.**\n\nHe didn’t.\n\n<Rule />\n\nWith **strategy and Scripture**, tears became testimony. *Fathering Without Fear* is more than a memoir: it’s a blueprint for men under pressure, a declaration that **grace is a weapon**, and a father’s letter to the next generation.\n\n<PullLine subtle>\n  He didn’t survive by chance. He endured by **grace**.\n</PullLine>\n\nAnd because **something always happens**, he kept moving — even when nothing else did.\n\n<Rule />\n\nThis is a story for the **faithful**, for the **underestimated**, and for anyone who has ever had to **fight to be seen**.\n\n<Note tone=\"key\" title=\"Stay in the loop\">\n  Want chapter drops, launch dates, and early excerpts? **[Join the list](/contact)** or read the origin piece:\n  **“Fathering Without Fear — A Memoir”** → [/blog/fathering-without-fear](/blog/fathering-without-fear)\n</Note>\n\n<ResourcesCTA\n  title=\"Related Reading\"\n  reads={[\n    { href: \"/blog/reclaiming-the-narrative\", label: \"Reclaiming the Narrative\", sub: \"Court-season clarity\" },\n    { href: \"/blog/the-brotherhood-code\", label: \"The Brotherhood Code\", sub: \"Build your band of brothers\" },\n    { href: \"/blog/leadership-begins-at-home\", label: \"Leadership Begins at Home\", sub: \"Lead from the inside out\" }\n  ]}\n  downloads={[\n    { href: \"/downloads/Fathering_Without_Fear_Teaser-A4.pdf\", label: \"Teaser PDF (A4/Letter)\" },\n    { href: \"/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf\", label: \"Teaser PDF (Mobile)\" },\n    { href: \"/downloads/Brotherhood_Starter_Kit.pdf\", label: \"Brotherhood Starter Kit\" }\n  ]}\n/>\n\n<ShareRow\n  text=\"Fathering Without Fear — a field-memoir forged in courtrooms and prayer rooms. Read the teaser & grab the PDFs.\"\n  hashtags=\"Fatherhood,Faith,Legacy\"\n/>",
+    "html": "<p>import ResourcesCTA from '@/components/ResourcesCTA';\nimport BrandFrame from '@/components/BrandFrame';</p>\n<p>&#x3C;ResourcesCTA pdfs={[{ href: \"/downloads/Fathering_Without_Fear.pdf\", title: \"Fathering Guide\" }]} />\n\nContent here\n</p>\n<p>Teaser · Field Memoir</p>\n<h1>Fathering Without Fear — Teaser</h1>\n<p>From the miraculous birth of a celebrated triplet in Lagos to the silent heartbreak of a father fighting for his son in London, <strong><em>Fathering Without Fear</em></strong> is a memoir forged in fire.</p>\n<p>Born in 1977, Abraham’s life tracks visionary highs and devastating losses: campus politics and spiritual entanglements, immigration dead ends, and legal labyrinths — a British son kept at a distance. Denied work. Barred from public funds. Opposed at every turn.</p>\n<p><strong>Every reason to quit.</strong></p>\n<p>He didn’t.</p>\n<p>With <strong>strategy and Scripture</strong>, tears became testimony. <em>Fathering Without Fear</em> is more than a memoir: it’s a blueprint for men under pressure, a declaration that <strong>grace is a weapon</strong>, and a father’s letter to the next generation.</p>\n<p>And because <strong>something always happens</strong>, he kept moving — even when nothing else did.</p>\n<p>This is a story for the <strong>faithful</strong>, for the <strong>underestimated</strong>, and for anyone who has ever had to <strong>fight to be seen</strong>.</p>\n<p>&#x3C;ResourcesCTA\ntitle=\"Related Reading\"\nreads={[\n{ href: \"/blog/reclaiming-the-narrative\", label: \"Reclaiming the Narrative\", sub: \"Court-season clarity\" },\n{ href: \"/blog/the-brotherhood-code\", label: \"The Brotherhood Code\", sub: \"Build your band of brothers\" },\n{ href: \"/blog/leadership-begins-at-home\", label: \"Leadership Begins at Home\", sub: \"Lead from the inside out\" }\n]}\ndownloads={[\n{ href: \"/downloads/Fathering_Without_Fear_Teaser-A4.pdf\", label: \"Teaser PDF (A4/Letter)\" },\n{ href: \"/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf\", label: \"Teaser PDF (Mobile)\" },\n{ href: \"/downloads/Brotherhood_Starter_Kit.pdf\", label: \"Brotherhood Starter Kit\" }\n]}\n/></p>\n<p></p>"
+  },
+  "_id": "blog/fathering-without-fear-teaser.mdx",
+  "_raw": {
+    "sourceFilePath": "blog/fathering-without-fear-teaser.mdx",
+    "sourceFileName": "fathering-without-fear-teaser.mdx",
+    "sourceFileDir": "blog",
+    "contentType": "mdx",
+    "flattenedPath": "blog/fathering-without-fear-teaser"
+  },
+  "type": "Post",
+  "url": "/blog/fathering-without-fear-teaser"
+}
