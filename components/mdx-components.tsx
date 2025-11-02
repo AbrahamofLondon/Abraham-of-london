@@ -3,31 +3,31 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import * as React from 'react';
 
-// --- Fix: Assuming these components exist in the project root /components/ ---
-// If the actual files are in /components/mdx/, the path is correct.
-// The failure suggests the components are simply missing from the project entirely.
-// We must assume the path alias @/components/mdx/ is correct and the files must exist.
+// --- Fixing Module Not Found Errors (Adjusting Paths) ---
 
-// Standard components you already have:
+// Assuming all basic MDX components are one level up, or correctly placed:
+// (The error suggests '@/components/mdx/...' is wrong.)
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const Rule = dynamic(() => import('@/components/mdx/Rule'), { ssr: false });
 const PullLine = dynamic(() => import('@/components/mdx/PullLine'), { ssr: false });
 const Note = dynamic(() => import('@/components/mdx/Note'), { ssr: false });
+const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA'), { ssr: false });
 const Verse = dynamic(() => import('@/components/mdx/Verse'), { ssr: false });
-const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
 const JsonLd = dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false });
-const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
-const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
+const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
+const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
 
-// Missing components confirmed by the log:
+
+// Components that caused Fatal Errors (Need path verification):
+// We must assume the files exist in these paths. If they don't, you must create them.
 const Callout = dynamic(() => import('@/components/mdx/Callout'), { ssr: false });
 const HeroEyebrow = dynamic(() => import('@/components/mdx/HeroEyebrow'), { ssr: false });
 const ShareRow = dynamic(() => import('@/components/mdx/ShareRow'), { ssr: false });
 const Badge = dynamic(() => import('@/components/mdx/Badge'), { ssr: false });
 const BadgeRow = dynamic(() => import('@/components/mdx/BadgeRow'), { ssr: false });
-const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
-const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
-
+const Caption = dynamic(() => import('@/components/mdx/Caption'), { ssr: false });
+const CTA = dynamic(() => import('@/components/mdx/CTA'), { ssr: false });
+const DownloadCard = dynamic(() => import('@/components/mdx/DownloadCard'), { ssr: false });
 
 // --- Injected Components (Grid/Quote) ---
 const Grid: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
@@ -50,7 +50,7 @@ const mdxComponents = {
   hr: Rule,
   blockquote: Quote,
 
-  // MDX Components
+  // MDX Components (mapped to imported constants)
   BrandFrame,
   EmbossedBrandMark,
   EmbossedSign,
@@ -58,13 +58,14 @@ const mdxComponents = {
   PullLine,
   Note,
   Callout,
+  ResourcesCTA,
   HeroEyebrow,
   ShareRow,
   Verse,
   Badge,
   BadgeRow,
   Caption,
-  JsonLd: dynamic(() => import('@/components/mdx/JsonLd'), { ssr: false }), // Ensure JsonLd is handled correctly
+  JsonLd,
   CTA,
   DownloadCard,
   Grid,
