@@ -3,11 +3,11 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components"; // The correct component map
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; // The unified data functions
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Import necessary data functions
 import type { PostMeta } from "@/types/post";
 
 const CONTENT_TYPE = "books";
@@ -20,7 +20,7 @@ type Props = {
 
 
 // ----------------------------------------------------
-// ✅ CRITICAL FIX 1: getStaticPaths (Resolves the Fatal Build Crash)
+// ✅ CRITICAL FIX: getStaticPaths (Resolves the Missing Function Crash)
 // ----------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
   // Use the unified content fetcher to get all slugs for the 'books' type
@@ -31,21 +31,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths: paths,
-    fallback: false, // Prevents loading dynamic pages that don't exist
+    fallback: false, // Ensures all known paths are pre-rendered
   };
 };
 
 // ----------------------------------------------------
-// ✅ CRITICAL FIX 2: getStaticProps (Ensures Data Fetching and Serialization)
+// ✅ getStaticProps (Ensures Data Fetching and Serialization Safety)
 // ----------------------------------------------------
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params!.slug as string;
   const { content, ...rawFrontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
 
-  // Use the raw frontmatter to construct a JSON-safe object
+  // Ensure all fields that could be undefined are safely coalesced to null/safe strings
   const frontmatter = {
     ...rawFrontmatter,
-    // Ensure critical string/optional fields are explicitly null if undefined (Serialization safety)
     title: rawFrontmatter.title ?? 'Untitled Book',
     author: rawFrontmatter.author ?? null,
     date: rawFrontmatter.date ?? null,
@@ -54,13 +53,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     summary: rawFrontmatter.summary ?? null, 
     pdfPath: (rawFrontmatter as any).pdfPath ?? null,
     
-    // Clean any accidental undefineds for serialization integrity
     ...Object.fromEntries(
         Object.entries(rawFrontmatter).filter(([key, value]) => value !== undefined)
         .map(([key, value]) => [key, value === undefined ? null : value])
     )
   };
-
 
   if (!content) {
     return { notFound: true };
@@ -70,7 +67,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   return { 
     props: { source: mdxSource, frontmatter: frontmatter },
-    revalidate: 3600, // Regenerate page every hour
+    revalidate: 3600,
   };
 };
 
