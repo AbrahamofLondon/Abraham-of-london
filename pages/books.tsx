@@ -1,4 +1,4 @@
-// pages/books.tsx
+// pages/books.tsx (Fully Robust Version)
 import { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
@@ -7,37 +7,57 @@ import BookCard from "@/components/BookCard";
 import { getAllContent } from "@/lib/mdx"; 
 import type { PostMeta } from "@/types/post";
 
-// We use PostMeta as a base, ensuring required fields are non-null later
-type BookData = PostMeta; 
+// Define a safe data structure type for the component props
+type SafeBookData = PostMeta & {
+    // These properties MUST be guaranteed strings ("") to prevent the .toLowerCase crash
+    slug: string;
+    title: string;
+    author: string;
+    excerpt: string;
+    category: string;
+    // Other properties are safe as strings or arrays, or null for serialization
+    date: string | null;
+    summary: string | null;
+    tags: string[] | null;
+};
 type BooksProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 // ------------------------------------------------------------------
-// ✅ CRITICAL FIX: getStaticProps (Ensures data integrity and crash prevention)
+// ✅ CRITICAL FIX: getStaticProps (Guarantees data integrity and serialization safety)
 // ------------------------------------------------------------------
 export const getStaticProps: GetStaticProps = async () => {
   const allBooks = getAllContent('books');
-
-  const books = allBooks.map((book) => {
-    // CRITICAL FIX: Coalesce all properties used in string methods or JSX attributes 
-    // to an empty string ("") if they are null or undefined.
+  
+  const books: SafeBookData[] = allBooks.map((book) => {
+    // CRITICAL: Coalesce properties that MUST be strings to ""
     const safeBook = {
+        // Ensure all properties are copied
         ...book,
-        // Properties MUST be guaranteed strings to prevent .toLowerCase() crash
+        
+        // --- String Coercion for Crash Prevention ---
         slug: book.slug ?? '',
         title: book.title ?? 'Untitled Book',
-        author: book.author ?? '', // FIX: Coalesce to ""
-        excerpt: book.excerpt ?? '', // FIX: Coalesce to ""
-        category: book.category ?? '', // FIX: Coalesce to "" (Used as 'genre' in BookCard)
+        author: book.author ?? '',      // FIX: Ensures string for rendering/comparison
+        excerpt: book.excerpt ?? '',    // FIX: Ensures string for rendering/comparison
+        category: book.category ?? '',  // FIX: Ensures string for rendering/comparison (used as 'genre')
         
-        // Optional fields that are safe as null for serialization:
+        // --- Serialization Safety (Null Coalescing) ---
         date: book.date ?? null,
+        coverImage: book.coverImage ?? null,
+        readTime: book.readTime ?? null,
+        location: book.location ?? null,
+        subtitle: book.subtitle ?? null,
+        coverAspect: (book as any).coverAspect ?? null,
+        coverFit: (book as any).coverFit ?? null,
+        coverPosition: (book as any).coverPosition ?? null,
         summary: (book as any).summary ?? null, 
         tags: book.tags ?? null,
-    };
+    } as SafeBookData; // Cast to the safe type
+
     return safeBook;
   });
 
-  // Final JSON-safe operation. This ensures full data integrity for SSG.
+  // Final JSON-safe operation. Use JSON.stringify/parse once to ensure all data is serializable.
   return {
     props: { books: JSON.parse(JSON.stringify(books)) },
     revalidate: 3600,
@@ -45,7 +65,7 @@ export const getStaticProps: GetStaticProps = async () => {
 };
 
 // ------------------------------------------------------------------
-// Component uses the safely coerced data
+// Component now uses the guaranteed clean data
 // ------------------------------------------------------------------
 export default function Books({ books }: BooksProps) {
   return (
@@ -62,13 +82,13 @@ export default function Books({ books }: BooksProps) {
           {books.map((book) => (
             <BookCard
               key={book.slug}
-              // Pass the safely coerced properties
+              // These props are guaranteed to be strings by getStaticProps
               slug={book.slug}
               title={book.title}
               author={book.author}
               excerpt={book.excerpt}
               coverImage={book.coverImage}
-              genre={book.category} // Now guaranteed to be a string
+              genre={book.category} 
             />
           ))}
         </div>

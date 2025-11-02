@@ -1,4 +1,4 @@
-// pages/print/resource/[slug].tsx (CLEANED VERSION - DELETE EVERYTHING AFTER THIS LINE)
+// pages/print/resource/[slug].tsx (ABSOLUTELY ROBUST FINAL VERSION)
 import * as React from 'react';
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
 import { MDXRemote } from 'next-mdx-remote';
@@ -19,7 +19,7 @@ type Props = {
 // CRITICAL FIX: getStaticPaths
 // ----------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Rely on the robustness built into lib/mdx.ts to find only valid content slugs
+  // Relies on robust file discovery in lib/mdx.ts
   const allContent = getAllContent(CONTENT_TYPE);
   const paths = allContent.map(item => ({ 
       params: { slug: item.slug.toLowerCase() } 
@@ -28,7 +28,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 // ----------------------------------------------------
-// CRITICAL FIX: getStaticProps
+// ✅ CRITICAL FIX: getStaticProps (Robustness Ensured)
 // ----------------------------------------------------
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = params!.slug as string;
@@ -38,16 +38,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
-  // Ensure ALL fields are serialized safely by relying on the null coalescing 
-  const frontmatter = {
-    ...rawFrontmatter,
-    title: rawFrontmatter.title ?? 'Untitled Resource',
-    excerpt: rawFrontmatter.excerpt ?? '', 
-    subtitle: rawFrontmatter.subtitle ?? '', 
+  // 1. Ensure Next.js serialization rules are met (undefined -> null)
+  const jsonSafeFrontmatter = JSON.parse(JSON.stringify(rawFrontmatter));
 
-    // Final JSON-safe operation. This uses the null-coalesced raw data.
-    ...JSON.parse(JSON.stringify(rawFrontmatter)),
-  };
+  // 2. Apply explicit string coalescing over the safe object to prevent component crashes (like .toLowerCase)
+  const frontmatter = {
+    ...jsonSafeFrontmatter,
+    title: jsonSafeFrontmatter.title ?? 'Untitled Resource',
+    excerpt: jsonSafeFrontmatter.excerpt ?? '', 
+    subtitle: jsonSafeFrontmatter.subtitle ?? '', 
+    // Add any other fields used directly in the component that MUST be strings here
+  } as PostMeta; // Type assertion since types are now safe
 
   const mdxSource = await serialize(content, { scope: frontmatter });
 
@@ -56,6 +57,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
 
 export default function PrintResourcePage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+  // Use the safely coerced properties directly
   const subtitleText = frontmatter.subtitle || frontmatter.excerpt || ''; 
   
   return (
