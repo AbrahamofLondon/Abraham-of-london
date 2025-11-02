@@ -1,53 +1,57 @@
 // pages/strategy/[slug].tsx
 import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import { allStrategies, type Strategy } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import MDXComponents from '@/components/MDXComponents';
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
+import type { PostMeta } from "@/types/post";
 
-type Props = { doc: Strategy };
+const CONTENT_TYPE = "strategy";
 
-export default function StrategyPage({ doc }: Props) {
-  const MDX = useMDXComponent(doc.body.code);
-
-  return (
-    <>
-      <Head>
-        <title>{doc.title} — Abraham of London</title>
-        {doc.description && <meta name="description" content={doc.description} />}
-        {doc.ogDescription && <meta property="og:description" content={doc.ogDescription} />}
-      </Head>
-
-      <article className="prose lg:prose-lg mx-auto px-4 py-10">
-        <header className="mb-6">
-          <h1 className="mt-0">{doc.title}</h1>
-          {(doc.author || doc.date) && (
-            <p className="m-0 text-sm text-gray-600">
-              {doc.author ?? ""}{doc.author && doc.date ? " • " : ""}{doc.date ?? ""}
-            </p>
-          )}
-          {doc.description && <p className="mt-2 text-lg text-gray-700">{doc.description}</p>}
-        </header>
-
-        <MDX components={components} />
-      </article>
-    </>
-  );
-}
+type Props = { 
+  source: Awaited<ReturnType<typeof serialize>>; 
+  frontmatter: PostMeta;
+};
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allStrategies
-      .filter((s) => !!s.slug)
-      .map((s) => ({ params: { slug: s.slug } })),
-    fallback: false,
-  };
+  const allContent = getAllContent(CONTENT_TYPE);
+  const paths = allContent.map(item => ({ 
+      params: { slug: item.slug.toLowerCase() } 
+  }));
+
+  return { paths: paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const doc = allStrategies.find((s) => s.slug === slug);
-  if (!doc) return { notFound: true };
-  return { props: { doc } };
+  const slug = params!.slug as string;
+  const { content, ...rawFrontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
+
+  if (!content) {
+    return { notFound: true };
+  }
+
+  // Ensure ALL fields are serialized safely
+  const frontmatter = JSON.parse(JSON.stringify(rawFrontmatter)); 
+
+  const mdxSource = await serialize(content, { scope: frontmatter });
+
+  return { props: { source: mdxSource, frontmatter: frontmatter }, revalidate: 3600 };
 };
+
+export default function StrategyPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
+  return (
+    <Layout pageTitle={frontmatter.title}>
+      <Head>
+        <title>{frontmatter.title} | Abraham of London</title>
+        <meta name="description" content={frontmatter.excerpt || frontmatter.title} />
+      </Head>
+      <article className="container mx-auto px-4 py-12 prose max-w-none">
+        <h1>{frontmatter.title}</h1>
+        <MDXRemote {...source} components={mdxComponents} />
+      </article>
+    </Layout>
+  );
+}
