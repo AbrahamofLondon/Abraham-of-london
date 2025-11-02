@@ -20,11 +20,11 @@
 
 [functions.emails]
   included_files = ["emails/**"]
-
+  
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  # Workaround: Locking plugin version to bypass potential build environment bugs
-  version = "4.41.0"
+  # ✅ FIX: Use the correct TOML property to pin the version
+  pinned_version = "4.41.0"
 
 # --- HEADERS ---
 [[headers]]
