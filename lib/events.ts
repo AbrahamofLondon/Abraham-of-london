@@ -1,72 +1,137 @@
-// ./lib/events.ts (FINAL CONTENTLAYER INTEGRATION)
+// lib/server/events-data.ts (FINAL ROBUST VERSION)
 
-// --- Type Definitions (Keep these as they allow nulls, fixing your TS errors) ---
-export type ResourceLink = { href: string; label: string };
-export type EventResources = {
-    downloads?: ResourceLink[] | null;
-    reads?: ResourceLink[] | null;
-};
-export interface EventMeta {
-    slug: string;
-    title: string;
-    date: string;
-    endDate?: string | null; 
-    location?: string;
-    excerpt?: string;
-    summary?: string;
-    coverImage?: string | null;
-    heroImage?: string | null;
-    ctaHref?: string;
-    ctaLabel?: string;
-    tags?: string[];
-    content?: string;
-    resources?: EventResources | null;
-    chatham?: boolean; 
-    related?: string[];
-}
-// -------------------------------------------------------------------------
-// ✅ CRITICAL FIX: Replace placeholder data with actual Contentlayer fetch
-// -------------------------------------------------------------------------
-
-// Assuming your Contentlayer generated types are accessible, e.g., 'allEvents'
-// If you are using next-contentlayer2, you would typically import it like this:
 import { allEvents } from "contentlayer/generated";
+import type { EventMeta, EventResources } from "@/types/event"; // Use the central event type
 
-// Function to fetch ALL events from the Contentlayer output
+// ----------------------------------------------------
+// Data Fetching Functions
+// ----------------------------------------------------
+
 export function getAllEvents(fields?: string[]): EventMeta[] {
-    // Coerce Contentlayer's output (allEvents) to your EventMeta structure
-    const events: EventMeta[] = allEvents.map(event => ({
-        // Map all fields, using null coalescing for safety
-        slug: event.slug ?? '',
-        title: event.title ?? 'Untitled Event',
-        date: event.date ?? new Date().toISOString(),
-        location: event.location ?? null,
-        summary: event.summary ?? null,
-        // ... include all other fields explicitly, using null if missing
-        chatham: event.chatham ?? false,
-        tags: event.tags ?? null,
-        // Since resources field in Contentlayer is likely JSON/object, ensure it's mapped safely
-        resources: (event.resources as EventResources) ?? null, 
+    const events: EventMeta[] = allEvents.map(event => {
+        // Destructure all known properties from the Contentlayer event
+        const { 
+            slug, 
+            title, 
+            date, 
+            location, 
+            summary, 
+            chatham, 
+            tags, 
+            resources, 
+            ...rest // Capture all other properties
+        } = event;
         
-        // This spreads the rest of the properties, ensuring everything defined in the frontmatter is included.
-        ...event
-    })) as EventMeta[];
+        // ✅ CRITICAL FIX: Build the new object. Spread 'rest' first, 
+        // then explicitly define the safe, coerced values.
+        // This avoids the "'slug' is specified more than once" error.
+        return {
+            ...rest, // Spread the remaining properties
+            slug: slug ?? '', // Overwrite with the safe value
+            title: title ?? 'Untitled Event', // Overwrite with the safe value
+            date: date ?? new Date().toISOString(), // Overwrite with the safe value
+            location: location ?? null, // Overwrite with the safe value
+            summary: summary ?? null, // Overwrite with the safe value
+            chatham: chatham ?? false, // Overwrite with the safe value
+            tags: Array.isArray(tags) ? tags : null, // Correctly check for array
+            resources: (resources as EventResources) ?? null, // Overwrite with the safe value
+        } as EventMeta; // Cast to EventMeta
+    });
 
-    // Return the full list for the index page
-    return events;
+    // Sort by date descending (newest first) by default
+    return events.sort((a, b) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
 }
 
-// Function to get all slugs (relies on the function above)
 export function getEventSlugs(): string[] {
-    const events = getAllEvents();
-    return events.map((event) => event.slug);
+    const events = getAllEvents([]); 
+    if (!Array.isArray(events)) return []; 
+    
+    return events.map((event) => event.slug).filter(Boolean);
 }
 
-// Function to get a single event by slug
-export function getEventBySlug(slug: string): EventMeta | null {
-    const events = getAllEvents();
-    return events.find((event) => event.slug === slug) || null;
+export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { content?: string }) | null {
+    const doc = allEvents.find((event) => event.slug === slug) || null;
+    
+    if (doc) {
+        // Destructure all known properties
+        const { 
+            slug: docSlug, 
+            title, 
+            date, 
+            location, 
+            summary, 
+            chatham, 
+            tags, 
+            resources,
+            body, // Get the body (MDX code)
+            ...rest 
+        } = doc;
+
+        // Return the full, safe object
+        return {
+            ...rest,
+            slug: docSlug ?? '',
+            title: title ?? 'Untitled Event',
+            date: date ?? new Date().toISOString(),
+            location: location ?? null,
+            summary: summary ?? null,
+            tags: Array.isArray(tags) ? tags : null,
+            content: body.code, // Pass the MDX content
+            resources: (resources as EventResources) ?? null,
+        } as EventMeta & { content?: string };
+    }
+    
+    return null;
 }
 
-// ... (Keep the rest of your utility functions: dedupeEventsByTitleAndDay, getEventResourcesSummary)
-// Note: You must ensure the rest of your file is synchronized with the latest helper function definitions.
+// ----------------------------------------------------
+// Helper Functions (Correctly Exported)
+// ----------------------------------------------------
+
+/** Convert a date string to a YYYY-MM-DD key in Europe/London. */
+function dateKey(d: string): string {
+  const only = /^\d{4}-\d{2}-\d{2}$/.test(d);
+  if (only) return d;
+  const dt = new Date(d);
+  if (Number.isNaN(dt.valueOf())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(dt);
+}
+
+/**
+ * Deduplicates a list of events based on matching titles and calendar day.
+ */
+export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
+    const seen = new Set<string>();
+    const out: EventMeta[] = [];
+    if (!Array.isArray(events)) return [];
+
+    for (const ev of events) {
+        const title = String(ev.title || "").trim().toLowerCase().replace(/\s+/g, " ");
+        const key = `${title}::${dateKey(String(ev.date || ""))}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            out.push(ev);
+        }
+    }
+    return out;
+}
+
+/**
+ * Calculates the total number of download and read links from a list of events.
+ */
+export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
+    if (!Array.isArray(events)) return { downloads: 0, reads: 0 };
+
+    return events.reduce(
+        (acc, event) => ({
+            downloads: acc.downloads + (event.resources?.downloads?.length || 0),
+            reads: acc.reads + (event.resources?.reads?.length || 0),
+        }),
+        { downloads: 0, reads: 0 }
+    );
+}

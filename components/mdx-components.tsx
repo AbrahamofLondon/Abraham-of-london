@@ -3,11 +3,9 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import * as React from 'react';
-import type { MDXRemoteProps } from 'next-mdx-remote'; // Ensure this type is available locally for component consumers
+import type { MDXRemoteProps } from 'next-mdx-remote'; 
 
 // --- Import All Dynamic Modules ---
-// CRITICAL: All these paths must resolve locally. If any path is wrong, 
-// the build will fail with 'Module not found'.
 const BrandFrame = dynamic(() => import('@/components/print/BrandFrame'), { ssr: false });
 const EmbossedBrandMark = dynamic(() => import('@/components/print/EmbossedBrandMark'), { ssr: false });
 const EmbossedSign = dynamic(() => import('@/components/print/EmbossedSign'), { ssr: false });
@@ -42,13 +40,27 @@ const Quote: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ clas
 
 /**
  * The map of components used by the MDXRenderer.
- * NOTE: The Image component uses hardcoded width/height for default MDX rendering.
  */
 const mdxComponents: MDXRemoteProps['components'] = {
   // Standard HTML tags
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <Image src={String(props.src)} alt={props.alt ?? ''} width={1200} height={800} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" {...props} className="rounded-lg" />
-  ),
+  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    // ✅ CRITICAL FIX: Destructure conflicting width/height props out.
+    // This prevents the HTML attributes (string) from overriding the Next.js attributes (number).
+    const { width, height, ...rest } = props;
+    
+    return (
+      <Image 
+        src={String(props.src)} 
+        alt={props.alt ?? ''} 
+        width={1200} // Use the hardcoded number
+        height={800} // Use the hardcoded number
+        sizes="(max-width: 768px) 100vw, 50vw" 
+        loading="lazy" 
+        {...rest} // Spread the rest of the non-conflicting props
+        className="rounded-lg" 
+      />
+    );
+  },
   hr: Rule,
   blockquote: Quote,
 

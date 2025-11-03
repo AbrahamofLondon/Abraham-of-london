@@ -4,7 +4,6 @@
 export type ResourceLink = { 
     href: string; 
     label: string; 
-    // Add optional fields if your data structure includes them (e.g., file size)
 };
 
 export type EventResources = {
@@ -17,7 +16,7 @@ export type EventResources = {
 /**
  * Defines the complete structure of an Event document, typically derived from 
  * Contentlayer frontmatter and augmented by server-side fetching utilities.
- * * NOTE: Fields are marked as optional (`?`) but explicitly allow `null` to prevent 
+ * * NOTE: Fields are marked as optional (?) and explicitly allow null to prevent 
  * compilation failures when data is missing during runtime serialization.
  */
 export interface EventMeta {
@@ -28,7 +27,7 @@ export interface EventMeta {
 
     // Optional fields (Allow null for robustness)
     endDate?: string | null; 
-    location?: string | null;
+    location?: string | null; // Changed from 'string' to 'string | null' for safety
     excerpt?: string | null;
     summary?: string | null;
     

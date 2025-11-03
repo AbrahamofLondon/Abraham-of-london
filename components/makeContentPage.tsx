@@ -1,11 +1,11 @@
-// components/makeContentPage.tsx (ROBUST TYPE AND IMPORT FIX)
+// components/makeContentPage.tsx (CLEANED VERSION)
 import * as React from "react";
 import Head from "next/head";
-// ✅ CRITICAL FIX: Use a named import { MDXRenderer }
-import { MDXRenderer } from "./MDXRenderer";
-// CRITICAL FIX: Import MDXRemoteProps to define the MdxComponents type
+// ✅ Use a named import { MDXRenderer }
+import { MDXRenderer } from "./MDXRenderer"; 
 import { MDXRemoteProps } from "next-mdx-remote";
-import Layout from "@/components/Layout"; // Assuming Layout is used
+import Layout from "@/components/Layout";
+import type { PostMeta } from "@/types/post";
 
 // ------------------------------
 // Type Definitions
@@ -17,10 +17,10 @@ export interface ContentDocument {
   description?: string;
   excerpt?: string;
   body?: { code: string };
-  // Extend this type with any other common metadata fields (e.g., date, author)
+  // Extend this type with any other common metadata fields
 }
 
-// 🎯 CRITICAL FIX: Define the missing MdxComponents type using MDXRemoteProps
+// Define the MdxComponents type using MDXRemoteProps
 export type MdxComponents = MDXRemoteProps['components'];
 
 // Type for the options passed to the HOC function
@@ -37,8 +37,6 @@ export interface MakeContentPageOptions {
 /**
  * A utility function (Higher-Order Component) to wrap content data 
  * into a standard page layout with SEO metadata.
- * * @param opts Options for the wrapper, such as title suffix and default MDX components.
- * @returns A React functional component (the Content Page) ready to be exported from a Next.js page file.
  */
 export function makeContentPage<T extends ContentDocument>(
   opts: MakeContentPageOptions = {} // Set default empty object for opts
@@ -49,11 +47,9 @@ export function makeContentPage<T extends ContentDocument>(
   } = opts;
 
   const ContentPage = ({ doc }: { doc: T }) => {
-    // Logic to determine the meta description
     const metaDescription = doc.description || doc.excerpt;
 
     return (
-      // Using Layout for consistency
       <Layout pageTitle={doc.title}>
         <Head>
           <title>{doc.title} — {titleSuffix}</title>
@@ -68,7 +64,6 @@ export function makeContentPage<T extends ContentDocument>(
     );
   };
   
-  // FIX: Add display name to satisfy the 'react/display-name' rule
   ContentPage.displayName = 'ContentPageWrapper';
 
   return ContentPage;

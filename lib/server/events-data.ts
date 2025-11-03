@@ -1,89 +1,77 @@
-// lib/server/events-data.ts (FINAL SYNCHRONIZED VERSION)
+// lib/server/events-data.ts (CRITICAL FIX)
 
 import { allEvents } from "contentlayer/generated";
-import type { EventMeta } from "@/types/event"; // Use the central event type
+import type { EventMeta, EventResources } from "@/types/event"; 
 
-// ----------------------------------------------------
-// Data Fetching Functions
-// ----------------------------------------------------
-
-/**
- * Fetches all events from Contentlayer and maps them to the robust EventMeta type.
- */
 export function getAllEvents(fields?: string[]): EventMeta[] {
-    const events: EventMeta[] = allEvents.map(event => ({
-        // Ensure all required fields exist or have safe fallbacks
-        slug: event.slug ?? '',
-        title: event.title ?? 'Untitled Event',
-        date: event.date ?? new Date().toISOString(),
-        location: event.location ?? null,
-        summary: event.summary ?? null,
-        tags: Array.isArray(event.tags) ? event.tags : null,
+    const events: EventMeta[] = allEvents.map(event => {
+        // Destructure all known properties
+        const { 
+            slug, 
+            title, 
+            date, 
+            location, 
+            summary, 
+            chatham, 
+            tags, 
+            resources, 
+            ...rest // Capture all other properties
+        } = event;
         
-        // Spread the remaining fields from Contentlayer
-        ...event,
-
-        // Ensure resource structure is safe, even if 'any'
-        resources: (event as any).resources ? {
-             downloads: (event as any).resources.downloads ?? null,
-             reads: (event as any).resources.reads ?? null,
-        } : null,
-        
-    })) as EventMeta[];
+        // ✅ FIX: Build the new object. Spread 'rest' first, 
+        // then explicitly define the safe, coerced values.
+        return {
+            ...rest, // Spread the remaining properties
+            slug: slug ?? '', // Overwrite with the safe value
+            title: title ?? 'Untitled Event', 
+            date: date ?? new Date().toISOString(), 
+            location: location ?? null, 
+            summary: summary ?? null, 
+            chatham: chatham ?? false, 
+            tags: Array.isArray(tags) ? tags : null, 
+            resources: (resources as EventResources) ?? null, 
+        } as EventMeta;
+    });
 
     // Sort by date descending (newest first) by default
     return events.sort((a, b) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
 }
 
-/**
- * Gets all event slugs for getStaticPaths.
- */
+// ... (Rest of the file: getEventSlugs, getEventBySlug, dedupeEventsByTitleAndDay, etc.) ...
+// (Make sure the other helper functions are still present and exported)
+
 export function getEventSlugs(): string[] {
     const events = getAllEvents([]); 
     if (!Array.isArray(events)) return []; 
-    
     return events.map((event) => event.slug).filter(Boolean);
 }
 
-/**
- * Gets a single event by slug, ensuring content is included.
- */
 export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { content?: string }) | null {
     const doc = allEvents.find((event) => event.slug === slug) || null;
     
     if (doc) {
+        const { slug: docSlug, title, date, location, summary, chatham, tags, resources, body, ...rest } = doc;
         return {
-            ...doc,
-            slug: doc.slug ?? '',
-            title: doc.title ?? 'Untitled Event',
-            date: doc.date ?? new Date().toISOString(),
-            location: doc.location ?? null,
-            summary: doc.summary ?? null,
-            tags: Array.isArray(doc.tags) ? doc.tags : null,
-            // Pass the MDX content
-            content: doc.body.code, 
-            // Ensure resources are safely mapped
-            resources: (doc as any).resources ? {
-                downloads: (doc as any).resources.downloads ?? null,
-                reads: (doc as any).resources.reads ?? null,
-            } : null,
+            ...rest,
+            slug: docSlug ?? '',
+            title: title ?? 'Untitled Event',
+            date: date ?? new Date().toISOString(),
+            location: location ?? null,
+            summary: summary ?? null,
+            tags: Array.isArray(tags) ? tags : null,
+            content: body.code, 
+            resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
     }
-    
     return null;
 }
 
-// ----------------------------------------------------
-// Helper Functions (Now Correctly Exported)
-// ----------------------------------------------------
-
-/** Convert a date string to a YYYY-MM-DD key in Europe/London. */
 function dateKey(d: string): string {
-  // handle both ISO-like and yyyy-mm-dd literal
+  if (!d || typeof d !== 'string') return "";
   const only = /^\d{4}-\d{2}-\d{2}$/.test(d);
   if (only) return d;
   const dt = new Date(d);
-  if (Number.isNaN(dt.valueOf())) return ""; // will sort to bottom
+  if (Number.isNaN(dt.valueOf())) return "";
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/London",
     year: "numeric",
@@ -92,15 +80,10 @@ function dateKey(d: string): string {
   }).format(dt);
 }
 
-/**
- * Deduplicates a list of events based on matching titles and calendar day.
- * This is the function your index page was missing.
- */
 export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
     const seen = new Set<string>();
     const out: EventMeta[] = [];
     if (!Array.isArray(events)) return [];
-
     for (const ev of events) {
         const title = String(ev.title || "").trim().toLowerCase().replace(/\s+/g, " ");
         const key = `${title}::${dateKey(String(ev.date || ""))}`;
@@ -112,10 +95,13 @@ export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
     return out;
 }
 
-/**
- * Sorts events by date, ascending (soonest first).
- */
-export function sortEventsAsc(events: EventMeta[]): EventMeta[] {
-    if (!Array.isArray(events)) return [];
-    return [...events].sort((a, b) => +new Date(a.date) - +new Date(b.date));
+export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
+    if (!Array.isArray(events)) return { downloads: 0, reads: 0 };
+    return events.reduce(
+        (acc, event) => ({
+            downloads: acc.downloads + (event.resources?.downloads?.length || 0),
+            reads: acc.reads + (event.resources?.reads?.length || 0),
+        }),
+        { downloads: 0, reads: 0 }
+    );
 }
