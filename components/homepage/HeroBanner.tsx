@@ -1,5 +1,5 @@
 // components/homepage/HeroBanner.tsx
-"use client"; // Explicitly marking as Client Component
+"use client"; 
 
 import * as React from "react";
 import clsx from "clsx";
@@ -65,8 +65,7 @@ export default function HeroBanner({
   // --- Image Fallback Props ---
   const imageProps = {
     src: poster,
-    // ✅ FIX: Added alt prop as requested to fix the warning
-    alt: "", 
+    alt: "", // ✅ Fixed alt prop warning
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
@@ -127,8 +126,42 @@ export default function HeroBanner({
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          // ✅ FIX: Added alt prop to noscript tag as well
-          alt="Decorative fallback image for hero section."
+          alt="Decorative fallback image for hero section." // Also fixed alt prop here
+          src={poster}
+          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
+          loading="lazy"
+        />
+      </noscript>
+    </section>
+  );
+}
+// ✅ CRITICAL: Ensure no stray characters exist after this final closing brace.   {/* Fallback: if video fails completely, the poster image defined below will show */}
+        </video>
+      ) : (
+        // --- Image Fallback Component (No Video) ---
+        // This is the image that needed the alt prop
+        <Image {...imageProps} />
+      )}
+
+      {/* Subtle top/bottom gradient for legibility (Overlay) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
+      />
+
+      {/* Overlay content (heading/CTA) */}
+      {overlay ? (
+        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
+          {/* ✅ SAFE: Ensure overlay content contrast */}
+          <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
+        </div>
+      ) : null}
+
+      {/* Noscript fallback for poster (essential for non-JS/server-side rendering) */}
+      <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          alt="Decorative fallback image for hero section." // Also added here
           src={poster}
           className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
           loading="lazy"
