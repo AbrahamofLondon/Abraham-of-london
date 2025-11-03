@@ -1,0 +1,231 @@
+# Generated 2025-10-27_18-49-47 - paste into netlify.toml
+# Old Title_Case → new kebab-case (200 rewrites keep old links working)
+[[redirects]]
+  from   = "/downloads/Boardinvestor_One_Pager_Template.pdf"
+  to     = "/downloads/boardinvestor-one-pager-template-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Board_Update_Onepager.pdf"
+  to     = "/downloads/board-update-onepager-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Board_Update_Template.pdf"
+  to     = "/downloads/board-update-template-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Brotherhood_Covenant.pdf"
+  to     = "/downloads/brotherhood-covenant-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Brotherhood_Cue_Card.pdf"
+  to     = "/downloads/brotherhood-cue-card-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Brotherhood_Cue_Card_Two_Up.pdf"
+  to     = "/downloads/brotherhood-cue-card-two-up-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf"
+  to     = "/downloads/brotherhood-leader-guide-4-weeks-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Brotherhood_Starter_Kit.pdf"
+  to     = "/downloads/brotherhood-starter-kit-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Communication_Script_Bpf.pdf"
+  to     = "/downloads/communication-script-bpf-4.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Communication_Script_Bpf_2.pdf"
+  to     = "/downloads/communication-script-bpf-2-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Communication_Script_Bpf_3.pdf"
+  to     = "/downloads/communication-script-bpf-3-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Communication_Script_Bpf_Jpg.pdf"
+  to     = "/downloads/communication-script-bpf-jpg-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Communication_Script_Budget_Plan_Forecast.pdf"
+  to     = "/downloads/communication-script-budget-plan-forecast-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Downloadsboard_Update_Onepager.pdf"
+  to     = "/downloads/downloadsboard-update-onepager-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Downloadsgrid_Tsx.pdf"
+  to     = "/downloads/downloadsgrid-tsx-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Operating_Pack.pdf"
+  to     = "/downloads/entrepreneur-operating-pack-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Operating_Pack_Week_In_Review_System.pdf"
+  to     = "/downloads/entrepreneur-operating-pack-week-in-review-system-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Survival_Checklist.pdf"
+  to     = "/downloads/entrepreneur-survival-checklist-4.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Survival_Checklist_2.pdf"
+  to     = "/downloads/entrepreneur-survival-checklist-2-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Survival_Checklist_3.pdf"
+  to     = "/downloads/entrepreneur-survival-checklist-3-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Entrepreneur_Survival_Checklist_Jpg.pdf"
+  to     = "/downloads/entrepreneur-survival-checklist-jpg-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Evidence_Log_Template.pdf"
+  to     = "/downloads/evidence-log-template-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Family_Altar_Liturgy.pdf"
+  to     = "/downloads/family-altar-liturgy-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Family_Altar_Liturgy_Jpg.pdf"
+  to     = "/downloads/family-altar-liturgy-jpg-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fatherhood_Guide.pdf"
+  to     = "/downloads/fatherhood-guide-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear.pdf"
+  to     = "/downloads/fathering-without-fear-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Mobile.pdf"
+  to     = "/downloads/fathering-without-fear-mobile-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-a4-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser_A4.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-a4-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-mobile-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathers_In_Family_Court_Practical_Pack.pdf"
+  to     = "/downloads/fathers-in-family-court-practical-pack-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Household_Rhythm_Starter.pdf"
+  to     = "/downloads/household-rhythm-starter-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Leadership_Playbook.pdf"
+  to     = "/downloads/leadership-playbook-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Leaders_Cue_Card.pdf"
+  to     = "/downloads/leaders-cue-card-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Leaders_Cue_Card_Two_Up.pdf"
+  to     = "/downloads/leaders-cue-card-two-up-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Mentorship_Starter_Kit.pdf"
+  to     = "/downloads/mentorship-starter-kit-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Mentorship_Starter_Kit_90_Day_Covenant.pdf"
+  to     = "/downloads/mentorship-starter-kit-90-day-covenant-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Principles_For_My_Son.pdf"
+  to     = "/downloads/principles-for-my-son-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Principles_For_My_Son_12_Standards.pdf"
+  to     = "/downloads/principles-for-my-son-12-standards-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Principles_For_My_Son_Cue_Card.pdf"
+  to     = "/downloads/principles-for-my-son-cue-card-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Scripture_Track_John14.pdf"
+  to     = "/downloads/scripture-track-john14-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Scripture_Track_John_14.pdf"
+  to     = "/downloads/scripture-track-john-14-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Standards_Brief.pdf"
+  to     = "/downloads/standards-brief-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Weekly_Operating_Rhythm.pdf"
+  to     = "/downloads/weekly-operating-rhythm-2.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Weekly_Operating_Rhythm_Daily_Blocks.pdf"
+  to     = "/downloads/weekly-operating-rhythm-daily-blocks-2.pdf"
+  status = 200

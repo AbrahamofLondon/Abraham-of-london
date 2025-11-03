@@ -1,0 +1,46 @@
+# Generated 2025-11-03_12-47-43 — paste into netlify.toml
+# Old Title_Case → new kebab-case (200 rewrites keep old links working)
+[[redirects]]
+  from   = "/downloads/Family_Altar_Liturgy.pdf"
+  to     = "/downloads/family-altar-liturgy-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fatherhood_Guide.pdf"
+  to     = "/downloads/fatherhood-guide-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-a4-4.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser_A4.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-a4-5.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Fathering_Without_Fear_Teaser_Mobile.pdf"
+  to     = "/downloads/fathering-without-fear-teaser-mobile-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Household_Rhythm_Starter.pdf"
+  to     = "/downloads/household-rhythm-starter-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Principles_for_My_Son.pdf"
+  to     = "/downloads/principles-for-my-son-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Principles_for_My_Son_Cue_Card.pdf"
+  to     = "/downloads/principles-for-my-son-cue-card-3.pdf"
+  status = 200
+
+[[redirects]]
+  from   = "/downloads/Scripture_Track_John14.pdf"
+  to     = "/downloads/scripture-track-john14-3.pdf"
+  status = 200
