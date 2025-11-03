@@ -1,4 +1,4 @@
-// lib/events.ts (or lib/server/events-data.ts) (FINAL ROBUST VERSION)
+// lib/server/events-data.ts (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
 // Make sure this path is correct. If your file is at 'types/event.ts', this is correct.
@@ -75,7 +75,6 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             location: location ?? null,
             summary: summary ?? null,
             tags: Array.isArray(tags) ? tags : null,
-            // ✅ CRITICAL FIX: Cast 'body' to 'any' to access the 'code' property
             content: (body as any)?.code, 
             resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
