@@ -27,9 +27,6 @@ async function main() {
     try {
       const content = await fsp.readFile(file, 'utf8');
       
-      // Simple check for stray HTML/JSX tags outside of code blocks
-      const strayTag = /<[a-zA-Z]/.test(content);
-      
       // Check for an unequal number of opening and closing braces
       const openBraces = (content.match(/{/g) || []).length;
       const closeBraces = (content.match(/}/g) || []).length;
