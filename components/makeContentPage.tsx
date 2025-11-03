@@ -1,9 +1,11 @@
-// components/makeContentPage.tsx (ROBUST TYPE FIX)
+// components/makeContentPage.tsx (ROBUST TYPE AND IMPORT FIX)
 import * as React from "react";
 import Head from "next/head";
-import MDXRenderer from "./MDXRenderer";
+// ✅ CRITICAL FIX: Use a named import { MDXRenderer }
+import { MDXRenderer } from "./MDXRenderer";
 // CRITICAL FIX: Import MDXRemoteProps to define the MdxComponents type
-import { MDXRemoteProps } from "next-mdx-remote"; 
+import { MDXRemoteProps } from "next-mdx-remote";
+import Layout from "@/components/Layout"; // Assuming Layout is used
 
 // ------------------------------
 // Type Definitions
@@ -51,7 +53,8 @@ export function makeContentPage<T extends ContentDocument>(
     const metaDescription = doc.description || doc.excerpt;
 
     return (
-      <>
+      // Using Layout for consistency
+      <Layout pageTitle={doc.title}>
         <Head>
           <title>{doc.title} — {titleSuffix}</title>
           {metaDescription && <meta name="description" content={metaDescription} />}
@@ -61,7 +64,7 @@ export function makeContentPage<T extends ContentDocument>(
           <h1>{doc.title}</h1>
           {doc.body?.code && <MDXRenderer code={doc.body.code} components={components} />}
         </article>
-      </>
+      </Layout>
     );
   };
   

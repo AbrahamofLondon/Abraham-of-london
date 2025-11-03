@@ -1,31 +1,33 @@
-// components/MDXRenderer.tsx
+// components/MDXRenderer.tsx (FINAL ROBUST FIX)
 import * as React from "react";
-// Import the default components map and its type
-import { mdxComponents, MdxComponents } from "./MdxComponents";
-
-// IMPORTANT: the correct hook import for contentlayer2:
+// ✅ FIX: Import the component map directly from its source file
+import mdxComponents from "./mdx-components"; 
+// ✅ FIX: Import the type definition for the components map
+import type { MDXRemoteProps } from 'next-mdx-remote';
+// ✅ FIX: Import the correct hook for contentlayer2
 import { useMDXComponent } from "next-contentlayer2/hooks";
 
-type MDXRendererProps = {
-  /** MDX code from Contentlayer's computed .body.code */
+// ✅ FIX: Define the 'MdxComponents' type locally as an alias for the prop type
+type MdxComponents = MDXRemoteProps['components'];
+
+interface MDXRendererProps {
   code: string;
-  /** Optional: extra component overrides provided by the consuming page */
-  components?: Partial<MdxComponents>;
-};
+  components?: MdxComponents;
+  [key: string]: unknown;
+}
 
-export default function MDXRenderer({ code, components }: MDXRendererProps) {
-  // Compiles the MDX code string into a React component
-  const MDX = useMDXComponent(code);
+/**
+ * Renders MDX content by merging the global component map (mdxComponents)
+ * with any page-specific components.
+ */
+export function MDXRenderer({ code, components = {}, ...rest }: MDXRendererProps) {
+  const MDXContent = useMDXComponent(code);
 
-  // Merge the default components with any overrides provided by the page
-  const mergedComponents = {
+  // Merge the default component map with any page-specific components
+  const allComponents = {
     ...mdxComponents,
     ...components,
   };
 
-  // Render the compiled MDX content with the merged components map
-  return <MDX components={mergedComponents} />;
+  return <MDXContent components={allComponents} {...rest} />;
 }
-
-// Add display name to satisfy the 'react/display-name' rule
-MDXRenderer.displayName = 'MDXRenderer';
