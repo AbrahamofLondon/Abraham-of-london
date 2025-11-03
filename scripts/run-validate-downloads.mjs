@@ -1,5 +1,6 @@
 // scripts/run-validate-downloads.mjs
-// CI-safe runner: generate placeholders, then validate (strict in CI).
+// ✅ CRITICAL FIX: This script should ONLY validate, not generate stubs.
+// We have removed all calls to generatePlaceholders().
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -11,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
 const SCRIPTS = path.join(ROOT, "scripts");
 
-const GEN = path.join(SCRIPTS, "generate-placeholder-downloads.mjs");
+// Path to the validator script
 const VAL = path.join(SCRIPTS, "validate-downloads.mjs");
 
 function runNode(scriptPath, args = []) {
@@ -27,8 +28,9 @@ function runNode(scriptPath, args = []) {
 }
 
 async function main() {
-  console.log("[downloads:step] generate placeholders");
-  await runNode(GEN);
+  // 🛑 REMOVED: The placeholder generation step that was overwriting real PDFs
+  // console.log("[downloads:step] generate placeholders");
+  // await runNode(GEN);
 
   console.log("[downloads:step] validate downloads --strict");
   let hasValidator = false;
@@ -46,6 +48,7 @@ async function main() {
   }
 
   try {
+    // Run ONLY the validator
     await runNode(VAL, ["--strict"]);
     console.log("[downloads:ok] validation passed.");
   } catch (err) {
