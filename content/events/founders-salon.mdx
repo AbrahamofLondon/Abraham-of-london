@@ -9,9 +9,21 @@ heroImage: /assets/images/events/founders-salon.jpg
 tags: ["Salon", "Founders", "Capital", "Chatham"]
 chatham: true
 resources:
-  # CRITICAL: This structure should be handled by your code, but the raw field is safe.
-  # If you are using a preset, ensure the code knows what 'founders' maps to.
-  preset: founders 
+  # The 'preset' field is retained for compatibility, but the 'resources' object is what links to files.
+  preset: founders
+  # ✅ FIX: Wire up relevant download and read links for the event page.
+  downloads: 
+    - href: "/downloads/board-update-onepager"
+      label: "Board Investor One-Pager Template"
+    - href: "/downloads/entrepreneur-operating-pack"
+      label: "Entrepreneur Operating Pack"
+    - href: "/downloads/weekly-operating-rhythm"
+      label: "Weekly Operating Rhythm & Daily Blocks"
+  reads:
+    - href: "/blog/leadership-begins-at-home"
+      label: "Leadership Begins at Home"
+    - href: "/blog/when-the-system-breaks-you"
+      label: "When the System Breaks You"
 ---
 
 _Salon · Invitation-Only · Chatham_
