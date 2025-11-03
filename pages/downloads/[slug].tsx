@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 
 import Layout from "@/components/Layout";
 import mdxComponents from '@/components/mdx-components';
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
+import { getAllContent } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post"; // Using PostMeta as it matches
 
 type DownloadMeta = PostMeta & { pdfPath?: string | null };
@@ -166,5 +166,7 @@ export default function DownloadPage({ meta, content }: Props) {
                 )}
             </main>
         </Layout>
+    );
+} </Layout>
     );
 }

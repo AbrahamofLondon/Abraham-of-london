@@ -208,7 +208,11 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getEventSlugs();
   const paths = slugs.map((slug: string) => ({ params: { slug } }));
-  return { paths, fallback: false };
+  return { 
+    paths, 
+    // ✅ FIX: Use 'blocking' to fix 404s
+    fallback: 'blocking' 
+  };
 };
 
 // CRITICAL FIX: getStaticProps must handle serialization
