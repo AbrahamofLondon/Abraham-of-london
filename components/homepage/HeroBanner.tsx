@@ -98,7 +98,7 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        // This is the image (around line 109) that needed the alt prop
+        // This is the image (around line 102) that needed the alt prop
         <Image {...imageProps} />
       )}
 
