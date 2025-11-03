@@ -3,6 +3,10 @@
 import { allEvents } from "contentlayer/generated";
 import type { EventMeta, EventResources } from "@/types/event"; 
 
+// ----------------------------------------------------
+// Data Fetching Functions
+// ----------------------------------------------------
+
 export function getAllEvents(fields?: string[]): EventMeta[] {
     const events: EventMeta[] = allEvents.map(event => {
         const { 
@@ -72,6 +76,10 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
     }
     return null;
 }
+
+// ----------------------------------------------------
+// Helper Functions (Correctly Exported)
+// ----------------------------------------------------
 
 function dateKey(d: string): string {
   if (!d || typeof d !== 'string') return "";
