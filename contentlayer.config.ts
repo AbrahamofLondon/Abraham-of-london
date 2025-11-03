@@ -1,6 +1,8 @@
 // contentlayer.config.ts (FINAL MERGED DEFINITION)
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
+// ✅ CRITICAL FIX: Import Pluggable type to resolve build error
+import type { Pluggable } from "unified";
 
 /** ---------- Document Types ---------- */
 
@@ -32,33 +34,26 @@ const Post = defineDocumentType(() => ({
 }));
 
 // ----------------------------------------------------
-// ✅ MERGED FIX: Download Definition
+// Download Definition
 // ----------------------------------------------------
 const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.mdx",
-  // If your downloads content uses frontmatter, remove isContent: false
-  // If it still exists in your local file, this line should be deleted, 
-  // as it was causing the "missing required fields" warning.
-  // Assuming Contentlayer is reading from frontmatter, we will remove isContent: false
-  // And ensure all fields are defined.
   fields: {
     title: { type: "string", required: true },
     slug: { type: "string", required: true },
-    date: { type: "date", required: true }, // Changed to Date type to match required field snippet
+    date: { type: "date", required: true },
     author: { type: "string", required: true },
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
     type: { type: "string", required: true },
     
-    // NEW: Optional fields added from your snippet (to resolve 'extra fields' warnings)
+    // Optional fields
     subtitle: { type: "string", required: false },
     excerpt:  { type: "string", required: false },
     tags:     { type: "list", of: { type: "string" }, required: false },
     coverImage: { type: "string", required: false },
-    print: { type: "boolean", required: false }, // From your snippet
-
-    // Remaining optional fields from the original config
+    print: { type: "boolean", required: false }, 
     pdfPath: { type: "string", required: false },
     coverAspect: { type: "string", required: false },
     coverFit: { type: "string", required: false },
@@ -101,10 +96,6 @@ const Book = defineDocumentType(() => ({
     coverImage: { type: "string" },
     description: { type: "string" },
     ogDescription: { type: "string" },
-    // If you are using these in your Book MDX files, they should be here:
-    // subtitle: { type: "string" },
-    // excerpt: { type: "string" }, 
-    // ...
   },
 }));
 
@@ -151,6 +142,29 @@ const Strategy = defineDocumentType(() => ({
     coverFit: { type: "string" },
     coverPosition: { type: "string" },
     draft: { type: "boolean" },
+  },
+}));
+
+/** ---------- Source ---------- */
+
+export default makeSource({
+  contentDirPath: "content",
+  contentDirExclude: ["_downloads-registry.md"],
+  documentTypes: [Post, Download, Event, Book, Resource, Strategy],
+  mdx: {
+    // ✅ CRITICAL FIX: Cast remarkGfm to 'Pluggable' to satisfy new type requirements
+    remarkPlugins: [remarkGfm as unknown as Pluggable],
+    esbuildOptions: (options) => {
+      options.external = [
+        ...(options.external ?? []),
+        "@/components/*",
+        "@/components/*.*",
+        "@/*",
+      ];
+      return options;
+    },
+  },
+});pe: "boolean" },
   },
 }));
 

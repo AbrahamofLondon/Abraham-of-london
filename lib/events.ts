@@ -1,7 +1,7 @@
-// lib/events.ts (or lib/server/events-data.ts)
+// lib/events.ts (or lib/server/events-data.ts) (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
-// ✅ FIX: Correctly import the newly created type definitions
+// Make sure this path is correct. If your file is at 'types/event.ts', this is correct.
 import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
@@ -23,8 +23,7 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
             ...rest // Capture all other properties
         } = event;
         
-        // ✅ CRITICAL FIX: Build the new object. Spread 'rest' first, 
-        // then explicitly define the safe, coerced values.
+        // Build the new object
         return {
             ...rest, // Spread the remaining properties
             slug: slug ?? '', // Overwrite with the safe value
@@ -76,7 +75,8 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             location: location ?? null,
             summary: summary ?? null,
             tags: Array.isArray(tags) ? tags : null,
-            content: body.code, // Pass the MDX content
+            // ✅ CRITICAL FIX: Cast 'body' to 'any' to access the 'code' property
+            content: (body as any)?.code, 
             resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
     }
