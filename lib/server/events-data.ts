@@ -1,7 +1,7 @@
 // lib/server/events-data.ts (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
-// Ensure this path is correct. If your file is at 'types/event.ts', this is correct.
+// Make sure this path is correct. If your file is at 'types/event.ts', this is correct.
 import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
@@ -66,9 +66,9 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             ...rest 
         } = doc;
 
-        // ✅ CRITICAL FIX: Handle both MDX and MD content types
+        // ✅ CRITICAL FIX: Robustly handle body.code for both MDX and MD
         const anyBody = body as unknown as { code?: string; raw?: string; html?: string };
-        const mdxOrMd = anyBody?.code ?? anyBody?.raw ?? anyBody?.html ?? "";
+        const content = anyBody?.code ?? anyBody?.raw ?? anyBody?.html ?? "";
 
         // Return the full, safe object
         return {
@@ -79,7 +79,7 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             location: location ?? null,
             summary: summary ?? null,
             tags: Array.isArray(tags) ? tags : null,
-            content: mdxOrMd, 
+            content: content, 
             resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
     }
