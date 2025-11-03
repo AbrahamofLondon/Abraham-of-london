@@ -53,7 +53,8 @@
     "covers:events": "node scripts/covers/make-event-covers.mjs",
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
     "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
-    "downloads:export": "node scripts/print-pdfs.mjs"
+    "downloads:export": "node scripts/print-pdfs.mjs",
+    "check:mdx:syntax": "node scripts/check-mdx-syntax.mjs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -117,6 +118,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.32",
     "glob": "^11.0.3",
+    "globby": "^15.0.0",
     "husky": "^9.1.6",
     "next-contentlayer2": "^0.5.8",
     "rehype-autolink-headings": "^7.1.0",
