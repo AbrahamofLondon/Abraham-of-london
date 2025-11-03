@@ -1,7 +1,6 @@
 // lib/server/events-data.ts (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
-// Ensure this path is correct. If your file is at 'types/event.ts', this is correct.
 import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
@@ -34,14 +33,12 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
             resources: (resources as EventResources) ?? null, 
         } as EventMeta; 
     });
-
     return events.sort((a, b) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
 }
 
 export function getEventSlugs(): string[] {
     const events = getAllEvents([]); 
     if (!Array.isArray(events)) return []; 
-    
     return events.map((event) => event.slug).filter(Boolean);
 }
 
@@ -58,14 +55,9 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             chatham, 
             tags, 
             resources,
-            body, // Get the body (MDX/MD code)
+            body, 
             ...rest 
         } = doc;
-
-        // ✅ CRITICAL FIX: Handle both MDX and MD content types
-        const anyBody = body as unknown as { code?: string; raw?: string; html?: string };
-        const mdxOrMd = anyBody?.code ?? anyBody?.raw ?? anyBody?.html ?? "";
-
         return {
             ...rest,
             slug: docSlug ?? '',
@@ -74,11 +66,10 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             location: location ?? null,
             summary: summary ?? null,
             tags: Array.isArray(tags) ? tags : null,
-            content: mdxOrMd, 
+            content: (body as any)?.code, 
             resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
     }
-    
     return null;
 }
 
@@ -86,7 +77,6 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
 // Helper Functions (Correctly Exported)
 // ----------------------------------------------------
 
-/** Convert a date string to a YYYY-MM-DD key in Europe/London. */
 function dateKey(d: string): string {
   if (!d || typeof d !== 'string') return "";
   const only = /^\d{4}-\d{2}-\d{2}$/.test(d);
@@ -101,14 +91,10 @@ function dateKey(d: string): string {
   }).format(dt);
 }
 
-/**
- * Deduplicates a list of events based on matching titles and calendar day.
- */
 export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
     const seen = new Set<string>();
     const out: EventMeta[] = [];
     if (!Array.isArray(events)) return [];
-
     for (const ev of events) {
         const title = String(ev.title || "").trim().toLowerCase().replace(/\s+/g, " ");
         const key = `${title}::${dateKey(String(ev.date || ""))}`;
@@ -120,9 +106,6 @@ export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
     return out;
 }
 
-/**
- * Calculates the total number of download and read links from a list of events.
- */
 export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
     if (!Array.isArray(events)) return { downloads: 0, reads: 0 };
     return events.reduce(
