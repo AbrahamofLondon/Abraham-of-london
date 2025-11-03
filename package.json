@@ -6,13 +6,6 @@
     "node": ">=20 <21",
     "npm": ">=10"
   },
-  "overrides": {
-    "vfile": "^6.0.1",
-    "vfile-message": "^4.0.2",
-    "unist-util-stringify-position": "^4.0.0",
-    "remark-gfm": "^3.0.0",
-    "remark": "^15.0.1"
-  },
   "scripts": {
     "clean": "rimraf .next .next-dev .contentlayer",
     "dev": "next dev",
