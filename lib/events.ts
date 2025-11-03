@@ -1,7 +1,7 @@
-// lib/events.ts (FINAL ROBUST VERSION)
+// lib/server/events-data.ts (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
-// Make sure this path is correct. If your file is at 'types/event.ts', this is correct.
+// Ensure this path is correct. If your file is at 'types/event.ts', this is correct.
 import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
@@ -10,7 +10,6 @@ import type { EventMeta, EventResources } from "@/types/event";
 
 export function getAllEvents(fields?: string[]): EventMeta[] {
     const events: EventMeta[] = allEvents.map(event => {
-        // Destructure all known properties from the Contentlayer event
         const { 
             slug, 
             title, 
@@ -20,13 +19,12 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
             chatham, 
             tags, 
             resources, 
-            ...rest // Capture all other properties
+            ...rest 
         } = event;
         
-        // Build the new object
         return {
-            ...rest, // Spread the remaining properties
-            slug: slug ?? '', // Overwrite with the safe value
+            ...rest, 
+            slug: slug ?? '', 
             title: title ?? 'Untitled Event', 
             date: date ?? new Date().toISOString(), 
             location: location ?? null, 
@@ -34,10 +32,9 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
             chatham: chatham ?? false, 
             tags: Array.isArray(tags) ? tags : null, 
             resources: (resources as EventResources) ?? null, 
-        } as EventMeta; // Cast to EventMeta
+        } as EventMeta; 
     });
 
-    // Sort by date descending (newest first) by default
     return events.sort((a, b) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
 }
 
@@ -52,7 +49,6 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
     const doc = allEvents.find((event) => event.slug === slug) || null;
     
     if (doc) {
-        // Destructure all known properties
         const { 
             slug: docSlug, 
             title, 
@@ -62,11 +58,14 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             chatham, 
             tags, 
             resources,
-            body, // Get the body (MDX code)
+            body, // Get the body (MDX/MD code)
             ...rest 
         } = doc;
 
-        // Return the full, safe object
+        // ✅ CRITICAL FIX: Handle both MDX and MD content types
+        const anyBody = body as unknown as { code?: string; raw?: string; html?: string };
+        const mdxOrMd = anyBody?.code ?? anyBody?.raw ?? anyBody?.html ?? "";
+
         return {
             ...rest,
             slug: docSlug ?? '',
@@ -75,7 +74,7 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
             location: location ?? null,
             summary: summary ?? null,
             tags: Array.isArray(tags) ? tags : null,
-            content: (body as any)?.code, 
+            content: mdxOrMd, 
             resources: (resources as EventResources) ?? null,
         } as EventMeta & { content?: string };
     }

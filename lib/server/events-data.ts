@@ -1,10 +1,26 @@
 // lib/server/events-data.ts (FINAL ROBUST VERSION)
+
 import { allEvents } from "contentlayer/generated";
 import type { EventMeta, EventResources } from "@/types/event"; 
 
+// ----------------------------------------------------
+// Data Fetching Functions
+// ----------------------------------------------------
+
 export function getAllEvents(fields?: string[]): EventMeta[] {
     const events: EventMeta[] = allEvents.map(event => {
-        const { slug, title, date, location, summary, chatham, tags, resources, ...rest } = event;
+        const { 
+            slug, 
+            title, 
+            date, 
+            location, 
+            summary, 
+            chatham, 
+            tags, 
+            resources, 
+            ...rest 
+        } = event;
+        
         return {
             ...rest, 
             slug: slug ?? '', 
@@ -28,10 +44,24 @@ export function getEventSlugs(): string[] {
 
 export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { content?: string }) | null {
     const doc = allEvents.find((event) => event.slug === slug) || null;
+    
     if (doc) {
-        const { slug: docSlug, title, date, location, summary, chatham, tags, resources, body, ...rest } = doc;
+        const { 
+            slug: docSlug, 
+            title, 
+            date, 
+            location, 
+            summary, 
+            chatham, 
+            tags, 
+            resources,
+            body, 
+            ...rest 
+        } = doc;
+
         const anyBody = body as unknown as { code?: string; raw?: string; html?: string };
         const mdxOrMd = anyBody?.code ?? anyBody?.raw ?? anyBody?.html ?? "";
+
         return {
             ...rest,
             slug: docSlug ?? '',
@@ -46,6 +76,10 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
     }
     return null;
 }
+
+// ----------------------------------------------------
+// Helper Functions (Correctly Exported)
+// ----------------------------------------------------
 
 function dateKey(d: string): string {
   if (!d || typeof d !== 'string') return "";

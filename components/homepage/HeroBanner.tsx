@@ -52,14 +52,13 @@ export default function HeroBanner({
     
     handlePlayback();
     mql.addEventListener("change", handlePlayback);
-    return () => mglisten.removeEventListener("change", handlePlayback);
+    return () => mql.removeEventListener("change", handlePlayback);
   }, [hasVideo]); 
 
   // --- Image Fallback Props ---
   const imageProps = {
     src: poster,
-    // ✅ FIX: Added alt prop as requested to fix the warning
-    alt: "", 
+    alt: "", // ✅ Fixed alt prop warning
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
