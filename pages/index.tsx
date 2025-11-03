@@ -24,7 +24,7 @@ import { getAllEvents, dedupeEventsByTitleAndDay } from "@/lib/server/events-dat
 import type { PostMeta } from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads";
 
-// ---------- Banner types ----------
+/* ---------- Banner types ---------- */
 type BannerCTA = { label: string; href: string };
 type BannerOverlay =
   | { eyebrow?: string; title?: string; body?: string; cta?: BannerCTA }
@@ -38,12 +38,11 @@ type BannerConfig = {
   heightClassName?: string | null;
 };
 
-const HeroBanner = dynamic(
-  () => import("@/components/homepage/HeroBanner"),
-  { ssr: false }
-);
+const HeroBanner = dynamic(() => import("@/components/homepage/HeroBanner"), {
+  ssr: false,
+});
 
-// ---------- Events teaser types ----------
+/* ---------- Events teaser types ---------- */
 type ResourceLink = { href: string; label: string };
 type EventResources = {
   downloads?: ResourceLink[] | null;
@@ -61,7 +60,7 @@ type EventsTeaserItem = {
 };
 type EventsTeaser = Array<EventsTeaserItem>;
 
-// ---------- Helpers ----------
+/* ---------- Helpers ---------- */
 function onlyUpcoming(dateString: string | undefined | null): boolean {
   if (!dateString) return false;
   const dt = new Date(dateString);
@@ -71,7 +70,7 @@ function onlyUpcoming(dateString: string | undefined | null): boolean {
   return dt >= today;
 }
 
-// ---------- Page props ----------
+/* ---------- Page props ---------- */
 type HomeProps = {
   posts: PostMeta[];
   booksCount: number;
@@ -80,15 +79,13 @@ type HomeProps = {
   resources: PostMeta[];
 };
 
-// ===================================================================
-// getStaticProps — feeds homepage widgets (CLOSED CLEANLY)
-// ===================================================================
+/* ===================================================================
+   getStaticProps — feeds homepage widgets (CLOSED CLEANLY)
+   =================================================================== */
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  // Downloads & Resources (defensive slices)
   const downloads = (getAllContent("downloads", { includeDrafts: false }) as DownloadItem[]).slice(0, 6);
   const resources = (getAllContent("resources", { includeDrafts: false }) as PostMeta[]).slice(0, 6);
 
-  // Posts — take 3 featured
   const allPosts = getAllPosts();
   const safePosts: PostMeta[] = allPosts.slice(0, 3).map((p: any) => ({
     ...p,
@@ -104,7 +101,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
     coverPosition: p.coverPosition ?? null,
   }));
 
-  // Events — upcoming only, deduped by title/day, soonest first, take 3
   const rawEvents = getAllEvents([
     "slug",
     "title",
@@ -118,12 +114,15 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const deduped = dedupeEventsByTitleAndDay(rawEvents);
   const upcomingSorted = deduped
     .filter((e: any) => onlyUpcoming(e.date))
-    .sort((a: any, b: any) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()
+    );
 
   const eventsTeaser: EventsTeaser = upcomingSorted.slice(0, 3).map((e: any) => {
     const baseForImage = String(e.slug).replace(/[–—].*$/, "");
     const heroImage = e.heroImage ?? `/assets/images/events/${baseForImage}.jpg`;
-    const res: EventResources | null = (e.resources ?? null);
+    const res: EventResources | null = e.resources ?? null;
 
     const safeResources = res
       ? {
@@ -152,15 +151,15 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   };
 };
 
-// ===================================================================
-// Component
-// ===================================================================
+/* ===================================================================
+   Component
+   =================================================================== */
 export default function Home({
   posts,
   booksCount,
   eventsTeaser,
   downloads,
-  resources, // eslint-disable-line @typescript-eslint/no-unused-vars
+  resources, // reserved
 }: HomeProps) {
   const router = useRouter();
   const incomingQ = typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -184,8 +183,10 @@ export default function Home({
       ] as const),
     overlay: raw?.overlay ?? null,
     mobileObjectPositionClass:
-      raw?.mobileObjectPositionClass ?? "object-left md:object-[30%_center] lg:object-[40%_center]",
-    heightClassName: raw?.heightClassName ?? "min-h-[65svh] sm:min-h-[70svh] lg:min-h-[78svh]",
+      raw?.mobileObjectPositionClass ??
+      "object-left md:object-[30%_center] lg:object-[40%_center]",
+    heightClassName:
+      raw?.heightClassName ?? "min-h-[65svh] sm:min-h-[70svh] lg:min-h-[78svh]",
   };
 
   const overlayNode: React.ReactNode =
@@ -202,7 +203,9 @@ export default function Home({
           </h1>
         )}
         {banner.overlay.body && (
-          <p className="mt-3 max-w-prose text-sm text-[rgba(255,255,255,.85)]">{banner.overlay.body}</p>
+          <p className="mt-3 max-w-prose text-sm text-[rgba(255,255,255,.85)]">
+            {banner.overlay.body}
+          </p>
         )}
         {banner.overlay.cta && (
           <div className="mt-5">
@@ -270,7 +273,10 @@ export default function Home({
               aria-label={`View books (${booksCount})`}
               prefetch={false}
             >
-              Books <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({booksCount})</span>
+              Books{" "}
+              <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">
+                ({booksCount})
+              </span>
             </Link>
             <Link
               href={blogHref}
@@ -278,7 +284,10 @@ export default function Home({
               aria-label={`View insights (${postsCount})`}
               prefetch={false}
             >
-              Insights <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">({postsCount})</span>
+              Insights{" "}
+              <span className="ml-1 text-[color:var(--color-on-secondary)/0.6]">
+                ({postsCount})
+              </span>
             </Link>
           </div>
         </div>
@@ -288,7 +297,9 @@ export default function Home({
       <section className="bg-warmWhite px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Insights</h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Featured Insights
+            </h2>
             <Link
               href={blogHref}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -324,7 +335,9 @@ export default function Home({
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Featured Books</h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Featured Books
+            </h2>
             <Link
               href={`/books${incomingQ ? `?q=${encodeURIComponent(incomingQ)}` : ""}`}
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -360,7 +373,9 @@ export default function Home({
       <section className="bg-white px-4 pb-4">
         <div className="mx-auto max-w-7xl">
           <header className="mb-6">
-            <h2 className="font-serif text-2xl font-semibold text-deepCharcoal">Downloads</h2>
+            <h2 className="font-serif text-2xl font-semibold text-deepCharcoal">
+              Downloads
+            </h2>
             <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               Practical tools to help you lead with clarity.
             </p>
@@ -380,7 +395,9 @@ export default function Home({
       <section className="bg-white px-4 pb-4 pt-2">
         <div className="mx-auto max-w-7xl">
           <header className="mb-2 flex items-end justify-between">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Upcoming Events</h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Upcoming Events
+            </h2>
             <Link
               href="/events"
               className="text-sm font-medium text-deepCharcoal underline decoration-softGold/50 underline-offset-4 hover:decoration-softGold"
@@ -422,7 +439,9 @@ export default function Home({
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-7xl">
           <header className="mb-8">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">Ventures</h2>
+            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal">
+              Ventures
+            </h2>
             <p className="mt-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
               A portfolio built on craftsmanship, stewardship, and endurance.
             </p>
@@ -435,11 +454,16 @@ export default function Home({
               prefetch={false}
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">Alomarada</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">
+                  Alomarada
+                </p>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
+                  Explore →
+                </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
-                Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
+                Strategy & capital—focused on durable businesses with moral
+                clarity and operational discipline.
               </p>
             </Link>
 
@@ -449,11 +473,16 @@ export default function Home({
               prefetch={false}
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">Endureluxe</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">
+                  Endureluxe
+                </p>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
+                  Explore →
+                </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
-                Essential goods and refined experiences—engineered to last, designed to serve.
+                Essential goods and refined experiences—engineered to last,
+                designed to serve.
               </p>
             </Link>
 
@@ -463,11 +492,16 @@ export default function Home({
               prefetch={false}
             >
               <div className="flex items-center justify-between">
-                <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
-                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
+                <p className="font-serif text-xl font-semibold text-deepCharcoal">
+                  Abraham of London
+                </p>
+                <span className="text-sm text-softGold transition group-hover:translate-x-0.5">
+                  Explore →
+                </span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
-                Writing, counsel, and cultural work at the intersection of family, enterprise, and society.
+                Writing, counsel, and cultural work at the intersection of
+                family, enterprise, and society.
               </p>
             </Link>
           </div>
@@ -493,7 +527,8 @@ export default function Home({
             Build with Clarity. Lead with Standards. Leave a Legacy.
           </h3>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[color:var(--color-on-primary)/0.85]">
-            Start a conversation that moves your family, your venture, and your community forward.
+            Start a conversation that moves your family, your venture, and your
+            community forward.
           </p>
           <div className="mt-8">
             <Link
@@ -509,12 +544,7 @@ export default function Home({
     </Layout>
   );
 }
- goods and refined experiences—engineered to last, designed to serve.
-                            </p>
-                        </Link>
-
-                        <Link href="/about" className="group rounded-2xl border border-lightGrey bg-white p-6 shadow-card transition hover:shadow-cardHover" prefetch={false}>
-                            <div className="flex items-center justify-between">
+">
                                 <p className="font-serif text-xl font-semibold text-deepCharcoal">Abraham of London</p>
                                 <span className="text-sm text-softGold transition group-hover:translate-x-0.5">Explore →</span>
                             </div>
