@@ -1,7 +1,8 @@
-// lib/server/events-data.ts (FINAL ROBUST VERSION)
+// lib/events.ts (or lib/server/events-data.ts)
 
 import { allEvents } from "contentlayer/generated";
-import type { EventMeta, EventResources } from "@/types/event"; // Use the central event type
+// ✅ FIX: Correctly import the newly created type definitions
+import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
 // Data Fetching Functions
@@ -24,17 +25,16 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
         
         // ✅ CRITICAL FIX: Build the new object. Spread 'rest' first, 
         // then explicitly define the safe, coerced values.
-        // This avoids the "'slug' is specified more than once" error.
         return {
             ...rest, // Spread the remaining properties
             slug: slug ?? '', // Overwrite with the safe value
-            title: title ?? 'Untitled Event', // Overwrite with the safe value
-            date: date ?? new Date().toISOString(), // Overwrite with the safe value
-            location: location ?? null, // Overwrite with the safe value
-            summary: summary ?? null, // Overwrite with the safe value
-            chatham: chatham ?? false, // Overwrite with the safe value
-            tags: Array.isArray(tags) ? tags : null, // Correctly check for array
-            resources: (resources as EventResources) ?? null, // Overwrite with the safe value
+            title: title ?? 'Untitled Event', 
+            date: date ?? new Date().toISOString(), 
+            location: location ?? null, 
+            summary: summary ?? null, 
+            chatham: chatham ?? false, 
+            tags: Array.isArray(tags) ? tags : null, 
+            resources: (resources as EventResources) ?? null, 
         } as EventMeta; // Cast to EventMeta
     });
 
@@ -90,6 +90,7 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
 
 /** Convert a date string to a YYYY-MM-DD key in Europe/London. */
 function dateKey(d: string): string {
+  if (!d || typeof d !== 'string') return "";
   const only = /^\d{4}-\d{2}-\d{2}$/.test(d);
   if (only) return d;
   const dt = new Date(d);
@@ -126,7 +127,6 @@ export function dedupeEventsByTitleAndDay(events: EventMeta[]): EventMeta[] {
  */
 export function getEventResourcesSummary(events: EventMeta[]): { downloads: number; reads: number } {
     if (!Array.isArray(events)) return { downloads: 0, reads: 0 };
-
     return events.reduce(
         (acc, event) => ({
             downloads: acc.downloads + (event.resources?.downloads?.length || 0),
