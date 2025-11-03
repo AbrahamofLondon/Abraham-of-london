@@ -1,7 +1,8 @@
-// lib/server/events-data.ts (FINAL ROBUST VERSION)
+// lib/events.ts (or lib/server/events-data.ts) (FINAL ROBUST VERSION)
 
 import { allEvents } from "contentlayer/generated";
-import type { EventMeta, EventResources } from "@/types/event"; // Use the central event type
+// Make sure this path is correct. If your file is at 'types/event.ts', this is correct.
+import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
 // Data Fetching Functions
