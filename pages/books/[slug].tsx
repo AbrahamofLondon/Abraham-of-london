@@ -51,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const source = await serialize(content, {
     parseFrontmatter: false,
     scope: book,
-    mdxOptions: { remarkPlugins: [remarkGfm] },
+    mdxOptions: { remarkPlugins: [remarkGfm as any] }, // Use 'as any' for safety
   });
 
   return { 
@@ -69,61 +69,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths: books.map((b) => ({
       params: { slug: b.slug },
     })),
-    // ✅ FIX: Use 'blocking' to fix 404s
-    fallback: 'blocking', 
-  };
-};y, value]) => value !== undefined)
-        .map(([key, value]) => [key, value === undefined ? null : value])
-    )
-  };
-
-  if (!content) {
-    return { notFound: true };
-  }
-
-  const mdxSource = await serialize(content, { scope: frontmatter });
-
-  return { 
-    props: { source: mdxSource, frontmatter: frontmatter },
-    revalidate: 3600,
+    fallback: 'blocking', // Fix for 404 stubs
   };
 };
-
-// ----------------------------------------------------
-// Page Component 
-// ----------------------------------------------------
-export default function BookPage({ source, frontmatter }: InferGetStaticPropsType<typeof getStaticProps>) {
-  return (
-    <Layout>
-      <Head>
-        <title>{frontmatter.title} by {frontmatter.author} | Abraham of London</title>
-        <meta name="description" content={frontmatter.excerpt || frontmatter.title} />
-      </Head>
-      <article className="container mx-auto px-4 py-12">
-        <header className="mb-10 flex flex-col items-start gap-6 md:flex-row">
-          {frontmatter.coverImage && (
-            <div className="relative w-full flex-shrink-0 overflow-hidden rounded-lg shadow-2xl md:w-80 aspect-[2/3]">
-              <Image
-                src={frontmatter.coverImage}
-                alt={`Cover of ${frontmatter.title}`}
-                width={1024}
-                height={1536}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
-          )}
-          <div className="flex-grow">
-            <h1 className="mb-2 text-4xl font-serif font-bold text-deep-forest">{frontmatter.title}</h1>
-            <p className="mb-4 text-xl text-soft-charcoal">
-              By {frontmatter.author}
-            </p>
-          </div>
-        </header>
-        <section className="prose prose-lg max-w-none border-t border-gray-200 pt-8">
-          <MDXRemote {...source} components={mdxComponents} />
-        </section>
-      </article>
-    </Layout>
-  );
-}

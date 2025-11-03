@@ -78,9 +78,17 @@
 # (Include all your redirects here)
 
 [[redirects]]
-  from = "/downloads/leaders-cue-card"
-  to = "/downloads/leaders-cue-card.pdf"
-  status = 301
+  from = "/downloads/leaders-cue-card.pdf"
+  to   = "/downloads/leaders-cue-card-two-up.pdf"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/downloads/brotherhood-cue-card.pdf"
+  to   = "/downloads/brotherhood-cue-card-two-up.pdf"
+  status = 200
+  force = true
+
 
 # Force apex to canonical host
 [[redirects]]

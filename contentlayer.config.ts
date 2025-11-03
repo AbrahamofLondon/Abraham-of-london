@@ -1,7 +1,6 @@
 // contentlayer.config.ts (FINAL MERGED DEFINITION)
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
-// ✅ CRITICAL FIX: Import Pluggable type to resolve build error
 import type { Pluggable } from "unified";
 
 /** ---------- Document Types ---------- */
@@ -33,9 +32,6 @@ const Post = defineDocumentType(() => ({
   },
 }));
 
-// ----------------------------------------------------
-// Download Definition
-// ----------------------------------------------------
 const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.mdx",
@@ -47,8 +43,6 @@ const Download = defineDocumentType(() => ({
     readTime: { type: "string", required: true },
     category: { type: "string", required: true },
     type: { type: "string", required: true },
-    
-    // Optional fields
     subtitle: { type: "string", required: false },
     excerpt:  { type: "string", required: false },
     tags:     { type: "list", of: { type: "string" }, required: false },
@@ -60,7 +54,6 @@ const Download = defineDocumentType(() => ({
     coverPosition: { type: "string", required: false },
   },
 }));
-// ----------------------------------------------------
 
 const Event = defineDocumentType(() => ({
   name: 'Event',
@@ -81,7 +74,6 @@ const Event = defineDocumentType(() => ({
     related: { type: 'list', of: { type: 'string' }, required: false },
   },
 }));
-
 
 const Book = defineDocumentType(() => ({
   name: "Book",
@@ -152,30 +144,7 @@ export default makeSource({
   contentDirExclude: ["_downloads-registry.md"],
   documentTypes: [Post, Download, Event, Book, Resource, Strategy],
   mdx: {
-    // ✅ CRITICAL FIX: Cast remarkGfm to 'Pluggable' to satisfy new type requirements
     remarkPlugins: [remarkGfm as unknown as Pluggable],
-    esbuildOptions: (options) => {
-      options.external = [
-        ...(options.external ?? []),
-        "@/components/*",
-        "@/components/*.*",
-        "@/*",
-      ];
-      return options;
-    },
-  },
-});pe: "boolean" },
-  },
-}));
-
-/** ---------- Source ---------- */
-
-export default makeSource({
-  contentDirPath: "content",
-  contentDirExclude: ["_downloads-registry.md"],
-  documentTypes: [Post, Download, Event, Book, Resource, Strategy],
-  mdx: {
-    remarkPlugins: [remarkGfm],
     esbuildOptions: (options) => {
       options.external = [
         ...(options.external ?? []),

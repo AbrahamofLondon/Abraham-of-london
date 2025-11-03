@@ -1,57 +1,38 @@
 // scripts/check-mdx-syntax.mjs
-// This script scans MDX files for common syntax errors like brace mismatches
-// or stray HTML/JSX tags that can break the build.
-
 import { globby } from 'globby';
 import fsp from 'fs/promises';
 import path from 'path';
+import { compile } from "@mdx-js/mdx";
+import remarkGfm from "remark-gfm";
 
-const ROOT = process.cwd();
+const root = process.cwd();
 
-async function main() {
-  console.log('[MDX Check] Scanning for MDX/MD files...');
+const run = async () => {
+  console.log("[MDX Check] Scanning and compiling all .mdx files...");
   
-  const files = await globby([
-    'content/**/*.{md,mdx}',
-    'pages/**/*.{md,mdx}',
-    '!**/node_modules/**',
-  ], {
-    cwd: ROOT,
+  const files = await globby(["content/**/*.mdx"], { 
+    cwd: root,
     absolute: true,
+    ignore: ["**/node_modules/**"],
   });
 
-  let errorCount = 0;
-
-  for (const file of files) {
-    const relPath = path.relative(ROOT, file);
+  for (const f of files) {
+    const src = await fs.readFile(f, "utf8");
     try {
-      const content = await fsp.readFile(file, 'utf8');
-      
-      // Check for an unequal number of opening and closing braces
-      const openBraces = (content.match(/{/g) || []).length;
-      const closeBraces = (content.match(/}/g) || []).length;
-      const braceMismatch = openBraces !== closeBraces;
-
-      if (braceMismatch) {
-        console.error(`[MDX Check] ERROR: Brace mismatch {} detected in: ${relPath} (Open: ${openBraces}, Close: ${closeBraces})`);
-        errorCount++;
-      }
-
+      await compile(src, { jsx: true, remarkPlugins: [remarkGfm] });
     } catch (e) {
-      console.error(`[MDX Check] FAILED to read ${relPath}: ${e.message}`);
-      errorCount++;
+      console.error("\n" + "=".repeat(60));
+      console.error("❌ FATAL MDX SYNTAX ERROR IN:", path.relative(root, f));
+      console.error("=".repeat(60));
+      console.error(String(e?.message || e));
+      process.exit(1); 
     }
   }
+  
+  console.log(`✅ [MDX Check] All ${files.length} MDX files compiled cleanly.`);
+};
 
-  if (errorCount > 0) {
-    console.error(`\n[MDX Check] Failed with ${errorCount} error(s). Please review the files above.`);
-    process.exit(1);
-  } else {
-    console.log(`[MDX Check] All ${files.length} files seem clean.`);
-  }
-}
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
+run().catch((e) => { 
+  console.error("[MDX Check] A critical error occurred:", e); 
+  process.exit(1); 
 });

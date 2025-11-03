@@ -10,25 +10,23 @@ import remarkGfm from "remark-gfm";
 
 import Layout from "@/components/Layout";
 import mdxComponents from '@/components/mdx-components';
-import { getAllContent } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post"; // Using PostMeta as it matches
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
+import type { PostMeta } from "@/types/post";
 
 type DownloadMeta = PostMeta & { pdfPath?: string | null };
 type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
 
 // ----------------------------------------------------------------------
-// 1. getStaticProps (Data Coercion and MDX Serialization)
+// 1. getStaticProps
 // ----------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const slug = String(params?.slug || "");
     const { content, ...data } = getContentBySlug("downloads", slug, { withContent: true });
 
     if (!data.title) {
-      // If no title, it's not a real page
       return { notFound: true };
     }
     
-    // Coerce data to safe types
     const meta: DownloadMeta = {
         slug,
         title: data.title ?? 'Untitled Download',
@@ -48,29 +46,28 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const mdx = await serialize(content || "", {
         parseFrontmatter: false,
         scope: meta,
-        mdxOptions: { remarkPlugins: [remarkGfm] },
+        mdxOptions: { remarkPlugins: [remarkGfm as any] },
     });
 
     return { 
       props: JSON.parse(JSON.stringify({ meta, content: mdx })), 
-      revalidate: 3600 // Revalidate every hour
+      revalidate: 3600 
     };
 };
 
 // ----------------------------------------------------------------------
-// 2. getStaticPaths (Required for SSG)
+// 2. getStaticPaths
 // ----------------------------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
     const slugs = getAllContent("downloads").map(item => item.slug.toLowerCase());
     return { 
       paths: slugs.map((slug) => ({ params: { slug } })), 
-      // ✅ FIX: Use 'blocking' to fix 404s
       fallback: "blocking" 
     };
 };
 
 // ----------------------------------------------------------------------
-// 3. COMPONENT (Defensive Rendering)
+// 3. COMPONENT
 // ----------------------------------------------------------------------
 export default function DownloadPage({ meta, content }: Props) {
     const {
@@ -128,45 +125,5 @@ export default function DownloadPage({ meta, content }: Props) {
                 )}
             </main>
         </Layout>
-    );
-}/div>
-                )}
-
-                <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
-
-                <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
-                    <span>By {authorName}</span>
-
-                    {date && (
-                        <>
-                            {" "}· <time dateTime={date}>{formattedDate}</time>
-                        </>
-                    )}
-                    {readTime && <> · {readTime}</>}
-                    
-                    {/* Category Chip */}
-                    {category && (
-                        <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
-                            {category}
-                        </span>
-                    )}
-                </div>
-
-                <div className="prose prose-lg max-w-none text-deepCharcoal">
-                    <MDXRemote {...content} components={mdxComponents} />
-                </div>
-
-                {/* Download Button */}
-                {pdfPath && (
-                    <div className="mt-10">
-                        <Link href={String(pdfPath)} className="aol-btn" rel="noopener">
-                            Download PDF
-                        </Link>
-                    </div>
-                )}
-            </main>
-        </Layout>
-    );
-} </Layout>
     );
 }
