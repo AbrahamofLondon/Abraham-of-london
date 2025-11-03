@@ -31,6 +31,3 @@ contentDirs.forEach(dirName => {
           fs.writeFileSync(filePath, updatedContent);
           console.log(`Å“¦ Updated path in: ${file}`);
         }
-      });
-  });
-});

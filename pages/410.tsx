@@ -51,14 +51,3 @@ export default function Gone410() {
     </>
   );
 }
-
-/**
- * If you ever want to send an actual 410 status from Next for /410,
- * switch to getServerSideProps below. (Netlify brand-host redirects
- * already return 410 for /410.html, so this is optional.)
- *
- * export const getServerSideProps: GetServerSideProps = async ({ res }) => {
- *   res.statusCode = 410;
- *   return { props: {} };
- * };
- */

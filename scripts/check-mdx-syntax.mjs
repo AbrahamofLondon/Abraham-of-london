@@ -28,11 +28,3 @@ const run = async () => {
       process.exit(1); 
     }
   }
-  
-  console.log(`✅ [MDX Check] All ${files.length} MDX files compiled cleanly.`);
-};
-
-run().catch((e) => { 
-  console.error("[MDX Check] A critical error occurred:", e); 
-  process.exit(1); 
-});

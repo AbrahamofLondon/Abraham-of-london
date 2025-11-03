@@ -266,5 +266,3 @@ async function main() {
 
   console.log("\nNext: run `npm run pdfs` to render → public/downloads/*.pdf");
 }
-
-main().catch((e) => { console.error(e); process.exit(1); });

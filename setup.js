@@ -123,10 +123,3 @@ const pkg = {
     axios: "^1.5.1",
     dotenv: "^16.3.1"
   }
-};
-
-fs.writeFileSync('alomarada-site/package.json', JSON.stringify(pkg, null, 2));
-
-console.log("✅ Setup complete. Run:");
-console.log("cd alomarada-site");
-console.log("npm install && npm run deploy");

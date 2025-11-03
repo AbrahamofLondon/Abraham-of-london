@@ -54,6 +54,3 @@ for (const file of files) {
     console.log(`${WRITE ? "✔ fixed" : "→ would fix"}: ${path.relative(ROOT, file)}`);
   }
 }
-
-console.log(changed ? `${WRITE ? "Updated" : "Would update"} ${changed} file(s).` : "No JSON-LD <script> blocks found.");
-if (!WRITE && changed) process.exitCode = 1;

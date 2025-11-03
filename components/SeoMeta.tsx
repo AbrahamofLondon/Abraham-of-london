@@ -34,16 +34,3 @@ export default function SeoMeta({
     </Head>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

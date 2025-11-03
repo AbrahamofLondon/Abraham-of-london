@@ -82,8 +82,3 @@ async function run() {
 
   console.log(`sanitize-source: processed ${files.length} files, changed ${changed}`);
 }
-
-run().catch((e) => {
-  console.error("sanitize-source failed:", e);
-  process.exit(1);
-});

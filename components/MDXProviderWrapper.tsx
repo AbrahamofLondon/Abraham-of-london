@@ -13,16 +13,3 @@ export default function MDXProviderWrapper({
 }) {
   return <MDXProvider components={components}>{children}</MDXProvider>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

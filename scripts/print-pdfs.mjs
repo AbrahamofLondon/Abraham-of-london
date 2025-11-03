@@ -50,7 +50,3 @@ async function main() {
     if (code !== 0) process.exit(code);
   });
 }
-main().catch((e) => {
-  console.error("\n--- Error in print-pdfs.mjs ---\n", e.message || e);
-  process.exit(1);
-});

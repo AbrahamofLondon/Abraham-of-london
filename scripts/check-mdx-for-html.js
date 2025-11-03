@@ -59,5 +59,3 @@ function main() {
     console.log('✅ MDX looks clean.');
   }
 }
-
-main();

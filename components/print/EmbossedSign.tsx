@@ -53,6 +53,3 @@ function EmbossedSign({
     </span>
   );
 }
-
-export default React.memo(EmbossedSign);
-export type { Effect };

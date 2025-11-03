@@ -101,8 +101,3 @@ async function main() {
     console.log(`✅ Passed with ${warnings.length} warning(s).`);
   }
 }
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

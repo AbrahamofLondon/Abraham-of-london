@@ -86,13 +86,3 @@ async function main() {
   console.log(JSON.stringify(report, null, 2));
   console.log(`[fix-frontmatter] Done. Fixed ${report.fixed.length}, skipped ${report.skipped.length}.`);
 }
-
-main().catch((e) => {
-  console.error("[fix-frontmatter] An unexpected error occurred:");
-  console.error(e);
-  process.exit(1);
-});((e) => {
-  console.error("[fix-frontmatter] An unexpected error occurred:");
-  console.error(e);
-  process.exit(1);
-});

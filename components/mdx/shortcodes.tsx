@@ -137,18 +137,3 @@ export function ResourcesCTA({
     </div>
   );
 }
-
-/* Export a components map for MDXRemote */
-export const mdxComponents = {
-  // missing ones that caused your build to fail
-  HeroEyebrow,
-  Callout,
-  Badge,
-
-  // plus the others you’ve been using in posts
-  Rule,
-  PullLine,
-  Verse,
-  Note,
-  ResourcesCTA,
-};

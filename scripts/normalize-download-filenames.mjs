@@ -283,6 +283,3 @@ const nowStamp = () => {
       `\n${WRITE ? "Updated" : "Would update"} ${changedFiles} file(s) with new kebab-case links.`
     );
   }
-
-  console.log("\nDone.");
-})();

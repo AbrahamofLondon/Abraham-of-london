@@ -18,7 +18,3 @@ const pieces = currentPrebuild.split('&&').map(s => s.trim()).filter(Boolean);
 if (!pieces.includes('node scripts/doctor.mjs')) {
   pieces.unshift('node scripts/doctor.mjs');
 }
-pkg.scripts.prebuild = pieces.join(' && ') || 'node scripts/doctor.mjs';
-
-fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-console.log('✓ package.json scripts updated: added "doctor" and ensured it runs in prebuild.');

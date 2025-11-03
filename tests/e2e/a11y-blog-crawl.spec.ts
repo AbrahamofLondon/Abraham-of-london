@@ -20,5 +20,3 @@ test.describe('A11y blog crawl (axe)', () => {
         await testInfo.attach('page.txt', { body: Buffer.from(href), contentType: 'text/plain' });
       });
     }
-  });
-});

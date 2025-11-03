@@ -68,5 +68,3 @@ if (isAnalyze) {
     withAnalyzer = analyzer({ enabled: true });
   } catch {}
 }
-
-export default withContentlayer(withAnalyzer(withMDX(nextConfig)));

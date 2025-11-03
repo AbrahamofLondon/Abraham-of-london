@@ -34,4 +34,3 @@ test("crawl /blog posts and verify metadata", async ({ page }) => {
       }
     });
   }
-});

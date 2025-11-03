@@ -13,6 +13,3 @@ const dst = path.join(DL, "leaders-cue-card.pdf");
     console.error("source missing:", src);
     process.exit(1);
   }
-  await fs.copyFile(src, dst);
-  console.log("created:", path.relative(process.cwd(), dst));
-})();

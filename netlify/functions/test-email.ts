@@ -85,4 +85,3 @@ export const handler: Handler = async (event) => {
       body: JSON.stringify({ ok: false, error: { message: err?.message || "Unknown error" } }),
     };
   }
-};

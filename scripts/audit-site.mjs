@@ -365,5 +365,3 @@ async function main() {
   const issuesCount = Object.values(summary).reduce((a, b) => a + b, 0);
   if (issuesCount > 0 && !(DO_FIX || DO_RENAME)) process.exitCode = 1;
 }
-
-main().catch((e) => { console.error(e); process.exit(2); });

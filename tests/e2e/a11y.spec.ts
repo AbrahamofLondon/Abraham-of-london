@@ -15,4 +15,3 @@ test.describe('A11y core routes (axe)', () => {
       await runAxe(page, { tags: ['wcag2a', 'wcag2aa'] });
     });
   }
-});

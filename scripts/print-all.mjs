@@ -41,6 +41,3 @@ function waitForHealth(url, timeoutMs = 40_000) {
     console.log("Shutting down Next…");
     server.kill("SIGINT");
   }
-
-  console.log("All done.");
-})();

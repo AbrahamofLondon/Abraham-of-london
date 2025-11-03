@@ -212,8 +212,3 @@ async function main() {
   await saveBlogCovers();
   console.log("generate-og: social defaults, hero banner, and covers ready.");
 }
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

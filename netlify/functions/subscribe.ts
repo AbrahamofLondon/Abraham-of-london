@@ -76,6 +76,3 @@ export const handler: Handler = async (evt) => {
   } catch (err: any) {
     return oops(err?.message || "Failed to subscribe");
   }
-};
-
-export default { handler };

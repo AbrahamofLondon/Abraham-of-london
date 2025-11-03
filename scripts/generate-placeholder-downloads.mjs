@@ -138,5 +138,3 @@ async function main(){
 
   console.log(`\n✅ Done. PDFs created: ${created}, covers created: ${covered}`);
 }
-
-main().catch(e => { console.error(`\n🚨 FATAL: ${e.stack || e.message}`); process.exit(1); });

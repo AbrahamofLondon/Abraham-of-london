@@ -43,4 +43,3 @@ export const handler = async (event) => {
     console.error("submission-created error:", err);
     return { statusCode: 500, body: "Error" };
   }
-};

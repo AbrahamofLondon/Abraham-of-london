@@ -113,8 +113,3 @@ async function main() {
 
   console.log("\nAll done.");
 }
-
-main().catch((e) => {
-  console.error("\n--- Error in render-pdfs.mjs ---\n", e);
-  process.exit(1);
-});

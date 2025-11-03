@@ -21,26 +21,3 @@ function gtagSafe(...args: unknown[]) {
   if (!gaEnabled || typeof window === "undefined") return;
   if (typeof window.gtag === "function") window.gtag(...args);
 }
-
-export const pageview = (url: string) => {
-  gtagSafe("config", GA_MEASUREMENT_ID, { page_path: url });
-};
-
-export const gaEvent = (action: string, params: Record<string, unknown> = {}) => {
-  gtagSafe("event", action, params);
-};
-
-export const trackOutbound = (url: string, label?: string) => {
-  gaEvent("click", {
-    event_category: "outbound",
-    event_label: label ?? url,
-    transport_type: "beacon",
-  });
-};
-
-export const setConsent = (granted: boolean) => {
-  gtagSafe("consent", "update", {
-    ad_storage: granted ? "granted" : "denied",
-    analytics_storage: granted ? "granted" : "denied",
-  });
-};

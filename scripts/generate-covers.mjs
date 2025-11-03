@@ -166,8 +166,3 @@ async function exists(p) {
     return false;
   }
 }
-
-run().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

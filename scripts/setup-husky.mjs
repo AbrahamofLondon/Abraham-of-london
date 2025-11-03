@@ -29,6 +29,3 @@ if (!fs.existsSync(path.join(huskyDir, '_'))) {
 command -v sh >/dev/null 2>&1 || { echo >&2 "sh required for husky hooks."; exit 1; }
 `, 'utf8');
 }
-
-fs.writeFileSync(hook, script, { encoding: 'utf8', mode: 0o755 });
-console.log('✔ Husky pre-commit hook installed: .husky/pre-commit');

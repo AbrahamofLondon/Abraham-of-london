@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 import Layout from "@/components/Layout";
 import mdxComponents from '@/components/mdx-components';
 import { getAllBooks, getBookBySlug } from "@/lib/books"; 
-import type { PostMeta } from "@/types/post"; // Using PostMeta as it matches
+import type { PostMeta } from "@/types/post"; 
 
 type Props = { 
   book: PostMeta; 
@@ -51,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const source = await serialize(content, {
     parseFrontmatter: false,
     scope: book,
-    mdxOptions: { remarkPlugins: [remarkGfm as any] }, // Use 'as any' for safety
+    mdxOptions: { remarkPlugins: [remarkGfm as any] }, 
   });
 
   return { 
@@ -61,7 +61,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     },
     revalidate: 3600
   };
-};
+}; 
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const books = getAllBooks(["slug"]);
@@ -69,6 +69,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths: books.map((b) => ({
       params: { slug: b.slug },
     })),
-    fallback: 'blocking', // Fix for 404 stubs
+    fallback: 'blocking', 
   };
 };

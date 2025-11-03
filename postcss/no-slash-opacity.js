@@ -55,12 +55,3 @@ module.exports = function noSlashOpacity(opts = {}) {
           `Move it into @apply or a className so it can be rewritten.`
         );
       }
-
-      throw decl.error(
-        `Forbidden slash opacity token "${m[0].trim()}" in "${decl.prop}".`
-      );
-    },
-  };
-};
-
-module.exports.postcss = true; // ✅ important for PostCSS 8

@@ -101,5 +101,3 @@ Please add an open-licensed cursive TTF as assets/fonts/Signature.ttf (e.g., OFL
 
   console.log('Signature saved:\n ', path.relative(process.cwd(), outPng), '\n ', path.relative(process.cwd(), outJpg));
 }
-
-main().catch((e) => { console.error(e); process.exit(2); });

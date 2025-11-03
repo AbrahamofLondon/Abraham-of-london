@@ -27,8 +27,3 @@ declare module 'next-mdx-remote' {
 
   export const MDXRemote: React.ComponentType<MDXRemoteProps>;
 }
-
-
-
-
-

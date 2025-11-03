@@ -30,26 +30,3 @@ export default function PrintPage({ source, frontmatter }: PrintPageProps) {
     </BrandFrame>
   );
 }
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params!.slug as string;
-  const { content, ...frontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-  
-  const finalFrontmatter = JSON.parse(JSON.stringify(frontmatter));
-  // Ensure 'summary' is null, not undefined, if missing (Fixes serialization crash)
-  if (finalFrontmatter.summary === undefined) finalFrontmatter.summary = null;
-
-  const mdxSource = await serialize(content || '', { scope: finalFrontmatter });
-  
-  return { props: { source: mdxSource, frontmatter: finalFrontmatter } };
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const allContent = getAllContent(CONTENT_TYPE);
-  const slugs = allContent.map(item => item.slug.toLowerCase());
-
-  return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
-    fallback: false,
-  };
-};

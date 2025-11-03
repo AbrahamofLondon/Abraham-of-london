@@ -39,4 +39,3 @@ async function main() {
     for (const r of uniq) console.log(r);
   }
 }
-main().catch(e => { console.error(e); process.exit(1); });

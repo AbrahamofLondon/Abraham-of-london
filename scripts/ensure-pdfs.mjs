@@ -194,5 +194,3 @@ async function main() {
     console.log(`\nPDF ensure completed. Report: ${REPORT}`);
   }
 }
-
-main().catch((e) => { console.error(e); process.exit(1); });

@@ -57,4 +57,3 @@ console.log("❌ Unbalanced delimiters found:");
 for (const b of bad) {
   console.log(`- ${b.file}  ${b.reason}${b.line ? `  (line ${b.line}, col ${b.col})` : ""}`);
 }
-process.exit(1);

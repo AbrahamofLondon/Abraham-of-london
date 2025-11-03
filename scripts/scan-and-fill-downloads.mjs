@@ -215,4 +215,3 @@ const listExisting = async (dir) => {
   } else if (!WRITE && missing.length) {
     console.log("\n(DRY-RUN) No files were created. Re-run with --write to create placeholders.");
   }
-})();

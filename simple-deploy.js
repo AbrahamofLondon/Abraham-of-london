@@ -11,9 +11,3 @@ fetch(hookUrl, { method: 'POST' })
     } else {
       console.log("❌ Deployment failed:", response.status);
     }
-  })
-  .catch(error => console.log("❌ Error:", error));
-"@ | Out-File -FilePath "simple-deploy.js" -Encoding UTF8
-
-# Then run it
-node simple-deploy.js

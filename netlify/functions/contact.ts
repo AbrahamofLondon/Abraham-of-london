@@ -124,4 +124,3 @@ export const handler: Handler = async (event) => {
     // common Resend issues: unverified domain/sender, invalid API key
     return cors(502, { ok: false, error: "Email send failed." });
   }
-};

@@ -11,10 +11,3 @@ try {
   const siTiktok = (await import("simple-icons/icons/tiktok.js")).default;
   pathData = siTiktok.path;
 }
-
-const svg = `<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>TikTok</title><path fill="currentColor" d="${pathData}"/></svg>`;
-
-const out = "public/assets/images/social/tiktok.svg";
-mkdirSync(dirname(out), { recursive: true });
-writeFileSync(out, svg, "utf8");
-console.log("✅ Exported", out);

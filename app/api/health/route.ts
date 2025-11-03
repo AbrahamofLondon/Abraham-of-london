@@ -32,24 +32,3 @@ export async function GET() {
   // Why: health responses must not cache
   return NextResponse.json(body, { headers: { 'Cache-Control': 'no-store' } });
 }
-
-// File: playwright.config.ts
-import { defineConfig, devices } from '@playwright/test';
-
-const PORT = process.env.PORT || '3100';
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
-
-export default defineConfig({
-  testDir: './tests/e2e',
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
-  use: { baseURL: BASE_URL, trace: 'on-first-retry' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // Single webServer entry; Windows-friendly (no inline "PORT=...")
-  webServer: {
-    command: 'npm run dev',
-    url: `http://localhost:${PORT}`,
-    timeout: 120000,
-    reuseExistingServer: !process.env.CI,
-    env: { PORT }, // cross-platform
-  },
-});

@@ -144,7 +144,3 @@ async function main() {
   console.log(JSON.stringify(report, null, 2));
   if (report.weak.length || report.missing.length) process.exitCode = 1;
 }
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

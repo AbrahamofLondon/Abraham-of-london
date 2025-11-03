@@ -104,4 +104,3 @@ export const handler = async (event: HandlerEvent): Promise<HandlerResponse> => 
     console.error("[send-teaser] error", err);
     return json(500, { ok: false, message: "Internal Server Error" });
   }
-};

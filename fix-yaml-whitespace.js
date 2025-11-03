@@ -81,5 +81,3 @@ try {
 } catch (error) {
     console.error(`\n❌ An error occurred during file processing: ${error.message}`);
 }
-
-console.log('--------------------------------------');

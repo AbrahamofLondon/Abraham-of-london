@@ -72,16 +72,3 @@ export function getAllPosts(
       return ad > bd ? -1 : 1;
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

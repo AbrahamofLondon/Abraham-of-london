@@ -36,9 +36,3 @@ export default function ContactEmail({ name, email, message }: Props) {
     </Html>
   );
 }
-
-
-
-
-
-

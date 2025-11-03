@@ -59,8 +59,3 @@ async function main() {
 
   console.log(`[bom-fix] Done. Scanned ${files.length} files, fixed ${fixed}.`);
 }
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

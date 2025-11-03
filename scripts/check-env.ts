@@ -77,5 +77,3 @@ URL=https://abrahamoflondon.org
 DEPLOY_PRIME_URL=https://abraham-of-london.netlify.app`);
   process.exit(1);
 }
-
-console.log("\nAll required environment variables look good ✅");

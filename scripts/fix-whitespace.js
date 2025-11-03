@@ -34,5 +34,3 @@ const replaceWeird = (txt) =>
       /* ignore missing folders */
     }
   }
-  console.log("Whitespace clean complete.");
-})();

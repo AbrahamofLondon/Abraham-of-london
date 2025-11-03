@@ -57,5 +57,3 @@ for (const file of files) {
     break;
   }
 }
-
-if (!failed) console.log("✅ Esbuild parsed all candidate files cleanly.");
