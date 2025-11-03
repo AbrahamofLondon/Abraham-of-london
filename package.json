@@ -54,7 +54,8 @@
     "downloads:scan": "node scripts/scan-and-fill-downloads.mjs",
     "downloads:fill": "node scripts/scan-and-fill-downloads.mjs --write",
     "downloads:export": "node scripts/print-pdfs.mjs",
-    "check:mdx:syntax": "node scripts/check-mdx-syntax.mjs"
+    "check:mdx:syntax": "node scripts/check-mdx-syntax.mjs",
+    "check:esbuild": "node scripts/check-esbuild-syntax.mjs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -70,7 +71,6 @@
     "clsx": "2.1.1",
     "cross-env": "10.0.0",
     "date-fns": "4.1.0",
-    "fast-glob": "^3.3.2",
     "framer-motion": "12.23.12",
     "fuse.js": "7.1.0",
     "gray-matter": "4.0.3",
@@ -117,6 +117,7 @@
     "esbuild-plugin-tsconfig-paths": "^1.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.32",
+    "fast-glob": "^3.3.3",
     "glob": "^11.0.3",
     "globby": "^15.0.0",
     "husky": "^9.1.6",
