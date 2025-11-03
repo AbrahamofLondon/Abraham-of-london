@@ -17,9 +17,11 @@ import DownloadsGrid from "@/components/downloads/DownloadsGrid";
 import { getActiveBanner } from "@/lib/hero-banners";
 import { getAllPosts, getAllContent } from "@/lib/mdx"; 
 import { getAllBooks } from "@/lib/books"; 
+
+// ✅ SYNTAX FIX: Combined and corrected import block
 import {
     getAllEvents, 
-    dedupeEventsByTitleAndDay, // This import will now work
+    dedupeEventsByTitleAndDay,
 } from "@/lib/server/events-data";
 import type { PostMeta } from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads"; 
@@ -431,7 +433,7 @@ export default function Home({
                             </div>
                             <p className="mt-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.85]">
                                 Strategy & capital—focused on durable businesses with moral clarity and operational discipline.
-                            </p>
+                            </Grid>
                         </Link>
 
                         <Link
