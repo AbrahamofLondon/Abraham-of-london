@@ -52,7 +52,7 @@ export default function HeroBanner({
     
     handlePlayback();
     mql.addEventListener("change", handlePlayback);
-    return () => mql.removeEventListener("change", handlePlayback);
+    return () => mglisten.removeEventListener("change", handlePlayback);
   }, [hasVideo]); 
 
   // --- Image Fallback Props ---
