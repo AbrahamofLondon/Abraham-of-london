@@ -54,8 +54,7 @@ export default function HeroBanner({
   // --- Image Fallback Props ---
   const imageProps = {
     src: poster,
-    // ✅ FIX: Added alt prop as requested to fix the warning
-    alt: "", 
+    alt: "", // ✅ Fixed alt prop warning
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
@@ -93,7 +92,6 @@ export default function HeroBanner({
           ))}
         </video>
       ) : (
-        // This is the image (around line 102) that needed the alt prop
         <Image {...imageProps} />
       )}
       <div
@@ -106,9 +104,8 @@ export default function HeroBanner({
         </div>
       ) : null}
       <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          alt="Decorative fallback image for hero section." // Also added here
+          alt="Decorative fallback image for hero section."
           src={poster}
           className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
           loading="lazy"
