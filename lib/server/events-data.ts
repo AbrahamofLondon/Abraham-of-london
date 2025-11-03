@@ -1,12 +1,16 @@
-// lib/server/events-data.ts (FINAL ROBUST VERSION)
+// lib/server/events-data.ts (FINAL SYNCHRONIZED VERSION)
 
 import { allEvents } from "contentlayer/generated";
-import type { EventMeta, EventResources } from "@/types/event"; // Use the central event type
+// We must import the type definition to use it
+import type { EventMeta, EventResources } from "@/types/event"; 
 
 // ----------------------------------------------------
 // Data Fetching Functions
 // ----------------------------------------------------
 
+/**
+ * Fetches all events from Contentlayer and maps them to the robust EventMeta type.
+ */
 export function getAllEvents(fields?: string[]): EventMeta[] {
     const events: EventMeta[] = allEvents.map(event => {
         // Destructure all known properties from the Contentlayer event
@@ -22,10 +26,10 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
             ...rest // Capture all other properties
         } = event;
         
-        // Build the new object
+        // Build the new object, ensuring safe, coerced values
         return {
             ...rest, // Spread the remaining properties
-            slug: slug ?? '', // Overwrite with the safe value
+            slug: slug ?? '', 
             title: title ?? 'Untitled Event', 
             date: date ?? new Date().toISOString(), 
             location: location ?? null, 
@@ -40,6 +44,9 @@ export function getAllEvents(fields?: string[]): EventMeta[] {
     return events.sort((a, b) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
 }
 
+/**
+ * Gets all event slugs for getStaticPaths.
+ */
 export function getEventSlugs(): string[] {
     const events = getAllEvents([]); 
     if (!Array.isArray(events)) return []; 
@@ -47,6 +54,9 @@ export function getEventSlugs(): string[] {
     return events.map((event) => event.slug).filter(Boolean);
 }
 
+/**
+ * Gets a single event by slug, ensuring content is included.
+ */
 export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { content?: string }) | null {
     const doc = allEvents.find((event) => event.slug === slug) || null;
     
@@ -84,7 +94,7 @@ export function getEventBySlug(slug: string, fields?: string[]): (EventMeta & { 
 }
 
 // ----------------------------------------------------
-// Helper Functions (Correctly Exported)
+// Helper Functions (From your snippet, now correctly integrated)
 // ----------------------------------------------------
 
 /** Convert a date string to a YYYY-MM-DD key in Europe/London. */

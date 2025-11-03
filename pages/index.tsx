@@ -19,15 +19,17 @@ import DownloadsGrid from "@/components/downloads/DownloadsGrid";
 import { getActiveBanner } from "@/lib/hero-banners";
 import { getAllPosts, getAllContent } from "@/lib/mdx";
 import { getAllBooks } from "@/lib/books";
-// ✅ SYNTAX FIX: Correctly import all required functions from events-data
+
+// ✅ CRITICAL FIX: Corrected the import path from '/server/events-data' to '/events'
 import { 
     getAllEvents, 
     dedupeEventsByTitleAndDay 
-} from "@/lib/server/events-data";
+} from "@/lib/events"; 
 
 // Types
 import type { PostMeta } from "@/types/post";
 import type { DownloadItem } from "@/lib/downloads";
+import type { EventMeta, EventResources, ResourceLink } from "@/types/event"; // Import event types
 
 // ---------- Banner types ----------
 type BannerCTA = { label: string; href: string };
@@ -49,11 +51,7 @@ const HeroBanner = dynamic(
 );
 
 // ---------- Events teaser types ----------
-type ResourceLink = { href: string; label: string };
-type EventResources = {
-  downloads?: ResourceLink[] | null;
-  reads?: ResourceLink[] | null;
-};
+// (These types are now imported from types/event.ts, but we define the Teaser item here)
 type EventsTeaserItem = {
   slug: string;
   title: string;
