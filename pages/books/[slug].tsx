@@ -1,60 +1,78 @@
-// pages/books/[slug].tsx
-import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+// pages/books/[slug].tsx (FINAL ROBUST VERSION)
+import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import { MDXRemote } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Import necessary data functions
-import type { PostMeta } from "@/types/post";
+import mdxComponents from '@/components/mdx-components';
+import { getAllBooks, getBookBySlug } from "@/lib/books"; 
+import type { PostMeta } from "@/types/post"; // Using PostMeta as it matches
 
-const CONTENT_TYPE = "books";
-
-// Define the shape of the props returned by getStaticProps
 type Props = { 
-  source: Awaited<ReturnType<typeof serialize>>; 
-  frontmatter: PostMeta & { pdfPath?: string | null };
+  book: PostMeta; 
+  source: MDXRemoteSerializeResult 
 };
 
+export default function BookPage({ book, source }: Props) {
+  if (!book) return <div>Book not found.</div>;
+  
+  const { title, description, ogDescription, coverImage, slug } = book;
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const url = `${site}/books/${slug}`;
+  const absImage = coverImage ? new URL(coverImage, site).toString() : undefined;
 
-// ----------------------------------------------------
-// ✅ CRITICAL FIX: getStaticPaths (Resolves the Missing Function Crash)
-// ----------------------------------------------------
-export const getStaticPaths: GetStaticPaths = async () => {
-  // Use the unified content fetcher to get all slugs for the 'books' type
-  const allContent = getAllContent(CONTENT_TYPE);
-  const paths = allContent.map(item => ({ 
-      params: { slug: item.slug.toLowerCase() } 
-  }));
+  return (
+    <Layout pageTitle={title}>
+      <Head>
+        <title>{title} | Abraham of London</title>
+        <meta name="description" content={description || ogDescription || ""} />
+        {absImage && <meta property="og:image" content={absImage} />}
+        <meta property="og:url" content={url} />
+      </Head>
+      
+      <article className="prose prose-lg mx-auto px-4 py-10">
+        <h1>{title}</h1>
+        <MDXRemote {...source} components={mdxComponents} />
+      </article>
+    </Layout>
+  );
+}
 
-  return {
-    paths: paths,
-    fallback: false, // Ensures all known paths are pre-rendered
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = String(params?.slug || "");
+  const { content, ...book } = getBookBySlug(slug);
+
+  if (!book || !content) {
+    return { notFound: true };
+  }
+
+  const source = await serialize(content, {
+    parseFrontmatter: false,
+    scope: book,
+    mdxOptions: { remarkPlugins: [remarkGfm] },
+  });
+
+  return { 
+    props: { 
+      book: JSON.parse(JSON.stringify(book)), 
+      source 
+    },
+    revalidate: 3600
   };
 };
 
-// ----------------------------------------------------
-// ✅ getStaticProps (Ensures Data Fetching and Serialization Safety)
-// ----------------------------------------------------
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = params!.slug as string;
-  const { content, ...rawFrontmatter } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-
-  // Ensure all fields that could be undefined are safely coalesced to null/safe strings
-  const frontmatter = {
-    ...rawFrontmatter,
-    title: rawFrontmatter.title ?? 'Untitled Book',
-    author: rawFrontmatter.author ?? null,
-    date: rawFrontmatter.date ?? null,
-    excerpt: rawFrontmatter.excerpt ?? null,
-    coverImage: rawFrontmatter.coverImage ?? null,
-    summary: rawFrontmatter.summary ?? null, 
-    pdfPath: (rawFrontmatter as any).pdfPath ?? null,
-    
-    ...Object.fromEntries(
-        Object.entries(rawFrontmatter).filter(([key, value]) => value !== undefined)
+export const getStaticPaths: GetStaticPaths = async () => {
+  const books = getAllBooks(["slug"]);
+  return {
+    paths: books.map((b) => ({
+      params: { slug: b.slug },
+    })),
+    // ✅ FIX: Use 'blocking' to fix 404s
+    fallback: 'blocking', 
+  };
+};y, value]) => value !== undefined)
         .map(([key, value]) => [key, value === undefined ? null : value])
     )
   };

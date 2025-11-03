@@ -11,7 +11,6 @@ type VideoSource = {
   type: "video/webm" | "video/mp4";
   media?: string;
 };
-
 type Props = {
   poster: string;
   videoSources?: ReadonlyArray<VideoSource> | null;
@@ -20,7 +19,6 @@ type Props = {
   overlay?: React.ReactNode;
   className?: string;
 };
-
 // --- Component ---
 export default function HeroBanner({
   poster,
@@ -31,10 +29,8 @@ export default function HeroBanner({
   className,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
-
   const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
   const hasVideo = sources.length > 0;
-
   const normalizedHeight = heightClassName ?? "min-h-[70dvh] sm:min-h-[72dvh] lg:min-h-[78lvh]";
 
   React.useEffect(() => {
@@ -58,13 +54,13 @@ export default function HeroBanner({
   // --- Image Fallback Props ---
   const imageProps = {
     src: poster,
-    alt: "", // ✅ Fixed alt prop warning
+    // ✅ FIX: Added alt prop as requested to fix the warning
+    alt: "", 
     className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
     fill: true as const,
     sizes: "100vw",
     priority: true as const,
   };
-
   return (
     <section
       role="banner" 
@@ -100,18 +96,15 @@ export default function HeroBanner({
         // This is the image (around line 102) that needed the alt prop
         <Image {...imageProps} />
       )}
-
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
       />
-
       {overlay ? (
         <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
           <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
         </div>
       ) : null}
-
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

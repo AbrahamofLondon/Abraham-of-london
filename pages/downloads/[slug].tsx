@@ -1,4 +1,4 @@
-// pages/downloads/[slug].tsx (ABSOLUTE FINAL ROBUST VERSION)
+// pages/downloads/[slug].tsx (FINAL ROBUST VERSION)
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,80 +8,65 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
-// ✅ CLEANED IMPORTS: Use unified system
 import Layout from "@/components/Layout";
-import mdxComponents from '@/components/mdx-components'; // Corrected casing import
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; // Unified server functions
+import mdxComponents from '@/components/mdx-components';
+import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
+import type { PostMeta } from "@/types/post"; // Using PostMeta as it matches
 
-// --- Data Type Definitions (Ensuring null safety) ---
-const CONTENT_TYPE = "downloads";
-
-type DownloadMeta = {
-    slug: string;
-    title: string;
-    // CRITICAL: Ensure all optional properties allow null
-    date: string | null; 
-    excerpt: string | null;
-    coverImage: string | null;
-    pdfPath: string | null;
-    author: string | null;
-    readTime: string | null;
-    category: string | null;
-    tags: string[] | null;
-    coverAspect: "book" | "wide" | "square" | null;
-    coverFit: "cover" | "contain" | null;
-    coverPosition: "left" | "center" | "right" | null;
-};
-
+type DownloadMeta = PostMeta & { pdfPath?: string | null };
 type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
 
 // ----------------------------------------------------------------------
-// 1. CRITICAL FIX: getStaticProps (Data Coercion and MDX Serialization)
+// 1. getStaticProps (Data Coercion and MDX Serialization)
 // ----------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const slug = String(params?.slug || "");
+    const { content, ...data } = getContentBySlug("downloads", slug, { withContent: true });
+
+    if (!data.title) {
+      // If no title, it's not a real page
+      return { notFound: true };
+    }
     
-    // Fetch content; relies on lib/mdx.ts to perform robust file reading and null coalescing
-    const { content, ...data } = getContentBySlug(CONTENT_TYPE, slug, { withContent: true });
-    
-    // CRITICAL SAFETY CHECK: Ensure data is clean and coercing occurs
+    // Coerce data to safe types
     const meta: DownloadMeta = {
         slug,
-        title: (data as any).title || slug,
-        
-        // FIX: Explicitly map potentially complex/optional fields, coercing undefined to null/string
-        date: (data as any).date ?? null,
-        excerpt: (data as any).excerpt ?? null,
-        coverImage: (data as any).coverImage ?? null,
+        title: data.title ?? 'Untitled Download',
+        date: data.date ?? null,
+        excerpt: data.excerpt ?? null,
+        coverImage: data.coverImage ?? null,
         pdfPath: (data as any).pdfPath ?? null,
-        author: (data as any).author ?? "Abraham of London", // Guaranteed string fallback for rendering
-        readTime: (data as any).readTime ?? null,
-        category: (data as any).category ?? null,
-        tags: Array.isArray((data as any).tags) ? (data as any).tags : null,
-        
-        // Ensure complex union types are correctly assigned or null
-        coverAspect: (data as any).coverAspect ?? null,
-        coverFit: (data as any).coverFit ?? null,
-        coverPosition: (data as any).coverPosition ?? null,
+        author: data.author ?? "Abraham of London",
+        readTime: data.readTime ?? null,
+        category: data.category ?? null,
+        tags: Array.isArray(data.tags) ? data.tags : null,
+        coverAspect: data.coverAspect ?? null,
+        coverFit: data.coverFit ?? null,
+        coverPosition: data.coverPosition ?? null,
     };
 
     const mdx = await serialize(content || "", {
         parseFrontmatter: false,
-        scope: meta, // Pass cleaned meta to MDX scope
-        mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [] },
+        scope: meta,
+        mdxOptions: { remarkPlugins: [remarkGfm] },
     });
 
-    // CRITICAL: Ensure props are fully JSON-safe before returning
-    return { props: JSON.parse(JSON.stringify({ meta, content: mdx })), revalidate: 120 };
+    return { 
+      props: JSON.parse(JSON.stringify({ meta, content: mdx })), 
+      revalidate: 3600 // Revalidate every hour
+    };
 };
 
 // ----------------------------------------------------------------------
-// 2. CRITICAL FIX: getStaticPaths (Required for SSG)
+// 2. getStaticPaths (Required for SSG)
 // ----------------------------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
-    // Use unified getAllContent, ensuring slugs are lowercased for path matching
-    const slugs = getAllContent(CONTENT_TYPE).map(item => item.slug.toLowerCase());
-    return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
+    const slugs = getAllContent("downloads").map(item => item.slug.toLowerCase());
+    return { 
+      paths: slugs.map((slug) => ({ params: { slug } })), 
+      // ✅ FIX: Use 'blocking' to fix 404s
+      fallback: "blocking" 
+    };
 };
 
 // ----------------------------------------------------------------------
@@ -89,28 +74,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // ----------------------------------------------------------------------
 export default function DownloadPage({ meta, content }: Props) {
     const {
-        title,
-        date,
-        excerpt,
-        coverImage,
-        author,
-        readTime,
-        category,
-        tags,
-        pdfPath,
+        title, date, excerpt, coverImage, author, readTime, category, pdfPath
     } = meta;
 
-    // ROBUSTNESS: Ensure date is safe for formatting
     const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-    
-    // ROBUSTNESS: Ensure author is a simple string for rendering
     const authorName = String(author || "Abraham of London");
 
     return (
         <Layout pageTitle={title}>
             <main className="mx-auto max-w-3xl px-4 py-10 md:py-16">
                 
-                {/* Image Rendering: Uses defensive casting */}
                 {coverImage && (
                     <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card aspect-[16/9]">
                         <Image
@@ -123,6 +96,40 @@ export default function DownloadPage({ meta, content }: Props) {
                             priority
                         />
                     </div>
+                )}
+
+                <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
+
+                <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
+                    <span>By {authorName}</span>
+                    {date && (
+                        <>
+                            {" "}· <time dateTime={date}>{formattedDate}</time>
+                        </>
+                    )}
+                    {readTime && <> · {readTime}</>}
+                    {category && (
+                        <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
+                            {category}
+                        </span>
+                    )}
+                </div>
+
+                <div className="prose prose-lg max-w-none text-deepCharcoal">
+                    <MDXRemote {...content} components={mdxComponents} />
+                </div>
+
+                {pdfPath && (
+                    <div className="mt-10">
+                        <a href={String(pdfPath)} className="aol-btn" download rel="noopener">
+                            Download PDF
+                        </a>
+                    </div>
+                )}
+            </main>
+        </Layout>
+    );
+}/div>
                 )}
 
                 <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
