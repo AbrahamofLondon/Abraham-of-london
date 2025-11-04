@@ -34,7 +34,6 @@ type EventPageProps = {
 
 function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
   if (!event) return <div>Event not found.</div>;
-
   const { slug, title, summary, location, date, tags, heroImage, coverImage } = event;
   const prettyDate = formatPretty(date);
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
@@ -42,7 +41,6 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
   const relImage = coverImage ?? heroImage;
   const absImage = relImage ? new URL(relImage, site).toString() : undefined;
   const isChatham = Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham");
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -70,10 +68,8 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
-
       <article className="event-page px-4 py-10 mx-auto max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{title}</h1>
-        
         {isChatham && (
           <>
             <span
@@ -85,7 +81,6 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
             <p className="mt-2 text-xs text-neutral-600">Off the record. No recordings. No press.</p>
           </>
         )}
-
         <p className="mt-3 text-sm text-neutral-600 mb-1">
           <span className="font-medium">Date:</span> {prettyDate}
         </p>
@@ -94,11 +89,9 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
             <span className="font-medium">Location:</span> {location}
           </p>
         )}
-
         <div className="prose max-w-none">
           <MDXRemote {...contentSource} components={mdxComponents} /> 
         </div>
-
         {resourcesMeta?.length > 0 && (
           <section className="mt-10 border-t border-lightGrey pt-8">
             <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-4">
@@ -171,20 +164,15 @@ export const getStaticProps: GetStaticProps<EventPageProps> = async ({ params })
   const eventData = getEventBySlug(slug, [
     "slug", "title", "date", "location", "summary", "heroImage", "coverImage", "tags", "resources", "content",
   ]);
-
   if (!eventData || !eventData.title || !eventData.content) {
     return { notFound: true };
   }
-  
   const { content, ...event } = eventData;
   const jsonSafeEvent = JSON.parse(JSON.stringify(event));
   const contentSource = await serialize(content, { scope: jsonSafeEvent, mdxOptions: { remarkPlugins: [remarkGfm as any] } });
-
   const resourceSlugs: string[] = (jsonSafeEvent.resources?.downloads?.map((r: any) => r.href.split('/').pop()) || [])
                                 .concat(jsonSafeEvent.resources?.reads?.map((r: any) => r.href.split('/').pop()) || []);
-  
   const resourcesMeta = resourceSlugs.length ? getDownloadsBySlugs(resourceSlugs) : [];
-
   return { 
     props: { 
       event: jsonSafeEvent, 

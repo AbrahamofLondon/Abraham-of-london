@@ -4,7 +4,6 @@ import Head from "next/head";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
-
 import Layout from "@/components/Layout";
 import mdxComponents from '@/components/mdx-components';
 import { getAllBooks, getBookBySlug } from "@/lib/books"; 
@@ -17,12 +16,10 @@ type Props = {
 
 export default function BookPage({ book, source }: Props) {
   if (!book) return <div>Book not found.</div>;
-  
   const { title, description, ogDescription, coverImage, slug } = book;
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/books/${slug}`;
   const absImage = coverImage ? new URL(coverImage, site).toString() : undefined;
-
   return (
     <Layout pageTitle={title}>
       <Head>
@@ -31,7 +28,6 @@ export default function BookPage({ book, source }: Props) {
         {absImage && <meta property="og:image" content={absImage} />}
         <meta property="og:url" content={url} />
       </Head>
-      
       <article className="prose prose-lg mx-auto px-4 py-10">
         <h1>{title}</h1>
         <MDXRemote {...source} components={mdxComponents} />
@@ -43,17 +39,14 @@ export default function BookPage({ book, source }: Props) {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
   const { content, ...book } = getBookBySlug(slug);
-
   if (!book || !content) {
     return { notFound: true };
   }
-
   const source = await serialize(content, {
     parseFrontmatter: false,
     scope: book,
     mdxOptions: { remarkPlugins: [remarkGfm as any] }, 
   });
-
   return { 
     props: { 
       book: JSON.parse(JSON.stringify(book)), 
