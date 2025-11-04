@@ -57,9 +57,21 @@
     "check:esbuild": "node scripts/check-esbuild-syntax.mjs",
     "guard:fix": "node scripts/remove-stray-angle-brackets.mjs",
     "format": "prettier --write .",
-    "fix:gremlins": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"& (Resolve-Path './scripts/fix-gremlins.ps1')\"",
-    "fix:gremlins:dry": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"& (Resolve-Path './scripts/fix-gremlins.ps1') -DryRun\"",
-    "fix:gremlins:fast": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"& (Resolve-Path './scripts/fix-gremlins.ps1') -NoBackup -SkipValidation\""
+    "heal": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/Repair-Repository.ps1 -AutoFix",
+    "heal:scan": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/Repair-Repository.ps1 -ScanOnly",
+    "heal:interactive": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/Repair-Repository.ps1",
+    "heal:git": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/Repair-Repository.ps1 -AutoFix -UseGitHistory",
+    "heal:full": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/Repair-Repository.ps1 -AutoFix -UseGitHistory -Verbose",
+    "fix:gremlins": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-gremlins.ps1",
+    "fix:gremlins:dry": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-gremlins.ps1 -DryRun",
+    "fix:gremlins:fast": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-gremlins.ps1 -NoBackup -SkipValidation",
+    "fix:migration": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-migration-errors.ps1",
+    "fix:migration:dry": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-migration-errors.ps1 -DryRun",
+    "fix:syntax": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/emergency-syntax-fix.ps1",
+    "fix:syntax:dry": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/emergency-syntax-fix.ps1 -DryRun",
+    "fix:import": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-import-parens.ps1",
+    "fix:import:dry": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/fix-import-parens.ps1 -DryRun",
+    "fix:all": "npm run fix:gremlins && npm run fix:import && npm run typecheck"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -112,7 +124,7 @@
     "@next/mdx": "^16.0.1",
     "@playwright/test": "^1.48.2",
     "@types/mdx": "2.0.13",
-    "@types/node": "^20.14.12",
+    "@types/node": "20.14.10",
     "@types/react": "^18.3.26",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "7.18.0",
@@ -133,6 +145,6 @@
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "simple-icons": "15.14.0",
-    "typescript": "^5.6.3"
+    "typescript": "5.5.4"
   }
 }

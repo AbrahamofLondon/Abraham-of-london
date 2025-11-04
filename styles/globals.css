@@ -1,0 +1,265 @@
+/* ------------------------------------------------------------------- */
+/* ---------- Global Styles & Optimization --------------------------- */
+/* ------------------------------------------------------------------- */
+
+/* 1. Local self-hosted fonts (Critical for consistent rendering, including print) */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/PlayfairDisplay-Variable.woff2") format("woff2-variations");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. Tailwind Base Imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ------------------------------------------------------------------- */
+/* ---------- Theme Variables (LUXURY LIGHT MODE) -------------------- */
+/* ------------------------------------------------------------------- */
+
+:root {
+  /* Font Tokens */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* UPGRADED COLORS (Deep Forest, Warm Cream, Muted Gold) */
+  --color-primary: #0B2E1F;          /* deep-forest */
+  --color-primary-hover: #16573D;    /* Slightly lighter deep forest for subtle hover */
+  --color-on-primary: #FAF7F2;      /* warm-cream */
+
+  --color-secondary: #FAF7F2;        /* page bg: warm-cream */
+  --color-on-secondary: #333333;     /* soft-charcoal for main text */
+
+  --color-accent: #C5A352;          /* muted-gold */
+  --color-accent-hover: #A0833F;    /* Darker muted-gold for contrast */
+  --color-on-accent: #ffffff;
+
+  --color-lightGrey: #E5E5E5;        /* light-gray */
+  --color-warmWhite: #FAF7F2;        /* Alias for warm-cream */
+  --color-midGreen: #4B8B6B;        /* subtle-green (for bullets/accents) */
+
+  /* Fluid type scale (remains the same) */
+  --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
+  --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
+  --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
+  --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
+  --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
+  --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Dark tokens (Retuned for richer contrast) -------------- */
+/* ------------------------------------------------------------------- */
+.dark {
+  /* Primary/Text Colors */
+  --color-primary: #C5A352;          /* Primary is now muted-gold (High contrast) */
+  --color-primary-hover: #E9D79A;    /* Lighter gold hover */
+  --color-on-primary: #0f172a;
+
+  /* Background/Surface Colors */
+  --color-secondary: #111827;        /* Deeper background (slate-900 equivalent) */
+  --color-on-secondary: #F8FAFC;     /* Near-white text (slate-50) */
+
+  /* Accent Colors */
+  --color-accent: #86efac;           /* Mid-green accent for subtle contrast */
+  --color-accent-hover: #4B8B6B;
+  --color-on-accent: #111827;
+
+  /* UI Colors */
+  --color-lightGrey: #2D3748;        /* Darker border/divider (slate-800 equivalent) */
+  --color-warmWhite: #1F2937;        /* Dark surface/card backgrounds */
+  --color-midGreen: #86efac;         /* midGreen in dark mode */
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Base / Reset & Typography (Luxury) --------------------- */
+/* ------------------------------------------------------------------- */
+html {
+  color-scheme: light dark;
+  hanging-punctuation: first allow-end;
+  text-rendering: geometricPrecision; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+body {
+  font-family: var(--font-sans); /* Use consolidated variable */
+  font-size: var(--step-0);
+  line-height: 1.85; /* Increased line-height for luxury readability */
+  color: var(--color-on-secondary);
+  background-color: var(--color-secondary);
+  transition: background-color .3s ease, color .3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif); /* Use consolidated variable */
+  color: var(--color-primary);
+  text-wrap: balance;
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color .25s ease;
+}
+a:hover {
+  color: var(--color-accent); 
+}
+
+/* Selection & Focus */
+::selection {
+  background: #E9D79A;
+  color: var(--color-primary);
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Media & Accessibility */
+img, video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Printing fidelity helpers (Important for PDF generation) */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+
+/* ------------------------------------------------------------------- */
+/* ---------- Tailwind Components / Utilities ------------------------ */
+/* ------------------------------------------------------------------- */
+
+/* Cards (Refined Visuals) */
+.card {
+  border: 1px solid var(--color-lightGrey);
+  padding: 28px;
+  box-shadow: 0 4px 18px rgba(11,46,31,.08);
+  transition: transform .25s ease, box-shadow .25s ease;
+  background-color: #fff;
+  border-radius: 12px;
+}
+.dark .card { 
+  background-color: var(--color-warmWhite);
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(11,46,31,.12);
+}
+
+@layer components {
+  /* Button (aol-btn updated for new colors) */
+  .aol-btn {
+    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold text-white
+           focus:outline-none focus-visible:ring-2;
+    background-color: var(--color-primary);
+    --tw-ring-color: rgba(11,46,31,.35); 
+  }
+  .aol-btn:hover { 
+    background-color: var(--color-primary-hover); 
+  }
+
+  /* Background Pattern */
+  .pattern-bg {
+    background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Typography Polish (Prose Overrides) -------------------- */
+/* ------------------------------------------------------------------- */
+.prose {
+  --tw-prose-body: var(--color-on-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-primary);
+  --tw-prose-quotes: var(--color-on-secondary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+}
+.dark .prose {
+  --tw-prose-body: var(--color-on-secondary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-on-secondary);
+  --tw-prose-quotes: var(--color-on-secondary);
+  --tw-prose-quote-borders: var(--color-lightGrey);
+}
+
+/* Font Consistency */
+.prose h1, .prose h2, .prose h3 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+}
+
+/* Heading Sizing and Spacing */
+.prose h1 {
+  font-size: var(--step-4);
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin-bottom: .6rem;
+}
+.prose h2 {
+  font-size: var(--step-3);
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  margin: 2.5rem 0 .8rem;
+}
+.prose h3 {
+  font-size: var(--step-2);
+  line-height: 1.2;
+  margin: 2rem 0 .6rem;
+}
+
+/* Body Text Consistency */
+.prose p,
+.prose li {
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.85;
+  margin-block: 1rem;
+}
+.prose blockquote {
+  font-style: italic;
+  font-size: var(--step-1);
+  line-height: 1.6;
+  padding-left: 1.5rem;
+  border-left: 3px solid var(--color-accent); 
+  color: var(--color-on-secondary);
+}
+
+/* List Markers */
+.prose ul > li::marker {
+    color: var(--color-midGreen);
+}
