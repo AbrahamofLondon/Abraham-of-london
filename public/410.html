@@ -1,119 +1,181 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>410 • Gone — Abraham of London</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
-  <style>
-    :root{
-      --forest:#0b2e1f;
-      --cream:#f5f5f0;
-      --softGold:#d4af37;
-      --ink:#333333;
-      --paper:#fafaf5;
-      --muted:#6b7280;
-    }
-    @media (prefers-color-scheme: dark){
-      :root{
-        --forest:#047857;
-        --cream:#ffffff;
-        --ink:#f5f5f0;
-        --paper:#111111;
+  <head>
+    <meta charset="utf-8" />
+    <title>410 • Gone — Abraham of London</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <style>
+      :root {
+        --forest: #0b2e1f;
+        --cream: #f5f5f0;
+        --softGold: #d4af37;
+        --ink: #333333;
+        --paper: #fafaf5;
+        --muted: #6b7280;
       }
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background:var(--paper);
-      color:var(--ink);
-      line-height:1.6;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-    .wrap{
-      min-height:100%;
-      display:grid;
-      place-items:center;
-      padding:32px 16px;
-    }
-    .card{
-      width:min(720px, 100%);
-      border:1px solid #e5e5e5;
-      border-radius:16px;
-      background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.7));
-      backdrop-filter:saturate(1.1) blur(6px);
-      padding:28px 24px;
-      box-shadow:0 10px 30px rgba(27, 67, 50, .12);
-    }
-    @media (prefers-color-scheme: dark){
-      .card{ 
-        background:linear-gradient(180deg, rgba(17,17,17,.85), rgba(17,17,17,.7));
-        border-color:#3a3a3a;
-        box-shadow:0 10px 30px rgba(0,0,0,.35);
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --forest: #047857;
+          --cream: #ffffff;
+          --ink: #f5f5f0;
+          --paper: #111111;
+        }
       }
-    }
-    .badge{
-      display:inline-flex; gap:.5rem; align-items:center;
-      padding:.25rem .6rem; border-radius:999px;
-      border:1px solid rgba(0,0,0,.1);
-      background:rgba(0,0,0,.03);
-      font-size:.7rem; letter-spacing:.14em; text-transform:uppercase;
-      color:rgba(0,0,0,.7);
-    }
-    @media (prefers-color-scheme: dark){
-      .badge{ border-color:rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:rgba(255,255,255,.85);}
-    }
-    h1{
-      font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-      color:var(--forest);
-      font-weight:700; line-height:1.1;
-      font-size:clamp(2rem, 3.5vw, 3rem);
-      margin:.7rem 0 .25rem;
-    }
-    p.lead{
-      margin:.25rem 0 1rem; 
-      color:rgba(0,0,0,.72);
-    }
-    @media (prefers-color-scheme: dark){
-      p.lead{ color:rgba(255,255,255,.85); }
-    }
-    .actions{ display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1rem;}
-    a.btn{
-      display:inline-flex; align-items:center; gap:.5rem;
-      padding:.7rem 1rem; border-radius:999px; text-decoration:none;
-      font-weight:600; border:1px solid transparent;
-    }
-    a.btn-primary{
-      background:var(--softGold); color:#111; 
-    }
-    a.btn-outline{
-      border-color:rgba(0,0,0,.2); color:var(--ink);
-      background:transparent;
-    }
-    @media (prefers-color-scheme: dark){
-      a.btn-outline{ border-color:rgba(255,255,255,.25); color:var(--cream); }
-    }
-    .meta{ margin-top:1rem; font-size:.85rem; color:var(--muted); }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <section class="card" role="document" aria-labelledby="t">
-      <span class="badge">410 • Gone</span>
-      <h1 id="t">This content is no longer available</h1>
-      <p class="lead">
-        The page you requested has been intentionally retired or is restricted to private sessions.
-        You can continue to our main site or explore active ventures.
-      </p>
-      <div class="actions">
-        <a class="btn btn-primary" href="https://www.abrahamoflondon.org/">Go to Homepage</a>
-        <a class="btn btn-outline" href="https://www.abrahamoflondon.org/ventures">Explore Ventures</a>
-      </div>
-      <p class="meta">Abraham of London • Principled strategy, writing, and ventures.</p>
-    </section>
-  </main>
-</body>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+        background: var(--paper);
+        color: var(--ink);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .wrap {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 32px 16px;
+      }
+      .card {
+        width: min(720px, 100%);
+        border: 1px solid #e5e5e5;
+        border-radius: 16px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.85),
+          rgba(255, 255, 255, 0.7)
+        );
+        backdrop-filter: saturate(1.1) blur(6px);
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px rgba(27, 67, 50, 0.12);
+      }
+      @media (prefers-color-scheme: dark) {
+        .card {
+          background: linear-gradient(
+            180deg,
+            rgba(17, 17, 17, 0.85),
+            rgba(17, 17, 17, 0.7)
+          );
+          border-color: #3a3a3a;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+      }
+      .badge {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(0, 0, 0, 0.03);
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.7);
+      }
+      @media (prefers-color-scheme: dark) {
+        .badge {
+          border-color: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      h1 {
+        font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+        color: var(--forest);
+        font-weight: 700;
+        line-height: 1.1;
+        font-size: clamp(2rem, 3.5vw, 3rem);
+        margin: 0.7rem 0 0.25rem;
+      }
+      p.lead {
+        margin: 0.25rem 0 1rem;
+        color: rgba(0, 0, 0, 0.72);
+      }
+      @media (prefers-color-scheme: dark) {
+        p.lead {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 1rem;
+      }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        border: 1px solid transparent;
+      }
+      a.btn-primary {
+        background: var(--softGold);
+        color: #111;
+      }
+      a.btn-outline {
+        border-color: rgba(0, 0, 0, 0.2);
+        color: var(--ink);
+        background: transparent;
+      }
+      @media (prefers-color-scheme: dark) {
+        a.btn-outline {
+          border-color: rgba(255, 255, 255, 0.25);
+          color: var(--cream);
+        }
+      }
+      .meta {
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card" role="document" aria-labelledby="t">
+        <span class="badge">410 • Gone</span>
+        <h1 id="t">This content is no longer available</h1>
+        <p class="lead">
+          The page you requested has been intentionally retired or is restricted
+          to private sessions. You can continue to our main site or explore
+          active ventures.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://www.abrahamoflondon.org/"
+            >Go to Homepage</a
+          >
+          <a
+            class="btn btn-outline"
+            href="https://www.abrahamoflondon.org/ventures"
+            >Explore Ventures</a
+          >
+        </div>
+        <p class="meta">
+          Abraham of London • Principled strategy, writing, and ventures.
+        </p>
+      </section>
+    </main>
+  </body>
 </html>

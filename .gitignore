@@ -84,3 +84,6 @@ github-recovery-codes.txt
 *.tsx text eol=lf
 *.ts  text eol=lf
 
+
+# Gremlin fix backups
+.gremlin-backups/

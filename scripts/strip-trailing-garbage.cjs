@@ -14,12 +14,14 @@ if (!fs.existsSync(p)) {
 
 const raw = fs.readFileSync(p, "utf8");
 
-// Find the last valid closing brace '}' in the file, 
+// Find the last valid closing brace '}' in the file,
 // which should be the end of either the component or getStaticProps.
 const match = raw.match(/^[\s\S]*^\s*}\s*$/m);
 
 if (!match) {
-  console.log("[guard] Could not find valid closing brace in pages/index.tsx, skipping.");
+  console.log(
+    "[guard] Could not find valid closing brace in pages/index.tsx, skipping.",
+  );
   process.exit(0);
 }
 

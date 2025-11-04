@@ -1,4 +1,4 @@
-# File: .github/workflows/uptime.yml
+# .github/workflows/uptime.yml (CLEANED YAML)
 name: Uptime, Headers, E2E & PageSpeed
 
 on:
@@ -99,7 +99,7 @@ jobs:
             api="https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys?state=ready&context=deploy-preview&per_page=50"
             json="$(curl -fsSL -H "Authorization: Bearer ${NETLIFY_AUTH_TOKEN}" "$api" || true)"
             if [ -z "$json" ] || [ "$json" = "[]" ]; then
-              echo "⚠️ No ready previews returned."
+              echo ⚠️ No ready previews returned."
               if [ "$abort_missing" = "true" ]; then exit 1; fi
               echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
               echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
@@ -108,9 +108,7 @@ jobs:
               echo "RUN_PAGESPEED=${RUN_PAGESPEED}" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            jq_filter='.[]
-              | select(.deploy_url != null)
-            '
+            jq_filter='.[] | select(.deploy_url != null)'
             if [ -n "$preview_branch" ]; then
               jq_filter="$jq_filter | select(.branch == \"$preview_branch\")"
             fi
