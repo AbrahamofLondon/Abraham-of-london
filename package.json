@@ -132,7 +132,7 @@
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
-    "simple-icons": "15.14.0",
+    "simple-icons": "15.20.0",
     "typescript": "5.5.4"
   }
 }
