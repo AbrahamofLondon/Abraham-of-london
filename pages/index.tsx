@@ -1,3 +1,4 @@
+import React from 'react';
 // pages/index.tsx (ABSOLUTELY CLEAN, SYNCHRONIZED AND ERROR-FREE STRUCTURE)
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import * as React from "react";

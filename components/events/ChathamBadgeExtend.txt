@@ -1,0 +1,95 @@
+// components/events/ChathamBadgeExtended.tsx
+import * as React from "react";
+import clsx from "clsx";
+
+interface ChathamBadgeExtendedProps {
+  size?: "small" | "medium" | "large";
+  variant?: "subtle" | "prominent" | "minimal" | "outline";
+  className?: string;
+  withTooltip?: boolean;
+  interactive?: boolean;
+  showIcon?: boolean;
+  showFullText?: boolean;
+  pulse?: boolean;
+}
+
+export default function ChathamBadgeExtended({
+  size = "small",
+  variant = "subtle",
+  className,
+  withTooltip = true,
+  interactive = false,
+  showIcon = true,
+  showFullText = true,
+  pulse = false,
+}: ChathamBadgeExtendedProps) {
+  const sizeClasses = clsx({
+    "px-2 py-0.5 text-[10px]": size === "small",
+    "px-3 py-1 text-xs": size === "medium",
+    "px-4 py-1.5 text-sm": size === "large",
+  });
+
+  const variantClasses = clsx({
+    "border border-lightGrey bg-warmWhite text-deepCharcoal": variant === "subtle",
+    "border border-forest bg-forest text-cream": variant === "prominent",
+    "text-neutral-600": variant === "minimal",
+    "border border-forest text-forest bg-transparent": variant === "outline",
+  });
+
+  const interactiveClasses = clsx({
+    "transition-all duration-200 cursor-default": interactive,
+    "hover:shadow-sm hover:-translate-y-0.5": interactive && variant !== "minimal",
+    "hover:text-forest hover:border-forest": interactive && variant === "minimal",
+  });
+
+  const pulseClasses = pulse ? "animate-pulse" : "";
+
+  const displayText = showFullText ? "Chatham" : "C";
+
+  const badgeContent = (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full font-semibold uppercase tracking-widest",
+        sizeClasses,
+        variantClasses,
+        interactiveClasses,
+        pulseClasses,
+        className
+      )}
+    >
+      {showIcon && variant !== "minimal" && (
+        <svg 
+          className={clsx({
+            "w-3 h-3 mr-1": size === "small",
+            "w-3.5 h-3.5 mr-1": size === "medium",
+            "w-4 h-4 mr-1.5": size === "large",
+          })} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
+          />
+        </svg>
+      )}
+      {displayText}
+    </span>
+  );
+
+  if (withTooltip) {
+    return (
+      <span 
+        className="inline-flex"
+        title="Chatham Room: Off the record. No recordings. No press."
+      >
+        {badgeContent}
+      </span>
+    );
+  }
+
+  return badgeContent;
+}

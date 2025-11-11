@@ -1,3 +1,4 @@
+import React from 'react';
 // components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
