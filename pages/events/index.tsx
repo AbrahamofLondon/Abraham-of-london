@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { GetStaticProps } from "next";
 
-import { getAllEvents(), type Event } from "@/lib/events"; // Contentlayer source
+import { getAllEvents, type Event } from "@/lib/events";
 import clsx from "clsx";
 import EventCard from "@/components/events/EventCard";
 import Layout from "@/components/Layout";
