@@ -1,5 +1,12 @@
+// components/print/EmbossedSign.tsx
+"use client";
+
 import * as React from "react";
 import Image from "next/image";
+import clsx from "clsx";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable import/no-anonymous-default-export */
 
 type Effect = "emboss" | "deboss" | "none";
 
@@ -11,9 +18,12 @@ export type EmbossedSignProps = {
   effect?: Effect;
   baseColor?: string;
   className?: string;
+  children?: React.ReactNode;
+  text?: string;
+  variant?: "image" | "text" | "hybrid";
 };
 
-function EmbossedSign({
+export function EmbossedSign({
   src = "/assets/images/signature/abraham-of-london-cursive.svg",
   alt = "Abraham of London Signature",
   width = 120,
@@ -21,6 +31,9 @@ function EmbossedSign({
   effect = "deboss",
   baseColor = "transparent",
   className = "",
+  children,
+  text,
+  variant = "image",
 }: EmbossedSignProps) {
   const plateShadow =
     effect === "deboss"
@@ -29,27 +42,84 @@ function EmbossedSign({
       ? "1.5px 1.5px 2.5px rgba(0,0,0,.18), -1.5px -1.5px 2.5px rgba(255,255,255,.4)"
       : "none";
 
+  const containerClasses = clsx(
+    "inline-block relative",
+    {
+      "cursor-pointer transition-transform hover:scale-105": effect !== "none",
+    },
+    className
+  );
+
+  const renderContent = () => {
+    if (children) {
+      return children;
+    }
+
+    switch (variant) {
+      case "text":
+        return (
+          <span 
+            className="font-serif font-bold text-deepCharcoal tracking-wide"
+            style={{ fontSize: `${height * 0.6}px` }}
+          >
+            {text || "Abraham of London"}
+          </span>
+        );
+      
+      case "hybrid":
+        return (
+          <div className="flex flex-col items-center">
+            <Image
+              src={src}
+              alt={alt}
+              width={width * 0.8}
+              height={height * 0.6}
+              className="block mb-1"
+              style={{ filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))" }}
+              priority
+            />
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.7] font-sans">
+              {text || "Leadership & Fatherhood"}
+            </span>
+          </div>
+        );
+      
+      case "image":
+      default:
+        return (
+          <Image
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            className="block"
+            style={{ filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))" }}
+            priority
+          />
+        );
+    }
+  };
+
   return (
-    <span className={`inline-block ${className}`} style={{ position: "relative" }}>
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: 4,
-          background: baseColor,
-          boxShadow: plateShadow,
-        }}
-      />
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className="block"
-        style={{ position: "relative", filter: "drop-shadow(0 0 .25px rgba(0,0,0,.25))" }}
-        priority
-      />
+    <span className={containerClasses} style={{ position: "relative" }}>
+      {effect !== "none" && (
+        <span
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 4,
+            background: baseColor,
+            boxShadow: plateShadow,
+          }}
+        />
+      )}
+      <span style={{ position: "relative", display: "block" }}>
+        {renderContent()}
+      </span>
     </span>
   );
 }
+
+// Default export for backward compatibility
+export default EmbossedSign;

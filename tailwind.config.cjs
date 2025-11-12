@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-const colors = require("tailwindcss/colors");
+import colors from 'tailwindcss/colors';
 
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
   darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -57,7 +58,9 @@ module.exports = {
 
         emerald: { ...colors.emerald, 700: "#047857" }
       },
-      ringColor: { forest: "var(--color-primary)" },
+      ringColor: { 
+        forest: "var(--color-primary)" 
+      },
       borderColor: {
         forest: "var(--color-primary)",
         lightGrey: "#e5e5e5"
@@ -79,36 +82,48 @@ module.exports = {
             "--tw-prose-bullets": theme("colors.subtle-green"),
             "--tw-prose-counters": theme("colors.subtle-green"),
             // Increased Paragraph Spacing for Luxury Readability
-            p: { lineHeight: "1.85" }, 
+            p: { 
+              lineHeight: "1.85" 
+            }, 
             a: {
               textDecoration: "none",
               fontWeight: "500",
               transition: "color .15s ease",
-              "&:hover": { color: theme("colors.softGold") } // Muted Gold hover
+              "&:hover": { 
+                color: theme("colors.softGold") 
+              } // Muted Gold hover
             },
             // Tighter, elegant heading spacing
             h1: { 
-                letterSpacing: "-0.015em", 
-                lineHeight: "1.1", 
-                marginBottom: "0.8rem", // Slightly more space
-                fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Headings
+              letterSpacing: "-0.015em", 
+              lineHeight: "1.1", 
+              marginBottom: "0.8rem", // Slightly more space
+              fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Headings
             },
             h2: { 
-                letterSpacing: "-0.01em", 
-                lineHeight: "1.2", 
-                marginTop: "2.5rem", // More margin for breathing room
-                marginBottom: "0.8rem", 
-                fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Subheadings
+              letterSpacing: "-0.01em", 
+              lineHeight: "1.2", 
+              marginTop: "2.5rem", // More margin for breathing room
+              marginBottom: "0.8rem", 
+              fontFamily: theme("fontFamily.serif").join(", ") // Use Serif for Subheadings
             },
-            strong: { fontWeight: "700" }, // Bolder strong text
+            strong: { 
+              fontWeight: "700" 
+            }, // Bolder strong text
             blockquote: {
               borderLeftColor: theme("colors.softGold"), // Gold accent on quotes
               fontStyle: "italic",
               color: theme("colors.soft-charcoal")
             },
-            hr: { borderColor: theme("colors.lightGrey") },
-            ul: { paddingLeft: "1.5rem" }, // More padding for list items
-            "ul > li::marker": { color: theme("colors.subtle-green") }
+            hr: { 
+              borderColor: theme("colors.lightGrey") 
+            },
+            ul: { 
+              paddingLeft: "1.5rem" 
+            }, // More padding for list items
+            "ul > li::marker": { 
+              color: theme("colors.subtle-green") 
+            }
           }
         },
         invert: {
@@ -116,7 +131,6 @@ module.exports = {
             "--tw-prose-body": theme("colors.warm-cream"),
             "--tw-prose-headings": theme("colors.warm-cream"),
             "--tw-prose-links": theme("colors.softGold"),
-            // ... (rest of invert remains similar)
             blockquote: {
               borderLeftColor: theme("colors.softGold"),
               color: theme("colors.warm-cream")
@@ -125,3 +139,8 @@ module.exports = {
         }
       })
     }
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
+}

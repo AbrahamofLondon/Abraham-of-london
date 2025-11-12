@@ -1,13 +1,13 @@
 // app/api/downloads/route.ts
-import { NextResponse } from "next/server";
-import { getDownloads } from "@/lib/downloads";
-
-export const dynamic = "force-dynamic"; // always reflect current disk
+import { getDownloads } from '@/lib/downloads'; // Correct import
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const items = getDownloads();
-  return NextResponse.json(
-    { ok: true, count: items.length, items },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  try {
+    const downloads = getDownloads();
+    return NextResponse.json(downloads);
+  } catch (error) {
+    console.error('Error fetching downloads:', error);
+    return NextResponse.json([], { status: 500 });
+  }
 }

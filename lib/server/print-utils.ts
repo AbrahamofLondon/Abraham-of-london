@@ -1,310 +1,145 @@
-// lib/server/print-utils.ts
+// lib/print-utils.ts - PRODUCTION SAFE VERSION
+import { allPrints, type Print } from "contentlayer/generated";
 
-export type PrintDocument = {
-  slug: string;
+// Type-safe fallback for Print type
+interface SafePrint {
+  _id: string;
   title: string;
-  description?: string;
+  slug: string;
+  date: string;
+  url: string;
   excerpt?: string;
-  author?: string;
-  date?: string;
-  content?: string;
-  type: 'download' | 'book' | 'strategy';
-  source: 'downloads' | 'books'; // Track source for debugging
-};
+  tags?: string[];
+  coverImage?: string;
+  [key: string]: any;
+}
 
-// Cache for performance
-let printSlugsCache: string[] | null = null;
-let printDocumentsCache: PrintDocument[] | null = null;
-
-export function getPrintSlugs(): string[] {
-  if (printSlugsCache) {
-    return printSlugsCache;
-  }
-
+/**
+ * Safely get all print documents with comprehensive error handling
+ */
+export function getAllPrintDocuments(): SafePrint[] {
   try {
-    const { getDownloadSlugs } = require("./downloads-data");
-    const { getBookSlugs } = require("./books-data");
-    
-    const downloadSlugs = getDownloadSlugs();
-    const bookSlugs = getBookSlugs();
-    
-    console.log(`📚 Raw slugs - Downloads: ${downloadSlugs.length}, Books: ${bookSlugs.length}`);
-    
-    // Normalize all slugs to strings and track sources
-    const allSlugs: { slug: string; source: string }[] = [];
-    
-    // Process download slugs
-    downloadSlugs.forEach((item: any) => {
-      const slug = normalizeSlug(item, 'download');
-      if (slug) {
-        allSlugs.push({ slug, source: 'download' });
-      }
-    });
-    
-    // Process book slugs
-    bookSlugs.forEach((item: any) => {
-      const slug = normalizeSlug(item, 'book');
-      if (slug) {
-        allSlugs.push({ slug, source: 'book' });
-      }
-    });
-    
-    // Check for duplicates
-    const slugCounts = new Map<string, number>();
-    const duplicateSources = new Map<string, string[]>();
-    
-    allSlugs.forEach(({ slug, source }) => {
-      slugCounts.set(slug, (slugCounts.get(slug) || 0) + 1);
-      
-      if (!duplicateSources.has(slug)) {
-        duplicateSources.set(slug, []);
-      }
-      duplicateSources.get(slug)!.push(source);
-    });
-    
-    // Log duplicates for debugging
-    const duplicates = Array.from(slugCounts.entries())
-      .filter(([_, count]) => count > 1);
-    
-    if (duplicates.length > 0) {
-      console.warn('⚠️ DUPLICATE SLUGS FOUND:');
-      duplicates.forEach(([slug, count]) => {
-        const sources = duplicateSources.get(slug) || [];
-        console.warn(`  - "${slug}" (${count} times) from: ${sources.join(', ')}`);
-      });
+    if (typeof allPrints === 'undefined') {
+      console.warn('⚠️ ContentLayer prints data is undefined - returning empty array');
+      return [];
     }
-    
-    // Remove duplicates - keep first occurrence
-    const uniqueSlugs: string[] = [];
-    const seenSlugs = new Set<string>();
-    
-    allSlugs.forEach(({ slug }) => {
-      if (!seenSlugs.has(slug)) {
-        seenSlugs.add(slug);
-        uniqueSlugs.push(slug);
+
+    if (!Array.isArray(allPrints)) {
+      console.error('❌ ContentLayer prints is not an array:', typeof allPrints);
+      return [];
+    }
+
+    // Enhanced duplicate prevention
+    const seenSlugs = new Set();
+    const safePrints: SafePrint[] = [];
+
+    allPrints.forEach(print => {
+      // Validate basic structure
+      const isValid = print && 
+                     typeof print === 'object' &&
+                     typeof print._id === 'string' &&
+                     typeof print.title === 'string' &&
+                     typeof print.slug === 'string' &&
+                     typeof print.date === 'string' &&
+                     typeof print.url === 'string';
+
+      if (!isValid) {
+        console.warn('🚨 Filtering out invalid print:', print);
+        return;
+      }
+
+      // Check for duplicates
+      if (seenSlugs.has(print.slug)) {
+        console.warn(`🚨 DUPLICATE SLUG FOUND: ${print.slug} - "${print.title}"`);
+        return;
+      }
+
+      seenSlugs.add(print.slug);
+      safePrints.push(print as SafePrint);
+    });
+
+    console.log(`✅ Found ${safePrints.length} unique prints (from ${allPrints.length} total)`);
+
+    // Sort by date (newest first) with error handling
+    return safePrints.sort((a, b) => {
+      try {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      } catch (error) {
+        console.warn(`📅 Date sorting error for prints "${a.title}" and "${b.title}"`);
+        return 0;
       }
     });
-    
-    console.log(`✅ Final unique slugs: ${uniqueSlugs.length} (from ${allSlugs.length} total)`);
-    
-    printSlugsCache = uniqueSlugs;
-    return uniqueSlugs;
-    
+
   } catch (error) {
-    console.error('❌ Error getting print slugs:', error);
+    console.error('💥 Critical error in getAllPrintDocuments:', error);
     return [];
   }
 }
 
-// Helper function to normalize any input to a valid slug string
-function normalizeSlug(item: any, source: string): string | null {
-  if (typeof item === 'string') {
-    return item.trim();
-  }
-  
-  if (item && typeof item === 'object') {
-    // Object with slug property
-    if (item.slug && typeof item.slug === 'string') {
-      return item.slug.trim();
-    }
-    // Object with id property
-    if (item.id && typeof item.id === 'string') {
-      return item.id.trim();
-    }
-    // Object with title property - generate slug
-    if (item.title && typeof item.title === 'string') {
-      return generateSlugFromTitle(item.title);
-    }
-    // Last resort: stringify with source prefix
-    console.warn(`⚠️ Unusual object in ${source} slugs:`, item);
-    return `${source}-${JSON.stringify(item).slice(0, 30).replace(/[^a-z0-9]/gi, '-')}`;
-  }
-  
-  // Numbers, booleans, etc.
-  if (item !== null && item !== undefined) {
-    return String(item).trim();
-  }
-  
-  console.warn(`⚠️ Invalid item in ${source} slugs:`, item);
-  return null;
-}
-
-// Generate consistent slug from title
-function generateSlugFromTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .trim();
-}
-
-export function getPrintSlugsWithType(): Array<{ slug: string; type: string; source: string }> {
-  const slugs = getPrintSlugs();
-  
-  // We need to determine the actual type for each slug
-  return slugs.map(slug => {
-    // Try to determine type by checking which data source has this slug
-    try {
-      const { getDownloadBySlug } = require("./downloads-data");
-      const download = getDownloadBySlug(slug, [], true);
-      if (download && download.title !== "Download Not Found") {
-        return { slug, type: 'download', source: 'downloads' };
-      }
-    } catch (error) {
-      // Continue to next check
-    }
-    
-    try {
-      const { getBookBySlug } = require("./books-data");
-      const book = getBookBySlug(slug, [], true);
-      if (book && book.title !== "Book Not Found") {
-        return { slug, type: 'book', source: 'books' };
-      }
-    } catch (error) {
-      // Continue
-    }
-    
-    // Default fallback
-    return { slug, type: 'download', source: 'unknown' };
-  });
-}
-
-export function getPrintBySlug(slug: string): PrintDocument | null {
-  if (!slug || typeof slug !== 'string') {
-    console.warn('❌ Invalid slug provided to getPrintBySlug:', slug);
-    return null;
-  }
-
+/**
+ * Safely get all print slugs for static generation
+ */
+export function getAllPrintSlugs(): string[] {
   try {
-    // Try downloads first
-    const { getDownloadBySlug } = require("./downloads-data");
-    const download = getDownloadBySlug(slug, [], true);
-    if (download && download.title !== "Download Not Found") {
-      console.log(`✅ Found download: "${download.title}" (${slug})`);
-      return {
-        ...download,
-        type: 'download' as const,
-        description: download.excerpt || download.description || undefined,
-        source: 'downloads' as const
-      };
-    }
+    const prints = getAllPrintDocuments();
+    const slugs = prints.map(doc => doc.slug).filter(Boolean);
 
-    // Try books next
-    const { getBookBySlug } = require("./books-data");
-    const book = getBookBySlug(slug, [], true);
-    if (book && book.title !== "Book Not Found") {
-      console.log(`✅ Found book: "${book.title}" (${slug})`);
-      return {
-        ...book,
-        type: 'book' as const,
-        description: book.excerpt || book.description || undefined,
-        source: 'books' as const
-      };
-    }
+    console.log(`🖨️ Generated ${slugs.length} valid print slugs`);
+    return slugs;
 
-    console.warn(`❌ No document found for slug: "${slug}"`);
-    return null;
-    
   } catch (error) {
-    console.error(`❌ Error loading print document for slug "${slug}":`, error);
-    return null;
+    console.error('💥 Error generating print slugs:', error);
+    return [];
   }
 }
 
-export function getPrintDocumentBySlug(slug: string, type?: string): PrintDocument | null {
-  // If type is specified, we can optimize the lookup
-  if (type === 'download') {
-    try {
-      const { getDownloadBySlug } = require("./downloads-data");
-      const download = getDownloadBySlug(slug, [], true);
-      if (download && download.title !== "Download Not Found") {
-        return {
-          ...download,
-          type: 'download' as const,
-          description: download.excerpt || download.description || undefined,
-          source: 'downloads' as const
-        };
-      }
-    } catch (error) {
-      console.error('Error loading download:', error);
-    }
-    return null;
-  }
-  
-  if (type === 'book') {
-    try {
-      const { getBookBySlug } = require("./books-data");
-      const book = getBookBySlug(slug, [], true);
-      if (book && book.title !== "Book Not Found") {
-        return {
-          ...book,
-          type: 'book' as const,
-          description: book.excerpt || book.description || undefined,
-          source: 'books' as const
-        };
-      }
-    } catch (error) {
-      console.error('Error loading book:', error);
-    }
-    return null;
-  }
-  
-  // No type specified, try both
-  return getPrintBySlug(slug);
-}
-
-export function getAllPrintSlugs(): Array<{slug: string, type: string, source: string}> {
-  return getPrintSlugsWithType();
-}
-
-export function getAllPrintDocuments(): PrintDocument[] {
-  if (printDocumentsCache) {
-    return printDocumentsCache;
-  }
-
-  const slugs = getPrintSlugs();
-  const documents: PrintDocument[] = [];
-  
-  slugs.forEach(slug => {
-    const doc = getPrintBySlug(slug);
-    if (doc) {
-      documents.push(doc);
-    }
-  });
-  
-  console.log(`📄 Loaded ${documents.length} print documents`);
-  printDocumentsCache = documents;
-  return documents;
-}
-
-// Debug function to analyze slug sources
-export function debugSlugSources(): void {
-  console.log('🔍 DEBUG: Slug Sources Analysis');
-  
+/**
+ * Safely get a print document by slug with fallbacks
+ */
+export function getPrintDocumentBySlug(slug: string): SafePrint | null {
   try {
-    const { getDownloadSlugs } = require("./downloads-data");
-    const { getBookSlugs } = require("./books-data");
-    
-    const downloadSlugs = getDownloadSlugs();
-    const bookSlugs = getBookSlugs();
-    
-    console.log('Downloads raw:', downloadSlugs);
-    console.log('Books raw:', bookSlugs);
-    
-    const normalizedDownloads = downloadSlugs.map((item: any) => normalizeSlug(item, 'download'));
-    const normalizedBooks = bookSlugs.map((item: any) => normalizeSlug(item, 'book'));
-    
-    console.log('Downloads normalized:', normalizedDownloads);
-    console.log('Books normalized:', normalizedBooks);
-    
+    if (!slug || typeof slug !== 'string') {
+      console.warn('⚠️ Invalid slug provided to getPrintDocumentBySlug:', slug);
+      return null;
+    }
+
+    if (slug === 'untitled') {
+      console.warn('🚫 Attempted to access "untitled" slug - returning null');
+      return null;
+    }
+
+    const prints = getAllPrintDocuments();
+    const print = prints.find(doc => doc.slug === slug);
+
+    if (!print) {
+      console.warn(`🔍 Print document not found for slug: "${slug}"`);
+      return null;
+    }
+
+    return print;
+
   } catch (error) {
-    console.error('Debug error:', error);
+    console.error(`💥 Error finding print with slug "${slug}":`, error);
+    return null;
   }
 }
 
-// Clear cache (useful for development)
-export function clearPrintCache(): void {
-  printSlugsCache = null;
-  printDocumentsCache = null;
-  console.log('🧹 Print cache cleared');
+/**
+ * Generate static paths for print pages
+ */
+export function getPrintPaths() {
+  try {
+    const slugs = getAllPrintSlugs();
+    const paths = slugs.map(slug => ({ params: { slug } }));
+
+    console.log(`🛣️ Generated ${paths.length} unique print paths`);
+    return paths;
+
+  } catch (error) {
+    console.error('💥 Error generating print paths:', error);
+    return [];
+  }
 }
+
+// Export types for use in other files
+export type { SafePrint as PrintDocument };

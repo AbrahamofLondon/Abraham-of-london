@@ -1,13 +1,14 @@
 // types/book.ts
 
-export type BookMeta = {
+export interface BookMeta {
   slug: string;
   title: string;
-  author?: string;
-  excerpt?: string;
+  date: string;
+  author: string;
+  readTime: string;
+  category: string;
   coverImage?: string;
-  buyLink?: string;
-  genre?: string;
-  downloadPdf?: string;
-  downloadEpub?: string;
-};
+  description?: string;
+  ogDescription?: string;
+  excerpt?: string;
+}

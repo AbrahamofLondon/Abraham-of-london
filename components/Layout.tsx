@@ -1,8 +1,10 @@
 // components/Layout.tsx
+"use client"; // Add this since we're using hooks
+
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation"; // Replace next/router with next/navigation
 
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
@@ -15,11 +17,15 @@ export type LayoutProps = {
   pageTitle?: string;
   hideSocialStrip?: boolean;
   footerVariant?: "light" | "dark";
-  /** Hide the sticky CTA on specific pages (e.g., /contact, /newsletter) */
   hideCTA?: boolean;
-  /** Optional page-level hero, rendered below the social strip and above <main> */
   hero?: React.ReactNode;
 };
+
+function toArray<T>(val: unknown): T[] {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === "object") return Object.values(val as Record<string, T>).filter(Boolean) as T[];
+  return [];
+}
 
 export default function Layout({
   children,
@@ -29,17 +35,15 @@ export default function Layout({
   hideCTA = false,
   hero,
 }: LayoutProps) {
-  const router = useRouter();
+  const pathname = usePathname(); // Replace useRouter with usePathname
   const [open, setOpen] = React.useState(false);
   const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null);
 
   const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
 
-  // Normalize current path (strip query/hash and trailing slash)
   const normalize = (href: string) => href.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
-  const isActive = (href: string) => normalize(router.asPath) === normalize(href);
+  const isActive = (href: string) => normalize(pathname) === normalize(href); // Use pathname instead of router.asPath
 
-  // Lock body scroll + focus first item
   React.useEffect(() => {
     const root = document.documentElement;
     const prev = root.style.overflow || "";
@@ -54,19 +58,16 @@ export default function Layout({
     };
   }, [open]);
 
-  // Close drawer on route change
-  React.useEffect(() => {
-    const handleRoute = () => setOpen(false);
-    router.events.on("routeChangeStart", handleRoute);
-    return () => router.events.off("routeChangeStart", handleRoute);
-  }, [router.events]);
+  // Remove the router.events effect since it's not available in App Router
+  // The mobile menu will close when links are clicked via the onClick handler
 
-  // JSON-LD
+  // Robust: socialLinks may be an array or object; normalise for JSON-LD.
+  const socialArr = toArray<{ href?: string; external?: boolean }>((siteConfig as any).socialLinks);
   const sameAs = Array.from(
     new Set(
-      (siteConfig.socialLinks || [])
-        .filter((s) => s.external && /^https?:\/\//i.test(s.href))
-        .map((s) => s.href)
+      socialArr
+        .filter((s) => s && s.external && typeof s.href === "string" && /^https?:\/\//i.test(s.href))
+        .map((s) => s.href as string)
     )
   );
 
@@ -108,7 +109,6 @@ export default function Layout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(NAV_JSONLD) }} />
       </Head>
 
-      {/* Skip link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
@@ -116,23 +116,17 @@ export default function Layout({
         Skip to content
       </a>
 
-      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-[color:var(--color-on-secondary)/0.1] bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-black/50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-20">
-          {/* Brand */}
           <Link href="/" className="group inline-flex items-baseline gap-2" prefetch={false}>
             <span className="font-serif text-xl font-semibold tracking-wide text-deepCharcoal md:text-2xl dark:text-cream">
               {siteConfig.title}
             </span>
-            <span
-              className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block"
-              aria-hidden="true"
-            >
+            <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block" aria-hidden="true">
               EST. MMXXIV
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:block" aria-label="Primary">
             <ul className="flex items-center gap-8">
               {NAV.map((item) => {
@@ -165,7 +159,6 @@ export default function Layout({
             </ul>
           </nav>
 
-          {/* Desktop CTA */}
           <div className="hidden md:block">
             <Link
               href="/contact"
@@ -176,7 +169,6 @@ export default function Layout({
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -197,11 +189,7 @@ export default function Layout({
           </button>
         </div>
 
-        {/* Mobile Drawer */}
-        <div
-          id="mobile-nav"
-          className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg:black`}
-        >
+        <div id="mobile-nav" className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg:black`}>
           <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile">
             <ul className="grid gap-2">
               {NAV.map((item, idx) => {
@@ -241,7 +229,6 @@ export default function Layout({
         </div>
       </header>
 
-      {/* Social Strip */}
       {!hideSocialStrip && (
         <div className="border-b border-gray-100 bg-white dark:bg-black/40">
           <div className="mx-auto max-w-7xl px-4 py-2">
@@ -250,29 +237,20 @@ export default function Layout({
         </div>
       )}
 
-      {/* Page-level hero (if provided) */}
       {hero ? <div data-layout-hero>{hero}</div> : null}
 
-      {/* Main */}
-      <main
-        id="main-content"
-        className="min-h-screen bg-white dark:bg-black"
-        style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}
-      >
+      <main id="main-content" className="min-h-screen bg-white dark:bg-black" style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}>
         {children}
       </main>
 
-      {/* Sticky CTA on wide screens only */}
       {!hideCTA && (
         <div className="hidden 2xl:block">
           <StickyCTA showAfter={420} />
         </div>
       )}
 
-      {/* Floating teaser CTA OUTSIDE footer for clean stacking */}
       <FloatingTeaserCTA />
 
-      {/* Footer */}
       <footer
         className={`border-t ${
           footerVariant === "dark"

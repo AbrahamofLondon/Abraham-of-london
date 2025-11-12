@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "es6"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -12,35 +16,44 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": false,
-    "downlevelIteration": true,
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
-      "@/*": ["./*"],
-      "@/lib/*": ["./lib/*"],
-      "@/components/*": ["./components/*"],
-      "@/styles/*": ["./styles/*"],
-      "@/public/*": ["./public/*"],
-      "@/config/*": ["./config/*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/styles/*": [
+        "./styles/*"
+      ],
+      "@/types/*": [
+        "./types/*"
+      ],
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
+      ]
     },
-    "plugins": [{ "name": "next" }]
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.d.ts",
     ".next/types/**/*.ts",
-    "netlify/**/*.ts",
-    "netlify/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
     ".contentlayer/generated/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "**/abraham-of-london/**"]
+  "exclude": [
+    "node_modules",
+    ".contentlayer"
+  ]
 }

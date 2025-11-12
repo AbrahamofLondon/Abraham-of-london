@@ -133,27 +133,36 @@
   box-shadow: 0 0 0 0.5px transparent;
 }
 
-a.primary {
+.ctas a.primary {
   background: var(--button-primary-bg);
   color: var(--button-primary-text);
   gap: 8px;
   border-color: var(--button-primary-bg);
 }
 
-a.secondary {
+.ctas a.secondary {
   background: transparent;
   color: var(--color-on-background);
   border-color: var(--ui-alpha-border); /* Subtle border */
   min-width: 158px;
 }
 
-a:focus-visible {
+.ctas a:focus-visible {
   /* ✅ UPGRADE: Custom focus ring for accessibility */
   box-shadow: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
   border-color: transparent;
 }
-.page.dark a:focus-visible { /* Adjust focus ring for dark mode */
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  .page.dark .ctas a:focus-visible {
+    /* Adjust focus ring for dark mode */
     box-shadow: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary-light);
+  }
+  
+  .logo {
+    filter: brightness(0) invert(1);
+  }
 }
 
 /*
@@ -192,12 +201,12 @@ a:focus-visible {
  */
 
 @media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
+  .ctas a.primary:hover {
     background: var(--button-primary-hover-bg);
     border-color: var(--button-primary-hover-bg);
   }
 
-  a.secondary:hover {
+  .ctas a.secondary:hover {
     background: var(--button-secondary-hover-bg);
     border-color: var(--button-secondary-hover-bg);
   }
@@ -210,16 +219,16 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
-    /* Center main content on smaller screens */
-    .page {
-        padding: 40px 20px;
-        align-items: flex-start; /* Stop stretching vertically */
-        grid-template-rows: auto auto auto;
-    }
-    .main {
-        max-width: 100%;
-        margin: 0 auto;
-    }
+  /* Center main content on smaller screens */
+  .page {
+    padding: 40px 20px;
+    align-items: flex-start; /* Stop stretching vertically */
+    grid-template-rows: auto auto auto;
+  }
+  .main {
+    max-width: 100%;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 600px) {
@@ -252,12 +261,5 @@ a:focus-visible {
     gap: 16px 24px;
     padding-top: 12px;
     border-top: none; /* Removed redundant border-top */
-  }
-}
-
-/* Dark mode specific image filter for logos */
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: brightness(0) invert(1);
   }
 }
