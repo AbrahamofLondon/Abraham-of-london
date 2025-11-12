@@ -17,11 +17,6 @@
 *.toml text eol=lf
 *.sh text eol=lf
 
-<<<<<<< HEAD
-
-# Gremlin fix backups
-.gremlin-backups/
-=======
 # Denote binary files
 *.png binary
 *.jpg binary
@@ -44,7 +39,9 @@
 # Force LF for scripts
 scripts/*.mjs text eol=lf
 scripts/*.js text eol=lf
->>>>>>> test-netlify-fix
+
+# Gremlin fix backups
+.gremlin-backups/
 
 # Windows junk
 *.lnk
@@ -62,9 +59,15 @@ fix-parsing-errors.mjs.txt
 github-recovery-codes.txt
 
 # Build artifacts
-next-env.d.ts
+.next
+.contentlayer
+node_modules/
+.npm
+.pnpm-store
+.next-env.d.ts
 tsconfig.tsbuildinfo
 .pdfcache/
+package-lock.json
 
 # IDE/Config
 .vscode/
@@ -76,3 +79,6 @@ patches/
 # Dev only
 _tests_/
 lighthouse-budget.json
+.env.local
+.DS_Store
+*.log
