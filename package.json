@@ -18,7 +18,7 @@
     "fix:mdx": "node scripts/fix-mdx-imports.mjs",
     "prebuild": "npm run fix:mdx",
     "build:full": "npm run fix:all && npm run contentlayer:clean && contentlayer build && next build",
-    "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('🧹 Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('🧹 Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\"",
+    "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\"",
     "contentlayer:generate": "npm run contentlayer:clean && contentlayer build",
     "contentlayer:build": "contentlayer build",
     "contentlayer:dev": "contentlayer dev",
