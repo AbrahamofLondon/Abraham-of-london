@@ -11,8 +11,8 @@
   "scripts": {
     "ci:downloads": "node -e \"console.log('Skipping download validation (script not deployed).')\"",
     "clean": "node -e \"if (process.platform === 'win32') { require('child_process').execSync('rd /s /q .next .contentlayer 2>nul || echo Cleaned', { stdio: 'inherit' }) } else { require('child_process').execSync('rm -rf .next .contentlayer', { stdio: 'inherit' }) }\"",
-    "dev": "npm run contentlayer:clean && contentlayer dev && next dev",
-    "build": "contentlayer build && cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
+    "dev": "npm run contentlayer:clean && contentlayer2 dev && next dev",
+    "build": "contentlayer2 build && cross-env NEXT_BUILDER=webpack NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -122,8 +122,8 @@
     "@types/react-dom": "18.3.7",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
-    "contentlayer": "0.3.4",
-    "next-contentlayer": "0.3.4",
+    "contentlayer2": "0.5.8",
+    "next-contentlayer2": "0.5.8",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.33",
     "husky": "9.1.6",
@@ -135,10 +135,9 @@
   },
   "pnpm": {
     "overrides": {
+      "@effect-ts/system": "npm:@types/node@*",
+      "@effect-ts/core": "npm:@types/node@*",
       "esbuild": "0.19.12"
     }
-  },
-  "resolutions": {
-    "esbuild": "0.19.12"
   }
 }
