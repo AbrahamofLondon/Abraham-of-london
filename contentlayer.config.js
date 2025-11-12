@@ -1,4 +1,4 @@
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files';
+import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 
 const withSlug = {
   slug: { type: 'string', required: false },
@@ -106,8 +106,7 @@ export const Print = defineDocumentType(() => ({
   computedFields: computedSlug,
 }));
 
-// CRITICAL: This must be a default export
-export default makeSource({
+const contentLayerConfig = makeSource({
   contentDirPath: 'content',
   documentTypes: [Post, Download, Event, Book, Resource, Print],
   mdx: {
@@ -115,3 +114,5 @@ export default makeSource({
     rehypePlugins: [],
   },
 });
+
+export default contentLayerConfig;
