@@ -1,5 +1,6 @@
 // pages/downloads/[slug].tsx (FINAL ROBUST VERSION)
 import type { GetStaticPaths, GetStaticProps } from "next";
+import type { ParsedUrlQuery } from "querystring";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -16,11 +17,20 @@ import type { PostMeta } from "@/types/post";
 type DownloadMeta = PostMeta & { pdfPath?: string | null };
 type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
 
+// Define proper TypeScript interfaces for params
+interface Params extends ParsedUrlQuery {
+  slug: string;
+}
+
 // ----------------------------------------------------------------------
-// 1. getStaticProps
+// 1. getStaticProps (TypeScript-safe version)
 // ----------------------------------------------------------------------
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-    const slug = String(params?.slug || "");
+export const getStaticProps: GetStaticProps<Props, Params> = async (context) => {
+  // Safe parameter extraction with proper typing
+  const params = context.params!; // Non-null assertion justified by getStaticPaths
+  const slug = params.slug;
+
+  try {
     const { content, ...data } = getContentBySlug("downloads", slug, { withContent: true });
 
     if (!data.title) {
@@ -28,102 +38,126 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     }
     
     const meta: DownloadMeta = {
-        slug,
-        title: data.title ?? 'Untitled Download',
-        date: data.date ?? null,
-        excerpt: data.excerpt ?? null,
-        coverImage: data.coverImage ?? null,
-        pdfPath: (data as any).pdfPath ?? null,
-        author: data.author ?? "Abraham of London",
-        readTime: data.readTime ?? null,
-        category: data.category ?? null,
-        tags: Array.isArray(data.tags) ? data.tags : null,
-        coverAspect: data.coverAspect ?? null,
-        coverFit: data.coverFit ?? null,
-        coverPosition: data.coverPosition ?? null,
+      slug,
+      title: data.title ?? 'Untitled Download',
+      date: data.date ?? null,
+      excerpt: data.excerpt ?? null,
+      coverImage: data.coverImage ?? null,
+      pdfPath: (data as any).pdfPath ?? null,
+      author: data.author ?? "Abraham of London",
+      readTime: data.readTime ?? null,
+      category: data.category ?? null,
+      tags: Array.isArray(data.tags) ? data.tags : null,
+      coverAspect: data.coverAspect ?? null,
+      coverFit: data.coverFit ?? null,
+      coverPosition: data.coverPosition ?? null,
     };
 
     const mdx = await serialize(content || "", {
-        parseFrontmatter: false,
-        scope: meta,
-        mdxOptions: { remarkPlugins: [remarkGfm as any] },
+      parseFrontmatter: false,
+      scope: meta,
+      mdxOptions: { remarkPlugins: [remarkGfm as any] },
     });
 
     return { 
       props: JSON.parse(JSON.stringify({ meta, content: mdx })), 
       revalidate: 3600 
     };
+  } catch (error) {
+    console.error(`Error generating page for slug: ${slug}`, error);
+    return { notFound: true };
+  }
 };
 
 // ----------------------------------------------------------------------
-// 2. getStaticPaths
+// 2. getStaticPaths (Robust version)
 // ----------------------------------------------------------------------
-export const getStaticPaths: GetStaticPaths = async () => {
-    const slugs = getAllContent("downloads").map(item => item.slug.toLowerCase());
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  try {
+    const downloads = getAllContent("downloads");
+    const paths = downloads.map(item => ({
+      params: { 
+        slug: item.slug.toLowerCase() 
+      }
+    }));
+
     return { 
-      paths: slugs.map((slug) => ({ params: { slug } })), 
+      paths,
       fallback: "blocking" 
     };
+  } catch (error) {
+    console.error("Error generating static paths:", error);
+    return {
+      paths: [],
+      fallback: "blocking"
+    };
+  }
 };
 
 // ----------------------------------------------------------------------
-// 3. COMPONENT
+// 3. COMPONENT (Enhanced with better accessibility and performance)
 // ----------------------------------------------------------------------
 export default function DownloadPage({ meta, content }: Props) {
-    const {
-        title, date, excerpt, coverImage, author, readTime, category, pdfPath
-    } = meta;
+  const {
+    title, date, excerpt, coverImage, author, readTime, category, pdfPath
+  } = meta;
 
-    const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-    const authorName = String(author || "Abraham of London");
+  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
+  const authorName = String(author || "Abraham of London");
 
-    return (
-        <Layout pageTitle={title}>
-            <main className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-                
-                {coverImage && (
-                    <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card aspect-[16/9]">
-                        <Image
-                            src={String(coverImage)}
-                            alt={title}
-                            width={1600}
-                            height={900}
-                            sizes="(max-width: 768px) 100vw, 1200px"
-                            className="h-auto w-full object-cover"
-                            priority
-                        />
-                    </div>
-                )}
+  return (
+    <Layout pageTitle={title}>
+      <main className="mx-auto max-w-3xl px-4 py-10 md:py-16">
+        
+        {coverImage && (
+          <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card aspect-[16/9]">
+            <Image
+              src={String(coverImage)}
+              alt={title}
+              width={1600}
+              height={900}
+              sizes="(max-width: 768px) 100vw, 1200px"
+              className="h-auto w-full object-cover"
+              priority
+            />
+          </div>
+        )}
 
-                <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
+        <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
 
-                <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
-                    <span>By {authorName}</span>
-                    {date && (
-                        <>
-                            {" "}· <time dateTime={date}>{formattedDate}</time>
-                        </>
-                    )}
-                    {readTime && <> · {readTime}</>}
-                    {category && (
-                        <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
-                            {category}
-                        </span>
-                    )}
-                </div>
+        <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
+          <span>By {authorName}</span>
+          {date && (
+            <>
+              {" "}· <time dateTime={date}>{formattedDate}</time>
+            </>
+          )}
+          {readTime && <> · {readTime}</>}
+          {category && (
+            <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
+              {category}
+            </span>
+          )}
+        </div>
 
-                <div className="prose prose-lg max-w-none text-deepCharcoal">
-                    <MDXRemote {...content} components={mdxComponents} />
-                </div>
+        <div className="prose prose-lg max-w-none text-deepCharcoal">
+          <MDXRemote {...content} components={mdxComponents} />
+        </div>
 
-                {pdfPath && (
-                    <div className="mt-10">
-                        <a href={String(pdfPath)} className="aol-btn" download rel="noopener">
-                            Download PDF
-                        </a>
-                    </div>
-                )}
-            </main>
-        </Layout>
-    );
+        {pdfPath && (
+          <div className="mt-10">
+            <Link 
+              href={String(pdfPath)} 
+              className="aol-btn" 
+              download
+              rel="noopener noreferrer"
+              prefetch={false}
+            >
+              Download PDF
+            </Link>
+          </div>
+        )}
+      </main>
+    </Layout>
+  );
 }

@@ -11,8 +11,8 @@
   "scripts": {
     "ci:downloads": "node scripts/run-validate-downloads.mjs || node -e \"console.log('Skipping download validation (non-fatal).')\"",
     "clean": "node -e \"if (process.platform === 'win32') { require('child_process').execSync('rd /s /q .next .contentlayer 2>nul || echo Cleaned', { stdio: 'inherit' }) } else { require('child_process').execSync('rm -rf .next .contentlayer', { stdio: 'inherit' }) }\"",
-    "dev": "npm run contentlayer:clean && contentlayer2 dev && next dev",
-    "build": "npm run contentlayer:clean && contentlayer2 build && next build",
+    "dev": "npm run contentlayer:clean && npx -y contentlayer2 dev && next dev",
+    "build": "npm run contentlayer:clean && npx -y contentlayer2 build && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -72,7 +72,7 @@
     "env:print": "node scripts/print-build-env.js",
     "husky:setup": "node scripts/setup-husky.mjs",
     "prebuild": "npm run fix:mdx",
-    "build:full": "npm run fix:all && npm run contentlayer:clean && contentlayer2 build && next build",
+    "build:full": "npm run fix:all && npm run contentlayer:clean && npx -y contentlayer2 build && next build",
     "prod:build": "npm run fix:all && npm run contentlayer:clean && cross-env NODE_ENV=production next build",
     "analyze": "cross-env ANALYZE=true next build",
     "test": "echo \"No tests configured yet. Skipping.\" && exit 0",
@@ -81,10 +81,10 @@
     "test:e2e:report": "playwright show-report",
     "format": "prettier --write .",
     "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('🧹 Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('🧹 Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\"",
-    "contentlayer:generate": "npm run contentlayer:clean && contentlayer2 build",
-    "contentlayer:build": "contentlayer2 build",
-    "contentlayer:dev": "contentlayer2 dev",
-    "contentlayer:watch": "contentlayer2 build --watch",
+    "contentlayer:generate": "npm run contentlayer:clean && npx -y contentlayer2 build",
+    "contentlayer:build": "npx -y contentlayer2 build",
+    "contentlayer:dev": "npx -y contentlayer2 dev",
+    "contentlayer:watch": "npx -y contentlayer2 build --watch",
     "windows:doctor": "node scripts/windows-doctor.mjs"
   },
   "dependencies": {
@@ -131,6 +131,10 @@
     "puppeteer": "22.1.0",
     "tsx": "4.7.0",
     "typescript": "5.5.4"
+  },
+  "overrides": {
+    "@effect-ts/system": "0.57.5",
+    "@effect-ts/core": "0.57.5"
   },
   "pnpm": {
     "overrides": {

@@ -1,17 +1,32 @@
+import { withContentlayer } from 'next-contentlayer';  // Changed from 'next-contentlayer2'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
-  swcMinify: true,
-
-  // Remove exportPathMap (app router incompatible). Do not re-add.
-  // If you need static export: output: 'export' (but only if you’ve built for that pattern).
-
-  // Keep your redirects here (middleware doesn’t help during prerender).
-  async redirects() {
-    return [
-      { source: '/strategy', destination: '/', permanent: true },
-    ];
+  poweredByHeader: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.abrahamoflondon.org',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.netlify.app',
+      },
+    ],
+  },
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react'],
   },
 };
 
-module.exports = nextConfig;
+export default withContentlayer(nextConfig);

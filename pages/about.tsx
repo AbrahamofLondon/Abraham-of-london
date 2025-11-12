@@ -1,21 +1,21 @@
-// ./pages/about.tsx
+// pages/about.tsx
 
 import Link from "next/link";
+import Image from "next/image";
 import Layout from "@/components/Layout";
 import SEOHead from "@/components/SEOHead";
 import AboutSection, { type Achievement } from "@/components/homepage/AboutSection";
 import ResourcesCTA from "@/components/mdx/ResourcesCTA";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 import { sanitizeSocialLinks } from "@/lib/social";
-import clsx from "clsx"; // Added clsx for cleaner class strings
+import clsx from "clsx";
 
 // --- Component: FeatureCard (Refined Styling) ---
-/** Simple card for featured links, refined for the new grid layout */
 function FeatureCard({
   href,
   title,
   sub,
-  icon = "📚", // Added an optional icon prop
+  icon = "📚",
 }: {
   href: string;
   title: string;
@@ -23,7 +23,7 @@ function FeatureCard({
   icon?: string;
 }) {
   return (
-    <li className="list-none"> {/* Removes default list styling */}
+    <li className="list-none">
       <Link
         href={href}
         className="block rounded-xl border border-lightGrey bg-white p-4 shadow-sm transition hover:shadow-md hover:border-[color:var(--color-primary)/0.3] focus:outline-none focus-visible:ring-2 focus-visible:ring-forest"
@@ -35,27 +35,25 @@ function FeatureCard({
             <span className="mr-2 text-xl">{icon}</span>
             {title}
           </h3>
-          <span className="shrink-0 ml-4 mt-1 text-sm font-medium text-[color:var(--color-primary)/0.7] group-hover:text-forest">
+          <span className="ml-4 mt-1 shrink-0 text-sm font-medium text-[color:var(--color-primary)/0.7] group-hover:text-forest">
             View →
           </span>
         </div>
-        {sub && (
+        {sub ? (
           <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.8]">{sub}</p>
-        )}
+        ) : null}
       </Link>
     </li>
   );
 }
 
 // --- Main Page Component ---
-
 export default function AboutPage() {
   const CANONICAL = absUrl("/about");
 
-  const portrait = siteConfig.authorImage;
-  const portraitAbs = absUrl(
-    portrait?.startsWith("/") ? portrait : siteConfig.authorImage
-  );
+  // Defensive author image resolution
+  const portrait = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+  const portraitAbs = portrait.startsWith("/") ? absUrl(portrait) : portrait;
 
   const bio =
     "Strategy, fatherhood, and craftsmanship—brought together for enduring impact. I help fathers, young founders, and enterprise leaders build durable brands and products with clear thinking, principled execution, and a long view.";
@@ -66,8 +64,7 @@ export default function AboutPage() {
   const achievements: Achievement[] = [
     {
       title: "Launched InnovateHub",
-      description:
-        "Innovation studio for prototypes, research, and venture experiments.",
+      description: "Innovation studio for prototypes, research, and venture experiments.",
       year: 2025,
       href: innovateHubUrl,
     },
@@ -80,39 +77,37 @@ export default function AboutPage() {
     },
     {
       title: "Founded Abraham of London",
-      description:
-        "A practice for principled strategy, writing, and stewardship.",
+      description: "A practice for principled strategy, writing, and stewardship.",
       year: 2020,
     },
     {
       title: "Launched Alomarada",
-      description:
-        "Advisory for investors & entrepreneurs developing African markets.",
+      description: "Advisory for investors & entrepreneurs developing African markets.",
       year: 2018,
       href: "/ventures?brand=alomarada",
     },
   ];
 
-  // Social sameAs (JSON-LD)
+  // Social sameAs (JSON-LD) — robust against non-array configs
   const sameAs = Array.from(
     new Set(
-      (sanitizeSocialLinks(siteConfig.socialLinks || []) || [])
-        .map((l) => l.href)
-        .filter((href) => /^https?:\/\//i.test(href))
+      (sanitizeSocialLinks((siteConfig as any).socialLinks || []) || [])
+        .map((l) => l?.href)
+        .filter((href): href is string => !!href && /^https?:\/\//i.test(href))
     )
   );
 
+  // OG/Twitter images — keep absolute when needed
   const ogImageAbs = siteConfig.ogImage?.startsWith("/")
     ? absUrl(siteConfig.ogImage)
     : siteConfig.ogImage;
-
   const twitterImageAbs = siteConfig.twitterImage?.startsWith("/")
     ? absUrl(siteConfig.twitterImage)
     : siteConfig.twitterImage;
 
-  const pageTitle = "About Abraham of London"; // ✅ UPGRADE: Richer page title
+  const pageTitle = "About Abraham of London";
   const pageDesc =
-    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history."; // ✅ UPGRADE: Richer page description
+    "Quiet counsel and durable execution for fathers, young founders, and enterprise teams. Explore the practice's principles and history.";
 
   // JSON-LD (web page + person)
   const webPageSchema = {
@@ -134,7 +129,7 @@ export default function AboutPage() {
   const personSchema: Record<string, any> = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: siteConfig.author,
+    name: siteConfig.author || "Abraham of London",
     url: siteConfig.siteUrl,
     image: portraitAbs,
     ...(sameAs.length ? { sameAs } : {}),
@@ -144,11 +139,8 @@ export default function AboutPage() {
     <Layout pageTitle={pageTitle}>
       <SEOHead
         title={pageTitle}
-        // NOTE ON FIX: This line previously caused a Type Error because 'profile' was not
-        // allowed by the SEOHead component's interface. It assumes the developer has 
-        // updated the SEOHead interface (e.g., in components/SEOHead.tsx) to include 'profile'.
-        // If not, this must be changed to type="website" to compile.
-        type="profile" 
+        // Use "website" to avoid type mismatch unless your SEOHead supports "profile"
+        type="website"
         description={pageDesc}
         slug="/about"
         coverImage={ogImageAbs || undefined}
@@ -170,33 +162,27 @@ export default function AboutPage() {
 
       {/* Main Content Grid: Two columns on desktop */}
       <div className="container mx-auto max-w-6xl px-4 pt-10 pb-20 md:grid md:grid-cols-[1fr,280px] md:gap-12">
-        
         {/* === LEFT COLUMN: Narrative Sections & Resources === */}
         <div className="md:order-2 space-y-16">
-          
-          {/* Hero/About Section (Left Column) */}
-          {/* Note: AboutSection component handles its own layout, so we just wrap it. */}
+          {/* Hero/About Section */}
           <AboutSection
             id="about"
             bio={bio}
             achievements={achievements}
             portraitSrc={portrait}
-            portraitAlt="Abraham of London portrait" // Added missing alt text to satisfy ESLint warning (hypothetical fix)
-            priority // Keep priority on the LCP image
-            className="!px-0 !py-0" // Remove padding/margin from AboutSection itself
+            portraitAlt="Abraham of London portrait"
+            priority
+            className="!px-0 !py-0"
           />
 
-          <hr className="border-t border-lightGrey mx-auto max-w-lg" />
+          <hr className="mx-auto max-w-lg border-t border-lightGrey" />
 
-          {/* Letter of Practice (Integrated) */}
+          {/* Letter of Practice */}
           <section
             aria-labelledby="letter-heading"
             className="prose md:prose-lg max-w-none text-[color:var(--color-on-secondary)/0.9] dark:prose-invert"
           >
-            <h2
-              id="letter-heading"
-              className="font-serif text-3xl font-bold !mt-0 text-forest"
-            >
+            <h2 id="letter-heading" className="font-serif text-3xl font-bold !mt-0 text-forest">
               Letter of Practice
             </h2>
             <p className="lead">
@@ -205,23 +191,23 @@ export default function AboutPage() {
               durable.
             </p>
 
-            <h3 className="font-medium text-xl !mt-6 text-deepCharcoal dark:text-cream">For Fathers:</h3>
+            <h3 className="!mt-6 font-medium text-xl text-deepCharcoal dark:text-cream">For Fathers:</h3>
             <ul>
               <li>Build the house first—schedule, Scripture, and standards.</li>
-              <li>Choose **presence** over performance; private order before public output.</li>
+              <li>Choose presence over performance; private order before public output.</li>
               <li>Lead with truth and kindness; own errors without ceremony.</li>
             </ul>
 
-            <h3 className="font-medium text-xl !mt-6 text-deepCharcoal dark:text-cream">For Young Founders:</h3>
+            <h3 className="!mt-6 font-medium text-xl text-deepCharcoal dark:text-cream">For Young Founders:</h3>
             <ul>
               <li>Ship less, better. Protect constraints; they preserve quality.</li>
-              <li>Measure twice. Cut once. **Record progress**; do not perform it.</li>
+              <li>Measure twice. Cut once. Record progress; do not perform it.</li>
               <li>Cash discipline over clout; stewardship over spectacle.</li>
             </ul>
 
-            <h3 className="font-medium text-xl !mt-6 text-deepCharcoal dark:text-cream">For Enterprise Leaders:</h3>
+            <h3 className="!mt-6 font-medium text-xl text-deepCharcoal dark:text-cream">For Enterprise Leaders:</h3>
             <ul>
-              <li>Clarify mandate, remove friction, **guard the standard**.</li>
+              <li>Clarify mandate, remove friction, guard the standard.</li>
               <li>Keep counsel private; let public work speak.</li>
               <li>Scale only what proves worthy; heritage over headlines.</li>
             </ul>
@@ -229,7 +215,7 @@ export default function AboutPage() {
             <p className="mt-8 font-medium italic">If our standards align, we can begin.</p>
           </section>
 
-          {/* Contextual CTA like the blogs (Centered) */}
+          {/* Contextual CTA (Centered) */}
           <div className="mx-auto max-w-xl">
             <ResourcesCTA preset="leadership" className="mb-10" />
           </div>
@@ -237,13 +223,9 @@ export default function AboutPage() {
 
         {/* --- RIGHT COLUMN: Featured/Quick Links (Fixed Width Sidebar) --- */}
         <div className="md:order-3 md:col-start-2 space-y-12 pt-16 md:pt-0">
-          
           {/* Featured Writing */}
           <section aria-labelledby="featured-writing" className="mt-12 md:mt-0">
-            <h2
-              id="featured-writing"
-              className="mb-4 font-serif text-xl font-semibold text-deepCharcoal"
-            >
+            <h2 id="featured-writing" className="mb-4 font-serif text-xl font-semibold text-deepCharcoal">
               Featured Writing
             </h2>
             <ul className="space-y-4">
@@ -267,20 +249,17 @@ export default function AboutPage() {
               />
             </ul>
             <div className="mt-6 text-center">
-                <Link href="/blog" className="text-sm font-medium text-forest hover:underline underline-offset-2">
-                  View All Writing →
-                </Link>
+              <Link href="/blog" className="text-sm font-medium text-forest underline-offset-2 hover:underline">
+                View All Writing →
+              </Link>
             </div>
           </section>
 
           <hr className="border-t border-lightGrey" />
-          
+
           {/* Quick Downloads */}
           <section aria-labelledby="quick-downloads">
-            <h2
-              id="quick-downloads"
-              className="mb-4 font-serif text-xl font-semibold text-deepCharcoal"
-            >
+            <h2 id="quick-downloads" className="mb-4 font-serif text-xl font-semibold text-deepCharcoal">
               Quick Downloads
             </h2>
             <ul className="space-y-3">
@@ -315,18 +294,16 @@ export default function AboutPage() {
           </section>
 
           <hr className="border-t border-lightGrey" />
-          
-          {/* House standards (Elevated Sidebar Style) */}
+
+          {/* House standards */}
           <aside
             className="rounded-2xl border border-lightGrey bg-warmWhite p-6 text-sm text-[color:var(--color-on-secondary)/0.8] shadow-card"
             aria-label="House standards and operating principles"
           >
-            <h2 className="mb-3 font-serif text-xl font-semibold text-deepCharcoal">
-              House Standards
-            </h2>
+            <h2 className="mb-3 font-serif text-xl font-semibold text-deepCharcoal">House Standards</h2>
             <ul className="list-disc space-y-2 pl-5">
               <li className="font-medium">Confidentiality is the standard; trust is primary.</li>
-              <li>Devices silent. **No photos.** No recordings.</li>
+              <li>Devices silent. No photos. No recordings.</li>
               <li>Names and affiliations kept private.</li>
               <li>Use insights freely; attribution by permission.</li>
             </ul>
@@ -334,13 +311,13 @@ export default function AboutPage() {
               Private rooms available for sensitive, long-term work.
             </p>
           </aside>
-          
+
           {/* Final Sidebar CTA */}
           <Link
             href="/contact"
             className={clsx(
-                "aol-btn aol-btn-primary w-full justify-center text-lg mt-8 mb-12",
-                "bg-forest text-cream hover:brightness-90 focus:ring-forest"
+              "aol-btn aol-btn-primary mt-8 mb-12 w-full justify-center text-lg",
+              "bg-forest text-cream hover:brightness-90 focus:ring-forest"
             )}
             prefetch={false}
           >
@@ -350,4 +327,9 @@ export default function AboutPage() {
       </div>
     </Layout>
   );
+}
+
+// Optional ISR (daily). Remove if you prefer fully static.
+export async function getStaticProps() {
+  return { props: {}, revalidate: 86400 };
 }

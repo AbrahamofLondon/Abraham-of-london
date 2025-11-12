@@ -1,86 +1,41 @@
-# Dependency directories
-node_modules/
-.next/
-out/
-/coverage
-/build
-
-.next
-node_modules
-.contentlayer
-*.log
-.env.local
-
-# Next.js
-/.next/
-/out/
-next-env.d.ts
-
-# Misc
-.DS_Store
-Thumbs.db
-*.tsbuildinfo
-*.log
-*.tar
-*.gz
-
-# Local env files
-.env*.local
-.env
-
-# Vercel
-.vercel
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-.contentlayer/.cache/
-# IDE
-.vscode/
-.idea/
-
-# Project files
-*.bat
-*.zip
-*.docx
-*.xlsx
-*.lnk
-*.ini
-# Local Netlify folder
-.netlify
-
-*.mp3
-*.wav
-
-public/downloads/*.pdf binary
-.pdf.sha
-
-# Temporary build folders
-.next/
-.contentlayer/
-.pdfcache/
-scripts/output/
-
-# scripts: force LF, avoid BOM
-scripts/*.mjs text eol=lf
-
-# Personal/Sensitive
-github-recovery-codes.txt
+# Auto detect text files and normalize line endings to LF
 * text=auto eol=lf
 
-# enforce text and LF for scripts and JSON
+# Explicitly declare text files with LF
+*.js text eol=lf
 *.mjs text eol=lf
-*.js  text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
 *.json text eol=lf
 *.css text eol=lf
-*.tsx text eol=lf
-*.ts  text eol=lf
+*.scss text eol=lf
+*.md text eol=lf
+*.mdx text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.sh text eol=lf
 
+# Denote binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp3 binary
+*.wav binary
+*.mp4 binary
+*.webm binary
+*.zip binary
+*.tar binary
+*.gz binary
+
+# Force LF for scripts
+scripts/*.mjs text eol=lf
+scripts/*.js text eol=lf

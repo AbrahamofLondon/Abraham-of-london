@@ -1,5 +1,5 @@
 // contentlayer.config.ts
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files';
+import { defineDocumentType, makeSource } from 'contentlayer/source-files'; 
 
 const withSlug = {
   slug: { type: 'string', required: false }, // allow explicit slug if provided
