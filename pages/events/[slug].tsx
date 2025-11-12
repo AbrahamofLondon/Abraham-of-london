@@ -1,4 +1,4 @@
-// pages/events/[slug].tsx (FINAL ROBUST VERSION)
+// pages/events/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,8 +11,10 @@ import mdxComponents from "@/components/mdx-components";
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next"; 
 import Layout from "@/components/Layout";
 import remarkGfm from "remark-gfm";
+import * as React from "react";
 
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
 function formatPretty(isoish: string | null | undefined, tz = "Europe/London"): string {
   if (!isoish || typeof isoish !== 'string') return ''; 
   if (isDateOnly(isoish)) {
@@ -32,8 +34,9 @@ type EventPageProps = {
   resourcesMeta: DownloadMeta[];
 };
 
-function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
+function EventPage({ event, contentSource, resourcesMeta }: EventPageProps): JSX.Element {
   if (!event) return <div>Event not found.</div>;
+  
   const { slug, title, summary, location, date, tags, heroImage, coverImage } = event;
   const prettyDate = formatPretty(date);
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
@@ -41,6 +44,7 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
   const relImage = coverImage ?? heroImage;
   const absImage = relImage ? new URL(relImage, site).toString() : undefined;
   const isChatham = Array.isArray(tags) && tags.some((t) => String(t).toLowerCase() === "chatham");
+  
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -48,8 +52,16 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
     startDate: date, 
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: { "@type": "Place", name: location, address: location },
-    organizer: { "@type": "Organization", name: "Abraham of London", url: site },
+    location: { 
+      "@type": "Place", 
+      name: location, 
+      address: location 
+    },
+    organizer: { 
+      "@type": "Organization", 
+      name: "Abraham of London", 
+      url: site 
+    },
     ...(absImage ? { image: [absImage] } : {}),
     description: summary,
     url,
@@ -68,10 +80,12 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
+      
       <article className="event-page px-4 py-10 mx-auto max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-serif font-semibold mb-2">{title}</h1>
+        
         {isChatham && (
-          <>
+          <div className="mb-4">
             <span
               className="inline-block rounded-full bg-[color:var(--color-on-secondary)/0.9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
               title="Chatham Room (off the record)"
@@ -79,19 +93,23 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
               Chatham
             </span>
             <p className="mt-2 text-xs text-neutral-600">Off the record. No recordings. No press.</p>
-          </>
+          </div>
         )}
+        
         <p className="mt-3 text-sm text-neutral-600 mb-1">
           <span className="font-medium">Date:</span> {prettyDate}
         </p>
+        
         {location && (
           <p className="text-sm text-neutral-600 mb-6">
             <span className="font-medium">Location:</span> {location}
           </p>
         )}
+        
         <div className="prose max-w-none">
           <MDXRemote {...contentSource} components={mdxComponents} /> 
         </div>
+        
         {resourcesMeta?.length > 0 && (
           <section className="mt-10 border-t border-lightGrey pt-8">
             <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-4">
@@ -104,7 +122,7 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
                     <div className="relative aspect-[3/2] w-full">
                       <Image
                         src={String(r.coverImage)}
-                        alt={r.title || ''}
+                        alt={r.title || 'Resource cover image'}
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 50vw"
@@ -113,8 +131,12 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
                   )}
                   <div className="p-4">
                     <h3 className="text-base font-semibold text-deepCharcoal">
-                      <Link href={`/downloads/${r.slug}`} className="hover:underline">
-                        {r.title}
+                      <Link 
+                        href={`/downloads/${r.slug}`} 
+                        className="hover:underline"
+                        prefetch={false}
+                      >
+                        {r.title || 'Untitled Resource'}
                       </Link>
                     </h3>
                     {r.excerpt && (
@@ -125,7 +147,8 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
                     <div className="mt-3 flex gap-2">
                       <Link
                         href={`/downloads/${r.slug}`}
-                        className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest hover:bg-forest hover:text-cream"
+                        className="inline-flex items-center rounded-full border border-[color:var(--color-primary)/0.2] px-3 py-1.5 text-sm font-medium text-forest hover:bg-forest hover:text-cream transition-colors"
+                        prefetch={false}
                       >
                         Notes
                       </Link>
@@ -133,7 +156,8 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
                         <a
                           href={String((r as any).pdfPath)}
                           download
-                          className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
+                          className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal hover:bg-warmWhite transition-colors"
+                          rel="noopener noreferrer"
                         >
                           Download
                         </a>
@@ -151,34 +175,82 @@ function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getEventSlugs();
-  const paths = slugs.map((slug: string) => ({ params: { slug } }));
-  return { 
-    paths, 
-    fallback: 'blocking' 
-  };
+  try {
+    const slugs = getEventSlugs();
+    const paths = slugs.map((slug: string) => ({ params: { slug } }));
+    return { 
+      paths, 
+      fallback: 'blocking' 
+    };
+  } catch (error) {
+    console.error('Error generating event paths:', error);
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<EventPageProps> = async ({ params }) => {
-  const slug = params!.slug as string;
-  const eventData = getEventBySlug(slug, [
-    "slug", "title", "date", "location", "summary", "heroImage", "coverImage", "tags", "resources", "content",
-  ]);
-  if (!eventData || !eventData.title || !eventData.content) {
+  try {
+    if (!params?.slug) {
+      return { notFound: true };
+    }
+
+    const slug = params.slug as string;
+    const eventData = getEventBySlug(slug, [
+      "slug", "title", "date", "location", "summary", "heroImage", "coverImage", "tags", "resources", "content",
+    ]);
+    
+    if (!eventData || !eventData.title || !eventData.content) {
+      return { notFound: true };
+    }
+
+    const { content, ...event } = eventData;
+    const jsonSafeEvent = JSON.parse(JSON.stringify(event));
+    
+    const contentSource = await serialize(content, { 
+      scope: jsonSafeEvent, 
+      mdxOptions: { remarkPlugins: [remarkGfm as any] } 
+    });
+
+    // Extract resource slugs safely
+    const resourceSlugs: string[] = [];
+    try {
+      const downloads = jsonSafeEvent.resources?.downloads || [];
+      const reads = jsonSafeEvent.resources?.reads || [];
+      
+      downloads.forEach((r: any) => {
+        if (r?.href) {
+          const slug = r.href.split('/').pop();
+          if (slug) resourceSlugs.push(slug);
+        }
+      });
+      
+      reads.forEach((r: any) => {
+        if (r?.href) {
+          const slug = r.href.split('/').pop();
+          if (slug) resourceSlugs.push(slug);
+        }
+      });
+    } catch (error) {
+      console.warn('Error extracting resource slugs:', error);
+    }
+
+    const resourcesMeta = resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
+    
+    return { 
+      props: { 
+        event: jsonSafeEvent, 
+        contentSource, 
+        resourcesMeta: JSON.parse(JSON.stringify(resourcesMeta))
+      },
+      revalidate: 3600 
+    };
+  } catch (error) {
+    console.error('Error in getStaticProps for event:', params?.slug, error);
     return { notFound: true };
   }
-  const { content, ...event } = eventData;
-  const jsonSafeEvent = JSON.parse(JSON.stringify(event));
-  const contentSource = await serialize(content, { scope: jsonSafeEvent, mdxOptions: { remarkPlugins: [remarkGfm as any] } });
-  const resourceSlugs: string[] = (jsonSafeEvent.resources?.downloads?.map((r: any) => r.href.split('/').pop()) || [])
-                                .concat(jsonSafeEvent.resources?.reads?.map((r: any) => r.href.split('/').pop()) || []);
-  const resourcesMeta = resourceSlugs.length ? getDownloadsBySlugs(resourceSlugs) : [];
-  return { 
-    props: { 
-      event: jsonSafeEvent, 
-      contentSource, 
-      resourcesMeta: JSON.parse(JSON.stringify(resourcesMeta))
-    },
-    revalidate: 3600 
-  };
 };
+
+export default EventPage;

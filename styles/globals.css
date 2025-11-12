@@ -59,7 +59,11 @@
 }
 
 /* ------------------------------------------------------------------- */
+<<<<<<< HEAD
 /* ---------- Dark tokens (Retuned for richer contrast) -------------- */
+=======
+/* ---------- Dark Mode Tokens --------------------------------------- */
+>>>>>>> test-netlify-fix
 /* ------------------------------------------------------------------- */
 .dark {
   /* Primary/Text Colors */
@@ -261,5 +265,9 @@ img, video {
 
 /* List Markers */
 .prose ul > li::marker {
+<<<<<<< HEAD
     color: var(--color-midGreen);
+=======
+  color: var(--color-midGreen);
+>>>>>>> test-netlify-fix
 }
