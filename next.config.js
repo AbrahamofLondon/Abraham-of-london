@@ -1,4 +1,4 @@
-import { withContentlayer } from 'next-contentlayer';  // Changed from 'next-contentlayer2'
+const { withContentlayer } = require('next-contentlayer2');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -27,6 +27,32 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react'],
   },
+  webpack: (config, { isServer }) => {
+    // Fix for MDX component resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/components': `${process.cwd()}/components`,
+      '@/components/mdx': `${process.cwd()}/components/mdx`,
+      '@/components/print': `${process.cwd()}/components/print`,
+      '@/lib': `${process.cwd()}/lib`,
+      '@/styles': `${process.cwd()}/styles`,
+    };
+
+    // Handle MDX files properly
+    config.module.rules.push({
+      test: /\.mdx?$/,
+      use: [
+        {
+          loader: '@mdx-js/loader',
+          options: {
+            remarkPlugins: [],
+          },
+        },
+      ],
+    });
+
+    return config;
+  },
 };
 
-export default withContentlayer(nextConfig);
+module.exports = withContentlayer(nextConfig);

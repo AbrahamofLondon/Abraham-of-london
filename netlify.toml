@@ -1,18 +1,13 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile || true && pnpm run clean && pnpm run build"
+  command = "pnpm install && pnpm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  CI_LAX = "1"
   CI = "1"
   NETLIFY = "1"
-  SKIP_PWSH = "1"
-  # Force pnpm to ignore old npm/yarn node_modules
-  NPM_FLAGS = "--prefer-offline --no-audit"
-  PNPM_FLAGS = "--force"
 
 [functions]
   node_bundler = "esbuild"
