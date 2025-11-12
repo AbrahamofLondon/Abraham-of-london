@@ -1,12 +1,11 @@
-// contentlayer.config.ts
-import { defineDocumentType, makeSource } from 'contentlayer/source-files'; 
+import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 
 const withSlug = {
-  slug: { type: 'string', required: false }, // allow explicit slug if provided
+  slug: { type: 'string', required: false },
 };
 
 const withCover = {
-  coverImage: { type: 'string', required: false }, // allow cover image path
+  coverImage: { type: 'string', required: false },
 };
 
 const withTags = {
@@ -16,7 +15,6 @@ const withTags = {
 const computedSlug = {
   slug: {
     type: 'string',
-    // If frontmatter.slug exists, use it; otherwise use the flattened path.
     resolve: (doc: any) => doc.slug ?? doc._raw.flattenedPath.replace(/^.*?\//, ''),
   },
 };
@@ -101,7 +99,6 @@ export const Print = defineDocumentType(() => ({
   fields: {
     title: { type: 'string', required: true },
     excerpt: { type: 'string', required: false },
-    // These two fields triggered warnings earlier — now explicitly allowed:
     ...withCover,
     ...withSlug,
     ...withTags,
@@ -109,7 +106,8 @@ export const Print = defineDocumentType(() => ({
   computedFields: computedSlug,
 }));
 
-const contentLayerConfig = makeSource({
+// CRITICAL: This must be a default export
+export default makeSource({
   contentDirPath: 'content',
   documentTypes: [Post, Download, Event, Book, Resource, Print],
   mdx: {
@@ -117,5 +115,3 @@ const contentLayerConfig = makeSource({
     rehypePlugins: [],
   },
 });
-
-export default contentLayerConfig;

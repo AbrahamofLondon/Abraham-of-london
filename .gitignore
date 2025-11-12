@@ -45,3 +45,34 @@
 scripts/*.mjs text eol=lf
 scripts/*.js text eol=lf
 >>>>>>> test-netlify-fix
+
+# Windows junk
+*.lnk
+*.bat
+*.tar
+*.tar.gz
+*.zip
+music.mp3
+nvm-setup.zip
+offline-node-modules.tar.gz
+_emergency-backup.tar
+setup-abraham-project.bat
+criptsemergency-restore.ps1
+fix-parsing-errors.mjs.txt
+github-recovery-codes.txt
+
+# Build artifacts
+next-env.d.ts
+tsconfig.tsbuildinfo
+.pdfcache/
+
+# IDE/Config
+.vscode/
+.netlify/
+.ncurc.json
+.gitignore.backup
+patches/
+
+# Dev only
+_tests_/
+lighthouse-budget.json
