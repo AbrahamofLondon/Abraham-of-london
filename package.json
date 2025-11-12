@@ -1,77 +1,58 @@
 {
-  "name": "codex-setup",
-  "version": "1.0.0",
+  "name": "abraham-of-london",
   "private": true,
-  "type": "commonjs",
-  "engines": {
-    "node": ">=20 <21",
-    "npm": ">=10"
-  },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@9.12.0",
+  "engines": { "node": ">=20 <21", "pnpm": ">=9 <10" },
+
   "scripts": {
-    "clean": "node -e \"if (process.platform === 'win32') { require('child_process').execSync('rd /s /q .next .contentlayer 2>nul || echo Cleaned', { stdio: 'inherit' }) } else { require('child_process').execSync('rm -rf .next .contentlayer', { stdio: 'inherit' }) }\"",
-    "dev": "contentlayer2 dev && next dev",
-    "build": "contentlayer2 build && next build",
+    "preinstall": "npx only-allow pnpm",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "fix:mdx": "node scripts/fix-mdx-imports.mjs",
-    "prebuild": "npm run fix:mdx",
-    "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\""
+    "lint": "eslint ."
   },
+
   "dependencies": {
-    "@heroicons/react": "2.2.0",
-    "@netlify/functions": "4.2.1",
-    "@react-email/components": "0.5.0",
-    "@tailwindcss/typography": "0.5.19",
-    "autoprefixer": "10.4.21",
-    "clsx": "2.1.1",
-    "cross-env": "10.0.0",
-    "date-fns": "4.1.0",
-    "framer-motion": "12.23.12",
-    "gray-matter": "4.0.3",
-    "lucide-react": "0.542.0",
-    "next": "14.2.33",
-    "next-mdx-remote": "4.4.1",
-    "next-themes": "0.4.6",
-    "postcss": "8.5.6",
+    "next": "14.2.12",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-icons": "5.5.0",
+
+    "contentlayer2": "0.5.9",
+    "next-contentlayer2": "0.5.9",
+
+    "gray-matter": "4.0.3",
+    "remark-gfm": "4.0.0",
     "rehype-slug": "6.0.0",
-    "remark-gfm": "4.0.1",
-    "resend": "6.1.2",
-    "rimraf": "5.0.5",
-    "sharp": "0.34.3",
-    "tailwindcss": "3.4.0"
+    "lucide-react": "0.454.0",
+    "framer-motion": "11.2.10",
+    "clsx": "2.1.1",
+    "date-fns": "4.1.0",
+    "next-themes": "0.4.3",
+    "next-mdx-remote": "5.0.0",
+    "react-icons": "5.3.0",
+    "@heroicons/react": "2.1.5"
   },
+
   "devDependencies": {
-    "@next/mdx": "14.2.33",
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.26",
-    "@types/react-dom": "18.3.7",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "contentlayer2": "0.5.8",
-    "esbuild": "0.25.11",
+    "typescript": "5.6.3",
+    "@types/node": "20.11.30",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
     "eslint": "8.57.1",
-    "eslint-config-next": "14.2.33",
-    "next-contentlayer2": "0.5.8",
-    "prettier": "3.3.3",
-    "tsx": "4.7.0",
-    "typescript": "5.5.4"
+    "eslint-config-next": "14.2.12",
+    "postcss": "8.4.47",
+    "tailwindcss": "3.4.14",
+    "autoprefixer": "10.4.20",
+    "rimraf": "6.0.1",
+    "cross-env": "7.0.3",
+    "prettier": "3.3.3"
   },
+
   "pnpm": {
     "overrides": {
-      "@effect-ts/system": "0.57.5",
-      "@effect-ts/core": "0.57.5",
-      "esbuild": "0.25.11"
-    },
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "@effect-ts/system",
-        "@effect-ts/core"
-      ]
+      "@effect-ts/core@*": "0.57.5",
+      "@effect-ts/system@*": "0.57.5"
     }
   }
 }

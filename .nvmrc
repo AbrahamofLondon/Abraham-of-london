@@ -1,1 +1,3 @@
-20
+prefer-frozen-lockfile=false
+strict-peer-dependencies=false
+auto-install-peers=true

@@ -1,46 +1,8 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && pnpm run build"
-  publish = ".next"
+command = "pnpm install --no-frozen-lockfile && pnpm run build"
+publish = "out"
 
 [build.environment]
-  NODE_VERSION = "20"
-  NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  CI = "1"
-  NETLIFY = "1"
-
-[functions]
-  node_bundler = "esbuild"
-  directory = "netlify/functions"
-  external_node_modules = ["resend"]
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=86400"
-
-[[redirects]]
-  from = "/downloads/leaders-cue-card.pdf"
-  to = "/downloads/leaders-cue-card-two-up.pdf"
-  status = 200
-
-[[redirects]]
-  from = "/downloads/brotherhood-cue-card.pdf"
-  to = "/downloads/brotherhood-cue-card-two-up.pdf"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  conditions = { Host = ["abrahamoflondon.org"] }
+NODE_VERSION = "20"
+PNPM_VERSION = "9.12.0"
+CI = "true"
