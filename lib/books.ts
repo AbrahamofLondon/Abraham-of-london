@@ -1,5 +1,5 @@
 // lib/books.ts - PRODUCTION SAFE VERSION
-import { allBooks } from "contentlayer/generated";
+import allBooks from "contentlayer/generated";
 
 // Type-safe fallback for Book type
 interface SafeBook {

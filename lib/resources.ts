@@ -1,5 +1,5 @@
 // lib/resources.ts - PRODUCTION SAFE VERSION
-import { allResources } from "contentlayer/generated";
+import allBooks from "contentlayer/generated";
 
 // Type-safe fallback for Resource type
 interface SafeResource {
