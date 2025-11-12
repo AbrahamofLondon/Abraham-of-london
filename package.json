@@ -10,14 +10,19 @@
   "packageManager": "pnpm@9.0.0",
   "scripts": {
     "clean": "node -e \"if (process.platform === 'win32') { require('child_process').execSync('rd /s /q .next .contentlayer 2>nul || echo Cleaned', { stdio: 'inherit' }) } else { require('child_process').execSync('rm -rf .next .contentlayer', { stdio: 'inherit' }) }\"",
-    "dev": "npm run contentlayer:clean && contentlayer2 dev && next dev",
-    "build": "npm run contentlayer:clean && contentlayer2 build && next build",
+    "dev": "npm run contentlayer:clean && contentlayer dev && next dev",
+    "build": "npm run contentlayer:clean && contentlayer build && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "fix:mdx": "node scripts/fix-mdx-imports.mjs",
     "prebuild": "npm run fix:mdx",
-    "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('🧹 Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('🧹 Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\""
+    "build:full": "npm run fix:all && npm run contentlayer:clean && contentlayer build && next build",
+    "contentlayer:clean": "node -e \"if (process.platform === 'win32') { console.log('🧹 Windows: Clearing Contentlayer cache...'); require('child_process').execSync('rd /s /q .contentlayer 2>nul || echo Cache already cleared', { stdio: 'inherit' }); } else { console.log('🧹 Clearing Contentlayer cache...'); require('child_process').execSync('rm -rf .contentlayer', { stdio: 'inherit' }); }\"",
+    "contentlayer:generate": "npm run contentlayer:clean && contentlayer build",
+    "contentlayer:build": "contentlayer build",
+    "contentlayer:dev": "contentlayer dev",
+    "contentlayer:watch": "contentlayer build --watch"
   },
   "dependencies": {
     "@heroicons/react": "2.2.0",
@@ -52,26 +57,19 @@
     "@types/react-dom": "18.3.7",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
-    "contentlayer2": "0.5.8",
+    "contentlayer": "0.3.4",
+    "esbuild": "0.25.11",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.33",
-    "next-contentlayer2": "0.5.8",
+    "next-contentlayer": "0.3.4",
     "prettier": "3.3.3",
     "tsx": "4.7.0",
     "typescript": "5.5.4"
   },
   "pnpm": {
     "overrides": {
-      "@effect-ts/core": "0.57.5",
-      "@effect-ts/system": "0.57.5",
-      "@effect-ts/tracing-utils": "0.57.5"
+      "esbuild": "0.25.11"
     },
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "@effect-ts/system",
-        "@effect-ts/core",
-        "@effect-ts/tracing-utils"
-      ]
-    }
+    "dedupePeerDependents": true
   }
 }
