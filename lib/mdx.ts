@@ -1,6 +1,8 @@
 // lib/mdx.ts
 // Centralised MDX utilities: load, parse, and (optionally) serialize MDX files.
+// App Router + server runtime safe.
 
+import "server-only";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -12,13 +14,7 @@ import rehypeSlug from "rehype-slug";
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
 /** Collections we typically use (blog, posts, books, downloads, print…) */
-export type Collection =
-  | "blog"
-  | "posts"
-  | "books"
-  | "downloads"
-  | "print"
-  | string;
+export type Collection = "blog" | "posts" | "books" | "downloads" | "print" | string;
 
 /** Minimal, safe shape used across the app (re-exported elsewhere). */
 export type PostMeta = {
@@ -34,39 +30,25 @@ export type PostMeta = {
   coverImage?: string;
   author?: string;
   readTime?: string;
-
   // Optional SEO
   ogImage?: string;
   canonicalUrl?: string;
   ogDescription?: string;
-
   // Control flags
   draft?: boolean;
   published?: boolean;
-
   // Arbitrary extras
   [key: string]: unknown;
 };
 
-export type LoadedMdx = {
-  meta: PostMeta;
-  content: string; // raw MDX
-};
-
-export type SerializedMdx = {
-  meta: PostMeta;
-  // MDXRemoteSerializeResult is intentionally not imported as a type to avoid
-  // leaking that dependency into callers that don't need it. Use `any` here.
-  mdx: any;
-};
+export type LoadedMdx = { meta: PostMeta; content: string };
+export type SerializedMdx = { meta: PostMeta; mdx: any };
 
 function ensureDir(p: string): string | null {
   const abs = path.isAbsolute(p) ? p : path.join(CONTENT_ROOT, p);
   try {
     if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) return abs;
-  } catch {
-    /* noop */
-  }
+  } catch {}
   return null;
 }
 
@@ -81,11 +63,6 @@ function listMdFiles(absDir: string): string[] {
   }
 }
 
-function fileToSlug(absFile: string): string {
-  const base = path.basename(absFile).replace(/\.(mdx?|MDX?)$/, "");
-  return toCanonicalSlug(base);
-}
-
 function toCanonicalSlug(input: unknown): string {
   const s = String(input ?? "")
     .trim()
@@ -94,6 +71,11 @@ function toCanonicalSlug(input: unknown): string {
     .replace(/[^a-z0-9]+/gi, "-")
     .replace(/-+/g, "-");
   return s || "untitled";
+}
+
+function fileToSlug(absFile: string): string {
+  const base = path.basename(absFile).replace(/\.(mdx?|MDX?)$/, "");
+  return toCanonicalSlug(base);
 }
 
 function normaliseBool(v: unknown): boolean | undefined {
@@ -116,46 +98,26 @@ function toMeta(slug: string, data: Record<string, unknown>): PostMeta {
     title: typeof data.title === "string" ? data.title : undefined,
     subtitle: typeof data.subtitle === "string" ? data.subtitle : undefined,
     excerpt: typeof data.excerpt === "string" ? data.excerpt : undefined,
-    description:
-      typeof data.description === "string" ? data.description : undefined,
+    description: typeof data.description === "string" ? data.description : undefined,
     date: typeof data.date === "string" ? data.date : undefined,
-    lastModified:
-      typeof data.lastModified === "string" ? data.lastModified : undefined,
+    lastModified: typeof data.lastModified === "string" ? data.lastModified : undefined,
     category: typeof data.category === "string" ? data.category : undefined,
     tags: coerceArray<string>(data.tags),
-    coverImage:
-      typeof data.coverImage === "string" ? data.coverImage : undefined,
+    coverImage: typeof data.coverImage === "string" ? data.coverImage : undefined,
     author: typeof data.author === "string" ? data.author : undefined,
     readTime: typeof data.readTime === "string" ? data.readTime : undefined,
     ogImage: typeof data.ogImage === "string" ? data.ogImage : undefined,
-    canonicalUrl:
-      typeof data.canonicalUrl === "string" ? data.canonicalUrl : undefined,
-    ogDescription:
-      typeof data.ogDescription === "string" ? data.ogDescription : undefined,
+    canonicalUrl: typeof data.canonicalUrl === "string" ? data.canonicalUrl : undefined,
+    ogDescription: typeof data.ogDescription === "string" ? data.ogDescription : undefined,
     draft: normaliseBool(data.draft),
     published: normaliseBool(data.published),
     // keep any other front-matter keys (namespaced safely)
     ...Object.fromEntries(
-      Object.entries(data).filter(
-        ([k]) =>
-          ![
-            "title",
-            "subtitle",
-            "excerpt",
-            "description",
-            "date",
-            "lastModified",
-            "category",
-            "tags",
-            "coverImage",
-            "author",
-            "readTime",
-            "ogImage",
-            "canonicalUrl",
-            "ogDescription",
-            "draft",
-            "published",
-          ].includes(k),
+      Object.entries(data).filter(([k]) =>
+        ![
+          "title","subtitle","excerpt","description","date","lastModified","category","tags",
+          "coverImage","author","readTime","ogImage","canonicalUrl","ogDescription","draft","published",
+        ].includes(k),
       ),
     ),
   };
@@ -175,46 +137,30 @@ export function getMdxSlugs(collection: Collection): string[] {
 }
 
 /** Load a single MDX (raw content + parsed front-matter) */
-export function getMdxBySlug(
-  collection: Collection,
-  slug: string,
-): LoadedMdx | null {
+export function getMdxBySlug(collection: Collection, slug: string): LoadedMdx | null {
   const abs = ensureDir(collection);
   if (!abs) return null;
 
-  const candidates = [
-    path.join(abs, `${slug}.mdx`),
-    path.join(abs, `${slug}.md`),
-  ];
-
+  const candidates = [path.join(abs, `${slug}.mdx`), path.join(abs, `${slug}.md`)];
   const found = candidates.find((f) => {
-    try {
-      return fs.existsSync(f);
-    } catch {
-      return false;
-    }
+    try { return fs.existsSync(f); } catch { return false; }
   });
   if (!found) return null;
 
   const raw = fs.readFileSync(found, "utf8");
   const fm = matter(raw);
   const meta = toMeta(slug, (fm.data ?? {}) as Record<string, unknown>);
-
   return { meta, content: fm.content ?? "" };
 }
 
-/** Load and serialize MDX (for MDXRemote) */
+/** Serialize MDX (for MDXRemote) */
 export async function getSerializedMdx(
   collection: Collection,
   slug: string,
-  opts?: {
-    scope?: Record<string, unknown>;
-    mdxOptions?: Parameters<typeof serialize>[1]["mdxOptions"];
-  },
+  opts?: { scope?: Record<string, unknown>; mdxOptions?: Parameters<typeof serialize>[1]["mdxOptions"] },
 ): Promise<SerializedMdx | null> {
   const loaded = getMdxBySlug(collection, slug);
   if (!loaded) return null;
-
   const mdx = await serialize(loaded.content, {
     scope: { ...(opts?.scope ?? {}), ...loaded.meta },
     mdxOptions: {
@@ -224,26 +170,27 @@ export async function getSerializedMdx(
       ...(opts?.mdxOptions ?? {}),
     },
   });
-
   return { meta: loaded.meta, mdx };
 }
 
+/** Serialize arbitrary MDX string with our standard plugin stack */
+export async function renderMdx(source: string, scope: Record<string, unknown> = {}) {
+  return serialize(source, {
+    scope,
+    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
+  });
+}
+
 /** Get all MDX metas in a collection (optionally include drafts) */
-export function getAllMdx(
-  collection: Collection,
-  options?: { includeDrafts?: boolean },
-): PostMeta[] {
+export function getAllMdx(collection: Collection, options?: { includeDrafts?: boolean }): PostMeta[] {
   const slugs = getMdxSlugs(collection);
   const metas: PostMeta[] = [];
-
   for (const slug of slugs) {
     const item = getMdxBySlug(collection, slug);
     if (!item) continue;
     if (!options?.includeDrafts && isDraftLike(item.meta)) continue;
     metas.push(item.meta);
   }
-
-  // Stable, safe sort by date desc (invalid/missing dates sink)
   return metas.sort((a, b) => {
     const da = a.date ? +new Date(a.date) || 0 : 0;
     const db = b.date ? +new Date(b.date) || 0 : 0;
@@ -252,18 +199,13 @@ export function getAllMdx(
 }
 
 /** Convenience: get all posts from both blog/ and posts/ */
-export function getAllPosts(
-  options?: { includeDrafts?: boolean },
-): PostMeta[] {
+export function getAllPosts(options?: { includeDrafts?: boolean }): PostMeta[] {
   const a = getAllMdx("blog", options);
   const b = getAllMdx("posts", options);
   const seen = new Set<string>();
   const out: PostMeta[] = [];
   for (const m of [...a, ...b]) {
-    if (!seen.has(m.slug)) {
-      seen.add(m.slug);
-      out.push(m);
-    }
+    if (!seen.has(m.slug)) { seen.add(m.slug); out.push(m); }
   }
   return out.sort((x, y) => {
     const dx = x.date ? +new Date(x.date) || 0 : 0;
@@ -273,9 +215,7 @@ export function getAllPosts(
 }
 
 /** Convenience: get one post by slug (checks blog/ then posts/) */
-export function getPostBySlug(
-  slug: string,
-): LoadedMdx | null {
+export function getPostBySlug(slug: string): LoadedMdx | null {
   return getMdxBySlug("blog", slug) ?? getMdxBySlug("posts", slug);
 }
 

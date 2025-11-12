@@ -1,6 +1,9 @@
+// scripts/prevent-pages-router.js
 // Pure Node guard: fail build if non-API Pages Router files exist.
-import fs from "node:fs";
-import path from "node:path";
+// CommonJS so `node scripts/prevent-pages-router.js` works in CI.
+
+const fs = require("node:fs");
+const path = require("node:path");
 
 const ROOT = process.cwd();
 const pagesDir = path.join(ROOT, "pages");
@@ -38,4 +41,4 @@ if (offenders.length > 0) {
   process.exit(1);
 }
 
-console.log("✅ App Router enforced: no legacy /pages routes detected.")
+console.log("✅ App Router enforced: no legacy /pages routes detected.");

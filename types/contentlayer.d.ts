@@ -1,8 +1,6 @@
 // types/contentlayer.d.ts
-import type { Post, Download, Event, Book, Resource, Strategy } from 'contentlayer2/generated';
-
-declare module 'contentlayer2/generated' {
-  export type { Post, Download, Event, Book, Resource, Strategy };
+declare module "contentlayer/generated" {
+  export const allPosts: any[];
+  export const allDownloads: any[];
+  export const allPrints: any[];
 }
-
-export type AllTypes = Post | Download | Event | Book | Resource | Strategy;

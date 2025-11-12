@@ -1,4 +1,6 @@
 // lib/siteConfig.ts
+export { siteConfig, authorImage, canonicalUrl } from "@/config/site";
+export type { SiteConfig } from "@/config/site";
 
 export interface SocialLink {
   href: string;
