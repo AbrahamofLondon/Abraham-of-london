@@ -8,18 +8,23 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "clean": "rimraf .next .turbo node_modules .contentlayer .reports",
-    "guard:conflicts": "node -e \"const fs=require('fs'),p=require('path');const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(p.join(d,e.name)):[p.join(d,e.name)]);const bad=walk('.').filter(f=>/\\.(tsx?|jsx?|mdx?|md)$/.test(f)&&/<<<<<<<|>>>>>>>/.test(fs.readFileSync(f,'utf8')));if(bad.length){console.error('\\nMerge markers found in:\\n'+bad.join('\\n'));process.exit(1);}\"",
-    "prebuild": "npm run guard:conflicts && node scripts/prevent-pages-router.js",
+
+    "content:build": "contentlayer build",
+    "build": "pnpm run guard:conflicts && node scripts/prevent-pages-router.js && next build",
+    "build:netlify": "pnpm run content:build && node scripts/prevent-pages-router.js && next build",
+
+    "guard:conflicts": "node -e \"const fs=require('fs'),p=require('path');function walk(d){return fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(p.join(d,e.name)):[p.join(d,e.name)]);}const bad=walk('.').filter(f=>{try{const st=fs.statSync(f);if(!st.isFile())return false;const t=fs.readFileSync(f,'utf8');return /<<<<<<<|>>>>>>>/.test(t);}catch{return false;}});if(bad.length){console.error('\\nMerge markers found in:\\n'+bad.join('\\n'));process.exit(1);}\"",
+
     "check": "pnpm run lint && pnpm run typecheck"
   },
   "dependencies": {
-    "@heroicons/react": "2.1.5",
+    "@contentlayer/core": "0.3.4",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
     "framer-motion": "11.2.10",
@@ -32,7 +37,8 @@
     "react-dom": "18.3.1",
     "react-icons": "5.3.0",
     "rehype-slug": "6.0.0",
-    "remark-gfm": "4.0.0"
+    "remark-gfm": "4.0.0",
+    "contentlayer": "0.3.4"
   },
   "devDependencies": {
     "@types/node": "20.11.30",
@@ -47,6 +53,5 @@
     "rimraf": "6.0.1",
     "tailwindcss": "3.4.14",
     "typescript": "5.6.3"
-  },
-  "pnpm": {}
+  }
 }

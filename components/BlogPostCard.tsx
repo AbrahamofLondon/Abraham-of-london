@@ -1,49 +1,56 @@
+// components/BlogPostCard.tsx
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import { siteConfig } from "@/lib/siteConfig";
+import { safeString } from "@/lib/safe-props";
 
-/** ──────────────────────────────────────────────────────────────────────────
- * BlogPostCard
- * - Resilient cover fallbacks (slug-based, then defaults)
- * - Safe excerpt stripping
- * - Accessible date formatting + avatars with fallback
- * ────────────────────────────────────────────────────────────────────────── */
+/**
+ * BlogPostCard Component
+ * - Robust cover fallback chain
+ * - Resilient avatar fallback
+ * - Accessible metadata (date, readTime, category)
+ */
 
-type AuthorType = string | { name?: string; image?: string };
-
-type BlogPostCardProps = {
+export interface BlogPostCardProps {
   slug: string;
   title: string;
   date?: string;
   excerpt?: string;
   coverImage?: string;
-  author?: AuthorType;
+  author?: string | { name?: string; image?: string };
   readTime?: string | number;
   category?: string;
   tags?: string[];
   coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
   coverPosition?: "center" | "left" | "right";
+}
+
+const FALLBACK_AVATAR =
+  siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+
+const DEFAULT_COVERS = [
+  "/assets/images/blog/default.webp",
+  "/assets/images/blog/default.jpg",
+] as const;
+
+/* -------------------------------------------------------------------------- */
+/*  Utility helpers                                                           */
+/* -------------------------------------------------------------------------- */
+
+const stripMarkup = (input?: string | null): string =>
+  input ? input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim() : "";
+
+const normalizeLocal = (src?: string | null): string | undefined => {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src; // allow absolute URLs
+  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
 };
 
-const FALLBACK_AVATAR = siteConfig.authorImage || "/assets/images/profile-portrait.webp";
-const DEFAULT_COVERS = ["/assets/images/blog/default.webp", "/assets/images/blog/default.jpg"] as const;
-
-function stripMarkup(input?: string | null): string {
-  if (!input) return "";
-  return input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-}
-
-function normalizeLocal(src?: string | null): string | undefined {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return undefined;
-  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-}
-
-function buildCoverCandidates(slug: string, coverImage?: string | null) {
-  const s = String(slug).trim();
+function buildCoverCandidates(slug: string, coverImage?: string | null): string[] {
+  const s = safeString(slug).trim();
   const base = [
     normalizeLocal(coverImage),
     `/assets/images/blog/${s}.webp`,
@@ -54,6 +61,10 @@ function buildCoverCandidates(slug: string, coverImage?: string | null) {
   ].filter(Boolean) as string[];
   return Array.from(new Set(base));
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Component                                                                 */
+/* -------------------------------------------------------------------------- */
 
 export default function BlogPostCard({
   slug,
@@ -68,13 +79,20 @@ export default function BlogPostCard({
   coverFit = "cover",
   coverPosition = "center",
 }: BlogPostCardProps) {
-  // Author data
-  const authorName = typeof author === "string" ? author : author?.name || siteConfig.author;
-  const preferredAvatar = (typeof author !== "string" && normalizeLocal(author?.image)) || FALLBACK_AVATAR;
+  // Author handling
+  const authorName =
+    typeof author === "string" ? author : author?.name || siteConfig.author;
+  const preferredAvatar =
+    (typeof author !== "string" && normalizeLocal(author?.image)) ||
+    FALLBACK_AVATAR;
+
   const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
 
   // Cover fallback chain
-  const candidates = React.useMemo(() => buildCoverCandidates(slug, coverImage), [slug, coverImage]);
+  const candidates = React.useMemo(
+    () => buildCoverCandidates(slug, coverImage),
+    [slug, coverImage],
+  );
   const [idx, setIdx] = React.useState(0);
   const [coverFailed, setCoverFailed] = React.useState(false);
   const coverSrc = !coverFailed ? candidates[idx] : undefined;
@@ -93,44 +111,63 @@ export default function BlogPostCard({
   const valid = dt && !Number.isNaN(+dt);
   const dateTime = valid ? dt!.toISOString().slice(0, 10) : undefined;
   const dateLabel = valid
-    ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(dt!)
+    ? new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(dt!)
     : undefined;
 
-  // Class helpers
+  // Styling helpers
   const aspectClass = clsx({
     "aspect-[1/1]": coverAspect === "square",
     "aspect-[16/9]": coverAspect === "wide",
     "aspect-[2/3]": coverAspect === "book",
   });
 
-  const imageClasses = clsx(coverFit === "contain" ? "object-contain" : "object-cover", {
-    "object-left": coverPosition === "left",
-    "object-right": coverPosition === "right",
-    "object-center": coverPosition === "center",
-  });
+  const imageClasses = clsx(
+    coverFit === "contain" ? "object-contain" : "object-cover",
+    {
+      "object-left": coverPosition === "left",
+      "object-right": coverPosition === "right",
+      "object-center": coverPosition === "center",
+    },
+  );
 
   const frameClasses = clsx(
     "relative w-full overflow-hidden rounded-t-2xl",
     aspectClass,
-    coverFit === "contain" && "bg-warmWhite p-2 sm:p-3"
+    coverFit === "contain" && "bg-warmWhite p-2 sm:p-3",
   );
 
+  // Fallback initials
   const initials = React.useMemo(() => {
-    const words = String(title || "").trim().split(/\s+/).slice(0, 3);
-    return words.map((w) => w[0]?.toUpperCase() || "").join("") || "A•L";
+    const words = safeString(title).trim().split(/\s+/).slice(0, 3);
+    return (
+      words.map((w) => w[0]?.toUpperCase() || "").join("") || "A•L"
+    );
   }, [title]);
 
   const safeExcerpt = stripMarkup(excerpt);
 
+  /* ------------------------------------------------------------------------ */
+  /*  RENDER                                                                  */
+  /* ------------------------------------------------------------------------ */
+
   return (
     <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link href={`/blog/${slug}`} className="block" prefetch={false} aria-label={`Read: ${title}`}>
+      <Link
+        href={`/blog/${slug}`}
+        className="block"
+        prefetch={false}
+        aria-label={`Read: ${title}`}
+      >
         {/* Cover */}
         <div className={frameClasses}>
           {!coverFailed && coverSrc ? (
             <Image
               src={coverSrc}
-              alt=""
+              alt={title || ""}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
               className={imageClasses}
@@ -148,17 +185,29 @@ export default function BlogPostCard({
 
         {/* Body */}
         <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
+          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
+            {title}
+          </h3>
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
             {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
-            {readTime && <span aria-label="Estimated reading time">{readTime} min read</span>}
-            {category && <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">{category}</span>}
+            {readTime && (
+              <span aria-label="Estimated reading time">
+                {readTime} min read
+              </span>
+            )}
+            {category && (
+              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">
+                {category}
+              </span>
+            )}
             <span className="luxury-link">Discuss</span>
           </div>
 
           {safeExcerpt && (
-            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">{safeExcerpt}</p>
+            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">
+              {safeExcerpt}
+            </p>
           )}
 
           <div className="mt-4 flex items-center gap-3">

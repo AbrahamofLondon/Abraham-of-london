@@ -1,6 +1,7 @@
-// Pure, alias-free Contentlayer2 config
-import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import path from "node:path";
+import { defineDocumentType, makeSource } from "contentlayer/source-files";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 export const Post = defineDocumentType(() => ({
   name: "Post",
@@ -9,20 +10,13 @@ export const Post = defineDocumentType(() => ({
   fields: {
     title: { type: "string", required: true },
     date: { type: "date", required: true },
-    excerpt: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false }
+    excerpt: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } }
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => doc._raw.flattenedPath.replace(/^posts\//, "")
-    },
-    url: {
-      type: "string",
-      resolve: (doc) =>
-        `/blog/${doc._raw.flattenedPath.replace(/^posts\//, "")}`
-    }
+    slug: { type: "string", resolve: (doc) => doc._raw.flattenedPath.replace(/^posts\//, "") },
+    url: { type: "string", resolve: (doc) => `/blog/${doc._raw.flattenedPath.replace(/^posts\//, "")}` }
   }
 }));
 
@@ -32,29 +26,19 @@ export const Download = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     title: { type: "string", required: true },
-    excerpt: { type: "string", required: false },
-    type: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false }
+    excerpt: { type: "string" },
+    type: { type: "string" },
+    coverImage: { type: "string" },
+    tags: { type: "list", of: { type: "string" } }
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => doc._raw.flattenedPath.replace(/^downloads\//, "")
-    },
-    url: {
-      type: "string",
-      resolve: (doc) =>
-        `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}`
-    }
+    slug: { type: "string", resolve: (doc) => doc._raw.flattenedPath.replace(/^downloads\//, "") },
+    url: { type: "string", resolve: (doc) => `/downloads/${doc._raw.flattenedPath.replace(/^downloads\//, "")}` }
   }
 }));
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
   documentTypes: [Post, Download],
-  mdx: {
-    remarkPlugins: [],
-    rehypePlugins: []
-  }
+  mdx: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] }
 });
