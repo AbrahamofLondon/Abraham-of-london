@@ -1,13 +1,9 @@
-// scripts/prevent-pages-router.js
-// Pure Node guard: fail build if non-API Pages Router files exist.
-// CommonJS so `node scripts/prevent-pages-router.js` works in CI.
-
+// scripts/prevent-pages-router.js (CommonJS)
 const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = process.cwd();
 const pagesDir = path.join(ROOT, "pages");
-
 const isApiPath = (fp) => fp.split(path.sep).includes("api");
 
 function collectPages(dir) {
