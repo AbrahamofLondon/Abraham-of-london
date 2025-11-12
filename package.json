@@ -132,5 +132,13 @@
     "sass": "1.94.0",
     "tsx": "4.7.0",
     "typescript": "5.5.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.19.12"
+    }
+  },
+  "resolutions": {
+    "esbuild": "0.19.12"
   }
 }

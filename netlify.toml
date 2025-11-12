@@ -1,5 +1,5 @@
 [build]
-  command = "npm run clean && npm run build"
+  command = "pnpm install --no-frozen-lockfile || true && pnpm run clean && pnpm run build"
   publish = ".next"
 
 [build.environment]
@@ -9,8 +9,10 @@
   CI_LAX = "1"
   CI = "1"
   NETLIFY = "1"
-  # Skip PowerShell scripts in CI
   SKIP_PWSH = "1"
+  # Force pnpm to ignore old npm/yarn node_modules
+  NPM_FLAGS = "--prefer-offline --no-audit"
+  PNPM_FLAGS = "--force"
 
 [functions]
   node_bundler = "esbuild"
