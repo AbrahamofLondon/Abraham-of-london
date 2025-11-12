@@ -1,8 +1,5 @@
-# netlify.toml (CLEANED AND CORRECTED)
-
 [build]
-  # ✅ FIX: Use the simple, clean build command you requested
-  command = "npm run clean && npm run build"
+  command = "cross-env CI=1 NETLIFY=1 npm run clean && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -10,48 +7,17 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   CI_LAX = "1"
-  NO_SLASH_OPACITY_MODE = "fix"
-  DOWNLOADS_STRICT = "0"
-  # Note: PDF_ON_CI = "1" is removed as 'npm run pdfs' is not in the clean build command
+  CONTENTLAYER_EXPERIMENTAL = "1"
 
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
   external_node_modules = ["resend"]
 
-[functions.emails]
-  included_files = ["emails/**"]
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-  # You can pin this if needed, but letting Netlify manage it is fine
-  # pinned_version = "5.14.4"
-
-# --- HEADERS ---
-[[headers]]
-  for = "/"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
 [[headers]]
   for = "/*"
   [headers.values]
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-
-[[headers]]
-  for = "/assets/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/assets/video/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Accept-Ranges = "bytes"
+    Cache-Control = "public, max-age=3600"
 
 [[headers]]
   for = "/_next/static/*"
@@ -59,41 +25,22 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/_next/image*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800"
-
-[[headers]]
-  for = "/downloads/*.pdf"
-  [headers.values]
-    Cache-Control = "public, max-age=600, must-revalidate"
-    Content-Type = "application/pdf"
-
-# --- REDIRECTS ---
-# (Include all your redirects here)
+    Cache-Control = "public, max-age=86400"
 
 [[redirects]]
   from = "/downloads/leaders-cue-card.pdf"
-  to   = "/downloads/leaders-cue-card-two-up.pdf"
+  to = "/downloads/leaders-cue-card-two-up.pdf"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/downloads/brotherhood-cue-card.pdf"
-  to   = "/downloads/brotherhood-cue-card-two-up.pdf"
+  to = "/downloads/brotherhood-cue-card-two-up.pdf"
   status = 200
-  force = true
 
-
-# Force apex to canonical host
 [[redirects]]
   from = "/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
-  force = true
   conditions = { Host = ["abrahamoflondon.org"] }
