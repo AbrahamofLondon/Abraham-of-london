@@ -1,4 +1,3 @@
-# .github/workflows/uptime.yml (CLEANED YAML)
 name: Uptime, Headers, E2E & PageSpeed
 
 on:
@@ -27,12 +26,12 @@ on:
         type: choice
         options: ['false', 'true']
       base_url:
-        description: 'Base URL when not using preview (or as fallback if allowed)'
+        description: 'Base URL when not using preview (or fallback)'
         required: false
         default: 'https://www.abrahamoflondon.org'
         type: string
       run_pagespeed:
-        description: 'Also run Lighthouse/PageSpeed against targets'
+        description: 'Also run Lighthouse/PageSpeed'
         required: false
         default: 'false'
         type: choice
@@ -87,7 +86,7 @@ jobs:
 
           if [ "$use_preview" = "true" ]; then
             if [ -z "${NETLIFY_AUTH_TOKEN:-}" ] || [ -z "${NETLIFY_SITE_ID:-}" ]; then
-              echo "❌ Missing NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID while use_preview=true."
+              echo "❌ Missing NETLIFY_* secrets while use_preview=true."
               if [ "$abort_missing" = "true" ]; then exit 1; fi
               echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
               echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
@@ -99,7 +98,7 @@ jobs:
             api="https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys?state=ready&context=deploy-preview&per_page=50"
             json="$(curl -fsSL -H "Authorization: Bearer ${NETLIFY_AUTH_TOKEN}" "$api" || true)"
             if [ -z "$json" ] || [ "$json" = "[]" ]; then
-              echo ⚠️ No ready previews returned."
+              echo "⚠️ No ready previews."
               if [ "$abort_missing" = "true" ]; then exit 1; fi
               echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
               echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
@@ -125,7 +124,7 @@ jobs:
               echo "USED_BRANCH=${branch_used}" >> "$GITHUB_OUTPUT"
               echo "USED_PR=${pr_number}" >> "$GITHUB_OUTPUT"
             else
-              echo "⚠️ No matching preview found (branch=${preview_branch:-any}, pr=${pr_number:-any})."
+              echo "⚠️ No matching preview found."
               if [ "$abort_missing" = "true" ]; then exit 1; fi
               echo "BASE_URL=${FALLBACK_URL}" >> "$GITHUB_OUTPUT"
               echo "USED_PREVIEW=false" >> "$GITHUB_OUTPUT"
@@ -139,37 +138,28 @@ jobs:
             echo "USED_PR=" >> "$GITHUB_OUTPUT"
           fi
           echo "RUN_PAGESPEED=${RUN_PAGESPEED}" >> "$GITHUB_OUTPUT"
+
       - name: Write summary
-        env:
-          BASE_URL: ${{ steps.resolve.outputs.BASE_URL }}
-          USED_PREVIEW: ${{ steps.resolve.outputs.USED_PREVIEW }}
-          USED_BRANCH: ${{ steps.resolve.outputs.USED_BRANCH }}
-          USED_PR: ${{ steps.resolve.outputs.USED_PR }}
-          PROD_URL: ${{ steps.resolve.outputs.PROD_URL }}
-          RUN_PAGESPEED: ${{ steps.resolve.outputs.RUN_PAGESPEED }}
         run: |
           {
             echo "### Target Resolution"
             echo ""
             echo "| Key | Value |"
             echo "| --- | ----- |"
-            echo "| PROD_URL | $PROD_URL |"
-            echo "| PREVIEW_URL | $BASE_URL |"
-            echo "| USED_PREVIEW | $USED_PREVIEW |"
-            echo "| USED_BRANCH | ${USED_BRANCH:-} |"
-            echo "| USED_PR | ${USED_PR:-} |"
-            echo "| RUN_PAGESPEED | $RUN_PAGESPEED |"
+            echo "| PROD_URL | ${{ steps.resolve.outputs.PROD_URL }} |"
+            echo "| PREVIEW_URL | ${{ steps.resolve.outputs.BASE_URL }} |"
+            echo "| USED_PREVIEW | ${{ steps.resolve.outputs.USED_PREVIEW }} |"
+            echo "| USED_BRANCH | ${{ steps.resolve.outputs.USED_BRANCH }} |"
+            echo "| USED_PR | ${{ steps.resolve.outputs.USED_PR }} |"
+            echo "| RUN_PAGESPEED | ${{ steps.resolve.outputs.RUN_PAGESPEED }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # ── Probe & E2E: Production
   probe_prod:
     needs: [resolve-base-url]
     runs-on: ubuntu-latest
     env:
       BASE_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
     steps:
-      - name: Show target
-        run: echo "Probing PROD $BASE_URL"
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
       - name: Health 200 + no-store
@@ -199,33 +189,20 @@ jobs:
     env:
       BASE_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
       PLAYWRIGHT_BROWSERS_PATH: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-      NODE_VERSION: ${{ env.NODE_VERSION }}
-    outputs:
-      REPORT_NAME: ${{ steps.report_meta.outputs.REPORT_NAME }}
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-      - name: Install deps
-        run: npm ci
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      - name: Run E2E tests (PROD)
-        run: npm run test:e2e
-      - name: Set report metadata
-        id: report_meta
-        run: echo "REPORT_NAME=playwright-report-prod" >> "$GITHUB_OUTPUT"
-      - name: Upload Playwright HTML report (always)
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm dlx playwright install --with-deps
+      - name: Run E2E (PROD)
+        run: pnpm run test:e2e
+      - name: Upload Playwright report (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -233,7 +210,6 @@ jobs:
           path: playwright-report
           retention-days: 7
 
-  # ── Probe & E2E: Preview (conditional)
   probe_preview:
     needs: [resolve-base-url]
     if: needs.resolve-base-url.outputs.USED_PREVIEW == 'true'
@@ -241,8 +217,6 @@ jobs:
     env:
       BASE_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
     steps:
-      - name: Show target
-        run: echo "Probing PREVIEW $BASE_URL (branch='${{ needs.resolve-base-url.outputs.USED_BRANCH }}', pr='${{ needs.resolve-base-url.outputs.USED_PR }}')"
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
       - name: Health 200 + no-store
@@ -273,33 +247,20 @@ jobs:
     env:
       BASE_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
       PLAYWRIGHT_BROWSERS_PATH: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-      NODE_VERSION: ${{ env.NODE_VERSION }}
-    outputs:
-      REPORT_NAME: ${{ steps.report_meta.outputs.REPORT_NAME }}
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-      - name: Install deps
-        run: npm ci
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      - name: Run E2E tests (PREVIEW)
-        run: npm run test:e2e
-      - name: Set report metadata
-        id: report_meta
-        run: echo "REPORT_NAME=playwright-report-preview" >> "$GITHUB_OUTPUT"
-      - name: Upload Playwright HTML report (always)
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm dlx playwright install --with-deps
+      - name: Run E2E (PREVIEW)
+        run: pnpm run test:e2e
+      - name: Upload Playwright report (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -307,20 +268,17 @@ jobs:
           path: playwright-report
           retention-days: 7
 
-  # ── PageSpeed / Lighthouse (optional)
   pagespeed_prod:
     needs: [resolve-base-url, e2e_prod]
     if: needs.resolve-base-url.outputs.RUN_PAGESPEED == 'true'
     runs-on: ubuntu-latest
-    env:
-      TARGET_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
     steps:
-      - name: PageSpeed (Lighthouse) on PROD
+      - name: PageSpeed on PROD
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
-            ${{ env.TARGET_URL }}/
-            ${{ env.TARGET_URL }}/downloads
+            ${{ needs.resolve-base-url.outputs.PROD_URL }}/
+            ${{ needs.resolve-base-url.outputs.PROD_URL }}/downloads
           uploadArtifacts: true
           temporaryPublicStorage: true
 
@@ -328,19 +286,16 @@ jobs:
     needs: [resolve-base-url, e2e_preview]
     if: needs.resolve-base-url.outputs.RUN_PAGESPEED == 'true' && needs.resolve-base-url.outputs.USED_PREVIEW == 'true'
     runs-on: ubuntu-latest
-    env:
-      TARGET_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
     steps:
-      - name: PageSpeed (Lighthouse) on PREVIEW
+      - name: PageSpeed on PREVIEW
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
-            ${{ env.TARGET_URL }}/
-            ${{ env.TARGET_URL }}/downloads
+            ${{ needs.resolve-base-url.outputs.BASE_URL }}/
+            ${{ needs.resolve-base-url.outputs.BASE_URL }}/downloads
           uploadArtifacts: true
           temporaryPublicStorage: true
 
-  # ── Notifications
   notify:
     name: Notify (Slack/Discord)
     needs:
@@ -353,64 +308,7 @@ jobs:
       - pagespeed_preview
     if: always()
     runs-on: ubuntu-latest
-    env:
-      PROD_URL: ${{ needs.resolve-base-url.outputs.PROD_URL }}
-      PREVIEW_URL: ${{ needs.resolve-base-url.outputs.BASE_URL }}
-      USED_PREVIEW: ${{ needs.resolve-base-url.outputs.USED_PREVIEW }}
-      USED_BRANCH: ${{ needs.resolve-base-url.outputs.USED_BRANCH }}
-      USED_PR: ${{ needs.resolve-base-url.outputs.USED_PR }}
-      PROBE_PROD_STATUS: ${{ needs.probe_prod.result }}
-      E2E_PROD_STATUS: ${{ needs.e2e_prod.result }}
-      PROBE_PREVIEW_STATUS: ${{ needs.probe_preview.result }}
-      E2E_PREVIEW_STATUS: ${{ needs.e2e_preview.result }}
-      PAGESPEED_PROD_STATUS: ${{ needs.pagespeed_prod.result }}
-      PAGESPEED_PREVIEW_STATUS: ${{ needs.pagespeed_preview.result }}
-      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      REPO: ${{ github.repository }}
-      REF: ${{ github.ref }}
     steps:
-      - name: Compose message
-        id: msg
+      - name: Compose & print summary
         run: |
-          set -euo pipefail
-          overall="SUCCESS"
-          for s in "$PROBE_PROD_STATUS" "$E2E_PROD_STATUS" "${PROBE_PREVIEW_STATUS:-skipped}" "${E2E_PREVIEW_STATUS:-skipped}" "${PAGESPEED_PROD_STATUS:-skipped}" "${PAGESPEED_PREVIEW_STATUS:-skipped}"; do
-            if [ "$s" != "success" ] && [ "$s" != "skipped" ]; then overall="FAILURE"; fi
-          done
-          text="[*$overall*] ${REPO}@${REF}
-- PROD: probe=${PROBE_PROD_STATUS}, e2e=${E2E_PROD_STATUS}, pagespeed=${PAGESPEED_PROD_STATUS:-skipped}
-- PREVIEW (used=${USED_PREVIEW}, branch=${USED_BRANCH:-n/a}, pr=${USED_PR:-n/a}):
-  - url: ${PREVIEW_URL}
-  - probe=${PROBE_PREVIEW_STATUS:-skipped}, e2e=${E2E_PREVIEW_STATUS:-skipped}, pagespeed=${PAGESPEED_PREVIEW_STATUS:-skipped}
-- run: ${RUN_URL}
-- artifacts: playwright-report-prod, playwright-report-preview (if present)"
-          echo "TEXT<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$text" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-      - name: Slack notify (if webhook present)
-        if: ${{ always() && secrets.SLACK_WEBHOOK_URL != '' }}
-        env:
-          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          TEXT: ${{ steps.msg.outputs.TEXT }}
-        run: |
-          payload=$(jq -Rn --arg text "$TEXT" '{text: $text}')
-          curl -fsS -X POST -H 'Content-type: application/json' --data "$payload" "$WEBHOOK"
-      - name: Discord notify (if webhook present)
-        if: ${{ always() && secrets.DISCORD_WEBHOOK_URL != '' }}
-        env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          TEXT: ${{ steps.msg.outputs.TEXT }}
-        run: |
-          payload=$(jq -Rn --arg content "$TEXT" '{content: $content}')
-          curl -fsS -X POST -H 'Content-type: application/json' --data "$payload" "$WEBHOOK"
-      - name: Final summary
-        run: |
-          {
-            echo "### Notifications & Results"
-            echo ""
-            echo "- **PROD** → probe: $PROBE_PROD_STATUS, e2e: $E2E_PROD_STATUS, pagespeed: ${PAGESPEED_PROD_STATUS:-skipped}"
-            echo "- **PREVIEW** (used=$USED_PREVIEW, branch='${USED_BRANCH:-}', pr='${USED_PR:-}')"
-            echo "  - probe: ${PROBE_PREVIEW_STATUS:-skipped}, e2e: ${E2E_PREVIEW_STATUS:-skipped}, pagespeed: ${PAGESPEED_PREVIEW_STATUS:-skipped}"
-            echo "- **Run:** $RUN_URL"
-            echo "- **Artifacts:** playwright-report-prod / playwright-report-preview (if uploaded)"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_STEP_SUMMARY"

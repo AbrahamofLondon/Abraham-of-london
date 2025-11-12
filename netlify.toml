@@ -1,15 +1,6 @@
 [build]
-command = "pnpm install --no-frozen-lockfile && pnpm run build:netlify"
-publish = ".next"
-node_version = "20"
-
-[build.environment]
-CI = "true"
-NEXT_TELEMETRY_DISABLED = "1"
-
-[context.production.environment]
-NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-CONTENTLAYER_LOG_LEVEL = "info"
+  command = "pnpm install --no-frozen-lockfile && pnpm run build:netlify"
+  publish = ".next"
 
 [[plugins]]
-package = "@netlify/plugin-nextjs"
+  package = "@netlify/plugin-nextjs"

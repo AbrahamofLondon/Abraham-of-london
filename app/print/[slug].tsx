@@ -1,6 +1,6 @@
 // app/print/[slug]/page.tsx
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound } from "next/navigation"; 
 import type { Metadata } from "next";
 
 import { MDXRemote } from "next-mdx-remote";

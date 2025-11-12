@@ -4,12 +4,12 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 // Helper function to safely get fields with fallbacks
-const getField = (doc: any, field: string, fallback: any = "") => {
+const getField = (doc, field, fallback = "") => {
   return doc[field] ?? fallback;
 };
 
 // Helper function to generate safe slug
-const generateSlug = (rawPath: string, prefix: string) => {
+const generateSlug = (rawPath, prefix) => {
   try {
     return rawPath.replace(new RegExp(`^${prefix}/`), "").replace(/\/index$/, "") || "untitled";
   } catch {
@@ -18,7 +18,7 @@ const generateSlug = (rawPath: string, prefix: string) => {
 };
 
 // Helper function to generate URL
-const generateUrl = (slug: string, basePath: string) => {
+const generateUrl = (slug, basePath) => {
   return `/${basePath}/${slug}`.replace(/\/+/g, "/");
 };
 

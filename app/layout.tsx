@@ -1,6 +1,7 @@
 // app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/lib/themeContext";
 
 export const metadata: Metadata = {
   title: {
@@ -19,7 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-user-theme="system"
       suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body>
+        <ThemeProvider defaultTheme="system" storageKey="theme">
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

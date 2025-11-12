@@ -3,13 +3,12 @@ name: Build & Commit PDFs
 on:
   push:
     branches: [main]
-    # Rebuild PDFs when content or the PDF script changes
     paths:
       - "content/**"
       - "scripts/make-pdfs.mjs"
       - "package.json"
-      - "package-lock.json"
-      - "public/downloads/**" # allow manual edits to retrigger
+      - "pnpm-lock.yaml"
+      - "public/downloads/**"
   workflow_dispatch: {}
 
 permissions:
@@ -21,51 +20,50 @@ concurrency:
 
 jobs:
   pdfs:
-    if: github.repository_owner == github.actor || github.actor != 'github-actions'
+    # don’t re-trigger infinitely on bot commits
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-22.04
-
     env:
       NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
       PUPPETEER_CACHE_DIR: ${{ runner.tool_cache }}/puppeteer
-      # Force your script to run even if it has a "skip on CI" guard.
       PDF_ON_CI: "1"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
 
-      - name: Use Node.js 20.x
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with: { version: 9 }
+
+      - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: pnpm
 
-      - name: Cache Puppeteer browser binaries
+      - name: Cache Puppeteer Chromium
         uses: actions/cache@v4
         with:
           path: ${{ env.PUPPETEER_CACHE_DIR }}
-          key: puppeteer-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            puppeteer-${{ runner.os }}-
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: puppeteer-${{ runner.os }}-
 
-      - name: Install dependencies (prod)
-        run: npm ci --omit=optional
+      - name: Install deps (prod)
+        run: pnpm install --filter . --prod --frozen-lockfile=false
 
       - name: Install Chrome for Puppeteer
-        run: npx puppeteer browsers install chrome
+        run: pnpm dlx puppeteer browsers install chrome
 
       - name: Generate PDFs
-        run: npm run pdfs
-        # If your script used to bail on CI, ensure it respects PDF_ON_CI.
-        # (See script patch below.)
+        run: pnpm run pdfs
 
       - name: Commit changes (if any)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Prevent looped builds
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "chore(pdfs): auto-generate PDFs [skip ci]"

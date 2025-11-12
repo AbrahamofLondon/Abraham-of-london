@@ -1,4 +1,4 @@
-// scripts/prevent-pages-router.js (CommonJS)
+// scripts/prevent-pages-router.js
 const fs = require("node:fs");
 const path = require("node:path");
 

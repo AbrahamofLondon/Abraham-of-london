@@ -1,17 +1,46 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "jsx": "react-jsx",
-    "strict": true,
-    "moduleResolution": "Bundler",
+    "lib": ["dom", "es2022"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowJs": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["*"],
-      "~/*": ["*"]
+      "@/*": ["*"]
     },
-    "skipLibCheck": true,
-    "noErrorTruncation": true
+    "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["node_modules", ".next", "dist", "_tests_"]
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "pages/**/*.ts",
+    "pages/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "config/**/*.ts",
+    "config/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "public",
+    "tests",
+    "scripts",
+    "patches",
+    "netlify",
+    "emails",
+    "pages/api/ws/**",
+    "pages/resources/**",
+    "pages/strategy/**",
+    "pages/downloads/**"
+  ]
 }

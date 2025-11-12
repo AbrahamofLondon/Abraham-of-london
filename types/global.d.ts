@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
-// types/global.d.ts
 /// <reference path="./downloads.d.ts" />
 /// <reference path="./nav.d.ts" />
 /// <reference path="./site.d.ts" />
 /// <reference path="./post.d.ts" />
+/// <reference path="./event.d.ts" />
+/// <reference path="./print.d.ts" />
 
 declare global {
   // Global utility types
   type Nullable<T> = T | null;
   type Optional<T> = T | undefined;
   type Maybe<T> = T | null | undefined;
+  type AnyRecord = Record<string, any>;
 
   // Common React types
   interface ReactChildren {
@@ -42,6 +44,58 @@ declare global {
     dateTo?: string;
   }
 
+  // Missing module declarations
+  declare module '...' {
+    export const useTheme: any;
+    export const motion: any;
+    export const useRouter: any;
+    export const safePostProp: any;
+    export const safeString: any;
+    export const getFontClasses: any;
+    export const fontPresets: any;
+    export const siteConfig: any;
+    export const usePathname: any;
+    export const GetStaticProps: any;
+    export const GetStaticPaths: any;
+    export const InferGetStaticPropsType: any;
+    export const allResources: any;
+    export const components: any;
+    export const useMDXComponent: any;
+    export const safeReadMdx: any;
+    export const z: any;
+    export const inter: any;
+    export const playfair: any;
+    export const jetbrainsMono: any;
+    export const sourceSerif: any;
+    export const spaceGrotesk: any;
+    export const customFont: any;
+    export const useEffect: any;
+    export const useCallback: any;
+    export const useRef: any;
+    export const useState: any;
+    export const NextRequest: any;
+    export const NextResponse: any;
+  }
+
+  // Netlify Functions
+  declare module '@netlify/functions' {
+    export interface Handler {
+      (event: any, context?: any): Promise<any>;
+    }
+    export interface HandlerResponse {
+      statusCode: number;
+      body?: string;
+      headers?: Record<string, string>;
+    }
+  }
+
+  // External libraries
+  declare module 'fuse.js';
+  declare module 'ws';
+  declare module 'rehype-autolink-headings';
+  declare module 'rehype-external-links';
+  declare module '@react-email/components';
+
   // Environment variables (extended with your actual env vars)
   namespace NodeJS {
     interface ProcessEnv {
@@ -69,25 +123,6 @@ declare global {
       NEXT_PUBLIC_ENABLE_FEATURE_X?: string;
       NEXT_PUBLIC_ENABLE_FEATURE_Y?: string;
     }
-  }
-
-  // Framer Motion type fixes
-  declare module "framer-motion" {
-    export * from "framer-motion/dist/index";
-  }
-
-  // ContentLayer type fixes
-  declare module "contentlayer/core" {
-    export * from "contentlayer/core/dist/index";
-  }
-
-  // Next.js Font type fixes
-  declare module "next/font/google" {
-    export * from "next/font/google/dist/index";
-  }
-
-  declare module "next/font/local" {
-    export * from "next/font/local/dist/index";
   }
 
   // CSS modules

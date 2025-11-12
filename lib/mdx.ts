@@ -157,7 +157,10 @@ export function getMdxBySlug(collection: Collection, slug: string): LoadedMdx | 
 export async function getSerializedMdx(
   collection: Collection,
   slug: string,
-  opts?: { scope?: Record<string, unknown>; mdxOptions?: Parameters<typeof serialize>[1]["mdxOptions"] },
+  opts?: { 
+    scope?: Record<string, unknown>; 
+    mdxOptions?: any;  // Keep it loose to match next-mdx-remote v5
+  },
 ): Promise<SerializedMdx | null> {
   const loaded = getMdxBySlug(collection, slug);
   if (!loaded) return null;
