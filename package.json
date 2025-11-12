@@ -134,9 +134,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@effect-ts/core": "0.57.5",
-      "@effect-ts/system": "0.57.5",
-      "@contentlayer2/utils": "0.5.8"
+      "@effect-ts/core": "0.60.5",
+      "@effect-ts/system": "0.60.5"
     },
     "peerDependencyRules": {
       "ignoreMissing": [
