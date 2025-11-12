@@ -1,3 +1,1 @@
-prefer-frozen-lockfile=false
-strict-peer-dependencies=false
-auto-install-peers=true
+20.11.1

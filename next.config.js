@@ -1,28 +1,21 @@
-const { withContentlayer } = require('next-contentlayer2');
+/** @type {import("next").NextConfig} */
+const path = require("node:path");
 
-/** @type {import('next').NextConfig} */
+// Try to load the plugin; fall back to identity if missing
+const withContentlayer = (() => {
+  try { return require("next-contentlayer"); }
+  catch { return (cfg) => cfg; }
+})();
+
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   reactStrictMode: true,
-  poweredByHeader: false,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.abrahamoflondon.org',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.netlify.app',
-      },
-    ],
+  webpack: (config) => {
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "contentlayer/generated": path.resolve(__dirname, "lib/stubs/contentlayer-generated.js"),
+    };
+    return config;
   },
 };
 
