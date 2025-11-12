@@ -1,66 +1,97 @@
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-// Scan only real source trees
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+/** Only scan real source trees (skip build output) */
 const SOURCE_DIRS = [
   "app","components","lib","src","scripts","styles","netlify","patches","types","pages","config"
-];
-
+]
 const IGNORE_DIRS = [
   "node_modules",".next",".netlify",".contentlayer",".turbo",".cache",".git","dist","build","public"
-];
-
-// Do not flag this script or other utility files
-const IGNORE_FILES_ABS = new Set([
-  path.resolve("scripts/check-conflicts.js"),
-]);
-
-// FIXED: More specific conflict marker detection
-// Only matches lines that are ONLY conflict markers (no other text)
-const MARKER_RE = /^\s*<<<<<<<\s*$|^\s*=======\s*$|^\s*>>>>>>>\s*$/m;
-
+]
 const TEXT_EXTS = new Set([
-  ".ts",".tsx",".js",".jsx",".mjs",".cjs",".json",".md",".mdx",".css",".scss",".sass",".yml",".yaml",".toml",".tsconfig"
-]);
+  ".ts",".tsx",".js",".jsx",".mjs",".cjs",".json",".md",".mdx",".css",".scss",".sass",".yml",".yaml",".toml"
+])
+
+/** Strict Git marker regexes (line must match the actual markers) */
+const START_RE = /^<{7}(?:[ \t].*)?$/m   // <<<<<<< HEAD or <<<<<<< branch
+const MID_RE   = /^={7}\s*$/m            // =======
+const END_RE   = /^>{7}(?:[ \t].*)?$/m   // >>>>>>> commit/branch
 
 function walk(dir) {
-  const out = [];
-  if (!fs.existsSync(dir)) return out;
+  const out = []
+  if (!fs.existsSync(dir)) return out
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (IGNORE_DIRS.some(d => full.includes(path.sep + d + path.sep))) continue;
-    if (entry.isDirectory()) out.push(...walk(full));
-    else out.push(full);
+    const full = path.join(dir, entry.name)
+    if (IGNORE_DIRS.some(d => full.includes(path.sep + d + path.sep))) continue
+    if (entry.isDirectory()) out.push(...walk(full))
+    else out.push(full)
   }
-  return out;
+  return out
 }
 
 function isTextFile(file) {
-  return TEXT_EXTS.has(path.extname(file).toLowerCase());
+  return TEXT_EXTS.has(path.extname(file).toLowerCase())
 }
 
-function hasMarkers(file) {
+/** True conflict iff a file has a proper block: start + mid + end (at least one set) */
+function hasRealConflict(text) {
+  // fast check
+  if (!START_RE.test(text)) return false
+  // verify a block order exists
+  let i = 0
+  while (i < text.length) {
+    const start = text.slice(i).search(START_RE)
+    if (start === -1) return false
+    const sIdx = i + start
+
+    const afterStart = text.slice(sIdx)
+    const midRel = afterStart.search(MID_RE)
+    if (midRel === -1) return false
+    const mIdx = sIdx + midRel
+
+    const afterMid = text.slice(mIdx)
+    const endRel = afterMid.search(END_RE)
+    if (endRel === -1) return false
+    const eIdx = mIdx + endRel
+
+    // Found one valid block
+    return true
+  }
+  return false
+}
+
+function collectCandidates() {
+  let files = []
+  for (const d of SOURCE_DIRS) if (fs.existsSync(d)) files.push(...walk(d))
+  // only text files under 1MB
+  return files.filter(f => {
+    try {
+      const st = fs.statSync(f)
+      if (!st.isFile() || st.size > 1024 * 1024) return false
+      return isTextFile(f)
+    } catch { return false }
+  })
+}
+
+console.log("🔍 Checking for merge conflicts in editable source files...\n")
+
+const conflicted = []
+for (const f of collectCandidates()) {
   try {
-    if (IGNORE_FILES_ABS.has(path.resolve(file))) return false;
-    if (!isTextFile(file)) return false;
-    const stat = fs.statSync(file);
-    if (!stat.isFile() || stat.size > 1024 * 1024) return false; // skip >1MB
-    const text = fs.readFileSync(file, "utf8");
-    return MARKER_RE.test(text);
-  } catch { return false; }
+    const txt = fs.readFileSync(f, "utf8")
+    if (hasRealConflict(txt)) conflicted.push(f)
+  } catch { /* ignore */ }
 }
-
-console.log("🔍 Checking for merge conflicts in editable source files...\n");
-
-let candidates = [];
-for (const d of SOURCE_DIRS) if (fs.existsSync(d)) candidates.push(...walk(d));
-const conflicted = candidates.filter(hasMarkers);
 
 if (conflicted.length) {
-  console.error("❌ Merge conflict markers found in the following files:\n");
-  conflicted.forEach(f => console.error(" • " + f));
-  console.error("\n🚨 Resolve these before committing or deploying.\n");
-  process.exit(1);
+  console.error("❌ Merge conflict markers found in the following files:\n")
+  conflicted.forEach(f => console.error(" • " + f))
+  console.error("\n🚨 Resolve these before committing or deploying.\n")
+  process.exit(1)
 }
 
-console.log("✅ No merge conflicts found in your source tree.");
+console.log("✅ No merge conflicts found in your source tree.")
