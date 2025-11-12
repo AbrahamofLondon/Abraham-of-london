@@ -7,6 +7,7 @@
     "node": ">=20 <21",
     "npm": ">=10"
   },
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "ci:downloads": "node scripts/run-validate-downloads.mjs || node -e \"console.log('Skipping download validation (non-fatal).')\"",
     "clean": "node -e \"if (process.platform === 'win32') { require('child_process').execSync('rd /s /q .next .contentlayer 2>nul || echo Cleaned', { stdio: 'inherit' }) } else { require('child_process').execSync('rm -rf .next .contentlayer', { stdio: 'inherit' }) }\"",
@@ -133,9 +134,15 @@
   },
   "pnpm": {
     "overrides": {
-      "@effect-ts/core": "0.60.5",
-      "@effect-ts/system": "0.60.5"
+      "@effect-ts/core": "0.57.5",
+      "@effect-ts/system": "0.57.5",
+      "@contentlayer2/utils": "0.5.8"
+    },
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@effect-ts/system",
+        "@effect-ts/core"
+      ]
     }
-  },
-  "packageManager": "pnpm@9.0.0+sha512.b4106707c7225b1748b61595953ccbebff97b54ad05d002aa3635f633b9c53cd666f7ce9b8bc44704f1fa048b9a49b55371ab2d9e9d667d1efe2ef1514bcd513"
+  }
 }

@@ -1,5 +1,5 @@
 [build]
-  command = "cross-env CI=1 NETLIFY=1 npm run clean && npm run build"
+  command = "npm run clean && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -8,6 +8,8 @@
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   CI_LAX = "1"
   CONTENTLAYER_EXPERIMENTAL = "1"
+  CI = "1"
+  NETLIFY = "1"
 
 [functions]
   node_bundler = "esbuild"
