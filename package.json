@@ -63,8 +63,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@effect-ts/core": "0.60.5",
-      "@effect-ts/system": "0.60.5",
+      "@effect-ts/system": "0.57.5",
+      "@effect-ts/core": "0.57.5",
       "esbuild": "0.25.11"
     },
     "peerDependencyRules": {
