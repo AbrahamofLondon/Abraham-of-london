@@ -1,11 +1,10 @@
-import React from 'react';
 // components/Layout.tsx
-"use client"; // Add this since we're using hooks
+"use client";
 
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Replace next/router with next/navigation
+import { usePathname } from "next/navigation";
 
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import StickyCTA from "@/components/StickyCTA";
@@ -24,7 +23,9 @@ export type LayoutProps = {
 
 function toArray<T>(val: unknown): T[] {
   if (Array.isArray(val)) return val;
-  if (val && typeof val === "object") return Object.values(val as Record<string, T>).filter(Boolean) as T[];
+  if (val && typeof val === "object") {
+    return Object.values(val as Record<string, T>).filter(Boolean) as T[];
+  }
   return [];
 }
 
@@ -36,14 +37,15 @@ export default function Layout({
   hideCTA = false,
   hero,
 }: LayoutProps) {
-  const pathname = usePathname(); // Replace useRouter with usePathname
+  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null);
 
   const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
 
-  const normalize = (href: string) => href.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
-  const isActive = (href: string) => normalize(pathname) === normalize(href); // Use pathname instead of router.asPath
+  const normalize = (href: string) =>
+    href.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
+  const isActive = (href: string) => normalize(pathname) === normalize(href);
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -59,15 +61,20 @@ export default function Layout({
     };
   }, [open]);
 
-  // Remove the router.events effect since it's not available in App Router
-  // The mobile menu will close when links are clicked via the onClick handler
-
   // Robust: socialLinks may be an array or object; normalise for JSON-LD.
-  const socialArr = toArray<{ href?: string; external?: boolean }>((siteConfig as any).socialLinks);
+  const socialArr = toArray<{ href?: string; external?: boolean }>(
+    (siteConfig as any).socialLinks
+  );
   const sameAs = Array.from(
     new Set(
       socialArr
-        .filter((s) => s && s.external && typeof s.href === "string" && /^https?:\/\//i.test(s.href))
+        .filter(
+          (s) =>
+            s &&
+            s.external &&
+            typeof s.href === "string" &&
+            /^https?:\/\//i.test(s.href)
+        )
         .map((s) => s.href as string)
     )
   );
@@ -106,8 +113,16 @@ export default function Layout({
       <Head>
         <title>{title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(NAV_JSONLD) }} />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
+        />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(NAV_JSONLD) }}
+        />
       </Head>
 
       <a
@@ -123,7 +138,10 @@ export default function Layout({
             <span className="font-serif text-xl font-semibold tracking-wide text-deepCharcoal md:text-2xl dark:text-cream">
               {siteConfig.title}
             </span>
-            <span className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block" aria-hidden="true">
+            <span
+              className="hidden text-[10px] uppercase tracking-[0.25em] text-gray-500 md:inline-block"
+              aria-hidden="true"
+            >
               EST. MMXXIV
             </span>
           </Link>
@@ -190,7 +208,10 @@ export default function Layout({
           </button>
         </div>
 
-        <div id="mobile-nav" className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg:black`}>
+        <div
+          id="mobile-nav"
+          className={`md:hidden ${open ? "block" : "hidden"} border-t border-gray-200 bg-white dark:bg:black`}
+        >
           <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile">
             <ul className="grid gap-2">
               {NAV.map((item, idx) => {
@@ -240,7 +261,11 @@ export default function Layout({
 
       {hero ? <div data-layout-hero>{hero}</div> : null}
 
-      <main id="main-content" className="min-h-screen bg-white dark:bg-black" style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}>
+      <main
+        id="main-content"
+        className="min-h-screen bg-white dark:bg-black"
+        style={{ paddingBottom: "var(--sticky-cta-h, 0px)" }}
+      >
         {children}
       </main>
 

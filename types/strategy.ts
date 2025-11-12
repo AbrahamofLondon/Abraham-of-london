@@ -1,32 +1,16 @@
-<<<<<<< HEAD
-export interface Strategy {
+// types/strategy.ts
+// Minimal placeholders so imports compile. Flesh out when strategy content is wired.
+
+export type StrategyDoc = {
   slug: string;
   title: string;
-  description?: string;
-  ogDescription?: string;
-  author?: string;
   date?: string;
-  body?: { code: string };
-}
-=======
-export interface StrategyMeta {
-  slug: string;
-  title: string;
-  type: string;
-  description?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  socialCaption?: string;
-  date?: string;
-  author?: string;
-  excerpt?: string;
-  readTime?: string;
-  category?: string;
+  summary?: string;
   tags?: string[];
-  coverImage?: string;
-  coverAspect?: string;
-  coverFit?: string;
-  coverPosition?: string;
-  draft?: boolean;
-}
->>>>>>> test-netlify-fix
+};
+
+export type StrategyLink = {
+  href: string;
+  label: string;
+  sub?: string;
+};

@@ -1,136 +1,226 @@
-<<<<<<< HEAD
-=======
-// lib/posts.ts - PRODUCTION SAFE VERSION
-import { allPosts } from "contentlayer/generated";
+// lib/posts.ts
+import fs from "fs";
+import path from "path";
+import {
+  ensureDir,
+  listMdFiles,
+  fileToSlug,
+  readFrontmatter,
+  sortByDateDesc,
+} from "./fs-utils";
 
-// Type-safe fallback for Post type
-interface SafePost {
-  _id: string;
-  title: string;
+export type PostMeta = {
   slug: string;
-  date: string;
-  author: string;
-  readTime: string;
-  category: string;
-  url: string;
+  title?: string;
+  date?: string;              // ISO-ish preferred
   excerpt?: string;
-  coverImage?: string;
+  category?: string;
   tags?: string[];
-  [key: string]: any;
+  coverImage?: string;
+  author?: string;
+  readTime?: string;
+  coverAspect?: string;
+  coverFit?: string;
+  coverPosition?: string;
+  subtitle?: string;
+  ogDescription?: string;
+
+  // common flags we’ll respect if present
+  draft?: boolean;
+  published?: boolean;
+};
+
+export type Post = PostMeta & { body?: string; content?: string };
+
+type AnyRecord = Record<string, unknown>;
+
+function pickFields(src: AnyRecord, fields?: string[]) {
+  if (!fields || fields.length === 0) return { ...src };
+  const out: AnyRecord = {};
+  for (const f of fields) out[f] = src[f];
+  return out;
 }
 
-/**
- * Safely get all posts with comprehensive error handling
- */
-export function getAllPosts(): SafePost[] {
-  try {
-    if (typeof allPosts === 'undefined') {
-      console.warn('⚠️ ContentLayer posts data is undefined - returning empty array');
-      return [];
-    }
+function normaliseBool(v: unknown): boolean | undefined {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "string") {
+    const s = v.trim().toLowerCase();
+    if (s === "true" || s === "1" || s === "yes") return true;
+    if (s === "false" || s === "0" || s === "no") return false;
+  }
+  return undefined;
+}
 
-    if (!Array.isArray(allPosts)) {
-      console.error('❌ ContentLayer posts is not an array:', typeof allPosts);
-      return [];
-    }
+function isDraftLike(meta: AnyRecord): boolean {
+  // Prefer explicit flags if present
+  const draft = normaliseBool(meta.draft);
+  if (draft === true) return true;
+  const published = normaliseBool(meta.published);
+  if (published === false) return true;
 
-    const safePosts = allPosts.filter((post): post is SafePost => {
-      const isValid = post && 
-                     typeof post === 'object' &&
-                     typeof post._id === 'string' &&
-                     typeof post.title === 'string' &&
-                     typeof post.slug === 'string' &&
-                     typeof post.date === 'string' &&
-                     typeof post.author === 'string' &&
-                     typeof post.readTime === 'string' &&
-                     typeof post.category === 'string' &&
-                     typeof post.url === 'string';
+  // Heuristic: missing/empty title + future date could be treated as draft,
+  // but we’ll avoid magic here—explicit flags rule.
+  return false;
+}
 
-      if (!isValid) {
-        console.warn('🚨 Filtering out invalid post:', post);
+// Normalise parameter: string[] | { includeDrafts?: boolean; fields?: string[] }
+function normalizeFieldsArg(
+  arg?: string[] | { includeDrafts?: boolean; fields?: string[] },
+): { fields?: string[]; includeDrafts?: boolean } {
+  if (!arg) return {};
+  if (Array.isArray(arg)) return { fields: arg };
+  const { includeDrafts, fields } = arg;
+  return { includeDrafts, fields };
+}
+
+function coerceArray<T = unknown>(v: unknown): T[] | undefined {
+  return Array.isArray(v) ? (v as T[]) : undefined;
+}
+
+function toPostMeta(slug: string, data: AnyRecord): PostMeta {
+  // Defensive copies + gentle coercions
+  const tags = coerceArray<string>(data.tags) ?? undefined;
+
+  const meta: PostMeta = {
+    slug,
+    title: typeof data.title === "string" ? data.title : undefined,
+    date: typeof data.date === "string" ? data.date : undefined,
+    excerpt: typeof data.excerpt === "string" ? data.excerpt : undefined,
+    category: typeof data.category === "string" ? data.category : undefined,
+    tags,
+    coverImage:
+      typeof data.coverImage === "string" ? data.coverImage : undefined,
+    author: typeof data.author === "string" ? data.author : undefined,
+    readTime: typeof data.readTime === "string" ? data.readTime : undefined,
+    coverAspect:
+      typeof data.coverAspect === "string" ? data.coverAspect : undefined,
+    coverFit: typeof data.coverFit === "string" ? data.coverFit : undefined,
+    coverPosition:
+      typeof data.coverPosition === "string" ? data.coverPosition : undefined,
+    subtitle: typeof data.subtitle === "string" ? data.subtitle : undefined,
+    ogDescription:
+      typeof data.ogDescription === "string" ? data.ogDescription : undefined,
+    draft: normaliseBool(data.draft),
+    published: normaliseBool(data.published),
+  };
+
+  return meta;
+}
+
+/** Generic: returns array of items (always includes slug) from a collection dir */
+export function getAllContent(
+  collection: string,
+  fieldsOrOpts?: string[] | { includeDrafts?: boolean; fields?: string[] },
+): { slug: string; [k: string]: unknown }[] {
+  const { fields, includeDrafts } = normalizeFieldsArg(fieldsOrOpts);
+  const abs = ensureDir(collection);
+  if (!abs) return [];
+
+  const files = listMdFiles(abs);
+  const items = files
+    .map((absFile) => {
+      const slug = fileToSlug(absFile);
+      const { data, content } = readFrontmatter(absFile);
+      const meta = toPostMeta(slug, data ?? {});
+      const shape: AnyRecord = { ...meta };
+
+      if (fields?.includes("content") || fields?.includes("body")) {
+        shape.content = content;
+        shape.body = content;
       }
 
-      return isValid;
-    });
+      // Respect draft/published flags unless includeDrafts===true
+      if (!includeDrafts && isDraftLike(meta)) return null;
 
-    if (safePosts.length !== allPosts.length) {
-      console.warn(`🔄 Filtered ${allPosts.length - safePosts.length} invalid posts`);
-    }
+      const picked = pickFields(shape, fields);
+      picked.slug = slug; // always
+      return picked;
+    })
+    .filter(Boolean) as AnyRecord[];
 
-    return safePosts;
-
-  } catch (error) {
-    console.error('💥 Critical error in getAllPosts:', error);
-    return [];
-  }
+  // Sort by date desc using your helper (assumes it can handle missing/invalid dates)
+  return sortByDateDesc(items as any);
 }
 
-/**
- * Safely get a post by slug with fallbacks
- */
-export function getPostBySlug(slug: string): SafePost | null {
-  try {
-    if (!slug || typeof slug !== 'string') {
-      console.warn('⚠️ Invalid slug provided to getPostBySlug:', slug);
-      return null;
+/** Generic: returns one document (or null) */
+export function getContentBySlug(
+  collection: string,
+  slug: string,
+  fieldsOrOpts?: string[] | { withContent?: boolean; fields?: string[] },
+): { slug: string; body?: string; content?: string; [k: string]: unknown } | null {
+  const abs = ensureDir(collection);
+  if (!abs) return null;
+
+  // Accept slugs with or without nested dirs; our guess looks in the collection root
+  const guessFiles = [
+    path.join(abs, `${slug}.mdx`),
+    path.join(abs, `${slug}.md`),
+  ];
+  const found = guessFiles.find((f) => {
+    try {
+      return fs.existsSync(f);
+    } catch {
+      return false;
     }
+  });
+  if (!found) return null;
 
-    const posts = getAllPosts();
-    const post = posts.find(post => post.slug === slug);
+  const { data, content } = readFrontmatter(found);
 
-    if (!post) {
-      console.warn(`🔍 Post not found for slug: "${slug}"`);
-      return null;
-    }
-
-    return post;
-
-  } catch (error) {
-    console.error(`💥 Error finding post with slug "${slug}":`, error);
-    return null;
+  let withContent = false;
+  let fields: string[] | undefined;
+  if (Array.isArray(fieldsOrOpts)) {
+    fields = fieldsOrOpts;
+    withContent = fields.includes("content") || fields.includes("body");
+  } else if (fieldsOrOpts) {
+    fields = fieldsOrOpts.fields;
+    withContent =
+      !!fieldsOrOpts.withContent ||
+      !!(fields && (fields.includes("content") || fields.includes("body")));
   }
+
+  const meta = toPostMeta(slug, data ?? {});
+  const shape: AnyRecord = { ...meta };
+  if (withContent) {
+    shape.body = content;
+    shape.content = content;
+  }
+
+  const picked = pickFields(shape, fields);
+  picked.slug = slug;
+  if (withContent) {
+    picked.body = content;
+    picked.content = content;
+  }
+  return picked;
 }
 
-/**
- * Get posts by category with validation
- */
-export function getPostsByCategory(category: string): SafePost[] {
-  try {
-    if (!category || typeof category !== 'string') {
-      console.warn('⚠️ Invalid category provided to getPostsByCategory:', category);
-      return [];
-    }
+/** Blog/posts convenience. Supports legacy { includeDrafts, fields } */
+export function getAllPosts(
+  fieldsOrOpts?: string[] | { includeDrafts?: boolean; fields?: string[] },
+): Post[] {
+  const { fields, includeDrafts } = normalizeFieldsArg(fieldsOrOpts);
 
-    return getAllPosts().filter(post => 
-      post.category?.toLowerCase() === category.toLowerCase()
-    );
+  // Look in /content/blog and /content/posts (whatever ensureDir resolves)
+  const dirs = ["blog", "posts"].map(ensureDir).filter(Boolean) as string[];
 
-  } catch (error) {
-    console.error(`💥 Error getting posts by category "${category}":`, error);
-    return [];
+  let items: Post[] = [];
+  for (const d of dirs) {
+    // Convert absolute back to collection-relative for getAllContent
+    const rel = d.replace(/.*[/\\]content[/\\]/, "");
+    const chunk = getAllContent(rel, { fields, includeDrafts }) as any[];
+    items = items.concat(chunk as Post[]);
   }
-}
 
-/**
- * Get latest posts with limit
- */
-export function getLatestPosts(limit: number = 10): SafePost[] {
-  try {
-    if (typeof limit !== 'number' || limit < 1) {
-      console.warn('⚠️ Invalid limit provided to getLatestPosts:', limit);
-      return [];
+  // Dedup by slug (first wins)
+  const seen = new Set<string>();
+  const out: Post[] = [];
+  for (const p of items) {
+    if (!seen.has(p.slug)) {
+      seen.add(p.slug);
+      out.push(p);
     }
-
-    return getAllPosts()
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, limit);
-
-  } catch (error) {
-    console.error(`💥 Error getting latest posts with limit ${limit}:`, error);
-    return [];
   }
-}
 
-// Export types for use in other files
-export type { SafePost as Post };
->>>>>>> test-netlify-fix
+  return sortByDateDesc(out as any);
+}

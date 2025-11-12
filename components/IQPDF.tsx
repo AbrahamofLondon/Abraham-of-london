@@ -1,167 +1,133 @@
 // components/IQPDF.tsx
-import * as React from "react";
-import { useState, useRef, useCallback } from '...';
+"use client";
+
+import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import clsx from "clsx";
 
-/** ──────────────────────────────────────────────────────────────────────────
- * INTELLIGENT PDF VIEWER COMPONENT - PRODUCTION GRADE
- * - Comprehensive error boundaries and fallbacks
- * - Performance optimizations with lazy loading
- * - Advanced loading states with progress tracking
- * - Type-safe configuration management
- * - Accessibility enhancements
- * ────────────────────────────────────────────────────────────────────────── */
+/**
+ * INTELLIGENT PDF VIEWER (iframe-based)
+ * - No pdf.js dependency (keeps bundle sane)
+ * - Strong typing & SSR safety
+ * - Graceful loading/error states
+ * - Optional controls (zoom/page/print/download)
+ */
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
+/* ============================== Types ============================== */
 
 export interface IQPDFProps {
-  /** PDF source URL */
+  /** PDF source URL (absolute or site-relative) */
   src: string;
-  /** PDF title for accessibility */
+  /** PDF title for accessibility and downloads */
   title?: string;
-  /** Width of the PDF viewer */
+  /** Container width (px, %, etc.) */
   width?: string | number;
-  /** Height of the PDF viewer */
+  /** Container height (px, %, etc.) */
   height?: string | number;
-  /** Show download button */
+  /** UI toggles */
   showDownload?: boolean;
-  /** Show print button */
   showPrint?: boolean;
-  /** Show page controls */
-  showPageControls?: boolean;
-  /** Show zoom controls */
+  showPageControls?: boolean; // page controls are visual only (iframe does not expose page count)
   showZoomControls?: boolean;
-  /** Initial zoom level (0.5 to 3.0) */
+  /** Initial zoom (0.5–3.0) */
   initialZoom?: number;
-  /** Custom class names */
+  /** Extra className for container */
   className?: string;
-  /** Custom loader component */
+  /** Optional custom loader/error components */
   loader?: React.ReactNode;
-  /** Custom error component */
   errorComponent?: React.ReactNode;
-  /** On load callback */
+  /** Callbacks */
   onLoad?: () => void;
-  /** On error callback */
   onError?: (error: Error) => void;
-  /** On page change callback */
-  onPageChange?: (page: number) => void;
-  /** On zoom change callback */
+  onPageChange?: (page: number) => void; // visual only
   onZoomChange?: (zoom: number) => void;
 }
 
 interface PDFState {
   status: "idle" | "loading" | "success" | "error";
   currentPage: number;
-  totalPages: number;
+  totalPages: number; // not measurable via iframe; kept for UI parity
   zoom: number;
-  progress: number;
+  progress: number; // simulated progress (0–100)
   error: Error | null;
 }
 
-// ============================================================================
-// CONSTANTS & DEFAULTS
-// ============================================================================
+/* ============================ Constants ============================ */
 
 const DEFAULT_ZOOM_LEVELS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0] as const;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3.0;
 const ZOOM_STEP = 0.25;
 
-// ============================================================================
-// CUSTOM HOOKS
-// ============================================================================
+/* ============================= Hooks =============================== */
 
-/**
- * Hook for PDF state management
- */
-function usePDFState(initialZoom: number = 1.0) {
+function usePDFState(initialZoom: number) {
   const [state, setState] = useState<PDFState>({
     status: "idle",
     currentPage: 1,
     totalPages: 0,
-    zoom: initialZoom,
+    zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialZoom || 1.0)),
     progress: 0,
     error: null,
   });
 
-  const setLoading = useCallback((progress: number = 0) => {
-    setState((prev) => ({
-      ...prev,
-      status: "loading",
-      progress,
-      error: null,
-    }));
+  const setStatusLoading = useCallback(() => {
+    setState((s) => ({ ...s, status: "loading", progress: 0, error: null }));
   }, []);
 
-  const setSuccess = useCallback((totalPages: number = 0) => {
-    setState((prev) => ({
-      ...prev,
-      status: "success",
-      totalPages,
-      progress: 100,
-      error: null,
-    }));
+  const setStatusSuccess = useCallback((totalPages = 0) => {
+    setState((s) => ({ ...s, status: "success", totalPages, progress: 100, error: null }));
   }, []);
 
-  const setError = useCallback((error: Error) => {
-    setState((prev) => ({
-      ...prev,
-      status: "error",
-      error,
-      progress: 0,
-    }));
+  const setStatusError = useCallback((error: Error) => {
+    setState((s) => ({ ...s, status: "error", error, progress: 0 }));
+  }, []);
+
+  const setProgress = useCallback((progress: number) => {
+    const clamped = Math.max(0, Math.min(100, progress));
+    setState((s) => ({ ...s, progress: clamped }));
   }, []);
 
   const setPage = useCallback((page: number) => {
-    setState((prev) => ({
-      ...prev,
-      currentPage: Math.max(1, Math.min(prev.totalPages, page)),
+    setState((s) => ({
+      ...s,
+      currentPage: Math.max(1, Math.min(s.totalPages || 1, Math.floor(page || 1))),
     }));
   }, []);
 
   const setZoom = useCallback((zoom: number) => {
-    setState((prev) => ({
-      ...prev,
-      zoom: Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom)),
-    }));
+    const z = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+    setState((s) => ({ ...s, zoom: z }));
   }, []);
 
   const nextPage = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      currentPage: Math.min(prev.totalPages, prev.currentPage + 1),
+    setState((s) => ({
+      ...s,
+      currentPage: Math.min(s.totalPages || s.currentPage, s.currentPage + 1),
     }));
   }, []);
 
   const prevPage = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      currentPage: Math.max(1, prev.currentPage - 1),
+    setState((s) => ({
+      ...s,
+      currentPage: Math.max(1, s.currentPage - 1),
     }));
   }, []);
 
   const zoomIn = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      zoom: Math.min(MAX_ZOOM, prev.zoom + ZOOM_STEP),
-    }));
+    setState((s) => ({ ...s, zoom: Math.min(MAX_ZOOM, s.zoom + ZOOM_STEP) }));
   }, []);
 
   const zoomOut = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      zoom: Math.max(MIN_ZOOM, prev.zoom - ZOOM_STEP),
-    }));
+    setState((s) => ({ ...s, zoom: Math.max(MIN_ZOOM, s.zoom - ZOOM_STEP) }));
   }, []);
 
   return {
     state,
     actions: {
-      setLoading,
-      setSuccess,
-      setError,
+      setStatusLoading,
+      setStatusSuccess,
+      setStatusError,
+      setProgress,
       setPage,
       setZoom,
       nextPage,
@@ -172,63 +138,44 @@ function usePDFState(initialZoom: number = 1.0) {
   };
 }
 
-/**
- * Hook for PDF loading and error handling
- */
-function usePDFLoader(
-  src: string,
-  onLoad?: () => void,
-  onError?: (error: Error) => void,
-) {
+/** Resolve src into a usable absolute URL for the iframe/download link */
+function useResolvedPdfUrl(src: string, onError?: (e: Error) => void) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
 
-  const validatePdfUrl = useCallback((url: string): boolean => {
-    try {
-      const parsed = new URL(url, window.location.origin);
-      return parsed.protocol === "http:" || parsed.protocol === "https:";
-    } catch {
-      return url.startsWith("/") || url.startsWith("./");
-    }
-  }, []);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (!src) {
-      const error = new Error("PDF source URL is required");
-      onError?.(error);
+      const err = new Error("PDF source URL is required");
       setIsValid(false);
+      onError?.(err);
       return;
     }
 
-    const isValidUrl = validatePdfUrl(src);
-    if (!isValidUrl) {
-      const error = new Error(`Invalid PDF URL: ${src}`);
-      onError?.(error);
+    try {
+      // If absolute http/https URL, use as-is
+      if (/^https?:\/\//i.test(src)) {
+        setPdfUrl(src);
+        setIsValid(true);
+        return;
+      }
+
+      // If site-relative, prefix with origin (client-only)
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const base = process.env.NEXT_PUBLIC_SITE_URL || origin || "";
+      const clean = src.startsWith("/") ? src : `/${src}`;
+      setPdfUrl(`${base}${clean}`);
+      setIsValid(true);
+    } catch {
+      const err = new Error(`Invalid PDF URL: ${src}`);
       setIsValid(false);
-      return;
+      onError?.(err);
     }
-
-    setIsValid(true);
-
-    // For external URLs, use directly
-    if (src.startsWith("http")) {
-      setPdfUrl(src);
-      return;
-    }
-
-    // For local paths, construct full URL
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      (typeof window !== "undefined" ? window.location.origin : "");
-    setPdfUrl(src.startsWith("/") ? `${baseUrl}${src}` : `${baseUrl}/${src}`);
-  }, [src, validatePdfUrl, onError]);
+  }, [src, onError]);
 
   return { pdfUrl, isValid };
 }
 
-// ============================================================================
-// SUB-COMPONENTS
-// ============================================================================
+/* =========================== Subcomponents ========================= */
 
 interface PDFControlsProps {
   currentPage: number;
@@ -270,57 +217,46 @@ const PDFControls = React.memo(function PDFControls({
   const handlePageInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const page = parseInt(e.target.value, 10);
-      if (!isNaN(page)) {
-        onPageChange(page);
-      }
+      if (!Number.isNaN(page)) onPageChange(page);
     },
     [onPageChange],
   );
 
   const handlePageInputBlur = useCallback(() => {
-    if (pageInputRef.current) {
-      pageInputRef.current.value = currentPage.toString();
-    }
+    if (pageInputRef.current) pageInputRef.current.value = String(currentPage);
   }, [currentPage]);
 
   const handlePrint = useCallback(() => {
     if (!pdfUrl) return;
-
-    const printWindow = window.open(pdfUrl, "_blank");
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
+    const win = window.open(pdfUrl, "_blank");
+    if (win) {
+      win.onload = () => {
+        try {
+          win.print();
+        } catch {
+          /* ignore */
+        }
       };
     }
   }, [pdfUrl]);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gray-50 border-b border-gray-200">
-      {/* Page Controls */}
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 p-4">
+      {/* Page Controls (visual only; iframe can't control pages) */}
       {showPageControls && totalPages > 0 && (
         <div className="flex items-center gap-2">
           <button
             onClick={onPrevPage}
             disabled={currentPage <= 1}
             className={clsx(
-              "p-2 rounded border border-gray-300 bg-white",
-              "hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed",
-              "focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white p-2",
+              "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
             aria-label="Previous page"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
@@ -333,7 +269,7 @@ const PDFControls = React.memo(function PDFControls({
               defaultValue={currentPage}
               onChange={handlePageInput}
               onBlur={handlePageInputBlur}
-              className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+              className="w-16 rounded border border-gray-300 px-2 py-1 text-center"
               aria-label="Current page"
             />
             <span>of {totalPages}</span>
@@ -343,24 +279,14 @@ const PDFControls = React.memo(function PDFControls({
             onClick={onNextPage}
             disabled={currentPage >= totalPages}
             className={clsx(
-              "p-2 rounded border border-gray-300 bg-white",
-              "hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed",
-              "focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white p-2",
+              "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
             aria-label="Next page"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
@@ -373,31 +299,21 @@ const PDFControls = React.memo(function PDFControls({
             onClick={onZoomOut}
             disabled={zoom <= MIN_ZOOM}
             className={clsx(
-              "p-2 rounded border border-gray-300 bg-white",
-              "hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed",
-              "focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white p-2",
+              "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
             aria-label="Zoom out"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 12H4"
-              />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
             </svg>
           </button>
 
           <select
             value={zoom}
             onChange={(e) => onZoomChange(parseFloat(e.target.value))}
-            className="px-3 py-1 border border-gray-300 rounded bg-white text-sm focus:outline-none focus:ring-2 focus:ring-forest"
+            className="rounded border border-gray-300 bg-white px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
             aria-label="Zoom level"
           >
             {DEFAULT_ZOOM_LEVELS.map((level) => (
@@ -411,38 +327,28 @@ const PDFControls = React.memo(function PDFControls({
             onClick={onZoomIn}
             disabled={zoom >= MAX_ZOOM}
             className={clsx(
-              "p-2 rounded border border-gray-300 bg-white",
-              "hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed",
-              "focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white p-2",
+              "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
             aria-label="Zoom in"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 ml-auto">
+      {/* Actions */}
+      <div className="ml-auto flex items-center gap-2">
         {showDownload && pdfUrl && (
           <a
             href={pdfUrl}
             download={title ? `${title}.pdf` : "document.pdf"}
             className={clsx(
-              "px-4 py-2 rounded border border-gray-300 bg-white text-sm font-medium",
-              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium",
+              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
           >
             Download
@@ -453,8 +359,8 @@ const PDFControls = React.memo(function PDFControls({
           <button
             onClick={handlePrint}
             className={clsx(
-              "px-4 py-2 rounded border border-gray-300 bg-white text-sm font-medium",
-              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2",
+              "rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium",
+              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
             )}
           >
             Print
@@ -467,92 +373,63 @@ const PDFControls = React.memo(function PDFControls({
 
 PDFControls.displayName = "PDFControls";
 
-// ============================================================================
-
-interface PDFLoadingStateProps {
-  progress: number;
-  loader?: React.ReactNode;
-}
-
-const PDFLoadingState = React.memo(function PDFLoadingState({
-  progress,
-  loader,
-}: PDFLoadingStateProps) {
-  if (loader) {
-    return <>{loader}</>;
-  }
-
+function PDFLoadingState({ progress, loader }: { progress: number; loader?: React.ReactNode }) {
+  if (loader) return <>{loader}</>;
   return (
     <div
-      className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg"
+      className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-8"
       role="status"
       aria-label="Loading PDF document"
     >
-      <div className="w-16 h-16 border-4 border-forest border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-gray-600 mb-2">Loading PDF document...</p>
-      <div className="w-48 bg-gray-200 rounded-full h-2">
+      <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <p className="mb-2 text-gray-600">Loading PDF document...</p>
+      <div className="h-2 w-48 rounded-full bg-gray-200">
         <div
-          className="bg-forest h-2 rounded-full transition-all duration-300"
+          className="h-2 rounded-full bg-blue-600 transition-all duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>
-      <p className="text-sm text-gray-500 mt-2">{progress}%</p>
+      <p className="mt-2 text-sm text-gray-500">{progress}%</p>
     </div>
   );
-});
-
-PDFLoadingState.displayName = "PDFLoadingState";
-
-// ============================================================================
-
-interface PDFErrorStateProps {
-  error: Error;
-  errorComponent?: React.ReactNode;
-  onRetry?: () => void;
 }
 
-const PDFErrorState = React.memo(function PDFErrorState({
+function PDFErrorState({
   error,
   errorComponent,
   onRetry,
-}: PDFErrorStateProps) {
-  if (errorComponent) {
-    return <>{errorComponent}</>;
-  }
-
+}: {
+  error: Error;
+  errorComponent?: React.ReactNode;
+  onRetry?: () => void;
+}) {
+  if (errorComponent) return <>{errorComponent}</>;
   return (
     <div
-      className="flex flex-col items-center justify-center p-8 bg-red-50 rounded-lg text-center"
+      className="flex flex-col items-center justify-center rounded-lg bg-red-50 p-8 text-center"
       role="alert"
       aria-label="Error loading PDF"
     >
-      <div className="text-red-500 text-4xl mb-4" aria-hidden="true">
+      <div className="mb-4 text-4xl text-red-500" aria-hidden="true">
         📄❌
       </div>
-      <h3 className="text-lg font-semibold text-red-800 mb-2">
-        Failed to Load Document
-      </h3>
-      <p className="text-red-600 mb-4 max-w-md">
-        {error.message ||
-          "Unable to load the PDF document. Please check the file URL and try again."}
+      <h3 className="mb-2 text-lg font-semibold text-red-800">Failed to Load Document</h3>
+      <p className="mb-4 max-w-md text-red-600">
+        {error.message || "Unable to load the PDF document. Please check the file URL and try again."}
       </p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          className="rounded-lg bg-red-600 px-6 py-2 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         >
           Try Again
         </button>
       )}
     </div>
   );
-});
+}
 
-PDFErrorState.displayName = "PDFErrorState";
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+/* =========================== Main Component ======================== */
 
 const IQPDF = React.memo(function IQPDF({
   src,
@@ -561,7 +438,7 @@ const IQPDF = React.memo(function IQPDF({
   height = "600px",
   showDownload = true,
   showPrint = true,
-  showPageControls = true,
+  showPageControls = false, // default off (iframe cannot read page count)
   showZoomControls = true,
   initialZoom = 1.0,
   className,
@@ -573,58 +450,63 @@ const IQPDF = React.memo(function IQPDF({
   onZoomChange,
 }: IQPDFProps) {
   const { state, actions } = usePDFState(initialZoom);
-  const { pdfUrl, isValid } = usePDFLoader(src, onLoad, onError);
+  const { pdfUrl, isValid } = useResolvedPdfUrl(src, onError);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const progressTimerRef = useRef<number | null>(null);
 
-  // Handle iframe load events
+  // Simulated progress UX
+  useEffect(() => {
+    if (!isValid || !pdfUrl) return;
+    actions.setStatusLoading();
+    actions.setProgress(0);
+
+    let prog = 0;
+    progressTimerRef.current = window.setInterval(() => {
+      prog = Math.min(prog + 10, 90);
+      actions.setProgress(prog);
+    }, 200);
+
+    return () => {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
+    };
+  }, [pdfUrl, isValid, actions]);
+
+  // Callbacks
   const handleIframeLoad = useCallback(() => {
-    actions.setSuccess();
+    // Finish progress
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    actions.setStatusSuccess(0); // totalPages unknown in iframe
     onLoad?.();
   }, [actions, onLoad]);
 
   const handleIframeError = useCallback(() => {
-    const error = new Error(`Failed to load PDF from: ${src}`);
-    actions.setError(error);
-    onError?.(error);
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    const err = new Error(`Failed to load PDF from: ${src}`);
+    actions.setStatusError(err);
+    onError?.(err);
   }, [src, actions, onError]);
 
-  // Effect to simulate loading progress
-  React.useEffect(() => {
-    if (!isValid || !pdfUrl) return;
-
-    actions.setLoading(0);
-
-    // Simulate progress for better UX
-    const progressInterval = setInterval(() => {
-      actions.setLoading((prev) => {
-        const newProgress = Math.min(prev + 10, 90);
-        return newProgress;
-      });
-    }, 200);
-
-    return () => clearInterval(progressInterval);
-  }, [pdfUrl, isValid, actions]);
-
-  // Call parent callbacks when state changes
-  React.useEffect(() => {
-    if (state.currentPage > 0) {
-      onPageChange?.(state.currentPage);
-    }
+  // Notify parent on state changes
+  useEffect(() => {
+    if (state.currentPage > 0) onPageChange?.(state.currentPage);
   }, [state.currentPage, onPageChange]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     onZoomChange?.(state.zoom);
   }, [state.zoom, onZoomChange]);
 
-  // ✅ FIXED: Properly typed style object
-  const containerStyle = React.useMemo((): React.CSSProperties => {
-    return {
-      width,
-      height,
-    };
-  }, [width, height]);
+  const containerStyle = useMemo<React.CSSProperties>(() => ({ width, height }), [width, height]);
 
-  // Render loading state
+  // Loading state
   if (state.status === "loading") {
     return (
       <div className={className} style={containerStyle}>
@@ -633,7 +515,7 @@ const IQPDF = React.memo(function IQPDF({
     );
   }
 
-  // Render error state
+  // Error state
   if (state.status === "error" || !isValid) {
     return (
       <div className={className} style={containerStyle}>
@@ -646,16 +528,12 @@ const IQPDF = React.memo(function IQPDF({
     );
   }
 
-  // Main PDF viewer
+  // Main viewer
   return (
     <div
-      className={clsx(
-        "border border-gray-300 rounded-lg overflow-hidden bg-white",
-        className,
-      )}
+      className={clsx("overflow-hidden rounded-lg border border-gray-300 bg-white", className)}
       style={containerStyle}
     >
-      {/* PDF Controls */}
       <PDFControls
         currentPage={state.currentPage}
         totalPages={state.totalPages}
@@ -674,14 +552,13 @@ const IQPDF = React.memo(function IQPDF({
         title={title}
       />
 
-      {/* PDF Viewer */}
       <div className="flex-1 overflow-auto bg-gray-100">
         {pdfUrl ? (
           <iframe
             ref={iframeRef}
-            src={`${pdfUrl}#view=fitH&zoom=${state.zoom * 100}`}
+            src={`${pdfUrl}#view=fitH`} // basic fit; visual zoom applied via CSS scaling below
             title={title}
-            className="w-full h-full border-0"
+            className="h-full w-full border-0"
             onLoad={handleIframeLoad}
             onError={handleIframeError}
             style={{
@@ -694,10 +571,7 @@ const IQPDF = React.memo(function IQPDF({
             aria-label={`PDF document: ${title}`}
           />
         ) : (
-          <PDFErrorState
-            error={new Error("PDF URL not available")}
-            errorComponent={errorComponent}
-          />
+          <PDFErrorState error={new Error("PDF URL not available")} errorComponent={errorComponent} />
         )}
       </div>
     </div>
@@ -706,11 +580,8 @@ const IQPDF = React.memo(function IQPDF({
 
 IQPDF.displayName = "IQPDF";
 
-// ============================================================================
-// COMPONENT VARIANTS
-// ============================================================================
+/* ============================ Variants ============================ */
 
-// ✅ FIXED: Component variants with proper typing
 export const MinimalPDF = React.memo(function MinimalPDF(props: IQPDFProps) {
   return (
     <IQPDF
@@ -723,16 +594,14 @@ export const MinimalPDF = React.memo(function MinimalPDF(props: IQPDFProps) {
   );
 });
 
-export const PrintablePDF = React.memo(function PrintablePDF(
-  props: IQPDFProps,
-) {
+export const PrintablePDF = React.memo(function PrintablePDF(props: IQPDFProps) {
   return (
     <IQPDF
       {...props}
-      showDownload={true}
-      showPrint={true}
-      showPageControls={true}
-      showZoomControls={true}
+      showDownload
+      showPrint
+      showPageControls={false}
+      showZoomControls
     />
   );
 });
@@ -749,9 +618,5 @@ export const EmbeddedPDF = React.memo(function EmbeddedPDF(props: IQPDFProps) {
     />
   );
 });
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export default IQPDF;

@@ -1,37 +1,19 @@
 // app/print/[slug]/page.tsx
-import { MDXRemote } from 'next-mdx-remote';
-import mdxComponents from '@/components/mdx-components';
-import BrandFrame from '@/components/print/BrandFrame';
-import { getAllPrintSlugs, getPrintDocumentBySlug } from '@/lib/server/print-utils';
-import { serialize } from 'next-mdx-remote/serialize';
-import type { PrintMeta } from '@/types/print';
-import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-// Generate static params for all print slugs 
-export async function generateStaticParams() {
-  try {
-    const slugs = getAllPrintSlugs(); // Array<{ slug: string; type: string; source: string }>
-    
-    // Apply the same robust deduplication logic
-    const uniqueSlugs = Array.from(new Set(
-      slugs.map(item => toCanonicalSlug(item.slug)).filter(Boolean)
-    ));
-    
-    // Log for debugging (only in build time)
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🖨️ Generated ${uniqueSlugs.length} print paths`);
-    }
-    
-    return uniqueSlugs.map((slug) => ({ slug }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 
-// Canonical slug helper function (same as before)
+import mdxComponents from "@/components/mdx-components";
+import BrandFrame from "@/components/print/BrandFrame";
+import { getAllPrintSlugs, getPrintDocumentBySlug } from "@/lib/server/print-utils";
+import type { PrintMeta } from "@/types/print";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+
+/* ---------------------- Utilities ---------------------- */
+
 function toCanonicalSlug(input: unknown): string {
   const s = String(input ?? "")
     .trim()
@@ -42,7 +24,6 @@ function toCanonicalSlug(input: unknown): string {
   return s || "untitled";
 }
 
-// Date formatting helper (same as before)
 function formatPretty(isoish?: string | null, tz = "Europe/London"): string {
   if (!isoish || typeof isoish !== "string") return "Date TBC";
   try {
@@ -76,56 +57,81 @@ function formatPretty(isoish?: string | null, tz = "Europe/London"): string {
   }
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+/* ------------------ Static params (SSG) ----------------- */
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    const slugs = getAllPrintSlugs(); // Array<{ slug: string; type: string; source: string }>
+    const unique = Array.from(
+      new Set(
+        slugs
+          .map((item) => toCanonicalSlug(item?.slug))
+          .filter(Boolean)
+      )
+    );
+    if (process.env.NODE_ENV === "development") {
+      console.log(`🖨️ Generated ${unique.length} print paths`);
+    }
+    return unique.map((slug) => ({ slug }));
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
+}
+
+/* -------------------- Metadata (SEO) -------------------- */
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const { slug } = params;
   const doc = getPrintDocumentBySlug(slug);
-  
+
   if (!doc) {
     return {
-      title: 'Print Not Found',
-      description: 'The requested print document was not found.',
+      title: "Print Not Found",
+      description: "The requested print document was not found.",
+      robots: { index: false, follow: true },
     };
   }
-  
-  const title = doc.title || 'Untitled Print';
-  const description = doc.description || doc.excerpt || 'Printable document from Abraham of London';
-  
+
+  const title = doc.title || "Untitled Print";
+  const description = doc.description || doc.excerpt || "Printable document from Abraham of London";
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+
   return {
     title: `${title} | Print`,
     description,
     openGraph: {
-      type: 'article',
+      type: "article",
       title,
       description,
-      url: `/print/${slug}`,
+      url: `${site}/print/${slug}`,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
     },
     robots: {
-      index: false, // Don't index print pages
+      index: false, // prevent indexing print views
       follow: true,
     },
   };
 }
 
+/* --------------------- Page component ------------------- */
+
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export default async function PrintPage({ params }: PageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const doc = getPrintDocumentBySlug(slug);
-  
-  // Handle not found
-  if (!doc) {
-    notFound();
-  }
 
-  // Prepare metadata
+  if (!doc) notFound();
+
   const meta: PrintMeta = {
     slug,
     title: doc.title || "Untitled Print",
@@ -144,22 +150,21 @@ export default async function PrintPage({ params }: PageProps) {
     published: true,
   };
 
-  // Serialize MDX content
   let mdx: MDXRemoteSerializeResult | null = null;
   if (meta.content && meta.content.trim()) {
     try {
-      mdx = await serialize(meta.content, { 
+      mdx = await serialize(meta.content, {
         scope: meta,
         mdxOptions: {
-          development: process.env.NODE_ENV === 'development',
-        }
+          development: process.env.NODE_ENV === "development",
+        },
       });
     } catch (error) {
-      console.error('Error serializing MDX:', error);
+      console.error("Error serializing MDX:", error);
+      // Fall through to empty state
     }
   }
 
-  // Structured data for SEO
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/print/${slug}`;
   const structuredData = {
@@ -170,7 +175,7 @@ export default async function PrintPage({ params }: PageProps) {
     url,
     ...(meta.author ? { author: { "@type": "Person", name: meta.author } } : {}),
     ...(meta.date ? { datePublished: meta.date } : {}),
-    ...(meta.tags && meta.tags.length > 0 ? { keywords: meta.tags.join(', ') } : {}),
+    ...(meta.tags && meta.tags.length > 0 ? { keywords: meta.tags.join(", ") } : {}),
   };
 
   return (
@@ -180,11 +185,11 @@ export default async function PrintPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      
+
       {/* Print Content */}
       <BrandFrame
         title={meta.title}
-        subtitle={meta.description || meta.excerpt || ''}
+        subtitle={meta.description || meta.excerpt || ""}
         author={meta.author}
         date={meta.date}
         pageSize="A4"
@@ -193,18 +198,18 @@ export default async function PrintPage({ params }: PageProps) {
         tags={meta.tags}
       >
         <article className="prose prose-lg mx-auto max-w-none print:prose-sm">
-          <header className="border-b border-gray-200 pb-6 mb-8 print:border-b print:pb-4 print:mb-6">
-            <h1 className="font-serif text-3xl print:text-2xl mb-4 text-deepCharcoal">
+          <header className="mb-8 border-b border-gray-200 pb-6 print:mb-6 print:border-b print:pb-4">
+            <h1 className="mb-4 font-serif text-3xl text-deepCharcoal print:text-2xl">
               {meta.title}
             </h1>
-            
+
             {(meta.description || meta.excerpt) && (
-              <p className="text-lg text-gray-600 print:text-base leading-relaxed">
+              <p className="leading-relaxed text-lg text-gray-600 print:text-base">
                 {meta.description || meta.excerpt}
               </p>
             )}
-            
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500 print:text-xs">
+
+            <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-500 print:text-xs">
               {meta.author && (
                 <div className="flex items-center gap-1">
                   <span className="font-medium">By:</span>
@@ -224,13 +229,13 @@ export default async function PrintPage({ params }: PageProps) {
                 </div>
               )}
             </div>
-            
+
             {meta.tags && meta.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {meta.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded print:bg-transparent print:border print:border-gray-300"
+                    className="inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 print:border print:border-gray-300 print:bg-transparent"
                   >
                     {String(tag)}
                   </span>
@@ -242,37 +247,35 @@ export default async function PrintPage({ params }: PageProps) {
           {/* Main Content */}
           <div className="print-content">
             {mdx ? (
-              <MDXRemote 
-                {...mdx} 
-                components={mdxComponents}
-              />
+              <MDXRemote {...mdx} components={mdxComponents} />
             ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p className="text-lg mb-2">Content not available for printing</p>
+              <div className="py-12 text-center text-gray-500">
+                <p className="mb-2 text-lg">Content not available for printing</p>
                 <p className="text-sm">Please check back later or contact support.</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-500 print:mt-8 print:pt-4">
-            <p>Generated by Abraham of London • Printed on {new Date().toLocaleDateString('en-GB')}</p>
-            <p className="mt-1 text-xs">
-              {url}
+          <footer className="mt-12 border-t border-gray-200 pt-6 text-center text-sm text-gray-500 print:mt-8 print:pt-4">
+            <p>
+              Generated by Abraham of London • Printed on{" "}
+              {new Date().toLocaleDateString("en-GB")}
             </p>
+            <p className="mt-1 text-xs">{url}</p>
           </footer>
         </article>
       </BrandFrame>
 
       {/* Back Navigation (Hidden in print) */}
       <div className="fixed bottom-4 left-4 print:hidden">
-        <Link 
-          href="/print" 
-          className="bg-white shadow-lg rounded-full p-3 text-gray-600 hover:text-deepCharcoal transition-colors border border-gray-200"
+        <Link
+          href="/print"
+          className="rounded-full border border-gray-200 bg-white p-3 text-gray-600 shadow-lg transition-colors hover:text-deepCharcoal"
           title="Back to Print Materials"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0 7-7m-7 7h18" />
           </svg>
         </Link>
       </div>
@@ -280,5 +283,5 @@ export default async function PrintPage({ params }: PageProps) {
   );
 }
 
-// ISR Configuration - 1 hour revalidation
+/** ISR: revalidate every hour */
 export const revalidate = 3600;

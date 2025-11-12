@@ -1,7 +1,6 @@
 // types/index.ts
-export type { PostMeta as LibPostMeta } from "@/lib/mdx";
 
-// Core site configuration
+// ----- Core site configuration -----
 export interface SiteConfig {
   url: string;
   title: string;
@@ -16,7 +15,7 @@ export interface SiteConfig {
   };
 }
 
-// Base content interface with common fields
+// ----- Base content interface -----
 export interface BaseContentMeta {
   slug: string;
   title: string;
@@ -34,19 +33,18 @@ export interface BaseContentMeta {
   draft?: boolean;
 }
 
-// Extended interfaces for specific content types
+// ----- Posts -----
 export interface PostMeta extends BaseContentMeta {
-  // Post-specific fields
   ogImage?: string;
   canonicalUrl?: string;
   series?: string;
   seriesOrder?: number;
 }
 
-// Export download types directly
+// ----- Downloads (from local module) -----
 export type { DownloadItem, DownloadMeta } from "./download";
 
-// Book types
+// ----- Books -----
 export interface BookMeta extends BaseContentMeta {
   isbn?: string;
   publisher?: string;
@@ -59,7 +57,7 @@ export interface BookMeta extends BaseContentMeta {
   rating?: number;
 }
 
-// Strategy types
+// ----- Strategy -----
 export interface StrategyMeta extends BaseContentMeta {
   difficulty?: "beginner" | "intermediate" | "advanced";
   duration?: string;
@@ -67,15 +65,15 @@ export interface StrategyMeta extends BaseContentMeta {
   outcomes?: string[];
 }
 
-// Generic content interface (union type for flexibility)
+// ----- Generic content union -----
 export type ContentMeta =
   | PostMeta
   | BookMeta
   | StrategyMeta
-  | DownloadMeta
+  | import("./download").DownloadMeta
   | BaseContentMeta;
 
-// Legacy/compatibility types (keep for backward compatibility)
+// ----- Legacy compatibility -----
 export interface PostData {
   slug: string;
   title: string;
@@ -84,34 +82,37 @@ export interface PostData {
   [key: string]: unknown;
 }
 
-// Type guards for content discrimination
+// ----- Type guards -----
 export function isBookMeta(content: ContentMeta): content is BookMeta {
-  return "isbn" in content || "publisher" in content;
+  return typeof (content as BookMeta).isbn === "string" || "publisher" in content;
 }
 
 export function isPostMeta(content: ContentMeta): content is PostMeta {
-  return "ogImage" in content || "series" in content;
-}
-
-export function isStrategyMeta(content: ContentMeta): content is StrategyMeta {
-  return "difficulty" in content || "tools" in content;
-}
-
-export function isDownloadMeta(content: ContentMeta): content is DownloadMeta {
   return (
-    "file" in content && typeof (content as DownloadMeta).file === "string"
+    "ogImage" in content ||
+    "series" in content ||
+    typeof (content as PostMeta).canonicalUrl === "string"
   );
 }
 
-// Utility types for content handling
+export function isStrategyMeta(content: ContentMeta): content is StrategyMeta {
+  return "difficulty" in content || Array.isArray((content as StrategyMeta).tools);
+}
+
+export function isDownloadMeta(
+  content: ContentMeta
+): content is import("./download").DownloadMeta {
+  return typeof (content as import("./download").DownloadMeta).file === "string";
+}
+
+// ----- Utility types -----
 export type ContentType = "posts" | "books" | "strategies" | "downloads";
 
 export interface ContentMap {
   posts: PostMeta;
   books: BookMeta;
   strategies: StrategyMeta;
-  downloads: DownloadMeta;
+  downloads: import("./download").DownloadMeta;
 }
 
-// Type-safe content retrieval helper
 export type ContentByType<T extends ContentType> = ContentMap[T];

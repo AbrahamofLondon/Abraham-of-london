@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/no-anonymous-default-export */
-// lib/upgraded-components.tsx
+/* lib/upgraded-components.tsx */
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-// =============================================================================
-// TYPES & INTERFACES
-// =============================================================================
+/* ============================================================================
+   TYPES & INTERFACES
+   ========================================================================== */
 
 export type SocialPlatform =
   | "x"
@@ -38,23 +40,23 @@ export type LinkVariant = "default" | "embossed" | "minimal" | "primary";
 export type LinkSize = "sm" | "md" | "lg" | "xl";
 export type ColorVariant = "light" | "dark" | "auto";
 
-// =============================================================================
-// CONFIGURATION
-// =============================================================================
+/* ============================================================================
+   CONFIGURATION
+   ========================================================================== */
 
-// Environment configuration with validation
+const isProd = process.env.NODE_ENV === "production";
+
+/** Safe env accessor – warns only in prod if missing (avoids noisy dev logs). */
 const getEnvVar = (key: string, fallback: string): string => {
-  const value = process.env[key];
-  if (!value && process.env.NODE_ENV === "production") {
-    console.warn(
-      `Missing environment variable: ${key}, using fallback: ${fallback}`,
-    );
+  const v = process.env[key];
+  if (!v && isProd) {
+    // eslint-disable-next-line no-console
+    console.warn(`Missing env ${key}; using fallback: ${fallback}`);
   }
-  return value || fallback;
+  return v || fallback;
 };
 
 const AOF_URL = getEnvVar("NEXT_PUBLIC_AOF_URL", "https://abrahamoflondon.org");
-
 const INNOVATE_HUB_URL = getEnvVar(
   "NEXT_PUBLIC_INNOVATEHUB_URL",
   getEnvVar(
@@ -62,23 +64,11 @@ const INNOVATE_HUB_URL = getEnvVar(
     "https://innovatehub-abrahamoflondon.netlify.app",
   ),
 );
+const ALOMARADA_URL = getEnvVar("NEXT_PUBLIC_ALOMARADA_URL", "https://alomarada.com");
+const ENDURELUXE_URL = getEnvVar("NEXT_PUBLIC_ENDURELUXE_URL", "https://endureluxe.com");
+const CONTACT_EMAIL = getEnvVar("NEXT_PUBLIC_CONTACT_EMAIL", "info@abrahamoflondon.org");
 
-const ALOMARADA_URL = getEnvVar(
-  "NEXT_PUBLIC_ALOMARADA_URL",
-  "https://alomarada.com",
-);
-
-const ENDURELUXE_URL = getEnvVar(
-  "NEXT_PUBLIC_ENDURELUXE_URL",
-  "https://endureluxe.com",
-);
-
-const CONTACT_EMAIL = getEnvVar(
-  "NEXT_PUBLIC_CONTACT_EMAIL",
-  "info@abrahamoflondon.org",
-);
-
-// Social links configuration with proper typing
+/** Social links (sorted by priority) */
 export const socials: SocialLink[] = [
   {
     href: "https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09",
@@ -108,44 +98,22 @@ export const socials: SocialLink[] = [
     kind: "youtube",
     priority: 4,
   },
-].sort((a, b) => (a.priority || 99) - (b.priority || 99));
+].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
 
-// Venture links with proper typing
+/** Venture links (sorted by priority) */
 export const ventures: VentureLink[] = [
-  {
-    href: AOF_URL,
-    label: "Abraham of London",
-    description: "Leadership & Legacy",
-    priority: 1,
-  },
-  {
-    href: INNOVATE_HUB_URL,
-    label: "Innovate Hub",
-    description: "Technology & Innovation",
-    priority: 2,
-  },
-  {
-    href: ALOMARADA_URL,
-    label: "Alo Marada",
-    description: "Luxury & Lifestyle",
-    priority: 3,
-  },
-  {
-    href: ENDURELUXE_URL,
-    label: "Endure Luxe",
-    description: "Resilience & Excellence",
-    priority: 4,
-  },
-].sort((a, b) => (a.priority || 99) - (b.priority || 99));
+  { href: AOF_URL, label: "Abraham of London", description: "Leadership & Legacy", priority: 1 },
+  { href: INNOVATE_HUB_URL, label: "Innovate Hub", description: "Technology & Innovation", priority: 2 },
+  { href: ALOMARADA_URL, label: "Alo Marada", description: "Luxury & Lifestyle", priority: 3 },
+  { href: ENDURELUXE_URL, label: "Endure Luxe", description: "Resilience & Excellence", priority: 4 },
+].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
 
-// =============================================================================
-// UTILITY FUNCTIONS
-// =============================================================================
+/* ============================================================================
+   UTILITIES
+   ========================================================================== */
 
 export const isExternal = (href: string): boolean =>
-  /^https?:\/\//i.test(href) ||
-  href.startsWith("mailto:") ||
-  href.startsWith("tel:");
+  /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
 
 export const isEmail = (href: string): boolean => href.startsWith("mailto:");
 export const isPhone = (href: string): boolean => href.startsWith("tel:");
@@ -164,9 +132,9 @@ export const getLinkProps = (href: string) => {
   };
 };
 
-// =============================================================================
-// CORE COMPONENTS
-// =============================================================================
+/* ============================================================================
+   CORE COMPONENTS
+   ========================================================================== */
 
 export interface SmartLinkProps {
   href: string;
@@ -195,8 +163,7 @@ export function SmartLink({
   iconPosition = "left",
   onClick,
 }: SmartLinkProps) {
-  // Base styles for each variant
-  const baseStyles = {
+  const baseStyles: Record<LinkVariant, string> = {
     default: `
       inline-flex items-center justify-center font-medium transition-all duration-200
       hover:text-forest focus-visible:outline-none focus-visible:ring-2 
@@ -228,8 +195,7 @@ export function SmartLink({
     `,
   };
 
-  // Size styles
-  const sizeStyles = {
+  const sizeStyles: Record<LinkSize, string> = {
     sm: "px-3 py-1.5 text-sm min-h-[36px] gap-1.5",
     md: "px-4 py-2 text-base min-h-[44px] gap-2",
     lg: "px-6 py-3 text-lg min-h-[52px] gap-2.5",
@@ -246,20 +212,16 @@ export function SmartLink({
 
   const content = (
     <>
-      {icon && iconPosition === "left" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "left" && <span className="flex-shrink-0">{icon}</span>}
       {loading ? (
         <span className="flex items-center gap-2">
           <LoadingSpinner size="sm" />
-          Loading...
+          <span aria-live="polite">Loading…</span>
         </span>
       ) : (
         children
       )}
-      {icon && iconPosition === "right" && (
-        <span className="flex-shrink-0">{icon}</span>
-      )}
+      {icon && iconPosition === "right" && <span className="flex-shrink-0">{icon}</span>}
     </>
   );
 
@@ -287,47 +249,37 @@ export function SmartLink({
   }
 
   return (
-    <Link
-      href={href}
-      prefetch={false}
-      className={baseClass}
-      aria-label={ariaLabel}
-      onClick={onClick}
-    >
+    <Link href={href} prefetch={false} className={baseClass} aria-label={ariaLabel} onClick={onClick}>
       {content}
     </Link>
   );
 }
 
-// Loading Spinner Component
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export function LoadingSpinner({
-  size = "md",
-  className = "",
-}: LoadingSpinnerProps) {
-  const sizeClasses = {
+export function LoadingSpinner({ size = "md", className = "" }: LoadingSpinnerProps) {
+  const sizeClasses: Record<NonNullable<LoadingSpinnerProps["size"]>, string> = {
     sm: "w-4 h-4",
     md: "w-6 h-6",
     lg: "w-8 h-8",
   };
-
   return (
-    <div
+    <span
       className={`
-        animate-spin rounded-full border-2 border-gray-300 border-t-forest
-        ${sizeClasses[size]} ${className}
+        inline-block align-middle animate-spin rounded-full border-2 
+        border-gray-300 border-t-forest ${sizeClasses[size]} ${className}
       `}
+      aria-hidden="true"
     />
   );
 }
 
-// =============================================================================
-// SOCIAL COMPONENTS
-// =============================================================================
+/* ============================================================================
+   SOCIAL COMPONENTS
+   ========================================================================== */
 
 export interface SocialLinksProps {
   variant?: ColorVariant;
@@ -348,11 +300,7 @@ export function SocialLinks({
   const resolvedVariant = variant === "auto" ? "light" : variant;
 
   return (
-    <div
-      className={`flex items-center gap-3 ${className}`}
-      role="list"
-      aria-label="Social media links"
-    >
+    <div className={`flex items-center gap-3 ${className}`} role="list" aria-label="Social media links">
       {displaySocials.map((social) => (
         <SmartLink
           key={social.href}
@@ -362,17 +310,13 @@ export function SocialLinks({
           size={size}
           className="min-w-[44px] min-h-[44px]"
         >
-          <div
+          <span
             className={`
               flex items-center gap-2 transition-colors duration-300
-              ${
-                resolvedVariant === "dark"
-                  ? "text-gray-200 hover:text-amber-200"
-                  : "text-gray-700 hover:text-forest"
-              }
+              ${resolvedVariant === "dark" ? "text-gray-200 hover:text-amber-200" : "text-gray-700 hover:text-forest"}
             `}
           >
-            <div
+            <span
               className={`
                 relative rounded-lg p-2 transition-all duration-300
                 ${
@@ -387,28 +331,25 @@ export function SocialLinks({
                 alt=""
                 width={20}
                 height={20}
-                className={`
-                  transition-all duration-300
-                  ${resolvedVariant === "dark" ? "filter brightness-125" : "filter brightness-90"}
-                `}
+                priority={false}
                 loading="lazy"
+                aria-hidden="true"
+                className={`transition-all duration-300 ${
+                  resolvedVariant === "dark" ? "brightness-125" : "brightness-90"
+                }`}
               />
-            </div>
-            {showLabels && (
-              <span className="text-sm font-medium hidden sm:inline-block">
-                {social.label}
-              </span>
-            )}
-          </div>
+            </span>
+            {showLabels && <span className="text-sm font-medium hidden sm:inline-block">{social.label}</span>}
+          </span>
         </SmartLink>
       ))}
     </div>
   );
 }
 
-// =============================================================================
-// VENTURE COMPONENTS
-// =============================================================================
+/* ============================================================================
+   VENTURE COMPONENTS
+   ========================================================================== */
 
 export interface VentureLinksProps {
   variant?: ColorVariant;
@@ -416,20 +357,12 @@ export interface VentureLinksProps {
   maxItems?: number;
 }
 
-export function VentureLinks({
-  variant = "light",
-  className = "",
-  maxItems,
-}: VentureLinksProps) {
+export function VentureLinks({ variant = "light", className = "", maxItems }: VentureLinksProps) {
   const displayVentures = maxItems ? ventures.slice(0, maxItems) : ventures;
   const resolvedVariant = variant === "auto" ? "light" : variant;
 
   return (
-    <div
-      className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${className}`}
-      role="list"
-      aria-label="Business ventures"
-    >
+    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${className}`} role="list" aria-label="Business ventures">
       {displayVentures.map((venture) => (
         <SmartLink
           key={venture.href}
@@ -440,22 +373,16 @@ export function VentureLinks({
         >
           <div
             className={`
-            transition-all duration-300 group-hover:scale-105 h-full flex flex-col justify-center
-            ${
-              resolvedVariant === "dark"
-                ? "text-gray-200 hover:text-amber-200"
-                : "text-gray-700 hover:text-forest"
-            }
-          `}
+              transition-all duration-300 group-hover:scale-105 h-full flex flex-col justify-center
+              ${resolvedVariant === "dark" ? "text-gray-200 hover:text-amber-200" : "text-gray-700 hover:text-forest"}
+            `}
           >
-            <h3 className="font-serif font-semibold text-lg mb-1">
-              {venture.label}
-            </h3>
+            <h3 className="font-serif font-semibold text-lg mb-1">{venture.label}</h3>
             <p
               className={`
-              text-sm opacity-75 transition-opacity duration-300 group-hover:opacity-100
-              ${resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600"}
-            `}
+                text-sm opacity-75 transition-opacity duration-300 group-hover:opacity-100
+                ${resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600"}
+              `}
             >
               {venture.description}
             </p>
@@ -466,9 +393,9 @@ export function VentureLinks({
   );
 }
 
-// =============================================================================
-// CONTACT COMPONENTS
-// =============================================================================
+/* ============================================================================
+   CONTACT COMPONENTS
+   ========================================================================== */
 
 export interface ContactSectionProps {
   variant?: ColorVariant;
@@ -486,28 +413,24 @@ export function ContactSection({
   showIcons = true,
 }: ContactSectionProps) {
   const resolvedVariant = variant === "auto" ? "light" : variant;
-  const textColor =
-    resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700";
-  const subtitleColor =
-    resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600";
+  const textColor = resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700";
+  const subtitleColor = resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600";
 
   const EmailIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
     </svg>
   );
 
   const ContactIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
     </svg>
   );
 
   return (
     <div className={`text-center ${className}`}>
-      <h2 className={`font-serif text-2xl font-semibold mb-4 ${textColor}`}>
-        {title}
-      </h2>
+      <h2 className={`font-serif text-2xl font-semibold mb-4 ${textColor}`}>{title}</h2>
       <p className={`mb-6 max-w-2xl mx-auto ${subtitleColor}`}>{description}</p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
         <SmartLink
@@ -519,12 +442,7 @@ export function ContactSection({
         >
           Email Us
         </SmartLink>
-        <SmartLink
-          href="/contact"
-          variant="primary"
-          size="lg"
-          icon={showIcons ? <ContactIcon /> : undefined}
-        >
+        <SmartLink href="/contact" variant="primary" size="lg" icon={showIcons ? <ContactIcon /> : undefined}>
           Contact Form
         </SmartLink>
       </div>
@@ -532,9 +450,9 @@ export function ContactSection({
   );
 }
 
-// =============================================================================
-// COMPOSITE COMPONENTS
-// =============================================================================
+/* ============================================================================
+   COMPOSITE COMPONENTS
+   ========================================================================== */
 
 export interface EnhancedFooterProps {
   variant?: ColorVariant;
@@ -557,12 +475,9 @@ export function EnhancedFooter({
       ? "bg-gradient-to-b from-gray-900 to-gray-800 border-t border-gray-700"
       : "bg-gradient-to-b from-white to-gray-50 border-t border-gray-300";
 
-  const textColor =
-    resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700";
-  const subtitleColor =
-    resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600";
-  const borderColor =
-    resolvedVariant === "dark" ? "border-gray-700" : "border-gray-300";
+  const textColor = resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700";
+  const subtitleColor = resolvedVariant === "dark" ? "text-gray-400" : "text-gray-600";
+  const borderColor = resolvedVariant === "dark" ? "border-gray-700" : "border-gray-300";
 
   return (
     <footer className={`${bgColor} ${className}`} role="contentinfo">
@@ -570,12 +485,9 @@ export function EnhancedFooter({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand Section */}
           <div className="text-center md:text-left">
-            <h3 className={`font-serif text-2xl font-bold mb-4 ${textColor}`}>
-              Abraham of London
-            </h3>
+            <h3 className={`font-serif text-2xl font-bold mb-4 ${textColor}`}>Abraham of London</h3>
             <p className={`mb-4 ${subtitleColor}`}>
-              Building legacies through principled leadership, innovative
-              ventures, and timeless wisdom.
+              Building legacies through principled leadership, innovative ventures, and timeless wisdom.
             </p>
             {showSocial && <SocialLinks variant={resolvedVariant} />}
           </div>
@@ -583,11 +495,7 @@ export function EnhancedFooter({
           {/* Ventures Section */}
           {showVentures && (
             <div>
-              <h4
-                className={`font-serif text-lg font-semibold mb-4 ${textColor}`}
-              >
-                Ventures
-              </h4>
+              <h4 className={`font-serif text-lg font-semibold mb-4 ${textColor}`}>Ventures</h4>
               <VentureLinks variant={resolvedVariant} maxItems={2} />
             </div>
           )}
@@ -602,10 +510,7 @@ export function EnhancedFooter({
 
         {/* Bottom Bar */}
         <div className={`border-t pt-6 text-center ${borderColor}`}>
-          <p className={`text-sm ${subtitleColor}`}>
-            © {new Date().getFullYear()} Abraham of London. All rights
-            reserved.
-          </p>
+          <p className={`text-sm ${subtitleColor}`}>© {new Date().getFullYear()} Abraham of London. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4" role="list">
             <SmartLink href="/privacy" variant="minimal" className="text-sm">
               Privacy
@@ -639,12 +544,12 @@ export function QuickActionBar({
   const resolvedVariant = variant === "auto" ? "light" : variant;
 
   return (
-    <div
+    <aside
       className={`
-      bg-gradient-to-b from-white to-gray-50 border-b border-gray-300/60 p-4
-      ${resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700"}
-      ${className}
-    `}
+        bg-gradient-to-b from-white to-gray-50 border-b border-gray-300/60 p-4
+        ${resolvedVariant === "dark" ? "text-gray-200" : "text-gray-700"}
+        ${className}
+      `}
       role="complementary"
       aria-label="Quick actions"
     >
@@ -654,31 +559,21 @@ export function QuickActionBar({
           <p className="text-sm opacity-75">{description}</p>
         </div>
         <div className="flex gap-3">
-          <SmartLink
-            href={`mailto:${CONTACT_EMAIL}`}
-            variant="embossed"
-            size="sm"
-            className="whitespace-nowrap"
-          >
+          <SmartLink href={`mailto:${CONTACT_EMAIL}`} variant="embossed" size="sm" className="whitespace-nowrap">
             Quick Email
           </SmartLink>
-          <SmartLink
-            href="/contact"
-            variant="primary"
-            size="sm"
-            className="whitespace-nowrap"
-          >
+          <SmartLink href="/contact" variant="primary" size="sm" className="whitespace-nowrap">
             Book Call
           </SmartLink>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
 
-// =============================================================================
-// DEFAULT EXPORTS
-// =============================================================================
+/* ============================================================================
+   DEFAULT EXPORTS
+   ========================================================================== */
 
 export default {
   SmartLink,

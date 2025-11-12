@@ -6,15 +6,151 @@ export type SocialPlatform =
   | "whatsapp" | "tiktok" | "mail" | "email" | "phone" | "website" | "link";
 
 export interface SocialLink {
-  href: string;
-  kind?: SocialPlatform | string;
-  label?: string;
-  external?: boolean;
-  icon?: string;
+  href: string;                  // Fully-formed, safe URL or mailto:/tel:
+  kind?: SocialPlatform;         // Normalised platform key
+  label?: string;                // Human-readable label
+  external?: boolean;            // True for http(s) off-site links
+  icon?: string;                 // Optional icon id/name
+}
+
+/** Map aliases → canonical platform keys */
+const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
+  x: "twitter",
+  twitter: "twitter",
+  ig: "instagram",
+  insta: "instagram",
+  instagram: "instagram",
+  fb: "facebook",
+  facebook: "facebook",
+  li: "linkedin",
+  linkedin: "linkedin",
+  yt: "youtube",
+  youtube: "youtube",
+  wa: "whatsapp",
+  whatsapp: "whatsapp",
+  tiktok: "tiktok",
+  mail: "email",
+  email: "email",
+  phone: "phone",
+  tel: "phone",
+  site: "website",
+  website: "website",
+  url: "link",
+  link: "link",
+};
+
+/** Base URL builders for common platforms given a handle/username */
+const PLATFORM_BUILDERS: Partial<Record<SocialPlatform, (h: string) => string>> = {
+  twitter: (h) => `https://twitter.com/${stripAt(h)}`,
+  instagram: (h) => `https://instagram.com/${stripAt(h)}`,
+  facebook: (h) => `https://facebook.com/${stripAt(h)}`,
+  linkedin: (h) => {
+    const u = stripAt(h);
+    // crude heuristic: company vs profile
+    return u.startsWith("company/") || u.startsWith("in/") || u.includes("/")
+      ? `https://www.linkedin.com/${u.replace(/^\/+/, "")}`
+      : `https://www.linkedin.com/in/${u}`;
+  },
+  youtube: (h) => {
+    const u = stripAt(h);
+    return u.startsWith("@")
+      ? `https://www.youtube.com/${u}`
+      : `https://www.youtube.com/${u.replace(/^\/+/, "")}`;
+  },
+  tiktok: (h) => `https://www.tiktok.com/@${stripAt(h)}`,
+  whatsapp: (h) => buildWhatsApp(h),
+};
+
+function stripAt(v: string) {
+  return String(v || "").trim().replace(/^@+/, "");
+}
+
+function normalisePlatform(input: unknown): SocialPlatform | undefined {
+  if (typeof input !== "string") return undefined;
+  const key = input.trim().toLowerCase();
+  return PLATFORM_ALIASES[key] ?? undefined;
+}
+
+/** Very strict URL safety: only http(s), mailto, tel allowed */
+function isSafeHref(href: string): boolean {
+  const v = String(href).trim();
+  if (v.startsWith("mailto:") || v.startsWith("tel:")) return true;
+  try {
+    const u = new URL(v, "https://dummy.local"); // base for relative
+    const scheme = (u.protocol || "").toLowerCase();
+    return scheme === "http:" || scheme === "https:" || v.startsWith("/");
+  } catch {
+    return v.startsWith("/");
+  }
+}
+
+/** Build href from handle when platform known; fall back to raw href */
+function coerceHref(
+  rawHref: unknown,
+  kind?: SocialPlatform,
+): string | null {
+  const v = String(rawHref ?? "").trim();
+  if (!v) return null;
+
+  // Already a complete safe link?
+  if (v.startsWith("http://") || v.startsWith("https://") || v.startsWith("mailto:") || v.startsWith("tel:") || v.startsWith("/")) {
+    return isSafeHref(v) ? v : null;
+  }
+
+  // If looks like email
+  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return `mailto:${v}`;
+
+  // If looks like phone (very permissive)
+  if (/^[+]?[\d\s().-]{6,}$/.test(v)) return `tel:${v.replace(/\s+/g, "")}`;
+
+  // If we know the platform and it's a handle, build URL
+  if (kind && PLATFORM_BUILDERS[kind]) {
+    return PLATFORM_BUILDERS[kind]!(v);
+  }
+
+  // If it looks like a bare domain, normalise to https
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(v)) {
+    return `https://${v}`;
+  }
+
+  // If starts with @ and unknown platform, assume Twitter-style
+  if (v.startsWith("@")) return `https://twitter.com/${stripAt(v)}`;
+
+  // Otherwise refuse unsafe strings
+  return null;
+}
+
+/** WhatsApp URL builder: accepts phone numbers or message templates */
+function buildWhatsApp(input: string): string {
+  const v = String(input || "").trim();
+  // if full wa.me link passed through
+  if (/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(v)) return v;
+
+  // If phone
+  if (/^[+]?[\d\s().-]{6,}$/.test(v)) {
+    const digits = v.replace(/[^\d]/g, "");
+    return `https://wa.me/${digits}`;
+  }
+  // If text message
+  const text = encodeURIComponent(v.replace(/^msg:/i, "").trim() || "Hello");
+  return `https://wa.me/?text=${text}`;
+}
+
+/** Decide external flag */
+function computeExternal(href: string): boolean {
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) return false;
+  if (href.startsWith("/")) return false;
+  return /^https?:\/\//i.test(href);
+}
+
+/** Public type guard */
+export function isSocialLink(x: unknown): x is SocialLink {
+  return !!x && typeof x === "object" && typeof (x as any).href === "string";
 }
 
 /** Coerce unknown shapes (array/object/primitive) into a clean SocialLink[] */
 export function sanitizeSocialLinks(input: unknown): SocialLink[] {
+  // Flatten input to a candidate array
   const arr: unknown[] = Array.isArray(input)
     ? input
     : input && typeof input === "object"
@@ -22,33 +158,43 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
     : [];
 
   const out: SocialLink[] = [];
+
   for (const item of arr) {
     if (!item || typeof item !== "object") continue;
 
-    const href = String((item as any).href ?? "").trim();
-    if (!href) continue;
+    const rawHref = (item as any).href ?? (item as any).url ?? (item as any).handle ?? "";
+    const rawKind = (item as any).kind ?? (item as any).type ?? (item as any).platform;
+    const rawLabel = (item as any).label ?? (item as any).name;
+    const rawIcon = (item as any).icon;
+    const rawExternal = (item as any).external;
 
-    const kindRaw = (item as any).kind;
-    const kind = typeof kindRaw === "string" ? (kindRaw as SocialPlatform | string) : undefined;
+    const kind = normalisePlatform(rawKind);
+    const href = coerceHref(rawHref, kind);
+    if (!href || !isSafeHref(href)) continue;
 
-    const labelRaw = (item as any).label;
     const label =
-      typeof labelRaw === "string" && labelRaw.trim()
-        ? labelRaw.trim()
+      typeof rawLabel === "string" && rawLabel.trim()
+        ? rawLabel.trim()
         : kind
-        ? kind.toString().charAt(0).toUpperCase() + kind.toString().slice(1)
+        ? kind.charAt(0).toUpperCase() + kind.slice(1)
         : "Social";
 
-    const icon =
-      typeof (item as any).icon === "string" ? ((item as any).icon as string) : undefined;
-
-    const externalHint =
-      typeof (item as any).external === "boolean" ? (item as any).external : undefined;
-
-    const isUtility = href.startsWith("mailto:") || href.startsWith("tel:");
-    const external = externalHint ?? (/^https?:\/\//i.test(href) && !isUtility);
+    const icon = typeof rawIcon === "string" ? rawIcon : undefined;
+    const external =
+      typeof rawExternal === "boolean" ? rawExternal : computeExternal(href);
 
     out.push({ href, kind, label, icon, external });
   }
-  return out;
+
+  // Deduplicate by (kind, href)
+  const seen = new Set<string>();
+  const deduped: SocialLink[] = [];
+  for (const s of out) {
+    const key = `${s.kind ?? "unknown"}|${s.href}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduped.push(s);
+    }
+  }
+  return deduped;
 }

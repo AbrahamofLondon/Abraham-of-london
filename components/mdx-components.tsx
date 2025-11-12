@@ -1,98 +1,127 @@
-<<<<<<< HEAD
-export { default } from './MDXComponents';
-=======
 // components/mdx-components.tsx
-import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import * as React from 'react';
-import type { MDXRemoteProps } from 'next-mdx-remote'; 
+import * as React from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import type { MDXRemoteProps } from "next-mdx-remote";
 
-// Error boundary for MDX components
-const withErrorBoundary = (Component: React.ComponentType<any>) => {
-  return (props: any) => {
+/** Simple error boundary wrapper for MDX components */
+const withErrorBoundary =
+  (Component: React.ComponentType<any>, name = Component.displayName || Component.name || "Component") =>
+  (props: any) => {
     try {
-      return React.createElement(Component, props);
+      return <Component {...props} />;
     } catch (error) {
-      console.warn('MDX component error:', error);
-      return React.createElement('div', { 
-        className: 'bg-yellow-50 border border-yellow-200 p-4 rounded'
-      }, `Component: ${Component.displayName || 'Unknown'}`);
+      // Avoid crashing the whole MDX tree if a leaf throws.
+      // Surface a visible but non-fatal placeholder.
+      console.warn(`MDX component error in ${name}:`, error);
+      return (
+        <div className="rounded border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900">
+          {name} failed to render.
+        </div>
+      );
     }
   };
-};
 
-// --- Import All Dynamic Modules with Error Handling ---
-const BrandFrame = dynamic(() => import('@/components/print/BrandFrame').catch(() => 
-  () => <div className="border rounded p-4">Brand Frame Placeholder</div>
-), { ssr: false });
+/* -------------------------------------------------------------------------- */
+/*  Lazy components with graceful fallbacks                                   */
+/* -------------------------------------------------------------------------- */
 
-const ResourcesCTA = dynamic(() => import('@/components/mdx/ResourcesCTA').catch(() => 
-  () => <div className="bg-blue-50 p-4 rounded">Resources CTA Placeholder</div>
-), { ssr: false });
+const BrandFrame = dynamic(
+  () =>
+    import("@/components/print/BrandFrame").catch(() => () => (
+      <div className="rounded border p-4">Brand Frame Placeholder</div>
+    )),
+  { ssr: false }
+);
 
-// Placeholder components for any missing ones
-const EmbossedBrandMark = () => <div>Embossed Brand Mark</div>;
-const EmbossedSign = () => <div>Embossed Sign</div>;
-const Rule = () => <hr className="my-8 border-gray-300" />;
-const PullLine = ({ children }: any) => <div className="border-l-4 border-gold pl-4 my-4">{children}</div>;
-const Note = ({ children }: any) => <div className="bg-yellow-50 border border-yellow-200 p-4 rounded my-4">{children}</div>;
-const Verse = ({ children }: any) => <div className="italic text-gray-600 my-4">{children}</div>;
-const JsonLd = () => null;
-const DownloadCard = () => <div className="border rounded p-4 my-4">Download Card</div>;
-const Caption = ({ children }: any) => <div className="text-sm text-gray-600 mt-2">{children}</div>;
-const CTA = ({ children }: any) => <div className="bg-blue-100 p-4 rounded my-4">{children}</div>;
-const Callout = ({ children }: any) => <div className="bg-purple-50 border border-purple-200 p-4 rounded my-4">{children}</div>;
-const HeroEyebrow = ({ children }: any) => <div className="text-sm uppercase tracking-wider text-gray-500 mb-2">{children}</div>;
-const ShareRow = () => <div className="my-4 p-4 bg-gray-100 rounded">Share Buttons</div>;
-const Badge = ({ children }: any) => <span className="bg-gray-200 px-2 py-1 rounded text-sm">{children}</span>;
-const BadgeRow = ({ children }: any) => <div className="flex gap-2 my-4">{children}</div>;
+const ResourcesCTA = dynamic(
+  () =>
+    import("@/components/mdx/ResourcesCTA").catch(() => () => (
+      <div className="rounded bg-blue-50 p-4">Resources CTA Placeholder</div>
+    )),
+  { ssr: false }
+);
 
-// --- Injected Components (Grid/Quote) ---
+/* -------------------------------------------------------------------------- */
+/*  Lightweight placeholders for optional shortcodes                          */
+/* -------------------------------------------------------------------------- */
+
+const EmbossedBrandMark: React.FC = () => <div>Embossed Brand Mark</div>;
+const EmbossedSign: React.FC = () => <div>Embossed Sign</div>;
+const Rule: React.FC = () => <hr className="my-8 border-gray-300" />;
+const PullLine: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 border-l-4 border-yellow-400 pl-4">{children}</div>
+);
+const Note: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 rounded border border-yellow-200 bg-yellow-50 p-4">{children}</div>
+);
+const Verse: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 italic text-gray-600">{children}</div>
+);
+const JsonLd: React.FC = () => null;
+const DownloadCard: React.FC = () => <div className="my-4 rounded border p-4">Download Card</div>;
+const Caption: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="mt-2 text-sm text-gray-600">{children}</div>
+);
+const CTA: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 rounded bg-blue-100 p-4">{children}</div>
+);
+const Callout: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 rounded border border-purple-200 bg-purple-50 p-4">{children}</div>
+);
+const HeroEyebrow: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="mb-2 text-sm uppercase tracking-wider text-gray-500">{children}</div>
+);
+const ShareRow: React.FC = () => <div className="my-4 rounded bg-gray-100 p-4">Share Buttons</div>;
+const Badge: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <span className="rounded bg-gray-200 px-2 py-1 text-sm">{children}</span>
+);
+const BadgeRow: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="my-4 flex gap-2">{children}</div>
+);
+
 const Grid: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
-  <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
-    {children}
-  </div>
+  <div className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${className}`}>{children}</div>
 );
 
 const Quote: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
-  <blockquote className={`border-l-4 border-yellow-400 pl-4 italic text-gray-600 ${className}`}>
-    {children}
-  </blockquote>
+  <blockquote className={`border-l-4 border-yellow-400 pl-4 italic text-gray-600 ${className}`}>{children}</blockquote>
 );
 
-/**
- * The map of components used by the MDXRenderer.
- */
-const mdxComponents: MDXRemoteProps['components'] = {
-  // Standard HTML tags
+/* -------------------------------------------------------------------------- */
+/*  MDX component map                                                         */
+/* -------------------------------------------------------------------------- */
+
+const mdxComponents: MDXRemoteProps["components"] = {
+  // HTML tag overrides
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-    const { width, height, ...rest } = props;
-    
+    const { src = "", alt = "", ...rest } = props;
+    // Use Next/Image when possible with sensible defaults
     return (
-      <Image 
-        src={String(props.src)} 
-        alt={props.alt ?? ''} 
+      <Image
+        src={String(src)}
+        alt={alt}
         width={1200}
         height={800}
-        sizes="(max-width: 768px) 100vw, 50vw" 
-        loading="lazy" 
+        sizes="(max-width: 768px) 100vw, 50vw"
+        loading="lazy"
+        className="rounded-lg"
         {...rest}
-        className="rounded-lg" 
       />
     );
   },
   hr: Rule,
   blockquote: Quote,
 
-  // MDX Components
-  BrandFrame,
+  // Custom shortcodes / components
+  BrandFrame: withErrorBoundary(BrandFrame as unknown as React.ComponentType<any>, "BrandFrame"),
+  ResourcesCTA: withErrorBoundary(ResourcesCTA as unknown as React.ComponentType<any>, "ResourcesCTA"),
   EmbossedBrandMark,
   EmbossedSign,
   Rule,
   PullLine,
   Note,
   Callout,
-  ResourcesCTA,
   HeroEyebrow,
   ShareRow,
   Verse,
@@ -103,9 +132,8 @@ const mdxComponents: MDXRemoteProps['components'] = {
   CTA,
   DownloadCard,
   Grid,
-  Quote,
+  Quote
 };
 
 export { mdxComponents };
 export default mdxComponents;
->>>>>>> test-netlify-fix
