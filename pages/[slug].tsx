@@ -66,9 +66,9 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   };
 
   return (
-  <Layout title={title}>
-    <Head>
-      <title>{title} | Abraham of London</title>
+    <Layout title={title}>
+      <Head>
+        <title>{title} | Abraham of London</title>
         <meta name="description" content={displayDescription} />
         {absImage && <meta property="og:image" content={absImage} />}
         <meta property="og:type" content="article" />
