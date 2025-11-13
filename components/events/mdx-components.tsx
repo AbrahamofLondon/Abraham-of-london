@@ -1,29 +1,35 @@
-import * as React from "react";
+// components/events/mdx-components.tsx
 import Link from "next/link";
 import Image, { type ImageProps } from "next/image";
 import type { MDXComponents } from "mdx/types";
 
 const A: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = ({ href, children, ...rest }) => {
   const url = href || "#";
-  const external = /^https?:\/\//i.test(url);
-  return external ? (
-    <a href={url} target="_blank" rel="noopener noreferrer" {...rest}>
-      {children}
-    </a>
-  ) : (
-    <Link href={url} {...(rest as any)}>
+  const isExternal = url.startsWith('http') || url.startsWith('mailto:') || url.startsWith('tel:');
+  
+  if (isExternal) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" {...rest}>
+        {children}
+      </a>
+    );
+  }
+  
+  return (
+    <Link href={url} {...rest}>
       {children}
     </Link>
   );
 };
 
-const Img: React.FC<ImageProps> = ({ alt = "", sizes = "100vw", ...rest }) => <Image alt={alt} sizes={sizes} {...rest} />;
-
-const mdxComponents: MDXComponents = {
-  a: A,
-  img: (props: any) => <Img {...props} />,
-  pre: (p) => <pre className="not-prose overflow-auto rounded-lg bg-gray-900 p-4 text-gray-100" {...p} />,
-  code: (p) => <code className="rounded bg-gray-100 px-1 py-0.5" {...p} />,
+const Img: React.FC<ImageProps> = (props) => {
+  return <Image {...props} alt={props.alt || ""} />;
 };
 
-export default mdxComponents;
+const components: MDXComponents = {
+  a: A,
+  img: Img,
+  // Add other components as needed
+};
+
+export default components;
