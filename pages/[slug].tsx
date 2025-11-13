@@ -1,4 +1,4 @@
-// pages/[slug].tsx
+// pages/books/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,34 +11,17 @@ import mdxComponents from "@/components/mdx-components";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Layout from "@/components/Layout";
 
-// Date formatting utility
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
 function formatPretty(isoish: string | null | undefined, tz = "Europe/London"): string {
   if (!isoish || typeof isoish !== "string") return "";
   if (isDateOnly(isoish)) {
     const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
+    return new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
   }
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
+  const date = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "2-digit", month: "short", year: "numeric" }).format(d);
+  const time = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
   return `${date}, ${time}`;
 }
 
@@ -83,9 +66,9 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   };
 
   return (
-    <Layout title={title}>
-      <Head>
-        <title>{title} | Abraham of London</title>
+  <Layout title={title}>
+    <Head>
+      <title>{title} | Abraham of London</title>
         <meta name="description" content={displayDescription} />
         {absImage && <meta property="og:image" content={absImage} />}
         <meta property="og:type" content="article" />
@@ -99,7 +82,6 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
       </Head>
 
       <article className="dynamic-page px-4 py-10 mx-auto max-w-4xl">
-        {/* Hero Section */}
         <header className="mb-8 text-center">
           {heroImage && (
             <div className="relative aspect-[21/9] w-full mb-6 rounded-xl overflow-hidden">
@@ -124,7 +106,6 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
             </p>
           )}
 
-          {/* Metadata */}
           <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 mb-8">
             {author && (
               <div className="flex items-center gap-1">
@@ -160,12 +141,10 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           )}
         </header>
 
-        {/* Page Content */}
         <section className="prose prose-lg max-w-none mb-12">
           <MDXRemote {...contentSource} components={mdxComponents} />
         </section>
 
-        {/* Resources Section */}
         {resourcesMeta?.length > 0 && (
           <section className="mt-12 border-t border-lightGrey pt-8">
             <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-6">
@@ -226,7 +205,6 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           </section>
         )}
 
-        {/* Call to Action */}
         <section className="mt-12 bg-gradient-to-r from-forest to-softGold rounded-2xl p-8 text-center text-white">
           <h2 className="text-2xl font-serif font-semibold mb-4">Ready to take the next step?</h2>
           <p className="text-lg mb-6 opacity-90">
