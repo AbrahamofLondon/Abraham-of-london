@@ -1,136 +1,59 @@
 // lib/server/content-data.ts
-import { getAllDownloads } from "./downloads-data";
-import { getAllBooks } from "./books-data";
-import { getAllEvents } from "./events-data";
 
-export type ContentItem = {
-  type: "download" | "book" | "event" | "resource";
+export type ContentKind = "post" | "event" | "download" | "print" | "page";
+
+export interface ContentSummary {
   slug: string;
   title: string;
-  excerpt?: string | null;
-  coverImage?: string | null;
+  kind: ContentKind;
   date?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
+  tags?: string[];
+  description?: string | null;
+}
+
+/**
+ * Return all known content items.
+ * Stub implementation: returns an empty list.
+ */
+export function getAllContent(): ContentSummary[] {
+  return [];
+}
+
+/**
+ * Find a single item by slug/kind.
+ * Stub implementation: returns null.
+ */
+export function getContentBySlug(
+  _slug: string,
+  _kind?: ContentKind
+): ContentSummary | null {
+  return null;
+}
+
+/**
+ * Grouped content index.
+ * Stub implementation: each group is an empty list.
+ */
+export function getContentIndex(): {
+  posts: ContentSummary[];
+  events: ContentSummary[];
+  downloads: ContentSummary[];
+  prints: ContentSummary[];
+  pages: ContentSummary[];
+} {
+  return {
+    posts: [],
+    events: [],
+    downloads: [],
+    prints: [],
+    pages: [],
+  };
+}
+
+const contentData = {
+  getAllContent,
+  getContentBySlug,
+  getContentIndex,
 };
 
-export function getContentSlugs(type?: "downloads" | "books" | "events"): string[] {
-  try {
-    if (type === "downloads") {
-      const { getDownloadSlugs } = require("./downloads-data");
-      return getDownloadSlugs();
-    }
-    
-    if (type === "books") {
-      const { getBookSlugs } = require("./books-data");
-      return getBookSlugs();
-    }
-    
-    if (type === "events") {
-      const { getEventSlugs } = require("./events-data");
-      return getEventSlugs();
-    }
-    
-    // Return all slugs if no type specified
-    const { getDownloadSlugs } = require("./downloads-data");
-    const { getBookSlugs } = require("./books-data");
-    const { getEventSlugs } = require("./events-data");
-    
-    return [
-      ...getDownloadSlugs(),
-      ...getBookSlugs(), 
-      ...getEventSlugs()
-    ];
-  } catch (error) {
-    console.error('Error getting content slugs:', error);
-    return [];
-  }
-}
-
-export function getAllContent(type?: "downloads" | "books" | "events"): ContentItem[] {
-  try {
-    if (type === "downloads") {
-      return getAllDownloads(["slug", "title", "excerpt", "coverImage", "date", "category", "tags"])
-        .map(item => ({
-          type: "download" as const,
-          slug: item.slug,
-          title: item.title || "Untitled Download",
-          excerpt: item.excerpt,
-          coverImage: item.coverImage,
-          date: item.date,
-          category: item.category,
-          tags: item.tags,
-        }));
-    }
-    
-    if (type === "books") {
-      return getAllBooks(["slug", "title", "excerpt", "coverImage", "date", "category", "tags"])
-        .map(item => ({
-          type: "book" as const,
-          slug: item.slug,
-          title: item.title || "Untitled Book",
-          excerpt: item.excerpt,
-          coverImage: item.coverImage,
-          date: item.date,
-          category: item.category,
-          tags: item.tags,
-        }));
-    }
-    
-    if (type === "events") {
-      return getAllEvents(["slug", "title", "summary", "coverImage", "date", "tags"])
-        .map(item => ({
-          type: "event" as const,
-          slug: item.slug,
-          title: item.title || "Untitled Event",
-          excerpt: item.summary,
-          coverImage: item.coverImage || item.heroImage,
-          date: item.date,
-          tags: item.tags,
-        }));
-    }
-    
-    // Return all content if no type specified
-    const downloads = getAllDownloads(["slug", "title", "excerpt", "coverImage", "date", "category", "tags"])
-      .map(item => ({ ...item, type: "download" as const }));
-    
-    const books = getAllBooks(["slug", "title", "excerpt", "coverImage", "date", "category", "tags"])
-      .map(item => ({ ...item, type: "book" as const }));
-    
-    const events = getAllEvents(["slug", "title", "summary", "coverImage", "date", "tags"])
-      .map(item => ({ ...item, type: "event" as const, excerpt: item.summary }));
-    
-    return [...downloads, ...books, ...events];
-  } catch (error) {
-    console.error('Error getting all content:', error);
-    return [];
-  }
-}
-
-export function getContentBySlug(
-  type: "downloads" | "books" | "events", 
-  slug: string, 
-  options: { withContent?: boolean } = {}
-) {
-  try {
-    if (type === "downloads") {
-      const { getDownloadBySlug } = require("./downloads-data");
-      return getDownloadBySlug(slug, undefined, options.withContent);
-    }
-    
-    if (type === "books") {
-      const { getBookBySlug } = require("./books-data");
-      return getBookBySlug(slug, undefined, options.withContent);
-    }
-    
-    if (type === "events") {
-      const { getEventBySlug } = require("./events-data");
-      return getEventBySlug(slug, undefined, options.withContent);
-    }
-    
-    return null;
-  } catch (error) {
-    console.error(`Error getting content by slug ${slug}:`, error);
-    return null;
-  }
-}
+export default contentData;

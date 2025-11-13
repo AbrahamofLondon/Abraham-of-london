@@ -1,18 +1,36 @@
 // app/print/[slug]/page.tsx
 import Link from "next/link";
-import { notFound } from "next/navigation"; 
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 import mdxComponents from "@/components/mdx-components";
 import BrandFrame from "@/components/print/BrandFrame";
 import { getAllPrintSlugs, getPrintDocumentBySlug } from "@/lib/server/print-utils";
 import type { PrintMeta } from "@/types/print";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-/* ---------------------- Utilities ---------------------- */
+/* ---------------------- Type guards / helpers ---------------------- */
+
+const asStringOrNull = (v: unknown): string | null =>
+  typeof v === "string" ? v : null;
+
+const asStringOrDefault = (v: unknown, fallback: string): string =>
+  typeof v === "string" && v.trim() ? v.trim() : fallback;
+
+const asStringArray = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+
+const asBool = (v: unknown, fallback = false): boolean =>
+  typeof v === "boolean" ? v : fallback;
+
+const asKind = (t: unknown): PrintMeta["kind"] => {
+  if (t === "book") return "book";
+  if (t === "download") return "download";
+  return "print";
+};
 
 function toCanonicalSlug(input: unknown): string {
   const s = String(input ?? "")
@@ -61,13 +79,15 @@ function formatPretty(isoish?: string | null, tz = "Europe/London"): string {
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   try {
-    const slugs = getAllPrintSlugs(); // Array<{ slug: string; type: string; source: string }>
+    const rawSlugs = getAllPrintSlugs() as Array<string | { slug: string }>;
     const unique = Array.from(
       new Set(
-        slugs
-          .map((item) => toCanonicalSlug(item?.slug))
-          .filter(Boolean)
-      )
+        rawSlugs
+          .map((item) =>
+            typeof item === "string" ? toCanonicalSlug(item) : toCanonicalSlug(item?.slug),
+          )
+          .filter(Boolean),
+      ),
     );
     if (process.env.NODE_ENV === "development") {
       console.log(`🖨️ Generated ${unique.length} print paths`);
@@ -82,7 +102,7 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 /* -------------------- Metadata (SEO) -------------------- */
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } },
 ): Promise<Metadata> {
   const { slug } = params;
   const doc = getPrintDocumentBySlug(slug);
@@ -95,28 +115,30 @@ export async function generateMetadata(
     };
   }
 
-  const title = doc.title || "Untitled Print";
-  const description = doc.description || doc.excerpt || "Printable document from Abraham of London";
+  const title = asStringOrDefault((doc as any).title, "Untitled Print");
+
+  const descriptionText =
+    asStringOrNull((doc as any).description) ??
+    asStringOrNull((doc as any).excerpt) ??
+    "Printable document from Abraham of London";
+
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
   return {
     title: `${title} | Print`,
-    description,
+    description: descriptionText,
     openGraph: {
       type: "article",
       title,
-      description,
+      description: descriptionText,
       url: `${site}/print/${slug}`,
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description,
+      description: descriptionText,
     },
-    robots: {
-      index: false, // prevent indexing print views
-      follow: true,
-    },
+    robots: { index: false, follow: true },
   };
 }
 
@@ -129,24 +151,25 @@ interface PageProps {
 export default async function PrintPage({ params }: PageProps) {
   const { slug } = params;
   const doc = getPrintDocumentBySlug(slug);
-
   if (!doc) notFound();
+
+  const d = doc as Record<string, unknown>;
 
   const meta: PrintMeta = {
     slug,
-    title: doc.title || "Untitled Print",
-    description: doc.description ?? null,
-    excerpt: doc.excerpt ?? null,
-    author: doc.author ?? "Abraham of London",
-    date: doc.date ?? null,
-    category: (doc as any).category ?? null,
-    tags: (doc as any).tags ?? [],
-    coverImage: (doc as any).coverImage ?? null,
-    heroImage: (doc as any).heroImage ?? null,
-    isChathamRoom: (doc as any).isChathamRoom ?? false,
-    source: doc.source ?? "mdx",
-    kind: doc.type === "book" ? "book" : doc.type === "download" ? "download" : "print",
-    content: doc.content ?? "",
+    title: asStringOrDefault(d.title, "Untitled Print"),
+    description: asStringOrNull(d.description),
+    excerpt: asStringOrNull(d.excerpt),
+    author: asStringOrDefault(d.author, "Abraham of London"),
+    date: asStringOrNull(d.date),
+    category: asStringOrNull(d.category),
+    tags: asStringArray(d.tags),
+    coverImage: asStringOrNull(d.coverImage),
+    heroImage: asStringOrNull(d.heroImage),
+    isChathamRoom: asBool(d.isChathamRoom, false),
+    source: asStringOrDefault(d.source, "mdx"),
+    kind: asKind(d.type),
+    content: asStringOrDefault(d.content, ""),
     published: true,
   };
 
@@ -161,7 +184,6 @@ export default async function PrintPage({ params }: PageProps) {
       });
     } catch (error) {
       console.error("Error serializing MDX:", error);
-      // Fall through to empty state
     }
   }
 
@@ -230,14 +252,14 @@ export default async function PrintPage({ params }: PageProps) {
               )}
             </div>
 
-            {meta.tags && meta.tags.length > 0 && (
+            {meta.tags.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {meta.tags.map((tag, index) => (
                   <span
                     key={index}
                     className="inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 print:border print:border-gray-300 print:bg-transparent"
                   >
-                    {String(tag)}
+                    {tag}
                   </span>
                 ))}
               </div>
