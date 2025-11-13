@@ -1,112 +1,62 @@
-// components/Footer.tsx
-import React from 'react';
-import Link from 'next/link';
-import { siteConfig } from '@/lib/siteConfig';
+import * as React from "react";
+import Link from "next/link";
+import { siteConfig, absUrl } from "@/lib/siteConfig";
 
-export default function Footer() {
-  const currentYear = new Date().getFullYear();
+export default function Footer(): JSX.Element {
+  const socials = siteConfig.socialLinks ?? [];
 
   return (
-    <footer className="bg-deepCharcoal text-warmWhite py-12">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xl font-serif font-semibold">
-                Abraham of London
-              </span>
-            </div>
-            <p className="text-warmWhite/70 text-sm leading-relaxed">
-              Professional insights and portfolio showcasing expertise in 
-              technology, leadership, and innovation.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-warmWhite">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link 
-                  href="/"
-                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/about"
-                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/print"
-                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
-                >
-                  Print Materials
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Connect Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-warmWhite">Connect</h3>
-            <div className="flex space-x-4">
-              (siteConfig.socialLinks ?? []).map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  target={social.external ? "_blank" : undefined}
-                  rel={social.external ? "noopener noreferrer" : undefined}
-                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
-                  aria-label={social.label}
-                >
-                  <span className="sr-only">{social.label}</span>
-                  {/* Add social icons here if needed */}
-                  {social.label}
-                </a>
-              ))}
-            </div>
-            <div className="text-sm text-warmWhite/70">
-              <a 
-                href={`mailto:${siteConfig.email}`}
-                className="hover:text-warmWhite transition-colors"
-              >
+    <footer className="mt-16 w-full border-t border-lightGrey bg-white text-deepCharcoal">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 md:flex-row">
+        <div className="text-sm">
+          <span className="font-semibold">{siteConfig.title}</span>
+          <span className="mx-2">•</span>
+          <Link href={absUrl("/")} className="hover:underline">
+            Home
+          </Link>
+          {siteConfig.email ? (
+            <>
+              <span className="mx-2">•</span>
+              <a href={`mailto:${siteConfig.email}`} className="hover:underline">
                 {siteConfig.email}
               </a>
-            </div>
-          </div>
+            </>
+          ) : null}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-warmWhite/20">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-sm text-warmWhite/60">
-              © {currentYear} {(siteConfig as any).company ?? "Abraham of London"}. All rights reserved.
-            </div>
-            <div className="flex space-x-6 text-sm text-warmWhite/60">
-              <Link 
-                href="/privacy"
-                className="hover:text-warmWhite transition-colors"
-              >
-                Privacy
-              </Link>
-              <Link 
-                href="/terms"
-                className="hover:text-warmWhite transition-colors"
-              >
-                Terms
-              </Link>
-            </div>
-          </div>
-        </div>
+        {socials.length > 0 && (
+          <ul className="flex flex-wrap items-center gap-4 text-sm">
+            {socials.map((social, index) => {
+              const href = social.href?.trim() ?? "#";
+              const label = social.label ?? href.replace(/^https?:\/\//, "");
+              const external = Boolean((social as any).external) || /^https?:\/\//i.test(href);
+
+              return (
+                <li key={`${label}-${index}`}>
+                  {external ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
+                      aria-label={label}
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <Link href={href} className="hover:underline" aria-label={label}>
+                      {label}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <div className="bg-warmWhite/60 py-4 text-center text-xs text-gray-600">
+        © {new Date().getFullYear()} {siteConfig.title}. All rights reserved.
       </div>
     </footer>
   );

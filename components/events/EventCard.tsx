@@ -1,132 +1,47 @@
-// components/events/EventCard.tsx
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { Event } from "@/lib/events";
 
-export interface EventResourceLink {
-  label: string;
-  href: string;
-  kind?: "download" | "read";
-}
+export type EventCardProps = {
+  slug: string;
+  title: string;
+  date?: string | null;
+  coverImage?: string | null;
+  summary?: string | null;
+};
 
-export interface EventResourcesProps {
-  downloads?: EventResourceLink[];
-  reads?: EventResourceLink[];
-}
-
-export interface EventCardProps {
-  event: Event;
-  layout?: "list" | "grid" | "detail";
-  showCta?: boolean;
-  resources?: EventResourcesProps | null;
-  tags?: string[] | null;
-}
-
-export function EventCard({
-  event,
-  layout = "list",
-  showCta = true,
-  resources,
-  tags,
+export default function EventCard({
+  slug,
+  title,
+  date,
+  coverImage,
+  summary,
 }: EventCardProps): JSX.Element {
-  const href = `/events/${event.slug}`;
-  const hasCover = Boolean(event.coverImage);
-  const effectiveTags = tags ?? (event.tags as string[] | undefined) ?? [];
-
-  const wrapperClasses =
-    layout === "detail"
-      ? "flex flex-col gap-6 rounded-2xl border border-lightGrey bg-warmWhite/60 p-6 shadow-sm"
-      : "flex flex-col gap-4 rounded-2xl border border-lightGrey bg-white/80 p-4 shadow-sm hover:shadow-md transition-shadow";
-
   return (
-    <article className={wrapperClasses}>
-      {hasCover && (
-        <div className="relative overflow-hidden rounded-xl">
-          <Image
-            src={event.coverImage as string}
-            alt={event.title}
-            width={1200}
-            height={630}
-            className="h-56 w-full object-cover"
-            priority={layout === "detail"}
-          />
+    <article className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+      {coverImage ? (
+        <div className="relative aspect-[16/9] w-full">
+          <Image src={coverImage} alt={title} fill className="object-cover" />
         </div>
-      )}
-
-      <div className="flex flex-col gap-3">
-        <header>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {event.category ?? "Event"}
+      ) : null}
+      <div className="p-4 md:p-5">
+        <h3 className="text-lg font-semibold text-deepCharcoal">
+          <Link href={`/events/${slug}`} className="hover:underline">
+            {title}
+          </Link>
+        </h3>
+        {date ? (
+          <p className="mt-1 text-sm text-gray-500">
+            {new Date(date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
           </p>
-          <h2 className="mt-1 text-xl font-semibold text-deepCharcoal">
-            <Link href={href} className="hover:underline">
-              {event.title}
-            </Link>
-          </h2>
-          {event.date && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              {event.dateReadable ?? event.date}
-            </p>
-          )}
-        </header>
-
-        {event.excerpt && (
-          <p className="text-sm text-muted-foreground">{event.excerpt}</p>
-        )}
-
-        {effectiveTags.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-2">
-            {effectiveTags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-forest/5 px-2.5 py-0.5 text-xs text-forest"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {resources && (resources.downloads?.length || resources.reads?.length) && (
-          <div className="mt-3 flex flex-wrap gap-3 text-xs">
-            {resources.downloads?.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="inline-flex items-center gap-1 underline"
-              >
-                {item.label}
-              </a>
-            ))}
-            {resources.reads?.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="inline-flex items-center gap-1 underline"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {showCta && (
-          <div className="mt-4">
-            <Link
-              href={href}
-              className="inline-flex items-center text-sm font-medium text-forest hover:underline"
-            >
-              View details
-              <span aria-hidden="true" className="ml-1">
-                →
-              </span>
-            </Link>
-          </div>
-        )}
+        ) : null}
+        {summary ? <p className="mt-3 text-sm text-gray-600">{summary}</p> : null}
+        <div className="mt-4">
+          <Link href={`/events/${slug}`} className="text-forest hover:underline text-sm font-medium">
+            View details →
+          </Link>
+        </div>
       </div>
     </article>
   );
 }
-
-export default EventCard;
