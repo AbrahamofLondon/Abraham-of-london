@@ -1,14 +1,28 @@
+// components/LuxuryAnimations.tsx
 import * as React from "react";
 
-export const FadeIn: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className, children }) => {
+export interface FadeInProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export const FadeIn: React.FC<FadeInProps> = ({ className, children }) => {
   return <div className={className}>{children}</div>;
 };
 
-export const Parallax: React.FC<React.PropsWithChildren<{ strength?: number; className?: string }>> = ({
+export interface ParallaxProps {
+  children?: React.ReactNode;
+  strength?: number;
+  className?: string;
+}
+
+export const Parallax: React.FC<ParallaxProps> = ({
   className,
   children,
 }) => {
   return <div className={className}>{children}</div>;
 };
 
-export default { FadeIn, Parallax };
+const LuxuryAnimations = { FadeIn, Parallax };
+
+export default LuxuryAnimations;
