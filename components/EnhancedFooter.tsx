@@ -1,6 +1,6 @@
 // components/EnhancedFooter.tsx (NUCLEAR OPTION - FORCE THROUGH)
 import Link from "next/link";
-import { siteConfig } from '...';
+import { siteConfig } from "@/lib/siteConfig";
 import clsx from "clsx";
 
 interface EnhancedFooterProps {

@@ -1,116 +1,77 @@
 // components/homepage/HeroBanner.tsx
-"use client"; 
-
 import * as React from "react";
-import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
+import Button from "@/components/Button";
 
-// --- Type Definitions ---
-type VideoSource = {
-  src: string;
-  type: "video/webm" | "video/mp4";
-  media?: string;
-};
-type Props = {
-  poster: string;
-  videoSources?: ReadonlyArray<VideoSource> | null;
-  heightClassName?: string | null;
-  mobileObjectPositionClass?: string;
-  overlay?: React.ReactNode;
-  className?: string;
-};
-// --- Component ---
-export default function HeroBanner({
-  poster,
-  videoSources,
-  heightClassName,
-  mobileObjectPositionClass = "object-center",
-  overlay,
-  className,
-}: Props) {
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
-  const sources: ReadonlyArray<VideoSource> = Array.isArray(videoSources) ? videoSources : [];
-  const hasVideo = sources.length > 0;
-  const normalizedHeight = heightClassName ?? "min-h-[70dvh] sm:min-h-[72dvh] lg:min-h-[78lvh]";
+export interface HeroBannerProps {
+  title: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
+  imageSrc?: string;
+  imageAlt?: string;
+}
 
-  React.useEffect(() => {
-    const v = videoRef.current;
-    if (!v || typeof window === 'undefined' || !("matchMedia" in window)) return;
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    
-    const handlePlayback = () => {
-      if (mql.matches) {
-        v.pause();
-        return;
-      }
-      v.play().catch(error => { /* Silently catch autoplay errors */ });
-    };
-    
-    handlePlayback();
-    mql.addEventListener("change", handlePlayback);
-    return () => mql.removeEventListener("change", handlePlayback);
-  }, [hasVideo]); 
-
-  // --- Image Fallback Props ---
-  const imageProps = {
-    src: poster,
-    alt: "", // ✅ Fixed alt prop warning
-    className: clsx("h-full w-full object-cover", mobileObjectPositionClass),
-    fill: true as const,
-    sizes: "100vw",
-    priority: true as const,
-  };
+export function HeroBanner({
+  title,
+  subtitle,
+  ctaLabel = "Explore the work",
+  ctaHref = "/",
+  secondaryCtaLabel,
+  secondaryCtaHref,
+  imageSrc = "/assets/images/abraham-of-london-banner.webp",
+  imageAlt = "Abraham of London hero banner",
+}: HeroBannerProps): JSX.Element {
   return (
-    <section
-      role="banner" 
-      className={clsx(
-        "relative isolate w-full overflow-hidden bg-black",
-        normalizedHeight,
-        className
-      )}
-    >
-      {hasVideo ? (
-        <video
-          ref={videoRef}
-          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
-          poster={poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata" 
-          aria-hidden="true"
-          onContextMenu={(e) => e.preventDefault()} 
-        >
-          {sources.map((s, i) => (
-            <source 
-              key={i} 
-              src={s.src} 
-              type={s.type} 
-              {...(s.media ? { media: s.media } : {})} 
-            />
-          ))}
-        </video>
-      ) : (
-        <Image {...imageProps} />
-      )}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,.35),transparent_40%,transparent_70%,rgba(0,0,0,.25))]"
-      />
-      {overlay ? (
-        <div className="relative z-[1] mx-auto flex h-full max-w-7xl items-end px-4 pb-10">
-          <div className="text-cream drop-shadow-[0_1px_10px_rgba(0,0,0,.35)]">{overlay}</div>
+    <section className="relative overflow-hidden bg-warmWhite">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 md:flex-row md:items-center">
+        <div className="flex-1 space-y-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Abraham of London
+          </p>
+          <h1 className="text-3xl font-semibold text-deepCharcoal sm:text-4xl lg:text-5xl">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
+              {subtitle}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-3">
+            {ctaHref && (
+              <Link href={ctaHref}>
+                <Button size="lg" variant="primary">
+                  {ctaLabel}
+                </Button>
+              </Link>
+            )}
+            {secondaryCtaHref && secondaryCtaLabel && (
+              <Link href={secondaryCtaHref}>
+                <Button size="lg" variant="ghost">
+                  {secondaryCtaLabel}
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
-      ) : null}
-      <noscript>
-        <img
-          alt="Decorative fallback image for hero section."
-          src={poster}
-          className={clsx("absolute inset-0 h-full w-full object-cover", mobileObjectPositionClass)}
-          loading="lazy"
-        />
-      </noscript>
+
+        <div className="relative flex-1">
+          <div className="relative h-64 w-full md:h-80">
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              priority
+              className="rounded-2xl object-cover shadow-lg"
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
+
+export default HeroBanner;

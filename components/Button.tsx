@@ -1,14 +1,14 @@
 // components/Button.tsx
-import { getFontClasses, fontPresets } from '...';
+import * as React from "react";
+import { fontPresets } from "@/lib/fonts";
 
-interface ButtonProps {
-  children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
-  size?: "sm" | "base" | "lg";
-  className?: string;
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  disabled?: boolean;
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
+export type ButtonSize = "sm" | "base" | "lg";
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
 }
 
@@ -17,44 +17,47 @@ export function Button({
   variant = "primary",
   size = "base",
   className = "",
-  onClick,
-  type = "button",
-  disabled = false,
   loading = false,
+  disabled,
+  type = "button",
+  ...rest
 }: ButtonProps) {
-  // Use getFontClasses for consistent typography
-  const buttonFont =
-    size === "sm"
-      ? fontPresets["button-sm"]
-      : size === "lg"
-        ? fontPresets["button-lg"]
-        : fontPresets.button;
-
   const baseClasses =
-    "inline-flex items-center justify-center rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center rounded-lg transition-all duration-200 " +
+    "focus:outline-none focus:ring-2 focus:ring-offset-2 " +
+    "disabled:opacity-50 disabled:cursor-not-allowed";
 
-  const variantClasses = {
+  const variantClasses: Record<ButtonVariant, string> = {
     primary:
-      "bg-forest text-white hover:bg-forest/90 focus:ring-forest border border-transparent shadow-sm hover:shadow-md",
+      "bg-forest text-white hover:bg-forest/90 focus:ring-forest " +
+      "border border-transparent shadow-sm hover:shadow-md",
     secondary:
-      "bg-warmWhite text-deepCharcoal hover:bg-gray-100 focus:ring-forest border border-lightGrey shadow-sm hover:shadow-md",
+      "bg-warmWhite text-deepCharcoal hover:bg-gray-100 focus:ring-forest " +
+      "border border-lightGrey shadow-sm hover:shadow-md",
     outline:
       "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-forest",
     ghost:
       "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-transparent",
   };
 
-  const sizeClasses = {
+  const sizeClasses: Record<ButtonSize, string> = {
     sm: "px-3 py-1.5 gap-1.5",
     base: "px-4 py-2 gap-2",
     lg: "px-6 py-3 gap-2.5",
   };
 
+  const fontClass =
+    size === "sm"
+      ? fontPresets["button-sm"]
+      : size === "lg"
+      ? fontPresets["button-lg"]
+      : fontPresets.button;
+
   const buttonClasses = [
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
-    buttonFont,
+    fontClass,
     className,
   ]
     .filter(Boolean)
@@ -64,11 +67,16 @@ export function Button({
     <button
       type={type}
       className={buttonClasses}
-      onClick={onClick}
       disabled={disabled || loading}
+      {...rest}
     >
       {loading && (
-        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg
+          className="animate-spin h-4 w-4 mr-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
           <circle
             className="opacity-25"
             cx="12"

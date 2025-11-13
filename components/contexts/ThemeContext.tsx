@@ -1,267 +1,58 @@
-// contexts/ThemeContext.tsx
+// components/contexts/ThemeContext.tsx
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import * as React from "react";
 
-// Enhanced safe localStorage with expiration and validation
-const createStorage = (namespace: string = "theme") => {
-  const getItem = (key: string): string | null => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        const item = localStorage.getItem(`${namespace}:${key}`);
-        if (!item) return null;
-        return item;
-      }
-    } catch (error) {
-      console.warn("localStorage access denied:", error);
-    }
-    return null;
-  };
+export type ThemeMode = "light" | "dark";
 
-  const setItem = (key: string, value: string): boolean => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.setItem(`${namespace}:${key}`, value);
-        return true;
-      }
-    } catch (error) {
-      console.warn("localStorage access denied:", error);
-    }
-    return false;
-  };
+export interface ThemeContextValue {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+}
 
-  const removeItem = (key: string): boolean => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.removeItem(`${namespace}:${key}`);
-        return true;
-      }
-    } catch (error) {
-      console.warn("localStorage access denied:", error);
-    }
-    return false;
-  };
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined,
+);
 
-  return { getItem, setItem, removeItem };
-};
+export interface ThemeProviderProps {
+  children: React.ReactNode;
+  initialTheme?: ThemeMode;
+}
 
-const themeStorage = createStorage("app-theme");
-
-// Enhanced safe matchMedia with subscription support
-const createMediaQuery = (query: string) => {
-  try {
-    if (typeof window !== "undefined" && window.matchMedia) {
-      const mediaQuery = window.matchMedia(query);
-
-      const subscribe = (callback: (matches: boolean) => void) => {
-        const handler = (event: MediaQueryListEvent) => callback(event.matches);
-        mediaQuery.addEventListener("change", handler);
-        return () => mediaQuery.removeEventListener("change", handler);
-      };
-
-      return {
-        matches: mediaQuery.matches,
-        subscribe,
-        mediaQuery,
-      };
-    }
-  } catch (error) {
-    console.warn("matchMedia not supported:", error);
-  }
-
-  return {
-    matches: false,
-    subscribe: () => () => {},
-    mediaQuery: null,
-  };
-};
-
-// System theme detection with real-time updates
-const useSystemTheme = () => {
-  const [systemTheme, setSystemTheme] = React.useState<"light" | "dark">(
-    "light",
-  );
+export function ThemeProvider({
+  children,
+  initialTheme = "light",
+}: ThemeProviderProps): JSX.Element {
+  const [theme, setTheme] = React.useState<ThemeMode>(initialTheme);
 
   React.useEffect(() => {
-    const darkMedia = createMediaQuery("(prefers-color-scheme: dark)");
-
-    setSystemTheme(darkMedia.matches ? "dark" : "light");
-
-    const unsubscribe = darkMedia.subscribe((isDark) => {
-      setSystemTheme(isDark ? "dark" : "light");
-    });
-
-    return unsubscribe;
-  }, []);
-
-  return systemTheme;
-};
-
-// Theme validation with strict typing
-const THEMES = ["light", "dark"] as const;
-type Theme = (typeof THEMES)[number];
-
-const isValidTheme = (theme: string): theme is Theme => {
-  return THEMES.includes(theme as Theme);
-};
-
-// Apply theme to DOM safely
-const applyThemeToDOM = (theme: Theme): void => {
-  try {
-    if (typeof document !== "undefined") {
-      const { documentElement } = document;
-
-      // Remove existing theme classes
-      documentElement.classList.remove("light", "dark");
-
-      // Add new theme class
-      documentElement.classList.add(theme);
-
-      // Set color-scheme CSS property
-      documentElement.style.colorScheme = theme;
-
-      // Set data-theme attribute for CSS variables
-      documentElement.setAttribute("data-theme", theme);
-
-      // Dispatch custom event for other components
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("themechange", {
-            detail: { theme, source: "user" },
-          }),
-        );
-      }
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
     }
-  } catch (error) {
-    console.error("Error applying theme to DOM:", error);
-  }
-};
-
-// Theme manager with persistence and synchronization
-const useThemeManager = () => {
-  const [mounted, setMounted] = React.useState(false);
-  const [resolvedTheme, setResolvedTheme] = React.useState<Theme>("light");
-  const systemTheme = useSystemTheme();
-
-  // Initialize theme on mount
-  React.useEffect(() => {
-    setMounted(true);
-
-    try {
-      const savedTheme = themeStorage.getItem("preference");
-      const systemTheme = createMediaQuery("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      let initialTheme: Theme = systemTheme;
-
-      if (savedTheme && isValidTheme(savedTheme)) {
-        initialTheme = savedTheme;
-      }
-
-      setResolvedTheme(initialTheme);
-      applyThemeToDOM(initialTheme);
-    } catch (error) {
-      console.error("Error initializing theme:", error);
-      setResolvedTheme("light");
-      applyThemeToDOM("light");
-    }
-  }, []);
-
-  // Sync theme across tabs - FIXED: Proper cleanup function
-  React.useEffect(() => {
-    // Early return for server-side
-    if (typeof window === "undefined") {
-      return () => {};
-    }
-
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === "app-theme:preference" && event.newValue) {
-        if (isValidTheme(event.newValue) && event.newValue !== resolvedTheme) {
-          setResolvedTheme(event.newValue);
-          applyThemeToDOM(event.newValue);
-        }
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [resolvedTheme]);
-
-  const setTheme = React.useCallback((theme: Theme) => {
-    try {
-      setResolvedTheme(theme);
-      applyThemeToDOM(theme);
-      themeStorage.setItem("preference", theme);
-    } catch (error) {
-      console.error("Error setting theme:", error);
-    }
-  }, []);
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const toggleTheme = React.useCallback(() => {
-    const newTheme = resolvedTheme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-  }, [resolvedTheme, setTheme]);
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  }, []);
 
-  const resetToSystem = React.useCallback(() => {
-    themeStorage.removeItem("preference");
-    setResolvedTheme(systemTheme);
-    applyThemeToDOM(systemTheme);
-  }, [systemTheme]);
-
-  return {
-    theme: resolvedTheme,
-    systemTheme,
-    mounted,
-    setTheme,
-    toggleTheme,
-    resetToSystem,
-    isModified: mounted && themeStorage.getItem("preference") !== null,
-  };
-};
-
-// Create the context
-const ThemeContext = React.createContext<ReturnType<
-  typeof useThemeManager
-> | null>(null);
-
-// Context provider for theme state management
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const themeManager = useThemeManager();
-  return (
-    <ThemeContext.Provider value={themeManager}>
-      {children}
-    </ThemeContext.Provider>
+  const value = React.useMemo<ThemeContextValue>(
+    () => ({ theme, setTheme, toggleTheme }),
+    [theme, toggleTheme],
   );
-};
 
-// Custom hook to use the theme context
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme(): ThemeContextValue {
+  const ctx = React.useContext(ThemeContext);
+  if (!ctx) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
-  return context;
-};
-
-// Export hooks for other components to use
-export { useSystemTheme };
-
-// Enhanced TypeScript declarations
-declare global {
-  interface WindowEventMap {
-    themechange: CustomEvent<{ theme: Theme; source: "user" | "system" }>;
-  }
+  return ctx;
 }

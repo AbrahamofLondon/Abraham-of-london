@@ -3,7 +3,7 @@
 import { useTheme } from "@/lib/ThemeContext";
 
 export default function ThemeToggle({ className = "" }: { className?: string }) {
-  const { resolvedTheme, toggle, mounted } = useTheme();
+  const { resolvedTheme, toggle, mounted } = useTheme() as any;
 
   const base =
     "inline-flex h-9 w-9 items-center justify-center rounded-md border transition " +

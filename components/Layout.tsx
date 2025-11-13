@@ -19,6 +19,7 @@ export type LayoutProps = {
   footerVariant?: "light" | "dark";
   hideCTA?: boolean;
   hero?: React.ReactNode;
+  showAfter?: number;
 };
 
 function toArray<T>(val: unknown): T[] {
@@ -40,13 +41,14 @@ export default function Layout({
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const firstMobileLinkRef = React.useRef<HTMLAnchorElement | null>(null);
+  const showAfterMs = (showAfter ?? 0) * 1000;
 
   const title = pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
 
   const normalize = (href: string) =>
     href.replace(/[?#].*$/, "").replace(/\/+$/, "") || "/";
   const isActive = (href: string) => normalize(pathname) === normalize(href);
-
+  
   React.useEffect(() => {
     const root = document.documentElement;
     const prev = root.style.overflow || "";

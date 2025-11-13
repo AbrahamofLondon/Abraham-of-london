@@ -1,30 +1,44 @@
-// Allow importing your siteConfig with richer fields
+// types/ambient.d.ts
+
+// ------------------------
+// siteConfig augmentation
+// ------------------------
 declare module "@/lib/siteConfig" {
-  export type SocialLink = { label: string; href: string };
+  export type SocialLink = { label: string; href: string; external?: boolean };
+
   export type SiteConfig = {
     siteUrl: string;
     title?: string;
     email?: string;
     author?: string;
-    authorImage?: string;
+    authorImage?: string;   // <- for BlogPostCard fallback
     ogImage?: string;
     twitterImage?: string;
     socialLinks?: SocialLink[];
   };
+
   export const siteConfig: SiteConfig;
   export function absUrl(path: string): string;
-  // Any other exports stay as-is; this augments types only.
+  export function getPageTitle(pageTitle?: string): string;
 }
 
-// Mark these as modules for TS typing (uses whatever the runtime files export)
+// ------------------------
+// Theme context (runtime module present at "@/lib/ThemeContext.tsx")
+// ------------------------
 declare module "@/lib/ThemeContext.tsx" {
   import * as React from "react";
-  export const ThemeProvider: React.FC<React.PropsWithChildren<{}>>;
-  export function useTheme(): { theme: "light" | "dark"; setTheme(t: "light" | "dark"): void };
+
+  export type ThemeName = "light" | "dark";
+  export function useTheme(): { theme: ThemeName; setTheme(t: ThemeName): void };
+
+  export const ThemeProvider: React.FC<React.PropsWithChildren<Record<string, never>>>;
   const _default: any;
   export default _default;
 }
 
+// ------------------------
+// GA helpers
+// ------------------------
 declare module "@/lib/gtag.ts" {
   export const GA_TRACKING_ID: string;
   export function pageview(url: string): void;
@@ -33,18 +47,36 @@ declare module "@/lib/gtag.ts" {
   export default _default;
 }
 
+// ------------------------
+// Hooks
+// ------------------------
 declare module "@/lib/hooks/useDebounce.ts" {
   export default function useDebounce<T>(value: T, delay?: number): T;
 }
 
+// ------------------------
+// Contentlayer generated types passthrough
+// ------------------------
 declare module "contentlayer/generated" {
-  // Wire TypeScript to your generated runtime at .contentlayer/generated/index.ts
-  export * from "../../.contentlayer/generated/index";
+  // Type-only re-export of the generated module (keeps TS happy in editors)
+  export * from "../.contentlayer/generated";
 }
 
-declare module "@/components/events/ChathamBadge.tsx" { const C: any; export default C; }
-declare module "@/components/events/EventMeta.tsx" { const C: any; export default C; }
+// ------------------------
+// Lightweight component stubs used in MDX routes (resolved at build time)
+// ------------------------
+declare module "@/components/events/ChathamBadge.tsx" {
+  const C: React.ComponentType<any>;
+  export default C;
+}
+declare module "@/components/events/EventMeta.tsx" {
+  const C: React.ComponentType<any>;
+  export default C;
+}
 
+// ------------------------
+// Event meta used in various places
+// ------------------------
 declare module "@/types/event.ts" {
   export type EventMeta = {
     slug: string;
@@ -57,5 +89,3 @@ declare module "@/types/event.ts" {
     chatham?: boolean;
   };
 }
-
-// MDXComponents casing aliases will import actual component at build time

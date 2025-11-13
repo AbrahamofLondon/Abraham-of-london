@@ -1,36 +1,27 @@
-// components/SocialFollowStrip.tsx
+// components/SocialLinks.tsx
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { siteConfig, type SocialLink as ConfigLink } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/siteConfig";
 
-type SocialItem = Pick<ConfigLink, "href" | "label" | "icon" | "kind" | "external">;
+interface SocialItem {
+  href: string;
+  label: string;
+  kind: string;
+  external: boolean;
+  icon?: string;
+}
 
-type Props = {
-  /** Light (default) = warm card; Dark = subtle glass on dark sections */
-  variant?: "light" | "dark";
-  className?: string;
-  /** Optionally override/extend items (e.g., reorder or limit) */
-  itemsOverride?: SocialItem[];
-};
-
-const isExternalHttp = (href: string) => /^https?:\/\//i.test(href);
-
-// Be flexible with kinds coming from config; always fall back to a generic icon.
-const ICONS: Partial<Record<NonNullable<SocialItem["kind"]>, string>> & Record<string, string> = {
-  x: "/assets/images/social/x.svg",
-  twitter: "/assets/images/social/x.svg",
-  instagram: "/assets/images/social/instagram.svg",
-  facebook: "/assets/images/social/facebook.svg",
-  linkedin: "/assets/images/social/linkedin.svg",
-  youtube: "/assets/images/social/youtube.svg",
-  whatsapp: "/assets/images/social/whatsapp.svg",
-  mail: "/assets/images/social/email.svg",
-  email: "/assets/images/social/email.svg",
-  phone: "/assets/images/social/phone.svg",
-  tiktok: "/assets/images/social/tiktok.svg",
-  website: "/assets/images/social/link.svg",
-  link: "/assets/images/social/link.svg",
+const ICONS: Record<string, string> = {
+  twitter: "/assets/icons/twitter.svg",
+  linkedin: "/assets/icons/linkedin.svg",
+  instagram: "/assets/icons/instagram.svg",
+  youtube: "/assets/icons/youtube.svg",
+  github: "/assets/icons/github.svg",
+  facebook: "/assets/icons/facebook.svg",
+  threads: "/assets/icons/threads.svg",
+  medium: "/assets/icons/medium.svg",
+  substack: "/assets/icons/substack.svg",
+  website: "/assets/icons/website.svg",
 };
 
 function toArray<T>(val: unknown): T[] {

@@ -1,4 +1,5 @@
-// app/print/[slug]/page.tsx
+// app/print/[slug].tsx (or app/print/[slug]/page.tsx in app router)
+import type React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -176,11 +177,9 @@ export default async function PrintPage({ params }: PageProps) {
   let mdx: MDXRemoteSerializeResult | null = null;
   if (meta.content && meta.content.trim()) {
     try {
-      // Convert meta to Record<string, unknown> to fix TypeScript error
-      const scope = { ...meta } as Record<string, unknown>;
-      
+      const scopeForMdx: Record<string, unknown> = { ...meta };
       mdx = await serialize(meta.content, {
-        scope: scope,
+        scope: scopeForMdx,
         mdxOptions: {
           development: process.env.NODE_ENV === "development",
         },
@@ -198,9 +197,13 @@ export default async function PrintPage({ params }: PageProps) {
     name: meta.title,
     description: meta.description || meta.excerpt || "",
     url,
-    ...(meta.author ? { author: { "@type": "Person", name: meta.author } } : {}),
+    ...(meta.author
+      ? { author: { "@type": "Person", name: meta.author } }
+      : {}),
     ...(meta.date ? { datePublished: meta.date } : {}),
-    ...(meta.tags && meta.tags.length > 0 ? { keywords: meta.tags.join(", ") } : {}),
+    ...(meta.tags && meta.tags.length > 0
+      ? { keywords: meta.tags.join(", ") }
+      : {}),
   };
 
   return (
@@ -297,8 +300,18 @@ export default async function PrintPage({ params }: PageProps) {
           className="rounded-full border border-gray-200 bg-white p-3 text-gray-600 shadow-lg transition-colors hover:text-deepCharcoal"
           title="Back to Print Materials"
         >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0 7-7m-7 7h18" />
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0 7-7m-7 7h18"
+            />
           </svg>
         </Link>
       </div>

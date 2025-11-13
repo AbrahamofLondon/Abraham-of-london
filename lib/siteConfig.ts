@@ -17,6 +17,8 @@ export interface SiteConfig {
   email: string;
   /** Optional social links used across the site */
   socialLinks?: SocialLink[];
+  /** Optional default author avatar used across blog cards, etc. */
+  authorImage?: string;
 }
 
 /**
@@ -24,10 +26,10 @@ export interface SiteConfig {
  * Keep this lean to avoid type churn across the app.
  */
 export const siteConfig: SiteConfig = {
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org")
-    .replace(/\/+$/, ""),
+  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, ""),
   title: "Abraham of London",
   email: "hello@abrahamoflondon.org",
+  authorImage: "/assets/images/profile-portrait.webp", // ✅ satisfies BlogPostCard
   socialLinks: [
     {
       href: "https://www.linkedin.com/in/abrahamadaramola",
@@ -46,11 +48,7 @@ export const siteConfig: SiteConfig = {
   ],
 };
 
-/**
- * Build an absolute URL safely.
- * - Absolute URLs are returned unchanged.
- * - Relative paths are joined onto siteConfig.siteUrl.
- */
+/** Build an absolute URL safely. */
 export function absUrl(path: string): string {
   const p = String(path || "").trim();
   if (!p) return siteConfig.siteUrl;
@@ -58,9 +56,7 @@ export function absUrl(path: string): string {
   return `${siteConfig.siteUrl}/${p.replace(/^\/+/, "")}`;
 }
 
-/**
- * Compose a page title consistently.
- */
+/** Compose a page title consistently. */
 export function getPageTitle(pageTitle?: string): string {
   const base = siteConfig.title || "Abraham of London";
   if (!pageTitle || typeof pageTitle !== "string") return base;

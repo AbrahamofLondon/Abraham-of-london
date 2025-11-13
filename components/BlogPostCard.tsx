@@ -1,228 +1,125 @@
 // components/BlogPostCard.tsx
-import * as React from "react";
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
-import clsx from "clsx";
+import Image from "next/image";
 import { siteConfig } from "@/lib/siteConfig";
-import { safeString } from "@/lib/safe-props";
 
-/**
- * BlogPostCard Component
- * - Robust cover fallback chain
- * - Resilient avatar fallback
- * - Accessible metadata (date, readTime, category)
- */
-
-export interface BlogPostCardProps {
+type PostLike = {
   slug: string;
   title: string;
-  date?: string;
-  excerpt?: string;
-  coverImage?: string;
-  author?: string | { name?: string; image?: string };
-  readTime?: string | number;
-  category?: string;
-  tags?: string[];
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
-  coverPosition?: "center" | "left" | "right";
+  excerpt?: string | null;
+  coverImage?: string | null;
+  date?: string | null;
+  readTime?: string | number | null;
+  tags?: string[] | null;
+  author?:
+    | { name?: string | null; picture?: string | null }
+    | string
+    | null
+    | undefined;
+};
+
+interface BlogPostCardProps {
+  post: PostLike;
 }
 
 const FALLBACK_AVATAR =
-  siteConfig.authorImage || "/assets/images/profile-portrait.webp";
+  siteConfig.authorImage ?? "/assets/images/profile-portrait.webp";
 
-const DEFAULT_COVERS = [
+const FALLBACK_COVERS = [
   "/assets/images/blog/default.webp",
-  "/assets/images/blog/default.jpg",
-] as const;
+  "/assets/images/writing-desk.webp",
+];
 
-/* -------------------------------------------------------------------------- */
-/*  Utility helpers                                                           */
-/* -------------------------------------------------------------------------- */
-
-const stripMarkup = (input?: string | null): string =>
-  input ? input.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim() : "";
-
-const normalizeLocal = (src?: string | null): string | undefined => {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return src; // allow absolute URLs
-  return src.startsWith("/") ? src : `/${src.replace(/^\/+/, "")}`;
-};
-
-function buildCoverCandidates(slug: string, coverImage?: string | null): string[] {
-  const s = safeString(slug).trim();
-  const base = [
-    normalizeLocal(coverImage),
-    `/assets/images/blog/${s}.webp`,
-    `/assets/images/blog/${s}.jpg`,
-    `/assets/images/blog/${s}.jpeg`,
-    `/assets/images/blog/${s}.png`,
-    ...DEFAULT_COVERS,
-  ].filter(Boolean) as string[];
-  return Array.from(new Set(base));
+function formatDateISOToGB(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return null;
+  return new Intl.DateTimeFormat("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  }).format(d);
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                 */
-/* -------------------------------------------------------------------------- */
+export default function BlogPostCard({ post }: BlogPostCardProps) {
+  const href = `/blog/${encodeURIComponent(post.slug)}`;
 
-export default function BlogPostCard({
-  slug,
-  title,
-  excerpt,
-  date,
-  coverImage,
-  author,
-  readTime,
-  category,
-  coverAspect = "book",
-  coverFit = "cover",
-  coverPosition = "center",
-}: BlogPostCardProps) {
-  // Author handling
+  const cover =
+    (post.coverImage && String(post.coverImage)) || FALLBACK_COVERS[0];
+
   const authorName =
-    typeof author === "string" ? author : author?.name || siteConfig.author;
-  const preferredAvatar =
-    (typeof author !== "string" && normalizeLocal(author?.image)) ||
-    FALLBACK_AVATAR;
+    typeof post.author === "string"
+      ? post.author
+      : post.author?.name || "Abraham of London";
 
-  const [avatarSrc, setAvatarSrc] = React.useState(preferredAvatar);
+  const authorPic =
+    (typeof post.author !== "string" && post.author?.picture) || FALLBACK_AVATAR;
 
-  // Cover fallback chain
-  const candidates = React.useMemo(
-    () => buildCoverCandidates(slug, coverImage),
-    [slug, coverImage],
-  );
-  const [idx, setIdx] = React.useState(0);
-  const [coverFailed, setCoverFailed] = React.useState(false);
-  const coverSrc = !coverFailed ? candidates[idx] : undefined;
+  const dateText = formatDateISOToGB(post.date);
 
-  const onCoverError = React.useCallback(() => {
-    setIdx((i) => {
-      const next = i + 1;
-      if (next < candidates.length) return next;
-      setCoverFailed(true);
-      return i;
-    });
-  }, [candidates.length]);
-
-  // Date formatting
-  const dt = date ? new Date(date) : null;
-  const valid = dt && !Number.isNaN(+dt);
-  const dateTime = valid ? dt!.toISOString().slice(0, 10) : undefined;
-  const dateLabel = valid
-    ? new Intl.DateTimeFormat("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }).format(dt!)
-    : undefined;
-
-  // Styling helpers
-  const aspectClass = clsx({
-    "aspect-[1/1]": coverAspect === "square",
-    "aspect-[16/9]": coverAspect === "wide",
-    "aspect-[2/3]": coverAspect === "book",
-  });
-
-  const imageClasses = clsx(
-    coverFit === "contain" ? "object-contain" : "object-cover",
-    {
-      "object-left": coverPosition === "left",
-      "object-right": coverPosition === "right",
-      "object-center": coverPosition === "center",
-    },
-  );
-
-  const frameClasses = clsx(
-    "relative w-full overflow-hidden rounded-t-2xl",
-    aspectClass,
-    coverFit === "contain" && "bg-warmWhite p-2 sm:p-3",
-  );
-
-  // Fallback initials
-  const initials = React.useMemo(() => {
-    const words = safeString(title).trim().split(/\s+/).slice(0, 3);
-    return (
-      words.map((w) => w[0]?.toUpperCase() || "").join("") || "A•L"
-    );
-  }, [title]);
-
-  const safeExcerpt = stripMarkup(excerpt);
-
-  /* ------------------------------------------------------------------------ */
-  /*  RENDER                                                                  */
-  /* ------------------------------------------------------------------------ */
+  const readText =
+    typeof post.readTime === "number"
+      ? `${post.readTime} min read`
+      : typeof post.readTime === "string" && post.readTime.trim()
+      ? post.readTime
+      : null;
 
   return (
-    <article className="rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link
-        href={`/blog/${slug}`}
-        className="block"
-        prefetch={false}
-        aria-label={`Read: ${title}`}
-      >
-        {/* Cover */}
-        <div className={frameClasses}>
-          {!coverFailed && coverSrc ? (
-            <Image
-              src={coverSrc}
-              alt={title || ""}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className={imageClasses}
-              onError={onCoverError}
-              priority={false}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[color:var(--color-primary)/0.1] to-[color:var(--color-on-secondary)/0.1]">
-              <span className="select-none font-serif text-4xl font-semibold text-[color:var(--color-on-secondary)/0.7]">
-                {initials}
-              </span>
-            </div>
-          )}
+    <article className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+      <Link href={href} className="block">
+        <div className="relative aspect-[16/9] w-full overflow-hidden">
+          <Image
+            src={cover}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="(min-width: 1024px) 600px, 100vw"
+            priority={false}
+          />
         </div>
 
-        {/* Body */}
-        <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
-            {title}
+        <div className="p-4">
+          <h3 className="mb-2 line-clamp-2 font-serif text-xl text-gray-900">
+            {post.title}
           </h3>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
-            {dateTime && <time dateTime={dateTime}>{dateLabel}</time>}
-            {readTime && (
-              <span aria-label="Estimated reading time">
-                {readTime} min read
-              </span>
-            )}
-            {category && (
-              <span className="inline-flex rounded-full border border-lightGrey px-2 py-0.5">
-                {category}
-              </span>
-            )}
-            <span className="luxury-link">Discuss</span>
-          </div>
-
-          {safeExcerpt && (
-            <p className="mt-3 line-clamp-3 text-sm text-[color:var(--color-on-secondary)/0.8]">
-              {safeExcerpt}
+          {post.excerpt ? (
+            <p className="mb-3 line-clamp-3 text-sm text-gray-600">
+              {post.excerpt}
             </p>
-          )}
+          ) : null}
 
           <div className="mt-4 flex items-center gap-3">
             <Image
-              src={avatarSrc}
-              alt={authorName || "Author"}
-              width={40}
-              height={40}
-              className="rounded-full object-cover"
-              onError={() => setAvatarSrc(FALLBACK_AVATAR)}
+              src={authorPic}
+              alt={authorName}
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover"
             />
-            <div className="text-xs text-[color:var(--color-on-secondary)/0.7]">
-              <p className="font-medium">{authorName}</p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+              <span className="font-medium text-gray-700">{authorName}</span>
+              {dateText ? <span aria-hidden>•</span> : null}
+              {dateText ? <time dateTime={post.date || undefined}>{dateText}</time> : null}
+              {readText ? <span aria-hidden>•</span> : null}
+              {readText ? <span>{readText}</span> : null}
             </div>
           </div>
+
+          {post.tags && post.tags.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {post.tags.slice(0, 3).map((t, i) => (
+                <span
+                  key={`${String(t)}-${i}`}
+                  className="rounded bg-gray-100 px-2 py-0.5 text-[11px] text-gray-700"
+                >
+                  {String(t)}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
       </Link>
     </article>

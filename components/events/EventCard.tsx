@@ -1,66 +1,132 @@
-// components/events/EventCard.tsx (ROBUST LINK GUARD)
-"use client";
+// components/events/EventCard.tsx
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx";
-import type { EventMeta, EventResources } from "@/types/event";
+import Image from "next/image";
+import type { Event } from "@/lib/events";
 
-type Props = Partial<EventMeta>;
+export interface EventResourceLink {
+  label: string;
+  href: string;
+  kind?: "download" | "read";
+}
 
-const DEFAULT_EVENT_IMAGE = "/assets/images/events/default.jpg";
+export interface EventResourcesProps {
+  downloads?: EventResourceLink[];
+  reads?: EventResourceLink[];
+}
 
-export default function EventCard({
-  slug,
-  title,
-  date,
-  location,
-  description,
-  tags,
-  heroImage,
+export interface EventCardProps {
+  event: Event;
+  layout?: "list" | "grid" | "detail";
+  showCta?: boolean;
+  resources?: EventResourcesProps | null;
+  tags?: string[] | null;
+}
+
+export function EventCard({
+  event,
+  layout = "list",
+  showCta = true,
   resources,
-}: Props) {
-  
-  // ✅ FIX: Guard the href against undefined/null slugs
-  const href = slug ? `/events/${slug}` : '#';
-  const isLinkDisabled = !slug;
+  tags,
+}: EventCardProps): JSX.Element {
+  const href = `/events/${event.slug}`;
+  const hasCover = Boolean(event.coverImage);
+  const effectiveTags = tags ?? (event.tags as string[] | undefined) ?? [];
 
-  const [currentHeroSrc, setCurrentHeroSrc] = React.useState(heroImage || DEFAULT_EVENT_IMAGE);
-  
-  const dt = React.useMemo(() => (date ? new Date(date) : null), [date]);
-  const isValidDate = dt && !Number.isNaN(+dt);
-  const dateLabel = isValidDate
-    ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric" }).format(dt!)
-    : date;
+  const wrapperClasses =
+    layout === "detail"
+      ? "flex flex-col gap-6 rounded-2xl border border-lightGrey bg-warmWhite/60 p-6 shadow-sm"
+      : "flex flex-col gap-4 rounded-2xl border border-lightGrey bg-white/80 p-4 shadow-sm hover:shadow-md transition-shadow";
 
   return (
-    <article className="group rounded-2xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover">
-      <Link href={href} prefetch={false} className={clsx("block", isLinkDisabled && "pointer-events-none")} aria-label={`View event details for: ${title}`}>
-        {/* Hero image container */}
-        <div className="relative w-full overflow-hidden rounded-t-2xl aspect-[16/10] bg-warmWhite">
+    <article className={wrapperClasses}>
+      {hasCover && (
+        <div className="relative overflow-hidden rounded-xl">
           <Image
-            src={currentHeroSrc}
-            alt={title ? `${title} event illustration` : "Event illustration"}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            onError={() => setCurrentHeroSrc(DEFAULT_EVENT_IMAGE)}
-            priority={false}
+            src={event.coverImage as string}
+            alt={event.title}
+            width={1200}
+            height={630}
+            className="h-56 w-full object-cover"
+            priority={layout === "detail"}
           />
         </div>
+      )}
 
-        <div className="p-5">
-          <h3 className="font-serif text-xl font-semibold text-deepCharcoal">{title}</h3>
+      <div className="flex flex-col gap-3">
+        <header>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            {event.category ?? "Event"}
+          </p>
+          <h2 className="mt-1 text-xl font-semibold text-deepCharcoal">
+            <Link href={href} className="hover:underline">
+              {event.title}
+            </Link>
+          </h2>
+          {event.date && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {event.dateReadable ?? event.date}
+            </p>
+          )}
+        </header>
 
-          {/* Date and Location */}
-          <div className="mt-1 text-sm text-[color:var(--color-on-secondary)]/[0.7]">
-            <span>{dateLabel}</span>
-            {location && <span className="ml-2">• {location}</span>}
+        {event.excerpt && (
+          <p className="text-sm text-muted-foreground">{event.excerpt}</p>
+        )}
+
+        {effectiveTags.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-2">
+            {effectiveTags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-forest/5 px-2.5 py-0.5 text-xs text-forest"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
+        )}
 
-          {description && <p className="mt-3 text-sm line-clamp-3 text-[color:var(--color-on-secondary)]/[0.85]">{description}</p>}
-        </div>
-      </Link>
+        {resources && (resources.downloads?.length || resources.reads?.length) && (
+          <div className="mt-3 flex flex-wrap gap-3 text-xs">
+            {resources.downloads?.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="inline-flex items-center gap-1 underline"
+              >
+                {item.label}
+              </a>
+            ))}
+            {resources.reads?.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="inline-flex items-center gap-1 underline"
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        )}
+
+        {showCta && (
+          <div className="mt-4">
+            <Link
+              href={href}
+              className="inline-flex items-center text-sm font-medium text-forest hover:underline"
+            >
+              View details
+              <span aria-hidden="true" className="ml-1">
+                →
+              </span>
+            </Link>
+          </div>
+        )}
+      </div>
     </article>
   );
 }
+
+export default EventCard;

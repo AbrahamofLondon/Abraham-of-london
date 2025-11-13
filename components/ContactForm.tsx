@@ -11,11 +11,12 @@ import {
 } from "framer-motion";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
 
+const siteMeta = siteConfig as any;
 const SITE_URL = siteConfig.siteUrl;
 const FORM_NAME = "contact-form";
 
 /** Use a cubic-bezier so TS is happy about Transition["ease"] */
-const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98 },

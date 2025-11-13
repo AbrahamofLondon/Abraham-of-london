@@ -1,6 +1,6 @@
 // components/QuickActionBar.tsx
 import Link from "next/link";
-import { useRouter } from '...';
+import { useRouter } from "next/router";
 import clsx from "clsx";
 
 interface QuickActionBarProps {

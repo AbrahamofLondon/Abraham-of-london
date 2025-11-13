@@ -2,10 +2,10 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { withFallback } from '@/lib/safe-fallbacks';
+import { withSafeFallback } from "@/lib/safe-fallbacks";
 
 // Base components with fallbacks
-const SafeLink = withFallback(Link, ({ href, children, ...props }: any) => (
+const Components = withSafeFallback(MdxComponents);
   <a href={href as string} {...props}>{children}</a>
 ));
 

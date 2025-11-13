@@ -1,49 +1,48 @@
 // components/mdx/ShareRow.tsx
-import * as React from 'react';
-import Link from 'next/link';
-import clsx from 'clsx';
-// Assuming you have a small SocialIcon component or just use text/emoji
-import { Share2 } from 'lucide-react'; 
+import * as React from "react";
 
-interface ShareRowProps {
-  text?: string;
-  hashtags?: string;
+export interface ShareRowProps {
+  url: string;
+  title: string;
 }
 
-/**
- * Renders a row with social media sharing links.
- */
-export default function ShareRow({ text = '', hashtags = '' }: ShareRowProps) {
-  const encodedText = encodeURIComponent(text);
-  const encodedHashtags = encodeURIComponent(hashtags.replace(/\s+/g, ','));
-  const url = encodeURIComponent(typeof window !== 'undefined' ? window.location.href : 'https://www.abrahamoflondon.org');
+export function ShareRow({ url, title }: ShareRowProps): JSX.Element {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
 
-  const shareLinks = [
-    { name: 'Twitter (X)', href: `https://twitter.com/intent/tweet?url=${url}&text=${encodedText}&hashtags=${encodedHashtags}` },
-    { name: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}` },
-    { name: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${url}` },
-    { name: 'Email', href: `mailto:?subject=${encodedText}&body=Check out this article: ${url}` },
-  ];
+  const twitterHref = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+  const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+  const whatsappHref = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
 
   return (
-    <div className="mt-12 py-4 border-t border-gray-200">
-      <h4 className="font-semibold text-sm text-deepCharcoal mb-3">Share This Insight</h4>
-      <div className="flex flex-wrap gap-3">
-        {shareLinks.map((link) => (
-          <a
-            key={link.name}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={clsx(
-              'inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800 transition'
-            )}
-          >
-            <Share2 className="w-4 h-4" />
-            {link.name}
-          </a>
-        ))}
-      </div>
+    <div className="mt-6 flex flex-wrap items-center gap-2 text-xs">
+      <span className="font-medium text-muted-foreground">Share:</span>
+      <a
+        href={twitterHref}
+        target="_blank"
+        rel="noreferrer"
+        className="underline"
+      >
+        X / Twitter
+      </a>
+      <a
+        href={linkedinHref}
+        target="_blank"
+        rel="noreferrer"
+        className="underline"
+      >
+        LinkedIn
+      </a>
+      <a
+        href={whatsappHref}
+        target="_blank"
+        rel="noreferrer"
+        className="underline"
+      >
+        WhatsApp
+      </a>
     </div>
   );
 }
+
+export default ShareRow;

@@ -193,11 +193,14 @@ export function LogoIcon(props: SvgProps) {
   );
 }
 
-// Export all logos for easy importing
-export default {
+// Create named export object
+const Logos = {
   LogoMonogram,
   LogoWordmark,
   LogoFull,
   LogoCompact,
   LogoIcon,
 };
+
+// Export all logos for easy importing
+export default Logos;

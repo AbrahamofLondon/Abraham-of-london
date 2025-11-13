@@ -1,57 +1,113 @@
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
+// components/Footer.tsx
+import React from 'react';
+import Link from 'next/link';
+import { siteConfig } from '@/lib/siteConfig';
 
-const AOF_URL = process.env.NEXT_PUBLIC_AOF_URL || "https://abrahamoflondon.org";
-const INNOVATE_HUB_URL =
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
-  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL ||
-  "https://innovatehub-abrahamoflondon.netlify.app";
-const ALOMARADA_URL = process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com";
-const ENDURELUXE_URL = process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://endureluxe.com";
-const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@abrahamoflondon.org";
-
-const socials = [
-  { href: "https://x.com/AbrahamAda48634?t=vXINB5EdYjhjr-eeb6tnjw&s=09", icon: "/assets/images/social/twitter.svg", label: "Twitter / X" },
-  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", icon: "/assets/images/social/linkedin.svg", label: "LinkedIn" },
-  { href: "https://www.instagram.com/abraham_of_london", icon: "/assets/images/social/instagram.svg", label: "Instagram" },
-  { href: "https://youtube.com", icon: "/assets/images/social/youtube.svg", label: "YouTube" },
-];
-
-const isExternal = (href: string) => /^https?:\/\//i.test(href) || href.startsWith("mailto:");
-
-function SmartLink({
-  href,
-  children,
-  className,
-  ariaLabel,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-  ariaLabel?: string;
-}) {
-  const base =
-    className ||
-    "hover:text-forest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-opacity-40 rounded-sm";
-
-  if (isExternal(href)) {
-    const isHttp = href.startsWith("http");
-    return (
-      <a
-        href={href}
-        className={base}
-        aria-label={ariaLabel}
-        {...(isHttp ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      >
-        {children}
-      </a>
-    );
-  }
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <Link href={href} prefetch={false} className={base} aria-label={ariaLabel}>
-      {children}
-    </Link>
+    <footer className="bg-deepCharcoal text-warmWhite py-12">
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Brand Section */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-xl font-serif font-semibold">
+                Abraham of London
+              </span>
+            </div>
+            <p className="text-warmWhite/70 text-sm leading-relaxed">
+              Professional insights and portfolio showcasing expertise in 
+              technology, leadership, and innovation.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-warmWhite">Quick Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link 
+                  href="/"
+                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/about"
+                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/print"
+                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
+                >
+                  Print Materials
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Connect Section */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-warmWhite">Connect</h3>
+            <div className="flex space-x-4">
+              (siteConfig.socialLinks ?? []).map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  target={social.external ? "_blank" : undefined}
+                  rel={social.external ? "noopener noreferrer" : undefined}
+                  className="text-warmWhite/70 hover:text-warmWhite transition-colors"
+                  aria-label={social.label}
+                >
+                  <span className="sr-only">{social.label}</span>
+                  {/* Add social icons here if needed */}
+                  {social.label}
+                </a>
+              ))}
+            </div>
+            <div className="text-sm text-warmWhite/70">
+              <a 
+                href={`mailto:${siteConfig.email}`}
+                className="hover:text-warmWhite transition-colors"
+              >
+                {siteConfig.email}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-warmWhite/20">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="text-sm text-warmWhite/60">
+              © {currentYear} {(siteConfig as any).company ?? "Abraham of London"}. All rights reserved.
+            </div>
+            <div className="flex space-x-6 text-sm text-warmWhite/60">
+              <Link 
+                href="/privacy"
+                className="hover:text-warmWhite transition-colors"
+              >
+                Privacy
+              </Link>
+              <Link 
+                href="/terms"
+                className="hover:text-warmWhite transition-colors"
+              >
+                Terms
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }

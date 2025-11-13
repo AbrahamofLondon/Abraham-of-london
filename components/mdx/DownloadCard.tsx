@@ -1,32 +1,43 @@
 // components/mdx/DownloadCard.tsx
-import * as React from 'react';
-import Link from 'next/link';
-import { Download } from 'lucide-react'; // Assuming lucide-react is the icon library
+import * as React from "react";
+import Link from "next/link";
 
-interface DownloadCardProps {
-    title: string;
-    href: string;
-    meta?: string;
+export interface DownloadCardProps {
+  title: string;
+  description?: string;
+  href: string;
+  fileType?: string;
+  fileSize?: string;
 }
 
-/**
- * Renders a stylized card for a downloadable resource.
- */
-export default function DownloadCard({ title, href, meta }: DownloadCardProps) {
-    return (
-        <a 
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block p-4 border border-lightGrey rounded-lg shadow-sm hover:shadow-md transition bg-white"
+export function DownloadCard({
+  title,
+  description,
+  href,
+  fileType,
+  fileSize,
+}: DownloadCardProps): JSX.Element {
+  return (
+    <article className="flex flex-col gap-2 rounded-xl border border-lightGrey bg-white/80 p-4 shadow-sm">
+      <h3 className="text-sm font-semibold text-deepCharcoal">{title}</h3>
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="flex gap-2">
+          {fileType && <span>{fileType}</span>}
+          {fileType && fileSize && <span>&middot;</span>}
+          {fileSize && <span>{fileSize}</span>}
+        </div>
+        <Link
+          href={href}
+          className="text-xs font-medium text-forest hover:underline"
         >
-            <div className="flex items-start">
-                <Download className="w-5 h-5 text-deepCharcoal flex-shrink-0 mt-1 mr-3" />
-                <div>
-                    <h4 className="font-semibold text-deepCharcoal text-base">{title}</h4>
-                    {meta && <p className="text-xs text-gray-500 mt-1">{meta}</p>}
-                </div>
-            </div>
-        </a>
-    );
+          Download
+        </Link>
+      </div>
+    </article>
+  );
 }
+
+export default DownloadCard;

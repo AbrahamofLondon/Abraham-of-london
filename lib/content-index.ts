@@ -1,7 +1,6 @@
 // lib/content-index.ts
 import path from 'node:path';
 import fs from 'fs';
-import { safeReadMdx } from '...';
 
 const ROOT = process.cwd();
 

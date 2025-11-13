@@ -1,7 +1,6 @@
 // components/blog/BlogPostPreview.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { safePostProp, safeString } from '...';
 import type { PostMeta } from "@/types/post";
 
 interface BlogPostPreviewProps {
@@ -10,13 +9,24 @@ interface BlogPostPreviewProps {
   className?: string;
 }
 
+// Local utility functions to replace the missing imports
+const safeString = (value: unknown, fallback: string = ""): string => {
+  if (typeof value === "string") return value.trim();
+  if (value == null) return fallback;
+  return String(value).trim() || fallback;
+};
+
+const safePostProp = (value: unknown): string => {
+  return safeString(value, "");
+};
+
 // Safe date formatting utility
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
 
   try {
     const date = new Date(dateString);
-    // Check if ___date is valid
+    // Check if date is valid
     if (isNaN(date.getTime())) return "";
 
     return date.toLocaleDateString("en-US", {

@@ -53,7 +53,7 @@ function isValidUrl(href?: string): boolean {
   if (!href) return false;
 
   try {
-    const url = new URL(href, window.location.origin);
+    new URL(href, window.location.origin);
     return ["http:", "https:", "mailto:", "tel:", "/"].some((protocol) =>
       href.startsWith(protocol),
     );
@@ -255,7 +255,7 @@ const MdxImage = React.memo(function MdxImage({
     );
   }
 
-  // Fallback to native img for remote images (bypassing Next.js Image optimization)
+  // Use Next.js Image for remote images with unoptimized to avoid domain configuration issues
   return (
     <figure className="my-6">
       <div
@@ -264,9 +264,12 @@ const MdxImage = React.memo(function MdxImage({
           imgLoading && "animate-pulse",
         )}
       >
-        <img
+        <Image
           src={safeSrc}
           alt={safeAlt}
+          width={width ? Number(width) : 1920}
+          height={height ? Number(height) : 1080}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 860px, 1024px"
           className={clsx(
             "h-auto w-full object-contain transition-opacity duration-300",
             imgLoading ? "opacity-0" : "opacity-100",
@@ -274,6 +277,7 @@ const MdxImage = React.memo(function MdxImage({
           )}
           onError={handleError}
           onLoad={handleLoad}
+          unoptimized={true} // Bypass Next.js image optimization for external domains
           {...props}
         />
 
@@ -289,7 +293,7 @@ const MdxImage = React.memo(function MdxImage({
       {/* Caption */}
       {safeAlt && (
         <figcaption className="mt-3 text-center text-sm text-deepCharcoal/70 leading-relaxed">
-            {safeAlt}
+          {safeAlt}
         </figcaption>
       )}
     </figure>
@@ -327,7 +331,7 @@ Pre.displayName = "MDXPre";
 const Code = React.memo(function Code({
   children,
   className,
-  "data-language": language,
+  "data-language": _language, // Prefix with _ to indicate unused
   ...props
 }: CodeProps) {
   const isBlock = className?.includes("language-");
@@ -340,7 +344,7 @@ const Code = React.memo(function Code({
           "block font-mono text-[0.9em] subpixel-antialiased",
           className,
         )}
-        data-language={language}
+        data-language={_language}
       >
         {children}
       </code>
@@ -575,8 +579,8 @@ const createHeading = (
         await navigator.clipboard.writeText(url);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
-      } catch (err) {
-        console.warn("Failed to copy link:", err);
+      } catch (_err) { // Prefix with _ to indicate unused
+        console.warn("Failed to copy link");
       }
     }, [headingId]);
 
