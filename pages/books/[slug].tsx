@@ -85,7 +85,7 @@ function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
   };
 
   return (
-    <Layout pageTitle={title}>
+    <Layout title={title}>
       <Head>
         <title>{title} | Abraham of London</title>
         <meta name="description" content={displayDescription} />
