@@ -176,8 +176,11 @@ export default async function PrintPage({ params }: PageProps) {
   let mdx: MDXRemoteSerializeResult | null = null;
   if (meta.content && meta.content.trim()) {
     try {
+      // Convert meta to Record<string, unknown> to fix TypeScript error
+      const scope = { ...meta } as Record<string, unknown>;
+      
       mdx = await serialize(meta.content, {
-        scope: meta,
+        scope: scope,
         mdxOptions: {
           development: process.env.NODE_ENV === "development",
         },
@@ -212,12 +215,10 @@ export default async function PrintPage({ params }: PageProps) {
       <BrandFrame
         title={meta.title}
         subtitle={meta.description || meta.excerpt || ""}
-        author={meta.author}
-        date={meta.date}
+        author={meta.author || undefined}
+        date={meta.date || undefined}
         pageSize="A4"
         marginsMm={18}
-        category={meta.category}
-        tags={meta.tags}
       >
         <article className="prose prose-lg mx-auto max-w-none print:prose-sm">
           <header className="mb-8 border-b border-gray-200 pb-6 print:mb-6 print:border-b print:pb-4">
