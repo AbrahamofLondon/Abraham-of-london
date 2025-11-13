@@ -1,83 +1,63 @@
 // types/book.ts
-import type { BaseContentMeta } from "./index";
-
-export interface BookMeta extends BaseContentMeta {
-  // Book identification
-  isbn?: string;
-  asin?: string;
-
-  // Publication details
+export interface BookMeta {
+  slug: string;
+  title: string;
+  author?: string;
   publisher?: string;
   publishedDate?: string;
+  isbn?: string;
+  description?: string;
+  summary?: string;
+  coverImage?: string;
+  heroImage?: string;
+  tags?: string[];
+  category?: string;
+  resources?: {
+    downloads?: Array<{ href: string; title?: string }>;
+    reads?: Array<{ href: string; title?: string }>;
+    videos?: Array<{ href: string; title?: string }>;
+  };
+  content?: string;
+  excerpt?: string;
+  status?: 'published' | 'draft' | 'archived';
+  featured?: boolean;
+  rating?: number;
   pages?: number;
   language?: string;
-  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
-
-  // Commercial details
-  price?: string;
-  currency?: string;
-  purchaseLink?: string;
-  affiliateLink?: string;
-
-  // Content details
-  genre?: string[];
-  rating?: number; // 1-5 scale
-  review?: string;
-  featuredQuote?: string;
-
-  // Technical details for display
-  coverAspect?: string;
-  coverFit?: "contain" | "cover";
-  coverPosition?: string;
-
-  // Reading status
-  status?: "want-to-read" | "reading" | "completed" | "abandoned";
-  startDate?: string;
-  endDate?: string;
-
-  // Additional metadata
-  goodreadsUrl?: string;
-  amazonUrl?: string;
+  format?: 'hardcover' | 'paperback' | 'ebook' | 'audiobook';
+  purchaseLinks?: Array<{
+    platform: string;
+    url: string;
+    price?: string;
+  }>;
 }
 
-// Book-specific utility functions
-export const createBookMeta = (
-  overrides: Partial<BookMeta> = {},
-): BookMeta => ({
-  slug: "",
-  title: "",
-  ...overrides,
-});
+export interface BookFilters {
+  category?: string;
+  author?: string;
+  status?: string;
+  featured?: boolean;
+  tags?: string[];
+}
 
-export const isValidBookMeta = (meta: unknown): meta is BookMeta => {
-  return (
-    typeof meta === "object" &&
-    meta !== null &&
-    "slug" in meta &&
-    "title" in meta &&
-    typeof (meta as BookMeta).slug === "string" &&
-    typeof (meta as BookMeta).title === "string"
-  );
-};
-
-// Book collection utilities
-export interface BookCollection {
+export interface BookListResponse {
   books: BookMeta[];
   total: number;
-  categories: string[];
-  genres: string[];
+  page: number;
+  limit: number;
+  hasMore: boolean;
 }
 
-export const createBookCollection = (books: BookMeta[]): BookCollection => {
-  const categories = Array.from(
-    new Set(books.map((book) => book.category).filter(Boolean)),
-  ) as string[];
-  const genres = Array.from(new Set(books.flatMap((book) => book.genre || [])));
+// Utility types for book operations
+export type BookField = keyof BookMeta;
+export type BookCreateInput = Omit<BookMeta, 'slug'>;
+export type BookUpdateInput = Partial<BookCreateInput>;
 
-  return {
-    books: books.sort((a, b) => (a.title || "").localeCompare(b.title || "")),
-    total: books.length,
-    categories,
-    genres,
-  };
-};
+// Validation schemas (for runtime validation if needed)
+export const bookRequiredFields: BookField[] = ['slug', 'title'];
+export const bookOptionalFields: BookField[] = [
+  'author', 'publisher', 'publishedDate', 'isbn', 'description', 'summary',
+  'coverImage', 'heroImage', 'tags', 'category', 'resources', 'content',
+  'excerpt', 'status', 'featured', 'rating', 'pages', 'language', 'format',
+  'purchaseLinks'
+];
