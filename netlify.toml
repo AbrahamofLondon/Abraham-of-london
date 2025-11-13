@@ -1,11 +1,7 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && pnpm run build:netlify"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+  command = "pnpm run build:netlify"   # keep your existing build pipeline
+  publish = "out"                      # or ".next" / "dist" depending on your setup
 
 [build.environment]
-  NODE_VERSION = "18"
-  
-[build.caching]
-  enabled = true
+  PNPM_FLAGS = "--no-frozen-lockfile"
+  NODE_VERSION = "20.11.1"             # align with Netlify logs
