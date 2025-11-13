@@ -1,107 +1,134 @@
 // pages/resources/[slug].tsx
-import { GetStaticProps, GetStaticPaths, InferGetStaticPropsType } from '...';
-import { allResources } from '...';
-import SiteLayout from '@/components/SiteLayout';
-import { components } from '...'; // Fixed import
-import { useMDXComponent } from '...';
+import type { GetStaticPaths, GetStaticProps } from "next";
+import type { ParsedUrlQuery } from "querystring";
+import * as React from "react";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
 
-interface ResourcePageProps {
-  resource: {
-    code: string;
-    frontmatter: {
-      title: string;
-      description: string;
-      date: string;
-      author: string;
-      category?: string;
-      tags?: string[];
-    };
-    slug: string;
-  };
+import SiteLayout from "@/components/SiteLayout";
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+
+interface Params extends ParsedUrlQuery {
+  slug: string;
 }
 
-export default function ResourcePage({
-  resource,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  const ResourceContent = useMDXComponent(resource.code);
+interface ResourcePageProps {
+  meta: PostMeta;
+  mdxSource: MDXRemoteSerializeResult;
+}
+
+// ----------------------------------------------------------------------
+// Page component
+// ----------------------------------------------------------------------
+
+export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
+  const { title, excerpt, coverImage, date } = meta;
 
   return (
     <SiteLayout
-      pageTitle={`${resource.frontmatter.title} - Resources - Abraham of London`}
-      metaDescription={resource.frontmatter.description}
-      canonicalUrl={`https://abrahamoflondon.com/resources/${resource.slug}`}
+      pageTitle={title}
+      metaDescription={excerpt || undefined}
+      ogImage={typeof coverImage === "string" ? coverImage : undefined}
+      ogType="article"
     >
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <article className="prose prose-lg max-w-none">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold mb-4">{resource.frontmatter.title}</h1>
-            <p className="text-xl text-gray-600 mb-4">{resource.frontmatter.description}</p>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-              <span>By {resource.frontmatter.author}</span>
-              <span>{resource.frontmatter.date}</span>
-              {resource.frontmatter.category && <span>{resource.frontmatter.category}</span>}
-            </div>
-          </header>
-
-          <div className="content">
-            <ResourceContent components={components} />
-          </div>
-
-          {resource.frontmatter.tags && resource.frontmatter.tags.length > 0 && (
-            <footer className="mt-8 pt-6 border-t">
-              <div className="flex flex-wrap gap-2">
-                {resource.frontmatter.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </footer>
+      <article className="mx-auto max-w-3xl px-4 py-12 prose prose-slate dark:prose-invert">
+        <header className="mb-8">
+          <p className="text-sm text-gray-500">
+            {date ? new Date(date).toLocaleDateString("en-GB") : null}
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+            {title}
+          </h1>
+          {excerpt && (
+            <p className="mt-3 text-lg text-gray-600 leading-relaxed">
+              {excerpt}
+            </p>
           )}
-        </article>
-      </div>
+          {coverImage && (
+            <div className="mt-6">
+              {/* Optional: add a responsive <Image> for the cover here */}
+            </div>
+          )}
+        </header>
+
+        <div className="mt-8">
+          <MDXRemote {...mdxSource} components={mdxComponents} />
+        </div>
+      </article>
     </SiteLayout>
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = allResources.map((resource) => ({
-    params: { slug: resource.slug },
-  }));
+// ----------------------------------------------------------------------
+// getStaticPaths
+// ----------------------------------------------------------------------
 
-  return {
-    paths,
-    fallback: false,
-  };
-};
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  try {
+    const resources = getAllContent("resources");
+    const paths =
+      resources?.map((item: any) => ({
+        params: { slug: String(item.slug) },
+      })) ?? [];
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const resource = allResources.find((resource) => resource.slug === params?.slug);
-
-  if (!resource) {
     return {
-      notFound: true,
+      paths,
+      fallback: false,
+    };
+  } catch (error) {
+    console.error("Error generating static paths for resources:", error);
+    return {
+      paths: [],
+      fallback: false,
     };
   }
+};
 
-  return {
-    props: {
-      resource: {
-        code: resource.body.code,
-        frontmatter: {
-          title: resource.title,
-          description: resource.description || resource.excerpt || '',
-          date: resource.date,
-          author: resource.author,
-          category: resource.category,
-          tags: resource.tags || [],
-        },
-        slug: resource.slug,
+// ----------------------------------------------------------------------
+// getStaticProps
+// ----------------------------------------------------------------------
+
+export const getStaticProps: GetStaticProps<
+  ResourcePageProps,
+  Params
+> = async (context) => {
+  const slug = context.params?.slug;
+  if (!slug) return { notFound: true };
+
+  try {
+    const { content, ...meta } = getContentBySlug(
+      "resources",
+      String(slug),
+      { withContent: true }
+    );
+
+    if (!meta || !meta.title) {
+      return { notFound: true };
+    }
+
+    const mdxSource = await serialize(content || "", {
+      parseFrontmatter: false,
+      scope: meta,
+      mdxOptions: {
+        remarkPlugins: [remarkGfm as any],
       },
-    },
-    revalidate: 3600,
-  };
+    });
+
+    return {
+      props: {
+        meta: meta as PostMeta,
+        mdxSource,
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error(`Error generating resource page for slug: ${slug}`, error);
+    return { notFound: true };
+  }
 };

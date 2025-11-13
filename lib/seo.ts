@@ -4,11 +4,13 @@ import Head from "next/head";
 export const SITE_NAME = "Abraham of London";
 export const ORIGIN =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+
 const DEFAULT_DESC =
   "Principled strategy, writing, and ventures that prioritise signal over noise. Discreet Chatham Rooms available—off the record.";
 const TWITTER_HANDLE = "@Abraham_of_LDN";
 
-function abs(path: string) {
+function abs(path: string): string {
+  if (!path) return ORIGIN;
   return path.startsWith("/") ? `${ORIGIN}${path}` : path;
 }
 
@@ -65,10 +67,16 @@ export function OgHead({
 }
 
 /* -------------------- JSON-LD helpers -------------------- */
-function JsonLd({ data }: { data: Record<string, any> }) {
+
+type JsonLdProps = {
+  data: Record<string, unknown>;
+};
+
+function JsonLd({ data }: JsonLdProps) {
   return (
     <script
       type="application/ld+json"
+      // We know this is safe structured data we control
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
@@ -94,7 +102,7 @@ export function ArticleJsonLd({
   const url = abs(path);
   const img = image ? abs(image) : undefined;
 
-  const data = {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
@@ -139,7 +147,7 @@ export function EventJsonLd({
     | "https://schema.org/EventMovedOnline"
     | "https://schema.org/EventCompleted";
 }) {
-  const data: any = {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Event",
     name,
@@ -150,13 +158,15 @@ export function EventJsonLd({
     image: image ? [abs(image)] : undefined,
     eventStatus: eventStatus || "https://schema.org/EventScheduled",
   };
+
   if (location?.name) {
-    data.location = {
+    (data as any).location = {
       "@type": "Place",
       name: location.name,
       address: location.address,
     };
   }
+
   return <JsonLd data={data} />;
 }
 
@@ -173,7 +183,7 @@ export function BookJsonLd({
   image?: string;
   description?: string;
 }) {
-  const data = {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Book",
     name,
@@ -183,6 +193,7 @@ export function BookJsonLd({
     description,
     publisher: { "@type": "Organization", name: SITE_NAME },
   };
+
   return <JsonLd data={data} />;
 }
 
@@ -191,7 +202,7 @@ export function BreadcrumbJsonLd({
 }: {
   items: Array<{ name: string; item: string }>;
 }) {
-  const data = {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: items.map((it, i) => ({
@@ -201,5 +212,6 @@ export function BreadcrumbJsonLd({
       item: it.item,
     })),
   };
+
   return <JsonLd data={data} />;
 }

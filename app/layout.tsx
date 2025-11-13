@@ -1,7 +1,7 @@
 // app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/lib/themeContext";
+import { ThemeProvider } from "@/lib/ThemeContext"; // 👈 capital T
 
 export const metadata: Metadata = {
   title: {

@@ -1,163 +1,135 @@
-// pages/downloads/[slug].tsx (FINAL ROBUST VERSION)
+// pages/resources/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
 import type { ParsedUrlQuery } from "querystring";
-import Image from "next/image";
-import Link from "next/link";
-import { format } from "date-fns";
 import * as React from "react";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
-import Layout from "@/components/Layout";
-import mdxComponents from '@/components/mdx-components';
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
+import SiteLayout from "@/components/SiteLayout";
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-type DownloadMeta = PostMeta & { pdfPath?: string | null };
-type Props = { meta: DownloadMeta; content: MDXRemoteSerializeResult };
-
-// Define proper TypeScript interfaces for params
 interface Params extends ParsedUrlQuery {
   slug: string;
 }
 
-// ----------------------------------------------------------------------
-// 1. getStaticProps (TypeScript-safe version)
-// ----------------------------------------------------------------------
-export const getStaticProps: GetStaticProps<Props, Params> = async (context) => {
-  // Safe parameter extraction with proper typing
-  const params = context.params!; // Non-null assertion justified by getStaticPaths
-  const slug = params.slug;
+interface ResourcePageProps {
+  meta: PostMeta;
+  mdxSource: MDXRemoteSerializeResult;
+}
 
+// ----------------------------------------------------------------------
+// Page component
+// ----------------------------------------------------------------------
+
+export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
+  const { title, excerpt, coverImage, date } = meta;
+
+  return (
+    <SiteLayout
+      pageTitle={title}
+      metaDescription={excerpt || undefined}
+      ogImage={typeof coverImage === "string" ? coverImage : undefined}
+      ogType="article"
+    >
+      <article className="mx-auto max-w-3xl px-4 py-12 prose prose-slate dark:prose-invert">
+        <header className="mb-8">
+          <p className="text-sm text-gray-500">
+            {date ? new Date(date).toLocaleDateString("en-GB") : null}
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+            {title}
+          </h1>
+          {excerpt && (
+            <p className="mt-3 text-lg text-gray-600 leading-relaxed">
+              {excerpt}
+            </p>
+          )}
+          {coverImage && (
+            <div className="mt-6">
+              {/* Optionally render a responsive <Image> here if you want */}
+            </div>
+          )}
+        </header>
+
+        <div className="mt-8">
+          <MDXRemote {...mdxSource} components={mdxComponents} />
+        </div>
+      </article>
+    </SiteLayout>
+  );
+}
+
+// ----------------------------------------------------------------------
+// getStaticPaths
+// ----------------------------------------------------------------------
+
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
   try {
-    const { content, ...data } = getContentBySlug("downloads", slug, { withContent: true });
+    const resources = getAllContent("resources");
+    const paths =
+      resources?.map((item: any) => ({
+        params: { slug: String(item.slug) },
+      })) ?? [];
 
-    if (!data.title) {
-      return { notFound: true };
-    }
-    
-    const meta: DownloadMeta = {
-      slug,
-      title: data.title ?? 'Untitled Download',
-      date: data.date ?? null,
-      excerpt: data.excerpt ?? null,
-      coverImage: data.coverImage ?? null,
-      pdfPath: (data as any).pdfPath ?? null,
-      author: data.author ?? "Abraham of London",
-      readTime: data.readTime ?? null,
-      category: data.category ?? null,
-      tags: Array.isArray(data.tags) ? data.tags : null,
-      coverAspect: data.coverAspect ?? null,
-      coverFit: data.coverFit ?? null,
-      coverPosition: data.coverPosition ?? null,
-    };
-
-    const mdx = await serialize(content || "", {
-      parseFrontmatter: false,
-      scope: meta,
-      mdxOptions: { remarkPlugins: [remarkGfm as any] },
-    });
-
-    return { 
-      props: JSON.parse(JSON.stringify({ meta, content: mdx })), 
-      revalidate: 3600 
+    return {
+      paths,
+      fallback: false,
     };
   } catch (error) {
-    console.error(`Error generating page for slug: ${slug}`, error);
+    console.error("Error generating static paths for resources:", error);
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
+};
+
+// ----------------------------------------------------------------------
+// getStaticProps
+// ----------------------------------------------------------------------
+
+export const getStaticProps: GetStaticProps<
+  ResourcePageProps,
+  Params
+> = async (context) => {
+  const slug = context.params?.slug;
+  if (!slug) return { notFound: true };
+
+  try {
+    // Mirror the downloads pattern: assume fs-based sync helper
+    const { content, ...meta } = getContentBySlug(
+      "resources",
+      String(slug),
+      { withContent: true }
+    );
+
+    if (!meta || !meta.title) {
+      return { notFound: true };
+    }
+
+    const mdxSource = await serialize(content || "", {
+      parseFrontmatter: false,
+      scope: meta,
+      mdxOptions: {
+        remarkPlugins: [remarkGfm as any],
+      },
+    });
+
+    return {
+      props: {
+        meta: meta as PostMeta,
+        mdxSource,
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error(`Error generating resource page for slug: ${slug}`, error);
     return { notFound: true };
   }
 };
-
-// ----------------------------------------------------------------------
-// 2. getStaticPaths (Robust version)
-// ----------------------------------------------------------------------
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  try {
-    const downloads = getAllContent("downloads");
-    const paths = downloads.map(item => ({
-      params: { 
-        slug: item.slug.toLowerCase() 
-      }
-    }));
-
-    return { 
-      paths,
-      fallback: "blocking" 
-    };
-  } catch (error) {
-    console.error("Error generating static paths:", error);
-    return {
-      paths: [],
-      fallback: "blocking"
-    };
-  }
-};
-
-// ----------------------------------------------------------------------
-// 3. COMPONENT (Enhanced with better accessibility and performance)
-// ----------------------------------------------------------------------
-export default function DownloadPage({ meta, content }: Props) {
-  const {
-    title, date, excerpt, coverImage, author, readTime, category, pdfPath
-  } = meta;
-
-  const formattedDate = date ? format(new Date(date), "MMMM d, yyyy") : "";
-  const authorName = String(author || "Abraham of London");
-
-  return (
-    <Layout pageTitle={title}>
-      <main className="mx-auto max-w-3xl px-4 py-10 md:py-16">
-        
-        {coverImage && (
-          <div className="mb-6 overflow-hidden rounded-xl border border-lightGrey shadow-card aspect-[16/9]">
-            <Image
-              src={String(coverImage)}
-              alt={title}
-              width={1600}
-              height={900}
-              sizes="(max-width: 768px) 100vw, 1200px"
-              className="h-auto w-full object-cover"
-              priority
-            />
-          </div>
-        )}
-
-        <h1 className="mb-4 font-serif text-4xl text-deepCharcoal md:text-5xl">{title}</h1>
-
-        <div className="mb-6 text-sm text-[color:var(--color-on-secondary)/0.7]">
-          <span>By {authorName}</span>
-          {date && (
-            <>
-              {" "}· <time dateTime={date}>{formattedDate}</time>
-            </>
-          )}
-          {readTime && <> · {readTime}</>}
-          {category && (
-            <span className="ml-2 inline-block rounded border border-lightGrey bg-warmWhite px-2 py-0.5 text-xs">
-              {category}
-            </span>
-          )}
-        </div>
-
-        <div className="prose prose-lg max-w-none text-deepCharcoal">
-          <MDXRemote {...content} components={mdxComponents} />
-        </div>
-
-        {pdfPath && (
-          <div className="mt-10">
-            <Link 
-              href={String(pdfPath)} 
-              className="aol-btn" 
-              download
-              rel="noopener noreferrer"
-              prefetch={false}
-            >
-              Download PDF
-            </Link>
-          </div>
-        )}
-      </main>
-    </Layout>
-  );
-}

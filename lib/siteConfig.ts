@@ -1,6 +1,6 @@
 // lib/siteConfig.ts
-export { siteConfig, authorImage, canonicalUrl } from "@/config/site";
-export type { SiteConfig } from "@/config/site";
+// Lean, browser-safe site configuration used by Layout & SiteLayout.
+// No 'fs', no Node-only APIs.
 
 export interface SocialLink {
   href: string;
@@ -24,20 +24,32 @@ export interface SiteConfig {
  * Keep this lean to avoid type churn across the app.
  */
 export const siteConfig: SiteConfig = {
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, ""),
+  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org")
+    .replace(/\/+$/, ""),
   title: "Abraham of London",
   email: "hello@abrahamoflondon.org",
   socialLinks: [
-    { href: "https://www.linkedin.com/in/abrahamadaramola", label: "LinkedIn", external: true },
-    { href: "https://x.com/AbrahamOfLondon", label: "X (Twitter)", external: true },
-    { href: "mailto:hello@abrahamoflondon.org", label: "Email" },
+    {
+      href: "https://www.linkedin.com/in/abrahamadaramola",
+      label: "LinkedIn",
+      external: true,
+    },
+    {
+      href: "https://x.com/AbrahamOfLondon",
+      label: "X (Twitter)",
+      external: true,
+    },
+    {
+      href: "mailto:hello@abrahamoflondon.org",
+      label: "Email",
+    },
   ],
 };
 
 /**
  * Build an absolute URL safely.
- * - Accepts absolute URLs unchanged.
- * - Joins relative paths to siteConfig.siteUrl.
+ * - Absolute URLs are returned unchanged.
+ * - Relative paths are joined onto siteConfig.siteUrl.
  */
 export function absUrl(path: string): string {
   const p = String(path || "").trim();

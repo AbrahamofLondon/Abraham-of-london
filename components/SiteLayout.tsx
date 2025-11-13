@@ -1,7 +1,8 @@
 // components/SiteLayout.tsx
 import React from "react";
 import Head from "next/head";
-import { useRouter } from '...';
+import { useRouter } from "next/router";
+import { absUrl, getPageTitle, siteConfig } from "@/lib/siteConfig";
 
 // Types for enhanced type safety
 interface MetaTag {
@@ -59,7 +60,7 @@ class LayoutErrorBoundary extends React.Component<
   },
   { hasError: boolean; error?: Error }
 > {
-  constructor(props: unknown) {
+  constructor(props: any) {
     super(props);
     this.state = { hasError: false };
   }
@@ -70,7 +71,6 @@ class LayoutErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Layout Error:", error, errorInfo);
-    // You can log to your error reporting service here
   }
 
   render() {
@@ -87,8 +87,8 @@ class LayoutErrorBoundary extends React.Component<
                 Layout Error
               </h1>
               <p className="text-gray-600 mb-6">
-                We're experiencing technical difficulties. Please try refreshing
-                the page.
+                We&apos;re experiencing technical difficulties. Please try
+                refreshing the page.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -140,22 +140,21 @@ export default function SiteLayout({
   const router = useRouter();
   const currentPath = router.asPath;
 
-  // Build full page title
-  const fullTitle = React.useMemo(() => {
-    const baseTitle = "Your Site Name"; // Replace with your actual site name
-    return pageTitle ? `${pageTitle} | ${baseTitle}` : baseTitle;
-  }, [pageTitle]);
+  // Build full page title using siteConfig helper
+  const fullTitle = React.useMemo(
+    () => getPageTitle(pageTitle),
+    [pageTitle]
+  );
 
   // Build canonical URL
   const fullCanonicalUrl = React.useMemo(() => {
     if (canonicalUrl) return canonicalUrl;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com";
-    return `${baseUrl}${currentPath}`;
+    return absUrl(currentPath || "/");
   }, [canonicalUrl, currentPath]);
 
   // Build meta robots content
   const robotsContent = React.useMemo(() => {
-    const directives = [];
+    const directives: string[] = [];
     if (noIndex) directives.push("noindex");
     if (noFollow) directives.push("nofollow");
     if (directives.length === 0) directives.push("index", "follow");
@@ -167,7 +166,9 @@ export default function SiteLayout({
     () => [
       {
         name: "description",
-        content: metaDescription || "Default description of your website",
+        content:
+          metaDescription ||
+          "Abraham of London — strategy, fatherhood, and legacy for a world that has lost its bearings.",
       },
       { name: "robots", content: robotsContent },
       { name: "theme-color", content: themeColor },
@@ -176,22 +177,32 @@ export default function SiteLayout({
       { property: "og:title", content: fullTitle },
       { property: "og:type", content: ogType },
       { property: "og:url", content: fullCanonicalUrl },
-      { property: "og:image", content: ogImage || "/default-og-image.jpg" },
+      {
+        property: "og:image",
+        content: ogImage || "/assets/images/social/og-image.jpg",
+      },
       {
         property: "og:description",
-        content: metaDescription || "Default description of your website",
+        content:
+          metaDescription ||
+          "Abraham of London — strategy, fatherhood, and legacy for a world that has lost its bearings.",
       },
-      { property: "og:site_name", content: "Your Site Name" },
-      { property: "og:locale", content: "en_US" },
+      { property: "og:site_name", content: siteConfig.title },
+      { property: "og:locale", content: "en_GB" },
 
       // Twitter Card
       { name: "twitter:card", content: twitterCard },
       { name: "twitter:title", content: fullTitle },
       {
         name: "twitter:description",
-        content: metaDescription || "Default description of your website",
+        content:
+          metaDescription ||
+          "Abraham of London — strategy, fatherhood, and legacy for a world that has lost its bearings.",
       },
-      { name: "twitter:image", content: ogImage || "/default-og-image.jpg" },
+      {
+        name: "twitter:image",
+        content: ogImage || "/assets/images/social/twitter-image.jpg",
+      },
 
       // Additional useful meta tags
       { name: "viewport", content: viewport },
@@ -208,7 +219,7 @@ export default function SiteLayout({
       twitterCard,
       viewport,
       charset,
-    ],
+    ]
   );
 
   // Default link tags
@@ -220,7 +231,7 @@ export default function SiteLayout({
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.json" },
     ],
-    [fullCanonicalUrl],
+    [fullCanonicalUrl]
   );
 
   // Combine default and custom tags
@@ -231,10 +242,10 @@ export default function SiteLayout({
           array.findIndex(
             (t) =>
               (t.name === tag.name && t.property === tag.property) ||
-              t.key === tag.key,
-          ) === index,
+              t.key === tag.key
+          ) === index
       ),
-    [defaultMetaTags, metaTags],
+    [defaultMetaTags, metaTags]
   );
 
   const allLinkTags = React.useMemo(
@@ -242,9 +253,9 @@ export default function SiteLayout({
       [...defaultLinkTags, ...linkTags].filter(
         (tag, index, array) =>
           array.findIndex((t) => t.rel === tag.rel && t.href === tag.href) ===
-          index,
+          index
       ),
-    [defaultLinkTags, linkTags],
+    [defaultLinkTags, linkTags]
   );
 
   // Structured data for SEO
@@ -296,7 +307,7 @@ export default function SiteLayout({
         />
 
         {/* Performance hints */}
-        <link rel="dns-prefetch" href="//cdn.yoursite.com" />
+        <link rel="dns-prefetch" href="//cdn.abrahamoflondon.org" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
       </Head>
 
@@ -312,9 +323,6 @@ export default function SiteLayout({
           className={`min-h-screen flex flex-col bg-white text-gray-900 antialiased ${className}`}
           lang={lang}
         >
-          {/* You can add header component here */}
-          {/* <Header /> */}
-
           <main
             id={skipToContentId}
             className="flex-1 focus:outline-none"
@@ -322,9 +330,6 @@ export default function SiteLayout({
           >
             {children}
           </main>
-
-          {/* You can add footer component here */}
-          {/* <Footer /> */}
         </div>
       </ErrorBoundary>
 
@@ -334,7 +339,6 @@ export default function SiteLayout({
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
-            // Your analytics initialization code here
           `,
         }}
       />
@@ -346,7 +350,7 @@ export default function SiteLayout({
 export function usePageMetadata(
   title: string,
   description?: string,
-  additionalMeta: Partial<SiteLayoutProps> = {},
+  additionalMeta: Partial<SiteLayoutProps> = {}
 ) {
   return React.useMemo(
     () => ({
@@ -354,14 +358,14 @@ export function usePageMetadata(
       metaDescription: description,
       ...additionalMeta,
     }),
-    [title, description, additionalMeta],
+    [title, description, additionalMeta]
   );
 }
 
 // Higher Order Component for page-level layouts
 export function withSiteLayout<P extends object>(
   Component: React.ComponentType<P>,
-  layoutProps: Omit<SiteLayoutProps, "children">,
+  layoutProps: Omit<SiteLayoutProps, "children">
 ) {
   return function LayoutWrapper(props: P) {
     return (
@@ -375,7 +379,7 @@ export function withSiteLayout<P extends object>(
 // Utility function for generating structured data
 export function generateStructuredData(
   type: "Article" | "WebPage" | "Organization",
-  data: object,
+  data: object
 ) {
   const baseStructure = {
     "@context": "https://schema.org",

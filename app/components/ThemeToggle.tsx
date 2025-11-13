@@ -2,7 +2,9 @@
 
 import React from "react";
 // Alias to avoid conflict with any global/local `useTheme`
-import { useTheme as useAppTheme } from '...';
+import { useTheme as useAppTheme } from "@/app/contexts/ThemeContext";
+
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeToggleProps {
   className?: string;
@@ -25,15 +27,15 @@ export default function ThemeToggle({
 }: ThemeToggleProps) {
   // Use the aliased hook
   const themeContext = useAppTheme() as any;
-  const { theme, mounted, toggle } = themeContext;
-  const resolvedTheme = themeContext.resolvedTheme || theme;
+  const { mounted, toggle } = themeContext || {};
+  const resolvedTheme = themeContext?.resolvedTheme || themeContext?.theme || "light";
 
   const [isHovered, setIsHovered] = React.useState(false);
   const [isPressed, setIsPressed] = React.useState(false);
 
   React.useEffect(() => {
     if (mounted && onThemeChange) {
-      onThemeChange(resolvedTheme);
+      onThemeChange(String(resolvedTheme));
     }
   }, [resolvedTheme, mounted, onThemeChange]);
 
@@ -42,7 +44,7 @@ export default function ThemeToggle({
       button: "w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg",
       icon: "w-3.5 h-3.5",
       container: "p-2 rounded-md",
-      touch: "min-w[44px] min-h[44px]",
+      touch: "min-w-[44px] min-h-[44px]",
     },
     md: {
       button: "w-12 h-12 min-w-[48px] min-h-[48px] rounded-xl",

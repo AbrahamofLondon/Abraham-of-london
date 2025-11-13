@@ -1,10 +1,15 @@
-/** @type {import("next").NextConfig} */
-const path = require("node:path");
+// next.config.mjs
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
 
-  // Let the build proceed even if TypeScript/ESLint complain
+  // ✅ Allow the app to build even if TS/ESLint complain
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 
@@ -12,14 +17,14 @@ const nextConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      // If any stray imports still reference Contentlayer, point to a harmless stub.
+      // ✅ Route any `contentlayer/generated` import to a stub
       "contentlayer/generated": path.resolve(
         __dirname,
         "lib/stubs/contentlayer-generated.js"
-      ),
+      )
     };
     return config;
-  },
+  }
 };
 
-module.exports = nextConfig;
+export default nextConfig;
