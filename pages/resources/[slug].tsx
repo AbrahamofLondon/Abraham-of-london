@@ -30,6 +30,11 @@ interface ResourcePageProps {
 export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
   const { title, excerpt, coverImage, date } = meta;
 
+  const displayDate =
+    date && !Number.isNaN(new Date(date).valueOf())
+      ? new Date(date).toLocaleDateString("en-GB")
+      : "";
+
   return (
     <SiteLayout
       pageTitle={title}
@@ -39,20 +44,22 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
     >
       <article className="mx-auto max-w-3xl px-4 py-12 prose prose-slate dark:prose-invert">
         <header className="mb-8">
-          <p className="text-sm text-gray-500">
-            {date ? new Date(date).toLocaleDateString("en-GB") : null}
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900">
+          {displayDate && (
+            <p className="text-sm text-gray-500">
+              {displayDate}
+            </p>
+          )}
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             {title}
           </h1>
           {excerpt && (
-            <p className="mt-3 text-lg text-gray-600 leading-relaxed">
+            <p className="mt-3 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               {excerpt}
             </p>
           )}
           {coverImage && (
             <div className="mt-6">
-              {/* Optional: add a responsive <Image> for the cover here */}
+              {/* Optional: add <Image /> if you want visual covers */}
             </div>
           )}
         </header>
@@ -94,24 +101,25 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 // getStaticProps
 // ----------------------------------------------------------------------
 
-export const getStaticProps: GetStaticProps<
-  ResourcePageProps,
-  Params
-> = async (context) => {
+export const getStaticProps: GetStaticProps<ResourcePageProps, Params> = async (
+  context
+) => {
   const slug = context.params?.slug;
-  if (!slug) return { notFound: true };
+
+  if (!slug || typeof slug !== "string") {
+    return { notFound: true };
+  }
 
   try {
-    const { content, ...meta } = getContentBySlug(
-      "resources",
-      String(slug),
-      { withContent: true }
-    );
+    const { content, ...meta } = getContentBySlug("resources", slug, {
+      withContent: true,
+    });
 
-    if (!meta || !meta.title) {
+    if (!meta || !(meta as PostMeta).title) {
       return { notFound: true };
     }
 
+    // Always serialize something (even empty string) to avoid MDXRemote runtime errors
     const mdxSource = await serialize(content || "", {
       parseFrontmatter: false,
       scope: meta,
