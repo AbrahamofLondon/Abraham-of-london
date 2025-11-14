@@ -9,16 +9,18 @@ interface BlogPostPreviewProps {
   className?: string;
 }
 
-// Local utility functions to replace the missing imports
+// -----------------------------------------------------------------------------
+// Local utility functions (safe, JSON-friendly, no external deps)
+// -----------------------------------------------------------------------------
+
 const safeString = (value: unknown, fallback: string = ""): string => {
   if (typeof value === "string") return value.trim();
   if (value == null) return fallback;
-  return String(value).trim() || fallback;
+  const asString = String(value).trim();
+  return asString || fallback;
 };
 
-const safePostProp = (value: unknown): string => {
-  return safeString(value, "");
-};
+const safePostProp = (value: unknown): string => safeString(value, "");
 
 // Safe date formatting utility
 const formatDateSafe = (dateString: string | null | undefined): string => {
@@ -26,10 +28,9 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
 
   try {
     const date = new Date(dateString);
-    // Check if date is valid
-    if (isNaN(date.getTime())) return "";
+    if (Number.isNaN(date.getTime())) return "";
 
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -39,18 +40,45 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
   }
 };
 
-// Safe image URL utility
-const getSafeImageUrl = (imageUrl: string | null | undefined): string => {
-  const url = safeString(imageUrl);
+// Cover image can be string or StaticImageData-like
+type CoverImageLike =
+  | string
+  | { src?: string | undefined }
+  | null
+  | undefined;
+
+// Safe image URL utility – supports string or StaticImageData-style objects
+const getSafeImageUrl = (image: CoverImageLike): string => {
+  if (!image) return "";
+
+  // Static import (e.g. next/image StaticImageData)
+  if (typeof image === "object") {
+    const candidate = safeString((image as { src?: string }).src);
+    if (!candidate) return "";
+    if (candidate.startsWith("/")) return candidate;
+    try {
+      // Absolute URL
+      // eslint-disable-next-line no-new
+      new URL(candidate);
+      return candidate;
+    } catch {
+      return "";
+    }
+  }
+
+  // Plain string path or URL
+  const url = safeString(image);
   if (!url) return "";
 
-  // Validate URL format
+  // Allow relative paths starting with "/"
+  if (url.startsWith("/")) return url;
+
+  // Validate absolute URL
   try {
+    // eslint-disable-next-line no-new
     new URL(url);
     return url;
   } catch {
-    // If it's a relative path, it's fine
-    if (url.startsWith("/")) return url;
     return "";
   }
 };
@@ -64,16 +92,16 @@ export default function BlogPostPreview({
   const safeExcerpt = safePostProp(post.excerpt);
   const safeDate = formatDateSafe(post.date);
   const safeReadTime = safePostProp(post.readTime);
-  const safeCoverImage = getSafeImageUrl(post.coverImage);
+  const safeCoverImage = getSafeImageUrl(post.coverImage as CoverImageLike);
+
+  // Route aligned with pages/post/[slug].tsx
+  const safeSlug = safeString(post.slug);
+  const href = safeSlug ? `/post/${safeSlug}` : "#";
 
   return (
     <article className={`group ${className}`}>
-      <Link
-        href={`/blog/${post.slug}`}
-        className="block h-full"
-        prefetch={false}
-      >
-        <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 group-hover:shadow-md">
+      <Link href={href} className="block h-full" prefetch={false}>
+        <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md">
           {/* Cover Image */}
           {safeCoverImage && (
             <div className="aspect-[4/3] overflow-hidden bg-gray-100">
@@ -83,6 +111,7 @@ export default function BlogPostPreview({
                 width={400}
                 height={300}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                // Static blur placeholder – safe even for dynamic paths
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
               />
@@ -93,7 +122,7 @@ export default function BlogPostPreview({
           <div className="flex flex-1 flex-col p-6">
             {/* Title */}
             <h3
-              className={`font-serif font-semibold text-deepCharcoal mb-3 line-clamp-2 ${
+              className={`mb-3 line-clamp-2 font-serif font-semibold text-deepCharcoal ${
                 featured ? "text-2xl" : "text-xl"
               }`}
             >
@@ -102,13 +131,13 @@ export default function BlogPostPreview({
 
             {/* Excerpt */}
             {safeExcerpt && (
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">
+              <p className="mb-4 flex-1 line-clamp-3 text-sm text-gray-600">
                 {safeExcerpt}
               </p>
             )}
 
             {/* Metadata */}
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+            <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
               {/* Date */}
               {safeDate && (
                 <time dateTime={post.date || undefined}>{safeDate}</time>
@@ -117,7 +146,7 @@ export default function BlogPostPreview({
               {/* Read Time */}
               {safeReadTime && <span>{safeReadTime}</span>}
 
-              {/* Empty spacer when no metadata */}
+              {/* Spacer when no metadata */}
               {!safeDate && !safeReadTime && <span />}
             </div>
 
