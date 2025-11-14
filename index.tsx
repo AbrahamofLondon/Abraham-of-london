@@ -68,6 +68,12 @@ const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
 const testimonials = [
   {
     quote:
+      "Abraham has walked these paths, forged in fire, yet still leads with kindness and truth. Every interaction with him – in how he lives, works, and loves – challenges me to reject what is popular but wrong and refuse the comfort of an average life.",
+    author: "Moyosore A",
+    role: "Senior Internal Auditor, Bank of Canada",
+  },
+  {
+    quote:
       "The entrepreneur survival checklist kept my head straight in a quarter where everything broke at once. No fluff – just disciplined execution.",
     author: "James R.",
     role: "Founder, Tech Startup",
@@ -98,7 +104,7 @@ const HomePage: React.FC = () => {
       name: "Abraham of London",
     },
     knowsAbout: [
-      "Christian leadership",
+      "Leadership",
       "Strategic planning",
       "Fatherhood",
       "Legacy building",
@@ -106,7 +112,7 @@ const HomePage: React.FC = () => {
     ],
     makesOffer: {
       "@type": "Service",
-      name: "Strategic resources for Christian leaders, fathers and builders",
+      name: "Strategic resources for Leaders, fathers and builders",
       description: siteTagline,
     },
   };
@@ -114,7 +120,7 @@ const HomePage: React.FC = () => {
   return (
     <Layout title={siteTitle}>
       <Head>
-        <title>{siteTitle} | Faith-rooted Strategy for Builders & Fathers</title>
+        <title>{siteTitle} | Faithful Strategy for Builders, Founders & Fathers</title>
         <meta name="description" content={siteTagline} />
 
         {/* Open Graph */}
