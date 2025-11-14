@@ -1,333 +1,488 @@
 // pages/index.tsx
 import * as React from "react";
-import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Download, Shield, Users, BookOpen } from "lucide-react";
-
+import { motion } from "framer-motion";
+import { BookOpen, Quote } from "lucide-react";
 import Layout from "@/components/Layout";
 
-const siteUrl = "https://www.abrahamoflondon.org";
 const siteTitle = "Abraham of London";
-const siteTagline = "Faith-rooted strategy, fatherhood, and legacy for serious men and builders.";
+const siteTagline =
+  "Faith-rooted strategy for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
+const siteUrl = "https://www.abrahamoflondon.org";
 
-const HomePage: NextPage = () => {
+// Framer Motion variants
+const containerVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+      when: "beforeChildren",
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
+// Simple animated counter for proof points
+const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
+  end,
+  duration = 2,
+}) => {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    let current = 0;
+    const fps = 60;
+    const totalFrames = duration * fps;
+    const increment = end / totalFrames;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= end) {
+        setCount(end);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, 1000 / fps);
+
+    return () => clearInterval(timer);
+  }, [end, duration]);
+
+  return <span>{count}+</span>;
+};
+
+const testimonials = [
+  {
+    quote:
+      "The entrepreneur survival checklist kept my head straight in a quarter where everything broke at once. No fluff – just disciplined execution.",
+    author: "James R.",
+    role: "Founder, Tech Startup",
+  },
+  {
+    quote:
+      "It’s rare to see faith, fatherhood, and board-level strategy handled with this level of clarity and honesty.",
+    author: "Michael T.",
+    role: "Executive Director",
+  },
+  {
+    quote:
+      "The brotherhood covenant turned a casual men’s group into a committed circle of accountability.",
+    author: "David L.",
+    role: "Church Leader",
+  },
+];
+
+const HomePage: React.FC = () => {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
+    "@type": "Organization",
     name: siteTitle,
     url: siteUrl,
-    description:
-      "Abraham of London – where faith, strategy, fatherhood, and legacy intersect. A hub for men and builders who refuse to drift.",
-    creator: {
+    description: siteTagline,
+    founder: {
       "@type": "Person",
       name: "Abraham of London",
+    },
+    knowsAbout: [
+      "Christian leadership",
+      "Strategic planning",
+      "Fatherhood",
+      "Legacy building",
+      "Business strategy",
+    ],
+    makesOffer: {
+      "@type": "Service",
+      name: "Strategic resources for Christian leaders, fathers and builders",
+      description: siteTagline,
     },
   };
 
   return (
-    <Layout title="Home">
+    <Layout title={siteTitle}>
       <Head>
-        <title>{siteTitle}</title>
+        <title>{siteTitle} | Faith-rooted Strategy for Builders & Fathers</title>
         <meta name="description" content={siteTagline} />
-        <meta property="og:title" content={siteTitle} />
+
+        {/* Open Graph */}
+        <meta
+          property="og:title"
+          content={`${siteTitle} | Building Fathers, Founders & Faithful Leaders`}
+        />
         <meta property="og:description" content={siteTagline} />
+        <meta
+          property="og:image"
+          content={`${siteUrl}/assets/images/social/og-image.jpg`}
+        />
         <meta property="og:url" content={siteUrl} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={siteTitle} />
-        <meta property="twitter:card" content="summary_large_image" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@abrahamoflondon" />
+
+        {/* Canonical */}
+        <link rel="canonical" href={siteUrl} />
+
+        {/* Preload key hero image */}
+        <link
+          rel="preload"
+          href="/assets/images/abraham-of-london-banner.webp"
+          as="image"
+        />
+
+        {/* JSON-LD */}
         <script
           type="application/ld+json"
-          // Safe: static stringified object
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
 
-      <main className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white">
-        {/* Subtle radial glow in the background */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-60"
-        >
-          <div className="absolute -top-24 -left-16 h-72 w-72 rounded-full bg-forest/30 blur-3xl" />
-          <div className="absolute top-40 -right-24 h-80 w-80 rounded-full bg-softGold/25 blur-3xl" />
-        </div>
+      <main className="min-h-screen bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
+        {/* HERO */}
+        <section className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 pb-20 pt-16 md:flex-row md:items-stretch md:pt-24">
+          {/* Left column */}
+          <motion.div
+            className="flex-1 space-y-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-xs uppercase tracking-[0.35em] text-softGold/80"
+            >
+              Abraham of London
+            </motion.p>
 
-        {/* CONTENT WRAPPER */}
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-16 px-4 pb-20 pt-16 md:pt-20 lg:pt-24">
-          {/* HERO SECTION */}
-          <section className="grid gap-12 md:grid-cols-[3fr,2fr] md:items-center">
-            <div>
-              <p className="mb-4 text-xs font-semibold tracking-[0.22em] text-softGold/80 uppercase">
-                ABRAHAM OF LONDON
-              </p>
+            <motion.h1
+              variants={itemVariants}
+              className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl"
+            >
+              Strategy for{" "}
+              <span className="block text-softGold">
+                kings, fathers & builders.
+              </span>
+            </motion.h1>
 
-              <h1 className="mb-4 text-4xl font-serif font-semibold leading-tight text-softGold md:text-5xl lg:text-6xl">
-                Building fathers, founders
-                <span className="text-white"> and faithful leaders.</span>
-              </h1>
+            <motion.p
+              variants={itemVariants}
+              className="max-w-xl text-base leading-relaxed text-gray-200 md:text-lg"
+            >
+              A premium hub for board-level thinking, founder discipline, and
+              unapologetic fatherhood – for men who still believe in duty,
+              consequence, and legacy.
+            </motion.p>
 
-              <p className="mb-6 max-w-xl text-base md:text-lg text-slate-200/90 leading-relaxed">
-                You carry responsibility – for a home, a team, a business, a calling.
-                This platform exists to give you language, structure, and tools
-                to build with clarity, courage, and conviction.
-              </p>
-
-              {/* HERO CTAs */}
-              <div className="mb-4 flex flex-wrap gap-4">
-                <Link
-                  href="/downloads"
-                  className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/40 transition hover:bg-forest/90"
-                >
-                  <Download className="h-4 w-4" />
-                  Strategic downloads
-                </Link>
-
-                <Link
-                  href="/strategy/sample-strategy"
-                  className="inline-flex items-center gap-2 rounded-full border border-softGold/70 bg-transparent px-6 py-3 text-sm font-semibold text-softGold transition hover:bg-softGold/10"
-                >
-                  Strategy sample
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              <p className="text-xs text-slate-300/80">
-                Built on conservative Christian conviction and disciplined strategy. No fluff,
-                no performance – just tools to help you stand, build, and finish well.
-              </p>
-            </div>
-
-            {/* HERO IMAGE PANEL */}
-            <div className="relative">
-              <div className="relative h-[260px] w-full overflow-hidden rounded-3xl border border-white/5 bg-slate-900/60 shadow-2xl shadow-black/60 backdrop-blur">
-                <Image
-                  src="/assets/images/abraham-of-london-banner.webp"
-                  alt="Abraham of London"
-                  fill
-                  priority
-                  className="object-cover object-center"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs md:text-sm text-slate-100/90">
-                  <div>
-                    <p className="font-semibold tracking-wide text-softGold">
-                      Fathering Without Fear
-                    </p>
-                    <p className="text-slate-200/80">
-                      A movement for men who refuse to drift.
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-slate-600/80 bg-black/40 px-3 py-1 text-[0.65rem] uppercase tracking-[0.18em] text-slate-200/80">
-                    LIVE BUILD
-                  </span>
-                </div>
-              </div>
-
-              {/* Floating stats card */}
-              <div className="absolute -bottom-6 left-6 hidden w-64 rounded-2xl border border-slate-700/80 bg-slate-900/90 p-4 text-xs text-slate-100/90 shadow-xl shadow-black/60 md:block">
-                <p className="mb-2 text-[0.65rem] font-semibold tracking-[0.2em] text-softGold/80 uppercase">
-                  CORE PILLARS
-                </p>
-                <div className="space-y-1.5">
-                  <p>• Fatherhood & legacy building</p>
-                  <p>• Strategy, systems & execution</p>
-                  <p>• Brotherhood & accountability</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* THREE PILLARS SECTION */}
-          <section className="space-y-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-serif font-semibold text-white">
-                  The work this platform is here to do.
-                </h2>
-                <p className="max-w-2xl text-sm md:text-base text-slate-200/85 mt-2">
-                  Everything sits under three pillars. If it doesn&apos;t serve one of these,
-                  it doesn&apos;t belong here. Simple.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {/* Fatherhood */}
-              <div className="group flex flex-col rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-950/90 p-5 shadow-lg shadow-black/50 transition hover:border-softGold/50 hover:shadow-softGold/30">
-                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-softGold/15 text-softGold">
-                  <Shield className="h-4 w-4" />
-                </div>
-                <h3 className="mb-1 text-lg font-semibold text-white">
-                  Fatherhood & Legacy
-                </h3>
-                <p className="mb-4 text-sm text-slate-200/90">
-                  Tools, language, and frameworks for men raising sons and daughters
-                  in a world that punishes conviction.
-                </p>
-                <Link
-                  href="/downloads/principles-for-my-son-cue-card"
-                  className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-softGold/90 hover:text-softGold"
-                >
-                  View “Principles for My Son”
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-
-              {/* Brotherhood */}
-              <div className="group flex flex-col rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-950/90 p-5 shadow-lg shadow-black/50 transition hover:border-softGold/50 hover:shadow-softGold/30">
-                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-forest/15 text-forest">
-                  <Users className="h-4 w-4" />
-                </div>
-                <h3 className="mb-1 text-lg font-semibold text-white">
-                  Brotherhood & Accountability
-                </h3>
-                <p className="mb-4 text-sm text-slate-200/90">
-                  Covenants, cues, and rhythms for building circles of men who
-                  sharpen each other instead of draining each other.
-                </p>
-                <Link
-                  href="/resources/brotherhood-starter-kit"
-                  className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-softGold/90 hover:text-softGold"
-                >
-                  Open Brotherhood Starter Kit
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-
-              {/* Strategy */}
-              <div className="group flex flex-col rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-950/90 p-5 shadow-lg shadow-black/50 transition hover:border-softGold/50 hover:shadow-softGold/30">
-                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-forest/15 text-forest">
-                  <BookOpen className="h-4 w-4" />
-                </div>
-                <h3 className="mb-1 text-lg font-semibold text-white">
-                  Strategy & Execution
-                </h3>
-                <p className="mb-4 text-sm text-slate-200/90">
-                  One-pagers, operating rhythms, and decision frameworks for
-                  founders, executives, and builders who think long-term.
-                </p>
-                <Link
-                  href="/downloads/board-investor-onepager"
-                  className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-softGold/90 hover:text-softGold"
-                >
-                  View Board / Investor One-Pager
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* FEATURED DOWNLOADS */}
-          <section className="space-y-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-white">
-                Featured strategic downloads
-              </h2>
+            {/* CTAs */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-wrap gap-4 pt-4"
+            >
               <Link
                 href="/downloads"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-softGold/90 hover:text-softGold"
+                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition hover:bg-softGold/90 hover:shadow-softGold/50"
               >
-                View all downloads
-                <ArrowRight className="h-4 w-4" />
+                Access strategic downloads
               </Link>
+
+              <Link
+                href="/strategy/sample-strategy"
+                className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-softGold hover:border-softGold hover:bg-softGold/5"
+              >
+                Explore strategy insights
+              </Link>
+            </motion.div>
+
+            {/* Quick links */}
+            <motion.div
+              variants={itemVariants}
+              className="mt-6 flex flex-wrap gap-4 text-sm text-gray-300"
+            >
+              <Link
+                href="/about"
+                className="underline-offset-4 hover:text-softGold hover:underline"
+              >
+                About Abraham
+              </Link>
+              <span className="text-gray-500">•</span>
+              <Link
+                href="/contact"
+                className="underline-offset-4 hover:text-softGold hover:underline"
+              >
+                Speak with Abraham
+              </Link>
+              <span className="text-gray-500">•</span>
+              <Link
+                href="/resources/brotherhood-starter-kit"
+                className="underline-offset-4 hover:text-softGold hover:underline"
+              >
+                Brotherhood starter kit
+              </Link>
+            </motion.div>
+
+            {/* Stats strip */}
+            <motion.div
+              variants={itemVariants}
+              className="mt-8 flex flex-wrap gap-6 border-t border-white/10 pt-6"
+            >
+              <div className="text-center">
+                <p className="text-2xl font-bold text-softGold">
+                  <AnimatedCounter end={25} />
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                  Strategic tools
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-forest">
+                  <AnimatedCounter end={500} />
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                  Men equipped
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-softGold">
+                  <AnimatedCounter end={12} />
+                </p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                  Brotherhood circles
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right column – hero card */}
+          <motion.div
+            className="mt-10 flex flex-1 items-center justify-center md:mt-0"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/60 backdrop-blur">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
+                  Fathering Without Fear
+                </p>
+                <span className="rounded-full bg-softGold/10 px-3 py-1 text-[11px] font-medium text-softGold">
+                  In development
+                </span>
+              </div>
+
+              <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10">
+                <Image
+                  src="/assets/images/abraham-of-london-banner.webp"
+                  alt="Abraham of London – banner"
+                  fill
+                  className="object-cover opacity-0 transition-opacity duration-500"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  priority
+                  onLoadingComplete={(img) => {
+                    img.classList.remove("opacity-0");
+                  }}
+                />
+              </div>
+
+              <h2 className="mb-2 font-serif text-2xl font-semibold text-white">
+                Fathering Without Fear:
+                <span className="block text-softGold">
+                  The story they thought they knew.
+                </span>
+              </h2>
+
+              <p className="mb-4 text-sm leading-relaxed text-gray-200">
+                A multi-format ecosystem – book, downloads, and a brotherhood of
+                men who refuse to apologize for leading well, loving well, and
+                building with conviction.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/downloads/brotherhood-covenant"
+                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-forest/90"
+                >
+                  View brotherhood covenant
+                </Link>
+                <Link
+                  href="/downloads/principles-for-my-son"
+                  className="text-xs font-medium text-softGold underline-offset-4 hover:underline"
+                >
+                  Principles for my son
+                </Link>
+              </div>
+
+              <p className="mt-6 text-right text-[10px] font-light tracking-[0.35em] text-gray-400">
+                ABRAHAMOFLONDON
+              </p>
             </div>
+          </motion.div>
+        </section>
 
-            <div className="grid gap-5 md:grid-cols-3">
-              {/* Card 1 */}
-              <Link
-                href="/downloads/entrepreneur-survival-checklist"
-                className="group flex flex-col rounded-2xl border border-slate-800 bg-slate-950/80 p-5 text-left shadow-lg shadow-black/50 transition hover:border-softGold/60 hover:bg-slate-900/90"
-              >
-                <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-forest/80">
-                  ENTREPRENEUR
-                </p>
-                <h3 className="mb-2 text-base font-semibold text-white">
-                  Entrepreneur Survival Checklist
-                </h3>
-                <p className="mb-4 text-xs text-slate-200/90">
-                  A ruthless, practical grid for staying alive – financially,
-                  emotionally, and spiritually – while you build.
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-[0.75rem] font-semibold text-softGold/90">
-                  Open checklist
-                  <ArrowRight className="h-3 w-3" />
-                </span>
-              </Link>
+        {/* Divider strip */}
+        <section className="border-t border-white/10 bg-black/40">
+          <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-4 py-6 text-xs text-gray-300 md:text-sm">
+            <p className="uppercase tracking-[0.25em] text-gray-400">
+              Strategy • Fatherhood • Legacy • Faith
+            </p>
+            <p className="text-gray-500">
+              Designed to be read slowly. Lived fully.
+            </p>
+          </div>
+        </section>
 
-              {/* Card 2 */}
-              <Link
-                href="/downloads/family-altar-liturgy"
-                className="group flex flex-col rounded-2xl border border-slate-800 bg-slate-950/80 p-5 text-left shadow-lg shadow-black/50 transition hover:border-softGold/60 hover:bg-slate-900/90"
-              >
-                <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-softGold/80">
-                  FAMILY
-                </p>
-                <h3 className="mb-2 text-base font-semibold text-white">
-                  Family Altar Liturgy
-                </h3>
-                <p className="mb-4 text-xs text-slate-200/90">
-                  A simple, repeatable pattern for building Scripture, prayer,
-                  and gratitude into the actual rhythm of your home.
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-[0.75rem] font-semibold text-softGold/90">
-                  View liturgy
-                  <ArrowRight className="h-3 w-3" />
-                </span>
-              </Link>
+        {/* TRUST SIGNALS */}
+        <section className="mx-auto max-w-6xl space-y-6 px-4 py-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400">
+            Trusted by leaders at
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all hover:grayscale-0">
+            {/* Replace these placeholders with real logos when ready */}
+            <div className="h-8 w-32 rounded bg-white/10" />
+            <div className="h-8 w-32 rounded bg-white/10" />
+            <div className="h-8 w-32 rounded bg-white/10" />
+            <div className="h-8 w-32 rounded bg-white/10" />
+          </div>
+        </section>
 
-              {/* Card 3 */}
-              <Link
-                href="/downloads/brotherhood-covenant"
-                className="group flex flex-col rounded-2xl border border-slate-800 bg-slate-950/80 p-5 text-left shadow-lg shadow-black/50 transition hover:border-softGold/60 hover:bg-slate-900/90"
+        {/* TESTIMONIALS */}
+        <section className="mx-auto max-w-6xl space-y-8 px-4 pb-10">
+          <h2 className="text-center font-serif text-2xl font-semibold text-white md:text-3xl">
+            Trusted by builders and leaders
+          </h2>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map((t, index) => (
+              <motion.div
+                key={t.author + index}
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                className="relative rounded-2xl border border-white/10 bg-white/5 p-6"
               >
-                <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-forest/80">
-                  BROTHERHOOD
+                <div className="absolute -top-3 left-6 rounded-full bg-black p-1">
+                  <Quote className="h-5 w-5 text-softGold/60" />
+                </div>
+                <p className="mb-4 text-sm italic text-gray-100/90">
+                  “{t.quote}”
                 </p>
-                <h3 className="mb-2 text-base font-semibold text-white">
-                  Brotherhood Covenant
-                </h3>
-                <p className="mb-4 text-xs text-slate-200/90">
-                  A clear, unapologetic covenant for men who want more than
-                  banter – they want sharpening, truth, and tested loyalty.
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-[0.75rem] font-semibold text-softGold/90">
-                  Read covenant
-                  <ArrowRight className="h-3 w-3" />
-                </span>
-              </Link>
+                <div>
+                  <p className="text-sm font-semibold text-softGold">
+                    {t.author}
+                  </p>
+                  <p className="text-xs text-gray-400">{t.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* NEWSLETTER */}
+        <section className="mx-auto max-w-5xl px-4 pb-10">
+          <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-deepCharcoal via-black to-forest/40 p-8 text-center shadow-2xl shadow-black/70 md:p-10">
+            <div className="mx-auto max-w-2xl">
+              <BookOpen className="mx-auto mb-4 h-10 w-10 text-softGold" />
+              <h2 className="mb-3 font-serif text-2xl font-semibold text-white md:text-3xl">
+                Weekly building notes
+              </h2>
+              <p className="mx-auto mb-6 max-w-xl text-sm text-gray-200 md:text-base">
+                Get frameworks, early access to new tools, and practical
+                patterns for building faith, family, and business without
+                compromise.
+              </p>
+
+              {/* Simple HTML form (you can wire this to /api/subscribe later) */}
+              <form
+                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder="Your best email"
+                  className="flex-1 rounded-lg border border-gray-600 bg-black/60 px-4 py-3 text-sm text-white placeholder-gray-400 focus:border-softGold focus:outline-none focus:ring-2 focus:ring-softGold/70"
+                />
+                <button
+                  type="submit"
+                  className="rounded-lg bg-forest px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/30 transition hover:bg-forest/90"
+                >
+                  Join builders
+                </button>
+              </form>
+
+              <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-4 text-[11px] text-gray-400">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-forest" />
+                  <span>No spam, ever.</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-softGold" />
+                  <span>Unsubscribe any time.</span>
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* FINAL CALLOUT */}
-          <section className="mt-4 rounded-3xl border border-softGold/40 bg-gradient-to-r from-forest/90 via-forest to-softGold/80 px-6 py-8 text-center shadow-2xl shadow-black/60 md:px-10 md:py-10">
-            <h2 className="mb-3 text-2xl md:text-3xl font-serif font-semibold text-slate-950">
+        {/* FINAL CTA */}
+        <section className="mx-auto max-w-5xl px-4 pb-16">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-softGold/40 bg-gradient-to-r from-forest/90 via-forest to-softGold/80 px-6 py-8 text-center shadow-2xl shadow-black/60 md:px-10 md:py-12">
+            <div className="mb-4 flex justify-center">
+              <div className="flex -space-x-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="h-8 w-8 rounded-full border-2 border-forest bg-emerald-900/70"
+                  />
+                ))}
+              </div>
+            </div>
+            <p className="mb-1 text-xs font-medium uppercase tracking-[0.25em] text-forest/90">
+              You&apos;re not the only one carrying weight.
+            </p>
+            <p className="mb-3 text-sm text-forest/90">
+              Join 500+ builders already using these tools.
+            </p>
+            <h2 className="mb-4 font-serif text-2xl font-semibold text-slate-950 md:text-3xl">
               You&apos;re not here by accident.
             </h2>
-            <p className="mx-auto mb-6 max-w-3xl text-sm md:text-base text-slate-950/90">
-              If your life is in a storm, or you&apos;re quietly rebuilding from the ground up,
-              you are exactly who this work is for. Take one tool, one principle, one
-              download, and actually use it. Then take the next step.
+            <p className="mx-auto mb-6 max-w-xl text-sm text-slate-900/90 md:text-base">
+              If you&apos;re still reading, you&apos;re the type of man who doesn&apos;t
+              flinch when it&apos;s time to take responsibility. Use the tools. Build
+              the systems. Protect the people who carry your name.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/downloads/entrepreneur-operating-pack"
-                className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-softGold shadow-lg shadow-black/50 transition hover:bg-black"
+                href="/downloads/entrepreneur-survival-checklist"
+                className="inline-flex items-center rounded-full bg-slate-950 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-softGold shadow-md shadow-black/40 hover:bg-black"
               >
-                Open Entrepreneur Operating Pack
-                <ArrowRight className="h-4 w-4" />
+                Start with the survival checklist
               </Link>
               <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-950/70 bg-transparent px-6 py-3 text-sm font-semibold text-slate-950 hover:bg-slate-950 hover:text-softGold"
+                href="/downloads/brotherhood-covenant"
+                className="inline-flex items-center rounded-full border border-slate-900/60 bg-forest/10 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 hover:bg-forest/20"
               >
-                Talk about a project
+                Build a brotherhood
               </Link>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </main>
     </Layout>
   );
