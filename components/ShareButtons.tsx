@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+
+type Platform = "twitter" | "linkedin" | "facebook" | "email" | "copy";
 
 interface ShareButtonsProps {
   url: string;
@@ -7,19 +11,26 @@ interface ShareButtonsProps {
   variant?: "minimal" | "standard" | "expanded";
   size?: "sm" | "md" | "lg";
   showLabels?: boolean;
-  platforms?: Array<"twitter" | "linkedin" | "facebook" | "email" | "copy">;
-  onShare?: (platform: string, url: string) => void;
-  onError?: (error: Error, platform: string) => void;
+  platforms?: Platform[];
+  onShare?: (platform: Platform | "native" | "validation", url: string) => void;
+  onError?: (error: Error, platform: Platform | "native" | "validation") => void;
 }
 
 // Platform configurations
-const PLATFORM_CONFIG = {
+const PLATFORM_CONFIG: Record<
+  Exclude<Platform, never>,
+  {
+    name: string;
+    color: string;
+    icon: JSX.Element;
+  }
+> = {
   twitter: {
     name: "Twitter",
     color: "hover:bg-blue-50 hover:text-blue-600",
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -33,7 +44,7 @@ const PLATFORM_CONFIG = {
     color: "hover:bg-blue-50 hover:text-blue-700",
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -47,7 +58,7 @@ const PLATFORM_CONFIG = {
     color: "hover:bg-blue-50 hover:text-blue-800",
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -61,7 +72,7 @@ const PLATFORM_CONFIG = {
     color: "hover:bg-gray-50 hover:text-gray-700",
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -81,7 +92,7 @@ const PLATFORM_CONFIG = {
     color: "hover:bg-green-50 hover:text-green-600",
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -102,17 +113,17 @@ const PLATFORM_CONFIG = {
 const SIZE_CONFIG = {
   sm: {
     button: "p-1.5",
-    icon: "w-4 h-4",
+    icon: "h-4 w-4",
     text: "text-xs",
   },
   md: {
     button: "p-2",
-    icon: "w-5 h-5",
+    icon: "h-5 w-5",
     text: "text-sm",
   },
   lg: {
     button: "p-3",
-    icon: "w-6 h-6",
+    icon: "h-6 w-6",
     text: "text-base",
   },
 } as const;
@@ -131,16 +142,17 @@ export default function ShareButtons({
   const [copied, setCopied] = React.useState(false);
   const [isSupported, setIsSupported] = React.useState(false);
 
-  // Check if Web Share API is supported
+  // Check if Web Share API is supported (client-only)
   React.useEffect(() => {
-    setIsSupported(
-      typeof navigator !== "undefined" && navigator.share !== undefined,
-    );
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      setIsSupported(true);
+    }
   }, []);
 
   // Validate URL
   const isValidUrl = React.useMemo(() => {
     try {
+      // eslint-disable-next-line no-new
       new URL(url);
       return true;
     } catch {
@@ -159,7 +171,9 @@ export default function ShareButtons({
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
-  const shareLinks = {
+  type SharePlatform = Exclude<Platform, "copy">;
+
+  const shareLinks: Record<SharePlatform, string> = {
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
@@ -168,90 +182,88 @@ export default function ShareButtons({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        onShare?.("copy", url);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      textArea.setAttribute("readonly", "");
+      textArea.style.position = "absolute";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+
       setCopied(true);
       onShare?.("copy", url);
-
-      // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
       if (onError) {
         onError(error as Error, "copy");
       }
-
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = url;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand("copy");
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        onShare?.("copy", url);
-      } catch (fallbackError) {
-        console.error("Fallback copy failed:", fallbackError);
-        if (onError) {
-          onError(fallbackError as Error, "copy");
-        }
-      }
-      document.body.removeChild(textArea);
     }
   };
 
   const handleNativeShare = async () => {
+    if (!isSupported || typeof navigator === "undefined" || !navigator.share) return;
+
     try {
-      await navigator.share({
-        title,
-        url,
-        text: title,
-      });
+      await navigator.share({ title, url, text: title });
       onShare?.("native", url);
     } catch (error) {
-      // Share was canceled or failed
-      if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Native share failed:", error);
-        if (onError) {
-          onError(error, "native");
-        }
+      if (error instanceof Error && error.name === "AbortError") return;
+      console.error("Native share failed:", error);
+      if (onError && error instanceof Error) {
+        onError(error, "native");
       }
     }
   };
 
-  const handlePlatformClick = (platform: string, shareUrl: string) => {
-    onShare?.(platform, shareUrl);
+  const getButtonClass = (platform: Platform) => {
+    const sizeCfg = SIZE_CONFIG[size];
+    const base = [
+      "flex items-center gap-2 rounded-full",
+      "transition-all duration-200",
+      "focus:outline-none focus:ring-2 focus:ring-offset-2",
+      "disabled:cursor-not-allowed disabled:opacity-50",
+      sizeCfg.button,
+      PLATFORM_CONFIG[platform].color,
+      variant === "minimal" ? "bg-transparent" : "bg-gray-100",
+      variant === "expanded" ? "px-4" : "",
+    ]
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return base;
   };
 
-  const getButtonClass = (platform: keyof typeof PLATFORM_CONFIG) => {
-    const baseClasses = `
-      flex items-center gap-2 rounded-full transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-offset-2
-      disabled:opacity-50 disabled:cursor-not-allowed
-      ${SIZE_CONFIG[size].button}
-      ${PLATFORM_CONFIG[platform].color}
-      ${variant === "minimal" ? "bg-transparent" : "bg-gray-100"}
-      ${variant === "expanded" ? "px-4" : ""}
-    `;
-
-    return baseClasses.replace(/\s+/g, " ").trim();
-  };
-
-  const renderShareButton = (platform: keyof typeof PLATFORM_CONFIG) => {
+  const renderShareButton = (platform: Platform) => {
     const config = PLATFORM_CONFIG[platform];
 
     if (platform === "copy") {
       return (
         <button
           key={platform}
+          type="button"
           onClick={handleCopy}
           className={getButtonClass(platform)}
           aria-label={copied ? "Link copied!" : config.name}
           disabled={copied}
         >
-          <div className={SIZE_CONFIG[size].icon}>
+          <span className={SIZE_CONFIG[size].icon}>
             {copied ? (
               <svg
+                className="h-full w-full"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -267,7 +279,7 @@ export default function ShareButtons({
             ) : (
               config.icon
             )}
-          </div>
+          </span>
           {(showLabels || variant === "expanded") && (
             <span className={SIZE_CONFIG[size].text}>
               {copied ? "Copied!" : config.name}
@@ -277,17 +289,19 @@ export default function ShareButtons({
       );
     }
 
+    const shareUrl = shareLinks[platform as SharePlatform];
+
     return (
       <a
         key={platform}
-        href={shareLinks[platform]}
+        href={shareUrl}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => handlePlatformClick(platform, shareLinks[platform])}
+        onClick={() => onShare?.(platform, shareUrl)}
         className={getButtonClass(platform)}
         aria-label={`Share on ${config.name}`}
       >
-        <div className={SIZE_CONFIG[size].icon}>{config.icon}</div>
+        <span className={SIZE_CONFIG[size].icon}>{config.icon}</span>
         {(showLabels || variant === "expanded") && (
           <span className={SIZE_CONFIG[size].text}>{config.name}</span>
         )}
@@ -295,27 +309,37 @@ export default function ShareButtons({
     );
   };
 
+  const visiblePlatforms: Platform[] = React.useMemo(() => {
+    // If native share exists, we still keep copy button explicitly unless you want to hide it.
+    return platforms;
+  }, [platforms]);
+
   return (
     <div
-      className={`
-        flex flex-wrap gap-2 ${className}
-        ${variant === "expanded" ? "items-stretch" : "items-center"}
-      `}
+      className={[
+        "flex flex-wrap gap-2",
+        variant === "expanded" ? "items-stretch" : "items-center",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       role="group"
       aria-label="Share options"
     >
       {/* Native Share Button (when supported) */}
-      {isSupported && platforms.includes("copy") && (
+      {isSupported && (
         <button
+          type="button"
           onClick={handleNativeShare}
-          className={`
-            flex items-center gap-2 rounded-full transition-all duration-200
-            bg-gradient-to-r from-purple-500 to-pink-500 text-white
-            hover:from-purple-600 hover:to-pink-600
-            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-            ${SIZE_CONFIG[size].button}
-            ${variant === "expanded" ? "px-4" : ""}
-          `}
+          className={[
+            "flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white",
+            "hover:from-purple-600 hover:to-pink-600",
+            "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
+            SIZE_CONFIG[size].button,
+            variant === "expanded" ? "px-4" : "",
+          ]
+            .join(" ")
+            .trim()}
           aria-label="Share using native share dialog"
         >
           <svg
@@ -323,6 +347,7 @@ export default function ShareButtons({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -338,9 +363,7 @@ export default function ShareButtons({
       )}
 
       {/* Platform-specific buttons */}
-      {platforms
-        .filter((platform) => platform !== "copy" || !isSupported) // Show copy only if native share not supported
-        .map((platform) => renderShareButton(platform))}
+      {visiblePlatforms.map((platform) => renderShareButton(platform))}
 
       {/* Accessibility announcement for copy status */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -350,7 +373,7 @@ export default function ShareButtons({
   );
 }
 
-// Additional exports for customization
+// Presets for convenient reuse
 export const ShareButtonsPresets = {
   minimal: {
     variant: "minimal" as const,
@@ -368,14 +391,10 @@ export const ShareButtonsPresets = {
     size: "md" as const,
   },
   socialOnly: {
-    platforms: ["twitter", "linkedin", "facebook"] as Array<
-      "twitter" | "linkedin" | "facebook"
-    >,
+    platforms: ["twitter", "linkedin", "facebook"] as Platform[],
   },
   allPlatforms: {
-    platforms: ["twitter", "linkedin", "facebook", "email", "copy"] as Array<
-      "twitter" | "linkedin" | "facebook" | "email" | "copy"
-    >,
+    platforms: ["twitter", "linkedin", "facebook", "email", "copy"] as Platform[],
   },
 };
 
@@ -384,32 +403,44 @@ export function useShare() {
   const [isSupported, setIsSupported] = React.useState(false);
 
   React.useEffect(() => {
-    setIsSupported(
-      typeof navigator !== "undefined" && navigator.share !== undefined,
-    );
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      setIsSupported(true);
+    }
   }, []);
 
   const share = React.useCallback(
     async (data: { title: string; url: string; text?: string }) => {
-      if (isSupported) {
-        try {
-          await navigator.share(data);
-          return true;
-        } catch (error) {
-          if (error instanceof Error && error.name !== "AbortError") {
-            console.error("Share failed:", error);
-          }
-          return false;
-        }
+      if (!isSupported || typeof navigator === "undefined" || !navigator.share) {
+        return false;
       }
-      return false;
+      try {
+        await navigator.share(data);
+        return true;
+      } catch (error) {
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Share failed:", error);
+        }
+        return false;
+      }
     },
-    [isSupported],
+    [isSupported]
   );
 
   const copyToClipboard = React.useCallback(async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.setAttribute("readonly", "");
+      textArea.style.position = "absolute";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
       return true;
     } catch (error) {
       console.error("Copy failed:", error);

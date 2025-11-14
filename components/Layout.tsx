@@ -7,9 +7,9 @@ import Footer from "@/components/Footer";
 type LayoutProps = {
   children: React.ReactNode;
   /** canonical title prop */
-  title?: string;
+  title?: string | null;
   /** legacy alias, supported for compatibility */
-  pageTitle?: string;
+  pageTitle?: string | null;
 };
 
 export default function Layout({
