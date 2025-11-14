@@ -15,6 +15,16 @@ import {
 } from "@/lib/server/downloads-data";
 import type { PageMeta } from "@/types/page";
 
+// Add this: List of static pages that should NOT be handled by this dynamic route
+const STATIC_PAGES = [
+  'about',
+  'contact', 
+  'downloads',
+  'strategy',
+  'books',
+  'print'
+];
+
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 function formatPretty(
@@ -270,10 +280,15 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const slugs = getPageSlugs();
-    const paths =
-      slugs?.map((slug: string) => ({
-        params: { slug: String(slug) },
-      })) ?? [];
+    
+    // Filter out static pages that have their own routes
+    const dynamicSlugs = slugs?.filter((slug: string) => 
+      !STATIC_PAGES.includes(slug)
+    ) ?? [];
+
+    const paths = dynamicSlugs.map((slug: string) => ({
+      params: { slug: String(slug) },
+    }));
 
     return { paths, fallback: "blocking" };
   } catch (error) {
@@ -286,6 +301,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slug = params?.slug as string | undefined;
     if (!slug) return { notFound: true };
+
+    // Double-check: if this is a static page, return 404
+    if (STATIC_PAGES.includes(slug)) {
+      return { notFound: true };
+    }
 
     const pageData = getPageBySlug(slug, [
       "slug",
