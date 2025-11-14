@@ -36,18 +36,19 @@
   /* UPGRADED COLORS (Deep Forest, Warm Cream, Muted Gold) */
   --color-primary: #0B2E1F;          /* deep-forest */
   --color-primary-hover: #16573D;    /* Slightly lighter deep forest for subtle hover */
-  --color-on-primary: #FAF7F2;      /* warm-cream */
+  --color-on-primary: #FAF7F2;       /* warm-cream */
+  --color-on-primary-hover: #FAF7F2; /* hover text on primary (same as on-primary) */
 
   --color-secondary: #FAF7F2;        /* page bg: warm-cream */
   --color-on-secondary: #333333;     /* soft-charcoal for main text */
 
-  --color-accent: #C5A352;          /* muted-gold */
-  --color-accent-hover: #A0833F;    /* Darker muted-gold for contrast */
+  --color-accent: #C5A352;           /* muted-gold */
+  --color-accent-hover: #A0833F;     /* Darker muted-gold for contrast */
   --color-on-accent: #ffffff;
 
   --color-lightGrey: #E5E5E5;        /* light-gray */
   --color-warmWhite: #FAF7F2;        /* Alias for warm-cream */
-  --color-midGreen: #4B8B6B;        /* subtle-green (for bullets/accents) */
+  --color-midGreen: #4B8B6B;         /* subtle-green (for bullets/accents) */
 
   /* Fluid type scale (remains the same) */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
@@ -67,6 +68,7 @@
   --color-primary: #C5A352;          /* Primary is now muted-gold (High contrast) */
   --color-primary-hover: #E9D79A;    /* Lighter gold hover */
   --color-on-primary: #0f172a;
+  --color-on-primary-hover: #0f172a;
 
   /* Background/Surface Colors */
   --color-secondary: #111827;        /* Deeper background (slate-900 equivalent) */
@@ -87,9 +89,9 @@
 /* ---------- Base / Reset & Typography (Luxury) --------------------- */
 /* ------------------------------------------------------------------- */
 html {
-  color-scheme: light dark;
-  hanging-punctuation: first allow-end;
-  text-rendering: geometricPrecision; 
+  /* Keep this page explicitly light unless .dark is applied */
+  /* color-scheme removed to avoid mixed system heuristics */
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -220,8 +222,8 @@ img, video {
 
 /* Font Consistency */
 .prose h1, .prose h2, .prose h3 {
-    font-family: var(--font-serif);
-    font-weight: 700;
+  font-family: var(--font-serif);
+  font-weight: 700;
 }
 
 /* Heading Sizing and Spacing */
