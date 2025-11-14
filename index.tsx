@@ -9,7 +9,7 @@ import Layout from "@/components/Layout";
 
 const siteTitle = "Abraham of London";
 const siteTagline =
-  "Faith-rooted strategy for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
+  "Faithful strategy for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
 const siteUrl = "https://www.abrahamoflondon.org";
 
 // Framer Motion variants
@@ -36,30 +36,38 @@ const itemVariants = {
   },
 };
 
-// Simple animated counter for proof points
+// Optimized animated counter with requestAnimationFrame
 const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
   end,
   duration = 2,
 }) => {
   const [count, setCount] = React.useState(0);
+  const frameRef = React.useRef<number>();
+  const startTimeRef = React.useRef<number>();
 
   React.useEffect(() => {
-    let current = 0;
-    const fps = 60;
-    const totalFrames = duration * fps;
-    const increment = end / totalFrames;
-
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
+    const animate = (currentTime: number) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = currentTime;
       }
-    }, 1000 / fps);
 
-    return () => clearInterval(timer);
+      const elapsed = currentTime - startTimeRef.current;
+      const progress = Math.min(elapsed / (duration * 1000), 1);
+      
+      setCount(Math.floor(progress * end));
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
   }, [end, duration]);
 
   return <span>{count}+</span>;
@@ -80,17 +88,17 @@ const testimonials = [
   },
   {
     quote:
-      "It’s rare to see faith, fatherhood, and board-level strategy handled with this level of clarity and honesty.",
+      "It's rare to see faith, fatherhood, and board-level strategy handled with this level of clarity and honesty.",
     author: "Michael T.",
     role: "Executive Director",
   },
   {
     quote:
-      "The brotherhood covenant turned a casual men’s group into a committed circle of accountability.",
+      "The brotherhood covenant turned a casual men's group into a committed circle of accountability.",
     author: "David L.",
     role: "Church Leader",
   },
-];
+] as const;
 
 const HomePage: React.FC = () => {
   const jsonLd = {
@@ -105,14 +113,15 @@ const HomePage: React.FC = () => {
     },
     knowsAbout: [
       "Leadership",
-      "Strategic planning",
+      "Strategic planning", 
       "Fatherhood",
       "Legacy building",
       "Business strategy",
+      "Faith-based entrepreneurship",
     ],
     makesOffer: {
       "@type": "Service",
-      name: "Strategic resources for Leaders, fathers and builders",
+      name: "Strategic Resources for Leaders, Fathers and Builders",
       description: siteTagline,
     },
   };
@@ -133,6 +142,8 @@ const HomePage: React.FC = () => {
           property="og:image"
           content={`${siteUrl}/assets/images/social/og-image.jpg`}
         />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content={siteUrl} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={siteTitle} />
@@ -140,21 +151,16 @@ const HomePage: React.FC = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@abrahamoflondon" />
+        <meta name="twitter:title" content={`${siteTitle} | Faithful Strategy for Builders, Founders & Fathers`} />
+        <meta name="twitter:description" content={siteTagline} />
+        <meta name="twitter:image" content={`${siteUrl}/assets/images/social/og-image.jpg`} />
 
         {/* Canonical */}
         <link rel="canonical" href={siteUrl} />
 
-        {/* Preload key hero image */}
-        <link
-          rel="preload"
-          href="/assets/images/abraham-of-london-banner.webp"
-          as="image"
-        />
-
         {/* JSON-LD */}
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -202,14 +208,16 @@ const HomePage: React.FC = () => {
             >
               <Link
                 href="/downloads"
-                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition hover:bg-softGold/90 hover:shadow-softGold/50"
+                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition-all hover:bg-softGold/90 hover:shadow-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
+                prefetch={true}
               >
                 Access strategic downloads
               </Link>
 
               <Link
                 href="/strategy/sample-strategy"
-                className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-softGold hover:border-softGold hover:bg-softGold/5"
+                className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-softGold transition-all hover:border-softGold hover:bg-softGold/5 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
+                prefetch={true}
               >
                 Explore strategy insights
               </Link>
@@ -222,21 +230,24 @@ const HomePage: React.FC = () => {
             >
               <Link
                 href="/about"
-                className="underline-offset-4 hover:text-softGold hover:underline"
+                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+                prefetch={true}
               >
                 About Abraham
               </Link>
-              <span className="text-gray-500">•</span>
+              <span className="text-gray-500 select-none">•</span>
               <Link
                 href="/contact"
-                className="underline-offset-4 hover:text-softGold hover:underline"
+                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+                prefetch={true}
               >
                 Speak with Abraham
               </Link>
-              <span className="text-gray-500">•</span>
+              <span className="text-gray-500 select-none">•</span>
               <Link
-                href="/resources/brotherhood-starter-kit"
-                className="underline-offset-4 hover:text-softGold hover:underline"
+                href="/downloads/brotherhood-starter-kit"
+                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+                prefetch={true}
               >
                 Brotherhood starter kit
               </Link>
@@ -294,12 +305,13 @@ const HomePage: React.FC = () => {
               <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10">
                 <Image
                   src="/assets/images/abraham-of-london-banner.webp"
-                  alt="Abraham of London – banner"
+                  alt="Abraham of London – Fathering Without Fear book cover"
                   fill
                   className="object-cover opacity-0 transition-opacity duration-500"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   priority
-                  onLoadingComplete={(img) => {
+                  onLoad={(event) => {
+                    const img = event.currentTarget;
                     img.classList.remove("opacity-0");
                   }}
                 />
@@ -321,19 +333,21 @@ const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/downloads/brotherhood-covenant"
-                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-forest/90"
+                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-deepCharcoal"
+                  prefetch={true}
                 >
                   View brotherhood covenant
                 </Link>
                 <Link
                   href="/downloads/principles-for-my-son"
-                  className="text-xs font-medium text-softGold underline-offset-4 hover:underline"
+                  className="text-xs font-medium text-softGold underline-offset-4 hover:underline focus:outline-none focus:underline"
+                  prefetch={true}
                 >
                   Principles for my son
                 </Link>
               </div>
 
-              <p className="mt-6 text-right text-[10px] font-light tracking-[0.35em] text-gray-400">
+              <p className="mt-6 text-right text-[10px] font-light tracking-[0.35em] text-gray-400 select-none">
                 ABRAHAMOFLONDON
               </p>
             </div>
@@ -343,10 +357,10 @@ const HomePage: React.FC = () => {
         {/* Divider strip */}
         <section className="border-t border-white/10 bg-black/40">
           <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-4 py-6 text-xs text-gray-300 md:text-sm">
-            <p className="uppercase tracking-[0.25em] text-gray-400">
+            <p className="uppercase tracking-[0.25em] text-gray-400 select-none">
               Strategy • Fatherhood • Legacy • Faith
             </p>
-            <p className="text-gray-500">
+            <p className="text-gray-500 select-none">
               Designed to be read slowly. Lived fully.
             </p>
           </div>
@@ -354,15 +368,15 @@ const HomePage: React.FC = () => {
 
         {/* TRUST SIGNALS */}
         <section className="mx-auto max-w-6xl space-y-6 px-4 py-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 select-none">
             Trusted by leaders at
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all hover:grayscale-0">
             {/* Replace these placeholders with real logos when ready */}
-            <div className="h-8 w-32 rounded bg-white/10" />
-            <div className="h-8 w-32 rounded bg-white/10" />
-            <div className="h-8 w-32 rounded bg-white/10" />
-            <div className="h-8 w-32 rounded bg-white/10" />
+            <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
+            <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
+            <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
+            <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
           </div>
         </section>
 
@@ -372,10 +386,10 @@ const HomePage: React.FC = () => {
             Trusted by builders and leaders
           </h2>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((t, index) => (
               <motion.div
-                key={t.author + index}
+                key={`${t.author}-${index}`}
                 variants={itemVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -383,10 +397,10 @@ const HomePage: React.FC = () => {
                 className="relative rounded-2xl border border-white/10 bg-white/5 p-6"
               >
                 <div className="absolute -top-3 left-6 rounded-full bg-black p-1">
-                  <Quote className="h-5 w-5 text-softGold/60" />
+                  <Quote className="h-5 w-5 text-softGold/60" aria-hidden="true" />
                 </div>
                 <p className="mb-4 text-sm italic text-gray-100/90">
-                  “{t.quote}”
+                  &ldquo;{t.quote}&rdquo;
                 </p>
                 <div>
                   <p className="text-sm font-semibold text-softGold">
@@ -403,7 +417,7 @@ const HomePage: React.FC = () => {
         <section className="mx-auto max-w-5xl px-4 pb-10">
           <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-deepCharcoal via-black to-forest/40 p-8 text-center shadow-2xl shadow-black/70 md:p-10">
             <div className="mx-auto max-w-2xl">
-              <BookOpen className="mx-auto mb-4 h-10 w-10 text-softGold" />
+              <BookOpen className="mx-auto mb-4 h-10 w-10 text-softGold" aria-hidden="true" />
               <h2 className="mb-3 font-serif text-2xl font-semibold text-white md:text-3xl">
                 Weekly building notes
               </h2>
@@ -416,17 +430,21 @@ const HomePage: React.FC = () => {
               {/* Simple HTML form (you can wire this to /api/subscribe later) */}
               <form
                 className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // Add newsletter signup logic here
+                }}
               >
                 <input
                   type="email"
                   required
                   placeholder="Your best email"
                   className="flex-1 rounded-lg border border-gray-600 bg-black/60 px-4 py-3 text-sm text-white placeholder-gray-400 focus:border-softGold focus:outline-none focus:ring-2 focus:ring-softGold/70"
+                  aria-label="Email for newsletter subscription"
                 />
                 <button
                   type="submit"
-                  className="rounded-lg bg-forest px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/30 transition hover:bg-forest/90"
+                  className="rounded-lg bg-forest px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/30 transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-black"
                 >
                   Join builders
                 </button>
@@ -434,11 +452,11 @@ const HomePage: React.FC = () => {
 
               <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-4 text-[11px] text-gray-400">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-forest" />
+                  <span className="h-2 w-2 rounded-full bg-forest" aria-hidden="true" />
                   <span>No spam, ever.</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-softGold" />
+                  <span className="h-2 w-2 rounded-full bg-softGold" aria-hidden="true" />
                   <span>Unsubscribe any time.</span>
                 </div>
               </div>
@@ -450,11 +468,11 @@ const HomePage: React.FC = () => {
         <section className="mx-auto max-w-5xl px-4 pb-16">
           <div className="mx-auto max-w-3xl rounded-3xl border border-softGold/40 bg-gradient-to-r from-forest/90 via-forest to-softGold/80 px-6 py-8 text-center shadow-2xl shadow-black/60 md:px-10 md:py-12">
             <div className="mb-4 flex justify-center">
-              <div className="flex -space-x-2">
+              <div className="flex -space-x-2" aria-hidden="true">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
-                    className="h-8 w-8 rounded-full border-2 border-forest bg-emerald-900/70"
+                    className="h-8 w-8 rounded-full border-2 border-forest bg-forest/20"
                   />
                 ))}
               </div>
@@ -476,13 +494,15 @@ const HomePage: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/downloads/entrepreneur-survival-checklist"
-                className="inline-flex items-center rounded-full bg-slate-950 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-softGold shadow-md shadow-black/40 hover:bg-black"
+                className="inline-flex items-center rounded-full bg-slate-950 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-softGold shadow-md shadow-black/40 transition-all hover:bg-black focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-forest"
+                prefetch={true}
               >
                 Start with the survival checklist
               </Link>
               <Link
                 href="/downloads/brotherhood-covenant"
-                className="inline-flex items-center rounded-full border border-slate-900/60 bg-forest/10 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 hover:bg-forest/20"
+                className="inline-flex items-center rounded-full border border-slate-900/60 bg-white/20 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 transition-all hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-forest"
+                prefetch={true}
               >
                 Build a brotherhood
               </Link>
