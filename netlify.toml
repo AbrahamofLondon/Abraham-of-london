@@ -4,7 +4,46 @@
 
 [build.environment]
   NODE_VERSION = "20.11.1"
-  PNPM_FLAGS = "--no-frozen-lockfile"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/functions", "@netlify/emails"]
+  directory = "netlify/functions"
+
+# CRITICAL: Add redirects for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Language = ["en"], Country = ["US"]}
+
+# Handle 404s - this is essential for Next.js Pages Router
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+  conditions = {Language = ["en"], Country = ["US"]}
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Security headers (safe)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

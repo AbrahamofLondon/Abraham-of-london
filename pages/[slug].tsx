@@ -15,15 +15,16 @@ import {
 } from "@/lib/server/downloads-data";
 import type { PageMeta } from "@/types/page";
 
-// Add this: List of static pages that should NOT be handled by this dynamic route
-const STATIC_PAGES = [
-  'about',
-  'contact', 
-  'downloads',
-  'strategy',
-  'books',
-  'print'
-];
+// -----------------------------------------------------------------------------
+// Helpers & constants
+// -----------------------------------------------------------------------------
+
+const RESERVED_SLUGS = new Set<string>([
+  "about",
+  "contact",
+  "brands",
+  "ventures",
+]);
 
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
@@ -64,6 +65,10 @@ type PageProps = {
   contentSource: MDXRemoteSerializeResult;
   resourcesMeta: DownloadMeta[];
 };
+
+// -----------------------------------------------------------------------------
+// Page component
+// -----------------------------------------------------------------------------
 
 function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   if (!page) return <div>Page not found.</div>;
@@ -122,6 +127,7 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
         <meta property="og:description" content={displayDescription} />
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -277,18 +283,22 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   );
 }
 
+// -----------------------------------------------------------------------------
+// SSG – paths
+// -----------------------------------------------------------------------------
+
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const slugs = getPageSlugs();
-    
-    // Filter out static pages that have their own routes
-    const dynamicSlugs = slugs?.filter((slug: string) => 
-      !STATIC_PAGES.includes(slug)
-    ) ?? [];
+    const slugs = getPageSlugs() ?? [];
 
-    const paths = dynamicSlugs.map((slug: string) => ({
-      params: { slug: String(slug) },
-    }));
+    const paths =
+      slugs
+        .map((slug: string) => String(slug).trim())
+        .filter((slug) => slug.length > 0)
+        .filter((slug) => !RESERVED_SLUGS.has(slug))
+        .map((slug) => ({
+          params: { slug },
+        })) ?? [];
 
     return { paths, fallback: "blocking" };
   } catch (error) {
@@ -297,13 +307,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 };
 
+// -----------------------------------------------------------------------------
+// SSG – props
+// -----------------------------------------------------------------------------
+
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slug = params?.slug as string | undefined;
     if (!slug) return { notFound: true };
 
-    // Double-check: if this is a static page, return 404
-    if (STATIC_PAGES.includes(slug)) {
+    // Guard against reserved slugs that have dedicated pages
+    if (RESERVED_SLUGS.has(slug)) {
       return { notFound: true };
     }
 
