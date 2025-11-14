@@ -15,44 +15,10 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# CRITICAL: Explicit static route handling
-[[redirects]]
-  from = "/about"
-  to = "/about.html"
-  status = 200
-  force = true
+# ✅ NO manual page redirects to .html
+# Next.js plugin will wire up SSR/ISR/dynamic routes correctly.
 
-[[redirects]]
-  from = "/contact"
-  to = "/contact.html" 
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/downloads"
-  to = "/downloads.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/brands"
-  to = "/brands.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/ventures"
-  to = "/ventures.html"
-  status = 200
-  force = true
-
-# Fallback for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Security headers (safe)
+# Security headers (fine to keep)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -60,7 +26,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache static assets
+# Cache static assets (also fine)
 [[headers]]
   for = "/_next/static/*"
   [headers.values]

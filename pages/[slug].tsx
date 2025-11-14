@@ -16,15 +16,8 @@ import {
 import type { PageMeta } from "@/types/page";
 
 // -----------------------------------------------------------------------------
-// Helpers & constants
+// Helpers
 // -----------------------------------------------------------------------------
-
-const RESERVED_SLUGS = new Set<string>([
-  "about",
-  "contact",
-  "brands",
-  "ventures",
-]);
 
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
@@ -33,6 +26,7 @@ function formatPretty(
   tz = "Europe/London"
 ): string {
   if (!isoish || typeof isoish !== "string") return "";
+
   if (isDateOnly(isoish)) {
     const d = new Date(`${isoish}T00:00:00Z`);
     return new Intl.DateTimeFormat("en-GB", {
@@ -42,8 +36,10 @@ function formatPretty(
       year: "numeric",
     }).format(d);
   }
+
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
+
   const date = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     weekday: "short",
@@ -51,14 +47,20 @@ function formatPretty(
     month: "short",
     year: "numeric",
   }).format(d);
+
   const time = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   }).format(d);
+
   return `${date}, ${time}`;
 }
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 
 type PageProps = {
   page: PageMeta;
@@ -67,7 +69,7 @@ type PageProps = {
 };
 
 // -----------------------------------------------------------------------------
-// Page component
+// Component
 // -----------------------------------------------------------------------------
 
 function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
@@ -93,7 +95,9 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   const url = `${siteBase}/${pathSegment}`;
 
   const relImage = coverImage ?? heroImage;
-  const absImage = relImage ? new URL(relImage, siteBase).toString() : undefined;
+  const absImage = relImage
+    ? new URL(relImage, siteBase).toString()
+    : undefined;
   const displayDescription = description || excerpt || "";
 
   const jsonLd = {
@@ -284,42 +288,40 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
 }
 
 // -----------------------------------------------------------------------------
-// SSG – paths
+// getStaticPaths – FILTER RESERVED SLUGS
 // -----------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const slugs = getPageSlugs() ?? [];
+    const slugs = getPageSlugs();
+
+    // Slugs that have their own dedicated pages in /pages
+    // Adjust this list if you add/remove top-level pages.
+    const RESERVED_ROOT_SLUGS = new Set(["about", "contact"]);
 
     const paths =
       slugs
-        .map((slug: string) => String(slug).trim())
-        .filter((slug) => slug.length > 0)
-        .filter((slug) => !RESERVED_SLUGS.has(slug))
+        ?.map((slug: string) => String(slug).trim())
+        .filter((slug) => slug && !RESERVED_ROOT_SLUGS.has(slug))
         .map((slug) => ({
           params: { slug },
         })) ?? [];
 
     return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error("Error generating page paths:", error);
+    console.error("Error generating page paths for /[slug]:", error);
     return { paths: [], fallback: "blocking" };
   }
 };
 
 // -----------------------------------------------------------------------------
-// SSG – props
+// getStaticProps
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slug = params?.slug as string | undefined;
     if (!slug) return { notFound: true };
-
-    // Guard against reserved slugs that have dedicated pages
-    if (RESERVED_SLUGS.has(slug)) {
-      return { notFound: true };
-    }
 
     const pageData = getPageBySlug(slug, [
       "slug",

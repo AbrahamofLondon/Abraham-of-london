@@ -48,6 +48,42 @@ function formatPretty(
   return `${date}, ${time}`;
 }
 
+/**
+ * Resolve the actual download URL for a given download meta.
+ * - Prefer explicit fields: pdfPath, fileUrl, downloadUrl
+ * - Fallback: /downloads/[slug].pdf
+ * - Normalise leading slash
+ * - Allow absolute URLs
+ */
+function resolveDownloadUrl(download: DownloadMeta & { slug?: string }) {
+  const site =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org";
+  const siteBase = site.replace(/\/+$/, "");
+
+  const raw =
+    (download as any).pdfPath ||
+    (download as any).fileUrl ||
+    (download as any).downloadUrl ||
+    (download.slug ? `/downloads/${download.slug}.pdf` : null);
+
+  if (!raw) return { relative: null as string | null, absolute: null as string | null };
+
+  const str = String(raw).trim();
+  if (!str) return { relative: null, absolute: null };
+
+  // Absolute URL already
+  if (/^https?:\/\//i.test(str)) {
+    return { relative: str, absolute: str };
+  }
+
+  // Ensure leading slash and strip any leading "./"
+  const normalised =
+    str.startsWith("/") ? str.replace(/^\/+/, "/") : `/${str.replace(/^\/+/, "")}`;
+
+  const absolute = new URL(normalised, siteBase).toString();
+  return { relative: normalised, absolute };
+}
+
 type DownloadPageProps = {
   download: DownloadMeta;
   contentSource: MDXRemoteSerializeResult;
@@ -82,7 +118,10 @@ function DownloadPage({ download, contentSource }: DownloadPageProps) {
     : undefined;
   const displayDescription = description || excerpt || "";
 
-  const jsonLd = {
+  const { relative: downloadUrl, absolute: downloadAbsUrl } =
+    resolveDownloadUrl(download as DownloadMeta & { slug?: string });
+
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "DigitalDocument",
     name: title,
@@ -91,13 +130,8 @@ function DownloadPage({ download, contentSource }: DownloadPageProps) {
     ...(date ? { datePublished: date } : {}),
     ...(absImage ? { image: [absImage] } : {}),
     ...(category ? { about: category } : {}),
+    ...(downloadAbsUrl ? { contentUrl: downloadAbsUrl } : {}),
   };
-
-  const downloadUrl =
-    (download as any).pdfPath ||
-    (download as any).fileUrl ||
-    (download as any).downloadUrl ||
-    null;
 
   return (
     <Layout title={title}>
@@ -111,6 +145,7 @@ function DownloadPage({ download, contentSource }: DownloadPageProps) {
         <meta property="og:description" content={displayDescription} />
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -168,15 +203,20 @@ function DownloadPage({ download, contentSource }: DownloadPageProps) {
             </div>
           )}
 
-          {downloadUrl && (
+          {downloadUrl ? (
             <div className="mb-8 flex justify-center">
               <a
-                href={String(downloadUrl)}
+                href={downloadUrl}
                 download
                 className="inline-flex items-center rounded-lg bg-forest px-6 py-3 font-medium text-white transition-colors hover:bg-forest/90"
               >
                 Download
               </a>
+            </div>
+          ) : (
+            <div className="mb-8 text-sm text-red-600">
+              Download link is not configured for this resource. Please contact
+              Abraham if you believe this is an error.
             </div>
           )}
         </header>

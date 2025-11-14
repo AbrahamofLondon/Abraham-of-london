@@ -10,7 +10,8 @@ import Layout from "@/components/Layout";
 const siteTitle = "Abraham of London";
 const siteTagline =
   "Faith-rooted strategy for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
-const siteUrl = "https://www.abrahamoflondon.org";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
 
 // Framer Motion variants
 const containerVariants = {
@@ -53,7 +54,7 @@ const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
 
       const elapsed = currentTime - startTimeRef.current;
       const progress = Math.min(elapsed / (duration * 1000), 1);
-      
+
       setCount(Math.floor(progress * end));
 
       if (progress < 1) {
@@ -113,7 +114,7 @@ const HomePage: React.FC = () => {
     },
     knowsAbout: [
       "Christian leadership",
-      "Strategic planning", 
+      "Strategic planning",
       "Fatherhood",
       "Legacy building",
       "Business strategy",
@@ -129,7 +130,9 @@ const HomePage: React.FC = () => {
   return (
     <Layout title={siteTitle}>
       <Head>
-        <title>{siteTitle} | Faithful Strategy for Builders, Founders & Fathers</title>
+        <title>
+          {siteTitle} | Faithful Strategy for Builders, Founders & Fathers
+        </title>
         <meta name="description" content={siteTagline} />
 
         {/* Open Graph */}
@@ -151,9 +154,15 @@ const HomePage: React.FC = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@abrahamoflondon" />
-        <meta name="twitter:title" content={`${siteTitle} | Faithful Strategy for Builders, Founders & Fathers`} />
+        <meta
+          name="twitter:title"
+          content={`${siteTitle} | Faithful Strategy for Builders, Founders & Fathers`}
+        />
         <meta name="twitter:description" content={siteTagline} />
-        <meta name="twitter:image" content={`${siteUrl}/assets/images/social/og-image.jpg`} />
+        <meta
+          name="twitter:image"
+          content={`${siteUrl}/assets/images/social/og-image.jpg`}
+        />
 
         {/* Canonical */}
         <link rel="canonical" href={siteUrl} />
@@ -161,6 +170,7 @@ const HomePage: React.FC = () => {
         {/* JSON-LD */}
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -235,7 +245,7 @@ const HomePage: React.FC = () => {
               >
                 About Abraham
               </Link>
-              <span className="text-gray-500 select-none">•</span>
+              <span className="select-none text-gray-500">•</span>
               <Link
                 href="/contact"
                 className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
@@ -243,7 +253,7 @@ const HomePage: React.FC = () => {
               >
                 Speak with Abraham
               </Link>
-              <span className="text-gray-500 select-none">•</span>
+              <span className="select-none text-gray-500">•</span>
               <Link
                 href="/downloads/brotherhood-starter-kit"
                 className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
@@ -262,7 +272,7 @@ const HomePage: React.FC = () => {
                 <p className="text-2xl font-bold text-softGold">
                   <AnimatedCounter end={25} />
                 </p>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
                   Strategic tools
                 </p>
               </div>
@@ -270,7 +280,7 @@ const HomePage: React.FC = () => {
                 <p className="text-2xl font-bold text-forest">
                   <AnimatedCounter end={500} />
                 </p>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
                   Men equipped
                 </p>
               </div>
@@ -278,7 +288,7 @@ const HomePage: React.FC = () => {
                 <p className="text-2xl font-bold text-softGold">
                   <AnimatedCounter end={12} />
                 </p>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
                   Brotherhood circles
                 </p>
               </div>
@@ -307,7 +317,7 @@ const HomePage: React.FC = () => {
                   src="/assets/images/abraham-of-london-banner.webp"
                   alt="Abraham of London – Fathering Without Fear book cover"
                   fill
-                  className="object-cover opacity-0 transition-opacity duration-500"
+                  className="opacity-0 object-cover transition-opacity duration-500"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   priority
                   onLoad={(event) => {
@@ -333,7 +343,7 @@ const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/downloads/brotherhood-covenant"
-                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-deepCharcoal"
+                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-forest/30 transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-deepCharcoal"
                   prefetch={true}
                 >
                   View brotherhood covenant
@@ -347,7 +357,7 @@ const HomePage: React.FC = () => {
                 </Link>
               </div>
 
-              <p className="mt-6 text-right text-[10px] font-light tracking-[0.35em] text-gray-400 select-none">
+              <p className="mt-6 select-none text-right text-[10px] font-light tracking-[0.35em] text-gray-400">
                 ABRAHAMOFLONDON
               </p>
             </div>
@@ -357,10 +367,10 @@ const HomePage: React.FC = () => {
         {/* Divider strip */}
         <section className="border-t border-white/10 bg-black/40">
           <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-4 py-6 text-xs text-gray-300 md:text-sm">
-            <p className="uppercase tracking-[0.25em] text-gray-400 select-none">
+            <p className="select-none text-xs uppercase tracking-[0.25em] text-gray-400">
               Strategy • Fatherhood • Legacy • Faith
             </p>
-            <p className="text-gray-500 select-none">
+            <p className="select-none text-gray-500">
               Designed to be read slowly. Lived fully.
             </p>
           </div>
@@ -368,7 +378,7 @@ const HomePage: React.FC = () => {
 
         {/* TRUST SIGNALS */}
         <section className="mx-auto max-w-6xl space-y-6 px-4 py-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 select-none">
+          <p className="select-none text-xs font-semibold uppercase tracking-[0.3em] text-gray-400">
             Trusted by leaders at
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all hover:grayscale-0">
@@ -397,7 +407,10 @@ const HomePage: React.FC = () => {
                 className="relative rounded-2xl border border-white/10 bg-white/5 p-6"
               >
                 <div className="absolute -top-3 left-6 rounded-full bg-black p-1">
-                  <Quote className="h-5 w-5 text-softGold/60" aria-hidden="true" />
+                  <Quote
+                    className="h-5 w-5 text-softGold/60"
+                    aria-hidden="true"
+                  />
                 </div>
                 <p className="mb-4 text-sm italic text-gray-100/90">
                   &ldquo;{t.quote}&rdquo;
@@ -417,7 +430,10 @@ const HomePage: React.FC = () => {
         <section className="mx-auto max-w-5xl px-4 pb-10">
           <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-deepCharcoal via-black to-forest/40 p-8 text-center shadow-2xl shadow-black/70 md:p-10">
             <div className="mx-auto max-w-2xl">
-              <BookOpen className="mx-auto mb-4 h-10 w-10 text-softGold" aria-hidden="true" />
+              <BookOpen
+                className="mx-auto mb-4 h-10 w-10 text-softGold"
+                aria-hidden="true"
+              />
               <h2 className="mb-3 font-serif text-2xl font-semibold text-white md:text-3xl">
                 Weekly building notes
               </h2>
@@ -427,12 +443,12 @@ const HomePage: React.FC = () => {
                 compromise.
               </p>
 
-              {/* Simple HTML form (you can wire this to /api/subscribe later) */}
+              {/* Simple HTML form (wire up to /api/subscribe when ready) */}
               <form
                 className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  // Add newsletter signup logic here
+                  // TODO: Add newsletter signup logic here
                 }}
               >
                 <input
@@ -452,11 +468,17 @@ const HomePage: React.FC = () => {
 
               <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-4 text-[11px] text-gray-400">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-forest" aria-hidden="true" />
+                  <span
+                    className="h-2 w-2 rounded-full bg-forest"
+                    aria-hidden="true"
+                  />
                   <span>No spam, ever.</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-softGold" aria-hidden="true" />
+                  <span
+                    className="h-2 w-2 rounded-full bg-softGold"
+                    aria-hidden="true"
+                  />
                   <span>Unsubscribe any time.</span>
                 </div>
               </div>
