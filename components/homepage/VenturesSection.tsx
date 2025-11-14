@@ -24,10 +24,20 @@ const INNOVATE_HUB_BASE = pickUrl(
   process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,
   "https://innovatehub-abrahamoflondon.netlify.app"
 );
-const INNOVATE_HUB_EARLY_ACCESS = new URL("/forms/early-access.html", INNOVATE_HUB_BASE).toString();
 
-const ALOMARADA_URL = pickUrl(process.env.NEXT_PUBLIC_ALOMARADA_URL, "https://alomarada.com");
-const ENDURELUXE_URL = pickUrl(process.env.NEXT_PUBLIC_ENDURELUXE_URL, "https://endureluxe.com");
+const INNOVATE_HUB_EARLY_ACCESS = new URL(
+  "/forms/early-access.html",
+  INNOVATE_HUB_BASE
+).toString();
+
+const ALOMARADA_URL = pickUrl(
+  process.env.NEXT_PUBLIC_ALOMARADA_URL,
+  "https://alomarada.com"
+);
+const ENDURELUXE_URL = pickUrl(
+  process.env.NEXT_PUBLIC_ENDURELUXE_URL,
+  "https://endureluxe.com"
+);
 
 export const defaultBrands: Brand[] = [
   {
@@ -67,10 +77,16 @@ const container = {
 
 const item = {
   hidden: { y: 16, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.35, ease: "easeOut" } },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
 } as const;
 
-function ExternalAwareLink(props: React.ComponentProps<typeof Link> & { href: string }) {
+function ExternalAwareLink(
+  props: React.ComponentProps<typeof Link> & { href: string }
+) {
   const isExternal = /^https?:\/\//i.test(props.href);
   return (
     <Link
@@ -84,10 +100,16 @@ function ExternalAwareLink(props: React.ComponentProps<typeof Link> & { href: st
 
 function BrandCard({ brand }: { brand: Brand }) {
   const reduce = useReducedMotion();
+
   const primaryCta = (
     <span className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-forest hover:text-[color:var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]">
       Learn more
-      <svg className="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <svg
+        className="ml-2 h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
         <path
           fillRule="evenodd"
           d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
@@ -100,7 +122,7 @@ function BrandCard({ brand }: { brand: Brand }) {
   return (
     <motion.article
       variants={item}
-      className="group flex flex-col rounded-2xl border border-lightGrey bg-white p-6 text-center shadow-card transition hover:shadow-cardHover"
+      className="group flex flex-col rounded-2xl border border-lightGrey bg-white p-6 text-center shadow-lg shadow-black/5 transition hover:shadow-xl hover:shadow-black/10"
       whileHover={reduce ? undefined : { scale: 1.01 }}
     >
       <div className="relative mx-auto mb-5 h-[140px] w-[140px]">
@@ -114,11 +136,16 @@ function BrandCard({ brand }: { brand: Brand }) {
         />
       </div>
 
-      <h3 className="mb-1 font-serif text-2xl font-semibold text-deepCharcoal">{brand.name}</h3>
-      <p className="mb-3 flex-1 text-[color:var(--color-on-secondary)/0.8]">{brand.description}</p>
+      <h3 className="mb-1 font-serif text-2xl font-semibold text-deepCharcoal">
+        {brand.name}
+      </h3>
+
+      <p className="mb-3 flex-1 text-[color:var(--color-on-secondary)] opacity-80">
+        {brand.description}
+      </p>
 
       {brand.metric && (
-        <p className="mx-auto mb-4 inline-flex items-center justify-center rounded-full border border-lightGrey bg-warmWhite px-3 py-1 text-xs text-[color:var(--color-on-secondary)/0.8]">
+        <p className="mx-auto mb-4 inline-flex items-center justify-center rounded-full border border-lightGrey bg-warmWhite px-3 py-1 text-xs text-[color:var(--color-on-secondary)] opacity-80">
           {brand.metric}
         </p>
       )}
@@ -147,7 +174,7 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
   return (
     <section
       id="ventures"
-      className="bg-gradient-to-br from-gray-50 to-white px-4 py-16"
+      className="bg-gradient-to-br from-warmWhite to-white px-4 py-16"
       aria-labelledby="ventures-title"
     >
       <div className="container mx-auto max-w-6xl">
@@ -159,11 +186,15 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
           className="rounded-3xl bg-white p-8 text-deepCharcoal shadow-2xl ring-1 ring-black/5 md:p-12"
         >
           <motion.header variants={item} className="mb-10">
-            <h2 id="ventures-title" className="font-serif text-3xl font-bold text-gray-900 md:text-5xl">
+            <h2
+              id="ventures-title"
+              className="font-serif text-3xl font-bold text-gray-900 md:text-5xl"
+            >
               Ventures & Brands
             </h2>
-            <p className="mt-3 max-w-2xl text-lg text-[color:var(--color-on-secondary)/0.8] md:text-xl">
-              A portfolio at the intersection of strategy, sustainability, and impact.
+            <p className="mt-3 max-w-2xl text-lg text-[color:var(--color-on-secondary)] opacity-80 md:text-xl">
+              A portfolio at the intersection of strategy, sustainability, and
+              impact.
             </p>
           </motion.header>
 
@@ -183,9 +214,12 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
               />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">Abraham of London</h3>
-              <p className="text-[color:var(--color-on-secondary)/0.8]">
-                Strategic stewardship, thought leadership, and the standards that hold the family together.
+              <h3 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+                Abraham of London
+              </h3>
+              <p className="text-[color:var(--color-on-secondary)] opacity-80">
+                Strategic stewardship, thought leadership, and the standards
+                that hold the family together.
               </p>
               <div className="mt-4">
                 <Link
@@ -199,7 +233,10 @@ export default function VenturesSection({ brandsData = defaultBrands }: Ventures
             </div>
           </motion.div>
 
-          <motion.div variants={container} className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <motion.div
+            variants={container}
+            className="grid grid-cols-1 gap-8 md:grid-cols-3"
+          >
             {brandsData.map((b) => (
               <BrandCard key={b.name} brand={b} />
             ))}

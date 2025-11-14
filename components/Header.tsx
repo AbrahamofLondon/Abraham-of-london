@@ -63,14 +63,24 @@ export default function Header({ variant = "light" }: HeaderProps) {
     };
   }, [open]);
 
-  const lightShell = scrolled ? "bg-white/85 border-black/10 shadow-sm" : "bg-white/70 border-black/10";
-  const darkShell = scrolled ? "bg-black/60 border-white/10 shadow-sm" : "bg-black/50 border-white/10";
-  const shell = variant === "dark" ? `${darkShell} text-cream` : `${lightShell} text-deepCharcoal`;
+  const lightShell = scrolled
+    ? "bg-white/85 border-black/10 shadow-sm"
+    : "bg-white/70 border-black/10";
 
+  const darkShell = scrolled
+    ? "bg-black/60 border-white/10 shadow-sm"
+    : "bg-black/50 border-white/10";
+
+  const shell =
+    variant === "dark"
+      ? `${darkShell} text-cream`
+      : `${lightShell} text-deepCharcoal`;
+
+  // Base link styling – now using valid Tailwind + CSS var combo
   const linkBase =
     variant === "dark"
-      ? "text-[color:var(--color-on-primary)/0.8] hover:text-cream"
-      : "text-[color:var(--color-on-secondary)/0.8] hover:text-deepCharcoal";
+      ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:text-cream"
+      : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
@@ -86,7 +96,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
   // CSS var for header height
   const headerStyle = React.useMemo(
     () =>
-      ({ ["--header-h"]: scrolled ? "4rem" : "5rem" } as React.CSSProperties & {
+      ({
+        ["--header-h"]: scrolled ? "4rem" : "5rem",
+      } as React.CSSProperties & {
         ["--header-h"]?: string;
       }),
     [scrolled]
@@ -151,7 +163,6 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 Call
               </a>
             )}
-            {/* Removed slash-opacity ring class to avoid guards */}
             <Link
               href="/contact"
               className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
@@ -172,17 +183,39 @@ export default function Header({ variant = "light" }: HeaderProps) {
             aria-expanded={open}
             aria-controls="mobile-nav"
             className={`inline-flex items-center justify-center rounded-md border p-2 ${
-              variant === "dark" ? "border-white/20 text-cream" : "border-black/20 text-deepCharcoal"
+              variant === "dark"
+                ? "border-white/20 text-cream"
+                : "border-black/20 text-deepCharcoal"
             }`}
           >
             <span className="sr-only">Toggle navigation</span>
             {!open ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" />
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 6h16M4 12h16M4 18h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
               </svg>
             ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" />
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
               </svg>
             )}
           </button>
@@ -194,9 +227,14 @@ export default function Header({ variant = "light" }: HeaderProps) {
         id="mobile-nav"
         className={`md:hidden ${open ? "block" : "hidden"} ${
           variant === "dark" ? "bg-black/80" : "bg-white/95"
-        } border-t ${variant === "dark" ? "border-white/10" : "border-black/10"} backdrop-blur`}
+        } border-t ${
+          variant === "dark" ? "border-white/10" : "border-black/10"
+        } backdrop-blur`}
       >
-        <nav className="mx-auto max-w-7xl px-4 py-4" aria-label="Mobile Primary">
+        <nav
+          className="mx-auto max-w-7xl px-4 py-4"
+          aria-label="Mobile Primary"
+        >
           <ul className="grid gap-2">
             {NAV.map((item) => (
               <li key={item.href}>
@@ -209,8 +247,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
                         ? "bg-white/10 text-cream"
                         : "bg-black/5 text-deepCharcoal"
                       : variant === "dark"
-                      ? "text-[color:var(--color-on-primary)/0.8] hover:bg-white/10 hover:text-cream"
-                      : "text-[color:var(--color-on-secondary)/0.8] hover:bg-black/5 hover:text-deepCharcoal"
+                      ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
+                      : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
@@ -223,7 +261,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 href={`mailto:${EMAIL}`}
                 onClick={() => setOpen(false)}
                 className={`text-base underline-offset-4 hover:underline ${
-                  variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+                  variant === "dark"
+                    ? "text-[color:var(--color-on-primary)] opacity-90"
+                    : "text-[color:var(--color-on-secondary)] opacity-90"
                 }`}
               >
                 Email
@@ -233,7 +273,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
                   href={`tel:${PHONE.replace(/\s+/g, "")}`}
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
-                    variant === "dark" ? "text-[color:var(--color-on-primary)/0.9]" : "text-[color:var(--color-on-secondary)/0.9]"
+                    variant === "dark"
+                      ? "text-[color:var(--color-on-primary)] opacity-90"
+                      : "text-[color:var(--color-on-secondary)] opacity-90"
                   }`}
                 >
                   Call

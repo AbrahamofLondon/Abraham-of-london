@@ -1,3 +1,4 @@
+// components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
 import { siteConfig, absUrl } from "@/lib/siteConfig";
@@ -17,7 +18,10 @@ export default function Footer(): JSX.Element {
           {siteConfig.email ? (
             <>
               <span className="mx-2">•</span>
-              <a href={`mailto:${siteConfig.email}`} className="hover:underline">
+              <a
+                href={`mailto:${siteConfig.email}`}
+                className="hover:underline"
+              >
                 {siteConfig.email}
               </a>
             </>
@@ -28,8 +32,11 @@ export default function Footer(): JSX.Element {
           <ul className="flex flex-wrap items-center gap-4 text-sm">
             {socials.map((social, index) => {
               const href = social.href?.trim() ?? "#";
-              const label = social.label ?? href.replace(/^https?:\/\//, "");
-              const external = Boolean((social as any).external) || /^https?:\/\//i.test(href);
+              const label =
+                social.label ?? href.replace(/^https?:\/\//, "");
+              const external =
+                Boolean((social as any).external) ||
+                /^https?:\/\//i.test(href);
 
               return (
                 <li key={`${label}-${index}`}>
@@ -44,7 +51,11 @@ export default function Footer(): JSX.Element {
                       {label}
                     </a>
                   ) : (
-                    <Link href={href} className="hover:underline" aria-label={label}>
+                    <Link
+                      href={href}
+                      className="hover:underline"
+                      aria-label={label}
+                    >
                       {label}
                     </Link>
                   )}
