@@ -1,87 +1,115 @@
 // pages/books/[slug].tsx
+
+import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { getBookBySlug, getBookSlugs } from "@/lib/server/books-data";
-import type { BookMeta } from "@/types/book";
-import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
-import mdxComponents from "@/components/mdx-components";
-import { GetStaticPaths, GetStaticProps } from "next";
-import Layout from "@/components/Layout";
 
-// Date formatting utility
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getPageBySlug, getPageSlugs } from "@/lib/server/pages-data";
+import type { PageMeta } from "@/types/page";
+import {
+  getDownloadsBySlugs,
+  type DownloadMeta,
+} from "@/lib/server/downloads-data";
+
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
-function formatPretty(isoish: string | null | undefined, tz = "Europe/London"): string {
-  if (!isoish || typeof isoish !== 'string') return '';
+
+function formatPretty(
+  isoish: string | null | undefined,
+  tz = "Europe/London"
+): string {
+  if (!isoish || typeof isoish !== "string") return "";
   if (isDateOnly(isoish)) {
     const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
   }
+
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "2-digit", month: "short", year: "numeric" }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+
+  const date = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
+
   return `${date}, ${time}`;
 }
 
-type BookPageProps = {
-  book: BookMeta;
+type PageProps = {
+  page: PageMeta;
   contentSource: MDXRemoteSerializeResult;
   resourcesMeta: DownloadMeta[];
 };
 
-function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
-  if (!book) return <div>Book not found.</div>;
+function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
+  if (!page) return <div>Page not found.</div>;
 
-  const { 
-    slug, 
-    title, 
-    description, 
-    summary, 
-    author, 
-    publisher, 
-    publishedDate, 
-    isbn, 
-    coverImage, 
-    heroImage, 
-    tags, 
+  const {
+    slug,
+    title,
+    description,
+    excerpt,
+    heroImage,
+    coverImage,
+    date,
+    author,
+    tags,
     category,
-    rating,
-    pages,
-    language,
-    format,
-    purchaseLinks
-  } = book;
-  
-  const prettyDate = formatPretty(publishedDate);
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const url = `${site}/books/${slug}`;
+  } = page;
+
+  const site =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://www.abrahamoflondon.org";
+
+  const pathSegment = slug ? `books/${slug}` : "books";
+  const url = `${site.replace(/\/+$/, "")}/${pathSegment}`;
+
   const relImage = coverImage ?? heroImage;
-  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
-  const displayDescription = description || summary || "";
+  const absImage = relImage
+    ? new URL(relImage, site).toString()
+    : undefined;
+
+  const displayDescription = description || excerpt || "";
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Book",
     name: title,
-    author: author ? {
-      "@type": "Person",
-      name: author
-    } : undefined,
-    publisher: publisher ? {
-      "@type": "Organization",
-      name: publisher
-    } : undefined,
-    datePublished: publishedDate,
-    isbn: isbn,
-    numberOfPages: pages,
-    inLanguage: language,
-    bookFormat: format ? `https://schema.org/${format.charAt(0).toUpperCase() + format.slice(1)}Format` : undefined,
-    ...(absImage ? { image: [absImage] } : {}),
     description: displayDescription,
     url,
+    ...(author
+      ? {
+          author: {
+            "@type": "Person",
+            name: author,
+          },
+        }
+      : {}),
+    ...(date ? { datePublished: date } : {}),
+    ...(absImage ? { image: [absImage] } : {}),
+    ...(category ? { about: category } : {}),
   };
 
   return (
@@ -90,192 +118,123 @@ function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
         <title>{title} | Abraham of London</title>
         <meta name="description" content={displayDescription} />
         {absImage && <meta property="og:image" content={absImage} />}
-        <meta property="og:type" content="book" />
+        <meta property="og:type" content="article" />
         <meta property="og:url" content={url} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={displayDescription} />
-        {isbn && <meta property="book:isbn" content={isbn} />}
-        {author && <meta property="book:author" content={author} />}
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
 
-      <article className="book-page px-4 py-10 mx-auto max-w-6xl">
-        {/* Header Section */}
-        <header className="mb-12">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Book Cover */}
-            {coverImage && (
-              <div className="lg:w-2/5">
-                <div className="relative aspect-[3/4] w-full max-w-[400px] mx-auto lg:mx-0">
-                  <Image
-                    src={coverImage}
-                    alt={`Cover of ${title}`}
-                    fill
-                    className="object-cover rounded-xl shadow-2xl"
-                    sizes="(max-width: 1024px) 400px, 300px"
-                    priority
-                  />
-                </div>
+      <article className="dynamic-page mx-auto max-w-4xl px-4 py-10">
+        <header className="mb-8 text-center">
+          {heroImage && (
+            <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-xl">
+              <Image
+                src={heroImage}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 80vw"
+                priority
+              />
+            </div>
+          )}
+
+          <h1 className="mb-4 font-serif text-4xl font-semibold text-deepCharcoal md:text-5xl">
+            {title}
+          </h1>
+
+          {displayDescription && (
+            <p className="mx-auto mb-6 max-w-3xl text-xl leading-relaxed text-gray-600">
+              {displayDescription}
+            </p>
+          )}
+
+          <div className="mb-8 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+            {author && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">By:</span>
+                <span>{author}</span>
               </div>
             )}
-            
-            {/* Book Info */}
-            <div className="lg:w-3/5">
-              <div className="mb-6">
-                {category && (
-                  <span className="inline-block bg-forest text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
-                    {category}
-                  </span>
-                )}
-                <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-4 text-deepCharcoal leading-tight">
-                  {title}
-                </h1>
-                
-                {author && (
-                  <p className="text-2xl text-forest mb-6 font-light">
-                    by <span className="font-semibold">{author}</span>
-                  </p>
-                )}
+            {date && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Published:</span>
+                <time dateTime={date}>{formatPretty(date)}</time>
               </div>
-              
-              {/* Book Metadata */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {publisher && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Publisher:</span>
-                    <p className="text-gray-600">{publisher}</p>
-                  </div>
-                )}
-                {publishedDate && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Published:</span>
-                    <p className="text-gray-600">{prettyDate}</p>
-                  </div>
-                )}
-                {isbn && (
-                  <div>
-                    <span className="font-semibold text-gray-700">ISBN:</span>
-                    <p className="text-gray-600 font-mono">{isbn}</p>
-                  </div>
-                )}
-                {pages && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Pages:</span>
-                    <p className="text-gray-600">{pages}</p>
-                  </div>
-                )}
-                {language && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Language:</span>
-                    <p className="text-gray-600">{language}</p>
-                  </div>
-                )}
-                {format && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Format:</span>
-                    <p className="text-gray-600 capitalize">{format}</p>
-                  </div>
-                )}
-                {rating && (
-                  <div>
-                    <span className="font-semibold text-gray-700">Rating:</span>
-                    <p className="text-gray-600">{rating}/5 ⭐</p>
-                  </div>
-                )}
+            )}
+            {category && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Category:</span>
+                <span>{category}</span>
               </div>
-
-              {/* Book Description */}
-              {displayDescription && (
-                <div className="mb-8">
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    {displayDescription}
-                  </p>
-                </div>
-              )}
-
-              {/* Purchase Links */}
-              {purchaseLinks && purchaseLinks.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold mb-4 text-deepCharcoal">Where to Buy</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {purchaseLinks.map((link, index) => (
-                      <a
-                        key={index}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center bg-forest text-white px-6 py-3 rounded-lg font-medium hover:bg-forest/90 transition-colors"
-                      >
-                        {link.platform}
-                        {link.price && <span className="ml-2 text-sm opacity-90">({link.price})</span>}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {tags && tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm border border-gray-200"
-                    >
-                      {String(tag)}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
+
+          {tags && tags.length > 0 && (
+            <div className="mb-6 flex flex-wrap justify-center gap-2">
+              {tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+                >
+                  {String(tag)}
+                </span>
+              ))}
+            </div>
+          )}
         </header>
 
-        {/* Book Content */}
-        {contentSource && (
-          <section className="prose prose-lg max-w-none mb-16 bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            <MDXRemote {...contentSource} components={mdxComponents} />
-          </section>
-        )}
+        <section className="prose prose-lg mb-12 max-w-none">
+          <MDXRemote {...contentSource} components={mdxComponents} />
+        </section>
 
-        {/* Resources Section */}
-        {resourcesMeta?.length > 0 && (
-          <section className="mt-16 border-t border-gray-200 pt-12">
-            <h2 className="font-serif text-3xl font-semibold text-deepCharcoal mb-8 text-center">
+        {resourcesMeta && resourcesMeta.length > 0 && (
+          <section className="mt-12 border-t border-lightGrey pt-8">
+            <h2 className="mb-6 font-serif text-2xl font-semibold text-deepCharcoal">
               Related Resources
             </h2>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {resourcesMeta.map((resource) => (
-                <div key={resource.slug} className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+                <div
+                  key={resource.slug}
+                  className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
+                >
                   {resource.coverImage && (
                     <div className="relative aspect-[4/3] w-full">
                       <Image
                         src={String(resource.coverImage)}
-                        alt={resource.title || ''}
+                        alt={resource.title || ""}
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     </div>
                   )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-deepCharcoal mb-3">
-                      <Link href={`/downloads/${resource.slug}`} className="hover:text-forest transition-colors">
+                  <div className="p-4">
+                    <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
+                      <Link
+                        href={`/downloads/${resource.slug}`}
+                        className="transition-colors hover:text-forest"
+                      >
                         {resource.title}
                       </Link>
                     </h3>
+
                     {resource.excerpt && (
-                      <p className="text-gray-600 mb-4 line-clamp-3">
+                      <p className="mb-3 line-clamp-2 text-sm text-gray-600">
                         {String(resource.excerpt)}
                       </p>
                     )}
+
                     <div className="flex gap-2">
                       <Link
                         href={`/downloads/${resource.slug}`}
-                        className="inline-flex items-center rounded-lg bg-forest px-4 py-2 text-sm font-medium text-white hover:bg-forest/90 transition-colors"
+                        className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
                       >
                         View Details
                       </Link>
@@ -283,9 +242,9 @@ function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
                         <a
                           href={String((resource as any).pdfPath)}
                           download
-                          className="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                         >
-                          Download PDF
+                          Download
                         </a>
                       )}
                     </div>
@@ -296,19 +255,28 @@ function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
           </section>
         )}
 
-        {/* Navigation */}
-        <footer className="mt-16 pt-8 border-t border-gray-200 flex justify-between items-center">
-          <Link
-            href="/books"
-            className="inline-flex items-center text-forest hover:text-forest/80 transition-colors font-medium"
-          >
-            ← Back to All Books
-          </Link>
-          
-          <div className="text-sm text-gray-500">
-            Last updated: {new Date().toLocaleDateString('en-GB')}
+        <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest to-softGold p-8 text-center text-white">
+          <h2 className="mb-4 font-serif text-2xl font-semibold">
+            Ready to take the next step?
+          </h2>
+          <p className="mb-6 text-lg opacity-90">
+            Explore more resources or get in touch to discuss your project.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/print"
+              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal transition-colors hover:bg-gray-100"
+            >
+              Browse Print Materials
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white hover:text-deepCharcoal"
+            >
+              Get In Touch
+            </Link>
           </div>
-        </footer>
+        </section>
       </article>
     </Layout>
   );
@@ -316,82 +284,86 @@ function BookPage({ book, contentSource, resourcesMeta }: BookPageProps) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const slugs = getBookSlugs();
-    const paths = slugs.map((slug: string) => ({ params: { slug } }));
-    
-    return {
-      paths,
-      fallback: 'blocking'
-    };
+    const slugs = getPageSlugs();
+    const paths =
+      slugs?.map((slug: string) => ({
+        params: { slug: String(slug) },
+      })) ?? [];
+
+    return { paths, fallback: false };
   } catch (error) {
-    console.error('Error generating book paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking'
-    };
+    // eslint-disable-next-line no-console
+    console.error("Error generating page paths:", error);
+    return { paths: [], fallback: false };
   }
 };
 
-export const getStaticProps: GetStaticProps<BookPageProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
-    const slug = params?.slug as string;
-    
-    if (!slug) {
-      return { notFound: true };
-    }
+    const slug = params?.slug as string | undefined;
+    if (!slug) return { notFound: true };
 
-    const bookData = getBookBySlug(slug, [
-      "slug", "title", "author", "publisher", "publishedDate", "isbn", 
-      "description", "summary", "coverImage", "heroImage", "tags", "category",
-      "resources", "content", "rating", "pages", "language", "format", "purchaseLinks"
+    const pageData = getPageBySlug(slug, [
+      "slug",
+      "title",
+      "description",
+      "excerpt",
+      "heroImage",
+      "coverImage",
+      "date",
+      "author",
+      "tags",
+      "category",
+      "resources",
+      "content",
     ]);
 
-    if (!bookData || !bookData.title) {
-      return { notFound: true };
-    }
+    if (!pageData || !pageData.title) return { notFound: true };
 
-    const { content, ...book } = bookData;
-    const jsonSafeBook = JSON.parse(JSON.stringify(book));
-    
-    let contentSource: MDXRemoteSerializeResult | null = null;
-    if (content) {
-      contentSource = await serialize(content, { scope: jsonSafeBook });
-    }
+    const { content, ...page } = pageData;
 
-    // Extract resource slugs from book resources
+    const jsonSafePage: PageMeta = JSON.parse(JSON.stringify(page));
+
+    const contentSource = await serialize(content || "", {
+     scope: jsonSafePage as unknown as Record<string, unknown>,
+   });
+
     const resourceSlugs: string[] = [];
-    if (jsonSafeBook.resources?.downloads) {
-      jsonSafeBook.resources.downloads.forEach((resource: any) => {
-        if (resource.href) {
-          const slug = resource.href.split('/').pop();
-          if (slug) resourceSlugs.push(slug);
-        }
+
+    if (jsonSafePage.resources?.downloads) {
+      jsonSafePage.resources.downloads.forEach((r: any) => {
+        const s = r?.href?.split("/").pop();
+        if (s) resourceSlugs.push(s);
       });
     }
 
-    if (jsonSafeBook.resources?.reads) {
-      jsonSafeBook.resources.reads.forEach((resource: any) => {
-        if (resource.href) {
-          const slug = resource.href.split('/').pop();
-          if (slug) resourceSlugs.push(slug);
-        }
+    if (jsonSafePage.resources?.reads) {
+      jsonSafePage.resources.reads.forEach((r: any) => {
+        const s = r?.href?.split("/").pop();
+        if (s) resourceSlugs.push(s);
       });
     }
 
-    const resourcesMeta = resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
+    const resourcesMeta: DownloadMeta[] =
+      resourceSlugs.length > 0
+        ? JSON.parse(
+            JSON.stringify(getDownloadsBySlugs(resourceSlugs))
+          )
+        : [];
 
     return {
       props: {
-        book: jsonSafeBook,
-        contentSource: contentSource || {} as MDXRemoteSerializeResult,
-        resourcesMeta: JSON.parse(JSON.stringify(resourcesMeta))
+        page: jsonSafePage,
+        contentSource,
+        resourcesMeta,
       },
-      revalidate: 3600 // Revalidate every hour
+      revalidate: 3600,
     };
   } catch (error) {
-    console.error('Error in getStaticProps for book:', error);
+    // eslint-disable-next-line no-console
+    console.error("Error in getStaticProps for /books/[slug]:", error);
     return { notFound: true };
   }
 };
 
-export default BookPage;
+export default DynamicPage;

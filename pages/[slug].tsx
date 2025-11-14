@@ -4,24 +4,48 @@ import Image from "next/image";
 import Link from "next/link";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { getPageBySlug, getPageSlugs } from "@/lib/server/pages-data";
-import type { PageMeta } from "@/types/page";
-import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
-import mdxComponents from "@/components/mdx-components";
 import type { GetStaticPaths, GetStaticProps } from "next";
+
 import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getPageBySlug, getPageSlugs } from "@/lib/server/pages-data";
+import {
+  getDownloadsBySlugs,
+  type DownloadMeta,
+} from "@/lib/server/downloads-data";
+import type { PageMeta } from "@/types/page";
 
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
-function formatPretty(isoish: string | null | undefined, tz = "Europe/London"): string {
+
+function formatPretty(
+  isoish: string | null | undefined,
+  tz = "Europe/London"
+): string {
   if (!isoish || typeof isoish !== "string") return "";
   if (isDateOnly(isoish)) {
     const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
   }
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "2-digit", month: "short", year: "numeric" }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
+  const date = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
   return `${date}, ${time}`;
 }
 
@@ -47,10 +71,14 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
     category,
   } = page;
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const url = `${site}/${slug}`;
+  const site =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const siteBase = site.replace(/\/+$/, "");
+  const pathSegment = slug || "";
+  const url = `${siteBase}/${pathSegment}`;
+
   const relImage = coverImage ?? heroImage;
-  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
+  const absImage = relImage ? new URL(relImage, siteBase).toString() : undefined;
   const displayDescription = description || excerpt || "";
 
   const jsonLd = {
@@ -59,7 +87,14 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
     name: title,
     description: displayDescription,
     url,
-    ...(author ? { author: { "@type": "Person", name: author } } : {}),
+    ...(author
+      ? {
+          author: {
+            "@type": "Person",
+            name: author,
+          },
+        }
+      : {}),
     ...(date ? { datePublished: date } : {}),
     ...(absImage ? { image: [absImage] } : {}),
     ...(category ? { about: category } : {}),
@@ -81,10 +116,10 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
         />
       </Head>
 
-      <article className="dynamic-page px-4 py-10 mx-auto max-w-4xl">
+      <article className="dynamic-page mx-auto max-w-4xl px-4 py-10">
         <header className="mb-8 text-center">
           {heroImage && (
-            <div className="relative aspect-[21/9] w-full mb-6 rounded-xl overflow-hidden">
+            <div className="relative mb-6 w-full overflow-hidden rounded-xl aspect-[21/9]">
               <Image
                 src={heroImage}
                 alt={title}
@@ -96,17 +131,17 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-serif font-semibold mb-4 text-deepCharcoal">
+          <h1 className="mb-4 text-4xl font-serif font-semibold text-deepCharcoal md:text-5xl">
             {title}
           </h1>
 
           {displayDescription && (
-            <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+            <p className="mx-auto mb-6 max-w-3xl text-xl leading-relaxed text-gray-600">
               {displayDescription}
             </p>
           )}
 
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 mb-8">
+          <div className="mb-8 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
             {author && (
               <div className="flex items-center gap-1">
                 <span className="font-medium">By:</span>
@@ -128,11 +163,11 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           </div>
 
           {tags && tags.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <div className="mb-6 flex flex-wrap justify-center gap-2">
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
                 >
                   {String(tag)}
                 </span>
@@ -141,13 +176,13 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           )}
         </header>
 
-        <section className="prose prose-lg max-w-none mb-12">
+        <section className="prose prose-lg mb-12 max-w-none">
           <MDXRemote {...contentSource} components={mdxComponents} />
         </section>
 
-        {resourcesMeta?.length > 0 && (
+        {resourcesMeta && resourcesMeta.length > 0 && (
           <section className="mt-12 border-t border-lightGrey pt-8">
-            <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-6">
+            <h2 className="mb-6 font-serif text-2xl font-semibold text-deepCharcoal">
               Related Resources
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -157,7 +192,7 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
                   className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
                 >
                   {resource.coverImage && (
-                    <div className="relative aspect-[4/3] w-full">
+                    <div className="relative w-full aspect-[4/3]">
                       <Image
                         src={String(resource.coverImage)}
                         alt={resource.title || ""}
@@ -168,23 +203,23 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
                     </div>
                   )}
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-deepCharcoal mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
                       <Link
                         href={`/downloads/${resource.slug}`}
-                        className="hover:text-forest transition-colors"
+                        className="transition-colors hover:text-forest"
                       >
                         {resource.title}
                       </Link>
                     </h3>
                     {resource.excerpt && (
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      <p className="mb-3 line-clamp-2 text-sm text-gray-600">
                         {String(resource.excerpt)}
                       </p>
                     )}
                     <div className="flex gap-2">
                       <Link
                         href={`/downloads/${resource.slug}`}
-                        className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white hover:bg-forest/90 transition-colors"
+                        className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
                       >
                         View Details
                       </Link>
@@ -192,7 +227,7 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
                         <a
                           href={String((resource as any).pdfPath)}
                           download
-                          className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                         >
                           Download
                         </a>
@@ -205,21 +240,23 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           </section>
         )}
 
-        <section className="mt-12 bg-gradient-to-r from-forest to-softGold rounded-2xl p-8 text-center text-white">
-          <h2 className="text-2xl font-serif font-semibold mb-4">Ready to take the next step?</h2>
-          <p className="text-lg mb-6 opacity-90">
+        <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest to-softGold p-8 text-center text-white">
+          <h2 className="mb-4 text-2xl font-serif font-semibold">
+            Ready to take the next step?
+          </h2>
+          <p className="mb-6 text-lg opacity-90">
             Explore more resources or get in touch to discuss your project.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/print"
-              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal transition-colors hover:bg-gray-100"
             >
               Browse Print Materials
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white hover:bg-white hover:text-deepCharcoal transition-colors"
+              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white hover:text-deepCharcoal"
             >
               Get In Touch
             </Link>
@@ -233,7 +270,11 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const slugs = getPageSlugs();
-    const paths = slugs.map((slug: string) => ({ params: { slug } }));
+    const paths =
+      slugs?.map((slug: string) => ({
+        params: { slug: String(slug) },
+      })) ?? [];
+
     return { paths, fallback: "blocking" };
   } catch (error) {
     console.error("Error generating page paths:", error);
@@ -243,7 +284,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
-    const slug = params?.slug as string;
+    const slug = params?.slug as string | undefined;
     if (!slug) return { notFound: true };
 
     const pageData = getPageBySlug(slug, [
@@ -264,42 +305,53 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     if (!pageData || !pageData.title) return { notFound: true };
 
     const { content, ...page } = pageData;
-    const jsonSafePage = JSON.parse(JSON.stringify(page));
 
-    let contentSource: MDXRemoteSerializeResult | null = null;
-    if (content) {
-      contentSource = await serialize(content, { 
-        scope: jsonSafePage as Record<string, unknown> 
-      });
-    }
+    // Make it JSON-serialisable and type-friendly
+    const jsonSafePage = JSON.parse(JSON.stringify(page)) as PageMeta & {
+      resources?: {
+        downloads?: { href?: string }[];
+        reads?: { href?: string }[];
+      };
+    };
+
+    // Always serialise content (empty string is fine if missing)
+    const contentSource = await serialize(content || "", {
+      scope: jsonSafePage as unknown as Record<string, unknown>,
+    });
 
     const resourceSlugs: string[] = [];
+
     if (jsonSafePage.resources?.downloads) {
-      jsonSafePage.resources.downloads.forEach((r: any) => {
-        const s = r?.href?.split("/").pop();
-        if (s) resourceSlugs.push(s);
-      });
-    }
-    if (jsonSafePage.resources?.reads) {
-      jsonSafePage.resources.reads.forEach((r: any) => {
+      jsonSafePage.resources.downloads.forEach((r) => {
         const s = r?.href?.split("/").pop();
         if (s) resourceSlugs.push(s);
       });
     }
 
-    const resourcesMeta =
+    if (jsonSafePage.resources?.reads) {
+      jsonSafePage.resources.reads.forEach((r) => {
+        const s = r?.href?.split("/").pop();
+        if (s) resourceSlugs.push(s);
+      });
+    }
+
+    const resourcesMetaRaw: DownloadMeta[] =
       resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
+
+    const resourcesMeta = JSON.parse(
+      JSON.stringify(resourcesMetaRaw)
+    ) as DownloadMeta[];
 
     return {
       props: {
-        page: jsonSafePage,
-        contentSource: (contentSource || {}) as MDXRemoteSerializeResult,
-        resourcesMeta: JSON.parse(JSON.stringify(resourcesMeta)),
+        page: jsonSafePage as PageMeta,
+        contentSource,
+        resourcesMeta,
       },
       revalidate: 3600,
     };
   } catch (error) {
-    console.error("Error in getStaticProps for page:", error);
+    console.error("Error in getStaticProps for /[slug]:", error);
     return { notFound: true };
   }
 };
