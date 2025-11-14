@@ -1,54 +1,27 @@
-// pages/books/[slug].tsx
-import type { GetStaticPaths, GetStaticProps } from "next";
+// pages/[slug].tsx
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
 import { getPageBySlug, getPageSlugs } from "@/lib/server/pages-data";
 import type { PageMeta } from "@/types/page";
-import {
-  getDownloadsBySlugs,
-  type DownloadMeta,
-} from "@/lib/server/downloads-data";
+import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
+import mdxComponents from "@/components/mdx-components";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import Layout from "@/components/Layout";
 
 const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-function formatPretty(
-  isoish: string | null | undefined,
-  tz = "Europe/London"
-): string {
+function formatPretty(isoish: string | null | undefined, tz = "Europe/London"): string {
   if (!isoish || typeof isoish !== "string") return "";
   if (isDateOnly(isoish)) {
     const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
+    return new Intl.DateTimeFormat("en-GB", { timeZone: tz, day: "2-digit", month: "short", year: "numeric" }).format(d);
   }
   const d = new Date(isoish);
   if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
+  const date = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "2-digit", month: "short", year: "numeric" }).format(d);
+  const time = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
   return `${date}, ${time}`;
 }
 
@@ -74,29 +47,19 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
     category,
   } = page;
 
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://www.abrahamoflondon.org";
-  const pathSegment = slug ? `books/${slug}` : "books";
-  const url = `${site.replace(/\/+$/, "")}/${pathSegment}`;
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+  const url = `${site}/${slug}`;
   const relImage = coverImage ?? heroImage;
   const absImage = relImage ? new URL(relImage, site).toString() : undefined;
   const displayDescription = description || excerpt || "";
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Book",
+    "@type": "WebPage",
     name: title,
     description: displayDescription,
     url,
-    ...(author
-      ? {
-          author: {
-            "@type": "Person",
-            name: author,
-          },
-        }
-      : {}),
+    ...(author ? { author: { "@type": "Person", name: author } } : {}),
     ...(date ? { datePublished: date } : {}),
     ...(absImage ? { image: [absImage] } : {}),
     ...(category ? { about: category } : {}),
@@ -114,7 +77,6 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
         <meta property="og:description" content={displayDescription} />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -183,7 +145,7 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
           <MDXRemote {...contentSource} components={mdxComponents} />
         </section>
 
-        {resourcesMeta && resourcesMeta.length > 0 && (
+        {resourcesMeta?.length > 0 && (
           <section className="mt-12 border-t border-lightGrey pt-8">
             <h2 className="font-serif text-2xl font-semibold text-deepCharcoal mb-6">
               Related Resources
@@ -244,9 +206,7 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
         )}
 
         <section className="mt-12 bg-gradient-to-r from-forest to-softGold rounded-2xl p-8 text-center text-white">
-          <h2 className="text-2xl font-serif font-semibold mb-4">
-            Ready to take the next step?
-          </h2>
+          <h2 className="text-2xl font-serif font-semibold mb-4">Ready to take the next step?</h2>
           <p className="text-lg mb-6 opacity-90">
             Explore more resources or get in touch to discuss your project.
           </p>
@@ -270,32 +230,20 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
   );
 }
 
-// ----------------------------------------------------------------------
-// getStaticPaths
-// ----------------------------------------------------------------------
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const slugs = getPageSlugs();
-    const paths =
-      slugs?.map((slug: string) => ({
-        params: { slug: String(slug) },
-      })) ?? [];
-
-    return { paths, fallback: false };
+    const paths = slugs.map((slug: string) => ({ params: { slug } }));
+    return { paths, fallback: "blocking" };
   } catch (error) {
     console.error("Error generating page paths:", error);
-    return { paths: [], fallback: false };
+    return { paths: [], fallback: "blocking" };
   }
 };
 
-// ----------------------------------------------------------------------
-// getStaticProps
-// ----------------------------------------------------------------------
-
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
-    const slug = params?.slug as string | undefined;
+    const slug = params?.slug as string;
     if (!slug) return { notFound: true };
 
     const pageData = getPageBySlug(slug, [
@@ -316,14 +264,14 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     if (!pageData || !pageData.title) return { notFound: true };
 
     const { content, ...page } = pageData;
+    const jsonSafePage = JSON.parse(JSON.stringify(page));
 
-    // Make sure everything is JSON-safe for Next
-    const jsonSafePage: PageMeta = JSON.parse(JSON.stringify(page));
-
-    // Always serialize something (even empty string) so MDXRemote never explodes
-    const contentSource = await serialize(content || "", {
-      scope: jsonSafePage,
-    });
+    let contentSource: MDXRemoteSerializeResult | null = null;
+    if (content) {
+      contentSource = await serialize(content, { 
+        scope: jsonSafePage as Record<string, unknown> 
+      });
+    }
 
     const resourceSlugs: string[] = [];
     if (jsonSafePage.resources?.downloads) {
@@ -339,23 +287,19 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       });
     }
 
-    const resourcesMeta: DownloadMeta[] =
-      resourceSlugs.length > 0
-        ? JSON.parse(
-            JSON.stringify(getDownloadsBySlugs(resourceSlugs))
-          )
-        : [];
+    const resourcesMeta =
+      resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
 
     return {
       props: {
         page: jsonSafePage,
-        contentSource,
-        resourcesMeta,
+        contentSource: (contentSource || {}) as MDXRemoteSerializeResult,
+        resourcesMeta: JSON.parse(JSON.stringify(resourcesMeta)),
       },
       revalidate: 3600,
     };
   } catch (error) {
-    console.error("Error in getStaticProps for /books/[slug]:", error);
+    console.error("Error in getStaticProps for page:", error);
     return { notFound: true };
   }
 };
