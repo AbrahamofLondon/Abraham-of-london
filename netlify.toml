@@ -12,22 +12,45 @@
   external_node_modules = ["@netlify/functions", "@netlify/emails"]
   directory = "netlify/functions"
 
-# CRITICAL: Add redirects for SPA routing
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# CRITICAL: Explicit static route handling
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html" 
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/downloads"
+  to = "/downloads.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/brands"
+  to = "/brands.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ventures"
+  to = "/ventures.html"
+  status = 200
+  force = true
+
+# Fallback for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Language = ["en"], Country = ["US"]}
-
-# Handle 404s - this is essential for Next.js Pages Router
-[[redirects]]
-  from = "/*"
-  to = "/404.html"
-  status = 404
-  conditions = {Language = ["en"], Country = ["US"]}
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # Security headers (safe)
 [[headers]]
