@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "es2022"
-    ],
+    "lib": ["dom", "es2022"],
     "jsx": "preserve",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -14,9 +11,7 @@
     "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ]
+      "@/*": ["*"]
     },
     "forceConsistentCasingInFileNames": true,
     "incremental": true,

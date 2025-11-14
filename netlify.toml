@@ -1,7 +1,12 @@
 [build]
-  command = "pnpm run build:netlify"   # keep your existing build pipeline
-  publish = "out"                      # or ".next" / "dist" depending on your setup
+  command = "pnpm run build:netlify"
+  publish = ".next"
 
 [build.environment]
+  NODE_VERSION = "20.11.1"
+  NPM_FLAGS = "--version"            # Netlify sometimes requires this; harmless
   PNPM_FLAGS = "--no-frozen-lockfile"
-  NODE_VERSION = "20.11.1"             # align with Netlify logs
+
+# Official Next.js plugin – lets Netlify understand `.next` correctly
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
