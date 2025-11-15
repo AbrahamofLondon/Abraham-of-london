@@ -1,4 +1,14 @@
 // lib/utils.ts
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/**
+ * Tailwind-friendly className merge helper.
+ * Uses clsx and tailwind-merge for optimal class handling.
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 /**
  * Safe environment variable access

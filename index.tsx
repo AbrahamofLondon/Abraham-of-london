@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BookOpen, Quote } from "lucide-react";
+
 import Layout from "@/components/Layout";
+import { HeroBanner } from "@/components/InterActiveElements";
+import SocialFollowStrip from "@/components/SocialFollowStrip";
+import ShareButtons, { ShareButtonsPresets } from "@/components/ShareButtons";
 
 const siteTitle = "Abraham of London";
 const siteTagline =
@@ -53,7 +57,7 @@ const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
 
       const elapsed = currentTime - startTimeRef.current;
       const progress = Math.min(elapsed / (duration * 1000), 1);
-      
+
       setCount(Math.floor(progress * end));
 
       if (progress < 1) {
@@ -113,7 +117,7 @@ const HomePage: React.FC = () => {
     },
     knowsAbout: [
       "Leadership",
-      "Strategic planning", 
+      "Strategic planning",
       "Fatherhood",
       "Legacy building",
       "Business strategy",
@@ -129,7 +133,9 @@ const HomePage: React.FC = () => {
   return (
     <Layout title={siteTitle}>
       <Head>
-        <title>{siteTitle} | Faithful Strategy for Builders, Founders & Fathers</title>
+        <title>
+          {siteTitle} | Faithful Strategy for Builders, Founders & Fathers
+        </title>
         <meta name="description" content={siteTagline} />
 
         {/* Open Graph */}
@@ -151,9 +157,15 @@ const HomePage: React.FC = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@abrahamoflondon" />
-        <meta name="twitter:title" content={`${siteTitle} | Faithful Strategy for Builders, Founders & Fathers`} />
+        <meta
+          name="twitter:title"
+          content={`${siteTitle} | Faithful Strategy for Builders, Founders & Fathers`}
+        />
         <meta name="twitter:description" content={siteTagline} />
-        <meta name="twitter:image" content={`${siteUrl}/assets/images/social/og-image.jpg`} />
+        <meta
+          name="twitter:image"
+          content={`${siteUrl}/assets/images/social/og-image.jpg`}
+        />
 
         {/* Canonical */}
         <link rel="canonical" href={siteUrl} />
@@ -166,9 +178,52 @@ const HomePage: React.FC = () => {
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
-        {/* HERO */}
-        <section className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 pb-20 pt-16 md:flex-row md:items-stretch md:pt-24">
-          {/* Left column */}
+        {/* NEW: WebSocket-aware HeroBanner */}
+        <HeroBanner
+          title="Strategy for kings, fathers & builders."
+          subtitle="A premium hub for board-level thinking, founder discipline, and unapologetic fatherhood – for men who still believe in duty, consequence, and legacy."
+          eyebrow="Abraham of London"
+          backgroundImage="/assets/images/abraham-of-london-banner.webp"
+          overlayOpacity={0.55}
+          height="70vh"
+          textAlign="left"
+          ctaText="Access strategic downloads"
+          ctaOnClick={() => {
+            // Keep simple to avoid router dependency in this file
+            window.location.href = "/downloads";
+          }}
+          showConnectionStatus
+        >
+          <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-200">
+            <Link
+              href="/about"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch
+            >
+              About Abraham
+            </Link>
+            <span className="text-gray-500 select-none">•</span>
+            <Link
+              href="/contact"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch
+            >
+              Speak with Abraham
+            </Link>
+            <span className="text-gray-500 select-none">•</span>
+            <Link
+              href="/downloads/brotherhood-starter-kit"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch
+            >
+              Brotherhood starter kit
+            </Link>
+          </div>
+        </HeroBanner>
+
+        {/* CORE HERO CONTENT (reused, now as follow-on section) */}
+        <section className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 pb-20 pt-10 md:flex-row md:items-stretch md:pt-16">
+          {/* Left column: stats + CTAs (unchanged logic) */}
           <motion.div
             className="flex-1 space-y-6"
             variants={containerVariants}
@@ -179,18 +234,8 @@ const HomePage: React.FC = () => {
               variants={itemVariants}
               className="text-xs uppercase tracking-[0.35em] text-softGold/80"
             >
-              Abraham of London
+              Builders, fathers & founders
             </motion.p>
-
-            <motion.h1
-              variants={itemVariants}
-              className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl"
-            >
-              Strategy for{" "}
-              <span className="block text-softGold">
-                kings, fathers & builders.
-              </span>
-            </motion.h1>
 
             <motion.p
               variants={itemVariants}
@@ -209,7 +254,7 @@ const HomePage: React.FC = () => {
               <Link
                 href="/downloads"
                 className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition-all hover:bg-softGold/90 hover:shadow-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
-                prefetch={true}
+                prefetch
               >
                 Access strategic downloads
               </Link>
@@ -217,39 +262,9 @@ const HomePage: React.FC = () => {
               <Link
                 href="/strategy/sample-strategy"
                 className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-softGold transition-all hover:border-softGold hover:bg-softGold/5 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
-                prefetch={true}
+                prefetch
               >
                 Explore strategy insights
-              </Link>
-            </motion.div>
-
-            {/* Quick links */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-6 flex flex-wrap gap-4 text-sm text-gray-300"
-            >
-              <Link
-                href="/about"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                About Abraham
-              </Link>
-              <span className="text-gray-500 select-none">•</span>
-              <Link
-                href="/contact"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                Speak with Abraham
-              </Link>
-              <span className="text-gray-500 select-none">•</span>
-              <Link
-                href="/downloads/brotherhood-starter-kit"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                Brotherhood starter kit
               </Link>
             </motion.div>
 
@@ -285,7 +300,7 @@ const HomePage: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right column – hero card */}
+          {/* Right column – hero card (unchanged) */}
           <motion.div
             className="mt-10 flex flex-1 items-center justify-center md:mt-0"
             initial={{ opacity: 0, x: 40 }}
@@ -334,14 +349,14 @@ const HomePage: React.FC = () => {
                 <Link
                   href="/downloads/brotherhood-covenant"
                   className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-deepCharcoal"
-                  prefetch={true}
+                  prefetch
                 >
                   View brotherhood covenant
                 </Link>
                 <Link
                   href="/downloads/principles-for-my-son"
                   className="text-xs font-medium text-softGold underline-offset-4 hover:underline focus:outline-none focus:underline"
-                  prefetch={true}
+                  prefetch
                 >
                   Principles for my son
                 </Link>
@@ -366,13 +381,16 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
+        {/* NEW: Social follow strip */}
+        <SocialFollowStrip variant="dark" className="pt-4" />
+
         {/* TRUST SIGNALS */}
         <section className="mx-auto max-w-6xl space-y-6 px-4 py-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 select-none">
             Trusted by leaders at
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all hover:grayscale-0">
-            {/* Replace these placeholders with real logos when ready */}
+            {/* Placeholders – swap for real logos later */}
             <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
             <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
             <div className="h-8 w-32 rounded bg-white/10" aria-hidden="true" />
@@ -397,7 +415,10 @@ const HomePage: React.FC = () => {
                 className="relative rounded-2xl border border-white/10 bg-white/5 p-6"
               >
                 <div className="absolute -top-3 left-6 rounded-full bg-black p-1">
-                  <Quote className="h-5 w-5 text-softGold/60" aria-hidden="true" />
+                  <Quote
+                    className="h-5 w-5 text-softGold/60"
+                    aria-hidden="true"
+                  />
                 </div>
                 <p className="mb-4 text-sm italic text-gray-100/90">
                   &ldquo;{t.quote}&rdquo;
@@ -413,11 +434,14 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* NEWSLETTER */}
+        {/* NEWSLETTER + SHARE BUTTONS */}
         <section className="mx-auto max-w-5xl px-4 pb-10">
           <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-deepCharcoal via-black to-forest/40 p-8 text-center shadow-2xl shadow-black/70 md:p-10">
             <div className="mx-auto max-w-2xl">
-              <BookOpen className="mx-auto mb-4 h-10 w-10 text-softGold" aria-hidden="true" />
+              <BookOpen
+                className="mx-auto mb-4 h-10 w-10 text-softGold"
+                aria-hidden="true"
+              />
               <h2 className="mb-3 font-serif text-2xl font-semibold text-white md:text-3xl">
                 Weekly building notes
               </h2>
@@ -427,12 +451,11 @@ const HomePage: React.FC = () => {
                 compromise.
               </p>
 
-              {/* Simple HTML form (you can wire this to /api/subscribe later) */}
               <form
                 className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  // Add newsletter signup logic here
+                  // Wire up /api/subscribe when ready
                 }}
               >
                 <input
@@ -450,13 +473,32 @@ const HomePage: React.FC = () => {
                 </button>
               </form>
 
+              {/* NEW: Share homepage */}
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <p className="text-[11px] text-gray-400">
+                  Share this with a man who refuses to outsource responsibility.
+                </p>
+                <ShareButtons
+                  url={siteUrl}
+                  title={siteTitle}
+                  className="justify-center"
+                  {...ShareButtonsPresets.standard}
+                />
+              </div>
+
               <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-4 text-[11px] text-gray-400">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-forest" aria-hidden="true" />
+                  <span
+                    className="h-2 w-2 rounded-full bg-forest"
+                    aria-hidden="true"
+                  />
                   <span>No spam, ever.</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-softGold" aria-hidden="true" />
+                  <span
+                    className="h-2 w-2 rounded-full bg-softGold"
+                    aria-hidden="true"
+                  />
                   <span>Unsubscribe any time.</span>
                 </div>
               </div>
@@ -495,14 +537,14 @@ const HomePage: React.FC = () => {
               <Link
                 href="/downloads/entrepreneur-survival-checklist"
                 className="inline-flex items-center rounded-full bg-slate-950 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-softGold shadow-md shadow-black/40 transition-all hover:bg-black focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-forest"
-                prefetch={true}
+                prefetch
               >
                 Start with the survival checklist
               </Link>
               <Link
                 href="/downloads/brotherhood-covenant"
                 className="inline-flex items-center rounded-full border border-slate-900/60 bg-white/20 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 transition-all hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-forest"
-                prefetch={true}
+                prefetch
               >
                 Build a brotherhood
               </Link>

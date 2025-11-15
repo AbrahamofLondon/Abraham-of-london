@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 // hooks/useAnalytics.ts
-import { useEffect, useCallback } from '...';
+import { useEffect, useCallback } from 'react'; // Fixed import
 
 interface AnalyticsEvent {
   event: string;

@@ -1,5 +1,5 @@
 // hooks/usePerformanceMonitor.ts
-import { useEffect, useRef, useCallback } from '...';
+import { useEffect, useRef, useCallback } from 'react'; // Fixed import
 
 interface PerformanceMetrics {
   componentName: string;

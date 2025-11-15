@@ -149,7 +149,7 @@ export default function ShareButtons({
     }
   }, []);
 
-  // Validate URL
+  // Validate URL - moved useMemo to top level to fix conditional hook call
   const isValidUrl = React.useMemo(() => {
     try {
       // eslint-disable-next-line no-new
@@ -160,6 +160,12 @@ export default function ShareButtons({
     }
   }, [url]);
 
+  // Move visiblePlatforms useMemo to top level (before any conditional returns)
+  const visiblePlatforms: Platform[] = React.useMemo(() => {
+    return platforms;
+  }, [platforms]);
+
+  // Early return after all hooks have been called
   if (!isValidUrl) {
     console.warn("ShareButtons: Invalid URL provided", url);
     if (onError) {
@@ -308,11 +314,6 @@ export default function ShareButtons({
       </a>
     );
   };
-
-  const visiblePlatforms: Platform[] = React.useMemo(() => {
-    // If native share exists, we still keep copy button explicitly unless you want to hide it.
-    return platforms;
-  }, [platforms]);
 
   return (
     <div

@@ -8,22 +8,29 @@
     "allowJs": false,
     "skipLibCheck": true,
     "noEmit": true,
+
+    // Type-safety
     "strict": false,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["*"]
-    },
+    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
+
+    // Module interop
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+
+    // Aliases
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*", "./src/*"]
+    },
+
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "strictNullChecks": true
+    ]
   },
   "include": [
     "app/**/*.ts",
@@ -38,6 +45,8 @@
     "src/**/*.tsx",
     "config/**/*.ts",
     "config/**/*.tsx",
+    "hooks/**/*.ts",
+    "hooks/**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [

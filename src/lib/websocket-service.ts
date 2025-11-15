@@ -1,10 +1,24 @@
 // src/lib/websocket-service.ts
 import { useEffect, useState } from "react";
 
-export type WebSocketEvent = "connected" | "disconnected" | "error" | "tick" | "pong" | "message";
+export type WebSocketEvent =
+  | "connected"
+  | "disconnected"
+  | "error"
+  | "tick"
+  | "pong"
+  | "message";
 
+/**
+ * Widened so it can carry any domain-specific event:
+ * - "price_update"
+ * - "chat_message"
+ * - "user_joined"
+ * - "subscribe"/"unsubscribe"
+ * - etc.
+ */
 export type WebSocketMessage = {
-  type: WebSocketEvent | "price_update";
+  type: string;
   data?: Record<string, unknown>;
 };
 
@@ -13,7 +27,8 @@ type Subscriber = (data: WebSocketMessage) => void;
 export class WebSocketService {
   private socket: WebSocket | null = null;
   private isOpen = false;
-  private subscribers = new Map<WebSocketEvent | "price_update", Subscriber[]>();
+  // was: new Map<WebSocketEvent | "price_update", Subscriber[]>();
+  private subscribers = new Map<string, Subscriber[]>();
 
   constructor(
     private url: string,
@@ -50,7 +65,7 @@ export class WebSocketService {
 
       if (parsed && typeof parsed === "object" && "type" in (parsed as any)) {
         const msg = parsed as WebSocketMessage;
-        // Emit the specific event (e.g., "price_update") and also generic "message"
+        // Emit the specific event and also generic "message"
         this.emit(msg);
         this.emit({ type: "message", data: msg.data ?? {} });
       } else {
@@ -69,15 +84,16 @@ export class WebSocketService {
     this.isOpen = false;
   }
 
-  on(event: WebSocketEvent | "price_update", cb: Subscriber): () => void {
-    const list = this.subscribers.get(event) ?? [];
+  on(event: WebSocketEvent | string, cb: Subscriber): () => void {
+    const key = event as string;
+    const list = this.subscribers.get(key) ?? [];
     list.push(cb);
-    this.subscribers.set(event, list);
+    this.subscribers.set(key, list);
     return () => {
-      const arr = this.subscribers.get(event) ?? [];
+      const arr = this.subscribers.get(key) ?? [];
       const idx = arr.indexOf(cb);
       if (idx >= 0) arr.splice(idx, 1);
-      this.subscribers.set(event, arr);
+      this.subscribers.set(key, arr);
     };
   }
 
