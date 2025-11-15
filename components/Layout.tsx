@@ -3,7 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/context/ThemeContext"; // Adjust import path based on your theme setup
+import { ThemeProvider } from "@/context/ThemeContext";
 
 type LayoutProps = {
   children: React.ReactNode;
