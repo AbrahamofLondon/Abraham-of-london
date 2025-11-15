@@ -3,6 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ThemeProvider } from "@/context/ThemeContext"; // Adjust import path based on your theme setup
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -27,11 +28,13 @@ export default function Layout({
         <title>{effectiveTitle}</title>
       </Head>
 
-      <div className="flex min-h-screen flex-col bg-warmWhite text-deepCharcoal">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </div>
+      <ThemeProvider>
+        <div className="flex min-h-screen flex-col bg-warmWhite text-deepCharcoal">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+      </ThemeProvider>
     </>
   );
 }
