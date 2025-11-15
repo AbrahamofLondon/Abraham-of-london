@@ -1,13 +1,13 @@
-// components/InterActiveElements.tsx
+// src/components/InterActiveElements/HeroBanner.tsx
 "use client";
 
 import * as React from "react";
 import { motion } from "framer-motion";
 import { useWebSocketStatus } from "@/lib/websocket-service";
 
-type TextAlign = "left" | "center" | "right";
+export type TextAlign = "left" | "center" | "right";
 
-interface HeroBannerProps {
+export interface HeroBannerProps {
   title: string;
   subtitle?: string;
   backgroundImage: string;
@@ -47,7 +47,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       className="relative flex w-full items-stretch justify-center overflow-hidden"
       style={{ height }}
     >
-      {/* Background image */}
+      {/* Background layer */}
       <div className="absolute inset-0">
         <div
           className="h-full w-full bg-cover bg-center bg-no-repeat"
@@ -59,7 +59,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         />
       </div>
 
-      {/* Content */}
+      {/* Foreground content */}
       <div className="relative z-10 flex h-full w-full max-w-6xl px-4 py-10 md:px-8 lg:px-10">
         <motion.div
           className={`flex w-full flex-col justify-center gap-4 ${alignmentClasses[textAlign]}`}
@@ -67,7 +67,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          {/* Eyebrow + connection status row */}
+          {/* Eyebrow + connection */}
           <div className="mb-1 flex w-full flex-wrap items-center gap-4">
             {eyebrow && (
               <p className="text-xs uppercase tracking-[0.35em] text-softGold/80">
@@ -101,7 +101,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             </p>
           )}
 
-          {/* CTA */}
+          {/* CTA + children */}
           {(ctaText || children) && (
             <div className="mt-4 flex flex-col gap-4">
               {ctaText && (
