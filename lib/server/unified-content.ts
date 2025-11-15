@@ -1,3 +1,10 @@
+// lib/server/unified-content.ts
+
+// Optional: mark as server-only (defensive)
+if (typeof window !== "undefined") {
+  throw new Error("lib/server/unified-content.ts must not be imported on the client");
+}
+
 export interface UnifiedContent {
   slug: string;
   title: string;
@@ -21,29 +28,95 @@ export interface UnifiedContent {
   published: boolean;
 }
 
-export async function getAllContent(): Promise<UnifiedContent[]> {
-  const sources = await Promise.allSettled([getMdxContent(), getContentlayerContent(), getApiContent()]);
+/**
+ * Internal helpers — each source can be implemented later.
+ * For now they are safe stubs returning empty arrays.
+ */
+
+async function getMdxContent(): Promise<UnifiedContent[]> {
+  // TODO: Wire MD/MDX filesystem content here.
+  return [];
+}
+
+async function getContentlayerContent(): Promise<UnifiedContent[]> {
+  // TODO: Wire Contentlayer documents here, mapping to UnifiedContent.
+  return [];
+}
+
+async function getApiContent(): Promise<UnifiedContent[]> {
+  // TODO: Wire external API content here (if needed).
+  return [];
+}
+
+/**
+ * Fetch all unified content across all sources.
+ */
+export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
+  const sources = await Promise.allSettled<UnifiedContent[]>([
+    getMdxContent(),
+    getContentlayerContent(),
+    getApiContent(),
+  ]);
+
   const all: UnifiedContent[] = [];
-  for (const res of sources) if (res.status === "fulfilled") all.push(...res.value);
+
+  for (const res of sources) {
+    if (res.status === "fulfilled" && Array.isArray(res.value)) {
+      all.push(...res.value);
+    } else if (res.status === "rejected") {
+      // Soft-fail: log on server only, avoid breaking runtime
+      console.warn("Unified content source failed:", res.reason);
+    }
+  }
+
+  // Optional: sort by date desc if present
+  all.sort((a, b) => {
+    const da = a.date ? Date.parse(a.date) : 0;
+    const db = b.date ? Date.parse(b.date) : 0;
+    return db - da;
+  });
+
   return all;
 }
 
-export async function getContentBySlug(slug: string): Promise<UnifiedContent | null> {
-  const all = await getAllContent();
-  return all.find((d) => d.slug === slug && d.published) || null;
+/**
+ * Find a single unified content item by slug.
+ */
+export async function getUnifiedContentBySlug(
+  slug: string
+): Promise<UnifiedContent | null> {
+  if (!slug) return null;
+
+  const normalized = slug.replace(/^\/+|\/+$/g, "");
+  const all = await getAllUnifiedContent();
+
+  return (
+    all.find(
+      (d) =>
+        d.published &&
+        d.slug &&
+        d.slug.replace(/^\/+|\/+$/g, "") === normalized
+    ) || null
+  );
 }
 
-export async function getContentByType(type: UnifiedContent["type"]): Promise<UnifiedContent[]> {
-  const all = await getAllContent();
+/**
+ * Get items by type (print, blog, document, page).
+ */
+export async function getUnifiedContentByType(
+  type: UnifiedContent["type"]
+): Promise<UnifiedContent[]> {
+  const all = await getAllUnifiedContent();
   return all.filter((d) => d.type === type && d.published);
 }
 
-async function getMdxContent(): Promise<UnifiedContent[]> {
-  return [];
-}
-async function getContentlayerContent(): Promise<UnifiedContent[]> {
-  return [];
-}
-async function getApiContent(): Promise<UnifiedContent[]> {
-  return [];
-}
+/**
+ * Convenience re-exports in a single object if you prefer default import.
+ */
+const unifiedContent = {
+  getAllUnifiedContent,
+  getUnifiedContentBySlug,
+  getUnifiedContentByType,
+};
+
+export default unifiedContent;

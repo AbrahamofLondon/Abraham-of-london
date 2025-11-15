@@ -40,7 +40,7 @@ const DEFAULT_FIELDS: FieldKey[] = [
   "file",
   "coverAspect",
   "coverFit",
-  "coverPosition"
+  "coverPosition",
 ];
 
 const COMPATIBILITY_FIELDS: FieldKey[] = [
@@ -49,8 +49,10 @@ const COMPATIBILITY_FIELDS: FieldKey[] = [
   "author",
   "readTime",
   "category",
-  "tags"
+  "tags",
 ];
+
+// ---------- Path + normalisation helpers ----------
 
 function resolveDownloadPath(slug: string): string | null {
   const real = slug.replace(/\.mdx?$/i, "");
@@ -91,6 +93,8 @@ function normalizePdfFile(v: unknown): string | null {
   return raw;
 }
 
+// ---------- Resources extraction ----------
+
 /** Extract possible resource slugs from front-matter `resources` blocks */
 export function extractResourceSlugs(content: any): string[] {
   if (!content?.resources) return [];
@@ -114,11 +118,13 @@ export function extractResourceSlugs(content: any): string[] {
       });
     }
   } catch (e) {
-    console.warn("Error extracting resource slugs:", e);
+    console.warn("[downloads-data] Error extracting resource slugs:", e);
   }
 
   return [...new Set(slugs)];
 }
+
+// ---------- Core loaders ----------
 
 export function getDownloadSlugs(): string[] {
   if (!fs.existsSync(downloadsDir)) return [];
@@ -128,7 +134,7 @@ export function getDownloadSlugs(): string[] {
       .filter((f) => exts.some((e) => f.toLowerCase().endsWith(e)))
       .map((f) => f.replace(/\.mdx?$/i, ""));
   } catch (err) {
-    console.error("Error reading downloads directory:", err);
+    console.error("[downloads-data] Error reading downloads directory:", err);
     return [];
   }
 }
@@ -141,7 +147,10 @@ export function getDownloadBySlug(
   const real = slug.replace(/\.mdx?$/i, "");
   const fullPath = resolveDownloadPath(real);
 
+  // If file is missing, return a non-throwing placeholder
   if (!fullPath) {
+    console.warn("[downloads-data] Download not found for slug:", real);
+
     const base: DownloadMeta = {
       slug: real,
       title: "Download Not Found",
@@ -156,10 +165,13 @@ export function getDownloadBySlug(
       author: "Abraham of London",
       readTime: null,
       category: null,
-      tags: null
+      tags: null,
     };
+
     const out: any = { slug: base.slug };
-    for (const f of fields) out[f] = (base as any)[f] ?? null;
+    for (const f of fields) {
+      out[f] = (base as any)[f] ?? null;
+    }
     if (includeContent) out.content = base.content ?? "";
     return out as DownloadMeta;
   }
@@ -176,10 +188,12 @@ export function getDownloadBySlug(
           out.slug = real;
           break;
         case "title":
-          out.title = typeof fm.title === "string" ? fm.title.trim() : null;
+          out.title =
+            typeof fm.title === "string" ? fm.title.trim() : null;
           break;
         case "excerpt":
-          out.excerpt = typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
+          out.excerpt =
+            typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
           break;
         case "coverImage":
           out.coverImage = normalizeCoverImage(fm.coverImage);
@@ -197,7 +211,9 @@ export function getDownloadBySlug(
           out[f] = typeof fm[f] === "string" ? String(fm[f]).trim() : null;
           break;
         case "tags":
-          out.tags = Array.isArray(fm.tags) ? (fm.tags as any[]).map(String) : null;
+          out.tags = Array.isArray(fm.tags)
+            ? (fm.tags as any[]).map(String)
+            : null;
           break;
         case "content":
           if (includeContent) out.content = content || "";
@@ -209,7 +225,8 @@ export function getDownloadBySlug(
 
     return out as DownloadMeta;
   } catch (err) {
-    console.error(`Error processing download ${slug}:`, err);
+    console.error(`[downloads-data] Error processing download ${slug}:`, err);
+
     const base: DownloadMeta = {
       slug: real,
       title: "Error Loading Download",
@@ -224,26 +241,52 @@ export function getDownloadBySlug(
       author: "Abraham of London",
       readTime: null,
       category: null,
-      tags: null
+      tags: null,
     };
+
     const out: any = { slug: base.slug };
-    for (const f of fields) out[f] = (base as any)[f] ?? null;
+    for (const f of fields) {
+      out[f] = (base as any)[f] ?? null;
+    }
     if (includeContent) out.content = base.content ?? "";
     return out as DownloadMeta;
   }
 }
 
 export function getDownloadsBySlugs(
-  slugs: string[],
+  slugs: unknown[],
   fields: FieldKey[] = DEFAULT_FIELDS
 ): DownloadMeta[] {
   if (!Array.isArray(slugs)) return [];
-  return slugs
-    .map((s) => getDownloadBySlug(s, fields))
-    .filter(Boolean) as DownloadMeta[];
+
+  const seen = new Set<string>();
+  const items: DownloadMeta[] = [];
+
+  for (const raw of slugs) {
+    const slug = String(raw ?? "").trim();
+    if (!slug) continue;
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+
+    try {
+      const meta = getDownloadBySlug(slug, fields);
+      if (meta && meta.slug) {
+        items.push(meta);
+      } else {
+        console.warn("[downloads-data] Empty meta returned for slug:", slug);
+      }
+    } catch (err) {
+      // Should not happen with the current getDownloadBySlug, but guard anyway
+      console.error("[downloads-data] Skipping bad download slug:", slug, err);
+    }
+  }
+
+  return items;
 }
 
-export function getAllDownloads(fields: FieldKey[] = DEFAULT_FIELDS): DownloadMeta[] {
+export function getAllDownloads(
+  fields: FieldKey[] = DEFAULT_FIELDS
+): DownloadMeta[] {
   const slugs = getDownloadSlugs();
   const items = slugs.map((s) => getDownloadBySlug(s, fields));
   items.sort((a, b) => {
@@ -268,7 +311,7 @@ export default {
   getDownloadsBySlugs,
   getAllDownloads,
   getAllContent,
-  extractResourceSlugs
+  extractResourceSlugs,
 };
 
 export type { FieldKey as DownloadFieldKey };

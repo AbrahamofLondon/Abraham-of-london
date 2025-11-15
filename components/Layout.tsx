@@ -7,9 +7,9 @@ import Footer from "@/components/Footer";
 type LayoutProps = {
   children: React.ReactNode;
   /** canonical title prop */
-  title?: string | null;
+  title?: string | null | undefined;
   /** legacy alias, supported for compatibility */
-  pageTitle?: string | null;
+  pageTitle?: string | null | undefined;
 };
 
 export default function Layout({
@@ -28,13 +28,8 @@ export default function Layout({
       </Head>
 
       <div className="flex min-h-screen flex-col bg-warmWhite text-deepCharcoal">
-        {/* Global header (already handles fixed positioning + main offset internally) */}
         <Header />
-
-        <main className="flex-1">
-          {children}
-        </main>
-
+        <main className="flex-1">{children}</main>
         <Footer />
       </div>
     </>
