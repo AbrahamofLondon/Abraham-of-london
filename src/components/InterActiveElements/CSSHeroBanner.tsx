@@ -1,42 +1,23 @@
-/ src/components/InterActiveElements/HeroBanner.tsx
+// src/components/InterActiveElements/CSSHeroBanner.tsx
 import React from "react";
 import { useWebSocketStatus } from "@/lib/websocket-service";
 
-export interface HeroBannerProps {
+export interface CSSHeroBannerProps {
   title: string;
   subtitle?: string;
-  backgroundImage: string;
-  overlayOpacity?: number; // 0–1
-  height?: string; // e.g. "70vh", "480px"
+  height?: string;
   textAlign?: "left" | "center" | "right";
   ctaText?: string;
   ctaOnClick?: () => void;
-  /** Show a small live/offline indicator from WebSocketService */
   showConnectionStatus?: boolean;
-  /** Optional small label above title */
   eyebrow?: string;
-  /** Any extra content under CTA (chips, badges, etc.) */
   children?: React.ReactNode;
+  gradient?: string;
 }
 
-const clampOpacity = (value: number | undefined, fallback = 0.4): number => {
-  if (typeof value !== "number" || Number.isNaN(value)) return fallback;
-  if (value < 0) return 0;
-  if (value > 1) return 1;
-  return value;
-};
-
-const textAlignToClass: Record<NonNullable<HeroBannerProps["textAlign"]>, string> = {
-  left: "text-left items-start",
-  center: "text-center items-center",
-  right: "text-right items-end",
-};
-
-const HeroBanner: React.FC<HeroBannerProps> = ({
+const CSSHeroBanner: React.FC<CSSHeroBannerProps> = ({
   title,
   subtitle,
-  backgroundImage,
-  overlayOpacity = 0.4,
   height = "70vh",
   textAlign = "center",
   ctaText,
@@ -44,23 +25,20 @@ const HeroBanner: React.FC<HeroBannerProps> = ({
   showConnectionStatus = false,
   eyebrow,
   children,
+  gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
 }) => {
   const connected = useWebSocketStatus();
-  const safeOpacity = clampOpacity(overlayOpacity);
 
   const bannerStyle: React.CSSProperties = {
-    backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
+    background: gradient,
     height,
   };
 
-  const overlayStyle: React.CSSProperties = {
-    backgroundColor: `rgba(0, 0, 0, ${safeOpacity})`,
-  };
-
-  const alignClass = textAlignToClass[textAlign];
+  const alignClass = {
+    left: "text-left items-start",
+    center: "text-center items-center",
+    right: "text-right items-end",
+  }[textAlign];
 
   return (
     <section
@@ -68,9 +46,6 @@ const HeroBanner: React.FC<HeroBannerProps> = ({
       style={bannerStyle}
       aria-label={title}
     >
-      {/* Dark/soft overlay */}
-      <div className="hero-overlay absolute inset-0" style={overlayStyle} />
-
       {/* Content */}
       <div className="hero-content relative z-10 flex h-full w-full px-6 py-10 sm:px-10 lg:px-16">
         <div
@@ -149,4 +124,4 @@ const HeroBanner: React.FC<HeroBannerProps> = ({
   );
 };
 
-export default HeroBanner;
+export default CSSHeroBanner;

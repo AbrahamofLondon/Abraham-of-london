@@ -3,8 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
- * Tailwind-friendly className merge helper.
- * Uses clsx and tailwind-merge for optimal class handling.
+ * Tailwind-friendly className merge helper
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,9 +16,7 @@ export function getEnv(key: string, defaultValue: string = ""): string {
   if (typeof process === "undefined" || !process.env) {
     return defaultValue;
   }
-  return (
-    (process.env as Record<string, string | undefined>)[key] || defaultValue
-  );
+  return (process.env as Record<string, string | undefined>)[key] || defaultValue;
 }
 
 /**
@@ -55,3 +52,43 @@ export const ENV_KEYS = {
   ALOMARADA_URL: "NEXT_PUBLIC_ALOMARADA_URL",
   ENDURELUXE_URL: "NEXT_PUBLIC_ENDURELUXE_URL",
 } as const;
+
+/**
+ * Format currency with proper localization
+ */
+export function formatCurrency(amount: number, currency: string = "USD"): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+/**
+ * Format percentage with sign
+ */
+export function formatPercent(value: number, decimals: number = 2): string {
+  return `${value >= 0 ? "+" : ""}${value.toFixed(decimals)}%`;
+}
+
+/**
+ * Debounce function for performance
+ */
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+/**
+ * Generate unique ID
+ */
+export function generateId(): string {
+  return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}

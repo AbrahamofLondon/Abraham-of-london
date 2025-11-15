@@ -4,14 +4,78 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BookOpen, Quote } from "lucide-react";
+import {
+  BookOpen,
+  Quote,
+  Building2,
+  PackageCheck,
+  Lightbulb,
+  ArrowRight,
+} from "lucide-react";
 import Layout from "@/components/Layout";
+import { HeroBanner } from "@/components/InterActiveElements";
+import NewsletterForm from "@/components/NewsletterForm";
+import AnimatedCounter from "@/components/AnimatedCounter";
+import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
 
 const siteTitle = "Abraham of London";
 const siteTagline =
   "Faith-rooted strategy for fathers, founders, and board-level leaders who refuse to outsource responsibility.";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
+
+// Venture URLs with environment-aware fallbacks
+const alomaradaUrl = pickEnvUrl(
+  [ENV_KEYS.ALOMARADA_URL],
+  "https://alomarada.com/"
+);
+
+const endureluxeUrl = pickEnvUrl(
+  [ENV_KEYS.ENDURELUXE_URL],
+  "https://alomarada.com/endureluxe"
+);
+
+const innovateHubUrl = pickEnvUrl(
+  [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
+  "https://alomarada.com/hub"
+);
+
+// Venture data structure
+const ventures = [
+  {
+    name: "Alomarada Ltd",
+    slug: "alomarada",
+    description:
+      "Board-level advisory, operating systems, and market-entry strategy for Africa-focused founders, boards, and institutions.",
+    icon: Building2,
+    href: alomaradaUrl,
+    status: "Active",
+    focus: "Strategic Advisory & Market Systems",
+    externalLabel: "Visit Alomarada.com",
+  },
+  {
+    name: "Endureluxe",
+    slug: "endureluxe",
+    description:
+      "Durable luxury performance gear for people who train, build, and endure – without compromising on quality or aesthetics.",
+    icon: PackageCheck,
+    href: endureluxeUrl,
+    status: "In development",
+    focus: "Performance & Durable Luxury",
+    externalLabel: "Explore Endureluxe",
+  },
+  {
+    name: "Innovative Hub",
+    slug: "innovative-hub",
+    description:
+      "A practical innovation lab – content, cohorts, and tools for builders who want to test ideas, ship value, and stay accountable.",
+    icon: Lightbulb,
+    href: innovateHubUrl,
+    status: "Emerging",
+    focus: "Innovation & Capability Building",
+    externalLabel: "Enter the Hub",
+  },
+];
 
 // Framer Motion variants
 const containerVariants = {
@@ -35,43 +99,6 @@ const itemVariants = {
     y: 0,
     transition: { duration: 0.6, ease: "easeOut" },
   },
-};
-
-// Optimized animated counter with requestAnimationFrame
-const AnimatedCounter: React.FC<{ end: number; duration?: number }> = ({
-  end,
-  duration = 2,
-}) => {
-  const [count, setCount] = React.useState(0);
-  const frameRef = React.useRef<number>();
-  const startTimeRef = React.useRef<number>();
-
-  React.useEffect(() => {
-    const animate = (currentTime: number) => {
-      if (!startTimeRef.current) {
-        startTimeRef.current = currentTime;
-      }
-
-      const elapsed = currentTime - startTimeRef.current;
-      const progress = Math.min(elapsed / (duration * 1000), 1);
-
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        frameRef.current = requestAnimationFrame(animate);
-      }
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [end, duration]);
-
-  return <span>{count}+</span>;
 };
 
 const testimonials = [
@@ -127,6 +154,13 @@ const HomePage: React.FC = () => {
     },
   };
 
+  const handleHeroCTAClick = () => {
+    // Simple client-side navigation without pulling in router
+    if (typeof window !== "undefined") {
+      window.location.href = "/downloads";
+    }
+  };
+
   return (
     <Layout title={siteTitle}>
       <Head>
@@ -176,133 +210,100 @@ const HomePage: React.FC = () => {
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
-        {/* HERO */}
-        <section className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 pb-20 pt-16 md:flex-row md:items-stretch md:pt-24">
-          {/* Left column */}
+        {/* HERO BANNER SECTION */}
+        <HeroBanner
+          title="Strategy for kings, fathers & builders."
+          subtitle="A premium hub for board-level thinking, founder discipline, and unapologetic fatherhood – for men who still believe in duty, consequence, and legacy."
+          backgroundImage="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+          overlayOpacity={0.6}
+          height="85vh"
+          textAlign="left"
+          ctaText="Access strategic downloads"
+          ctaOnClick={handleHeroCTAClick}
+          showConnectionStatus={true}
+          eyebrow="Abraham of London"
+        >
+          {/* Additional content below CTA */}
+          <div className="mt-6 flex flex-wrap gap-4 text-sm text-gray-300">
+            <Link
+              href="/about"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch={true}
+            >
+              About Abraham
+            </Link>
+            <span className="select-none text-gray-500">•</span>
+            <Link
+              href="/contact"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch={true}
+            >
+              Speak with Abraham
+            </Link>
+            <span className="select-none text-gray-500">•</span>
+            <Link
+              href="/downloads/brotherhood-starter-kit"
+              className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
+              prefetch={true}
+            >
+              Brotherhood starter kit
+            </Link>
+          </div>
+
+          {/* Stats strip */}
+          <div className="mt-8 flex flex-wrap gap-6 border-t border-white/20 pt-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-softGold">
+                <AnimatedCounter
+                  end={25}
+                  duration={2}
+                  className="font-mono"
+                  suffix=""
+                />
+              </p>
+              <p className="text-xs uppercase tracking-wide text-gray-300">
+                Strategic tools
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-forest">
+                <AnimatedCounter
+                  end={500}
+                  duration={2.5}
+                  className="font-mono"
+                  suffix=""
+                />
+              </p>
+              <p className="text-xs uppercase tracking-wide text-gray-300">
+                Men equipped
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-softGold">
+                <AnimatedCounter
+                  end={12}
+                  duration={1.5}
+                  className="font-mono"
+                  suffix=""
+                />
+              </p>
+              <p className="text-xs uppercase tracking-wide text-gray-300">
+                Brotherhood circles
+              </p>
+            </div>
+          </div>
+        </HeroBanner>
+
+        {/* MAIN CONTENT SECTION */}
+        <section className="relative z-10 -mt-20 bg-gradient-to-b from-transparent via-deepCharcoal/80 to-deepCharcoal pb-20 pt-32">
+          {/* Hero card - positioned over the hero banner */}
           <motion.div
-            className="flex-1 space-y-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            className="mx-auto max-w-6xl px-4"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
           >
-            <motion.p
-              variants={itemVariants}
-              className="text-xs uppercase tracking-[0.35em] text-softGold/80"
-            >
-              Abraham of London
-            </motion.p>
-
-            <motion.h1
-              variants={itemVariants}
-              className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl"
-            >
-              Strategy for{" "}
-              <span className="block text-softGold">
-                kings, fathers & builders.
-              </span>
-            </motion.h1>
-
-            <motion.p
-              variants={itemVariants}
-              className="max-w-xl text-base leading-relaxed text-gray-200 md:text-lg"
-            >
-              A premium hub for board-level thinking, founder discipline, and
-              unapologetic fatherhood – for men who still believe in duty,
-              consequence, and legacy.
-            </motion.p>
-
-            {/* CTAs */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap gap-4 pt-4"
-            >
-              <Link
-                href="/downloads"
-                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition-all hover:bg-softGold/90 hover:shadow-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
-                prefetch={true}
-              >
-                Access strategic downloads
-              </Link>
-
-              <Link
-                href="/strategy/sample-strategy"
-                className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-softGold transition-all hover:border-softGold hover:bg-softGold/5 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-deepCharcoal"
-                prefetch={true}
-              >
-                Explore strategy insights
-              </Link>
-            </motion.div>
-
-            {/* Quick links */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-6 flex flex-wrap gap-4 text-sm text-gray-300"
-            >
-              <Link
-                href="/about"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                About Abraham
-              </Link>
-              <span className="select-none text-gray-500">•</span>
-              <Link
-                href="/contact"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                Speak with Abraham
-              </Link>
-              <span className="select-none text-gray-500">•</span>
-              <Link
-                href="/downloads/brotherhood-starter-kit"
-                className="underline-offset-4 hover:text-softGold hover:underline focus:outline-none focus:text-softGold focus:underline"
-                prefetch={true}
-              >
-                Brotherhood starter kit
-              </Link>
-            </motion.div>
-
-            {/* Stats strip */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-8 flex flex-wrap gap-6 border-t border-white/10 pt-6"
-            >
-              <div className="text-center">
-                <p className="text-2xl font-bold text-softGold">
-                  <AnimatedCounter end={25} />
-                </p>
-                <p className="text-xs uppercase tracking-wide text-gray-400">
-                  Strategic tools
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-forest">
-                  <AnimatedCounter end={500} />
-                </p>
-                <p className="text-xs uppercase tracking-wide text-gray-400">
-                  Men equipped
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-softGold">
-                  <AnimatedCounter end={12} />
-                </p>
-                <p className="text-xs uppercase tracking-wide text-gray-400">
-                  Brotherhood circles
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Right column – hero card */}
-          <motion.div
-            className="mt-10 flex flex-1 items-center justify-center md:mt-0"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          >
-            <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/60 backdrop-blur">
+            <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-black/80 p-5 shadow-2xl shadow-black/60 backdrop-blur lg:float-right lg:-mt-64">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
                   Fathering Without Fear
@@ -317,7 +318,7 @@ const HomePage: React.FC = () => {
                   src="/assets/images/abraham-of-london-banner.webp"
                   alt="Abraham of London – Fathering Without Fear book cover"
                   fill
-                  className="opacity-0 object-cover transition-opacity duration-500"
+                  className="object-cover opacity-0 transition-opacity duration-500"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   priority
                   onLoad={(event) => {
@@ -334,10 +335,13 @@ const HomePage: React.FC = () => {
                 </span>
               </h2>
 
+              {/* UPDATED TEASER – memoir-first, not just “ecosystem” */}
               <p className="mb-4 text-sm leading-relaxed text-gray-200">
-                A multi-format ecosystem – book, downloads, and a brotherhood of
-                men who refuse to apologize for leading well, loving well, and
-                building with conviction.
+                First, a memoir – drawn from real court transcripts, immigration
+                files, and the quiet moments in between – tracing a father who
+                refused to disappear quietly. From that story grows the tools,
+                downloads, and brotherhood for men who still intend to stand,
+                even when the system leans the other way.
               </p>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -362,18 +366,114 @@ const HomePage: React.FC = () => {
               </p>
             </div>
           </motion.div>
+
+          {/* Divider strip */}
+          <div className="mx-auto mt-20 max-w-6xl border-t border-white/10 bg-black/40 px-4 py-6">
+            <div className="flex flex-wrap justify-between gap-4 text-xs text-gray-300 md:text-sm">
+              <p className="select-none text-xs uppercase tracking-[0.25em] text-gray-400">
+                Strategy • Fatherhood • Legacy • Faith
+              </p>
+              <p className="select-none text-gray-500">
+                Designed to be read slowly. Lived fully.
+              </p>
+            </div>
+          </div>
         </section>
 
-        {/* Divider strip */}
-        <section className="border-t border-white/10 bg-black/40">
-          <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-4 py-6 text-xs text-gray-300 md:text-sm">
-            <p className="select-none text-xs uppercase tracking-[0.25em] text-gray-400">
-              Strategy • Fatherhood • Legacy • Faith
-            </p>
-            <p className="select-none text-gray-500">
-              Designed to be read slowly. Lived fully.
-            </p>
+        {/* STRATEGIC VENTURES - Premium Positioning */}
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          <div className="mb-12 text-center">
+            <motion.h2
+              className="mb-4 font-serif text-3xl font-semibold text-white md:text-4xl"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              Strategic Ventures
+            </motion.h2>
+            <motion.p
+              className="mx-auto max-w-2xl text-lg text-gray-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              Disciplined, faith-rooted initiatives built to create sustainable
+              impact, not just headlines. Each venture is a focused expression
+              of the same core conviction: truth, responsibility, and legacy.
+            </motion.p>
           </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {ventures.map((venture, index) => (
+              <motion.div
+                key={venture.slug}
+                className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-softGold/40 hover:bg-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <div className="mb-4 flex items-start justify-between">
+                  <div className="rounded-xl bg-forest/20 p-3">
+                    <venture.icon className="h-6 w-6 text-forest" />
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      venture.status === "Active"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : venture.status === "Emerging"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                    }`}
+                  >
+                    {venture.status}
+                  </span>
+                </div>
+
+                <h3 className="mb-3 font-serif text-xl font-semibold text-white">
+                  {venture.name}
+                </h3>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  {venture.description}
+                </p>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-sm font-medium text-forest">
+                    {venture.focus}
+                  </span>
+                  <a
+                    href={venture.href}
+                    className="group inline-flex items-center text-sm font-semibold text-softGold transition-colors hover:text-softGold/80"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {venture.externalLabel}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            className="mt-12 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <Link
+              href="/ventures"
+              className="inline-flex items-center rounded-full border border-softGold/40 px-6 py-3 text-sm font-semibold text-softGold transition-all hover:border-softGold hover:bg-softGold/5"
+              prefetch={true}
+            >
+              Explore all ventures
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </motion.div>
         </section>
 
         {/* TRUST SIGNALS */}
@@ -443,45 +543,7 @@ const HomePage: React.FC = () => {
                 compromise.
               </p>
 
-              {/* Simple HTML form (wire up to /api/subscribe when ready) */}
-              <form
-                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  // TODO: Add newsletter signup logic here
-                }}
-              >
-                <input
-                  type="email"
-                  required
-                  placeholder="Your best email"
-                  className="flex-1 rounded-lg border border-gray-600 bg-black/60 px-4 py-3 text-sm text-white placeholder-gray-400 focus:border-softGold focus:outline-none focus:ring-2 focus:ring-softGold/70"
-                  aria-label="Email for newsletter subscription"
-                />
-                <button
-                  type="submit"
-                  className="rounded-lg bg-forest px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/30 transition-all hover:bg-forest/90 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 focus:ring-offset-black"
-                >
-                  Join builders
-                </button>
-              </form>
-
-              <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-4 text-[11px] text-gray-400">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2 w-2 rounded-full bg-forest"
-                    aria-hidden="true"
-                  />
-                  <span>No spam, ever.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2 w-2 rounded-full bg-softGold"
-                    aria-hidden="true"
-                  />
-                  <span>Unsubscribe any time.</span>
-                </div>
-              </div>
+              <NewsletterForm />
             </div>
           </div>
         </section>

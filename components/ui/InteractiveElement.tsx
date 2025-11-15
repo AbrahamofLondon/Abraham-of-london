@@ -238,4 +238,4 @@ const InteractiveElement = React.forwardRef<
 
 InteractiveElement.displayName = "InteractiveElement";
 
-export default InteractiveElement;
+export default HeroBanner;

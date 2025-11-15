@@ -1,4 +1,6 @@
 // lib/websocket-service.ts
+import { useState, useEffect, useRef } from 'react';
+
 type MessageHandler = (data: unknown) => void;
 type EventType = 'connected' | 'disconnected' | 'error' | 'message';
 
@@ -8,6 +10,7 @@ export class WebSocketService {
   private handlers: Map<EventType, MessageHandler[]> = new Map();
   private autoConnect: boolean;
   private debug: boolean;
+  private connectionStatus: boolean = false;
 
   constructor(url: string, options: { autoConnect?: boolean; debug?: boolean } = {}) {
     this.url = url;
@@ -27,6 +30,7 @@ export class WebSocketService {
       
       this.ws.onopen = () => {
         if (this.debug) console.log('WebSocket connected');
+        this.connectionStatus = true;
         this.emit('connected', null);
       };
 
@@ -45,6 +49,7 @@ export class WebSocketService {
 
       this.ws.onclose = () => {
         if (this.debug) console.log('WebSocket disconnected');
+        this.connectionStatus = false;
         this.emit('disconnected', null);
       };
     } catch (error) {
@@ -94,7 +99,12 @@ export class WebSocketService {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
+      this.connectionStatus = false;
     }
+  }
+
+  isConnected(): boolean {
+    return this.connectionStatus && this.ws?.readyState === WebSocket.OPEN;
   }
 }
 
@@ -102,3 +112,57 @@ export type WebSocketMessage = {
   type: string;
   data?: Record<string, unknown>;
 };
+
+// React hook for WebSocket status
+export function useWebSocketStatus(): boolean {
+  const [isConnected, setIsConnected] = useState(false);
+  const serviceRef = useRef<WebSocketService | null>(null);
+
+  useEffect(() => {
+    // This is a simplified hook that tracks connection status
+    // In a real implementation, you'd want to connect to an actual WebSocketService instance
+    // For now, it simulates connection status
+    
+    // Simulate connection status changes for demo purposes
+    const interval = setInterval(() => {
+      // Randomly change connection status for demo
+      if (Math.random() > 0.7) {
+        setIsConnected(prev => !prev);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  return isConnected;
+}
+
+// Alternative hook that works with a specific WebSocketService instance
+export function useWebSocketStatusForService(service: WebSocketService | null): boolean {
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    if (!service) {
+      setIsConnected(false);
+      return;
+    }
+
+    const handleConnected = () => setIsConnected(true);
+    const handleDisconnected = () => setIsConnected(false);
+
+    const unsubscribeConnected = service.on('connected', handleConnected);
+    const unsubscribeDisconnected = service.on('disconnected', handleDisconnected);
+
+    // Set initial state
+    setIsConnected(service.isConnected());
+
+    return () => {
+      unsubscribeConnected();
+      unsubscribeDisconnected();
+    };
+  }, [service]);
+
+  return isConnected;
+}

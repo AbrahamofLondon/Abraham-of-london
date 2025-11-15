@@ -14,6 +14,7 @@ interface UseWebSocketReturn {
   sendMessage: (message: WebSocketMessage) => void;
   connect: () => void;
   disconnect: () => void;
+  reconnect: () => void;
 }
 
 export const useWebSocket = (
@@ -24,12 +25,30 @@ export const useWebSocket = (
     onMessage?: (message: WebSocketMessage) => void;
     onConnected?: () => void;
     onDisconnected?: () => void;
+    onError?: (error: Event) => void;
+    reconnectAttempts?: number;
+    reconnectInterval?: number;
   }
 ): UseWebSocketReturn => {
   const wsRef = useRef<WebSocketService | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const [error, setError] = useState<Event | null>(null);
+  const reconnectCountRef = useRef(0);
+
+  const maxReconnectAttempts = options?.reconnectAttempts ?? 5;
+  const reconnectInterval = options?.reconnectInterval ?? 3000;
+
+  const handleReconnect = useCallback(() => {
+    if (reconnectCountRef.current < maxReconnectAttempts) {
+      reconnectCountRef.current += 1;
+      setTimeout(() => {
+        if (wsRef.current) {
+          wsRef.current.connect();
+        }
+      }, reconnectInterval);
+    }
+  }, [maxReconnectAttempts, reconnectInterval]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -42,28 +61,28 @@ export const useWebSocket = (
     const unsubscribeConnected = wsRef.current.on("connected", () => {
       setIsConnected(true);
       setError(null);
+      reconnectCountRef.current = 0;
       options?.onConnected?.();
     });
 
     const unsubscribeDisconnected = wsRef.current.on("disconnected", () => {
       setIsConnected(false);
       options?.onDisconnected?.();
+      handleReconnect();
     });
 
     const unsubscribeError = wsRef.current.on("error", (message) => {
-      // Fix: Handle message that might not have data property
       let errorEvent: Event | null = null;
       
       if (message && typeof message === 'object' && 'data' in message) {
-        // If message has data property, try to extract event
         const messageWithData = message as { data?: { event?: unknown } };
         errorEvent = (messageWithData.data?.event as Event) || (message as unknown as Event);
       } else {
-        // If no data property, use message directly
         errorEvent = message as unknown as Event;
       }
       
       setError(errorEvent);
+      options?.onError?.(errorEvent);
     });
 
     const unsubscribeMessage = wsRef.current.on("message", (message) => {
@@ -77,10 +96,9 @@ export const useWebSocket = (
       unsubscribeDisconnected();
       unsubscribeError();
       unsubscribeMessage();
-      wsRef.current?.disconnect();
+      wsRef.current?.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, options?.debug, options?.autoConnect]);
+  }, [url, options?.debug, options?.autoConnect, handleReconnect]);
 
   const sendMessage = useCallback((message: WebSocketMessage) => {
     wsRef.current?.send(message);
@@ -91,7 +109,16 @@ export const useWebSocket = (
   }, []);
 
   const disconnect = useCallback(() => {
-    wsRef.current?.disconnect();
+    reconnectCountRef.current = maxReconnectAttempts; // Stop reconnecting
+    wsRef.current?.close();
+  }, [maxReconnectAttempts]);
+
+  const reconnect = useCallback(() => {
+    reconnectCountRef.current = 0;
+    wsRef.current?.close();
+    setTimeout(() => {
+      wsRef.current?.connect();
+    }, 1000);
   }, []);
 
   return {
@@ -101,5 +128,6 @@ export const useWebSocket = (
     sendMessage,
     connect,
     disconnect,
+    reconnect,
   };
 };
