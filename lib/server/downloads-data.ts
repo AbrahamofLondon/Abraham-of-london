@@ -1,317 +1,156 @@
 // lib/server/downloads-data.ts
-// Server-only module: read front-matter for downloads (MD/MDX) safely.
-
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
-
-if (typeof window !== "undefined") {
-  throw new Error("This module is server-only");
-}
+import {
+  ensureDir,
+  listMdFiles,
+  fileToSlug,
+  readFrontmatter,
+  sortByDateDesc,
+} from "@/lib/server/md-utils";
 
 export type DownloadMeta = {
   slug: string;
-  title?: string | null;
-  excerpt?: string | null;
-  coverImage?: string | null;
-  file?: string | null;
-  coverAspect?: "book" | "square" | "16/9" | string | null;
-  coverFit?: "contain" | "cover" | string | null;
-  coverPosition?: "center" | "top" | "left" | "right" | string | null;
-  content?: string;
-  // Compatibility fields
-  date?: string | null;
-  author?: string | null;
-  readTime?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
+  title: string;
+  category?: string;
+  excerpt?: string;
+  description?: string;
+  date?: string;
+  tags?: string[];
+  fileUrl?: string;
+  buttonLabel?: string;
+  href?: string;   // /downloads/[slug]
+  [key: string]: unknown;
 };
 
-type FieldKey = keyof DownloadMeta;
+export type DownloadFieldKey = keyof DownloadMeta;
 
-const downloadsDir = path.join(process.cwd(), "content", "downloads");
-const exts = [".mdx", ".md"] as const;
+// ------------------------------
+// Internal FS loader
+// ------------------------------
 
-const DEFAULT_FIELDS: FieldKey[] = [
-  "slug",
-  "title",
-  "excerpt",
-  "coverImage",
-  "file",
-  "coverAspect",
-  "coverFit",
-  "coverPosition",
-];
+function loadAllDownloadsFromFs(): DownloadMeta[] {
+  const abs = ensureDir("downloads");
+  if (!abs) return [];
 
-const COMPATIBILITY_FIELDS: FieldKey[] = [
-  ...DEFAULT_FIELDS,
-  "date",
-  "author",
-  "readTime",
-  "category",
-  "tags",
-];
+  const files = listMdFiles(abs);
+  if (!files.length) return [];
 
-// ---------- Path + normalisation helpers ----------
+  const items: DownloadMeta[] = files.map((absFile) => {
+    const { data, content } = readFrontmatter(absFile);
+    const rawSlug = (data.slug as string) || fileToSlug(absFile);
 
-function resolveDownloadPath(slug: string): string | null {
-  const real = slug.replace(/\.mdx?$/i, "");
-  for (const ext of exts) {
-    const full = path.join(downloadsDir, `${real}${ext}`);
-    if (fs.existsSync(full)) return full;
+    const slug = String(rawSlug || "")
+      .trim()
+      .replace(/^\/+|\/+$/g, "");
+
+    const title =
+      (data.title as string | undefined) ||
+      slug ||
+      "Untitled download";
+
+    const category = (data.category as string | undefined) || undefined;
+
+    const excerpt =
+      (data.excerpt as string | undefined) ||
+      (data.summary as string | undefined) ||
+      (data.description as string | undefined) ||
+      undefined;
+
+    const description =
+      (data.description as string | undefined) || undefined;
+
+    const date = (data.date as string | undefined) || undefined;
+
+    const tags = Array.isArray(data.tags)
+      ? data.tags.map((t: unknown) => String(t))
+      : undefined;
+
+    const fileUrl =
+      (data.fileUrl as string | undefined) ||
+      (data.file as string | undefined) ||
+      (data.downloadUrl as string | undefined) ||
+      undefined;
+
+    const buttonLabel =
+      (data.buttonLabel as string | undefined) ||
+      (data.ctaLabel as string | undefined) ||
+      undefined;
+
+    return {
+      slug,
+      title,
+      category,
+      excerpt,
+      description,
+      date,
+      tags,
+      fileUrl,
+      buttonLabel,
+      href: `/downloads/${slug}`,
+      content,
+      ...data,
+    };
+  });
+
+  return sortByDateDesc(items);
+}
+
+// Cache
+let DOWNLOADS_CACHE: DownloadMeta[] | null = null;
+
+function allDownloads(): DownloadMeta[] {
+  if (!DOWNLOADS_CACHE) {
+    DOWNLOADS_CACHE = loadAllDownloadsFromFs();
   }
-  return null;
+  return DOWNLOADS_CACHE;
 }
 
-function ensureLocal(p?: string | null): string | null {
-  if (!p) return null;
-  const s = String(p).trim();
-  if (!s) return null;
-  if (/^https?:\/\//i.test(s)) return s; // absolute URL
-  return s.startsWith("/") ? s : `/${s.replace(/^\/+/, "")}`;
+// ------------------------------
+// Public API
+// ------------------------------
+
+export function getAllDownloads(): DownloadMeta[] {
+  return allDownloads();
 }
-
-function normalizeCoverImage(v: unknown): string | null {
-  const raw = ensureLocal(typeof v === "string" ? v : null);
-  if (!raw) return null;
-  if (
-    !raw.startsWith("/assets/") &&
-    !raw.startsWith("/_next/") &&
-    !/^https?:\/\//i.test(raw)
-  ) {
-    return `/assets/images/downloads/${raw.replace(/^\/+/, "")}`;
-  }
-  return raw;
-}
-
-function normalizePdfFile(v: unknown): string | null {
-  const raw = ensureLocal(typeof v === "string" ? v : null);
-  if (!raw) return null;
-  if (!raw.startsWith("/downloads/") && !/^https?:\/\//i.test(raw)) {
-    return `/downloads/${raw.replace(/^\/+/, "")}`;
-  }
-  return raw;
-}
-
-// ---------- Resources extraction ----------
-
-/** Extract possible resource slugs from front-matter `resources` blocks */
-export function extractResourceSlugs(content: any): string[] {
-  if (!content?.resources) return [];
-  const slugs: string[] = [];
-
-  try {
-    if (Array.isArray(content.resources.downloads)) {
-      content.resources.downloads.forEach((r: any) => {
-        if (r?.href) {
-          const slug = String(r.href).split("/").pop();
-          if (slug) slugs.push(slug);
-        }
-      });
-    }
-    if (Array.isArray(content.resources.reads)) {
-      content.resources.reads.forEach((r: any) => {
-        if (r?.href) {
-          const slug = String(r.href).split("/").pop();
-          if (slug) slugs.push(slug);
-        }
-      });
-    }
-  } catch (e) {
-    console.warn("[downloads-data] Error extracting resource slugs:", e);
-  }
-
-  return [...new Set(slugs)];
-}
-
-// ---------- Core loaders ----------
 
 export function getDownloadSlugs(): string[] {
-  if (!fs.existsSync(downloadsDir)) return [];
-  try {
-    return fs
-      .readdirSync(downloadsDir)
-      .filter((f) => exts.some((e) => f.toLowerCase().endsWith(e)))
-      .map((f) => f.replace(/\.mdx?$/i, ""));
-  } catch (err) {
-    console.error("[downloads-data] Error reading downloads directory:", err);
-    return [];
-  }
+  return allDownloads().map((d) => d.slug);
 }
 
-export function getDownloadBySlug(
-  slug: string,
-  fields: FieldKey[] = DEFAULT_FIELDS,
-  includeContent = false
-): DownloadMeta {
-  const real = slug.replace(/\.mdx?$/i, "");
-  const fullPath = resolveDownloadPath(real);
+export function getDownloadBySlug(slug: string): DownloadMeta | undefined {
+  const key = String(slug || "").toLowerCase();
+  return allDownloads().find(
+    (d) => String(d.slug || "").toLowerCase() === key,
+  );
+}
 
-  // If file is missing, return a non-throwing placeholder
-  if (!fullPath) {
-    console.warn("[downloads-data] Download not found for slug:", real);
+export function getDownloadsBySlugs(slugs: string[]): DownloadMeta[] {
+  const keys = new Set(slugs.map((s) => String(s || "").toLowerCase()));
+  return allDownloads().filter((d) =>
+    keys.has(String(d.slug || "").toLowerCase()),
+  );
+}
 
-    const base: DownloadMeta = {
-      slug: real,
-      title: "Download Not Found",
-      excerpt: null,
-      coverImage: null,
-      file: null,
-      coverAspect: null,
-      coverFit: null,
-      coverPosition: null,
-      content: includeContent ? "" : undefined,
-      date: null,
-      author: "Abraham of London",
-      readTime: null,
-      category: null,
-      tags: null,
-    };
+// If some of your downloads have associated resources (e.g. "related resources"),
+// you can extract those slugs from frontmatter; otherwise, this safely returns [].
+export function extractResourceSlugs(): string[] {
+  const downloads = allDownloads();
+  const out = new Set<string>();
 
-    const out: any = { slug: base.slug };
-    for (const f of fields) {
-      out[f] = (base as any)[f] ?? null;
-    }
-    if (includeContent) out.content = base.content ?? "";
-    return out as DownloadMeta;
-  }
-
-  try {
-    const raw = fs.readFileSync(fullPath, "utf8");
-    const { data, content } = matter(raw);
-    const fm = (data || {}) as Record<string, unknown>;
-    const out: any = { slug: real };
-
-    for (const f of fields) {
-      switch (f) {
-        case "slug":
-          out.slug = real;
-          break;
-        case "title":
-          out.title =
-            typeof fm.title === "string" ? fm.title.trim() : null;
-          break;
-        case "excerpt":
-          out.excerpt =
-            typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
-          break;
-        case "coverImage":
-          out.coverImage = normalizeCoverImage(fm.coverImage);
-          break;
-        case "file":
-          out.file = normalizePdfFile(fm.file);
-          break;
-        case "coverAspect":
-        case "coverFit":
-        case "coverPosition":
-        case "date":
-        case "author":
-        case "readTime":
-        case "category":
-          out[f] = typeof fm[f] === "string" ? String(fm[f]).trim() : null;
-          break;
-        case "tags":
-          out.tags = Array.isArray(fm.tags)
-            ? (fm.tags as any[]).map(String)
-            : null;
-          break;
-        case "content":
-          if (includeContent) out.content = content || "";
-          break;
-        default:
-          break;
+  for (const d of downloads) {
+    const resources = (d as any).resources;
+    if (!resources) continue;
+    const arr = Array.isArray(resources) ? resources : [];
+    for (const r of arr) {
+      if (r && typeof r.slug === "string") {
+        out.add(r.slug.trim());
       }
     }
-
-    return out as DownloadMeta;
-  } catch (err) {
-    console.error(`[downloads-data] Error processing download ${slug}:`, err);
-
-    const base: DownloadMeta = {
-      slug: real,
-      title: "Error Loading Download",
-      excerpt: null,
-      coverImage: null,
-      file: null,
-      coverAspect: null,
-      coverFit: null,
-      coverPosition: null,
-      content: includeContent ? "" : undefined,
-      date: null,
-      author: "Abraham of London",
-      readTime: null,
-      category: null,
-      tags: null,
-    };
-
-    const out: any = { slug: base.slug };
-    for (const f of fields) {
-      out[f] = (base as any)[f] ?? null;
-    }
-    if (includeContent) out.content = base.content ?? "";
-    return out as DownloadMeta;
-  }
-}
-
-export function getDownloadsBySlugs(
-  slugs: unknown[],
-  fields: FieldKey[] = DEFAULT_FIELDS
-): DownloadMeta[] {
-  if (!Array.isArray(slugs)) return [];
-
-  const seen = new Set<string>();
-  const items: DownloadMeta[] = [];
-
-  for (const raw of slugs) {
-    const slug = String(raw ?? "").trim();
-    if (!slug) continue;
-    if (seen.has(slug)) continue;
-    seen.add(slug);
-
-    try {
-      const meta = getDownloadBySlug(slug, fields);
-      if (meta && meta.slug) {
-        items.push(meta);
-      } else {
-        console.warn("[downloads-data] Empty meta returned for slug:", slug);
-      }
-    } catch (err) {
-      // Should not happen with the current getDownloadBySlug, but guard anyway
-      console.error("[downloads-data] Skipping bad download slug:", slug, err);
-    }
   }
 
-  return items;
+  return Array.from(out);
 }
 
-export function getAllDownloads(
-  fields: FieldKey[] = DEFAULT_FIELDS
-): DownloadMeta[] {
-  const slugs = getDownloadSlugs();
-  const items = slugs.map((s) => getDownloadBySlug(s, fields));
-  items.sort((a, b) => {
-    const at = (a.title || a.slug || "").toLowerCase();
-    const bt = (b.title || b.slug || "").toLowerCase();
-    return at.localeCompare(bt);
-  });
-  return items;
+// Keep API symmetrical with events-data
+export function getAllContent(): DownloadMeta[] {
+  return getAllDownloads();
 }
-
-// Compatibility export for a unified loader
-export function getAllContent(type: "downloads"): DownloadMeta[] {
-  if (type !== "downloads") {
-    throw new Error(`Unsupported content type: ${type}`);
-  }
-  return getAllDownloads(COMPATIBILITY_FIELDS);
-}
-
-export default {
-  getDownloadSlugs,
-  getDownloadBySlug,
-  getDownloadsBySlugs,
-  getAllDownloads,
-  getAllContent,
-  extractResourceSlugs,
-};
-
-export type { FieldKey as DownloadFieldKey };
