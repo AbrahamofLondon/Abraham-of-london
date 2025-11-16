@@ -18,14 +18,4 @@ const ContentPage: NextPage = () => {
   );
 };
 
-// SAFE FIX: This will override any problematic getStaticProps
-export async function getStaticProps() {
-  // Return completely safe, serializable props
-  return {
-    props: {
-      // No data that could contain undefined values
-    },
-  };
-}
-
 export default ContentPage;

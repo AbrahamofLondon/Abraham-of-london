@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 import type { UnifiedContent } from "@/lib/server/unified-content";
 import { getAllUnifiedContent } from "@/lib/server/unified-content";
 
-type ContentListItem = Omit<UnifiedContent, "updatedAt"> & {
+type ContentListItem = Omit<UnifiedContent, "updatedAt" | "content"> & {
   updatedAt: string | null;
 };
 
@@ -19,14 +19,24 @@ interface ContentIndexProps {
 export const getStaticProps: GetStaticProps<ContentIndexProps> = async () => {
   const all = await getAllUnifiedContent();
 
-  // 🔒 HARD GUARANTEE: no `undefined` in `updatedAt`
-  const items: ContentListItem[] = all.map((item) => ({
-    ...item,
-    updatedAt:
-      typeof item.updatedAt === "string" && item.updatedAt.trim().length > 0
-        ? item.updatedAt
-        : null,
-  }));
+  const itemsRaw: ContentListItem[] = all.map((item) => {
+    // Strip out the ReactNode so Next.js doesn't try to serialize it
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { content, ...rest } = item;
+
+    const normalised: ContentListItem = {
+      ...rest,
+      updatedAt:
+        typeof item.updatedAt === "string" && item.updatedAt.trim().length > 0
+          ? item.updatedAt
+          : null,
+    };
+
+    return normalised;
+  });
+
+  // Final safety net: ensure everything is JSON-serializable
+  const items = JSON.parse(JSON.stringify(itemsRaw)) as ContentListItem[];
 
   return {
     props: { items },
