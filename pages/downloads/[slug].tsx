@@ -1,321 +1,330 @@
 // pages/downloads/[slug].tsx
+
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  InferGetStaticPropsType,
+} from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
 import {
-  getDownloadBySlug,
   getDownloadSlugs,
-  type DownloadMeta,
-} from "@/lib/server/downloads-data";
+  getDownloadBySlug,
+} from "@/lib/downloads";
 
-const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-function formatPretty(
-  isoish: string | null | undefined,
-  tz = "Europe/London"
-): string {
-  if (!isoish || typeof isoish !== "string") return "";
-  if (isDateOnly(isoish)) {
-    const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
-  }
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
-  return `${date}, ${time}`;
-}
-
-/**
- * Resolve the actual download URL for a given download meta.
- * - Prefer explicit fields: pdfPath, fileUrl, downloadUrl
- * - Fallback: /downloads/[slug].pdf
- * - Normalise leading slash
- * - Allow absolute URLs
- */
-function resolveDownloadUrl(download: DownloadMeta & { slug?: string }) {
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org";
-  const siteBase = site.replace(/\/+$/, "");
-
-  const raw =
-    (download as any).pdfPath ||
-    (download as any).fileUrl ||
-    (download as any).downloadUrl ||
-    (download.slug ? `/downloads/${download.slug}.pdf` : null);
-
-  if (!raw) return { relative: null as string | null, absolute: null as string | null };
-
-  const str = String(raw).trim();
-  if (!str) return { relative: null, absolute: null };
-
-  // Absolute URL already
-  if (/^https?:\/\//i.test(str)) {
-    return { relative: str, absolute: str };
-  }
-
-  // Ensure leading slash and strip any leading "./"
-  const normalised =
-    str.startsWith("/") ? str.replace(/^\/+/, "/") : `/${str.replace(/^\/+/, "")}`;
-
-  const absolute = new URL(normalised, siteBase).toString();
-  return { relative: normalised, absolute };
-}
+/* -------------------------------------------------------------------------- */
+/* Types – keep this JSON-safe and defensive                                  */
+/* -------------------------------------------------------------------------- */
 
 type DownloadPageProps = {
-  download: DownloadMeta;
-  contentSource: MDXRemoteSerializeResult;
+  download: DownloadMetaSerialized;
 };
 
-function DownloadPage({ download, contentSource }: DownloadPageProps) {
-  if (!download) return <div>Download not found.</div>;
+type DownloadMetaSerialized = {
+  slug: string;
+  title?: string;
+  description?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  file?: string | null;       // generic file URL
+  pdfUrl?: string | null;     // explicit PDF if present
+  epubUrl?: string | null;    // explicit EPUB if present
+  category?: string | null;
+  tags?: string[] | null;
+  kind?: string | null;
+};
 
-  const {
-    slug,
-    title,
-    description,
-    excerpt,
+/* -------------------------------------------------------------------------- */
+/* Normalisers                                                                 */
+/* -------------------------------------------------------------------------- */
+
+function toSerializable<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function serialiseDownload(raw: any): DownloadMetaSerialized {
+  if (!raw || typeof raw !== "object") {
+    return {
+      slug: "",
+      title: "Download",
+      description: null,
+      excerpt: null,
+      coverImage: null,
+      file: null,
+      pdfUrl: null,
+      epubUrl: null,
+      category: null,
+      tags: null,
+      kind: null,
+    };
+  }
+
+  const baseSlug = String(raw.slug ?? "").trim();
+
+  const coverImage =
+    typeof raw.coverImage === "string" && raw.coverImage.trim().length
+      ? raw.coverImage
+      : typeof raw.heroImage === "string" && raw.heroImage.trim().length
+      ? raw.heroImage
+      : null;
+
+  // Try to locate any obvious file/pdf/epub URLs
+  const pdfUrl =
+    typeof raw.pdfUrl === "string" && raw.pdfUrl.trim().length
+      ? raw.pdfUrl
+      : typeof raw.pdf === "string" && raw.pdf.trim().length
+      ? raw.pdf
+      : null;
+
+  const epubUrl =
+    typeof raw.epubUrl === "string" && raw.epubUrl.trim().length
+      ? raw.epubUrl
+      : typeof raw.epub === "string" && raw.epub.trim().length
+      ? raw.epub
+      : null;
+
+  const file =
+    typeof raw.file === "string" && raw.file.trim().length
+      ? raw.file
+      : pdfUrl || epubUrl || null;
+
+  const tags =
+    Array.isArray(raw.tags) && raw.tags.length
+      ? raw.tags.map((t: any) => String(t))
+      : null;
+
+  return {
+    slug: baseSlug,
+    title: raw.title ?? raw.name ?? "Download",
+    description: raw.description ?? raw.body ?? raw.excerpt ?? null,
+    excerpt: raw.excerpt ?? null,
     coverImage,
-    heroImage,
-    date,
+    file,
+    pdfUrl,
+    epubUrl,
+    category: raw.category ?? raw.section ?? null,
     tags,
-    category,
-  } = download as DownloadMeta & {
-    heroImage?: string;
+    kind: raw.kind ?? raw.type ?? null,
   };
+}
 
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const siteBase = site.replace(/\/+$/, "");
-  const pathSegment = slug ? `downloads/${slug}` : "downloads";
-  const url = `${siteBase}/${pathSegment}`;
+/* -------------------------------------------------------------------------- */
+/* getStaticPaths                                                              */
+/* -------------------------------------------------------------------------- */
 
-  const relImage = coverImage ?? heroImage;
-  const absImage = relImage
-    ? new URL(String(relImage), siteBase).toString()
-    : undefined;
-  const displayDescription = description || excerpt || "";
+export const getStaticPaths: GetStaticPaths = async () => {
+  const slugsMaybe = await Promise.resolve(getDownloadSlugs());
 
-  const { relative: downloadUrl, absolute: downloadAbsUrl } =
-    resolveDownloadUrl(download as DownloadMeta & { slug?: string });
+  const slugs = Array.isArray(slugsMaybe) ? slugsMaybe : [];
 
-  const jsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "DigitalDocument",
-    name: title,
-    description: displayDescription,
-    url,
-    ...(date ? { datePublished: date } : {}),
-    ...(absImage ? { image: [absImage] } : {}),
-    ...(category ? { about: category } : {}),
-    ...(downloadAbsUrl ? { contentUrl: downloadAbsUrl } : {}),
+  const paths =
+    slugs.length > 0
+      ? slugs
+          .filter(
+            (s): s is string =>
+              typeof s === "string" && s.trim().length > 0,
+          )
+          .map((slug) => ({ params: { slug } }))
+      : [];
+
+  return {
+    paths,
+    fallback: "blocking",
   };
+};
+
+/* -------------------------------------------------------------------------- */
+/* getStaticProps                                                              */
+/* -------------------------------------------------------------------------- */
+
+export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
+  ctx,
+) => {
+  const slugParam = ctx.params?.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
+
+  if (!slug) {
+    return { notFound: true };
+  }
+
+  const raw = await Promise.resolve(getDownloadBySlug(slug));
+
+  if (!raw) {
+    return { notFound: true };
+  }
+
+  const download = toSerializable(serialiseDownload(raw));
+
+  return {
+    props: {
+      download,
+    },
+    revalidate: 3600,
+  };
+};
+
+/* -------------------------------------------------------------------------- */
+/* Page component                                                              */
+/* -------------------------------------------------------------------------- */
+
+export default function DownloadPage({
+  download,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const pageTitle = download.title || "Download";
+  const description =
+    download.description ||
+    download.excerpt ||
+    "A strategic resource from Abraham of London.";
+
+  const hasCover =
+    typeof download.coverImage === "string" &&
+    download.coverImage.trim().length > 0;
+
+  const hasPdf =
+    typeof download.pdfUrl === "string" && download.pdfUrl.trim().length > 0;
+  const hasEpub =
+    typeof download.epubUrl === "string" && download.epubUrl.trim().length > 0;
+  const hasFile =
+    typeof download.file === "string" && download.file.trim().length > 0;
+
+  const primaryHref = download.pdfUrl || download.file || null;
 
   return (
-    <Layout title={title}>
+    <Layout title={pageTitle}>
       <Head>
-        <title>{title} | Downloads | Abraham of London</title>
-        <meta name="description" content={displayDescription} />
-        {absImage && <meta property="og:image" content={absImage} />}
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={url} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={displayDescription} />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <title>{pageTitle} | Abraham of London</title>
+        <meta name="description" content={description} />
       </Head>
 
-      <article className="mx-auto max-w-4xl px-4 py-10">
-        <header className="mb-8 text-center">
-          {(heroImage || coverImage) && (
-            <div className="relative mb-6 w-full overflow-hidden rounded-xl aspect-[21/9]">
-              <Image
-                src={String(heroImage || coverImage)}
-                alt={title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 80vw"
-                priority
-              />
-            </div>
-          )}
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        {/* Breadcrumb */}
+        <nav className="mb-6 text-xs text-gray-500">
+          <Link
+            href="/downloads"
+            className="underline-offset-4 hover:text-forest hover:underline"
+          >
+            Downloads
+          </Link>{" "}
+          <span aria-hidden>›</span>{" "}
+          <span className="text-gray-700">{pageTitle}</span>
+        </nav>
 
-          <h1 className="mb-4 text-4xl font-serif font-semibold text-deepCharcoal md:text-5xl">
-            {title}
-          </h1>
-
-          {displayDescription && (
-            <p className="mx-auto mb-6 max-w-3xl text-xl leading-relaxed text-gray-600">
-              {displayDescription}
+        <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
+          {/* Text column */}
+          <section>
+            <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
+              Strategic Download
             </p>
-          )}
+            <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
+              {pageTitle}
+            </h1>
 
-          <div className="mb-6 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-            {date && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Published:</span>
-                <time dateTime={date}>{formatPretty(date)}</time>
+            {download.category && (
+              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-forest">
+                {download.category}
+              </p>
+            )}
+
+            <p className="mt-4 text-sm leading-relaxed text-gray-800">
+              {description}
+            </p>
+
+            {download.tags && download.tags.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                {download.tags.map((tag, i) => (
+                  <span
+                    key={`${tag}-${i}`}
+                    className="rounded-full border border-lightGrey px-3 py-1 text-gray-600"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             )}
-            {category && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Category:</span>
-                <span>{category}</span>
-              </div>
-            )}
-          </div>
 
-          {tags && tags.length > 0 && (
-            <div className="mb-6 flex flex-wrap justify-center gap-2">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+            {/* CTA buttons */}
+            <div className="mt-6 flex flex-wrap gap-3">
+              {primaryHref && (
+                <a
+                  href={primaryHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full bg-forest px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-cream shadow-sm transition hover:bg-forest/90"
                 >
-                  {String(tag)}
-                </span>
-              ))}
-            </div>
-          )}
+                  Download resource
+                </a>
+              )}
 
-          {downloadUrl ? (
-            <div className="mb-8 flex justify-center">
-              <a
-                href={downloadUrl}
-                download
-                className="inline-flex items-center rounded-lg bg-forest px-6 py-3 font-medium text-white transition-colors hover:bg-forest/90"
-              >
-                Download
-              </a>
-            </div>
-          ) : (
-            <div className="mb-8 text-sm text-red-600">
-              Download link is not configured for this resource. Please contact
-              Abraham if you believe this is an error.
-            </div>
-          )}
-        </header>
+              {hasPdf && download.pdfUrl && download.pdfUrl !== primaryHref && (
+                <a
+                  href={download.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full border border-forest/40 bg-white px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest/5"
+                >
+                  PDF version
+                </a>
+              )}
 
-        <section className="prose prose-lg mb-12 max-w-none">
-          <MDXRemote {...contentSource} components={mdxComponents} />
-        </section>
+              {hasEpub && (
+                <a
+                  href={download.epubUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full border border-lightGrey bg-white px-4 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-gray-50"
+                >
+                  EPUB version
+                </a>
+              )}
+            </div>
 
-        <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest to-softGold p-8 text-center text-white">
-          <h2 className="mb-4 text-2xl font-serif font-semibold">
-            Explore more resources
-          </h2>
-          <p className="mb-6 text-lg opacity-90">
-            Browse the full downloads library or get in touch if you need
-            something tailored.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/downloads"
-              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal transition-colors hover:bg-gray-100"
-            >
-              Back to Downloads
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white hover:text-deepCharcoal"
-            >
-              Contact Abraham
-            </Link>
-          </div>
-        </section>
-      </article>
+            {/* Small note since MDX body is temporarily disabled */}
+            <p className="mt-6 text-xs text-gray-500">
+              Detailed walkthrough and narrative will be available in the next
+              content refresh. The core tool is ready to use now.
+            </p>
+          </section>
+
+          {/* Cover / visual */}
+          <aside className="md:pl-4">
+            <div className="overflow-hidden rounded-2xl border border-lightGrey bg-gray-50">
+              {hasCover ? (
+                <div className="relative aspect-[4/5] w-full">
+                  <Image
+                    src={download.coverImage as string}
+                    alt={pageTitle}
+                    fill
+                    sizes="(min-width: 768px) 320px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-deepCharcoal via-black to-forest/70">
+                  <p className="px-6 text-center text-sm font-medium text-cream/85">
+                    Abraham of London strategic download
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-gray-400 text-center select-none">
+              ABRAHAMOFLONDON
+            </p>
+          </aside>
+        </div>
+
+        {/* Back link */}
+        <div className="mt-10">
+          <Link
+            href="/downloads"
+            className="text-sm text-forest underline-offset-4 hover:underline"
+          >
+            Back to all downloads
+          </Link>
+        </div>
+      </main>
     </Layout>
   );
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const slugs = getDownloadSlugs?.() ?? [];
-    const paths = slugs.map((slug: string) => ({
-      params: { slug: String(slug) },
-    }));
-    return { paths, fallback: "blocking" };
-  } catch (error) {
-    console.error("Error generating download paths:", error);
-    return { paths: [], fallback: "blocking" };
-  }
-};
-
-export const getStaticProps: GetStaticProps<DownloadPageProps> = async ({
-  params,
-}) => {
-  try {
-    const slug = params?.slug as string | undefined;
-    if (!slug) return { notFound: true };
-
-    const downloadData = getDownloadBySlug(slug, [
-      "slug",
-      "title",
-      "description",
-      "excerpt",
-      "coverImage",
-      "heroImage",
-      "date",
-      "tags",
-      "category",
-      "content",
-      "pdfPath",
-      "fileUrl",
-      "downloadUrl",
-    ]);
-
-    if (!downloadData || !downloadData.title) {
-      return { notFound: true };
-    }
-
-    const { content, ...download } = downloadData as DownloadMeta & {
-      content?: string;
-    };
-
-    const jsonSafeDownload = JSON.parse(
-      JSON.stringify(download)
-    ) as DownloadMeta;
-
-    const contentSource = await serialize(content || "", {
-      scope: jsonSafeDownload as unknown as Record<string, unknown>,
-    });
-
-    return {
-      props: {
-        download: jsonSafeDownload,
-        contentSource,
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps for /downloads/[slug]:", error);
-    return { notFound: true };
-  }
-};
-
-export default DownloadPage;

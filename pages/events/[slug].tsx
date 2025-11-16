@@ -1,330 +1,417 @@
 // pages/events/[slug].tsx
+
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  InferGetStaticPropsType,
+} from "next";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-
+import Image from "next/image";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getEventBySlug, getEventSlugs } from "@/lib/server/events-data";
-import { getDownloadsBySlugs, type DownloadMeta } from "@/lib/server/downloads-data";
-import type { EventMeta } from "@/types/event";
+import {
+  getEventSlugs,
+  getEventBySlug,
+  getEventResourcesSummary,
+  type EventMeta,
+  // NOTE: we deliberately do NOT import EventResources here,
+  // because the actual implementation of getEventResourcesSummary
+  // returns a looser/different shape.
+} from "@/lib/events";
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Types                                                                     */
+/* -------------------------------------------------------------------------- */
 
-const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
-
-function formatPretty(
-  isoish: string | null | undefined,
-  tz = "Europe/London"
-): string {
-  if (!isoish || typeof isoish !== "string") return "";
-  if (isDateOnly(isoish)) {
-    const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
-  }
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return isoish;
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  }).format(d);
-  return `${date}, ${time}`;
-}
-
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-type EventPageProps = {
-  event: EventMeta;
-  contentSource: MDXRemoteSerializeResult;
-  resourcesMeta: DownloadMeta[];
+type EventMetaSerialized = {
+  slug: string;
+  title?: string;
+  date?: string | null;
+  time?: string | null;
+  location?: string | null;
+  description?: string | null;
+  heroImage?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
+  [key: string]: unknown;
 };
 
-// -----------------------------------------------------------------------------
-// Page component
-// -----------------------------------------------------------------------------
+type RelatedResourceSerialized = {
+  slug?: string | null;
+  title?: string | null;
+  description?: string | null;
+  coverImage?: string | null;
+  href?: string | null;
+  kind?: string | null;
+};
 
-function EventPage({ event, contentSource, resourcesMeta }: EventPageProps) {
-  if (!event) return <div>Event not found.</div>;
+type EventResourcesSerialized = {
+  heading?: string | null;
+  description?: string | null;
+  downloads?: RelatedResourceSerialized[];
+  links?: RelatedResourceSerialized[];
+};
 
-  const { slug, title, summary, location, date, tags, heroImage, coverImage } = event;
+type EventPageProps = {
+  event: EventMetaSerialized;
+  resources: EventResourcesSerialized | null;
+};
 
-  const prettyDate = formatPretty(date);
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  const url = `${site.replace(/\/+$/, "")}/events/${slug}`;
-  const relImage = coverImage ?? heroImage;
-  const absImage = relImage ? new URL(relImage, site).toString() : undefined;
-  const isChatham =
-    Array.isArray(tags) &&
-    tags.some((t) => String(t).toLowerCase() === "chatham");
+/* -------------------------------------------------------------------------- */
+/*  Utilities                                                                 */
+/* -------------------------------------------------------------------------- */
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: title,
-    startDate: date,
-    eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: {
-      "@type": "Place",
-      name: location,
-      address: location,
-    },
-    organizer: {
-      "@type": "Organization",
-      name: "Abraham of London",
-      url: site,
-    },
-    ...(absImage ? { image: [absImage] } : {}),
-    description: summary,
-    url,
-  };
-
-  return (
-    <Layout title={title || undefined}>
-      <Head>
-        <title>{title} | Events | Abraham of London</title>
-        <meta name="description" content={summary || ""} />
-        {absImage && <meta property="og:image" content={absImage} />}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={url} />
-        <meta property="og:title" content={`${title} | Abraham of London`} />
-        <meta property="og:description" content={summary || ""} />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
-
-      <article className="event-page mx-auto max-w-3xl px-4 py-10">
-        {/* Hero image if present */}
-        {(heroImage || coverImage) && (
-          <div className="relative mb-6 w-full overflow-hidden rounded-xl aspect-[21/9]">
-            <Image
-              src={String(heroImage || coverImage)}
-              alt={title || "Event image"}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 80vw"
-              priority
-            />
-          </div>
-        )}
-
-        <h1 className="mb-2 font-serif text-3xl font-semibold md:text-4xl">
-          {title}
-        </h1>
-
-        {isChatham && (
-          <>
-            <span
-              className="inline-block rounded-full bg-[color:var(--color-on-secondary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cream"
-              title="Chatham Room (off the record)"
-            >
-              Chatham
-            </span>
-            <p className="mt-2 text-xs text-neutral-600">
-              Off the record. No recordings. No press.
-            </p>
-          </>
-        )}
-
-        <p className="mb-1 mt-3 text-sm text-neutral-600">
-          <span className="font-medium">Date:</span> {prettyDate}
-        </p>
-        {location && (
-          <p className="mb-6 text-sm text-neutral-600">
-            <span className="font-medium">Location:</span> {location}
-          </p>
-        )}
-
-        <section className="prose max-w-none">
-          <MDXRemote {...contentSource} components={mdxComponents} />
-        </section>
-
-        {resourcesMeta && resourcesMeta.length > 0 && (
-          <section className="mt-10 border-t border-lightGrey pt-8">
-            <h2 className="mb-4 font-serif text-2xl font-semibold text-deepCharcoal">
-              Suggested Resources
-            </h2>
-            <ul className="grid gap-5 sm:grid-cols-2">
-              {resourcesMeta.map((r) => (
-                <li
-                  key={r.slug}
-                  className="group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-md transition hover:shadow-lg"
-                >
-                  {r.coverImage && (
-                    <div className="relative aspect-[3/2] w-full">
-                      <Image
-                        src={String(r.coverImage)}
-                        alt={r.title || ""}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold text-deepCharcoal">
-                      <Link
-                        href={`/downloads/${r.slug}`}
-                        className="hover:underline"
-                      >
-                        {r.title}
-                      </Link>
-                    </h3>
-                    {r.excerpt && (
-                      <p className="mt-1 line-clamp-3 text-sm text-[color:var(--color-on-secondary)] opacity-85">
-                        {String(r.excerpt)}
-                      </p>
-                    )}
-                    <div className="mt-3 flex gap-2">
-                      <Link
-                        href={`/downloads/${r.slug}`}
-                        className="inline-flex items-center rounded-full border border-[color:var(--color-primary)]/20 px-3 py-1.5 text-sm font-medium text-forest hover:bg-forest hover:text-cream"
-                      >
-                        Notes
-                      </Link>
-                      {(r as any).pdfPath && (
-                        <a
-                          href={String((r as any).pdfPath)}
-                          download
-                          className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal hover:bg-warmWhite"
-                        >
-                          Download
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </article>
-    </Layout>
-  );
+/** Ensure values from getStaticProps are JSON-serialisable */
+function toSerializable<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
-// -----------------------------------------------------------------------------
-// SSG – paths
-// -----------------------------------------------------------------------------
+/** Normalise event fields into a serialisable shape */
+function serialiseEvent(event: EventMeta): EventMetaSerialized {
+  const anyEv = event as any;
+
+  const dateRaw = anyEv.date ?? anyEv.startDate ?? null;
+  const date =
+    typeof dateRaw === "string"
+      ? dateRaw
+      : dateRaw instanceof Date
+      ? dateRaw.toISOString()
+      : null;
+
+  const heroImage =
+    typeof anyEv.heroImage === "string"
+      ? anyEv.heroImage
+      : typeof anyEv.coverImage === "string"
+      ? anyEv.coverImage
+      : null;
+
+  return {
+    slug: String(anyEv.slug ?? ""),
+    title: anyEv.title ?? "",
+    date,
+    time: anyEv.time ?? null,
+    location: anyEv.location ?? anyEv.venue ?? null,
+    description: anyEv.description ?? anyEv.excerpt ?? null,
+    heroImage,
+    coverImage:
+      typeof anyEv.coverImage === "string" ? anyEv.coverImage : heroImage,
+    tags: Array.isArray(anyEv.tags) ? anyEv.tags : null,
+  };
+}
+
+/**
+ * Normalise resources into a serialisable shape.
+ * Accepts unknown because the underlying implementation is loose
+ * (e.g. may return stats objects, etc.).
+ */
+function serialiseResources(resources: unknown): EventResourcesSerialized | null {
+  if (!resources || typeof resources !== "object") return null;
+
+  const anyRes = resources as any;
+
+  const toRel = (item: any): RelatedResourceSerialized => {
+    if (!item || typeof item !== "object") return {};
+    return {
+      slug: item.slug ?? null,
+      title: item.title ?? null,
+      description: item.description ?? item.excerpt ?? null,
+      coverImage:
+        typeof item.coverImage === "string" ? item.coverImage : null,
+      href: typeof item.href === "string" ? item.href : null,
+      kind: item.kind ?? null,
+    };
+  };
+
+  const downloadsSource = Array.isArray(anyRes.downloads)
+    ? anyRes.downloads
+    : [];
+
+  const linksSource = Array.isArray(anyRes.links) ? anyRes.links : [];
+
+  return {
+    heading:
+      typeof anyRes.heading === "string" ? anyRes.heading : null,
+    description:
+      typeof anyRes.description === "string" ? anyRes.description : null,
+    downloads: downloadsSource.map(toRel),
+    links: linksSource.map(toRel),
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Next.js data functions                                                    */
+/* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getEventSlugs();
+  const rawSlugs = await Promise.resolve(getEventSlugs());
+  const slugs = Array.isArray(rawSlugs) ? rawSlugs : [];
+
   const paths =
-    slugs?.map((slug: string) => ({
-      params: { slug },
-    })) ?? [];
+    slugs.length > 0
+      ? slugs
+          .filter(
+            (s): s is string =>
+              typeof s === "string" && s.trim().length > 0,
+          )
+          .map((slug) => ({ params: { slug } }))
+      : [];
 
   return {
     paths,
-    // keep blocking to avoid 404 for new events
     fallback: "blocking",
   };
 };
 
-// -----------------------------------------------------------------------------
-// SSG – props
-// -----------------------------------------------------------------------------
+export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
+  const slugParam = ctx.params?.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
 
-export const getStaticProps: GetStaticProps<EventPageProps> = async ({
-  params,
-}) => {
-  try {
-    const slug = params?.slug as string | undefined;
-    if (!slug) return { notFound: true };
-
-    const eventData = getEventBySlug(slug, [
-      "slug",
-      "title",
-      "date",
-      "location",
-      "summary",
-      "heroImage",
-      "coverImage",
-      "tags",
-      "resources",
-      "content",
-    ]);
-
-    if (!eventData || !eventData.title || !eventData.content) {
-      return { notFound: true };
-    }
-
-    const { content, ...event } = eventData;
-
-    const jsonSafeEvent = JSON.parse(
-      JSON.stringify(event)
-    ) as EventMeta & {
-      resources?: {
-        downloads?: { href?: string }[];
-        reads?: { href?: string }[];
-      };
-    };
-
-    const contentSource = await serialize(content || "", {
-      scope: jsonSafeEvent as unknown as Record<string, unknown>,
-    });
-
-    const resourceSlugs: string[] = [];
-
-    if (jsonSafeEvent.resources?.downloads) {
-      jsonSafeEvent.resources.downloads.forEach((r) => {
-        const s = r.href?.split("/").pop();
-        if (s) resourceSlugs.push(s);
-      });
-    }
-
-    if (jsonSafeEvent.resources?.reads) {
-      jsonSafeEvent.resources.reads.forEach((r) => {
-        const s = r.href?.split("/").pop();
-        if (s) resourceSlugs.push(s);
-      });
-    }
-
-    const resourcesMetaRaw: DownloadMeta[] =
-      resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
-
-    const resourcesMeta = JSON.parse(
-      JSON.stringify(resourcesMetaRaw)
-    ) as DownloadMeta[];
-
-    return {
-      props: {
-        event: jsonSafeEvent,
-        contentSource,
-        resourcesMeta,
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps for /events/[slug]:", error);
+  if (!slug) {
     return { notFound: true };
   }
+
+  // Tolerate sync/async implementations
+  const rawEvent = await Promise.resolve(getEventBySlug(slug));
+  if (!rawEvent) {
+    return { notFound: true };
+  }
+
+  /// NOTE: treat resources as unknown – the implementation currently returns
+  // a loose stats object, not strictly EventResources.
+  let rawResources: unknown = null;
+  try {
+    rawResources = await Promise.resolve(
+      getEventResourcesSummary ? getEventResourcesSummary() : null,
+    );
+  } catch {
+    rawResources = null;
+  }
+
+  const event = toSerializable(serialiseEvent(rawEvent));
+  const resources = toSerializable(serialiseResources(rawResources));
+
+  return {
+    props: {
+      event,
+      resources,
+    },
+    revalidate: 3600,
+  };
 };
 
-export default EventPage;
+/* -------------------------------------------------------------------------- */
+/*  Page component                                                            */
+/* -------------------------------------------------------------------------- */
+
+export default function EventPage({
+  event,
+  resources,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const pageTitle = event.title || "Event";
+
+  const displayDate =
+    event.date &&
+    new Date(event.date).toString() !== "Invalid Date"
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(new Date(event.date))
+      : null;
+
+  const hasHeroImage =
+    typeof event.heroImage === "string" &&
+    event.heroImage.trim().length > 0;
+
+  return (
+    <Layout title={pageTitle}>
+      <Head>
+        <title>{pageTitle} | Abraham of London</title>
+        {event.description && (
+          <meta name="description" content={event.description} />
+        )}
+      </Head>
+
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        {/* Hero */}
+        <header className="mb-8">
+          {hasHeroImage && (
+            <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl border border-lightGrey bg-black/5">
+              <Image
+                src={event.heroImage as string}
+                alt={event.title ?? ""}
+                fill
+                sizes="(min-width: 1024px) 960px, 100vw"
+                className="object-cover"
+              />
+            </div>
+          )}
+
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Event
+          </p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
+            {event.title}
+          </h1>
+
+          {(displayDate || event.location || event.time) && (
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              {displayDate && (
+                <span>
+                  <span aria-hidden>📅 </span>
+                  {displayDate}
+                </span>
+              )}
+              {event.time && (
+                <>
+                  <span aria-hidden>•</span>
+                  <span>
+                    <span aria-hidden>⏰ </span>
+                    {event.time}
+                  </span>
+                </>
+              )}
+              {event.location && (
+                <>
+                  <span aria-hidden>•</span>
+                  <span>
+                    <span aria-hidden>📍 </span>
+                    {event.location}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </header>
+
+        {/* Description */}
+        {event.description && (
+          <section className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest">
+            <p>{event.description}</p>
+          </section>
+        )}
+
+        {/* Related resources */}
+        {resources &&
+        ((resources.downloads && resources.downloads.length > 0) ||
+          (resources.links && resources.links.length > 0)) ? (
+          <section className="mt-10 border-t border-lightGrey pt-8">
+            <h2 className="font-serif text-xl font-semibold text-deepCharcoal">
+              {resources.heading || "Resources for this event"}
+            </h2>
+            {resources.description && (
+              <p className="mt-1 text-sm text-gray-600">
+                {resources.description}
+              </p>
+            )}
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              {(resources.downloads ?? []).map((r, idx) => (
+                <RelatedResourceCard
+                  key={`download-${idx}-${r.slug ?? r.title ?? idx}`}
+                  resource={r}
+                  kindLabel="Download"
+                />
+              ))}
+              {(resources.links ?? []).map((r, idx) => (
+                <RelatedResourceCard
+                  key={`link-${idx}-${r.slug ?? r.title ?? idx}`}
+                  resource={r}
+                  kindLabel="Link"
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* Back link */}
+        <div className="mt-10">
+          <Link
+            href="/events"
+            className="text-sm text-forest underline-offset-4 hover:underline"
+          >
+            View all events
+          </Link>
+        </div>
+      </main>
+    </Layout>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Related resource card                                                     */
+/* -------------------------------------------------------------------------- */
+
+type RelatedResourceProps = {
+  resource: RelatedResourceSerialized;
+  kindLabel?: string;
+};
+
+function RelatedResourceCard({
+  resource,
+  kindLabel = "Resource",
+}: RelatedResourceProps) {
+  const title = resource.title || "Resource";
+  const hasCover =
+    typeof resource.coverImage === "string" &&
+    resource.coverImage.trim().length > 0;
+
+  const href =
+    typeof resource.href === "string" && resource.href.trim().length > 0
+      ? resource.href
+      : resource.slug
+      ? `/${resource.slug}`
+      : null;
+
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+    href ? (
+      href.startsWith("http") ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          {children}
+        </a>
+      ) : (
+        <Link href={href} className="block">
+          {children}
+        </Link>
+      )
+    ) : (
+      <>{children}</>
+    );
+
+  return (
+    <article className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md">
+      <Wrapper>
+        {hasCover && (
+          <div className="relative w-full aspect-[4/3] overflow-hidden">
+            <Image
+              src={resource.coverImage as string}
+              alt={title}
+              fill
+              sizes="(min-width: 1024px) 480px, 100vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          </div>
+        )}
+
+        <div className="p-4">
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            {kindLabel}
+          </p>
+          <h3 className="mt-1 font-serif text-lg text-deepCharcoal">
+            {title}
+          </h3>
+          {resource.description && (
+            <p className="mt-2 line-clamp-3 text-sm text-gray-600">
+              {resource.description}
+            </p>
+          )}
+        </div>
+      </Wrapper>
+    </article>
+  );
+}
