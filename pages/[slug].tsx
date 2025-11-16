@@ -206,56 +206,76 @@ function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
               Related Resources
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {resourcesMeta.map((resource) => (
-                <div
-                  key={resource.slug}
-                  className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
-                >
-                  {resource.coverImage && (
-                    <div className="relative w-full aspect-[4/3]">
-                      <Image
-                        src={String(resource.coverImage)}
-                        alt={resource.title || ""}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
-                      <Link
-                        href={`/downloads/${resource.slug}`}
-                        className="transition-colors hover:text-forest"
-                      >
-                        {resource.title}
-                      </Link>
-                    </h3>
-                    {resource.excerpt && (
-                      <p className="mb-3 line-clamp-2 text-sm text-gray-600">
-                        {String(resource.excerpt)}
-                      </p>
-                    )}
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/downloads/${resource.slug}`}
-                        className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
-                      >
-                        View Details
-                      </Link>
-                      {(resource as any).pdfPath && (
-                        <a
-                          href={String((resource as any).pdfPath)}
-                          download
-                          className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              {resourcesMeta.map((resource) => {
+                // FIX: Safely handle coverImage with proper type checking
+                const coverImage =
+                  typeof resource.coverImage === "string" && 
+                  resource.coverImage.trim().length > 0
+                    ? resource.coverImage
+                    : null;
+
+                // FIX: Safely handle pdfPath with type checking
+                const pdfPath =
+                  typeof (resource as any).pdfPath === "string" && 
+                  (resource as any).pdfPath.trim().length > 0
+                    ? (resource as any).pdfPath
+                    : null;
+
+                return (
+                  <div
+                    key={resource.slug}
+                    className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
+                  >
+                    {coverImage ? (
+                      <div className="relative w-full aspect-[4/3]">
+                        <Image
+                          src={coverImage}
+                          alt={resource.title || resource.slug || "Resource image"}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      </div>
+                    ) : null}
+                    
+                    <div className="p-4">
+                      <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
+                        <Link
+                          href={`/downloads/${resource.slug}`}
+                          className="transition-colors hover:text-forest"
                         >
-                          Download
-                        </a>
+                          {resource.title}
+                        </Link>
+                      </h3>
+                      
+                      {resource.excerpt && (
+                        <p className="mb-3 line-clamp-2 text-sm text-gray-600">
+                          {String(resource.excerpt)}
+                        </p>
                       )}
+                      
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/downloads/${resource.slug}`}
+                          className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
+                        >
+                          View Details
+                        </Link>
+                        
+                        {pdfPath && (
+                          <a
+                            href={pdfPath}
+                            download
+                            className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                          >
+                            Download
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
