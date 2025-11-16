@@ -1,5 +1,5 @@
 // lib/server/unified-content.ts
-// Single source of truth for all content types (blog, events, books, etc.)
+// Single source of truth for all content types (blog, events, books, downloads, resources, etc.)
 
 import type { ReactNode } from "react";
 
@@ -12,6 +12,7 @@ export type UnifiedContentType =
   | "event"
   | "book"
   | "download"
+  | "resource"
   | "page"
   | "print"
   | "other";
@@ -21,6 +22,7 @@ export type UnifiedSource =
   | "events"
   | "books"
   | "downloads"
+  | "resources"
   | "static"
   | "unknown";
 
@@ -80,7 +82,7 @@ async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
 }
 
 // ---------------------------------------------------------------------------
-// MDX / BLOG CONTENT
+// MDX / BLOG CONTENT  →  /[slug]
 // ---------------------------------------------------------------------------
 
 async function getMdxContent(): Promise<UnifiedContent[]> {
@@ -98,7 +100,8 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
   const posts = await getAllPosts();
 
   return posts.map((post: any): UnifiedContent => {
-    const slug = normaliseSlug(post.slug || post._id || "", "blog");
+    // Blog posts live at "/[slug]" (no "blog/" prefix)
+    const slug = cleanSlug(post.slug || post._id || "");
 
     return {
       slug,
@@ -134,7 +137,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// EVENTS CONTENT
+// EVENTS CONTENT  →  /events/[slug]
 // ---------------------------------------------------------------------------
 
 async function getEventContent(): Promise<UnifiedContent[]> {
@@ -159,7 +162,8 @@ async function getEventContent(): Promise<UnifiedContent[]> {
       type: "event",
 
       content: event.body || event.description || undefined,
-      description: event.excerpt || event.summary || event.description || undefined,
+      description:
+        event.excerpt || event.summary || event.description || undefined,
 
       author: event.speaker || event.host || undefined,
       date: event.date || event.startDate || undefined,
@@ -184,7 +188,7 @@ async function getEventContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// BOOKS CONTENT
+// BOOKS CONTENT  →  /books/[slug]
 // ---------------------------------------------------------------------------
 
 async function getBookContent(): Promise<UnifiedContent[]> {
@@ -233,7 +237,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// OTHER SOURCES (DOWNLOADS / STATIC PRINTS / ETC.)
+// DOWNLOADS CONTENT  →  /downloads/[slug]
 // ---------------------------------------------------------------------------
 
 async function getDownloadContent(): Promise<UnifiedContent[]> {
@@ -283,10 +287,64 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
   });
 }
 
-// Example static / hard-coded printables, if you want them:
+// ---------------------------------------------------------------------------
+// RESOURCES CONTENT  →  /resources/[slug]
+// ---------------------------------------------------------------------------
+
+async function getResourceContent(): Promise<UnifiedContent[]> {
+  const resourcesModule = await safeImport(
+    () => import("@/lib/resources" as string),
+  );
+  if (!resourcesModule) return [];
+
+  const getAllResources = (resourcesModule as any).getAllResources as
+    | (() => Promise<any[]>)
+    | undefined;
+
+  if (!getAllResources) return [];
+
+  const resources = await getAllResources();
+
+  return resources.map((r: any): UnifiedContent => {
+    const rawSlug = r.slug || r.id || r._id || r.title || "";
+    const slug = normaliseSlug(rawSlug, "resources");
+
+    return {
+      slug,
+      title: r.title || slug,
+      type: "resource",
+
+      content: r.body || r.description || undefined,
+      description: r.excerpt || r.description || undefined,
+
+      author: r.author || undefined,
+      date: r.date || r.publishedAt || undefined,
+      updatedAt: r.updatedAt || undefined,
+      category: r.category || undefined,
+      tags: r.tags || undefined,
+
+      printSettings: r.printSettings || undefined,
+
+      seoTitle: r.seoTitle || r.title || undefined,
+      seoDescription:
+        r.seoDescription ||
+        r.excerpt ||
+        r.description ||
+        undefined,
+
+      source: "resources",
+      published: (r.status ?? "published") !== "draft",
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// STATIC / HARD-CODED PRINTABLES
+// ---------------------------------------------------------------------------
+
 async function getStaticPrintContent(): Promise<UnifiedContent[]> {
   return [
-    // Add or remove as you like
+    // Example:
     // {
     //   slug: "print/fathering-without-fear-teaser-mobile",
     //   title: "Fathering Without Fear – Teaser (Print)",
@@ -304,15 +362,16 @@ async function getStaticPrintContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 export async function getUnifiedContent(): Promise<UnifiedContent[]> {
-  const [mdx, events, books, downloads, statics] = await Promise.all([
+  const [mdx, events, books, downloads, resources, statics] = await Promise.all([
     getMdxContent(),
     getEventContent(),
     getBookContent(),
     getDownloadContent(),
+    getResourceContent(),
     getStaticPrintContent(),
   ]);
 
-  return [...mdx, ...events, ...books, ...downloads, ...statics];
+  return [...mdx, ...events, ...books, ...downloads, ...resources, ...statics];
 }
 
 // Alias for older callers (e.g. pages/content/index.tsx)

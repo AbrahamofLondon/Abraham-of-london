@@ -29,17 +29,53 @@ type Props = {
   itemsOverride?: SocialItem[];
 };
 
-/* ---------- Defaults ---------- */
+/* ---------- Defaults (your real accounts) ---------- */
 const DEFAULT_ITEMS: SocialItem[] = [
-  { href: "https://tiktok.com/@abrahamoflondon", label: "TikTok", kind: "tiktok" },
-  { href: "https://x.com/AbrahamAda48634", label: "X", kind: "x" },
-  { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", kind: "instagram" },
-  { href: "https://www.facebook.com/share/16tvsnTgRG/", label: "Facebook", kind: "facebook" },
-  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321/", label: "LinkedIn", kind: "linkedin" },
-  { href: "https://www.youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube" },
-  { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "mail" },
-  { href: "tel:+442086225909", label: "Call", kind: "phone" },
-  // { href: "https://wa.me/447496334022", label: "WhatsApp", kind: "whatsapp" },
+  {
+    href: "https://tiktok.com/@abrahamoflondon",
+    label: "TikTok",
+    kind: "tiktok",
+  },
+  {
+    href: "https://x.com/AbrahamAda48634",
+    label: "X",
+    kind: "x",
+  },
+  {
+    href: "https://www.instagram.com/abraham_of_london_/",
+    label: "Instagram",
+    kind: "instagram",
+  },
+  {
+    href: "https://www.facebook.com/share/16tvsnTgRG/",
+    label: "Facebook",
+    kind: "facebook",
+  },
+  {
+    href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
+    label: "LinkedIn",
+    kind: "linkedin",
+  },
+  {
+    href: "https://www.youtube.com/@abrahamoflondon",
+    label: "YouTube",
+    kind: "youtube",
+  },
+  {
+    href: "mailto:info@abrahamoflondon.org",
+    label: "Email",
+    kind: "mail",
+  },
+  {
+    href: "tel:+442086225909",
+    label: "Landline",
+    kind: "phone",
+  },
+  {
+    href: "https://wa.me/447496334022",
+    label: "WhatsApp",
+    kind: "whatsapp",
+  },
 ];
 
 /* ---------- Brand colours ---------- */
@@ -275,28 +311,28 @@ export default function SocialFollowStrip({
   itemsOverride,
 }: Props): JSX.Element {
   const items = (itemsOverride?.length ? itemsOverride : DEFAULT_ITEMS).filter(
-    (it): it is SocialItem => Boolean(it)
+    (it): it is SocialItem => Boolean(it),
   );
 
   const panel = clsx(
     "rounded-2xl ring-1 shadow-xl",
     variant === "dark"
       ? "bg-deepCharcoal ring-white/10"
-      : "bg-white ring-lightGrey"
+      : "bg-white ring-lightGrey",
   );
 
   const pill = clsx(
     "inline-flex items-center gap-2 rounded-full border px-3 py-2 transition-colors",
     variant === "dark"
       ? "border-white/15 bg-white/5 text-cream hover:bg-white/10"
-      : "border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite"
+      : "border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite",
   );
 
   return (
     <section
       className={clsx(
         "mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12",
-        className
+        className,
       )}
     >
       <div className={panel}>
@@ -307,14 +343,14 @@ export default function SocialFollowStrip({
               variant === "dark"
                 ? "text-[color:var(--color-on-primary)/0.85]"
                 : "text-[color:var(--color-on-secondary)/0.8]",
-              "text-base sm:text-lg"
+              "text-base sm:text-lg",
             )}
           >
             Join the conversation — follow{" "}
             <span
               className={clsx(
                 "font-semibold",
-                variant === "dark" ? "text-cream" : "text-deepCharcoal"
+                variant === "dark" ? "text-cream" : "text-deepCharcoal",
               )}
             >
               Abraham of London
@@ -327,8 +363,7 @@ export default function SocialFollowStrip({
           >
             {items.map(({ href, label, kind }) => {
               const IconComp = (kind && ICONS[kind]) || DefaultLinkIcon;
-              const color =
-                (kind && BRAND_HEX[kind]) || "#1F2937";
+              const color = (kind && BRAND_HEX[kind]) || "#1F2937";
 
               const content = (
                 <span className={pill}>
