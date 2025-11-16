@@ -15,7 +15,7 @@ import {
 } from "@/lib/downloads";
 
 /* -------------------------------------------------------------------------- */
-/* Types – keep this JSON-safe and defensive                                  */
+/* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 
 type DownloadPageProps = {
@@ -28,16 +28,19 @@ type DownloadMetaSerialized = {
   description?: string | null;
   excerpt?: string | null;
   coverImage?: string | null;
-  file?: string | null;       // generic file URL
-  pdfUrl?: string | null;     // explicit PDF if present
-  epubUrl?: string | null;    // explicit EPUB if present
+  /** Generic primary file URL */
+  file?: string | null;
+  /** Explicit PDF URL if present */
+  pdfUrl?: string | null;
+  /** Explicit EPUB URL if present */
+  epubUrl?: string | null;
   category?: string | null;
   tags?: string[] | null;
   kind?: string | null;
 };
 
 /* -------------------------------------------------------------------------- */
-/* Normalisers                                                                 */
+/* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
 function toSerializable<T>(value: T): T {
@@ -61,7 +64,17 @@ function serialiseDownload(raw: any): DownloadMetaSerialized {
     };
   }
 
-  const baseSlug = String(raw.slug ?? "").trim();
+  // Base slug from multiple possible locations
+  const fromSlug =
+    typeof raw.slug === "string" && raw.slug.trim().length
+      ? raw.slug.trim()
+      : "";
+  const fromId =
+    typeof raw._id === "string" && raw._id.trim().length
+      ? raw._id.split("/").pop() ?? ""
+      : "";
+
+  const slug = (fromSlug || fromId).trim();
 
   const coverImage =
     typeof raw.coverImage === "string" && raw.coverImage.trim().length
@@ -70,25 +83,41 @@ function serialiseDownload(raw: any): DownloadMetaSerialized {
       ? raw.heroImage
       : null;
 
-  // Try to locate any obvious file/pdf/epub URLs
-  const pdfUrl =
+  // Try to derive URLs from a variety of common keys
+  const explicitPdf =
     typeof raw.pdfUrl === "string" && raw.pdfUrl.trim().length
       ? raw.pdfUrl
       : typeof raw.pdf === "string" && raw.pdf.trim().length
       ? raw.pdf
       : null;
 
-  const epubUrl =
+  const explicitEpub =
     typeof raw.epubUrl === "string" && raw.epubUrl.trim().length
       ? raw.epubUrl
       : typeof raw.epub === "string" && raw.epub.trim().length
       ? raw.epub
       : null;
 
-  const file =
-    typeof raw.file === "string" && raw.file.trim().length
-      ? raw.file
-      : pdfUrl || epubUrl || null;
+  const explicitFileCandidates: unknown[] = [
+    raw.file,
+    raw.fileUrl,
+    raw.fileURL,
+    raw.downloadUrl,
+    raw.downloadURL,
+    raw.download,
+    raw.href, // some content uses href for direct file
+  ];
+
+  const explicitFile =
+    explicitFileCandidates.find(
+      (v) => typeof v === "string" && v.trim().length,
+    ) ?? null;
+
+  // 🚨 IMPORTANT: fallback to public/downloads/<slug>.pdf if nothing provided
+  const fallbackFile =
+    !explicitFile && !explicitPdf && slug
+      ? `/downloads/${slug}.pdf`
+      : null;
 
   const tags =
     Array.isArray(raw.tags) && raw.tags.length
@@ -96,14 +125,14 @@ function serialiseDownload(raw: any): DownloadMetaSerialized {
       : null;
 
   return {
-    slug: baseSlug,
+    slug,
     title: raw.title ?? raw.name ?? "Download",
     description: raw.description ?? raw.body ?? raw.excerpt ?? null,
     excerpt: raw.excerpt ?? null,
     coverImage,
-    file,
-    pdfUrl,
-    epubUrl,
+    file: (explicitFile as string | null) ?? fallbackFile,
+    pdfUrl: explicitPdf,
+    epubUrl: explicitEpub,
     category: raw.category ?? raw.section ?? null,
     tags,
     kind: raw.kind ?? raw.type ?? null,
@@ -111,12 +140,11 @@ function serialiseDownload(raw: any): DownloadMetaSerialized {
 }
 
 /* -------------------------------------------------------------------------- */
-/* getStaticPaths                                                              */
+/* getStaticPaths                                                             */
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugsMaybe = await Promise.resolve(getDownloadSlugs());
-
   const slugs = Array.isArray(slugsMaybe) ? slugsMaybe : [];
 
   const paths =
@@ -136,7 +164,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* getStaticProps                                                              */
+/* getStaticProps                                                             */
 /* -------------------------------------------------------------------------- */
 
 export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
@@ -145,15 +173,10 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
   const slugParam = ctx.params?.slug;
   const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
 
-  if (!slug) {
-    return { notFound: true };
-  }
+  if (!slug) return { notFound: true };
 
   const raw = await Promise.resolve(getDownloadBySlug(slug));
-
-  if (!raw) {
-    return { notFound: true };
-  }
+  if (!raw) return { notFound: true };
 
   const download = toSerializable(serialiseDownload(raw));
 
@@ -166,7 +189,7 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
 };
 
 /* -------------------------------------------------------------------------- */
-/* Page component                                                              */
+/* Page component                                                             */
 /* -------------------------------------------------------------------------- */
 
 export default function DownloadPage({
@@ -189,7 +212,12 @@ export default function DownloadPage({
   const hasFile =
     typeof download.file === "string" && download.file.trim().length > 0;
 
-  const primaryHref = download.pdfUrl || download.file || null;
+  // 👉 Primary CTA href: use explicit file, then PDF, then EPUB
+  const primaryHref =
+    (hasFile && download.file) ||
+    (hasPdf && download.pdfUrl) ||
+    (hasEpub && download.epubUrl) ||
+    null;
 
   return (
     <Layout title={pageTitle}>
@@ -212,7 +240,7 @@ export default function DownloadPage({
         </nav>
 
         <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-          {/* Text column */}
+          {/* Left column */}
           <section>
             <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
               Strategic Download
@@ -257,37 +285,39 @@ export default function DownloadPage({
                 </a>
               )}
 
-              {hasPdf && download.pdfUrl && download.pdfUrl !== primaryHref && (
-                <a
-                  href={download.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-full border border-forest/40 bg-white px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest/5"
-                >
-                  PDF version
-                </a>
-              )}
+              {hasPdf &&
+                download.pdfUrl &&
+                download.pdfUrl !== primaryHref && (
+                  <a
+                    href={download.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-full border border-forest/40 bg-white px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest/5"
+                  >
+                    PDF version
+                  </a>
+                )}
 
-              {hasEpub && (
+              {hasEpub && download.epubUrl && (
                 <a
-                  href={download.epubUrl!}
+                  href={download.epubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center rounded-full border border-lightGrey bg-white px-4 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-gray-50"
-                >
-                  EPUB version
-                </a>
-              )}
+                  >
+                    EPUB version
+                  </a>
+                )}
             </div>
 
-            {/* Small note since MDX body is temporarily disabled */}
+            {/* Temporary note */}
             <p className="mt-6 text-xs text-gray-500">
-              Detailed walkthrough and narrative will be available in the next
-              content refresh. The core tool is ready to use now.
+              Full narrative / walkthrough will ship in a later content refresh.
+              The core tool is live and ready to use.
             </p>
           </section>
 
-          {/* Cover / visual */}
+          {/* Right column – cover */}
           <aside className="md:pl-4">
             <div className="overflow-hidden rounded-2xl border border-lightGrey bg-gray-50">
               {hasCover ? (
@@ -309,7 +339,7 @@ export default function DownloadPage({
               )}
             </div>
 
-            <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-gray-400 text-center select-none">
+            <p className="mt-3 select-none text-center text-[10px] uppercase tracking-[0.3em] text-gray-400">
               ABRAHAMOFLONDON
             </p>
           </aside>
