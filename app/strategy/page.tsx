@@ -29,7 +29,8 @@ export default function StrategyPage() {
           <p className="text-gray-500 text-sm">
             In the meantime, you can access{" "}
             <a
-              href="/blog"
+              import Link from 'next/link';
+              <Link href="/blog/">Blog</Link>
               className="text-blue-600 underline underline-offset-4"
             >
               Insights
