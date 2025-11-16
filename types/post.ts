@@ -1,13 +1,17 @@
 // types/post.ts
-
-export type PostMeta = {
+export interface PostMeta {
   slug: string;
   title: string;
-  date?: string;
   excerpt?: string;
-  coverImage?: string;
-  author?: string | { name?: string; image?: string };
-  readTime?: string;
+  date?: string;
+  author?: string;
   category?: string;
   tags?: string[];
-};
+  // ✅ ADD THESE OPTIONAL PROPERTIES:
+  readTime?: string;
+  coverImage?: string | { src?: string } | null;
+  // Add any other missing properties that your posts might have
+  published?: boolean;
+  description?: string;
+  heroImage?: string;
+}

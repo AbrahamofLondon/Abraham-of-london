@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import InteractiveElement from "@/components/ui/InteractiveElement";
+import Button from "@/components/ui/Button"; // Note: lowercase 'b' if file is Button.tsx
 
 interface SomeComponentProps {
   title?: string;
@@ -12,7 +12,7 @@ interface SomeComponentProps {
 
 export default function SomeComponent({
   title = "Interactive Component",
-  description = "This component demonstrates the use of InteractiveElement",
+  description = "This component demonstrates the use of Button",
   variant = "default",
 }: SomeComponentProps) {
   const [clickCount, setClickCount] = React.useState(0);
@@ -31,31 +31,30 @@ export default function SomeComponent({
       <p className="text-gray-600 mb-6">{description}</p>
       
       <div className="flex flex-wrap gap-4 items-center">
-        <InteractiveElement
+        <Button
           variant="primary"
           onClick={handleButtonClick}
         >
           Click me! ({clickCount})
-        </InteractiveElement>
+        </Button>
 
-        <InteractiveElement
-          variant="outline"
+        <Button
+          variant="secondary"
           size="sm"
-          onClick={() => alert("Outline button clicked!")}
+          onClick={() => alert("Secondary button clicked!")}
         >
-          Outline
-        </InteractiveElement>
+          Secondary
+        </Button>
 
-        <InteractiveElement
-          variant="success"
-          loading={clickCount > 5}
+        <Button
+          variant="primary"
+          disabled={clickCount > 5}
           onClick={handleButtonClick}
         >
-          {clickCount > 5 ? "Processing..." : "Success"}
-        </InteractiveElement>
+          {clickCount > 5 ? "Max clicks reached!" : "Primary"}
+        </Button>
 
-        <InteractiveElement
-          as="a"
+        <Button
           href="#"
           variant="ghost"
           onClick={(e) => {
@@ -64,7 +63,7 @@ export default function SomeComponent({
           }}
         >
           Link Button
-        </InteractiveElement>
+        </Button>
       </div>
 
       {clickCount > 0 && (

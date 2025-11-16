@@ -23,26 +23,59 @@ export const ChatRoom = () => {
   useEffect(() => {
     if (!lastMessage) return;
 
-    const { type, data } = lastMessage as any;
+    const message = lastMessage as any;
 
-    if (type === "chat_message") {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          user: data?.user ?? "User",
-          text: data?.text ?? "",
-          timestamp: new Date(),
-          type: "user",
-        },
-      ]);
-    } else if (type === "user_joined") {
+    // Handle different message types based on your WebSocketService
+    if (message.type === "message") {
+      // Generic message type - check for chat-specific data
+      const data = message.data || {};
+      
+      // Check if this is a chat message by looking for text content
+      if (data.text || data.message) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            user: data.user || "User",
+            text: data.text || data.message || "",
+            timestamp: new Date(data.timestamp || Date.now()),
+            type: "user",
+          },
+        ]);
+      }
+    } else if (message.type === "connected") {
+      // Connection established
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
           user: "System",
-          text: `${data?.user ?? "Someone"} joined the chat`,
+          text: "Connected to chat",
+          timestamp: new Date(),
+          type: "system",
+        },
+      ]);
+    } else if (message.type === "disconnected") {
+      // Connection lost
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          user: "System",
+          text: "Disconnected from chat",
+          timestamp: new Date(),
+          type: "system",
+        },
+      ]);
+    } else if (message.type === "error") {
+      // Error message
+      const data = message.data || {};
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          user: "System",
+          text: `Error: ${data.error || "Unknown error"}`,
           timestamp: new Date(),
           type: "system",
         },
@@ -56,14 +89,17 @@ export const ChatRoom = () => {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !isConnected) return;
 
+    // Use "message" type which is allowed by your WebSocketService
     sendMessage({
-      type: "chat_message",
+      type: "message", // This is the allowed type
       data: {
         user: "You", // Replace with actual user
         text: inputText,
         timestamp: new Date().toISOString(),
+        // You can add additional fields to differentiate message types
+        messageType: "chat", // Custom field to identify chat messages
       },
     });
 
@@ -95,38 +131,47 @@ export const ChatRoom = () => {
 
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto p-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`mb-3 ${
-              message.type === "system" ? "text-center" : ""
-            }`}
-          >
-            {message.type === "system" ? (
-              <span className="text-sm text-gray-500">{message.text}</span>
-            ) : (
-              <div
-                className={`flex ${
-                  message.user === "You" ? "justify-end" : "justify-start"
-                }`}
-              >
+        {messages.length === 0 ? (
+          <div className="flex h-full items-center justify-center text-gray-500">
+            {isConnected 
+              ? "No messages yet. Start a conversation!" 
+              : "Connecting to chat..."
+            }
+          </div>
+        ) : (
+          messages.map((message) => (
+            <div
+              key={message.id}
+              className={`mb-3 ${
+                message.type === "system" ? "text-center" : ""
+              }`}
+            >
+              {message.type === "system" ? (
+                <span className="text-sm text-gray-500">{message.text}</span>
+              ) : (
                 <div
-                  className={`max-w-xs rounded-lg px-4 py-2 ${
-                    message.user === "You"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
+                  className={`flex ${
+                    message.user === "You" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="text-sm font-medium">{message.user}</div>
-                  <div>{message.text}</div>
-                  <div className="text-xs opacity-70">
-                    {message.timestamp.toLocaleTimeString()}
+                  <div
+                    className={`max-w-xs rounded-lg px-4 py-2 ${
+                      message.user === "You"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    <div className="text-sm font-medium">{message.user}</div>
+                    <div>{message.text}</div>
+                    <div className="text-xs opacity-70">
+                      {message.timestamp.toLocaleTimeString()}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -137,8 +182,12 @@ export const ChatRoom = () => {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={
+              isConnected 
+                ? "Type your message..." 
+                : "Connecting..."
+            }
+            className="flex-1 rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             disabled={!isConnected}
           />
           <button

@@ -234,8 +234,8 @@ export default function LiveStockTracker({
         )}
       </div>
 
-      {/* Error Display */}
-      {error && (
+            {/* Error Display */}
+      {error ? (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
           <div className="flex items-center gap-2 text-red-800">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -247,11 +247,11 @@ export default function LiveStockTracker({
             </svg>
             <span className="font-medium">Connection Error</span>
           </div>
-          <p className="text-red-700 text-sm mt-1">
+          <p className="mt-1 text-sm text-red-700">
             Failed to connect to stock data service. Please try reconnecting.
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Add Stock Form */}
       <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">

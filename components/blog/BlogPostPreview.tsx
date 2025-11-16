@@ -3,8 +3,12 @@ import Link from "next/link";
 import Image from "next/image";
 import type { PostMeta } from "@/types/post";
 
+// Extended interface to handle optional properties safely
 interface BlogPostPreviewProps {
-  post: PostMeta;
+  post: PostMeta & {
+    readTime?: string;
+    coverImage?: string | { src?: string } | null;
+  };
   featured?: boolean;
   className?: string;
 }
@@ -83,16 +87,31 @@ const getSafeImageUrl = (image: CoverImageLike): string => {
   }
 };
 
+// Type guard to check if object has coverImage property
+const hasCoverImage = (post: any): post is { coverImage: CoverImageLike } => {
+  return 'coverImage' in post;
+};
+
+// Type guard to check if object has readTime property
+const hasReadTime = (post: any): post is { readTime: string } => {
+  return 'readTime' in post && typeof post.readTime === 'string';
+};
+
 export default function BlogPostPreview({
   post,
   featured = false,
   className = "",
 }: BlogPostPreviewProps) {
+  // Safe extraction with proper type checking
   const safeTitle = safeString(post.title, "Untitled Post");
   const safeExcerpt = safePostProp(post.excerpt);
   const safeDate = formatDateSafe(post.date);
-  const safeReadTime = safePostProp(post.readTime);
-  const safeCoverImage = getSafeImageUrl(post.coverImage as CoverImageLike);
+  
+  // ✅ TYPE-SAFE: Handle readTime with proper type checking
+  const safeReadTime = hasReadTime(post) ? safePostProp(post.readTime) : "";
+  
+  // ✅ TYPE-SAFE: Handle coverImage with proper type checking
+  const safeCoverImage = hasCoverImage(post) ? getSafeImageUrl(post.coverImage) : "";
 
   // Route aligned with pages/post/[slug].tsx
   const safeSlug = safeString(post.slug);
@@ -102,7 +121,7 @@ export default function BlogPostPreview({
     <article className={`group ${className}`}>
       <Link href={href} className="block h-full" prefetch={false}>
         <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md">
-          {/* Cover Image */}
+          {/* Cover Image - Only render if we have a valid image */}
           {safeCoverImage && (
             <div className="aspect-[4/3] overflow-hidden bg-gray-100">
               <Image
@@ -119,7 +138,7 @@ export default function BlogPostPreview({
           )}
 
           {/* Content */}
-          <div className="flex flex-1 flex-col p-6">
+          <div className={`flex flex-1 flex-col ${safeCoverImage ? 'p-6' : 'p-6 pt-8'}`}>
             {/* Title */}
             <h3
               className={`mb-3 line-clamp-2 font-serif font-semibold text-deepCharcoal ${
@@ -143,7 +162,7 @@ export default function BlogPostPreview({
                 <time dateTime={post.date || undefined}>{safeDate}</time>
               )}
 
-              {/* Read Time */}
+              {/* Read Time - Only show if we have readTime */}
               {safeReadTime && <span>{safeReadTime}</span>}
 
               {/* Spacer when no metadata */}

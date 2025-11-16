@@ -1,8 +1,9 @@
-// app/print/[slug].tsx (or app/print/[slug]/page.tsx in app router)
+// pages/print/[slug].tsx (Pages Router)
 import type React from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import { useRouter } from "next/router";
+import type { GetStaticProps, GetStaticPaths, NextPage } from "next";
+import Head from "next/head";
 
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
@@ -76,9 +77,9 @@ function formatPretty(isoish?: string | null, tz = "Europe/London"): string {
   }
 }
 
-/* ------------------ Static params (SSG) ----------------- */
+/* ------------------ Static paths (SSG) ----------------- */
 
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
+export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const rawSlugs = getAllPrintSlugs() as Array<string | { slug: string }>;
     const unique = Array.from(
@@ -90,69 +91,46 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
           .filter(Boolean),
       ),
     );
+    
     if (process.env.NODE_ENV === "development") {
       console.log(`🖨️ Generated ${unique.length} print paths`);
     }
-    return unique.map((slug) => ({ slug }));
+
+    const paths = unique.map((slug) => ({
+      params: { slug },
+    }));
+
+    return {
+      paths,
+      fallback: 'blocking', // Show loading state for new slugs
+    };
   } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
+    console.error("Error generating static paths:", error);
+    return {
+      paths: [],
+      fallback: true,
+    };
   }
-}
+};
 
-/* -------------------- Metadata (SEO) -------------------- */
+/* ------------------ Static props (SSG) ----------------- */
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } },
-): Promise<Metadata> {
-  const { slug } = params;
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params?.slug as string;
+  
+  if (!slug) {
+    return {
+      notFound: true,
+    };
+  }
+
   const doc = getPrintDocumentBySlug(slug);
 
   if (!doc) {
     return {
-      title: "Print Not Found",
-      description: "The requested print document was not found.",
-      robots: { index: false, follow: true },
+      notFound: true,
     };
   }
-
-  const title = asStringOrDefault((doc as any).title, "Untitled Print");
-
-  const descriptionText =
-    asStringOrNull((doc as any).description) ??
-    asStringOrNull((doc as any).excerpt) ??
-    "Printable document from Abraham of London";
-
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-
-  return {
-    title: `${title} | Print`,
-    description: descriptionText,
-    openGraph: {
-      type: "article",
-      title,
-      description: descriptionText,
-      url: `${site}/print/${slug}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: descriptionText,
-    },
-    robots: { index: false, follow: true },
-  };
-}
-
-/* --------------------- Page component ------------------- */
-
-interface PageProps {
-  params: { slug: string };
-}
-
-export default async function PrintPage({ params }: PageProps) {
-  const { slug } = params;
-  const doc = getPrintDocumentBySlug(slug);
-  if (!doc) notFound();
 
   const d = doc as Record<string, unknown>;
 
@@ -191,6 +169,40 @@ export default async function PrintPage({ params }: PageProps) {
 
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const url = `${site}/print/${slug}`;
+
+  return {
+    props: {
+      meta,
+      mdx,
+      url,
+    },
+    revalidate: 3600, // ISR: revalidate every hour
+  };
+};
+
+/* --------------------- Page component ------------------- */
+
+interface PageProps {
+  meta: PrintMeta;
+  mdx: MDXRemoteSerializeResult | null;
+  url: string;
+}
+
+const PrintPage: NextPage<PageProps> = ({ meta, mdx, url }) => {
+  const router = useRouter();
+
+  // Show loading state for fallback pages
+  if (router.isFallback) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-softGold mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading print document...</p>
+        </div>
+      </div>
+    );
+  }
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -206,13 +218,33 @@ export default async function PrintPage({ params }: PageProps) {
       : {}),
   };
 
+  const pageTitle = `${meta.title} | Print`;
+  const pageDescription = meta.description || meta.excerpt || "Printable document from Abraham of London";
+
   return (
     <>
-      {/* Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="robots" content="noindex, follow" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={url} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={meta.title} />
+        <meta name="twitter:description" content={pageDescription} />
+        
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </Head>
 
       {/* Print Content */}
       <BrandFrame
@@ -317,7 +349,6 @@ export default async function PrintPage({ params }: PageProps) {
       </div>
     </>
   );
-}
+};
 
-/** ISR: revalidate every hour */
-export const revalidate = 3600;
+export default PrintPage;

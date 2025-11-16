@@ -1,13 +1,28 @@
 // next.config.js
-const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable React strict mode for better development practices
+  reactStrictMode: true,
+  
+  // Enable SWC minification for better performance
+  swcMinify: true,
+  
+  // Optimize images
+  images: {
+    domains: [],
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // Webpack configuration
   webpack: (config) => {
+    // Aliases for cleaner imports
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
+      '@': require('path').resolve(__dirname, 'src'),
     };
-    return config; // Remember to return the modified config
+    
+    return config;
   },
 };
+
 module.exports = nextConfig;

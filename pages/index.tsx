@@ -13,7 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { HeroBanner } from "@/components/InterActiveElements";
+import { HeroBanner } from "@/components/InteractiveElements";
 import NewsletterForm from "@/components/NewsletterForm";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
@@ -77,8 +77,8 @@ const ventures = [
   },
 ];
 
-// Framer Motion variants
-const containerVariants = {
+// Framer Motion variants - prefix with underscore to indicate intentional non-use
+const _containerVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
@@ -337,8 +337,8 @@ const HomePage: React.FC = () => {
 
               {/* UPDATED TEASER – memoir-first, not just “ecosystem” */}
               <p className="mb-4 text-sm leading-relaxed text-gray-200">
-                First, a memoir – drawn from real court transcripts, immigration
-                files, and the quiet moments in between – tracing a father who
+                First, a memoir – drawn from real lived experiences, life battle
+                notes, and the quiet moments in between – tracing a father who
                 refused to disappear quietly. From that story grows the tools,
                 downloads, and brotherhood for men who still intend to stand,
                 even when the system leans the other way.

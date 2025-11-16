@@ -1,168 +1,152 @@
 // lib/websocket-service.ts
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from "react";
 
-type MessageHandler = (data: unknown) => void;
-type EventType = 'connected' | 'disconnected' | 'error' | 'message';
+export type WebSocketEvent =
+  | "connected"
+  | "disconnected"
+  | "error"
+  | "tick"
+  | "pong"
+  | "message"
+  | "subscribe"   
+  | "unsubscribe";
+
+export type WebSocketMessage = {
+  type: WebSocketEvent | "price_update";
+  data?: Record<string, unknown>;
+};
+
+type Subscriber = (data: WebSocketMessage) => void;
 
 export class WebSocketService {
-  private url: string;
-  private ws: WebSocket | null = null;
-  private handlers: Map<EventType, MessageHandler[]> = new Map();
-  private autoConnect: boolean;
-  private debug: boolean;
-  private connectionStatus: boolean = false;
+  private socket: WebSocket | null = null;
+  private isOpen = false;
+  private subscribers = new Map<WebSocketEvent | "price_update" | "message", Subscriber[]>();
 
-  constructor(url: string, options: { autoConnect?: boolean; debug?: boolean } = {}) {
-    this.url = url;
-    this.autoConnect = options.autoConnect ?? true;
-    this.debug = options.debug ?? false;
-    
-    if (this.autoConnect) {
-      this.connect();
-    }
+  constructor(
+    private url: string,
+    private opts: { debug?: boolean; autoConnect?: boolean } = {}
+  ) {
+    if (opts.autoConnect) this.connect();
   }
 
   connect(): void {
-    if (typeof window === "undefined" || typeof WebSocket === "undefined") return;
-    
-    try {
-      this.ws = new WebSocket(this.url);
-      
-      this.ws.onopen = () => {
-        if (this.debug) console.log('WebSocket connected');
-        this.connectionStatus = true;
-        this.emit('connected', null);
-      };
+    if (typeof window === "undefined") return;
+    if (this.isOpen || this.socket) return;
 
-      this.ws.onmessage = (ev) => {
-        const data = (() => {
-          try { return JSON.parse(String(ev.data)); } catch { return ev.data; }
-        })();
-        if (this.debug) console.log('WebSocket message:', data);
-        this.emit('message', data);
-      };
+    const ws = new WebSocket(this.url);
+    this.socket = ws;
 
-      this.ws.onerror = (error) => {
-        if (this.debug) console.error('WebSocket error:', error);
-        this.emit('error', error);
-      };
+    ws.addEventListener("open", () => {
+      this.isOpen = true;
+      if (this.opts.debug) console.log("[WebSocket] connected");
+      this.emit({ type: "connected", data: {} });
+    });
 
-      this.ws.onclose = () => {
-        if (this.debug) console.log('WebSocket disconnected');
-        this.connectionStatus = false;
-        this.emit('disconnected', null);
-      };
-    } catch (error) {
-      console.error('WebSocket connection failed:', error);
-      this.emit('error', error);
-    }
-  }
+    ws.addEventListener("close", () => {
+      this.isOpen = false;
+      if (this.opts.debug) console.log("[WebSocket] disconnected");
+      this.emit({ type: "disconnected", data: {} });
+    });
 
-  send(payload: unknown): void {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not connected');
-      return;
-    }
-    this.ws.send(typeof payload === "string" ? payload : JSON.stringify(payload));
-  }
+    ws.addEventListener("error", (ev) => {
+      if (this.opts.debug) console.error("[WebSocket] error", ev);
+      this.emit({ type: "error", data: { event: ev } });
+    });
 
-  on(event: EventType, handler: MessageHandler): () => void {
-    if (!this.handlers.has(event)) {
-      this.handlers.set(event, []);
-    }
-    this.handlers.get(event)!.push(handler);
-
-    // Return unsubscribe function
-    return () => {
-      const handlers = this.handlers.get(event);
-      if (handlers) {
-        const index = handlers.indexOf(handler);
-        if (index > -1) {
-          handlers.splice(index, 1);
-        }
-      }
-    };
-  }
-
-  private emit(event: EventType, data: unknown): void {
-    const handlers = this.handlers.get(event) || [];
-    handlers.forEach(handler => {
+    ws.addEventListener("message", (ev) => {
+      let parsed: unknown;
       try {
-        handler(data);
-      } catch (error) {
-        console.error(`Error in WebSocket ${event} handler:`, error);
+        parsed = JSON.parse(String(ev.data));
+      } catch {
+        // non-JSON payloads
+      }
+
+      if (parsed && typeof parsed === "object" && "type" in (parsed as any)) {
+        const msg = parsed as WebSocketMessage;
+        this.emit(msg);
+        this.emit({ type: "message", data: msg.data ?? {} });
+      } else {
+        this.emit({ type: "message", data: { raw: ev.data } });
       }
     });
   }
 
-  close(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-      this.connectionStatus = false;
+  disconnect(): void {
+    try {
+      this.socket?.close();
+    } catch {
+      // ignore
     }
+    this.socket = null;
+    this.isOpen = false;
   }
 
-  isConnected(): boolean {
-    return this.connectionStatus && this.ws?.readyState === WebSocket.OPEN;
+  on(event: WebSocketEvent | "price_update" | "message", cb: Subscriber): () => void {
+    const list = this.subscribers.get(event) ?? [];
+    list.push(cb);
+    this.subscribers.set(event, list);
+
+    return () => {
+      const arr = this.subscribers.get(event) ?? [];
+      const idx = arr.indexOf(cb);
+      if (idx >= 0) arr.splice(idx, 1);
+      this.subscribers.set(event, arr);
+    };
+  }
+
+  onMessage(cb: Subscriber): () => void {
+    return this.on("message", cb);
+  }
+
+  send(message: WebSocketMessage): boolean {
+    if (this.isOpen && this.socket) {
+      try {
+        this.socket.send(JSON.stringify(message));
+        return true;
+      } catch (err) {
+        if (this.opts.debug) console.error("[WebSocket] send error", err);
+        this.emit({ type: "error", data: { error: err } });
+        return false;
+      }
+    }
+    return false;
+  }
+
+  private emit(message: WebSocketMessage): void {
+    const list = this.subscribers.get(message.type) ?? [];
+    for (const cb of list) {
+      try {
+        cb(message);
+      } catch (err) {
+        if (this.opts.debug) console.error("[WebSocket] subscriber error", err);
+      }
+    }
   }
 }
 
-export type WebSocketMessage = {
-  type: string;
-  data?: Record<string, unknown>;
-};
+export const ws = new WebSocketService(
+  process.env.NEXT_PUBLIC_WS_URL || "wss://example.com/ws",
+  { autoConnect: false, debug: process.env.NODE_ENV === "development" }
+);
 
-// React hook for WebSocket status
 export function useWebSocketStatus(): boolean {
-  const [isConnected, setIsConnected] = useState(false);
-  const serviceRef = useRef<WebSocketService | null>(null);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    // This is a simplified hook that tracks connection status
-    // In a real implementation, you'd want to connect to an actual WebSocketService instance
-    // For now, it simulates connection status
-    
-    // Simulate connection status changes for demo purposes
-    const interval = setInterval(() => {
-      // Randomly change connection status for demo
-      if (Math.random() > 0.7) {
-        setIsConnected(prev => !prev);
-      }
-    }, 5000);
+    if (typeof window === "undefined") return;
+
+    const offConnected = ws.on("connected", () => setConnected(true));
+    const offDisconnected = ws.on("disconnected", () => setConnected(false));
+
+    ws.connect();
 
     return () => {
-      clearInterval(interval);
+      offConnected();
+      offDisconnected();
+      ws.disconnect();
     };
   }, []);
 
-  return isConnected;
-}
-
-// Alternative hook that works with a specific WebSocketService instance
-export function useWebSocketStatusForService(service: WebSocketService | null): boolean {
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    if (!service) {
-      setIsConnected(false);
-      return;
-    }
-
-    const handleConnected = () => setIsConnected(true);
-    const handleDisconnected = () => setIsConnected(false);
-
-    const unsubscribeConnected = service.on('connected', handleConnected);
-    const unsubscribeDisconnected = service.on('disconnected', handleDisconnected);
-
-    // Set initial state
-    setIsConnected(service.isConnected());
-
-    return () => {
-      unsubscribeConnected();
-      unsubscribeDisconnected();
-    };
-  }, [service]);
-
-  return isConnected;
+  return connected;
 }

@@ -1,121 +1,156 @@
-// components/InterActiveElements.tsx
+// components/InteractiveElements.tsx
 "use client";
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { useWebSocketStatus } from "@/lib/websocket-service";
+import { WifiOff, Wifi } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type TextAlign = "left" | "center" | "right";
 
-interface HeroBannerProps {
+export interface HeroBannerProps {
   title: string;
   subtitle?: string;
-  backgroundImage: string;
+  eyebrow?: string;
+  backgroundImage?: string;
   overlayOpacity?: number;
   height?: string;
   textAlign?: TextAlign;
   ctaText?: string;
   ctaOnClick?: () => void;
-  children?: React.ReactNode;
   showConnectionStatus?: boolean;
-  eyebrow?: string;
+  children?: React.ReactNode;
 }
+
+const textAlignClasses: Record<TextAlign, string> = {
+  left: "items-start text-left",
+  center: "items-center text-center",
+  right: "items-end text-right",
+};
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   title,
   subtitle,
+  eyebrow,
   backgroundImage,
-  overlayOpacity = 0.5,
-  height = "80vh",
-  textAlign = "center",
+  overlayOpacity = 0.6,
+  height = "85vh",
+  textAlign = "left",
   ctaText,
   ctaOnClick,
-  children,
   showConnectionStatus = false,
-  eyebrow,
+  children,
 }) => {
-  const connected = showConnectionStatus ? useWebSocketStatus() : null;
+  const [isOnline, setIsOnline] = React.useState<boolean>(true);
 
-  const alignmentClasses: Record<TextAlign, string> = {
-    left: "items-start text-left",
-    center: "items-center text-center",
-    right: "items-end text-right",
-  };
+  // Simple client-side online/offline indicator (no WebSocket dependency)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   return (
     <section
-      className="relative flex w-full items-stretch justify-center overflow-hidden"
-      style={{ height }}
+      className="relative w-full overflow-hidden border-b border-white/10"
+      style={{ minHeight: height }}
     >
       {/* Background image */}
-      <div className="absolute inset-0">
+      {backgroundImage && (
         <div
-          className="h-full w-full bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backgroundImage})` }}
+          aria-hidden="true"
         />
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
-        />
-      </div>
+      )}
+
+      {/* Overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at top, rgba(0,0,0,0.3), rgba(0,0,0,0.95))",
+          opacity: overlayOpacity,
+        }}
+      />
 
       {/* Content */}
-      <div className="relative z-10 flex h-full w-full max-w-6xl px-4 py-10 md:px-8 lg:px-10">
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-4 py-16 lg:py-24">
         <motion.div
-          className={`flex w-full flex-col justify-center gap-4 ${alignmentClasses[textAlign]}`}
-          initial={{ opacity: 0, y: 24 }}
+          className={cn(
+            "flex w-full flex-col gap-6 text-white",
+            textAlignClasses[textAlign]
+          )}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          {/* Eyebrow + connection status row */}
-          <div className="mb-1 flex w-full flex-wrap items-center gap-4">
+          {/* Eyebrow + status */}
+          <div className="flex flex-wrap items-center gap-3">
             {eyebrow && (
-              <p className="text-xs uppercase tracking-[0.35em] text-softGold/80">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-softGold">
                 {eyebrow}
-              </p>
+              </span>
             )}
 
-            {showConnectionStatus && connected !== null && (
-              <div className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 text-[11px] text-gray-200 ring-1 ring-white/10">
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    connected ? "bg-green-400" : "bg-red-500"
-                  }`}
-                />
-                <span className="uppercase tracking-[0.15em]">
-                  {connected ? "Live link active" : "Offline mode"}
-                </span>
-              </div>
+            {showConnectionStatus && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[11px] font-medium text-gray-200">
+                {isOnline ? (
+                  <>
+                    <Wifi className="h-3 w-3 text-emerald-400" />
+                    <span>Online</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3 text-red-400" />
+                    <span>Offline (content still available)</span>
+                  </>
+                )}
+              </span>
             )}
           </div>
 
           {/* Title */}
-          <h1 className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl">
-            {title}
-          </h1>
+          <div className="space-y-4">
+            <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="max-w-2xl text-base text-gray-200 md:text-lg">
+                {subtitle}
+              </p>
+            )}
+          </div>
 
-          {/* Subtitle */}
-          {subtitle && (
-            <p className="max-w-2xl text-base leading-relaxed text-gray-200 md:text-lg">
-              {subtitle}
-            </p>
-          )}
+          {/* CTA + children */}
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            {ctaText && ctaOnClick && (
+              <button
+                type="button"
+                onClick={ctaOnClick}
+                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-softGold/90 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+              >
+                {ctaText}
+              </button>
+            )}
 
-          {/* CTA */}
-          {(ctaText || children) && (
-            <div className="mt-4 flex flex-col gap-4">
-              {ctaText && (
-                <button
-                  type="button"
-                  onClick={ctaOnClick}
-                  className="inline-flex w-fit items-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold uppercase tracking-wide text-deepCharcoal shadow-lg shadow-softGold/30 transition-all hover:bg-softGold/90 hover:shadow-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
-                >
-                  {ctaText}
-                </button>
-              )}
-              {children && <div className="max-w-3xl">{children}</div>}
-            </div>
-          )}
+            {children && (
+              <div className="w-full text-xs text-gray-200 md:w-auto">
+                {children}
+              </div>
+            )}
+          </div>
         </motion.div>
       </div>
     </section>

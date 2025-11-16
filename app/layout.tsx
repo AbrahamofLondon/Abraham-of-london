@@ -1,7 +1,6 @@
 // app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/lib/ThemeContext"; // 👈 capital T
 
 export const metadata: Metadata = {
   title: {
@@ -11,20 +10,18 @@ export const metadata: Metadata = {
   description: "Official site for Abraham of London.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en-GB"
       className="scroll-smooth"
-      data-theme="light"
-      data-user-theme="system"
       suppressHydrationWarning
     >
-      <body>
-        <ThemeProvider defaultTheme="system" storageKey="theme">
-          {children}
-        </ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

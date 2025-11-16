@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { useWebSocket } from "@/hooks"; // ✅ import the hook from hooks/index.ts
+import { useWebSocket } from "@/hooks";
 
 interface StockData {
   symbol: string;
@@ -34,7 +34,6 @@ export default function LiveStockTracker({
 
   const {
     isConnected,
-    // Removed unused lastMessage to fix the warning
     error,
     sendMessage,
     connect,
@@ -66,10 +65,10 @@ export default function LiveStockTracker({
   React.useEffect(() => {
     if (isConnected && subscribedSymbols.size > 0) {
       sendMessage({
-        type: "message",
+        type: "message", // Changed from "subscribe" to "message"
         data: {
           symbols: Array.from(subscribedSymbols),
-          action: "subscribe",
+          action: "subscribe", // Keep the action in the data
         },
       });
     }
@@ -100,10 +99,10 @@ export default function LiveStockTracker({
       // Subscribe to the new symbol
       if (isConnected) {
         sendMessage({
-          type: "message",
+          type: "message", // Changed from "subscribe" to "message"
           data: {
             symbols: [upperSymbol],
-            action: "subscribe",
+            action: "subscribe", // Keep the action in the data
           },
         });
       }
@@ -129,10 +128,10 @@ export default function LiveStockTracker({
       // Unsubscribe from WebSocket
       if (isConnected) {
         sendMessage({
-          type: "message",
+          type: "message", // Changed from "subscribe" to "message"
           data: {
             symbols: [symbol],
-            action: "unsubscribe",
+            action: "unsubscribe", // Keep the action in the data
           },
         });
       }

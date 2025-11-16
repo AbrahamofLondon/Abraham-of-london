@@ -8,18 +8,22 @@
     "allowJs": false,
     "skipLibCheck": true,
     "noEmit": true,
+
+    // Type-safety
     "strict": false,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
+
+    // Module interop
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-    // ✅ POINT TO ROOT FOLDERS, NOT SRC
+    // Aliases
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["*", "src/*"]
     },
 
     "plugins": [
@@ -29,9 +33,18 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "pages/**/*.ts",
+    "pages/**/*.tsx",
+    "config/**/*.ts",
+    "config/**/*.tsx",
+    "hooks/**/*.ts",
+    "hooks/**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [
@@ -43,6 +56,7 @@
     "patches",
     "netlify",
     "emails",
+    "src",
     "pages/api/ws/**",
     "pages/resources/**",
     "pages/strategy/**",

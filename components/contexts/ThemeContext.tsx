@@ -1,58 +1,42 @@
-// components/contexts/ThemeContext.tsx
-"use client";
+// Generic, SSR-safe theme context stub
+// app/contexts/ThemeContext.tsx  (and the other ThemeContext files)
 
 import * as React from "react";
 
-export type ThemeMode = "light" | "dark";
+export type ThemeName = "light" | "dark";
 
 export interface ThemeContextValue {
-  theme: ThemeMode;
-  setTheme: (theme: ThemeMode) => void;
-  toggleTheme: () => void;
+  theme: ThemeName;
+  resolvedTheme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
 }
 
-const ThemeContext = React.createContext<ThemeContextValue | undefined>(
-  undefined,
-);
-
-export interface ThemeProviderProps {
-  children: React.ReactNode;
-  initialTheme?: ThemeMode;
-}
-
-export function ThemeProvider({
-  children,
-  initialTheme = "light",
-}: ThemeProviderProps): JSX.Element {
-  const [theme, setTheme] = React.useState<ThemeMode>(initialTheme);
-
-  React.useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
+const defaultValue: ThemeContextValue = {
+  theme: "light",
+  resolvedTheme: "light",
+  setTheme: () => {
+    // no-op – theming disabled for now
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[ThemeContext] setTheme called, but theming is stubbed.");
     }
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
+  },
+};
 
-  const toggleTheme = React.useCallback(() => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  }, []);
+const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
 
-  const value = React.useMemo<ThemeContextValue>(
-    () => ({ theme, setTheme, toggleTheme }),
-    [theme, toggleTheme],
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // We always just use the default value; no throwing, no dependency
+  return (
+    <ThemeContext.Provider value={defaultValue}>
+      {children}
+    </ThemeContext.Provider>
   );
+};
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
-
+// CRITICAL: This hook must NEVER throw in SSR/prerender
 export function useTheme(): ThemeContextValue {
-  const ctx = React.useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return ctx;
+  // Even if no provider is present, React will fall back to `defaultValue`
+  return React.useContext(ThemeContext);
 }

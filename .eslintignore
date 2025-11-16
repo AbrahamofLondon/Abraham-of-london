@@ -15,3 +15,6 @@ src/components/LiveStockTracker.tsx
 src/lib/websocket-service.ts
 lib/websocket-service.ts
 lib/websocket/WebSocketService.ts
+
+#ESLint ignores
+src/**

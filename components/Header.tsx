@@ -1,7 +1,8 @@
+"use client";
+
 // components/Header.tsx
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { siteConfig } from "@/lib/siteConfig";
@@ -19,24 +20,16 @@ const NAV = [
 export default function Header({ variant = "light" }: HeaderProps) {
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-  const router = useRouter();
+  const [currentPath, setCurrentPath] = React.useState<string>("/");
 
+  // Derive active link from window.location so it works in both app + pages router
   const isActive = (href: string) => {
-    const p = router.asPath || router.pathname || "";
+    const p = currentPath || "";
     if (href === "/") return p === "/";
     return p === href || p.startsWith(href + "/");
   };
 
-  React.useEffect(() => {
-    const close = () => setOpen(false);
-    router.events?.on("routeChangeComplete", close);
-    router.events?.on("hashChangeComplete", close);
-    return () => {
-      router.events?.off("routeChangeComplete", close);
-      router.events?.off("hashChangeComplete", close);
-    };
-  }, [router.events]);
-
+  // Track scroll depth for header styling
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -44,15 +37,38 @@ export default function Header({ variant = "light" }: HeaderProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Track current path on client
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updatePath = () => {
+      setCurrentPath(window.location.pathname || "/");
+    };
+
+    updatePath();
+    window.addEventListener("popstate", updatePath);
+    window.addEventListener("hashchange", updatePath);
+
+    return () => {
+      window.removeEventListener("popstate", updatePath);
+      window.removeEventListener("hashchange", updatePath);
+    };
+  }, []);
+
+  // Lock body scroll while mobile menu open
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
     if (!open) return;
+
     const y = window.scrollY;
     const { style } = document.documentElement;
+
     style.position = "fixed";
     style.top = `-${y}px`;
     style.left = "0";
     style.right = "0";
     style.width = "100%";
+
     return () => {
       style.position = "";
       style.top = "";
@@ -76,7 +92,6 @@ export default function Header({ variant = "light" }: HeaderProps) {
       ? `${darkShell} text-cream`
       : `${lightShell} text-deepCharcoal`;
 
-  // Base link styling – now using valid Tailwind + CSS var combo
   const linkBase =
     variant === "dark"
       ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:text-cream"
@@ -93,7 +108,6 @@ export default function Header({ variant = "light" }: HeaderProps) {
     variant === "dark" ? "text-cream" : "text-deepCharcoal",
   ].join(" ");
 
-  // CSS var for header height
   const headerStyle = React.useMemo(
     () =>
       ({
@@ -101,7 +115,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
       } as React.CSSProperties & {
         ["--header-h"]?: string;
       }),
-    [scrolled]
+    [scrolled],
   );
 
   return (
@@ -190,13 +204,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
           >
             <span className="sr-only">Toggle navigation</span>
             {!open ? (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M4 6h16M4 12h16M4 18h16"
                   stroke="currentColor"
@@ -204,13 +212,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 />
               </svg>
             ) : (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M6 6l12 12M18 6L6 18"
                   stroke="currentColor"

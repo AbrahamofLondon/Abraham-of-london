@@ -1,39 +1,67 @@
+// components/ThemeToggle.tsx
 "use client";
 
-import { useTheme } from "@/lib/ThemeContext";
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
 
-export default function ThemeToggle({ className = "" }: { className?: string }) {
-  const { resolvedTheme, toggle, mounted } = useTheme() as any;
+type Theme = "light" | "dark";
 
-  const base =
-    "inline-flex h-9 w-9 items-center justify-center rounded-md border transition " +
-    "focus:outline-none focus:ring-2 focus:ring-offset-2 " +
-    "border-black/10 bg-white/90 text-black hover:bg-white " +
-    "dark:border-white/20 dark:bg-black/70 dark:text-white dark:hover:bg-black";
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
 
-  if (!mounted) {
-    return <button type="button" aria-label="Toggle theme" className={`${base} ${className}`} disabled />;
+  const stored = window.localStorage.getItem("theme");
+  if (stored === "dark" || stored === "light") return stored as Theme;
+
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
   }
+  return "light";
+}
 
-  const dark = resolvedTheme === "dark";
+export const ThemeToggle: React.FC = () => {
+  const [theme, setTheme] = React.useState<Theme>("light");
+
+  // Initialise from localStorage / system preference, and sync to <html> class
+  React.useEffect(() => {
+    const initial = getInitialTheme();
+    setTheme(initial);
+
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      root.classList.toggle("dark", initial === "dark");
+    }
+  }, []);
+
+  const toggleTheme = React.useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+
+      if (typeof document !== "undefined") {
+        const root = document.documentElement;
+        root.classList.toggle("dark", next === "dark");
+      }
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("theme", next);
+      }
+
+      return next;
+    });
+  }, []);
+
   return (
     <button
       type="button"
-      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      aria-pressed={dark}
-      onClick={toggle}
-      className={`${base} ${className} transition-transform duration-300`}
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white shadow-sm transition-colors hover:bg-black/70 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
     >
-      {dark ? (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-        </svg>
+      {theme === "dark" ? (
+        <Sun className="h-4 w-4" aria-hidden="true" />
       ) : (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z" />
-        </svg>
+        <Moon className="h-4 w-4" aria-hidden="true" />
       )}
     </button>
   );
-}
+};
+
+export default ThemeToggle;

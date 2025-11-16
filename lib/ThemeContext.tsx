@@ -1,115 +1,48 @@
-// lib/themeContext.tsx
-"use client";
+// lib/ThemeContext.tsx
+import * as React from "react";
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-
-export type Theme = "light" | "dark" | "system";
+export type ThemeName = "light" | "dark";
 
 export interface ThemeContextValue {
-  theme: Theme;                    // user preference: light | dark | system
-  resolvedTheme: "light" | "dark"; // actual applied
-  setTheme: (value: Theme) => void;
+  theme: ThemeName;
+  resolvedTheme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
 }
 
-export interface ThemeProviderProps {
+const defaultValue: ThemeContextValue = {
+  theme: "light",
+  resolvedTheme: "light",
+  setTheme: () => {
+    // no-op – theming is stubbed for now
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn("[ThemeContext] setTheme called, but theming is stubbed.");
+    }
+  },
+};
+
+const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
+
+interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultTheme?: Theme;
+  /** Kept for compatibility with previous usage (ignored) */
+  defaultTheme?: string;
+  /** Kept for compatibility with previous usage (ignored) */
   storageKey?: string;
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-function resolveSystemTheme(): "light" | "dark" {
-  if (typeof window === "undefined" || !window.matchMedia) return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-export function ThemeProvider({
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  defaultTheme = "system",
-  storageKey = "theme",
-}: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] =
-    useState<"light" | "dark">("light");
-
-  const applyTheme = useCallback(
-    (value: Theme) => {
-      if (typeof document === "undefined") return;
-
-      const root = document.documentElement;
-      const effective =
-        value === "system" ? resolveSystemTheme() : (value as "light" | "dark");
-
-      // data-attributes for CSS hooks
-      root.dataset.theme = effective;
-      root.dataset.userTheme = value;
-
-      // persist choice
-      try {
-        if (storageKey) {
-          window.localStorage.setItem(storageKey, value);
-        }
-      } catch {
-        // ignore storage failures
-      }
-
-      setThemeState(value);
-      setResolvedTheme(effective);
-    },
-    [storageKey]
+}) => {
+  // Always provide the safe default; no throwing, SSR-safe
+  return (
+    <ThemeContext.Provider value={defaultValue}>
+      {children}
+    </ThemeContext.Provider>
   );
+};
 
-  // initial load
-  useEffect(() => {
-    try {
-      const stored = storageKey
-        ? (window.localStorage.getItem(storageKey) as Theme | null)
-        : null;
-      applyTheme(stored || defaultTheme);
-    } catch {
-      applyTheme(defaultTheme);
-    }
-  }, [applyTheme, defaultTheme, storageKey]);
-
-  // react to OS theme change if user is on "system"
-  useEffect(() => {
-    if (typeof window === "undefined" || theme !== "system") return;
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const listener = () => {
-      applyTheme("system");
-    };
-
-    mq.addEventListener("change", listener);
-    return () => mq.removeEventListener("change", listener);
-  }, [theme, applyTheme]);
-
-  const setTheme = (value: Theme) => {
-    applyTheme(value);
-  };
-
-  const value: ThemeContextValue = {
-    theme,
-    resolvedTheme,
-    setTheme,
-  };
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
-
+// CRITICAL: must never throw during SSR/prerender
 export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return ctx;
+  return React.useContext(ThemeContext);
 }

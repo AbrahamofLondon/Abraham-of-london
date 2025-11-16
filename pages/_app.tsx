@@ -10,9 +10,9 @@ function usePageView() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleRouteChange = (url: string) => {
+    const handleRouteChange = (_url: string) => {
       // Hook in GA / Plausible / whatever later
-      // console.log("Page view:", url);
+      // console.log("Page view:", _url);
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);
