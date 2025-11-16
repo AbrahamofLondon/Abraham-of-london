@@ -25,6 +25,12 @@ const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
 
+function normaliseBookSlug(raw: string): string {
+  const s = (raw || "").toString().trim().toLowerCase().replace(/^\/+|\/+$/g, "");
+  // If it's "books/slug" or "/books/slug", strip the prefix
+  return s.replace(/^books\//, "");
+}
+
 export default function BookCard({
   slug,
   title,
@@ -39,11 +45,11 @@ export default function BookCard({
   className = "",
   motionProps = {},
 }: BookCardProps) {
-  // ✅ FIX: Force slug to lowercase for reliable Linux routing
-  const normalizedSlug = slug.toLowerCase();
-  const detailHref = `/books/${normalizedSlug}`;
-  
-  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER; 
+  const normalizedSlug = normaliseBookSlug(slug);
+  const detailHref = `/books/${encodeURIComponent(normalizedSlug)}`;
+
+  const finalImageSrc =
+    (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
 
   return (
     <motion.article
@@ -52,10 +58,16 @@ export default function BookCard({
         "group overflow-hidden rounded-2xl border border-lightGrey bg-white shadow-card transition-all hover:shadow-cardHover",
         "focus-within:ring-1 focus-within:ring-softGold/50",
         featured && "ring-1 ring-softGold/30",
-        className
+        className,
       )}
     >
-      <Link href={detailHref} prefetch={false} className="block relative w-full" tabIndex={-1} aria-hidden="true">
+      <Link
+        href={detailHref}
+        prefetch={false}
+        className="block relative w-full"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
         <div className="relative w-full aspect-[2/3]">
           <Image
             src={finalImageSrc}
@@ -85,12 +97,14 @@ export default function BookCard({
           </Link>
         </h3>
 
-        <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">By {author}</p>
+        <p className="mt-1 text-sm text-[color:var(--color-on-secondary)/0.7]">
+          By {author}
+        </p>
 
         <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[color:var(--color-on-secondary)/0.9]">
           {excerpt}
         </p>
-        
+
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {/* Genre chip */}
           <span className="inline-flex rounded-full border border-lightGrey px-2.5 py-1 text-xs text-[color:var(--color-on-secondary)/0.7]">
@@ -124,12 +138,22 @@ export default function BookCard({
         {(isValidLink(downloadPdf) || isValidLink(downloadEpub)) && (
           <div className="mt-3 flex flex-wrap gap-4 text-xs">
             {isValidLink(downloadPdf) && (
-              <a href={downloadPdf} target="_blank" rel="noopener noreferrer" className="luxury-link">
+              <a
+                href={downloadPdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="luxury-link"
+              >
                 PDF
               </a>
             )}
             {isValidLink(downloadEpub) && (
-              <a href={downloadEpub} target="_blank" rel="noopener noreferrer" className="luxury-link">
+              <a
+                href={downloadEpub}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="luxury-link"
+              >
                 EPUB
               </a>
             )}

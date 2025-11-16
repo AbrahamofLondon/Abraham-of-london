@@ -43,8 +43,15 @@ function formatDateISOToGB(iso?: string | null): string | null {
   }).format(d);
 }
 
+function normalisePostSlug(raw: string): string {
+  const s = (raw || "").toString().trim().replace(/^\/+|\/+$/g, "");
+  // If someone stored "blog/slug" or "/blog/slug", strip the "blog/" prefix
+  return s.replace(/^blog\//i, "");
+}
+
 export default function BlogPostCard({ post }: BlogPostCardProps) {
-  const href = `/blog/${encodeURIComponent(post.slug)}`;
+  const slug = normalisePostSlug(post.slug);
+  const href = `/${encodeURIComponent(slug)}`; // ✅ matches /[slug] page
 
   const cover =
     (post.coverImage && String(post.coverImage)) || FALLBACK_COVERS[0];
@@ -68,7 +75,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
-      <Link href={href} className="block">
+      <Link href={href} className="block" prefetch={false}>
         <div className="relative aspect-[16/9] w-full overflow-hidden">
           <Image
             src={cover}
@@ -102,7 +109,9 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
               <span className="font-medium text-gray-700">{authorName}</span>
               {dateText ? <span aria-hidden>•</span> : null}
-              {dateText ? <time dateTime={post.date || undefined}>{dateText}</time> : null}
+              {dateText ? (
+                <time dateTime={post.date || undefined}>{dateText}</time>
+              ) : null}
               {readText ? <span aria-hidden>•</span> : null}
               {readText ? <span>{readText}</span> : null}
             </div>
