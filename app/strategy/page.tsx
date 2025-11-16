@@ -1,4 +1,5 @@
-// app/strategy/page.tsx
+// Import Link at the top of the file with other imports
+import Link from 'next/link';
 
 export const metadata = {
   title: "Strategy | Abraham of London",
@@ -28,20 +29,19 @@ export default function StrategyPage() {
           </p>
           <p className="text-gray-500 text-sm">
             In the meantime, you can access{" "}
-            <a
-              import Link from 'next/link';
-              <Link href="/blog/">Blog</Link>
+            <Link
+              href="/blog/"
               className="text-blue-600 underline underline-offset-4"
             >
               Insights
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
+            <Link
               href="/downloads"
               className="text-blue-600 underline underline-offset-4"
             >
               Downloadable Playbooks
-            </a>{" "}
+            </Link>{" "}
             for strategy material.
           </p>
         </div>
