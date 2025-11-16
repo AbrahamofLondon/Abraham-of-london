@@ -11,7 +11,7 @@ type HeaderProps = { variant?: "light" | "dark" };
 
 const NAV = [
   { href: "/books", label: "Books" },
-  { href: "/blog", label: "Insights" },
+  { href: "/blogs", label: "Insights" }, // ✅ matches /blogs index
   { href: "/ventures", label: "Ventures" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -100,7 +100,8 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
   const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
-  const PHONE = (siteConfig as any)?.phone || "";
+  const PHONE =
+    (siteConfig as any)?.phone?.toString().trim() || "+442086225909"; // ✅ landline fallback
 
   const brandClass = [
     "font-serif font-bold transition-all duration-200",
@@ -204,7 +205,13 @@ export default function Header({ variant = "light" }: HeaderProps) {
           >
             <span className="sr-only">Toggle navigation</span>
             {!open ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
                 <path
                   d="M4 6h16M4 12h16M4 18h16"
                   stroke="currentColor"
@@ -212,7 +219,13 @@ export default function Header({ variant = "light" }: HeaderProps) {
                 />
               </svg>
             ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
                 <path
                   d="M6 6l12 12M18 6L6 18"
                   stroke="currentColor"
