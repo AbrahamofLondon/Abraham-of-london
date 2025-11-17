@@ -101,88 +101,150 @@ export default function Footer(): JSX.Element {
     return { href, label, external };
   });
 
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="mt-16 w-full border-t border-lightGrey bg-white text-deepCharcoal">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 md:flex-row">
-        <div className="text-sm">
-          <span className="font-semibold">{title}</span>
-          <span className="mx-2">•</span>
-          {/* ✅ Use canonical route, NOT absUrl */}
-          <Link href={getRoutePath("home")} className="hover:underline">
-            Home
-          </Link>
-          {email ? (
-            <>
-              <span className="mx-2">•</span>
-              <a href={`mailto:${email}`} className="hover:underline">
+    <footer className="w-full border-t border-white/10 bg-gradient-to-b from-black via-deepCharcoal to-black text-gray-200">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:flex-row md:items-start md:justify-between">
+        {/* Brand + core links */}
+        <div className="space-y-3 text-sm">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-softGold/80">
+            Abraham of London
+          </p>
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            {title}
+          </h2>
+          <p className="max-w-md text-xs text-gray-300 md:text-sm">
+            Faith-rooted strategy for fathers, founders, and boards who refuse
+            to outsource responsibility – at home or in the marketplace.
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs md:text-sm">
+            <Link
+              href={getRoutePath("home")}
+              className="text-gray-300 hover:text-softGold hover:underline"
+            >
+              Home
+            </Link>
+            <span className="text-gray-500">•</span>
+            <Link
+              href="/ventures"
+              className="text-gray-300 hover:text-softGold hover:underline"
+            >
+              Ventures
+            </Link>
+            <span className="text-gray-500">•</span>
+            <Link
+              href="/books"
+              className="text-gray-300 hover:text-softGold hover:underline"
+            >
+              Books
+            </Link>
+            <span className="text-gray-500">•</span>
+            <Link
+              href="/downloads"
+              className="text-gray-300 hover:text-softGold hover:underline"
+            >
+              Downloads
+            </Link>
+            <span className="text-gray-500">•</span>
+            <Link
+              href="/contact"
+              className="text-gray-300 hover:text-softGold hover:underline"
+            >
+              Contact
+            </Link>
+          </div>
+
+          {email && (
+            <p className="mt-2 text-xs text-gray-400">
+              Email:{" "}
+              <a
+                href={`mailto:${email}`}
+                className="font-medium text-softGold hover:underline"
+              >
                 {email}
               </a>
-            </>
-          ) : null}
+            </p>
+          )}
         </div>
 
+        {/* Social strip */}
         {socials.length > 0 && (
-          <ul className="flex flex-wrap items-center gap-4 text-sm">
-            {socials.map(({ href, label, external }, index) => {
-              if (!href) {
-                return (
-                  <li key={`social-empty-${index}`} className="opacity-60">
-                    <span>{label}</span>
-                  </li>
-                );
-              }
+          <div className="space-y-3 text-sm">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-softGold/80">
+              Connect
+            </p>
+            <ul className="flex flex-wrap items-center gap-3">
+              {socials.map(({ href, label, external }, index) => {
+                if (!href) {
+                  return (
+                    <li
+                      key={`social-empty-${index}`}
+                      className="rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400"
+                    >
+                      <span>{label}</span>
+                    </li>
+                  );
+                }
 
-              const utility = isUtility(href);
+                const utility = isUtility(href);
 
-              if (external && !utility) {
+                const baseClasses =
+                  "inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200 transition hover:bg-white/10 hover:text-softGold";
+
+                if (external && !utility) {
+                  return (
+                    <li key={`${label}-${index}`}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={baseClasses}
+                        aria-label={label}
+                      >
+                        {label}
+                      </a>
+                    </li>
+                  );
+                }
+
+                if (utility) {
+                  return (
+                    <li key={`${label}-${index}`}>
+                      <a
+                        href={href}
+                        className={baseClasses}
+                        aria-label={label}
+                      >
+                        {label}
+                      </a>
+                    </li>
+                  );
+                }
+
+                // Internal links if you ever add them to siteConfig.socialLinks
                 return (
                   <li key={`${label}-${index}`}>
-                    <a
+                    <Link
                       href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline"
+                      className={baseClasses}
                       aria-label={label}
                     >
                       {label}
-                    </a>
+                    </Link>
                   </li>
                 );
-              }
-
-              if (utility) {
-                return (
-                  <li key={`${label}-${index}`}>
-                    <a
-                      href={href}
-                      className="hover:underline"
-                      aria-label={label}
-                    >
-                      {label}
-                    </a>
-                  </li>
-                );
-              }
-
-              // Internal links if you ever add them to siteConfig.socialLinks
-              return (
-                <li key={`${label}-${index}`}>
-                  <Link
-                    href={href}
-                    className="hover:underline"
-                    aria-label={label}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+              })}
+            </ul>
+          </div>
         )}
       </div>
 
-      <div className="bg-warmWhite/60 py-4 text-center text-xs text-gray-600">
-        © {new Date().getFullYear()} {title}. All rights reserved.
+      {/* Legal bar */}
+      <div className="border-t border-white/10 bg-black/80 py-4 text-center text-[11px] text-gray-500">
+        © {year} {title}. All rights reserved. Built for men who still believe
+        in duty, consequence, and legacy.
       </div>
     </footer>
   );

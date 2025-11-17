@@ -1,4 +1,3 @@
-// components/SocialFollowStrip.tsx
 "use client";
 
 import * as React from "react";
@@ -89,7 +88,6 @@ type IconKind = NonNullable<SocialItem["kind"]>;
 
 /**
  * Convention: each kind maps to /assets/images/social/svg/{kind}.svg
- * If filenames differ, tweak this mapping.
  */
 function iconPathForKind(kind: IconKind): string {
   return `/assets/images/social/svg/${kind}.svg`;
@@ -97,7 +95,6 @@ function iconPathForKind(kind: IconKind): string {
 
 /**
  * Optional brand colour accent per platform.
- * Only tints text/border; icons themselves are pure SVG art.
  */
 const BRAND_HEX: Partial<Record<IconKind, string>> = {
   tiktok: "#010101",
@@ -166,15 +163,22 @@ export default function SocialFollowStrip({
     (it): it is SocialItem => Boolean(it),
   );
 
-  const panel = cn(
-    "rounded-2xl ring-1 shadow-xl",
+  const panelBase =
+    "rounded-3xl border shadow-2xl backdrop-blur-sm transition-colors duration-300";
+
+  const panel =
     variant === "dark"
-      ? "bg-deepCharcoal ring-white/10"
-      : "bg-white ring-lightGrey",
-  );
+      ? cn(
+          panelBase,
+          "border-white/12 bg-gradient-to-r from-black/85 via-deepCharcoal/90 to-black/85",
+        )
+      : cn(
+          panelBase,
+          "border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50",
+        );
 
   const pillBase =
-    "inline-flex items-center gap-2 rounded-full border px-3 py-2 transition-colors";
+    "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-sm transition-colors";
 
   const pill =
     variant === "dark"
@@ -187,34 +191,43 @@ export default function SocialFollowStrip({
           "border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite",
         );
 
+  const headlineColor =
+    variant === "dark" ? "text-cream" : "text-deepCharcoal";
+
+  const subColor =
+    variant === "dark" ? "text-gray-300" : "text-slate-600";
+
   return (
     <section
       className={cn(
-        "mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-12",
+        "mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-10",
         className,
       )}
     >
       <div className={panel}>
-        <div className="flex flex-wrap items-center justify-between gap-6 px-8 py-6 sm:px-10 sm:py-8">
-          <p
-            className={cn(
-              "font-serif leading-relaxed text-base sm:text-lg",
-              variant === "dark"
-                ? "text-[color:var(--color-on-primary)/0.85]"
-                : "text-[color:var(--color-on-secondary)/0.8]",
-            )}
-          >
-            Join the conversation — follow{" "}
-            <span
+        <div className="flex flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-8">
+          {/* Text block */}
+          <div className="max-w-xl space-y-2">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-softGold/80">
+              Stay connected
+            </p>
+            <p
               className={cn(
-                "font-semibold",
-                variant === "dark" ? "text-cream" : "text-deepCharcoal",
+                "font-serif text-lg sm:text-xl",
+                headlineColor,
               )}
             >
-              Abraham of London
-            </span>
-          </p>
+              Join the conversation with{" "}
+              <span className="font-semibold">Abraham of London</span>
+              {" – across the channels you actually use."}
+            </p>
+            <p className={cn("text-xs sm:text-sm", subColor)}>
+              Strategy, fatherhood, and legacy – filtered, structured, and
+              grounded. No fluff, no noise, just signal.
+            </p>
+          </div>
 
+          {/* Social pills */}
           <nav
             aria-label="Social links"
             className="flex flex-wrap items-center gap-3 sm:gap-4"
@@ -236,14 +249,13 @@ export default function SocialFollowStrip({
                   style={
                     accentColor
                       ? {
-                          // Flat solid look; just tint text slightly with brand colour
                           color: accentColor,
                         }
                       : undefined
                   }
                 >
                   {IconNode}
-                  <span className="text-sm font-serif text-current">
+                  <span className="font-serif text-current">
                     {label}
                   </span>
                 </span>
