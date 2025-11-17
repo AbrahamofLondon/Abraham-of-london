@@ -1,7 +1,7 @@
 // components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
-import { siteConfig, absUrl, getRoutePath } from "@/lib/siteConfig";
+import { siteConfig, getRoutePath } from "@/lib/siteConfig";
 
 type BareSocial = {
   href?: string;
