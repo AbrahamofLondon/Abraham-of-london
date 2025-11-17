@@ -1,9 +1,9 @@
 // components/BookCard.tsx
+import * as React from "react";
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { motion, type MotionProps } from "framer-motion";
 import clsx from "clsx";
-import * as React from "react";
 
 export type BookCardProps = {
   slug: string;
@@ -20,7 +20,8 @@ export type BookCardProps = {
   motionProps?: MotionProps;
 };
 
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover@1600.jpg";
+// Default placeholder specifically for books
+const DEFAULT_COVER = "/assets/images/default-book.jpg";
 
 const isValidLink = (link?: string | null): link is string =>
   !!link && link.trim() !== "" && link.trim() !== "#";
@@ -29,6 +30,21 @@ function normaliseBookSlug(raw: string): string {
   const s = (raw || "").toString().trim().toLowerCase().replace(/^\/+|\/+$/g, "");
   // If it's "books/slug" or "/books/slug", strip the prefix
   return s.replace(/^books\//, "");
+}
+
+/**
+ * Support both string paths and StaticImageData
+ */
+function resolveCoverImage(
+  coverImage?: string | StaticImageData | null
+): string | StaticImageData {
+  if (typeof coverImage === "string" && coverImage.trim().length > 0) {
+    return coverImage;
+  }
+  if (coverImage && typeof coverImage === "object") {
+    return coverImage;
+  }
+  return DEFAULT_COVER;
 }
 
 export default function BookCard({
@@ -48,8 +64,7 @@ export default function BookCard({
   const normalizedSlug = normaliseBookSlug(slug);
   const detailHref = `/books/${encodeURIComponent(normalizedSlug)}`;
 
-  const finalImageSrc =
-    (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
+  const finalImageSrc = resolveCoverImage(coverImage);
 
   return (
     <motion.article
@@ -61,6 +76,7 @@ export default function BookCard({
         className,
       )}
     >
+      {/* COVER */}
       <Link
         href={detailHref}
         prefetch={false}
@@ -68,15 +84,19 @@ export default function BookCard({
         tabIndex={-1}
         aria-hidden="true"
       >
-        <div className="relative w-full aspect-[2/3]">
-          <Image
-            src={finalImageSrc}
-            alt={`${title} book cover`}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            priority={featured}
-          />
+        <div className="relative w-full bg-warmWhite/80">
+          {/* Book-like aspect */}
+          <div className="relative w-full aspect-[2/3]">
+            <Image
+              src={finalImageSrc}
+              alt={`${title} book cover`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
+              // 🔑 Show the whole cover as a “book object”
+              className="object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
+              priority={featured}
+            />
+          </div>
         </div>
 
         {featured && (
@@ -86,6 +106,7 @@ export default function BookCard({
         )}
       </Link>
 
+      {/* BODY */}
       <div className="p-6">
         <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
           <Link

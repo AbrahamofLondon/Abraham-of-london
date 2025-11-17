@@ -1,144 +1,225 @@
 // components/events/mdx-components.tsx
-"use client";
+// Central MDX components mapping for blog + events.
+// Used by next-mdx-remote to render MDX content.
 
-import type { ComponentProps, ReactNode } from "react";
-import React from "react";
+import * as React from "react";
 import Link from "next/link";
+import Rule from "@/components/mdx/Rule";
 
-type AnyProps = { children?: ReactNode; [key: string]: any };
+/* -------------------------------------------------------------------------- */
+/* Basic typography                                                            */
+/* -------------------------------------------------------------------------- */
 
-// Ultra-simple MDX components - just what's needed to build
-const components = {
-  a: ({ href, children, ...props }: AnyProps) => {
-    const isExternal = typeof href === "string" && href.startsWith("http");
-    if (isExternal) {
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          {...props}
-        >
-          {children}
-        </a>
-      );
-    }
-    return (
-      <Link href={href || "#"} {...props}>
-        {children}
-      </Link>
-    );
-  },
+const H1: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <h1 className="mt-6 font-serif text-3xl font-semibold text-deepCharcoal md:text-4xl">
+    {children}
+  </h1>
+);
 
-  img: ({ src, alt, ...props }: AnyProps) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt || ""}
-      className="my-4 h-auto max-w-full rounded-lg"
-      {...props}
-    />
-  ),
+const H2: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <h2 className="mt-6 font-serif text-2xl font-semibold text-deepCharcoal md:text-3xl">
+    {children}
+  </h2>
+);
 
-  h1: ({ children, ...props }: ComponentProps<"h1">) => (
-    <h1 className="my-4 text-3xl font-bold" {...props}>
-      {children}
-    </h1>
-  ),
-  h2: ({ children, ...props }: ComponentProps<"h2">) => (
-    <h2 className="my-3 text-2xl font-bold" {...props}>
-      {children}
-    </h2>
-  ),
-  h3: ({ children, ...props }: ComponentProps<"h3">) => (
-    <h3 className="my-2 text-xl font-bold" {...props}>
-      {children}
-    </h3>
-  ),
-  h4: ({ children, ...props }: ComponentProps<"h4">) => (
-    <h4 className="my-2 text-lg font-bold" {...props}>
-      {children}
-    </h4>
-  ),
-  h5: ({ children, ...props }: ComponentProps<"h5">) => (
-    <h5 className="my-1 text-base font-bold" {...props}>
-      {children}
-    </h5>
-  ),
-  h6: ({ children, ...props }: ComponentProps<"h6">) => (
-    <h6 className="my-1 text-sm font-bold" {...props}>
-      {children}
-    </h6>
-  ),
+const H3: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <h3 className="mt-5 font-serif text-xl font-semibold text-deepCharcoal">
+    {children}
+  </h3>
+);
 
-  p: ({ children, ...props }: ComponentProps<"p">) => (
-    <p className="my-2" {...props}>
-      {children}
-    </p>
-  ),
-  strong: ({ children, ...props }: ComponentProps<"strong">) => (
-    <strong className="font-bold" {...props}>
-      {children}
-    </strong>
-  ),
-  em: ({ children, ...props }: ComponentProps<"em">) => (
-    <em className="italic" {...props}>
-      {children}
-    </em>
-  ),
+const P: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <p className="my-3 text-[color:var(--color-on-secondary)/0.9] leading-relaxed">
+    {children}
+  </p>
+);
 
-  ul: ({ children, ...props }: ComponentProps<"ul">) => (
-    <ul className="my-2 list-inside list-disc" {...props}>
-      {children}
-    </ul>
-  ),
-  ol: ({ children, ...props }: ComponentProps<"ol">) => (
-    <ol className="my-2 list-inside list-decimal" {...props}>
-      {children}
-    </ol>
-  ),
-  li: ({ children, ...props }: ComponentProps<"li">) => (
-    <li className="my-1" {...props}>
-      {children}
-    </li>
-  ),
+const Ul: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <ul className="my-3 list-disc space-y-1 pl-6 text-[color:var(--color-on-secondary)/0.9]">
+    {children}
+  </ul>
+);
 
-  pre: ({ children, ...props }: ComponentProps<"pre">) => (
-    <pre
-      className="my-4 overflow-x-auto rounded bg-gray-100 p-4"
-      {...props}
-    >
-      {children}
-    </pre>
-  ),
+const Ol: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <ol className="my-3 list-decimal space-y-1 pl-6 text-[color:var(--color-on-secondary)/0.9]">
+    {children}
+  </ol>
+);
 
-  code: ({ children, ...props }: ComponentProps<"code">) => (
-    <code className="rounded bg-gray-100 px-1 text-sm" {...props}>
-      {children}
-    </code>
-  ),
+const Li: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <li className="leading-relaxed">{children}</li>
+);
 
-  table: ({ children, ...props }: ComponentProps<"table">) => (
-    <table
-      className="my-4 w-full border-collapse border border-gray-300"
-      {...props}
-    >
-      {children}
-    </table>
-  ),
+const Strong: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <strong className="font-semibold text-deepCharcoal">{children}</strong>
+);
 
-  blockquote: ({ children, ...props }: ComponentProps<"blockquote">) => (
-    <blockquote
-      className="my-4 border-l-4 border-gray-300 pl-4 italic"
-      {...props}
-    >
-      {children}
-    </blockquote>
-  ),
+const Em: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <em className="italic">{children}</em>
+);
 
-  hr: (props: ComponentProps<"hr">) => (
-    <hr className="my-4 border-gray-300" {...props} />
-  ),
+const Blockquote: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <blockquote className="my-4 border-l-4 border-softGold/70 bg-warmWhite/60 px-4 py-3 text-sm text-[color:var(--color-on-secondary)/0.9]">
+    {children}
+  </blockquote>
+);
+
+/* -------------------------------------------------------------------------- */
+/* Links & images                                                              */
+/* -------------------------------------------------------------------------- */
+
+type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href?: string;
 };
 
-export default components;
+const A: React.FC<AnchorProps> = ({ href = "#", children, ...rest }) => {
+  const isExternal = /^https?:\/\//i.test(href);
+  if (isExternal) {
+    return (
+      <a
+        href={href}
+        {...rest}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="luxury-link"
+      >
+        {children}
+      </a>
+    );
+  }
+
+  // Internal route
+  return (
+    <Link href={href} {...rest} className="luxury-link">
+      {children}
+    </Link>
+  );
+};
+
+type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
+
+// Keep this simple: MDX <img> just maps to a styled <img>
+const Img: React.FC<ImgProps> = (props) => (
+  <img
+    {...props}
+    className={
+      "my-6 w-full rounded-xl border border-lightGrey bg-warmWhite object-contain " +
+      (props.className || "")
+    }
+  />
+);
+
+/* -------------------------------------------------------------------------- */
+/* Custom MDX components used in your content                                  */
+/* -------------------------------------------------------------------------- */
+
+type NoteProps = React.PropsWithChildren<{
+  title?: string;
+  tone?: "info" | "warning" | "success";
+}>;
+
+const Note: React.FC<NoteProps> = ({ title, tone = "info", children }) => {
+  const toneClasses =
+    tone === "warning"
+      ? "border-amber-300 bg-amber-50/80"
+      : tone === "success"
+      ? "border-emerald-300 bg-emerald-50/80"
+      : "border-sky-300 bg-sky-50/80";
+
+  return (
+    <aside
+      className={`my-4 rounded-xl border px-4 py-3 text-sm text-gray-800 ${toneClasses}`}
+    >
+      {title && (
+        <p className="mb-1 font-semibold text-deepCharcoal">{title}</p>
+      )}
+      <div>{children}</div>
+    </aside>
+  );
+};
+
+type QuoteProps = React.PropsWithChildren<{
+  author?: string;
+}>;
+
+const Quote: React.FC<QuoteProps> = ({ children, author }) => (
+  <figure className="my-6 border-l-2 border-softGold/80 pl-4 text-sm text-gray-800">
+    <div className="italic">{children}</div>
+    {author && (
+      <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-500">
+        — {author}
+      </figcaption>
+    )}
+  </figure>
+);
+
+type VerseProps = React.PropsWithChildren<{
+  refText?: string;
+}>;
+
+const Verse: React.FC<VerseProps> = ({ children, refText }) => (
+  <div className="my-4 rounded-lg bg-warmWhite/80 px-4 py-3 text-sm text-gray-800">
+    <p className="italic">{children}</p>
+    {refText && (
+      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-softGold">
+        {refText}
+      </p>
+    )}
+  </div>
+);
+
+/**
+ * Placeholder for any MDX <JsonLd> usage.
+ * Safe no-op during render; you can wire actual JSON-LD later.
+ */
+type JsonLdProps = {
+  children?: React.ReactNode;
+  [key: string]: unknown;
+};
+
+const JsonLd: React.FC<JsonLdProps> = () => null;
+
+/**
+ * Generic "share row" wrapper – keeps layout from breaking
+ * even if MDX refers to <ShareRow>.
+ */
+const ShareRow: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-lightGrey pt-4 text-sm">
+    {children}
+  </div>
+);
+
+/* -------------------------------------------------------------------------- */
+/* Export mapping for next-mdx-remote                                         */
+/* -------------------------------------------------------------------------- */
+
+const mdxComponents = {
+  // Typography
+  h1: H1,
+  h2: H2,
+  h3: H3,
+  p: P,
+  ul: Ul,
+  ol: Ol,
+  li: Li,
+  strong: Strong,
+  em: Em,
+  blockquote: Blockquote,
+
+  // Horizontal rules & custom separator
+  hr: () => <Rule />,
+  Rule, // <Rule /> used directly in MDX
+
+  // Links & images
+  a: A,
+  img: Img,
+
+  // Custom helpers used in your posts
+  Note,
+  Quote,
+  Verse,
+  JsonLd,
+  ShareRow,
+};
+
+export default mdxComponents;

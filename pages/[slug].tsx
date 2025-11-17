@@ -1,6 +1,6 @@
 // pages/[slug].tsx
-// Dynamic blog post route – reads MDX from content/posts (or Posts/blog) and
-// makes sure it works both locally (Windows) and on Netlify (Linux).
+// Dynamic blog post route – reads MDX from content/posts (or Posts/blog)
+// and works both locally (Windows) and on Netlify (Linux).
 
 import type {
   GetStaticPaths,
@@ -56,12 +56,7 @@ type PostPageProps = {
 function resolvePostsDir(): string | null {
   const contentRoot = path.join(process.cwd(), "content");
 
-  const candidates = [
-    "posts",
-    "Posts",
-    "blog",
-    "Blog",
-  ];
+  const candidates = ["posts", "Posts", "blog", "Blog"];
 
   for (const dir of candidates) {
     const full = path.join(contentRoot, dir);
@@ -87,7 +82,10 @@ function listPostFiles(): string[] {
     .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
 }
 
-function readFrontMatter(filePath: string): { frontMatter: FrontMatter; content: string } {
+function readFrontMatter(filePath: string): {
+  frontMatter: FrontMatter;
+  content: string;
+} {
   const raw = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
   return {
@@ -127,8 +125,6 @@ function findPostFileBySlug(slug: string): string | null {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   if (!POSTS_DIR) {
-    // No posts directory on build server – nothing to pre-render,
-    // but keep route alive with blocking fallback (in case of future fix).
     return {
       paths: [],
       fallback: "blocking",
@@ -157,60 +153,74 @@ export const getStaticPaths: GetStaticPaths = async () => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticProps: GetStaticProps<PostPageProps> = async (ctx) => {
-  const slugParam = ctx.params?.slug;
-  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam || "";
+  try {
+    const slugParam = ctx.params?.slug;
+    const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam || "";
 
-  if (!slug || !POSTS_DIR) {
-    return { notFound: true };
-  }
+    if (!slug || !POSTS_DIR) {
+      console.warn("[posts] Missing slug or POSTS_DIR");
+      return { notFound: true };
+    }
 
-  const filePath = findPostFileBySlug(slug);
-  if (!filePath) {
-    console.warn("[posts] No file found for slug:", slug);
-    return { notFound: true };
-  }
+    const filePath = findPostFileBySlug(slug);
+    if (!filePath) {
+      console.warn("[posts] No file found for slug:", slug);
+      return { notFound: true };
+    }
 
-  const { frontMatter, content } = readFrontMatter(filePath);
+    const { frontMatter, content } = readFrontMatter(filePath);
 
-  const rawDate = frontMatter.date ?? null;
-  const date =
-    rawDate instanceof Date
-      ? rawDate.toISOString()
-      : typeof rawDate === "string"
-      ? rawDate
-      : null;
+    const rawDate = frontMatter.date ?? null;
+    const date =
+      rawDate instanceof Date
+        ? rawDate.toISOString()
+        : typeof rawDate === "string"
+        ? rawDate
+        : null;
 
-  const fm = {
-    title: (frontMatter.title ?? slug) as string,
-    slug,
-    date,
-    author: frontMatter.author ?? null,
-    excerpt: frontMatter.excerpt ?? null,
-    readTime: frontMatter.readTime ?? null,
-    category: frontMatter.category ?? null,
-    tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : null,
-    coverImage: frontMatter.coverImage ?? null,
-  };
+    const fm = {
+      title: (frontMatter.title ?? slug) as string,
+      slug,
+      date,
+      author: frontMatter.author ?? null,
+      excerpt: frontMatter.excerpt ?? null,
+      readTime: frontMatter.readTime ?? null,
+      category: frontMatter.category ?? null,
+      tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : null,
+      coverImage: frontMatter.coverImage ?? null,
+    };
 
-  const mdxSource =
-    content && content.trim().length
-      ? await serialize(content, {
+    let mdxSource: MDXRemoteSerializeResult | null = null;
+
+    if (content && content.trim().length) {
+      try {
+        mdxSource = await serialize(content, {
           mdxOptions: {
             remarkPlugins: [],
             rehypePlugins: [],
           },
-        })
-      : null;
+        });
+      } catch (err) {
+        console.error("[posts] MDX serialize failed for slug:", slug, err);
+        // Fall back to raw content rendering
+        mdxSource = null;
+      }
+    }
 
-  return {
-    props: {
-      slug,
-      frontMatter: fm,
-      mdxSource,
-      content: content || null,
-    },
-    revalidate: 3600,
-  };
+    return {
+      props: {
+        slug,
+        frontMatter: fm,
+        mdxSource,
+        content: content || null,
+      },
+      revalidate: 3600,
+    };
+  } catch (err) {
+    console.error("[posts] getStaticProps crashed:", err);
+    // Fail safe – if something unexpected happens, don't kill the whole export
+    return { notFound: true };
+  }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -265,7 +275,7 @@ export default function PostPage({
 
         <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest dark:prose-invert">
           {mdxSource ? (
-            <MDXRemote {...mdxSource} components={mdxComponents} />
+            <MDXRemote {...mdxSource} components={mdxComponents as any} />
           ) : content ? (
             <p>{content}</p>
           ) : null}
