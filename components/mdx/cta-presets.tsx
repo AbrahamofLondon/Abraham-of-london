@@ -37,28 +37,30 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     title: "Explore Fatherhood Resources",
     description: "Transform your fatherhood journey with proven frameworks and brotherhood support",
     theme: "fatherhood",
+    // ✅ POINT TO REAL, EXISTING POST SLUGS
     reads: [
       {
-        href: "/blog/leadership-begins-at-home",
+        href: "/leadership-begins-at-home",
         label: "Leadership Begins at Home",
         sub: "Lead from the inside out",
         icon: "🏠",
         badge: "popular",
       },
       {
-        href: "/blog/the-brotherhood-code",
+        href: "/the-brotherhood-code",
         label: "The Brotherhood Code",
         sub: "Build your band of brothers",
         icon: "🤝",
         badge: "featured",
       },
       {
-        href: "/blog/reclaiming-the-narrative",
+        href: "/reclaiming-the-narrative",
         label: "Reclaiming the Narrative",
         sub: "Court-season clarity",
         icon: "✍️",
       },
     ],
+    // NOTE: keep these as-is – they assume matching static files in /public/downloads.
     downloads: [
       {
         href: "/downloads/Fatherhood_Guide.pdf",
@@ -96,22 +98,23 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     title: "Leadership Development",
     description: "Cultivate authentic leadership that transforms teams and organizations",
     theme: "leadership",
+    // These are intentionally future-facing; routes can be created later.
     reads: [
       {
-        href: "/blog/leading-with-purpose",
+        href: "/leading-with-purpose",
         label: "Leading with Purpose",
         sub: "Beyond profit and performance",
         icon: "🎯",
         badge: "featured",
       },
       {
-        href: "/blog/decision-making-under-pressure",
+        href: "/decision-making-under-pressure",
         label: "Decision Making Under Pressure",
         sub: "Crisis leadership framework",
         icon: "⚡",
       },
       {
-        href: "/blog/legacy-leadership",
+        href: "/legacy-leadership",
         label: "Legacy Leadership",
         sub: "Building beyond your tenure",
         icon: "🌱",
@@ -150,14 +153,14 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "brotherhood",
     reads: [
       {
-        href: "/blog/what-is-brotherhood",
+        href: "/what-is-brotherhood",
         label: "What is Brotherhood?",
         sub: "Beyond friendship and networking",
         icon: "👥",
         badge: "new",
       },
       {
-        href: "/blog/accountability-partnerships",
+        href: "/accountability-partnerships",
         label: "Accountability Partnerships",
         sub: "Transform your growth trajectory",
         icon: "📊",
@@ -192,14 +195,14 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "mentorship",
     reads: [
       {
-        href: "/blog/becoming-a-mentor",
+        href: "/becoming-a-mentor",
         label: "Becoming a Mentor",
         sub: "The art of guiding others",
         icon: "🧭",
         badge: "popular",
       },
       {
-        href: "/blog/finding-mentors",
+        href: "/finding-mentors",
         label: "Finding the Right Mentors",
         sub: "Building your personal board",
         icon: "🔍",
@@ -237,12 +240,34 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     description: "Access our complete collection of free guides, templates, and frameworks",
     theme: "default",
     downloads: [
-      { href: "/downloads/Fatherhood_Principles_Checklist.pdf", label: "Fatherhood Principles Checklist", badge: "free" },
-      { href: "/downloads/Daily_Leadership_Journal.pdf", label: "Daily Leadership Journal", badge: "free" },
-      { href: "/downloads/Family_Meeting_Agenda.pdf", label: "Family Meeting Agenda", badge: "free" },
-      { href: "/downloads/Personal_Growth_Assessment.pdf", label: "Personal Growth Assessment", badge: "free" },
+      {
+        href: "/downloads/Fatherhood_Principles_Checklist.pdf",
+        label: "Fatherhood Principles Checklist",
+        badge: "free",
+      },
+      {
+        href: "/downloads/Daily_Leadership_Journal.pdf",
+        label: "Daily Leadership Journal",
+        badge: "free",
+      },
+      {
+        href: "/downloads/Family_Meeting_Agenda.pdf",
+        label: "Family Meeting Agenda",
+        badge: "free",
+      },
+      {
+        href: "/downloads/Personal_Growth_Assessment.pdf",
+        label: "Personal Growth Assessment",
+        badge: "free",
+      },
     ],
-    actions: [{ href: "/resources", label: "View All Resources", sub: "100+ free downloads available" }],
+    actions: [
+      {
+        href: "/resources",
+        label: "View All Resources",
+        sub: "100+ free downloads available",
+      },
+    ],
   },
 
   premium: {
@@ -256,12 +281,28 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
         sub: "12-week intensive transformation",
         badge: "featured",
       },
-      { href: "/programs/executive-leadership", label: "Executive Leadership Academy", sub: "For senior leaders and entrepreneurs" },
-      { href: "/programs/legacy-building", label: "Legacy Building Intensive", sub: "Design your lasting impact" },
+      {
+        href: "/programs/executive-leadership",
+        label: "Executive Leadership Academy",
+        sub: "For senior leaders and entrepreneurs",
+      },
+      {
+        href: "/programs/legacy-building",
+        label: "Legacy Building Intensive",
+        sub: "Design your lasting impact",
+      },
     ],
     related: [
-      { href: "/testimonials", label: "Success Stories", sub: "See transformation in action" },
-      { href: "/pricing", label: "Program Pricing", sub: "Investment details" },
+      {
+        href: "/testimonials",
+        label: "Success Stories",
+        sub: "See transformation in action",
+      },
+      {
+        href: "/pricing",
+        label: "Program Pricing",
+        sub: "Investment details",
+      },
     ],
   },
 
@@ -270,13 +311,35 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     description: "Connect with like-minded men on the journey of growth and impact",
     theme: "brotherhood",
     actions: [
-      { href: "/brotherhood", label: "Brotherhood Inner Circle", sub: "Exclusive membership community", badge: "featured" },
-      { href: "/events", label: "Live Events & Retreats", sub: "In-person connection experiences" },
-      { href: "https://discord.gg/abraham-london", label: "Discord Community", sub: "Daily conversations and support", external: true },
+      {
+        href: "/brotherhood",
+        label: "Brotherhood Inner Circle",
+        sub: "Exclusive membership community",
+        badge: "featured",
+      },
+      {
+        href: "/events",
+        label: "Live Events & Retreats",
+        sub: "In-person connection experiences",
+      },
+      {
+        href: "https://discord.gg/abraham-london",
+        label: "Discord Community",
+        sub: "Daily conversations and support",
+        external: true,
+      },
     ],
     related: [
-      { href: "/community/guidelines", label: "Community Guidelines", sub: "Our commitment to each other" },
-      { href: "/faq", label: "Community FAQ", sub: "Common questions answered" },
+      {
+        href: "/community/guidelines",
+        label: "Community Guidelines",
+        sub: "Our commitment to each other",
+      },
+      {
+        href: "/faq",
+        label: "Community FAQ",
+        sub: "Common questions answered",
+      },
     ],
   },
 
@@ -284,19 +347,39 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     title: "Stay Connected",
     description: "Get weekly insights, resources, and updates delivered to your inbox",
     theme: "default",
-    actions: [{ href: "/newsletter", label: "Join Newsletter", sub: "Weekly wisdom and updates", badge: "free" }],
+    actions: [
+      {
+        href: "/newsletter",
+        label: "Join Newsletter",
+        sub: "Weekly wisdom and updates",
+        badge: "free",
+      },
+    ],
     related: [
-      { href: "/newsletter/archive", label: "Newsletter Archive", sub: "Browse past editions" },
-      { href: "/privacy", label: "Privacy Promise", sub: "We respect your inbox" },
+      {
+        href: "/newsletter/archive",
+        label: "Newsletter Archive",
+        sub: "Browse past editions",
+      },
+      {
+        href: "/privacy",
+        label: "Privacy Promise",
+        sub: "We respect your inbox",
+      },
     ],
   },
 } as const;
 
 /* ---------- Utilities ---------- */
+export function validatePresetKey(key: string): key is CTAKey {
+  return key in CTA_PRESETS;
+}
+
 export function getCtaPreset(key?: string): CTAPreset | null {
   if (!key) return null;
-  const k = String(key).trim().toLowerCase() as CTAKey;
-  return (CTA_PRESETS as Record<string, CTAPreset>)[k] ?? null;
+  const k = String(key).trim().toLowerCase();
+  if (!validatePresetKey(k)) return null;
+  return CTA_PRESETS[k as CTAKey];
 }
 
 export function getAllPresetKeys(): CTAKey[] {
@@ -307,10 +390,6 @@ export function getPresetByTheme(theme: NonNullable<CTAPreset["theme"]>): CTAPre
   return Object.values(CTA_PRESETS).filter((p) => p.theme === theme);
 }
 
-export function validatePresetKey(key: string): key is CTAKey {
-  return key in CTA_PRESETS;
-}
-
 export function getFeaturedItems(presetKey: CTAKey): LinkItem[] {
   const preset = CTA_PRESETS[presetKey];
   const featured: LinkItem[] = [];
@@ -318,7 +397,9 @@ export function getFeaturedItems(presetKey: CTAKey): LinkItem[] {
 
   (["reads", "downloads", "actions", "related"] as const).forEach((cat) => {
     const items = preset[cat];
-    if (Array.isArray(items)) featured.push(...items.filter((i) => i.badge));
+    if (Array.isArray(items)) {
+      featured.push(...items.filter((i) => i.badge));
+    }
   });
 
   return featured.slice(0, 3);
@@ -338,7 +419,10 @@ export function searchPresets(query: string): CTAPreset[] {
     if (p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)) return true;
     for (const k of ["reads", "downloads", "actions", "related"] as const) {
       const arr = p[k];
-      if (Array.isArray(arr) && arr.some((it) => it.label.toLowerCase().includes(q) || it.sub?.toLowerCase().includes(q))) {
+      if (
+        Array.isArray(arr) &&
+        arr.some((it) => it.label.toLowerCase().includes(q) || it.sub?.toLowerCase().includes(q))
+      ) {
         return true;
       }
     }
@@ -349,6 +433,7 @@ export function searchPresets(query: string): CTAPreset[] {
 export function isCTAPreset(obj: unknown): obj is CTAPreset {
   return !!obj && typeof (obj as any).title === "string";
 }
+
 export function isLinkItem(obj: unknown): obj is LinkItem {
   return !!obj && typeof (obj as any).href === "string" && typeof (obj as any).label === "string";
 }

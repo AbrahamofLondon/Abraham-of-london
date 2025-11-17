@@ -1,110 +1,152 @@
 // components/mdx/ResourcesCTA.tsx
+import * as React from "react";
 import Link from "next/link";
-import { CTA_PRESETS, getCtaPreset, type LinkItem } from "./cta-presets";
+import {
+  getCtaPreset,
+  type CTAKey,
+  type CTAPreset,
+  type LinkItem,
+} from "@/components/mdx/cta-presets";
 
-export type ResourcesCTAProps =
-  | {
-      /** Use a preset key from CTA_PRESETS (e.g., "fatherhood") */
-      preset: keyof typeof CTA_PRESETS | string;
-      title?: never;
-      reads?: never;
-      downloads?: never;
-      className?: string;
-    }
-  | {
-      /** Manual mode */
-      preset?: never;
-      title?: string;
-      reads?: LinkItem[];
-      downloads?: LinkItem[];
-      className?: string;
-    };
+type ResourcesCTAProps = {
+  /** Preset key – can be CTAKey or string in MDX: <ResourcesCTA preset="fatherhood" /> */
+  preset?: CTAKey | string;
+  /** Optional overrides from MDX */
+  titleOverride?: string;
+  descriptionOverride?: string;
+  className?: string;
+};
 
-// Internal posts (these slugs exist)
-const defaultReads: LinkItem[] = [
-  { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Court-season clarity" },
-  { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build your band of brothers" },
-  { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Lead from the inside out" },
-];
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
-// PDFs that exist today
-const defaultDownloads: LinkItem[] = [
-  { href: "/downloads/Mentorship_Starter_Kit.pdf", label: "Mentorship Starter Kit" },
-  { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-  { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
-];
+function LinkChip({ item }: { item: LinkItem }) {
+  const href = item.href || "#";
+  const label = item.label || href;
+  const sub = item.sub;
+  const badge = item.badge;
+  const external = item.external ?? isExternal(href);
 
-function isInternal(href = "") {
-  return href.startsWith("/") && !href.endsWith(".pdf");
+  const content = (
+    <div className="flex flex-col gap-0.5 rounded-xl border border-lightGrey/70 bg-white/80 px-3 py-2 text-left shadow-sm transition hover:border-softGold/60 hover:bg-warmWhite/80">
+      <div className="flex items-center gap-2">
+        {item.icon ? <span className="text-lg leading-none">{item.icon}</span> : null}
+        <span className="text-sm font-semibold text-deepCharcoal">{label}</span>
+        {badge && (
+          <span className="ml-auto inline-flex items-center rounded-full bg-softGold/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-softGold">
+            {badge}
+          </span>
+        )}
+      </div>
+      {sub && <p className="text-[0.75rem] text-gray-600">{sub}</p>}
+    </div>
+  );
+
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block no-underline"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className="block no-underline">
+      {content}
+    </Link>
+  );
+}
+
+function Section({
+  title,
+  items,
+}: {
+  title: string;
+  items?: LinkItem[];
+}) {
+  if (!items || !items.length) return null;
+
+  return (
+    <div className="space-y-2">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        {title}
+      </h3>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {items.map((item, idx) => (
+          <LinkChip key={`${item.href}-${idx}`} item={item} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function ResourcesCTA(props: ResourcesCTAProps) {
-  const presetKey = "preset" in props ? props.preset : undefined;
-  const preset = presetKey ? getCtaPreset(String(presetKey)) : null;
+  const { preset, titleOverride, descriptionOverride, className = "" } = props;
 
-  const data = preset
-    ? preset
-    : {
-        title: ("title" in props && props.title) || "Further Reading & Tools",
-        reads: ("reads" in props && props.reads) || defaultReads,
-        downloads: ("downloads" in props && props.downloads) || defaultDownloads,
-      };
+  const rawKey = (preset ?? "").toString().trim().toLowerCase();
+  const config: CTAPreset | null = getCtaPreset(rawKey);
 
-  if (!data) return null;
+  // Fail-safe: if preset is unknown or missing, render nothing so MDX doesn’t explode.
+  if (!config) return null;
 
-  const reads = (data.reads ?? []).filter(Boolean);
-  const downloads = (data.downloads ?? []).filter(Boolean);
+  const title = titleOverride || config.title;
+  const description = descriptionOverride || config.description;
+
+  const hasReads = config.reads && config.reads.length > 0;
+  const hasDownloads = config.downloads && config.downloads.length > 0;
+  const hasActions = config.actions && config.actions.length > 0;
+  const hasRelated = config.related && config.related.length > 0;
+
+  const hasAny =
+    hasReads || hasDownloads || hasActions || hasRelated || !!config.featured;
+
+  if (!hasAny) return null;
+
+  const tone =
+    config.theme === "fatherhood"
+      ? "border-softGold/40 bg-warmWhite/80"
+      : config.theme === "brotherhood"
+      ? "border-forest/30 bg-forest/3"
+      : config.theme === "leadership"
+      ? "border-deepCharcoal/25 bg-slate-900/2"
+      : "border-lightGrey bg-white/80";
 
   return (
     <section
-      className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${("className" in props && props.className) || ""}`}
-      aria-labelledby="resources-cta-title"
+      className={[
+        "my-10 rounded-3xl border px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6 sm:py-7",
+        tone,
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
-      <h3 id="resources-cta-title" className="mb-4 font-serif text-2xl text-forest">
-        {data.title}
-      </h3>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline">
+        <div className="flex-1">
+          <h2 className="font-serif text-xl font-semibold text-deepCharcoal sm:text-2xl">
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-1 max-w-2xl text-sm text-gray-700">{description}</p>
+          )}
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {!!reads.length && (
-          <div>
-            <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
-              Further Reading
-            </h4>
-            <ul className="space-y-2">
-              {reads.map((r) => (
-                <li key={r.href}>
-                  {isInternal(r.href) ? (
-                    <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
-                      {r.label}
-                    </Link>
-                  ) : (
-                    <a href={r.href} className="luxury-link text-forest" target="_blank" rel="noopener noreferrer">
-                      {r.label}
-                    </a>
-                  )}
-                  {r.sub && <span className="ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]">— {r.sub}</span>}
-                </li>
-              ))}
-            </ul>
+        {config.featured && (
+          <div className="mt-2 sm:mt-0">
+            <LinkChip item={config.featured} />
           </div>
         )}
+      </div>
 
-        {!!downloads.length && (
-          <div>
-            <h4 className="mb-2 text-sm font-semibold tracking-wide text-[color:var(--color-on-secondary)/0.7] uppercase">
-              Downloads
-            </h4>
-            <ul className="space-y-2">
-              {downloads.map((d) => (
-                <li key={d.href}>
-                  <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
-                    {d.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        {hasReads && <Section title="Recommended reading" items={config.reads} />}
+        {hasDownloads && <Section title="Downloads" items={config.downloads} />}
+        {hasActions && <Section title="Next steps" items={config.actions} />}
+        {hasRelated && <Section title="Related resources" items={config.related} />}
       </div>
     </section>
   );
