@@ -71,7 +71,7 @@ const ContactPage = (): JSX.Element => {
   return (
     <Layout title={pageTitle}>
       <Head>
-        <title>{pageTitle} | Strategic Stewardship & Legacy Building</title>
+        <title>{siteConfig.getPageTitle(pageTitle)}</title>
         <meta
           name="description"
           content="Connect with Abraham of London for strategic advisory, fatherhood advocacy, legacy building, and venture leadership. Priority given to aligned vision and principled partnerships."
@@ -144,10 +144,10 @@ const ContactPage = (): JSX.Element => {
                     <div>
                       <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Email</h3>
                       <a 
-                        href="mailto:info@abrahamoflondon.org" 
+                        href={`mailto:${siteConfig.email}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
                       >
-                        info@abrahamoflondon.org
+                        {siteConfig.email}
                       </a>
                     </div>
                   </div>
@@ -159,10 +159,10 @@ const ContactPage = (): JSX.Element => {
                     <div>
                       <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Phone</h3>
                       <a 
-                        href="tel:+442086225909" 
+                        href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
                       >
-                        +44 20 8622 5909
+                        {siteConfig.phone}
                       </a>
                     </div>
                   </div>
@@ -330,7 +330,7 @@ const ContactPage = (): JSX.Element => {
                     <p className={`text-sm ${secondaryTextClass}`}>
                       Prefer direct communication?{" "}
                       <a
-                        href="mailto:info@abrahamoflondon.org"
+                        href={`mailto:${siteConfig.email}`}
                         className={`font-semibold underline-offset-2 hover:underline ${accentTextClass}`}
                       >
                         Email directly

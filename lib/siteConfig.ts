@@ -68,8 +68,8 @@ export interface SiteConfig {
   author: string;
   /** Public contact email */
   email: string;
-  /** Optional public phone (used in header/footer) */
-  phone?: string;
+  /** Public contact phone */
+  phone: string;
   /** Optional social links used across the site */
   socialLinks?: SocialLink[];
   /** Default author avatar used across blog cards, etc. */
@@ -121,8 +121,8 @@ export const siteConfig: SiteConfig = {
   siteUrl: PUBLIC_SITE_URL,
   title: "Abraham of London",
   author: "Abraham of London",
-  email: "hello@abrahamoflondon.org",
-  phone: "+44 0000 000000", // optional – adjust or remove
+  email: "info@abrahamoflondon.org",
+  phone: "+44 20 8622 5909",
   authorImage: "/assets/images/profile-portrait.webp",
 
   socialLinks: [
@@ -270,24 +270,30 @@ export function getRoutePath(id: RouteId): string {
 
 /** Build an internal href from either a route id or a raw path. */
 export function internalHref(target: RouteId | string): string {
+  // Handle RouteId case first
   if (typeof target === "string" && target in siteConfig.routes) {
-    // Narrow RouteId case when devs accidentally pass "blogIndex" as string
     return getRoutePath(target as RouteId);
   }
-  if (typeof target === "string" && target.startsWith("/")) {
-    return normalisePath(target);
-  }
+  
+  // Handle string paths
   if (typeof target === "string") {
-    // Non-slash string – treat as path fragment
+    // If it's already a proper path, normalize it
+    if (target.startsWith("/") || target.startsWith("#") || target.startsWith("mailto:") || target.startsWith("tel:")) {
+      return target;
+    }
+    // Otherwise treat as path fragment
     return normalisePath(`/${target}`);
   }
-  return "/";
+  
+  // Handle RouteId directly
+  return getRoutePath(target);
 }
 
 /** Build an absolute URL safely (for OG tags, emails, sitemaps, etc.). */
 export function absUrl(path: string | RouteId): string {
   const href = typeof path === "string" ? internalHref(path) : getRoutePath(path);
   if (/^https?:\/\//iu.test(href)) return href;
+  if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return href;
   return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
 }
 
@@ -296,4 +302,16 @@ export function getPageTitle(pageTitle?: string): string {
   const base = siteConfig.title || "Abraham of London";
   if (!pageTitle || typeof pageTitle !== "string") return base;
   return `${pageTitle} | ${base}`;
+}
+
+/** Check if a route is active (for navigation highlighting) */
+export function isActiveRoute(currentPath: string, target: RouteId | string): boolean {
+  const targetPath = internalHref(target);
+  const normalizedCurrent = normalisePath(currentPath);
+  
+  if (targetPath === "/") {
+    return normalizedCurrent === "/";
+  }
+  
+  return normalizedCurrent.startsWith(targetPath);
 }
