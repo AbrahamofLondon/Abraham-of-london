@@ -1,144 +1,274 @@
 // pages/[slug].tsx
+// Dynamic blog post route – reads MDX from content/posts (or Posts/blog) and
+// makes sure it works both locally (Windows) and on Netlify (Linux).
+
 import type {
   GetStaticPaths,
   GetStaticProps,
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import Layout from "@/components/Layout";
+
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import {
-  getAllPostsMeta,
-  getPostBySlug,
-  type PostWithContent,
-} from "@/lib/server/posts-data";
-import * as mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components";
 
-type BlogPageProps = {
-  post: {
-    slug: string;
-    title: string;
-    date: string | null;
-    excerpt: string | null;
-    coverImage: string | null;
-    tags: string[] | null;
-  };
-  mdxSource: MDXRemoteSerializeResult;
+type FrontMatter = {
+  type?: string;
+  title?: string;
+  slug?: string;
+  date?: string | Date;
+  author?: string;
+  excerpt?: string;
+  readTime?: string;
+  category?: string;
+  tags?: string[];
+  coverImage?: string;
+  [key: string]: unknown;
 };
 
+type PostPageProps = {
+  slug: string;
+  frontMatter: {
+    title: string;
+    slug: string;
+    date: string | null;
+    author: string | null;
+    excerpt: string | null;
+    readTime: string | null;
+    category: string | null;
+    tags: string[] | null;
+    coverImage: string | null;
+  };
+  mdxSource: MDXRemoteSerializeResult | null;
+  content: string | null;
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Helpers: robustly locate the posts directory                              */
+/* -------------------------------------------------------------------------- */
+
+function resolvePostsDir(): string | null {
+  const contentRoot = path.join(process.cwd(), "content");
+
+  const candidates = [
+    "posts",
+    "Posts",
+    "blog",
+    "Blog",
+  ];
+
+  for (const dir of candidates) {
+    const full = path.join(contentRoot, dir);
+    if (fs.existsSync(full) && fs.statSync(full).isDirectory()) {
+      console.log(`[posts] Using directory: ${full}`);
+      return full;
+    }
+  }
+
+  console.warn(
+    "[posts] No posts directory found. Checked:",
+    candidates.map((d) => path.join(contentRoot, d)).join(", "),
+  );
+  return null;
+}
+
+const POSTS_DIR = resolvePostsDir();
+
+function listPostFiles(): string[] {
+  if (!POSTS_DIR || !fs.existsSync(POSTS_DIR)) return [];
+  return fs
+    .readdirSync(POSTS_DIR)
+    .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+}
+
+function readFrontMatter(filePath: string): { frontMatter: FrontMatter; content: string } {
+  const raw = fs.readFileSync(filePath, "utf8");
+  const { data, content } = matter(raw);
+  return {
+    frontMatter: data as FrontMatter,
+    content,
+  };
+}
+
+function effectiveSlugFromFile(fileName: string): string {
+  if (!POSTS_DIR) return fileName.replace(/\.mdx?$/, "");
+  const fullPath = path.join(POSTS_DIR, fileName);
+  const { frontMatter } = readFrontMatter(fullPath);
+
+  const fmSlug =
+    typeof frontMatter.slug === "string" && frontMatter.slug.trim().length
+      ? frontMatter.slug.trim()
+      : null;
+
+  return fmSlug ?? fileName.replace(/\.mdx?$/, "");
+}
+
+function findPostFileBySlug(slug: string): string | null {
+  if (!POSTS_DIR) return null;
+  const files = listPostFiles();
+  for (const file of files) {
+    const eff = effectiveSlugFromFile(file);
+    if (eff === slug) {
+      return path.join(POSTS_DIR, file);
+    }
+  }
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  getStaticPaths                                                            */
+/* -------------------------------------------------------------------------- */
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = getAllPostsMeta();
-  const paths = posts
-    .filter((p) => p.slug && String(p.slug).trim().length > 0)
-    .map((p) => ({
-      params: { slug: String(p.slug) },
-    }));
+  if (!POSTS_DIR) {
+    // No posts directory on build server – nothing to pre-render,
+    // but keep route alive with blocking fallback (in case of future fix).
+    return {
+      paths: [],
+      fallback: "blocking",
+    };
+  }
+
+  const files = listPostFiles();
+
+  const paths = files.map((file) => ({
+    params: { slug: effectiveSlugFromFile(file) },
+  }));
+
+  console.log(
+    "[posts] getStaticPaths slugs:",
+    paths.map((p) => p.params.slug),
+  );
 
   return {
     paths,
-    fallback: false, // all valid slugs are known at build time
+    fallback: "blocking",
   };
 };
 
-export const getStaticProps: GetStaticProps<BlogPageProps> = async (ctx) => {
+/* -------------------------------------------------------------------------- */
+/*  getStaticProps                                                            */
+/* -------------------------------------------------------------------------- */
+
+export const getStaticProps: GetStaticProps<PostPageProps> = async (ctx) => {
   const slugParam = ctx.params?.slug;
-  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
-  if (!slug) return { notFound: true };
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam || "";
 
-  const doc: PostWithContent | null = getPostBySlug(String(slug));
-  if (!doc) return { notFound: true };
+  if (!slug || !POSTS_DIR) {
+    return { notFound: true };
+  }
 
-  const mdxSource = await serialize(doc.content);
+  const filePath = findPostFileBySlug(slug);
+  if (!filePath) {
+    console.warn("[posts] No file found for slug:", slug);
+    return { notFound: true };
+  }
+
+  const { frontMatter, content } = readFrontMatter(filePath);
+
+  const rawDate = frontMatter.date ?? null;
+  const date =
+    rawDate instanceof Date
+      ? rawDate.toISOString()
+      : typeof rawDate === "string"
+      ? rawDate
+      : null;
+
+  const fm = {
+    title: (frontMatter.title ?? slug) as string,
+    slug,
+    date,
+    author: frontMatter.author ?? null,
+    excerpt: frontMatter.excerpt ?? null,
+    readTime: frontMatter.readTime ?? null,
+    category: frontMatter.category ?? null,
+    tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : null,
+    coverImage: frontMatter.coverImage ?? null,
+  };
+
+  const mdxSource =
+    content && content.trim().length
+      ? await serialize(content, {
+          mdxOptions: {
+            remarkPlugins: [],
+            rehypePlugins: [],
+          },
+        })
+      : null;
 
   return {
     props: {
-      post: {
-        slug: doc.slug,
-        title: (doc.title as string) ?? "",
-        date: doc.date ?? null,
-        excerpt: (doc.excerpt as string) ?? null,
-        coverImage: (doc.coverImage as string) ?? null,
-        tags: (doc.tags as string[] | null) ?? null,
-      },
+      slug,
+      frontMatter: fm,
       mdxSource,
+      content: content || null,
     },
+    revalidate: 3600,
   };
 };
 
-export default function BlogPostPage({
-  post,
-  mdxSource,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  const pageTitle = post.title || "Article";
+/* -------------------------------------------------------------------------- */
+/*  Page component                                                            */
+/* -------------------------------------------------------------------------- */
 
-  const displayDate =
-    post.date && new Date(post.date).toString() !== "Invalid Date"
-      ? new Intl.DateTimeFormat("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }).format(new Date(post.date))
-      : null;
+export default function PostPage({
+  frontMatter,
+  mdxSource,
+  content,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const pageTitle = frontMatter.title || "Article";
 
   return (
     <Layout title={pageTitle}>
       <Head>
         <title>{pageTitle} | Abraham of London</title>
-        {post.excerpt && (
-          <meta name="description" content={post.excerpt} />
+        {frontMatter.excerpt && (
+          <meta name="description" content={frontMatter.excerpt} />
         )}
       </Head>
 
-      <main className="mx-auto max-w-3xl px-4 py-10">
-        {post.coverImage && (
-          <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl border border-lightGrey bg-black/5">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              sizes="(min-width: 1024px) 960px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        )}
-
+      <main className="mx-auto max-w-4xl px-4 py-10">
         <header className="mb-8">
           <p className="text-xs uppercase tracking-wide text-gray-500">
-            Blog
+            {frontMatter.category || "Article"}
           </p>
           <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
-            {post.title}
+            {frontMatter.title}
           </h1>
-
-          {(displayDate || (post.tags && post.tags.length)) && (
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600">
-              {displayDate && (
+          {(frontMatter.date || frontMatter.readTime) && (
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              {frontMatter.date && (
                 <span>
                   <span aria-hidden>📅 </span>
-                  {displayDate}
+                  {new Intl.DateTimeFormat("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  }).format(new Date(frontMatter.date))}
                 </span>
               )}
-              {post.tags && post.tags.length > 0 && (
+              {frontMatter.readTime && (
                 <>
                   <span aria-hidden>•</span>
-                  <span>
-                    {post.tags.map((tag, i) => (
-                      <span key={tag}>
-                        {i > 0 && ", "}
-                        {tag}
-                      </span>
-                    ))}
-                  </span>
+                  <span>{frontMatter.readTime}</span>
                 </>
               )}
             </div>
           )}
         </header>
 
-        <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest">
-          <MDXRemote {...mdxSource} components={mdxComponents} />
+        <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest dark:prose-invert">
+          {mdxSource ? (
+            <MDXRemote {...mdxSource} components={mdxComponents} />
+          ) : content ? (
+            <p>{content}</p>
+          ) : null}
         </article>
       </main>
     </Layout>
