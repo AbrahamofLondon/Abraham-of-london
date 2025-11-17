@@ -315,3 +315,16 @@ export function isActiveRoute(currentPath: string, target: RouteId | string): bo
   
   return normalizedCurrent.startsWith(targetPath);
 }
+
+// Optional: Export a convenience object for common routes
+export const routes = {
+  home: siteConfig.routes.home.path,
+  about: siteConfig.routes.about.path,
+  blog: siteConfig.routes.blogIndex.path,
+  content: siteConfig.routes.contentIndex.path,
+  books: siteConfig.routes.booksIndex.path,
+  ventures: siteConfig.routes.ventures.path,
+  downloads: siteConfig.routes.downloadsIndex.path,
+  strategy: siteConfig.routes.strategyLanding.path,
+  contact: siteConfig.routes.contact.path,
+} as const;
