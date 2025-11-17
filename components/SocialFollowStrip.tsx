@@ -4,7 +4,11 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/upgraded-component";
+
+/* ---------- Local utility: cn (no external deps) ---------- */
+function cn(...parts: Array<string | false | null | undefined>): string {
+  return parts.filter(Boolean).join(" ");
+}
 
 /* ---------- Types ---------- */
 type Variant = "light" | "dark";
@@ -80,27 +84,20 @@ const DEFAULT_ITEMS: SocialItem[] = [
 ];
 
 /* ---------- Asset-based icons ---------- */
-/**
- * Map each social "kind" to its SVG asset under public/assets/images/social/svg.
- * Adjust filenames here if your actual files differ.
- */
+
 type IconKind = NonNullable<SocialItem["kind"]>;
 
-const ICON_SOURCES: Record<IconKind, string> = {
-  tiktok: "/assets/images/social/tiktok.svg",
-  x: "/assets/images/social/x.svg",
-  instagram: "/assets/images/social/instagram.svg",
-  facebook: "/assets/images/social/facebook.svg",
-  linkedin: "/assets/images/social/linkedin.svg",
-  youtube: "/assets/images/social/youtube.svg",
-  mail: "/assets/images/social/mail.svg",
-  phone: "/assets/images/social/phone.svg",
-  whatsapp: "/assets/images/social/whatsapp.svg",
-};
+/**
+ * Convention: each kind maps to /assets/images/social/svg/{kind}.svg
+ * If filenames differ, tweak this mapping.
+ */
+function iconPathForKind(kind: IconKind): string {
+  return `/assets/images/social/svg/${kind}.svg`;
+}
 
 /**
  * Optional brand colour accent per platform.
- * Used only to lightly tint text/borders – icons themselves are the SVG art.
+ * Only tints text/border; icons themselves are pure SVG art.
  */
 const BRAND_HEX: Partial<Record<IconKind, string>> = {
   tiktok: "#010101",
@@ -130,7 +127,7 @@ function SocialIcon({
   kind: IconKind;
   label: string;
 }): JSX.Element {
-  const src = ICON_SOURCES[kind];
+  const src = iconPathForKind(kind);
 
   return (
     <span className="relative inline-flex h-5 w-5 items-center justify-center overflow-hidden">
@@ -146,8 +143,7 @@ function SocialIcon({
 }
 
 /**
- * Very simple fallback icon if "kind" is missing or misconfigured.
- * Keeps everything build-safe.
+ * Simple fallback if "kind" is missing or misconfigured.
  */
 function DefaultLinkIcon({ label }: { label: string }): JSX.Element {
   return (
@@ -240,7 +236,7 @@ export default function SocialFollowStrip({
                   style={
                     accentColor
                       ? {
-                          // lightly tint text to brand colour while icon stays pure asset
+                          // Flat solid look; just tint text slightly with brand colour
                           color: accentColor,
                         }
                       : undefined
