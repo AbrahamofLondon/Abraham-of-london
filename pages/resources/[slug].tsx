@@ -10,7 +10,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
 import SiteLayout from "@/components/SiteLayout";
-import mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 

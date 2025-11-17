@@ -3,6 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getPageTitle } from "@/lib/siteConfig";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -17,9 +18,7 @@ export default function Layout({
   title,
   pageTitle,
 }: LayoutProps): JSX.Element {
-  const baseTitle = "Abraham of London";
-  const raw = title ?? pageTitle;
-  const effectiveTitle = raw ? `${raw} | ${baseTitle}` : baseTitle;
+  const effectiveTitle = getPageTitle(title ?? pageTitle);
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-deepCharcoal">
@@ -35,9 +34,7 @@ export default function Layout({
       <Header />
 
       {/* Main content */}
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
       {/* Global footer */}
       <Footer />

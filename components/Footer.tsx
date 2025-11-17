@@ -1,7 +1,7 @@
 // components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
-import { siteConfig, absUrl } from "@/lib/siteConfig";
+import { siteConfig, absUrl, getRoutePath } from "@/lib/siteConfig";
 
 type BareSocial = {
   href?: string;
@@ -60,7 +60,9 @@ const DEFAULT_SOCIALS: BareSocial[] = [
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) =>
-  href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:");
+  href.startsWith("mailto:") ||
+  href.startsWith("tel:") ||
+  href.startsWith("sms:");
 
 export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
@@ -105,16 +107,14 @@ export default function Footer(): JSX.Element {
         <div className="text-sm">
           <span className="font-semibold">{title}</span>
           <span className="mx-2">•</span>
-          <Link href={absUrl("/")} className="hover:underline">
+          {/* ✅ Use canonical route, NOT absUrl */}
+          <Link href={getRoutePath("home")} className="hover:underline">
             Home
           </Link>
           {email ? (
             <>
               <span className="mx-2">•</span>
-              <a
-                href={`mailto:${email}`}
-                className="hover:underline"
-              >
+              <a href={`mailto:${email}`} className="hover:underline">
                 {email}
               </a>
             </>

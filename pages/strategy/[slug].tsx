@@ -9,7 +9,7 @@ import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components";
 // Assuming the unified data fetcher is now correctly robust in lib/mdx.ts
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";

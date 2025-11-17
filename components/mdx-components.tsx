@@ -1,229 +1,266 @@
 // components/mdx-components.tsx
-"use client";
 
-import React, { type ReactNode } from "react";
+import * as React from "react";
+import type { ComponentProps, ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
-// Named exports — as confirmed by your file list
-import { Quote } from "@/components/Quote";
-import { Rule } from "@/components/Rule";
-import { Verse } from "@/components/Verse";
-import { Note } from "@/components/Note";
-import { JsonLd } from "@/components/JsonLd";
-import ShareRow from "@/components/ShareRow"; // default export
+// Basic typography helpers ---------------------------------------------------
 
-// Avoid TS over-strictness: MDX accepts ANY React component
-type AnyProps = { children?: ReactNode; [key: string]: any };
-const mdxComponents: Record<string, any> = {
-  //
-  // ==== LINKS ====
-  //
-  a: ({ href, children, ...props }: AnyProps) => {
-    const isExternal =
-      typeof href === "string" &&
-      (href.startsWith("http://") ||
-        href.startsWith("https://") ||
-        href.startsWith("//"));
+type AnyProps = { children?: ReactNode } & React.HTMLAttributes<HTMLElement>;
 
-    if (!href)
-      return (
-        <span className="text-forest underline decoration-dotted" {...props}>
-          {children}
-        </span>
-      );
+const Paragraph = (props: AnyProps) => (
+  <p
+    {...props}
+    className={
+      "my-4 text-[0.95rem] leading-relaxed text-gray-800 dark:text-gray-100 " +
+      (props.className ?? "")
+    }
+  />
+);
 
-    if (isExternal)
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-forest underline decoration-forest/40 hover:decoration-forest"
-          {...props}
-        >
-          {children}
-        </a>
-      );
-
-    return (
-      <Link
-        href={href}
-        className="text-forest underline decoration-forest/40 hover:decoration-forest"
-        {...props}
-      >
-        {children}
-      </Link>
-    );
-  },
-
-  //
-  // ==== IMAGES ====
-  //
-  img: ({ src, alt, ...props }: AnyProps) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt || ""}
-      className="my-4 h-auto max-w-full rounded-xl shadow-sm"
+const Heading = (
+  Tag: "h1" | "h2" | "h3" | "h4",
+  base: string,
+): React.FC<AnyProps> => {
+  return (props: AnyProps) => (
+    <Tag
       {...props}
+      className={
+        base +
+        " text-deepCharcoal dark:text-gray-50 tracking-tight " +
+        (props.className ?? "")
+      }
+    />
+  );
+};
+
+const H1 = Heading(
+  "h1",
+  "mt-8 mb-4 font-serif text-3xl sm:text-4xl font-semibold",
+);
+const H2 = Heading(
+  "h2",
+  "mt-8 mb-3 font-serif text-2xl sm:text-3xl font-semibold",
+);
+const H3 = Heading(
+  "h3",
+  "mt-6 mb-2 font-serif text-xl sm:text-2xl font-semibold",
+);
+const H4 = Heading("h4", "mt-5 mb-2 font-serif text-lg font-semibold");
+
+const Blockquote = (props: AnyProps) => (
+  <blockquote
+    {...props}
+    className={
+      "my-6 border-l-4 border-softGold/80 bg-softGold/5 px-4 py-3 text-[0.95rem] italic text-gray-800 dark:text-gray-100 " +
+      (props.className ?? "")
+    }
+  />
+);
+
+const Anchor = (
+  props: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href?: string },
+) => {
+  const href = props.href ?? "#";
+
+  // External vs internal links
+  const isExternal = href.startsWith("http");
+
+  const className =
+    "font-medium text-forest underline-offset-2 hover:underline";
+
+  if (isExternal) {
+    return (
+      <a
+        {...props}
+        href={href}
+        target={props.target ?? "_blank"}
+        rel={props.rel ?? "noopener noreferrer"}
+        className={className + " " + (props.className ?? "")}
+      />
+    );
+  }
+
+  return (
+    <Link href={href} className={className + " " + (props.className ?? "")}>
+      {props.children}
+    </Link>
+  );
+};
+
+// MDX Image wrapper ----------------------------------------------------------
+
+type MdxImageProps = Omit<
+  ComponentProps<typeof Image>,
+  "src" | "alt" | "width" | "height"
+> & {
+  src: string;
+  alt?: string;
+  width?: number | string;
+  height?: number | string;
+};
+
+const MdxImage: React.FC<MdxImageProps> = (props) => {
+  const { src, alt = "", width, height, className = "", ...rest } = props;
+
+  const numericWidth: number =
+    typeof width === "string"
+      ? Number.parseInt(width, 10) || 1200
+      : typeof width === "number"
+      ? width
+      : 1200;
+
+  const numericHeight: number =
+    typeof height === "string"
+      ? Number.parseInt(height, 10) || 675
+      : typeof height === "number"
+      ? height
+      : 675;
+
+  return (
+    <div className="my-6 overflow-hidden rounded-xl">
+      <Image
+        src={src}
+        alt={alt}
+        width={numericWidth}
+        height={numericHeight}
+        className={`h-auto w-full object-cover ${className}`.trim()}
+        {...rest}
+      />
+    </div>
+  );
+};
+
+// Custom components used inside MDX ------------------------------------------
+
+// Pull-out line / emphasis line
+const PullLine: React.FC<{ children?: ReactNode }> = ({ children }) => (
+  <p className="my-6 border-l-4 border-softGold/80 bg-softGold/5 px-4 py-3 text-base italic text-gray-900 dark:text-gray-50">
+    {children}
+  </p>
+);
+
+// Simple responsive grid wrapper used in some downloads MDX
+const Grid: React.FC<{ children?: ReactNode; cols?: number }> = ({
+  children,
+  cols = 2,
+}) => {
+  const base = "my-6 grid gap-6";
+  const colsClass =
+    cols === 4
+      ? "md:grid-cols-4"
+      : cols === 3
+      ? "md:grid-cols-3"
+      : "md:grid-cols-2";
+  return <div className={`${base} ${colsClass}`}>{children}</div>;
+};
+
+// Embossed brand mark used in covers / footers
+const EmbossedBrandMark: React.FC<{ children?: ReactNode }> = ({
+  children,
+}) => (
+  <p className="mt-6 select-none text-right text-[10px] font-light tracking-[0.35em] text-gray-400">
+    {(children as ReactNode) ?? "ABRAHAMOFLONDON"}
+  </p>
+);
+
+// Code / pre wrappers
+const Code = (props: AnyProps) => (
+  <code
+    {...props}
+    className={
+      "rounded bg-black/5 px-1.5 py-0.5 text-[0.85em] font-mono text-rose-700 dark:bg-black/40 dark:text-rose-200 " +
+      (props.className ?? "")
+    }
+  />
+);
+
+const Pre = (props: AnyProps) => (
+  <pre
+    {...props}
+    className={
+      "my-4 overflow-x-auto rounded-lg bg-[#0b1020] p-4 text-[0.8rem] text-gray-100 " +
+      (props.className ?? "")
+    }
+  />
+);
+
+// Exported MDX components map ------------------------------------------------
+
+export const mdxComponents = {
+  // block structure
+  h1: H1,
+  h2: H2,
+  h3: H3,
+  h4: H4,
+  p: Paragraph,
+  blockquote: Blockquote,
+  a: Anchor,
+  ul: (props: AnyProps) => (
+    <ul
+      {...props}
+      className={
+        "my-4 ml-5 list-disc text-[0.95rem] text-gray-800 dark:text-gray-100 " +
+        (props.className ?? "")
+      }
+    />
+  ),
+  ol: (props: AnyProps) => (
+    <ol
+      {...props}
+      className={
+        "my-4 ml-5 list-decimal text-[0.95rem] text-gray-800 dark:text-gray-100 " +
+        (props.className ?? "")
+      }
+    />
+  ),
+  li: (props: AnyProps) => (
+    <li
+      {...props}
+      className={
+        "my-1 text-[0.95rem] leading-relaxed text-gray-800 dark:text-gray-100 " +
+        (props.className ?? "")
+      }
+    />
+  ),
+  hr: (props: AnyProps) => (
+    <hr
+      {...props}
+      className={
+        "my-8 border-t border-gray-200/80 dark:border-gray-700/80 " +
+        (props.className ?? "")
+      }
     />
   ),
 
-  //
-  // ==== HEADINGS ====
-  //
-  h1: ({ children, ...props }: AnyProps) => (
-    <h1
-      className="mb-4 mt-6 font-serif text-4xl font-semibold text-deepCharcoal"
+  // inline & code
+  code: Code,
+  pre: Pre,
+  strong: (props: AnyProps) => (
+    <strong
       {...props}
-    >
-      {children}
-    </h1>
+      className={
+        "font-semibold text-deepCharcoal dark:text-gray-50 " +
+        (props.className ?? "")
+      }
+    />
   ),
-  h2: ({ children, ...props }: AnyProps) => (
-    <h2
-      className="mb-3 mt-6 font-serif text-3xl font-semibold text-deepCharcoal"
+  em: (props: AnyProps) => (
+    <em
       {...props}
-    >
-      {children}
-    </h2>
-  ),
-  h3: ({ children, ...props }: AnyProps) => (
-    <h3
-      className="mb-2 mt-5 font-serif text-2xl font-semibold text-deepCharcoal"
-      {...props}
-    >
-      {children}
-    </h3>
-  ),
-  h4: ({ children, ...props }: AnyProps) => (
-    <h4
-      className="mb-2 mt-4 text-xl font-semibold text-deepCharcoal"
-      {...props}
-    >
-      {children}
-    </h4>
+      className={
+        "italic text-deepCharcoal/90 dark:text-gray-50/90 " +
+        (props.className ?? "")
+      }
+    />
   ),
 
-  //
-  // ==== PARAGRAPHS ====
-  //
-  p: ({ children, ...props }: AnyProps) => (
-    <p className="my-3 leading-relaxed text-gray-800" {...props}>
-      {children}
-    </p>
-  ),
+  // images
+  img: MdxImage,
 
-  strong: ({ children, ...props }: AnyProps) => (
-    <strong className="font-semibold text-deepCharcoal" {...props}>
-      {children}
-    </strong>
-  ),
-
-  em: ({ children, ...props }: AnyProps) => (
-    <em className="italic" {...props}>{children}</em>
-  ),
-
-  inlineCode: ({ children, ...props }: AnyProps) => (
-    <code
-      className="rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono text-gray-800"
-      {...props}
-    >
-      {children}
-    </code>
-  ),
-
-  //
-  // ==== LISTS ====
-  //
-  ul: ({ children, ...props }: AnyProps) => (
-    <ul className="my-3 ml-5 list-disc space-y-1 text-gray-800" {...props}>
-      {children}
-    </ul>
-  ),
-  ol: ({ children, ...props }: AnyProps) => (
-    <ol className="my-3 ml-5 list-decimal space-y-1 text-gray-800" {...props}>
-      {children}
-    </ol>
-  ),
-
-  //
-  // ==== CODE BLOCKS ====
-  //
-  pre: ({ children, ...props }: AnyProps) => (
-    <pre
-      className="my-4 overflow-x-auto rounded-xl bg-gray-950/90 p-4 font-mono text-sm text-gray-100"
-      {...props}
-    >
-      {children}
-    </pre>
-  ),
-
-  //
-  // ==== TABLES ====
-  //
-  table: ({ children, ...props }: AnyProps) => (
-    <div className="my-4 overflow-x-auto">
-      <table
-        className="w-full border-collapse text-sm text-gray-800"
-        {...props}
-      >
-        {children}
-      </table>
-    </div>
-  ),
-
-  //
-  // ==== BLOCKQUOTE ====
-  //
-  blockquote: ({ children, ...props }: AnyProps) => (
-    <blockquote
-      className="my-4 border-l-4 border-forest/40 bg-forest/5 px-4 py-3 italic text-gray-800"
-      {...props}
-    >
-      {children}
-    </blockquote>
-  ),
-
-  //
-  // ==== CUSTOM MDX COMPONENTS ====
-  //
-  Callout: ({ children, ...props }: AnyProps) => (
-    <div
-      className="my-6 rounded-2xl border border-amber-500/40 bg-amber-50/70 px-4 py-3 text-sm text-neutral-900 shadow-sm"
-      {...props}
-    >
-      {children}
-    </div>
-  ),
-
-  Caption: ({ children, ...props }: AnyProps) => (
-    <p className="mt-2 text-xs italic text-neutral-500" {...props}>
-      {children}
-    </p>
-  ),
-
-  EmbossedBrandMark: ({ children, ...props }: AnyProps) => (
-    <div className="mt-8 text-xs tracking-[0.25em] uppercase text-neutral-400" {...props}>
-      {children ?? "Abraham of London"}
-    </div>
-  ),
-
-  EmbossedSign: ({ children, ...props }: AnyProps) => (
-    <div className="mt-10 text-right text-lg font-[cursive] text-neutral-700" {...props}>
-      {children ?? "AbrahamofLondon"}
-    </div>
-  ),
-
-  //
-  // ==== PROJECT COMPONENTS ====
-  //
-  Quote,
-  Rule,
-  Verse,
-  Note,
-  JsonLd,
-  ShareRow,
+  // Custom MDX-only components that were causing runtime errors
+  PullLine,
+  Grid,
+  EmbossedBrandMark,
 };
-
-export default mdxComponents;

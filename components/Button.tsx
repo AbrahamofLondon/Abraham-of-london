@@ -1,3 +1,4 @@
+// components/Button.tsx
 import * as React from "react";
 
 type Variant = "primary" | "secondary" | "outline" | "ghost";
@@ -10,7 +11,6 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 function getFontClasses(size: Size): string {
-  // Local, stable fallback. Swap to your font helper later if desired.
   switch (size) {
     case "sm":
       return "text-sm font-medium tracking-wide";
@@ -28,6 +28,7 @@ export default function Button({
   className = "",
   loading = false,
   disabled,
+  type,
   ...rest
 }: ButtonProps): JSX.Element {
   const base =
@@ -39,8 +40,10 @@ export default function Button({
       "bg-forest text-white hover:bg-forest/90 focus:ring-forest border border-transparent shadow-sm hover:shadow-md",
     secondary:
       "bg-warmWhite text-deepCharcoal hover:bg-gray-100 focus:ring-forest border border-lightGrey shadow-sm hover:shadow-md",
-    outline: "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-forest",
-    ghost: "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-transparent",
+    outline:
+      "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-forest",
+    ghost:
+      "bg-transparent text-forest hover:bg-forest/10 focus:ring-forest border border-transparent",
   };
 
   const sizes: Record<Size, string> = {
@@ -49,16 +52,43 @@ export default function Button({
     lg: "px-6 py-3 gap-2.5",
   };
 
-  const classes = [base, variants[variant], sizes[size], getFontClasses(size), className]
+  const classes = [
+    base,
+    variants[variant],
+    sizes[size],
+    getFontClasses(size),
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <button className={classes} disabled={disabled || loading} {...rest}>
+    <button
+      className={classes}
+      disabled={disabled || loading}
+      type={type || "button"}
+      {...rest}
+    >
       {loading && (
-        <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24" aria-hidden>
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
+        <svg
+          className="animate-spin h-4 w-4 mr-2"
+          viewBox="0 0 24 24"
+          aria-hidden
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+            fill="none"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z"
+          />
         </svg>
       )}
       {children}

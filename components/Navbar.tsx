@@ -1,20 +1,28 @@
+// components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import ScrollProgress from "./ScrollProgress"; // ← import
+import ScrollProgress from "./ScrollProgress";
+import { getRoutePath, RouteId } from "@/lib/siteConfig";
+
+type NavItem = {
+  name: string;
+  route: RouteId;
+};
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Books", href: "/books" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" },
+  const navLinks: NavItem[] = [
+    { name: "Home", route: "home" },
+    { name: "About", route: "about" },
+    { name: "Books", route: "booksIndex" },
+    // ✅ Point “Blog” to the real index for now
+    { name: "Blog", route: "contentIndex" },
+    { name: "Contact", route: "contact" },
   ];
 
   return (
@@ -31,7 +39,7 @@ export default function Navbar() {
         <div className="container-custom flex justify-between items-center">
           {/* Logo */}
           <Link
-            href="/"
+            href={getRoutePath("home")}
             className="flex items-center space-x-2 text-2xl font-bold font-serif text-deep-gold hover:text-warm-gold transition-colors duration-200"
           >
             <Image
@@ -50,7 +58,7 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <Link
                 key={link.name}
-                href={link.href}
+                href={getRoutePath(link.route)}
                 className="text-lg font-sans text-off-white hover:text-warm-gold transition-colors duration-200"
               >
                 {link.name}
@@ -109,7 +117,7 @@ export default function Navbar() {
                 {navLinks.map((link) => (
                   <Link
                     key={link.name}
-                    href={link.href}
+                    href={getRoutePath(link.route)}
                     onClick={() => setIsOpen(false)}
                     className="text-xl font-sans text-off-white hover:text-warm-gold transition-colors duration-200 py-2"
                   >

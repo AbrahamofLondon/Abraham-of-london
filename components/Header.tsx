@@ -5,16 +5,22 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
 type HeaderProps = { variant?: "light" | "dark" };
 
-const NAV = [
-  { href: "/books", label: "Books" },
-  { href: "/blogs", label: "Insights" }, // ✅ matches /blogs index
-  { href: "/ventures", label: "Ventures" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+type NavItem = {
+  route: RouteId;
+  label: string;
+};
+
+// ✅ Single source of truth for where nav items point
+const NAV: NavItem[] = [
+  { route: "booksIndex", label: "Books" },
+  { route: "contentIndex", label: "Insights" }, // was "/blogs" → now the real index
+  { route: "ventures", label: "Ventures" },
+  { route: "about", label: "About" },
+  { route: "contact", label: "Contact" },
 ];
 
 export default function Header({ variant = "light" }: HeaderProps) {
@@ -22,22 +28,28 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const [scrolled, setScrolled] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState<string>("/");
 
-  // Derive active link from window.location so it works in both app + pages router
-  const isActive = (href: string) => {
-    const p = currentPath || "";
-    if (href === "/") return p === "/";
-    return p === href || p.startsWith(href + "/");
-  };
+  // Derive active link from currentPath (kept in sync with location)
+  const isActive = React.useCallback(
+    (route: RouteId) => {
+      const href = getRoutePath(route);
+      const p = currentPath || "";
+      if (href === "/") return p === "/";
+      return p === href || p.startsWith(href + "/");
+    },
+    [currentPath],
+  );
 
   // Track scroll depth for header styling
   React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Track current path on client
+  // Track current path on client and keep it in sync with SPA navigation
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -45,13 +57,26 @@ export default function Header({ variant = "light" }: HeaderProps) {
       setCurrentPath(window.location.pathname || "/");
     };
 
+    // Initial
     updatePath();
-    window.addEventListener("popstate", updatePath);
-    window.addEventListener("hashchange", updatePath);
+
+    // Back/forward + hash changes
+    const handlePopOrHash = () => updatePath();
+
+    // Generic click listener – catches Next.js <Link> client navs
+    const handleClick = () => {
+      // Let Next update history/location first
+      setTimeout(updatePath, 0);
+    };
+
+    window.addEventListener("popstate", handlePopOrHash);
+    window.addEventListener("hashchange", handlePopOrHash);
+    window.addEventListener("click", handleClick, true);
 
     return () => {
-      window.removeEventListener("popstate", updatePath);
-      window.removeEventListener("hashchange", updatePath);
+      window.removeEventListener("popstate", handlePopOrHash);
+      window.removeEventListener("hashchange", handlePopOrHash);
+      window.removeEventListener("click", handleClick, true);
     };
   }, []);
 
@@ -101,7 +126,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
 
   const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
   const PHONE =
-    (siteConfig as any)?.phone?.toString().trim() || "+442086225909"; // ✅ landline fallback
+    (siteConfig as any)?.phone?.toString().trim() || "+442086225909";
 
   const brandClass = [
     "font-serif font-bold transition-all duration-200",
@@ -134,7 +159,11 @@ export default function Header({ variant = "light" }: HeaderProps) {
         style={{ height: scrolled ? "3.75rem" : "5rem" }}
       >
         {/* Brand */}
-        <Link href="/" aria-label="Home" className={brandClass}>
+        <Link
+          href={getRoutePath("home")}
+          aria-label="Home"
+          className={brandClass}
+        >
           Abraham of London
         </Link>
 
@@ -142,18 +171,18 @@ export default function Header({ variant = "light" }: HeaderProps) {
         <div className="hidden items-center gap-6 md:flex">
           <ul className="flex items-center gap-6">
             {NAV.map((item) => (
-              <li key={item.href} className="relative">
+              <li key={item.route} className="relative">
                 <Link
-                  href={item.href}
+                  href={getRoutePath(item.route)}
                   className={`text-sm font-medium transition-colors ${linkBase}`}
-                  aria-current={isActive(item.href) ? "page" : undefined}
+                  aria-current={isActive(item.route) ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
                 <span
                   aria-hidden="true"
                   className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all ${
-                    isActive(item.href) ? `w-full ${underlineActive}` : "w-0"
+                    isActive(item.route) ? `w-full ${underlineActive}` : "w-0"
                   }`}
                 />
               </li>
@@ -179,7 +208,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
               </a>
             )}
             <Link
-              href="/contact"
+              href={getRoutePath("contact")}
               className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               aria-label="Go to contact form"
             >
@@ -252,12 +281,12 @@ export default function Header({ variant = "light" }: HeaderProps) {
         >
           <ul className="grid gap-2">
             {NAV.map((item) => (
-              <li key={item.href}>
+              <li key={item.route}>
                 <Link
-                  href={item.href}
+                  href={getRoutePath(item.route)}
                   onClick={() => setOpen(false)}
                   className={`block rounded-md px-3 py-2 text-base font-medium ${
-                    isActive(item.href)
+                    isActive(item.route)
                       ? variant === "dark"
                         ? "bg-white/10 text-cream"
                         : "bg-black/5 text-deepCharcoal"
@@ -265,7 +294,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                       ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
                       : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
                   }`}
-                  aria-current={isActive(item.href) ? "page" : undefined}
+                  aria-current={isActive(item.route) ? "page" : undefined}
                 >
                   {item.label}
                 </Link>
@@ -299,7 +328,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
             </li>
             <li className="pt-2">
               <Link
-                href="/contact"
+                href={getRoutePath("contact")}
                 onClick={() => setOpen(false)}
                 className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               >

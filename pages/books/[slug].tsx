@@ -1,409 +1,231 @@
+
 // pages/books/[slug].tsx
 
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticProps,
+  InferGetStaticPropsType,
+} from "next";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getPageBySlug, getPageSlugs } from "@/lib/server/pages-data";
-import type { PageMeta } from "@/types/page";
-import {
-  getDownloadsBySlugs,
-  type DownloadMeta,
-} from "@/lib/server/downloads-data";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { mdxComponents } from "@/components/mdx-components";
+import { getAllBooks, getBookBySlug } from "@/lib/books";
 
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-type PageProps = {
-  page: PageMeta;
-  contentSource: MDXRemoteSerializeResult;
-  resourcesMeta: DownloadMeta[];
-};
-
-type _RelatedResource = {
+/**
+ * Shape we actually need on the page – kept loose to avoid
+ * fighting with server-side types.
+ */
+type SerializableBook = {
   slug: string;
   title?: string;
-  description?: string | null;
+  subtitle?: string;
+  description?: string;
+  excerpt?: string;
+  author?: string;
+  date?: string | null;
   coverImage?: string | null;
-  href?: string;
-  excerpt?: string | null;
-  pdfPath?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  readTime?: string | null;
+  mdxSource?: MDXRemoteSerializeResult | null;
+  content?: string | null;
+  [key: string]: unknown;
 };
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+type BookPageProps = {
+  book: SerializableBook;
+};
 
-const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
+/* -------------------------------------------------------------------------- */
+/*  Static paths                                                              */
+/* -------------------------------------------------------------------------- */
 
-function formatPretty(
-  isoish: string | null | undefined,
-  tz = "Europe/London"
-): string {
-  if (!isoish || typeof isoish !== "string") return "";
-  if (isDateOnly(isoish)) {
-    const d = new Date(`${isoish}T00:00:00Z`);
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: tz,
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(d);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const books = await Promise.resolve(getAllBooks());
+
+  const slugs =
+    Array.isArray(books) && books.length
+      ? books
+          .map((b: any) => b?.slug)
+          .filter(
+            (s): s is string =>
+              typeof s === "string" && s.trim().length > 0,
+          )
+      : [];
+
+  const paths = slugs.map((slug) => ({ params: { slug } }));
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Static props – fully JSON-safe                                            */
+/* -------------------------------------------------------------------------- */
+
+export const getStaticProps: GetStaticProps<BookPageProps> = async (ctx) => {
+  const slugParam = ctx.params?.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
+
+  if (!slug) {
+    return { notFound: true };
   }
 
-  const d = new Date(isoish);
-  if (Number.isNaN(d.valueOf())) return isoish;
+  const rawBook = await Promise.resolve(getBookBySlug(slug));
 
-  const date = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
+  if (!rawBook) {
+    return { notFound: true };
+  }
 
-  const time = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
+  // 🔐 Make every Date a string so Next.js can serialise it
+  const serialised = JSON.parse(
+    JSON.stringify(rawBook, (_key, value) =>
+      value instanceof Date ? value.toISOString() : value,
+    ),
+  ) as SerializableBook;
 
-  return `${date}, ${time}`;
-}
+  return {
+    props: {
+      book: serialised,
+    },
+    revalidate: 3600,
+  };
+};
 
-// -----------------------------------------------------------------------------
-// Component
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Page component                                                            */
+/* -------------------------------------------------------------------------- */
 
-function DynamicPage({ page, contentSource, resourcesMeta }: PageProps) {
-  if (!page) return <div>Page not found.</div>;
+export default function BookPage(
+  props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
+  const { book } = props;
 
   const {
-    slug,
     title,
+    subtitle,
     description,
     excerpt,
-    heroImage,
-    coverImage,
-    date,
     author,
-    tags,
+    date,
+    coverImage,
     category,
-  } = page;
+    tags,
+    mdxSource,
+    content,
+  } = book;
 
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://www.abrahamoflondon.org";
+  const pageTitle = title || "Book";
 
-  const pathSegment = slug ? `books/${slug}` : "books";
-  const url = `${site.replace(/\/+$/, "")}/${pathSegment}`;
+  const displayDate =
+    date && typeof date === "string" && !Number.isNaN(Date.parse(date))
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(new Date(date))
+      : null;
 
-  const relImage = coverImage ?? heroImage;
-  const absImage = relImage
-    ? new URL(relImage, site).toString()
-    : undefined;
+  const safeCover =
+    typeof coverImage === "string" && coverImage.trim().length > 0
+      ? coverImage
+      : null;
 
-  const displayDescription = description || excerpt || "";
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Book",
-    name: title,
-    description: displayDescription,
-    url,
-    ...(author
-      ? {
-          author: {
-            "@type": "Person",
-            name: author,
-          },
-        }
-      : {}),
-    ...(date ? { datePublished: date } : {}),
-    ...(absImage ? { image: [absImage] } : {}),
-    ...(category ? { about: category } : {}),
-  };
+  const hasMdxSource =
+    mdxSource &&
+    typeof mdxSource === "object" &&
+    "compiledSource" in mdxSource;
 
   return (
-    <Layout title={title}>
+    <Layout title={pageTitle}>
       <Head>
-        <title>{title} | Abraham of London</title>
-        <meta name="description" content={displayDescription} />
-        {absImage && <meta property="og:image" content={absImage} />}
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={url} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={displayDescription} />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <title>{pageTitle} | Abraham of London</title>
+        {description && <meta name="description" content={description} />}
+        {excerpt && !description && (
+          <meta name="description" content={excerpt} />
+        )}
       </Head>
 
-      <article className="dynamic-page mx-auto max-w-4xl px-4 py-10">
-        <header className="mb-8 text-center">
-          {heroImage && (
-            <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-xl">
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        {/* Header */}
+        <header className="mb-8">
+          {safeCover && (
+            <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl border border-lightGrey bg-black/5">
               <Image
-                src={heroImage}
-                alt={title}
+                src={safeCover}
+                alt={title ?? ""}
                 fill
+                sizes="(min-width: 1024px) 960px, 100vw"
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 80vw"
-                priority
               />
             </div>
           )}
 
-          <h1 className="mb-4 font-serif text-4xl font-semibold text-deepCharcoal md:text-5xl">
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            {category || "Book"}
+          </p>
+
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
             {title}
           </h1>
 
-          {displayDescription && (
-            <p className="mx-auto mb-6 max-w-3xl text-xl leading-relaxed text-gray-600">
-              {displayDescription}
-            </p>
+          {subtitle && (
+            <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
           )}
 
-          <div className="mb-8 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-            {author && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">By:</span>
-                <span>{author}</span>
-              </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+            {author && <span>By {author}</span>}
+            {displayDate && (
+              <>
+                <span aria-hidden>•</span>
+                <span>{displayDate}</span>
+              </>
             )}
-            {date && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Published:</span>
-                <time dateTime={date}>{formatPretty(date)}</time>
-              </div>
+            {book.readTime && (
+              <>
+                <span aria-hidden>•</span>
+                <span>{book.readTime}</span>
+              </>
             )}
-            {category && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Category:</span>
-                <span>{category}</span>
-              </div>
+            {tags && tags.length > 0 && (
+              <>
+                <span aria-hidden>•</span>
+                <span>{tags.join(" · ")}</span>
+              </>
             )}
           </div>
-
-          {tags && tags.length > 0 && (
-            <div className="mb-6 flex flex-wrap justify-center gap-2">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
-                >
-                  {String(tag)}
-                </span>
-              ))}
-            </div>
-          )}
         </header>
 
-        <section className="prose prose-lg mb-12 max-w-none">
-          <MDXRemote {...contentSource} components={mdxComponents} />
-        </section>
-
-        {resourcesMeta && resourcesMeta.length > 0 && (
-          <section className="mt-12 border-t border-lightGrey pt-8">
-            <h2 className="mb-6 font-serif text-2xl font-semibold text-deepCharcoal">
-              Related Resources
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {resourcesMeta.map((resource) => {
-                // FIX: Safely handle coverImage with proper type checking
-                const coverImage =
-                  typeof resource.coverImage === "string" &&
-                  resource.coverImage.trim().length > 0
-                    ? resource.coverImage
-                    : null;
-
-                // FIX: Safely handle pdfPath with type checking
-                const pdfPath =
-                  typeof (resource as any).pdfPath === "string" &&
-                  (resource as any).pdfPath.trim().length > 0
-                    ? (resource as any).pdfPath
-                    : null;
-
-                return (
-                  <div
-                    key={resource.slug}
-                    className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
-                  >
-                    {coverImage ? (
-                      <div className="relative aspect-[4/3] w-full">
-                        <Image
-                          src={coverImage}
-                          alt={resource.title || resource.slug || "Resource image"}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </div>
-                    ) : null}
-                    
-                    <div className="p-4">
-                      <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
-                        <Link
-                          href={`/downloads/${resource.slug}`}
-                          className="transition-colors hover:text-forest"
-                        >
-                          {resource.title}
-                        </Link>
-                      </h3>
-
-                      {resource.excerpt && (
-                        <p className="mb-3 line-clamp-2 text-sm text-gray-600">
-                          {String(resource.excerpt)}
-                        </p>
-                      )}
-
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/downloads/${resource.slug}`}
-                          className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
-                        >
-                          View Details
-                        </Link>
-                        
-                        {pdfPath && (
-                          <a
-                            href={pdfPath}
-                            download
-                            className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                          >
-                            Download
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+        {/* Short intro / excerpt */}
+        {excerpt && (
+          <p className="mb-6 text-sm text-gray-700">{excerpt}</p>
         )}
 
-        <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest to-softGold p-8 text-center text-white">
-          <h2 className="mb-4 font-serif text-2xl font-semibold">
-            Ready to take the next step?
-          </h2>
-          <p className="mb-6 text-lg opacity-90">
-            Explore more resources or get in touch to discuss your project.
+        {/* Main content */}
+        {hasMdxSource ? (
+           <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest">
+            <MDXRemote
+              {...(mdxSource as MDXRemoteSerializeResult)}
+              components={mdxComponents as any}
+            />
+          </article>
+        ) : content ? (
+          // Basic fallback if we only have raw content but no compiled MDX
+          <article className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-800 prose-headings:font-serif prose-a:text-forest">
+            {String(content)}
+          </article>
+        ) : (
+          <p className="mt-6 text-sm text-gray-600">
+            Full details for this book are coming soon. The title and
+            positioning are set first so we can design and test the
+            ecosystem around it.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/print"
-              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal transition-colors hover:bg-gray-100"
-            >
-              Browse Print Materials
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white hover:text-deepCharcoal"
-            >
-              Get In Touch
-            </Link>
-          </div>
-        </section>
-      </article>
+        )}
+      </main>
     </Layout>
   );
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const slugs = getPageSlugs();
-    const paths =
-      slugs?.map((slug: string) => ({
-        params: { slug: String(slug) },
-      })) ?? [];
-
-    return { paths, fallback: false };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating page paths:", error);
-    return { paths: [], fallback: false };
-  }
-};
-
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  try {
-    const slug = params?.slug as string | undefined;
-    if (!slug) return { notFound: true };
-
-    const pageData = getPageBySlug(slug, [
-      "slug",
-      "title",
-      "description",
-      "excerpt",
-      "heroImage",
-      "coverImage",
-      "date",
-      "author",
-      "tags",
-      "category",
-      "resources",
-      "content",
-    ]);
-
-    if (!pageData || !pageData.title) return { notFound: true };
-
-    const { content, ...page } = pageData;
-
-    const jsonSafePage: PageMeta = JSON.parse(JSON.stringify(page));
-
-    const contentSource = await serialize(content || "", {
-      scope: jsonSafePage as unknown as Record<string, unknown>,
-    });
-
-    const resourceSlugs: string[] = [];
-
-    if (jsonSafePage.resources?.downloads) {
-      jsonSafePage.resources.downloads.forEach((r: any) => {
-        const s = r?.href?.split("/").pop();
-        if (s) resourceSlugs.push(s);
-      });
-    }
-
-    if (jsonSafePage.resources?.reads) {
-      jsonSafePage.resources.reads.forEach((r: any) => {
-        const s = r?.href?.split("/").pop();
-        if (s) resourceSlugs.push(s);
-      });
-    }
-
-    const resourcesMeta: DownloadMeta[] =
-      resourceSlugs.length > 0
-        ? JSON.parse(
-            JSON.stringify(getDownloadsBySlugs(resourceSlugs))
-          )
-        : [];
-
-    return {
-      props: {
-        page: jsonSafePage,
-        contentSource,
-        resourcesMeta,
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error in getStaticProps for /books/[slug]:", error);
-    return { notFound: true };
-  }
-};
-
-export default DynamicPage;

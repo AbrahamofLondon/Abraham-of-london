@@ -6,354 +6,176 @@ import type {
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
 import Layout from "@/components/Layout";
-import {
-  getDownloadSlugs,
-  getDownloadBySlug,
-} from "@/lib/downloads";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import { mdxComponents } from "@/components/mdx-components";
 
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
+// We only rely on this ONE function from downloads-data.
+// Its exact return type doesn't matter; we'll normalise it ourselves.
+import { getDownloadBySlug } from "@/lib/server/downloads-data";
 
 type DownloadPageProps = {
-  download: DownloadMetaSerialized;
-};
-
-type DownloadMetaSerialized = {
   slug: string;
-  title?: string;
-  description?: string | null;
+  title: string;
   excerpt?: string | null;
   coverImage?: string | null;
-  /** Generic primary file URL */
-  file?: string | null;
-  /** Explicit PDF URL if present */
-  pdfUrl?: string | null;
-  /** Explicit EPUB URL if present */
-  epubUrl?: string | null;
   category?: string | null;
   tags?: string[] | null;
-  kind?: string | null;
+  readTime?: string | null;
+  mdxSource: MDXRemoteSerializeResult;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
-/* -------------------------------------------------------------------------- */
-
-function toSerializable<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
-}
-
-function serialiseDownload(raw: any): DownloadMetaSerialized {
-  if (!raw || typeof raw !== "object") {
-    return {
-      slug: "",
-      title: "Download",
-      description: null,
-      excerpt: null,
-      coverImage: null,
-      file: null,
-      pdfUrl: null,
-      epubUrl: null,
-      category: null,
-      tags: null,
-      kind: null,
-    };
-  }
-
-  // Base slug from multiple possible locations
-  const fromSlug =
-    typeof raw.slug === "string" && raw.slug.trim().length
-      ? raw.slug.trim()
-      : "";
-  const fromId =
-    typeof raw._id === "string" && raw._id.trim().length
-      ? raw._id.split("/").pop() ?? ""
-      : "";
-
-  const slug = (fromSlug || fromId).trim();
+/**
+ * We don't need to know the exact type from downloads-data,
+ * we just pick the fields we care about in a defensive way.
+ */
+function normaliseDownload(raw: any, slug: string) {
+  const safeSlug = String(raw?.slug ?? slug);
+  const title = String(raw?.title ?? "Untitled download");
 
   const coverImage =
-    typeof raw.coverImage === "string" && raw.coverImage.trim().length
+    typeof raw?.coverImage === "string" && raw.coverImage.trim().length
       ? raw.coverImage
-      : typeof raw.heroImage === "string" && raw.heroImage.trim().length
+      : typeof raw?.heroImage === "string" && raw.heroImage.trim().length
       ? raw.heroImage
       : null;
 
-  // Try to derive URLs from a variety of common keys
-  const explicitPdf =
-    typeof raw.pdfUrl === "string" && raw.pdfUrl.trim().length
-      ? raw.pdfUrl
-      : typeof raw.pdf === "string" && raw.pdf.trim().length
-      ? raw.pdf
-      : null;
-
-  const explicitEpub =
-    typeof raw.epubUrl === "string" && raw.epubUrl.trim().length
-      ? raw.epubUrl
-      : typeof raw.epub === "string" && raw.epub.trim().length
-      ? raw.epub
-      : null;
-
-  const explicitFileCandidates: unknown[] = [
-    raw.file,
-    raw.fileUrl,
-    raw.fileURL,
-    raw.downloadUrl,
-    raw.downloadURL,
-    raw.download,
-    raw.href, // some content uses href for direct file
-  ];
-
-  const explicitFile =
-    explicitFileCandidates.find(
-      (v) => typeof v === "string" && v.trim().length,
-    ) ?? null;
-
-  // 🚨 IMPORTANT: fallback to public/downloads/<slug>.pdf if nothing provided
-  const fallbackFile =
-    !explicitFile && !explicitPdf && slug
-      ? `/downloads/${slug}.pdf`
-      : null;
-
-  const tags =
-    Array.isArray(raw.tags) && raw.tags.length
-      ? raw.tags.map((t: any) => String(t))
-      : null;
-
   return {
-    slug,
-    title: raw.title ?? raw.name ?? "Download",
-    description: raw.description ?? raw.body ?? raw.excerpt ?? null,
-    excerpt: raw.excerpt ?? null,
+    slug: safeSlug,
+    title,
+    excerpt: raw?.excerpt ?? raw?.description ?? null,
     coverImage,
-    file: (explicitFile as string | null) ?? fallbackFile,
-    pdfUrl: explicitPdf,
-    epubUrl: explicitEpub,
-    category: raw.category ?? raw.section ?? null,
-    tags,
-    kind: raw.kind ?? raw.type ?? null,
+    category: raw?.category ?? null,
+    tags: Array.isArray(raw?.tags) ? raw.tags : null,
+    readTime: raw?.readTime ?? null,
+    // Content/body will be handled separately
+    body:
+      typeof raw?.content === "string"
+        ? raw.content
+        : typeof raw?.body === "string"
+        ? raw.body
+        : "",
   };
 }
 
 /* -------------------------------------------------------------------------- */
-/* getStaticPaths                                                             */
+/*  Next.js data functions                                                    */
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugsMaybe = await Promise.resolve(getDownloadSlugs());
-  const slugs = Array.isArray(slugsMaybe) ? slugsMaybe : [];
-
-  const paths =
-    slugs.length > 0
-      ? slugs
-          .filter(
-            (s): s is string =>
-              typeof s === "string" && s.trim().length > 0,
-          )
-          .map((slug) => ({ params: { slug } }))
-      : [];
-
+  // We don't have a clean "get all downloads" API yet,
+  // so we let Next generate pages on demand.
   return {
-    paths,
+    paths: [],
     fallback: "blocking",
   };
 };
-
-/* -------------------------------------------------------------------------- */
-/* getStaticProps                                                             */
-/* -------------------------------------------------------------------------- */
 
 export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
   ctx,
 ) => {
   const slugParam = ctx.params?.slug;
-  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
+  const slug = Array.isArray(slugParam)
+    ? slugParam[0]
+    : (slugParam as string | undefined) ?? "";
 
-  if (!slug) return { notFound: true };
+  if (!slug) {
+    return { notFound: true };
+  }
 
-  const raw = await Promise.resolve(getDownloadBySlug(slug));
-  if (!raw) return { notFound: true };
+  // NOTE: downloads-data may be sync or async; Promise.resolve handles both.
+  const raw = (await Promise.resolve(
+    // Type from downloads-data is opaque; we don't care, hence `any` in normaliser.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (getDownloadBySlug as any)(slug),
+  )) as any;
 
-  const download = toSerializable(serialiseDownload(raw));
+  if (!raw) {
+    return { notFound: true };
+  }
+
+  const normalised = normaliseDownload(raw, slug);
+
+  const mdxSource = await serialize(normalised.body ?? "");
 
   return {
     props: {
-      download,
+      slug: normalised.slug,
+      title: normalised.title,
+      excerpt: normalised.excerpt,
+      coverImage: normalised.coverImage,
+      category: normalised.category,
+      tags: normalised.tags,
+      readTime: normalised.readTime,
+      mdxSource,
     },
-    revalidate: 3600,
+    revalidate: 3600, // 1 hour
   };
 };
 
 /* -------------------------------------------------------------------------- */
-/* Page component                                                             */
+/*  Page component                                                            */
 /* -------------------------------------------------------------------------- */
 
-export default function DownloadPage({
-  download,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  const pageTitle = download.title || "Download";
-  const description =
-    download.description ||
-    download.excerpt ||
-    "A strategic resource from Abraham of London.";
-
-  const hasCover =
-    typeof download.coverImage === "string" &&
-    download.coverImage.trim().length > 0;
-
-  const hasPdf =
-    typeof download.pdfUrl === "string" && download.pdfUrl.trim().length > 0;
-  const hasEpub =
-    typeof download.epubUrl === "string" && download.epubUrl.trim().length > 0;
-  const hasFile =
-    typeof download.file === "string" && download.file.trim().length > 0;
-
-  // 👉 Primary CTA href: use explicit file, then PDF, then EPUB
-  const primaryHref =
-    (hasFile && download.file) ||
-    (hasPdf && download.pdfUrl) ||
-    (hasEpub && download.epubUrl) ||
-    null;
+export default function DownloadPage(
+  props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
+  const pageTitle = props.title || "Download";
 
   return (
     <Layout title={pageTitle}>
       <Head>
         <title>{pageTitle} | Abraham of London</title>
-        <meta name="description" content={description} />
+        {props.excerpt && <meta name="description" content={props.excerpt} />}
       </Head>
 
       <main className="mx-auto max-w-4xl px-4 py-10">
-        {/* Breadcrumb */}
-        <nav className="mb-6 text-xs text-gray-500">
-          <Link
-            href="/downloads"
-            className="underline-offset-4 hover:text-forest hover:underline"
-          >
-            Downloads
-          </Link>{" "}
-          <span aria-hidden>›</span>{" "}
-          <span className="text-gray-700">{pageTitle}</span>
-        </nav>
+        <header className="mb-8 border-b border-lightGrey pb-5">
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Strategic Download
+          </p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
+            {props.title}
+          </h1>
 
-        <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-          {/* Left column */}
-          <section>
-            <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-              Strategic Download
-            </p>
-            <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
-              {pageTitle}
-            </h1>
-
-            {download.category && (
-              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-forest">
-                {download.category}
-              </p>
-            )}
-
-            <p className="mt-4 text-sm leading-relaxed text-gray-800">
-              {description}
-            </p>
-
-            {download.tags && download.tags.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                {download.tags.map((tag, i) => (
-                  <span
-                    key={`${tag}-${i}`}
-                    className="rounded-full border border-lightGrey px-3 py-1 text-gray-600"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* CTA buttons */}
-            <div className="mt-6 flex flex-wrap gap-3">
-              {primaryHref && (
-                <a
-                  href={primaryHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-full bg-forest px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-cream shadow-sm transition hover:bg-forest/90"
-                >
-                  Download resource
-                </a>
+          {(props.category || props.readTime || props.tags?.length) && (
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+              {props.category && (
+                <span className="rounded-full bg-forest/5 px-3 py-1 text-forest">
+                  {props.category}
+                </span>
               )}
-
-              {hasPdf &&
-                download.pdfUrl &&
-                download.pdfUrl !== primaryHref && (
-                  <a
-                    href={download.pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-full border border-forest/40 bg-white px-4 py-2 text-xs font-semibold text-forest transition hover:bg-forest/5"
-                  >
-                    PDF version
-                  </a>
-                )}
-
-              {hasEpub && download.epubUrl && (
-                <a
-                  href={download.epubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-full border border-lightGrey bg-white px-4 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-gray-50"
-                  >
-                    EPUB version
-                  </a>
-                )}
-            </div>
-
-            {/* Temporary note */}
-            <p className="mt-6 text-xs text-gray-500">
-              Full narrative / walkthrough will ship in a later content refresh.
-              The core tool is live and ready to use.
-            </p>
-          </section>
-
-          {/* Right column – cover */}
-          <aside className="md:pl-4">
-            <div className="overflow-hidden rounded-2xl border border-lightGrey bg-gray-50">
-              {hasCover ? (
-                <div className="relative aspect-[4/5] w-full">
-                  <Image
-                    src={download.coverImage as string}
-                    alt={pageTitle}
-                    fill
-                    sizes="(min-width: 768px) 320px, 100vw"
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-deepCharcoal via-black to-forest/70">
-                  <p className="px-6 text-center text-sm font-medium text-cream/85">
-                    Abraham of London strategic download
-                  </p>
-                </div>
+              {props.readTime && (
+                <span className="rounded-full bg-gray-100 px-3 py-1">
+                  {props.readTime}
+                </span>
               )}
+              {props.tags?.length ? (
+                <span className="flex flex-wrap gap-1">
+                  {props.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] text-gray-600"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
             </div>
+          )}
 
-            <p className="mt-3 select-none text-center text-[10px] uppercase tracking-[0.3em] text-gray-400">
-              ABRAHAMOFLONDON
+          {props.excerpt && (
+            <p className="mt-4 max-w-2xl text-sm text-gray-700">
+              {props.excerpt}
             </p>
-          </aside>
-        </div>
+          )}
+        </header>
 
-        {/* Back link */}
-        <div className="mt-10">
-          <Link
-            href="/downloads"
-            className="text-sm text-forest underline-offset-4 hover:underline"
-          >
-            Back to all downloads
-          </Link>
-        </div>
+        <article className="prose prose-sm max-w-none text-gray-900 prose-headings:font-serif prose-a:text-forest">
+          <MDXRemote {...props.mdxSource} components={mdxComponents} />
+        </article>
       </main>
     </Layout>
   );

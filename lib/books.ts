@@ -1,11 +1,10 @@
 // lib/books.ts
+// Facade over the server-side books loader, returning fully-typed Book objects.
+
 import {
-  ensureDir,
-  listMdFiles,
-  fileToSlug,
-  readFrontmatter,
-  sortByDateDesc,
-} from "@/lib/server/md-utils";
+  getAllBooksMeta,
+  getBookBySlug as getBookDocBySlug,
+} from "@/lib/server/books-data";
 
 export interface Book {
   slug: string;
@@ -13,80 +12,54 @@ export interface Book {
   excerpt?: string;
   coverImage?: string;
   date?: string;
-  author?: string;
+  author?: string | null;
+  readTime?: string | null;
   [key: string]: unknown;
 }
 
-// ------------------------------
-// Internal FS loader
-// ------------------------------
+/**
+ * Normalise raw meta into a strongly-typed Book.
+ * Ensures title is always a non-empty string.
+ */
+function normaliseBookMeta(raw: Record<string, unknown>): Book {
+  const slug = String(raw.slug ?? "").trim();
+  const title =
+    typeof raw.title === "string" && raw.title.trim().length
+      ? raw.title
+      : "Untitled";
 
-function loadAllBooksFromFs(): Book[] {
-  // We assume /content/books holds your book MD/MDX
-  const abs = ensureDir("books");
-  if (!abs) {
-    // No books directory – empty, but safe
-    return [];
-  }
+  const book: Book = {
+    slug,
+    title,
+    excerpt:
+      typeof raw.excerpt === "string" ? raw.excerpt : undefined,
+    coverImage:
+      typeof raw.coverImage === "string" ? raw.coverImage : undefined,
+    date: typeof raw.date === "string" ? raw.date : undefined,
+    author:
+      typeof (raw as any).author === "string"
+        ? (raw as any).author
+        : null,
+    readTime:
+      typeof (raw as any).readTime === "string"
+        ? (raw as any).readTime
+        : null,
+    // keep the rest of the fields available for consumers that need them
+    ...raw,
+  };
 
-  const files = listMdFiles(abs);
-  if (!files.length) return [];
-
-  const books: Book[] = files.map((absFile) => {
-    const { data, content } = readFrontmatter(absFile);
-    const rawSlug = (data.slug as string) || fileToSlug(absFile);
-
-    const slug = String(rawSlug || "").trim().replace(/^\/+|\/+$/g, "");
-
-    const title =
-      (data.title as string | undefined) ||
-      slug ||
-      "Untitled";
-
-    const excerpt =
-      (data.excerpt as string | undefined) ||
-      (data.description as string | undefined) ||
-      undefined;
-
-    const coverImage =
-      (data.coverImage as string | undefined) ||
-      (data.cover as string | undefined) ||
-      undefined;
-
-    const date = (data.date as string | undefined) || undefined;
-
-    const author =
-      (data.author as string | undefined) ||
-      (data.primaryAuthor as string | undefined) ||
-      undefined;
-
-    return {
-      slug,
-      title,
-      excerpt,
-      coverImage,
-      date,
-      author,
-      content,
-      ...data,
-    };
-  });
-
-  return sortByDateDesc(books);
+  return book;
 }
 
-// Simple cache
-let BOOKS_CACHE: Book[] | null = null;
-
+/** All books as fully-typed Book[] – safe for UI use. */
 export function getAllBooks(): Book[] {
-  if (!BOOKS_CACHE) {
-    BOOKS_CACHE = loadAllBooksFromFs();
-  }
-  return BOOKS_CACHE;
+  const metas = getAllBooksMeta() as Record<string, unknown>[];
+  return metas.map((meta) => normaliseBookMeta(meta));
 }
 
+/** Single book by slug, or undefined if not found. */
 export function getBookBySlug(slug: string): Book | undefined {
-  const key = String(slug || "").toLowerCase();
-  const books = getAllBooks();
-  return books.find((b) => String(b.slug || "").toLowerCase() === key);
+  const raw = getBookDocBySlug(slug);
+  if (!raw) return undefined;
+  return normaliseBookMeta(raw as Record<string, unknown>);
 }
