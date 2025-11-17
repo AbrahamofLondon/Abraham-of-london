@@ -80,6 +80,8 @@ export interface SiteConfig {
   routes: Record<RouteId, RouteConfig>;
   /** Portfolio of ventures under the Abraham of London umbrella */
   ventures: Venture[];
+  /** Method to compose page titles consistently */
+  getPageTitle: (pageTitle?: string) => string;
 }
 
 /**
@@ -250,6 +252,12 @@ export const siteConfig: SiteConfig = {
       themeColor: "#0b2e1f",
     },
   ],
+
+  getPageTitle: (pageTitle?: string): string => {
+    const base = siteConfig.title || "Abraham of London";
+    if (!pageTitle || typeof pageTitle !== "string") return base;
+    return `${pageTitle} | ${base}`;
+  }
 };
 
 // --------- HELPERS ----------------------------------------------------------
@@ -297,13 +305,6 @@ export function absUrl(path: string | RouteId): string {
   return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
 }
 
-/** Compose a page title consistently. */
-export function getPageTitle(pageTitle?: string): string {
-  const base = siteConfig.title || "Abraham of London";
-  if (!pageTitle || typeof pageTitle !== "string") return base;
-  return `${pageTitle} | ${base}`;
-}
-
 /** Check if a route is active (for navigation highlighting) */
 export function isActiveRoute(currentPath: string, target: RouteId | string): boolean {
   const targetPath = internalHref(target);
@@ -316,7 +317,7 @@ export function isActiveRoute(currentPath: string, target: RouteId | string): bo
   return normalizedCurrent.startsWith(targetPath);
 }
 
-// Optional: Export a convenience object for common routes
+// Convenience exports for common routes
 export const routes = {
   home: siteConfig.routes.home.path,
   about: siteConfig.routes.about.path,
