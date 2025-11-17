@@ -1,8 +1,12 @@
 // components/mdx/CtaPresetComponent.tsx
-import React from "react";
+import * as React from "react";
 import Link from "next/link";
-import type { CTAPreset, LinkItem, CTAKey } from "./cta-presets";
-import { getCtaPreset } from "./cta-presets";
+import {
+  getCtaPreset,
+  type CTAPreset,
+  type LinkItem,
+  type CTAKey,
+} from "@/components/mdx/cta-presets";
 
 type Props = {
   presetKey?: CTAKey | string;
@@ -11,33 +15,32 @@ type Props = {
   compact?: boolean;
 };
 
-const Section: React.FC<{ title: string; items?: LinkItem[] | null }> = ({
-  title,
-  items,
-}) => {
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
+const Section: React.FC<{
+  title: string;
+  items?: LinkItem[] | null;
+}> = ({ title, items }) => {
   if (!items || items.length === 0) return null;
 
   return (
     <section className="space-y-2">
-      <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
         {title}
       </h4>
       <ul className="grid gap-2">
-        {items.map((it) => (
-          <li key={`${it.href}:${it.label}`}>
-            <Link
-              href={it.href}
-              target={it.external ? "_blank" : undefined}
-              rel={it.external ? "noopener noreferrer" : undefined}
-              prefetch={false}
-              className="block rounded-lg border border-gray-200 p-3 transition hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5"
-            >
-              <div className="flex items-start justify-between">
-                <span className="font-medium text-deepCharcoal dark:text-cream">
+        {items.map((it) => {
+          const href = it.href || "#";
+          const external = it.external ?? isExternal(href);
+
+          const content = (
+            <div className="block rounded-lg border border-lightGrey/70 bg-white/90 p-3 text-left shadow-sm transition hover:border-softGold/60 hover:bg-warmWhite/90">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-medium text-sm text-deepCharcoal">
                   {it.label}
                 </span>
                 {it.badge ? (
-                  <span className="ml-2 inline-flex items-center rounded-full border px-2 text-[10px] uppercase tracking-wide">
+                  <span className="ml-2 inline-flex items-center rounded-full border border-softGold/40 px-2 text-[10px] font-semibold uppercase tracking-wide text-softGold">
                     {it.badge}
                   </span>
                 ) : null}
@@ -45,9 +48,28 @@ const Section: React.FC<{ title: string; items?: LinkItem[] | null }> = ({
               {it.sub ? (
                 <p className="mt-1 text-xs text-gray-600">{it.sub}</p>
               ) : null}
-            </Link>
-          </li>
-        ))}
+            </div>
+          );
+
+          return (
+            <li key={`${href}:${it.label}`}>
+              {external ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-underline"
+                >
+                  {content}
+                </a>
+              ) : (
+                <Link href={href} prefetch={false} className="no-underline">
+                  {content}
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
@@ -57,31 +79,64 @@ const CtaPresetComponent: React.FC<Props> = ({
   presetKey,
   title,
   description,
+  compact = false,
 }) => {
-  const view: CTAPreset | null = getCtaPreset(presetKey || "") ?? null;
+  const rawKey = (presetKey ?? "").toString().trim().toLowerCase();
+  const view: CTAPreset | null = getCtaPreset(rawKey);
+
+  const hasReads = view?.reads && view.reads.length > 0;
+  const hasDownloads = view?.downloads && view.downloads.length > 0;
+  const hasActions = view?.actions && view.actions.length > 0;
+  const hasRelated = view?.related && view.related.length > 0;
+
+  const hasAny = hasReads || hasDownloads || hasActions || hasRelated;
+
+  // If there is no preset and no custom copy, render nothing rather than
+  // throwing MDX errors.
+  if (!view && !title && !description) {
+    return null;
+  }
+
+  const shellTitle = title || view?.title || "Resources";
+  const shellDescription = description || view?.description || null;
+
+  const padding = compact ? "p-4" : "p-5 sm:p-6";
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-black/30">
+    <div
+      className={[
+        "rounded-2xl border border-lightGrey bg-white/90 shadow-sm backdrop-blur-sm",
+        padding,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="mb-4">
-        <h3 className="text-lg font-semibold">{title || view?.title || "Resources"}</h3>
-        {description || view?.description ? (
-          <p className="mt-1 text-sm text-gray-600">
-            {description || view?.description}
-          </p>
-        ) : null}
-        {!view ? (
-          <p className="mt-2 text-xs text-amber-700">
+        <h3 className="text-base sm:text-lg font-semibold text-deepCharcoal">
+          {shellTitle}
+        </h3>
+        {shellDescription && (
+          <p className="mt-1 text-sm text-gray-600">{shellDescription}</p>
+        )}
+        {!view && (
+          <p className="mt-2 text-[11px] text-amber-700">
             Preset not found. Showing a generic panel.
           </p>
-        ) : null}
+        )}
       </div>
 
-      <div className="grid gap-6">
-        <Section title="Recommended Reads" items={view?.reads ?? null} />
-        <Section title="Downloads" items={view?.downloads ?? null} />
-        <Section title="Actions" items={view?.actions ?? null} />
-        <Section title="Related" items={view?.related ?? null} />
-      </div>
+      {hasAny ? (
+        <div className={compact ? "grid gap-4" : "grid gap-6 sm:grid-cols-2"}>
+          <Section title="Recommended reads" items={view?.reads ?? null} />
+          <Section title="Downloads" items={view?.downloads ?? null} />
+          {!compact && (
+            <>
+              <Section title="Actions" items={view?.actions ?? null} />
+              <Section title="Related" items={view?.related ?? null} />
+            </>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 };
