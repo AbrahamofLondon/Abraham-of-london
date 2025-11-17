@@ -35,6 +35,14 @@ export interface RouteConfig {
 }
 
 /**
+ * Brand values and principles
+ */
+export interface BrandConfig {
+  values: string[];
+  principles?: string[];
+}
+
+/**
  * Venture model used across the site (cards, landing pages, etc.).
  * This is what BrandCard expects via `import { Venture } from "@/lib/siteConfig"`.
  */
@@ -66,6 +74,8 @@ export interface SiteConfig {
   socialLinks?: SocialLink[];
   /** Default author avatar used across blog cards, etc. */
   authorImage?: string;
+  /** Brand values and principles */
+  brand: BrandConfig;
   /** Canonical routes */
   routes: Record<RouteId, RouteConfig>;
   /** Portfolio of ventures under the Abraham of London umbrella */
@@ -143,6 +153,22 @@ export const siteConfig: SiteConfig = {
       external: true,
     },
   ],
+
+  brand: {
+    values: [
+      "Excellence in every detail",
+      "Innovation that matters", 
+      "Integrity above all",
+      "Collaboration for impact",
+      "Continuous learning and growth"
+    ],
+    principles: [
+      "Quality over quantity",
+      "User-centric design",
+      "Sustainable business practices",
+      "Transparent communication"
+    ]
+  },
 
   routes: {
     home: {
@@ -233,7 +259,7 @@ export function getRoutePath(id: RouteId): string {
   const cfg = siteConfig.routes[id];
   if (!cfg) {
     if (process.env.NODE_ENV !== "production") {
-      // Fail loudly in dev so we don’t ship broken links.
+      // Fail loudly in dev so we don't ship broken links.
       // eslint-disable-next-line no-console
       console.warn(`[siteConfig] Unknown route id: ${id as string}`);
     }
