@@ -1,3 +1,4 @@
+// components/homepage/VenturesSection.tsx
 "use client";
 
 import React from "react";
@@ -18,11 +19,11 @@ export type Brand = {
 const pickUrl = (...candidates: (string | undefined | null)[]) =>
   candidates.find((u) => typeof u === "string" && u.trim().length) || "#";
 
-// Prefer env overrides; fall back to stable public URLs
+// Prefer env overrides; fall back to branded InnovateHub domain
 const INNOVATE_HUB_BASE = pickUrl(
   process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
   process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,
-  "https://innovatehub-abrahamoflondon.netlify.app"
+  "https://innovatehub.abrahamoflondon.org"
 );
 
 const INNOVATE_HUB_EARLY_ACCESS = new URL(
@@ -34,6 +35,7 @@ const ALOMARADA_URL = pickUrl(
   process.env.NEXT_PUBLIC_ALOMARADA_URL,
   "https://alomarada.com"
 );
+
 const ENDURELUXE_URL = pickUrl(
   process.env.NEXT_PUBLIC_ENDURELUXE_URL,
   "https://endureluxe.com"
@@ -168,7 +170,9 @@ function BrandCard({ brand }: { brand: Brand }) {
   );
 }
 
-export default function VenturesSection({ brandsData = defaultBrands }: VenturesProps) {
+export default function VenturesSection({
+  brandsData = defaultBrands,
+}: VenturesProps) {
   const reduce = useReducedMotion();
 
   return (

@@ -1,5 +1,5 @@
 // lib/siteConfig.ts
-// Browser-safe site configuration + route registry.
+// Browser-safe site configuration + route & venture registry.
 // No fs, no Node-only APIs.
 
 export interface SocialLink {
@@ -35,6 +35,20 @@ export interface RouteConfig {
 }
 
 /**
+ * Venture model used across the site (cards, landing pages, etc.).
+ * This is what BrandCard expects via `import { Venture } from "@/lib/siteConfig"`.
+ */
+export interface Venture {
+  initials: string;
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+  muted?: boolean;
+  themeColor?: string;
+}
+
+/**
  * Top-level site configuration.
  */
 export interface SiteConfig {
@@ -42,6 +56,8 @@ export interface SiteConfig {
   siteUrl: string;
   /** Brand/site title */
   title: string;
+  /** Canonical author/owner name */
+  author: string;
   /** Public contact email */
   email: string;
   /** Optional public phone (used in header/footer) */
@@ -52,6 +68,8 @@ export interface SiteConfig {
   authorImage?: string;
   /** Canonical routes */
   routes: Record<RouteId, RouteConfig>;
+  /** Portfolio of ventures under the Abraham of London umbrella */
+  ventures: Venture[];
 }
 
 /**
@@ -65,28 +83,150 @@ function normalisePath(raw: string): string {
   return withLead.replace(/\/+$/u, "");
 }
 
+// --------- URL CONSTANTS (BROWSER-SAFE) -------------------------------------
+
+const PUBLIC_SITE_URL =
+  (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(
+    /\/+$/u,
+    ""
+  );
+
+const ALOMARADA_URL =
+  process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com";
+
+const ENDURELUXE_URL =
+  process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://endureluxe.com";
+
+const INNOVATEHUB_URL =
+  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
+  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL ||
+  "https://innovatehub.abrahamoflondon.org";
+
+// --------- PRIMARY CONFIG OBJECT --------------------------------------------
+
 /**
- * Single source of truth for site identity + routes.
+ * Single source of truth for site identity + routes + ventures.
  */
 export const siteConfig: SiteConfig = {
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/u, ""),
+  siteUrl: PUBLIC_SITE_URL,
   title: "Abraham of London",
+  author: "Abraham of London",
   email: "hello@abrahamoflondon.org",
   phone: "+44 0000 000000", // optional – adjust or remove
   authorImage: "/assets/images/profile-portrait.webp",
 
+  socialLinks: [
+    {
+      href: "https://abrahamoflondon.org",
+      label: "Abraham of London",
+      external: true,
+    },
+    {
+      href:
+        process.env.NEXT_PUBLIC_LINKEDIN_URL ||
+        "https://www.linkedin.com/in/abrahamoflondon",
+      label: "LinkedIn",
+      external: true,
+    },
+    {
+      href:
+        process.env.NEXT_PUBLIC_INSTAGRAM_URL ||
+        "https://www.instagram.com/abrahamoflondon",
+      label: "Instagram",
+      external: true,
+    },
+    {
+      href:
+        process.env.NEXT_PUBLIC_YOUTUBE_URL ||
+        "https://www.youtube.com/@abrahamoflondon",
+      label: "YouTube",
+      external: true,
+    },
+  ],
+
   routes: {
-    home:          { id: "home",          path: "/",            label: "Home" },
-    about:         { id: "about",         path: "/about",       label: "About" },
-    blogIndex:     { id: "blogIndex",     path: "/blog",        label: "Insights" },
-    contentIndex:  { id: "contentIndex",  path: "/content",     label: "All Content" },
-    booksIndex:    { id: "booksIndex",    path: "/books",       label: "Books" },
-    ventures:      { id: "ventures",      path: "/ventures",    label: "Ventures" },
-    downloadsIndex:{ id: "downloadsIndex",path: "/downloads",   label: "Downloads" },
-    strategyLanding:{id: "strategyLanding",path: "/strategy",   label: "Strategy" },
-    contact:       { id: "contact",       path: "/contact",     label: "Contact" },
+    home: {
+      id: "home",
+      path: "/",
+      label: "Home",
+    },
+    about: {
+      id: "about",
+      path: "/about",
+      label: "About",
+    },
+    blogIndex: {
+      id: "blogIndex",
+      path: "/blog",
+      label: "Insights",
+    },
+    contentIndex: {
+      id: "contentIndex",
+      path: "/content",
+      label: "All Content",
+    },
+    booksIndex: {
+      id: "booksIndex",
+      path: "/books",
+      label: "Books",
+    },
+    ventures: {
+      id: "ventures",
+      path: "/ventures",
+      label: "Ventures",
+    },
+    downloadsIndex: {
+      id: "downloadsIndex",
+      path: "/downloads",
+      label: "Downloads",
+    },
+    strategyLanding: {
+      id: "strategyLanding",
+      path: "/strategy",
+      label: "Strategy",
+    },
+    contact: {
+      id: "contact",
+      path: "/contact",
+      label: "Contact",
+    },
   },
+
+  ventures: [
+    {
+      initials: "AL",
+      title: "Alomarada Ltd",
+      description:
+        "Board-level advisory, operating systems, and market-entry strategy for Africa-focused founders, boards, and institutions.",
+      href: ALOMARADA_URL,
+      cta: "Visit Alomarada.com",
+      muted: false,
+      themeColor: "#0b2e1f",
+    },
+    {
+      initials: "EL",
+      title: "EndureLuxe",
+      description:
+        "Durable luxury performance gear for people who train, build, and endure – without compromising on quality or aesthetics.",
+      href: ENDURELUXE_URL,
+      cta: "Explore EndureLuxe",
+      muted: true,
+      themeColor: "#9f7a38",
+    },
+    {
+      initials: "IH",
+      title: "InnovateHub",
+      description:
+        "Tools, cohorts, and hands-on support for builders who want to test ideas, ship value, and stay accountable.",
+      href: INNOVATEHUB_URL,
+      cta: "Visit InnovateHub",
+      muted: false,
+      themeColor: "#0b2e1f",
+    },
+  ],
 };
+
+// --------- HELPERS ----------------------------------------------------------
 
 /** Look up the canonical path for a given route id. */
 export function getRoutePath(id: RouteId): string {

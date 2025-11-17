@@ -1,4 +1,5 @@
 // pages/ventures/index.tsx
+
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -40,9 +41,10 @@ const ENDURELUXE_URL = pickEnvUrl(
   "https://alomarada.com/endureluxe"
 );
 
+// ✅ Branded InnovateHub URL by default, with env overrides
 const INNOVATEHUB_URL = pickEnvUrl(
   [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
-  "https://alomarada.com/hub"
+  "https://innovatehub.abrahamoflondon.org"
 );
 
 const ventures: Venture[] = [
@@ -69,15 +71,16 @@ const ventures: Venture[] = [
     externalLabel: "Explore Endureluxe",
   },
   {
-    name: "Innovative Hub",
-    slug: "innovative-hub",
+    // ✅ Name, slug, URL all consistent with the InnovateHub brand
+    name: "InnovateHub",
+    slug: "innovatehub",
     description:
-      "A practical innovation lab – content, cohorts, and tools for builders who want to test ideas, ship value, and stay accountable.",
+      "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and stay accountable.",
     icon: Lightbulb,
     href: INNOVATEHUB_URL,
     status: "Emerging",
     focus: "Innovation & Capability Building",
-    externalLabel: "Enter the Hub",
+    externalLabel: "Visit InnovateHub",
   },
 ];
 
@@ -88,7 +91,7 @@ const VenturesPage: NextPage = () => {
         <title>Strategic Ventures | Abraham of London</title>
         <meta
           name="description"
-          content="Explore the strategic ventures and business initiatives under Abraham of London – Alomarada Ltd, Endureluxe, and the Innovative Hub."
+          content="Explore the strategic ventures and business initiatives under Abraham of London – Alomarada Ltd, Endureluxe, and InnovateHub."
         />
       </Head>
 
