@@ -3,7 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import { Moon, SunMedium, Mail, Phone, MapPin, Clock, Users, Target } from "lucide-react";
 import Layout from "@/components/Layout";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig, getPageTitle } from "@/lib/siteConfig";
 
 const ContactPage = (): JSX.Element => {
   const pageTitle = "Contact Abraham of London";
@@ -71,7 +71,7 @@ const ContactPage = (): JSX.Element => {
   return (
     <Layout title={pageTitle}>
       <Head>
-        <title>{siteConfig.getPageTitle(pageTitle)}</title>
+        <title>{getPageTitle(pageTitle)}</title>
         <meta
           name="description"
           content="Connect with Abraham of London for strategic advisory, fatherhood advocacy, legacy building, and venture leadership. Priority given to aligned vision and principled partnerships."

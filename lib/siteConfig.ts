@@ -305,6 +305,13 @@ export function absUrl(path: string | RouteId): string {
   return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
 }
 
+/** Compose a page title consistently. */
+export function getPageTitle(pageTitle?: string): string {
+  const base = siteConfig.title || "Abraham of London";
+  if (!pageTitle || typeof pageTitle !== "string") return base;
+  return `${pageTitle} | ${base}`;
+}
+
 /** Check if a route is active (for navigation highlighting) */
 export function isActiveRoute(currentPath: string, target: RouteId | string): boolean {
   const targetPath = internalHref(target);
