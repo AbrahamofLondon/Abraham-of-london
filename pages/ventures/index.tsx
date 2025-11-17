@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
 import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
@@ -32,19 +33,18 @@ interface Venture {
 // Resolve external URLs safely with env overrides
 const ALOMARADA_URL = pickEnvUrl(
   [ENV_KEYS.ALOMARADA_URL],
-  "https://alomarada.com/"
+  "https://alomarada.com/",
 );
 
 const ENDURELUXE_URL = pickEnvUrl(
   [ENV_KEYS.ENDURELUXE_URL],
-  // For now, treat as a sub-path or adjust when Endureluxe has its own domain
-  "https://alomarada.com/endureluxe"
+  "https://alomarada.com/endureluxe",
 );
 
-// ✅ Branded InnovateHub URL by default, with env overrides
+// Branded InnovateHub URL by default, with env overrides
 const INNOVATEHUB_URL = pickEnvUrl(
   [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
-  "https://innovatehub.abrahamoflondon.org"
+  "https://innovatehub.abrahamoflondon.org",
 );
 
 const ventures: Venture[] = [
@@ -71,7 +71,6 @@ const ventures: Venture[] = [
     externalLabel: "Explore Endureluxe",
   },
   {
-    // ✅ Name, slug, URL all consistent with the InnovateHub brand
     name: "InnovateHub",
     slug: "innovatehub",
     description:
@@ -84,6 +83,15 @@ const ventures: Venture[] = [
   },
 ];
 
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
 const VenturesPage: NextPage = () => {
   return (
     <Layout title="Ventures">
@@ -95,119 +103,224 @@ const VenturesPage: NextPage = () => {
         />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-20 dark:from-slate-900 dark:to-slate-800">
-        <div className="mx-auto max-w-6xl px-4">
-          {/* Header */}
-          <div className="mb-16 text-center">
-            <h1 className="mb-6 font-serif text-4xl font-semibold text-deepCharcoal dark:text-cream md:text-5xl">
-              Strategic Ventures
-            </h1>
-            <p className="mx-auto max-w-3xl text-xl text-slate-600 dark:text-slate-300">
-              Disciplined, faith-rooted initiatives built to create sustainable
-              impact, not just headlines. Each venture is a focused expression
-              of the same core conviction: truth, responsibility, and legacy.
+      <main className="min-h-screen bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
+        {/* HERO */}
+        <section className="border-b border-white/10 bg-gradient-to-b from-black/80 via-deepCharcoal/80 to-black/90">
+          <div className="mx-auto flex max-w-6xl flex-col px-4 pb-16 pt-20 md:flex-row md:items-center md:justify-between md:pt-24">
+            <div className="max-w-xl">
+              <p className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+                Abraham of London · Ventures
+              </p>
+              <h1 className="font-serif text-3xl font-semibold tracking-tight text-cream sm:text-4xl md:text-5xl">
+                Strategic ventures for{" "}
+                <span className="text-softGold">kings, builders, and boards</span>.
+              </h1>
+              <p className="mt-5 max-w-xl text-sm text-gray-200 md:text-base">
+                Disciplined, faith-rooted initiatives designed for durable impact –
+                not vanity metrics. Each venture is a focused expression of the
+                same mandate: truth, responsibility, and multi-generational legacy.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-4 text-xs md:text-sm">
+                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
+                  <span className="font-semibold text-softGold">3</span>{" "}
+                  active venture tracks
+                </div>
+                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
+                  Africa-first, kingdom-aligned thesis
+                </div>
+                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
+                  Strategy · Product · Ecosystems
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 w-full max-w-md md:mt-0">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/60">
+                <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">
+                  <span>Venture Portfolio Snapshot</span>
+                  <span className="rounded-full bg-softGold/10 px-2 py-1 text-[0.65rem] text-softGold">
+                    In motion
+                  </span>
+                </div>
+                <dl className="grid grid-cols-2 gap-4 text-sm text-gray-100">
+                  <div>
+                    <dt className="text-xs text-gray-400">Advisory & Systems</dt>
+                    <dd className="mt-1 font-serif text-xl text-softGold">
+                      Alomarada
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-gray-400">Product & Brand</dt>
+                    <dd className="mt-1 font-serif text-xl">Endureluxe</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-gray-400">Innovation Engine</dt>
+                    <dd className="mt-1 font-serif text-xl">InnovateHub</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-gray-400">Core thesis</dt>
+                    <dd className="mt-1 text-xs">
+                      Strategy, discipline, and brotherhood as unfair advantage.
+                    </dd>
+                  </div>
+                </dl>
+                <div className="mt-6 rounded-2xl bg-black/40 p-3 text-[0.8rem] text-gray-200">
+                  Built for founders, boards, and fathers who want operating
+                  systems – not just inspiration. Every venture is designed to stand
+                  scrutiny in the boardroom and at the dinner table.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* VENTURES GRID */}
+        <section className="mx-auto max-w-6xl px-4 pb-20 pt-12">
+          <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
+                Portfolio
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-gray-300 md:text-base">
+                Each venture sits on the same spine: kingdom ethics, disciplined
+                execution, and a bias for building what outlives us.
+              </p>
+            </div>
+            <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
+              CURRENT FOCUS: STRATEGY · PRODUCT · CAPABILITY
             </p>
           </div>
 
-          {/* Ventures Grid */}
-          <div className="mb-16 grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-3">
             {ventures.map((venture) => (
-              <div
+              <motion.article
                 key={venture.slug ?? venture.name}
-                className="group rounded-2xl border border-slate-200 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-700 dark:bg-slate-800"
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 transition-all duration-300 hover:-translate-y-1 hover:border-softGold/40 hover:bg-white/10"
+                variants={itemVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
               >
-                <div className="mb-6 flex items-start justify-between">
-                  <div className="rounded-xl bg-forest/10 p-3 dark:bg-forest/20">
-                    <venture.icon className="h-8 w-8 text-forest" />
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div className="rounded-xl bg-softGold/10 p-3">
+                    <venture.icon className="h-7 w-7 text-softGold" />
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${
                       venture.status === "Active"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        ? "bg-green-100/10 text-emerald-200"
                         : venture.status === "Emerging"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                        ? "bg-blue-100/10 text-sky-200"
+                        : "bg-amber-100/10 text-amber-200"
                     }`}
                   >
                     {venture.status}
                   </span>
                 </div>
 
-                <h3 className="mb-4 font-serif text-2xl font-semibold text-deepCharcoal dark:text-white">
+                <h3 className="mb-2 font-serif text-xl font-semibold text-cream">
                   {venture.name}
                 </h3>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-softGold/80">
+                  {venture.focus}
+                </p>
 
-                <p className="mb-4 leading-relaxed text-slate-600 dark:text-slate-300">
+                <p className="mb-4 flex-1 text-sm leading-relaxed text-gray-200">
                   {venture.description}
                 </p>
 
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-sm font-medium text-forest dark:text-forest/80">
-                    {venture.focus}
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-gray-300">
+                    External ·{" "}
+                    <span className="font-medium text-softGold">
+                      {venture.href.replace(/^https?:\/\//, "")}
+                    </span>
                   </span>
                   <Link
                     href={venture.href}
-                    className="group inline-flex items-center font-semibold text-forest transition-colors hover:text-forest/80"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-softGold hover:text-softGold/80"
                   >
                     {venture.externalLabel ?? "Visit site"}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
-              </div>
+              </motion.article>
             ))}
           </div>
+        </section>
 
-          {/* Investment Philosophy */}
-          <div className="rounded-2xl bg-slate-100 p-8 md:p-12 dark:bg-slate-700">
-            <h2 className="mb-8 text-center font-serif text-3xl font-semibold text-deepCharcoal dark:text-white md:text-4xl">
-              Our Investment Philosophy
-            </h2>
+        {/* INVESTMENT / BUILD PHILOSOPHY */}
+        <section className="border-t border-white/10 bg-gradient-to-br from-deepCharcoal via-black to-forest/30">
+          <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+            <div className="mb-10 text-center">
+              <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
+                How we decide what to build
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 md:text-base">
+                We’re not chasing hype cycles. We’re building tools, platforms,
+                and ecosystems that a serious founder, father, or policymaker
+                would still respect ten years from now.
+              </p>
+            </div>
+
             <div className="grid gap-8 md:grid-cols-3">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-forest/20">
-                  <Target className="h-6 w-6 text-forest" />
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/15">
+                  <Target className="h-6 w-6 text-softGold" />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-deepCharcoal dark:text-white">
+                <h3 className="mb-3 text-lg font-semibold text-cream">
                   Strategic Alignment
                 </h3>
-                <p className="text-slate-600 dark:text-slate-300">
-                  Every venture must align with our core mission: faith-rooted
-                  leadership, disciplined strategy, and legacy building across
-                  generations.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/20">
-                  <TrendingUp className="h-6 w-6 text-softGold" />
-                </div>
-                <h3 className="mb-3 text-lg font-semibold text-deepCharcoal dark:text-white">
-                  Sustainable Impact
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300">
-                  We prioritise long-term value creation over quick wins. Each
-                  venture is designed to be cashflow-aware, scalable, and
-                  principled.
+                <p className="text-sm text-gray-300">
+                  Every venture must align with the mandate: restoring fathers,
+                  equipping founders, and positioning Africa to lead with dignity
+                  and competence.
                 </p>
               </div>
               <div className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-forest/20">
-                  <Users className="h-6 w-6 text-forest" />
+                  <TrendingUp className="h-6 w-6 text-forest/90" />
                 </div>
-                <h3 className="mb-3 text-lg font-semibold text-deepCharcoal dark:text-white">
-                  Community Focus
+                <h3 className="mb-3 text-lg font-semibold text-cream">
+                  Sustainable Impact
                 </h3>
-                <p className="text-slate-600 dark:text-slate-300">
-                  We build ecosystems, not celebrity brands – brotherhoods,
-                  advisory circles, and operating systems that outlast any one
-                  individual.
+                <p className="text-sm text-gray-300">
+                  We bias towards long-term cashflow, integrity, and resilience.
+                  If it can’t survive scrutiny from both investors and intercessors,
+                  we don’t build it.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/15">
+                  <Users className="h-6 w-6 text-softGold" />
+                </div>
+                <h3 className="mb-3 text-lg font-semibold text-cream">
+                  Community & Brotherhood
+                </h3>
+                <p className="text-sm text-gray-300">
+                  We design for brotherhood, not celebrity. Advisory circles,
+                  cohorts, and operating systems that keep men accountable to their
+                  calling – not just their revenue targets.
                 </p>
               </div>
             </div>
+
+            <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 px-5 py-6 text-center text-sm text-gray-200 md:px-8">
+              Ready for aligned capital or collaboration?{" "}
+              <Link
+                href="/contact"
+                className="font-semibold text-softGold underline-offset-4 hover:underline"
+              >
+                Start a strategic conversation
+              </Link>
+              . We don’t promise hype. We promise clarity, honesty, and a plan.
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </Layout>
   );
 };
