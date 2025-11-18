@@ -28,6 +28,7 @@ interface Venture {
   status: VentureStatus | string;
   focus: string;
   externalLabel?: string;
+  superbrandTag?: string;
 }
 
 // Resolve external URLs safely with env overrides
@@ -52,34 +53,35 @@ const ventures: Venture[] = [
     name: "Alomarada Ltd",
     slug: "alomarada",
     description:
-      "Board-level advisory, operating systems, and market-entry strategy for Africa-focused founders, boards, and institutions.",
+      "Board-level advisory, operating systems, and market-entry strategy for founders, boards, and institutions who take Africa seriously.",
     icon: Building2,
     href: ALOMARADA_URL,
     status: "Active",
-    focus: "Strategic Advisory & Market Systems",
+    focus: "Strategic advisory · Market systems · Deal architecture",
     externalLabel: "Visit Alomarada.com",
   },
   {
     name: "Endureluxe",
     slug: "endureluxe",
     description:
-      "Durable luxury performance gear for people who train, build, and endure – without compromising on quality or aesthetics.",
+      "Community-driven fitness and performance gear for people who train, build, and endure – designed to survive real life, not just product shoots.",
     icon: PackageCheck,
     href: ENDURELUXE_URL,
     status: "Active",
-    focus: "Performance & Durable Luxury",
+    focus: "Fitness community · Performance gear · Everyday durability",
     externalLabel: "Explore Endureluxe",
   },
   {
     name: "InnovateHub",
     slug: "innovatehub",
     description:
-      "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and stay accountable.",
+      "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and build operating rhythms that actually hold.",
     icon: Lightbulb,
     href: INNOVATEHUB_URL,
     status: "In development",
-    focus: "Innovation & Capability Building",
+    focus: "Innovation engine · Capability building · Venture design",
     externalLabel: "Visit InnovateHub",
+    superbrandTag: "Superbrand innovation lab",
   },
 ];
 
@@ -99,7 +101,7 @@ const VenturesPage: NextPage = () => {
         <title>Strategic Ventures | Abraham of London</title>
         <meta
           name="description"
-          content="Explore the strategic ventures and business initiatives under Abraham of London – Alomarada Ltd, Endureluxe, and InnovateHub."
+          content="The venture portfolio of Abraham of London — Alomarada, Endureluxe, and InnovateHub — built around one mandate: kingship, stewardship, and multi-generational legacy."
         />
       </Head>
 
@@ -108,29 +110,29 @@ const VenturesPage: NextPage = () => {
         <section className="border-b border-white/10 bg-gradient-to-b from-black/80 via-deepCharcoal/80 to-black/90">
           <div className="mx-auto flex max-w-6xl flex-col px-4 pb-16 pt-20 md:flex-row md:items-center md:justify-between md:pt-24">
             <div className="max-w-xl">
-              <p className="mb-4 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
-                Abraham of London · Ventures
+              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+                Abraham of London · Venture Portfolio
               </p>
               <h1 className="font-serif text-3xl font-semibold tracking-tight text-cream sm:text-4xl md:text-5xl">
-                Strategic ventures for{" "}
-                <span className="text-softGold">kings, builders, and boards</span>.
+                One superbrand.{" "}
+                <span className="text-softGold">Three strategic engines.</span>
               </h1>
               <p className="mt-5 max-w-xl text-sm text-gray-200 md:text-base">
-                Disciplined, faith-rooted initiatives designed for durable impact –
-                not vanity metrics. Each venture is a focused expression of the
-                same mandate: truth, responsibility, and multi-generational legacy.
+                Abraham of London is the superbrand — the worldview, the voice,
+                and the standard. These ventures are how that standard shows up
+                in boardrooms, gyms, communities, and build rooms across markets.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-4 text-xs md:text-sm">
                 <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
-                  <span className="font-semibold text-softGold">3</span>{" "}
-                  active venture tracks
-                </div>
-                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
-                  Africa-first, kingdom-aligned thesis
+                  <span className="font-semibold text-softGold">Superbrand:</span>{" "}
+                  Abraham of London
                 </div>
                 <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
                   Strategy · Product · Ecosystems
+                </div>
+                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
+                  Kings, builders &amp; boards in view
                 </div>
               </div>
             </div>
@@ -138,37 +140,38 @@ const VenturesPage: NextPage = () => {
             <div className="mt-10 w-full max-w-md md:mt-0">
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/60">
                 <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">
-                  <span>Venture Portfolio Snapshot</span>
+                  <span>Abraham of London · Superbrand Map</span>
                   <span className="rounded-full bg-softGold/10 px-2 py-1 text-[0.65rem] text-softGold">
-                    In motion
+                    Leader
                   </span>
                 </div>
                 <dl className="grid grid-cols-2 gap-4 text-sm text-gray-100">
                   <div>
-                    <dt className="text-xs text-gray-400">Advisory & Systems</dt>
-                    <dd className="mt-1 font-serif text-xl text-softGold">
-                      Alomarada
+                    <dt className="text-xs text-gray-400">Narrative &amp; lens</dt>
+                    <dd className="mt-1 font-serif text-lg text-softGold">
+                      Abraham of London
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-gray-400">Product & Brand</dt>
-                    <dd className="mt-1 font-serif text-xl">Endureluxe</dd>
+                    <dt className="text-xs text-gray-400">Advisory &amp; systems</dt>
+                    <dd className="mt-1 font-serif text-lg">Alomarada</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-gray-400">Innovation Engine</dt>
-                    <dd className="mt-1 font-serif text-xl">InnovateHub</dd>
+                    <dt className="text-xs text-gray-400">
+                      Fitness &amp; performance culture
+                    </dt>
+                    <dd className="mt-1 font-serif text-lg">Endureluxe</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-gray-400">Core thesis</dt>
-                    <dd className="mt-1 text-xs">
-                      Strategy, discipline, and brotherhood as unfair advantage.
-                    </dd>
+                    <dt className="text-xs text-gray-400">Innovation engine</dt>
+                    <dd className="mt-1 font-serif text-lg">InnovateHub</dd>
                   </div>
                 </dl>
                 <div className="mt-6 rounded-2xl bg-black/40 p-3 text-[0.8rem] text-gray-200">
-                  Built for founders, boards, and fathers who want operating
-                  systems – not just inspiration. Every venture is designed to stand
-                  scrutiny in the boardroom and at the dinner table.
+                  The homepage, the writing, and the fatherhood work set the
+                  bar. These ventures are how that standard gets translated into
+                  deals, products, cohorts, and communities that can survive
+                  real pressure.
                 </div>
               </div>
             </div>
@@ -180,15 +183,16 @@ const VenturesPage: NextPage = () => {
           <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
             <div>
               <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
-                Portfolio
+                Portfolio under the superbrand
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-gray-300 md:text-base">
-                Each venture sits on the same spine: kingdom ethics, disciplined
-                execution, and a bias for building what outlives us.
+                Each venture is accountable to the same spine: kingdom ethics,
+                disciplined execution, and a commitment to build work that your
+                sons and investors can both respect.
               </p>
             </div>
             <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
-              CURRENT FOCUS: STRATEGY · PRODUCT · CAPABILITY
+              CURRENT FOCUS · STRATEGY · PRODUCT · CAPABILITY
             </p>
           </div>
 
@@ -206,23 +210,30 @@ const VenturesPage: NextPage = () => {
                   <div className="rounded-xl bg-softGold/10 p-3">
                     <venture.icon className="h-7 w-7 text-softGold" />
                   </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${
-                      venture.status === "Active"
-                        ? "bg-green-100/10 text-emerald-200"
-                        : venture.status === "Emerging"
-                        ? "bg-blue-100/10 text-sky-200"
-                        : "bg-amber-100/10 text-amber-200"
-                    }`}
-                  >
-                    {venture.status}
-                  </span>
+                  <div className="text-right">
+                    <span
+                      className={`mb-1 inline-block rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${
+                        venture.status === "Active"
+                          ? "bg-green-100/10 text-emerald-200"
+                          : venture.status === "Emerging"
+                          ? "bg-blue-100/10 text-sky-200"
+                          : "bg-amber-100/10 text-amber-200"
+                      }`}
+                    >
+                      {venture.status}
+                    </span>
+                    {venture.superbrandTag && (
+                      <div className="text-[0.65rem] uppercase tracking-[0.18em] text-softGold/80">
+                        {venture.superbrandTag}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <h3 className="mb-2 font-serif text-xl font-semibold text-cream">
                   {venture.name}
                 </h3>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-softGold/80">
+                <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-softGold/80">
                   {venture.focus}
                 </p>
 
@@ -252,17 +263,17 @@ const VenturesPage: NextPage = () => {
           </div>
         </section>
 
-        {/* INVESTMENT / BUILD PHILOSOPHY */}
+        {/* BUILD PHILOSOPHY */}
         <section className="border-t border-white/10 bg-gradient-to-br from-deepCharcoal via-black to-forest/30">
           <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
             <div className="mb-10 text-center">
               <h2 className="font-serif text-2xl font-semibold text-cream md:text-3xl">
-                How we decide what to build
+                The superbrand filter for every venture
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 md:text-base">
-                We’re not chasing hype cycles. We’re building tools, platforms,
-                and ecosystems that a serious founder, father, or policymaker
-                would still respect ten years from now.
+                If a venture doesn’t pass this filter, it doesn’t get built
+                under Abraham of London — no matter how attractive the numbers
+                look on paper.
               </p>
             </div>
 
@@ -272,12 +283,12 @@ const VenturesPage: NextPage = () => {
                   <Target className="h-6 w-6 text-softGold" />
                 </div>
                 <h3 className="mb-3 text-lg font-semibold text-cream">
-                  Strategic Alignment
+                  Alignment with mandate
                 </h3>
                 <p className="text-sm text-gray-300">
-                  Every venture must align with the mandate: restoring fathers,
-                  equipping founders, and positioning Africa to lead with dignity
-                  and competence.
+                  The work must strengthen fathers, founders, and stewards — not
+                  just produce revenue. If it fights the core mandate, it’s a
+                  distraction, not a venture.
                 </p>
               </div>
               <div className="text-center">
@@ -285,12 +296,12 @@ const VenturesPage: NextPage = () => {
                   <TrendingUp className="h-6 w-6 text-forest/90" />
                 </div>
                 <h3 className="mb-3 text-lg font-semibold text-cream">
-                  Sustainable Impact
+                  Sustainable, honest impact
                 </h3>
                 <p className="text-sm text-gray-300">
-                  We bias towards long-term cashflow, integrity, and resilience.
-                  If it can’t survive scrutiny from both investors and intercessors,
-                  we don’t build it.
+                  We don’t build what needs spin to survive. Ventures must be
+                  defensible in due diligence, in prayer, and in front of the
+                  next generation.
                 </p>
               </div>
               <div className="text-center">
@@ -298,25 +309,26 @@ const VenturesPage: NextPage = () => {
                   <Users className="h-6 w-6 text-softGold" />
                 </div>
                 <h3 className="mb-3 text-lg font-semibold text-cream">
-                  Community & Brotherhood
+                  Brotherhood & accountability
                 </h3>
                 <p className="text-sm text-gray-300">
-                  We design for brotherhood, not celebrity. Advisory circles,
-                  cohorts, and operating systems that keep men accountable to their
-                  calling – not just their revenue targets.
+                  Everything sits inside community and accountability — not
+                  celebrity. Circles, cohorts, and boards that keep the work
+                  submitted to something bigger than ego.
                 </p>
               </div>
             </div>
 
             <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 px-5 py-6 text-center text-sm text-gray-200 md:px-8">
-              Ready for aligned capital or collaboration?{" "}
+              If you&apos;re exploring aligned capital, strategic partnership, or
+              ecosystem collaboration under the Abraham of London superbrand,{" "}
               <Link
                 href="/contact"
                 className="font-semibold text-softGold underline-offset-4 hover:underline"
               >
-                Start a strategic conversation
+                start a strategic conversation
               </Link>
-              . We don’t promise hype. We promise clarity, honesty, and a plan.
+              . No pitches, no fluff — just clarity, truth, and a plan.
             </div>
           </div>
         </section>
