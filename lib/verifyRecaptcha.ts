@@ -8,7 +8,8 @@ export interface RecaptchaVerificationResult {
   score: number;
   action?: string;
   hostname?: string;
-  errorCodes?: string[];
+  // Always normalised to an array
+  errorCodes: string[];
   timestamp?: Date;
   reasons?: string[];
 }
@@ -22,27 +23,7 @@ export interface RecaptchaConfig {
   allowedHostnames?: string[];
 }
 
-// Raw response type from Google reCAPTCHA v3
-type GoogleRecaptchaRawResponse = {
-  success: boolean;
-  score?: number;
-  action?: string;
-  hostname?: string;
-  "error-codes"?: string[];
-  challenge_ts?: string;
-};
-
-// Small helper to safely split env lists
-function splitEnvList(value: string | undefined): string[] | undefined {
-  if (!value) return undefined;
-  const items = value
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-  return items.length ? items : undefined;
-}
-
-// Default configuration (evaluated once per process)
+// Default configuration
 const DEFAULT_CONFIG: RecaptchaConfig = {
   secretKey: process.env.RECAPTCHA_SECRET_KEY || "",
   minScore: parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5"),
@@ -50,8 +31,8 @@ const DEFAULT_CONFIG: RecaptchaConfig = {
   enabled:
     process.env.NODE_ENV === "production" ||
     process.env.RECAPTCHA_ENABLED === "true",
-  requiredActions: splitEnvList(process.env.RECAPTCHA_REQUIRED_ACTIONS),
-  allowedHostnames: splitEnvList(process.env.RECAPTCHA_ALLOWED_HOSTNAMES),
+  requiredActions: process.env.RECAPTCHA_REQUIRED_ACTIONS?.split(","),
+  allowedHostnames: process.env.RECAPTCHA_ALLOWED_HOSTNAMES?.split(","),
 };
 
 // Cache for temporary token blacklisting (prevents replay attacks)
@@ -101,7 +82,6 @@ export class RecaptchaError extends Error {
 
 /**
  * Enhanced reCAPTCHA v3 verification with security features
- * NOTE: SERVER-SIDE ONLY. Do NOT import this in client components.
  */
 export async function verifyRecaptcha(
   token: string,
@@ -113,6 +93,7 @@ export async function verifyRecaptcha(
     success: false,
     score: 0,
     timestamp: new Date(),
+    errorCodes: [],
   };
 
   // Skip verification in development if not enabled
@@ -130,7 +111,6 @@ export async function verifyRecaptcha(
   }
 
   if (!token || typeof token !== "string" || token.length < 50) {
-    // Length check is heuristic, but helps catch obvious junk
     throw new RecaptchaError(
       "Invalid or missing reCAPTCHA token",
       "INVALID_TOKEN",
@@ -180,20 +160,10 @@ export async function verifyRecaptcha(
       );
     }
 
-    let responseData: unknown;
-    try {
-      responseData = await response.json();
-    } catch {
-      throw new RecaptchaError(
-        "Invalid response format from reCAPTCHA API",
-        "INVALID_RESPONSE",
-      );
-    }
+    const responseData = await response.json();
 
-    if (
-      typeof responseData !== "object" ||
-      responseData === null
-    ) {
+    // Type guard for response data
+    if (typeof responseData !== "object" || responseData === null) {
       throw new RecaptchaError(
         "Invalid response format from reCAPTCHA API",
         "INVALID_RESPONSE",
@@ -206,7 +176,13 @@ export async function verifyRecaptcha(
       action,
       hostname,
       "error-codes": errorCodes = [],
-    } = responseData as GoogleRecaptchaRawResponse;
+    } = responseData as {
+      success?: boolean;
+      score?: number;
+      action?: string;
+      hostname?: string;
+      "error-codes"?: string[];
+    };
 
     // Update result with API response
     Object.assign(result, {
@@ -266,7 +242,7 @@ export async function verifyRecaptcha(
       tokenCache.add(token);
     }
 
-    // Log security events (no secrets, no tokens)
+    // Log security events
     if (!result.success) {
       console.warn("🔒 reCAPTCHA verification failed:", {
         score: result.score,
@@ -342,7 +318,5 @@ export function cleanupRecaptchaCache(): void {
   tokenCache.cleanup();
 }
 
-// Run cleanup every 5 minutes (Node/serverless only)
-if (typeof setInterval === "function") {
-  setInterval(cleanupRecaptchaCache, 5 * 60 * 1000).unref?.();
-}
+// Run cleanup every 5 minutes
+setInterval(cleanupRecaptchaCache, 5 * 60 * 1000).unref();
