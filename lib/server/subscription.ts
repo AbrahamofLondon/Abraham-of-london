@@ -1,4 +1,10 @@
 // lib/server/subscription.ts
+// Robust subscription service (Buttondown + local fallback)
+
+// Hard guard: this must never be imported in the browser.
+if (typeof window !== "undefined") {
+  throw new Error("subscription must not be imported on the client");
+}
 
 export interface SubscriptionResult {
   ok: boolean;
@@ -104,6 +110,7 @@ async function subscribeToButtondown(
 // Fallback email storage (for when ESP is down)
 async function storeEmailLocally(email: string): Promise<void> {
   // In a real implementation, you might store in a database or file
+  // This is just a safety fallback
   console.log("Storing email locally for later processing:", email);
 }
 
@@ -120,9 +127,7 @@ class RateLimiter {
     const userAttempts = this.attempts.get(identifier) || [];
 
     // Clean old attempts
-    const recentAttempts = userAttempts.filter(
-      (time) => now - time < windowMs,
-    );
+    const recentAttempts = userAttempts.filter((time) => now - time < windowMs);
 
     if (recentAttempts.length >= maxAttempts) {
       return true;
@@ -135,6 +140,23 @@ class RateLimiter {
 }
 
 const rateLimiter = new RateLimiter();
+
+// Simple disposable email checker
+function isDisposableEmail(email: string): boolean {
+  const disposableDomains = [
+    "tempmail.com",
+    "guerrillamail.com",
+    "mailinator.com",
+    "10minutemail.com",
+    "throwaway.com",
+    "fake.com",
+    "yopmail.com",
+    "trashmail.com",
+  ];
+
+  const domain = email.split("@")[1];
+  return disposableDomains.includes(domain);
+}
 
 // Main subscription function
 export async function subscribe(
@@ -183,7 +205,7 @@ export async function subscribe(
   // Try Buttondown first
   const result = await subscribeToButtondown(subscriberData);
 
-  // If Buttondown fails, store locally for later processing
+  // If Buttondown fails (for reasons other than missing API key), store locally
   if (!result.ok && result.error !== "API_KEY_MISSING") {
     await storeEmailLocally(normalizedEmail);
     return {
@@ -195,23 +217,6 @@ export async function subscribe(
   }
 
   return result;
-}
-
-// Simple disposable email checker
-function isDisposableEmail(email: string): boolean {
-  const disposableDomains = [
-    "tempmail.com",
-    "guerrillamail.com",
-    "mailinator.com",
-    "10minutemail.com",
-    "throwaway.com",
-    "fake.com",
-    "yopmail.com",
-    "trashmail.com",
-  ];
-
-  const domain = email.split("@")[1];
-  return disposableDomains.includes(domain);
 }
 
 // Bulk subscription helper
@@ -231,9 +236,7 @@ export async function bulkSubscribe(
 
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
-    const promises = batch.map((email) =>
-      subscribe(email, { tags: options.tags }),
-    );
+    const promises = batch.map((email) => subscribe(email, { tags: options.tags }));
 
     const results = await Promise.all(promises);
 
@@ -257,7 +260,7 @@ export async function bulkSubscribe(
   return { successful, failed };
 }
 
-// Unsubscribe function (stub / future extension)
+// Unsubscribe function (stub – extend with real ESP logic as needed)
 export async function unsubscribe(email: string): Promise<SubscriptionResult> {
   // Implementation for unsubscribe would be similar to subscribe
   // but using the DELETE method or specific unsubscribe endpoint
