@@ -9,12 +9,13 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import mdxComponents from "@/components/mdx-components";
+import { mdxComponents } from "@/components/mdx-components";
 
+// Use the filesystem-backed helpers (server-only)
 import {
   getDownloadBySlug,
   getDownloadSlugs,
-} from "@/lib/downloads";
+} from "@/lib/server/downloads-data";
 
 type DownloadPageProps = {
   slug: string;
@@ -24,16 +25,14 @@ type DownloadPageProps = {
   category?: string | null;
   tags?: string[] | null;
   readTime?: string | null;
-  fileUrl?: string | null;
-  fileSize?: string | null;
   mdxSource: MDXRemoteSerializeResult;
 };
 
 /**
- * Defensive normaliser around whatever downloads-data returns.
+ * Normalise download shape from the raw server object.
  */
-function normaliseDownload(raw: any, slugFallback: string) {
-  const safeSlug = String(raw?.slug ?? slugFallback);
+function normaliseDownload(raw: any, slug: string) {
+  const safeSlug = String(raw?.slug ?? slug);
   const title = String(raw?.title ?? "Untitled download");
 
   const coverImage =
@@ -41,16 +40,6 @@ function normaliseDownload(raw: any, slugFallback: string) {
       ? raw.coverImage
       : typeof raw?.heroImage === "string" && raw.heroImage.trim().length
       ? raw.heroImage
-      : null;
-
-  const fileUrl =
-    typeof raw?.fileUrl === "string" && raw.fileUrl.trim().length
-      ? raw.fileUrl
-      : null;
-
-  const fileSize =
-    typeof raw?.fileSize === "string" && raw.fileSize.trim().length
-      ? raw.fileSize
       : null;
 
   return {
@@ -61,8 +50,6 @@ function normaliseDownload(raw: any, slugFallback: string) {
     category: raw?.category ?? null,
     tags: Array.isArray(raw?.tags) ? raw.tags : null,
     readTime: raw?.readTime ?? null,
-    fileUrl,
-    fileSize,
     body:
       typeof raw?.content === "string"
         ? raw.content
@@ -77,17 +64,16 @@ function normaliseDownload(raw: any, slugFallback: string) {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // Pre-generate ALL download pages so next export is happy
   const slugs = getDownloadSlugs();
 
-  const paths =
-    slugs?.map((slug) => ({
-      params: { slug },
-    })) ?? [];
+  const paths = slugs.map((slug) => ({
+    params: { slug },
+  }));
 
   return {
     paths,
-    // Still allow new downloads to be added without a full rebuild
-    fallback: "blocking",
+    fallback: false, // 🔴 no blocking / no fallback for static export
   };
 };
 
@@ -103,17 +89,15 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
     return { notFound: true };
   }
 
-  // getDownloadBySlug is exposed via lib/downloads, sync or async.
-  const raw = (await Promise.resolve(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (getDownloadBySlug as any)(slug),
-  )) as any;
+  // Server-only helper; returns frontmatter + raw MDX body
+  const raw = getDownloadBySlug(slug) as any;
 
   if (!raw) {
     return { notFound: true };
   }
 
   const normalised = normaliseDownload(raw, slug);
+
   const mdxSource = await serialize(normalised.body ?? "");
 
   return {
@@ -125,8 +109,6 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
       category: normalised.category,
       tags: normalised.tags,
       readTime: normalised.readTime,
-      fileUrl: normalised.fileUrl,
-      fileSize: normalised.fileSize,
       mdxSource,
     },
     revalidate: 3600, // 1 hour
@@ -189,21 +171,6 @@ export default function DownloadPage(
             <p className="mt-4 max-w-2xl text-sm text-gray-700">
               {props.excerpt}
             </p>
-          )}
-
-          {props.fileUrl && (
-            <div className="mt-5">
-              <a
-                href={props.fileUrl}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream transition-colors hover:bg-deepCharcoal"
-              >
-                Download PDF
-                {props.fileSize ? ` (${props.fileSize})` : ""}
-              </a>
-            </div>
           )}
         </header>
 
