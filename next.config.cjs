@@ -1,21 +1,24 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  images: {
-    unoptimized: true,
-  },
   trailingSlash: true,
-  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   reactStrictMode: true,
   
-  // Add these to ensure build passes
-  typescript: {
-    ignoreBuildErrors: true,
+  // Enhanced image configuration
+  images: {
+    unoptimized: true, // Required for static export
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
+
+  // Asset optimization
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+
+  // Enhanced redirects
   async redirects() {
     return [
       {
@@ -24,13 +27,62 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: '/books', 
+        source: '/books',
+        destination: '/content', 
+        permanent: true,
+      },
+      {
+        source: '/articles',
         destination: '/content',
         permanent: true,
       },
     ];
   },
+
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
+
+  // Build optimization
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 };
 
-console.log('Building with next.config.cjs - static export mode');
-module.exports = nextConfig;
+// Environment-specific configurations
+if (process.env.ANALYZE === 'true') {
+  const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: true,
+  });
+  module.exports = withBundleAnalyzer(nextConfig);
+} else {
+  module.exports = nextConfig;
+}

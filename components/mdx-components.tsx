@@ -1,10 +1,9 @@
 // components/mdx-components.tsx
-// Canonical MDX component map – used by all MDX pages (posts, books, downloads, etc.)
-
 import * as React from "react";
+import Image from "next/image";
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/EmbossedBrandMark";
-import EmbossedSign from "@/components/print/EmbossedSign"; 
+import EmbossedSign from "@/components/print/EmbossedSign";
 
 type AnyProps = {
   [key: string]: any;
@@ -124,32 +123,57 @@ const Pre = ({ children, ...rest }: AnyProps) => (
 
 /* --------------------------------- Links ---------------------------------- */
 
-const A = ({ children, ...rest }: AnyProps) => (
-  <a
-    className="font-medium text-forest underline-offset-2 hover:text-softGold hover:underline"
-    {...rest}
-  >
-    {children}
-  </a>
-);
+const A = ({ children, href, ...rest }: AnyProps) => {
+  const isExternal = href?.startsWith('http') || href?.startsWith('//');
+  const anchorProps = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+  
+  return (
+    <a
+      href={href}
+      className="font-medium text-forest underline-offset-2 hover:text-softGold hover:underline"
+      {...anchorProps}
+      {...rest}
+    >
+      {children}
+    </a>
+  );
+};
 
 /* --------------------------------- Images --------------------------------- */
 /**
- * MDX <img> handler – keep it dead simple.
- * We deliberately use a plain <img> here to avoid Next/Image type friction.
+ * Modern MDX Image handler with Next.js Image optimization
  */
 const MdxImage = (props: AnyProps) => {
-  const { src, alt = "", className = "", ...rest } = props;
+  const { src, alt = "", className = "", width, height, ...rest } = props;
 
   if (!src) return null;
 
+  // Handle external images vs local images
+  const isExternal = src.startsWith('http') || src.startsWith('//');
+  
+  // Default dimensions for when not provided
+  const imageWidth = width ? parseInt(String(width)) : 800;
+  const imageHeight = height ? parseInt(String(height)) : 600;
+
   return (
-    <img
-      src={String(src)}
-      alt={String(alt)}
-      className={`my-4 h-auto w-full rounded-xl object-cover ${className}`.trim()}
-      {...rest}
-    />
+    <div className={`my-6 relative ${className}`.trim()}>
+      <Image
+        src={src}
+        alt={String(alt)}
+        width={imageWidth}
+        height={imageHeight}
+        className="rounded-xl object-cover w-full h-auto"
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaUMk9jkHLyDswBwcq9sCsoqKvWpb9bT31bNVA5I+Yq6tZug1rWmG3n6nqYvqkBdMkSOSicf4q6/9k="
+        unoptimized={isExternal} // Only optimize local images for static export
+        {...rest}
+      />
+      {alt && (
+        <figcaption className="mt-2 text-sm text-gray-600 text-center italic">
+          {alt}
+        </figcaption>
+      )}
+    </div>
   );
 };
 
@@ -157,7 +181,7 @@ const MdxImage = (props: AnyProps) => {
 
 const Grid = ({ children, className = "", ...rest }: AnyProps) => (
   <div
-    className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ${className}`.trim()}
+    className={`grid gap-6 sm:grid-cols-2 lg:grid-cols-3 ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -165,15 +189,17 @@ const Grid = ({ children, className = "", ...rest }: AnyProps) => (
 );
 
 /**
- * PullLine – used for those single-line “punch” quotes in downloads/posts.
+ * PullLine – used for those single-line "punch" quotes in downloads/posts.
  */
 const PullLine = ({ children, className = "", ...rest }: AnyProps) => (
-  <p
-    className={`my-6 border-y border-softGold/40 py-3 text-center font-serif text-lg italic text-deepCharcoal ${className}`.trim()}
+  <div
+    className={`my-8 border-y border-softGold/40 py-4 text-center ${className}`.trim()}
     {...rest}
   >
-    {children}
-  </p>
+    <p className="font-serif text-lg md:text-xl italic text-deepCharcoal">
+      {children}
+    </p>
+  </div>
 );
 
 // Eyebrow component for blog heroes used in MDX
@@ -220,16 +246,18 @@ const CalloutBlock = ({
   className = "",
   ...rest
 }: AnyProps) => {
-  const tone =
-    type === "warning" || type === "danger"
-      ? "border-amber-500/60 bg-amber-50/10 text-amber-900"
-      : "border-softGold/40 bg-softGold/5 text-deepCharcoal";
+  const toneMap = {
+    info: "border-softGold/40 bg-softGold/5 text-deepCharcoal",
+    warning: "border-amber-500/60 bg-amber-50/10 text-amber-900",
+    danger: "border-red-500/60 bg-red-50/10 text-red-900",
+    success: "border-green-500/60 bg-green-50/10 text-green-900",
+  };
 
   return (
     <div
       className={(
-        "my-4 rounded-2xl border px-4 py-3 text-sm " +
-        tone +
+        "my-6 rounded-2xl border px-6 py-4 text-sm " +
+        toneMap[type as keyof typeof toneMap] +
         " " +
         className
       ).trim()}
@@ -247,7 +275,7 @@ const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
   <div
     className={(
       "my-4 rounded-xl border border-lightGrey bg-warmWhite/60 " +
-      "px-4 py-3 text-xs text-gray-800 " +
+      "px-4 py-3 text-sm text-gray-800 " +
       className
     ).trim()}
     {...rest}
@@ -270,23 +298,21 @@ const RuleBlock = ({ className = "", ...rest }: AnyProps) => (
 
 /**
  * Caption – for image captions / small explanatory text.
- * Usage in MDX: <Caption>Photo of …</Caption>
  */
 const CaptionBlock = ({ children, className = "", ...rest }: AnyProps) => (
-  <p
+  <figcaption
     className={(
-      "mt-2 text-[0.75rem] text-gray-500 text-center italic " +
+      "mt-2 text-sm text-gray-600 text-center italic " +
       className
     ).trim()}
     {...rest}
   >
     {children}
-  </p>
+  </figcaption>
 );
 
 /**
  * Badge – small pill for tags / labels in posts.
- * Usage in MDX: <Badge tone="primary">Fatherhood</Badge>
  */
 const BadgeBlock = ({
   children,
@@ -294,18 +320,20 @@ const BadgeBlock = ({
   className = "",
   ...rest
 }: AnyProps) => {
-  const toneClass =
-    tone === "primary"
-      ? "bg-forest text-cream border-forest/80"
-      : tone === "accent"
-      ? "bg-softGold/90 text-deepCharcoal border-softGold"
-      : "bg-warmWhite text-gray-800 border-lightGrey";
+  const toneMap = {
+    primary: "bg-forest text-cream border-forest/80",
+    accent: "bg-softGold/90 text-deepCharcoal border-softGold",
+    neutral: "bg-warmWhite text-gray-800 border-lightGrey",
+    success: "bg-green-100 text-green-800 border-green-200",
+    warning: "bg-amber-100 text-amber-800 border-amber-200",
+    danger: "bg-red-100 text-red-800 border-red-200",
+  };
 
   return (
     <span
       className={(
-        "inline-flex items-center rounded-full border px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide " +
-        toneClass +
+        "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
+        toneMap[tone as keyof typeof toneMap] +
         " " +
         className
       ).trim()}
@@ -318,12 +346,11 @@ const BadgeBlock = ({
 
 /**
  * BadgeRow – row layout for multiple badges.
- * Usage: <BadgeRow><Badge>One</Badge><Badge>Two</Badge></BadgeRow>
  */
 const BadgeRowBlock = ({ children, className = "", ...rest }: AnyProps) => (
   <div
     className={(
-      "mt-4 flex flex-wrap items-center gap-2 " + className
+      "my-4 flex flex-wrap items-center gap-2 " + className
     ).trim()}
     {...rest}
   >
@@ -334,17 +361,24 @@ const BadgeRowBlock = ({ children, className = "", ...rest }: AnyProps) => (
 /**
  * Quote – stylised pull quote, often with author.
  */
-type QuoteProps = AnyProps & { author?: React.ReactNode };
+type QuoteProps = AnyProps & { author?: React.ReactNode; cite?: string };
 
-const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
+const QuoteBlock = ({ children, author, cite, ...rest }: QuoteProps) => (
   <figure
-    className="my-6 border-l-2 border-softGold/80 pl-4 text-sm text-gray-800"
+    className="my-8 border-l-4 border-softGold/80 pl-6 py-2"
     {...rest}
   >
-    <div className="italic">{children}</div>
-    {author != null && author !== false && (
-      <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-500">
-        — {author}
+    <blockquote className="text-lg italic text-gray-700">
+      {children}
+    </blockquote>
+    {(author || cite) && (
+      <figcaption className="mt-3 text-sm text-gray-600">
+        {author && <span className="font-semibold">— {author}</span>}
+        {cite && (
+          <cite className="not-italic text-gray-500 ml-2">
+            ({cite})
+          </cite>
+        )}
       </figcaption>
     )}
   </figure>
@@ -353,17 +387,17 @@ const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
 /**
  * Verse – Scripture or key line with reference.
  */
-type VerseProps = AnyProps & { refText?: React.ReactNode };
+type VerseProps = AnyProps & { reference?: React.ReactNode };
 
-const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
+const VerseBlock = ({ children, reference, ...rest }: VerseProps) => (
   <div
-    className="my-4 rounded-lg bg-warmWhite/80 px-4 py-3 text-sm text-gray-800"
+    className="my-6 rounded-lg bg-warmWhite/80 px-6 py-4"
     {...rest}
   >
-    <p className="italic">{children}</p>
-    {refText != null && refText !== false && (
-      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-softGold">
-        {refText}
+    <p className="italic text-gray-800 text-lg leading-relaxed">{children}</p>
+    {reference && (
+      <p className="mt-3 text-sm font-medium uppercase tracking-wide text-softGold">
+        {reference}
       </p>
     )}
   </div>
@@ -374,7 +408,7 @@ const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
  */
 const ShareRow = ({ children, ...rest }: AnyProps) => (
   <div
-    className="mt-6 flex flex-wrap items-center gap-3 border-t border-lightGrey pt-4 text-sm"
+    className="my-8 flex flex-wrap items-center gap-4 border-t border-lightGrey pt-6"
     {...rest}
   >
     {children}
@@ -383,22 +417,6 @@ const ShareRow = ({ children, ...rest }: AnyProps) => (
 
 /**
  * DownloadCard – compact card for a single downloadable resource.
- *
- * Usage in MDX (examples):
- *   <DownloadCard
- *     title="Brotherhood Code Cheat Sheet"
- *     href="/downloads/brotherhood-code-cheat-sheet.pdf"
- *   >
- *     A one-page summary you can keep on your desk.
- *   </DownloadCard>
- *
- *  or
- *
- *   <DownloadCard
- *     title="Playbook"
- *     link="/downloads/playbook.pdf"
- *     label="Download PDF"
- *   />
  */
 const DownloadCardBlock = ({
   title,
@@ -410,42 +428,33 @@ const DownloadCardBlock = ({
   children,
   ...rest
 }: AnyProps) => {
-  const displayTitle =
-    (title as React.ReactNode) ||
-    (heading as React.ReactNode) ||
-    "Download";
-
-  const displayDescription =
-    (description as React.ReactNode) || children;
-
-  const url = (href as string) || (link as string) || "";
-
-  const buttonText =
-    (label as React.ReactNode) || "Download";
+  const displayTitle = title || heading || "Download";
+  const displayDescription = description || children;
+  const url = href || link || "";
 
   return (
     <article
-      className="my-4 flex flex-col justify-between rounded-2xl border border-lightGrey bg-white p-4 shadow-sm"
+      className="my-6 flex flex-col justify-between rounded-2xl border border-lightGrey bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
       {...rest}
     >
       <div>
-        <h4 className="font-serif text-base font-semibold text-deepCharcoal">
+        <h4 className="font-serif text-lg font-semibold text-deepCharcoal">
           {displayTitle}
         </h4>
         {displayDescription && (
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-3 text-gray-700 leading-relaxed">
             {displayDescription}
           </p>
         )}
       </div>
 
       {url && (
-        <div className="mt-4">
+        <div className="mt-6">
           <a
             href={url}
-            className="inline-flex items-center rounded-full bg-forest px-4 py-1.5 text-xs font-semibold text-cream underline-offset-4 hover:bg-forest/90"
+            className="inline-flex items-center gap-2 rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-cream hover:bg-forest/90 transition-colors"
           >
-            {buttonText}
+            {label || "Download PDF"}
           </a>
         </div>
       )}
@@ -455,7 +464,6 @@ const DownloadCardBlock = ({
 
 /**
  * ResourcesCTA – end-of-article block to push downloads, events, etc.
- * Very forgiving: will render with whatever subset of props MDX passes in.
  */
 const ResourcesCTABlock = ({
   title,
@@ -468,61 +476,42 @@ const ResourcesCTABlock = ({
   children,
   ...rest
 }: AnyProps) => {
-  const displayTitle =
-    (title as React.ReactNode) ||
-    (heading as React.ReactNode) ||
-    "Further resources";
-  const displayDescription = (description as React.ReactNode) || children;
-  const url = (href as string) || (link as string) || "";
-
-  const buttonText =
-    (buttonLabel as React.ReactNode) ||
-    (label as React.ReactNode) ||
-    "Explore resources";
+  const displayTitle = title || heading || "Further resources";
+  const displayDescription = description || children;
+  const url = href || link || "";
 
   return (
     <section
-      className="mt-10 rounded-2xl border border-softGold/40 bg-warmWhite/70 p-6"
+      className="my-10 rounded-2xl border border-softGold/40 bg-warmWhite/70 p-8"
       {...rest}
     >
-      <h3 className="font-serif text-lg font-semibold text-deepCharcoal">
+      <h3 className="font-serif text-xl font-semibold text-deepCharcoal">
         {displayTitle}
       </h3>
       {displayDescription && (
-        <p className="mt-2 text-sm text-gray-700">{displayDescription}</p>
+        <p className="mt-3 text-gray-700">{displayDescription}</p>
       )}
 
       {url && (
-        <div className="mt-4">
+        <div className="mt-6">
           <a
             href={url}
-            className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream underline-offset-4 hover:bg-forest/90"
+            className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-cream hover:bg-forest/90 transition-colors"
           >
-            {buttonText}
+            {buttonLabel || label || "Explore resources"}
           </a>
         </div>
       )}
     </section>
   );
 };
+
 /* ----------------------- Brand-specific MDX components -------------------- */
 
-// Loosen typing so TS doesn't complain when MDX uses these
-const BrandFrameWrapper = (props: AnyProps) => {
-  const SafeBrandFrame = BrandFrame as unknown as React.ComponentType<any>;
-  return <SafeBrandFrame {...props} />;
-};
-
-const EmbossedBrandMarkWrapper = (props: AnyProps) => {
-  const SafeEmbossed =
-    EmbossedBrandMark as unknown as React.ComponentType<any>;
-  return <SafeEmbossed {...props} />;
-};
-
-const EmbossedSignWrapper = (props: AnyProps) => {
-  const SafeEmbossedSign = EmbossedSign as unknown as React.ComponentType<any>;
-  return <SafeEmbossedSign {...props} />;
-};
+// Type-safe wrappers for brand components
+const BrandFrameWrapper = (props: AnyProps) => <BrandFrame {...props} />;
+const EmbossedBrandMarkWrapper = (props: AnyProps) => <EmbossedBrandMark {...props} />;
+const EmbossedSignWrapper = (props: AnyProps) => <EmbossedSign {...props} />;
 
 /* --------------------------- Exported map for MDX -------------------------- */
 
@@ -573,7 +562,7 @@ export const mdxComponents = {
   // Brand components used in MDX content
   BrandFrame: BrandFrameWrapper,
   EmbossedBrandMark: EmbossedBrandMarkWrapper,
-  EmbossedSign: EmbossedSignWrapper, // Add this line
-};
+  EmbossedSign: EmbossedSignWrapper,
+} as const;
 
 export default mdxComponents;
