@@ -1,3 +1,4 @@
+// contentlayer.config.ts
 import path from "node:path";
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import remarkGfm from "remark-gfm";
@@ -7,36 +8,48 @@ import rehypeSlug from "rehype-slug";
 // Helpers
 // -----------------------------------------------------------------------------
 
-type RawDoc = {
-  _raw: { flattenedPath: string };
-  body?: { raw: string };
-  [key: string]: unknown;
-};
+function escapeForRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-const generateSlug = (rawPath: string, prefix: string): string => {
+// Generate a clean slug from flattenedPath + collection prefix
+function generateSlug(flattenedPath: string, prefix: string): string {
+  if (!flattenedPath) return "untitled";
   try {
-    const withoutPrefix = rawPath.replace(new RegExp(`^${prefix}/`), "");
-    const cleaned = withoutPrefix.replace(/\/index$/, "");
-    return cleaned || "untitled";
+    const safePrefix = escapeForRegExp(prefix);
+    return (
+      flattenedPath
+        .replace(new RegExp(`^${safePrefix}/`, "u"), "")
+        .replace(/\/index$/u, "") || "untitled"
+    );
   } catch {
     return "untitled";
   }
-};
+}
 
-const generateUrl = (slug: string, basePath: string): string => {
-  return `/${basePath}/${slug}`.replace(/\/+/g, "/");
-};
+// Build a URL from slug + base path
+function generateUrl(slug: string, basePath: string): string {
+  const cleanSlug = slug.replace(/^\/+|\/+$/gu, "");
+  const cleanBase = basePath.replace(/^\/+|\/+$/gu, "");
+  if (!cleanSlug) return `/${cleanBase}`;
+  return `/${cleanBase}/${cleanSlug}`.replace(/\/+/gu, "/");
+}
 
 // -----------------------------------------------------------------------------
-// Post
+// Document types
 // -----------------------------------------------------------------------------
 
+// BLOG POSTS (content/blog/**/*)
 export const Post = defineDocumentType(() => ({
   name: "Post",
-  filePathPattern: `posts/**/*.{md,mdx}`,
+  filePathPattern: `blog/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Post" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Post",
+    },
     date: {
       type: "date",
       required: true,
@@ -50,52 +63,57 @@ export const Post = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "posts"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "blog"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateUrl(generateSlug(doc._raw.flattenedPath, "posts"), "blog"),
+      resolve: (doc) =>
+        generateUrl(generateSlug(doc._raw.flattenedPath, "blog"), "blog"),
     },
     readingTime: {
       type: "number",
-      resolve: (doc: RawDoc) => {
+      resolve: (doc) => {
         const wordsPerMinute = 200;
-        const raw = (doc.body as RawDoc["body"] | undefined)?.raw ?? "";
-        const wordCount = raw.split(/\s+/).filter(Boolean).length;
+        const wordCount = doc.body.raw.split(/\s+/u).length;
         return Math.ceil(wordCount / wordsPerMinute);
       },
     },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// Download
-// -----------------------------------------------------------------------------
-
+// DOWNLOAD RESOURCES (content/downloads/**/*)
 export const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: `downloads/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Download" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Download",
+    },
+    date: {
+      type: "date",
+      required: true,
+      default: new Date().toISOString().split("T")[0],
+    },
     excerpt: { type: "string", default: "" },
-    type: { type: "string", default: "resource" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
+    // Primary path to the PDF in /public/downloads/...
+    downloadFile: { type: "string", required: true, default: "" },
+    // Optional legacy field if some MDX still uses fileUrl
     fileUrl: { type: "string", default: "" },
-    fileSize: { type: "string", default: "" },
+    type: { type: "string", default: "download" },
   },
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "downloads"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "downloads"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
+      resolve: (doc) =>
         generateUrl(
           generateSlug(doc._raw.flattenedPath, "downloads"),
           "downloads",
@@ -104,16 +122,17 @@ export const Download = defineDocumentType(() => ({
   },
 }));
 
-// -----------------------------------------------------------------------------
-// Book
-// -----------------------------------------------------------------------------
-
+// BOOKS (content/books/**/*)
 export const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: `books/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Book" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Book",
+    },
     date: {
       type: "date",
       required: true,
@@ -129,27 +148,27 @@ export const Book = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "books"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "books"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
+      resolve: (doc) =>
         generateUrl(generateSlug(doc._raw.flattenedPath, "books"), "books"),
     },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// Event
-// -----------------------------------------------------------------------------
-
+// EVENTS (content/events/**/*)
 export const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: `events/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Event" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Event",
+    },
     date: {
       type: "date",
       required: true,
@@ -168,40 +187,36 @@ export const Event = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "events"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "events"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
+      resolve: (doc) =>
         generateUrl(generateSlug(doc._raw.flattenedPath, "events"), "events"),
     },
     isUpcoming: {
       type: "boolean",
-      resolve: (doc: any) => {
-        const baseDate = (doc.eventDate as string) ?? (doc.date as string);
-        if (!baseDate) return false;
-        const eventDate = new Date(baseDate);
-        const now = new Date();
-        // Normalise to date-only comparison
-        eventDate.setHours(0, 0, 0, 0);
-        now.setHours(0, 0, 0, 0);
-        return eventDate >= now;
+      resolve: (doc) => {
+        const eventDate = new Date(doc.eventDate || doc.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return eventDate >= today;
       },
     },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// Print
-// -----------------------------------------------------------------------------
-
+// PRINTABLE RESOURCES (content/prints/**/*)
 export const Print = defineDocumentType(() => ({
   name: "Print",
   filePathPattern: `prints/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Print" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Print",
+    },
     date: {
       type: "date",
       required: true,
@@ -210,34 +225,37 @@ export const Print = defineDocumentType(() => ({
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
+    // e.g. "A4", "US Letter"
     dimensions: { type: "string", default: "" },
+    // optional PDF path in /public/downloads if distinct
+    downloadFile: { type: "string", default: "" },
     price: { type: "string", default: "" },
     available: { type: "boolean", default: true },
   },
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "prints"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "prints"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
+      resolve: (doc) =>
         generateUrl(generateSlug(doc._raw.flattenedPath, "prints"), "prints"),
     },
   },
 }));
 
-// -----------------------------------------------------------------------------
-// Resource
-// -----------------------------------------------------------------------------
-
+// GENERIC RESOURCES (content/resources/**/*) – keep for legacy
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: `resources/**/*.{md,mdx}`,
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true, default: "Untitled Resource" },
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Resource",
+    },
     date: {
       type: "date",
       required: true,
@@ -252,75 +270,15 @@ export const Resource = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc: RawDoc) =>
-        generateSlug(doc._raw.flattenedPath, "resources"),
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "resources"),
     },
     url: {
       type: "string",
-      resolve: (doc: RawDoc) =>
+      resolve: (doc) =>
         generateUrl(
           generateSlug(doc._raw.flattenedPath, "resources"),
           "resources",
         ),
-    },
-  },
-}));
-
-// -----------------------------------------------------------------------------
-// Page (catch-all for any remaining MD/MDX content)
-// NOTE: to avoid pattern collisions, this assumes your "real" content
-// lives under the known collection folders.
-// -----------------------------------------------------------------------------
-
-export const Page = defineDocumentType(() => ({
-  name: "Page",
-  filePathPattern: `**/*.{md,mdx}`,
-  contentType: "mdx",
-  fields: {
-    title: { type: "string", required: true, default: "Untitled Page" },
-    date: {
-      type: "date",
-      default: new Date().toISOString().split("T")[0],
-    },
-    excerpt: { type: "string", default: "" },
-    coverImage: { type: "string", default: "" },
-    tags: { type: "list", of: { type: "string" }, default: [] },
-  },
-  computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc: RawDoc) => {
-        const flattened = doc._raw.flattenedPath;
-        const knownPrefixes = [
-          "posts",
-          "downloads",
-          "books",
-          "events",
-          "prints",
-          "resources",
-        ];
-        const prefix = knownPrefixes.find((p) =>
-          flattened.startsWith(`${p}/`),
-        );
-        return prefix ? generateSlug(flattened, prefix) : flattened;
-      },
-    },
-    url: {
-      type: "string",
-      resolve: (doc: RawDoc) => `/${doc._raw.flattenedPath}`,
-    },
-    contentType: {
-      type: "string",
-      resolve: (doc: RawDoc) => {
-        const path = doc._raw.flattenedPath;
-        if (path.startsWith("posts/")) return "post";
-        if (path.startsWith("downloads/")) return "download";
-        if (path.startsWith("books/")) return "book";
-        if (path.startsWith("events/")) return "event";
-        if (path.startsWith("prints/")) return "print";
-        if (path.startsWith("resources/")) return "resource";
-        return "page";
-      },
     },
   },
 }));
@@ -331,19 +289,9 @@ export const Page = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [Post, Download, Book, Event, Print, Resource, Page],
+  documentTypes: [Post, Download, Book, Event, Print, Resource],
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
-  },
-  // Log unknown docs instead of failing builds
-  onUnknownDocuments: (unknownDocuments) => {
-    if (!unknownDocuments?.length) return;
-    console.warn(
-      `Found ${unknownDocuments.length} documents without type definition`,
-    );
-    for (const doc of unknownDocuments) {
-      console.warn(`- ${doc._raw.flattenedPath}`);
-    }
   },
 });

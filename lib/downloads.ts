@@ -1,37 +1,80 @@
 // lib/downloads.ts
-// Thin facade over the server-side downloads-data helpers.
-// Used by pages and components so we can refactor the backend without touching the UI layer.
+// Content-layer backed helpers for downloads & print resources.
 
-import type {
-  Download,
-  DownloadMeta,
-  DownloadFieldKey,
-} from "@/lib/server/downloads-data";
 import {
-  getAllDownloadsMeta as _getAllDownloadsMeta,
-  getDownloadBySlug as _getDownloadBySlug,
-  getDownloadSlugs as _getDownloadSlugs,
-} from "@/lib/server/downloads-data";
-
-export type { Download, DownloadMeta, DownloadFieldKey };
+  allDownloads,
+  allPrints,
+  type Download as CLDownload,
+  type Print as CLPrint,
+} from "contentlayer/generated";
 
 /**
- * All downloads (meta only) for listings / grids.
+ * Canonical runtime types
+ */
+export type Download = CLDownload;
+export type DownloadMeta = CLDownload;
+export type DownloadFieldKey = keyof Download;
+
+export type PrintResource = CLPrint;
+export type PrintMeta = CLPrint;
+
+// -----------------------------------------------------------------------------
+// Downloads
+// -----------------------------------------------------------------------------
+
+function sortByDateDesc<T extends { date?: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const da = a.date ? new Date(a.date).getTime() : 0;
+    const db = b.date ? new Date(b.date).getTime() : 0;
+    return db - da;
+  });
+}
+
+/**
+ * All downloads (meta) for listings.
  */
 export function getAllDownloads(): DownloadMeta[] {
-  return _getAllDownloadsMeta();
+  if (!allDownloads || !Array.isArray(allDownloads)) return [];
+  return sortByDateDesc(allDownloads);
 }
 
 /**
  * Slugs for getStaticPaths in pages/downloads/[slug].tsx.
  */
 export function getDownloadSlugs(): string[] {
-  return _getDownloadSlugs();
+  return allDownloads.map((doc) => doc.slug);
 }
 
 /**
  * Full download (including MDX content) for detail pages.
  */
 export function getDownloadBySlug(slug: string): Download | null {
-  return _getDownloadBySlug(slug);
+  const target = String(slug).trim().toLowerCase();
+  const found =
+    allDownloads.find(
+      (doc) =>
+        doc.slug.toLowerCase() === target ||
+        doc.slug.toLowerCase() === target.replace(/\.mdx?$/iu, ""),
+    ) ?? null;
+  return found;
+}
+
+// -----------------------------------------------------------------------------
+// Prints (print-ready resources)
+// -----------------------------------------------------------------------------
+
+export function getAllPrints(): PrintMeta[] {
+  if (!allPrints || !Array.isArray(allPrints)) return [];
+  return sortByDateDesc(allPrints);
+}
+
+export function getPrintBySlug(slug: string): PrintResource | null {
+  const target = String(slug).trim().toLowerCase();
+  const found =
+    allPrints.find(
+      (doc) =>
+        doc.slug.toLowerCase() === target ||
+        doc.slug.toLowerCase() === target.replace(/\.mdx?$/iu, ""),
+    ) ?? null;
+  return found;
 }
