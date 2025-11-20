@@ -1,11 +1,31 @@
 // pages/api/subscribe.ts
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { subscribe, type SubscriptionResult } from "@/lib/server/subscription";
+import {
+  subscribe,
+  type SubscriptionResult,
+  type SubscriptionPreferences,
+} from "@/lib/server/subscription";
+
+interface SubscribeRequestBody {
+  email?: string;
+  preferences?: SubscriptionPreferences;
+  metadata?: Record<string, unknown>;
+  tags?: string[];
+  referrer?: string;
+}
+
+type SubscribeResponseBody =
+  | SubscriptionResult
+  | {
+      ok?: boolean;
+      message: string;
+      error?: string;
+    };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<SubscribeResponseBody>,
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method Not Allowed" });
@@ -18,20 +38,14 @@ export default async function handler(
       metadata,
       tags,
       referrer,
-    } = req.body as {
-      email?: string;
-      preferences?: any;
-      metadata?: Record<string, unknown>;
-      tags?: string[];
-      referrer?: string;
-    };
+    } = (req.body ?? {}) as SubscribeRequestBody;
 
     // Validate required fields
     if (!email) {
-      return res.status(400).json({ 
-        ok: false, 
+      return res.status(400).json({
+        ok: false,
         message: "Email is required",
-        error: "MISSING_EMAIL" 
+        error: "MISSING_EMAIL",
       });
     }
 
@@ -49,15 +63,14 @@ export default async function handler(
         timestamp: new Date().toISOString(),
       },
       tags: tags || ["api-subscriber"],
-      referrer: referrer || req.headers.referer || "direct",
+      referrer: referrer || (req.headers.referer as string | undefined) || "direct",
     });
 
     // Return appropriate status code based on result
     const statusCode = result.ok ? 200 : result.status || 400;
 
     return res.status(statusCode).json(result);
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Subscription API error:", error);
 
     return res.status(500).json({
@@ -84,5 +97,5 @@ function getClientIp(req: NextApiRequest): string | undefined {
   }
 
   // Fallback to connection remote address
-  return req.socket?.remoteAddress;
+  return req.socket?.remoteAddress ?? undefined;
 }
