@@ -1,5 +1,5 @@
 // lib/mdx.ts
-// Centralised MDX utilities: load, parse, and read frontmatter.
+// Centralised MD/MDX utilities: load, parse, and read frontmatter.
 // Only used in getStaticProps / getStaticPaths (server-side).
 
 import fs from "fs";
@@ -9,7 +9,8 @@ import matter from "gray-matter";
 export interface RawContentEntry {
   slug: string;
   content: string;
-  [key: string]: any;
+  // dynamic frontmatter fields
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 interface GetContentOptions {
@@ -17,8 +18,6 @@ interface GetContentOptions {
   withContent?: boolean;
 }
 
-// Root folder where your MD/MDX content lives.
-// Adjust this to your actual structure if needed.
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
 function resolveCollectionDir(collection: string): string {
@@ -39,9 +38,9 @@ function readFileSafe(filePath: string): string | null {
  * Example structure:
  *   content/
  *     downloads/
- *       brotherhood-cue-card.mdx
- *     resources/
- *       lessons-from-noah.mdx
+ *       brotherhood-covenant.mdx
+ *     prints/
+ *       weekly-operating-rhythm.mdx
  */
 export function getAllContent(collection: string): RawContentEntry[] {
   const dir = resolveCollectionDir(collection);
@@ -60,7 +59,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
 
     const { data, content } = matter(raw);
     const slug =
-      (data.slug as string) ?? file.replace(/\.mdx?$/i, "");
+      (data.slug as string | undefined) ?? file.replace(/\.mdx?$/i, "");
 
     entries.push({
       slug,
@@ -79,10 +78,11 @@ export function getAllContent(collection: string): RawContentEntry[] {
 export function getContentBySlug(
   collection: string,
   slug: string,
-  options?: GetContentOptions
+  options?: GetContentOptions,
 ): RawContentEntry | null {
   const dir = resolveCollectionDir(collection);
   const targetSlug = String(slug).trim();
+
   const candidates = [
     path.join(dir, `${targetSlug}.mdx`),
     path.join(dir, `${targetSlug}.md`),
@@ -99,21 +99,21 @@ export function getContentBySlug(
     }
   }
 
-  // Fallback: search all entries
+  // Fallback: search all entries if no direct file match
   if (!filePath) {
     const all = getAllContent(collection);
     const found =
       all.find(
         (entry) =>
           entry.slug === targetSlug ||
-          entry.slug === targetSlug.toLowerCase()
-      ) || null;
+          entry.slug === targetSlug.toLowerCase(),
+      ) ?? null;
 
     if (!found) return null;
 
     if (options?.withContent === false) {
       const { content: _omit, ...meta } = found;
-      return meta as any;
+      return meta as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
     return found;
@@ -123,7 +123,7 @@ export function getContentBySlug(
   if (!raw) return null;
 
   const { data, content } = matter(raw);
-  const resolvedSlug = (data.slug as string) || targetSlug;
+  const resolvedSlug = (data.slug as string | undefined) ?? targetSlug;
 
   const entry: RawContentEntry = {
     slug: resolvedSlug,
@@ -133,7 +133,7 @@ export function getContentBySlug(
 
   if (options?.withContent === false) {
     const { content: _omit, ...meta } = entry;
-    return meta as any;
+    return meta as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   return entry;

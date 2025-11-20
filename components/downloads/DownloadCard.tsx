@@ -1,4 +1,3 @@
-// components/downloads/DownloadCard.tsx (CLEANED & OPTIMIZED VERSION)
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
@@ -37,7 +36,7 @@ export default function DownloadCard({
 }: DownloadCardProps) {
   
   const detailHref = `/downloads/${slug}`;
-  const finalImageSrc = (typeof coverImage === 'string' && coverImage) || DEFAULT_COVER;
+  const finalImageSrc = (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
 
   return (
     <article
@@ -48,10 +47,10 @@ export default function DownloadCard({
       )}
     >
       {/* Image Link Block */}
-      <Link 
-        href={detailHref} 
-        prefetch={false} 
-        className="block relative w-full flex-shrink-0" 
+      <Link
+        href={detailHref}
+        prefetch={false}
+        className="block relative w-full flex-shrink-0"
         tabIndex={-1}
       >
         <div className="relative w-full aspect-[16/9]">
@@ -77,14 +76,18 @@ export default function DownloadCard({
             {title}
           </Link>
         </h3>
-        
+
         {/* Metadata */}
         <div className="mt-1 flex items-center text-xs text-gray-600 space-x-2">
           {category && (
-            <span className="rounded-full bg-warmWhite px-2 py-0.5">{category}</span>
+            <span className="rounded-full bg-warmWhite px-2 py-0.5">
+              {category}
+            </span>
           )}
           {size && (
-            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">{size}</span>
+            <span className="text-xs text-[color:var(--color-on-secondary)/0.6]">
+              {size}
+            </span>
           )}
         </div>
 

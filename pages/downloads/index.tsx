@@ -1,9 +1,11 @@
 // pages/downloads/index.tsx
 import Head from "next/head";
 import Link from "next/link";
+import * as React from "react";
+
 import Layout from "@/components/Layout";
 
-const DownloadsIndexPage = () => {
+const DownloadsIndexPage: React.FC = () => {
   const title = "Downloads";
   const description =
     "Curated tools, cue cards, briefs, and print-ready resources from Abraham of London.";
@@ -33,7 +35,7 @@ const DownloadsIndexPage = () => {
           <h2 className="mb-3 text-xl font-semibold text-deepCharcoal">
             How to access resources
           </h2>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
+          <ul className="list-inside list-disc space-y-2 text-gray-700">
             <li>
               Open any{" "}
               <Link
@@ -53,8 +55,8 @@ const DownloadsIndexPage = () => {
             </li>
             <li>
               Each card links to a dedicated{" "}
-              <span className="font-mono text-sm">/downloads/[slug]</span>{" "}
-              page with a primary download button.
+              <span className="font-mono text-sm">/downloads/[slug]</span> page
+              with a primary download button.
             </li>
             <li>
               If you&apos;re looking for something specific,{" "}

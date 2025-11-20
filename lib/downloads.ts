@@ -1,4 +1,6 @@
 // lib/downloads.ts
+// Thin facade over the server-side downloads-data helpers.
+// Used by pages and components so we can refactor the backend without touching the UI layer.
 
 import type {
   Download,
@@ -28,7 +30,7 @@ export function getDownloadSlugs(): string[] {
 }
 
 /**
- * Full download (including content) for detail pages.
+ * Full download (including MDX content) for detail pages.
  */
 export function getDownloadBySlug(slug: string): Download | null {
   return _getDownloadBySlug(slug);
