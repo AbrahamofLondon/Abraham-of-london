@@ -4,8 +4,22 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import ThemeToggle from "./ThemeToggle";
+// Remove ThemeToggle if not implemented, or create a basic one
+// import ThemeToggle from "./ThemeToggle";
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
+
+// Simple fallback ThemeToggle component if not implemented
+const ThemeToggle: React.FC = () => (
+  <button
+    type="button"
+    className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+    aria-label="Toggle theme"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+);
 
 type HeaderProps = { variant?: "light" | "dark" };
 
@@ -17,7 +31,7 @@ type NavItem = {
 // ✅ Single source of truth for where nav items point
 const NAV: NavItem[] = [
   { route: "booksIndex", label: "Books" },
-  { route: "contentIndex", label: "Insights" }, // was "/blogs" → now the real index
+  { route: "contentIndex", label: "Insights" },
   { route: "ventures", label: "Ventures" },
   { route: "about", label: "About" },
   { route: "contact", label: "Contact" },
@@ -27,29 +41,46 @@ export default function Header({ variant = "light" }: HeaderProps) {
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState<string>("/");
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // Mark component as mounted to avoid SSR mismatches
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Derive active link from currentPath (kept in sync with location)
   const isActive = React.useCallback(
     (route: RouteId) => {
+      if (!isMounted) return false;
       const href = getRoutePath(route);
       const p = currentPath || "";
       if (href === "/") return p === "/";
       return p === href || p.startsWith(href + "/");
     },
-    [currentPath],
+    [currentPath, isMounted],
   );
 
-  // Track scroll depth for header styling
+  // Track scroll depth for header styling - SAFE version
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    const onScroll = () => {
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 8);
+      });
+    };
+
+    // Add passive scroll listener
     window.addEventListener("scroll", onScroll, { passive: true });
+    
+    // Initial check
+    onScroll();
+    
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Track current path on client and keep it in sync with SPA navigation
+  // Track current path on client and keep it in sync with SPA navigation - SAFE version
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -60,47 +91,59 @@ export default function Header({ variant = "light" }: HeaderProps) {
     // Initial
     updatePath();
 
-    // Back/forward + hash changes
-    const handlePopOrHash = () => updatePath();
-
-    // Generic click listener – catches Next.js <Link> client navs
-    const handleClick = () => {
-      // Let Next update history/location first
-      setTimeout(updatePath, 0);
+    // Back/forward navigation
+    const handlePopState = () => {
+      // Small delay to ensure URL is updated
+      setTimeout(updatePath, 10);
     };
 
-    window.addEventListener("popstate", handlePopOrHash);
-    window.addEventListener("hashchange", handlePopOrHash);
-    window.addEventListener("click", handleClick, true);
+    // Listen for Next.js route changes
+    const handleRouteChange = () => {
+      setTimeout(updatePath, 10);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    
+    // For Next.js app router, we can listen to clicks on links
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[href]');
+      if (link && link.getAttribute('href')?.startsWith('/')) {
+        setTimeout(updatePath, 50);
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
 
     return () => {
-      window.removeEventListener("popstate", handlePopOrHash);
-      window.removeEventListener("hashchange", handlePopOrHash);
-      window.removeEventListener("click", handleClick, true);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener('click', handleClick, true);
     };
   }, []);
 
-  // Lock body scroll while mobile menu open
+  // Lock body scroll while mobile menu open - FIXED version
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!open) return;
+    if (typeof window === "undefined" || !open) return;
 
-    const y = window.scrollY;
-    const { style } = document.documentElement;
+    const originalStyle = window.getComputedStyle(document.body).position;
+    const originalOverflow = window.getComputedStyle(document.body).overflow;
+    const scrollY = window.scrollY;
 
-    style.position = "fixed";
-    style.top = `-${y}px`;
-    style.left = "0";
-    style.right = "0";
-    style.width = "100%";
+    // Apply styles
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
 
     return () => {
-      style.position = "";
-      style.top = "";
-      style.left = "";
-      style.right = "";
-      style.width = "";
-      window.scrollTo(0, y);
+      // Restore styles
+      document.body.style.position = originalStyle;
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = originalOverflow;
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -144,12 +187,17 @@ export default function Header({ variant = "light" }: HeaderProps) {
     [scrolled],
   );
 
+  // Don't render motion effects during SSR to avoid hydration mismatches
+  const MotionHeader = isMounted ? motion.header : 'header';
+
   return (
-    <motion.header
+    <MotionHeader
       className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur supports-[backdrop-filter]:bg-opacity-60 ${shell}`}
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      {...(isMounted && {
+        initial: { y: -100, opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+        transition: { type: "spring", stiffness: 100, damping: 20 }
+      })}
       role="navigation"
       aria-label="Primary"
       style={headerStyle}
@@ -163,6 +211,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
           href={getRoutePath("home")}
           aria-label="Home"
           className={brandClass}
+          prefetch={true}
         >
           Abraham of London
         </Link>
@@ -176,6 +225,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
                   href={getRoutePath(item.route)}
                   className={`text-sm font-medium transition-colors ${linkBase}`}
                   aria-current={isActive(item.route) ? "page" : undefined}
+                  prefetch={true}
                 >
                   {item.label}
                 </Link>
@@ -211,6 +261,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
               href={getRoutePath("contact")}
               className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               aria-label="Go to contact form"
+              prefetch={true}
             >
               Enquire
             </Link>
@@ -267,54 +318,42 @@ export default function Header({ variant = "light" }: HeaderProps) {
       </nav>
 
       {/* Mobile drawer */}
-      <div
-        id="mobile-nav"
-        className={`md:hidden ${open ? "block" : "hidden"} ${
-          variant === "dark" ? "bg-black/80" : "bg-white/95"
-        } border-t ${
-          variant === "dark" ? "border-white/10" : "border-black/10"
-        } backdrop-blur`}
-      >
-        <nav
-          className="mx-auto max-w-7xl px-4 py-4"
-          aria-label="Mobile Primary"
+      {open && (
+        <div
+          id="mobile-nav"
+          className={`md:hidden ${variant === "dark" ? "bg-black/80" : "bg-white/95"} border-t ${
+            variant === "dark" ? "border-white/10" : "border-black/10"
+          } backdrop-blur`}
         >
-          <ul className="grid gap-2">
-            {NAV.map((item) => (
-              <li key={item.route}>
-                <Link
-                  href={getRoutePath(item.route)}
-                  onClick={() => setOpen(false)}
-                  className={`block rounded-md px-3 py-2 text-base font-medium ${
-                    isActive(item.route)
-                      ? variant === "dark"
-                        ? "bg-white/10 text-cream"
-                        : "bg-black/5 text-deepCharcoal"
-                      : variant === "dark"
-                      ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
-                      : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
-                  }`}
-                  aria-current={isActive(item.route) ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-            <li className="flex items-center gap-4 px-3 pt-3">
-              <a
-                href={`mailto:${EMAIL}`}
-                onClick={() => setOpen(false)}
-                className={`text-base underline-offset-4 hover:underline ${
-                  variant === "dark"
-                    ? "text-[color:var(--color-on-primary)] opacity-90"
-                    : "text-[color:var(--color-on-secondary)] opacity-90"
-                }`}
-              >
-                Email
-              </a>
-              {PHONE && (
+          <nav
+            className="mx-auto max-w-7xl px-4 py-4"
+            aria-label="Mobile Primary"
+          >
+            <ul className="grid gap-2">
+              {NAV.map((item) => (
+                <li key={item.route}>
+                  <Link
+                    href={getRoutePath(item.route)}
+                    onClick={() => setOpen(false)}
+                    className={`block rounded-md px-3 py-2 text-base font-medium ${
+                      isActive(item.route)
+                        ? variant === "dark"
+                          ? "bg-white/10 text-cream"
+                          : "bg-black/5 text-deepCharcoal"
+                        : variant === "dark"
+                        ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
+                        : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
+                    }`}
+                    aria-current={isActive(item.route) ? "page" : undefined}
+                    prefetch={true}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="flex items-center gap-4 px-3 pt-3">
                 <a
-                  href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                  href={`mailto:${EMAIL}`}
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
                     variant === "dark"
@@ -322,34 +361,48 @@ export default function Header({ variant = "light" }: HeaderProps) {
                       : "text-[color:var(--color-on-secondary)] opacity-90"
                   }`}
                 >
-                  Call
+                  Email
                 </a>
-              )}
-            </li>
-            <li className="pt-2">
-              <Link
-                href={getRoutePath("contact")}
-                onClick={() => setOpen(false)}
-                className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
-              >
-                Enquire
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
+                {PHONE && (
+                  <a
+                    href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                    onClick={() => setOpen(false)}
+                    className={`text-base underline-offset-4 hover:underline ${
+                      variant === "dark"
+                        ? "text-[color:var(--color-on-primary)] opacity-90"
+                        : "text-[color:var(--color-on-secondary)] opacity-90"
+                    }`}
+                  >
+                    Call
+                  </a>
+                )}
+              </li>
+              <li className="pt-2">
+                <Link
+                  href={getRoutePath("contact")}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+                  prefetch={true}
+                >
+                  Enquire
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
 
-      {/* Offset main by header height var */}
-      <style jsx>{`
-        :global(main) {
+      {/* Offset main by header height var - FIXED for Next.js */}
+      <style jsx global>{`
+        main {
           padding-top: var(--header-h, 5rem);
         }
         @media (max-width: 767px) {
-          :global(header[role="navigation"]) {
+          header[role="navigation"] {
             --header-h: ${scrolled ? "3.5rem" : "4rem"};
           }
         }
       `}</style>
-    </motion.header>
+    </MotionHeader>
   );
 }

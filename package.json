@@ -28,7 +28,7 @@
     "build:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next build",
     "build:fast": "next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
-    "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next build",
+    "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer build && next build",
     "check": "pnpm run lint && pnpm run typecheck",
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
     "prebuild": "pnpm run clean:build",

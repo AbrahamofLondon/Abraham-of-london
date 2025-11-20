@@ -311,7 +311,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts }) => {
   };
 
   return (
-    <Layout title={siteTitle} transparentHeader={true}>
+    <Layout title={siteTitle}>
       <Head>
         <title>
           {siteTitle} | Faithful Strategy for Builders, Founders & Fathers

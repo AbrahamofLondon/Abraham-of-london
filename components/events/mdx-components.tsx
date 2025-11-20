@@ -1,7 +1,4 @@
 // components/events/mdx-components.tsx
-// Central MDX components mapping for blog + events.
-// Used by next-mdx-remote to render MDX content.
-
 import * as React from "react";
 import Link from "next/link";
 import Rule from "@/components/mdx/Rule";
@@ -98,10 +95,11 @@ const A: React.FC<AnchorProps> = ({ href = "#", children, ...rest }) => {
 
 type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
-// Keep this simple: MDX <img> just maps to a styled <img>
-const Img: React.FC<ImgProps> = (props) => (
+// FIXED: Added proper alt text handling
+const Img: React.FC<ImgProps> = ({ alt = "", ...props }) => (
   <img
     {...props}
+    alt={alt}
     className={
       "my-6 w-full rounded-xl border border-lightGrey bg-warmWhite object-contain " +
       (props.className || "")
