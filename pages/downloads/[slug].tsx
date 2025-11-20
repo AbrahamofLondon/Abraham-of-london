@@ -9,13 +9,9 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { mdxComponents } from "@/components/mdx-components";
+import mdxComponents from "@/components/mdx-components";
 
-// Use the filesystem-backed helpers (server-only)
-import {
-  getDownloadBySlug,
-  getDownloadSlugs,
-} from "@/lib/server/downloads-data";
+import { getDownloadBySlug, getDownloadSlugs } from "@/lib/downloads";
 
 type DownloadPageProps = {
   slug: string;
@@ -25,14 +21,16 @@ type DownloadPageProps = {
   category?: string | null;
   tags?: string[] | null;
   readTime?: string | null;
+  fileUrl?: string | null;
+  fileSize?: string | null;
   mdxSource: MDXRemoteSerializeResult;
 };
 
 /**
- * Normalise download shape from the raw server object.
+ * Defensive normaliser around whatever downloads-data returns.
  */
-function normaliseDownload(raw: any, slug: string) {
-  const safeSlug = String(raw?.slug ?? slug);
+function normaliseDownload(raw: any, slugFallback: string) {
+  const safeSlug = String(raw?.slug ?? slugFallback);
   const title = String(raw?.title ?? "Untitled download");
 
   const coverImage =
@@ -40,6 +38,16 @@ function normaliseDownload(raw: any, slug: string) {
       ? raw.coverImage
       : typeof raw?.heroImage === "string" && raw.heroImage.trim().length
       ? raw.heroImage
+      : null;
+
+  const fileUrl =
+    typeof raw?.fileUrl === "string" && raw.fileUrl.trim().length
+      ? raw.fileUrl
+      : null;
+
+  const fileSize =
+    typeof raw?.fileSize === "string" && raw.fileSize.trim().length
+      ? raw.fileSize
       : null;
 
   return {
@@ -50,12 +58,14 @@ function normaliseDownload(raw: any, slug: string) {
     category: raw?.category ?? null,
     tags: Array.isArray(raw?.tags) ? raw.tags : null,
     readTime: raw?.readTime ?? null,
+    fileUrl,
+    fileSize,
     body:
-      typeof raw?.content === "string"
-        ? raw.content
-        : typeof raw?.body === "string"
+      typeof raw?.body === "string"
         ? raw.body
-        : "",
+        : typeof raw?.content === "string"
+        ? raw.content
+        : "# Content coming soon\n\nThis download is being prepared.",
   };
 }
 
@@ -64,55 +74,78 @@ function normaliseDownload(raw: any, slug: string) {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Pre-generate ALL download pages so next export is happy
-  const slugs = getDownloadSlugs();
+  try {
+    const slugs = getDownloadSlugs();
 
-  const paths = slugs.map((slug) => ({
-    params: { slug },
-  }));
+    const paths =
+      slugs?.map((slug) => ({
+        params: { slug },
+      })) ?? [];
 
-  return {
-    paths,
-    fallback: false, // 🔴 no blocking / no fallback for static export
-  };
+    return {
+      paths,
+      // MUST be false for next export / Netlify static build
+      fallback: false,
+    };
+  } catch (error) {
+    console.error("Error in getStaticPaths for downloads:", error);
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
   ctx,
 ) => {
-  const slugParam = ctx.params?.slug;
-  const slug = Array.isArray(slugParam)
-    ? slugParam[0]
-    : (slugParam as string | undefined) ?? "";
+  try {
+    const slugParam = ctx.params?.slug;
+    const slug = Array.isArray(slugParam)
+      ? slugParam[0]
+      : (slugParam as string | undefined) ?? "";
 
-  if (!slug) {
+    if (!slug) {
+      return { notFound: true };
+    }
+
+    const raw = await Promise.resolve(getDownloadBySlug(slug));
+
+    if (!raw) {
+      return { notFound: true };
+    }
+
+    const normalised = normaliseDownload(raw, slug);
+
+    const content =
+      normalised.body?.trim() ||
+      "# Content coming soon\n\nThis download is being prepared.";
+
+    const mdxSource = await serialize(content, {
+      mdxOptions: {
+        development: process.env.NODE_ENV === "development",
+      },
+    });
+
+    return {
+      props: {
+        slug: normalised.slug,
+        title: normalised.title,
+        excerpt: normalised.excerpt,
+        coverImage: normalised.coverImage,
+        category: normalised.category,
+        tags: normalised.tags,
+        readTime: normalised.readTime,
+        fileUrl: normalised.fileUrl,
+        fileSize: normalised.fileSize,
+        mdxSource,
+      },
+      revalidate: 3600, // 1 hour
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps for downloads:", error);
     return { notFound: true };
   }
-
-  // Server-only helper; returns frontmatter + raw MDX body
-  const raw = getDownloadBySlug(slug) as any;
-
-  if (!raw) {
-    return { notFound: true };
-  }
-
-  const normalised = normaliseDownload(raw, slug);
-
-  const mdxSource = await serialize(normalised.body ?? "");
-
-  return {
-    props: {
-      slug: normalised.slug,
-      title: normalised.title,
-      excerpt: normalised.excerpt,
-      coverImage: normalised.coverImage,
-      category: normalised.category,
-      tags: normalised.tags,
-      readTime: normalised.readTime,
-      mdxSource,
-    },
-    revalidate: 3600, // 1 hour
-  };
 };
 
 /* -------------------------------------------------------------------------- */
@@ -171,6 +204,21 @@ export default function DownloadPage(
             <p className="mt-4 max-w-2xl text-sm text-gray-700">
               {props.excerpt}
             </p>
+          )}
+
+          {props.fileUrl && (
+            <div className="mt-5">
+              <a
+                href={props.fileUrl}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream transition-colors hover:bg-deepCharcoal"
+              >
+                Download PDF
+                {props.fileSize ? ` (${props.fileSize})` : ""}
+              </a>
+            </div>
           )}
         </header>
 

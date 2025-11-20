@@ -4,6 +4,7 @@
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/EmbossedBrandMark";
+import EmbossedSign from "@/components/print/EmbossedSign"; 
 
 type AnyProps = {
   [key: string]: any;
@@ -504,10 +505,9 @@ const ResourcesCTABlock = ({
     </section>
   );
 };
-
 /* ----------------------- Brand-specific MDX components -------------------- */
 
-// Loosen typing so TS doesn’t complain when MDX uses these
+// Loosen typing so TS doesn't complain when MDX uses these
 const BrandFrameWrapper = (props: AnyProps) => {
   const SafeBrandFrame = BrandFrame as unknown as React.ComponentType<any>;
   return <SafeBrandFrame {...props} />;
@@ -517,6 +517,11 @@ const EmbossedBrandMarkWrapper = (props: AnyProps) => {
   const SafeEmbossed =
     EmbossedBrandMark as unknown as React.ComponentType<any>;
   return <SafeEmbossed {...props} />;
+};
+
+const EmbossedSignWrapper = (props: AnyProps) => {
+  const SafeEmbossedSign = EmbossedSign as unknown as React.ComponentType<any>;
+  return <SafeEmbossedSign {...props} />;
 };
 
 /* --------------------------- Exported map for MDX -------------------------- */
@@ -568,6 +573,7 @@ export const mdxComponents = {
   // Brand components used in MDX content
   BrandFrame: BrandFrameWrapper,
   EmbossedBrandMark: EmbossedBrandMarkWrapper,
+  EmbossedSign: EmbossedSignWrapper, // Add this line
 };
 
 export default mdxComponents;
