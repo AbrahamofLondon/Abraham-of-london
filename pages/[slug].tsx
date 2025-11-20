@@ -8,6 +8,7 @@ import type {
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import Layout from "@/components/Layout";
 
 import fs from "node:fs";
@@ -182,12 +183,17 @@ export const getStaticProps: GetStaticProps<PostPageProps> = async (ctx) => {
       title: (frontMatter.title ?? slug) as string,
       slug,
       date,
-      author: frontMatter.author ?? null,
-      excerpt: frontMatter.excerpt ?? null,
-      readTime: frontMatter.readTime ?? null,
-      category: frontMatter.category ?? null,
-      tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : null,
-      coverImage: frontMatter.coverImage ?? null,
+      author: (frontMatter.author as string) ?? null,
+      excerpt: (frontMatter.excerpt as string) ?? null,
+      readTime: (frontMatter.readTime as string) ?? null,
+      category: (frontMatter.category as string) ?? null,
+      tags: Array.isArray(frontMatter.tags)
+        ? (frontMatter.tags as string[])
+        : null,
+      coverImage:
+        typeof frontMatter.coverImage === "string"
+          ? frontMatter.coverImage
+          : null,
     };
 
     let mdxSource: MDXRemoteSerializeResult | null = null;
@@ -244,7 +250,7 @@ export default function PostPage({
       </Head>
 
       <main className="mx-auto max-w-4xl px-4 py-10">
-        <header className="mb-8">
+        <header className="mb-6">
           <p className="text-xs uppercase tracking-wide text-gray-500">
             {frontMatter.category || "Article"}
           </p>
@@ -272,6 +278,19 @@ export default function PostPage({
             </div>
           )}
         </header>
+
+        {frontMatter.coverImage && (
+          <div className="mb-8 overflow-hidden rounded-2xl border border-lightGrey">
+            <Image
+              src={frontMatter.coverImage}
+              alt={frontMatter.title}
+              width={1200}
+              height={630}
+              className="h-auto w-full object-cover"
+              priority={false}
+            />
+          </div>
+        )}
 
         <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest dark:prose-invert">
           {mdxSource ? (

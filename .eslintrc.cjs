@@ -1,126 +1,116 @@
-// eslint.config.mjs (Modern replacement for .eslintrc.cjs)
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { defineConfig } from 'eslint/config';
-import js from '@eslint/js';
-import nextPlugin from '@next/eslint-plugin-next';
-import typescriptPlugin from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
+// .eslintrc.cjs
+const path = require("path");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+module.exports = {
+  root: true,
+  extends: ["next/core-web-vitals", "next/typescript"],
+  plugins: ["@typescript-eslint"],
 
-export default defineConfig([
-  // Base JavaScript configuration
-  {
-    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
-    extends: [js.configs.recommended],
-    rules: {
-      'prefer-const': 'warn',
-      'no-unused-vars': 'off', // Handled by TypeScript
+  settings: {
+    "import/resolver": {
+      alias: {
+        map: [
+          ["@", path.resolve(__dirname, "./")],
+          ["@/components", path.resolve(__dirname, "./components")],
+          ["@/content", path.resolve(__dirname, "./content")],
+          ["@/lib", path.resolve(__dirname, "./lib")],
+          ["@/pages", path.resolve(__dirname, "./pages")],
+          ["@/netlify", path.resolve(__dirname, "./netlify")],
+          ["@/types", path.resolve(__dirname, "./types")],
+          [
+            "contentlayer/generated",
+            path.resolve(__dirname, "./.contentlayer/generated"),
+          ],
+        ],
+        extensions: [".js", ".jsx", ".ts", ".tsx", ".mdx"],
+      },
+      typescript: {},
     },
   },
 
-  // Next.js specific configuration
-  {
-    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
-    plugins: {
-      '@next/next': nextPlugin,
-    },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
-      '@next/next/no-img-element': 'warn',
-      '@next/next/no-html-link-for-pages': 'warn',
-    },
+  rules: {
+    // TypeScript rules
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      },
+    ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/triple-slash-reference": "off",
+    "@typescript-eslint/no-misused-promises": "off",
+
+    // React/Next rules
+    "react/no-unescaped-entities": "off",
+    "react/display-name": "off",
+    "@next/next/no-img-element": "off", // We're using Next.js Image now
+    "@next/next/no-html-link-for-pages": "warn",
+
+    // Hooks
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
+
+    // General
+    "import/no-anonymous-default-export": "warn",
+    "prefer-const": "warn",
+    "prefer-rest-params": "warn",
   },
 
-  // TypeScript configuration
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      parser: typescriptParser,
-      parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: __dirname,
+  overrides: [
+    // Contentlayer generated files
+    {
+      files: [".contentlayer/generated/**/*.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "import/no-anonymous-default-export": "off",
+        "@typescript-eslint/ban-types": "off",
       },
     },
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
-    rules: {
-      ...typescriptPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
+
+    // Components and pages
+    {
+      files: [
+        "components/**/*.tsx",
+        "components/**/*.ts",
+        "data/**/*.ts",
+        "hooks/**/*.ts",
+        "pages/**/*.tsx",
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-require-imports': 'off',
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "react-hooks/rules-of-hooks": "warn",
+      },
     },
-  },
 
-  // React specific rules
-  {
-    files: ['**/*.jsx', '**/*.tsx'],
-    rules: {
-      'react/no-unescaped-entities': 'off',
-      'react/display-name': 'off',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/rules-of-hooks': 'error',
+    // TypeScript declaration files
+    {
+      files: ["**/*.d.ts"],
+      rules: {
+        "@typescript-eslint/triple-slash-reference": "off",
+      },
     },
-  },
 
-  // File-specific overrides
-  {
-    files: ['.contentlayer/generated/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'import/no-anonymous-default-export': 'off',
+    // MDX components - allow img elements since we're using Next/Image
+    {
+      files: ["components/mdx/**/*.ts", "components/mdx/**/*.tsx"],
+      rules: {
+        "@next/next/no-img-element": "off",
+      },
     },
-  },
 
-  {
-    files: [
-      'components/**/*.tsx',
-      'components/**/*.ts',
-      'lib/**/*.ts',
-      'pages/**/*.tsx',
-    ],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'react-hooks/rules-of-hooks': 'warn',
+    // API routes and lib files
+    {
+      files: ["pages/api/**/*.ts", "lib/**/*.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "import/no-anonymous-default-export": "off",
+        "prefer-rest-params": "off",
+      },
     },
-  },
-
-  {
-    files: ['components/mdx/**/*.ts', 'components/mdx/**/*.tsx'],
-    rules: {
-      '@next/next/no-img-element': 'off', // We're using Next.js Image now
-    },
-  },
-
-  {
-    files: ['pages/api/**/*.ts', 'lib/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
-
-  // Ignore patterns
-  {
-    ignores: [
-      'node_modules/',
-      '.next/',
-      'out/',
-      'public/',
-      '*.config.js',
-      '*.config.mjs',
-    ],
-  },
-]);
+  ],
+};
