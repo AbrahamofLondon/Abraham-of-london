@@ -1,53 +1,94 @@
 // lib/utils.ts
 
-// ...
+// -----------------------------------------------------------------------------
+// Classname helper (used across components – incl. InteractiveElements)
+// -----------------------------------------------------------------------------
+export function cn(
+  ...values: Array<string | number | false | null | undefined>
+): string {
+  return values.filter(Boolean).join(" ");
+}
+
+// -----------------------------------------------------------------------------
+// Environment URL helpers
+// -----------------------------------------------------------------------------
+
+export const ENV_KEYS = {
+  ALOMARADA_URL: "NEXT_PUBLIC_ALOMARADA_URL",
+  ENDURELUXE_URL: "NEXT_PUBLIC_ENDURELUXE_URL",
+  INNOVATEHUB_URL: "NEXT_PUBLIC_INNOVATEHUB_URL",
+  INNOVATEHUB_ALT_URL: "NEXT_PUBLIC_INNOVATEHUB_ALT_URL",
+} as const;
 
 /**
- * Resolve a cover image from various possible fields and normalise the path.
- * Supports:
- * - coverImage
- * - heroImage
- * - image
- * - cover / banner (fallbacks from older content)
+ * Pick the first defined environment URL from a list of env keys.
+ * Falls back to the provided default if none are set.
  */
-export function resolveCoverImage(
-  input:
-    | {
-        coverImage?: string | null;
-        heroImage?: string | null;
-        image?: string | null;
-        cover?: string | null;
-        banner?: string | null;
-      }
-    | null
-    | undefined,
-): string | null {
-  if (!input) return null;
+export function pickEnvUrl(
+  keys: readonly string[],
+  fallback: string,
+): string {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return fallback;
+}
 
+// -----------------------------------------------------------------------------
+// Safe URL join (fixes the previous `normalizedBase` bug)
+// -----------------------------------------------------------------------------
+
+/**
+ * Safely join a base URL and a path segment.
+ * - Handles trailing/leading slashes
+ * - Attempts URL constructor first, then falls back to string join
+ */
+export function safeJoinUrl(base: string, path?: string | null): string {
+  const trimmedBase = (base || "").trim();
+  if (!path || !path.trim()) return trimmedBase;
+
+  const trimmedPath = path.trim();
+
+  try {
+    const joined = new URL(trimmedPath, trimmedBase);
+    return joined.toString();
+  } catch {
+    const baseClean = trimmedBase.replace(/\/+$/, "");
+    const pathClean = trimmedPath.replace(/^\/+/, "");
+    return `${baseClean}/${pathClean}`;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Cover image resolver (used for Events, etc.)
+// -----------------------------------------------------------------------------
+
+type HasCoverFields = {
+  coverImage?: string | null;
+  heroImage?: string | null;
+  image?: string | null;
+  bannerImage?: string | null;
+  thumbnail?: string | null;
+};
+
+/**
+ * Resolve a "best guess" cover image from various potential fields.
+ */
+export function resolveCoverImage(input: HasCoverFields): string | null {
   const candidates = [
     input.coverImage,
     input.heroImage,
     input.image,
-    input.cover,
-    input.banner,
+    input.bannerImage,
+    input.thumbnail,
   ];
 
-  const value = candidates.find(
-    (v): v is string => typeof v === "string" && v.trim().length > 0,
+  const chosen = candidates.find(
+    (val) => typeof val === "string" && val.trim().length > 0,
   );
 
-  if (!value) return null;
-
-  const trimmed = value.trim();
-
-  // Absolute / remote URLs – leave as is
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  // Strip any leading "public/"
-  const cleaned = trimmed.replace(/^public\//i, "");
-
-  // Ensure a single leading slash for local assets
-  return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+  return chosen ?? null;
 }

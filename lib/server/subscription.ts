@@ -19,13 +19,26 @@ export interface SubscriptionPreferences {
   marketing?: boolean;
 }
 
+export interface SubscriberMetadata {
+  [key: string]: unknown;
+}
+
 export interface SubscriberData {
   email: string;
-  metadata?: Record<string, any>;
+  metadata?: SubscriberMetadata;
   tags?: string[];
   preferences?: SubscriptionPreferences;
   referrer?: string;
 }
+
+interface ButtondownErrorShape {
+  email?: unknown;
+  detail?: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Basic email utilities
+// ---------------------------------------------------------------------------
 
 // Validate email with more comprehensive regex
 function isValidEmail(email: string): boolean {
@@ -39,7 +52,10 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-// Buttondown API integration
+// ---------------------------------------------------------------------------
+// Buttondown API integration (SERVER-SIDE ONLY)
+// ---------------------------------------------------------------------------
+
 async function subscribeToButtondown(
   subscriber: SubscriberData,
 ): Promise<SubscriptionResult> {
@@ -47,7 +63,7 @@ async function subscribeToButtondown(
   const API_URL = "https://api.buttondown.email/v1/subscribers";
 
   if (!API_KEY) {
-    console.error("Buttondown API key not configured");
+    console.error("[Buttondown] API key not configured");
     return {
       ok: false,
       message: "Subscription service temporarily unavailable",
@@ -70,7 +86,12 @@ async function subscribeToButtondown(
       }),
     });
 
-    const data = await response.json();
+    let data: ButtondownErrorShape | null = null;
+    try {
+      data = (await response.json()) as ButtondownErrorShape;
+    } catch {
+      data = null;
+    }
 
     if (response.ok) {
       return {
@@ -81,8 +102,14 @@ async function subscribeToButtondown(
     }
 
     // Handle specific Buttondown errors
-    if (response.status === 400) {
-      if (data.email?.[0]?.includes("already subscribed")) {
+    if (response.status === 400 && data && data.email) {
+      const firstEmailMsg =
+        Array.isArray(data.email) && data.email.length > 0
+          ? data.email[0]
+          : data.email;
+
+      const msg = String(firstEmailMsg ?? "").toLowerCase();
+      if (msg.includes("already subscribed")) {
         return {
           ok: true,
           message: "You are already subscribed to our newsletter.",
@@ -94,11 +121,13 @@ async function subscribeToButtondown(
     return {
       ok: false,
       message: "Failed to subscribe. Please try again later.",
-      error: data.detail || `API_ERROR_${response.status}`,
+      error:
+        (data && typeof data.detail === "string" && data.detail) ||
+        `API_ERROR_${response.status}`,
       status: response.status,
     };
   } catch (error) {
-    console.error("Buttondown API error:", error);
+    console.error("[Buttondown] API error:", error);
     return {
       ok: false,
       message: "Network error. Please check your connection and try again.",
@@ -107,14 +136,22 @@ async function subscribeToButtondown(
   }
 }
 
-// Fallback email storage (for when ESP is down)
+// ---------------------------------------------------------------------------
+// Fallback: local storage (stubbed)
+// ---------------------------------------------------------------------------
+
 async function storeEmailLocally(email: string): Promise<void> {
-  // In a real implementation, you might store in a database or file
-  // This is just a safety fallback
-  console.log("Storing email locally for later processing:", email);
+  // In production, push into a queue / DB.
+  console.log(
+    "[Subscription] Storing email locally for later processing:",
+    email,
+  );
 }
 
-// Rate limiting (simple in-memory version)
+// ---------------------------------------------------------------------------
+// Rate limiting (simple in-memory version, per process)
+// ---------------------------------------------------------------------------
+
 class RateLimiter {
   private attempts = new Map<string, number[]>();
 
@@ -126,7 +163,6 @@ class RateLimiter {
     const now = Date.now();
     const userAttempts = this.attempts.get(identifier) || [];
 
-    // Clean old attempts
     const recentAttempts = userAttempts.filter((time) => now - time < windowMs);
 
     if (recentAttempts.length >= maxAttempts) {
@@ -141,7 +177,10 @@ class RateLimiter {
 
 const rateLimiter = new RateLimiter();
 
-// Simple disposable email checker
+// ---------------------------------------------------------------------------
+// Disposable email blocking
+// ---------------------------------------------------------------------------
+
 function isDisposableEmail(email: string): boolean {
   const disposableDomains = [
     "tempmail.com",
@@ -154,50 +193,67 @@ function isDisposableEmail(email: string): boolean {
     "trashmail.com",
   ];
 
-  const domain = email.split("@")[1];
-  return disposableDomains.includes(domain);
+  const domain = email.split("@")[1]?.toLowerCase();
+  return !!domain && disposableDomains.includes(domain);
 }
 
-// Main subscription function
+// ---------------------------------------------------------------------------
+// Main subscription function (SERVER-SIDE ONLY)
+// ---------------------------------------------------------------------------
+
 export async function subscribe(
   email: string,
   options: {
     preferences?: SubscriptionPreferences;
-    metadata?: Record<string, any>;
+    metadata?: SubscriberMetadata;
     tags?: string[];
     referrer?: string;
   } = {},
 ): Promise<SubscriptionResult> {
-  // Rate limiting (5 attempts per hour per IP/email)
-  const rateLimitKey = `${email}_${options.referrer || "default"}`;
+  // Normalise early so rate-limit key is predictable
+  const normalizedEmail = normalizeEmail(email || "");
+
+  // Rate limiting (5 attempts per hour per email + referrer bucket)
+  const rateLimitKey = `${normalizedEmail || "invalid"}_${
+    options.referrer || "default"
+  }`;
+
   if (rateLimiter.isRateLimited(rateLimitKey, 5, 60 * 60 * 1000)) {
     return {
       ok: false,
       message: "Too many subscription attempts. Please try again later.",
+      error: "RATE_LIMITED",
+      status: 429,
     };
   }
 
   // Validate email
-  const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
     return {
       ok: false,
       message: "Please provide a valid email address.",
+      error: "INVALID_EMAIL",
+      status: 400,
     };
   }
 
-  // Check for disposable/temporary emails
+  // Block obvious disposable / temporary addresses
   if (isDisposableEmail(normalizedEmail)) {
     return {
       ok: false,
       message: "Temporary email addresses are not allowed.",
+      error: "DISPOSABLE_EMAIL",
+      status: 400,
     };
   }
 
   const subscriberData: SubscriberData = {
     email: normalizedEmail,
     metadata: options.metadata,
-    tags: options.tags || ["website-subscriber"],
+    tags:
+      options.tags && options.tags.length > 0
+        ? options.tags
+        : ["website-subscriber"],
     preferences: options.preferences,
     referrer: options.referrer,
   };
@@ -208,18 +264,23 @@ export async function subscribe(
   // If Buttondown fails (for reasons other than missing API key), store locally
   if (!result.ok && result.error !== "API_KEY_MISSING") {
     await storeEmailLocally(normalizedEmail);
+
     return {
       ok: false,
       message:
         "Subscription service is temporarily unavailable. We have saved your email and will retry.",
       error: result.error,
+      status: result.status,
     };
   }
 
   return result;
 }
 
+// ---------------------------------------------------------------------------
 // Bulk subscription helper
+// ---------------------------------------------------------------------------
+
 export async function bulkSubscribe(
   emails: string[],
   options: {
@@ -236,23 +297,25 @@ export async function bulkSubscribe(
 
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
-    const promises = batch.map((email) => subscribe(email, { tags: options.tags }));
-
-    const results = await Promise.all(promises);
+    const results: SubscriptionResult[] = await Promise.all(
+      batch.map((addr) => subscribe(addr, { tags: options.tags })),
+    );
 
     results.forEach((result, index) => {
+      const originalEmail = batch[index];
       if (result.ok) {
-        successful.push(batch[index]);
+        successful.push(originalEmail);
       } else {
         failed.push({
-          email: batch[index],
+          email: originalEmail,
           error: result.error || result.message,
         });
       }
     });
 
-    // Small delay between batches to avoid rate limiting
+    // Small delay between batches to avoid any ESP-side throttling
     if (i + batchSize < emails.length) {
+      // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
@@ -260,12 +323,29 @@ export async function bulkSubscribe(
   return { successful, failed };
 }
 
-// Unsubscribe function (stub – extend with real ESP logic as needed)
-export async function unsubscribe(email: string): Promise<SubscriptionResult> {
-  // Implementation for unsubscribe would be similar to subscribe
-  // but using the DELETE method or specific unsubscribe endpoint
+// ---------------------------------------------------------------------------
+// Unsubscribe (stub – implement real Buttondown call when needed)
+// ---------------------------------------------------------------------------
+
+export async function unsubscribe(
+  email: string,
+): Promise<SubscriptionResult> {
+  const normalizedEmail = normalizeEmail(email || "");
+
+  if (!normalizedEmail || !isValidEmail(normalizedEmail)) {
+    return {
+      ok: false,
+      message: "Please provide a valid email address.",
+      error: "INVALID_EMAIL",
+      status: 400,
+    };
+  }
+
+  // TODO: call Buttondown unsubscribe endpoint when you’re ready.
+  // For now, we just return success to avoid blocking the UX.
   return {
     ok: true,
-    message: "Successfully unsubscribed",
+    message: "Successfully unsubscribed.",
+    status: 200,
   };
 }

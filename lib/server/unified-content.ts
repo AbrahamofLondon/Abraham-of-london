@@ -23,6 +23,8 @@ export type UnifiedSource =
   | "books"
   | "downloads"
   | "resources"
+  | "pages"
+  | "print"
   | "static"
   | "unknown";
 
@@ -34,7 +36,8 @@ export interface PrintSettings {
 }
 
 export interface UnifiedContent {
-  slug: string; // full route slug: e.g. "blog/when-the-storm-finds-you"
+  /** Full route-oriented slug, e.g. "blog/when-the-storm-finds-you" */
+  slug: string;
   title: string;
   type: UnifiedContentType;
 
@@ -217,7 +220,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
       title: book.title || slug,
       type: "book",
 
-      content: undefined, // meta only here; body is handled in /books/[slug]
+      content: undefined, // meta only; full body loaded in /books/[slug]
       description: book.excerpt || book.description || undefined,
 
       author: book.author || book.primaryAuthor || undefined,
@@ -243,7 +246,6 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 
 // ---------------------------------------------------------------------------
 // DOWNLOADS CONTENT  →  /downloads/[slug]
-// (adjust imports to your actual downloads module)
 // ---------------------------------------------------------------------------
 
 async function getDownloadContent(): Promise<UnifiedContent[]> {
@@ -252,10 +254,11 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
   );
   if (!downloadsModule) return [];
 
-  const getAllDownloads = (downloadsModule as any)
+  // adjust this name if your module exports a different function
+  const getAllDownloadsMeta = (downloadsModule as any)
     .getAllDownloadsMeta as (() => any[] | Promise<any[]>) | undefined;
 
-  const downloads = (await resolveMaybeAsync(getAllDownloads)) ?? [];
+  const downloads = (await resolveMaybeAsync(getAllDownloadsMeta)) ?? [];
 
   return downloads.map((d: any): UnifiedContent => {
     const rawSlug = d.slug || d.id || d._id || d.title || "";
@@ -292,7 +295,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 
 // ---------------------------------------------------------------------------
 // RESOURCES CONTENT  →  /resources/[slug]
-// (adjust imports to actual resources module)
+// (wired to lib/server/resources-data.ts you just showed)
 // ---------------------------------------------------------------------------
 
 async function getResourceContent(): Promise<UnifiedContent[]> {
@@ -302,7 +305,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
   if (!resourcesModule) return [];
 
   const getAllResources = (resourcesModule as any)
-    .getAllResourcesMeta as (() => any[] | Promise<any[]>) | undefined;
+    .getAllResources as (() => any[] | Promise<any[]>) | undefined;
 
   const resources = (await resolveMaybeAsync(getAllResources)) ?? [];
 
@@ -315,7 +318,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
       title: r.title || slug,
       type: "resource",
 
-      content: undefined,
+      content: r.content || undefined,
       description: r.excerpt || r.description || undefined,
 
       author: r.author || undefined,
@@ -340,13 +343,108 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// STATIC / HARD-CODED PRINTABLES
+// PAGES CONTENT  →  /[slug]
+// (from lib/server/pages-data.ts – about, contact, etc.)
+// ---------------------------------------------------------------------------
+
+async function getPageContent(): Promise<UnifiedContent[]> {
+  const pagesModule = await safeImport(
+    () => import("@/lib/server/pages-data" as string),
+  );
+  if (!pagesModule) return [];
+
+  const getPageSlugs = (pagesModule as any).getPageSlugs as
+    | (() => string[])
+    | undefined;
+  const getPageBySlug = (pagesModule as any).getPageBySlug as
+    | ((slug: string, fields?: string[]) => any)
+    | undefined;
+
+  if (!getPageSlugs || !getPageBySlug) return [];
+
+  const slugs = getPageSlugs();
+  const pages = slugs
+    .map((slug) => getPageBySlug(slug, ["slug", "title", "description"]))
+    .filter(Boolean);
+
+  return pages.map((p: any): UnifiedContent => {
+    const slug = cleanSlug(p.slug || "");
+    return {
+      slug, // route: "/about", "/contact", etc.
+      title: p.title || slug,
+      type: "page",
+
+      content: undefined, // rendered by dedicated /[slug] page
+      description: p.description || undefined,
+
+      author: undefined,
+      date: undefined,
+      updatedAt: undefined,
+      category: undefined,
+      tags: undefined,
+
+      printSettings: undefined,
+
+      seoTitle: p.seoTitle || p.title || undefined,
+      seoDescription: p.seoDescription || p.description || undefined,
+
+      source: "pages",
+      published: true,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// PRINT CONTENT  →  /print/[slug]
+// (from lib/print-utils.ts)
+// ---------------------------------------------------------------------------
+
+async function getPrintContent(): Promise<UnifiedContent[]> {
+  const printModule = await safeImport(
+    () => import("@/lib/print-utils" as string),
+  );
+  if (!printModule) return [];
+
+  const getAllPrintDocuments = (printModule as any)
+    .getAllPrintDocuments as (() => any[] | Promise<any[]>) | undefined;
+
+  const docs = (await resolveMaybeAsync(getAllPrintDocuments)) ?? [];
+
+  return docs.map((d: any): UnifiedContent => {
+    const rawSlug = d.slug || d._id || d.title || "";
+    const slug = normaliseSlug(rawSlug, "print");
+
+    return {
+      slug,
+      title: d.title || slug,
+      type: "print",
+
+      content: d.content || undefined,
+      description: d.excerpt || undefined,
+
+      author: undefined,
+      date: d.date || undefined,
+      updatedAt: undefined,
+      category: undefined,
+      tags: d.tags || undefined,
+
+      printSettings: undefined,
+
+      seoTitle: d.seoTitle || d.title || undefined,
+      seoDescription: d.seoDescription || d.excerpt || undefined,
+
+      source: "print",
+      published: true,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// STATIC PLACEHOLDERS (if needed)
 // ---------------------------------------------------------------------------
 
 async function getStaticPrintContent(): Promise<UnifiedContent[]> {
-  return [
-    // Add static print entries here if you need them
-  ];
+  return [];
 }
 
 // ---------------------------------------------------------------------------
@@ -354,17 +452,28 @@ async function getStaticPrintContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 export async function getUnifiedContent(): Promise<UnifiedContent[]> {
-  const [mdx, events, books, downloads, resources, statics] =
+  const [mdx, events, books, downloads, resources, pages, prints, statics] =
     await Promise.all([
       getMdxContent(),
       getEventContent(),
       getBookContent(),
       getDownloadContent(),
       getResourceContent(),
+      getPageContent(),
+      getPrintContent(),
       getStaticPrintContent(),
     ]);
 
-  return [...mdx, ...events, ...books, ...downloads, ...resources, ...statics];
+  return [
+    ...mdx,
+    ...events,
+    ...books,
+    ...downloads,
+    ...resources,
+    ...pages,
+    ...prints,
+    ...statics,
+  ];
 }
 
 export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
