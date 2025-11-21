@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 const colors = require("tailwindcss/colors");
-const typography = require("@tailwindcss/typography");
 
 module.exports = {
   darkMode: "class",
@@ -28,107 +27,125 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Tokenised luxury palette from CSS variables
+        // RESTORED Luxury Colors - these make existing classes work
+        forest: "#0B2E1F",
+        deepCharcoal: "#333333", 
+        softGold: "#C5A352",
+        warmCream: "#FAF7F2",
+        charcoal: "#1F2937",
+
+        // Theme variables for consistency
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
-
+        
         secondary: "var(--color-secondary)",
         "on-secondary": "var(--color-on-secondary)",
-
+        
         accent: "var(--color-accent)",
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
-
+        
         border: "var(--color-border)",
         surface: "var(--color-surface)",
         muted: "var(--color-muted)",
 
-        charcoal: "#1a1a1a",
-        bronze: "#8b7355",
-
-        gray: colors.gray,
+        // Supporting colors
+        emerald: { ...colors.emerald, 700: "#047857" },
       },
       fontFamily: {
-        // 👈 key fix: use the right variables
-        serif: [
-          "var(--font-serif)",
-          '"Playfair Display"',
-          "Georgia",
-          "Cambria",
-          '"Times New Roman"',
-          "serif",
-        ],
-        sans: [
-          "var(--font-sans)",
-          '"Inter"',
-          "system-ui",
-          "-apple-system",
-          '"Segoe UI"',
-          "sans-serif",
-        ],
+        // CORRECTED: Inter for body, Playfair for headings
+        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Playfair Display", "serif"],
       },
       spacing: {
-        18: "4.5rem",
-        88: "22rem",
-        128: "32rem",
-      },
-      opacity: {
-        8: "0.08",
-      },
-      transitionDuration: {
-        400: "400ms",
+        '18': '4.5rem',
+        '88': '22rem',
       },
       boxShadow: {
-        subtle: "0 2px 8px rgba(0, 0, 0, 0.04)",
-        elevated: "0 4px 12px rgba(0, 0, 0, 0.05)",
-      },
-      borderRadius: {
-        xl: "0.5rem",
+        'luxury': '0 4px 24px rgba(0, 0, 0, 0.08)',
+        'luxury-hover': '0 8px 40px rgba(0, 0, 0, 0.12)',
       },
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            maxWidth: "70ch",
-            color: theme("colors['on-secondary']"),
+            color: theme('colors.on-secondary'),
             a: {
-              color: theme("colors.primary"),
-              textDecoration: "none",
-              fontWeight: "500",
-              transition: "color 0.3s ease",
-              "&:hover": {
-                color: theme("colors.accent"),
+              color: theme('colors.primary'),
+              textDecoration: 'none',
+              fontWeight: '500',
+              transition: 'color 0.3s ease',
+              '&:hover': {
+                color: theme('colors.accent'),
               },
             },
             h1: {
-              fontFamily: theme("fontFamily.serif").join(", "),
-              fontWeight: "600",
-              color: theme("colors.primary"),
+              fontFamily: theme('fontFamily.serif').join(', '),
+              fontWeight: '600',
+              color: theme('colors.primary'),
             },
             h2: {
-              fontFamily: theme("fontFamily.serif").join(", "),
-              fontWeight: "600",
-              color: theme("colors.primary"),
+              fontFamily: theme('fontFamily.serif').join(', '),
+              fontWeight: '600',
+              color: theme('colors.primary'),
             },
             h3: {
-              fontFamily: theme("fontFamily.serif").join(", "),
-              fontWeight: "600",
-              color: theme("colors.primary"),
+              fontFamily: theme('fontFamily.serif').join(', '),
+              fontWeight: '600',
+              color: theme('colors.primary'),
+            },
+            h4: {
+              fontFamily: theme('fontFamily.serif').join(', '),
+              fontWeight: '600',
+              color: theme('colors.primary'),
             },
             blockquote: {
-              borderLeftColor: theme("colors.border"),
-              fontStyle: "normal",
-              backgroundColor: "rgba(0,0,0,0.01)",
-              padding: "1rem 1.5rem",
+              borderLeftColor: theme('colors.accent'),
+              fontStyle: 'italic',
             },
             strong: {
-              color: theme("colors.primary"),
-              fontWeight: "600",
+              color: theme('colors.primary'),
+              fontWeight: '600',
+            },
+            code: {
+              color: theme('colors.primary'),
+              fontWeight: '600',
+            },
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+          },
+        },
+        invert: {
+          css: {
+            color: theme('colors.on-secondary'),
+            a: {
+              color: theme('colors.primary'),
+              '&:hover': {
+                color: theme('colors.accent'),
+              },
+            },
+            h1: {
+              color: theme('colors.primary'),
+            },
+            h2: {
+              color: theme('colors.primary'),
+            },
+            h3: {
+              color: theme('colors.primary'),
+            },
+            blockquote: {
+              borderLeftColor: theme('colors.accent'),
             },
           },
         },
       }),
     },
   },
-  plugins: [typography],
+  plugins: [
+    require('@tailwindcss/typography'), // RESTORED typography plugin
+  ],
 };
