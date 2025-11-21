@@ -1,11 +1,19 @@
 // lib/server/posts-data.ts
-// Robust MDX data access for blog posts
+// Filesystem-based blog loader for content/blog/*
+// Canonicalises slugs so /blog/[slug] routing is stable.
 
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import {
+  ensureDir,
+  listMdFiles,
+  fileToSlug,
+  readFrontmatter,
+  sortByDateDesc,
+} from "@/lib/server/md-utils";
 
-const POSTS_DIR = path.join(process.cwd(), "content", "blog");
+export type PostResources = {
+  downloads?: { href?: string }[];
+  reads?: { href?: string }[];
+};
 
 export type PostMeta = {
   slug: string;
@@ -20,134 +28,199 @@ export type PostMeta = {
   tags?: (string | number)[];
   category?: string;
   readTime?: string;
-  draft?: boolean;
-  resources?: {
-    downloads?: { href?: string }[];
-    reads?: { href?: string }[];
-  };
-  keyInsights?: string[];
-  authorNote?: string;
-  authorTitle?: string;
+  resources?: PostResources;
   [key: string]: unknown;
 };
 
-type PostWithContent = PostMeta & { content?: string };
+export type PostWithContent = PostMeta & {
+  content: string;
+};
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+// ------------------------
+// slug helpers
+// ------------------------
 
-function getPostFilePaths(): string[] {
-  if (!fs.existsSync(POSTS_DIR)) return [];
-  return fs
-    .readdirSync(POSTS_DIR)
-    .filter(
-      (file) =>
-        file.toLowerCase().endsWith(".mdx") ||
-        file.toLowerCase().endsWith(".md"),
-    );
+function cleanSlug(raw: unknown): string {
+  // Input like " blog/when-the-storm-finds-you/ " → "when-the-storm-finds-you"
+  return String(raw || "")
+    .trim()
+    .replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
+    .replace(/^blog\//i, ""); // drop leading "blog/"
 }
 
-// Exposed slugs used by getStaticPaths
+// ------------------------
+// internal FS loader
+// ------------------------
+
+function loadAllPostsFromFs(): PostWithContent[] {
+  const abs = ensureDir("blog"); // => content/blog
+  if (!abs) return [];
+
+  const files = listMdFiles(abs);
+  if (!files.length) return [];
+
+  const items: PostWithContent[] = files.map((absFile) => {
+    const { data, content } = readFrontmatter(absFile);
+
+    const anyData = data as any;
+
+    const rawSlug =
+      (typeof anyData.slug === "string" && anyData.slug.trim()) ||
+      fileToSlug(absFile);
+    const slug = cleanSlug(rawSlug);
+
+    const title =
+      (typeof anyData.title === "string" && anyData.title.trim()) ||
+      slug ||
+      "Untitled post";
+
+    const description =
+      (typeof anyData.description === "string" &&
+        anyData.description.trim()) ||
+      undefined;
+
+    const excerpt =
+      (typeof anyData.excerpt === "string" && anyData.excerpt.trim()) ||
+      (typeof anyData.summary === "string" && anyData.summary.trim()) ||
+      description ||
+      undefined;
+
+    const coverImage =
+      (typeof anyData.coverImage === "string" &&
+        anyData.coverImage.trim()) ||
+      (typeof anyData.image === "string" && anyData.image.trim()) ||
+      undefined;
+
+    const heroImage =
+      (typeof anyData.heroImage === "string" &&
+        anyData.heroImage.trim()) || undefined;
+
+    const date =
+      (typeof anyData.date === "string" && anyData.date.trim()) ||
+      undefined;
+
+    const updated =
+      (typeof anyData.updated === "string" && anyData.updated.trim()) ||
+      undefined;
+
+    const author =
+      (typeof anyData.author === "string" && anyData.author.trim()) ||
+      undefined;
+
+    const category =
+      (typeof anyData.category === "string" && anyData.category.trim()) ||
+      undefined;
+
+    const readTime =
+      (typeof anyData.readTime === "string" && anyData.readTime.trim()) ||
+      undefined;
+
+    const tags = Array.isArray(anyData.tags)
+      ? (anyData.tags as unknown[]).map((t) => String(t))
+      : undefined;
+
+    const resources: PostResources | undefined =
+      anyData.resources && typeof anyData.resources === "object"
+        ? (anyData.resources as PostResources)
+        : undefined;
+
+    const base: PostWithContent = {
+      slug,
+      title,
+      description,
+      excerpt,
+      coverImage,
+      heroImage,
+      date,
+      updated,
+      author,
+      category,
+      readTime,
+      tags,
+      resources,
+      content,
+    };
+
+    // Spread data LAST so we keep any extra fields,
+    // then re-assert our canonical fields to avoid being overwritten.
+    return {
+      ...anyData,
+      ...base,
+      slug,
+      title,
+      description,
+      excerpt,
+      coverImage,
+      heroImage,
+      date,
+      updated,
+      author,
+      category,
+      readTime,
+      tags,
+      resources,
+      content,
+    };
+  });
+
+  // newest first
+  return sortByDateDesc(items);
+}
+
+let POSTS_CACHE: PostWithContent[] | null = null;
+
+function allPosts(): PostWithContent[] {
+  if (!POSTS_CACHE) {
+    POSTS_CACHE = loadAllPostsFromFs();
+  }
+  return POSTS_CACHE;
+}
+
+// ------------------------
+// public API
+// ------------------------
+
 export function getPostSlugs(): string[] {
-  return getPostFilePaths().map((file) =>
-    file.replace(/\.mdx?$/i, ""),
-  );
+  return allPosts().map((p) => p.slug);
 }
 
-// Core loader
-export function getPostBySlug(
-  slug: string,
-  fields: string[] = [],
-): PostWithContent {
-  const realSlug = slug.replace(/\.mdx?$/i, "");
+export function getAllPostsMeta(): PostMeta[] {
+  return allPosts().map((p) => {
+    const { content, ...meta } = p;
+    return meta;
+  });
+}
 
-  // Try .mdx first, then .md
-  let fullPath = path.join(POSTS_DIR, `${realSlug}.mdx`);
-  if (!fs.existsSync(fullPath)) {
-    const mdPath = path.join(POSTS_DIR, `${realSlug}.md`);
-    if (!fs.existsSync(mdPath)) {
-      throw new Error(
-        `Post not found for slug "${slug}" in ${POSTS_DIR}`,
-      );
-    }
-    fullPath = mdPath;
+// Supports "slug", "/slug", "blog/slug"
+export function getPostBySlug(
+  rawSlug: string,
+  fields: string[] = [],
+): Record<string, unknown> | null {
+  const target = cleanSlug(rawSlug);
+  if (!target) return null;
+
+  const match =
+    allPosts().find(
+      (p) => cleanSlug(p.slug) === target,
+    ) || null;
+
+  if (!match) return null;
+
+  if (!fields || fields.length === 0) {
+    // return full object
+    return { ...match };
   }
 
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
-
-  // If fields not specified, use a sensible default set
-  const defaultFields = [
-    "slug",
-    "title",
-    "description",
-    "excerpt",
-    "coverImage",
-    "heroImage",
-    "date",
-    "updated",
-    "author",
-    "tags",
-    "category",
-    "readTime",
-    "draft",
-    "resources",
-    "keyInsights",
-    "authorNote",
-    "authorTitle",
-    "content",
-  ];
-
-  const fieldSet = new Set(fields.length > 0 ? fields : defaultFields);
-
-  const post: Record<string, unknown> = {};
-
-  fieldSet.forEach((field) => {
+  const filtered: Record<string, unknown> = {};
+  fields.forEach((field) => {
     if (field === "slug") {
-      post.slug = realSlug;
+      filtered.slug = match.slug;
       return;
     }
-    if (field === "content") {
-      post.content = content;
-      return;
-    }
-    if (Object.prototype.hasOwnProperty.call(data, field)) {
-      post[field] = (data as any)[field];
+    if (field in match) {
+      filtered[field] = (match as any)[field];
     }
   });
 
-  return post as PostWithContent;
-}
-
-// All posts (for /blog index etc.)
-export function getAllPosts(
-  fields: string[] = [],
-): PostWithContent[] {
-  const slugs = getPostSlugs();
-
-  const posts = slugs
-    .map((slug) => {
-      try {
-        return getPostBySlug(slug, fields);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error reading post for slug "${slug}":`,
-          err,
-        );
-        return null;
-      }
-    })
-    .filter((p): p is PostWithContent => p !== null)
-    // strip drafts
-    .filter((post) => !post.draft)
-    // sort by date desc
-    .sort((a, b) => {
-      const aDate = a.date ? new Date(a.date).getTime() : 0;
-      const bDate = b.date ? new Date(b.date).getTime() : 0;
-      return bDate - aDate;
-    });
-
-  return posts;
+  return filtered;
 }

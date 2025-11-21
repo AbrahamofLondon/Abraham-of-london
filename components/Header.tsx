@@ -5,19 +5,66 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
+import { Moon, Sun, Menu, X } from "lucide-react";
 
-// Simple fallback ThemeToggle component if not implemented
-const ThemeToggle: React.FC = () => (
-  <button
-    type="button"
-    className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-    aria-label="Toggle theme"
-  >
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  </button>
-);
+// Functional ThemeToggle component with actual dark mode logic
+const ThemeToggle: React.FC = () => {
+  const [mounted, setMounted] = React.useState(false);
+  const [isDark, setIsDark] = React.useState(true);
+
+  React.useEffect(() => {
+    setMounted(true);
+    // Check if dark mode is enabled
+    const isDarkMode = document.documentElement.classList.contains('dark') ||
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDark(isDarkMode);
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    
+    if (typeof document !== 'undefined') {
+      if (newIsDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+  };
+
+  // Prevent SSR mismatch
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+        aria-label="Toggle theme"
+      >
+        <Moon className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+      aria-label="Toggle theme"
+    >
+      {isDark ? (
+        <Sun className="h-4 w-4 text-amber-200" />
+      ) : (
+        <Moon className="h-4 w-4 text-charcoal" />
+      )}
+    </button>
+  );
+};
 
 type HeaderProps = {
   variant?: "light" | "dark";
@@ -57,6 +104,22 @@ export default function Header({
   // Mark component as mounted to avoid SSR mismatches
   React.useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Initialize theme from localStorage or system preference
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const theme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (theme === 'dark' || (!theme && systemPrefersDark)) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
   }, []);
 
   // Derive active link from currentPath (kept in sync with location)
@@ -160,8 +223,8 @@ export default function Header({
 
   const linkBase =
     variant === "dark"
-      ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:text-cream"
-      : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:text-deepCharcoal";
+      ? "text-cream opacity-80 hover:opacity-100 hover:text-cream"
+      : "text-deepCharcoal opacity-80 hover:opacity-100 hover:text-deepCharcoal";
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
@@ -258,7 +321,7 @@ export default function Header({
             )}
             <Link
               href={getRoutePath("contact")}
-              className="rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+              className="rounded-full bg-gold px-5 py-2 text-sm font-semibold text-charcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
               aria-label="Go to contact form"
               prefetch={true}
             >
@@ -278,39 +341,15 @@ export default function Header({
             aria-controls="mobile-nav"
             className={`inline-flex items-center justify-center rounded-md border p-2 ${
               variant === "dark"
-                ? "border-white/20 text-cream"
-                : "border-black/20 text-deepCharcoal"
-            }`}
+                ? "border-white/20 text-cream hover:bg-white/10"
+                : "border-black/20 text-deepCharcoal hover:bg-black/10"
+            } transition-colors`}
           >
             <span className="sr-only">Toggle navigation</span>
             {!open ? (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M4 6h16M4 12h16M4 18h16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
+              <Menu className="h-5 w-5" />
             ) : (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M6 6l12 12M18 6L6 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
+              <X className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -321,7 +360,7 @@ export default function Header({
         <div
           id="mobile-nav"
           className={`md:hidden ${
-            variant === "dark" ? "bg-black/80" : "bg-white/95"
+            variant === "dark" ? "bg-black/95" : "bg-white/95"
           } border-t ${
             variant === "dark" ? "border-white/10" : "border-black/10"
           } backdrop-blur`}
@@ -336,14 +375,14 @@ export default function Header({
                   <Link
                     href={getRoutePath(item.route)}
                     onClick={() => setOpen(false)}
-                    className={`block rounded-md px-3 py-2 text-base font-medium ${
+                    className={`block rounded-md px-3 py-2 text-base font-medium transition-colors ${
                       isActive(item.route)
                         ? variant === "dark"
                           ? "bg-white/10 text-cream"
                           : "bg-black/5 text-deepCharcoal"
                         : variant === "dark"
-                        ? "text-[color:var(--color-on-primary)] opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
-                        : "text-[color:var(--color-on-secondary)] opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
+                        ? "text-cream opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
+                        : "text-deepCharcoal opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
                     }`}
                     aria-current={isActive(item.route) ? "page" : undefined}
                     prefetch={true}
@@ -358,8 +397,8 @@ export default function Header({
                   onClick={() => setOpen(false)}
                   className={`text-base underline-offset-4 hover:underline ${
                     variant === "dark"
-                      ? "text-[color:var(--color-on-primary)] opacity-90"
-                      : "text-[color:var(--color-on-secondary)] opacity-90"
+                      ? "text-cream opacity-90 hover:opacity-100"
+                      : "text-deepCharcoal opacity-90 hover:opacity-100"
                   }`}
                 >
                   Email
@@ -370,8 +409,8 @@ export default function Header({
                     onClick={() => setOpen(false)}
                     className={`text-base underline-offset-4 hover:underline ${
                       variant === "dark"
-                        ? "text-[color:var(--color-on-primary)] opacity-90"
-                        : "text-[color:var(--color-on-secondary)] opacity-90"
+                        ? "text-cream opacity-90 hover:opacity-100"
+                        : "text-deepCharcoal opacity-90 hover:opacity-100"
                     }`}
                   >
                     Call
@@ -382,7 +421,7 @@ export default function Header({
                 <Link
                   href={getRoutePath("contact")}
                   onClick={() => setOpen(false)}
-                  className="block rounded-full bg-softGold px-5 py-2 text-center text-sm font-semibold text-deepCharcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+                  className="block rounded-full bg-gold px-5 py-2 text-center text-sm font-semibold text-charcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
                   prefetch={true}
                 >
                   Enquire
