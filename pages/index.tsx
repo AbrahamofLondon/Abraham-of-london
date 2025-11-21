@@ -383,7 +383,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
               consequence, and covenant.
             </>
           }
-          backgroundImage="/assets/images/abraham-of-london-banner-premium.jpg"
+          backgroundImage="/assets/images/abraham-of-london-banner.webp"
           overlayOpacity={0.5}
           height="100vh"
           ctaText="Start with the right tools"
