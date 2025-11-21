@@ -3,14 +3,16 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Users, Target, Globe } from "lucide-react";
+import { ArrowRight, CheckCircle2, Users, Target, Globe, Shield, Anchor } from "lucide-react";
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
+import { getPageTitle } from "@/lib/siteConfig"; // Add missing import
 
 export default function ConsultingPage(): JSX.Element {
   return (
     <Layout title="Consulting & Advisory">
       <Head>
+        <title>{getPageTitle("Consulting & Advisory")}</title> {/* Add page title */}
         <meta
           name="description"
           content="Faith-rooted strategy and advisory for founders, boards, and builders who refuse to outsource responsibility."

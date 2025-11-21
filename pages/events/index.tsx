@@ -298,7 +298,7 @@ export async function getStaticProps() {
       typeof value === "string" ? value : null;
 
     const events: EventListing[] = rawEvents
-      .map((event) => {
+      .map<EventListing | null>((event) => {
         const slug = safeString(event.slug) || "";
         if (!slug) return null;
 
@@ -308,12 +308,12 @@ export async function getStaticProps() {
         return {
           slug,
           title: safeString(event.title) || "Untitled Event",
-          date: safeString(event.date) || null,
-          time: safeString(event.time) || null,
-          location: safeString(event.location) || null,
-          description: safeString(event.description) || null,
-          heroImage: heroImage || coverImage || null,
-          coverImage: coverImage || heroImage || null,
+          date: safeString(event.date),
+          time: safeString(event.time),
+          location: safeString(event.location),
+          description: safeString(event.description),
+          heroImage: heroImage || coverImage,
+          coverImage: coverImage || heroImage,
           tags: Array.isArray(event.tags)
             ? event.tags.filter(
                 (tag): tag is string => typeof tag === "string",

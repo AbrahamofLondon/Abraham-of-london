@@ -26,6 +26,7 @@ import { HeroBanner } from "@/components/InteractiveElements";
 import NewsletterForm from "@/components/NewsletterForm";
 import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import MandateStatement from "@/components/MandateStatement";
 
 const siteTitle = "Abraham of London";
 const siteTagline =

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Shield, Users, BookOpen, ArrowRight, CheckCircle2 } from "lucide-react";
 import Layout from "@/components/Layout";
+import MandateStatement from "@/components/MandateStatement";
 import { getPageTitle } from "@/lib/siteConfig";
 
 export default function ChathamRoomsPage(): JSX.Element {
@@ -91,6 +92,9 @@ export default function ChathamRoomsPage(): JSX.Element {
             </motion.header>
           </div>
         </section>
+
+        {/* Mandate Statement - Added here for consistency */}
+        <MandateStatement />
 
         {/* What It Is */}
         <section className="py-16">

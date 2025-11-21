@@ -25,12 +25,12 @@ export function getEnv(key: string, defaultValue: string = ""): string {
  * Safe URL builder
  *
  * - Leaves absolute URLs as-is
- * - If base is empty, returns path (so local /public paths still work)
+ * - If base is empty, returns path (for local /public paths)
  * - Joins base + path sensibly when both are present
  */
 export function buildUrl(base: string, path: string): string {
-  const trimmedPath = String(path || "").trim();
-  const trimmedBase = String(base || "").trim();
+  const trimmedPath = String(path ?? "").trim();
+  const trimmedBase = String(base ?? "").trim();
 
   // No path at all – nothing we can do
   if (!trimmedPath) return "#";
@@ -51,23 +51,21 @@ export function buildUrl(base: string, path: string): string {
       const normalizedBase = trimmedBase.endsWith("/")
         ? trimmedBase
         : `${trimmedBase}/`;
-      return new URL(trimmedPath, normalizedBase).toString();
+      const cleanPath = trimmedPath.replace(/^\/+/, "");
+      return new URL(cleanPath, normalizedBase).toString();
     } catch {
-      // If URL join somehow fails, fall back to naive join
-      const baseClean = normalizedBase.replace(/\/+$/, "");
-      const pathClean = trimmedPath.replace(/^\/+/, "");
-      return `${baseClean}/${pathClean}`;
+      // fall through to naive join below
     }
   }
 
-  // Fallback: naive join for non-URL bases (edge cases)
+  // Fallback: naive join for non-URL bases or failed URL join
   const baseClean = trimmedBase.replace(/\/+$/, "");
   const pathClean = trimmedPath.replace(/^\/+/, "");
   return `${baseClean}/${pathClean}`;
 }
 
 /**
- * Pick first valid URL from environment variables
+ * Pick first valid URL from environment variables.
  *
  * Returns:
  * - first env value that looks like a full http(s) URL, or
@@ -83,10 +81,7 @@ export function pickEnvUrl(
     if (!value) continue;
 
     const trimmed = value.trim();
-    if (
-      trimmed.length > 0 &&
-      /^https?:\/\//i.test(trimmed)
-    ) {
+    if (trimmed.length > 0 && /^https?:\/\//i.test(trimmed)) {
       return trimmed;
     }
   }
