@@ -310,7 +310,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 // PAGE COMPONENT
 // ============================================================================
 
-const HomePage: React.FC<HomePageProps> = ({ posts }) => {
+const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -354,6 +354,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts }) => {
         <meta property="og:image" content="/assets/images/og-homepage.jpg" />
         <script
           type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </Head>
@@ -676,7 +677,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts }) => {
                       )}
 
                       <Link
-                        href={`/${post.slug}`}
+                        href={`/blog/${post.slug}`}
                         className="group/link inline-flex items-center gap-2 font-semibold text-softGold"
                       >
                         Read Article
@@ -728,7 +729,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts }) => {
                   )}
 
                   <Link
-                    href={`/${post.slug}`}
+                    href={`/blog/${post.slug}`}
                     className="group/link inline-flex items-center gap-1 text-sm font-semibold text-softGold"
                   >
                     Read More
