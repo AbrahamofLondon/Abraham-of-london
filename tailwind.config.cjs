@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const colors = require("tailwindcss/colors");
+const typography = require("@tailwindcss/typography");
 
 module.exports = {
   darkMode: "class",
@@ -27,7 +28,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Semantic system tokens (wired to CSS variables)
+        // Tokenised luxury palette from CSS variables
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
@@ -43,22 +44,29 @@ module.exports = {
         surface: "var(--color-surface)",
         muted: "var(--color-muted)",
 
-        // Luxury brand colors – used across components:
-        // bg-softGold, border-softGold/20, from-deepCharcoal, bg-forest/20, etc.
-        softGold: "var(--lux-soft-gold)",
-        "softGold-strong": "var(--lux-soft-gold-strong)",
-        deepCharcoal: "var(--lux-deep-charcoal)",
-        forest: "var(--lux-forest)",
-
-        // Supporting neutrals
         charcoal: "#1a1a1a",
         bronze: "#8b7355",
+
         gray: colors.gray,
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Playfair Display", "Georgia", "serif"],
-        // 🔑 Fix: use the sans variable here, not serif
-        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        // 👈 key fix: use the right variables
+        serif: [
+          "var(--font-serif)",
+          '"Playfair Display"',
+          "Georgia",
+          "Cambria",
+          '"Times New Roman"',
+          "serif",
+        ],
+        sans: [
+          "var(--font-sans)",
+          '"Inter"',
+          "system-ui",
+          "-apple-system",
+          '"Segoe UI"',
+          "sans-serif",
+        ],
       },
       spacing: {
         18: "4.5rem",
@@ -73,16 +81,16 @@ module.exports = {
       },
       boxShadow: {
         subtle: "0 2px 8px rgba(0, 0, 0, 0.04)",
-        elevated: "0 4px 12px rgba(0, 0, 0, 0.06)",
+        elevated: "0 4px 12px rgba(0, 0, 0, 0.05)",
       },
       borderRadius: {
-        xl: "0.75rem",
+        xl: "0.5rem",
       },
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            maxWidth: "65ch",
-            color: theme("colors.on-secondary"),
+            maxWidth: "70ch",
+            color: theme("colors['on-secondary']"),
             a: {
               color: theme("colors.primary"),
               textDecoration: "none",
@@ -110,6 +118,7 @@ module.exports = {
             blockquote: {
               borderLeftColor: theme("colors.border"),
               fontStyle: "normal",
+              backgroundColor: "rgba(0,0,0,0.01)",
               padding: "1rem 1.5rem",
             },
             strong: {
@@ -118,30 +127,8 @@ module.exports = {
             },
           },
         },
-        invert: {
-          css: {
-            color: theme("colors.on-primary"),
-            h1: { color: theme("colors.on-primary") },
-            h2: { color: theme("colors.on-primary") },
-            h3: { color: theme("colors.on-primary") },
-            a: {
-              color: theme("colors.on-primary"),
-              "&:hover": {
-                color: theme("colors.softGold"),
-              },
-            },
-            strong: {
-              color: theme("colors.on-primary"),
-            },
-            blockquote: {
-              borderLeftColor: theme("colors.softGold"),
-            },
-          },
-        },
       }),
     },
   },
-  plugins: [
-    require("@tailwindcss/typography"),
-  ],
+  plugins: [typography],
 };

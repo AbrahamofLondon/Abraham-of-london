@@ -1,5 +1,5 @@
 // lib/posts.ts
-// Contentlayer-free adapter used by unified-content and /blog index
+// Contentlayer-free adapter hooked into lib/server/posts-data
 
 import {
   getAllPostsMeta,
@@ -32,17 +32,16 @@ const DEFAULT_FIELDS = [
 ] as const;
 
 /**
- * Legacy-style async API returning all posts.
- * Used by lib/server/unified-content.ts and any old callers.
+ * Used by lib/server/unified-content.ts
  */
 export async function getAllPosts(): Promise<Post[]> {
   const metas = getAllPostsMeta?.() ?? [];
 
   const posts: Post[] = metas.map((meta) => {
+    // pull full doc if needed
     const full = getPostBySlugServer(meta.slug, [...DEFAULT_FIELDS]) as any;
     const merged = { ...meta, ...(full || {}) };
-
-    // JSON-safe clone to strip Dates etc.
+    // JSON clone to strip Date objects etc.
     return JSON.parse(JSON.stringify(merged)) as Post;
   });
 
@@ -50,11 +49,9 @@ export async function getAllPosts(): Promise<Post[]> {
 }
 
 /**
- * Optional convenience if you ever want an async single-post helper.
+ * Optional convenience single-fetch
  */
-export async function getPostBySlug(
-  slug: string,
-): Promise<Post | null> {
+export async function getPostBySlug(slug: string): Promise<Post | null> {
   const full = getPostBySlugServer(slug, [...DEFAULT_FIELDS]) as any;
   if (!full || !full.title) return null;
   return JSON.parse(JSON.stringify(full)) as Post;
