@@ -16,17 +16,16 @@ import {
   Phone,
   ArrowUp,
 } from "lucide-react";
-import { siteConfig, getRoutePath } from "@/lib/siteConfig";
+import { siteConfig } from "@/lib/siteConfig";
 
 type BareSocial = {
   href?: string;
   label?: string;
   external?: boolean;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 // Enhanced social links with icons
-const DEFAULT_SOCIALS: BareSocial[] = [
+const DEFAULT_SOCIALS = [
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
@@ -85,18 +84,7 @@ const DEFAULT_SOCIALS: BareSocial[] = [
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) =>
-  href.startsWith("mailto:") ||
-  href.startsWith("tel:") ||
-  href.startsWith("sms:");
-
-// Centralised route resolution so future route config changes are painless
-const resolveHref = (href: string): string => {
-  try {
-    return getRoutePath ? getRoutePath(href) : href;
-  } catch {
-    return href;
-  }
-};
+  href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:");
 
 const footerSections = [
   {
@@ -131,48 +119,41 @@ const footerSections = [
 
 export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
+  const email = siteConfig.email || "info@abrahamoflondon.org";
 
   const configSocials: BareSocial[] = Array.isArray(siteConfig.socialLinks)
     ? (siteConfig.socialLinks as BareSocial[])
     : [];
 
-  // Merge and dedupe socials by href
-  const byHref = new Map<string, BareSocial>();
-
+  // Merge and process social links
+  const byHref = new Map<string, any>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
     if (!rawHref) return;
-
     byHref.set(rawHref, {
       ...item,
       href: rawHref,
+      label: item.label,
+      external: item.external,
     });
   });
 
   const socials = Array.from(byHref.values()).map((item) => {
-    const href = item.href || "#";
-
     const rawLabel =
       item.label ||
-      href.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
+      item.href.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
       "Link";
-
+    const label = rawLabel;
     const external =
       typeof item.external === "boolean"
         ? item.external
-        : isExternal(href) && !isUtility(href);
-
-    const Icon =
-      typeof item.icon === "function"
-        ? item.icon
-        : Sparkles; // Fallback icon if config passes something odd
+        : isExternal(item.href) && !isUtility(item.href);
 
     return {
       ...item,
-      href,
-      label: rawLabel,
+      label,
       external,
-      Icon,
+      Icon: item.icon || Sparkles, // Fallback icon
     };
   });
 
@@ -186,7 +167,7 @@ export default function Footer(): JSX.Element {
   return (
     <footer className="relative border-t border-gold/20 bg-gradient-to-b from-charcoal to-black">
       {/* Background decoration */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Main footer content */}
@@ -199,11 +180,7 @@ export default function Footer(): JSX.Element {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link
-              href="/"
-              className="mb-6 flex items-center gap-3"
-              aria-label="Back to homepage"
-            >
+            <Link href="/" className="group mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-200 shadow-lg">
                 <Crown className="h-6 w-6 text-charcoal" />
               </div>
@@ -223,18 +200,18 @@ export default function Footer(): JSX.Element {
             </p>
 
             {/* Contact info */}
-            <div className="mb-6 space-y-3 text-sm text-gold/60">
-              <div className="flex items-center gap-2">
+            <div className="mb-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm text-gold/60">
                 <MapPin className="h-4 w-4" />
                 <span>Based in London, working globally</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-gold/60">
                 <Mail className="h-4 w-4" />
                 <a
-                  href="mailto:info@abrahamoflondon.org"
+                  href={`mailto:${email}`}
                   className="transition-colors hover:text-gold"
                 >
-                  info@abrahamoflondon.org
+                  {email}
                 </a>
               </div>
             </div>
@@ -274,7 +251,7 @@ export default function Footer(): JSX.Element {
                 {section.links.map((link) => (
                   <li key={link.href}>
                     <Link
-                      href={resolveHref(link.href)}
+                      href={link.href}
                       className="group flex items-center gap-2 text-sm text-gold/70 transition-all hover:text-gold"
                     >
                       <Sparkles className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -309,29 +286,19 @@ export default function Footer(): JSX.Element {
 
           {/* Legal links */}
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
-            <Link
-              href={resolveHref("/privacy")}
-              className="transition-colors hover:text-gold"
-            >
+            <Link href="/privacy" className="transition-colors hover:text-gold">
               Privacy Policy
             </Link>
-            <Link
-              href={resolveHref("/terms")}
-              className="transition-colors hover:text-gold"
-            >
+            <Link href="/terms" className="transition-colors hover:text-gold">
               Terms of Service
             </Link>
-            <Link
-              href={resolveHref("/cookies")}
-              className="transition-colors hover:text-gold"
-            >
+            <Link href="/cookies" className="transition-colors hover:text-gold">
               Cookie Policy
             </Link>
           </div>
 
           {/* Scroll to top */}
           <motion.button
-            type="button"
             onClick={scrollToTop}
             className="group flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal"
             whileHover={{ scale: 1.05, y: -2 }}

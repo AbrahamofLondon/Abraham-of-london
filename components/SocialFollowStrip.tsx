@@ -129,7 +129,7 @@ function SocialIcon({
   const [isHovered, setIsHovered] = React.useState(false);
 
   return (
-    <motion.span 
+    <motion.span
       className="relative inline-flex h-6 w-6 items-center justify-center overflow-hidden"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -143,7 +143,7 @@ function SocialIcon({
         sizes="24px"
         className="object-contain transition-all duration-300"
       />
-      
+
       {/* Hover glow effect */}
       <AnimatePresence>
         {isHovered && (
@@ -190,7 +190,7 @@ export default function SocialFollowStrip({
   const panelBase = cn(
     "rounded-3xl border-2 shadow-2xl backdrop-blur-xl transition-all duration-500",
     "bg-gradient-to-br from-charcoal/95 to-black/95 border-gold/20",
-    "hover:border-gold/40 hover:shadow-3xl"
+    "hover:border-gold/40 hover:shadow-3xl",
   );
 
   // Premium pill styling
@@ -198,7 +198,7 @@ export default function SocialFollowStrip({
     "group relative inline-flex items-center gap-3 rounded-2xl border-2 px-4 py-3",
     "text-sm font-medium transition-all duration-300 overflow-hidden",
     "border-gold/30 bg-gradient-to-r from-gold/5 to-gold/10",
-    "hover:border-gold/60 hover:from-gold/10 hover:to-gold/20 hover:shadow-lg"
+    "hover:border-gold/60 hover:from-gold/10 hover:to-gold/20 hover:shadow-lg",
   );
 
   const textColor = variant === "dark" ? "text-cream" : "text-charcoal";
@@ -210,9 +210,9 @@ export default function SocialFollowStrip({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -223,9 +223,9 @@ export default function SocialFollowStrip({
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 24
-      }
-    }
+        damping: 24,
+      },
+    },
   };
 
   return (
@@ -239,18 +239,18 @@ export default function SocialFollowStrip({
       viewport={{ once: true, margin: "-50px" }}
       variants={containerVariants}
     >
-      <motion.div 
+      <motion.div
         className={panelBase}
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 300 }}
       >
         <div className="flex flex-col gap-8 px-8 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-12 sm:py-10">
           {/* Premium text block */}
-          <motion.div 
+          <motion.div
             className="max-w-xl space-y-3"
             variants={itemVariants}
           >
-            <motion.p 
+            <motion.p
               className="text-xs font-bold uppercase tracking-[0.3em] text-gold"
               variants={itemVariants}
             >
@@ -258,21 +258,21 @@ export default function SocialFollowStrip({
             </motion.p>
             <motion.h3
               className={cn(
-                "font-serif text-2xl sm:text-3xl leading-tight",
+                "font-serif text-2xl leading-tight sm:text-3xl",
                 textColor,
               )}
               variants={itemVariants}
             >
               Connect with{" "}
-              <span className="bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent font-bold">
+              <span className="bg-gradient-to-r from-gold to-amber-200 bg-clip-text font-bold text-transparent">
                 Abraham of London
               </span>
             </motion.h3>
-            <motion.p 
+            <motion.p
               className={cn("text-sm leading-relaxed", subColor)}
               variants={itemVariants}
             >
-              Exclusive insights, strategic frameworks, and real conversations 
+              Exclusive insights, strategic frameworks, and real conversations
               across platforms that matter. No fluff, just signal.
             </motion.p>
           </motion.div>
@@ -297,10 +297,10 @@ export default function SocialFollowStrip({
                 <motion.span
                   className={pillBase}
                   style={accentColor ? { color: accentColor } : undefined}
-                  whileHover={{ 
-                    scale: 1.05, 
+                  whileHover={{
+                    scale: 1.05,
                     y: -2,
-                    transition: { type: "spring", stiffness: 400 }
+                    transition: { type: "spring", stiffness: 400 },
                   }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -310,16 +310,16 @@ export default function SocialFollowStrip({
                     initial={false}
                     transition={{ duration: 0.3 }}
                   />
-                  
+
                   {/* Border glow */}
                   <motion.span
                     className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-gold to-amber-200 opacity-0 group-hover:opacity-20"
                     initial={false}
                     transition={{ duration: 0.3 }}
                   />
-                  
+
                   {IconNode}
-                  <span className="font-medium text-current relative z-10">
+                  <span className="relative z-10 font-medium text-current">
                     {label}
                   </span>
                 </motion.span>
@@ -336,7 +336,6 @@ export default function SocialFollowStrip({
                     target={external ? "_blank" : undefined}
                     rel={external ? "noopener noreferrer" : undefined}
                     variants={itemVariants}
-                    whileHover="hover"
                   >
                     {content}
                   </motion.a>
@@ -359,7 +358,7 @@ export default function SocialFollowStrip({
         </div>
 
         {/* Premium footer note */}
-        <motion.div 
+        <motion.div
           className="border-t border-gold/20 px-8 py-4 sm:px-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
