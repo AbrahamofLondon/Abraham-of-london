@@ -23,36 +23,77 @@ export function getEnv(key: string, defaultValue: string = ""): string {
 
 /**
  * Safe URL builder
+ *
+ * - Leaves absolute URLs as-is
+ * - If base is empty, returns path (so local /public paths still work)
+ * - Joins base + path sensibly when both are present
  */
 export function buildUrl(base: string, path: string): string {
-  try {
-    const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-    return new URL(path, normalizedBase).toString();
-  } catch {
-    return "#";
+  const trimmedPath = String(path || "").trim();
+  const trimmedBase = String(base || "").trim();
+
+  // No path at all – nothing we can do
+  if (!trimmedPath) return "#";
+
+  // If path is already absolute, trust it
+  if (/^https?:\/\//i.test(trimmedPath)) {
+    return trimmedPath;
   }
+
+  // If base is empty, just return the path (handles `/images/foo.jpg` etc.)
+  if (!trimmedBase) {
+    return trimmedPath;
+  }
+
+  // If base looks like a URL, try to join using WHATWG URL
+  if (/^https?:\/\//i.test(trimmedBase)) {
+    try {
+      const normalizedBase = trimmedBase.endsWith("/")
+        ? trimmedBase
+        : `${trimmedBase}/`;
+      return new URL(trimmedPath, normalizedBase).toString();
+    } catch {
+      // If URL join somehow fails, fall back to naive join
+      const baseClean = normalizedBase.replace(/\/+$/, "");
+      const pathClean = trimmedPath.replace(/^\/+/, "");
+      return `${baseClean}/${pathClean}`;
+    }
+  }
+
+  // Fallback: naive join for non-URL bases (edge cases)
+  const baseClean = trimmedBase.replace(/\/+$/, "");
+  const pathClean = trimmedPath.replace(/^\/+/, "");
+  return `${baseClean}/${pathClean}`;
 }
 
 /**
  * Pick first valid URL from environment variables
+ *
+ * Returns:
+ * - first env value that looks like a full http(s) URL, or
+ * - first non-empty fallback, or
+ * - "#" as absolute last resort
  */
-export function pickEnvUrl(envKeys: string[], ...fallbacks: string[]): string {
+export function pickEnvUrl(
+  envKeys: string[],
+  ...fallbacks: string[]
+): string {
   for (const key of envKeys) {
     const value = getEnv(key);
-    if (value) {
-      const trimmed = value.trim();
-      if (
-        trimmed.length > 0 &&
-        (trimmed.startsWith("http://") || trimmed.startsWith("https://"))
-      ) {
-        return trimmed;
-      }
+    if (!value) continue;
+
+    const trimmed = value.trim();
+    if (
+      trimmed.length > 0 &&
+      /^https?:\/\//i.test(trimmed)
+    ) {
+      return trimmed;
     }
   }
 
-  const fallback = fallbacks.find(
-    (fb) => fb && fb.trim().length > 0,
-  );
+  const fallback = fallbacks
+    .map((fb) => (fb || "").trim())
+    .find((fb) => fb.length > 0);
 
   return fallback ?? "#";
 }
