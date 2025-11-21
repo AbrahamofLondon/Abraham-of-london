@@ -8,17 +8,33 @@ import { cn } from "@/lib/utils";
 
 type TextAlign = "left" | "center" | "right";
 
+type HeroBannerCTA = {
+  text: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  variant?: "primary" | "secondary" | "outline";
+};
+
 export interface HeroBannerProps {
-  title: string;
-  subtitle?: string;
-  eyebrow?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  eyebrow?: React.ReactNode;
   backgroundImage?: string;
   overlayOpacity?: number;
   height?: string;
   textAlign?: TextAlign;
-  ctaText?: string;
+
+  // Primary CTA
+  ctaText?: React.ReactNode;
   ctaOnClick?: () => void;
+  ctaHref?: string;
+
+  // Extra CTAs (e.g. "View Latest Writing")
+  additionalCTAs?: HeroBannerCTA[];
+
+  // Optional online/offline badge
   showConnectionStatus?: boolean;
+
   children?: React.ReactNode;
 }
 
@@ -38,6 +54,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   textAlign = "left",
   ctaText,
   ctaOnClick,
+  ctaHref,
+  additionalCTAs = [],
   showConnectionStatus = false,
   children,
 }) => {
@@ -60,6 +78,57 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  const hasPrimaryCTA = Boolean(ctaText && (ctaOnClick || ctaHref));
+
+  const renderCTA = (cta: HeroBannerCTA, key: React.Key) => {
+    const variant = cta.variant ?? "primary";
+
+    const base =
+      "inline-flex items-center justify-center rounded-full px-6 py-3 text-xs md:text-sm font-semibold uppercase tracking-wide transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
+    const byVariant: Record<NonNullable<HeroBannerCTA["variant"]>, string> = {
+      primary:
+        "bg-softGold text-slate-950 shadow-lg shadow-black/40 hover:bg-softGold/90 focus:ring-softGold",
+      secondary:
+        "bg-white/10 text-white border border-white/30 hover:bg-white/20 focus:ring-white/70",
+      outline:
+        "border border-softGold/70 text-softGold hover:bg-softGold/10 focus:ring-softGold/80",
+    };
+
+    const className = cn(base, byVariant[variant]);
+
+    if (cta.href) {
+      return (
+        <a
+          key={key}
+          href={cta.href}
+          className={className}
+        >
+          {cta.text}
+        </a>
+      );
+    }
+
+    return (
+      <button
+        key={key}
+        type="button"
+        onClick={cta.onClick}
+        className={className}
+      >
+        {cta.text}
+      </button>
+    );
+  };
+
+  const primaryCTA: HeroBannerCTA | null = hasPrimaryCTA
+    ? {
+        text: ctaText as React.ReactNode,
+        href: ctaHref,
+        onClick: ctaOnClick,
+        variant: "primary",
+      }
+    : null;
 
   return (
     <section
@@ -90,7 +159,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         <motion.div
           className={cn(
             "flex w-full flex-col gap-6 text-white",
-            textAlignClasses[textAlign]
+            textAlignClasses[textAlign],
           )}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -121,7 +190,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             )}
           </div>
 
-          {/* Title */}
+          {/* Title & subtitle */}
           <div className="space-y-4">
             <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
               {title}
@@ -133,16 +202,12 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             )}
           </div>
 
-          {/* CTA + children */}
+          {/* CTAs + children */}
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            {ctaText && ctaOnClick && (
-              <button
-                type="button"
-                onClick={ctaOnClick}
-                className="inline-flex items-center rounded-full bg-softGold px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-softGold/90 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
-              >
-                {ctaText}
-              </button>
+            {primaryCTA && renderCTA(primaryCTA, "primary")}
+
+            {additionalCTAs.map((cta, index) =>
+              renderCTA(cta, `extra-${index}`),
             )}
 
             {children && (

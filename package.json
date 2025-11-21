@@ -11,7 +11,7 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev",
     "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
-    "dev:content": "node -e \"console.log('Contentlayer disabled: no separate content dev step')\"",
+    "dev:content": "contentlayer2 build --watch",
     "start": "next start",
     "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
     "typecheck": "tsc --noEmit",
@@ -21,21 +21,23 @@
     "lint:fix": "eslint . --fix",
     "clean": "rimraf .next .turbo node_modules .reports .contentlayer",
     "clean:build": "rimraf .next .contentlayer",
-    "content:build": "node -e \"console.log('Contentlayer disabled: skipping content build step')\"",
-    "content:dev": "node -e \"console.log('Contentlayer disabled: skipping content dev step')\"",
+    "content:build": "contentlayer2 build",
+    "content:dev": "contentlayer2 build --watch",
     "guard:conflicts": "node scripts/check-conflicts.js",
-    "build": "pnpm run guard:conflicts && next build",
-    "build:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next build",
-    "build:fast": "next build",
+    "build": "pnpm run guard:conflicts && pnpm run content:build && next build",
+    "build:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run content:build && next build",
+    "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
-    "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer build && next build",
+    "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer2 build && next build",
     "check": "pnpm run lint && pnpm run typecheck",
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
     "prebuild": "pnpm run clean:build",
-    "postbuild": "node -e \"console.log('Build completed successfully')\""
+    "postbuild": "node -e \"console.log('Build completed successfully')\"",
+    "postinstall": "contentlayer2 build"
   },
   "dependencies": {
     "clsx": "2.1.1",
+    "contentlayer2": "0.5.8",
     "date-fns": "4.1.0",
     "framer-motion": "11.2.10",
     "fuse.js": "7.0.0",
@@ -55,8 +57,6 @@
     "ws": "8.18.3"
   },
   "devDependencies": {
-    "@contentlayer/core": "0.3.4",
-    "@contentlayer/source-files": "0.3.4",
     "@netlify/plugin-nextjs": "5.14.5",
     "@react-email/components": "0.0.23",
     "@tailwindcss/typography": "0.5.19",
@@ -68,7 +68,6 @@
     "@typescript-eslint/eslint-plugin": "8.46.4",
     "@typescript-eslint/parser": "8.46.4",
     "autoprefixer": "10.4.20",
-    "contentlayer": "0.3.4",
     "cross-env": "7.0.3",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.12",
@@ -80,8 +79,9 @@
   },
   "pnpm": {
     "overrides": {
-      "@contentlayer/core": "0.3.4",
-      "@contentlayer/source-files": "0.3.4"
+      "esbuild": "0.24.0",
+      "@contentlayer/core": "npm:contentlayer2@0.5.8",
+      "@contentlayer/source-files": "npm:contentlayer2@0.5.8"
     },
     "peerDependencyRules": {
       "ignoreMissing": [

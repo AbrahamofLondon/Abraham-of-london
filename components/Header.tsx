@@ -4,8 +4,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-// Remove ThemeToggle if not implemented, or create a basic one
-// import ThemeToggle from "./ThemeToggle";
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
 // Simple fallback ThemeToggle component if not implemented
@@ -21,7 +19,11 @@ const ThemeToggle: React.FC = () => (
   </button>
 );
 
-type HeaderProps = { variant?: "light" | "dark" };
+type HeaderProps = {
+  variant?: "light" | "dark";
+  /** When true, header starts transparent and only solidifies on scroll */
+  transparent?: boolean;
+};
 
 type NavItem = {
   route: RouteId;
@@ -37,7 +39,10 @@ const NAV: NavItem[] = [
   { route: "contact", label: "Contact" },
 ];
 
-export default function Header({ variant = "light" }: HeaderProps) {
+export default function Header({
+  variant = "light",
+  transparent = false,
+}: HeaderProps): JSX.Element {
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState<string>("/");
@@ -65,18 +70,14 @@ export default function Header({ variant = "light" }: HeaderProps) {
     if (typeof window === "undefined") return;
 
     const onScroll = () => {
-      // Use requestAnimationFrame for better performance
       requestAnimationFrame(() => {
         setScrolled(window.scrollY > 8);
       });
     };
 
-    // Add passive scroll listener
     window.addEventListener("scroll", onScroll, { passive: true });
-    
-    // Initial check
     onScroll();
-    
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -88,40 +89,30 @@ export default function Header({ variant = "light" }: HeaderProps) {
       setCurrentPath(window.location.pathname || "/");
     };
 
-    // Initial
     updatePath();
 
-    // Back/forward navigation
     const handlePopState = () => {
-      // Small delay to ensure URL is updated
       setTimeout(updatePath, 10);
     };
 
-    // Listen for Next.js route changes
-    const handleRouteChange = () => {
-      setTimeout(updatePath, 10);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    
-    // For Next.js app router, we can listen to clicks on links
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const link = target.closest('a[href]');
-      if (link && link.getAttribute('href')?.startsWith('/')) {
+      const link = target.closest("a[href]");
+      if (link && link.getAttribute("href")?.startsWith("/")) {
         setTimeout(updatePath, 50);
       }
     };
 
-    document.addEventListener('click', handleClick, true);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("click", handleClick, true);
 
     return () => {
       window.removeEventListener("popstate", handlePopState);
-      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener("click", handleClick, true);
     };
   }, []);
 
-  // Lock body scroll while mobile menu open - FIXED version
+  // Lock body scroll while mobile menu open
   React.useEffect(() => {
     if (typeof window === "undefined" || !open) return;
 
@@ -129,31 +120,32 @@ export default function Header({ variant = "light" }: HeaderProps) {
     const originalOverflow = window.getComputedStyle(document.body).overflow;
     const scrollY = window.scrollY;
 
-    // Apply styles
-    document.body.style.position = 'fixed';
+    document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.overflow = 'hidden';
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
 
     return () => {
-      // Restore styles
       document.body.style.position = originalStyle;
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.overflow = originalOverflow;
       window.scrollTo(0, scrollY);
     };
   }, [open]);
 
-  const lightShell = scrolled
+  // Shell behaviour:
+  // - If transparent=false: behaves as before (solid white/black, light shadow on scroll)
+  // - If transparent=true: starts transparent, only solid + shadow once scrolled
+  const lightShell = scrolled || !transparent
     ? "bg-white/85 border-black/10 shadow-sm"
-    : "bg-white/70 border-black/10";
+    : "bg-transparent border-transparent";
 
-  const darkShell = scrolled
+  const darkShell = scrolled || !transparent
     ? "bg-black/60 border-white/10 shadow-sm"
-    : "bg-black/50 border-white/10";
+    : "bg-transparent border-transparent";
 
   const shell =
     variant === "dark"
@@ -188,7 +180,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
   );
 
   // Don't render motion effects during SSR to avoid hydration mismatches
-  const MotionHeader = isMounted ? motion.header : 'header';
+  const MotionHeader = isMounted ? motion.header : "header";
 
   return (
     <MotionHeader
@@ -196,7 +188,7 @@ export default function Header({ variant = "light" }: HeaderProps) {
       {...(isMounted && {
         initial: { y: -100, opacity: 0 },
         animate: { y: 0, opacity: 1 },
-        transition: { type: "spring", stiffness: 100, damping: 20 }
+        transition: { type: "spring", stiffness: 100, damping: 20 },
       })}
       role="navigation"
       aria-label="Primary"
@@ -321,7 +313,9 @@ export default function Header({ variant = "light" }: HeaderProps) {
       {open && (
         <div
           id="mobile-nav"
-          className={`md:hidden ${variant === "dark" ? "bg-black/80" : "bg-white/95"} border-t ${
+          className={`md:hidden ${
+            variant === "dark" ? "bg-black/80" : "bg-white/95"
+          } border-t ${
             variant === "dark" ? "border-white/10" : "border-black/10"
           } backdrop-blur`}
         >

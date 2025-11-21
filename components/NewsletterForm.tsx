@@ -2,12 +2,30 @@
 "use client";
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function NewsletterForm() {
+type Status = "idle" | "loading" | "ok" | "err";
+type Variant = "default" | "premium";
+
+export interface NewsletterFormProps
+  extends React.FormHTMLAttributes<HTMLFormElement> {
+  variant?: Variant;
+  placeholder?: string;
+  buttonText?: string;
+}
+
+export default function NewsletterForm({
+  variant = "default",
+  placeholder = "you@example.com",
+  buttonText = "Subscribe",
+  className,
+  onSubmit,
+  ...formProps
+}: NewsletterFormProps) {
   const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [status, setStatus] = React.useState<Status>("idle");
   const [msg, setMsg] = React.useState("");
   const [hp, setHp] = React.useState(""); // honeypot
   const abortRef = React.useRef<AbortController | null>(null);
@@ -17,7 +35,7 @@ export default function NewsletterForm() {
     if (status !== "idle" && statusRef.current) statusRef.current.focus();
   }, [status, msg]);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (status === "loading") return;
 
@@ -48,7 +66,10 @@ export default function NewsletterForm() {
       // HOT-FIX: send both shapes so either backend contract is satisfied
       const r = await fetch("/api/newsletter", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
           email: value,
           payload: { email_address: value, email: value },
@@ -78,19 +99,34 @@ export default function NewsletterForm() {
       setStatus("err");
       setMsg("Network error. Please try again.");
     }
+
+    // Preserve any parent onSubmit handler if someone passes one
+    if (onSubmit) {
+      onSubmit(e);
+    }
   }
 
   const isLoading = status === "loading";
   const isError = status === "err";
+  const isPremium = variant === "premium";
 
   return (
     <form
-      onSubmit={onSubmit}
-      className="mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5"
+      onSubmit={handleSubmit}
       noValidate
+      {...formProps}
+      className={cn(
+        "mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:p-5",
+        isPremium
+          ? "border-white/20 bg-white/5"
+          : "border-lightGrey bg-warmWhite",
+        className,
+      )}
     >
       {/* Honeypot (hidden) */}
-      <label className="sr-only" htmlFor="newsletter-company">Company</label>
+      <label className="sr-only" htmlFor="newsletter-company">
+        Company
+      </label>
       <input
         id="newsletter-company"
         name="company"
@@ -111,10 +147,15 @@ export default function NewsletterForm() {
         inputMode="email"
         autoComplete="email"
         required
-        placeholder="you@example.com"
+        placeholder={placeholder}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal focus:outline-none"
+        className={cn(
+          "flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none",
+          isPremium
+            ? "border-white/30 bg-black/30 text-white placeholder:text-gray-400 focus:border-softGold focus:ring-1 focus:ring-softGold"
+            : "border-lightGrey bg-white text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal",
+        )}
         aria-describedby="newsletter-status"
         aria-invalid={isError || undefined}
         disabled={isLoading}
@@ -123,9 +164,14 @@ export default function NewsletterForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60"
+        className={cn(
+          "rounded-full px-5 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
+          isPremium
+            ? "bg-softGold text-black hover:bg-softGold/90"
+            : "bg-forest text-cream hover:bg-[color:var(--color-primary)/0.9]",
+        )}
       >
-        {isLoading ? "Subscribing…" : "Subscribe"}
+        {isLoading ? "Subscribing…" : buttonText}
       </button>
 
       <p
@@ -134,9 +180,18 @@ export default function NewsletterForm() {
         aria-live="polite"
         tabIndex={-1}
         ref={statusRef}
-        className={`sm:ml-2 text-sm ${
-          status === "ok" ? "text-forest" : status === "err" ? "text-red-600" : "text-transparent"
-        }`}
+        className={cn(
+          "sm:ml-2 text-sm",
+          status === "ok"
+            ? isPremium
+              ? "text-emerald-300"
+              : "text-forest"
+            : status === "err"
+            ? isPremium
+              ? "text-red-300"
+              : "text-red-600"
+            : "text-transparent",
+        )}
       >
         {msg || " "}
       </p>

@@ -1,69 +1,41 @@
-// next.config.js
-/** @type {import('next').NextConfig} */
-const { withContentlayer } = require("next-contentlayer");
-
-const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  reactStrictMode: true,
-  
-  images: {
-    unoptimized: true,
-    dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+// .eslintrc.cjs
+/** @type {import("eslint").Linter.Config} */
+module.exports = {
+  root: true,
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    ecmaVersion: 2021,
+    sourceType: "module",
+    ecmaFeatures: { jsx: true },
+    project: "./tsconfig.json",
   },
-
-  compress: true,
-  poweredByHeader: false,
-  generateEtags: false,
-
-  async redirects() {
-    return [
-      {
-        source: '/blog',
-        destination: '/content',
-        permanent: true,
-      },
-      {
-        source: '/books',
-        destination: '/content', 
-        permanent: true,
-      },
-      {
-        source: '/articles',
-        destination: '/content',
-        permanent: true,
-      },
-    ];
+  settings: {
+    react: {
+      version: "detect",
+    },
   },
-
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-        ],
-      },
-    ];
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
   },
-
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+  extends: [
+    "next",
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "prettier",
+  ],
+  plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
+  rules: {
+    // You can tune these as you like
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+    ],
+    "react/react-in-jsx-scope": "off", // Next.js handles this
   },
 };
-
-// Check if contentlayer is available before using it
-try {
-  module.exports = withContentlayer(nextConfig);
-} catch (error) {
-  console.log('Contentlayer not available, using standard config');
-  module.exports = nextConfig;
-}

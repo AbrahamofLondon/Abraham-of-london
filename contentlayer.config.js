@@ -1,6 +1,6 @@
 // contentlayer.config.ts
 import path from "node:path";
-import { defineDocumentType, makeSource } from "contentlayer/source-files";
+import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
@@ -8,17 +8,17 @@ import rehypeSlug from "rehype-slug";
 // Helpers
 // -----------------------------------------------------------------------------
 
-function escapeForRegExp(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function escapeForRegExp(input) {
+  return String(input).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 // Generate a clean slug from flattenedPath + collection prefix
-function generateSlug(flattenedPath: string, prefix: string): string {
+function generateSlug(flattenedPath, prefix) {
   if (!flattenedPath) return "untitled";
   try {
     const safePrefix = escapeForRegExp(prefix);
     return (
-      flattenedPath
+      String(flattenedPath)
         .replace(new RegExp(`^${safePrefix}/`, "u"), "")
         .replace(/\/index$/u, "") || "untitled"
     );
@@ -28,9 +28,9 @@ function generateSlug(flattenedPath: string, prefix: string): string {
 }
 
 // Build a URL from slug + base path
-function generateUrl(slug: string, basePath: string): string {
-  const cleanSlug = slug.replace(/^\/+|\/+$/gu, "");
-  const cleanBase = basePath.replace(/^\/+|\/+$/gu, "");
+function generateUrl(slug, basePath) {
+  const cleanSlug = String(slug).replace(/^\/+|\/+$/gu, "");
+  const cleanBase = String(basePath).replace(/^\/+|\/+$/gu, "");
   if (!cleanSlug) return `/${cleanBase}`;
   return `/${cleanBase}/${cleanSlug}`.replace(/\/+/gu, "/");
 }
@@ -74,7 +74,7 @@ export const Post = defineDocumentType(() => ({
       type: "number",
       resolve: (doc) => {
         const wordsPerMinute = 200;
-        const wordCount = doc.body.raw.split(/\s+/u).length;
+        const wordCount = String(doc.body.raw).split(/\s+/u).length;
         return Math.ceil(wordCount / wordsPerMinute);
       },
     },
@@ -240,12 +240,51 @@ export const Print = defineDocumentType(() => ({
     url: {
       type: "string",
       resolve: (doc) =>
-        generateUrl(generateSlug(doc._raw.flattenedPath, "prints"), "prints"),
+        generateUrl(
+          generateSlug(doc._raw.flattenedPath, "prints"),
+          "prints",
+        ),
     },
   },
 }));
 
-// GENERIC RESOURCES (content/resources/**/*) – keep for legacy
+// STRATEGY DOCS (content/strategy/**/*)
+export const Strategy = defineDocumentType(() => ({
+  name: "Strategy",
+  filePathPattern: `strategy/**/*.{md,mdx}`,
+  contentType: "mdx",
+  fields: {
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Strategy",
+    },
+    date: {
+      type: "date",
+      required: true,
+      default: new Date().toISOString().split("T")[0],
+    },
+    excerpt: { type: "string", default: "" },
+    coverImage: { type: "string", default: "" },
+    tags: { type: "list", of: { type: "string" }, default: [] },
+  },
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "strategy"),
+    },
+    url: {
+      type: "string",
+      resolve: (doc) =>
+        generateUrl(
+          generateSlug(doc._raw.flattenedPath, "strategy"),
+          "strategy",
+        ),
+    },
+  },
+}));
+
+// GENERIC RESOURCES (content/resources/**/*) – legacy
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: `resources/**/*.{md,mdx}`,
@@ -289,7 +328,7 @@ export const Resource = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [Post, Download, Book, Event, Print, Resource],
+  documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource],
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
