@@ -866,6 +866,27 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 // -----------------------------------------------------------------------------
+// SSG – paths
+// -----------------------------------------------------------------------------
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  try {
+    // 👈 KEY CHANGE: use "posts" (Contentlayer Post collection)
+    const posts = getAllContent("posts");
+    const paths =
+      posts?.map((item: any) => ({
+        params: { slug: String(item.slug) },
+      })) ?? [];
+
+    return { paths, fallback: "blocking" };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error generating blog post paths:", error);
+    return { paths: [], fallback: "blocking" };
+  }
+};
+
+// -----------------------------------------------------------------------------
 // SSG – props
 // -----------------------------------------------------------------------------
 
@@ -883,7 +904,8 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
 
     if (!slug) return { notFound: true };
 
-    const data = getContentBySlug("blog", slug, { withContent: true });
+    // 👈 KEY CHANGE: use "posts" (same collection)
+    const data = getContentBySlug("posts", slug, { withContent: true });
 
     if (!data) {
       return { notFound: true };
@@ -945,5 +967,3 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
     return { notFound: true };
   }
 };
-
-export default BlogPostPage;
