@@ -105,7 +105,16 @@ export default function BookPage(
 ) {
   const { book } = props;
 
+  // Default status by slug – extend as needed
+  const defaultStatusBySlug: Record<string, string> = {
+    "fathering-without-fear": "In Development",
+    // Add other books here as they come online:
+    // "fiction-adaptation": "In Concept",
+    // "kingdom-legacy-principles": "Drafting",
+  };
+
   const {
+    slug,
     title,
     subtitle,
     description,
@@ -118,8 +127,13 @@ export default function BookPage(
     mdxSource,
     content,
     readTime,
-    status,
+    status: rawStatus,
   } = book;
+
+  const status =
+    rawStatus ||
+    (slug && defaultStatusBySlug[slug]) ||
+    null;
 
   const pageTitle = title || "Book";
 

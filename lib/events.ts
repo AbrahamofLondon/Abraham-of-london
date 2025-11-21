@@ -24,8 +24,8 @@ export type {
 // -----------------------------------------------------------------------------
 // Re-export original server functions (backwards-compatible)
 // -----------------------------------------------------------------------------
+// NOTE: getEventSlugs is wrapped below for safety instead of direct alias.
 
-export const getEventSlugs = _getEventSlugs;
 export const getEventBySlug = _getEventBySlug;
 export const getAllEvents = _getAllEvents;
 export const getEventsBySlugs = _getEventsBySlugs;
@@ -74,7 +74,7 @@ function normaliseEventMeta(raw: unknown): EventSummary {
 
   const heroImage =
     typeof ev.heroImage === "string"
-      ? ev.heroImage
+      ? (ev.heroImage as string)
       : typeof ev.coverImage === "string"
       ? (ev.coverImage as string)
       : null;
@@ -85,23 +85,25 @@ function normaliseEventMeta(raw: unknown): EventSummary {
       : heroImage;
 
   const tags = Array.isArray(ev.tags)
-    ? (ev.tags as unknown[]).filter((t) => typeof t === "string") as string[]
+    ? (ev.tags as unknown[])
+        .filter((t) => typeof t === "string")
+        .map((t) => t as string)
     : null;
 
   return {
     slug,
     title,
     date,
-    time: typeof ev.time === "string" ? ev.time : null,
+    time: typeof ev.time === "string" ? (ev.time as string) : null,
     location:
       typeof ev.location === "string"
-        ? ev.location
+        ? (ev.location as string)
         : typeof ev.venue === "string"
         ? (ev.venue as string)
         : null,
     description:
       typeof ev.description === "string"
-        ? ev.description
+        ? (ev.description as string)
         : typeof ev.excerpt === "string"
         ? (ev.excerpt as string)
         : null,
@@ -118,21 +120,63 @@ function normaliseEventMeta(raw: unknown): EventSummary {
 // -----------------------------------------------------------------------------
 
 /**
+ * Safe slugs for SSG – trimmed, non-empty.
+ * Falls back to deriving from all events if the raw getter misbehaves.
+ */
+export function getEventSlugs(): string[] {
+  try {
+    const raw = _getEventSlugs?.() ?? [];
+    const array = Array.isArray(raw) ? raw : [];
+    const cleaned = array
+      .map((s) => String(s ?? "").trim())
+      .filter((s) => s.length > 0);
+
+    if (cleaned.length > 0) return cleaned;
+  } catch {
+    // ignore and fall back
+  }
+
+  // Fallback – derive from all events
+  return getAllEventsSafe()
+    .map((e) => e.slug)
+    .filter((s) => s.length > 0);
+}
+
+/**
  * All events as EventSummary[], safe for JSON serialisation and UI use.
  */
 export function getAllEventsSafe(): EventSummary[] {
-  const raw = _getAllEvents() as unknown[];
+  const raw = (_getAllEvents?.() ?? []) as unknown[];
   return raw.map((e) => normaliseEventMeta(e));
 }
 
 /**
  * Single event by slug as EventSummary, or null if not found.
+ * Tries the underlying getEventBySlug first, then falls back
+ * to scanning all events by normalised slug.
  */
 export function getEventBySlugSafe(slug: string): EventSummary | null {
-  if (!slug) return null;
-  const raw = _getEventBySlug(slug);
-  if (!raw) return null;
-  return normaliseEventMeta(raw as unknown);
+  const target = String(slug ?? "").trim();
+  if (!target) return null;
+
+  // 1) Try raw implementation first (correctly trimmed)
+  try {
+    const direct = _getEventBySlug?.(target) as unknown;
+    if (direct) {
+      return normaliseEventMeta(direct);
+    }
+  } catch {
+    // ignore and fall through to fallback
+  }
+
+  // 2) Fallback: scan all events and match by normalised slug
+  const allRaw = (_getAllEvents?.() ?? []) as unknown[];
+  for (const ev of allRaw) {
+    const normalised = normaliseEventMeta(ev);
+    if (normalised.slug === target) return normalised;
+  }
+
+  return null;
 }
 
 /**

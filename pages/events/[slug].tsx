@@ -14,9 +14,6 @@ import {
   getEventBySlug,
   getEventResourcesSummary,
   type EventMeta,
-  // NOTE: we deliberately do NOT import EventResources here,
-  // because the actual implementation of getEventResourcesSummary
-  // returns a looser/different shape.
 } from "@/lib/events";
 
 /* -------------------------------------------------------------------------- */
@@ -86,7 +83,7 @@ function serialiseEvent(event: EventMeta): EventMetaSerialized {
       : null;
 
   return {
-    slug: String(anyEv.slug ?? ""),
+    slug: String(anyEv.slug ?? "").trim(),
     title: anyEv.title ?? "",
     date,
     time: anyEv.time ?? null,
@@ -101,10 +98,11 @@ function serialiseEvent(event: EventMeta): EventMetaSerialized {
 
 /**
  * Normalise resources into a serialisable shape.
- * Accepts unknown because the underlying implementation is loose
- * (e.g. may return stats objects, etc.).
+ * Accepts unknown because the underlying implementation is loose.
  */
-function serialiseResources(resources: unknown): EventResourcesSerialized | null {
+function serialiseResources(
+  resources: unknown,
+): EventResourcesSerialized | null {
   if (!resources || typeof resources !== "object") return null;
 
   const anyRes = resources as any;
@@ -146,14 +144,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const rawSlugs = await Promise.resolve(getEventSlugs());
   const slugs = Array.isArray(rawSlugs) ? rawSlugs : [];
 
+  const normalisedSlugs = slugs
+    .map((s) => String(s).trim())
+    .filter((s) => s.length > 0);
+
   const paths =
-    slugs.length > 0
-      ? slugs
-          .filter(
-            (s): s is string =>
-              typeof s === "string" && s.trim().length > 0,
-          )
-          .map((slug) => ({ params: { slug } }))
+    normalisedSlugs.length > 0
+      ? normalisedSlugs.map((slug) => ({ params: { slug } }))
       : [];
 
   return {
@@ -164,7 +161,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
   const slugParam = ctx.params?.slug;
-  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
+  const rawSlug = Array.isArray(slugParam)
+    ? slugParam[0]
+    : slugParam ?? "";
+
+  const slug = String(rawSlug).trim();
 
   if (!slug) {
     return { notFound: true };
@@ -176,8 +177,7 @@ export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
     return { notFound: true };
   }
 
-  /// NOTE: treat resources as unknown – the implementation currently returns
-  // a loose stats object, not strictly EventResources.
+  // NOTE: treat resources as unknown – implementation is loose
   let rawResources: unknown = null;
   try {
     rawResources = await Promise.resolve(
@@ -232,108 +232,239 @@ export default function EventPage({
         )}
       </Head>
 
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        {/* Hero */}
-        <header className="mb-8">
-          {hasHeroImage && (
-            <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl border border-lightGrey bg-black/5">
-              <Image
-                src={event.heroImage as string}
-                alt={event.title ?? ""}
-                fill
-                sizes="(min-width: 1024px) 960px, 100vw"
-                className="object-cover"
-              />
-            </div>
-          )}
-
-          <p className="text-xs uppercase tracking-wide text-gray-500">
-            Event
-          </p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
-            {event.title}
-          </h1>
-
-          {(displayDate || event.location || event.time) && (
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-              {displayDate && (
-                <span>
-                  <span aria-hidden>📅 </span>
-                  {displayDate}
+      <div className="bg-gradient-to-b from-black via-deepCharcoal to-black">
+        <main className="mx-auto max-w-6xl px-4 pb-16 pt-10 lg:pt-12">
+          {/* Breadcrumb */}
+          <nav className="mb-6 text-sm text-gray-400">
+            <Link
+              href="/"
+              className="hover:text-softGold hover:underline underline-offset-4"
+            >
+              Home
+            </Link>
+            <span className="mx-2 select-none text-gray-500">/</span>
+            <Link
+              href="/events"
+              className="hover:text-softGold hover:underline underline-offset-4"
+            >
+              Events
+            </Link>
+            {event.title && (
+              <>
+                <span className="mx-2 select-none text-gray-500">/</span>
+                <span className="text-gray-300 line-clamp-1">
+                  {event.title}
                 </span>
+              </>
+            )}
+          </nav>
+
+          {/* HERO CARD */}
+          <section className="mb-10 overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-softGold/10 via-deepCharcoal to-black shadow-2xl shadow-black/40">
+            <div className="relative grid gap-0 md:grid-cols-[1.1fr_1fr]">
+              {/* Left: image or gradient */}
+              <div className="relative min-h-[220px] md:min-h-[260px]">
+                {hasHeroImage ? (
+                  <>
+                    <Image
+                      src={event.heroImage as string}
+                      alt={event.title ?? ""}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent" />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.13),transparent_55%),linear-gradient(135deg,_rgba(234,179,8,0.35),_rgba(15,23,42,0.95))]" />
+                )}
+              </div>
+
+              {/* Right: content */}
+              <div className="relative flex flex-col justify-center gap-4 p-6 text-white md:p-8 lg:p-10">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-softGold">
+                  <span>Event</span>
+                  {displayDate && (
+                    <>
+                      <span className="text-white/30">•</span>
+                      <span>{displayDate}</span>
+                    </>
+                  )}
+                  {event.location && (
+                    <>
+                      <span className="text-white/30">•</span>
+                      <span className="line-clamp-1">
+                        {event.location}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <h1 className="font-serif text-2xl font-semibold leading-snug md:text-3xl lg:text-4xl">
+                  {event.title}
+                </h1>
+
+                {event.time && (
+                  <p className="text-sm text-amber-100/90">
+                    ⏰ {event.time}
+                  </p>
+                )}
+
+                {event.description && (
+                  <p className="max-w-xl text-sm text-gray-100 md:text-base">
+                    {event.description}
+                  </p>
+                )}
+
+                {event.tags && event.tags.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {event.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-xs text-gray-200"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href="#event-details"
+                    className="inline-flex items-center rounded-full bg-softGold px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-slate-950 shadow-lg shadow-black/50 transition hover:bg-softGold/90"
+                  >
+                    View Event Details
+                  </a>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center rounded-full border border-white/40 px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 transition hover:bg-white/10"
+                  >
+                    Register Interest
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* DETAILS + RESOURCES */}
+          <section
+            id="event-details"
+            className="mx-auto max-w-4xl rounded-3xl bg-white/95 p-6 shadow-xl shadow-black/30 ring-1 ring-black/5 md:p-10"
+          >
+            {/* Core details block */}
+            <div className="mb-6 grid gap-4 text-sm text-gray-700 md:grid-cols-2">
+              {displayDate && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500">
+                    Date
+                  </p>
+                  <p className="mt-1 text-sm text-deepCharcoal">
+                    {displayDate}
+                  </p>
+                </div>
               )}
               {event.time && (
-                <>
-                  <span aria-hidden>•</span>
-                  <span>
-                    <span aria-hidden>⏰ </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500">
+                    Time
+                  </p>
+                  <p className="mt-1 text-sm text-deepCharcoal">
                     {event.time}
-                  </span>
-                </>
+                  </p>
+                </div>
               )}
               {event.location && (
-                <>
-                  <span aria-hidden>•</span>
-                  <span>
-                    <span aria-hidden>📍 </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500">
+                    Location
+                  </p>
+                  <p className="mt-1 text-sm text-deepCharcoal">
                     {event.location}
-                  </span>
-                </>
+                  </p>
+                </div>
               )}
             </div>
-          )}
-        </header>
 
-        {/* Description */}
-        {event.description && (
-          <section className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest">
-            <p>{event.description}</p>
-          </section>
-        )}
-
-        {/* Related resources */}
-        {resources &&
-        ((resources.downloads && resources.downloads.length > 0) ||
-          (resources.links && resources.links.length > 0)) ? (
-          <section className="mt-10 border-t border-lightGrey pt-8">
-            <h2 className="font-serif text-xl font-semibold text-deepCharcoal">
-              {resources.heading || "Resources for this event"}
-            </h2>
-            {resources.description && (
-              <p className="mt-1 text-sm text-gray-600">
-                {resources.description}
-              </p>
+            {/* Description again, but in richer prose if needed */}
+            {event.description && (
+              <div className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest">
+                <p>{event.description}</p>
+              </div>
             )}
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
-              {(resources.downloads ?? []).map((r, idx) => (
-                <RelatedResourceCard
-                  key={`download-${idx}-${r.slug ?? r.title ?? idx}`}
-                  resource={r}
-                  kindLabel="Download"
-                />
-              ))}
-              {(resources.links ?? []).map((r, idx) => (
-                <RelatedResourceCard
-                  key={`link-${idx}-${r.slug ?? r.title ?? idx}`}
-                  resource={r}
-                  kindLabel="Link"
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
+            {/* Related resources */}
+            {resources &&
+            ((resources.downloads && resources.downloads.length > 0) ||
+              (resources.links && resources.links.length > 0)) ? (
+              <section className="mt-10 border-t border-lightGrey pt-8">
+                <h2 className="mb-2 font-serif text-xl font-semibold text-deepCharcoal">
+                  {resources.heading || "Resources for this event"}
+                </h2>
+                {resources.description && (
+                  <p className="mb-4 text-sm text-gray-600">
+                    {resources.description}
+                  </p>
+                )}
 
-        {/* Back link */}
-        <div className="mt-10">
-          <Link
-            href="/events"
-            className="text-sm text-forest underline-offset-4 hover:underline"
-          >
-            View all events
-          </Link>
-        </div>
-      </main>
+                <div className="grid gap-5 md:grid-cols-2">
+                  {(resources.downloads ?? []).map((r, idx) => (
+                    <RelatedResourceCard
+                      key={`download-${idx}-${r.slug ?? r.title ?? idx}`}
+                      resource={r}
+                      kindLabel="Download"
+                    />
+                  ))}
+                  {(resources.links ?? []).map((r, idx) => (
+                    <RelatedResourceCard
+                      key={`link-${idx}-${r.slug ?? r.title ?? idx}`}
+                      resource={r}
+                      kindLabel="Link"
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {/* CTA strip */}
+            <section className="mt-10 rounded-2xl bg-gradient-to-r from-forest via-deepCharcoal to-softGold p-6 text-center text-white md:p-8">
+              <h2 className="mb-3 text-xl font-serif font-semibold md:text-2xl">
+                Want to be in the room when it happens?
+              </h2>
+              <p className="mx-auto mb-6 max-w-2xl text-sm opacity-90 md:text-base">
+                Use the contact form to express interest, or join the newsletter
+                to get first notice when registrations open for events like the
+                Founder&apos;s Salon and Fathers & Futures.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-deepCharcoal transition hover:bg-gray-100"
+                >
+                  Contact Abraham
+                </Link>
+                <Link
+                  href="/newsletter"
+                  className="inline-flex items-center rounded-full border border-white px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Join Inner Circle
+                </Link>
+              </div>
+            </section>
+          </section>
+
+          {/* Back link */}
+          <div className="mt-10 text-center">
+            <Link
+              href="/events"
+              className="text-sm text-softGold underline-offset-4 hover:underline"
+            >
+              View all events
+            </Link>
+          </div>
+        </main>
+      </div>
     </Layout>
   );
 }
