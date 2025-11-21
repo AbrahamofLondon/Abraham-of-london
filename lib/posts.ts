@@ -1,108 +1,61 @@
 // lib/posts.ts
-import {
-  ensureDir,
-  listMdFiles,
-  fileToSlug,
-  readFrontmatter,
-  sortByDateDesc,
-} from "@/lib/server/md-utils";
+// Contentlayer-free adapter used by unified-content and /blog index
 
-export type Post = {
-  slug: string;
-  title?: string;
-  date?: string;
-  excerpt?: string | null;
-  tags?: string[] | null;
-  coverImage?: string | null;
-  // You may want access to raw MD content later
+import {
+  getAllPostsMeta,
+  getPostBySlug as getPostBySlugServer,
+  type PostMeta,
+} from "@/lib/server/posts-data";
+
+export type Post = PostMeta & {
   content?: string;
-  [key: string]: unknown;
 };
 
-export function safePosts(input: unknown): Post[] {
-  if (!Array.isArray(input)) return [];
-  return input.filter((x) => x && typeof x === "object" && "slug" in x) as Post[];
-}
+const DEFAULT_FIELDS = [
+  "slug",
+  "title",
+  "description",
+  "excerpt",
+  "coverImage",
+  "heroImage",
+  "date",
+  "updated",
+  "author",
+  "tags",
+  "category",
+  "readTime",
+  "resources",
+  "content",
+  "seoTitle",
+  "seoDescription",
+  "status",
+] as const;
 
-export function findPost(posts: Post[], slug: string): Post | undefined {
-  const key = String(slug || "").toLowerCase();
-  return posts.find((p) => String(p.slug || "").toLowerCase() === key);
-}
+/**
+ * Legacy-style async API returning all posts.
+ * Used by lib/server/unified-content.ts and any old callers.
+ */
+export async function getAllPosts(): Promise<Post[]> {
+  const metas = getAllPostsMeta?.() ?? [];
 
-// ------------------------------
-// Internal FS loader
-// ------------------------------
+  const posts: Post[] = metas.map((meta) => {
+    const full = getPostBySlugServer(meta.slug, [...DEFAULT_FIELDS]) as any;
+    const merged = { ...meta, ...(full || {}) };
 
-function loadAllPostsFromFs(): Post[] {
-  // We support any of these directories under /content
-  const candidateDirs = ["posts", "blog", "blogs"];
-
-  const files: string[] = [];
-  for (const dir of candidateDirs) {
-    const abs = ensureDir(dir);
-    if (!abs) continue;
-    const dirFiles = listMdFiles(abs);
-    files.push(...dirFiles);
-  }
-
-  if (!files.length) {
-    // No blog directories found – empty, but safe
-    return [];
-  }
-
-  const posts: Post[] = files.map((absFile) => {
-    const { data, content } = readFrontmatter(absFile);
-    const rawSlug = (data.slug as string) || fileToSlug(absFile);
-
-    const slug = String(rawSlug || "").trim().replace(/^\/+|\/+$/g, "");
-
-    const title =
-      (data.title as string) ||
-      slug ||
-      "Untitled";
-
-    const date = (data.date as string | undefined) || undefined;
-
-    const excerpt =
-      (data.excerpt as string | undefined) ||
-      (data.description as string | undefined) ||
-      null;
-
-    const tags = Array.isArray(data.tags)
-      ? data.tags.map((t: unknown) => String(t))
-      : null;
-
-    const coverImage =
-      (data.coverImage as string | undefined) ||
-      (data.cover as string | undefined) ||
-      null;
-
-    return {
-      slug,
-      title,
-      date,
-      excerpt,
-      tags,
-      coverImage,
-      content,
-      ...data,
-    };
+    // JSON-safe clone to strip Dates etc.
+    return JSON.parse(JSON.stringify(merged)) as Post;
   });
 
-  return sortByDateDesc(posts);
+  return posts;
 }
 
-// Simple in-memory cache to avoid re-reading disk repeatedly in dev/ISR
-let POSTS_CACHE: Post[] | null = null;
-
-export function getAllPosts(): Post[] {
-  if (!POSTS_CACHE) {
-    POSTS_CACHE = loadAllPostsFromFs();
-  }
-  return POSTS_CACHE;
-}
-
-export function getPostBySlug(slug: string): Post | undefined {
-  const posts = getAllPosts();
-  return findPost(posts, slug);
+/**
+ * Optional convenience if you ever want an async single-post helper.
+ */
+export async function getPostBySlug(
+  slug: string,
+): Promise<Post | null> {
+  const full = getPostBySlugServer(slug, [...DEFAULT_FIELDS]) as any;
+  if (!full || !full.title) return null;
+  return JSON.parse(JSON.stringify(full)) as Post;
 }

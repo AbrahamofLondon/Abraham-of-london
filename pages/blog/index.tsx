@@ -1,57 +1,24 @@
 // pages/blog/index.tsx
-import * as React from "react";
 import type { GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import * as React from "react";
 
 import Layout from "@/components/Layout";
-import { getPostSlugs, getPostBySlug } from "@/lib/server/posts-data";
+import {
+  getAllPostsMeta,
+  type PostMeta,
+} from "@/lib/server/posts-data";
 
-// -----------------------------------------------------------------------------
-// Types & helpers
-// -----------------------------------------------------------------------------
+type BlogIndexProps = {
+  posts: PostMeta[];
+};
 
-interface BlogListItem {
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  coverImage: string | null;
-  category: string | null;
-  date: string | null;
-  author: string | null;
-  readTime: string | null;
-}
-
-interface BlogIndexProps {
-  posts: BlogListItem[];
-}
-
-function cleanSlug(raw: string): string {
-  return raw
-    .trim()
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/^blog\//i, "");
-}
-
-function normaliseDate(raw: unknown): string | null {
-  if (!raw) return null;
-  if (typeof raw === "string") return raw;
-  if (raw instanceof Date) return raw.toISOString();
-
-  try {
-    const d = new Date(raw as string | number);
-    if (!Number.isNaN(d.valueOf())) return d.toISOString();
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-function formatPrettyDate(input: string | null | undefined): string | null {
-  if (!input) return null;
-  const d = new Date(input);
-  if (Number.isNaN(d.valueOf())) return input;
+function formatPretty(date?: string): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (Number.isNaN(d.valueOf())) return date;
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
@@ -59,242 +26,146 @@ function formatPrettyDate(input: string | null | undefined): string | null {
   }).format(d);
 }
 
-// -----------------------------------------------------------------------------
-// Page
-// -----------------------------------------------------------------------------
+export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  const raw = getAllPostsMeta?.() ?? [];
 
-function BlogIndexPage({ posts }: BlogIndexProps) {
-  const hasPosts = Array.isArray(posts) && posts.length > 0;
+  // JSON-safe clone to strip any non-serialisable fields
+  const posts = JSON.parse(JSON.stringify(raw)) as PostMeta[];
+
+  // only keep published posts
+  const visible = posts.filter(
+    (p) => (p as any).status !== "draft" && p.title,
+  );
+
+  return {
+    props: {
+      posts: visible,
+    },
+    revalidate: 3600,
+  };
+};
+
+export default function BlogIndex({ posts }: BlogIndexProps) {
+  const hasPosts = posts && posts.length > 0;
 
   return (
-    <Layout title="Insights">
+    <Layout title="Insights & Reflections">
       <Head>
-        <title>Blog &amp; Insights | Abraham of London</title>
+        <title>Insights &amp; Reflections | Abraham of London</title>
         <meta
           name="description"
-          content="Long-form field notes on fatherhood, leadership, faith, and strategy — written from courtrooms, boardrooms, and the quiet in-between."
+          content="Essays, reflections, and strategic insights for fathers, founders, and leaders building enduring legacies."
         />
-        <link rel="canonical" href="https://www.abrahamoflondon.org/blog" />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-charcoal to-black pt-20">
-        {/* HERO */}
-        <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-gold/8 via-transparent to-forest/10" />
-          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <header className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-                Blog &amp; Insights
-              </p>
-              <h1 className="mt-4 font-serif text-4xl font-semibold text-cream sm:text-5xl lg:text-6xl">
-                Field notes for{" "}
-                <span className="block bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent">
-                  fathers, founders, and watchmen.
-                </span>
-              </h1>
-              <p className="mt-6 text-lg leading-relaxed text-gold/70 sm:text-xl">
-                Essays and reflections forged in real decisions — not
-                theory. Read if you&apos;re serious about legacy, not
-                noise.
-              </p>
-            </header>
+      <main className="relative z-10 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <header className="mb-12 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
+            Blog
+          </p>
+          <h1 className="mb-4 font-serif text-3xl font-light text-white sm:text-4xl lg:text-5xl">
+            Insights for Fathers, Founders &amp; Leaders
+          </h1>
+          <p className="mx-auto max-w-2xl text-sm text-gray-300 sm:text-base">
+            Long-form reflections on faith, fatherhood, leadership, and
+            legacy—written for those who refuse to outsource their
+            responsibility.
+          </p>
+        </header>
+
+        {!hasPosts && (
+          <div className="mt-16 rounded-2xl border border-white/10 bg-black/40 px-6 py-10 text-center text-gray-300">
+            <p className="mb-2 text-lg">
+              No essays are visible yet.
+            </p>
+            <p className="text-sm text-gray-400">
+              The writing room isn&apos;t empty—just being curated. Check
+              back soon or explore downloads and resources in the
+              meantime.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Link
+                href="/downloads"
+                className="rounded-full bg-softGold px-6 py-2.5 text-sm font-medium text-deepCharcoal hover:bg-softGold/90"
+              >
+                Explore Downloads
+              </Link>
+              <Link
+                href="/content"
+                className="rounded-full border border-softGold px-6 py-2.5 text-sm font-medium text-softGold hover:bg-softGold/10"
+              >
+                View All Content
+              </Link>
+            </div>
           </div>
-        </section>
+        )}
 
-        {/* LIST */}
-        <section className="pb-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {!hasPosts && (
-              <div className="mt-12 rounded-2xl border border-gold/30 bg-charcoal/60 p-8 text-center text-gold/70">
-                <p className="text-lg">
-                  The writing desk is warm, but this shelf is still being
-                  stocked. First essays will land here shortly.
-                </p>
-              </div>
-            )}
+        {hasPosts && (
+          <section className="grid gap-8 md:grid-cols-2">
+            {posts.map((post) => {
+              const href = `/blog/${post.slug}`;
+              const cover =
+                typeof post.coverImage === "string" &&
+                post.coverImage.trim().length > 0
+                  ? post.coverImage
+                  : "/assets/images/writing-desk.webp";
 
-            {hasPosts && (
-              <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {posts.map((post) => {
-                  const prettyDate = formatPrettyDate(post.date);
-                  const href = `/blog/${encodeURIComponent(post.slug)}`;
-                  const cover =
-                    post.coverImage && post.coverImage.trim().length > 0
-                      ? post.coverImage
-                      : "/assets/images/writing-desk.webp";
+              return (
+                <article
+                  key={post.slug}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/40 hover:shadow-2xl"
+                >
+                  <div className="relative h-56 w-full overflow-hidden">
+                    <Image
+                      src={cover}
+                      alt={post.title || "Post cover"}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 50vw, 100vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  </div>
 
-                  return (
-                    <article
-                      key={post.slug}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-gold/15 bg-charcoal/70 shadow-lg transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-2xl"
-                    >
-                      <div className="relative h-56 w-full overflow-hidden">
-                        <Image
-                          src={cover}
-                          alt={post.title || "Article cover"}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                        />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                        {prettyDate && (
-                          <div className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-gold/80 backdrop-blur">
-                            {prettyDate}
-                          </div>
-                        )}
-                        {post.category && (
-                          <div className="absolute bottom-4 left-4 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-gold/80 backdrop-blur">
-                            {post.category}
-                          </div>
-                        )}
-                      </div>
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-400">
+                      <span className="rounded-full border border-softGold/30 bg-softGold/10 px-3 py-1 uppercase tracking-[0.18em] text-softGold">
+                        {post.category || "Reflection"}
+                      </span>
+                      {post.date && (
+                        <time
+                          dateTime={post.date}
+                          className="text-[11px] uppercase tracking-[0.18em]"
+                        >
+                          {formatPretty(post.date)}
+                        </time>
+                      )}
+                    </div>
 
-                      <div className="flex flex-1 flex-col px-6 py-5">
-                        <h2 className="font-serif text-xl font-semibold text-cream">
-                          <Link href={href} className="hover:text-gold">
-                            {post.title}
-                          </Link>
-                        </h2>
+                    <h2 className="mb-3 font-serif text-xl font-light text-white group-hover:text-softGold">
+                      <Link href={href}>{post.title}</Link>
+                    </h2>
 
-                        {post.excerpt && (
-                          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-gold/70">
-                            {post.excerpt}
-                          </p>
-                        )}
+                    {post.excerpt && (
+                      <p className="mb-4 line-clamp-3 text-sm text-gray-300">
+                        {post.excerpt}
+                      </p>
+                    )}
 
-                        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gold/60">
-                          {post.author && (
-                            <span className="rounded-full border border-gold/25 px-3 py-1">
-                              {post.author}
-                            </span>
-                          )}
-                          {post.readTime && (
-                            <span className="rounded-full border border-gold/15 px-3 py-1">
-                              {post.readTime}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="mt-6 flex items-center justify-between text-sm">
-                          <Link
-                            href={href}
-                            className="inline-flex items-center gap-2 text-gold transition-colors hover:text-amber-200"
-                          >
-                            Read article
-                            <span aria-hidden>↗</span>
-                          </Link>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
+                    <div className="mt-auto flex items-center justify-between pt-2 text-xs text-gray-400">
+                      <span>
+                        {post.author || "Abraham of London"}
+                      </span>
+                      {post.readTime && (
+                        <span>{post.readTime}</span>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </main>
     </Layout>
   );
 }
-
-// -----------------------------------------------------------------------------
-// SSG
-// -----------------------------------------------------------------------------
-
-export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
-  try {
-    const slugs = getPostSlugs?.() ?? [];
-
-    const items: BlogListItem[] = [];
-
-    for (const raw of slugs) {
-      const cleaned = cleanSlug(String(raw));
-      if (!cleaned) continue;
-
-      // Try bare slug, then "blog/slug" as fallback – same pattern as [slug].tsx
-      const baseFields = [
-        "slug",
-        "title",
-        "description",
-        "excerpt",
-        "coverImage",
-        "heroImage",
-        "date",
-        "author",
-        "category",
-        "readTime",
-      ] as const;
-
-      let data =
-        getPostBySlug(cleaned, baseFields as unknown as string[]) || null;
-
-      if (!data || !data.title) {
-        data =
-          getPostBySlug(
-            `blog/${cleaned}`,
-            baseFields as unknown as string[],
-          ) || null;
-      }
-
-      if (!data || !data.title) continue;
-
-      const jsonSafe = JSON.parse(JSON.stringify(data)) as {
-        slug?: string;
-        title?: string;
-        description?: string;
-        excerpt?: string;
-        coverImage?: string;
-        heroImage?: string;
-        date?: string | Date;
-        author?: string;
-        category?: string;
-        readTime?: string;
-      };
-
-      const dateIso = normaliseDate(jsonSafe.date);
-
-      items.push({
-        slug: cleaned,
-        title: jsonSafe.title || cleaned,
-        excerpt:
-          jsonSafe.excerpt ||
-          jsonSafe.description ||
-          null,
-        coverImage:
-          jsonSafe.coverImage ||
-          jsonSafe.heroImage ||
-          null,
-        category: jsonSafe.category || null,
-        date: dateIso,
-        author: jsonSafe.author || null,
-        readTime: jsonSafe.readTime || null,
-      });
-    }
-
-    // Sort newest first, but don't crash on missing dates
-    items.sort((a, b) => {
-      if (!a.date && !b.date) return 0;
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
-    });
-
-    return {
-      props: {
-        posts: items,
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error in getStaticProps for /blog:", error);
-    return {
-      props: {
-        posts: [],
-      },
-      revalidate: 600,
-    };
-  }
-};
-
-export default BlogIndexPage;

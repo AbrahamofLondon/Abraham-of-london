@@ -27,94 +27,121 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Understated Color System
+        // Semantic system tokens (wired to CSS variables)
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
-        
+
         secondary: "var(--color-secondary)",
         "on-secondary": "var(--color-on-secondary)",
-        
+
         accent: "var(--color-accent)",
         "accent-hover": "var(--color-accent-hover)",
         "on-accent": "var(--color-on-accent)",
-        
+
         border: "var(--color-border)",
         surface: "var(--color-surface)",
         muted: "var(--color-muted)",
 
-        // Semantic aliases - minimal
-        charcoal: "#1a1a1a",
-        bronze: "#8b7355",
+        // Luxury brand colors – used across components:
+        // bg-softGold, border-softGold/20, from-deepCharcoal, bg-forest/20, etc.
+        softGold: "var(--lux-soft-gold)",
+        "softGold-strong": "var(--lux-soft-gold-strong)",
+        deepCharcoal: "var(--lux-deep-charcoal)",
+        forest: "var(--lux-forest)",
 
         // Supporting neutrals
+        charcoal: "#1a1a1a",
+        bronze: "#8b7355",
         gray: colors.gray,
       },
       fontFamily: {
-        serif: ["var(--font-serif)", '"Playfair Display"', "Georgia", "serif"],
-        sans: ["var(--font-serif)", '"Inter"', "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Playfair Display", "Georgia", "serif"],
+        // 🔑 Fix: use the sans variable here, not serif
+        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
+        18: "4.5rem",
+        88: "22rem",
+        128: "32rem",
       },
       opacity: {
-        '8': '0.08',
+        8: "0.08",
       },
       transitionDuration: {
-        '400': '400ms',
+        400: "400ms",
       },
       boxShadow: {
-        'subtle': '0 2px 8px rgba(0, 0, 0, 0.04)',
-        'elevated': '0 4px 12px rgba(0, 0, 0, 0.05)',
+        subtle: "0 2px 8px rgba(0, 0, 0, 0.04)",
+        elevated: "0 4px 12px rgba(0, 0, 0, 0.06)",
       },
       borderRadius: {
-        'xl': '0.5rem',
+        xl: "0.75rem",
       },
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            maxWidth: '65ch',
-            color: theme('colors.on-secondary'),
+            maxWidth: "65ch",
+            color: theme("colors.on-secondary"),
             a: {
-              color: theme('colors.primary'),
-              textDecoration: 'none',
-              fontWeight: '500',
-              transition: 'color 0.3s ease',
-              '&:hover': {
-                color: theme('colors.accent'),
+              color: theme("colors.primary"),
+              textDecoration: "none",
+              fontWeight: "500",
+              transition: "color 0.3s ease",
+              "&:hover": {
+                color: theme("colors.accent"),
               },
             },
             h1: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
+              fontFamily: theme("fontFamily.serif").join(", "),
+              fontWeight: "600",
+              color: theme("colors.primary"),
             },
             h2: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
+              fontFamily: theme("fontFamily.serif").join(", "),
+              fontWeight: "600",
+              color: theme("colors.primary"),
             },
             h3: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
+              fontFamily: theme("fontFamily.serif").join(", "),
+              fontWeight: "600",
+              color: theme("colors.primary"),
             },
             blockquote: {
-              borderLeftColor: theme('colors.border'),
-              fontStyle: 'normal',
-              backgroundColor: theme('colors.border / 0.03'),
-              padding: '1rem 1.5rem',
+              borderLeftColor: theme("colors.border"),
+              fontStyle: "normal",
+              padding: "1rem 1.5rem",
             },
             strong: {
-              color: theme('colors.primary'),
-              fontWeight: '600',
+              color: theme("colors.primary"),
+              fontWeight: "600",
+            },
+          },
+        },
+        invert: {
+          css: {
+            color: theme("colors.on-primary"),
+            h1: { color: theme("colors.on-primary") },
+            h2: { color: theme("colors.on-primary") },
+            h3: { color: theme("colors.on-primary") },
+            a: {
+              color: theme("colors.on-primary"),
+              "&:hover": {
+                color: theme("colors.softGold"),
+              },
+            },
+            strong: {
+              color: theme("colors.on-primary"),
+            },
+            blockquote: {
+              borderLeftColor: theme("colors.softGold"),
             },
           },
         },
       }),
     },
   },
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/typography"),
+  ],
 };

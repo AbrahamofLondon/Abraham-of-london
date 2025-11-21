@@ -1,226 +1,140 @@
 // lib/server/posts-data.ts
-// Filesystem-based blog loader for content/blog/*
-// Canonicalises slugs so /blog/[slug] routing is stable.
+// Filesystem + MDX based blog loader (content/blog/*)
 
 import {
-  ensureDir,
-  listMdFiles,
-  fileToSlug,
-  readFrontmatter,
-  sortByDateDesc,
-} from "@/lib/server/md-utils";
+  getMdxCollectionMeta,
+  getMdxDocumentBySlug,
+  type MdxMeta,
+  type MdxDocument,
+} from "@/lib/server/mdx-collections";
 
-export type PostResources = {
-  downloads?: { href?: string }[];
-  reads?: { href?: string }[];
-};
-
-export type PostMeta = {
-  slug: string;
-  title?: string;
+export type PostMeta = MdxMeta & {
   description?: string;
   excerpt?: string;
   coverImage?: string;
   heroImage?: string;
-  date?: string;
   updated?: string;
   author?: string;
-  tags?: (string | number)[];
+  tags?: string[];
   category?: string;
   readTime?: string;
-  resources?: PostResources;
-  [key: string]: unknown;
+  resources?: {
+    downloads?: { href?: string }[];
+    reads?: { href?: string }[];
+  };
+  seoTitle?: string;
+  seoDescription?: string;
+  status?: string;
 };
 
 export type PostWithContent = PostMeta & {
   content: string;
 };
 
-// ------------------------
-// slug helpers
-// ------------------------
+// ----------------- helpers -----------------
 
 function cleanSlug(raw: unknown): string {
-  // Input like " blog/when-the-storm-finds-you/ " → "when-the-storm-finds-you"
   return String(raw || "")
     .trim()
-    .replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
-    .replace(/^blog\//i, ""); // drop leading "blog/"
+    .replace(/^\/+|\/+$/g, "");
 }
 
-// ------------------------
-// internal FS loader
-// ------------------------
-
-function loadAllPostsFromFs(): PostWithContent[] {
-  const abs = ensureDir("blog"); // => content/blog
-  if (!abs) return [];
-
-  const files = listMdFiles(abs);
-  if (!files.length) return [];
-
-  const items: PostWithContent[] = files.map((absFile) => {
-    const { data, content } = readFrontmatter(absFile);
-
-    const anyData = data as any;
-
-    const rawSlug =
-      (typeof anyData.slug === "string" && anyData.slug.trim()) ||
-      fileToSlug(absFile);
-    const slug = cleanSlug(rawSlug);
-
-    const title =
-      (typeof anyData.title === "string" && anyData.title.trim()) ||
-      slug ||
-      "Untitled post";
-
-    const description =
-      (typeof anyData.description === "string" &&
-        anyData.description.trim()) ||
-      undefined;
-
-    const excerpt =
-      (typeof anyData.excerpt === "string" && anyData.excerpt.trim()) ||
-      (typeof anyData.summary === "string" && anyData.summary.trim()) ||
-      description ||
-      undefined;
-
-    const coverImage =
-      (typeof anyData.coverImage === "string" &&
-        anyData.coverImage.trim()) ||
-      (typeof anyData.image === "string" && anyData.image.trim()) ||
-      undefined;
-
-    const heroImage =
-      (typeof anyData.heroImage === "string" &&
-        anyData.heroImage.trim()) || undefined;
-
-    const date =
-      (typeof anyData.date === "string" && anyData.date.trim()) ||
-      undefined;
-
-    const updated =
-      (typeof anyData.updated === "string" && anyData.updated.trim()) ||
-      undefined;
-
-    const author =
-      (typeof anyData.author === "string" && anyData.author.trim()) ||
-      undefined;
-
-    const category =
-      (typeof anyData.category === "string" && anyData.category.trim()) ||
-      undefined;
-
-    const readTime =
-      (typeof anyData.readTime === "string" && anyData.readTime.trim()) ||
-      undefined;
-
-    const tags = Array.isArray(anyData.tags)
-      ? (anyData.tags as unknown[]).map((t) => String(t))
-      : undefined;
-
-    const resources: PostResources | undefined =
-      anyData.resources && typeof anyData.resources === "object"
-        ? (anyData.resources as PostResources)
-        : undefined;
-
-    const base: PostWithContent = {
-      slug,
-      title,
-      description,
-      excerpt,
-      coverImage,
-      heroImage,
-      date,
-      updated,
-      author,
-      category,
-      readTime,
-      tags,
-      resources,
-      content,
-    };
-
-    // Spread data LAST so we keep any extra fields,
-    // then re-assert our canonical fields to avoid being overwritten.
-    return {
-      ...anyData,
-      ...base,
-      slug,
-      title,
-      description,
-      excerpt,
-      coverImage,
-      heroImage,
-      date,
-      updated,
-      author,
-      category,
-      readTime,
-      tags,
-      resources,
-      content,
-    };
-  });
-
-  // newest first
-  return sortByDateDesc(items);
+function normaliseBlogSlug(raw: unknown): string {
+  const s = cleanSlug(raw);
+  return s.replace(/^blog\//i, "");
 }
 
-let POSTS_CACHE: PostWithContent[] | null = null;
-
-function allPosts(): PostWithContent[] {
-  if (!POSTS_CACHE) {
-    POSTS_CACHE = loadAllPostsFromFs();
+function normaliseDate(raw: unknown): string | undefined {
+  if (!raw) return undefined;
+  if (typeof raw === "string") return raw;
+  if (raw instanceof Date) {
+    // keep it simple: YYYY-MM-DD
+    return raw.toISOString().split("T")[0];
   }
-  return POSTS_CACHE;
+  return String(raw);
 }
 
-// ------------------------
-// public API
-// ------------------------
+function fromMdxMeta(meta: MdxMeta): PostMeta {
+  const anyMeta = meta as any;
 
-export function getPostSlugs(): string[] {
-  return allPosts().map((p) => p.slug);
+  const tags = Array.isArray(anyMeta.tags)
+    ? (anyMeta.tags as unknown[]).map((t) => String(t))
+    : undefined;
+
+  return {
+    ...meta,
+    slug: normaliseBlogSlug(meta.slug),
+    // normalise date to plain string
+    date: normaliseDate(anyMeta.date),
+    description: anyMeta.description ?? meta.excerpt ?? undefined,
+    excerpt: anyMeta.excerpt ?? anyMeta.description ?? meta.excerpt ?? undefined,
+    coverImage: anyMeta.coverImage ?? anyMeta.image ?? meta.coverImage,
+    heroImage: anyMeta.heroImage ?? undefined,
+    updated: normaliseDate(anyMeta.updated),
+    author: anyMeta.author ?? undefined,
+    tags,
+    category: anyMeta.category ?? undefined,
+    readTime: anyMeta.readTime ?? undefined,
+    resources: anyMeta.resources ?? undefined,
+    seoTitle: anyMeta.seoTitle ?? anyMeta.title ?? undefined,
+    seoDescription:
+      anyMeta.seoDescription ??
+      anyMeta.excerpt ??
+      anyMeta.description ??
+      undefined,
+    status: anyMeta.status ?? "published",
+  };
 }
+
+function fromMdxDocument(doc: MdxDocument): PostWithContent {
+  const meta = fromMdxMeta(doc);
+  return {
+    ...meta,
+    content: doc.content,
+  };
+}
+
+// ----------------- public API -----------------
 
 export function getAllPostsMeta(): PostMeta[] {
-  return allPosts().map((p) => {
-    const { content, ...meta } = p;
-    return meta;
-  });
+  const metas = getMdxCollectionMeta("blog");
+  return metas.map(fromMdxMeta);
 }
 
-// Supports "slug", "/slug", "blog/slug"
+export function getPostSlugs(): string[] {
+  return getAllPostsMeta()
+    .map((m) => m.slug)
+    .filter((s): s is string => Boolean(s && s.trim()));
+}
+
+/**
+ * Legacy-style accessor compatible with your /blog/[slug].tsx page.
+ */
 export function getPostBySlug(
-  rawSlug: string,
+  slug: string,
   fields: string[] = [],
-): Record<string, unknown> | null {
-  const target = cleanSlug(rawSlug);
-  if (!target) return null;
+): Partial<PostWithContent> {
+  const key = normaliseBlogSlug(slug);
+  const doc =
+    getMdxDocumentBySlug("blog", key) ??
+    // last-ditch: maybe slug came in already "blog/foo"
+    getMdxDocumentBySlug("blog", cleanSlug(slug).replace(/^blog\//i, ""));
 
-  const match =
-    allPosts().find(
-      (p) => cleanSlug(p.slug) === target,
-    ) || null;
-
-  if (!match) return null;
-
-  if (!fields || fields.length === 0) {
-    // return full object
-    return { ...match };
+  if (!doc) {
+    return {};
   }
 
-  const filtered: Record<string, unknown> = {};
-  fields.forEach((field) => {
-    if (field === "slug") {
-      filtered.slug = match.slug;
-      return;
-    }
-    if (field in match) {
-      filtered[field] = (match as any)[field];
-    }
-  });
+  const full = fromMdxDocument(doc) as any;
 
-  return filtered;
+  if (!fields || fields.length === 0) {
+    return full;
+  }
+
+  const result: any = {};
+  for (const field of fields) {
+    if (field in full) {
+      result[field] = full[field];
+    }
+  }
+  return result;
 }

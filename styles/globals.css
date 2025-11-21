@@ -23,7 +23,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* ------------------------------------------------------------------- */
 /* ---------- Understated Luxury Theme ------------------------------- */
 /* ------------------------------------------------------------------- */
@@ -33,12 +32,12 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* Understated Color Palette */
+  /* Understated Semantic Palette (site-wide) */
   --color-primary: #1a1a1a;          /* Deep Charcoal - authority, substance */
   --color-primary-hover: #2d2d2d;    /* Slightly lighter for subtle interaction */
   --color-on-primary: #ffffff;       /* Pure white for contrast */
   
-  --color-secondary: #fefefe;        /* Pure white background */
+  --color-secondary: #fefefe;        /* Clean light background */
   --color-on-secondary: #404040;     /* Charcoal gray - sophisticated readability */
   
   --color-accent: #8b7355;           /* Muted bronze - subtle warmth */
@@ -48,6 +47,12 @@
   --color-border: #e5e5e5;           /* Very subtle borders */
   --color-surface: #ffffff;          /* Clean surfaces */
   --color-muted: #666666;            /* Gray for secondary text */
+
+  /* Luxury Brand Palette – used by Tailwind classes (softGold, forest, deepCharcoal) */
+  --lux-soft-gold: #f3d8a0;
+  --lux-soft-gold-strong: #e5c37a;
+  --lux-deep-charcoal: #050608;
+  --lux-forest: #0f3b32;
 
   /* Fluid type scale */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
@@ -65,23 +70,20 @@
 /* ------------------------------------------------------------------- */
 .dark {
   /* Deep, rich dark mode */
-  --color-primary: #e5e5e5;          /* Light gray for text - easy reading */
-  --color-primary-hover: #ffffff;    /* Pure white for hover */
-  --color-on-primary: #1a1a1a;       /* Charcoal for backgrounds */
+  --color-primary: #e5e5e5;
+  --color-primary-hover: #ffffff;
+  --color-on-primary: #1a1a1a;
   
-  /* Layered dark backgrounds */
-  --color-secondary: #0a0a0a;        /* Near-black - depth */
-  --color-on-secondary: #e5e5e5;     /* Light gray - crisp readability */
+  --color-secondary: #0a0a0a;
+  --color-on-secondary: #e5e5e5;
   
-  /* Accent becomes even more subtle */
-  --color-accent: #8b7355;           /* Same muted bronze */
+  --color-accent: #8b7355;
   --color-accent-hover: #a08c6f;
   --color-on-accent: #ffffff;
   
-  /* Refined dark surfaces */
-  --color-border: #333333;           /* Subtle dark borders */
-  --color-surface: #1a1a1a;          /* Elevated surfaces */
-  --color-muted: #999999;            /* Medium gray for details */
+  --color-border: #333333;
+  --color-surface: #1a1a1a;
+  --color-muted: #999999;
 
   color-scheme: dark;
 }
@@ -106,7 +108,7 @@ html, body {
 body {
   font-family: var(--font-sans);
   font-size: var(--step-0);
-  line-height: 1.7; /* Refined, comfortable reading */
+  line-height: 1.7;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -120,7 +122,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   color: var(--color-primary);
   text-wrap: balance;
-  font-weight: 600; /* Slightly lighter for elegance */
+  font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
@@ -154,9 +156,9 @@ a:hover {
   color: var(--color-accent);
 }
 
-/* Selection - Subtle */
+/* Selection */
 ::selection {
-  background: rgba(139, 115, 85, 0.1); /* Very subtle bronze tint */
+  background: rgba(139, 115, 85, 0.1);
   color: var(--color-primary);
 }
 
@@ -169,12 +171,11 @@ a:hover {
 /* ---------- Sophisticated Components ------------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* Cards - Clean and understated */
 .card {
   border: 1px solid var(--color-border);
   padding: 2rem;
   background-color: var(--color-surface);
-  border-radius: 4px; /* Sharper corners for modernity */
+  border-radius: 0.75rem; /* Slightly softer for luxury feel */
   transition: all 0.3s ease;
 }
 
@@ -185,17 +186,17 @@ a:hover {
 
 .card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 }
 
-/* Buttons - Minimal and elegant */
+/* Buttons */
 .luxury-btn {
   display: inline-flex;
   align-items: center;
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: 999px;
   transition: all 0.3s ease;
   background-color: var(--color-primary);
   color: var(--color-on-primary);
@@ -205,6 +206,7 @@ a:hover {
 .luxury-btn:hover {
   background-color: var(--color-primary-hover);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .luxury-btn--outline {
@@ -218,7 +220,6 @@ a:hover {
   color: var(--color-on-primary);
 }
 
-/* Subtle accent button - used VERY sparingly */
 .luxury-btn--accent {
   background-color: var(--color-accent);
   color: var(--color-on-accent);
@@ -233,9 +234,8 @@ a:hover {
 /* ---------- Refined Utilities -------------------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* Elegant scrollbar */
 ::-webkit-scrollbar {
-  width: 4px; /* Even more subtle */
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -251,7 +251,7 @@ a:hover {
   background: var(--color-muted);
 }
 
-/* Print excellence */
+/* Print */
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
@@ -279,7 +279,8 @@ a:hover {
 /* ------------------------------------------------------------------- */
 @layer components {
   .bg-luxury-subtle {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, color-mix(in srgb, var(--color-secondary) 98%, white) 100%);
+    background: radial-gradient(circle at top left, rgba(243, 216, 160, 0.18), transparent 55%),
+                linear-gradient(135deg, var(--color-secondary) 0%, #f5f5f5 100%);
   }
   
   .text-luxury-muted {
@@ -313,12 +314,12 @@ a:hover {
 }
 
 .prose blockquote {
-  font-style: normal; /* Not italic for more authority */
+  font-style: normal;
   border-left-width: 2px;
   border-left-color: var(--color-border);
   color: var(--color-on-secondary);
   padding: 1rem 1.5rem;
-  background: color-mix(in srgb, var(--color-border) 3%, transparent);
+  background: rgba(229, 229, 229, 0.04);
   border-radius: 0;
 }
 
