@@ -1,20 +1,17 @@
-// components/EnhancedFooter.tsx (NUCLEAR OPTION - FORCE THROUGH)
+// components/EnhancedFooter.tsx
+import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { siteConfig } from "@/lib/siteConfig";
-import clsx from "clsx";
+import type { SocialLink as CoreSocialLink } from "@/lib/siteConfig";
 
 interface EnhancedFooterProps {
   variant?: "light" | "dark";
   className?: string;
 }
 
-// Safe type for social links with priority
-interface SortableSocialLink {
-  href: string;
-  kind: string;
-  label: string;
-  external: boolean;
-  handle?: string;
+// Extend the core SocialLink type with optional priority
+interface SortableSocialLink extends CoreSocialLink {
   priority?: number;
 }
 
@@ -22,17 +19,17 @@ export default function EnhancedFooter({
   variant = "light",
   className,
 }: EnhancedFooterProps) {
-  // ✅ NUCLEAR OPTION: Type assert the entire siteConfig
-  const config = siteConfig as any;
+  // Strongly typed config – no `any`
+  const config = siteConfig;
 
-  // ✅ SAFE sorting with type assertion
-  const socialLinks = [...(config.socialLinks || [])]
-    .map((link) => link as SortableSocialLink)
-    .sort((a, b) => {
-      const priorityA = a.priority ?? 999;
-      const priorityB = b.priority ?? 999;
-      return priorityA - priorityB;
-    });
+  // Safely normalise + sort social links
+  const socialLinks: SortableSocialLink[] = Array.isArray(config.socialLinks)
+    ? [...config.socialLinks].sort((a, b) => {
+        const priorityA = a.priority ?? 999;
+        const priorityB = b.priority ?? 999;
+        return priorityA - priorityB;
+      })
+    : [];
 
   const baseClasses = "py-16 transition-colors";
   const variantClasses = {
@@ -43,71 +40,85 @@ export default function EnhancedFooter({
 
   const linkClasses = "hover:text-forest transition-colors duration-200";
   const socialLinkClasses =
-    "p-3 rounded-xl hover:scale-110 transition-all duration-200 bg-white/50 shadow-sm hover:shadow-md";
+    "p-3 rounded-xl hover:scale-110 transition-all duration-200 shadow-sm hover:shadow-md";
 
+  // All routes now exist - no dead links
   const footerSections = [
     {
       title: "Explore",
       links: [
-        { href: "/books", label: "Books" },
-        { href: "/blog", label: "Insights" },
+        { href: "/", label: "Home" },
+        { href: "/content", label: "Insights" },
         { href: "/events", label: "Events" },
         { href: "/downloads", label: "Resources" },
+        { href: "/ventures", label: "Ventures" },
       ],
     },
     {
       title: "Connect",
       links: [
-        { href: "/about", label: "About" },
         { href: "/contact", label: "Contact" },
-        { href: "/chatham-rooms", label: "Chatham Rooms" },
-        { href: "/consulting", label: "Consulting" },
+        { href: "/content", label: "Newsletter" },
+        { href: "/contact", label: "Speaking" },
+        { href: "/contact", label: "Consulting" },
       ],
     },
     {
-      title: "Company",
+      title: "Legal",
       links: [
-        { href: "/privacy", label: "Privacy" },
-        { href: "/terms", label: "Terms" },
-        { href: "/cookies", label: "Cookies" },
+        { href: "/privacy", label: "Privacy Policy" },
+        { href: "/terms", label: "Terms of Service" },
+        { href: "/cookies", label: "Cookie Policy" },
         { href: "/accessibility", label: "Accessibility" },
+        { href: "/security", label: "Security Policy" },
       ],
     },
   ];
 
   return (
-    <footer className={clsx(baseClasses, variantClasses[variant], className)}>
+    <footer className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
       <div className="mx-auto max-w-7xl px-4">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="block mb-6">
-              <h3 className="font-serif text-2xl font-bold bg-gradient-to-r from-forest to-deepCharcoal bg-clip-text text-transparent">
-                {/* ✅ SAFE access to title */}
+          <motion.div 
+            className="lg:col-span-2"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Link href="/" className="mb-6 block">
+              <h3 className="bg-gradient-to-r from-forest to-deepCharcoal bg-clip-text font-serif text-2xl font-bold text-transparent">
                 {config.title || "Abraham of London"}
               </h3>
             </Link>
-            <p className="text-lg leading-relaxed opacity-80 mb-6 max-w-md">
-              {/* ✅ SAFE access to description with fallback */}
+
+            <p className="mb-6 max-w-md text-lg leading-relaxed opacity-80">
               {config.description ||
                 "Building enduring legacies through wisdom, strategy, and brotherhood."}
             </p>
+
             <div className="flex gap-3">
-              {socialLinks.map((link) => (
-                <a
+              {socialLinks.map((link, index) => (
+                <motion.a
                   key={link.href}
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
-                  className={clsx(
-                    socialLinkClasses,
+                  className={`${socialLinkClasses} ${
                     variant === "light"
                       ? "bg-white/70 text-deepCharcoal hover:bg-forest hover:text-cream"
-                      : "bg-cream/10 text-cream hover:bg-cream hover:text-deepCharcoal",
-                  )}
+                      : "bg-cream/10 text-cream hover:bg-cream hover:text-deepCharcoal"
+                  }`}
                   aria-label={link.label}
                   title={link.label}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  viewport={{ once: true }}
                 >
                   <span className="text-lg font-medium">
                     {link.kind === "twitter" && "𝕏"}
@@ -125,54 +136,70 @@ export default function EnhancedFooter({
                       "website",
                     ].includes(link.kind) && "🔗"}
                   </span>
-                </a>
+                </motion.a>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Links Sections */}
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold mb-6 text-base uppercase tracking-wider opacity-70">
+          {footerSections.map((section, sectionIndex) => (
+            <motion.div 
+              key={section.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: sectionIndex * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <h4 className="mb-6 text-base font-semibold uppercase tracking-wider opacity-70">
                 {section.title}
               </h4>
               <ul className="space-y-4">
-                {section.links.map((link) => (
-                  <li key={link.href}>
+                {section.links.map((link, linkIndex) => (
+                  <motion.li 
+                    key={link.href}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: (sectionIndex * 0.1) + (linkIndex * 0.05) }}
+                    viewport={{ once: true }}
+                  >
                     <Link
                       href={link.href}
-                      className={clsx("text-base font-medium", linkClasses)}
+                      className={`text-base font-medium ${linkClasses}`}
                       prefetch={false}
                     >
                       {link.label}
                     </Link>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-current/20">
+        <motion.div 
+          className="border-t border-current/20 pt-8"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="text-center md:text-left">
-              {/* ✅ SAFE access to copyright with fallback */}
-              <p className="text-sm opacity-70 font-medium">
+              <p className="text-sm font-medium opacity-70">
                 {config.copyright ||
                   `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`}
               </p>
-              {/* ✅ SAFE access to company info */}
+
               {config.companyNumber && (
                 <p className="mt-2 text-xs opacity-50">
                   Company No: {config.companyNumber}
-                  {/* ✅ SAFE access to VAT number */}
                   {config.vatNumber && <> • VAT: {config.vatNumber}</>}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-8 text-sm opacity-70 font-medium">
+            <div className="flex items-center gap-8 text-sm font-medium opacity-70">
               <Link href="/sitemap.xml" className={linkClasses}>
                 Sitemap
               </Link>
@@ -184,7 +211,7 @@ export default function EnhancedFooter({
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );

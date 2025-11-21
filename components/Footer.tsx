@@ -106,19 +106,17 @@ const footerSections = [
   },
   {
     title: "Resources",
-    // Keep the branding labels, but point to routes that actually exist today.
     links: [
       { label: "Fatherhood Frameworks", href: "/content" },
       { label: "Founder Tools", href: "/downloads" },
       { label: "Leadership Resources", href: "/content" },
-      { label: "Book Manuscripts", href: "/content" }, // /books redirects to /content anyway
+      { label: "Book Manuscripts", href: "/content" },
     ],
   },
   {
     title: "Connect",
     links: [
       { label: "Contact", href: "/contact" },
-      // Newsletter / Speaking / Advisory will likely be sections on content/contact
       { label: "Newsletter", href: "/content" },
       { label: "Speaking", href: "/contact" },
       { label: "Advisory", href: "/contact" },
@@ -291,11 +289,7 @@ export default function Footer(): JSX.Element {
             </p>
           </div>
 
-          {/* Legal links – point to live or planned routes.
-             If you don’t have these pages yet, you can either:
-             - create simple stub pages, or
-             - temporarily point them to /content or /contact.
-          */}
+          {/* Legal links - All pages now exist */}
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
             <Link href="/privacy" className="transition-colors hover:text-gold">
               Privacy Policy
@@ -305,6 +299,12 @@ export default function Footer(): JSX.Element {
             </Link>
             <Link href="/cookies" className="transition-colors hover:text-gold">
               Cookie Policy
+            </Link>
+            <Link href="/accessibility" className="transition-colors hover:text-gold">
+              Accessibility
+            </Link>
+            <Link href="/security" className="transition-colors hover:text-gold">
+              Security
             </Link>
           </div>
 
