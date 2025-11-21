@@ -1,196 +1,166 @@
 // components/BookCard.tsx
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import Image, { type StaticImageData } from "next/image";
-import { motion, type MotionProps } from "framer-motion";
-import clsx from "clsx";
 
-export type BookCardProps = {
+type BookCardProps = {
   slug: string;
   title: string;
-  author: string;
-  excerpt: string;
-  coverImage?: string | StaticImageData | null;
-  buyLink?: string | null;
-  genre: string;
-  downloadPdf?: string | null;
-  downloadEpub?: string | null;
-  featured?: boolean;
-  className?: string;
-  motionProps?: MotionProps;
+  subtitle?: string | null;
+  status?: string | null;
+  blurb?: string | null;
+  progress?: number | null;
+  coverImage?: string | null;
+  heroImage?: string | null;
+  image?: string | null;
 };
 
-// Premium placeholder for books
-const DEFAULT_COVER = "/assets/images/premium-book-placeholder.jpg";
+const BOOK_FALLBACK_COVER = "/assets/images/default-book.jpg";
 
-const isValidLink = (link?: string | null): link is string =>
-  !!link && link.trim() !== "" && link.trim() !== "#";
+function resolveBookCover(book: BookCardProps): string {
+  const candidates: string[] = [];
 
-function normaliseBookSlug(raw: string): string {
-  const s = (raw || "").toString().trim().toLowerCase().replace(/^\/+|\/+$/g, "");
-  return s.replace(/^books\//, "");
+  const addCandidate = (value?: string | null) => {
+    if (typeof value === "string" && value.trim().length > 0) {
+      candidates.push(value.trim());
+    }
+  };
+
+  addCandidate(book.coverImage);
+  addCandidate(book.heroImage);
+  addCandidate(book.image);
+
+  if (!candidates.includes(BOOK_FALLBACK_COVER)) {
+    candidates.push(BOOK_FALLBACK_COVER);
+  }
+
+  return candidates[0];
 }
 
-function resolveCoverImage(
-  coverImage?: string | StaticImageData | null
-): string | StaticImageData {
-  if (typeof coverImage === "string" && coverImage.trim().length > 0) {
-    return coverImage;
-  }
-  if (coverImage && typeof coverImage === "object") {
-    return coverImage;
-  }
-  return DEFAULT_COVER;
-}
+export default function BookCard(props: BookCardProps): JSX.Element {
+  const { slug, title, subtitle, status, blurb, progress } = props;
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [coverIndex, setCoverIndex] = React.useState(0);
 
-export default function BookCard({
-  slug,
-  title,
-  author,
-  excerpt,
-  coverImage,
-  buyLink,
-  genre,
-  downloadPdf,
-  downloadEpub,
-  featured = false,
-  className = "",
-  motionProps = {},
-}: BookCardProps) {
-  const normalizedSlug = normaliseBookSlug(slug);
-  const detailHref = `/books/${encodeURIComponent(normalizedSlug)}`;
-  const finalImageSrc = resolveCoverImage(coverImage);
+  const href = `/books/${encodeURIComponent(slug)}`;
+
+  const coverCandidates = React.useMemo(() => {
+    const candidates: string[] = [];
+
+    const addCandidate = (value?: string | null) => {
+      if (typeof value === "string" && value.trim().length > 0) {
+        candidates.push(value.trim());
+      }
+    };
+
+    addCandidate(props.coverImage);
+    addCandidate(props.heroImage);
+    addCandidate(props.image);
+
+    if (!candidates.includes(BOOK_FALLBACK_COVER)) {
+      candidates.push(BOOK_FALLBACK_COVER);
+    }
+
+    return candidates;
+  }, [props.coverImage, props.heroImage, props.image]);
+
+  const cover =
+    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)] ??
+    resolveBookCover(props);
+
+  const safeProgress =
+    typeof progress === "number" && progress >= 0 && progress <= 100
+      ? progress
+      : null;
 
   return (
-    <motion.article
-      {...motionProps}
-      className={clsx(
-        // Premium container styling
-        "group relative overflow-hidden rounded-xl bg-white",
-        "border border-gold/20 shadow-sm transition-all duration-500",
-        "hover:shadow-xl hover:border-gold/40",
-        "focus-within:ring-2 focus-within:ring-gold/30",
-        featured && "ring-2 ring-gold/50 shadow-lg",
-        className,
-      )}
-    >
-      {/* Premium featured badge */}
-      {featured && (
-        <div className="absolute top-4 left-4 z-10">
-          <div className="bg-gold text-charcoal px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase shadow-lg">
-            Featured
-            <span className="sr-only"> book</span>
-          </div>
-        </div>
-      )}
-
-      {/* Premium cover with enhanced styling */}
-      <Link
-        href={detailHref}
-        prefetch={false}
-        className="block relative overflow-hidden bg-gradient-to-br from-cream/10 to-gold/5"
-        tabIndex={-1}
-        aria-hidden="true"
-      >
-        <div className="relative w-full aspect-[2/3] overflow-hidden">
+    <article className="group flex h-full flex-col gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-softGold/30">
+      <div className="flex gap-6">
+        <Link
+          href={href}
+          className="relative h-40 w-28 flex-shrink-0 overflow-hidden rounded-xl border border-softGold/30 bg-black/40"
+          prefetch={false}
+        >
+          {!imageLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+          )}
           <Image
-            src={finalImageSrc}
-            alt={`${title} book cover`}
+            src={cover}
+            alt={title}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
-            className="object-cover transition-all duration-700 group-hover:scale-105"
-            priority={featured}
+            className={`object-cover transition-transform duration-700 ${
+              imageLoaded ? "opacity-100 group-hover:scale-105" : "opacity-0"
+            }`}
+            sizes="112px"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageLoaded(false);
+              setCoverIndex((prev) =>
+                prev + 1 < coverCandidates.length ? prev + 1 : prev,
+              );
+            }}
           />
-          {/* Premium overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        </div>
-      </Link>
+          {status && (
+            <span className="absolute left-2 top-2 rounded-full bg-amber-100/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-900">
+              {status}
+            </span>
+          )}
+        </Link>
 
-      {/* Premium content area */}
-      <div className="p-6 space-y-4">
-        {/* Title with premium typography */}
-        <h3 className="font-serif text-xl font-semibold text-charcoal leading-tight">
-          <Link
-            href={detailHref}
-            prefetch={false}
-            className="hover:text-gold transition-colors duration-300 block"
-          >
+        <div className="flex flex-1 flex-col">
+          <h3 className="mb-1 font-serif text-xl font-bold text-white transition-colors group-hover:text-softGold">
             {title}
-          </Link>
-        </h3>
+          </h3>
+          {subtitle && (
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-softGold/80">
+              {subtitle}
+            </p>
+          )}
+          {blurb && (
+            <p className="mb-4 text-sm text-gray-300">{blurb}</p>
+          )}
 
-        {/* Author with subtle styling */}
-        <p className="text-sm text-charcoal/70 font-light tracking-wide">
-          By {author}
-        </p>
+          {safeProgress !== null && (
+            <div className="mb-4">
+              <div className="mb-1 flex justify-between text-xs text-gray-400">
+                <span>Writing Progress</span>
+                <span>{safeProgress}%</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-white/10">
+                <div
+                  className="h-2 rounded-full bg-gradient-to-r from-softGold to-amber-200 transition-all duration-700"
+                  style={{ width: `${safeProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
-        {/* Excerpt with refined typography */}
-        <p className="text-sm leading-relaxed text-charcoal/80 font-light line-clamp-3">
-          {excerpt}
-        </p>
-
-        {/* Premium action bar */}
-        <div className="flex items-center justify-between pt-2">
-          {/* Genre with premium chip styling */}
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cream text-charcoal/70 text-xs font-medium border border-gold/20">
-            {genre || "Literature"}
-          </span>
-
-          {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            {/* Primary CTA */}
+          <div className="mt-auto">
             <Link
-              href={detailHref}
-              prefetch={false}
-              className="inline-flex items-center px-4 py-2 bg-charcoal text-cream rounded-lg text-sm font-medium hover:bg-gold hover:text-charcoal transition-all duration-300 shadow-sm hover:shadow-md"
+              href={href}
+              className="group/link inline-flex items-center gap-2 text-sm font-semibold text-softGold"
             >
-              Explore
+              View Book Details
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-softGold/40">
+                <svg
+                  className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5"
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 3l5 5-5 5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             </Link>
-
-            {/* Secondary CTA */}
-            {isValidLink(buyLink) && (
-              <a
-                href={buyLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 border border-charcoal/20 text-charcoal rounded-lg text-sm font-medium hover:bg-charcoal hover:text-cream transition-all duration-300"
-                aria-label={`Purchase ${title} (opens in new tab)`}
-              >
-                Buy
-              </a>
-            )}
           </div>
         </div>
-
-        {/* Premium download links */}
-        {(isValidLink(downloadPdf) || isValidLink(downloadEpub)) && (
-          <div className="flex items-center gap-4 pt-3 border-t border-gold/10">
-            <span className="text-xs text-charcoal/60 font-medium">Download:</span>
-            <div className="flex gap-3">
-              {isValidLink(downloadPdf) && (
-                <a
-                  href={downloadPdf}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-gold hover:text-charcoal transition-colors duration-300 font-medium"
-                >
-                  PDF
-                </a>
-              )}
-              {isValidLink(downloadEpub) && (
-                <a
-                  href={downloadEpub}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-gold hover:text-charcoal transition-colors duration-300 font-medium"
-                >
-                  EPUB
-                </a>
-              )}
-            </div>
-          </div>
-        )}
       </div>
-    </motion.article>
+    </article>
   );
 }
