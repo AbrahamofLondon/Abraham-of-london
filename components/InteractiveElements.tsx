@@ -29,10 +29,10 @@ export interface HeroBannerProps {
   ctaOnClick?: () => void;
   ctaHref?: string;
 
-  // Extra CTAs (e.g. "View Latest Writing")
+  // Extra CTAs
   additionalCTAs?: HeroBannerCTA[];
 
-  // Optional online/offline badge
+  // Online/offline badge
   showConnectionStatus?: boolean;
 
   children?: React.ReactNode;
@@ -61,7 +61,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 }) => {
   const [isOnline, setIsOnline] = React.useState<boolean>(true);
 
-  // Simple client-side online/offline indicator (no WebSocket dependency)
+  // Simple client-side online/offline indicator
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
