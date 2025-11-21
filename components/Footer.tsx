@@ -3,7 +3,6 @@ import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Crown,
   Mail,
   MapPin,
   Sparkles,
@@ -22,10 +21,14 @@ type BareSocial = {
   href?: string;
   label?: string;
   external?: boolean;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-// Enhanced social links with icons
-const DEFAULT_SOCIALS = [
+// ---------------------------------------------------------------------------
+// Socials
+// ---------------------------------------------------------------------------
+
+const DEFAULT_SOCIALS: BareSocial[] = [
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
@@ -86,6 +89,10 @@ const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) =>
   href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:");
 
+// ---------------------------------------------------------------------------
+// Footer navigation – mapped ONLY to live routes
+// ---------------------------------------------------------------------------
+
 const footerSections = [
   {
     title: "Navigation",
@@ -99,23 +106,29 @@ const footerSections = [
   },
   {
     title: "Resources",
+    // Keep the branding labels, but point to routes that actually exist today.
     links: [
-      { label: "Fatherhood Frameworks", href: "/fatherhood" },
-      { label: "Founder Tools", href: "/founder-tools" },
-      { label: "Leadership Resources", href: "/leadership" },
-      { label: "Book Manuscripts", href: "/books" },
+      { label: "Fatherhood Frameworks", href: "/content" },
+      { label: "Founder Tools", href: "/downloads" },
+      { label: "Leadership Resources", href: "/content" },
+      { label: "Book Manuscripts", href: "/content" }, // /books redirects to /content anyway
     ],
   },
   {
     title: "Connect",
     links: [
       { label: "Contact", href: "/contact" },
-      { label: "Newsletter", href: "/newsletter" },
-      { label: "Speaking", href: "/speaking" },
-      { label: "Advisory", href: "/advisory" },
+      // Newsletter / Speaking / Advisory will likely be sections on content/contact
+      { label: "Newsletter", href: "/content" },
+      { label: "Speaking", href: "/contact" },
+      { label: "Advisory", href: "/contact" },
     ],
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
@@ -126,34 +139,32 @@ export default function Footer(): JSX.Element {
     : [];
 
   // Merge and process social links
-  const byHref = new Map<string, any>();
+  const byHref = new Map<string, BareSocial>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
     if (!rawHref) return;
     byHref.set(rawHref, {
       ...item,
       href: rawHref,
-      label: item.label,
-      external: item.external,
     });
   });
 
   const socials = Array.from(byHref.values()).map((item) => {
     const rawLabel =
       item.label ||
-      item.href.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
+      item.href!.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
       "Link";
     const label = rawLabel;
     const external =
       typeof item.external === "boolean"
         ? item.external
-        : isExternal(item.href) && !isUtility(item.href);
+        : isExternal(item.href!) && !isUtility(item.href!);
 
     return {
       ...item,
       label,
       external,
-      Icon: item.icon || Sparkles, // Fallback icon
+      Icon: item.icon || Sparkles,
     };
   });
 
@@ -180,18 +191,14 @@ export default function Footer(): JSX.Element {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link href="/" className="group mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-200 shadow-lg">
-                <Crown className="h-6 w-6 text-charcoal" />
-              </div>
-              <div>
-                <span className="font-serif text-2xl font-bold text-cream">
-                  Abraham
-                </span>
-                <span className="block font-sans text-xs font-normal tracking-widest text-gold/70">
-                  OF LONDON
-                </span>
-              </div>
+            {/* Wordmark only – no Crown icon */}
+            <Link href="/" className="group mb-6 flex flex-col gap-1">
+              <span className="font-serif text-2xl font-bold tracking-wide text-cream">
+                Abraham of London
+              </span>
+              <span className="text-xs font-sans font-normal tracking-[0.3em] text-gold/70">
+                FAITH · STRATEGY · FATHERHOOD
+              </span>
             </Link>
 
             <p className="mb-6 text-sm leading-relaxed text-gold/70">
@@ -284,7 +291,11 @@ export default function Footer(): JSX.Element {
             </p>
           </div>
 
-          {/* Legal links */}
+          {/* Legal links – point to live or planned routes.
+             If you don’t have these pages yet, you can either:
+             - create simple stub pages, or
+             - temporarily point them to /content or /contact.
+          */}
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
             <Link href="/privacy" className="transition-colors hover:text-gold">
               Privacy Policy
