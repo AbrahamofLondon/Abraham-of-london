@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ---------- Local utility: cn (no external deps) ---------- */
 function cn(...parts: Array<string | false | null | undefined>): string {
@@ -94,9 +95,9 @@ function iconPathForKind(kind: IconKind): string {
 }
 
 /**
- * Optional brand colour accent per platform.
+ * Brand colour accent per platform.
  */
-const BRAND_HEX: Partial<Record<IconKind, string>> = {
+const BRAND_HEX: Record<IconKind, string> = {
   tiktok: "#010101",
   x: "#000000",
   instagram: "#E4405F",
@@ -115,7 +116,7 @@ const isUtility = (href: string) =>
   href.startsWith("mailto:") || href.startsWith("tel:");
 
 /**
- * Solid flat icon renderer drawing directly from your SVG assets.
+ * Premium icon renderer with hover animations
  */
 function SocialIcon({
   kind,
@@ -125,37 +126,59 @@ function SocialIcon({
   label: string;
 }): JSX.Element {
   const src = iconPathForKind(kind);
+  const [isHovered, setIsHovered] = React.useState(false);
 
   return (
-    <span className="relative inline-flex h-5 w-5 items-center justify-center overflow-hidden">
+    <motion.span 
+      className="relative inline-flex h-6 w-6 items-center justify-center overflow-hidden"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ scale: 1.1 }}
+      transition={{ type: "spring", stiffness: 400 }}
+    >
       <Image
         src={src}
         alt={label}
         fill
-        sizes="20px"
-        className="object-contain"
+        sizes="24px"
+        className="object-contain transition-all duration-300"
       />
-    </span>
+      
+      {/* Hover glow effect */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.span
+            className="absolute inset-0 rounded-full bg-current opacity-20"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1.2, opacity: 0.2 }}
+            exit={{ scale: 1, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        )}
+      </AnimatePresence>
+    </motion.span>
   );
 }
 
 /**
- * Simple fallback if "kind" is missing or misconfigured.
+ * Premium fallback icon
  */
 function DefaultLinkIcon({ label }: { label: string }): JSX.Element {
   return (
-    <span
+    <motion.span
       aria-hidden="true"
-      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-700 text-[10px] font-semibold text-white"
+      className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-gold to-amber-200 text-[10px] font-bold text-charcoal shadow-sm"
+      whileHover={{ scale: 1.1, rotate: 5 }}
+      transition={{ type: "spring", stiffness: 400 }}
     >
       {label.charAt(0).toUpperCase()}
-    </span>
+    </motion.span>
   );
 }
 
 /* ---------- Component ---------- */
 export default function SocialFollowStrip({
-  variant = "light",
+  variant = "dark",
   className,
   itemsOverride,
 }: Props): JSX.Element {
@@ -163,79 +186,106 @@ export default function SocialFollowStrip({
     (it): it is SocialItem => Boolean(it),
   );
 
-  const panelBase =
-    "rounded-3xl border shadow-2xl backdrop-blur-sm transition-colors duration-300";
+  // Luxury panel styling
+  const panelBase = cn(
+    "rounded-3xl border-2 shadow-2xl backdrop-blur-xl transition-all duration-500",
+    "bg-gradient-to-br from-charcoal/95 to-black/95 border-gold/20",
+    "hover:border-gold/40 hover:shadow-3xl"
+  );
 
-  const panel =
-    variant === "dark"
-      ? cn(
-          panelBase,
-          "border-white/12 bg-gradient-to-r from-black/85 via-deepCharcoal/90 to-black/85",
-        )
-      : cn(
-          panelBase,
-          "border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50",
-        );
+  // Premium pill styling
+  const pillBase = cn(
+    "group relative inline-flex items-center gap-3 rounded-2xl border-2 px-4 py-3",
+    "text-sm font-medium transition-all duration-300 overflow-hidden",
+    "border-gold/30 bg-gradient-to-r from-gold/5 to-gold/10",
+    "hover:border-gold/60 hover:from-gold/10 hover:to-gold/20 hover:shadow-lg"
+  );
 
-  const pillBase =
-    "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-sm transition-colors";
+  const textColor = variant === "dark" ? "text-cream" : "text-charcoal";
+  const subColor = variant === "dark" ? "text-gold/70" : "text-gold/80";
 
-  const pill =
-    variant === "dark"
-      ? cn(
-          pillBase,
-          "border-white/15 bg-white/5 text-cream hover:bg-white/10",
-        )
-      : cn(
-          pillBase,
-          "border-lightGrey bg-white text-deepCharcoal hover:bg-warmWhite",
-        );
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
 
-  const headlineColor =
-    variant === "dark" ? "text-cream" : "text-deepCharcoal";
-
-  const subColor =
-    variant === "dark" ? "text-gray-300" : "text-slate-600";
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24
+      }
+    }
+  };
 
   return (
-    <section
+    <motion.section
       className={cn(
-        "mx-auto my-12 max-w-7xl px-4 sm:px-6 lg:px-10",
+        "mx-auto my-16 max-w-6xl px-4 sm:px-6 lg:px-8",
         className,
       )}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={containerVariants}
     >
-      <div className={panel}>
-        <div className="flex flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-8">
-          {/* Text block */}
-          <div className="max-w-xl space-y-2">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-softGold/80">
-              Stay connected
-            </p>
-            <p
-              className={cn(
-                "font-serif text-lg sm:text-xl",
-                headlineColor,
-              )}
+      <motion.div 
+        className={panelBase}
+        whileHover={{ y: -2 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <div className="flex flex-col gap-8 px-8 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-12 sm:py-10">
+          {/* Premium text block */}
+          <motion.div 
+            className="max-w-xl space-y-3"
+            variants={itemVariants}
+          >
+            <motion.p 
+              className="text-xs font-bold uppercase tracking-[0.3em] text-gold"
+              variants={itemVariants}
             >
-              Join the conversation with{" "}
-              <span className="font-semibold">Abraham of London</span>
-              {" – across the channels you actually use."}
-            </p>
-            <p className={cn("text-xs sm:text-sm", subColor)}>
-              Strategy, fatherhood, and legacy – filtered, structured, and
-              grounded. No fluff, no noise, just signal.
-            </p>
-          </div>
+              Join The Inner Circle
+            </motion.p>
+            <motion.h3
+              className={cn(
+                "font-serif text-2xl sm:text-3xl leading-tight",
+                textColor,
+              )}
+              variants={itemVariants}
+            >
+              Connect with{" "}
+              <span className="bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent font-bold">
+                Abraham of London
+              </span>
+            </motion.h3>
+            <motion.p 
+              className={cn("text-sm leading-relaxed", subColor)}
+              variants={itemVariants}
+            >
+              Exclusive insights, strategic frameworks, and real conversations 
+              across platforms that matter. No fluff, just signal.
+            </motion.p>
+          </motion.div>
 
-          {/* Social pills */}
-          <nav
+          {/* Animated social pills */}
+          <motion.nav
             aria-label="Social links"
-            className="flex flex-wrap items-center gap-3 sm:gap-4"
+            className="flex flex-wrap justify-center gap-3 sm:justify-end"
+            variants={containerVariants}
           >
             {items.map(({ href, label, kind }) => {
               const iconKind = kind as IconKind | undefined;
-              const accentColor =
-                (iconKind && BRAND_HEX[iconKind]) || undefined;
+              const accentColor = iconKind ? BRAND_HEX[iconKind] : undefined;
 
               const IconNode = iconKind ? (
                 <SocialIcon kind={iconKind} label={label} />
@@ -244,53 +294,82 @@ export default function SocialFollowStrip({
               );
 
               const content = (
-                <span
-                  className={pill}
-                  style={
-                    accentColor
-                      ? {
-                          color: accentColor,
-                        }
-                      : undefined
-                  }
+                <motion.span
+                  className={pillBase}
+                  style={accentColor ? { color: accentColor } : undefined}
+                  whileHover={{ 
+                    scale: 1.05, 
+                    y: -2,
+                    transition: { type: "spring", stiffness: 400 }
+                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
+                  {/* Animated background */}
+                  <motion.span
+                    className="absolute inset-0 bg-gradient-to-r from-gold/20 to-amber-200/20 opacity-0 group-hover:opacity-100"
+                    initial={false}
+                    transition={{ duration: 0.3 }}
+                  />
+                  
+                  {/* Border glow */}
+                  <motion.span
+                    className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-gold to-amber-200 opacity-0 group-hover:opacity-20"
+                    initial={false}
+                    transition={{ duration: 0.3 }}
+                  />
+                  
                   {IconNode}
-                  <span className="font-serif text-current">
+                  <span className="font-medium text-current relative z-10">
                     {label}
                   </span>
-                </span>
+                </motion.span>
               );
 
               const external = isExternal(href);
 
               if (external || isUtility(href)) {
                 return (
-                  <a
+                  <motion.a
                     key={`${label}-${href}`}
                     href={href}
-                    className="group inline-flex items-center"
+                    className="inline-flex items-center"
                     target={external ? "_blank" : undefined}
                     rel={external ? "noopener noreferrer" : undefined}
+                    variants={itemVariants}
+                    whileHover="hover"
                   >
                     {content}
-                  </a>
+                  </motion.a>
                 );
               }
 
               return (
-                <Link
-                  key={`${label}-${href}`}
-                  href={href}
-                  className="group inline-flex items-center"
-                  prefetch={false}
-                >
-                  {content}
-                </Link>
+                <motion.div key={`${label}-${href}`} variants={itemVariants}>
+                  <Link
+                    href={href}
+                    className="inline-flex items-center"
+                    prefetch={false}
+                  >
+                    {content}
+                  </Link>
+                </motion.div>
               );
             })}
-          </nav>
+          </motion.nav>
         </div>
-      </div>
-    </section>
+
+        {/* Premium footer note */}
+        <motion.div 
+          className="border-t border-gold/20 px-8 py-4 sm:px-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <p className={cn("text-center text-xs", subColor)}>
+            Real conversations about faith, strategy, and legacy building
+          </p>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

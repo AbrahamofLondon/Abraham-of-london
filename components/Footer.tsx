@@ -1,6 +1,21 @@
 // components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { 
+  Crown, 
+  Mail, 
+  MapPin, 
+  Sparkles, 
+  Twitter, 
+  Linkedin,
+  Instagram,
+  Youtube,
+  Facebook,
+  MessageCircle,
+  Phone,
+  ArrowUp
+} from "lucide-react";
 import { siteConfig, getRoutePath } from "@/lib/siteConfig";
 
 type BareSocial = {
@@ -9,51 +24,60 @@ type BareSocial = {
   external?: boolean;
 };
 
-// Canonical social + contact endpoints
-const DEFAULT_SOCIALS: BareSocial[] = [
+// Enhanced social links with icons
+const DEFAULT_SOCIALS = [
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
+    icon: MessageCircle,
     external: true,
   },
   {
     href: "https://x.com/AbrahamAda48634",
     label: "X",
+    icon: Twitter,
     external: true,
   },
   {
     href: "https://www.instagram.com/abraham_of_london_/",
     label: "Instagram",
+    icon: Instagram,
     external: true,
   },
   {
     href: "https://www.facebook.com/share/16tvsnTgRG/",
     label: "Facebook",
+    icon: Facebook,
     external: true,
   },
   {
     href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     label: "LinkedIn",
+    icon: Linkedin,
     external: true,
   },
   {
     href: "https://www.youtube.com/@abrahamoflondon",
     label: "YouTube",
+    icon: Youtube,
     external: true,
   },
   {
     href: "mailto:info@abrahamoflondon.org",
     label: "Email",
+    icon: Mail,
     external: false,
   },
   {
     href: "https://wa.me/447496334022",
     label: "WhatsApp",
+    icon: MessageCircle,
     external: true,
   },
   {
     href: "tel:+442086225909",
     label: "Landline",
+    icon: Phone,
     external: false,
   },
 ];
@@ -64,6 +88,37 @@ const isUtility = (href: string) =>
   href.startsWith("tel:") ||
   href.startsWith("sms:");
 
+const footerSections = [
+  {
+    title: "Navigation",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "Content", href: "/content" },
+      { label: "Downloads", href: "/downloads" },
+      { label: "Events", href: "/events" },
+      { label: "Ventures", href: "/ventures" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "Fatherhood Frameworks", href: "/fatherhood" },
+      { label: "Founder Tools", href: "/founder-tools" },
+      { label: "Leadership Resources", href: "/leadership" },
+      { label: "Book Manuscripts", href: "/books" },
+    ],
+  },
+  {
+    title: "Connect",
+    links: [
+      { label: "Contact", href: "/contact" },
+      { label: "Newsletter", href: "/newsletter" },
+      { label: "Speaking", href: "/speaking" },
+      { label: "Advisory", href: "/advisory" },
+    ],
+  },
+];
+
 export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
   const email = siteConfig.email || "info@abrahamoflondon.org";
@@ -72,179 +127,183 @@ export default function Footer(): JSX.Element {
     ? (siteConfig.socialLinks as BareSocial[])
     : [];
 
-  // Merge defaults + config socials, giving precedence to config where href matches
-  const byHref = new Map<string, BareSocial>();
-
+  // Merge and process social links
+  const byHref = new Map<string, any>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
     if (!rawHref) return;
     byHref.set(rawHref, {
+      ...item,
       href: rawHref,
       label: item.label,
       external: item.external,
     });
   });
 
-  const socials = Array.from(byHref.entries()).map(([href, item]) => {
-    const rawLabel =
-      (typeof item.label === "string" ? item.label.trim() : "") || href;
-    const label =
-      rawLabel ||
-      href.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
-      "Link";
-
-    const external =
-      typeof item.external === "boolean"
-        ? item.external
-        : isExternal(href) && !isUtility(href);
-
-    return { href, label, external };
+  const socials = Array.from(byHref.values()).map((item) => {
+    const rawLabel = item.label || item.href.replace(/^https?:\/\//, "").replace(/\/$/, "") || "Link";
+    const label = rawLabel;
+    const external = typeof item.external === "boolean" ? item.external : isExternal(item.href) && !isUtility(item.href);
+    
+    return { 
+      ...item, 
+      label, 
+      external,
+      Icon: item.icon || Sparkles // Fallback icon
+    };
   });
 
   const year = new Date().getFullYear();
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer className="w-full border-t border-white/10 bg-gradient-to-b from-black via-deepCharcoal to-black text-gray-200">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 md:flex-row md:items-start md:justify-between">
-        {/* Brand + core links */}
-        <div className="space-y-3 text-sm">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-softGold/80">
-            Abraham of London
-          </p>
-          <h2 className="font-serif text-xl font-semibold text-cream">
-            {title}
-          </h2>
-          <p className="max-w-md text-xs text-gray-300 md:text-sm">
-            Faith-rooted strategy for fathers, founders, and boards who refuse
-            to outsource responsibility – at home or in the marketplace.
-          </p>
-
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs md:text-sm">
-            <Link
-              href={getRoutePath("home")}
-              className="text-gray-300 hover:text-softGold hover:underline"
-            >
-              Home
+    <footer className="relative bg-gradient-to-b from-charcoal to-black border-t border-gold/20">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
+      
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {/* Main footer content */}
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
+          {/* Brand section */}
+          <motion.div 
+            className="lg:col-span-1"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Link href="/" className="group flex items-center gap-3 mb-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-200 shadow-lg">
+                <Crown className="h-6 w-6 text-charcoal" />
+              </div>
+              <div>
+                <span className="font-serif text-2xl font-bold text-cream">
+                  Abraham
+                </span>
+                <span className="block font-sans text-xs font-normal tracking-widest text-gold/70">
+                  OF LONDON
+                </span>
+              </div>
             </Link>
-            <span className="text-gray-500">•</span>
-            <Link
-              href="/ventures"
-              className="text-gray-300 hover:text-softGold hover:underline"
-            >
-              Ventures
-            </Link>
-            <span className="text-gray-500">•</span>
-            <Link
-              href="/books"
-              className="text-gray-300 hover:text-softGold hover:underline"
-            >
-              Books
-            </Link>
-            <span className="text-gray-500">•</span>
-            <Link
-              href="/downloads"
-              className="text-gray-300 hover:text-softGold hover:underline"
-            >
-              Downloads
-            </Link>
-            <span className="text-gray-500">•</span>
-            <Link
-              href="/contact"
-              className="text-gray-300 hover:text-softGold hover:underline"
-            >
-              Contact
-            </Link>
-          </div>
-
-          {email && (
-            <p className="mt-2 text-xs text-gray-400">
-              Email:{" "}
-              <a
-                href={`mailto:${email}`}
-                className="font-medium text-softGold hover:underline"
-              >
-                {email}
-              </a>
+            
+            <p className="text-sm leading-relaxed text-gold/70 mb-6">
+              Faith-rooted strategy and leadership for fathers, founders, and board-level leaders 
+              who refuse to outsource responsibility.
             </p>
-          )}
-        </div>
 
-        {/* Social strip */}
-        {socials.length > 0 && (
-          <div className="space-y-3 text-sm">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-softGold/80">
-              Connect
-            </p>
-            <ul className="flex flex-wrap items-center gap-3">
-              {socials.map(({ href, label, external }, index) => {
-                if (!href) {
-                  return (
-                    <li
-                      key={`social-empty-${index}`}
-                      className="rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400"
-                    >
-                      <span>{label}</span>
-                    </li>
-                  );
-                }
+            {/* Contact info */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-2 text-sm text-gold/60">
+                <MapPin className="h-4 w-4" />
+                <span>Based in London, working globally</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gold/60">
+                <Mail className="h-4 w-4" />
+                <a 
+                  href="mailto:info@abrahamoflondon.org"
+                  className="hover:text-gold transition-colors"
+                >
+                  info@abrahamoflondon.org
+                </a>
+              </div>
+            </div>
 
-                const utility = isUtility(href);
+            {/* Social links */}
+            <div className="flex flex-wrap gap-2">
+              {socials.slice(0, 6).map((social, index) => (
+                <motion.a
+                  key={`${social.label}-${index}`}
+                  href={social.href}
+                  target={social.external ? "_blank" : "_self"}
+                  rel={social.external ? "noopener noreferrer" : undefined}
+                  className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gold/30 bg-gold/5 text-gold transition-all hover:bg-gold hover:text-charcoal"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label={social.label}
+                >
+                  <social.Icon className="h-4 w-4" />
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
 
-                const baseClasses =
-                  "inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200 transition hover:bg-white/10 hover:text-softGold";
-
-                if (external && !utility) {
-                  return (
-                    <li key={`${label}-${index}`}>
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={baseClasses}
-                        aria-label={label}
-                      >
-                        {label}
-                      </a>
-                    </li>
-                  );
-                }
-
-                if (utility) {
-                  return (
-                    <li key={`${label}-${index}`}>
-                      <a
-                        href={href}
-                        className={baseClasses}
-                        aria-label={label}
-                      >
-                        {label}
-                      </a>
-                    </li>
-                  );
-                }
-
-                // Internal links if you ever add them to siteConfig.socialLinks
-                return (
-                  <li key={`${label}-${index}`}>
+          {/* Navigation sections */}
+          {footerSections.map((section, index) => (
+            <motion.div
+              key={section.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="font-serif text-lg font-semibold text-cream mb-4">
+                {section.title}
+              </h3>
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.href}>
                     <Link
-                      href={href}
-                      className={baseClasses}
-                      aria-label={label}
+                      href={link.href}
+                      className="group flex items-center gap-2 text-sm text-gold/70 transition-all hover:text-gold"
                     >
-                      {label}
+                      <Sparkles className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <span className="transition-transform group-hover:translate-x-1">
+                        {link.label}
+                      </span>
                     </Link>
                   </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
 
-      {/* Legal bar */}
-      <div className="border-t border-white/10 bg-black/80 py-4 text-center text-[11px] text-gray-500">
-        © {year} {title}. All rights reserved. Built for men who still believe
-        in duty, consequence, and legacy.
+        {/* Bottom section */}
+        <motion.div 
+          className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-gold/20 pt-8 lg:flex-row"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          {/* Copyright */}
+          <div className="text-center lg:text-left">
+            <p className="text-sm text-gold/50">
+              © {year} {title}. All rights reserved.
+            </p>
+            <p className="mt-1 text-xs text-gold/30">
+              Built for men who still believe in duty, consequence, and legacy.
+            </p>
+          </div>
+
+          {/* Legal links */}
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
+            <Link href="/privacy" className="transition-colors hover:text-gold">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="transition-colors hover:text-gold">
+              Terms of Service
+            </Link>
+            <Link href="/cookies" className="transition-colors hover:text-gold">
+              Cookie Policy
+            </Link>
+          </div>
+
+          {/* Scroll to top */}
+          <motion.button
+            onClick={scrollToTop}
+            className="group flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Scroll to top"
+          >
+            Back to Top
+            <ArrowUp className="h-4 w-4 transition-transform group-hover:-translate-y-1" />
+          </motion.button>
+        </motion.div>
       </div>
     </footer>
   );
