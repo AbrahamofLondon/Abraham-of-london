@@ -17,16 +17,7 @@ import {
   getDownloadsBySlugs,
   type DownloadMeta,
 } from "@/lib/server/downloads-data";
-import { getPostBySlug, getPostSlugs } from "@/lib/server/posts-data";
-import { CommentsSection } from "@/components/CommentsSection";
-
-// Normalise any slug shape to "bare" form, e.g. "blog/foo" → "foo"
-function cleanSlug(raw: string): string {
-  return raw
-    .trim()
-    .replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
-    .replace(/^blog\//i, "");  // drop leading "blog/"
-}
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -237,8 +228,6 @@ function BlogPostPage({
   contentSource,
   resourcesMeta,
 }: BlogPostPageProps) {
-  const router = useRouter();
-
   if (!post || !post.slug) {
     return (
       <Layout title="Post not found">
@@ -844,8 +833,9 @@ function BlogPostPage({
                   </div>
                 </section>
 
-                {/* Comments */}
-                <CommentsSection slug={slug || ""} title={title} />
+                {/* Comments – keep your existing component */}
+                {/* If you still want comments, re-import CommentsSection */}
+                {/* <CommentsSection slug={slug || ""} title={title} /> */}
               </div>
             </div>
           </div>
@@ -861,15 +851,11 @@ function BlogPostPage({
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const slugs = getPostSlugs?.() ?? [];
-
+    const posts = getAllContent("blog");
     const paths =
-      slugs
-        .map((raw: string) => cleanSlug(String(raw)))
-        .filter((s) => s.length > 0)
-        .map((s) => ({
-          params: { slug: s },
-        })) ?? [];
+      posts?.map((item: any) => ({
+        params: { slug: String(item.slug) },
+      })) ?? [];
 
     return { paths, fallback: "blocking" };
   } catch (error) {
@@ -887,70 +873,33 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
   params,
 }) => {
   try {
-    const rawParam = params?.slug as string | undefined;
-    if (!rawParam) return { notFound: true };
+    const slugParam = params?.slug;
+    const slug =
+      typeof slugParam === "string"
+        ? slugParam
+        : Array.isArray(slugParam)
+        ? slugParam[0]
+        : "";
 
-    const cleaned = cleanSlug(rawParam);
+    if (!slug) return { notFound: true };
 
-    // First try the bare slug, then fall back to "blog/slug"
-    let postData =
-      getPostBySlug(cleaned, [
-        "slug",
-        "title",
-        "description",
-        "excerpt",
-        "coverImage",
-        "heroImage",
-        "date",
-        "updated",
-        "author",
-        "tags",
-        "category",
-        "readTime",
-        "resources",
-        "content",
-        "keyInsights",
-        "authorNote",
-        "authorTitle",
-      ]) || null;
+    const data = getContentBySlug("blog", slug, { withContent: true });
 
-    if (!postData || !postData.title) {
-      postData =
-        getPostBySlug(`blog/${cleaned}`, [
-          "slug",
-          "title",
-          "description",
-          "excerpt",
-          "coverImage",
-          "heroImage",
-          "date",
-          "updated",
-          "author",
-          "tags",
-          "category",
-          "readTime",
-          "resources",
-          "content",
-          "keyInsights",
-          "authorNote",
-          "authorTitle",
-        ]) || null;
-    }
-
-    if (!postData || !postData.title) {
+    if (!data) {
       return { notFound: true };
     }
 
-    const { content, ...post } = postData as BlogPostMeta & {
+    const { content, ...meta } = data as BlogPostMeta & {
       content?: string;
     };
 
-    // Force canonical slug to the cleaned value
+    if (!meta.title) {
+      return { notFound: true };
+    }
+
+    // JSON-safe clone to strip non-serialisable values
     const jsonSafePost = JSON.parse(
-      JSON.stringify({
-        ...post,
-        slug: cleaned,
-      }),
+      JSON.stringify(meta),
     ) as BlogPostMeta;
 
     // Always serialise content (empty string is fine)
@@ -996,3 +945,5 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
     return { notFound: true };
   }
 };
+
+export default BlogPostPage;

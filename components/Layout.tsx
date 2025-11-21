@@ -1,7 +1,7 @@
 // components/Layout.tsx
 import * as React from "react";
 import Head from "next/head";
-import LuxuryNavbar from "@/components/LuxuryNavbar";
+import Header from "@/components/Header"; // Use Header instead of LuxuryNavbar
 import Footer from "@/components/Footer";
 import { getPageTitle } from "@/lib/siteConfig";
 
@@ -34,11 +34,11 @@ export default function Layout({
         <meta name="color-scheme" content="dark" />
       </Head>
 
-      {/* Luxury Navigation */}
-      <LuxuryNavbar />
+      {/* Use Header component with proper props */}
+      <Header variant="dark" transparent={transparentHeader} />
       
-      {/* Main content with proper padding for fixed navbar */}
-      <main className="flex-1 pt-20">
+      {/* Main content - Header component handles the padding via CSS */}
+      <main className="flex-1">
         {children}
       </main>
       
