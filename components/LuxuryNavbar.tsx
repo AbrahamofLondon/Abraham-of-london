@@ -28,7 +28,7 @@ const navigation: NavItem[] = [
   {
     label: "Home",
     href: "/",
-    icon: <Crown className="h-4 w-4" />,
+    icon: <span className="text-xs font-bold">A</span>,
     description: "Start here",
   },
   {
@@ -57,7 +57,7 @@ const navigation: NavItem[] = [
   },
 ];
 
-export default function LuxuryNavbar(): JSX.Element {
+export default function LuxuryNavbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const pathname = usePathname();
@@ -70,19 +70,12 @@ export default function LuxuryNavbar(): JSX.Element {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Auto-close mobile menu when route changes
-  React.useEffect(() => {
-    if (isOpen) setIsOpen(false);
-  }, [pathname, isOpen]);
-
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   return (
     <>
       {/* Main Navbar */}
       <motion.nav
-        role="navigation"
-        aria-label="Primary"
         className={`fixed top-0 z-50 w-full transition-all duration-500 ${
           scrolled
             ? "bg-charcoal/95 backdrop-blur-xl border-b border-gold/20 shadow-2xl"
@@ -106,7 +99,7 @@ export default function LuxuryNavbar(): JSX.Element {
               >
                 <div className="relative">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-amber-200 shadow-lg">
-                    <Crown className="h-6 w-6 text-charcoal" />
+                    <span className="text-xl font-black text-charcoal">A</span>
                   </div>
                   <motion.div
                     className="absolute -inset-1 rounded-2xl bg-gold/20"
@@ -133,7 +126,6 @@ export default function LuxuryNavbar(): JSX.Element {
                     key={item.href}
                     href={item.href}
                     className="group relative py-2"
-                    aria-current={isActive ? "page" : undefined}
                   >
                     <motion.div
                       className="flex items-center gap-2 text-sm font-semibold text-cream transition-colors hover:text-gold"
@@ -144,7 +136,6 @@ export default function LuxuryNavbar(): JSX.Element {
                       {item.label}
                     </motion.div>
 
-                    {/* Active indicator */}
                     {isActive && (
                       <motion.div
                         className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-gold to-amber-200"
@@ -153,7 +144,6 @@ export default function LuxuryNavbar(): JSX.Element {
                       />
                     )}
 
-                    {/* Hover effect */}
                     <motion.div
                       className="absolute inset-0 rounded-lg bg-gold/10 opacity-0 group-hover:opacity-100"
                       initial={false}
@@ -178,7 +168,6 @@ export default function LuxuryNavbar(): JSX.Element {
                 >
                   <span className="relative z-10">Get in Touch</span>
 
-                  {/* Shine effect */}
                   <motion.div
                     className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                     initial={{ x: "-100%" }}
@@ -202,7 +191,6 @@ export default function LuxuryNavbar(): JSX.Element {
                 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Toggle menu"
-                aria-expanded={isOpen}
               >
                 <AnimatePresence mode="wait">
                   {isOpen ? (
@@ -228,7 +216,6 @@ export default function LuxuryNavbar(): JSX.Element {
                   )}
                 </AnimatePresence>
 
-                {/* Pulsing dot when closed */}
                 {!isOpen && (
                   <motion.div
                     className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-gradient-to-r from-gold to-amber-200"
@@ -246,7 +233,6 @@ export default function LuxuryNavbar(): JSX.Element {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               className="fixed inset-0 z-40 bg-charcoal/95 backdrop-blur-xl lg:hidden"
               initial={{ opacity: 0 }}
@@ -255,7 +241,6 @@ export default function LuxuryNavbar(): JSX.Element {
               onClick={toggleMenu}
             />
 
-            {/* Menu Panel */}
             <motion.div
               className="fixed right-0 top-0 z-50 h-full w-80 bg-gradient-to-b from-charcoal to-charcoal/95 backdrop-blur-2xl lg:hidden"
               initial={{ x: "100%" }}
@@ -267,7 +252,7 @@ export default function LuxuryNavbar(): JSX.Element {
               <div className="flex items-center justify-between border-b border-gold/20 p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-amber-200">
-                    <Crown className="h-5 w-5 text-charcoal" />
+                    <span className="text-lg font-black text-charcoal">A</span>
                   </div>
                   <span className="font-serif text-lg font-bold text-cream">
                     Navigation
@@ -279,14 +264,13 @@ export default function LuxuryNavbar(): JSX.Element {
                   className="flex h-10 w-10 items-center justify-center rounded-xl border border-gold/30 text-gold transition-colors hover:bg-gold/10"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  aria-label="Close menu"
                 >
                   <X className="h-5 w-5" />
                 </motion.button>
               </div>
 
               {/* Navigation Items */}
-              <nav className="p-6" aria-label="Mobile primary">
+              <nav className="p-6">
                 <ul className="space-y-4">
                   {navigation.map((item, index) => {
                     const isActive = pathname === item.href;
@@ -295,13 +279,11 @@ export default function LuxuryNavbar(): JSX.Element {
                         key={item.href}
                         initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: 50, opacity: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
                         <Link
                           href={item.href}
                           onClick={toggleMenu}
-                          aria-current={isActive ? "page" : undefined}
                           className={`group flex items-center gap-4 rounded-2xl p-4 transition-all ${
                             isActive
                               ? "bg-gradient-to-r from-gold/20 to-gold/10 border border-gold/30"
@@ -358,7 +340,6 @@ export default function LuxuryNavbar(): JSX.Element {
                   className="mt-8 border-t border-gold/20 pt-6"
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 20, opacity: 0 }}
                   transition={{ delay: 0.6 }}
                 >
                   <Link
@@ -372,7 +353,6 @@ export default function LuxuryNavbar(): JSX.Element {
                 </motion.div>
               </nav>
 
-              {/* Footer */}
               <div className="absolute bottom-0 left-0 right-0 border-t border-gold/20 p-6">
                 <div className="text-center text-sm text-gold/50">
                   Faith · Strategy · Fatherhood
