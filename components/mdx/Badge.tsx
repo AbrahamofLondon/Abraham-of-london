@@ -1,4 +1,4 @@
-// components/Badge.tsx
+// components/mdx/Badge.tsx
 import * as React from "react";
 
 export interface BadgeProps {
@@ -40,18 +40,38 @@ const Badge: React.FC<BadgeProps> = ({
     ? "cursor-pointer transition-all hover:scale-105 active:scale-95"
     : "";
 
+  // Use button element when onClick is provided, span otherwise
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={[
+          "inline-flex items-center rounded-full border font-semibold uppercase tracking-wide",
+          toneClasses[tone],
+          sizeClasses[size],
+          interactiveClass,
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        onClick={onClick}
+        {...rest}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
     <span
       className={[
         "inline-flex items-center rounded-full border font-semibold uppercase tracking-wide",
         toneClasses[tone],
         sizeClasses[size],
-        interactiveClass,
         className,
       ]
         .filter(Boolean)
         .join(" ")}
-      onClick={onClick}
       {...rest}
     >
       {children}
