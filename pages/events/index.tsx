@@ -4,9 +4,10 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+
 import Layout from "@/components/Layout";
 import { getPageTitle } from "@/lib/siteConfig";
-import { getEventSlugs, getEventBySlug } from "@/lib/events";
+import { getAllEventsSafe } from "@/lib/events";
 
 interface EventListing {
   slug: string;
@@ -26,7 +27,7 @@ interface EventsPageProps {
 
 export default function EventsPage({ events }: EventsPageProps) {
   const pageTitle = "Events & Gatherings";
-  
+
   // Sort events by date (most recent first)
   const sortedEvents = React.useMemo(() => {
     return [...events].sort((a, b) => {
@@ -36,14 +37,14 @@ export default function EventsPage({ events }: EventsPageProps) {
     });
   }, [events]);
 
-  // Separate into upcoming and past events
+  // Separate into upcoming and past events (client-time aware)
   const now = new Date();
-  const upcomingEvents = sortedEvents.filter(event => {
+  const upcomingEvents = sortedEvents.filter((event) => {
     if (!event.date) return false;
     return new Date(event.date) >= now;
   });
-  
-  const pastEvents = sortedEvents.filter(event => {
+
+  const pastEvents = sortedEvents.filter((event) => {
     if (!event.date) return false;
     return new Date(event.date) < now;
   });
@@ -64,22 +65,23 @@ export default function EventsPage({ events }: EventsPageProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-amber-200/5" />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="text-center">
-              <motion.h1 
-                className="font-serif text-4xl font-bold text-cream sm:text-5xl lg:text-6xl mb-6"
+              <motion.h1
+                className="mb-6 font-serif text-4xl font-bold text-cream sm:text-5xl lg:text-6xl"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
               >
                 Events & Gatherings
               </motion.h1>
-              <motion.p 
-                className="mx-auto max-w-2xl text-lg text-gold/70 leading-relaxed"
+              <motion.p
+                className="mx-auto max-w-2xl text-lg leading-relaxed text-gold/70"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                Intimate conversations, transformative workshops, and strategic gatherings 
-                for founders, fathers, and leaders committed to legacy and impact.
+                Intimate conversations, transformative workshops, and strategic
+                gatherings for founders, fathers, and leaders committed to
+                legacy and impact.
               </motion.p>
             </div>
           </div>
@@ -89,12 +91,12 @@ export default function EventsPage({ events }: EventsPageProps) {
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
-              <h2 className="font-serif text-3xl font-bold text-cream mb-4">
+              <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
                 Upcoming Events
               </h2>
-              <p className="text-gold/70 max-w-2xl">
-                Join us for these upcoming gatherings. Spaces are intentionally limited 
-                to ensure meaningful conversation and connection.
+              <p className="max-w-2xl text-gold/70">
+                Join us for these upcoming gatherings. Spaces are intentionally
+                limited to ensure meaningful conversation and connection.
               </p>
             </div>
 
@@ -106,12 +108,13 @@ export default function EventsPage({ events }: EventsPageProps) {
               </div>
             ) : (
               <div className="rounded-2xl border border-gold/20 bg-gold/5 p-12 text-center">
-                <h3 className="font-serif text-xl font-semibold text-cream mb-4">
+                <h3 className="mb-4 font-serif text-xl font-semibold text-cream">
                   No Upcoming Events Scheduled
                 </h3>
-                <p className="text-gold/70 mb-6 max-w-md mx-auto">
-                  New events are being planned. Join our newsletter to be the first 
-                  to know about upcoming gatherings, workshops, and salons.
+                <p className="mb-6 mx-auto max-w-md text-gold/70">
+                  New events are being planned. Join our newsletter to be the
+                  first to know about upcoming gatherings, workshops, and
+                  salons.
                 </p>
                 <Link
                   href="/newsletter"
@@ -126,21 +129,27 @@ export default function EventsPage({ events }: EventsPageProps) {
 
         {/* Past Events */}
         {pastEvents.length > 0 && (
-          <section className="py-16 border-t border-gold/20">
+          <section className="border-t border-gold/20 py-16">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
               <div className="mb-12">
-                <h2 className="font-serif text-3xl font-bold text-cream mb-4">
+                <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
                   Past Events
                 </h2>
-                <p className="text-gold/70 max-w-2xl">
-                  Browse through our previous gatherings and conversations. 
-                  Many of these events recur seasonally or inform future programming.
+                <p className="max-w-2xl text-gold/70">
+                  Browse through our previous gatherings and conversations. Many
+                  of these events recur seasonally or inform future
+                  programming.
                 </p>
               </div>
 
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {pastEvents.map((event, index) => (
-                  <EventCard key={event.slug} event={event} index={index} isPast={true} />
+                  <EventCard
+                    key={event.slug}
+                    event={event}
+                    index={index}
+                    isPast
+                  />
                 ))}
               </div>
             </div>
@@ -148,14 +157,14 @@ export default function EventsPage({ events }: EventsPageProps) {
         )}
 
         {/* CTA Section */}
-        <section className="py-16 border-t border-gold/20">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+        <section className="border-t border-gold/20 py-16">
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 to-gold/10 p-12">
-              <h2 className="font-serif text-3xl font-bold text-cream mb-4">
+              <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
                 Host Your Own Gathering
               </h2>
-              <p className="text-gold/70 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
-                Interested in bringing Abraham of London to your organization, 
+              <p className="mb-8 mx-auto max-w-2xl text-lg leading-relaxed text-gold/70">
+                Interested in bringing Abraham of London to your organization,
                 board, or community for a private event or workshop?
               </p>
               <div className="flex flex-wrap justify-center gap-4">
@@ -181,8 +190,16 @@ export default function EventsPage({ events }: EventsPageProps) {
 }
 
 // Event Card Component
-function EventCard({ event, index, isPast = false }: { event: EventListing; index: number; isPast?: boolean }) {
-  const displayDate = event.date 
+function EventCard({
+  event,
+  index,
+  isPast = false,
+}: {
+  event: EventListing;
+  index: number;
+  isPast?: boolean;
+}) {
+  const displayDate = event.date
     ? new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
@@ -213,13 +230,13 @@ function EventCard({ event, index, isPast = false }: { event: EventListing; inde
             />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
             {isPast && (
-              <div className="absolute top-4 right-4 rounded-full bg-charcoal/90 px-3 py-1 text-xs font-semibold text-gold">
+              <div className="absolute right-4 top-4 rounded-full bg-charcoal/90 px-3 py-1 text-xs font-semibold text-gold">
                 Past Event
               </div>
             )}
           </div>
         )}
-        
+
         <div className="p-6">
           <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold">
             {displayDate && <span>{displayDate}</span>}
@@ -231,19 +248,19 @@ function EventCard({ event, index, isPast = false }: { event: EventListing; inde
             )}
           </div>
 
-          <h3 className="font-serif text-xl font-semibold text-cream mb-3 leading-tight group-hover:text-gold transition-colors">
+          <h3 className="mb-3 font-serif text-xl font-semibold leading-tight text-cream transition-colors group-hover:text-gold">
             {event.title}
           </h3>
 
           {event.location && (
-            <p className="text-sm text-gold/70 mb-3 flex items-center gap-2">
+            <p className="mb-3 flex items-center gap-2 text-sm text-gold/70">
               <span>📍</span>
               {event.location}
             </p>
           )}
 
           {event.description && (
-            <p className="text-sm text-gold/60 leading-relaxed line-clamp-3">
+            <p className="line-clamp-3 text-sm leading-relaxed text-gold/60">
               {event.description}
             </p>
           )}
@@ -272,39 +289,39 @@ function EventCard({ event, index, isPast = false }: { event: EventListing; inde
   );
 }
 
-// Static Generation
+// Static Generation – now uses getAllEventsSafe (no per-slug losses)
 export async function getStaticProps() {
   try {
-    const slugs = await getEventSlugs();
-    const events: EventListing[] = [];
+    const rawEvents = getAllEventsSafe();
 
-    for (const slug of slugs) {
-      try {
-        const event = await getEventBySlug(slug);
-        if (event) {
-          // Helper function to safely convert unknown to string or null (not undefined)
-          const safeString = (value: unknown): string | null => {
-            return typeof value === 'string' ? value : null;
-          };
+    const safeString = (value: unknown): string | null =>
+      typeof value === "string" ? value : null;
 
-          events.push({
-            slug: safeString(event.slug) || slug,
-            title: safeString(event.title) || 'Untitled Event',
-            date: safeString(event.date) || safeString(event.startDate) || null,
-            time: safeString(event.time) || null,
-            location: safeString(event.location) || safeString(event.venue) || null,
-            description: safeString(event.description) || safeString(event.excerpt) || null,
-            heroImage: safeString(event.heroImage) || null,
-            coverImage: safeString(event.coverImage) || null,
-            tags: Array.isArray(event.tags) 
-              ? event.tags.map(tag => safeString(tag)).filter((tag): tag is string => tag !== null)
-              : undefined,
-          });
-        }
-      } catch (error) {
-        console.warn(`Failed to load event ${slug}:`, error);
-      }
-    }
+    const events: EventListing[] = rawEvents
+      .map((event) => {
+        const slug = safeString(event.slug) || "";
+        if (!slug) return null;
+
+        const heroImage = safeString(event.heroImage);
+        const coverImage = safeString(event.coverImage);
+
+        return {
+          slug,
+          title: safeString(event.title) || "Untitled Event",
+          date: safeString(event.date) || null,
+          time: safeString(event.time) || null,
+          location: safeString(event.location) || null,
+          description: safeString(event.description) || null,
+          heroImage: heroImage || coverImage || null,
+          coverImage: coverImage || heroImage || null,
+          tags: Array.isArray(event.tags)
+            ? event.tags.filter(
+                (tag): tag is string => typeof tag === "string",
+              )
+            : [],
+        };
+      })
+      .filter((ev): ev is EventListing => ev !== null);
 
     return {
       props: {
@@ -313,7 +330,7 @@ export async function getStaticProps() {
       revalidate: 3600, // Revalidate every hour
     };
   } catch (error) {
-    console.error('Error generating events page:', error);
+    console.error("Error generating events page:", error);
     return {
       props: {
         events: [],

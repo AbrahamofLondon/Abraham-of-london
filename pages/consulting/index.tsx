@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Users, Target, Globe } from "lucide-react";
 import Layout from "@/components/Layout";
+import MandateStatement from "@/components/MandateStatement";
 
 export default function ConsultingPage(): JSX.Element {
   return (
@@ -89,6 +90,8 @@ export default function ConsultingPage(): JSX.Element {
             </motion.header>
           </div>
         </section>
+
+        <MandateStatement />
 
         {/* Service Pillars */}
         <section className="relative py-16">
