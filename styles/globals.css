@@ -18,13 +18,12 @@
   font-display: swap;
 }
 
-/* 2. Tailwind Base Imports */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ------------------------------------------------------------------- */
-/* ---------- Understated Luxury Theme ------------------------------- */
+/* ---------- Luxury Theme Variables --------------------------------- */
 /* ------------------------------------------------------------------- */
 
 :root {
@@ -32,64 +31,57 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* Understated Semantic Palette (site-wide) */
-  --color-primary: #1a1a1a;          /* Deep Charcoal - authority, substance */
-  --color-primary-hover: #2d2d2d;    /* Slightly lighter for subtle interaction */
-  --color-on-primary: #ffffff;       /* Pure white for contrast */
+  /* Luxury Color Palette - RESTORED */
+  --color-forest: #0B2E1F;           /* Deep Forest */
+  --color-deepCharcoal: #333333;     /* Soft Charcoal */
+  --color-softGold: #C5A352;         /* Muted Gold */
+  --color-warmCream: #FAF7F2;        /* Warm Cream */
+  --color-charcoal: #1F2937;         /* Dark Charcoal */
   
-  --color-secondary: #fefefe;        /* Clean light background */
-  --color-on-secondary: #404040;     /* Charcoal gray - sophisticated readability */
+  /* Theme Variables */
+  --color-primary: var(--color-forest);
+  --color-primary-hover: #16573D;
+  --color-on-primary: var(--color-warmCream);
   
-  --color-accent: #8b7355;           /* Muted bronze - subtle warmth */
-  --color-accent-hover: #6d5a41;     /* Deeper bronze */
+  --color-secondary: var(--color-warmCream);
+  --color-on-secondary: var(--color-deepCharcoal);
+  
+  --color-accent: var(--color-softGold);
+  --color-accent-hover: #A0833F;
   --color-on-accent: #ffffff;
   
-  --color-border: #e5e5e5;           /* Very subtle borders */
-  --color-surface: #ffffff;          /* Clean surfaces */
-  --color-muted: #666666;            /* Gray for secondary text */
-
-  /* Luxury Brand Palette – used by Tailwind classes (softGold, forest, deepCharcoal) */
-  --lux-soft-gold: #f3d8a0;
-  --lux-soft-gold-strong: #e5c37a;
-  --lux-deep-charcoal: #050608;
-  --lux-forest: #0f3b32;
-
-  /* Fluid type scale */
-  --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
-  --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
-  --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
-  --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
-  --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
+  --color-border: #E5E5E5;
+  --color-surface: #FFFFFF;
+  --color-muted: #4B8B6B;
 
   color-scheme: light;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Sophisticated Dark Mode -------------------------------- */
+/* ---------- Luxury Dark Mode --------------------------------------- */
 /* ------------------------------------------------------------------- */
 .dark {
-  /* Deep, rich dark mode */
-  --color-primary: #e5e5e5;
-  --color-primary-hover: #ffffff;
-  --color-on-primary: #1a1a1a;
+  /* In dark mode, gold becomes primary for high contrast */
+  --color-primary: var(--color-softGold);
+  --color-primary-hover: #E9D79A;
+  --color-on-primary: var(--color-charcoal);
   
-  --color-secondary: #0a0a0a;
-  --color-on-secondary: #e5e5e5;
+  --color-secondary: var(--color-charcoal);
+  --color-on-secondary: #F8FAFC;
   
-  --color-accent: #8b7355;
-  --color-accent-hover: #a08c6f;
-  --color-on-accent: #ffffff;
+  --color-accent: var(--color-forest);
+  --color-accent-hover: #16573D;
+  --color-on-accent: #F8FAFC;
   
-  --color-border: #333333;
-  --color-surface: #1a1a1a;
-  --color-muted: #999999;
+  --color-border: #374151;
+  --color-surface: #1F2937;
+  --color-muted: #86efac;
 
   color-scheme: dark;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Base Styles - Pure Sophistication ---------------------- */
+/* ---------- Base Styles -------------------------------------------- */
 /* ------------------------------------------------------------------- */
 html {
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -106,228 +98,94 @@ html, body {
 }
 
 body {
-  font-family: var(--font-sans);
-  font-size: var(--step-0);
+  font-family: var(--font-sans); /* Inter for body */
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   transition: background-color 0.4s ease, color 0.4s ease;
-  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Typography - Pure Authority ---------------------------- */
+/* ---------- Typography --------------------------------------------- */
 /* ------------------------------------------------------------------- */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-serif); /* Playfair for headings */
   color: var(--color-primary);
   text-wrap: balance;
   font-weight: 600;
-  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
-h1 {
-  font-size: var(--step-4);
-  margin-bottom: 1.5rem;
-}
-
-h2 {
-  font-size: var(--step-3);
-  margin: 3rem 0 1.25rem;
-}
-
-h3 {
-  font-size: var(--step-2);
-  margin: 2.5rem 0 1rem;
-}
+h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+h2 { font-size: 2rem; margin: 3rem 0 1.25rem; }
+h3 { font-size: 1.5rem; margin: 2.5rem 0 1rem; }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Interactive Elements - Understated --------------------- */
+/* ---------- Interactive Elements ----------------------------------- */
 /* ------------------------------------------------------------------- */
 a {
   color: var(--color-primary);
   text-decoration: none;
   transition: color 0.3s ease;
-  font-weight: 500;
 }
 
 a:hover {
   color: var(--color-accent);
 }
 
-/* Selection */
 ::selection {
-  background: rgba(139, 115, 85, 0.1);
+  background: rgba(197, 163, 82, 0.1);
   color: var(--color-primary);
 }
 
 :focus-visible {
-  outline: 1px solid var(--color-accent);
-  outline-offset: 1px;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Sophisticated Components ------------------------------- */
+/* ---------- Luxury Gradients & Utilities --------------------------- */
 /* ------------------------------------------------------------------- */
 
-.card {
-  border: 1px solid var(--color-border);
-  padding: 2rem;
-  background-color: var(--color-surface);
-  border-radius: 0.75rem; /* Slightly softer for luxury feel */
-  transition: all 0.3s ease;
+/* These ensure the existing gradient classes work */
+.bg-gradient-to-br {
+  background-size: 100% 100%;
 }
 
-.dark .card {
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
+.from-deepCharcoal {
+  --tw-gradient-from: var(--color-deepCharcoal) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(51 51 51 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+.to-black {
+  --tw-gradient-to: #000 var(--tw-gradient-to-position);
 }
 
-/* Buttons */
-.luxury-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 999px;
-  transition: all 0.3s ease;
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
-  border: 1px solid var(--color-primary);
+.bg-softGold\/10 {
+  background-color: rgba(197, 163, 82, 0.1);
 }
 
-.luxury-btn:hover {
-  background-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+.border-softGold\/30 {
+  border-color: rgba(197, 163, 82, 0.3);
 }
 
-.luxury-btn--outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+.bg-forest\/20 {
+  background-color: rgba(11, 46, 31, 0.2);
 }
 
-.luxury-btn--outline:hover {
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.luxury-btn--accent {
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
-  border-color: var(--color-accent);
-}
-
-.luxury-btn--accent:hover {
-  background-color: var(--color-accent-hover);
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Refined Utilities -------------------------------------- */
-/* ------------------------------------------------------------------- */
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
-}
-
-/* Print */
+/* Print styles */
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  
-  .card {
-    break-inside: avoid;
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
 }
 
-/* Motion respect */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
     transition: none !important;
-    scroll-behavior: auto !important;
   }
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Tailwind Components ------------------------------------ */
-/* ------------------------------------------------------------------- */
-@layer components {
-  .bg-luxury-subtle {
-    background: radial-gradient(circle at top left, rgba(243, 216, 160, 0.18), transparent 55%),
-                linear-gradient(135deg, var(--color-secondary) 0%, #f5f5f5 100%);
-  }
-  
-  .text-luxury-muted {
-    color: var(--color-muted);
-  }
-  
-  .border-luxury-subtle {
-    border-color: var(--color-border);
-  }
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Prose Refinements -------------------------------------- */
-/* ------------------------------------------------------------------- */
-.prose {
-  --tw-prose-body: var(--color-on-secondary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-primary);
-  --tw-prose-bold: var(--color-primary);
-  --tw-prose-counters: var(--color-muted);
-  --tw-prose-bullets: var(--color-muted);
-  --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-border);
-}
-
-.dark .prose {
-  --tw-prose-body: var(--color-on-secondary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-primary);
-  --tw-prose-bold: var(--color-on-secondary);
-}
-
-.prose blockquote {
-  font-style: normal;
-  border-left-width: 2px;
-  border-left-color: var(--color-border);
-  color: var(--color-on-secondary);
-  padding: 1rem 1.5rem;
-  background: rgba(229, 229, 229, 0.04);
-  border-radius: 0;
-}
-
-.prose a {
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.prose a:hover {
-  color: var(--color-accent);
 }
