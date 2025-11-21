@@ -4,8 +4,12 @@
 
 export interface SocialLink {
   href: string;
-  label?: string;
-  external?: boolean;
+  kind: SocialPlatform;
+  label: string;
+  external: boolean;
+  handle?: string;
+  priority?: number; // ✅ add this
+  icon?: string;
 }
 
 /**

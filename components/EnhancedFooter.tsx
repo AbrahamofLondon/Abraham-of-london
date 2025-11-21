@@ -17,19 +17,22 @@ interface SortableSocialLink extends CoreSocialLink {
 
 export default function EnhancedFooter({
   variant = "light",
-  className,
+  className = "",
 }: EnhancedFooterProps) {
-  // Strongly typed config – no `any`
   const config = siteConfig;
 
-  // Safely normalise + sort social links
-  const socialLinks: SortableSocialLink[] = Array.isArray(config.socialLinks)
-    ? [...config.socialLinks].sort((a, b) => {
-        const priorityA = a.priority ?? 999;
-        const priorityB = b.priority ?? 999;
-        return priorityA - priorityB;
-      })
+  // ✅ Cast to SortableSocialLink[] BEFORE sort, so a/b are correctly typed
+  const rawSocials: SortableSocialLink[] = Array.isArray(config.socialLinks)
+    ? (config.socialLinks as SortableSocialLink[])
     : [];
+
+  const socialLinks: SortableSocialLink[] = rawSocials
+    .slice()
+    .sort((a, b) => {
+      const priorityA = a.priority ?? 999;
+      const priorityB = b.priority ?? 999;
+      return priorityA - priorityB;
+    });
 
   const baseClasses = "py-16 transition-colors";
   const variantClasses = {
@@ -60,7 +63,8 @@ export default function EnhancedFooter({
         { href: "/contact", label: "Contact" },
         { href: "/content", label: "Newsletter" },
         { href: "/contact", label: "Speaking" },
-        { href: "/contact", label: "Consulting" },
+        { href: "/consulting", label: "Consulting" },
+        { href: "/chatham-rooms", label: "Chatham Rooms" },
       ],
     },
     {
@@ -76,12 +80,14 @@ export default function EnhancedFooter({
   ];
 
   return (
-    <footer className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
+    <footer
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+    >
       <div className="mx-auto max-w-7xl px-4">
         {/* Main Footer Content */}
         <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand Section */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -143,7 +149,7 @@ export default function EnhancedFooter({
 
           {/* Links Sections */}
           {footerSections.map((section, sectionIndex) => (
-            <motion.div 
+            <motion.div
               key={section.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -155,11 +161,16 @@ export default function EnhancedFooter({
               </h4>
               <ul className="space-y-4">
                 {section.links.map((link, linkIndex) => (
-                  <motion.li 
+                  <motion.li
                     key={link.href}
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: (sectionIndex * 0.1) + (linkIndex * 0.05) }}
+                    transition={{
+                      duration: 0.4,
+                      delay:
+                        sectionIndex * 0.1 +
+                        linkIndex * 0.05,
+                    }}
                     viewport={{ once: true }}
                   >
                     <Link
@@ -177,7 +188,7 @@ export default function EnhancedFooter({
         </div>
 
         {/* Bottom Bar */}
-        <motion.div 
+        <motion.div
           className="border-t border-current/20 pt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

@@ -117,9 +117,10 @@ const footerSections = [
     title: "Connect",
     links: [
       { label: "Contact", href: "/contact" },
-      { label: "Newsletter", href: "/content" },
+      { label: "Newsletter", href: "/newsletter" },
       { label: "Speaking", href: "/contact" },
-      { label: "Advisory", href: "/contact" },
+      { label: "Consulting", href: "/consulting" },
+      { label: "Chatham Rooms", href: "/chatham-rooms" },
     ],
   },
 ];
