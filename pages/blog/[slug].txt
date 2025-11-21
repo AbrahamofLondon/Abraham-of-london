@@ -20,6 +20,14 @@ import {
 import { getPostBySlug, getPostSlugs } from "@/lib/server/posts-data";
 import { CommentsSection } from "@/components/CommentsSection";
 
+// Normalise any slug shape to "bare" form, e.g. "blog/foo" → "foo"
+function cleanSlug(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
+    .replace(/^blog\//i, "");  // drop leading "blog/"
+}
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -857,7 +865,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     const paths =
       slugs
-        .map((slug: string) => String(slug).trim())
+        .map((raw: string) => cleanSlug(String(raw)))
         .filter((s) => s.length > 0)
         .map((s) => ({
           params: { slug: s },
@@ -879,28 +887,55 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
   params,
 }) => {
   try {
-    const slug = params?.slug as string | undefined;
-    if (!slug) return { notFound: true };
+    const rawParam = params?.slug as string | undefined;
+    if (!rawParam) return { notFound: true };
 
-    const postData = getPostBySlug(slug, [
-      "slug",
-      "title",
-      "description",
-      "excerpt",
-      "coverImage",
-      "heroImage",
-      "date",
-      "updated",
-      "author",
-      "tags",
-      "category",
-      "readTime",
-      "resources",
-      "content",
-      "keyInsights",
-      "authorNote",
-      "authorTitle",
-    ]);
+    const cleaned = cleanSlug(rawParam);
+
+    // First try the bare slug, then fall back to "blog/slug"
+    let postData =
+      getPostBySlug(cleaned, [
+        "slug",
+        "title",
+        "description",
+        "excerpt",
+        "coverImage",
+        "heroImage",
+        "date",
+        "updated",
+        "author",
+        "tags",
+        "category",
+        "readTime",
+        "resources",
+        "content",
+        "keyInsights",
+        "authorNote",
+        "authorTitle",
+      ]) || null;
+
+    if (!postData || !postData.title) {
+      postData =
+        getPostBySlug(`blog/${cleaned}`, [
+          "slug",
+          "title",
+          "description",
+          "excerpt",
+          "coverImage",
+          "heroImage",
+          "date",
+          "updated",
+          "author",
+          "tags",
+          "category",
+          "readTime",
+          "resources",
+          "content",
+          "keyInsights",
+          "authorNote",
+          "authorTitle",
+        ]) || null;
+    }
 
     if (!postData || !postData.title) {
       return { notFound: true };
@@ -910,9 +945,12 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
       content?: string;
     };
 
-    // JSON-safe clone to strip non-serialisable values
+    // Force canonical slug to the cleaned value
     const jsonSafePost = JSON.parse(
-      JSON.stringify(post),
+      JSON.stringify({
+        ...post,
+        slug: cleaned,
+      }),
     ) as BlogPostMeta;
 
     // Always serialise content (empty string is fine)
@@ -958,5 +996,3 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
     return { notFound: true };
   }
 };
-
-export default BlogPostPage;
