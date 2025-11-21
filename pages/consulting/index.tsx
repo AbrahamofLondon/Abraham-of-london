@@ -3,26 +3,26 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Users, Target, Globe, Shield, Anchor } from "lucide-react";
-import Layout from "@/components/Layout";
+import { ArrowRight, CheckCircle, Users, Target, Globe } from "lucide-react";
+
 import MandateStatement from "@/components/MandateStatement";
-import { getPageTitle } from "@/lib/siteConfig"; // Add missing import
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 
 export default function ConsultingPage(): JSX.Element {
   return (
-    <Layout title="Consulting & Advisory">
+    <>
       <Head>
-        <title>{getPageTitle("Consulting & Advisory")}</title> {/* Add page title */}
+        <title>Consulting & Advisory - Abraham of London</title>
         <meta
           name="description"
-          content="Faith-rooted strategy and advisory for founders, boards, and builders who refuse to outsource responsibility."
+          content="Faith-rooted strategy for founders, boards, and builders."
         />
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-charcoal to-black pt-20">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gold/6 via-transparent to-amber-200/6" />
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-amber-200/5" />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <motion.header
               className="mb-12 max-w-3xl"
@@ -38,7 +38,6 @@ export default function ConsultingPage(): JSX.Element {
               >
                 Advisory & Consulting
               </motion.p>
-
               <motion.h1
                 className="mt-4 font-serif text-4xl font-semibold text-cream sm:text-5xl lg:text-6xl"
                 initial={{ opacity: 0, y: 20 }}
@@ -50,7 +49,6 @@ export default function ConsultingPage(): JSX.Element {
                   founders, boards, and builders.
                 </span>
               </motion.h1>
-
               <motion.p
                 className="mt-6 text-lg leading-relaxed text-gold/70 sm:text-xl"
                 initial={{ opacity: 0 }}
@@ -81,7 +79,6 @@ export default function ConsultingPage(): JSX.Element {
                     transition={{ duration: 0.8 }}
                   />
                 </Link>
-
                 <Link
                   href="/events"
                   className="rounded-xl border border-gold/40 px-8 py-4 text-lg font-semibold text-gold transition-all hover:border-gold hover:bg-gold/10"
@@ -93,7 +90,15 @@ export default function ConsultingPage(): JSX.Element {
           </div>
         </section>
 
-        <MandateStatement />
+        {/* Mandate + Strategic Funnel */}
+        <section className="border-t border-gold/15 bg-charcoal/90">
+          <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+            <MandateStatement />
+          </div>
+
+          {/* Global engagement pathways – consulting, rooms, events */}
+          <StrategicFunnelStrip />
+        </section>
 
         {/* Service Pillars */}
         <section className="relative py-16">
@@ -108,7 +113,7 @@ export default function ConsultingPage(): JSX.Element {
               {[
                 {
                   icon: Users,
-                  title: "Board & executive strategy",
+                  title: "Board & Executive Strategy",
                   description:
                     "Support for boards, founders, and C-suite on strategy, governance, and execution — with an eye on consequence, culture, and long-term legitimacy.",
                   points: [
@@ -119,7 +124,7 @@ export default function ConsultingPage(): JSX.Element {
                 },
                 {
                   icon: Target,
-                  title: "Founder & leadership advisory",
+                  title: "Founder & Leadership Advisory",
                   description:
                     "One-to-one advisory for founders and senior leaders: decision support, crisis navigation, and building strategy that honours both calling and commercial reality.",
                   points: [
@@ -130,7 +135,7 @@ export default function ConsultingPage(): JSX.Element {
                 },
                 {
                   icon: Globe,
-                  title: "Africa & frontier markets",
+                  title: "Africa & Frontier Markets",
                   description:
                     "Advisory for investors and operators engaging Nigeria and wider Africa — with honest context on risk, opportunity, and political reality.",
                   points: [
@@ -162,7 +167,7 @@ export default function ConsultingPage(): JSX.Element {
                         key={idx}
                         className="flex items-start gap-3 text-sm text-gold/70"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold" />
+                        <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold" />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -193,7 +198,6 @@ export default function ConsultingPage(): JSX.Element {
                 >
                   How I work
                 </motion.h2>
-
                 <motion.p
                   className="mb-8 text-lg leading-relaxed text-gold/70"
                   initial={{ opacity: 0 }}
@@ -205,7 +209,6 @@ export default function ConsultingPage(): JSX.Element {
                   The work is structured, documented, and accountable — but
                   always anchored in conviction and integrity.
                 </motion.p>
-
                 <motion.ol
                   className="space-y-6"
                   initial={{ opacity: 0 }}
@@ -222,12 +225,12 @@ export default function ConsultingPage(): JSX.Element {
                     {
                       step: "Diagnostic",
                       description:
-                        "Clear articulation of the real problem — not just the fashionable one.",
+                        "Clear articulation of the real problem, not the fashionable one.",
                     },
                     {
                       step: "Engagement",
                       description:
-                        "Defined scope, cadence, and measures of success. No vagueness, no open-ended drift.",
+                        "Defined scope, cadence, and measures of success.",
                     },
                   ].map((item, index) => (
                     <motion.li
@@ -242,7 +245,7 @@ export default function ConsultingPage(): JSX.Element {
                         {index + 1}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-cream">
+                        <h4 className="text-cream font-semibold">
                           {item.step}
                         </h4>
                         <p className="mt-1 text-gold/70">{item.description}</p>
@@ -268,9 +271,9 @@ export default function ConsultingPage(): JSX.Element {
                 </p>
                 <ul className="mb-6 space-y-3">
                   {[
-                    "Carry responsibility for others' livelihoods.",
-                    "Want strategy that respects both God and data.",
-                    "Are willing to be challenged, not entertained.",
+                    "Carry responsibility for others' livelihoods",
+                    "Want strategy that respects both God and data",
+                    "Are willing to be challenged, not entertained",
                   ].map((item, index) => (
                     <li
                       key={index}
@@ -282,8 +285,8 @@ export default function ConsultingPage(): JSX.Element {
                   ))}
                 </ul>
                 <p className="mb-6 text-gold/80">
-                  If that sounds like you, send a short context note. We will
-                  decide — together — whether there is a serious mandate.
+                  If that sounds like you, send a short context note and we
+                  will decide — together — if there is a serious mandate.
                 </p>
                 <Link
                   href="/contact"
@@ -297,6 +300,6 @@ export default function ConsultingPage(): JSX.Element {
           </div>
         </section>
       </main>
-    </Layout>
+    </>
   );
 }
