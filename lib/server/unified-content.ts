@@ -1,5 +1,5 @@
 // lib/server/unified-content.ts
-// Single source of truth for all content types (blog, events, books, downloads, resources, etc.)
+// Unified content loader — safe for static export / Netlify builds.
 
 import type { ReactNode } from "react";
 
@@ -60,13 +60,18 @@ export interface UnifiedContent {
   published: boolean;
 }
 
+// Internal loose object type (no `any`)
+type ContentLike = Record<string, unknown>;
+
 // ---------------------------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------------------------
 
 function cleanSlug(raw: unknown): string {
-  const s = (raw || "").toString().trim();
-  return s.replace(/^\/+|\/+$/g, "");
+  return (raw || "")
+    .toString()
+    .trim()
+    .replace(/^\/+|\/+$/g, "");
 }
 
 function normaliseSlug(base: string, prefix?: string): string {
@@ -83,13 +88,65 @@ async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
   }
 }
 
-async function resolveMaybeAsync<T>(fn?: () => T | Promise<T>): Promise<T | null> {
+// Generic “maybe async” resolver
+async function resolveMaybeAsync<T>(
+  fn?: () => T | Promise<T>,
+): Promise<T | null> {
   if (!fn) return null;
   try {
     return await Promise.resolve(fn());
   } catch {
     return null;
   }
+}
+
+// Safely coerce to array of ContentLike
+function toContentArray(value: unknown): ContentLike[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is ContentLike =>
+      !!item && typeof item === "object",
+  );
+}
+
+// Field readers (no `any`, runtime-guarded)
+function getString(obj: ContentLike, key: string): string | undefined {
+  const v = obj[key];
+  if (typeof v === "string") {
+    const trimmed = v.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+  return undefined;
+}
+
+function getDateLike(
+  obj: ContentLike,
+  key: string,
+): string | Date | undefined {
+  const v = obj[key];
+  if (v instanceof Date) return v;
+  if (typeof v === "string") {
+    const trimmed = v.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+  return undefined;
+}
+
+function getStringArray(
+  obj: ContentLike,
+  key: string,
+): string[] | undefined {
+  const v = obj[key];
+  if (!Array.isArray(v)) return undefined;
+  const filtered = v.filter(
+    (item): item is string => typeof item === "string",
+  );
+  return filtered.length > 0 ? filtered : undefined;
+}
+
+function getBoolean(obj: ContentLike, key: string): boolean | undefined {
+  const v = obj[key];
+  return typeof v === "boolean" ? v : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,45 +159,54 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
   );
   if (!postsModule) return [];
 
-  const getAllPosts = (postsModule as any).getAllPosts as
-    | (() => any[] | Promise<any[]>)
-    | undefined;
+  const getAllPosts =
+    (postsModule as { getAllPosts?: () => ContentLike[] | Promise<ContentLike[]> })
+      .getAllPosts;
 
-  const posts = (await resolveMaybeAsync(getAllPosts)) ?? [];
+  const postsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(getAllPosts);
+  const posts = toContentArray(postsRaw ?? []);
 
-  return posts.map((post: any): UnifiedContent => {
-    const rawSlug = post.slug || post._id || "";
+  return posts.map((post): UnifiedContent => {
+    const rawSlug =
+      getString(post, "slug") ?? getString(post, "_id") ?? "";
     const slug = normaliseSlug(rawSlug, "blog");
+
+    const draft = getBoolean(post, "draft");
 
     return {
       slug,
-      title: post.title || slug,
+      title: getString(post, "title") ?? slug,
       type: "blog",
 
-      content: post.content || undefined,
+      content: (post["content"] as ReactNode | undefined) ?? undefined,
       description:
-        post.excerpt ||
-        post.description ||
-        (post.summary as string | undefined) ||
-        undefined,
+        getString(post, "excerpt") ??
+        getString(post, "description") ??
+        getString(post, "summary"),
 
-      author: post.author || undefined,
-      date: post.date || post.publishedAt || undefined,
-      updatedAt: post.updated || post.updatedAt || undefined,
-      category: post.category || undefined,
-      tags: post.tags || undefined,
+      author: getString(post, "author"),
+      date:
+        getDateLike(post, "date") ??
+        getDateLike(post, "publishedAt"),
+      updatedAt:
+        getDateLike(post, "updated") ??
+        getDateLike(post, "updatedAt"),
+      category: getString(post, "category"),
+      tags: getStringArray(post, "tags"),
 
       printSettings: undefined,
 
-      seoTitle: post.seoTitle || post.title || undefined,
+      seoTitle:
+        getString(post, "seoTitle") ??
+        getString(post, "title") ??
+        slug,
       seoDescription:
-        post.seoDescription ||
-        post.excerpt ||
-        post.description ||
-        undefined,
+        getString(post, "seoDescription") ??
+        getString(post, "excerpt") ??
+        getString(post, "description"),
 
       source: "mdx",
-      published: (post.draft ?? false) !== true,
+      published: draft !== true,
     };
   });
 }
@@ -155,43 +221,65 @@ async function getEventContent(): Promise<UnifiedContent[]> {
   );
   if (!eventsModule) return [];
 
-  const getAllEvents = (eventsModule as any).getAllEvents as
-    | (() => any[] | Promise<any[]>)
-    | undefined;
+  const getAllEvents =
+    (eventsModule as { getAllEvents?: () => ContentLike[] | Promise<ContentLike[]> })
+      .getAllEvents;
 
-  const events = (await resolveMaybeAsync(getAllEvents)) ?? [];
+  const eventsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
+    getAllEvents,
+  );
+  const events = toContentArray(eventsRaw ?? []);
 
-  return events.map((event: any): UnifiedContent => {
-    const rawSlug = event.slug || event.id || event._id || event.title || "";
+  return events.map((event): UnifiedContent => {
+    const rawSlug =
+      getString(event, "slug") ??
+      getString(event, "id") ??
+      getString(event, "_id") ??
+      getString(event, "title") ??
+      "";
     const slug = normaliseSlug(rawSlug, "events");
+
+    const status = getString(event, "status");
 
     return {
       slug,
-      title: event.title || slug,
+      title: getString(event, "title") ?? slug,
       type: "event",
 
-      content: event.content || event.description || undefined,
+      content:
+        (event["content"] as ReactNode | undefined) ??
+        getString(event, "description"),
       description:
-        event.excerpt || event.summary || event.description || undefined,
+        getString(event, "excerpt") ??
+        getString(event, "summary") ??
+        getString(event, "description"),
 
-      author: event.speaker || event.host || undefined,
-      date: event.date || event.startDate || undefined,
-      updatedAt: event.updatedAt || undefined,
-      category: event.category || event.type || undefined,
-      tags: event.tags || undefined,
+      author:
+        getString(event, "speaker") ??
+        getString(event, "host"),
+      date:
+        getDateLike(event, "date") ??
+        getDateLike(event, "startDate"),
+      updatedAt: getDateLike(event, "updatedAt"),
+      category:
+        getString(event, "category") ??
+        getString(event, "type"),
+      tags: getStringArray(event, "tags"),
 
       printSettings: undefined,
 
-      seoTitle: event.seoTitle || event.title || undefined,
+      seoTitle:
+        getString(event, "seoTitle") ??
+        getString(event, "title") ??
+        slug,
       seoDescription:
-        event.seoDescription ||
-        event.excerpt ||
-        event.summary ||
-        event.description ||
-        undefined,
+        getString(event, "seoDescription") ??
+        getString(event, "excerpt") ??
+        getString(event, "summary") ??
+        getString(event, "description"),
 
       source: "events",
-      published: (event.status ?? "published") !== "draft",
+      published: (status ?? "published") !== "draft",
     };
   });
 }
@@ -206,40 +294,59 @@ async function getBookContent(): Promise<UnifiedContent[]> {
   );
   if (!booksModule) return [];
 
-  const getAllBooksMeta = (booksModule as any)
-    .getAllBooksMeta as (() => any[] | Promise<any[]>) | undefined;
+  const getAllBooksMeta =
+    (booksModule as { getAllBooksMeta?: () => ContentLike[] | Promise<ContentLike[]> })
+      .getAllBooksMeta;
 
-  const books = (await resolveMaybeAsync(getAllBooksMeta)) ?? [];
+  const booksRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
+    getAllBooksMeta,
+  );
+  const books = toContentArray(booksRaw ?? []);
 
-  return books.map((book: any): UnifiedContent => {
-    const rawSlug = book.slug || book.id || book._id || book.title || "";
+  return books.map((book): UnifiedContent => {
+    const rawSlug =
+      getString(book, "slug") ??
+      getString(book, "id") ??
+      getString(book, "_id") ??
+      getString(book, "title") ??
+      "";
     const slug = normaliseSlug(rawSlug, "books");
+
+    const status = getString(book, "status");
 
     return {
       slug,
-      title: book.title || slug,
+      title: getString(book, "title") ?? slug,
       type: "book",
 
       content: undefined, // meta only; full body loaded in /books/[slug]
-      description: book.excerpt || book.description || undefined,
+      description:
+        getString(book, "excerpt") ??
+        getString(book, "description"),
 
-      author: book.author || book.primaryAuthor || undefined,
-      date: book.publishedAt || book.date || undefined,
-      updatedAt: book.updatedAt || undefined,
-      category: book.category || undefined,
-      tags: book.tags || undefined,
+      author:
+        getString(book, "author") ??
+        getString(book, "primaryAuthor"),
+      date:
+        getDateLike(book, "publishedAt") ??
+        getDateLike(book, "date"),
+      updatedAt: getDateLike(book, "updatedAt"),
+      category: getString(book, "category"),
+      tags: getStringArray(book, "tags"),
 
-      printSettings: book.printSettings || undefined,
+      printSettings: book["printSettings"] as PrintSettings | undefined,
 
-      seoTitle: book.seoTitle || book.title || undefined,
+      seoTitle:
+        getString(book, "seoTitle") ??
+        getString(book, "title") ??
+        slug,
       seoDescription:
-        book.seoDescription ||
-        book.excerpt ||
-        book.description ||
-        undefined,
+        getString(book, "seoDescription") ??
+        getString(book, "excerpt") ??
+        getString(book, "description"),
 
       source: "books",
-      published: (book.status ?? "published") !== "draft",
+      published: (status ?? "published") !== "draft",
     };
   });
 }
@@ -254,48 +361,64 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
   );
   if (!downloadsModule) return [];
 
-  // adjust this name if your module exports a different function
-  const getAllDownloadsMeta = (downloadsModule as any)
-    .getAllDownloadsMeta as (() => any[] | Promise<any[]>) | undefined;
+  const getAllDownloadsMeta =
+    (downloadsModule as {
+      getAllDownloadsMeta?: () => ContentLike[] | Promise<ContentLike[]>;
+    }).getAllDownloadsMeta;
 
-  const downloads = (await resolveMaybeAsync(getAllDownloadsMeta)) ?? [];
+  const downloadsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
+    getAllDownloadsMeta,
+  );
+  const downloads = toContentArray(downloadsRaw ?? []);
 
-  return downloads.map((d: any): UnifiedContent => {
-    const rawSlug = d.slug || d.id || d._id || d.title || "";
+  return downloads.map((d): UnifiedContent => {
+    const rawSlug =
+      getString(d, "slug") ??
+      getString(d, "id") ??
+      getString(d, "_id") ??
+      getString(d, "title") ??
+      "";
     const slug = normaliseSlug(rawSlug, "downloads");
+
+    const status = getString(d, "status");
 
     return {
       slug,
-      title: d.title || slug,
+      title: getString(d, "title") ?? slug,
       type: "download",
 
       content: undefined,
-      description: d.excerpt || d.description || undefined,
+      description:
+        getString(d, "excerpt") ??
+        getString(d, "description"),
 
-      author: d.author || undefined,
-      date: d.date || d.publishedAt || undefined,
-      updatedAt: d.updatedAt || undefined,
-      category: d.category || undefined,
-      tags: d.tags || undefined,
+      author: getString(d, "author"),
+      date:
+        getDateLike(d, "date") ??
+        getDateLike(d, "publishedAt"),
+      updatedAt: getDateLike(d, "updatedAt"),
+      category: getString(d, "category"),
+      tags: getStringArray(d, "tags"),
 
-      printSettings: d.printSettings || undefined,
+      printSettings: d["printSettings"] as PrintSettings | undefined,
 
-      seoTitle: d.seoTitle || d.title || undefined,
+      seoTitle:
+        getString(d, "seoTitle") ??
+        getString(d, "title") ??
+        slug,
       seoDescription:
-        d.seoDescription ||
-        d.excerpt ||
-        d.description ||
-        undefined,
+        getString(d, "seoDescription") ??
+        getString(d, "excerpt") ??
+        getString(d, "description"),
 
       source: "downloads",
-      published: (d.status ?? "published") !== "draft",
+      published: (status ?? "published") !== "draft",
     };
   });
 }
 
 // ---------------------------------------------------------------------------
 // RESOURCES CONTENT  →  /resources/[slug]
-// (wired to lib/server/resources-data.ts you just showed)
 // ---------------------------------------------------------------------------
 
 async function getResourceContent(): Promise<UnifiedContent[]> {
@@ -304,47 +427,64 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
   );
   if (!resourcesModule) return [];
 
-  const getAllResources = (resourcesModule as any)
-    .getAllResources as (() => any[] | Promise<any[]>) | undefined;
+  const getAllResources =
+    (resourcesModule as {
+      getAllResources?: () => ContentLike[] | Promise<ContentLike[]>;
+    }).getAllResources;
 
-  const resources = (await resolveMaybeAsync(getAllResources)) ?? [];
+  const resourcesRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
+    getAllResources,
+  );
+  const resources = toContentArray(resourcesRaw ?? []);
 
-  return resources.map((r: any): UnifiedContent => {
-    const rawSlug = r.slug || r.id || r._id || r.title || "";
+  return resources.map((r): UnifiedContent => {
+    const rawSlug =
+      getString(r, "slug") ??
+      getString(r, "id") ??
+      getString(r, "_id") ??
+      getString(r, "title") ??
+      "";
     const slug = normaliseSlug(rawSlug, "resources");
+
+    const status = getString(r, "status");
 
     return {
       slug,
-      title: r.title || slug,
+      title: getString(r, "title") ?? slug,
       type: "resource",
 
-      content: r.content || undefined,
-      description: r.excerpt || r.description || undefined,
+      content: (r["content"] as ReactNode | undefined) ?? undefined,
+      description:
+        getString(r, "excerpt") ??
+        getString(r, "description"),
 
-      author: r.author || undefined,
-      date: r.date || r.publishedAt || undefined,
-      updatedAt: r.updatedAt || undefined,
-      category: r.category || undefined,
-      tags: r.tags || undefined,
+      author: getString(r, "author"),
+      date:
+        getDateLike(r, "date") ??
+        getDateLike(r, "publishedAt"),
+      updatedAt: getDateLike(r, "updatedAt"),
+      category: getString(r, "category"),
+      tags: getStringArray(r, "tags"),
 
-      printSettings: r.printSettings || undefined,
+      printSettings: r["printSettings"] as PrintSettings | undefined,
 
-      seoTitle: r.seoTitle || r.title || undefined,
+      seoTitle:
+        getString(r, "seoTitle") ??
+        getString(r, "title") ??
+        slug,
       seoDescription:
-        r.seoDescription ||
-        r.excerpt ||
-        r.description ||
-        undefined,
+        getString(r, "seoDescription") ??
+        getString(r, "excerpt") ??
+        getString(r, "description"),
 
       source: "resources",
-      published: (r.status ?? "published") !== "draft",
+      published: (status ?? "published") !== "draft",
     };
   });
 }
 
 // ---------------------------------------------------------------------------
 // PAGES CONTENT  →  /[slug]
-// (from lib/server/pages-data.ts – about, contact, etc.)
 // ---------------------------------------------------------------------------
 
 async function getPageContent(): Promise<UnifiedContent[]> {
@@ -353,29 +493,32 @@ async function getPageContent(): Promise<UnifiedContent[]> {
   );
   if (!pagesModule) return [];
 
-  const getPageSlugs = (pagesModule as any).getPageSlugs as
-    | (() => string[])
-    | undefined;
-  const getPageBySlug = (pagesModule as any).getPageBySlug as
-    | ((slug: string, fields?: string[]) => any)
-    | undefined;
+  const getPageSlugs =
+    (pagesModule as { getPageSlugs?: () => string[] }).getPageSlugs;
+  const getPageBySlug =
+    (pagesModule as {
+      getPageBySlug?: (slug: string, fields?: string[]) => ContentLike;
+    }).getPageBySlug;
 
   if (!getPageSlugs || !getPageBySlug) return [];
 
   const slugs = getPageSlugs();
   const pages = slugs
-    .map((slug) => getPageBySlug(slug, ["slug", "title", "description"]))
-    .filter(Boolean);
+    .map((slug) =>
+      getPageBySlug(slug, ["slug", "title", "description", "seoTitle", "seoDescription"]),
+    )
+    .filter((p): p is ContentLike => !!p);
 
-  return pages.map((p: any): UnifiedContent => {
-    const slug = cleanSlug(p.slug || "");
+  return pages.map((p): UnifiedContent => {
+    const slug = cleanSlug(getString(p, "slug") ?? "");
+
     return {
-      slug, // route: "/about", "/contact", etc.
-      title: p.title || slug,
+      slug,
+      title: getString(p, "title") ?? slug,
       type: "page",
 
-      content: undefined, // rendered by dedicated /[slug] page
-      description: p.description || undefined,
+      content: undefined,
+      description: getString(p, "description"),
 
       author: undefined,
       date: undefined,
@@ -385,8 +528,13 @@ async function getPageContent(): Promise<UnifiedContent[]> {
 
       printSettings: undefined,
 
-      seoTitle: p.seoTitle || p.title || undefined,
-      seoDescription: p.seoDescription || p.description || undefined,
+      seoTitle:
+        getString(p, "seoTitle") ??
+        getString(p, "title") ??
+        slug,
+      seoDescription:
+        getString(p, "seoDescription") ??
+        getString(p, "description"),
 
       source: "pages",
       published: true,
@@ -395,55 +543,12 @@ async function getPageContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// PRINT CONTENT  →  /print/[slug]
-// (from lib/print-utils.ts)
+// PRINT CONTENT  →  /print/[slug] (placeholder for now)
 // ---------------------------------------------------------------------------
 
 async function getPrintContent(): Promise<UnifiedContent[]> {
-  const printModule = await safeImport(
-    () => import("@/lib/print-utils" as string),
-  );
-  if (!printModule) return [];
-
-  const getAllPrintDocuments = (printModule as any)
-    .getAllPrintDocuments as (() => any[] | Promise<any[]>) | undefined;
-
-  const docs = (await resolveMaybeAsync(getAllPrintDocuments)) ?? [];
-
-  return docs.map((d: any): UnifiedContent => {
-    const rawSlug = d.slug || d._id || d.title || "";
-    const slug = normaliseSlug(rawSlug, "print");
-
-    return {
-      slug,
-      title: d.title || slug,
-      type: "print",
-
-      content: d.content || undefined,
-      description: d.excerpt || undefined,
-
-      author: undefined,
-      date: d.date || undefined,
-      updatedAt: undefined,
-      category: undefined,
-      tags: d.tags || undefined,
-
-      printSettings: undefined,
-
-      seoTitle: d.seoTitle || d.title || undefined,
-      seoDescription: d.seoDescription || d.excerpt || undefined,
-
-      source: "print",
-      published: true,
-    };
-  });
-}
-
-// ---------------------------------------------------------------------------
-// STATIC PLACEHOLDERS (if needed)
-// ---------------------------------------------------------------------------
-
-async function getStaticPrintContent(): Promise<UnifiedContent[]> {
+  // Intentionally returns [] until a real print-utils implementation
+  // is wired in without causing module-resolution failures.
   return [];
 }
 
@@ -451,8 +556,8 @@ async function getStaticPrintContent(): Promise<UnifiedContent[]> {
 // PUBLIC API
 // ---------------------------------------------------------------------------
 
-export async function getUnifiedContent(): Promise<UnifiedContent[]> {
-  const [mdx, events, books, downloads, resources, pages, prints, statics] =
+export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
+  const [mdx, events, books, downloads, resources, pages, prints] =
     await Promise.all([
       getMdxContent(),
       getEventContent(),
@@ -461,7 +566,6 @@ export async function getUnifiedContent(): Promise<UnifiedContent[]> {
       getResourceContent(),
       getPageContent(),
       getPrintContent(),
-      getStaticPrintContent(),
     ]);
 
   return [
@@ -472,19 +576,14 @@ export async function getUnifiedContent(): Promise<UnifiedContent[]> {
     ...resources,
     ...pages,
     ...prints,
-    ...statics,
   ];
-}
-
-export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
-  return getUnifiedContent();
 }
 
 export async function getUnifiedContentBySlug(
   rawSlug: string,
 ): Promise<UnifiedContent | null> {
   const target = cleanSlug(rawSlug);
-  const all = await getUnifiedContent();
+  const all = await getAllUnifiedContent();
 
   const match =
     all.find((item) => cleanSlug(item.slug) === target) ??

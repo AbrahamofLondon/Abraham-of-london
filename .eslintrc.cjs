@@ -6,8 +6,6 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: "module",
     ecmaFeatures: { jsx: true },
-    // IMPORTANT: we are NOT using `project` here
-    // to avoid typed-lint errors for files not in tsconfig during Netlify builds.
   },
   settings: {
     react: {
@@ -27,7 +25,7 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    // "prettier", // keep this commented out until eslint-config-prettier is installed
+    // "prettier",
   ],
   plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   rules: {
@@ -43,23 +41,34 @@ module.exports = {
     "react/prop-types": "off",
     "react/no-unescaped-entities": "off",
     "react/no-unknown-property": "off",
-    "react/jsx-no-undef": "off", // ⬅ stops 'Crown is not defined' from being fatal
+    "react/jsx-no-undef": "off",
 
     // Next.js
     "@next/next/no-img-element": "warn",
 
-    // A11y – keep signal, no build failures
+    // A11y
     "jsx-a11y/label-has-associated-control": "warn",
     "jsx-a11y/click-events-have-key-events": "warn",
     "jsx-a11y/no-noninteractive-element-interactions": "warn",
     "jsx-a11y/no-redundant-roles": "warn",
     "jsx-a11y/no-autofocus": "warn",
 
-    // Links security – downgrade
+    // Links security
     "react/jsx-no-target-blank": "warn",
 
     // Misc
     "no-useless-escape": "warn",
     "import/no-anonymous-default-export": "off",
   },
+
+  // Important: declaration files are allowed to be loose and noisy
+  overrides: [
+    {
+      files: ["**/*.d.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+      },
+    },
+  ],
 };

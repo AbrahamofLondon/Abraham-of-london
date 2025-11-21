@@ -10,7 +10,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
 import SiteLayout from "@/components/SiteLayout";
-import { mdxComponents } from "@/components/mdx-components";
+import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
@@ -18,9 +18,16 @@ interface Params extends ParsedUrlQuery {
   slug: string;
 }
 
+// Shape of the content returned for a single resource
+interface ResourceEntry extends PostMeta {
+  content?: string | null;
+}
+
+type ResourceMdxSource = MDXRemoteSerializeResult<Record<string, unknown>>;
+
 interface ResourcePageProps {
   meta: PostMeta;
-  mdxSource: MDXRemoteSerializeResult;
+  mdxSource: ResourceMdxSource;
 }
 
 // ----------------------------------------------------------------------
@@ -59,7 +66,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
           )}
           {coverImage && (
             <div className="mt-6">
-              {/* Optional: add <Image /> if you want visual covers */}
+              {/* Optional: add <Image /> for a visual cover if you want */}
             </div>
           )}
         </header>
@@ -78,9 +85,13 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
   try {
-    const resources = getAllContent("resources");
+    // getAllContent is untyped, so assert to the shape we need here
+    const resources = getAllContent("resources") as Array<
+      PostMeta & { slug: string }
+    >;
+
     const paths =
-      resources?.map((item: any) => ({
+      resources?.map((item) => ({
         params: { slug: String(item.slug) },
       })) ?? [];
 
@@ -102,7 +113,7 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 // ----------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<ResourcePageProps, Params> = async (
-  context
+  context,
 ) => {
   const slug = context.params?.slug;
 
@@ -111,26 +122,27 @@ export const getStaticProps: GetStaticProps<ResourcePageProps, Params> = async (
   }
 
   try {
-    const { content, ...meta } = getContentBySlug("resources", slug, {
+    const entry = getContentBySlug("resources", slug, {
       withContent: true,
-    });
+    }) as ResourceEntry | null;
 
-    if (!meta || !(meta as PostMeta).title) {
+    if (!entry || !entry.title) {
       return { notFound: true };
     }
 
-    // Always serialize something (even empty string) to avoid MDXRemote runtime errors
-    const mdxSource = await serialize(content || "", {
+    const { content, ...meta } = entry;
+
+    const mdxSource: ResourceMdxSource = await serialize(content || "", {
       parseFrontmatter: false,
       scope: meta,
       mdxOptions: {
-        remarkPlugins: [remarkGfm as any],
+        remarkPlugins: [remarkGfm],
       },
     });
 
     return {
       props: {
-        meta: meta as PostMeta,
+        meta,
         mdxSource,
       },
       revalidate: 3600,
