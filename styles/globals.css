@@ -2,7 +2,7 @@
 /* ---------- Global Styles & Optimization --------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* 1. Local self-hosted fonts (Critical for consistent rendering, including print) */
+/* 1. Local self-hosted fonts */
 @font-face {
   font-family: "Inter";
   src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
@@ -25,7 +25,7 @@
 
 
 /* ------------------------------------------------------------------- */
-/* ---------- Theme Variables (LUXURY LIGHT MODE) -------------------- */
+/* ---------- Luxury Theme Variables --------------------------------- */
 /* ------------------------------------------------------------------- */
 
 :root {
@@ -33,24 +33,23 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
   --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* UPGRADED COLORS (Deep Forest, Warm Cream, Muted Gold) */
-  --color-primary: #0B2E1F;          /* deep-forest */
-  --color-primary-hover: #16573D;    /* Slightly lighter deep forest for subtle hover */
-  --color-on-primary: #FAF7F2;       /* warm-cream */
-  --color-on-primary-hover: #FAF7F2; /* hover text on primary (same as on-primary) */
-
-  --color-secondary: #FAF7F2;        /* page bg: warm-cream */
-  --color-on-secondary: #333333;     /* soft-charcoal for main text */
-
-  --color-accent: #C5A352;           /* muted-gold */
-  --color-accent-hover: #A0833F;     /* Darker muted-gold for contrast */
+  /* Luxury Color Palette */
+  --color-primary: #0B2E1F;          /* Deep Forest - authority, heritage */
+  --color-primary-hover: #16573D;    /* Refined forest accent */
+  --color-on-primary: #FAF7F2;       /* Warm Cream - elegance */
+  
+  --color-secondary: #FAF7F2;        /* Page background - luxury paper */
+  --color-on-secondary: #333333;     /* Soft Charcoal - readable sophistication */
+  
+  --color-accent: #C5A352;           /* Muted Gold - restrained opulence */
+  --color-accent-hover: #A0833F;     /* Deeper gold for gravitas */
   --color-on-accent: #ffffff;
+  
+  --color-border: #E5E5E5;           /* Subtle borders */
+  --color-surface: #FFFFFF;          /* Card surfaces */
+  --color-muted: #4B8B6B;           /* Subtle green for details */
 
-  --color-lightGrey: #E5E5E5;        /* light-gray */
-  --color-warmWhite: #FAF7F2;        /* Alias for warm-cream */
-  --color-midGreen: #4B8B6B;         /* subtle-green (for bullets/accents) */
-
-  /* Fluid type scale (remains the same) */
+  /* Fluid type scale */
   --step--1: clamp(0.92rem, 0.84rem + 0.25vw, 1rem);
   --step-0: clamp(1.04rem, 0.96rem + 0.35vw, 1.15rem);
   --step-1: clamp(1.25rem, 1.10rem + 0.70vw, 1.45rem);
@@ -58,45 +57,40 @@
   --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
   --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
 
-  /* Color scheme for light mode */
   color-scheme: light;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Dark tokens (Retuned for richer contrast) -------------- */
-/* ---------- Dark Mode Tokens --------------------------------------- */
+/* ---------- Luxury Dark Mode --------------------------------------- */
 /* ------------------------------------------------------------------- */
 .dark {
-  /* Primary/Text Colors */
-  --color-primary: #C5A352;          /* Primary is now muted-gold (High contrast) */
-  --color-primary-hover: #E9D79A;    /* Lighter gold hover */
-  --color-on-primary: #0f172a;
-  --color-on-primary-hover: #0f172a;
+  /* Primary becomes the accent - gold for authority in darkness */
+  --color-primary: #C5A352;          /* Gold as primary in dark mode */
+  --color-primary-hover: #E9D79A;    /* Lighter gold for hover */
+  --color-on-primary: #0f172a;       /* Deep charcoal for text on gold */
+  
+  /* Sophisticated dark backgrounds */
+  --color-secondary: #111827;        /* Deep slate - luxury dark */
+  --color-on-secondary: #F8FAFC;     /* Near-white - crisp readability */
+  
+  /* Accent becomes the forest green */
+  --color-accent: #0B2E1F;           /* Forest green as accent */
+  --color-accent-hover: #16573D;
+  --color-on-accent: #F8FAFC;
+  
+  /* Refined dark surfaces */
+  --color-border: #2D3748;           /* Subtle dark borders */
+  --color-surface: #1F2937;          /* Elevated surfaces */
+  --color-muted: #86efac;            /* Soft green for details */
 
-  /* Background/Surface Colors */
-  --color-secondary: #111827;        /* Deeper background (slate-900 equivalent) */
-  --color-on-secondary: #F8FAFC;     /* Near-white text (slate-50) */
-
-  /* Accent Colors */
-  --color-accent: #86efac;           /* Mid-green accent for subtle contrast */
-  --color-accent-hover: #4B8B6B;
-  --color-on-accent: #111827;
-
-  /* UI Colors */
-  --color-lightGrey: #2D3748;        /* Darker border/divider (slate-800 equivalent) */
-  --color-warmWhite: #1F2937;        /* Dark surface/card backgrounds */
-  --color-midGreen: #86efac;         /* midGreen in dark mode */
-
-  /* Color scheme for dark mode */
   color-scheme: dark;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Base / Reset & Typography (Luxury) --------------------- */
+/* ---------- Base Styles with Cadence ------------------------------- */
 /* ------------------------------------------------------------------- */
 html {
-  /* Ensure smooth theme transitions */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -112,48 +106,167 @@ html, body {
 body {
   font-family: var(--font-sans);
   font-size: var(--step-0);
-  line-height: 1.85;
+  line-height: 1.75; /* Refined line height for luxury reading */
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
 }
 
+/* ------------------------------------------------------------------- */
+/* ---------- Typography with Authority ------------------------------ */
+/* ------------------------------------------------------------------- */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   color: var(--color-primary);
   text-wrap: balance;
   font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
+h1 {
+  font-size: var(--step-4);
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: var(--step-3);
+  margin: 2.5rem 0 1rem;
+}
+
+h3 {
+  font-size: var(--step-2);
+  margin: 2rem 0 0.75rem;
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Interactive Elements with Candor ---------------------- */
+/* ------------------------------------------------------------------- */
 a {
   color: var(--color-primary);
   text-decoration: none;
-  transition: color 0.25s ease;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
 }
 
 a:hover {
-  color: var(--color-accent); 
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
-/* Selection & Focus */
+/* Selection & Focus - Intentional */
 ::selection {
-  background: #E9D79A;
+  background: rgba(197, 163, 82, 0.15);
   color: var(--color-primary);
 }
 
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Luxury Components -------------------------------------- */
+/* ------------------------------------------------------------------- */
+
+/* Cards with depth and purpose */
+.card {
+  border: 1px solid var(--color-border);
+  padding: 2rem;
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .card {
+  background-color: var(--color-surface);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Sophisticated buttons */
+.luxury-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border: 1px solid var(--color-primary);
 }
 
-/* Media & Accessibility */
-img, video {
-  display: block;
-  max-width: 100%;
-  height: auto;
+.luxury-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.luxury-btn--outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.luxury-btn--outline:hover {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Subtle patterns */
+.luxury-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Refined Utilities -------------------------------------- */
+/* ------------------------------------------------------------------- */
+
+/* Elegant scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Print excellence */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+/* Motion respect */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -162,195 +275,50 @@ img, video {
   }
 }
 
-/* Printing fidelity helpers (Important for PDF generation) */
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-
 /* ------------------------------------------------------------------- */
-/* ---------- Missing Utilities & Components ------------------------- */
+/* ---------- Tailwind Components ------------------------------------ */
 /* ------------------------------------------------------------------- */
-
-/* Gold gradient text utility */
-.text-gold-gradient {
-  background: linear-gradient(135deg, #C5A352 0%, #E9D79A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Smooth shadow transitions */
-.shadow-3xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
-}
-
-/* Loading animation */
-@keyframes pulse-gold {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.animate-pulse-gold {
-  animation: pulse-gold 2s ease-in-out infinite;
-}
-
-/* ------------------------------------------------------------------- */
-/* ---------- Tailwind Components / Utilities ------------------------ */
-/* ------------------------------------------------------------------- */
-
-/* Cards (Refined Visuals) */
-.card {
-  border: 1px solid var(--color-lightGrey);
-  padding: 28px;
-  box-shadow: 0 4px 18px rgba(11,46,31,.08);
-  transition: transform .25s ease, box-shadow .25s ease;
-  background-color: #fff;
-  border-radius: 12px;
-}
-
-.dark .card { 
-  background-color: var(--color-warmWhite);
-  box-shadow: 0 4px 18px rgba(0,0,0,.35);
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(11,46,31,.12);
-}
-
 @layer components {
-  /* Button (aol-btn updated for new colors) */
-  .aol-btn {
-    @apply inline-flex items-center rounded-full px-5 py-2.5 text-base font-semibold text-white
-           focus:outline-none focus-visible:ring-2;
-    background-color: var(--color-primary);
-    --tw-ring-color: rgba(11,46,31,.35); 
+  .bg-luxury-gradient {
+    background: linear-gradient(135deg, var(--color-secondary) 0%, color-mix(in srgb, var(--color-secondary) 95%, white) 100%);
   }
-  .aol-btn:hover { 
-    background-color: var(--color-primary-hover); 
+  
+  .text-luxury-accent {
+    color: var(--color-accent);
   }
-
-  /* Background Pattern */
-  .pattern-bg {
-    background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Gold gradient background */
-  .bg-gold-gradient {
-    background: linear-gradient(135deg, #C5A352 0%, #E9D79A 100%);
-  }
-
-  /* Charcoal to black gradient */
-  .bg-charcoal-to-black {
-    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+  
+  .border-luxury {
+    border-color: var(--color-border);
   }
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Typography Polish (Prose Overrides) -------------------- */
+/* ---------- Prose Refinements -------------------------------------- */
 /* ------------------------------------------------------------------- */
 .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
   --tw-prose-links: var(--color-primary);
   --tw-prose-bold: var(--color-primary);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-muted);
   --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
+  --tw-prose-quote-borders: var(--color-accent);
 }
 
 .dark .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
-  --tw-prose-links: var(--color-accent);
+  --tw-prose-links: var(--color-primary);
   --tw-prose-bold: var(--color-on-secondary);
-  --tw-prose-quotes: var(--color-on-secondary);
-  --tw-prose-quote-borders: var(--color-lightGrey);
-}
-
-/* Font Consistency */
-.prose h1, .prose h2, .prose h3 {
-  font-family: var(--font-serif);
-  font-weight: 700;
-}
-
-/* Heading Sizing and Spacing */
-.prose h1 {
-  font-size: var(--step-4);
-  line-height: 1.1;
-  letter-spacing: -.02em;
-  margin-bottom: .6rem;
-}
-
-.prose h2 {
-  font-size: var(--step-3);
-  line-height: 1.15;
-  letter-spacing: -.01em;
-  margin: 2.5rem 0 .8rem;
-}
-
-.prose h3 {
-  font-size: var(--step-2);
-  line-height: 1.2;
-  margin: 2rem 0 .6rem;
-}
-
-/* Body Text Consistency */
-.prose p,
-.prose li {
-  font-family: var(--font-sans);
-  font-size: var(--step-0);
-  line-height: 1.85;
-  margin-block: 1rem;
 }
 
 .prose blockquote {
   font-style: italic;
-  font-size: var(--step-1);
-  line-height: 1.6;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--color-accent); 
+  border-left-width: 3px;
+  border-left-color: var(--color-accent);
   color: var(--color-on-secondary);
-}
-
-/* List Markers */
-.prose ul > li::marker {
-  color: var(--color-midGreen);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  padding: 1rem 1.5rem;
+  border-radius: 0 6px 6px 0;
 }
