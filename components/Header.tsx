@@ -39,6 +39,12 @@ const NAV: NavItem[] = [
   { route: "contact", label: "Contact" },
 ];
 
+// Define proper type for siteConfig phone property
+interface SiteConfigWithPhone {
+  email?: string;
+  phone?: string | number;
+}
+
 export default function Header({
   variant = "light",
   transparent = false,
@@ -159,9 +165,10 @@ export default function Header({
 
   const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
 
-  const EMAIL = siteConfig?.email || "info@abrahamoflondon.org";
-  const PHONE =
-    (siteConfig as any)?.phone?.toString().trim() || "+442086225909";
+  // Fix TypeScript warning by using proper typing
+  const siteConfigWithPhone = siteConfig as SiteConfigWithPhone;
+  const EMAIL = siteConfigWithPhone?.email || "info@abrahamoflondon.org";
+  const PHONE = siteConfigWithPhone?.phone?.toString().trim() || "+442086225909";
 
   const brandClass = [
     "font-serif font-bold transition-all duration-200",
