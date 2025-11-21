@@ -1,5 +1,5 @@
 // Generic, SSR-safe theme context stub
-// app/contexts/ThemeContext.tsx  (and the other ThemeContext files)
+// app/contexts/ThemeContext.tsx (and any other ThemeContext entry points)
 
 import * as React from "react";
 
@@ -14,20 +14,25 @@ export interface ThemeContextValue {
 const defaultValue: ThemeContextValue = {
   theme: "light",
   resolvedTheme: "light",
+  // No-op: theming is intentionally stubbed for now.
+  // Kept side-effect free to stay SSR-safe and lint-friendly.
   setTheme: () => {
-    // no-op – theming disabled for now
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[ThemeContext] setTheme called, but theming is stubbed.");
-    }
+    // intentionally empty
   },
 };
 
 const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  // We always just use the default value; no throwing, no dependency
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  /** Kept for compatibility with previous usage (ignored) */
+  defaultTheme?: string;
+  /** Kept for compatibility with previous usage (ignored) */
+  storageKey?: string;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // Always provide the static default; no throwing, no browser-only APIs
   return (
     <ThemeContext.Provider value={defaultValue}>
       {children}
@@ -35,8 +40,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// CRITICAL: This hook must NEVER throw in SSR/prerender
+// CRITICAL: must never throw during SSR / prerender
 export function useTheme(): ThemeContextValue {
-  // Even if no provider is present, React will fall back to `defaultValue`
+  // If no provider is mounted, React will still return `defaultValue`
   return React.useContext(ThemeContext);
 }

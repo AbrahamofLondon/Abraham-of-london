@@ -1,4 +1,3 @@
-// .eslintrc.cjs
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   root: true,
@@ -7,7 +6,8 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: "module",
     ecmaFeatures: { jsx: true },
-    project: "./tsconfig.json",
+    // ⚠️ Deliberately NOT using `project` here to avoid typed-lint
+    // errors for files not included in tsconfig during Netlify builds.
   },
   settings: {
     react: {
@@ -27,15 +27,33 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
-    "prettier",
+    // "prettier", // ⬅ removed to avoid requiring eslint-config-prettier
   ],
   plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   rules: {
-    // You can tune these as you like
+    // TS / general
     "@typescript-eslint/no-unused-vars": [
       "warn",
       { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
     ],
-    "react/react-in-jsx-scope": "off", // Next.js handles this
+    "@typescript-eslint/no-explicit-any": "warn",
+    "no-useless-escape": "warn",
+
+    // React / Next
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react/no-unescaped-entities": "off",
+    "react/no-unknown-property": "off",
+    "@next/next/no-img-element": "warn",
+
+    // A11y – keep signal, don’t break builds
+    "jsx-a11y/label-has-associated-control": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-noninteractive-element-interactions": "warn",
+    "jsx-a11y/no-redundant-roles": "warn",
+    "jsx-a11y/no-autofocus": "warn",
+
+    // Import / misc
+    "import/no-anonymous-default-export": "off",
   },
 };

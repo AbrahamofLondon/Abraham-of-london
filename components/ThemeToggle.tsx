@@ -10,29 +10,63 @@ interface ThemeToggleProps {
   size?: "sm" | "md" | "lg";
 }
 
-export default function ThemeToggle({ 
-  className = "", 
-  size = "md" 
-}: ThemeToggleProps) {
+export default function ThemeToggle({
+  className = "",
+  size = "md",
+}: ThemeToggleProps): JSX.Element {
   const [isDark, setIsDark] = React.useState(true);
   const [isHovered, setIsHovered] = React.useState(false);
 
-  const sizeClasses = {
+  const sizeClasses: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
     sm: "w-12 h-6",
     md: "w-16 h-8",
-    lg: "w-20 h-10"
+    lg: "w-20 h-10",
   };
 
-  const iconSizes = {
+  const iconSizes: Record<NonNullable<ThemeToggleProps["size"]>, number> = {
     sm: 12,
     md: 16,
-    lg: 20
+    lg: 20,
   };
 
+  const applyTheme = React.useCallback((dark: boolean) => {
+    if (typeof window === "undefined") return;
+
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add("dark");
+      window.localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      window.localStorage.setItem("theme", "light");
+    }
+  }, []);
+
+  // Initialise from localStorage / system preference
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const stored = window.localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark") {
+      const dark = stored === "dark";
+      setIsDark(dark);
+      applyTheme(dark);
+      return;
+    }
+
+    const prefersDark = window.matchMedia?.(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    setIsDark(prefersDark);
+    applyTheme(prefersDark);
+  }, [applyTheme]);
+
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    // In a real implementation, you'd hook this up to your theme context
-    // document.documentElement.classList.toggle('dark');
+    setIsDark((prev) => {
+      const next = !prev;
+      applyTheme(next);
+      return next;
+    });
   };
 
   return (
@@ -50,10 +84,11 @@ export default function ThemeToggle({
       onHoverEnd={() => setIsHovered(false)}
       whileTap={{ scale: 0.95 }}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      type="button"
     >
       {/* Background gradient */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold/10 via-transparent to-gold/5 opacity-0 transition-opacity duration-500 hover:opacity-100" />
-      
+
       {/* Track */}
       <div className="relative h-full w-full overflow-hidden rounded-full">
         {/* Animated background particles */}
@@ -85,18 +120,32 @@ export default function ThemeToggle({
             flex items-center justify-center
             rounded-full bg-gradient-to-br from-gold to-amber-200
             shadow-lg
-            ${size === "sm" ? "h-4 w-4" : size === "md" ? "h-6 w-6" : "h-8 w-8"}
+            ${
+              size === "sm"
+                ? "h-4 w-4"
+                : size === "md"
+                ? "h-6 w-6"
+                : "h-8 w-8"
+            }
           `}
           initial={false}
           animate={{
-            x: isDark 
-              ? size === "sm" ? 2 : size === "md" ? 4 : 6
-              : size === "sm" ? 26 : size === "md" ? 34 : 42
+            x: isDark
+              ? size === "sm"
+                ? 2
+                : size === "md"
+                ? 4
+                : 6
+              : size === "sm"
+              ? 26
+              : size === "md"
+              ? 34
+              : 42,
           }}
           transition={{
             type: "spring",
             stiffness: 500,
-            damping: 30
+            damping: 30,
           }}
         >
           {/* Sparkle effect */}
@@ -108,14 +157,14 @@ export default function ThemeToggle({
                 exit={{ scale: 0, rotate: 180 }}
                 transition={{ duration: 0.3 }}
               >
-                <Sparkles 
-                  size={iconSizes[size] - 8} 
+                <Sparkles
+                  size={iconSizes[size] - 8}
                   className="text-charcoal/80"
                 />
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* Sun/Moon Icons */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -127,16 +176,13 @@ export default function ThemeToggle({
               className="absolute"
             >
               {isDark ? (
-                <Moon 
-                  size={iconSizes[size] - 4} 
-                  className="text-charcoal" 
+                <Moon
+                  size={iconSizes[size] - 4}
+                  className="text-charcoal"
                   fill="currentColor"
                 />
               ) : (
-                <Sun 
-                  size={iconSizes[size] - 4} 
-                  className="text-charcoal" 
-                />
+                <Sun size={iconSizes[size] - 4} className="text-charcoal" />
               )}
             </motion.div>
           </AnimatePresence>
