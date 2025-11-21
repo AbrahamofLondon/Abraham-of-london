@@ -2,7 +2,7 @@
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { absUrl, getPageTitle, siteConfig } from "@/lib/siteConfig";
+import { getPageTitle, absUrl } from "@/lib/siteConfig"; // Added absUrl import
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -187,7 +187,7 @@ export default function SiteLayout({
       { property: "og:url", content: fullCanonicalUrl },
       { property: "og:image", content: defaultOgImageAbs },
       { property: "og:description", content: defaultDescription },
-      { property: "og:site_name", content: siteConfig.title },
+      { property: "og:site_name", content: "Abraham of London" },
       { property: "og:locale", content: "en_GB" },
 
       // Twitter

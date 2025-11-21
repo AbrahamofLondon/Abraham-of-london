@@ -2,37 +2,23 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { siteConfig } from "@/lib/siteConfig";
-import type { SocialLink as CoreSocialLink } from "@/lib/siteConfig";
+import { siteConfig, type SocialLink } from "@/lib/siteConfig";
 
 interface EnhancedFooterProps {
   variant?: "light" | "dark";
   className?: string;
 }
 
-// Extend the core SocialLink type with optional priority
-interface SortableSocialLink extends CoreSocialLink {
-  priority?: number;
-}
-
 export default function EnhancedFooter({
   variant = "light",
-  className = "",
+  className,
 }: EnhancedFooterProps) {
   const config = siteConfig;
 
-  // ✅ Cast to SortableSocialLink[] BEFORE sort, so a/b are correctly typed
-  const rawSocials: SortableSocialLink[] = Array.isArray(config.socialLinks)
-    ? (config.socialLinks as SortableSocialLink[])
+  // Safely normalize social links
+  const socialLinks: SocialLink[] = Array.isArray(config.socialLinks)
+    ? [...config.socialLinks]
     : [];
-
-  const socialLinks: SortableSocialLink[] = rawSocials
-    .slice()
-    .sort((a, b) => {
-      const priorityA = a.priority ?? 999;
-      const priorityB = b.priority ?? 999;
-      return priorityA - priorityB;
-    });
 
   const baseClasses = "py-16 transition-colors";
   const variantClasses = {
@@ -45,49 +31,45 @@ export default function EnhancedFooter({
   const socialLinkClasses =
     "p-3 rounded-xl hover:scale-110 transition-all duration-200 shadow-sm hover:shadow-md";
 
-  // All routes now exist - no dead links
   const footerSections = [
     {
-      title: "Explore",
+      title: "Navigation",
       links: [
         { href: "/", label: "Home" },
-        { href: "/content", label: "Insights" },
+        { href: "/content", label: "Content" },
+        { href: "/downloads", label: "Downloads" },
         { href: "/events", label: "Events" },
-        { href: "/downloads", label: "Resources" },
         { href: "/ventures", label: "Ventures" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { href: "/content", label: "Fatherhood Frameworks" },
+        { href: "/downloads", label: "Founder Tools" },
+        { href: "/content", label: "Leadership Resources" },
+        { href: "/content", label: "Book Manuscripts" },
       ],
     },
     {
       title: "Connect",
       links: [
         { href: "/contact", label: "Contact" },
-        { href: "/content", label: "Newsletter" },
+        { href: "/newsletter", label: "Newsletter" },
         { href: "/contact", label: "Speaking" },
         { href: "/consulting", label: "Consulting" },
         { href: "/chatham-rooms", label: "Chatham Rooms" },
       ],
     },
-    {
-      title: "Legal",
-      links: [
-        { href: "/privacy", label: "Privacy Policy" },
-        { href: "/terms", label: "Terms of Service" },
-        { href: "/cookies", label: "Cookie Policy" },
-        { href: "/accessibility", label: "Accessibility" },
-        { href: "/security", label: "Security Policy" },
-      ],
-    },
   ];
 
   return (
-    <footer
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
-    >
+    <footer className={`${baseClasses} ${variantClasses[variant]} ${className || ''}`}>
       <div className="mx-auto max-w-7xl px-4">
         {/* Main Footer Content */}
         <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand Section */}
-          <motion.div
+          <motion.div 
             className="lg:col-span-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -133,14 +115,16 @@ export default function EnhancedFooter({
                     {link.kind === "instagram" && "📸"}
                     {link.kind === "youtube" && "🎥"}
                     {link.kind === "website" && "🌐"}
+                    {link.kind === "tiktok" && "🎵"}
+                    {link.kind === "facebook" && "📘"}
+                    {link.kind === "email" && "✉️"}
+                    {link.kind === "phone" && "📞"}
+                    {link.kind === "whatsapp" && "💬"}
                     {![
-                      "twitter",
-                      "linkedin",
-                      "github",
-                      "instagram",
-                      "youtube",
-                      "website",
-                    ].includes(link.kind) && "🔗"}
+                      "twitter", "linkedin", "github", "instagram", 
+                      "youtube", "website", "tiktok", "facebook",
+                      "email", "phone", "whatsapp"
+                    ].includes(link.kind || '') && "🔗"}
                   </span>
                 </motion.a>
               ))}
@@ -149,7 +133,7 @@ export default function EnhancedFooter({
 
           {/* Links Sections */}
           {footerSections.map((section, sectionIndex) => (
-            <motion.div
+            <motion.div 
               key={section.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -161,16 +145,11 @@ export default function EnhancedFooter({
               </h4>
               <ul className="space-y-4">
                 {section.links.map((link, linkIndex) => (
-                  <motion.li
+                  <motion.li 
                     key={link.href}
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    transition={{
-                      duration: 0.4,
-                      delay:
-                        sectionIndex * 0.1 +
-                        linkIndex * 0.05,
-                    }}
+                    transition={{ duration: 0.4, delay: (sectionIndex * 0.1) + (linkIndex * 0.05) }}
                     viewport={{ once: true }}
                   >
                     <Link
@@ -188,7 +167,7 @@ export default function EnhancedFooter({
         </div>
 
         {/* Bottom Bar */}
-        <motion.div
+        <motion.div 
           className="border-t border-current/20 pt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

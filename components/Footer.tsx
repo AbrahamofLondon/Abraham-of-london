@@ -15,83 +15,77 @@ import {
   Phone,
   ArrowUp,
 } from "lucide-react";
-import { siteConfig } from "@/lib/siteConfig";
+import { siteConfig, type SocialLink } from "@/lib/siteConfig";
 
-type BareSocial = {
-  href?: string;
-  label?: string;
-  external?: boolean;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+// Icon mapping for social links
+const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  twitter: Twitter,
+  linkedin: Linkedin,
+  instagram: Instagram,
+  youtube: Youtube,
+  facebook: Facebook,
+  tiktok: MessageCircle,
+  email: Mail,
+  phone: Phone,
+  whatsapp: MessageCircle,
 };
 
-// ---------------------------------------------------------------------------
-// Socials
-// ---------------------------------------------------------------------------
-
-const DEFAULT_SOCIALS: BareSocial[] = [
+const DEFAULT_SOCIALS: SocialLink[] = [
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
-    icon: MessageCircle,
+    kind: "tiktok",
     external: true,
   },
   {
     href: "https://x.com/AbrahamAda48634",
     label: "X",
-    icon: Twitter,
+    kind: "twitter",
     external: true,
   },
   {
     href: "https://www.instagram.com/abraham_of_london_/",
     label: "Instagram",
-    icon: Instagram,
+    kind: "instagram",
     external: true,
   },
   {
     href: "https://www.facebook.com/share/16tvsnTgRG/",
     label: "Facebook",
-    icon: Facebook,
+    kind: "facebook",
     external: true,
   },
   {
     href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     label: "LinkedIn",
-    icon: Linkedin,
+    kind: "linkedin",
     external: true,
   },
   {
     href: "https://www.youtube.com/@abrahamoflondon",
     label: "YouTube",
-    icon: Youtube,
+    kind: "youtube",
     external: true,
   },
   {
     href: "mailto:info@abrahamoflondon.org",
     label: "Email",
-    icon: Mail,
+    kind: "email",
     external: false,
   },
   {
     href: "https://wa.me/447496334022",
     label: "WhatsApp",
-    icon: MessageCircle,
+    kind: "whatsapp",
     external: true,
   },
   {
     href: "tel:+442086225909",
     label: "Landline",
-    icon: Phone,
+    kind: "phone",
     external: false,
   },
 ];
-
-const isExternal = (href: string) => /^https?:\/\//i.test(href);
-const isUtility = (href: string) =>
-  href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:");
-
-// ---------------------------------------------------------------------------
-// Footer navigation – mapped ONLY to live routes
-// ---------------------------------------------------------------------------
 
 const footerSections = [
   {
@@ -125,45 +119,30 @@ const footerSections = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
   const email = siteConfig.email || "info@abrahamoflondon.org";
 
-  const configSocials: BareSocial[] = Array.isArray(siteConfig.socialLinks)
-    ? (siteConfig.socialLinks as BareSocial[])
+  const configSocials: SocialLink[] = Array.isArray(siteConfig.socialLinks)
+    ? siteConfig.socialLinks
     : [];
 
   // Merge and process social links
-  const byHref = new Map<string, BareSocial>();
+  const byHref = new Map<string, SocialLink>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
     if (!rawHref) return;
-    byHref.set(rawHref, {
-      ...item,
-      href: rawHref,
-    });
+    byHref.set(rawHref, item);
   });
 
   const socials = Array.from(byHref.values()).map((item) => {
-    const rawLabel =
-      item.label ||
-      item.href!.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
-      "Link";
-    const label = rawLabel;
-    const external =
-      typeof item.external === "boolean"
-        ? item.external
-        : isExternal(item.href!) && !isUtility(item.href!);
+    const external = item.external ?? (item.href.startsWith('http') && !item.href.startsWith('mailto:') && !item.href.startsWith('tel:'));
+    const Icon = item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
 
     return {
       ...item,
-      label,
       external,
-      Icon: item.icon || Sparkles,
+      Icon,
     };
   });
 

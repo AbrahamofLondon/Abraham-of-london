@@ -3,7 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import { Moon, SunMedium, Mail, Phone, MapPin, Clock, Users, Target } from "lucide-react";
 import Layout from "@/components/Layout";
-import { siteConfig, getPageTitle } from "@/lib/siteConfig";
+import { getPageTitle, siteConfig } from "@/lib/siteConfig"; // Added siteConfig import
 
 const ContactPage = (): JSX.Element => {
   const pageTitle = "Contact Abraham of London";

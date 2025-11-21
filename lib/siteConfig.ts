@@ -1,16 +1,8 @@
 // lib/siteConfig.ts
+import { SiteConfig, SocialLink, defaultSocialLinks } from '@/types/config';
+
 // Browser-safe site configuration + route & venture registry.
 // No fs, no Node-only APIs.
-
-export interface SocialLink {
-  href: string;
-  kind: SocialPlatform;
-  label: string;
-  external: boolean;
-  handle?: string;
-  priority?: number; // ✅ add this
-  icon?: string;
-}
 
 /**
  * Enumerate all "canonical" routes you actually support.
@@ -63,17 +55,21 @@ export interface Venture {
 /**
  * Top-level site configuration.
  */
-export interface SiteConfig {
+export interface FullSiteConfig {
   /** Public base URL (no trailing slash) */
   siteUrl: string;
   /** Brand/site title */
   title: string;
+  /** Site description */
+  description: string;
   /** Canonical author/owner name */
   author: string;
   /** Public contact email */
   email: string;
   /** Public contact phone */
   phone: string;
+  /** Copyright information */
+  copyright?: string;
   /** Optional social links used across the site */
   socialLinks?: SocialLink[];
   /** Default author avatar used across blog cards, etc. */
@@ -123,42 +119,17 @@ const INNOVATEHUB_URL =
 /**
  * Single source of truth for site identity + routes + ventures.
  */
-export const siteConfig: SiteConfig = {
+export const siteConfig: FullSiteConfig & SiteConfig = {
   siteUrl: PUBLIC_SITE_URL,
   title: "Abraham of London",
+  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
   author: "Abraham of London",
   email: "info@abrahamoflondon.org",
   phone: "+44 20 8622 5909",
+  copyright: `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`,
   authorImage: "/assets/images/profile-portrait.webp",
 
-  socialLinks: [
-    {
-      href: "https://abrahamoflondon.org",
-      label: "Abraham of London",
-      external: true,
-    },
-    {
-      href:
-        process.env.NEXT_PUBLIC_LINKEDIN_URL ||
-        "https://www.linkedin.com/in/abrahamoflondon",
-      label: "LinkedIn",
-      external: true,
-    },
-    {
-      href:
-        process.env.NEXT_PUBLIC_INSTAGRAM_URL ||
-        "https://www.instagram.com/abrahamoflondon",
-      label: "Instagram",
-      external: true,
-    },
-    {
-      href:
-        process.env.NEXT_PUBLIC_YOUTUBE_URL ||
-        "https://www.youtube.com/@abrahamoflondon",
-      label: "YouTube",
-      external: true,
-    },
-  ],
+  socialLinks: defaultSocialLinks,
 
   brand: {
     values: [
@@ -258,7 +229,7 @@ export const siteConfig: SiteConfig = {
   ],
 
   getPageTitle: (pageTitle?: string): string => {
-    const base = siteConfig.title || "Abraham of London";
+    const base = "Abraham of London";
     if (!pageTitle || typeof pageTitle !== "string") return base;
     return `${pageTitle} | ${base}`;
   }
@@ -309,13 +280,6 @@ export function absUrl(path: string | RouteId): string {
   return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
 }
 
-/** Compose a page title consistently. */
-export function getPageTitle(pageTitle?: string): string {
-  const base = siteConfig.title || "Abraham of London";
-  if (!pageTitle || typeof pageTitle !== "string") return base;
-  return `${pageTitle} | ${base}`;
-}
-
 /** Check if a route is active (for navigation highlighting) */
 export function isActiveRoute(currentPath: string, target: RouteId | string): boolean {
   const targetPath = internalHref(target);
@@ -328,15 +292,13 @@ export function isActiveRoute(currentPath: string, target: RouteId | string): bo
   return normalizedCurrent.startsWith(targetPath);
 }
 
-// Convenience exports for common routes
-export const routes = {
-  home: siteConfig.routes.home.path,
-  about: siteConfig.routes.about.path,
-  blog: siteConfig.routes.blogIndex.path,
-  content: siteConfig.routes.contentIndex.path,
-  books: siteConfig.routes.booksIndex.path,
-  ventures: siteConfig.routes.ventures.path,
-  downloads: siteConfig.routes.downloadsIndex.path,
-  strategy: siteConfig.routes.strategyLanding.path,
-  contact: siteConfig.routes.contact.path,
-} as const;
+/** Compose a page title consistently. */
+export function getPageTitle(pageTitle?: string): string {
+  const base = siteConfig.title || "Abraham of London";
+  if (!pageTitle || typeof pageTitle !== "string") return base;
+  return `${pageTitle} | ${base}`;
+}
+
+// Re-export types for convenience
+export type { SocialLink };
+export type { SiteConfig as BaseSiteConfig };
