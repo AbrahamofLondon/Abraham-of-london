@@ -11,12 +11,12 @@ import { getEventSlugs, getEventBySlug } from "@/lib/events";
 interface EventListing {
   slug: string;
   title: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  description?: string;
-  heroImage?: string;
-  coverImage?: string;
+  date?: string | null;
+  time?: string | null;
+  location?: string | null;
+  description?: string | null;
+  heroImage?: string | null;
+  coverImage?: string | null;
   tags?: string[];
 }
 
@@ -282,22 +282,22 @@ export async function getStaticProps() {
       try {
         const event = await getEventBySlug(slug);
         if (event) {
-          // Helper function to safely convert unknown to string or undefined
-          const safeString = (value: unknown): string | undefined => {
-            return typeof value === 'string' ? value : undefined;
+          // Helper function to safely convert unknown to string or null (not undefined)
+          const safeString = (value: unknown): string | null => {
+            return typeof value === 'string' ? value : null;
           };
 
           events.push({
             slug: safeString(event.slug) || slug,
             title: safeString(event.title) || 'Untitled Event',
-            date: safeString(event.date) || safeString(event.startDate),
-            time: safeString(event.time),
-            location: safeString(event.location) || safeString(event.venue),
-            description: safeString(event.description) || safeString(event.excerpt),
-            heroImage: safeString(event.heroImage),
-            coverImage: safeString(event.coverImage),
+            date: safeString(event.date) || safeString(event.startDate) || null,
+            time: safeString(event.time) || null,
+            location: safeString(event.location) || safeString(event.venue) || null,
+            description: safeString(event.description) || safeString(event.excerpt) || null,
+            heroImage: safeString(event.heroImage) || null,
+            coverImage: safeString(event.coverImage) || null,
             tags: Array.isArray(event.tags) 
-              ? event.tags.map(tag => safeString(tag)).filter((tag): tag is string => tag !== undefined)
+              ? event.tags.map(tag => safeString(tag)).filter((tag): tag is string => tag !== null)
               : undefined,
           });
         }

@@ -212,7 +212,8 @@ export async function verifyRecaptcha(
 
     if (
       config.allowedHostnames?.length &&
-      !config.allowedHostnames.includes(result.hostname || "")
+      result.hostname &&
+      !config.allowedHostnames.includes(result.hostname)
     ) {
       reasons.push(`Hostname ${result.hostname} not in allowed list`);
     }
@@ -261,18 +262,21 @@ export async function verifyRecaptcha(
     }
 
     return result;
-  } catch (error: any) {
-    if (error instanceof RecaptchaError) {
-      throw error;
-    }
-
-    if (error?.name === "AbortError") {
+  } catch (error: unknown) {
+    // Handle timeout errors
+    if (error instanceof Error && error.name === "AbortError") {
       throw new RecaptchaError(
         "reCAPTCHA verification timeout",
         "TIMEOUT",
       );
     }
 
+    // Handle RecaptchaError instances
+    if (error instanceof RecaptchaError) {
+      throw error;
+    }
+
+    // Handle unknown errors
     console.error("💥 reCAPTCHA verification unexpected error:", error);
 
     throw new RecaptchaError(
@@ -319,4 +323,6 @@ export function cleanupRecaptchaCache(): void {
 }
 
 // Run cleanup every 5 minutes
-setInterval(cleanupRecaptchaCache, 5 * 60 * 1000).unref();
+if (typeof setInterval !== 'undefined') {
+  setInterval(cleanupRecaptchaCache, 5 * 60 * 1000);
+}

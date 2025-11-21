@@ -1,12 +1,13 @@
+// components/ContactForm.tsx
 "use client";
 import * as React from "react";
 import Button from "@/components/Button";
 
-type FormState = {
+interface FormState {
   name: string;
   email: string;
   message: string;
-};
+}
 
 const initial: FormState = { name: "", email: "", message: "" };
 
@@ -39,8 +40,11 @@ export default function ContactForm(): JSX.Element {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Name</label>
+        <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700">
+          Name
+        </label>
         <input
+          id="contact-name"
           value={state.name}
           onChange={onChange("name")}
           required
@@ -49,8 +53,11 @@ export default function ContactForm(): JSX.Element {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
         <input
+          id="contact-email"
           type="email"
           value={state.email}
           onChange={onChange("email")}
@@ -60,8 +67,11 @@ export default function ContactForm(): JSX.Element {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Message</label>
+        <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700">
+          Message
+        </label>
         <textarea
+          id="contact-message"
           value={state.message}
           onChange={onChange("message")}
           required
@@ -74,7 +84,7 @@ export default function ContactForm(): JSX.Element {
         <Button type="submit" loading={submitting}>
           Send
         </Button>
-        {done === "ok" && <span className="ml-3 text-sm text-green-600">Sent. We’ll be in touch.</span>}
+        {done === "ok" && <span className="ml-3 text-sm text-green-600">Sent. We'll be in touch.</span>}
         {done === "err" && <span className="ml-3 text-sm text-red-600">Something went wrong.</span>}
       </div>
     </form>

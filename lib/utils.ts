@@ -5,8 +5,8 @@ import { twMerge } from "tailwind-merge";
 /**
  * Tailwind-friendly className merge helper
  */
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(...inputs));
 }
 
 /**
@@ -16,7 +16,9 @@ export function getEnv(key: string, defaultValue: string = ""): string {
   if (typeof process === "undefined" || !process.env) {
     return defaultValue;
   }
-  return (process.env as Record<string, string | undefined>)[key] || defaultValue;
+
+  const value = (process.env as Record<string, string | undefined>)[key];
+  return value ?? defaultValue;
 }
 
 /**
@@ -24,7 +26,8 @@ export function getEnv(key: string, defaultValue: string = ""): string {
  */
 export function buildUrl(base: string, path: string): string {
   try {
-    return new URL(path, base.endsWith("/") ? base : `${base}/`).toString();
+    const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+    return new URL(path, normalizedBase).toString();
   } catch {
     return "#";
   }
@@ -36,14 +39,22 @@ export function buildUrl(base: string, path: string): string {
 export function pickEnvUrl(envKeys: string[], ...fallbacks: string[]): string {
   for (const key of envKeys) {
     const value = getEnv(key);
-    if (value && value.trim().length > 0) {
+    if (value) {
       const trimmed = value.trim();
-      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      if (
+        trimmed.length > 0 &&
+        (trimmed.startsWith("http://") || trimmed.startsWith("https://"))
+      ) {
         return trimmed;
       }
     }
   }
-  return fallbacks.find((fb) => fb && fb.trim().length > 0) || "#";
+
+  const fallback = fallbacks.find(
+    (fb) => fb && fb.trim().length > 0,
+  );
+
+  return fallback ?? "#";
 }
 
 export const ENV_KEYS = {
@@ -56,8 +67,12 @@ export const ENV_KEYS = {
 /**
  * Format currency with proper localization
  */
-export function formatCurrency(amount: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(
+  amount: number,
+  currency: string = "USD",
+  locale: string = "en-US",
+): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
@@ -69,20 +84,26 @@ export function formatCurrency(amount: number, currency: string = "USD"): string
  * Format percentage with sign
  */
 export function formatPercent(value: number, decimals: number = 2): string {
-  return `${value >= 0 ? "+" : ""}${value.toFixed(decimals)}%`;
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${value.toFixed(decimals)}%`;
 }
 
 /**
  * Debounce function for performance
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
   return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
   };
 }
 
@@ -90,5 +111,5 @@ export function debounce<T extends (...args: any[]) => any>(
  * Generate unique ID
  */
 export function generateId(): string {
-  return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `id_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }

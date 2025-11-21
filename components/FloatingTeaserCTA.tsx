@@ -1,11 +1,12 @@
 // components/FloatingTeaserCTA.tsx
+
 "use client";
 import * as React from "react";
 import TeaserRequest from "@/components/TeaserRequest";
 
 const LS_KEY = "fwt_teaser_dismissed_until";
 
-export default function FloatingTeaserCTA() {
+export default function FloatingTeaserCTA(): JSX.Element | null {
   const [open, setOpen] = React.useState(false);
   const [visible, setVisible] = React.useState(false);
 
@@ -14,22 +15,40 @@ export default function FloatingTeaserCTA() {
     const until = Number(localStorage.getItem(LS_KEY) || 0);
     const now = Date.now();
     if (now < until) return; // snoozed
+
     const t = setTimeout(() => setVisible(true), 5000);
     return () => clearTimeout(t);
   }, []);
 
-  function snooze(days = 7) {
+  function snooze(days = 7): void {
     const until = Date.now() + days * 24 * 60 * 60 * 1000;
     localStorage.setItem(LS_KEY, String(until));
     setOpen(false);
     setVisible(false);
   }
 
+  const handleBackdropClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+  ): void => {
+    // Only close if the click is on the overlay itself, not inside the dialog
+    if (e.target === e.currentTarget) {
+      snooze();
+    }
+  };
+
+  const handleBackdropKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+  ): void => {
+    if (e.key === "Escape") {
+      snooze();
+    }
+  };
+
   if (!visible) return null;
 
   return (
     <>
-      {/* Button */}
+      {/* Floating button to open teaser */}
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -48,13 +67,26 @@ export default function FloatingTeaserCTA() {
           aria-modal="true"
           id="teaser-cta-panel"
           className="fixed inset-0 z-50 flex items-end justify-end bg-black/20 backdrop-blur-[1px]"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) snooze(); // click outside
-          }}
+          onClick={handleBackdropClick}
+          onKeyDown={handleBackdropKeyDown}
         >
-          <div className="m-5 w-full max-w-md rounded-2xl border border-lightGrey bg-white p-4 shadow-card">
+          {/* Backdrop – just closes, no event typing needed */}
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            onClick={() => snooze()}
+            aria-label="Close teaser dialog"
+          />
+
+          {/* Dialog content */}
+          <div
+            className="relative m-5 w-full max-w-md rounded-2xl border border-lightGrey bg-white p-4 shadow-card"
+            role="document"
+          >
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-semibold text-deepCharcoal">Fathering Without Fear — Teaser</p>
+              <p className="text-sm font-semibold text-deepCharcoal">
+                Fathering Without Fear — Teaser
+              </p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
