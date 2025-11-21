@@ -3,6 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { getPageTitle } from "@/lib/siteConfig";
 import { getEventSlugs, getEventBySlug } from "@/lib/events";
@@ -271,9 +272,6 @@ function EventCard({ event, index, isPast = false }: { event: EventListing; inde
   );
 }
 
-// Add motion import at the top (after other imports)
-import { motion } from "framer-motion";
-
 // Static Generation
 export async function getStaticProps() {
   try {
@@ -284,16 +282,23 @@ export async function getStaticProps() {
       try {
         const event = await getEventBySlug(slug);
         if (event) {
+          // Helper function to safely convert unknown to string or undefined
+          const safeString = (value: unknown): string | undefined => {
+            return typeof value === 'string' ? value : undefined;
+          };
+
           events.push({
-            slug: event.slug || slug,
-            title: event.title || 'Untitled Event',
-            date: event.date || event.startDate,
-            time: event.time,
-            location: event.location || event.venue,
-            description: event.description || event.excerpt,
-            heroImage: event.heroImage,
-            coverImage: event.coverImage,
-            tags: event.tags,
+            slug: safeString(event.slug) || slug,
+            title: safeString(event.title) || 'Untitled Event',
+            date: safeString(event.date) || safeString(event.startDate),
+            time: safeString(event.time),
+            location: safeString(event.location) || safeString(event.venue),
+            description: safeString(event.description) || safeString(event.excerpt),
+            heroImage: safeString(event.heroImage),
+            coverImage: safeString(event.coverImage),
+            tags: Array.isArray(event.tags) 
+              ? event.tags.map(tag => safeString(tag)).filter((tag): tag is string => tag !== undefined)
+              : undefined,
           });
         }
       } catch (error) {

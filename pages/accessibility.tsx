@@ -58,8 +58,8 @@ export default function AccessibilityStatement() {
                   encounter accessibility barriers:
                 </p>
                 <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
-                  <li>Email: <a href="mailto:accessibility@abrahamoflondon.com" className="text-gold hover:text-amber-200 transition-colors">accessibility@abrahamoflondon.com</a></li>
-                  <li>Phone: +44 (0)20 XXXX XXXX</li>
+                  <li>Email: <a href="mailto:info@abrahamoflondon.com" className="text-gold hover:text-amber-200 transition-colors">accessibility@abrahamoflondon.com</a></li>
+                  <li>Phone: +44 (0)20 80622 5909</li>
                 </ul>
               </section>
 
