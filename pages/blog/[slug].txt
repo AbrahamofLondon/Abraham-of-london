@@ -52,7 +52,7 @@ const isDateOnly = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 function formatPretty(
   isoish: string | null | undefined,
-  tz = "Europe/London"
+  tz = "Europe/London",
 ): string {
   if (!isoish || typeof isoish !== "string") return "";
   if (isDateOnly(isoish)) {
@@ -130,12 +130,13 @@ function BlogPostPage({ post, contentSource, resourcesMeta }: BlogPostPageProps)
   const pathSegment = slug ? `blog/${slug}` : "blog";
   const url = `${siteBase}/${pathSegment}`;
 
-  // FIX: Safely handle image URLs
+  // Safely handle image URLs for SEO
   const relImage = coverImage ?? heroImage;
-  const absImage = relImage && typeof relImage === 'string'
-    ? new URL(relImage, siteBase).toString()
-    : undefined;
-    
+  const absImage =
+    relImage && typeof relImage === "string"
+      ? new URL(relImage, siteBase).toString()
+      : undefined;
+
   const displayDescription = description || excerpt || "";
 
   const jsonLd: Record<string, unknown> = {
@@ -159,11 +160,12 @@ function BlogPostPage({ post, contentSource, resourcesMeta }: BlogPostPageProps)
     ...(category ? { articleSection: category } : {}),
   };
 
-  // FIX: Safely handle hero/cover image
+  // Safely handle hero/cover image for display
   const displayImage = heroImage || coverImage;
-  const safeImageSrc = displayImage && typeof displayImage === 'string' 
-    ? displayImage 
-    : undefined;
+  const safeImageSrc =
+    displayImage && typeof displayImage === "string" ? displayImage : undefined;
+
+  const hasImageHero = Boolean(safeImageSrc);
 
   return (
     <Layout title={title || "Article"}>
@@ -195,9 +197,7 @@ function BlogPostPage({ post, contentSource, resourcesMeta }: BlogPostPageProps)
           }
         />
         <meta name="twitter:description" content={displayDescription} />
-        {absImage && (
-          <meta name="twitter:image" content={absImage} />
-        )}
+        {absImage && <meta name="twitter:image" content={absImage} />}
         <link rel="canonical" href={url} />
         <script
           type="application/ld+json"
@@ -206,213 +206,317 @@ function BlogPostPage({ post, contentSource, resourcesMeta }: BlogPostPageProps)
         />
       </Head>
 
-      <article className="mx-auto max-w-4xl px-4 py-10">
-        {/* Breadcrumb */}
-        <nav className="mb-6 text-sm text-gray-500">
-          <Link
-            href="/"
-            className="hover:text-forest hover:underline underline-offset-4"
-          >
-            Home
-          </Link>
-          <span className="mx-2 select-none text-gray-400">/</span>
-          <Link
-            href="/blog"
-            className="hover:text-forest hover:underline underline-offset-4"
-          >
-            Blog
-          </Link>
-          {title && (
-            <>
-              <span className="mx-2 select-none text-gray-400">/</span>
-              <span className="text-gray-600">{title}</span>
-            </>
-          )}
-        </nav>
-
-        <header className="mb-10 text-center">
-          {safeImageSrc && (
-            <div className="relative mb-6 w-full overflow-hidden rounded-xl aspect-[21/9]">
-              <Image
-                src={safeImageSrc}
-                alt={title || ""}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 80vw"
-                priority
-              />
-            </div>
-          )}
-
-          {title && (
-            <h1 className="mb-4 text-4xl font-serif font-semibold text-deepCharcoal md:text-5xl">
-              {title}
-            </h1>
-          )}
-
-          {displayDescription && (
-            <p className="mx-auto mb-6 max-w-3xl text-xl leading-relaxed text-gray-600">
-              {displayDescription}
-            </p>
-          )}
-
-          <div className="mb-6 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-            {author && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">By:</span>
-                <span>{author}</span>
-              </div>
+      {/* Outer background frame – aligns with premium homepage look */}
+      <div className="bg-gradient-to-b from-black via-deepCharcoal to-black">
+        <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 lg:pt-10">
+          {/* Breadcrumb */}
+          <nav className="mb-6 text-sm text-gray-400">
+            <Link
+              href="/"
+              className="hover:text-softGold hover:underline underline-offset-4"
+            >
+              Home
+            </Link>
+            <span className="mx-2 select-none text-gray-500">/</span>
+            <Link
+              href="/blog"
+              className="hover:text-softGold hover:underline underline-offset-4"
+            >
+              Blog
+            </Link>
+            {title && (
+              <>
+                <span className="mx-2 select-none text-gray-500">/</span>
+                <span className="text-gray-300 line-clamp-1">{title}</span>
+              </>
             )}
-            {date && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Published:</span>
-                <time dateTime={date}>{formatPretty(date)}</time>
-              </div>
-            )}
-            {updated && updated !== date && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Updated:</span>
-                <time dateTime={updated}>{formatPretty(updated)}</time>
-              </div>
-            )}
-            {readTime && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Read time:</span>
-                <span>{readTime}</span>
-              </div>
-            )}
-            {category && (
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Category:</span>
-                <span>{category}</span>
-              </div>
-            )}
-          </div>
+          </nav>
 
-          {tags && tags.length > 0 && (
-            <div className="mb-6 flex flex-wrap justify-center gap-2">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
-                >
-                  {String(tag)}
-                </span>
-              ))}
-            </div>
-          )}
-        </header>
+          {/* HERO */}
+          <header className="mb-10">
+            {hasImageHero ? (
+              // Image-based hero
+              <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-black/60">
+                <div className="relative h-[260px] w-full sm:h-[320px] md:h-[380px]">
+                  <Image
+                    src={safeImageSrc as string}
+                    alt={title || ""}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 90vw, 1200px"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
+                </div>
 
-        {/* Main content */}
-        <section className="prose prose-lg mb-12 max-w-none">
-          <MDXRemote {...contentSource} components={mdxComponents} />
-        </section>
-
-        {/* Related downloads/resources */}
-        {resourcesMeta && resourcesMeta.length > 0 && (
-          <section className="mt-12 border-t border-lightGrey pt-8">
-            <h2 className="mb-6 font-serif text-2xl font-semibold text-deepCharcoal">
-              Related Resources
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {resourcesMeta.map((resource) => {
-                // FIX: Safely handle coverImage with proper type checking
-                const coverImage =
-                  typeof resource.coverImage === "string" &&
-                  resource.coverImage.trim().length > 0
-                    ? resource.coverImage
-                    : null;
-
-                // FIX: Safely handle pdfPath with type checking
-                const pdfPath =
-                  typeof (resource as any).pdfPath === "string" &&
-                  (resource as any).pdfPath.trim().length > 0
-                    ? (resource as any).pdfPath
-                    : null;
-
-                return (
-                  <div
-                    key={resource.slug}
-                    className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:shadow-md"
-                  >
-                    {coverImage ? (
-                      <div className="relative w-full aspect-[4/3]">
-                        <Image
-                          src={coverImage}
-                          alt={resource.title || resource.slug || "Resource image"}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </div>
-                    ) : null}
-                    
-                    <div className="p-4">
-                      <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
-                        <Link
-                          href={`/downloads/${resource.slug}`}
-                          className="transition-colors hover:text-forest"
-                        >
-                          {resource.title}
-                        </Link>
-                      </h3>
-                      
-                      {resource.excerpt && (
-                        <p className="mb-3 line-clamp-2 text-sm text-gray-600">
-                          {String(resource.excerpt)}
-                        </p>
-                      )}
-                      
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/downloads/${resource.slug}`}
-                          className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
-                        >
-                          View Details
-                        </Link>
-                        
-                        {pdfPath && (
-                          <a
-                            href={pdfPath}
-                            download
-                            className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                          >
-                            Download
-                          </a>
-                        )}
-                      </div>
+                <div className="relative px-6 pb-8 pt-6 md:px-10 md:pb-10">
+                  {category && (
+                    <div className="mb-3 inline-flex items-center rounded-full bg-softGold/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-softGold">
+                      {category}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                  )}
 
-        {/* CTA strip */}
-        <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest to-softGold p-8 text-center text-white">
-          <h2 className="mb-4 text-2xl font-serif font-semibold">
-            Ready to take the next step?
-          </h2>
-          <p className="mb-6 text-lg opacity-90">
-            Explore more resources or get in touch to discuss your project.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/downloads"
-              className="inline-flex items-center rounded-lg bg-white px-6 py-3 font-medium text-deepCharcoal transition-colors hover:bg-gray-100"
-            >
-              Browse Downloads
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center rounded-lg border border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white hover:text-deepCharcoal"
-            >
-              Contact Abraham
-            </Link>
-          </div>
-        </section>
-      </article>
+                  {title && (
+                    <h1 className="mb-4 max-w-3xl font-serif text-3xl font-semibold text-white md:text-4xl lg:text-5xl">
+                      {title}
+                    </h1>
+                  )}
+
+                  {displayDescription && (
+                    <p className="max-w-2xl text-base text-gray-200 md:text-lg">
+                      {displayDescription}
+                    </p>
+                  )}
+
+                  <div className="mt-6 flex flex-wrap gap-4 text-xs text-gray-300 md:text-sm">
+                    {author && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          By
+                        </span>
+                        <span>{author}</span>
+                      </div>
+                    )}
+                    {date && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Published
+                        </span>
+                        <time dateTime={date}>{formatPretty(date)}</time>
+                      </div>
+                    )}
+                    {updated && updated !== date && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Updated
+                        </span>
+                        <time dateTime={updated}>{formatPretty(updated)}</time>
+                      </div>
+                    )}
+                    {readTime && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Read time
+                        </span>
+                        <span>{readTime}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {tags && tags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-xs text-gray-200"
+                        >
+                          #{String(tag)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              // Gradient hero (no image)
+              <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-softGold/10 via-deepCharcoal to-black">
+                <div className="pointer-events-none absolute inset-0">
+                  <div className="absolute left-[-10%] top-[-10%] h-64 w-64 rounded-full bg-softGold/15 blur-3xl" />
+                  <div className="absolute bottom-[-10%] right-[-5%] h-80 w-80 rounded-full bg-forest/20 blur-3xl" />
+                </div>
+
+                <div className="relative px-6 py-10 md:px-10 md:py-12">
+                  {category && (
+                    <div className="mb-3 inline-flex items-center rounded-full bg-softGold/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-softGold">
+                      {category}
+                    </div>
+                  )}
+
+                  {title && (
+                    <h1 className="mb-4 max-w-3xl font-serif text-3xl font-semibold text-white md:text-4xl lg:text-5xl">
+                      {title}
+                    </h1>
+                  )}
+
+                  {displayDescription && (
+                    <p className="max-w-2xl text-base text-gray-200 md:text-lg">
+                      {displayDescription}
+                    </p>
+                  )}
+
+                  <div className="mt-6 flex flex-wrap gap-4 text-xs text-gray-300 md:text-sm">
+                    {author && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          By
+                        </span>
+                        <span>{author}</span>
+                      </div>
+                    )}
+                    {date && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Published
+                        </span>
+                        <time dateTime={date}>{formatPretty(date)}</time>
+                      </div>
+                    )}
+                    {updated && updated !== date && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Updated
+                        </span>
+                        <time dateTime={updated}>{formatPretty(updated)}</time>
+                      </div>
+                    )}
+                    {readTime && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-softGold">
+                          Read time
+                        </span>
+                        <span>{readTime}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {tags && tags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-xs text-gray-200"
+                        >
+                          #{String(tag)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </header>
+
+          {/* CONTENT CARD */}
+          <article className="mx-auto max-w-4xl">
+            <div className="rounded-3xl bg-white/95 p-6 shadow-xl shadow-black/30 ring-1 ring-black/5 md:p-10">
+              <section className="prose prose-lg max-w-none text-deepCharcoal prose-headings:font-serif prose-headings:text-deepCharcoal prose-a:text-forest prose-a:no-underline hover:prose-a:underline">
+                <MDXRemote {...contentSource} components={mdxComponents} />
+              </section>
+
+              {/* Related downloads/resources */}
+              {resourcesMeta && resourcesMeta.length > 0 && (
+                <section className="mt-12 border-t border-lightGrey pt-8">
+                  <h2 className="mb-6 font-serif text-2xl font-semibold text-deepCharcoal">
+                    Related Resources
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {resourcesMeta.map((resource) => {
+                      // Safely handle coverImage with proper type checking
+                      const resCoverImage =
+                        typeof resource.coverImage === "string" &&
+                        resource.coverImage.trim().length > 0
+                          ? resource.coverImage
+                          : null;
+
+                      // Safely handle pdfPath with type checking
+                      const pdfPath =
+                        typeof (resource as any).pdfPath === "string" &&
+                        (resource as any).pdfPath.trim().length > 0
+                          ? (resource as any).pdfPath
+                          : null;
+
+                      return (
+                        <div
+                          key={resource.slug}
+                          className="group overflow-hidden rounded-xl border border-lightGrey bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        >
+                          {resCoverImage ? (
+                            <div className="relative aspect-[4/3] w-full">
+                              <Image
+                                src={resCoverImage}
+                                alt={
+                                  resource.title ||
+                                  resource.slug ||
+                                  "Resource image"
+                                }
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              />
+                            </div>
+                          ) : null}
+
+                          <div className="p-4">
+                            <h3 className="mb-2 text-lg font-semibold text-deepCharcoal">
+                              <Link
+                                href={`/downloads/${resource.slug}`}
+                                className="transition-colors hover:text-forest"
+                              >
+                                {resource.title}
+                              </Link>
+                            </h3>
+
+                            {resource.excerpt && (
+                              <p className="mb-3 line-clamp-2 text-sm text-gray-600">
+                                {String(resource.excerpt)}
+                              </p>
+                            )}
+
+                            <div className="flex gap-2">
+                              <Link
+                                href={`/downloads/${resource.slug}`}
+                                className="inline-flex items-center rounded-lg bg-forest px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-forest/90"
+                              >
+                                View Details
+                              </Link>
+
+                              {pdfPath && (
+                                <a
+                                  href={pdfPath}
+                                  download
+                                  className="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                                >
+                                  Download
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {/* CTA strip */}
+              <section className="mt-12 rounded-2xl bg-gradient-to-r from-forest via-deepCharcoal to-softGold p-8 text-center text-white">
+                <h2 className="mb-3 text-2xl font-serif font-semibold">
+                  Don&apos;t let this stay as theory.
+                </h2>
+                <p className="mb-6 text-base opacity-90 md:text-lg">
+                  Download a field tool or reach out directly. The goal is not
+                  to be impressed — it&apos;s to build something that outlives
+                  you.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link
+                    href="/downloads"
+                    className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-deepCharcoal transition-colors hover:bg-gray-100"
+                  >
+                    Browse Strategic Downloads
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center rounded-full border border-white px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                  >
+                    Contact Abraham
+                  </Link>
+                </div>
+              </section>
+            </div>
+          </article>
+        </div>
+      </div>
     </Layout>
   );
 }
@@ -500,12 +604,10 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
     }
 
     const resourcesMetaRaw: DownloadMeta[] =
-      resourceSlugs.length > 0
-        ? getDownloadsBySlugs(resourceSlugs)
-        : [];
+      resourceSlugs.length > 0 ? getDownloadsBySlugs(resourceSlugs) : [];
 
     const resourcesMeta = JSON.parse(
-      JSON.stringify(resourcesMetaRaw)
+      JSON.stringify(resourcesMetaRaw),
     ) as DownloadMeta[];
 
     return {

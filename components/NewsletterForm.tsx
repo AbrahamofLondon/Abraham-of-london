@@ -2,16 +2,11 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type Status = "idle" | "loading" | "ok" | "err";
-type Variant = "default" | "premium";
-
-export interface NewsletterFormProps
-  extends React.FormHTMLAttributes<HTMLFormElement> {
-  variant?: Variant;
+export interface NewsletterFormProps {
+  variant?: "default" | "premium";
   placeholder?: string;
   buttonText?: string;
 }
@@ -20,12 +15,11 @@ export default function NewsletterForm({
   variant = "default",
   placeholder = "you@example.com",
   buttonText = "Subscribe",
-  className,
-  onSubmit,
-  ...formProps
 }: NewsletterFormProps) {
   const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<Status>("idle");
+  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">(
+    "idle",
+  );
   const [msg, setMsg] = React.useState("");
   const [hp, setHp] = React.useState(""); // honeypot
   const abortRef = React.useRef<AbortController | null>(null);
@@ -35,7 +29,7 @@ export default function NewsletterForm({
     if (status !== "idle" && statusRef.current) statusRef.current.focus();
   }, [status, msg]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (status === "loading") return;
 
@@ -99,30 +93,28 @@ export default function NewsletterForm({
       setStatus("err");
       setMsg("Network error. Please try again.");
     }
-
-    // Preserve any parent onSubmit handler if someone passes one
-    if (onSubmit) {
-      onSubmit(e);
-    }
   }
 
   const isLoading = status === "loading";
   const isError = status === "err";
-  const isPremium = variant === "premium";
+
+  const wrapperClasses =
+    variant === "premium"
+      ? "mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-softGold/40 bg-black/40 p-4 sm:flex-row sm:items-center sm:p-5"
+      : "mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-lightGrey bg-warmWhite p-4 sm:flex-row sm:items-center sm:p-5";
+
+  const buttonClasses =
+    variant === "premium"
+      ? "rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-black transition hover:bg-softGold/90 disabled:cursor-not-allowed disabled:opacity-60"
+      : "rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-[color:var(--color-primary)/0.9] disabled:cursor-not-allowed disabled:opacity-60";
+
+  const inputClasses =
+    variant === "premium"
+      ? "flex-1 rounded-lg border border-white/25 bg-black/40 px-3 py-2 text-sm text-cream placeholder:text-gray-400 focus:border-softGold focus:outline-none"
+      : "flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-sm text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal focus:outline-none";
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      {...formProps}
-      className={cn(
-        "mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:p-5",
-        isPremium
-          ? "border-white/20 bg-white/5"
-          : "border-lightGrey bg-warmWhite",
-        className,
-      )}
-    >
+    <form onSubmit={onSubmit} className={wrapperClasses} noValidate>
       {/* Honeypot (hidden) */}
       <label className="sr-only" htmlFor="newsletter-company">
         Company
@@ -150,27 +142,13 @@ export default function NewsletterForm({
         placeholder={placeholder}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={cn(
-          "flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none",
-          isPremium
-            ? "border-white/30 bg-black/30 text-white placeholder:text-gray-400 focus:border-softGold focus:ring-1 focus:ring-softGold"
-            : "border-lightGrey bg-white text-deepCharcoal placeholder:text-[color:var(--color-on-secondary)/0.5] focus:border-deepCharcoal",
-        )}
+        className={inputClasses}
         aria-describedby="newsletter-status"
         aria-invalid={isError || undefined}
         disabled={isLoading}
       />
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={cn(
-          "rounded-full px-5 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
-          isPremium
-            ? "bg-softGold text-black hover:bg-softGold/90"
-            : "bg-forest text-cream hover:bg-[color:var(--color-primary)/0.9]",
-        )}
-      >
+      <button type="submit" disabled={isLoading} className={buttonClasses}>
         {isLoading ? "Subscribing…" : buttonText}
       </button>
 
@@ -180,18 +158,13 @@ export default function NewsletterForm({
         aria-live="polite"
         tabIndex={-1}
         ref={statusRef}
-        className={cn(
-          "sm:ml-2 text-sm",
+        className={`sm:ml-2 text-sm ${
           status === "ok"
-            ? isPremium
-              ? "text-emerald-300"
-              : "text-forest"
+            ? "text-forest"
             : status === "err"
-            ? isPremium
-              ? "text-red-300"
-              : "text-red-600"
-            : "text-transparent",
-        )}
+            ? "text-red-500"
+            : "text-transparent"
+        }`}
       >
         {msg || " "}
       </p>

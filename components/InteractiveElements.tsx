@@ -3,16 +3,15 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { WifiOff, Wifi } from "lucide-react";
+import { WifiOff, Wifi, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type TextAlign = "left" | "center" | "right";
 
-type HeroBannerCTA = {
-  text: React.ReactNode;
-  href?: string;
-  onClick?: () => void;
-  variant?: "primary" | "secondary" | "outline";
+type CTAConfig = {
+  text: string;
+  href: string;
+  variant?: "solid" | "outline";
 };
 
 export interface HeroBannerProps {
@@ -23,18 +22,10 @@ export interface HeroBannerProps {
   overlayOpacity?: number;
   height?: string;
   textAlign?: TextAlign;
-
-  // Primary CTA
-  ctaText?: React.ReactNode;
+  ctaText?: string;
   ctaOnClick?: () => void;
-  ctaHref?: string;
-
-  // Extra CTAs
-  additionalCTAs?: HeroBannerCTA[];
-
-  // Online/offline badge
   showConnectionStatus?: boolean;
-
+  additionalCTAs?: CTAConfig[];
   children?: React.ReactNode;
 }
 
@@ -54,14 +45,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   textAlign = "left",
   ctaText,
   ctaOnClick,
-  ctaHref,
-  additionalCTAs = [],
   showConnectionStatus = false,
+  additionalCTAs,
   children,
 }) => {
-  const [isOnline, setIsOnline] = React.useState<boolean>(true);
+  const [isOnline, setIsOnline] = React.useState(true);
 
-  // Simple client-side online/offline indicator
+  // Simple client-side online/offline indicator (no WebSocket dependency)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -78,57 +68,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
-  const hasPrimaryCTA = Boolean(ctaText && (ctaOnClick || ctaHref));
-
-  const renderCTA = (cta: HeroBannerCTA, key: React.Key) => {
-    const variant = cta.variant ?? "primary";
-
-    const base =
-      "inline-flex items-center justify-center rounded-full px-6 py-3 text-xs md:text-sm font-semibold uppercase tracking-wide transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
-    const byVariant: Record<NonNullable<HeroBannerCTA["variant"]>, string> = {
-      primary:
-        "bg-softGold text-slate-950 shadow-lg shadow-black/40 hover:bg-softGold/90 focus:ring-softGold",
-      secondary:
-        "bg-white/10 text-white border border-white/30 hover:bg-white/20 focus:ring-white/70",
-      outline:
-        "border border-softGold/70 text-softGold hover:bg-softGold/10 focus:ring-softGold/80",
-    };
-
-    const className = cn(base, byVariant[variant]);
-
-    if (cta.href) {
-      return (
-        <a
-          key={key}
-          href={cta.href}
-          className={className}
-        >
-          {cta.text}
-        </a>
-      );
-    }
-
-    return (
-      <button
-        key={key}
-        type="button"
-        onClick={cta.onClick}
-        className={className}
-      >
-        {cta.text}
-      </button>
-    );
-  };
-
-  const primaryCTA: HeroBannerCTA | null = hasPrimaryCTA
-    ? {
-        text: ctaText as React.ReactNode,
-        href: ctaHref,
-        onClick: ctaOnClick,
-        variant: "primary",
-      }
-    : null;
 
   return (
     <section
@@ -149,7 +88,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at top, rgba(0,0,0,0.3), rgba(0,0,0,0.95))",
+            "radial-gradient(circle at top, rgba(0,0,0,0.35), rgba(0,0,0,0.98))",
           opacity: overlayOpacity,
         }}
       />
@@ -168,9 +107,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           {/* Eyebrow + status */}
           <div className="flex flex-wrap items-center gap-3">
             {eyebrow && (
-              <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-softGold">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-softGold">
                 {eyebrow}
-              </span>
+              </div>
             )}
 
             {showConnectionStatus && (
@@ -190,25 +129,50 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             )}
           </div>
 
-          {/* Title & subtitle */}
+          {/* Title */}
           <div className="space-y-4">
             <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
               {title}
             </h1>
             {subtitle && (
-              <p className="max-w-2xl text-base text-gray-200 md:text-lg">
+              <div className="max-w-2xl text-base text-gray-200 md:text-lg">
                 {subtitle}
-              </p>
+              </div>
             )}
           </div>
 
-          {/* CTAs + children */}
+          {/* CTA + children */}
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            {primaryCTA && renderCTA(primaryCTA, "primary")}
-
-            {additionalCTAs.map((cta, index) =>
-              renderCTA(cta, `extra-${index}`),
+            {ctaText && ctaOnClick && (
+              <button
+                type="button"
+                onClick={ctaOnClick}
+                className="inline-flex items-center gap-2 rounded-full bg-softGold px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-softGold/90 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+              >
+                {ctaText}
+                <ArrowRight className="h-4 w-4" />
+              </button>
             )}
+
+            {additionalCTAs?.length ? (
+              <div className="flex flex-wrap gap-3">
+                {additionalCTAs.map((cta) => (
+                  <a
+                    key={`${cta.text}-${cta.href}`}
+                    href={cta.href}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide transition-all",
+                      cta.variant === "outline"
+                        ? "border border-softGold/60 bg-black/20 text-softGold hover:bg-softGold/10"
+                        : "bg-white/10 text-white hover:bg-white/20",
+                    )}
+                  >
+                    {cta.text}
+                    <ArrowRight className="h-3 w-3" />
+                  </a>
+                ))}
+              </div>
+            ) : null}
 
             {children && (
               <div className="w-full text-xs text-gray-200 md:w-auto">
