@@ -27,7 +27,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Luxury Color System
+        // Understated Color System
         primary: "var(--color-primary)",
         "primary-hover": "var(--color-primary-hover)",
         "on-primary": "var(--color-on-primary)",
@@ -43,18 +43,16 @@ module.exports = {
         surface: "var(--color-surface)",
         muted: "var(--color-muted)",
 
-        // Semantic aliases
-        forest: "#0B2E1F",
-        charcoal: "#333333",
-        cream: "#FAF7F2",
-        gold: "#C5A352",
+        // Semantic aliases - minimal
+        charcoal: "#1a1a1a",
+        bronze: "#8b7355",
 
-        // Supporting palette
-        emerald: { ...colors.emerald, 700: "#047857" },
+        // Supporting neutrals
+        gray: colors.gray,
       },
       fontFamily: {
         serif: ["var(--font-serif)", '"Playfair Display"', "Georgia", "serif"],
-        sans: ["var(--font-sans)", '"Inter"', "system-ui", "sans-serif"],
+        sans: ["var(--font-serif)", '"Inter"', "system-ui", "sans-serif"],
       },
       spacing: {
         '18': '4.5rem',
@@ -62,60 +60,56 @@ module.exports = {
         '128': '32rem',
       },
       opacity: {
-        '15': '0.15',
+        '8': '0.08',
       },
       transitionDuration: {
         '400': '400ms',
       },
       boxShadow: {
-        'luxury': '0 4px 24px rgba(0, 0, 0, 0.08)',
-        'luxury-hover': '0 8px 40px rgba(0, 0, 0, 0.12)',
+        'subtle': '0 2px 8px rgba(0, 0, 0, 0.04)',
+        'elevated': '0 4px 12px rgba(0, 0, 0, 0.05)',
       },
-      backdropBlur: {
-        'xs': '2px',
+      borderRadius: {
+        'xl': '0.5rem',
       },
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            maxWidth: 'none',
+            maxWidth: '65ch',
             color: theme('colors.on-secondary'),
             a: {
               color: theme('colors.primary'),
               textDecoration: 'none',
-              borderBottom: `1px solid transparent`,
-              transition: 'all 0.3s ease',
+              fontWeight: '500',
+              transition: 'color 0.3s ease',
               '&:hover': {
                 color: theme('colors.accent'),
-                borderBottomColor: theme('colors.accent'),
               },
             },
             h1: {
               fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '700',
+              fontWeight: '600',
               color: theme('colors.primary'),
             },
             h2: {
               fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '700',
+              fontWeight: '600',
               color: theme('colors.primary'),
             },
             h3: {
               fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '700',
+              fontWeight: '600',
               color: theme('colors.primary'),
             },
             blockquote: {
-              borderLeftColor: theme('colors.accent'),
-              fontStyle: 'italic',
-              backgroundColor: theme('colors.accent / 0.05'),
-              borderRadius: '0 6px 6px 0',
+              borderLeftColor: theme('colors.border'),
+              fontStyle: 'normal',
+              backgroundColor: theme('colors.border / 0.03'),
               padding: '1rem 1.5rem',
             },
-            'blockquote p:first-of-type::before': {
-              content: '""',
-            },
-            'blockquote p:last-of-type::after': {
-              content: '""',
+            strong: {
+              color: theme('colors.primary'),
+              fontWeight: '600',
             },
           },
         },
