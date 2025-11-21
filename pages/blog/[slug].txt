@@ -10,6 +10,7 @@ import {
   type MDXRemoteSerializeResult,
 } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
@@ -40,7 +41,7 @@ type BlogPostMeta = {
     downloads?: { href?: string }[];
     reads?: { href?: string }[];
   };
-  // NEW: premium meta fields
+  // Premium meta fields
   keyInsights?: string[];
   authorNote?: string;
   authorTitle?: string;
@@ -240,7 +241,8 @@ function BlogPostPage({
               </h1>
             </div>
             <p className="mb-8 max-w-md text-xl text-gray-300">
-              The wisdom you&apos;re looking for has moved or is being refined.
+              The wisdom you&apos;re looking for has moved or is being
+              refined.
             </p>
             <Link
               href="/"
@@ -833,8 +835,7 @@ function BlogPostPage({
                   </div>
                 </section>
 
-                {/* Comments – keep your existing component */}
-                {/* If you still want comments, re-import CommentsSection */}
+                {/* Comments – keep your existing component if needed */}
                 {/* <CommentsSection slug={slug || ""} title={title} /> */}
               </div>
             </div>
@@ -845,25 +846,7 @@ function BlogPostPage({
   );
 }
 
-// -----------------------------------------------------------------------------
-// SSG – paths
-// -----------------------------------------------------------------------------
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const posts = getAllContent("blog");
-    const paths =
-      posts?.map((item: any) => ({
-        params: { slug: String(item.slug) },
-      })) ?? [];
-
-    return { paths, fallback: "blocking" };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating blog post paths:", error);
-    return { paths: [], fallback: "blocking" };
-  }
-};
+export default BlogPostPage;
 
 // -----------------------------------------------------------------------------
 // SSG – paths
@@ -871,12 +854,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    // 👈 KEY CHANGE: use "posts" (Contentlayer Post collection)
+    // Use "posts" collection (Contentlayer Post docs)
     const posts = getAllContent("posts");
     const paths =
       posts?.map((item: any) => ({
         params: { slug: String(item.slug) },
       })) ?? [];
+
+    // Optional: debug in Netlify logs
+    // eslint-disable-next-line no-console
+    console.log(
+      "[blog/[slug]] getStaticPaths slugs:",
+      paths.map((p) => p.params.slug),
+    );
 
     return { paths, fallback: "blocking" };
   } catch (error) {
@@ -904,10 +894,14 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
 
     if (!slug) return { notFound: true };
 
-    // 👈 KEY CHANGE: use "posts" (same collection)
+    // Use "posts" collection (same as paths)
     const data = getContentBySlug("posts", slug, { withContent: true });
 
     if (!data) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Post not found for slug "${slug}" in /blog/[slug]`,
+      );
       return { notFound: true };
     }
 
@@ -924,9 +918,12 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps> = async ({
       JSON.stringify(meta),
     ) as BlogPostMeta;
 
-    // Always serialise content (empty string is fine)
+    // MDX serialisation with GFM support
     const contentSource = await serialize(content || "", {
       scope: jsonSafePost as unknown as Record<string, unknown>,
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+      },
     });
 
     // Resolve related download slugs (from resources.downloads/reads)
