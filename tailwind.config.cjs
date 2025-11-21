@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const colors = require("tailwindcss/colors");
 
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
   content: [
@@ -39,7 +38,7 @@ module.exports = {
         "soft-charcoal": "#333333",
         // Supporting Colors
         "light-gray": "#E5E5E5",
-        "subtle-green": "#4B8B6B", // Retained for bullets/links
+        "subtle-green": "#4B8B6B",
 
         // --- MAPPING CUSTOM NAMES TO NEW LUXURY PALETTE ---
         primary: "var(--color-primary)",
@@ -53,9 +52,9 @@ module.exports = {
         "on-accent": "var(--color-on-accent)",
 
         // Internal aliases
-        forest: "#0B2E1F", // Used for headings
-        deepCharcoal: "#333333", // Used for body text
-        cream: "#FAF7F2", // Used for light backgrounds
+        forest: "#0B2E1F",
+        deepCharcoal: "#333333",
+        cream: "#FAF7F2",
 
         // Original aliases now using new values
         lightGrey: "#E5E5E5",
@@ -63,24 +62,56 @@ module.exports = {
         midGreen: "#4B8B6B",
         softGold: "#C5A352",
 
+        // Additional color utilities
+        charcoal: "#1F2937",
+        gold: "#C5A352",
+        amber: {
+          200: "#E9D79A",
+        },
+
         emerald: { ...colors.emerald, 700: "#047857" },
       },
       ringColor: {
         forest: "var(--color-primary)",
+        gold: "#C5A352",
       },
       borderColor: {
         forest: "var(--color-primary)",
         lightGrey: "#e5e5e5",
+        gold: "#C5A352",
+      },
+      backgroundColor: {
+        charcoal: "#1F2937",
+        gold: "#C5A352",
+      },
+      textColor: {
+        gold: "#C5A352",
+        charcoal: "#1F2937",
       },
       fontFamily: {
-        // Serif: authority & elegance
         serif: ["var(--font-serif)", '"Playfair Display"', "Georgia", "serif"],
-        // Sans: modern readability
         sans: ["var(--font-sans)", '"Inter"', "system-ui", "sans-serif"],
         cursive: ["var(--font-cursive)", "cursive"],
       },
-      // This config is safe even if the plugin is not loaded;
-      // Tailwind will just ignore it without the typography plugin.
+      backgroundImage: {
+        'gold-gradient': 'linear-gradient(135deg, #C5A352 0%, #E9D79A 100%)',
+        'charcoal-gradient': 'linear-gradient(135deg, #1F2937 0%, #111827 100%)',
+      },
+      animation: {
+        'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
+      },
+      keyframes: {
+        'pulse-gold': {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.7 },
+        }
+      },
+      boxShadow: {
+        '3xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
       typography: (theme) => ({
         DEFAULT: {
           css: {
@@ -146,10 +177,5 @@ module.exports = {
       }),
     },
   },
-  plugins: [
-    // If/when you want the typography plugin back:
-    // 1) pnpm add -D @tailwindcss/typography
-    // 2) Uncomment the line below
-    // require("@tailwindcss/typography"),
-  ],
+  plugins: [],
 };

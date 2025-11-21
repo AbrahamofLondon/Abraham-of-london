@@ -57,6 +57,9 @@
   --step-2: clamp(1.55rem, 1.30rem + 0.95vw, 1.85rem);
   --step-3: clamp(1.95rem, 1.60rem + 1.30vw, 2.40rem);
   --step-4: clamp(2.35rem, 1.92rem + 1.80vw, 3.00rem);
+
+  /* Color scheme for light mode */
+  color-scheme: light;
 }
 
 /* ------------------------------------------------------------------- */
@@ -83,35 +86,40 @@
   --color-lightGrey: #2D3748;        /* Darker border/divider (slate-800 equivalent) */
   --color-warmWhite: #1F2937;        /* Dark surface/card backgrounds */
   --color-midGreen: #86efac;         /* midGreen in dark mode */
+
+  /* Color scheme for dark mode */
+  color-scheme: dark;
 }
 
 /* ------------------------------------------------------------------- */
 /* ---------- Base / Reset & Typography (Luxury) --------------------- */
 /* ------------------------------------------------------------------- */
 html {
-  /* Keep this page explicitly light unless .dark is applied */
-  /* color-scheme removed to avoid mixed system heuristics */
+  /* Ensure smooth theme transitions */
+  transition: background-color 0.3s ease, color 0.3s ease;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 html, body {
   margin: 0;
   padding: 0;
   max-width: 100vw;
   overflow-x: hidden;
 }
+
 body {
-  font-family: var(--font-sans); /* Use consolidated variable */
+  font-family: var(--font-sans);
   font-size: var(--step-0);
-  line-height: 1.85; /* Increased line-height for luxury readability */
+  line-height: 1.85;
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
-  transition: background-color .3s ease, color .3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif); /* Use consolidated variable */
+  font-family: var(--font-serif);
   color: var(--color-primary);
   text-wrap: balance;
   font-weight: 700;
@@ -120,8 +128,9 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: var(--color-primary);
   text-decoration: none;
-  transition: color .25s ease;
+  transition: color 0.25s ease;
 }
+
 a:hover {
   color: var(--color-accent); 
 }
@@ -131,6 +140,7 @@ a:hover {
   background: #E9D79A;
   color: var(--color-primary);
 }
+
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
@@ -143,6 +153,7 @@ img, video {
   max-width: 100%;
   height: auto;
 }
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -150,6 +161,7 @@ img, video {
     scroll-behavior: auto !important;
   }
 }
+
 /* Printing fidelity helpers (Important for PDF generation) */
 @media print {
   * {
@@ -158,6 +170,66 @@ img, video {
   }
 }
 
+/* ------------------------------------------------------------------- */
+/* ---------- Missing Utilities & Components ------------------------- */
+/* ------------------------------------------------------------------- */
+
+/* Gold gradient text utility */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #C5A352 0%, #E9D79A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth shadow transitions */
+.shadow-3xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Loading animation */
+@keyframes pulse-gold {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s ease-in-out infinite;
+}
 
 /* ------------------------------------------------------------------- */
 /* ---------- Tailwind Components / Utilities ------------------------ */
@@ -172,10 +244,12 @@ img, video {
   background-color: #fff;
   border-radius: 12px;
 }
+
 .dark .card { 
   background-color: var(--color-warmWhite);
   box-shadow: 0 4px 18px rgba(0,0,0,.35);
 }
+
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(11,46,31,.12);
@@ -198,6 +272,16 @@ img, video {
     background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+
+  /* Gold gradient background */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #C5A352 0%, #E9D79A 100%);
+  }
+
+  /* Charcoal to black gradient */
+  .bg-charcoal-to-black {
+    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+  }
 }
 
 /* ------------------------------------------------------------------- */
@@ -211,6 +295,7 @@ img, video {
   --tw-prose-quotes: var(--color-on-secondary);
   --tw-prose-quote-borders: var(--color-lightGrey);
 }
+
 .dark .prose {
   --tw-prose-body: var(--color-on-secondary);
   --tw-prose-headings: var(--color-primary);
@@ -233,12 +318,14 @@ img, video {
   letter-spacing: -.02em;
   margin-bottom: .6rem;
 }
+
 .prose h2 {
   font-size: var(--step-3);
   line-height: 1.15;
   letter-spacing: -.01em;
   margin: 2.5rem 0 .8rem;
 }
+
 .prose h3 {
   font-size: var(--step-2);
   line-height: 1.2;
@@ -253,6 +340,7 @@ img, video {
   line-height: 1.85;
   margin-block: 1rem;
 }
+
 .prose blockquote {
   font-style: italic;
   font-size: var(--step-1);
