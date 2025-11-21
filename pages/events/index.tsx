@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import { getPageTitle } from "@/lib/siteConfig";
 import { getAllEventsSafe } from "@/lib/events";
+import { resolveCoverImage } from "@/lib/utils";
 
 interface EventListing {
   slug: string;
@@ -33,11 +34,11 @@ export default function EventsPage({ events }: EventsPageProps) {
     return [...events].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA; // Most recent first
+      return dateB - dateA;
     });
   }, [events]);
 
-  // Separate into upcoming and past events (client-time aware)
+  // Separate into upcoming and past events
   const now = new Date();
   const upcomingEvents = sortedEvents.filter((event) => {
     if (!event.date) return false;
@@ -71,7 +72,7 @@ export default function EventsPage({ events }: EventsPageProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
               >
-                Events & Gatherings
+                Events &amp; Gatherings
               </motion.h1>
               <motion.p
                 className="mx-auto max-w-2xl text-lg leading-relaxed text-gold/70"
@@ -111,7 +112,7 @@ export default function EventsPage({ events }: EventsPageProps) {
                 <h3 className="mb-4 font-serif text-xl font-semibold text-cream">
                   No Upcoming Events Scheduled
                 </h3>
-                <p className="mb-6 mx-auto max-w-md text-gold/70">
+                <p className="mx-auto mb-6 max-w-md text-gold/70">
                   New events are being planned. Join our newsletter to be the
                   first to know about upcoming gatherings, workshops, and
                   salons.
@@ -136,8 +137,8 @@ export default function EventsPage({ events }: EventsPageProps) {
                   Past Events
                 </h2>
                 <p className="max-w-2xl text-gold/70">
-                  Browse through our previous gatherings and conversations. Many
-                  of these events recur seasonally or inform future
+                  Browse through our previous gatherings and conversations.
+                  Many of these events recur seasonally or inform future
                   programming.
                 </p>
               </div>
@@ -163,7 +164,7 @@ export default function EventsPage({ events }: EventsPageProps) {
               <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
                 Host Your Own Gathering
               </h2>
-              <p className="mb-8 mx-auto max-w-2xl text-lg leading-relaxed text-gold/70">
+              <p className="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-gold/70">
                 Interested in bringing Abraham of London to your organization,
                 board, or community for a private event or workshop?
               </p>
@@ -207,8 +208,8 @@ function EventCard({
       }).format(new Date(event.date))
     : null;
 
-  const hasImage = event.heroImage || event.coverImage;
-  const imageSrc = event.heroImage || event.coverImage;
+  const hasImage = !!(event.heroImage || event.coverImage);
+  const imageSrc = event.heroImage || event.coverImage || undefined;
 
   return (
     <motion.article
@@ -289,7 +290,7 @@ function EventCard({
   );
 }
 
-// Static Generation – now uses getAllEventsSafe (no per-slug losses)
+// Static Generation – now uses getAllEventsSafe + resolveCoverImage
 export async function getStaticProps() {
   try {
     const rawEvents = getAllEventsSafe();
@@ -302,8 +303,10 @@ export async function getStaticProps() {
         const slug = safeString(event.slug) || "";
         if (!slug) return null;
 
-        const heroImage = safeString(event.heroImage);
-        const coverImage = safeString(event.coverImage);
+        const resolvedImage = resolveCoverImage(event);
+
+        const heroImage = safeString(event.heroImage) || resolvedImage;
+        const coverImage = safeString(event.coverImage) || resolvedImage;
 
         return {
           slug,
@@ -311,9 +314,12 @@ export async function getStaticProps() {
           date: safeString(event.date),
           time: safeString(event.time),
           location: safeString(event.location),
-          description: safeString(event.description),
-          heroImage: heroImage || coverImage,
-          coverImage: coverImage || heroImage,
+          description:
+            safeString(event.description) ||
+            safeString(event.excerpt) ||
+            null,
+          heroImage,
+          coverImage,
           tags: Array.isArray(event.tags)
             ? event.tags.filter(
                 (tag): tag is string => typeof tag === "string",
@@ -327,9 +333,10 @@ export async function getStaticProps() {
       props: {
         events,
       },
-      revalidate: 3600, // Revalidate every hour
+      revalidate: 3600,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error generating events page:", error);
     return {
       props: {

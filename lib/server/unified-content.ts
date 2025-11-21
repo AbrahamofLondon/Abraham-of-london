@@ -34,7 +34,7 @@ export interface PrintSettings {
 }
 
 export interface UnifiedContent {
-  slug: string;
+  slug: string; // full route slug: e.g. "blog/when-the-storm-finds-you"
   title: string;
   type: UnifiedContentType;
 
@@ -72,7 +72,6 @@ function normaliseSlug(base: string, prefix?: string): string {
   return clean.startsWith(`${prefix}/`) ? clean : `${prefix}/${clean}`;
 }
 
-// Safe dynamic import – returns null instead of throwing on build
 async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
     return await fn();
@@ -81,34 +80,41 @@ async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
   }
 }
 
+async function resolveMaybeAsync<T>(fn?: () => T | Promise<T>): Promise<T | null> {
+  if (!fn) return null;
+  try {
+    return await Promise.resolve(fn());
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
-// MDX / BLOG CONTENT  →  /[slug]
+// BLOG CONTENT  →  /blog/[slug]
 // ---------------------------------------------------------------------------
 
 async function getMdxContent(): Promise<UnifiedContent[]> {
-  // ⚠️ Adapt this to your real blog source if needed
-  // e.g. `@/lib/posts`, `contentlayer/generated`, etc.
-  const postsModule = await safeImport(() => import("@/lib/posts" as string));
+  const postsModule = await safeImport(
+    () => import("@/lib/server/posts-data" as string),
+  );
   if (!postsModule) return [];
 
   const getAllPosts = (postsModule as any).getAllPosts as
-    | (() => Promise<any[]>)
+    | (() => any[] | Promise<any[]>)
     | undefined;
 
-  if (!getAllPosts) return [];
-
-  const posts = await getAllPosts();
+  const posts = (await resolveMaybeAsync(getAllPosts)) ?? [];
 
   return posts.map((post: any): UnifiedContent => {
-    // Blog posts live at "/[slug]" (no "blog/" prefix)
-    const slug = cleanSlug(post.slug || post._id || "");
+    const rawSlug = post.slug || post._id || "";
+    const slug = normaliseSlug(rawSlug, "blog");
 
     return {
       slug,
       title: post.title || slug,
       type: "blog",
 
-      content: post.body || post.content || undefined,
+      content: post.content || undefined,
       description:
         post.excerpt ||
         post.description ||
@@ -117,7 +123,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 
       author: post.author || undefined,
       date: post.date || post.publishedAt || undefined,
-      updatedAt: post.updatedAt || undefined,
+      updatedAt: post.updated || post.updatedAt || undefined,
       category: post.category || undefined,
       tags: post.tags || undefined,
 
@@ -131,7 +137,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
         undefined,
 
       source: "mdx",
-      published: (post.status ?? "published") !== "draft",
+      published: (post.draft ?? false) !== true,
     };
   });
 }
@@ -141,16 +147,16 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getEventContent(): Promise<UnifiedContent[]> {
-  const eventsModule = await safeImport(() => import("@/lib/events" as string));
+  const eventsModule = await safeImport(
+    () => import("@/lib/server/events-data" as string),
+  );
   if (!eventsModule) return [];
 
   const getAllEvents = (eventsModule as any).getAllEvents as
-    | (() => Promise<any[]>)
+    | (() => any[] | Promise<any[]>)
     | undefined;
 
-  if (!getAllEvents) return [];
-
-  const events = await getAllEvents();
+  const events = (await resolveMaybeAsync(getAllEvents)) ?? [];
 
   return events.map((event: any): UnifiedContent => {
     const rawSlug = event.slug || event.id || event._id || event.title || "";
@@ -161,7 +167,7 @@ async function getEventContent(): Promise<UnifiedContent[]> {
       title: event.title || slug,
       type: "event",
 
-      content: event.body || event.description || undefined,
+      content: event.content || event.description || undefined,
       description:
         event.excerpt || event.summary || event.description || undefined,
 
@@ -192,16 +198,15 @@ async function getEventContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getBookContent(): Promise<UnifiedContent[]> {
-  const booksModule = await safeImport(() => import("@/lib/books" as string));
+  const booksModule = await safeImport(
+    () => import("@/lib/server/books-data" as string),
+  );
   if (!booksModule) return [];
 
-  const getAllBooks = (booksModule as any).getAllBooks as
-    | (() => Promise<any[]>)
-    | undefined;
+  const getAllBooksMeta = (booksModule as any)
+    .getAllBooksMeta as (() => any[] | Promise<any[]>) | undefined;
 
-  if (!getAllBooks) return [];
-
-  const books = await getAllBooks();
+  const books = (await resolveMaybeAsync(getAllBooksMeta)) ?? [];
 
   return books.map((book: any): UnifiedContent => {
     const rawSlug = book.slug || book.id || book._id || book.title || "";
@@ -212,7 +217,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
       title: book.title || slug,
       type: "book",
 
-      content: book.body || book.description || undefined,
+      content: undefined, // meta only here; body is handled in /books/[slug]
       description: book.excerpt || book.description || undefined,
 
       author: book.author || book.primaryAuthor || undefined,
@@ -238,21 +243,19 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 
 // ---------------------------------------------------------------------------
 // DOWNLOADS CONTENT  →  /downloads/[slug]
+// (adjust imports to your actual downloads module)
 // ---------------------------------------------------------------------------
 
 async function getDownloadContent(): Promise<UnifiedContent[]> {
   const downloadsModule = await safeImport(
-    () => import("@/lib/downloads" as string),
+    () => import("@/lib/server/downloads-data" as string),
   );
   if (!downloadsModule) return [];
 
-  const getAllDownloads = (downloadsModule as any).getAllDownloads as
-    | (() => Promise<any[]>)
-    | undefined;
+  const getAllDownloads = (downloadsModule as any)
+    .getAllDownloadsMeta as (() => any[] | Promise<any[]>) | undefined;
 
-  if (!getAllDownloads) return [];
-
-  const downloads = await getAllDownloads();
+  const downloads = (await resolveMaybeAsync(getAllDownloads)) ?? [];
 
   return downloads.map((d: any): UnifiedContent => {
     const rawSlug = d.slug || d.id || d._id || d.title || "";
@@ -263,7 +266,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
       title: d.title || slug,
       type: "download",
 
-      content: d.body || d.description || undefined,
+      content: undefined,
       description: d.excerpt || d.description || undefined,
 
       author: d.author || undefined,
@@ -289,21 +292,19 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 
 // ---------------------------------------------------------------------------
 // RESOURCES CONTENT  →  /resources/[slug]
+// (adjust imports to actual resources module)
 // ---------------------------------------------------------------------------
 
 async function getResourceContent(): Promise<UnifiedContent[]> {
   const resourcesModule = await safeImport(
-    () => import("@/lib/resources" as string),
+    () => import("@/lib/server/resources-data" as string),
   );
   if (!resourcesModule) return [];
 
-  const getAllResources = (resourcesModule as any).getAllResources as
-    | (() => Promise<any[]>)
-    | undefined;
+  const getAllResources = (resourcesModule as any)
+    .getAllResourcesMeta as (() => any[] | Promise<any[]>) | undefined;
 
-  if (!getAllResources) return [];
-
-  const resources = await getAllResources();
+  const resources = (await resolveMaybeAsync(getAllResources)) ?? [];
 
   return resources.map((r: any): UnifiedContent => {
     const rawSlug = r.slug || r.id || r._id || r.title || "";
@@ -314,7 +315,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
       title: r.title || slug,
       type: "resource",
 
-      content: r.body || r.description || undefined,
+      content: undefined,
       description: r.excerpt || r.description || undefined,
 
       author: r.author || undefined,
@@ -344,16 +345,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
 
 async function getStaticPrintContent(): Promise<UnifiedContent[]> {
   return [
-    // Example:
-    // {
-    //   slug: "print/fathering-without-fear-teaser-mobile",
-    //   title: "Fathering Without Fear – Teaser (Print)",
-    //   type: "print",
-    //   content: "Printable layout is rendered via a dedicated React component.",
-    //   description: "Static print entry to help unify routing.",
-    //   source: "static",
-    //   published: true,
-    // },
+    // Add static print entries here if you need them
   ];
 }
 
@@ -362,19 +354,19 @@ async function getStaticPrintContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 export async function getUnifiedContent(): Promise<UnifiedContent[]> {
-  const [mdx, events, books, downloads, resources, statics] = await Promise.all([
-    getMdxContent(),
-    getEventContent(),
-    getBookContent(),
-    getDownloadContent(),
-    getResourceContent(),
-    getStaticPrintContent(),
-  ]);
+  const [mdx, events, books, downloads, resources, statics] =
+    await Promise.all([
+      getMdxContent(),
+      getEventContent(),
+      getBookContent(),
+      getDownloadContent(),
+      getResourceContent(),
+      getStaticPrintContent(),
+    ]);
 
   return [...mdx, ...events, ...books, ...downloads, ...resources, ...statics];
 }
 
-// Alias for older callers (e.g. pages/content/index.tsx)
 export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
   return getUnifiedContent();
 }
@@ -385,10 +377,8 @@ export async function getUnifiedContentBySlug(
   const target = cleanSlug(rawSlug);
   const all = await getUnifiedContent();
 
-  // Try exact match first
   const match =
     all.find((item) => cleanSlug(item.slug) === target) ??
-    // Graceful fallback: ignore leading prefixes if needed
     all.find((item) => cleanSlug(item.slug).endsWith(`/${target}`));
 
   return match ?? null;
