@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Root tokens */
+/* ------------------------------------------------------------------- */
+/* ---------- Luxury Theme Variables --------------------------------- */
+/* ------------------------------------------------------------------- */
+
 :root {
   --color-background: #050608;
   --color-foreground: #fdfdfb;
@@ -12,18 +15,23 @@
   --color-forest: #0e3b33;
 }
 
+/* ------------------------------------------------------------------- */
+/* ---------- Base Styles -------------------------------------------- */
+/* ------------------------------------------------------------------- */
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(214, 178, 106, 0.17), transparent 55%),
+  background: 
+    radial-gradient(circle at top, rgba(214, 178, 106, 0.17), transparent 55%),
     radial-gradient(circle at bottom, rgba(14, 59, 51, 0.4), #050608);
   color: var(--color-foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
 }
 
 /* Selection */
@@ -37,11 +45,16 @@ a {
   transition: color 0.2s ease-in-out;
 }
 
+/* ------------------------------------------------------------------- */
+/* ---------- Tailwind Components ------------------------------------ */
+/* ------------------------------------------------------------------- */
+
 @layer components {
   /* Shell for dark, editorial pages (e.g. hub, blog hero) */
   .page-shell {
     @apply min-h-screen text-gray-100;
-    background: radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
+    background: 
+      radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
       radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608);
   }
 
@@ -65,10 +78,15 @@ a {
 
   /* Hero vignette helper for big headers */
   .hero-vignette {
-    background: radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
+    background: 
+      radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
       radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608);
   }
 }
+
+/* ------------------------------------------------------------------- */
+/* ---------- Utility Classes ---------------------------------------- */
+/* ------------------------------------------------------------------- */
 
 @layer utilities {
   /* High-contrast prose styling for dark, editorial pages */
@@ -110,7 +128,7 @@ a {
   }
 
   .prose-lux a {
-    @apply text-softGold no-underline font-medium;
+    @apply text-yellow-400 no-underline font-medium;
   }
 
   .prose-lux a:hover {
@@ -118,7 +136,7 @@ a {
   }
 
   .prose-lux blockquote {
-    @apply border-l-4 border-softGold/70 bg-white/5 text-gray-100 pl-4 pr-3 py-3 my-6 rounded-r-xl;
+    @apply border-l-4 border-yellow-400/70 bg-white/5 text-gray-100 pl-4 pr-3 py-3 my-6 rounded-r-xl;
   }
 
   .prose-lux blockquote p {
@@ -127,7 +145,7 @@ a {
 
   .prose-lux ul li::marker,
   .prose-lux ol li::marker {
-    @apply text-softGold;
+    @apply text-yellow-400;
   }
 
   .prose-lux hr {
@@ -135,10 +153,34 @@ a {
   }
 
   .prose-lux code {
-    @apply text-softGold bg-black/40 rounded px-1.5 py-0.5 text-sm;
+    @apply text-yellow-400 bg-black/40 rounded px-1.5 py-0.5 text-sm;
   }
 
   .prose-lux pre {
-    @apply bg-black/70 text-gray-100 rounded-2xl p-4 md:p-6 shadow-soft-elevated;
+    @apply bg-black/70 text-gray-100 rounded-2xl p-4 md:p-6 shadow-lg;
+  }
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Print Styles ------------------------------------------- */
+/* ------------------------------------------------------------------- */
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* ------------------------------------------------------------------- */
+/* ---------- Reduced Motion ----------------------------------------- */
+/* ------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
