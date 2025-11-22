@@ -52,7 +52,7 @@ a {
 /* ---------- Layout Shell & Cards ----------------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* Full-page dark editorial shell (used on hub, long-form pages, etc.) */
+/* Full-page dark editorial shell */
 .page-shell {
   min-height: 100vh;
   color: #f9fafb;
@@ -61,49 +61,49 @@ a {
     radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608);
 }
 
-/* Luxury cards – match existing Tailwind look but in plain CSS */
+/* Luxury “glass” card */
 .lux-card {
-  border-radius: 1rem;               /* ~rounded-2xl */
+  border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(17, 24, 39, 0.8); /* slate-900/80 style */
+  background-color: rgba(17, 24, 39, 0.8);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(18px);
 }
 
+/* Hover lift */
 .lux-card-hover {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .lux-card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(214, 178, 106, 0.25);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.8);
 }
 
-/* Filter pills on content hub */
+/* Filter pill chips */
 .lux-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(17, 24, 39, 0.8);
-  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(15, 23, 42, 0.9);
+  padding: 0.45rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #f9fafb;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(14px);
+  color: #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
 }
 
 .lux-pill-active {
   border-color: rgba(214, 178, 106, 0.7);
   background-color: #d6b26a;
   color: #111827;
-  box-shadow: 0 12px 30px rgba(214, 178, 106, 0.4);
+  box-shadow: 0 14px 40px rgba(214, 178, 106, 0.4);
 }
 
-/* Hero vignette helper for big headers */
+/* Hero vignette helper */
 .hero-vignette {
   background:
     radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
@@ -111,54 +111,52 @@ a {
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- High-End Prose for MDX (Dark Mode) --------------------- */
+/* ---------- Prose / MDX Styling ------------------------------------ */
 /* ------------------------------------------------------------------- */
 
-/* Use with Tailwind wrapper:
-   className="prose prose-lg prose-invert prose-lux"
-*/
 .prose-lux {
   max-width: none;
+  font-size: 1.0625rem;
+  line-height: 1.8;
   color: #e5e7eb;
-  font-size: 1.0625rem; /* ~text-[17px] */
-  line-height: 1.75;
 }
 
-.prose-lux p,
-.prose-lux li {
+.prose-lux p {
+  margin-top: 1em;
+  margin-bottom: 1em;
   color: #e5e7eb;
-  line-height: 1.75;
 }
 
 .prose-lux h1,
 .prose-lux h2,
 .prose-lux h3,
 .prose-lux h4 {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: #f9fafb;
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 .prose-lux h1 {
-  font-size: clamp(2.25rem, 3vw, 3rem);
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
 }
 
 .prose-lux h2 {
-  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
+  font-size: 1.6rem;
   margin-top: 2.5rem;
   margin-bottom: 1rem;
 }
 
 .prose-lux h3 {
-  font-size: clamp(1.4rem, 2vw, 1.7rem);
+  font-size: 1.3rem;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
 
 .prose-lux h4 {
   font-size: 1.1rem;
-  text-transform: none;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
@@ -169,66 +167,66 @@ a {
 }
 
 .prose-lux em {
-  color: #f3f4f6;
+  color: #f9fafb;
 }
 
-/* Links inside MDX */
 .prose-lux a {
-  color: var(--color-soft-gold);
+  color: #d6b26a;
   text-decoration: none;
   font-weight: 500;
 }
 
 .prose-lux a:hover {
-  color: #fefce8;
+  color: #ffffff;
   text-decoration: underline;
 }
 
-/* Quotes */
 .prose-lux blockquote {
-  border-left: 4px solid rgba(214, 178, 106, 0.8);
-  background-color: rgba(15, 23, 42, 0.65);
-  color: #f9fafb;
-  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  border-left: 4px solid rgba(214, 178, 106, 0.85);
+  background-color: rgba(17, 24, 39, 0.75);
+  padding: 0.75rem 0.9rem;
+  padding-left: 1.1rem;
   margin: 1.75rem 0;
-  border-radius: 0 1rem 1rem 0;
-  box-shadow: var(--shadow-soft-elevated);
+  border-radius: 0 0.75rem 0.75rem 0;
+  color: #f9fafb;
 }
 
-.prose-lux blockquote p {
-  color: inherit;
+.prose-lux ul,
+.prose-lux ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
 }
 
-/* Lists */
-.prose-lux ul li::marker,
-.prose-lux ol li::marker {
-  color: var(--color-soft-gold);
+.prose-lux li {
+  margin: 0.3rem 0;
 }
 
 .prose-lux hr {
-  border-color: #374151;
+  border: none;
+  border-top: 1px solid #374151;
   margin: 2.5rem 0;
 }
 
-/* Inline code & code blocks */
 .prose-lux code {
-  color: var(--color-soft-gold);
-  background-color: rgba(0, 0, 0, 0.45);
+  font-size: 0.9em;
+  color: #d6b26a;
+  background-color: rgba(0, 0, 0, 0.55);
   border-radius: 999px;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.85em;
+  padding: 0.15rem 0.45rem;
 }
 
 .prose-lux pre {
-  background-color: rgba(0, 0, 0, 0.75);
-  color: #f9fafb;
-  border-radius: 1.25rem;
-  padding: 1rem 1.5rem;
+  margin: 1.75rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.9rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #e5e7eb;
   box-shadow: var(--shadow-soft-elevated);
+  overflow-x: auto;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Print & Reduced Motion -------------------------------- */
+/* ---------- Print Styles ------------------------------------------- */
 /* ------------------------------------------------------------------- */
 
 @media print {
@@ -237,6 +235,10 @@ a {
     print-color-adjust: exact !important;
   }
 }
+
+/* ------------------------------------------------------------------- */
+/* ---------- Reduced Motion ----------------------------------------- */
+/* ------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   * {
