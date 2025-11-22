@@ -4,6 +4,8 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
+import Layout from "@/components/Layout";
+
 // Existing data helpers
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
@@ -14,7 +16,13 @@ import { getAllContent } from "@/lib/mdx";
 // Types
 // ---------------------------------------------------------------------------
 
-type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
+type ContentKind =
+  | "blog"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource";
 
 type ContentResource = {
   kind: ContentKind;
@@ -183,7 +191,6 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
             kind: "print",
             title: p.title,
             slug,
-            // We will add a dedicated /prints/[slug] page in step 2
             href: `/prints/${slug}`,
             date: p.date,
             excerpt: p.excerpt,
@@ -239,7 +246,9 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
         items.filter((i) => i.kind === "event").length
       }, Prints: ${
         items.filter((i) => i.kind === "print").length
-      }, Resources: ${items.filter((i) => i.kind === "resource").length}`
+      }, Resources: ${
+        items.filter((i) => i.kind === "resource").length
+      }`,
     );
     console.log("[content] ========================================");
 
@@ -273,7 +282,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 
 export default function ContentPage({ items }: ContentPageProps) {
   const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
-    "all"
+    "all",
   );
 
   const total = items.length;
@@ -300,7 +309,7 @@ export default function ContentPage({ items }: ContentPageProps) {
   ];
 
   return (
-    <>
+    <Layout title="Strategic Insights & Resources">
       <Head>
         <title>Strategic Insights &amp; Resources | Abraham of London</title>
         <meta
@@ -309,7 +318,7 @@ export default function ContentPage({ items }: ContentPageProps) {
         />
       </Head>
 
-      <main className="relative min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black px-4 py-16">
+      <div className="relative min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black px-4 py-16">
         <div className="relative z-10 mx-auto max-w-7xl">
           {/* Header */}
           <header className="mb-12 text-center">
@@ -371,7 +380,8 @@ export default function ContentPage({ items }: ContentPageProps) {
                   book: "bg-purple-500/10 text-purple-400 border-purple-500/30",
                   download:
                     "bg-green-500/10 text-green-400 border-green-500/30",
-                  event: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+                  event:
+                    "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
                   print: "bg-pink-500/10 text-pink-400 border-pink-500/30",
                   resource:
                     "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
@@ -427,7 +437,7 @@ export default function ContentPage({ items }: ContentPageProps) {
             </div>
           )}
         </div>
-      </main>
-    </>
+      </div>
+    </Layout>
   );
 }
