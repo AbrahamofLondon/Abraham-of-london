@@ -40,20 +40,27 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
     // Fetch posts
     try {
       const posts = getAllPostsMeta?.() || [];
-      console.log(`[content] Found ${posts.length} posts`);
+      console.log(`[content] Found ${posts.length} raw posts`);
+      
       posts.forEach((p: any) => {
-        if (p.title && p.slug) {
+        // More lenient slug extraction
+        const slug = p.slug || p._raw?.flattenedPath?.replace('blog/', '') || p.title?.toLowerCase().replace(/\s+/g, '-');
+        
+        if (p.title && slug) {
+          console.log(`[content] Adding blog post: ${p.title} (slug: ${slug})`);
           items.push({
             kind: "blog",
             title: p.title,
-            slug: p.slug,
-            href: `/blog/${p.slug}`,
+            slug: slug,
+            href: `/blog/${slug}`,
             date: p.date,
             excerpt: p.excerpt,
             description: p.description,
             category: p.category,
             tags: p.tags || [],
           });
+        } else {
+          console.log(`[content] Skipping post - missing title or slug:`, { title: p.title, slug });
         }
       });
     } catch (err) {
@@ -65,12 +72,13 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       const books = getAllBooksMeta?.() || [];
       console.log(`[content] Found ${books.length} books`);
       books.forEach((b: any) => {
-        if (b.title && b.slug) {
+        const slug = b.slug || b._raw?.flattenedPath?.replace('books/', '') || b.title?.toLowerCase().replace(/\s+/g, '-');
+        if (b.title && slug) {
           items.push({
             kind: "book",
             title: b.title,
-            slug: b.slug,
-            href: `/books/${b.slug}`,
+            slug: slug,
+            href: `/books/${slug}`,
             date: b.date,
             excerpt: b.excerpt,
             category: "Books",
@@ -87,12 +95,13 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       const downloads = getAllDownloadsMeta?.() || [];
       console.log(`[content] Found ${downloads.length} downloads`);
       downloads.forEach((d: any) => {
-        if (d.title && d.slug) {
+        const slug = d.slug || d._raw?.flattenedPath?.replace('downloads/', '') || d.title?.toLowerCase().replace(/\s+/g, '-');
+        if (d.title && slug) {
           items.push({
             kind: "download",
             title: d.title,
-            slug: d.slug,
-            href: `/downloads/${d.slug}`,
+            slug: slug,
+            href: `/downloads/${slug}`,
             date: d.date,
             excerpt: d.excerpt,
             description: d.description,
@@ -110,12 +119,13 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       const events = getAllContent?.("events") || [];
       console.log(`[content] Found ${events.length} events`);
       events.forEach((e: any) => {
-        if (e.title && e.slug) {
+        const slug = e.slug || e._raw?.flattenedPath?.replace('events/', '') || e.title?.toLowerCase().replace(/\s+/g, '-');
+        if (e.title && slug) {
           items.push({
             kind: "event",
             title: e.title,
-            slug: e.slug,
-            href: `/events/${e.slug}`,
+            slug: slug,
+            href: `/events/${slug}`,
             date: e.eventDate || e.date,
             excerpt: e.excerpt,
             description: e.description,
@@ -133,12 +143,13 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       const prints = getAllContent?.("prints") || [];
       console.log(`[content] Found ${prints.length} prints`);
       prints.forEach((p: any) => {
-        if (p.title && p.slug) {
+        const slug = p.slug || p._raw?.flattenedPath?.replace('prints/', '') || p.title?.toLowerCase().replace(/\s+/g, '-');
+        if (p.title && slug) {
           items.push({
             kind: "print",
             title: p.title,
-            slug: p.slug,
-            href: `/prints/${p.slug}`,
+            slug: slug,
+            href: `/prints/${slug}`,
             date: p.date,
             excerpt: p.excerpt,
             category: "Printables",
@@ -155,12 +166,13 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       const resources = getAllContent?.("resources") || [];
       console.log(`[content] Found ${resources.length} resources`);
       resources.forEach((r: any) => {
-        if (r.title && r.slug) {
+        const slug = r.slug || r._raw?.flattenedPath?.replace('resources/', '') || r.title?.toLowerCase().replace(/\s+/g, '-');
+        if (r.title && slug) {
           items.push({
             kind: "resource",
             title: r.title,
-            slug: r.slug,
-            href: `/resources/${r.slug}`,
+            slug: slug,
+            href: `/resources/${slug}`,
             date: r.date,
             excerpt: r.excerpt,
             description: r.description,
@@ -174,6 +186,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
     }
 
     console.log(`[content] Total items collected: ${items.length}`);
+    console.log(`[content] Breakdown - Blog: ${items.filter(i => i.kind === 'blog').length}, Books: ${items.filter(i => i.kind === 'book').length}, Downloads: ${items.filter(i => i.kind === 'download').length}`);
 
     // Sort newest first by date
     const sorted = items.slice().sort((a, b) => {
@@ -254,17 +267,6 @@ export default function ContentPage({ items }: ContentPageProps) {
               and tools for fathers, founders, and leaders.
             </p>
           </header>
-
-          {/* Debug info - remove after fixing */}
-          {total === 0 && (
-            <div className="mb-8 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-center text-yellow-200">
-              <p className="font-medium">Debug: No content items found</p>
-              <p className="text-sm mt-2">
-                Blog: {blogCount} | Books: {bookCount} | Downloads: {downloadCount} | 
-                Events: {eventCount} | Prints: {printCount} | Resources: {resourceCount}
-              </p>
-            </div>
-          )}
 
           {/* Filter Pills */}
           <div className="mb-12 flex flex-wrap justify-center gap-3">
