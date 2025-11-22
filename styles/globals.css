@@ -14,7 +14,7 @@
   --color-charcoal: #15171c;
   --color-forest: #0e3b33;
 
-  --shadow-soft-elevated: 0 10px 40px rgba(0, 0, 0, 0.3);
+  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
 
 /* ------------------------------------------------------------------- */
@@ -28,9 +28,11 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+
+  /* Softer, cleaner background – less glow, more flat charcoal */
   background:
-    radial-gradient(circle at top, rgba(214, 178, 106, 0.17), transparent 55%),
-    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.4), #050608);
+    radial-gradient(circle at top, rgba(214, 178, 106, 0.10), transparent 55%),
+    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #050608);
   color: var(--color-foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,118 +41,121 @@ body {
 
 /* Selection */
 ::selection {
-  background-color: rgba(214, 178, 106, 0.4);
+  background-color: rgba(214, 178, 106, 0.35);
   color: #fdfdfb;
 }
 
 /* Links */
 a {
-  transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 /* ------------------------------------------------------------------- */
 /* ---------- Layout Shell & Cards ----------------------------------- */
 /* ------------------------------------------------------------------- */
 
-/* Full-page dark editorial shell */
+/* Use this on big dark sections (About, Downloads, etc.) */
 .page-shell {
   min-height: 100vh;
   color: #f9fafb;
+
+  /* Lighter shell – no extra harsh shadows */
   background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608);
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.14), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.32), #050608);
 }
 
-/* Luxury “glass” card */
+/* Luxury cards – softened shadow & background */
 .lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(17, 24, 39, 0.8);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(18px);
+  border-radius: 1rem; /* ~rounded-2xl */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(15, 23, 42, 0.82); /* slightly lighter */
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
 }
 
-/* Hover lift */
 .lux-card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .lux-card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.8);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
+  border-color: rgba(214, 178, 106, 0.4);
 }
 
-/* Filter pill chips */
+/* Filter pills on content hub */
 .lux-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background-color: rgba(15, 23, 42, 0.9);
-  padding: 0.45rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(15, 23, 42, 0.85);
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #e5e7eb;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color: #f9fafb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
 }
 
 .lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.7);
+  border-color: rgba(214, 178, 106, 0.6);
   background-color: #d6b26a;
   color: #111827;
-  box-shadow: 0 14px 40px rgba(214, 178, 106, 0.4);
+  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
 }
 
-/* Hero vignette helper */
+/* Hero vignette helper for big headers */
 .hero-vignette {
   background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608);
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.16), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #050608);
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Prose / MDX Styling ------------------------------------ */
+/* ---------- High-End Prose for MDX (Dark Mode) --------------------- */
 /* ------------------------------------------------------------------- */
 
+/* Use with Tailwind wrapper:
+   className="prose prose-lg prose-invert prose-lux"
+*/
 .prose-lux {
   max-width: none;
-  font-size: 1.0625rem;
-  line-height: 1.8;
   color: #e5e7eb;
+  font-size: 1.0625rem;
+  line-height: 1.75;
 }
 
-.prose-lux p {
-  margin-top: 1em;
-  margin-bottom: 1em;
+.prose-lux p,
+.prose-lux li {
   color: #e5e7eb;
+  line-height: 1.75;
 }
 
 .prose-lux h1,
 .prose-lux h2,
 .prose-lux h3,
 .prose-lux h4 {
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
   color: #f9fafb;
+  letter-spacing: -0.03em;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 .prose-lux h1 {
-  font-size: 2rem;
-  margin-top: 0;
-  margin-bottom: 1.25rem;
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  margin-bottom: 1.5rem;
 }
 
 .prose-lux h2 {
-  font-size: 1.6rem;
+  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
 }
 
 .prose-lux h3 {
-  font-size: 1.3rem;
+  font-size: clamp(1.4rem, 2vw, 1.7rem);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
@@ -167,66 +172,66 @@ a {
 }
 
 .prose-lux em {
-  color: #f9fafb;
+  color: #f3f4f6;
 }
 
+/* Links inside MDX */
 .prose-lux a {
-  color: #d6b26a;
+  color: var(--color-soft-gold);
   text-decoration: none;
   font-weight: 500;
 }
 
 .prose-lux a:hover {
-  color: #ffffff;
+  color: #fefce8;
   text-decoration: underline;
 }
 
+/* Quotes */
 .prose-lux blockquote {
-  border-left: 4px solid rgba(214, 178, 106, 0.85);
-  background-color: rgba(17, 24, 39, 0.75);
-  padding: 0.75rem 0.9rem;
-  padding-left: 1.1rem;
-  margin: 1.75rem 0;
-  border-radius: 0 0.75rem 0.75rem 0;
+  border-left: 4px solid rgba(214, 178, 106, 0.8);
+  background-color: rgba(15, 23, 42, 0.65);
   color: #f9fafb;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  margin: 1.75rem 0;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: var(--shadow-soft-elevated);
 }
 
-.prose-lux ul,
-.prose-lux ol {
-  padding-left: 1.5rem;
-  margin: 1rem 0;
+.prose-lux blockquote p {
+  color: inherit;
 }
 
-.prose-lux li {
-  margin: 0.3rem 0;
+/* Lists */
+.prose-lux ul li::marker,
+.prose-lux ol li::marker {
+  color: var(--color-soft-gold);
 }
 
 .prose-lux hr {
-  border: none;
-  border-top: 1px solid #374151;
+  border-color: #374151;
   margin: 2.5rem 0;
 }
 
+/* Inline code & code blocks */
 .prose-lux code {
-  font-size: 0.9em;
-  color: #d6b26a;
-  background-color: rgba(0, 0, 0, 0.55);
+  color: var(--color-soft-gold);
+  background-color: rgba(0, 0, 0, 0.45);
   border-radius: 999px;
-  padding: 0.15rem 0.45rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85em;
 }
 
 .prose-lux pre {
-  margin: 1.75rem 0;
-  padding: 1rem 1.25rem;
-  border-radius: 0.9rem;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #e5e7eb;
+  background-color: rgba(0, 0, 0, 0.72);
+  color: #f9fafb;
+  border-radius: 1.25rem;
+  padding: 1rem 1.5rem;
   box-shadow: var(--shadow-soft-elevated);
-  overflow-x: auto;
 }
 
 /* ------------------------------------------------------------------- */
-/* ---------- Print Styles ------------------------------------------- */
+/* ---------- Print & Reduced Motion -------------------------------- */
 /* ------------------------------------------------------------------- */
 
 @media print {
@@ -235,10 +240,6 @@ a {
     print-color-adjust: exact !important;
   }
 }
-
-/* ------------------------------------------------------------------- */
-/* ---------- Reduced Motion ----------------------------------------- */
-/* ------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   * {
