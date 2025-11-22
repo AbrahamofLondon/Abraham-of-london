@@ -1,151 +1,148 @@
-/** @type {import('tailwindcss').Config} */
-const colors = require("tailwindcss/colors");
+// tailwind.config.ts
+import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
+import typography from "@tailwindcss/typography";
+import forms from "@tailwindcss/forms";
+import aspectRatio from "@tailwindcss/aspect-ratio";
+import lineClamp from "@tailwindcss/line-clamp";
 
-module.exports = {
+const config: Config = {
   darkMode: "class",
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,jsx,ts,tsx,mdx}",
+    "./app/**/*.{js,jsx,ts,tsx,mdx}",
+    "./components/**/*.{js,jsx,ts,tsx,mdx}",
     "./content/**/*.{md,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx}",
-    "./styles/**/*.css",
   ],
   theme: {
-    container: {
-      center: true,
-      padding: {
-        DEFAULT: "1rem",
-        lg: "2rem",
-        xl: "3rem",
-        "2xl": "4rem",
-      },
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
       colors: {
-        // RESTORED Luxury Colors - these make existing classes work
-        forest: "#0B2E1F",
-        deepCharcoal: "#333333", 
-        softGold: "#C5A352",
-        warmCream: "#FAF7F2",
-        charcoal: "#1F2937",
+        // Core brand tones
+        deepCharcoal: "#0B0D10",
+        charcoal: "#15171C",
+        softGold: "#D6B26A",
+        gold: "#C89B3C",
+        forest: "#0E3B33",
+        emerald: "#2F6F4E",
+        bone: "#F4F1EA",
+        cloud: "#E5E7EB",
 
-        // Theme variables for consistency
-        primary: "var(--color-primary)",
-        "primary-hover": "var(--color-primary-hover)",
-        "on-primary": "var(--color-on-primary)",
-        
-        secondary: "var(--color-secondary)",
-        "on-secondary": "var(--color-on-secondary)",
-        
-        accent: "var(--color-accent)",
-        "accent-hover": "var(--color-accent-hover)",
-        "on-accent": "var(--color-on-accent)",
-        
-        border: "var(--color-border)",
-        surface: "var(--color-surface)",
-        muted: "var(--color-muted)",
-
-        // Supporting colors
-        emerald: { ...colors.emerald, 700: "#047857" },
+        // Status / accents
+        error: "#B91C1C",
+        success: "#15803D",
       },
+
+      backgroundImage: {
+        "luxury-radial":
+          "radial-gradient(circle at top, rgba(214,178,106,0.22), transparent 55%), radial-gradient(circle at bottom, rgba(14,59,51,0.40), #050608)",
+        "luxury-diagonal":
+          "linear-gradient(135deg, #050608 0%, #15171C 45%, #0B0D10 100%)",
+      },
+
       fontFamily: {
-        // CORRECTED: Inter for body, Playfair for headings
-        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "Playfair Display", "serif"],
+        // Wire these to your Next.js font variables if you’re using them
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
+        serif: ["var(--font-serif)", ...defaultTheme.fontFamily.serif],
+        display: ["var(--font-display)", ...defaultTheme.fontFamily.serif],
       },
-      spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
+
+      borderRadius: {
+        xl: "0.9rem",
+        "2xl": "1.25rem",
+        "3xl": "1.75rem",
       },
+
       boxShadow: {
-        'luxury': '0 4px 24px rgba(0, 0, 0, 0.08)',
-        'luxury-hover': '0 8px 40px rgba(0, 0, 0, 0.12)',
+        "soft-elevated":
+          "0 18px 45px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02)",
+        "glow-gold":
+          "0 0 0 1px rgba(214,178,106,0.35), 0 26px 60px rgba(0,0,0,0.8)",
       },
+
+      maxWidth: {
+        "content-narrow": "46rem",
+        "content-wide": "72rem",
+      },
+
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            color: theme('colors.on-secondary'),
+            color: theme("colors.gray.800"),
+            maxWidth: "72ch",
+            fontFamily: theme("fontFamily.sans").join(", "),
             a: {
-              color: theme('colors.primary'),
-              textDecoration: 'none',
-              fontWeight: '500',
-              transition: 'color 0.3s ease',
-              '&:hover': {
-                color: theme('colors.accent'),
+              color: theme("colors.forest"),
+              textDecoration: "none",
+              fontWeight: "500",
+              "&:hover": {
+                color: theme("colors.softGold"),
+                textDecoration: "underline",
               },
             },
             h1: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
+              fontFamily: theme("fontFamily.display").join(", "),
+              letterSpacing: "-0.04em",
+              color: theme("colors.deepCharcoal"),
             },
             h2: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
+              fontFamily: theme("fontFamily.display").join(", "),
+              letterSpacing: "-0.03em",
+              color: theme("colors.deepCharcoal"),
             },
             h3: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
-            },
-            h4: {
-              fontFamily: theme('fontFamily.serif').join(', '),
-              fontWeight: '600',
-              color: theme('colors.primary'),
-            },
-            blockquote: {
-              borderLeftColor: theme('colors.accent'),
-              fontStyle: 'italic',
+              fontFamily: theme("fontFamily.display").join(", "),
+              letterSpacing: "-0.01em",
+              color: theme("colors.deepCharcoal"),
             },
             strong: {
-              color: theme('colors.primary'),
-              fontWeight: '600',
+              color: theme("colors.deepCharcoal"),
+              fontWeight: "600",
+            },
+            blockquote: {
+              fontStyle: "normal",
+              borderLeftColor: theme("colors.softGold"),
+              backgroundColor: theme("colors.bone"),
+            },
+            hr: {
+              borderColor: "rgba(214,178,106,0.45)",
             },
             code: {
-              color: theme('colors.primary'),
-              fontWeight: '600',
-            },
-            'code::before': {
-              content: '""',
-            },
-            'code::after': {
-              content: '""',
+              backgroundColor: theme("colors.gray.100"),
+              borderRadius: "999px",
+              paddingInline: "0.45em",
+              paddingBlock: "0.08em",
             },
           },
         },
         invert: {
           css: {
-            color: theme('colors.on-secondary'),
+            color: theme("colors.gray.100"),
             a: {
-              color: theme('colors.primary'),
-              '&:hover': {
-                color: theme('colors.accent'),
+              color: theme("colors.softGold"),
+              "&:hover": {
+                color: theme("colors.white"),
               },
             },
-            h1: {
-              color: theme('colors.primary'),
-            },
-            h2: {
-              color: theme('colors.primary'),
-            },
-            h3: {
-              color: theme('colors.primary'),
-            },
+            h1: { color: theme("colors.white") },
+            h2: { color: theme("colors.white") },
+            h3: { color: theme("colors.softGold") },
+            strong: { color: theme("colors.white") },
             blockquote: {
-              borderLeftColor: theme('colors.accent'),
+              borderLeftColor: theme("colors.softGold"),
+              backgroundColor: "rgba(5,6,8,0.85)",
+            },
+            hr: {
+              borderColor: "rgba(214,178,106,0.7)",
+            },
+            code: {
+              backgroundColor: "rgba(15,23,42,0.9)",
             },
           },
         },
       }),
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'), // RESTORED typography plugin
-  ],
+  plugins: [typography, forms, aspectRatio, lineClamp],
 };
+
+export default config;
