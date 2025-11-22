@@ -55,20 +55,37 @@ export const Post = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // Fields actually used in your MDX files
+    slug: { type: "string", required: false },
+    description: { type: "string", required: false },
+    author: { type: "string", required: false },
+    authorTitle: { type: "string", required: false },
+    readTime: { type: "string", required: false },
+    category: { type: "string", required: false },
+    ogTitle: { type: "string", required: false },
+    ogDescription: { type: "string", required: false },
+    socialCaption: { type: "string", required: false },
+    coverAspect: { type: "string", required: false },
+    coverFit: { type: "string", required: false },
+    coverPosition: { type: "string", required: false },
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+    resources: { type: "json", required: false },
+    keyInsights: { type: "json", required: false },
+    authorNote: { type: "string", required: false },
+    // Legacy fields (keep for backwards compatibility)
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
     draft: { type: "boolean", default: false },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "blog"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(generateSlug(doc._raw.flattenedPath, "blog"), "blog"),
+      resolve: (doc) => {
+        // Use explicit slug if provided, otherwise generate from path
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "blog");
+        return generateUrl(finalSlug, "blog");
+      },
     },
     readingTime: {
       type: "number",
@@ -97,27 +114,32 @@ export const Download = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // Fields actually used in your MDX files
+    slug: { type: "string", required: false },
+    author: { type: "string", required: false },
+    readTime: { type: "string", required: false },
+    readtime: { type: "string", required: false }, // Note: some files use lowercase
+    category: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
+    file: { type: "string", required: false },
+    pdfPath: { type: "string", required: false },
+    layout: { type: "string", required: false },
+    description: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
-    // Primary path to the PDF in /public/downloads/...
-    downloadFile: { type: "string", required: true, default: "" },
-    // Optional legacy field if some MDX still uses fileUrl
+    downloadFile: { type: "string", required: false, default: "" },
     fileUrl: { type: "string", default: "" },
     type: { type: "string", default: "download" },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "downloads"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(
-          generateSlug(doc._raw.flattenedPath, "downloads"),
-          "downloads",
-        ),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "downloads");
+        return generateUrl(finalSlug, "downloads");
+      },
     },
   },
 }));
@@ -225,9 +247,7 @@ export const Print = defineDocumentType(() => ({
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
-    // e.g. "A4", "US Letter"
     dimensions: { type: "string", default: "" },
-    // optional PDF path in /public/downloads if distinct
     downloadFile: { type: "string", default: "" },
     price: { type: "string", default: "" },
     available: { type: "boolean", default: true },
@@ -333,4 +353,5 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
   },
+  disableImportAliasWarning: true, // Suppress the import alias warning
 });
