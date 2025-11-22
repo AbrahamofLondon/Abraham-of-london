@@ -1,21 +1,32 @@
-import type { NextPage } from "next";
-import Layout from "@/components/Layout";
+// ---------------------------------------------------------------------------
+// SSG
+// ---------------------------------------------------------------------------
 
-const ContentPage: NextPage = () => {
-  return (
-    <Layout title="Content Library">
-      <main className="mx-auto max-w-4xl px-4 py-12">
-        <h1 className="text-3xl font-bold mb-4">Content Library</h1>
-        <p className="text-gray-600 mb-6">
-          A unified content index is coming soon.
-        </p>
-        <p className="text-gray-500 text-sm">
-          For now, please use the navigation to access books, blog posts,
-          downloads, and strategy content directly.
-        </p>
-      </main>
-    </Layout>
-  );
+interface ContentPageProps {
+  items: ContentResource[];
+}
+
+export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
+  const items: ContentResource[] = [
+    ...normalisePosts(),      // 👈 THIS is the missing piece
+    ...normaliseBooks(),
+    ...normaliseDownloads(),
+    ...normaliseEvents(),
+    ...normalisePrints(),
+    ...normaliseResources(),
+    // You can also inject static "page" links here if you want About/Contact etc.
+  ];
+
+  // Optional: sort newest first by date
+  const sorted = items.slice().sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return a.date < b.date ? 1 : -1;
+  });
+
+  return {
+    props: { items: sorted },
+    revalidate: 3600,
+  };
 };
-
-export default ContentPage;
