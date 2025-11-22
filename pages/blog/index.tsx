@@ -32,9 +32,12 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   // JSON-safe clone to strip any non-serialisable fields
   const posts = JSON.parse(JSON.stringify(raw)) as PostMeta[];
 
-  // only keep published posts
+  // Only keep published posts - check both 'draft' and 'status' fields
   const visible = posts.filter(
-    (p) => (p as any).status !== "draft" && p.title,
+    (p) => 
+      p.title && 
+      !(p as any).draft && 
+      (p as any).status !== "draft"
   );
 
   return {
@@ -110,6 +113,12 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                   ? post.coverImage
                   : "/assets/images/writing-desk.webp";
 
+              // Use description OR excerpt - whichever exists
+              const displayExcerpt = 
+                (post as any).description || 
+                post.excerpt || 
+                "";
+
               return (
                 <article
                   key={post.slug}
@@ -129,7 +138,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                   <div className="flex flex-1 flex-col p-6">
                     <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-400">
                       <span className="rounded-full border border-softGold/30 bg-softGold/10 px-3 py-1 uppercase tracking-[0.18em] text-softGold">
-                        {post.category || "Reflection"}
+                        {(post as any).category || "Reflection"}
                       </span>
                       {post.date && (
                         <time
@@ -145,18 +154,18 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                       <Link href={href}>{post.title}</Link>
                     </h2>
 
-                    {post.excerpt && (
+                    {displayExcerpt && (
                       <p className="mb-4 line-clamp-3 text-sm text-gray-300">
-                        {post.excerpt}
+                        {displayExcerpt}
                       </p>
                     )}
 
                     <div className="mt-auto flex items-center justify-between pt-2 text-xs text-gray-400">
                       <span>
-                        {post.author || "Abraham of London"}
+                        {(post as any).author || "Abraham of London"}
                       </span>
-                      {post.readTime && (
-                        <span>{post.readTime}</span>
+                      {(post as any).readTime && (
+                        <span>{(post as any).readTime}</span>
                       )}
                     </div>
                   </div>
