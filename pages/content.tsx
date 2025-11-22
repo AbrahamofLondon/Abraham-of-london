@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
+import { getAllPrintsMeta } from "@/lib/server/prints-data";
 import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
