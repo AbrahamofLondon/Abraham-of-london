@@ -21,7 +21,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: false, // all 6 prints are known at build time
+    fallback: false, // all prints are known at build time
   };
 };
 
@@ -34,13 +34,16 @@ export const getStaticProps: GetStaticProps<PrintPageProps> = async ({
   const doc = getPrintDocumentBySlug(slug);
   if (!doc) return { notFound: true };
 
+  // Plain JSON copy for safety in serialization / props
   const print: PrintDocument = JSON.parse(JSON.stringify(doc));
 
-  const content = print.content ?? "";
+  // Contentlayer stores MDX source on body.raw
+  const rawMdx: string = (doc as any).body?.raw ?? "";
+
   const contentSource =
-    content.trim().length > 0
-      ? await serialize(content, {
-          // allow front-matter fields in MDX if needed later
+    rawMdx.trim().length > 0
+      ? await serialize(rawMdx, {
+          // Allow access to front-matter fields inside MDX if needed
           scope: { ...print },
         })
       : null;
@@ -166,7 +169,10 @@ export default function PrintPage({ print, contentSource }: PrintPageProps) {
             )}
 
             <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800 pt-6 text-sm text-slate-300/90">
-              <p>Ready to use this? Print, laminate, and keep it in your line of sight.</p>
+              <p>
+                Ready to use this? Print, laminate, and keep it in your line of
+                sight.
+              </p>
               <Link
                 href="/downloads"
                 className="inline-flex items-center gap-2 rounded-full border border-softGold/60 bg-softGold/15 px-5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-softGold hover:bg-softGold/25"

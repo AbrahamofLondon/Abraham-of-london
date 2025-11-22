@@ -1,79 +1,91 @@
-// ============================================================================
-// FILE 2: lib/prints.ts (Client-safe utilities)
-// ============================================================================
+// lib/prints.ts
+// Unified helpers + data access for print documents (wrapping print-utils)
 
-export interface PrintDocument {
-  _id: string;
-  title: string;
-  slug: string;
-  date: string;
-  url: string;
-  excerpt?: string;
+import {
+  getAllPrintDocuments as _getAllPrintDocuments,
+  getAllPrintSlugs as _getAllPrintSlugs,
+  getPrintDocumentBySlug as _getPrintDocumentBySlug,
+  getPrintPaths as _getPrintPaths,
+  type PrintDocument as BasePrintDocument,
+} from "@/lib/print-utils";
+
+// Canonical print type used across the app
+export type PrintDocument = BasePrintDocument & {
   description?: string;
-  tags?: string[];
   category?: string;
-  coverImage?: string;
   dimensions?: string;
   downloadFile?: string;
   price?: string;
   available?: boolean;
-  content?: string;
-  [key: string]: unknown;
+};
+
+// ---------------------------------------------------------------------------
+// Data access (used by getStaticProps / getStaticPaths)
+// ---------------------------------------------------------------------------
+
+export function getAllPrintDocuments(): PrintDocument[] {
+  return _getAllPrintDocuments() as PrintDocument[];
 }
 
-/**
- * Helper to build print URL from slug
- */
+export function getAllPrintSlugs(): string[] {
+  return _getAllPrintSlugs();
+}
+
+export function getPrintDocumentBySlug(slug: string): PrintDocument | null {
+  return _getPrintDocumentBySlug(slug) as PrintDocument | null;
+}
+
+export function getPrintPaths(): { params: { slug: string } }[] {
+  return _getPrintPaths();
+}
+
+// ---------------------------------------------------------------------------
+// Client helpers
+// ---------------------------------------------------------------------------
+
+/** Build the public URL for a print page. */
 export function getPrintUrl(slug: string): string {
   return `/prints/${slug}`;
 }
 
-/**
- * Helper to format print dimensions for display
- */
+/** Format dimensions for UI display. */
 export function formatDimensions(dimensions?: string): string {
-  if (!dimensions) return "Standard size";
+  if (!dimensions || !dimensions.trim()) return "Standard size";
   return dimensions;
 }
 
-/**
- * Helper to check if a print is available
- */
+/** Check whether a print is currently available. */
 export function isPrintAvailable(print: PrintDocument): boolean {
   return print.available !== false;
 }
 
-/**
- * Filter prints by tag
- */
+/** Filter by tag (case-insensitive). */
 export function filterPrintsByTag(
   prints: PrintDocument[],
-  tag: string
+  tag: string,
 ): PrintDocument[] {
+  const needle = tag.toLowerCase();
   return prints.filter(
     (print) =>
       Array.isArray(print.tags) &&
-      print.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+      print.tags.some((t) => t.toLowerCase() === needle),
   );
 }
 
-/**
- * Filter prints by category
- */
+/** Filter by category (case-insensitive). */
 export function filterPrintsByCategory(
   prints: PrintDocument[],
-  category: string
+  category: string,
 ): PrintDocument[] {
+  const needle = category.toLowerCase();
   return prints.filter(
     (print) =>
-      print.category &&
-      print.category.toLowerCase() === category.toLowerCase()
+      typeof print.category === "string" &&
+      print.category.toLowerCase() === needle,
   );
 }
 
-/**
- * Get all unique tags from prints
- */
+/** Collect unique tags across all prints. */
 export function getAllPrintTags(prints: PrintDocument[]): string[] {
   const tagSet = new Set<string>();
   prints.forEach((print) => {
@@ -81,12 +93,10 @@ export function getAllPrintTags(prints: PrintDocument[]): string[] {
       print.tags.forEach((tag) => tagSet.add(tag));
     }
   });
-  return Array.from(tagSet).sort();
+  return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
 }
 
-/**
- * Get all unique categories from prints
- */
+/** Collect unique categories across all prints. */
 export function getAllPrintCategories(prints: PrintDocument[]): string[] {
   const categorySet = new Set<string>();
   prints.forEach((print) => {
@@ -94,5 +104,5 @@ export function getAllPrintCategories(prints: PrintDocument[]): string[] {
       categorySet.add(print.category);
     }
   });
-  return Array.from(categorySet).sort();
+  return Array.from(categorySet).sort((a, b) => a.localeCompare(b));
 }

@@ -23,7 +23,8 @@
     // Aliases
     "baseUrl": ".",
     "paths": {
-      "@/*": ["*", "src/*"]
+      "@/*": ["*", "src/*"],
+      "contentlayer/generated": ["./.contentlayer/generated"]
     },
 
     "plugins": [
@@ -45,7 +46,8 @@
     "config/**/*.tsx",
     "hooks/**/*.ts",
     "hooks/**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".contentlayer/generated"
   ],
   "exclude": [
     "node_modules",
