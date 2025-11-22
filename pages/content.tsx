@@ -1,21 +1,23 @@
+// pages/content.tsx
 import type { GetStaticProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-// Use your existing data fetching functions
+// Existing data helpers
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
-// import { getAllPrintsMeta } from "@/lib/server/prints-data"; // Not needed, using getAllContent
 import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
+type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
+
 type ContentResource = {
-  kind: "blog" | "book" | "download" | "event" | "print" | "resource";
+  kind: ContentKind;
   title: string;
   slug: string;
   href: string;
@@ -26,38 +28,41 @@ type ContentResource = {
   tags?: string[];
 };
 
-// ---------------------------------------------------------------------------
-// SSG
-// ---------------------------------------------------------------------------
-
 interface ContentPageProps {
   items: ContentResource[];
 }
+
+// ---------------------------------------------------------------------------
+// SSG
+// ---------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   console.log("============================================");
   console.log("[content] getStaticProps STARTING");
   console.log("============================================");
-  
+
   try {
     const items: ContentResource[] = [];
 
-    // Fetch posts
+    // ---------------- BLOG POSTS (pages/[slug].tsx) ----------------
     try {
       const posts = getAllPostsMeta?.() || [];
       console.log(`[content] Found ${posts.length} raw posts`);
-      
+
       posts.forEach((p: any) => {
-        // More lenient slug extraction
-        const slug = p.slug || p._raw?.flattenedPath?.replace('blog/', '') || p.title?.toLowerCase().replace(/\s+/g, '-');
-        
+        const slug: string | undefined =
+          p.slug ||
+          p._raw?.flattenedPath?.replace(/^blog\//, "") ||
+          p.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (p.title && slug) {
           console.log(`[content] Adding blog post: ${p.title} (slug: ${slug})`);
           items.push({
             kind: "blog",
             title: p.title,
-            slug: slug,
-            href: `/blog/${slug}`,
+            slug,
+            // IMPORTANT: blog posts live at /[slug], not /blog/[slug]
+            href: `/${slug}`,
             date: p.date,
             excerpt: p.excerpt,
             description: p.description,
@@ -65,24 +70,32 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
             tags: p.tags || [],
           });
         } else {
-          console.log(`[content] Skipping post - missing title or slug:`, { title: p.title, slug });
+          console.log("[content] Skipping post - missing title or slug", {
+            title: p.title,
+            slug,
+          });
         }
       });
     } catch (err) {
       console.error("[content] Error fetching posts:", err);
     }
 
-    // Fetch books
+    // ---------------- BOOKS ----------------
     try {
       const books = getAllBooksMeta?.() || [];
       console.log(`[content] Found ${books.length} books`);
+
       books.forEach((b: any) => {
-        const slug = b.slug || b._raw?.flattenedPath?.replace('books/', '') || b.title?.toLowerCase().replace(/\s+/g, '-');
+        const slug: string | undefined =
+          b.slug ||
+          b._raw?.flattenedPath?.replace(/^books\//, "") ||
+          b.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (b.title && slug) {
           items.push({
             kind: "book",
             title: b.title,
-            slug: slug,
+            slug,
             href: `/books/${slug}`,
             date: b.date,
             excerpt: b.excerpt,
@@ -95,17 +108,22 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching books:", err);
     }
 
-    // Fetch downloads
+    // ---------------- DOWNLOADS ----------------
     try {
       const downloads = getAllDownloadsMeta?.() || [];
       console.log(`[content] Found ${downloads.length} downloads`);
+
       downloads.forEach((d: any) => {
-        const slug = d.slug || d._raw?.flattenedPath?.replace('downloads/', '') || d.title?.toLowerCase().replace(/\s+/g, '-');
+        const slug: string | undefined =
+          d.slug ||
+          d._raw?.flattenedPath?.replace(/^downloads\//, "") ||
+          d.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (d.title && slug) {
           items.push({
             kind: "download",
             title: d.title,
-            slug: slug,
+            slug,
             href: `/downloads/${slug}`,
             date: d.date,
             excerpt: d.excerpt,
@@ -119,17 +137,22 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching downloads:", err);
     }
 
-    // Fetch events
+    // ---------------- EVENTS ----------------
     try {
       const events = getAllContent?.("events") || [];
       console.log(`[content] Found ${events.length} events`);
+
       events.forEach((e: any) => {
-        const slug = e.slug || e._raw?.flattenedPath?.replace('events/', '') || e.title?.toLowerCase().replace(/\s+/g, '-');
+        const slug: string | undefined =
+          e.slug ||
+          e._raw?.flattenedPath?.replace(/^events\//, "") ||
+          e.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (e.title && slug) {
           items.push({
             kind: "event",
             title: e.title,
-            slug: slug,
+            slug,
             href: `/events/${slug}`,
             date: e.eventDate || e.date,
             excerpt: e.excerpt,
@@ -143,18 +166,24 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching events:", err);
     }
 
-    // Fetch prints - use getAllContent like events since getAllPrintsMeta isn't being called
+    // ---------------- PRINTS ----------------
     try {
       const prints = getAllContent?.("prints") || [];
       console.log(`[content] Found ${prints.length} prints via getAllContent`);
+
       prints.forEach((p: any) => {
-        const slug = p.slug || p._raw?.flattenedPath?.replace('prints/', '') || p.title?.toLowerCase().replace(/\s+/g, '-');
+        const slug: string | undefined =
+          p.slug ||
+          p._raw?.flattenedPath?.replace(/^prints\//, "") ||
+          p.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (p.title && slug) {
           console.log(`[content] Adding print: ${p.title} (slug: ${slug})`);
           items.push({
             kind: "print",
             title: p.title,
-            slug: slug,
+            slug,
+            // We will add a dedicated /prints/[slug] page in step 2
             href: `/prints/${slug}`,
             date: p.date,
             excerpt: p.excerpt,
@@ -168,17 +197,22 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching prints:", err);
     }
 
-    // Fetch resources
+    // ---------------- GENERIC RESOURCES ----------------
     try {
       const resources = getAllContent?.("resources") || [];
       console.log(`[content] Found ${resources.length} resources`);
+
       resources.forEach((r: any) => {
-        const slug = r.slug || r._raw?.flattenedPath?.replace('resources/', '') || r.title?.toLowerCase().replace(/\s+/g, '-');
+        const slug: string | undefined =
+          r.slug ||
+          r._raw?.flattenedPath?.replace(/^resources\//, "") ||
+          r.title?.toLowerCase().replace(/\s+/g, "-");
+
         if (r.title && slug) {
           items.push({
             kind: "resource",
             title: r.title,
-            slug: slug,
+            slug,
             href: `/resources/${slug}`,
             date: r.date,
             excerpt: r.excerpt,
@@ -192,10 +226,22 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching resources:", err);
     }
 
-    console.log(`[content] ========================================`);
+    console.log("[content] ========================================");
     console.log(`[content] Total items collected: ${items.length}`);
-    console.log(`[content] Breakdown - Blog: ${items.filter(i => i.kind === 'blog').length}, Books: ${items.filter(i => i.kind === 'book').length}, Downloads: ${items.filter(i => i.kind === 'download').length}, Events: ${items.filter(i => i.kind === 'event').length}, Prints: ${items.filter(i => i.kind === 'print').length}, Resources: ${items.filter(i => i.kind === 'resource').length}`);
-    console.log(`[content] ========================================`);
+    console.log(
+      `[content] Breakdown - Blog: ${
+        items.filter((i) => i.kind === "blog").length
+      }, Books: ${
+        items.filter((i) => i.kind === "book").length
+      }, Downloads: ${
+        items.filter((i) => i.kind === "download").length
+      }, Events: ${
+        items.filter((i) => i.kind === "event").length
+      }, Prints: ${
+        items.filter((i) => i.kind === "print").length
+      }, Resources: ${items.filter((i) => i.kind === "resource").length}`
+    );
+    console.log("[content] ========================================");
 
     // Sort newest first by date
     const sorted = items.slice().sort((a, b) => {
@@ -226,7 +272,9 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 // ---------------------------------------------------------------------------
 
 export default function ContentPage({ items }: ContentPageProps) {
-  const [activeFilter, setActiveFilter] = React.useState<string>("all");
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
+    "all"
+  );
 
   const total = items.length;
   const blogCount = items.filter((i) => i.kind === "blog").length;
@@ -242,19 +290,19 @@ export default function ContentPage({ items }: ContentPageProps) {
       : items.filter((i) => i.kind === activeFilter);
 
   const filters = [
-    { key: "all", label: "All Content", count: total },
-    { key: "blog", label: "Blog", count: blogCount },
-    { key: "book", label: "Books", count: bookCount },
-    { key: "download", label: "Downloads", count: downloadCount },
-    { key: "event", label: "Events", count: eventCount },
-    { key: "print", label: "Prints", count: printCount },
-    { key: "resource", label: "Resources", count: resourceCount },
+    { key: "all" as const, label: "All Content", count: total },
+    { key: "blog" as const, label: "Blog", count: blogCount },
+    { key: "book" as const, label: "Books", count: bookCount },
+    { key: "download" as const, label: "Downloads", count: downloadCount },
+    { key: "event" as const, label: "Events", count: eventCount },
+    { key: "print" as const, label: "Prints", count: printCount },
+    { key: "resource" as const, label: "Resources", count: resourceCount },
   ];
 
   return (
     <>
       <Head>
-        <title>Strategic Insights & Resources | Abraham of London</title>
+        <title>Strategic Insights &amp; Resources | Abraham of London</title>
         <meta
           name="description"
           content="Explore essays, books, downloads, events, and resources for fathers, founders, and leaders building enduring legacies."
@@ -284,25 +332,19 @@ export default function ContentPage({ items }: ContentPageProps) {
                 key={filter.key}
                 type="button"
                 onClick={() => setActiveFilter(filter.key)}
-                className={`
-                  inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all
-                  ${
-                    activeFilter === filter.key
-                      ? "border-yellow-600/60 bg-yellow-600 text-gray-900 shadow-lg shadow-yellow-600/30"
-                      : "border-white/10 bg-gray-900/80 text-gray-100 hover:border-yellow-600/40 hover:bg-gray-800"
-                  }
-                `}
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                  activeFilter === filter.key
+                    ? "border-yellow-600/60 bg-yellow-600 text-gray-900 shadow-lg shadow-yellow-600/30"
+                    : "border-white/10 bg-gray-900/80 text-gray-100 hover:border-yellow-600/40 hover:bg-gray-800"
+                }`}
               >
                 {filter.label}
                 <span
-                  className={`
-                    rounded-full px-2 py-0.5 text-xs
-                    ${
-                      activeFilter === filter.key
-                        ? "bg-gray-900/20 text-gray-900"
-                        : "bg-white/10 text-gray-400"
-                    }
-                  `}
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    activeFilter === filter.key
+                      ? "bg-gray-900/20 text-gray-900"
+                      : "bg-white/10 text-gray-400"
+                  }`}
                 >
                   {filter.count}
                 </span>
@@ -313,7 +355,7 @@ export default function ContentPage({ items }: ContentPageProps) {
           {/* Content Grid */}
           {filtered.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-10 text-center text-gray-300">
-              <p className="text-lg mb-2">No content found for this filter.</p>
+              <p className="mb-2 text-lg">No content found for this filter.</p>
               {total === 0 && (
                 <p className="text-sm text-gray-500">
                   Check build logs for data fetching errors.
@@ -327,10 +369,12 @@ export default function ContentPage({ items }: ContentPageProps) {
                 const kindBadgeColors: Record<string, string> = {
                   blog: "bg-blue-500/10 text-blue-400 border-blue-500/30",
                   book: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-                  download: "bg-green-500/10 text-green-400 border-green-500/30",
+                  download:
+                    "bg-green-500/10 text-green-400 border-green-500/30",
                   event: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
                   print: "bg-pink-500/10 text-pink-400 border-pink-500/30",
-                  resource: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+                  resource:
+                    "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
                 };
 
                 return (

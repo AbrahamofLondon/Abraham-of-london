@@ -1,8 +1,9 @@
 // lib/server/posts-data.ts
-// Filesystem + MDX based blog loader (content/blog/*)
+// Blog loader using the generic MDX collections helper (NO Contentlayer).
 
 import {
   getMdxCollectionMeta,
+  getMdxCollectionDocuments,
   getMdxDocumentBySlug,
   type MdxMeta,
   type MdxDocument,
@@ -10,131 +11,101 @@ import {
 
 export type PostMeta = MdxMeta & {
   description?: string;
-  excerpt?: string;
-  coverImage?: string;
-  heroImage?: string;
   updated?: string;
   author?: string;
-  tags?: string[];
+  tags?: (string | number)[];
   category?: string;
+  coverImage?: string;
+  heroImage?: string;
   readTime?: string;
   resources?: {
     downloads?: { href?: string }[];
     reads?: { href?: string }[];
   };
-  seoTitle?: string;
-  seoDescription?: string;
-  status?: string;
+  keyInsights?: string[];
+  authorNote?: string;
+  authorTitle?: string;
 };
 
 export type PostWithContent = PostMeta & {
   content: string;
 };
 
-// ----------------- helpers -----------------
-
-function cleanSlug(raw: unknown): string {
-  return String(raw || "")
-    .trim()
-    .replace(/^\/+|\/+$/g, "");
-}
-
-function normaliseBlogSlug(raw: unknown): string {
-  const s = cleanSlug(raw);
-  return s.replace(/^blog\//i, "");
-}
-
-function normaliseDate(raw: unknown): string | undefined {
-  if (!raw) return undefined;
-  if (typeof raw === "string") return raw;
-  if (raw instanceof Date) {
-    // keep it simple: YYYY-MM-DD
-    return raw.toISOString().split("T")[0];
-  }
-  return String(raw);
-}
-
 function fromMdxMeta(meta: MdxMeta): PostMeta {
   const anyMeta = meta as any;
-
-  const tags = Array.isArray(anyMeta.tags)
-    ? (anyMeta.tags as unknown[]).map((t) => String(t))
-    : undefined;
-
   return {
     ...meta,
-    slug: normaliseBlogSlug(meta.slug),
-    // normalise date to plain string
-    date: normaliseDate(anyMeta.date),
-    description: anyMeta.description ?? meta.excerpt ?? undefined,
-    excerpt: anyMeta.excerpt ?? anyMeta.description ?? meta.excerpt ?? undefined,
-    coverImage: anyMeta.coverImage ?? anyMeta.image ?? meta.coverImage,
+    description: anyMeta.description ?? anyMeta.excerpt ?? undefined,
+    updated: anyMeta.updated ?? anyMeta.updatedAt ?? undefined,
+    author: anyMeta.author ?? "Abraham of London",
+    tags: anyMeta.tags ?? [],
+    category: anyMeta.category ?? anyMeta.section ?? undefined,
+    coverImage: anyMeta.coverImage ?? anyMeta.image ?? undefined,
     heroImage: anyMeta.heroImage ?? undefined,
-    updated: normaliseDate(anyMeta.updated),
-    author: anyMeta.author ?? undefined,
-    tags,
-    category: anyMeta.category ?? undefined,
-    readTime: anyMeta.readTime ?? undefined,
+    readTime: anyMeta.readTime ?? anyMeta.readingTime ?? undefined,
     resources: anyMeta.resources ?? undefined,
-    seoTitle: anyMeta.seoTitle ?? anyMeta.title ?? undefined,
-    seoDescription:
-      anyMeta.seoDescription ??
-      anyMeta.excerpt ??
-      anyMeta.description ??
-      undefined,
-    status: anyMeta.status ?? "published",
+    keyInsights: anyMeta.keyInsights ?? undefined,
+    authorNote: anyMeta.authorNote ?? undefined,
+    authorTitle: anyMeta.authorTitle ?? undefined,
   };
 }
 
 function fromMdxDocument(doc: MdxDocument): PostWithContent {
-  const meta = fromMdxMeta(doc);
-  return {
-    ...meta,
-    content: doc.content,
-  };
+  const { content, ...rest } = doc;
+  const meta = fromMdxMeta(rest);
+  return { ...meta, content };
 }
 
-// ----------------- public API -----------------
+// -----------------  PUBLIC API  -----------------
 
-export function getAllPostsMeta(): PostMeta[] {
-  const metas = getMdxCollectionMeta("blog");
-  return metas.map(fromMdxMeta);
+// Normalise slugs like "blog/foo" → "foo"
+function cleanSlug(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/^blog\//i, "");
 }
 
+/** All blog post slugs for SSG paths. */
 export function getPostSlugs(): string[] {
-  return getAllPostsMeta()
-    .map((m) => m.slug)
-    .filter((s): s is string => Boolean(s && s.trim()));
+  const metas = getMdxCollectionMeta("blog");
+  return metas
+    .map((m) => cleanSlug(String(m.slug || "")))
+    .filter((s) => s.length > 0);
 }
 
-/**
- * Legacy-style accessor compatible with your /blog/[slug].tsx page.
- */
+/** All posts (meta only). */
+export function getAllPostsMeta(): PostMeta[] {
+  const docs = getMdxCollectionDocuments("blog");
+  return docs.map((d) => fromMdxMeta(d));
+}
+
+/** Single post lookup by slug (with optional field filter, Next.js-style). */
 export function getPostBySlug(
   slug: string,
   fields: string[] = [],
-): Partial<PostWithContent> {
-  const key = normaliseBlogSlug(slug);
+): (PostMeta & { content?: string }) | null {
+  const target = cleanSlug(slug);
   const doc =
-    getMdxDocumentBySlug("blog", key) ??
-    // last-ditch: maybe slug came in already "blog/foo"
-    getMdxDocumentBySlug("blog", cleanSlug(slug).replace(/^blog\//i, ""));
+    getMdxDocumentBySlug("blog", target) ??
+    getMdxDocumentBySlug("blog", `blog/${target}`);
+  if (!doc) return null;
 
-  if (!doc) {
-    return {};
-  }
-
-  const full = fromMdxDocument(doc) as any;
+  const full = fromMdxDocument(doc);
 
   if (!fields || fields.length === 0) {
     return full;
   }
 
-  const result: any = {};
+  const filtered: any = {};
   for (const field of fields) {
+    if (field === "content") {
+      filtered.content = full.content;
+      continue;
+    }
     if (field in full) {
-      result[field] = full[field];
+      filtered[field] = (full as any)[field];
     }
   }
-  return result;
+  return filtered;
 }
