@@ -31,47 +31,75 @@ module.exports = {
         "luxury-diagonal":
           "radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%), radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608)",
       },
-      typography: (theme) => ({
+      // Global typography tuned for DARK backgrounds.
+      typography: ({ theme }) => ({
         DEFAULT: {
           css: {
             maxWidth: "none",
-            color: theme("colors.gray.800"),
-            a: {
-              color: theme("colors.forest"),
-              textDecoration: "none",
-              "&:hover": {
-                color: theme("colors.softGold"),
-                textDecoration: "underline",
-              },
+            color: theme("colors.slate.100"),
+
+            p: {
+              color: theme("colors.slate.100"),
             },
-          },
-        },
-        invert: {
-          css: {
-            "--tw-prose-body": theme("colors.gray.200"),
-            "--tw-prose-headings": "#ffffff",
-            "--tw-prose-lead": theme("colors.gray.300"),
-            "--tw-prose-links": theme("colors.softGold"),
-            "--tw-prose-bold": "#f9fafb",
-            "--tw-prose-counters": theme("colors.gray.400"),
-            "--tw-prose-bullets": theme("colors.softGold"),
-            "--tw-prose-hr": theme("colors.gray.700"),
-            "--tw-prose-quotes": theme("colors.gray.100"),
-            "--tw-prose-quote-borders": theme("colors.softGold"),
-            "--tw-prose-captions": theme("colors.gray.400"),
-            "--tw-prose-code": theme("colors.softGold"),
-            "--tw-prose-pre-code": theme("colors.gray.100"),
-            "--tw-prose-pre-bg": "#020617",
-            "--tw-prose-th-borders": theme("colors.gray.600"),
-            "--tw-prose-td-borders": theme("colors.gray.700"),
-            color: theme("colors.gray.200"),
+            li: {
+              color: theme("colors.slate.100"),
+            },
+            strong: {
+              color: theme("colors.slate.50"),
+            },
+            em: {
+              color: theme("colors.slate.100"),
+            },
+
+            h1: {
+              color: theme("colors.white"),
+              fontFamily: theme("fontFamily.serif").join(","),
+            },
+            h2: {
+              color: theme("colors.slate.50"),
+              fontFamily: theme("fontFamily.serif").join(","),
+            },
+            h3: {
+              color: theme("colors.slate.50"),
+              fontFamily: theme("fontFamily.serif").join(","),
+            },
+            h4: {
+              color: theme("colors.slate.50"),
+              fontFamily: theme("fontFamily.serif").join(","),
+            },
+
             a: {
               color: theme("colors.softGold"),
               textDecoration: "none",
+              fontWeight: "500",
               "&:hover": {
-                color: "#ffffff",
+                color: theme("colors.amber.200"),
                 textDecoration: "underline",
               },
+            },
+
+            blockquote: {
+              color: theme("colors.slate.100"),
+              borderLeftColor: theme("colors.softGold"),
+              backgroundColor: "rgba(255, 255, 255, 0.03)",
+            },
+
+            "ul > li::marker, ol > li::marker": {
+              color: theme("colors.softGold"),
+            },
+
+            hr: {
+              borderColor: theme("colors.slate.700"),
+            },
+
+            code: {
+              color: theme("colors.softGold"),
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            },
+
+            pre: {
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              color: theme("colors.slate.100"),
             },
           },
         },

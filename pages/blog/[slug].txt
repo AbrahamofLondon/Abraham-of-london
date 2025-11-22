@@ -283,7 +283,7 @@ function BlogPostPage({
     category,
   } = post;
 
-  // Read time: support both front-matter readTime and Contentlayer readingTime
+  // Read time
   const rawReadTime =
     post.readTime ?? (post as unknown as { readingTime?: number }).readingTime;
   const readTime =

@@ -6,8 +6,12 @@ import type {
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
+
 import Layout from "@/components/Layout";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import mdxComponents from "@/components/mdx-components";
 
@@ -88,6 +92,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       fallback: false,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error in getStaticPaths for downloads:", error);
     return {
       paths: [],
@@ -143,6 +148,7 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
       revalidate: 3600, // 1 hour
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error in getStaticProps for downloads:", error);
     return { notFound: true };
   }
@@ -164,24 +170,25 @@ export default function DownloadPage(
         {props.excerpt && <meta name="description" content={props.excerpt} />}
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <header className="mb-8 border-b border-lightGrey pb-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        {/* HEADER */}
+        <header className="mb-8 border-b border-slate-700 pb-5">
+          <p className="text-xs uppercase tracking-wide text-slate-400">
             Strategic Download
           </p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-slate-50 sm:text-4xl">
             {props.title}
           </h1>
 
           {(props.category || props.readTime || props.tags?.length) && (
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-300">
               {props.category && (
-                <span className="rounded-full bg-forest/5 px-3 py-1 text-forest">
+                <span className="rounded-full bg-forest/20 px-3 py-1 text-forest">
                   {props.category}
                 </span>
               )}
               {props.readTime && (
-                <span className="rounded-full bg-gray-100 px-3 py-1">
+                <span className="rounded-full bg-black/40 px-3 py-1 text-slate-100">
                   {props.readTime}
                 </span>
               )}
@@ -190,7 +197,7 @@ export default function DownloadPage(
                   {props.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] text-gray-600"
+                      className="rounded-full bg-black/40 px-2 py-0.5 text-[11px] text-slate-200"
                     >
                       #{tag}
                     </span>
@@ -201,7 +208,7 @@ export default function DownloadPage(
           )}
 
           {props.excerpt && (
-            <p className="mt-4 max-w-2xl text-sm text-gray-700">
+            <p className="mt-4 max-w-2xl text-sm text-slate-200">
               {props.excerpt}
             </p>
           )}
@@ -213,7 +220,7 @@ export default function DownloadPage(
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-semibold text-cream transition-colors hover:bg-deepCharcoal"
+                className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-deepCharcoal"
               >
                 Download PDF
                 {props.fileSize ? ` (${props.fileSize})` : ""}
@@ -222,7 +229,11 @@ export default function DownloadPage(
           )}
         </header>
 
-         <article className="prose-lux prose-headings:font-serif">
+        {/* CONTENT */}
+        <article
+          className="prose prose-lg max-w-none
+          prose-headings:font-serif"
+        >
           <MDXRemote {...props.mdxSource} components={mdxComponents} />
         </article>
       </main>
