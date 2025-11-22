@@ -160,6 +160,10 @@ export const Book = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // NEW: Add missing fields from build log
+    slug: { type: "string", required: false },
+    readTime: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
@@ -168,14 +172,12 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", default: "" },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "books"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(generateSlug(doc._raw.flattenedPath, "books"), "books"),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "books");
+        return generateUrl(finalSlug, "books");
+      },
     },
   },
 }));
@@ -196,6 +198,11 @@ export const Event = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // NEW: Add missing fields from build log
+    slug: { type: "string", required: false },
+    time: { type: "string", required: false },
+    description: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
@@ -207,14 +214,12 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", default: "" },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "events"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(generateSlug(doc._raw.flattenedPath, "events"), "events"),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "events");
+        return generateUrl(finalSlug, "events");
+      },
     },
     isUpcoming: {
       type: "boolean",
@@ -244,6 +249,9 @@ export const Print = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // NEW: Add missing slug field from build log
+    slug: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
@@ -253,17 +261,12 @@ export const Print = defineDocumentType(() => ({
     available: { type: "boolean", default: true },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "prints"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(
-          generateSlug(doc._raw.flattenedPath, "prints"),
-          "prints",
-        ),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "prints");
+        return generateUrl(finalSlug, "prints");
+      },
     },
   },
 }));
@@ -284,22 +287,22 @@ export const Strategy = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // NEW: Add missing fields from build log
+    slug: { type: "string", required: false },
+    author: { type: "string", required: false },
+    description: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "strategy"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(
-          generateSlug(doc._raw.flattenedPath, "strategy"),
-          "strategy",
-        ),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "strategy");
+        return generateUrl(finalSlug, "strategy");
+      },
     },
   },
 }));
@@ -320,6 +323,12 @@ export const Resource = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
+    // NEW: Add missing fields from build log
+    description: { type: "string", required: false },
+    slug: { type: "string", required: false },
+    author: { type: "string", required: false },
+    readtime: { type: "string", required: false },
+    // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
@@ -327,17 +336,12 @@ export const Resource = defineDocumentType(() => ({
     fileUrl: { type: "string", default: "" },
   },
   computedFields: {
-    slug: {
-      type: "string",
-      resolve: (doc) => generateSlug(doc._raw.flattenedPath, "resources"),
-    },
     url: {
       type: "string",
-      resolve: (doc) =>
-        generateUrl(
-          generateSlug(doc._raw.flattenedPath, "resources"),
-          "resources",
-        ),
+      resolve: (doc) => {
+        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "resources");
+        return generateUrl(finalSlug, "resources");
+      },
     },
   },
 }));
