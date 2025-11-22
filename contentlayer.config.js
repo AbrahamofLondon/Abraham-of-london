@@ -68,7 +68,11 @@ export const Post = defineDocumentType(() => ({
     coverAspect: { type: "string", required: false },
     coverFit: { type: "string", required: false },
     coverPosition: { type: "string", required: false },
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+    relatedDownloads: {
+      type: "list",
+      of: { type: "string" },
+      required: false,
+    },
     resources: { type: "json", required: false },
     keyInsights: { type: "json", required: false },
     authorNote: { type: "string", required: false },
@@ -79,13 +83,18 @@ export const Post = defineDocumentType(() => ({
     draft: { type: "boolean", default: false },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        // Use explicit slug if provided, otherwise generate from path
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "blog");
-        return generateUrl(finalSlug, "blog");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
+          "blog",
+        ),
     },
     readingTime: {
       type: "number",
@@ -118,7 +127,7 @@ export const Download = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false }, // Note: some files use lowercase
+    readtime: { type: "string", required: false }, // some files use lowercase
     category: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     file: { type: "string", required: false },
@@ -134,12 +143,18 @@ export const Download = defineDocumentType(() => ({
     type: { type: "string", default: "download" },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "downloads"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "downloads");
-        return generateUrl(finalSlug, "downloads");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "downloads"),
+          "downloads",
+        ),
     },
   },
 }));
@@ -160,9 +175,10 @@ export const Book = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
-    // NEW: Add missing fields from build log
+    // Extra fields you may use
     slug: { type: "string", required: false },
     readTime: { type: "string", required: false },
+    description: { type: "string", required: false },
     // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -172,12 +188,18 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", default: "" },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "books");
-        return generateUrl(finalSlug, "books");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
+          "books",
+        ),
     },
   },
 }));
@@ -198,7 +220,7 @@ export const Event = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
-    // NEW: Add missing fields from build log
+    // Extra fields
     slug: { type: "string", required: false },
     time: { type: "string", required: false },
     description: { type: "string", required: false },
@@ -214,12 +236,18 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", default: "" },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "events");
-        return generateUrl(finalSlug, "events");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+          "events",
+        ),
     },
     isUpcoming: {
       type: "boolean",
@@ -249,24 +277,32 @@ export const Print = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
-    // NEW: Add missing slug field from build log
     slug: { type: "string", required: false },
+    description: { type: "string", required: false },
     // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
+    // e.g. "A4", "US Letter"
     dimensions: { type: "string", default: "" },
+    // optional PDF path in /public/downloads if distinct
     downloadFile: { type: "string", default: "" },
     price: { type: "string", default: "" },
     available: { type: "boolean", default: true },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "prints"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "prints");
-        return generateUrl(finalSlug, "prints");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "prints"),
+          "prints",
+        ),
     },
   },
 }));
@@ -287,7 +323,6 @@ export const Strategy = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
-    // NEW: Add missing fields from build log
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     description: { type: "string", required: false },
@@ -297,12 +332,18 @@ export const Strategy = defineDocumentType(() => ({
     tags: { type: "list", of: { type: "string" }, default: [] },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "strategy"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "strategy");
-        return generateUrl(finalSlug, "strategy");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "strategy"),
+          "strategy",
+        ),
     },
   },
 }));
@@ -323,7 +364,6 @@ export const Resource = defineDocumentType(() => ({
       required: true,
       default: new Date().toISOString().split("T")[0],
     },
-    // NEW: Add missing fields from build log
     description: { type: "string", required: false },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
@@ -336,12 +376,18 @@ export const Resource = defineDocumentType(() => ({
     fileUrl: { type: "string", default: "" },
   },
   computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "resources"),
+    },
     url: {
       type: "string",
-      resolve: (doc) => {
-        const finalSlug = doc.slug || generateSlug(doc._raw.flattenedPath, "resources");
-        return generateUrl(finalSlug, "resources");
-      },
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "resources"),
+          "resources",
+        ),
     },
   },
 }));
