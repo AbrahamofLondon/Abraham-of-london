@@ -3,7 +3,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-// Use your existing data fetching functions instead of contentlayer/generated
+// Use your existing data fetching functions
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
@@ -26,92 +26,6 @@ type ContentResource = {
 };
 
 // ---------------------------------------------------------------------------
-// Normalizers
-// ---------------------------------------------------------------------------
-
-function normalisePosts(posts: any[]): ContentResource[] {
-  return posts.map((p) => ({
-    kind: "blog" as const,
-    title: p.title || "Untitled Post",
-    slug: p.slug,
-    href: `/blog/${p.slug}`,
-    date: p.date,
-    excerpt: p.excerpt,
-    description: p.description,
-    category: p.category,
-    tags: p.tags || [],
-  }));
-}
-
-function normaliseBooks(books: any[]): ContentResource[] {
-  return books.map((b) => ({
-    kind: "book" as const,
-    title: b.title || "Untitled Book",
-    slug: b.slug,
-    href: `/books/${b.slug}`,
-    date: b.date,
-    excerpt: b.excerpt,
-    category: "Books",
-    tags: b.tags || [],
-  }));
-}
-
-function normaliseDownloads(downloads: any[]): ContentResource[] {
-  return downloads.map((d) => ({
-    kind: "download" as const,
-    title: d.title || "Untitled Download",
-    slug: d.slug,
-    href: `/downloads/${d.slug}`,
-    date: d.date,
-    excerpt: d.excerpt,
-    description: d.description,
-    category: d.category || "Downloads",
-    tags: d.tags || [],
-  }));
-}
-
-function normaliseEvents(events: any[]): ContentResource[] {
-  return events.map((e) => ({
-    kind: "event" as const,
-    title: e.title || "Untitled Event",
-    slug: e.slug,
-    href: `/events/${e.slug}`,
-    date: e.eventDate || e.date,
-    excerpt: e.excerpt,
-    description: e.description,
-    category: "Events",
-    tags: e.tags || [],
-  }));
-}
-
-function normalisePrints(prints: any[]): ContentResource[] {
-  return prints.map((p) => ({
-    kind: "print" as const,
-    title: p.title || "Untitled Print",
-    slug: p.slug,
-    href: `/prints/${p.slug}`,
-    date: p.date,
-    excerpt: p.excerpt,
-    category: "Printables",
-    tags: p.tags || [],
-  }));
-}
-
-function normaliseResources(resources: any[]): ContentResource[] {
-  return resources.map((r) => ({
-    kind: "resource" as const,
-    title: r.title || "Untitled Resource",
-    slug: r.slug,
-    href: `/resources/${r.slug}`,
-    date: r.date,
-    excerpt: r.excerpt,
-    description: r.description,
-    category: "Resources",
-    tags: r.tags || [],
-  }));
-}
-
-// ---------------------------------------------------------------------------
 // SSG
 // ---------------------------------------------------------------------------
 
@@ -121,24 +35,145 @@ interface ContentPageProps {
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   try {
-    // Fetch all content using existing helper functions
-    const posts = getAllPostsMeta?.() || [];
-    const books = getAllBooksMeta?.() || [];
-    const downloads = getAllDownloadsMeta?.() || [];
-    
-    // Use getAllContent for other types
-    const events = getAllContent?.("events") || [];
-    const prints = getAllContent?.("prints") || [];
-    const resources = getAllContent?.("resources") || [];
+    const items: ContentResource[] = [];
 
-    const items: ContentResource[] = [
-      ...normalisePosts(posts),
-      ...normaliseBooks(books),
-      ...normaliseDownloads(downloads),
-      ...normaliseEvents(events),
-      ...normalisePrints(prints),
-      ...normaliseResources(resources),
-    ];
+    // Fetch posts
+    try {
+      const posts = getAllPostsMeta?.() || [];
+      console.log(`[content] Found ${posts.length} posts`);
+      posts.forEach((p: any) => {
+        if (p.title && p.slug) {
+          items.push({
+            kind: "blog",
+            title: p.title,
+            slug: p.slug,
+            href: `/blog/${p.slug}`,
+            date: p.date,
+            excerpt: p.excerpt,
+            description: p.description,
+            category: p.category,
+            tags: p.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching posts:", err);
+    }
+
+    // Fetch books
+    try {
+      const books = getAllBooksMeta?.() || [];
+      console.log(`[content] Found ${books.length} books`);
+      books.forEach((b: any) => {
+        if (b.title && b.slug) {
+          items.push({
+            kind: "book",
+            title: b.title,
+            slug: b.slug,
+            href: `/books/${b.slug}`,
+            date: b.date,
+            excerpt: b.excerpt,
+            category: "Books",
+            tags: b.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching books:", err);
+    }
+
+    // Fetch downloads
+    try {
+      const downloads = getAllDownloadsMeta?.() || [];
+      console.log(`[content] Found ${downloads.length} downloads`);
+      downloads.forEach((d: any) => {
+        if (d.title && d.slug) {
+          items.push({
+            kind: "download",
+            title: d.title,
+            slug: d.slug,
+            href: `/downloads/${d.slug}`,
+            date: d.date,
+            excerpt: d.excerpt,
+            description: d.description,
+            category: d.category || "Downloads",
+            tags: d.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching downloads:", err);
+    }
+
+    // Fetch events
+    try {
+      const events = getAllContent?.("events") || [];
+      console.log(`[content] Found ${events.length} events`);
+      events.forEach((e: any) => {
+        if (e.title && e.slug) {
+          items.push({
+            kind: "event",
+            title: e.title,
+            slug: e.slug,
+            href: `/events/${e.slug}`,
+            date: e.eventDate || e.date,
+            excerpt: e.excerpt,
+            description: e.description,
+            category: "Events",
+            tags: e.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching events:", err);
+    }
+
+    // Fetch prints
+    try {
+      const prints = getAllContent?.("prints") || [];
+      console.log(`[content] Found ${prints.length} prints`);
+      prints.forEach((p: any) => {
+        if (p.title && p.slug) {
+          items.push({
+            kind: "print",
+            title: p.title,
+            slug: p.slug,
+            href: `/prints/${p.slug}`,
+            date: p.date,
+            excerpt: p.excerpt,
+            category: "Printables",
+            tags: p.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching prints:", err);
+    }
+
+    // Fetch resources
+    try {
+      const resources = getAllContent?.("resources") || [];
+      console.log(`[content] Found ${resources.length} resources`);
+      resources.forEach((r: any) => {
+        if (r.title && r.slug) {
+          items.push({
+            kind: "resource",
+            title: r.title,
+            slug: r.slug,
+            href: `/resources/${r.slug}`,
+            date: r.date,
+            excerpt: r.excerpt,
+            description: r.description,
+            category: "Resources",
+            tags: r.tags || [],
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[content] Error fetching resources:", err);
+    }
+
+    console.log(`[content] Total items collected: ${items.length}`);
 
     // Sort newest first by date
     const sorted = items.slice().sort((a, b) => {
@@ -148,12 +183,15 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       return a.date < b.date ? 1 : -1;
     });
 
+    // JSON-safe serialization
+    const safeItems = JSON.parse(JSON.stringify(sorted));
+
     return {
-      props: { items: sorted },
+      props: { items: safeItems },
       revalidate: 3600,
     };
   } catch (error) {
-    console.error("Error fetching content:", error);
+    console.error("[content] Critical error in getStaticProps:", error);
     return {
       props: { items: [] },
       revalidate: 3600,
@@ -217,6 +255,17 @@ export default function ContentPage({ items }: ContentPageProps) {
             </p>
           </header>
 
+          {/* Debug info - remove after fixing */}
+          {total === 0 && (
+            <div className="mb-8 rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-center text-yellow-200">
+              <p className="font-medium">Debug: No content items found</p>
+              <p className="text-sm mt-2">
+                Blog: {blogCount} | Books: {bookCount} | Downloads: {downloadCount} | 
+                Events: {eventCount} | Prints: {printCount} | Resources: {resourceCount}
+              </p>
+            </div>
+          )}
+
           {/* Filter Pills */}
           <div className="mb-12 flex flex-wrap justify-center gap-3">
             {filters.map((filter) => (
@@ -228,8 +277,8 @@ export default function ContentPage({ items }: ContentPageProps) {
                   inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all
                   ${
                     activeFilter === filter.key
-                      ? "border-softGold/60 bg-softGold text-deepCharcoal shadow-lg shadow-softGold/30"
-                      : "border-white/10 bg-charcoal/80 text-gray-100 hover:border-softGold/40 hover:bg-charcoal"
+                      ? "border-yellow-600/60 bg-yellow-600 text-gray-900 shadow-lg shadow-yellow-600/30"
+                      : "border-white/10 bg-gray-900/80 text-gray-100 hover:border-yellow-600/40 hover:bg-gray-800"
                   }
                 `}
               >
@@ -239,7 +288,7 @@ export default function ContentPage({ items }: ContentPageProps) {
                     rounded-full px-2 py-0.5 text-xs
                     ${
                       activeFilter === filter.key
-                        ? "bg-deepCharcoal/20 text-deepCharcoal"
+                        ? "bg-gray-900/20 text-gray-900"
                         : "bg-white/10 text-gray-400"
                     }
                   `}
@@ -253,7 +302,12 @@ export default function ContentPage({ items }: ContentPageProps) {
           {/* Content Grid */}
           {filtered.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-10 text-center text-gray-300">
-              <p className="text-lg">No content found for this filter.</p>
+              <p className="text-lg mb-2">No content found for this filter.</p>
+              {total === 0 && (
+                <p className="text-sm text-gray-500">
+                  Check build logs for data fetching errors.
+                </p>
+              )}
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -271,7 +325,7 @@ export default function ContentPage({ items }: ContentPageProps) {
                 return (
                   <article
                     key={`${item.kind}-${item.slug}`}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/40 hover:shadow-2xl"
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-yellow-600/40 hover:shadow-2xl"
                   >
                     <div className="flex flex-1 flex-col p-6">
                       <div className="mb-3 flex items-center justify-between gap-2">
@@ -294,7 +348,7 @@ export default function ContentPage({ items }: ContentPageProps) {
                         )}
                       </div>
 
-                      <h2 className="mb-3 font-serif text-xl font-light text-white group-hover:text-softGold">
+                      <h2 className="mb-3 font-serif text-xl font-light text-white group-hover:text-yellow-600">
                         <Link href={item.href}>{item.title}</Link>
                       </h2>
 
