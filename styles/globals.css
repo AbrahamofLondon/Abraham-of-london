@@ -10,7 +10,7 @@
 /* -------------------------------------------------------------------------- */
 
 :root {
-  /* Luxury theme tokens */
+  /* Luxury theme tokens (DARK as canonical theme) */
   --color-background: #050608;
   --color-foreground: #fdfdfb;
   --color-soft-gold: #d6b26a;
@@ -25,12 +25,10 @@
   --color-fg: #fdfdfb;
   --color-softGold: #d6b26a;
   --color-deepCharcoal: #0b0d10;
-  --color-charcoal: #15171c;
-  --color-forest: #0e3b33;
   --color-cream: #fdfaf5;
 }
 
-/* Light mode override - if needed */
+/* Light mode override */
 html:not(.dark) {
   --color-background: #f9fafb;
   --color-foreground: #111827;
@@ -56,15 +54,24 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  
-  /* Luxury theme background as default */
+
+  /* Luxury theme background as default (DARK) */
   background:
     radial-gradient(circle at top, rgba(214, 178, 106, 0.10), transparent 55%),
     radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #050608);
   color: var(--color-foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Explicit dark-mode body (when .dark is toggled on html) */
+html.dark body {
+  background:
+    radial-gradient(circle at top, rgba(214, 178, 106, 0.10), transparent 55%),
+    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #050608);
+  color: var(--color-foreground);
 }
 
 /* Light mode body background */
@@ -73,7 +80,7 @@ html:not(.dark) body {
   color: var(--color-foreground);
 }
 
-/* Selection */
+/* Text selection */
 ::selection {
   background-color: rgba(214, 178, 106, 0.35);
   color: #fdfdfb;
@@ -141,7 +148,10 @@ html:not(.dark) .page-shell {
 }
 
 .lux-card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .lux-card-hover:hover {
@@ -202,7 +212,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   font-weight: 700;
 }
 
@@ -328,7 +339,7 @@ html.dark p {
 /* Header interaction                                                         */
 /* -------------------------------------------------------------------------- */
 
-/* Avoid content being hidden under the fixed header */
+/* If you ever add this class from JS, it will avoid content being hidden */
 body.has-fixed-header main {
   padding-top: 5rem;
 }
