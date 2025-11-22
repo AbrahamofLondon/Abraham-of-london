@@ -14,7 +14,13 @@ module.exports = {
         forest: "#0e3b33",
       },
       fontFamily: {
-        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "sans-serif"],
+        sans: [
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "sans-serif",
+        ],
         serif: ["Georgia", "Cambria", '"Times New Roman"', "Times", "serif"],
       },
       boxShadow: {
@@ -25,52 +31,10 @@ module.exports = {
         "luxury-diagonal":
           "radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%), radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608)",
       },
-      typography: (theme) => ({
-        DEFAULT: {
-          css: {
-            maxWidth: "none",
-            color: theme("colors.gray.800"),
-            a: {
-              color: theme("colors.forest"),
-              textDecoration: "none",
-              "&:hover": {
-                color: theme("colors.softGold"),
-                textDecoration: "underline",
-              },
-            },
-          },
-        },
-        invert: {
-          css: {
-            "--tw-prose-body": theme("colors.gray.200"),
-            "--tw-prose-headings": "#ffffff",
-            "--tw-prose-lead": theme("colors.gray.300"),
-            "--tw-prose-links": theme("colors.softGold"),
-            "--tw-prose-bold": "#f9fafb",
-            "--tw-prose-counters": theme("colors.gray.400"),
-            "--tw-prose-bullets": theme("colors.softGold"),
-            "--tw-prose-hr": theme("colors.gray.700"),
-            "--tw-prose-quotes": theme("colors.gray.100"),
-            "--tw-prose-quote-borders": theme("colors.softGold"),
-            "--tw-prose-captions": theme("colors.gray.400"),
-            "--tw-prose-code": theme("colors.softGold"),
-            "--tw-prose-pre-code": theme("colors.gray.100"),
-            "--tw-prose-pre-bg": "#020617",
-            "--tw-prose-th-borders": theme("colors.gray.600"),
-            "--tw-prose-td-borders": theme("colors.gray.700"),
-            color: theme("colors.gray.200"),
-            a: {
-              color: theme("colors.softGold"),
-              textDecoration: "none",
-              "&:hover": {
-                color: "#ffffff",
-                textDecoration: "underline",
-              },
-            },
-          },
-        },
-      }),
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [
+    // you can re-enable this later, but keep it simple for now
+    // require("@tailwindcss/typography"),
+  ],
 };
