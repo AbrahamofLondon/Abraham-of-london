@@ -1,11 +1,11 @@
 "use client";
 
-// components/Header.tsx
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 import { Moon, Sun, Menu, X } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle"; // ✅ use shared toggle
+import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
 // Functional ThemeToggle component with actual dark mode logic
 const ThemeToggle: React.FC = () => {

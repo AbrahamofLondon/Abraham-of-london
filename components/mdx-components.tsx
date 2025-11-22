@@ -16,7 +16,7 @@ type AnyProps = {
 
 const H1 = ({ children, ...rest }: AnyProps) => (
   <h1
-    className="mt-6 mb-4 font-serif text-3xl font-semibold text-slate-50 sm:text-4xl tracking-tight"
+    className="mt-6 mb-4 font-serif text-3xl font-semibold tracking-tight sm:text-4xl"
     {...rest}
   >
     {children}
@@ -25,7 +25,7 @@ const H1 = ({ children, ...rest }: AnyProps) => (
 
 const H2 = ({ children, ...rest }: AnyProps) => (
   <h2
-    className="mt-6 mb-3 font-serif text-2xl font-semibold text-slate-50 tracking-tight"
+    className="mt-6 mb-3 font-serif text-2xl font-semibold tracking-tight"
     {...rest}
   >
     {children}
@@ -33,28 +33,20 @@ const H2 = ({ children, ...rest }: AnyProps) => (
 );
 
 const H3 = ({ children, ...rest }: AnyProps) => (
-  <h3
-    className="mt-5 mb-2 font-serif text-xl font-semibold text-slate-50"
-    {...rest}
-  >
+  <h3 className="mt-5 mb-2 font-serif text-xl font-semibold" {...rest}>
     {children}
   </h3>
 );
 
 const H4 = ({ children, ...rest }: AnyProps) => (
-  <h4
-    className="mt-4 mb-2 text-base font-semibold text-slate-100"
-    {...rest}
-  >
+  <h4 className="mt-4 mb-2 text-base font-semibold" {...rest}>
     {children}
   </h4>
 );
 
 const P = ({ children, className = "", ...rest }: AnyProps) => (
   <p
-    className={
-      "my-4 text-[0.95rem] leading-relaxed text-gray-200 " + className
-    }
+    className={("my-4 text-[0.95rem] leading-relaxed " + className).trim()}
     {...rest}
   >
     {children}
@@ -62,13 +54,13 @@ const P = ({ children, className = "", ...rest }: AnyProps) => (
 );
 
 const Strong = ({ children, ...rest }: AnyProps) => (
-  <strong className="font-semibold text-slate-50" {...rest}>
+  <strong className="font-semibold" {...rest}>
     {children}
   </strong>
 );
 
 const Em = ({ children, ...rest }: AnyProps) => (
-  <em className="italic text-gray-200" {...rest}>
+  <em className="italic" {...rest}>
     {children}
   </em>
 );
@@ -76,13 +68,13 @@ const Em = ({ children, ...rest }: AnyProps) => (
 /* ------------------------------ Lists & misc ------------------------------- */
 
 const Ul = ({ children, ...rest }: AnyProps) => (
-  <ul className="my-4 ml-6 list-disc space-y-1 text-gray-200" {...rest}>
+  <ul className="my-4 ml-6 list-disc space-y-1" {...rest}>
     {children}
   </ul>
 );
 
 const Ol = ({ children, ...rest }: AnyProps) => (
-  <ol className="my-4 ml-6 list-decimal space-y-1 text-gray-200" {...rest}>
+  <ol className="my-4 ml-6 list-decimal space-y-1" {...rest}>
     {children}
   </ol>
 );
@@ -95,7 +87,7 @@ const Li = ({ children, ...rest }: AnyProps) => (
 
 const Blockquote = ({ children, ...rest }: AnyProps) => (
   <blockquote
-    className="my-6 border-l-4 border-softGold/70 bg-slate-900/55 px-4 py-3 text-[0.95rem] italic text-gray-100"
+    className="my-6 border-l-4 border-softGold/70 bg-white/5 px-4 py-3 text-[0.95rem] italic"
     {...rest}
   >
     {children}
@@ -106,7 +98,7 @@ const Blockquote = ({ children, ...rest }: AnyProps) => (
 
 const Code = ({ children, ...rest }: AnyProps) => (
   <code
-    className="rounded bg-slate-900/80 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
+    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
     {...rest}
   >
     {children}
@@ -115,7 +107,7 @@ const Code = ({ children, ...rest }: AnyProps) => (
 
 const Pre = ({ children, ...rest }: AnyProps) => (
   <pre
-    className="my-4 overflow-x-auto rounded-2xl bg-slate-900/85 p-4 text-[0.85rem] text-slate-100 border border-slate-800/60"
+    className="my-4 overflow-x-auto rounded-2xl bg-slate-950/90 p-4 text-[0.85rem] text-slate-100 border border-slate-800/80"
     {...rest}
   >
     {children}
@@ -148,7 +140,7 @@ const MdxImage = (props: AnyProps) => {
     <img
       src={String(src)}
       alt={alt ? String(alt) : ""}
-      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/60 bg-slate-900/40 object-cover ${className}`.trim()}
+      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/70 bg-slate-900/60 object-cover ${className}`.trim()}
       {...rest}
     />
   );
@@ -206,6 +198,7 @@ const JsonLdBlock = ({ children, ...rest }: AnyProps) => {
   return (
     <script
       type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: json }}
     />
   );
@@ -246,7 +239,7 @@ const CalloutBlock = ({
 const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
   <div
     className={(
-      "my-4 rounded-xl border border-slate-700 bg-slate-900/70 " +
+      "my-4 rounded-xl border border-slate-700 bg-slate-900/80 " +
       "px-4 py-3 text-xs text-gray-200 " +
       className
     ).trim()}
@@ -357,7 +350,7 @@ type VerseProps = AnyProps & { refText?: React.ReactNode };
 
 const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   <div
-    className="my-4 rounded-lg bg-slate-900/70 px-4 py-3 text-sm text-gray-100"
+    className="my-4 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
     {...rest}
   >
     <p className="italic">{children}</p>
@@ -374,7 +367,7 @@ const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
  */
 const ShareRow = ({ children, ...rest }: AnyProps) => (
   <div
-    className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm text-gray-200"
+    className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm"
     {...rest}
   >
     {children}
@@ -408,7 +401,7 @@ const DownloadCardBlock = ({
 
   return (
     <article
-      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/80 p-4 shadow-soft-elevated"
+      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/90 p-4 shadow-soft-elevated"
       {...rest}
     >
       <div>
@@ -464,7 +457,7 @@ const ResourcesCTABlock = ({
 
   return (
     <section
-      className="mt-10 rounded-2xl border border-softGold/35 bg-slate-900/80 p-6 shadow-soft-elevated"
+      className="mt-10 rounded-2xl border border-softGold/40 bg-black/60 p-6"
       {...rest}
     >
       <h3 className="font-serif text-lg font-semibold text-slate-50">
