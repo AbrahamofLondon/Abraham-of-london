@@ -222,7 +222,7 @@ export default function DownloadPage(
           )}
         </header>
 
-        <article className="prose prose-sm max-w-none text-gray-900 prose-headings:font-serif prose-a:text-forest">
+         <article className="prose-lux prose-headings:font-serif">
           <MDXRemote {...props.mdxSource} components={mdxComponents} />
         </article>
       </main>

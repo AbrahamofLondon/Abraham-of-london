@@ -149,17 +149,9 @@ export default function PrintPage({ print, contentSource }: PrintPageProps) {
           <article className="rounded-3xl border border-slate-700/70 bg-[#050608]/95 px-5 py-8 text-slate-100 shadow-2xl shadow-black/60 sm:px-10 sm:py-10">
             {contentSource ? (
               <div
-                className="
-                  prose prose-invert max-w-none
-                  prose-headings:font-serif prose-headings:text-slate-50
-                  prose-p:text-slate-200 prose-strong:text-slate-50
-                  prose-li:text-slate-200
-                  prose-a:text-softGold hover:prose-a:text-amber-200
-                  prose-hr:border-slate-700
-                  prose-code:text-amber-200 prose-code:bg-slate-900
-                  prose-code:px-2 prose-code:py-0.5 prose-code:rounded
-                "
-              >
+                className="prose-lux"
+                >
+
                 <MDXRemote {...contentSource} components={mdxComponents} />
               </div>
             ) : (

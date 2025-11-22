@@ -16,7 +16,7 @@ type AnyProps = {
 
 const H1 = ({ children, ...rest }: AnyProps) => (
   <h1
-    className="mt-6 mb-4 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl"
+    className="mt-6 mb-4 font-serif text-3xl font-semibold text-slate-50 sm:text-4xl tracking-tight"
     {...rest}
   >
     {children}
@@ -25,7 +25,7 @@ const H1 = ({ children, ...rest }: AnyProps) => (
 
 const H2 = ({ children, ...rest }: AnyProps) => (
   <h2
-    className="mt-6 mb-3 font-serif text-2xl font-semibold text-deepCharcoal"
+    className="mt-6 mb-3 font-serif text-2xl font-semibold text-slate-50 tracking-tight"
     {...rest}
   >
     {children}
@@ -34,7 +34,7 @@ const H2 = ({ children, ...rest }: AnyProps) => (
 
 const H3 = ({ children, ...rest }: AnyProps) => (
   <h3
-    className="mt-5 mb-2 font-serif text-xl font-semibold text-deepCharcoal"
+    className="mt-5 mb-2 font-serif text-xl font-semibold text-slate-50"
     {...rest}
   >
     {children}
@@ -43,7 +43,7 @@ const H3 = ({ children, ...rest }: AnyProps) => (
 
 const H4 = ({ children, ...rest }: AnyProps) => (
   <h4
-    className="mt-4 mb-2 text-base font-semibold text-deepCharcoal"
+    className="mt-4 mb-2 text-base font-semibold text-slate-100"
     {...rest}
   >
     {children}
@@ -53,8 +53,7 @@ const H4 = ({ children, ...rest }: AnyProps) => (
 const P = ({ children, className = "", ...rest }: AnyProps) => (
   <p
     className={
-      "my-4 text-[0.95rem] leading-relaxed text-gray-800 dark:text-gray-100 " +
-      className
+      "my-4 text-[0.95rem] leading-relaxed text-gray-200 " + className
     }
     {...rest}
   >
@@ -63,13 +62,13 @@ const P = ({ children, className = "", ...rest }: AnyProps) => (
 );
 
 const Strong = ({ children, ...rest }: AnyProps) => (
-  <strong className="font-semibold text-deepCharcoal" {...rest}>
+  <strong className="font-semibold text-slate-50" {...rest}>
     {children}
   </strong>
 );
 
 const Em = ({ children, ...rest }: AnyProps) => (
-  <em className="italic" {...rest}>
+  <em className="italic text-gray-200" {...rest}>
     {children}
   </em>
 );
@@ -77,13 +76,13 @@ const Em = ({ children, ...rest }: AnyProps) => (
 /* ------------------------------ Lists & misc ------------------------------- */
 
 const Ul = ({ children, ...rest }: AnyProps) => (
-  <ul className="my-4 ml-6 list-disc space-y-1 text-gray-800" {...rest}>
+  <ul className="my-4 ml-6 list-disc space-y-1 text-gray-200" {...rest}>
     {children}
   </ul>
 );
 
 const Ol = ({ children, ...rest }: AnyProps) => (
-  <ol className="my-4 ml-6 list-decimal space-y-1 text-gray-800" {...rest}>
+  <ol className="my-4 ml-6 list-decimal space-y-1 text-gray-200" {...rest}>
     {children}
   </ol>
 );
@@ -96,7 +95,7 @@ const Li = ({ children, ...rest }: AnyProps) => (
 
 const Blockquote = ({ children, ...rest }: AnyProps) => (
   <blockquote
-    className="my-6 border-l-4 border-softGold/70 bg-warmWhite/60 px-4 py-3 text-[0.95rem] italic text-deepCharcoal"
+    className="my-6 border-l-4 border-softGold/70 bg-white/5 px-4 py-3 text-[0.95rem] italic text-gray-100"
     {...rest}
   >
     {children}
@@ -107,7 +106,7 @@ const Blockquote = ({ children, ...rest }: AnyProps) => (
 
 const Code = ({ children, ...rest }: AnyProps) => (
   <code
-    className="rounded bg-slate-800 px-1.5 py-0.5 text-[0.8rem] text-emerald-200"
+    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
     {...rest}
   >
     {children}
@@ -116,7 +115,7 @@ const Code = ({ children, ...rest }: AnyProps) => (
 
 const Pre = ({ children, ...rest }: AnyProps) => (
   <pre
-    className="my-4 overflow-x-auto rounded-lg bg-slate-900 p-4 text-[0.85rem] text-slate-100"
+    className="my-4 overflow-x-auto rounded-2xl bg-slate-950/90 p-4 text-[0.85rem] text-slate-100 border border-slate-800/80"
     {...rest}
   >
     {children}
@@ -127,7 +126,7 @@ const Pre = ({ children, ...rest }: AnyProps) => (
 
 const A = ({ children, ...rest }: AnyProps) => (
   <a
-    className="font-medium text-forest underline-offset-2 hover:text-softGold hover:underline"
+    className="font-medium text-softGold underline-offset-2 hover:text-amber-200 hover:underline"
     {...rest}
   >
     {children}
@@ -145,10 +144,11 @@ const MdxImage = (props: AnyProps) => {
   if (!src) return null;
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={String(src)}
       alt={alt ? String(alt) : ""}
-      className={`my-4 h-auto w-full rounded-xl object-cover ${className}`.trim()}
+      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/70 bg-slate-900/60 object-cover ${className}`.trim()}
       {...rest}
     />
   );
@@ -170,7 +170,7 @@ const Grid = ({ children, className = "", ...rest }: AnyProps) => (
  */
 const PullLine = ({ children, className = "", ...rest }: AnyProps) => (
   <p
-    className={`my-6 border-y border-softGold/40 py-3 text-center font-serif text-lg italic text-deepCharcoal ${className}`.trim()}
+    className={`my-6 border-y border-softGold/50 py-3 text-center font-serif text-lg italic text-softGold ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -222,8 +222,8 @@ const CalloutBlock = ({
 }: AnyProps) => {
   const tone =
     type === "warning" || type === "danger"
-      ? "border-amber-500/60 bg-amber-50/10 text-amber-900"
-      : "border-softGold/40 bg-softGold/5 text-deepCharcoal";
+      ? "border-amber-400/80 bg-amber-500/10 text-amber-100"
+      : "border-softGold/50 bg-softGold/10 text-gray-100";
 
   return (
     <div
@@ -246,8 +246,8 @@ const CalloutBlock = ({
 const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
   <div
     className={(
-      "my-4 rounded-xl border border-lightGrey bg-warmWhite/60 " +
-      "px-4 py-3 text-xs text-gray-800 " +
+      "my-4 rounded-xl border border-slate-700 bg-slate-900/80 " +
+      "px-4 py-3 text-xs text-gray-200 " +
       className
     ).trim()}
     {...rest}
@@ -296,10 +296,10 @@ const BadgeBlock = ({
 }: AnyProps) => {
   const toneClass =
     tone === "primary"
-      ? "bg-forest text-cream border-forest/80"
+      ? "bg-forest text-slate-50 border-forest/80"
       : tone === "accent"
       ? "bg-softGold/90 text-deepCharcoal border-softGold"
-      : "bg-warmWhite text-gray-800 border-lightGrey";
+      : "bg-slate-800 text-gray-100 border-slate-600";
 
   return (
     <span
@@ -338,12 +338,12 @@ type QuoteProps = AnyProps & { author?: React.ReactNode };
 
 const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
   <figure
-    className="my-6 border-l-2 border-softGold/80 pl-4 text-sm text-gray-800"
+    className="my-6 border-l-2 border-softGold/80 pl-4 text-sm text-gray-200"
     {...rest}
   >
     <div className="italic">{children}</div>
     {author != null && author !== false && (
-      <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-500">
+      <figcaption className="mt-2 text-xs uppercase tracking-wide text-gray-400">
         — {author}
       </figcaption>
     )}
@@ -357,7 +357,7 @@ type VerseProps = AnyProps & { refText?: React.ReactNode };
 
 const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   <div
-    className="my-4 rounded-lg bg-warmWhite/80 px-4 py-3 text-sm text-gray-800"
+    className="my-4 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
     {...rest}
   >
     <p className="italic">{children}</p>
@@ -374,7 +374,7 @@ const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
  */
 const ShareRow = ({ children, ...rest }: AnyProps) => (
   <div
-    className="mt-6 flex flex-wrap items-center gap-3 border-t border-lightGrey pt-4 text-sm"
+    className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm text-gray-200"
     {...rest}
   >
     {children}
@@ -408,15 +408,15 @@ const DownloadCardBlock = ({
 
   return (
     <article
-      className="my-4 flex flex-col justify-between rounded-2xl border border-lightGrey bg-white p-4 shadow-sm"
+      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/90 p-4 shadow-soft-elevated"
       {...rest}
     >
       <div>
-        <h4 className="font-serif text-base font-semibold text-deepCharcoal">
+        <h4 className="font-serif text-base font-semibold text-slate-50">
           {displayTitle}
         </h4>
         {displayDescription && (
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-2 text-sm text-gray-200">
             {displayDescription}
           </p>
         )}
@@ -426,7 +426,7 @@ const DownloadCardBlock = ({
         <div className="mt-4">
           <a
             href={url}
-            className="inline-flex items-center rounded-full bg-forest px-4 py-1.5 text-xs font-semibold text-cream underline-offset-4 hover:bg-forest/90"
+            className="inline-flex items-center rounded-full bg-forest px-4 py-1.5 text-xs font-semibold text-slate-50 underline-offset-4 hover:bg-forest/90"
           >
             {buttonText}
           </a>
@@ -464,21 +464,21 @@ const ResourcesCTABlock = ({
 
   return (
     <section
-      className="mt-10 rounded-2xl border border-softGold/40 bg-warmWhite/70 p-6"
+      className="mt-10 rounded-2xl border border-softGold/40 bg-black/60 p-6"
       {...rest}
     >
-      <h3 className="font-serif text-lg font-semibold text-deepCharcoal">
+      <h3 className="font-serif text-lg font-semibold text-slate-50">
         {displayTitle}
       </h3>
       {displayDescription && (
-        <p className="mt-2 text-sm text-gray-700">{displayDescription}</p>
+        <p className="mt-2 text-sm text-gray-200">{displayDescription}</p>
       )}
 
       {url && (
         <div className="mt-4">
           <a
             href={url}
-            className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-xs font-semibold text-cream underline-offset-4 hover:bg-forest/90"
+            className="inline-flex items-center rounded-full bg-softGold px-4 py-2 text-xs font-semibold text-deepCharcoal underline-offset-4 hover:bg-softGold/90"
           >
             {buttonText}
           </a>
