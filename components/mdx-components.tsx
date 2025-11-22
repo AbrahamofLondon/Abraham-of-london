@@ -95,7 +95,7 @@ const Li = ({ children, ...rest }: AnyProps) => (
 
 const Blockquote = ({ children, ...rest }: AnyProps) => (
   <blockquote
-    className="my-6 border-l-4 border-softGold/70 bg-white/5 px-4 py-3 text-[0.95rem] italic text-gray-100"
+    className="my-6 border-l-4 border-softGold/70 bg-slate-900/55 px-4 py-3 text-[0.95rem] italic text-gray-100"
     {...rest}
   >
     {children}
@@ -106,7 +106,7 @@ const Blockquote = ({ children, ...rest }: AnyProps) => (
 
 const Code = ({ children, ...rest }: AnyProps) => (
   <code
-    className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
+    className="rounded bg-slate-900/80 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
     {...rest}
   >
     {children}
@@ -115,7 +115,7 @@ const Code = ({ children, ...rest }: AnyProps) => (
 
 const Pre = ({ children, ...rest }: AnyProps) => (
   <pre
-    className="my-4 overflow-x-auto rounded-2xl bg-slate-950/90 p-4 text-[0.85rem] text-slate-100 border border-slate-800/80"
+    className="my-4 overflow-x-auto rounded-2xl bg-slate-900/85 p-4 text-[0.85rem] text-slate-100 border border-slate-800/60"
     {...rest}
   >
     {children}
@@ -148,7 +148,7 @@ const MdxImage = (props: AnyProps) => {
     <img
       src={String(src)}
       alt={alt ? String(alt) : ""}
-      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/70 bg-slate-900/60 object-cover ${className}`.trim()}
+      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/60 bg-slate-900/40 object-cover ${className}`.trim()}
       {...rest}
     />
   );
@@ -246,7 +246,7 @@ const CalloutBlock = ({
 const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
   <div
     className={(
-      "my-4 rounded-xl border border-slate-700 bg-slate-900/80 " +
+      "my-4 rounded-xl border border-slate-700 bg-slate-900/70 " +
       "px-4 py-3 text-xs text-gray-200 " +
       className
     ).trim()}
@@ -357,7 +357,7 @@ type VerseProps = AnyProps & { refText?: React.ReactNode };
 
 const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   <div
-    className="my-4 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
+    className="my-4 rounded-lg bg-slate-900/70 px-4 py-3 text-sm text-gray-100"
     {...rest}
   >
     <p className="italic">{children}</p>
@@ -408,7 +408,7 @@ const DownloadCardBlock = ({
 
   return (
     <article
-      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/90 p-4 shadow-soft-elevated"
+      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/80 p-4 shadow-soft-elevated"
       {...rest}
     >
       <div>
@@ -464,7 +464,7 @@ const ResourcesCTABlock = ({
 
   return (
     <section
-      className="mt-10 rounded-2xl border border-softGold/40 bg-black/60 p-6"
+      className="mt-10 rounded-2xl border border-softGold/35 bg-slate-900/80 p-6 shadow-soft-elevated"
       {...rest}
     >
       <h3 className="font-serif text-lg font-semibold text-slate-50">
