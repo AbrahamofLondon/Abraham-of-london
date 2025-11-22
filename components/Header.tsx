@@ -7,64 +7,7 @@ import { Moon, Sun, Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle"; // ✅ use shared toggle
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
-// Functional ThemeToggle component with actual dark mode logic
-const ThemeToggle: React.FC = () => {
-  const [mounted, setMounted] = React.useState(false);
-  const [isDark, setIsDark] = React.useState(true);
-
-  React.useEffect(() => {
-    setMounted(true);
-    // Check if dark mode is enabled
-    const isDarkMode = document.documentElement.classList.contains('dark') ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDark(isDarkMode);
-  }, []);
-
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    
-    if (typeof document !== 'undefined') {
-      if (newIsDark) {
-        document.documentElement.classList.add('dark');
-        document.documentElement.style.colorScheme = 'dark';
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.style.colorScheme = 'light';
-        localStorage.setItem('theme', 'light');
-      }
-    }
-  };
-
-  // Prevent SSR mismatch
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-        aria-label="Toggle theme"
-      >
-        <Moon className="h-4 w-4" />
-      </button>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className="rounded-md p-2 text-sm transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-      aria-label="Toggle theme"
-    >
-      {isDark ? (
-        <Sun className="h-4 w-4 text-amber-200" />
-      ) : (
-        <Moon className="h-4 w-4 text-charcoal" />
-      )}
-    </button>
-  );
-};
+// ❌ REMOVED DUPLICATE ThemeToggle DEFINITION - it's already imported above!
 
 type HeaderProps = {
   variant?: "light" | "dark";
