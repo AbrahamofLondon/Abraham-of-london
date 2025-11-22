@@ -2,14 +2,12 @@ import type { GetStaticProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import {
-  allPosts,
-  allDownloads,
-  allBooks,
-  allEvents,
-  allPrints,
-  allResources,
-} from "contentlayer/generated";
+
+// Use your existing data fetching functions instead of contentlayer/generated
+import { getAllPostsMeta } from "@/lib/server/posts-data";
+import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
+import { getAllBooksMeta } from "@/lib/server/books-data";
+import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,85 +29,85 @@ type ContentResource = {
 // Normalizers
 // ---------------------------------------------------------------------------
 
-function normalisePosts(): ContentResource[] {
-  return allPosts.map((p) => ({
+function normalisePosts(posts: any[]): ContentResource[] {
+  return posts.map((p) => ({
     kind: "blog" as const,
     title: p.title || "Untitled Post",
-    slug: p.slug || p._raw.flattenedPath,
-    href: p.url || `/blog/${p.slug}`,
+    slug: p.slug,
+    href: `/blog/${p.slug}`,
     date: p.date,
-    excerpt: (p as any).excerpt,
-    description: (p as any).description,
-    category: (p as any).category,
-    tags: p.tags,
+    excerpt: p.excerpt,
+    description: p.description,
+    category: p.category,
+    tags: p.tags || [],
   }));
 }
 
-function normaliseBooks(): ContentResource[] {
-  return allBooks.map((b) => ({
+function normaliseBooks(books: any[]): ContentResource[] {
+  return books.map((b) => ({
     kind: "book" as const,
     title: b.title || "Untitled Book",
-    slug: b.slug || b._raw.flattenedPath,
-    href: b.url || `/books/${b.slug}`,
+    slug: b.slug,
+    href: `/books/${b.slug}`,
     date: b.date,
     excerpt: b.excerpt,
     category: "Books",
-    tags: b.tags,
+    tags: b.tags || [],
   }));
 }
 
-function normaliseDownloads(): ContentResource[] {
-  return allDownloads.map((d) => ({
+function normaliseDownloads(downloads: any[]): ContentResource[] {
+  return downloads.map((d) => ({
     kind: "download" as const,
     title: d.title || "Untitled Download",
-    slug: d.slug || d._raw.flattenedPath,
-    href: d.url || `/downloads/${d.slug}`,
+    slug: d.slug,
+    href: `/downloads/${d.slug}`,
     date: d.date,
     excerpt: d.excerpt,
-    description: (d as any).description,
-    category: (d as any).category || "Downloads",
-    tags: d.tags,
+    description: d.description,
+    category: d.category || "Downloads",
+    tags: d.tags || [],
   }));
 }
 
-function normaliseEvents(): ContentResource[] {
-  return allEvents.map((e) => ({
+function normaliseEvents(events: any[]): ContentResource[] {
+  return events.map((e) => ({
     kind: "event" as const,
     title: e.title || "Untitled Event",
-    slug: e.slug || e._raw.flattenedPath,
-    href: e.url || `/events/${e.slug}`,
+    slug: e.slug,
+    href: `/events/${e.slug}`,
     date: e.eventDate || e.date,
     excerpt: e.excerpt,
-    description: (e as any).description,
+    description: e.description,
     category: "Events",
-    tags: e.tags,
+    tags: e.tags || [],
   }));
 }
 
-function normalisePrints(): ContentResource[] {
-  return allPrints.map((p) => ({
+function normalisePrints(prints: any[]): ContentResource[] {
+  return prints.map((p) => ({
     kind: "print" as const,
     title: p.title || "Untitled Print",
-    slug: p.slug || p._raw.flattenedPath,
-    href: p.url || `/prints/${p.slug}`,
+    slug: p.slug,
+    href: `/prints/${p.slug}`,
     date: p.date,
     excerpt: p.excerpt,
     category: "Printables",
-    tags: p.tags,
+    tags: p.tags || [],
   }));
 }
 
-function normaliseResources(): ContentResource[] {
-  return allResources.map((r) => ({
+function normaliseResources(resources: any[]): ContentResource[] {
+  return resources.map((r) => ({
     kind: "resource" as const,
     title: r.title || "Untitled Resource",
-    slug: r.slug || r._raw.flattenedPath,
-    href: r.url || `/resources/${r.slug}`,
+    slug: r.slug,
+    href: `/resources/${r.slug}`,
     date: r.date,
     excerpt: r.excerpt,
-    description: (r as any).description,
+    description: r.description,
     category: "Resources",
-    tags: r.tags,
+    tags: r.tags || [],
   }));
 }
 
@@ -122,27 +120,45 @@ interface ContentPageProps {
 }
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const items: ContentResource[] = [
-    ...normalisePosts(),
-    ...normaliseBooks(),
-    ...normaliseDownloads(),
-    ...normaliseEvents(),
-    ...normalisePrints(),
-    ...normaliseResources(),
-  ];
+  try {
+    // Fetch all content using existing helper functions
+    const posts = getAllPostsMeta?.() || [];
+    const books = getAllBooksMeta?.() || [];
+    const downloads = getAllDownloadsMeta?.() || [];
+    
+    // Use getAllContent for other types
+    const events = getAllContent?.("events") || [];
+    const prints = getAllContent?.("prints") || [];
+    const resources = getAllContent?.("resources") || [];
 
-  // Sort newest first by date
-  const sorted = items.slice().sort((a, b) => {
-    if (!a.date && !b.date) return 0;
-    if (!a.date) return 1;
-    if (!b.date) return -1;
-    return a.date < b.date ? 1 : -1;
-  });
+    const items: ContentResource[] = [
+      ...normalisePosts(posts),
+      ...normaliseBooks(books),
+      ...normaliseDownloads(downloads),
+      ...normaliseEvents(events),
+      ...normalisePrints(prints),
+      ...normaliseResources(resources),
+    ];
 
-  return {
-    props: { items: sorted },
-    revalidate: 3600,
-  };
+    // Sort newest first by date
+    const sorted = items.slice().sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date < b.date ? 1 : -1;
+    });
+
+    return {
+      props: { items: sorted },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error("Error fetching content:", error);
+    return {
+      props: { items: [] },
+      revalidate: 3600,
+    };
+  }
 };
 
 // ---------------------------------------------------------------------------
