@@ -1,19 +1,29 @@
 // components/mdx/ctas.tsx
 import React from "react";
-import type { CTAKey } from "./cta-presets";
 import CtaPresetComponent from "./CtaPresetComponent";
+
+// Define locally since it might not be exported from cta-presets
+type CTAKey =
+  | "fatherhood"
+  | "leadership"
+  | "brotherhood"
+  | "mentorship"
+  | "free-resources"
+  | "premium"
+  | "community"
+  | "newsletter";
 
 /**
  * Props for the CTA block used inside MDX or pages.
  */
 export type CTAProps = {
-  /** Which preset to render (e.g., 'fatherhood', 'leadership', 'brotherhood', 'mentorship', 'free-resources', 'premium', 'community', 'newsletter') */
+  /** Which preset to render */
   presetKey?: CTAKey | string;
   /** Optional title override */
   title?: string;
   /** Optional description override */
   description?: string;
-  /** Optional compact mode if you add alternative layouts in future */
+  /** Optional compact mode */
   compact?: boolean;
   /** Optional wrapper className */
   className?: string;
@@ -30,7 +40,6 @@ export const CTA: React.FC<CTAProps> = ({
   compact,
   className,
 }) => {
-  // Wrapper for future layout variations; for now we just pass through.
   return (
     <div className={className}>
       <CtaPresetComponent
@@ -44,8 +53,7 @@ export const CTA: React.FC<CTAProps> = ({
 };
 
 /**
- * Aliases for semantic clarity if you want distinct tags in MDX.
- * All of these currently render the same component/preset pipeline.
+ * Aliases for semantic clarity
  */
 export const FatherhoodCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="fatherhood" {...props} />

@@ -1,3 +1,4 @@
+// components/CtaArt.tsx
 import * as React from "react";
 import Image from "next/image";
 import clsx from "clsx";
@@ -14,10 +15,20 @@ export default function CtaArt({ className }: Props) {
     []
   );
 
-  const [idx, setIdx] = React.useState(0);
-  const src = candidates[idx];
-  const fallback =
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [hasError, setHasError] = React.useState(false);
+  const src = candidates[currentIndex];
+  
+  const fallbackBackground = 
     "linear-gradient(135deg, rgba(253,224,71,0.9), rgba(234,179,8,0.9))";
+
+  const handleError = React.useCallback(() => {
+    if (currentIndex + 1 < candidates.length) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setHasError(true);
+    }
+  }, [currentIndex, candidates.length]);
 
   return (
     <div
@@ -28,9 +39,12 @@ export default function CtaArt({ className }: Props) {
       )}
       aria-hidden="true"
     >
-      {/* graceful fallback if image fails twice */}
-      {idx >= candidates.length ? (
-        <div className="absolute inset-0" style={{ background: fallback }} />
+      {/* Graceful fallback if image fails */}
+      {hasError || currentIndex >= candidates.length ? (
+        <div 
+          className="absolute inset-0" 
+          style={{ background: fallbackBackground }} 
+        />
       ) : (
         <Image
           src={src}
@@ -38,7 +52,7 @@ export default function CtaArt({ className }: Props) {
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover"
-          onError={() => setIdx((i) => (i + 1 < candidates.length ? i + 1 : i + 1))}
+          onError={handleError}
           priority={false}
         />
       )}

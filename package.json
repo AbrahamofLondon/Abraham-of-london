@@ -34,7 +34,7 @@
     "prebuild": "pnpm run clean:build",
     "postbuild": "node -e \"console.log('Build completed successfully')\"",
     "postinstall": "contentlayer2 build",
-    "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.mts"
+    "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.tsx"
   },
   "dependencies": {
     "@react-pdf/renderer": "4.3.1",

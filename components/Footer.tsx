@@ -136,7 +136,11 @@ export default function Footer(): JSX.Element {
   });
 
   const socials = Array.from(byHref.values()).map((item) => {
-    const external = item.external ?? (item.href.startsWith('http') && !item.href.startsWith('mailto:') && !item.href.startsWith('tel:'));
+    const external =
+      item.external ??
+      (item.href.startsWith("http") &&
+        !item.href.startsWith("mailto:") &&
+        !item.href.startsWith("tel:"));
     const Icon = item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
 
     return {
@@ -269,23 +273,43 @@ export default function Footer(): JSX.Element {
             </p>
           </div>
 
-          {/* Legal links - All pages now exist */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
-            <Link href="/privacy" className="transition-colors hover:text-gold">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="transition-colors hover:text-gold">
-              Terms of Service
-            </Link>
-            <Link href="/cookies" className="transition-colors hover:text-gold">
-              Cookie Policy
-            </Link>
-            <Link href="/accessibility" className="transition-colors hover:text-gold">
-              Accessibility
-            </Link>
-            <Link href="/security" className="transition-colors hover:text-gold">
-              Security
-            </Link>
+          {/* Legal / Governance links */}
+          <div className="flex flex-col items-center gap-2 lg:items-end">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-gold/40">
+              Governance
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
+              <Link
+                href="/privacy-policy"
+                className="transition-colors hover:text-gold"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms-of-service"
+                className="transition-colors hover:text-gold"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="/cookie-policy"
+                className="transition-colors hover:text-gold"
+              >
+                Cookie Policy
+              </Link>
+              <Link
+                href="/accessibility-statement"
+                className="transition-colors hover:text-gold"
+              >
+                Accessibility
+              </Link>
+              <Link
+                href="/security-policy"
+                className="transition-colors hover:text-gold"
+              >
+                Security
+              </Link>
+            </div>
           </div>
 
           {/* Scroll to top */}

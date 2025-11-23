@@ -1,9 +1,11 @@
 // pages/contact.tsx
 import * as React from "react";
 import Head from "next/head";
+import Link from "next/link"; // ADDED: Import Link
 import { Moon, SunMedium, Mail, Phone, MapPin, Clock, Users, Target } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getPageTitle, siteConfig } from "@/lib/siteConfig"; // Added siteConfig import
+import { getPageTitle, siteConfig } from "@/lib/siteConfig";
+import PolicyFooter from "@/components/PolicyFooter";
 
 const ContactPage = (): JSX.Element => {
   const pageTitle = "Contact Abraham of London";
@@ -48,7 +50,7 @@ const ContactPage = (): JSX.Element => {
   }
 
   // Theme classes
-  const shellClass = isDark 
+  const shellClass = isDark
     ? "min-h-screen bg-gradient-to-br from-deepCharcoal via-gray-900 to-black text-cream"
     : "min-h-screen bg-gradient-to-br from-warmWhite via-cream to-white text-ink";
 
@@ -74,7 +76,7 @@ const ContactPage = (): JSX.Element => {
         <title>{getPageTitle(pageTitle)}</title>
         <meta
           name="description"
-          content="Connect with Abraham of London for strategic advisory, fatherhood advocacy, legacy building, and venture leadership. Priority given to aligned vision and principled partnerships."
+          content="Connect with Abraham of London for strategic conversations around leadership, legacy, and principled ventures. Enquiries are considered based on clarity of brief and strategic fit."
         />
         <meta name="theme-color" content={isDark ? "#0f172a" : "#f7f5ee"} />
       </Head>
@@ -114,7 +116,7 @@ const ContactPage = (): JSX.Element => {
             </button>
           </div>
 
-          {/* Enhanced Hero Section */}
+          {/* Hero Section */}
           <header className="text-center mb-16">
             <p className={`text-[0.7rem] font-semibold uppercase tracking-[0.24em] ${accentTextClass}`}>
               Begin the Dialogue
@@ -123,8 +125,8 @@ const ContactPage = (): JSX.Element => {
               Contact Abraham of London
             </h1>
             <p className={`mt-6 max-w-2xl mx-auto text-lg leading-relaxed ${secondaryTextClass}`}>
-              For strategic advisory, fatherhood advocacy, legacy building, and venture leadership. 
-              Priority consideration given to aligned vision and principled partnerships.
+              For strategic advisory, fatherhood advocacy, legacy building, and venture leadership.
+              Enquiries are prioritised where there is clear alignment of vision, values, and impact.
             </p>
           </header>
 
@@ -135,7 +137,7 @@ const ContactPage = (): JSX.Element => {
                 <h2 className={`font-serif text-2xl font-semibold mb-6 ${primaryTextClass}`}>
                   Direct Contact
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <div className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
@@ -143,7 +145,7 @@ const ContactPage = (): JSX.Element => {
                     </div>
                     <div>
                       <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Email</h3>
-                      <a 
+                      <a
                         href={`mailto:${siteConfig.email}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
                       >
@@ -158,8 +160,8 @@ const ContactPage = (): JSX.Element => {
                     </div>
                     <div>
                       <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Phone</h3>
-                      <a 
-                        href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}
+                      <a
+                        href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
                       >
                         {siteConfig.phone}
@@ -183,7 +185,11 @@ const ContactPage = (): JSX.Element => {
                     </div>
                     <div>
                       <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Response Time</h3>
-                      <p className={`text-sm ${secondaryTextClass}`}>2-3 business days for qualified inquiries</p>
+                      <p className={`text-sm ${secondaryTextClass}`}>
+                        We aim to respond to qualified enquiries within 2–3 business days. Depending on
+                        volume and strategic fit, we may not be able to reply to every message
+                        individually.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -205,6 +211,20 @@ const ContactPage = (): JSX.Element => {
                     </li>
                   </ul>
                 </div>
+
+                <div
+                  className={`mt-6 pt-4 border-t text-xs ${
+                    isDark ? "border-white/10 text-gray-400" : "border-lightGrey text-slate-600"
+                  }`}
+                >
+                  <p className="mb-1">
+                    Submitting an enquiry does not create a client, advisory, or fiduciary relationship.
+                  </p>
+                  <p>
+                    Please avoid including confidential, highly sensitive, or case-specific legal,
+                    financial, or medical details at this stage.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -216,16 +236,13 @@ const ContactPage = (): JSX.Element => {
                     Strategic Enquiry Form
                   </h2>
                   <p className={`text-sm ${secondaryTextClass}`}>
-                    For speaking invitations, strategic advisory, media enquiries, or collaboration 
-                    opportunities. A response will be prioritised based on clarity of brief and strategic fit.
+                    For speaking invitations, strategic advisory, media enquiries, or collaboration
+                    opportunities. Responses are prioritised based on clarity of brief, timing, and
+                    strategic fit.
                   </p>
                 </div>
 
-                <form
-                  method="post"
-                  action="/api/contact"
-                  className="space-y-6"
-                >
+                <form method="post" action="/api/contact" className="space-y-6">
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
                       <label
@@ -318,11 +335,11 @@ const ContactPage = (): JSX.Element => {
                       rows={6}
                       required
                       className={`w-full rounded-xl border px-4 py-3 text-sm leading-relaxed outline-none ring-0 transition focus:ring-2 ${inputClass}`}
-                      placeholder="Provide context, objectives, timelines, and decision-makers involved. Precision accelerates progress."
+                      placeholder="Provide context, objectives, timelines, stakeholders, and decision-makers involved."
                     />
                     <p className={`mt-2 text-xs ${secondaryTextClass}`}>
-                      Be specific: context, objectives, timelines, and decision-makers involved. 
-                      Precision accelerates progress and ensures appropriate consideration.
+                      Precision helps us assess strategic fit and determine whether we are the right
+                      counterpart for your enquiry.
                     </p>
                   </div>
 
@@ -335,6 +352,7 @@ const ContactPage = (): JSX.Element => {
                       >
                         Email directly
                       </a>
+                      .
                     </p>
 
                     <button
@@ -344,6 +362,26 @@ const ContactPage = (): JSX.Element => {
                       Submit Strategic Enquiry
                     </button>
                   </div>
+
+                  <p className={`mt-4 text-xs ${secondaryTextClass}`}>
+                    By submitting this form, you acknowledge that you have read our{" "}
+                    {/* FIXED: Replace <a> with <Link> */}
+                    <Link
+                      href="/privacy-policy"
+                      className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
+                    >
+                      Privacy Policy
+                    </Link>{" "}
+                    and{" "}
+                    {/* FIXED: Replace <a> with <Link> */}
+                    <Link
+                      href="/terms-of-service"
+                      className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
+                    >
+                      Terms of Service
+                    </Link>
+                    .
+                  </p>
                 </form>
               </div>
 
@@ -353,14 +391,16 @@ const ContactPage = (): JSX.Element => {
                   About Abraham of London
                 </h3>
                 <p className={`text-sm leading-relaxed ${secondaryTextClass}`}>
-                  Abraham of London leads a family of strategic ventures focused on legacy building, 
-                  fatherhood advocacy, and principled leadership. Through InnovateHub, Alomarada, 
-                  and Endureluxe, we create sustainable impact across advisory, innovation, and 
-                  community domains.
+                  Abraham of London curates a family of ventures focused on legacy building, fatherhood
+                  advocacy, and principled leadership. Through platforms such as Alomarada, InnovateHub,
+                  and Endureluxe, we bring together strategic advisory, founder support, and community
+                  initiatives aimed at durable impact.
                 </p>
               </div>
             </div>
           </div>
+
+          <PolicyFooter isDark={isDark} />
         </div>
       </div>
     </Layout>

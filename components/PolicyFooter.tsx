@@ -1,0 +1,61 @@
+// components/PolicyFooter.tsx
+import * as React from "react";
+import Link from "next/link";
+
+interface PolicyFooterProps {
+  isDark?: boolean;
+}
+
+export default function PolicyFooter({ isDark = true }: PolicyFooterProps) {
+  const border = isDark ? "border-white/10" : "border-gray-300";
+  const text = isDark ? "text-gold/70" : "text-slate-700";
+  const link = isDark ? "text-gold hover:text-amber-200" : "text-forest hover:text-emerald-700";
+  const bg = isDark ? "bg-charcoal/60" : "bg-white";
+
+  return (
+    <div
+      className={`mt-16 rounded-2xl border ${border} ${bg} backdrop-blur-sm p-6 text-center`}
+    >
+      <p className={`text-sm mb-4 ${text}`}>
+        For a full view of how we manage data, security, accessibility, and platform use,
+        please refer to the following documents:
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-4 text-sm font-medium">
+        <Link href="/privacy-policy" className={`${link} underline underline-offset-2`}>
+          Privacy Policy
+        </Link>
+
+        <span className={text}>•</span>
+
+        <Link href="/terms-of-service" className={`${link} underline underline-offset-2`}>
+          Terms of Service
+        </Link>
+
+        <span className={text}>•</span>
+
+        <Link href="/cookie-policy" className={`${link} underline underline-offset-2`}>
+          Cookie Policy
+        </Link>
+
+        <span className={text}>•</span>
+
+        <Link href="/security-policy" className={`${link} underline underline-offset-2`}>
+          Security Policy
+        </Link>
+
+        <span className={text}>•</span>
+
+        <Link href="/accessibility-statement" className={`${link} underline underline-offset-2`}>
+          Accessibility Statement
+        </Link>
+      </div>
+
+      <p className={`mt-4 text-xs ${text}`}>
+        These documents collectively describe our governance framework. They are for general
+        information only and do not constitute legal, financial, or professional advice. Your use
+        of this site remains subject to the most recent versions published here.
+      </p>
+    </div>
+  );
+}
