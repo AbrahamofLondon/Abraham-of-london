@@ -24,19 +24,26 @@ type ContentKind =
   | "print"
   | "resource";
 
-interface BaseContentMeta {
+// More flexible interface that matches what getAllContent returns
+interface RawContentItem {
   slug?: string;
-  title: string;
+  title?: string;
   date?: string;
   excerpt?: string;
   description?: string;
   category?: string;
   tags?: string[];
   featured?: boolean;
-  readTime?: number;
+  readTime?: string | number;
   _raw?: {
     flattenedPath?: string;
   };
+  // Event-specific fields
+  eventDate?: string;
+  // Download-specific fields
+  fileSize?: string;
+  // Any other potential fields
+  [key: string]: unknown;
 }
 
 interface ContentResource {
@@ -50,7 +57,7 @@ interface ContentResource {
   category?: string;
   tags: string[];
   featured?: boolean;
-  readTime?: number;
+  readTime?: string | number;
 }
 
 interface ContentPageProps {
@@ -59,7 +66,7 @@ interface ContentPageProps {
 }
 
 // ---------------------------------------------------------------------------
-// Icons
+// Icons / helpers
 // ---------------------------------------------------------------------------
 
 const ContentIcons: Record<ContentKind, string> = {
@@ -72,52 +79,125 @@ const ContentIcons: Record<ContentKind, string> = {
 };
 
 const ArrowIcon = () => (
-  <svg 
-    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" 
-    fill="none" 
-    viewBox="0 0 24 24" 
+  <svg
+    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+    fill="none"
+    viewBox="0 0 24 24"
     stroke="currentColor"
   >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M14 5l7 7m0 0l-7 7m7-7H3" 
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M14 5l7 7m0 0l-7 7m7-7H3"
     />
   </svg>
 );
 
-// ---------------------------------------------------------------------------
-// Helper Functions
-// ---------------------------------------------------------------------------
+// Fixed order + labels for grouped view
+const kindOrder: ContentKind[] = [
+  "blog",
+  "book",
+  "download",
+  "event",
+  "print",
+  "resource",
+];
 
-const getSlug = (item: BaseContentMeta): string | undefined => {
-  return item.slug ||
-    item._raw?.flattenedPath?.replace(/^(blog|books|downloads|events|prints|resources)\//, "") ||
-    item.title?.toLowerCase().replace(/\s+/g, "-");
+const kindLabels: Record<ContentKind, string> = {
+  blog: "Blog Posts",
+  book: "Books",
+  download: "Downloads",
+  event: "Events",
+  print: "Printables",
+  resource: "Resources",
 };
 
+const getKindColor = (kind: ContentKind): string => {
+  const colors: Record<ContentKind, string> = {
+    blog: "from-blue-500/20 to-blue-600/20 border-blue-500/30",
+    book: "from-purple-500/20 to-purple-600/20 border-purple-500/30",
+    download: "from-green-500/20 to-green-600/20 border-green-500/30",
+    event: "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30",
+    print: "from-pink-500/20 to-pink-600/20 border-pink-500/30",
+    resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-500/30",
+  };
+  return colors[kind];
+};
+
+const getKindBadgeColor = (kind: ContentKind): string => {
+  const colors: Record<ContentKind, string> = {
+    blog: "border-blue-500/30 text-blue-400 bg-blue-500/10",
+    book: "border-purple-500/30 text-purple-400 bg-purple-500/10",
+    download: "border-green-500/30 text-green-400 bg-green-500/10",
+    event: "border-yellow-500/30 text-yellow-400 bg-yellow-500/10",
+    print: "border-pink-500/30 text-pink-400 bg-pink-500/10",
+    resource: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
+  };
+  return colors[kind];
+};
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Normalise slug from different sources:
+ * - Prefer explicit `slug` field
+ * - Fallback to `_raw.flattenedPath` with leading collection stripped
+ * - Last resort: basic slugified title
+ */
+const getSlug = (item: RawContentItem): string | undefined => {
+  const stripCollectionPrefix = (value: string) =>
+    value.replace(/^(blog|books|downloads|events|prints|resources)\//, "");
+
+  if (item.slug && typeof item.slug === "string") {
+    return stripCollectionPrefix(item.slug);
+  }
+
+  if (item._raw?.flattenedPath) {
+    return stripCollectionPrefix(item._raw.flattenedPath);
+  }
+
+  if (item.title) {
+    return item.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  return undefined;
+};
+
+/**
+ * Build href paths aligned with your routing:
+ * - Blog posts live at root: "/{slug}" (handled by pages/[slug].tsx)
+ * - Others follow "/{kind}s/{slug}"
+ */
 const getHref = (kind: ContentKind, slug: string): string => {
   if (kind === "blog") return `/${slug}`;
   return `/${kind}s/${slug}`;
 };
 
 const processContentItems = (
-  items: BaseContentMeta[], 
-  kind: ContentKind, 
-  defaultCategory?: string
+  items: RawContentItem[],
+  kind: ContentKind,
+  defaultCategory?: string,
 ): ContentResource[] => {
   const processed: ContentResource[] = [];
 
   items.forEach((item) => {
     const slug = getSlug(item);
-    if (item.title && slug) {
+    const title = item.title || "Untitled";
+
+    if (slug) {
       processed.push({
         kind,
-        title: item.title,
+        title,
         slug,
         href: getHref(kind, slug),
-        date: item.date,
+        date: item.date || item.eventDate,
         excerpt: item.excerpt,
         description: item.description,
         category: item.category || defaultCategory,
@@ -132,6 +212,96 @@ const processContentItems = (
 };
 
 // ---------------------------------------------------------------------------
+// Card component
+// ---------------------------------------------------------------------------
+
+function ContentCard({ item }: { item: ContentResource }) {
+  const description = item.description || item.excerpt || "";
+
+  // Context-aware CTA label – small UX lift
+  const ctaLabel =
+    item.kind === "download"
+      ? "View & Download"
+      : item.kind === "event"
+      ? "View Event"
+      : item.kind === "book"
+      ? "View Book"
+      : "Read more";
+
+  return (
+    <article
+      key={`${item.kind}-${item.slug}`}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/40 hover:shadow-2xl"
+    >
+      {/* Gradient overlay */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${getKindColor(
+          item.kind,
+        )} opacity-0 transition-opacity group-hover:opacity-10`}
+      />
+
+      <div className="relative flex flex-1 flex-col p-6">
+        {/* Header */}
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="text-lg">{ContentIcons[item.kind]}</div>
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
+                item.kind,
+              )}`}
+            >
+              {item.kind}
+            </span>
+          </div>
+
+          {item.date && (
+            <time className="flex-shrink-0 text-xs text-gray-500">
+              {new Date(item.date).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </time>
+          )}
+        </div>
+
+        {/* Content */}
+        <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
+          <Link href={item.href} className="hover:underline">
+            {item.title}
+          </Link>
+        </h3>
+
+        {description && (
+          <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-300">
+            {description}
+          </p>
+        )}
+
+        {/* Footer */}
+        <div className="mt-auto pt-4">
+          <div className="flex items-center justify-between">
+            {item.category && (
+              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400">
+                {item.category}
+              </span>
+            )}
+
+            <Link
+              href={item.href}
+              className="inline-flex items-center text-sm font-medium text-softGold transition-all hover:gap-2"
+            >
+              {ctaLabel}
+              <ArrowIcon />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // SSG
 // ---------------------------------------------------------------------------
 
@@ -143,62 +313,93 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   try {
     const allItems: ContentResource[] = [];
 
-    // Process blog posts
+    // Blog posts
     try {
       const posts = getAllPostsMeta?.() || [];
-      const processedPosts = processContentItems(posts, "blog", "Blog");
+      const processedPosts = processContentItems(
+        posts as unknown as RawContentItem[],
+        "blog",
+        "Blog",
+      );
       allItems.push(...processedPosts);
       console.log(`[content] Processed ${processedPosts.length} blog posts`);
     } catch (err) {
       console.error("[content] Error fetching posts:", err);
     }
 
-    // Process books
+    // Books
     try {
       const books = getAllBooksMeta?.() || [];
-      const processedBooks = processContentItems(books, "book", "Books");
+      const processedBooks = processContentItems(
+        books as unknown as RawContentItem[],
+        "book",
+        "Books",
+      );
       allItems.push(...processedBooks);
       console.log(`[content] Processed ${processedBooks.length} books`);
     } catch (err) {
       console.error("[content] Error fetching books:", err);
     }
 
-    // Process downloads
+    // Downloads
     try {
       const downloads = getAllDownloadsMeta?.() || [];
-      const processedDownloads = processContentItems(downloads, "download", "Downloads");
+      const processedDownloads = processContentItems(
+        downloads as unknown as RawContentItem[],
+        "download",
+        "Downloads",
+      );
       allItems.push(...processedDownloads);
-      console.log(`[content] Processed ${processedDownloads.length} downloads`);
+      console.log(
+        `[content] Processed ${processedDownloads.length} downloads`,
+      );
     } catch (err) {
       console.error("[content] Error fetching downloads:", err);
     }
 
-    // Process events
+    // Events
     try {
       const events = getAllContent?.("events") || [];
-      const processedEvents = processContentItems(events, "event", "Events");
+      const eventsAsRaw = events as unknown as RawContentItem[];
+      const processedEvents = processContentItems(
+        eventsAsRaw,
+        "event",
+        "Events",
+      );
       allItems.push(...processedEvents);
       console.log(`[content] Processed ${processedEvents.length} events`);
     } catch (err) {
       console.error("[content] Error fetching events:", err);
     }
 
-    // Process prints
+    // Prints
     try {
       const prints = getAllContent?.("prints") || [];
-      const processedPrints = processContentItems(prints, "print", "Printables");
+      const printsAsRaw = prints as unknown as RawContentItem[];
+      const processedPrints = processContentItems(
+        printsAsRaw,
+        "print",
+        "Printables",
+      );
       allItems.push(...processedPrints);
       console.log(`[content] Processed ${processedPrints.length} prints`);
     } catch (err) {
       console.error("[content] Error fetching prints:", err);
     }
 
-    // Process resources
+    // Resources
     try {
       const resources = getAllContent?.("resources") || [];
-      const processedResources = processContentItems(resources, "resource", "Resources");
+      const resourcesAsRaw = resources as unknown as RawContentItem[];
+      const processedResources = processContentItems(
+        resourcesAsRaw,
+        "resource",
+        "Resources",
+      );
       allItems.push(...processedResources);
-      console.log(`[content] Processed ${processedResources.length} resources`);
+      console.log(
+        `[content] Processed ${processedResources.length} resources`,
+      );
     } catch (err) {
       console.error("[content] Error fetching resources:", err);
     }
@@ -211,8 +412,8 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
-    // Get featured items
-    const featuredItems = sortedItems.filter(item => item.featured).slice(0, 3);
+    // Featured
+    const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 3);
 
     console.log("[content] ========================================");
     console.log(`[content] Total items: ${sortedItems.length}`);
@@ -220,19 +421,16 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
     console.log("[content] ========================================");
 
     return {
-      props: { 
+      props: {
         items: JSON.parse(JSON.stringify(sortedItems)),
-        featuredItems: JSON.parse(JSON.stringify(featuredItems))
+        featuredItems: JSON.parse(JSON.stringify(featuredItems)),
       },
       revalidate: 3600,
     };
   } catch (error) {
     console.error("[content] Critical error in getStaticProps:", error);
     return {
-      props: { 
-        items: [], 
-        featuredItems: [] 
-      },
+      props: { items: [], featuredItems: [] },
       revalidate: 3600,
     };
   }
@@ -243,10 +441,12 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 // ---------------------------------------------------------------------------
 
 const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
-  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  // Statistics for filters
+  // Stats
   const contentStats = {
     all: items.length,
     blog: items.filter((i) => i.kind === "blog").length,
@@ -257,7 +457,11 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     resource: items.filter((i) => i.kind === "resource").length,
   };
 
-  const filters: Array<{ key: ContentKind | "all"; label: string; count: number }> = [
+  const filters: Array<{
+    key: ContentKind | "all";
+    label: string;
+    count: number;
+  }> = [
     { key: "all", label: "All Content", count: contentStats.all },
     { key: "blog", label: "Blog Posts", count: contentStats.blog },
     { key: "book", label: "Books", count: contentStats.book },
@@ -267,55 +471,63 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     { key: "resource", label: "Resources", count: contentStats.resource },
   ];
 
-  // Filter and search logic
+  // Filter + search
   const filteredItems = items.filter((item) => {
     const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
-    const matchesSearch = searchQuery === "" || 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return matchesFilter && matchesSearch;
+    if (!matchesFilter) return false;
+
+    if (!searchQuery) return true;
+
+    const q = searchQuery.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.excerpt?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      item.tags.some((tag) => tag.toLowerCase().includes(q))
+    );
   });
 
-  const getKindColor = (kind: ContentKind): string => {
-    const colors = {
-      blog: "from-blue-500/20 to-blue-600/20 border-blue-500/30",
-      book: "from-purple-500/20 to-purple-600/20 border-purple-500/30",
-      download: "from-green-500/20 to-green-600/20 border-green-500/30",
-      event: "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30",
-      print: "from-pink-500/20 to-pink-600/20 border-pink-500/30",
-      resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-500/30",
-    };
-    return colors[kind];
+  // Group for "all" view (respects search)
+  const groupedByKind: Record<ContentKind, ContentResource[]> = {
+    blog: [],
+    book: [],
+    download: [],
+    event: [],
+    print: [],
+    resource: [],
   };
 
-  const getKindBadgeColor = (kind: ContentKind): string => {
-    const colors = {
-      blog: "border-blue-500/30 text-blue-400 bg-blue-500/10",
-      book: "border-purple-500/30 text-purple-400 bg-purple-500/10",
-      download: "border-green-500/30 text-green-400 bg-green-500/10",
-      event: "border-yellow-500/30 text-yellow-400 bg-yellow-500/10",
-      print: "border-pink-500/30 text-pink-400 bg-pink-500/10",
-      resource: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
-    };
-    return colors[kind];
+  for (const item of filteredItems) {
+    groupedByKind[item.kind].push(item);
+  }
+
+  // Handle keyboard events for accessibility
+  const handleKeyDown = (
+    event: React.KeyboardEvent,
+    filterKey: ContentKind | "all",
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setActiveFilter(filterKey);
+    }
   };
 
   return (
     <Layout title="Strategic Insights & Resources">
       <Head>
-        <title>Strategic Insights & Resources | Abraham of London</title>
+        <title>Strategic Insights &amp; Resources | Abraham of London</title>
         <meta
           name="description"
           content="Master strategic thinking with essays, books, tools, and resources for fathers, founders, and leaders building enduring legacies."
         />
-        <meta name="keywords" content="strategy, leadership, legacy building, fatherhood, entrepreneurship, resources" />
+        <meta
+          name="keywords"
+          content="strategy, leadership, legacy building, fatherhood, entrepreneurship, resources"
+        />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black">
-        {/* Hero Section */}
+        {/* Hero */}
         <section className="relative overflow-hidden px-4 py-20 lg:py-28">
           <div className="absolute inset-0 bg-gradient-to-r from-softGold/5 to-transparent" />
           <div className="relative mx-auto max-w-7xl">
@@ -325,27 +537,38 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   <span>✨</span>
                   <span>Premium Content Hub</span>
                 </div>
-                
+
                 <h1 className="mb-6 font-serif text-4xl font-light text-white sm:text-5xl lg:text-6xl">
-                  Build Your <span className="bg-gradient-to-r from-softGold to-yellow-200 bg-clip-text text-transparent">Legacy</span> With Strategic Wisdom
+                  Build Your{" "}
+                  <span className="bg-gradient-to-r from-softGold to-yellow-200 bg-clip-text text-transparent">
+                    Legacy
+                  </span>{" "}
+                  With Strategic Wisdom
                 </h1>
-                
+
                 <p className="mb-8 text-xl leading-relaxed text-gray-300">
-                  Curated essays, tools, and resources for fathers, founders, and leaders committed to 
-                  building enduring impact across generations.
+                  Curated essays, tools, and resources for fathers, founders,
+                  and leaders committed to building enduring impact across
+                  generations.
                 </p>
 
                 <div className="flex flex-wrap gap-4">
-                  <button 
-                    onClick={() => document.getElementById('content-grid')?.scrollIntoView({ behavior: 'smooth' })}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document
+                        .getElementById("content-grid")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
                     className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25"
                   >
                     <span className="relative z-10">Explore Resources</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity group-hover:opacity-100" />
                   </button>
-                  
-                  <button 
-                    onClick={() => setActiveFilter('download')}
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("download")}
                     className="group rounded-lg border border-softGold/30 bg-black/40 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10 hover:shadow-lg hover:shadow-yellow-500/10"
                   >
                     <span className="flex items-center gap-2">
@@ -360,21 +583,33 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
               <div className="mt-12 lg:mt-0">
                 <div className="grid grid-cols-2 gap-6">
                   {filters.slice(1).map((filter) => (
-                    <div 
+                    <button
                       key={filter.key}
-                      className={`group cursor-pointer rounded-2xl border bg-gradient-to-br ${getKindColor(filter.key as ContentKind)} p-6 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-2xl`}
-                      onClick={() => setActiveFilter(filter.key as ContentKind)}
+                      type="button"
+                      onClick={() =>
+                        setActiveFilter(filter.key as ContentKind | "all")
+                      }
+                      onKeyDown={(e) =>
+                        handleKeyDown(e, filter.key as ContentKind | "all")
+                      }
+                      className={`group rounded-2xl border bg-gradient-to-br ${getKindColor(
+                        filter.key as ContentKind,
+                      )} p-6 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="text-2xl">
                           {ContentIcons[filter.key as ContentKind]}
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-white">{filter.count}</div>
-                          <div className="text-sm text-gray-300">{filter.label}</div>
+                          <div className="text-2xl font-bold text-white">
+                            {filter.count}
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            {filter.label}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -382,7 +617,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
           </div>
         </section>
 
-        {/* Featured Section */}
+        {/* Featured */}
         {featuredItems.length > 0 && (
           <section className="px-4 py-16">
             <div className="mx-auto max-w-7xl">
@@ -390,21 +625,27 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
                   Featured <span className="text-softGold">Essentials</span>
                 </h2>
-                <p className="mt-4 text-gray-400">Handpicked resources to get you started</p>
+                <p className="mt-4 text-gray-400">
+                  Handpicked resources to get you started
+                </p>
               </div>
 
               <div className="grid gap-8 lg:grid-cols-3">
                 {featuredItems.map((item) => (
-                  <div 
+                  <div
                     key={item.slug}
                     className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/30 hover:shadow-2xl"
                   >
                     <div className="absolute top-6 right-6 text-2xl">
                       {ContentIcons[item.kind]}
                     </div>
-                    
+
                     <div className="mb-4">
-                      <span className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(item.kind)} text-white`}>
+                      <span
+                        className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
+                          item.kind,
+                        )} text-white`}
+                      >
                         {item.kind}
                       </span>
                     </div>
@@ -414,10 +655,12 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                     </h3>
 
                     {item.excerpt && (
-                      <p className="mb-6 line-clamp-3 text-gray-300">{item.excerpt}</p>
+                      <p className="mb-6 line-clamp-3 text-gray-300">
+                        {item.excerpt}
+                      </p>
                     )}
 
-                    <Link 
+                    <Link
                       href={item.href}
                       className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-3"
                     >
@@ -431,7 +674,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
           </section>
         )}
 
-        {/* Main Content Grid */}
+        {/* Main Content */}
         <section id="content-grid" className="px-4 py-16">
           <div className="mx-auto max-w-7xl">
             {/* Controls */}
@@ -453,28 +696,32 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   </div>
                 </div>
 
-                {/* Filter Pills */}
+                {/* Filter pills */}
                 <div className="flex flex-wrap gap-3">
                   {filters.map((filter) => (
                     <button
                       key={filter.key}
                       type="button"
                       onClick={() => setActiveFilter(filter.key)}
-                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black ${
                         activeFilter === filter.key
                           ? "border-softGold bg-softGold text-black shadow-lg shadow-yellow-500/30"
                           : "border-white/10 bg-black/40 text-gray-100 hover:border-softGold/40 hover:bg-gray-800"
                       }`}
                     >
                       <span className="text-xs">
-                        {ContentIcons[filter.key as ContentKind] || "📁"}
+                        {filter.key === "all"
+                          ? "📁"
+                          : ContentIcons[filter.key as ContentKind]}
                       </span>
                       {filter.label}
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${
-                        activeFilter === filter.key
-                          ? "bg-black/20 text-black"
-                          : "bg-white/10 text-gray-400"
-                      }`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${
+                          activeFilter === filter.key
+                            ? "bg-black/20 text-black"
+                            : "bg-white/10 text-gray-400"
+                        }`}
+                      >
                         {filter.count}
                       </span>
                     </button>
@@ -483,117 +730,95 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
               </div>
             </div>
 
-            {/* Results */}
+            {/* Result summary */}
             <div className="mb-8 flex items-center justify-between">
               <div className="text-gray-400">
                 Showing {filteredItems.length} of {items.length} resources
               </div>
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
-                  className="text-sm text-softGold hover:text-yellow-400"
+                  className="text-sm text-softGold hover:text-yellow-400 focus:outline-none focus:underline"
                 >
                   Clear search
                 </button>
               )}
             </div>
 
-            {/* Content Grid */}
+            {/* Grid / grouped content */}
             {filteredItems.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-16 text-center">
                 <div className="mb-4 text-6xl">🔍</div>
-                <h3 className="mb-2 text-xl font-semibold text-white">No resources found</h3>
+                <h3 className="mb-2 text-xl font-semibold text-white">
+                  No resources found
+                </h3>
                 <p className="mb-6 text-gray-400">
-                  {searchQuery 
+                  {searchQuery
                     ? `No results for "${searchQuery}". Try different keywords.`
-                    : `No ${activeFilter !== 'all' ? activeFilter + ' ' : ''}resources available.`
-                  }
+                    : `No ${
+                        activeFilter !== "all" ? `${activeFilter} ` : ""
+                      }resources available.`}
                 </p>
-                {(searchQuery || activeFilter !== 'all') && (
+                {(searchQuery || activeFilter !== "all") && (
                   <button
+                    type="button"
                     onClick={() => {
                       setSearchQuery("");
                       setActiveFilter("all");
                     }}
-                    className="rounded-lg bg-softGold px-6 py-2 font-semibold text-black transition-all hover:shadow-lg hover:shadow-yellow-500/25"
+                    className="rounded-lg bg-softGold px-6 py-2 font-semibold text-black transition-all hover:shadow-lg hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
                   >
                     Show all resources
                   </button>
                 )}
               </div>
+            ) : activeFilter === "all" ? (
+              // Grouped view for "All"
+              <div className="space-y-12">
+                {kindOrder.map((kind) => {
+                  const group = groupedByKind[kind];
+                  if (!group.length) return null;
+
+                  return (
+                    <section key={kind}>
+                      <header className="mb-4 flex items-center justify-between">
+                        <h2 className="flex items-center gap-2 font-serif text-2xl font-light text-white">
+                          <span>{ContentIcons[kind]}</span>
+                          <span>{kindLabels[kind]}</span>
+                        </h2>
+                        <span className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                          {group.length} item
+                          {group.length !== 1 ? "s" : ""}
+                        </span>
+                      </header>
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {group.map((item) => (
+                          <ContentCard
+                            key={`${item.kind}-${item.slug}`}
+                            item={item}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             ) : (
+              // Flat grid for a specific filter
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredItems.map((item) => (
-                  <article
+                  <ContentCard
                     key={`${item.kind}-${item.slug}`}
-                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/40 hover:shadow-2xl"
-                  >
-                    {/* Gradient overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${getKindColor(item.kind)} opacity-0 transition-opacity group-hover:opacity-10`} />
-                    
-                    <div className="relative flex flex-1 flex-col p-6">
-                      {/* Header */}
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="text-lg">
-                            {ContentIcons[item.kind]}
-                          </div>
-                          <span className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(item.kind)}`}>
-                            {item.kind}
-                          </span>
-                        </div>
-                        
-                        {item.date && (
-                          <time className="flex-shrink-0 text-xs text-gray-500">
-                            {new Date(item.date).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </time>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
-                        <Link href={item.href} className="hover:underline">
-                          {item.title}
-                        </Link>
-                      </h3>
-
-                      {(item.description || item.excerpt) && (
-                        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-300">
-                          {item.description || item.excerpt}
-                        </p>
-                      )}
-
-                      {/* Footer */}
-                      <div className="mt-auto pt-4">
-                        <div className="flex items-center justify-between">
-                          {item.category && (
-                            <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400">
-                              {item.category}
-                            </span>
-                          )}
-                          
-                          <Link 
-                            href={item.href}
-                            className="inline-flex items-center text-sm font-medium text-softGold transition-all hover:gap-2"
-                          >
-                            Read more
-                            <ArrowIcon />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
+                    item={item}
+                  />
                 ))}
               </div>
             )}
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* CTA */}
         <section className="px-4 py-20">
           <div className="mx-auto max-w-4xl text-center">
             <div className="rounded-2xl border border-softGold/20 bg-gradient-to-r from-softGold/5 to-yellow-600/5 px-8 py-12 backdrop-blur-sm">
@@ -601,14 +826,20 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 Ready to Build Your Legacy?
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-gray-300">
-                Join founders, fathers, and leaders who are already transforming their approach 
-                to strategy and legacy building.
+                Join founders, fathers, and leaders who are already transforming
+                their approach to strategy and legacy building.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <button className="rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25">
+                <button
+                  type="button"
+                  className="rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+                >
                   Get Started Today
                 </button>
-                <button className="rounded-lg border border-softGold/30 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10">
+                <button
+                  type="button"
+                  className="rounded-lg border border-softGold/30 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+                >
                   Book a Strategy Call
                 </button>
               </div>

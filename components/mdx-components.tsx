@@ -6,15 +6,15 @@ import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
-type AnyProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+interface MdxComponentProps {
+  [key: string]: unknown;
   children?: React.ReactNode;
-};
+  className?: string;
+}
 
 /* ----------------------------- Basic typography ---------------------------- */
 
-const H1 = ({ children, ...rest }: AnyProps) => (
+const H1 = ({ children, ...rest }: MdxComponentProps) => (
   <h1
     className="mt-6 mb-4 font-serif text-3xl font-semibold tracking-tight sm:text-4xl"
     {...rest}
@@ -23,7 +23,7 @@ const H1 = ({ children, ...rest }: AnyProps) => (
   </h1>
 );
 
-const H2 = ({ children, ...rest }: AnyProps) => (
+const H2 = ({ children, ...rest }: MdxComponentProps) => (
   <h2
     className="mt-6 mb-3 font-serif text-2xl font-semibold tracking-tight"
     {...rest}
@@ -32,34 +32,34 @@ const H2 = ({ children, ...rest }: AnyProps) => (
   </h2>
 );
 
-const H3 = ({ children, ...rest }: AnyProps) => (
+const H3 = ({ children, ...rest }: MdxComponentProps) => (
   <h3 className="mt-5 mb-2 font-serif text-xl font-semibold" {...rest}>
     {children}
   </h3>
 );
 
-const H4 = ({ children, ...rest }: AnyProps) => (
+const H4 = ({ children, ...rest }: MdxComponentProps) => (
   <h4 className="mt-4 mb-2 text-base font-semibold" {...rest}>
     {children}
   </h4>
 );
 
-const P = ({ children, className = "", ...rest }: AnyProps) => (
+const P = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={("my-4 text-[0.95rem] leading-relaxed " + className).trim()}
+    className={`my-4 text-[0.95rem] leading-relaxed ${className}`.trim()}
     {...rest}
   >
     {children}
   </p>
 );
 
-const Strong = ({ children, ...rest }: AnyProps) => (
+const Strong = ({ children, ...rest }: MdxComponentProps) => (
   <strong className="font-semibold" {...rest}>
     {children}
   </strong>
 );
 
-const Em = ({ children, ...rest }: AnyProps) => (
+const Em = ({ children, ...rest }: MdxComponentProps) => (
   <em className="italic" {...rest}>
     {children}
   </em>
@@ -67,25 +67,25 @@ const Em = ({ children, ...rest }: AnyProps) => (
 
 /* ------------------------------ Lists & misc ------------------------------- */
 
-const Ul = ({ children, ...rest }: AnyProps) => (
+const Ul = ({ children, ...rest }: MdxComponentProps) => (
   <ul className="my-4 ml-6 list-disc space-y-1" {...rest}>
     {children}
   </ul>
 );
 
-const Ol = ({ children, ...rest }: AnyProps) => (
+const Ol = ({ children, ...rest }: MdxComponentProps) => (
   <ol className="my-4 ml-6 list-decimal space-y-1" {...rest}>
     {children}
   </ol>
 );
 
-const Li = ({ children, ...rest }: AnyProps) => (
+const Li = ({ children, ...rest }: MdxComponentProps) => (
   <li className="leading-relaxed" {...rest}>
     {children}
   </li>
 );
 
-const Blockquote = ({ children, ...rest }: AnyProps) => (
+const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
   <blockquote
     className="my-6 border-l-4 border-softGold/70 bg-white/5 px-4 py-3 text-[0.95rem] italic"
     {...rest}
@@ -96,7 +96,7 @@ const Blockquote = ({ children, ...rest }: AnyProps) => (
 
 /* ------------------------------- Code blocks ------------------------------- */
 
-const Code = ({ children, ...rest }: AnyProps) => (
+const Code = ({ children, ...rest }: MdxComponentProps) => (
   <code
     className="rounded bg-slate-900 px-1.5 py-0.5 text-[0.8rem] text-amber-200 font-mono"
     {...rest}
@@ -105,7 +105,7 @@ const Code = ({ children, ...rest }: AnyProps) => (
   </code>
 );
 
-const Pre = ({ children, ...rest }: AnyProps) => (
+const Pre = ({ children, ...rest }: MdxComponentProps) => (
   <pre
     className="my-4 overflow-x-auto rounded-2xl bg-slate-950/90 p-4 text-[0.85rem] text-slate-100 border border-slate-800/80"
     {...rest}
@@ -116,7 +116,7 @@ const Pre = ({ children, ...rest }: AnyProps) => (
 
 /* --------------------------------- Links ---------------------------------- */
 
-const A = ({ children, ...rest }: AnyProps) => (
+const A = ({ children, ...rest }: MdxComponentProps) => (
   <a
     className="font-medium text-softGold underline-offset-2 hover:text-amber-200 hover:underline"
     {...rest}
@@ -126,11 +126,13 @@ const A = ({ children, ...rest }: AnyProps) => (
 );
 
 /* --------------------------------- Images --------------------------------- */
-/**
- * MDX <img> handler – keep it dead simple.
- * We deliberately use a plain <img> here to avoid Next/Image type friction.
- */
-const MdxImage = (props: AnyProps) => {
+
+interface ImageProps extends MdxComponentProps {
+  src?: string;
+  alt?: string;
+}
+
+const MdxImage = (props: ImageProps) => {
   const { src, alt, className = "", ...rest } = props;
 
   if (!src) return null;
@@ -148,7 +150,7 @@ const MdxImage = (props: AnyProps) => {
 
 /* ----------------------- Layout helpers used in MDX ----------------------- */
 
-const Grid = ({ children, className = "", ...rest }: AnyProps) => (
+const Grid = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <div
     className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ${className}`.trim()}
     {...rest}
@@ -160,7 +162,7 @@ const Grid = ({ children, className = "", ...rest }: AnyProps) => (
 /**
  * PullLine – used for those single-line "punch" quotes in downloads/posts.
  */
-const PullLine = ({ children, className = "", ...rest }: AnyProps) => (
+const PullLine = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
     className={`my-6 border-y border-softGold/50 py-3 text-center font-serif text-lg italic text-softGold ${className}`.trim()}
     {...rest}
@@ -170,7 +172,7 @@ const PullLine = ({ children, className = "", ...rest }: AnyProps) => (
 );
 
 // Eyebrow component for blog heroes used in MDX
-const HeroEyebrow = ({ children, className = "", ...rest }: AnyProps) => (
+const HeroEyebrow = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
     className={(
       "mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.25em] " +
@@ -188,8 +190,8 @@ const HeroEyebrow = ({ children, className = "", ...rest }: AnyProps) => (
 /**
  * JsonLd – allows MDX to inject structured data.
  */
-const JsonLdBlock = ({ children, ...rest }: AnyProps) => {
-  const data = (rest as any).data ?? children;
+const JsonLdBlock = ({ children, ...rest }: MdxComponentProps) => {
+  const data = (rest as { data?: unknown }).data ?? children;
   if (!data) return null;
 
   const json =
@@ -204,15 +206,16 @@ const JsonLdBlock = ({ children, ...rest }: AnyProps) => {
   );
 };
 
-/**
- * Callout – highlighted block for key ideas / warnings.
- */
+interface CalloutBlockProps extends MdxComponentProps {
+  type?: "info" | "warning" | "danger";
+}
+
 const CalloutBlock = ({
   children,
   type = "info",
   className = "",
   ...rest
-}: AnyProps) => {
+}: CalloutBlockProps) => {
   const tone =
     type === "warning" || type === "danger"
       ? "border-amber-400/80 bg-amber-500/10 text-amber-100"
@@ -236,7 +239,7 @@ const CalloutBlock = ({
 /**
  * Note – softer, secondary emphasis block.
  */
-const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
+const NoteBlock = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <div
     className={(
       "my-4 rounded-xl border border-slate-700 bg-slate-900/80 " +
@@ -252,7 +255,7 @@ const NoteBlock = ({ children, className = "", ...rest }: AnyProps) => (
 /**
  * Rule – horizontal rule used in MDX (`<Rule />` and `<hr />`).
  */
-const RuleBlock = ({ className = "", ...rest }: AnyProps) => (
+const RuleBlock = ({ className = "", ...rest }: MdxComponentProps) => (
   <hr
     className={(
       "my-8 mx-auto w-full border-t border-softGold/40 " + className
@@ -265,7 +268,7 @@ const RuleBlock = ({ className = "", ...rest }: AnyProps) => (
  * Caption – for image captions / small explanatory text.
  * Usage in MDX: <Caption>Photo of …</Caption>
  */
-const CaptionBlock = ({ children, className = "", ...rest }: AnyProps) => (
+const CaptionBlock = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
     className={(
       "mt-2 text-center text-[0.75rem] italic text-gray-500 " +
@@ -277,6 +280,10 @@ const CaptionBlock = ({ children, className = "", ...rest }: AnyProps) => (
   </p>
 );
 
+interface BadgeBlockProps extends MdxComponentProps {
+  tone?: "primary" | "accent" | "neutral";
+}
+
 /**
  * Badge – small pill for tags / labels in posts.
  * Usage in MDX: <Badge tone="primary">Fatherhood</Badge>
@@ -286,7 +293,7 @@ const BadgeBlock = ({
   tone = "neutral",
   className = "",
   ...rest
-}: AnyProps) => {
+}: BadgeBlockProps) => {
   const toneClass =
     tone === "primary"
       ? "bg-forest text-slate-50 border-forest/80"
@@ -313,7 +320,7 @@ const BadgeBlock = ({
  * BadgeRow – row layout for multiple badges.
  * Usage: <BadgeRow><Badge>One</Badge><Badge>Two</Badge></BadgeRow>
  */
-const BadgeRowBlock = ({ children, className = "", ...rest }: AnyProps) => (
+const BadgeRowBlock = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <div
     className={(
       "mt-4 flex flex-wrap items-center gap-2 " + className
@@ -327,7 +334,9 @@ const BadgeRowBlock = ({ children, className = "", ...rest }: AnyProps) => (
 /**
  * Quote – stylised pull quote, often with author.
  */
-type QuoteProps = AnyProps & { author?: React.ReactNode };
+interface QuoteProps extends MdxComponentProps {
+  author?: React.ReactNode;
+}
 
 const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
   <figure
@@ -346,7 +355,9 @@ const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
 /**
  * Verse – Scripture or key line with reference.
  */
-type VerseProps = AnyProps & { refText?: React.ReactNode };
+interface VerseProps extends MdxComponentProps {
+  refText?: React.ReactNode;
+}
 
 const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   <div
@@ -365,7 +376,7 @@ const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
 /**
  * ShareRow – simple flex row for share buttons / CTAs.
  */
-const ShareRow = ({ children, ...rest }: AnyProps) => (
+const ShareRow = ({ children, ...rest }: MdxComponentProps) => (
   <div
     className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm"
     {...rest}
@@ -373,6 +384,15 @@ const ShareRow = ({ children, ...rest }: AnyProps) => (
     {children}
   </div>
 );
+
+interface DownloadCardBlockProps extends MdxComponentProps {
+  title?: React.ReactNode;
+  heading?: React.ReactNode;
+  label?: React.ReactNode;
+  href?: string;
+  link?: string;
+  description?: React.ReactNode;
+}
 
 /**
  * DownloadCard – compact card for a single downloadable resource.
@@ -386,18 +406,16 @@ const DownloadCardBlock = ({
   description,
   children,
   ...rest
-}: AnyProps) => {
+}: DownloadCardBlockProps) => {
   const displayTitle =
-    (title as React.ReactNode) ||
-    (heading as React.ReactNode) ||
-    "Download";
+    title || heading || "Download";
 
   const displayDescription =
-    (description as React.ReactNode) || children;
+    description || children;
 
-  const url = (href as string) || (link as string) || "";
+  const url = href || link || "";
 
-  const buttonText = (label as React.ReactNode) || "Download";
+  const buttonText = label || "Download";
 
   return (
     <article
@@ -429,6 +447,16 @@ const DownloadCardBlock = ({
   );
 };
 
+interface ResourcesCTABlockProps extends MdxComponentProps {
+  title?: React.ReactNode;
+  heading?: React.ReactNode;
+  label?: React.ReactNode;
+  buttonLabel?: React.ReactNode;
+  href?: string;
+  link?: string;
+  description?: React.ReactNode;
+}
+
 /**
  * ResourcesCTA – end-of-article block to push downloads, events, etc.
  */
@@ -442,18 +470,14 @@ const ResourcesCTABlock = ({
   description,
   children,
   ...rest
-}: AnyProps) => {
+}: ResourcesCTABlockProps) => {
   const displayTitle =
-    (title as React.ReactNode) ||
-    (heading as React.ReactNode) ||
-    "Further resources";
-  const displayDescription = (description as React.ReactNode) || children;
-  const url = (href as string) || (link as string) || "";
+    title || heading || "Further resources";
+  const displayDescription = description || children;
+  const url = href || link || "";
 
   const buttonText =
-    (buttonLabel as React.ReactNode) ||
-    (label as React.ReactNode) ||
-    "Explore resources";
+    buttonLabel || label || "Explore resources";
 
   return (
     <section
@@ -483,21 +507,42 @@ const ResourcesCTABlock = ({
 
 /* ----------------------- Brand-specific MDX components -------------------- */
 
-// Loosen typing so TS doesn't complain when MDX uses these
-const BrandFrameWrapper = (props: AnyProps) => {
-  const SafeBrandFrame = BrandFrame as unknown as React.ComponentType<any>;
-  return <SafeBrandFrame {...props} />;
+interface BrandFrameWrapperProps extends MdxComponentProps {
+  children: React.ReactNode;
+}
+
+const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
+  const { children, ...rest } = props;
+  return (
+    <BrandFrame {...rest}>
+      {children}
+    </BrandFrame>
+  );
 };
 
-const EmbossedBrandMarkWrapper = (props: AnyProps) => {
-  const SafeEmbossed =
-    EmbossedBrandMark as unknown as React.ComponentType<any>;
-  return <SafeEmbossed {...props} />;
+interface EmbossedBrandMarkWrapperProps {
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  effect?: "emboss" | "deboss";
+  baseColor?: string;
+}
+
+const EmbossedBrandMarkWrapper = (props: EmbossedBrandMarkWrapperProps) => {
+  return <EmbossedBrandMark {...props} />;
 };
 
-const EmbossedSignWrapper = (props: AnyProps) => {
-  const SafeEmbossedSign = EmbossedSign as unknown as React.ComponentType<any>;
-  return <SafeEmbossedSign {...props} />;
+interface EmbossedSignWrapperProps {
+  // Add the actual props that EmbossedSign expects
+  children?: React.ReactNode;
+  className?: string;
+  // Add any other props that EmbossedSign requires
+}
+
+const EmbossedSignWrapper = (props: EmbossedSignWrapperProps) => {
+  return <EmbossedSign {...props} />;
 };
 
 /* --------------------------- Exported map for MDX -------------------------- */

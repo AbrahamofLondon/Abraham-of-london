@@ -1,6 +1,6 @@
 // lib/server/downloads-data.ts
 
-// Hard guard if you want it server-only
+// Hard guard – server-only.
 if (typeof window !== "undefined") {
   throw new Error("downloads-data must not be imported on the client");
 }
@@ -10,7 +10,7 @@ import path from "node:path";
 import matter from "gray-matter";
 
 export interface DownloadMeta {
-  slug: string;          // URL slug (currently based on filename)
+  slug: string;          // URL slug (filename without extension)
   title: string;
   excerpt?: string;
   category?: string;
@@ -30,7 +30,6 @@ const DOWNLOADS_DIR = path.join(process.cwd(), "content", "downloads");
 
 /**
  * Internal helper – resolve a slug to an actual md/mdx file if it exists.
- * Slug here is assumed to match the filename (without extension).
  */
 function resolveDownloadPath(slug: string): string | null {
   const mdxPath = path.join(DOWNLOADS_DIR, `${slug}.mdx`);
@@ -42,8 +41,7 @@ function resolveDownloadPath(slug: string): string | null {
 }
 
 /**
- * Used by pages/downloads/[slug].tsx (via wrapper) to build getStaticPaths.
- * Flat directory (no recursion) – matches your current structure.
+ * Used by pages/downloads/[slug].tsx to build getStaticPaths
  */
 export function getAllDownloadsMeta(): DownloadMeta[] {
   if (!fs.existsSync(DOWNLOADS_DIR)) {
@@ -55,19 +53,10 @@ export function getAllDownloadsMeta(): DownloadMeta[] {
     .filter((f) => f.endsWith(".md") || f.endsWith(".mdx"));
 
   return files.map((file) => {
-    const filenameSlug = file.replace(/\.mdx?$/, "");
+    const slug = file.replace(/\.mdx?$/, "");
     const fullPath = path.join(DOWNLOADS_DIR, file);
     const raw = fs.readFileSync(fullPath, "utf8");
     const { data } = matter(raw);
-
-    // If you ever want to display a custom slug, it's available here:
-    const frontmatterSlug =
-      typeof data.slug === "string" && data.slug.trim().length > 0
-        ? data.slug.trim()
-        : undefined;
-
-    // For now, the *URL* slug stays tied to the filename to avoid breaking routes.
-    const slug = filenameSlug;
 
     return {
       slug,
@@ -79,14 +68,12 @@ export function getAllDownloadsMeta(): DownloadMeta[] {
       coverImage:
         typeof data.coverImage === "string" ? data.coverImage : undefined,
       pdfPath: typeof data.pdfPath === "string" ? data.pdfPath : undefined,
-      // NOTE: frontmatterSlug is deliberately not exposed as a separate field
-      // to avoid confusing consumers. If you ever want it, we can add it.
     };
   });
 }
 
 /**
- * Convenience: just the slugs (for getStaticPaths wrappers).
+ * Convenience: just the slugs (for getStaticPaths).
  */
 export function getDownloadSlugs(): string[] {
   return getAllDownloadsMeta().map((d) => d.slug);
@@ -94,7 +81,6 @@ export function getDownloadSlugs(): string[] {
 
 /**
  * Full download (frontmatter + content body).
- * Lookup is filename-based: /downloads/[slug] → content/downloads/[slug].mdx
  */
 export function getDownloadBySlug(slug: string): Download | null {
   const filePath = resolveDownloadPath(slug);

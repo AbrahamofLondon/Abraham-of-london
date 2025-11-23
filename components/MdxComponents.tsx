@@ -1,3 +1,3 @@
-components/MDXcomponents
+// components/MDXcomponents.tsx
 // Uppercase alias retained for legacy imports
-export { default } from "@/components/events/mdx-components";
+export { default } from "./mdx-components";

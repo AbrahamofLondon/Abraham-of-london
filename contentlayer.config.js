@@ -134,6 +134,7 @@ export const Download = defineDocumentType(() => ({
     pdfPath: { type: "string", required: false },
     layout: { type: "string", required: false },
     description: { type: "string", required: false },
+    fileSize: { type: "string", required: false }, // for board-update-onepager
     // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -403,5 +404,5 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
   },
-  disableImportAliasWarning: true, // Suppress the import alias warning
+  disableImportAliasWarning: true,
 });

@@ -298,11 +298,11 @@ const scaleIn = {
 };
 
 // ============================================================================
-// DATA: getStaticProps – Safe build without Contentlayer
+// DATA: getStaticProps – Safe build without relying on Contentlayer
 // ============================================================================
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // Return empty posts array - fallback content will be used
+  // For now we don’t pull live posts here; we rely on fallbackFeaturedPosts.
   return {
     props: { posts: [] },
     revalidate: 3600,
@@ -313,7 +313,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 // PAGE COMPONENT
 // ============================================================================
 
-const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
+const HomePage: React.FC<HomePageProps> = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -334,14 +334,11 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
     ],
   };
 
-  // Use fallback posts for now (until Contentlayer is set up)
   const sourcePosts: HomePagePost[] = fallbackFeaturedPosts;
-
   const heroPosts = sourcePosts.slice(0, 2);
   const extraPosts = sourcePosts.slice(2);
 
   const handleHeroCTAClick = () => {
-    // Smooth scroll to downloads section
     if (typeof document === "undefined") return;
     const downloadsSection = document.getElementById("start-here");
     downloadsSection?.scrollIntoView({ behavior: "smooth" });
@@ -424,7 +421,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
       <StrategicFunnelStrip />
 
       {/* SIGNATURE STRIP */}
-      <section className="bg-black/95 border-b border-white/10">
+      <section className="border-b border-white/10 bg-black/95">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-softGold">
@@ -456,7 +453,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
         </div>
       </section>
 
-      {/* MANDATE STATEMENT – now visible on homepage */}
+      {/* MANDATE STATEMENT */}
       <MandateStatement />
 
       {/* START HERE SECTION */}
@@ -686,7 +683,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
                       )}
 
                       <Link
-                        href={`/blog/${post.slug}`}
+                        href={`/${post.slug}`}
                         className="group/link inline-flex items-center gap-2 font-semibold text-softGold"
                       >
                         Read Article
@@ -738,7 +735,7 @@ const HomePage: React.FC<HomePageProps> = ({ posts: _posts }) => {
                   )}
 
                   <Link
-                    href={`/blog/${post.slug}`}
+                    href={`/${post.slug}`}
                     className="group/link inline-flex items-center gap-1 text-sm font-semibold text-softGold"
                   >
                     Read More
