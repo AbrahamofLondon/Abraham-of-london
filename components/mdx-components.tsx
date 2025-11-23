@@ -74,19 +74,13 @@ const Em = ({ children, ...rest }: MdxComponentProps) => (
 /* ------------------------------ Lists & misc ------------------------------- */
 
 const Ul = ({ children, ...rest }: MdxComponentProps) => (
-  <ul
-    className="my-4 ml-6 list-disc space-y-1 text-gray-200"
-    {...rest}
-  >
+  <ul className="my-4 ml-6 list-disc space-y-1 text-gray-200" {...rest}>
     {children}
   </ul>
 );
 
 const Ol = ({ children, ...rest }: MdxComponentProps) => (
-  <ol
-    className="my-4 ml-6 list-decimal space-y-1 text-gray-200"
-    {...rest}
-  >
+  <ol className="my-4 ml-6 list-decimal space-y-1 text-gray-200" {...rest}>
     {children}
   </ol>
 );
@@ -532,11 +526,20 @@ const ResourcesCTABlock = ({
 /* ----------------------- Brand-specific MDX components -------------------- */
 
 interface BrandFrameWrapperProps extends MdxComponentProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
+/**
+ * BrandFrameWrapper – guard against empty usage in MDX.
+ * If MDX renders <BrandFrame /> with no children, we skip it
+ * to avoid giant empty frames at the top of posts.
+ */
 const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
   const { children, ...rest } = props;
+
+  const hasChildren = React.Children.count(children) > 0;
+  if (!hasChildren) return null;
+
   return <BrandFrame {...rest}>{children}</BrandFrame>;
 };
 

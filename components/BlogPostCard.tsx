@@ -1,4 +1,3 @@
-// components/BlogPostCard.tsx
 "use client";
 
 import Link from "next/link";
@@ -63,7 +62,7 @@ export default function BlogPostCard({
   const [coverIndex, setCoverIndex] = useState(0);
 
   const slug = normalisePostSlug(post.slug);
-  const href = `/${encodeURIComponent(slug)}`;
+  const href = `/${slug}`;
 
   // Build ordered list of possible cover images
   const coverCandidates = useMemo(() => {
@@ -89,7 +88,8 @@ export default function BlogPostCard({
     return candidates;
   }, [post.coverImage, post.heroImage, post.image]);
 
-  const cover = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+  const cover =
+    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
 
   const authorName =
     typeof post.author === "string"
@@ -237,7 +237,10 @@ export default function BlogPostCard({
                 </span>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   {dateText && (
-                    <time dateTime={post.date || undefined} className="font-light">
+                    <time
+                      dateTime={post.date || undefined}
+                      className="font-light"
+                    >
                       {dateText}
                     </time>
                   )}
