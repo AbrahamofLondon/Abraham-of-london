@@ -527,20 +527,62 @@ const ResourcesCTABlock = ({
 
 interface BrandFrameWrapperProps extends MdxComponentProps {
   children?: React.ReactNode;
+  variant?: string;
+  mode?: string;
+  purpose?: string;
+  forPrint?: boolean;
 }
 
 /**
- * BrandFrameWrapper – guard against empty usage in MDX.
- * If MDX renders <BrandFrame /> with no children, we skip it
- * to avoid giant empty frames at the top of posts.
+ * BrandFrameWrapper
+ *
+ * - On the web, we DO NOT want a huge empty A4-style frame at the top of posts.
+ * - By default, we render a compact, tasteful highlight card.
+ * - Only when explicitly flagged as print/PDF do we render the full BrandFrame.
+ *
+ * MDX rules:
+ *   - Normal blog use:      <BrandFrame>Some line</BrandFrame>  → small highlight block
+ *   - Print / PDF layouts:  <BrandFrame variant="print">…</BrandFrame>
+ *                            or <BrandFrame forPrint>…</BrandFrame>
  */
 const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
-  const { children, ...rest } = props;
+  const { children, variant, mode, purpose, forPrint, className, ...rest } =
+    props;
 
   const hasChildren = React.Children.count(children) > 0;
+
+  const printFlag =
+    forPrint ||
+    ["print", "pdf", "download"].includes(
+      String(variant || mode || purpose || "").toLowerCase(),
+    );
+
+  // If explicitly marked for print/PDF, render the full BrandFrame
+  if (printFlag) {
+    return (
+      <BrandFrame {...rest} variant={variant} mode={mode} purpose={purpose}>
+        {children}
+      </BrandFrame>
+    );
+  }
+
+  // No children = nothing to show (prevents giant empty frames)
   if (!hasChildren) return null;
 
-  return <BrandFrame {...rest}>{children}</BrandFrame>;
+  // Default web behaviour: compact premium callout, not full-page frame
+  return (
+    <div
+      className={(
+        "my-8 rounded-3xl border border-softGold/35 bg-black/40 " +
+        "px-6 py-5 text-center shadow-soft-elevated " +
+        (className ?? "")
+      ).trim()}
+    >
+      <p className="font-serif text-lg leading-snug text-softGold">
+        {children}
+      </p>
+    </div>
+  );
 };
 
 interface EmbossedBrandMarkWrapperProps {
