@@ -29,14 +29,12 @@ function formatPretty(date?: string): string {
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   const raw = getAllPostsMeta?.() ?? [];
 
-  // JSON-safe clone to strip any non-serialisable fields
   const posts = JSON.parse(JSON.stringify(raw)) as PostMeta[];
 
-  // Only keep published posts - check both 'draft' and 'status' fields
   const visible = posts.filter(
-    (p) => 
-      p.title && 
-      !(p as any).draft && 
+    (p) =>
+      p.title &&
+      !(p as any).draft &&
       (p as any).status !== "draft"
   );
 
@@ -78,13 +76,10 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
 
         {!hasPosts && (
           <div className="mt-16 rounded-2xl border border-white/10 bg-black/40 px-6 py-10 text-center text-gray-300">
-            <p className="mb-2 text-lg">
-              No essays are visible yet.
-            </p>
+            <p className="mb-2 text-lg">No essays are visible yet.</p>
             <p className="text-sm text-gray-400">
               The writing room isn&apos;t empty—just being curated. Check
-              back soon or explore downloads and resources in the
-              meantime.
+              back soon or explore downloads and resources in the meantime.
             </p>
             <div className="mt-6 flex justify-center gap-3">
               <Link
@@ -104,7 +99,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
         )}
 
         {hasPosts && (
-          <section className="grid gap-8 md:grid-cols-2">
+          <section className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
             {posts.map((post) => {
               const href = `/blog/${post.slug}`;
               const cover =
@@ -113,24 +108,21 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                   ? post.coverImage
                   : "/assets/images/writing-desk.webp";
 
-              // Use description OR excerpt - whichever exists
-              const displayExcerpt = 
-                (post as any).description || 
-                post.excerpt || 
-                "";
+              const displayExcerpt =
+                (post as any).description || post.excerpt || "";
 
               return (
                 <article
                   key={post.slug}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/40 hover:shadow-2xl"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/40 hover:shadow-2xl"
                 >
-                  <div className="relative h-56 w-full overflow-hidden">
+                  <div className="relative h-48 w-full overflow-hidden">
                     <Image
                       src={cover}
                       alt={post.title || "Post cover"}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(min-width: 1024px) 50vw, 100vw"
+                      sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   </div>
