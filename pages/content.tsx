@@ -535,7 +535,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
               <div className="flex flex-col justify-center">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-2 text-sm text-softGold">
                   <span>✨</span>
-                  <span>Premium Content Hub</span>
+                  <span>Content Hub</span>
                 </div>
 
                 <h1 className="mb-6 font-serif text-4xl font-light text-white sm:text-5xl lg:text-6xl">

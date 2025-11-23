@@ -1,0 +1,47 @@
+// scripts/generate-ultimate-purpose-of-man-pdf.mts
+import path from "node:path";
+import fs from "node:fs";
+import { renderToFile } from "@react-pdf/renderer";
+import UltimatePurposeOfManDocument from "../lib/pdf/ultimate-purpose-of-man-pdf";
+
+async function main() {
+  const root = process.cwd();
+
+  const coverImagePath = path.join(
+    root,
+    "public",
+    "assets",
+    "images",
+    "purpose-cover.jpg", // make sure this matches your actual file
+  );
+
+  if (!fs.existsSync(coverImagePath)) {
+    console.warn(
+      `[pdf] Cover image not found at ${coverImagePath}. ` +
+        `Update the path or add the image before regenerating.`
+    );
+  }
+
+  const outputDir = path.join(root, "public", "downloads");
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const outputPath = path.join(
+    outputDir,
+    "ultimate-purpose-of-man-editorial.pdf",
+  );
+
+  console.log("[pdf] Generating 'The Ultimate Purpose of Man' PDF...");
+  await renderToFile(
+    <UltimatePurposeOfManDocument coverImagePath={coverImagePath} />,
+    outputPath,
+  );
+
+  console.log(`[pdf] Done. Output: ${outputPath}`);
+}
+
+main().catch((err) => {
+  console.error("[pdf] Failed to generate PDF:", err);
+  process.exit(1);
+});

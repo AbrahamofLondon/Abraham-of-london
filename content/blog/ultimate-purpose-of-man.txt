@@ -15,6 +15,10 @@ tags:
 featured: true
 layout: "article"
 coverImage: "/assets/images/purpose-cover.jpg"
+coverAspect: "book"
+coverFit: "cover"
+coverPosition: "center"
+draft: false
 ---
 
 # **THE ULTIMATE PURPOSE OF MAN**

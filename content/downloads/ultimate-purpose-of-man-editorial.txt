@@ -1,0 +1,29 @@
+---
+type: "Download"
+title: "The Ultimate Purpose of Man — Strategic Editorial PDF"
+slug: "ultimate-purpose-of-man-editorial"
+date: "2025-11-23"
+author: "AbrahamofLondon"
+category: "Theology"
+tags:
+  - Purpose
+  - Leadership
+  - Theology
+  - Strategy
+  - Ancient Wisdom
+  - Frameworks
+coverImage: "/assets/images/purpose-cover.jpg"
+excerpt: "A flagship editorial on human purpose, from Eden’s design to modern civilisation, written for leaders who refuse to drift."
+file: "ultimate-purpose-of-man-editorial.pdf"
+pdfPath: "/downloads/ultimate-purpose-of-man-editorial.pdf"
+featured: true
+---
+
+<DownloadCard
+  title="Download the Strategic Editorial (PDF)"
+  label="Download PDF"
+  href="/downloads/ultimate-purpose-of-man-editorial.pdf"
+>
+  A premium, print-ready version of the full essay — designed for deep reading,
+  marginal notes, and board-level discussion.
+</DownloadCard>

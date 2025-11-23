@@ -33,9 +33,11 @@
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
     "prebuild": "pnpm run clean:build",
     "postbuild": "node -e \"console.log('Build completed successfully')\"",
-    "postinstall": "contentlayer2 build"
+    "postinstall": "contentlayer2 build",
+    "pdf:purpose": "tsx scripts/generate-ultimate-purpose-of-man-pdf.mts"
   },
   "dependencies": {
+    "@react-pdf/renderer": "4.3.1",
     "clsx": "2.1.1",
     "contentlayer2": "0.5.8",
     "date-fns": "4.1.0",
@@ -76,7 +78,8 @@
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
     "tailwindcss": "3.4.14",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "tsx": "^4.19.2"
   },
   "pnpm": {
     "overrides": {
