@@ -1,3 +1,4 @@
+// components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -16,11 +17,7 @@ import {
 } from "lucide-react";
 import { siteConfig, type SocialLink } from "@/lib/siteConfig";
 
-// Icon mapping for social links
-const iconMap: Record<
-  string,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
-> = {
+const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
@@ -129,7 +126,6 @@ export default function Footer(): JSX.Element {
     ? siteConfig.socialLinks
     : [];
 
-  // Merge and process social links
   const byHref = new Map<string, SocialLink>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
@@ -143,8 +139,7 @@ export default function Footer(): JSX.Element {
       (item.href.startsWith("http") &&
         !item.href.startsWith("mailto:") &&
         !item.href.startsWith("tel:"));
-    const Icon =
-      item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
+    const Icon = item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
 
     return {
       ...item,
@@ -162,13 +157,12 @@ export default function Footer(): JSX.Element {
 
   return (
     <footer className="relative border-t border-gold/20 bg-gradient-to-b from-charcoal to-black">
-      {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/5 via-transparent to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Main footer content */}
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-          {/* Brand section */}
+          {/* Brand */}
           <motion.div
             className="lg:col-span-1"
             initial={{ opacity: 0, y: 20 }}
@@ -190,7 +184,6 @@ export default function Footer(): JSX.Element {
               board-level leaders who refuse to outsource responsibility.
             </p>
 
-            {/* Contact info */}
             <div className="mb-6 space-y-3">
               <div className="flex items-center gap-2 text-sm text-gold/60">
                 <MapPin className="h-4 w-4" />
@@ -207,7 +200,6 @@ export default function Footer(): JSX.Element {
               </div>
             </div>
 
-            {/* Social links */}
             <div className="flex flex-wrap gap-2">
               {socials.slice(0, 6).map((social, index) => (
                 <motion.a
@@ -226,7 +218,7 @@ export default function Footer(): JSX.Element {
             </div>
           </motion.div>
 
-          {/* Navigation sections */}
+          {/* Sections */}
           {footerSections.map((section, index) => (
             <motion.div
               key={section.title}
@@ -257,7 +249,7 @@ export default function Footer(): JSX.Element {
           ))}
         </div>
 
-        {/* Bottom section */}
+        {/* Bottom strip */}
         <motion.div
           className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-gold/20 pt-8 lg:flex-row"
           initial={{ opacity: 0 }}
@@ -265,7 +257,6 @@ export default function Footer(): JSX.Element {
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
         >
-          {/* Copyright */}
           <div className="text-center lg:text-left">
             <p className="text-sm text-gold/50">
               © {year} {title}. All rights reserved.
@@ -275,7 +266,7 @@ export default function Footer(): JSX.Element {
             </p>
           </div>
 
-          {/* Legal / Governance links */}
+          {/* Governance links */}
           <div className="flex flex-col items-center gap-2 lg:items-end">
             <p className="text-[0.7rem] uppercase tracking-[0.2em] text-gold/40">
               Governance
@@ -314,7 +305,6 @@ export default function Footer(): JSX.Element {
             </div>
           </div>
 
-          {/* Scroll to top */}
           <motion.button
             onClick={scrollToTop}
             className="group flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal"

@@ -1,3 +1,4 @@
+// components/PolicyFooter.tsx
 import * as React from "react";
 import Link from "next/link";
 import { siteConfig } from "@/lib/siteConfig";
@@ -6,7 +7,7 @@ interface PolicyFooterProps {
   isDark?: boolean;
 }
 
-export default function PolicyFooter({ isDark = true }: PolicyFooterProps) {
+export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.Element {
   const border = isDark ? "border-white/10" : "border-gray-300";
   const text = isDark ? "text-gold/70" : "text-slate-700";
   const link =
