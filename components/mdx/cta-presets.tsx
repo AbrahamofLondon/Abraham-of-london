@@ -1,18 +1,24 @@
-// components/mdx/cta-presets.ts
-
 /* -------------------------------------------------------------------------- */
-/* Types                                                                      */
+/* Enhanced Types & Design System                                             */
 /* -------------------------------------------------------------------------- */
 
-export type BadgeType = "new" | "popular" | "featured" | "free" | "premium";
+export type BadgeType =
+  | "new"
+  | "popular"
+  | "featured"
+  | "free"
+  | "premium"
+  | "exclusive";
 
 export type LinkItem = {
   href: string;
   label: string;
   sub?: string;
-  icon?: string; // typically emoji or short symbol
+  icon?: string;
   badge?: BadgeType | string;
   external?: boolean;
+  priority?: number; // For sorting
+  image?: string; // For visual CTAs
 };
 
 export type CTAPresetTheme =
@@ -20,6 +26,8 @@ export type CTAPresetTheme =
   | "leadership"
   | "brotherhood"
   | "mentorship"
+  | "premium"
+  | "community"
   | "default";
 
 export type CTAPreset = {
@@ -31,6 +39,8 @@ export type CTAPreset = {
   related?: LinkItem[];
   theme?: CTAPresetTheme;
   featured?: LinkItem;
+  layout?: "grid" | "stack" | "featured-first";
+  accentColor?: string;
 };
 
 export type CTAKey =
@@ -44,334 +54,362 @@ export type CTAKey =
   | "newsletter";
 
 /* -------------------------------------------------------------------------- */
-/* Preset Configuration                                                       */
+/* Premium Color System                                                       */
+/* -------------------------------------------------------------------------- */
+
+export const THEME_COLORS: Record<
+  CTAPresetTheme,
+  {
+    primary: string;
+    secondary: string;
+    gradient: string;
+    glow: string;
+  }
+> = {
+  fatherhood: {
+    primary: "from-blue-600 to-cyan-500",
+    secondary: "bg-blue-50 border-blue-200 text-blue-800",
+    gradient: "bg-gradient-to-br from-blue-500/10 to-cyan-400/5",
+    glow: "hover:shadow-lg hover:shadow-blue-500/20",
+  },
+  leadership: {
+    primary: "from-amber-600 to-orange-500",
+    secondary: "bg-amber-50 border-amber-200 text-amber-800",
+    gradient: "bg-gradient-to-br from-amber-500/10 to-orange-400/5",
+    glow: "hover:shadow-lg hover:shadow-amber-500/20",
+  },
+  brotherhood: {
+    primary: "from-emerald-600 to-green-500",
+    secondary: "bg-emerald-50 border-emerald-200 text-emerald-800",
+    gradient: "bg-gradient-to-br from-emerald-500/10 to-green-400/5",
+    glow: "hover:shadow-lg hover:shadow-emerald-500/20",
+  },
+  mentorship: {
+    primary: "from-purple-600 to-indigo-500",
+    secondary: "bg-purple-50 border-purple-200 text-purple-800",
+    gradient: "bg-gradient-to-br from-purple-500/10 to-indigo-400/5",
+    glow: "hover:shadow-lg hover:shadow-purple-500/20",
+  },
+  premium: {
+    primary: "from-gold to-yellow-400",
+    secondary: "bg-yellow-50 border-yellow-200 text-yellow-800",
+    gradient: "bg-gradient-to-br from-gold/10 to-yellow-400/5",
+    glow: "hover:shadow-lg hover:shadow-yellow-500/30",
+  },
+  community: {
+    primary: "from-rose-600 to-pink-500",
+    secondary: "bg-rose-50 border-rose-200 text-rose-800",
+    gradient: "bg-gradient-to-br from-rose-500/10 to-pink-400/5",
+    glow: "hover:shadow-lg hover:shadow-rose-500/20",
+  },
+  default: {
+    primary: "from-slate-600 to-gray-500",
+    secondary: "bg-slate-50 border-slate-200 text-slate-800",
+    gradient: "bg-gradient-to-br from-slate-500/10 to-gray-400/5",
+    glow: "hover:shadow-lg hover:shadow-slate-500/20",
+  },
+};
+
+export type ThemeTokens = (typeof THEME_COLORS)[CTAPresetTheme];
+
+/* -------------------------------------------------------------------------- */
+/* Enhanced Preset Configuration                                              */
 /* -------------------------------------------------------------------------- */
 
 export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
   fatherhood: {
-    title: "Explore Fatherhood Resources",
+    title: "Transform Your Fatherhood Journey",
     description:
-      "Transform your fatherhood journey with proven frameworks and brotherhood support.",
+      "Proven frameworks, brotherhood support, and legacy-building tools for modern fathers committed to excellence.",
     theme: "fatherhood",
+    layout: "featured-first",
     reads: [
       {
         href: "/leadership-begins-at-home",
         label: "Leadership Begins at Home",
-        sub: "Lead from the inside out.",
-        icon: "🏠",
+        sub: "Lead your family with confidence and clarity",
+        icon: "👑",
         badge: "popular",
+        priority: 1,
       },
       {
         href: "/the-brotherhood-code",
         label: "The Brotherhood Code",
-        sub: "Build your band of brothers.",
+        sub: "Build your band of brothers for lifelong support",
         icon: "🤝",
         badge: "featured",
+        priority: 2,
       },
       {
         href: "/reclaiming-the-narrative",
         label: "Reclaiming the Narrative",
-        sub: "Court-season clarity.",
+        sub: "Court-season clarity for intentional fatherhood",
         icon: "✍️",
+        priority: 3,
       },
     ],
     downloads: [
       {
         href: "/downloads/Fatherhood_Guide.pdf",
-        label: "Fatherhood Guide",
-        sub: "Complete framework for modern fathers.",
+        label: "Complete Fatherhood Framework",
+        sub: "Step-by-step system for modern fatherhood",
         badge: "free",
+        priority: 1,
       },
       {
         href: "/downloads/Mentorship_Starter_Kit.pdf",
         label: "Mentorship Starter Kit",
-        sub: "Step-by-step mentorship framework.",
+        sub: "Guide to building meaningful mentorship relationships",
+        priority: 2,
       },
     ],
     actions: [
       {
         href: "/brotherhood",
-        label: "Join Brotherhood",
-        sub: "Exclusive community access.",
+        label: "Join Brotherhood Community",
+        sub: "Exclusive access to fatherhood circles and support",
         badge: "new",
+        priority: 1,
       },
       {
         href: "/consultation",
-        label: "Book Consultation",
-        sub: "1-on-1 guidance session.",
-      },
-    ],
-    related: [
-      {
-        href: "/content",
-        label: "Fatherhood essays",
-        sub: "Long-form reflections on duty and consequence.",
+        label: "Book Strategy Session",
+        sub: "1-on-1 guidance for your unique fatherhood journey",
+        priority: 2,
       },
     ],
     featured: {
       href: "/fatherhood-masterclass",
-      label: "Fatherhood Masterclass",
-      sub: "7-day transformative program.",
+      label: "7-Day Fatherhood Transformation",
+      sub: "Complete system to elevate your leadership at home",
+      badge: "featured",
+      priority: 0,
     },
   },
 
   leadership: {
-    title: "Leadership & Strategy",
+    title: "Elevate Your Leadership Impact",
     description:
-      "Leadership thinking for founders, directors, and men who carry responsibility for others.",
+      "Strategic frameworks and high-level advisory for founders, directors, and men carrying significant responsibility.",
     theme: "leadership",
+    layout: "grid",
     reads: [
       {
-        href: "/content",
-        label: "Leadership Essays",
-        sub: "Strategy, governance, and the burden of decision-making.",
+        href: "/ancient-future-leadership",
+        label: "Ancient-Future Leadership",
+        sub: "Timeless principles for modern strategic challenges",
         badge: "popular",
+        priority: 1,
+      },
+      {
+        href: "/decision-fatigue",
+        label: "Mastering Decision Fatigue",
+        sub: "Preserve cognitive capacity for high-stakes choices",
+        priority: 2,
       },
     ],
     downloads: [
       {
         href: "/downloads/Leadership_Playbook.pdf",
-        label: "Leadership Playbook",
-        sub: "Structured tools for high-stakes decisions.",
+        label: "Executive Leadership Playbook",
+        sub: "Structured tools for board-level decision making",
         badge: "free",
+        priority: 1,
       },
     ],
     actions: [
       {
         href: "/consulting",
-        label: "Explore Consulting",
-        sub: "Board-level and founder advisory.",
+        label: "Explore Strategic Advisory",
+        sub: "Board-level and founder advisory services",
+        priority: 1,
       },
       {
         href: "/contact",
-        label: "Request Strategic Advisory",
-        sub: "Outline your context, objectives, and time horizon.",
+        label: "Request Priority Consultation",
+        sub: "For complex, multi-stakeholder leadership challenges",
         badge: "premium",
-      },
-    ],
-    related: [
-      {
-        href: "/events",
-        label: "Leadership Workshops & Salons",
-        sub: "Closed-door conversations for serious operators.",
+        priority: 2,
       },
     ],
     featured: {
       href: "/contact",
-      label: "Secure a Leadership Conversation",
-      sub: "For founders, boards, and decision-makers.",
-      badge: "featured",
+      label: "Secure Leadership Strategy Session",
+      sub: "For founders, boards, and enterprise decision-makers",
+      badge: "exclusive",
+      priority: 0,
     },
   },
 
   brotherhood: {
-    title: "Brotherhood & Community",
+    title: "Join Serious Men in Purposeful Community",
     description:
-      "Spaces for men to think clearly, speak honestly, and sharpen one another.",
+      "Spaces for men to think clearly, speak honestly, and sharpen one another in trusted confidence.",
     theme: "brotherhood",
-    reads: [
-      {
-        href: "/content",
-        label: "Community & Culture Essays",
-        sub: "On friendship, loyalty, and standing firm in a soft age.",
-      },
-    ],
+    layout: "stack",
     actions: [
       {
         href: "/chatham-rooms",
         label: "Discover Chatham Rooms",
-        sub: "Closed-door conversations built on trust and confidentiality.",
+        sub: "Closed-door conversations built on absolute trust and discretion",
         badge: "featured",
+        priority: 1,
       },
       {
         href: "/newsletter",
         label: "Join The Inner Circle",
-        sub: "Invites to private rooms and small gatherings.",
-      },
-    ],
-    related: [
-      {
-        href: "/events",
-        label: "Brotherhood Gatherings",
-        sub: "Salons, circles, and small tables.",
+        sub: "Priority invites to private gatherings and curated content",
+        priority: 2,
       },
     ],
     featured: {
       href: "/chatham-rooms",
-      label: "Explore Chatham Rooms",
-      sub: "For men who need serious, discreet conversation.",
-      badge: "featured",
+      label: "Explore Private Conversation Rooms",
+      sub: "For men who need serious, discreet dialogue without posturing",
+      badge: "exclusive",
+      priority: 0,
     },
   },
 
   mentorship: {
-    title: "Mentorship & Guidance",
+    title: "Mentorship That Actually Changes Trajectory",
     description:
-      "Structured support for men navigating leadership, fatherhood, and calling.",
+      "Structured, intentional mentoring for men who refuse to drift and want to compound wisdom across generations.",
     theme: "mentorship",
+    layout: "stack",
     reads: [
       {
-        href: "/content",
-        label: "Mentorship Reflections",
-        sub: "Lessons learned the hard way, shared plainly.",
+        href: "/mentorship-as-stewardship",
+        label: "Mentorship as Stewardship",
+        sub: "Why passing on wisdom is a moral duty, not a hobby",
+        priority: 1,
       },
     ],
     actions: [
       {
-        href: "/contact",
-        label: "Enquire About Mentorship",
-        sub: "Share context, objectives, and your commitment.",
+        href: "/mentorship",
+        label: "Explore Mentorship Tracks",
+        sub: "Clarity calls, structured cohorts, and 1:1 options",
         badge: "premium",
+        priority: 1,
       },
     ],
-    related: [
-      {
-        href: "/events",
-        label: "Mentorship Circles",
-        sub: "Small, high-trust cohorts for shared growth.",
-      },
-    ],
-    featured: {
-      href: "/contact",
-      label: "Request a Mentorship Conversation",
-      sub: "Serious enquiries only; clarity over volume.",
-      badge: "featured",
-    },
   },
 
   "free-resources": {
-    title: "Free Resources",
+    title: "Start With Free, High-Value Resources",
     description:
-      "Downloadable tools, prompts, and frameworks you can put to work immediately.",
-    theme: "default",
+      "No paywall. No gimmicks. Just serious, field-tested tools to help you move.",
+    theme: "community",
+    layout: "grid",
     downloads: [
       {
-        href: "/downloads",
-        label: "All Free Downloads",
-        sub: "Fatherhood frameworks, founder tools, and leadership prompts.",
+        href: "/downloads/Fatherhood_Guide.pdf",
+        label: "Fatherhood Guide",
+        sub: "Core principles for leading at home",
         badge: "free",
+        priority: 1,
+      },
+      {
+        href: "/downloads/Leadership_Playbook.pdf",
+        label: "Leadership Playbook",
+        sub: "Tactics for higher-stakes decisions",
+        badge: "free",
+        priority: 2,
       },
     ],
     actions: [
       {
-        href: "/newsletter",
-        label: "Get New Tools First",
-        sub: "Priority access to fresh resources and printables.",
+        href: "/downloads",
+        label: "Browse All Free Downloads",
+        sub: "Frameworks, checklists, and field notes",
         badge: "popular",
+        priority: 3,
       },
     ],
-    featured: {
-      href: "/downloads",
-      label: "Browse Free Downloads",
-      sub: "Start with what you can act on this week.",
-      badge: "featured",
-    },
   },
 
   premium: {
-    title: "Premium Advisory & Experiences",
+    title: "Premium Access for Men Carrying Real Weight",
     description:
-      "Deep work, private rooms, and bespoke advisory for leaders with real stakes.",
-    theme: "leadership",
-    reads: [
-      {
-        href: "/ventures",
-        label: "Ventures & Platforms",
-        sub: "Alomarada, InnovateHub, Endureluxe and more.",
-      },
-    ],
+      "For fathers, founders, and directors who need more than generic motivation – they need strategic partnership.",
+    theme: "premium",
+    layout: "featured-first",
     actions: [
       {
         href: "/consulting",
-        label: "Consulting & Board Support",
-        sub: "Structured engagements with clear outcomes.",
+        label: "Explore Advisory & Consulting",
+        sub: "Engage at the level of your responsibility and risk",
         badge: "premium",
+        priority: 1,
       },
       {
-        href: "/contact",
-        label: "Strategic Advisory Enquiry",
-        sub: "For complex, multi-stakeholder, or cross-border matters.",
+        href: "/chatham-rooms",
+        label: "Apply for Chatham Rooms",
+        sub: "Closed-door, off-record rooms for high-stakes men",
+        badge: "exclusive",
+        priority: 2,
       },
     ],
     featured: {
       href: "/contact",
-      label: "Secure Premium Advisory",
-      sub: "Outline mandate, governance, and decision authority.",
-      badge: "premium",
+      label: "Request a Private Strategy Conversation",
+      sub: "For when the stakes are too high for trial-and-error",
+      badge: "exclusive",
+      priority: 0,
     },
   },
 
   community: {
-    title: "Community & Gatherings",
+    title: "Stay Connected to a Serious Community",
     description:
-      "Salons, workshops, and quiet rooms for people who care about truth, duty, and legacy.",
-    theme: "brotherhood",
-    reads: [
-      {
-        href: "/content",
-        label: "Event Reflections & Recaps",
-        sub: "Lessons carried out of the room, not left on the table.",
-      },
-    ],
+      "Regular touchpoints, private gatherings, and aligned men building lives that actually matter.",
+    theme: "community",
+    layout: "stack",
     actions: [
       {
-        href: "/events",
-        label: "View Upcoming Events",
-        sub: "Founder Salons, leadership workshops, and more.",
-        badge: "popular",
+        href: "/newsletter",
+        label: "Join The Inner Circle",
+        sub: "Primary channel for essays, tools, and private invites",
+        badge: "featured",
+        priority: 1,
       },
       {
-        href: "/newsletter",
-        label: "Inner Circle Invites",
-        sub: "Private gatherings announced to email first.",
+        href: "/events",
+        label: "Attend Upcoming Events",
+        sub: "Workshops, salons, and closed-room conversations",
+        priority: 2,
       },
     ],
-    featured: {
-      href: "/events",
-      label: "See Upcoming Gatherings",
-      sub: "Decide which room you need to be in next.",
-      badge: "featured",
-    },
   },
 
   newsletter: {
-    title: "The Inner Circle",
+    title: "The Inner Circle – Curated Wisdom Delivered",
     description:
-      "The only email worth opening: essays, tools, and early access for serious men.",
-    theme: "default",
-    reads: [
-      {
-        href: "/content",
-        label: "Featured Essays",
-        sub: "Sample the kind of thinking that lands in your inbox.",
-      },
-    ],
+      "The only email worth opening: deep essays, exclusive tools, and early access for serious builders and leaders.",
+    theme: "premium",
+    layout: "stack",
     actions: [
       {
         href: "/newsletter",
         label: "Subscribe to The Inner Circle",
-        sub: "Curated reflections for founders, fathers, and leaders.",
+        sub: "Curated reflections for founders, fathers, and legacy builders",
         badge: "featured",
-      },
-    ],
-    related: [
-      {
-        href: "/privacy-policy",
-        label: "Privacy & Data Use",
-        sub: "How your information is handled and protected.",
+        priority: 1,
       },
     ],
     featured: {
       href: "/newsletter",
-      label: "Join The Inner Circle",
-      sub: "Zero spam. Clear thinking. Real stakes.",
-      badge: "featured",
+      label: "Join The Inner Circle Today",
+      sub: "Zero spam. Clear thinking. Real stakes. Transformative impact.",
+      badge: "exclusive",
+      priority: 0,
     },
   },
 };
 
 /* -------------------------------------------------------------------------- */
-/* Utilities                                                                  */
+/* Enhanced Utilities with Sorting & Filtering                                */
 /* -------------------------------------------------------------------------- */
 
 export function validatePresetKey(key: string): key is CTAKey {
@@ -383,6 +421,59 @@ export function getCtaPreset(key?: string): CTAPreset | null {
   const normalised = String(key).trim().toLowerCase() as CTAKey;
   return CTA_PRESETS[normalised] ?? null;
 }
+
+// Sort items by priority (lower = higher priority)
+export function getSortedItems(
+  preset: CTAPreset,
+  category: keyof CTAPreset,
+): LinkItem[] {
+  const items = preset[category];
+  if (!Array.isArray(items)) return [];
+
+  return [...items].sort(
+    (a, b) => (a.priority ?? 999) - (b.priority ?? 999),
+  );
+}
+
+export function getThemeColors(theme: CTAPresetTheme = "default"): ThemeTokens {
+  return THEME_COLORS[theme];
+}
+
+// Collect all items for a preset (sorted by priority)
+export function getAllPresetItems(presetKey: CTAKey): LinkItem[] {
+  const preset = CTA_PRESETS[presetKey];
+  if (!preset) return [];
+
+  const allItems: LinkItem[] = [];
+
+  if (preset.featured) {
+    allItems.push({
+      ...preset.featured,
+      priority: preset.featured.priority ?? 0,
+    });
+  }
+
+  const categories: (keyof CTAPreset)[] = [
+    "reads",
+    "downloads",
+    "actions",
+    "related",
+  ];
+
+  categories.forEach((category) => {
+    const items = getSortedItems(preset, category);
+    allItems.push(...items);
+  });
+
+  // Global sort by priority
+  return allItems.sort(
+    (a, b) => (a.priority ?? 999) - (b.priority ?? 999),
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Existing Utilities (Enhanced where needed)                                 */
+/* -------------------------------------------------------------------------- */
 
 export function getAllPresetKeys(): CTAKey[] {
   return Object.keys(CTA_PRESETS) as CTAKey[];
@@ -410,7 +501,7 @@ export function getFeaturedItems(presetKey: CTAKey): LinkItem[] {
     },
   );
 
-  return featured.slice(0, 3);
+  return featured.slice(0, 4);
 }
 
 export function getAllDownloads(): LinkItem[] {
@@ -469,7 +560,8 @@ export function isLinkItem(obj: unknown): obj is LinkItem {
   if (!obj || typeof obj !== "object") return false;
   const candidate = obj as { href?: unknown; label?: unknown };
   return (
-    typeof candidate.href === "string" && typeof candidate.label === "string"
+    typeof candidate.href === "string" &&
+    typeof candidate.label === "string"
   );
 }
 
@@ -515,7 +607,9 @@ export function validatePresetLinks(
 
     items.forEach((item) => {
       if (!item.href || item.href === "#") {
-        brokenLinks.push(`${category}: ${item.label} – Missing or invalid href`);
+        brokenLinks.push(
+          `${String(category)}: ${item.label} – Missing or invalid href`,
+        );
       }
     });
   });
@@ -525,9 +619,5 @@ export function validatePresetLinks(
     brokenLinks,
   };
 }
-
-/* -------------------------------------------------------------------------- */
-/* Default Export                                                             */
-/* -------------------------------------------------------------------------- */
 
 export default CTA_PRESETS;

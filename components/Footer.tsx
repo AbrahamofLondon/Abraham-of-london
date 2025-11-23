@@ -1,4 +1,3 @@
-// components/Footer.tsx
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -18,7 +17,10 @@ import {
 import { siteConfig, type SocialLink } from "@/lib/siteConfig";
 
 // Icon mapping for social links
-const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+const iconMap: Record<
+  string,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
@@ -141,7 +143,8 @@ export default function Footer(): JSX.Element {
       (item.href.startsWith("http") &&
         !item.href.startsWith("mailto:") &&
         !item.href.startsWith("tel:"));
-    const Icon = item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
+    const Icon =
+      item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
 
     return {
       ...item,
@@ -173,7 +176,6 @@ export default function Footer(): JSX.Element {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            {/* Wordmark only – no Crown icon */}
             <Link href="/" className="group mb-6 flex flex-col gap-1">
               <span className="font-serif text-2xl font-bold tracking-wide text-cream">
                 Abraham of London
