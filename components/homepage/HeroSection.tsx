@@ -14,11 +14,10 @@ function Eyebrow({
     <span
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
-        "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
+        "border border-lightGrey/70 bg-warmWhite/80 px-3 py-1",
         "text-xs uppercase tracking-wide font-semibold",
-        "text-[color:var(--color-on-secondary)] opacity-70",
-        "dark:text-[color:var(--color-on-primary)] dark:opacity-80",
-        className
+        "text-slate-800 dark:text-cream",
+        className,
       )}
     >
       {children}
@@ -157,7 +156,7 @@ export default function HeroSection({
           </h1>
 
           {subtitle && (
-            <p className="mt-4 max-w-prose text-[color:var(--color-on-secondary)] opacity-85 dark:text-[color:var(--color-on-primary)] dark:opacity-85">
+            <p className="mt-4 max-w-prose text-base leading-relaxed text-slate-700 dark:text-gray-200">
               {subtitle}
             </p>
           )}

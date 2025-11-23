@@ -10,27 +10,13 @@ import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import ArticleHero from "@/components/ArticleHero";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import ArticleHero from "@/components/ArticleHero";
 
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-type PageMeta = {
-  slug: string;
-  title: string;
-  description?: string;
-  excerpt?: string;
-  date?: string;
-  updated?: string;
-  category?: string;
-  tags?: (string | number)[];
-  coverImage?: string;
-  coverAspect?: "book" | "wide" | "auto";
+type PageMeta = PostMeta & {
+  coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
-  readTime?: string;
-  [key: string]: unknown;
 };
 
 type PageProps = {
@@ -38,30 +24,14 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// If your content-layer key is different (e.g. "content"),
-// change this to match your config.
-const COLLECTION_KEY = "page";
-
-// -----------------------------------------------------------------------------
-// Helper
-// -----------------------------------------------------------------------------
-
-function buildCanonicalUrl(slug: string): string {
-  const site =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://www.abrahamoflondon.org";
-  const base = site.replace(/\/+$/, "");
-  const safeSlug = slug.replace(/^\/+/, "");
-  return `${base}/${safeSlug}`;
-}
+const COLLECTION_KEY = "pages"; // ⬅️ change if your collection key is different
 
 // -----------------------------------------------------------------------------
 // Page component
 // -----------------------------------------------------------------------------
 
-function DynamicPage({ meta, mdxSource }: PageProps): JSX.Element {
+function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   const {
-    slug,
     title,
     description,
     excerpt,
@@ -74,90 +44,63 @@ function DynamicPage({ meta, mdxSource }: PageProps): JSX.Element {
     coverFit,
   } = meta;
 
-  const displayDescription = description || excerpt || "";
-  const canonicalUrl = buildCanonicalUrl(slug);
+  const displaySubtitle =
+    excerpt || description || undefined;
 
-  const jsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    description: displayDescription,
-    url: canonicalUrl,
-    ...(date ? { datePublished: date } : {}),
-    ...(meta.updated ? { dateModified: meta.updated } : {}),
-    ...(category ? { articleSection: category } : {}),
-  };
+  const primaryCategory =
+    category ||
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+
+  const canonicalTitle =
+    title || "Abraham of London";
+
+  const displayDescription =
+    description || excerpt || "";
 
   return (
-    <Layout title={title} pageTitle={title}>
+    <Layout title={canonicalTitle}>
       <Head>
-        <title>
-          {title ? `${title} | Abraham of London` : "Abraham of London"}
-        </title>
+        <title>{canonicalTitle} | Abraham of London</title>
         {displayDescription && (
           <meta name="description" content={displayDescription} />
         )}
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta
-          property="og:title"
-          content={
-            title ? `${title} | Abraham of London` : "Abraham of London"
-          }
-        />
-        {displayDescription && (
-          <meta property="og:description" content={displayDescription} />
-        )}
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
       </Head>
 
-      {/* Controlled hero – no full-bleed image swallowing the viewport */}
       <ArticleHero
         title={title}
-        subtitle={excerpt || description}
-        category={category || (Array.isArray(tags) ? String(tags[0]) : undefined)}
+        subtitle={displaySubtitle}
+        category={primaryCategory}
         date={date}
         readTime={readTime}
-        coverImage={coverImage}
+        coverImage={coverImage as string | undefined}
         coverAspect={coverAspect}
         coverFit={coverFit}
       />
 
-      {/* High-contrast content card for legibility */}
-      <article className="mx-auto w-full max-w-3xl px-4 pb-16 lg:px-0">
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/95 shadow-2xl shadow-black/30">
-          <div className="px-6 pb-10 pt-8 sm:px-8">
-            <div
-              className="
-                prose prose-lg max-w-none
-                prose-headings:font-serif prose-headings:font-light prose-headings:text-deepCharcoal
-                prose-p:text-gray-800 prose-p:leading-relaxed
-                prose-strong:text-deepCharcoal prose-strong:font-semibold
-                prose-a:text-forest prose-a:no-underline hover:prose-a:underline
-                prose-ul:list-disc prose-ol:list-decimal
-                prose-li:marker:text-softGold
-                prose-blockquote:border-l-softGold prose-blockquote:bg-softGold/5
-                prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:text-gray-800
-                prose-img:rounded-xl prose-img:shadow-lg
-                prose-code:rounded prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1
-                prose-pre:bg-black prose-pre:text-gray-100 prose-pre:rounded-xl
-              "
-            >
-              <MDXRemote {...mdxSource} components={mdxComponents} />
-            </div>
+      <main className="bg-charcoal">
+        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
+          <div
+            className="
+              prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-cream
+              prose-p:text-gray-200 prose-p:leading-relaxed
+              prose-strong:text-cream prose-strong:font-semibold
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-gray-200 prose-ol:text-gray-200
+              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
+              prose-hr:border-t border-white/10
+              prose-img:rounded-xl prose-img:shadow-lg
+            "
+          >
+            <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
-        </div>
-      </article>
+        </article>
+      </main>
     </Layout>
   );
 }
 
-export default DynamicPage;
+export default ContentPage;
 
 // -----------------------------------------------------------------------------
 // SSG – paths
@@ -165,23 +108,20 @@ export default DynamicPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const items = getAllContent(COLLECTION_KEY);
-    const paths =
-      items?.map((item: { slug?: string }) => ({
+    const items = getAllContent(COLLECTION_KEY) ?? [];
+    const paths = items
+      .filter((item: any) => item?.slug)
+      .map((item: any) => ({
         params: { slug: String(item.slug) },
-      })) ?? [];
+      }));
 
     return {
       paths,
       fallback: "blocking",
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static paths for [slug]:", err);
-    return {
-      paths: [],
-      fallback: "blocking",
-    };
+    console.error("Error generating static paths for /[slug]:", err);
+    return { paths: [], fallback: "blocking" };
   }
 };
 
@@ -199,22 +139,22 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
         ? slugParam[0]
         : "";
 
-    if (!slug) {
-      return { notFound: true };
-    }
+    if (!slug) return { notFound: true };
 
     const data = getContentBySlug(COLLECTION_KEY, slug, {
       withContent: true,
     }) as (PageMeta & { content?: string }) | null;
 
-    if (!data || !data.title) {
-      return { notFound: true };
-    }
+    if (!data) return { notFound: true };
 
     const { content, ...meta } = data;
 
-    // JSON-safe clone to strip non-serialisable values
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+    if (!meta.title) return { notFound: true };
+
+    // Strip non-serialisable values
+    const jsonSafeMeta = JSON.parse(
+      JSON.stringify(meta),
+    ) as PageMeta;
 
     const mdxSource = await serialize(content || "", {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
@@ -228,8 +168,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       revalidate: 3600,
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error in getStaticProps for [slug]:", err);
+    console.error("Error in getStaticProps for /[slug]:", err);
     return { notFound: true };
   }
 };
