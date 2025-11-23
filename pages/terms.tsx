@@ -1,250 +1,248 @@
 // pages/terms.tsx
 import * as React from "react";
+import Head from "next/head";
+import Link from "next/link";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
+import { getPageTitle, siteConfig } from "@/lib/siteConfig";
 
 const TermsPage: NextPage = () => {
+  const pageTitle = "Terms";
+
   return (
-    <Layout title="Terms of Service">
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <section className="space-y-8">
-          <header className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-              Governance · Terms of Use
-            </p>
-            <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-              Terms of Service
-            </h1>
-            <p className="text-sm text-gold/70">
-              Last updated: {new Date().toLocaleDateString("en-GB")}
-            </p>
-            <p className="mt-2 text-sm text-gray-200">
-              These Terms of Service govern your use of the Abraham of London
-              website, content, downloads, newsletter, and any related services
-              (collectively, the “Services”). By accessing or using the Services,
-              you agree to these Terms.
-            </p>
-          </header>
+    <Layout title={pageTitle}>
+      <Head>
+        <title>{getPageTitle(pageTitle)}</title>
+        <meta
+          name="description"
+          content="Terms of use for Abraham of London's website, content, and related services."
+        />
+      </Head>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              1. About This Platform
-            </h2>
-            <p className="text-sm text-gray-200">
-              Abraham of London is a personal brand and advisory platform focused
-              on faith, fatherhood, leadership, and strategic thinking. The site
-              provides articles, tools, downloads, events, and channels to explore
-              advisory services.
-            </p>
-            <p className="text-sm text-gray-200">
-              The content is intended for adults seeking personal and professional
-              development. Use of this site does not create a formal advisory,
-              consulting, or fiduciary relationship unless expressly agreed in
-              writing.
-            </p>
-          </section>
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16 lg:py-20 text-sm leading-relaxed text-gray-200">
+        <header className="mb-10 border-b border-gold/30 pb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Governance · Terms
+          </p>
+          <h1 className="mt-3 font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            Terms of Service
+          </h1>
+          <p className="mt-3 max-w-2xl text-gold/70">
+            These Terms govern your use of this site and related content. By
+            using this site, you agree to act with good faith, common sense, and
+            respect for the boundaries set out below.
+          </p>
+          <p className="mt-2 text-xs text-gray-400">
+            Last updated: {new Date().getFullYear()}
+          </p>
+        </header>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              2. Acceptable Use
-            </h2>
-            <p className="text-sm text-gray-200">
-              You agree to use the Services in a lawful and responsible manner.
-              You must not:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Use the site for any unlawful, fraudulent, or malicious purpose.
-              </li>
-              <li>
-                Attempt to gain unauthorised access to the site, its infrastructure
-                or other users’ data.
-              </li>
-              <li>
-                Scrape, crawl, or harvest data in a way that breaches our{" "}
-                <a
-                  href="/privacy"
-                  className="text-softGold underline underline-offset-2 hover:text-amber-200"
-                >
-                  Privacy Policy
-                </a>
-                .
-              </li>
-              <li>
-                Copy, resell, or redistribute paid or premium content without
-                explicit written permission.
-              </li>
-              <li>
-                Interfere with the proper working of the site, including attempting
-                denial-of-service attacks, injection, or other abuse.
-              </li>
-            </ul>
-          </section>
+        {/* 1. Scope */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            1. Scope of these Terms
+          </h2>
+          <p>These Terms apply to:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>This website, its content, and any resources made available.</li>
+            <li>
+              Any newsletters or email content sent through this site to which
+              you have subscribed.
+            </li>
+            <li>
+              Publicly available information about events, gatherings, and
+              projects under the Abraham of London banner.
+            </li>
+          </ul>
+          <p>
+            Separate written agreements may apply to specific advisory,
+            consulting, or partnership engagements. In the event of conflict,
+            those agreements override these Terms for that specific engagement.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              3. Intellectual Property
-            </h2>
-            <p className="text-sm text-gray-200">
-              Unless stated otherwise, all content on this site — including
-              writing, frameworks, branding, graphics, downloads, and media — is
-              owned or controlled by Abraham of London.
-            </p>
-            <p className="text-sm text-gray-200">
-              You may:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Read and share public articles with proper attribution.</li>
-              <li>
-                Download free resources for your own personal or professional use.
-              </li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              You may not, without written permission:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Republish, resell, or commercially exploit site content.</li>
-              <li>
-                Use the Abraham of London brand, logo, or marks in a way that
-                implies endorsement.
-              </li>
-              <li>
-                Package our content or tools into your own products, courses, or
-                platforms.
-              </li>
-            </ul>
-          </section>
+        {/* 2. Not legal or financial advice */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            2. No legal, financial, or professional advice
+          </h2>
+          <p>
+            Content on this site is provided for general information, reflection,
+            and education. It is not legal, financial, immigration, medical, or
+            other regulated professional advice.
+          </p>
+          <p>
+            Decisions with legal or financial consequence should be made with
+            proper professional counsel who understands your specific
+            circumstances.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              4. Subscriptions & Communications
-            </h2>
-            <p className="text-sm text-gray-200">
-              Newsletter subscriptions are optional and managed through{" "}
-              <span className="font-semibold text-cream">Buttondown</span>. You
-              can unsubscribe at any time using the link in each email.
-            </p>
-            <p className="text-sm text-gray-200">
-              Transactional emails (such as confirmations, links to downloads, or
-              responses to contact forms) are sent via{" "}
-              <span className="font-semibold text-cream">Resend</span>. These are
-              part of delivering the Services you request and are not “marketing”
-              communications in themselves.
-            </p>
-          </section>
+        {/* 3. Acceptable use */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            3. Acceptable use
+          </h2>
+          <p>By using this site, you agree that you will not:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Abuse, attack, or attempt to compromise the site or systems.</li>
+            <li>
+              Scrape or harvest content or data in a way that breaches
+              applicable laws or these Terms.
+            </li>
+            <li>
+              Impersonate others, misrepresent your identity, or submit content
+              that is knowingly false, defamatory, or malicious.
+            </li>
+            <li>
+              Use any resources here to promote hatred, incitement, or unlawful
+              activity.
+            </li>
+          </ul>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              5. No Professional Advice
-            </h2>
-            <p className="text-sm text-gray-200">
-              The content on this site is for general information and personal
-              development only. It does not constitute:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Legal advice</li>
-              <li>Financial or investment advice</li>
-              <li>Clinical counselling or therapy</li>
-              <li>Any regulated professional service</li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              Any decisions you make based on content, downloads, or interactions
-              with this site are your responsibility. Where appropriate, you
-              should seek independent professional advice.
-            </p>
-          </section>
+        {/* 4. Intellectual property */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            4. Intellectual property
+          </h2>
+          <p>
+            Unless otherwise stated, the content on this site — including text,
+            images, frameworks, and branding — is the intellectual property of
+            Abraham of London or its licensors.
+          </p>
+          <p>
+            You may quote or reference short excerpts with appropriate credit
+            and, where practical, a link back to the original source. Wholesale
+            copying, republication, or commercial exploitation of content
+            without permission is not permitted.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              6. Disclaimers
-            </h2>
-            <p className="text-sm text-gray-200">
-              The Services are provided on an{" "}
-              <span className="font-semibold text-cream">“as is”</span> and{" "}
-              <span className="font-semibold text-cream">“as available”</span>{" "}
-              basis. While we take care with what we publish, we do not guarantee:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Continuous availability of the site or any specific feature.</li>
-              <li>
-                That content will be free from errors, omissions, or outdated
-                information.
-              </li>
-              <li>
-                That downloads or resources will be suitable for your precise
-                context.
-              </li>
-            </ul>
-          </section>
+        {/* 5. Third-party services */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            5. Third-party services and links
+          </h2>
+          <p>
+            This site may link to or integrate with third-party services (for
+            example, Buttondown for newsletters, Resend for email delivery,
+            analytics platforms, or event tools).
+          </p>
+          <p>
+            These services operate under their own terms and privacy policies.
+            You are responsible for reviewing those before using the services.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              7. Limitation of Liability
-            </h2>
-            <p className="text-sm text-gray-200">
-              To the fullest extent permitted by law, Abraham of London will not
-              be liable for any indirect, incidental, consequential, or punitive
-              damages arising out of your use of the Services.
-            </p>
-            <p className="text-sm text-gray-200">
-              Where our liability cannot be excluded, it is limited to the total
-              amount you have paid (if any) for the Services giving rise to the
-              claim.
-            </p>
-          </section>
+        {/* 6. Privacy link */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            6. Privacy and cookies
+          </h2>
+          <p>
+            How we collect, use, and protect your personal information is
+            described in our{" "}
+            <Link
+              href="/privacy"
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              Privacy Policy
+            </Link>
+            . Our approach to cookies and similar technologies is explained in
+            our{" "}
+            <Link
+              href="/cookies"
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              Cookie Policy
+            </Link>
+            .
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              8. Third-Party Links
-            </h2>
-            <p className="text-sm text-gray-200">
-              The site may contain links to third-party websites or services. We
-              are not responsible for their content, terms, or privacy practices.
-              You access them at your own risk.
-            </p>
-          </section>
+        {/* 7. Disclaimers & limitation */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            7. Disclaimers and limitation of liability
+          </h2>
+          <p>
+            While we aim for accuracy and usefulness, this site is provided on
+            an &quot;as is&quot; and &quot;as available&quot; basis. We do not
+            guarantee:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Uninterrupted or error-free operation of the site.</li>
+            <li>
+              That content will always be complete, current, or suitable for
+              your specific situation.
+            </li>
+          </ul>
+          <p>
+            To the fullest extent permitted by law, we are not liable for any
+            indirect, consequential, or special loss arising from your use of
+            this site or reliance on its content. Where liability cannot be
+            excluded, it is limited to the minimum extent permissible under
+            applicable law.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              9. Changes to the Services
-            </h2>
-            <p className="text-sm text-gray-200">
-              We may update, modify, or discontinue parts of the Services at any
-              time, including content, downloads, or features, without prior
-              notice.
-            </p>
-          </section>
+        {/* 8. Changes to the site */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            8. Changes, suspension, or withdrawal
+          </h2>
+          <p>
+            We may update content, change functionality, or suspend or withdraw
+            parts of the site at any time for operational, legal, or strategic
+            reasons. Where changes are significant, we will act with reasonable
+            care and avoid unnecessary disruption.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              10. Governing Law
-            </h2>
-            <p className="text-sm text-gray-200">
-              These Terms are governed by and construed in accordance with the
-              laws of England and Wales. Any disputes arising in connection with
-              these Terms will be subject to the exclusive jurisdiction of the
-              courts of England and Wales.
-            </p>
-          </section>
+        {/* 9. Governing law */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            9. Governing law and jurisdiction
+          </h2>
+          <p>
+            These Terms and any disputes arising out of or relating to your use
+            of this site are governed by the laws of England and Wales, without
+            regard to conflict of law principles.
+          </p>
+          <p>
+            Where court proceedings are necessary, the courts of England and
+            Wales will have non-exclusive jurisdiction, subject to any override
+            protections you may have as a consumer under local law.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              11. Contact
-            </h2>
-            <p className="text-sm text-gray-200">
-              If you have questions about these Terms, you can contact:
-            </p>
-            <p className="text-sm text-gray-200">
+        {/* 10. Contact */}
+        <section className="mb-12 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            10. Contact about these Terms
+          </h2>
+          <p>
+            If you have questions about these Terms or believe they need to be
+            clarified in light of a specific situation, contact:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
               Email:{" "}
               <a
-                href="mailto:info@abrahamoflondon.org"
+                href={`mailto:${siteConfig.email}`}
                 className="text-softGold underline underline-offset-2 hover:text-amber-200"
               >
-                info@abrahamoflondon.org
+                {siteConfig.email}
               </a>
-            </p>
-          </section>
+            </li>
+          </ul>
+          <p className="mt-2 text-xs text-gray-400">
+            These Terms are intended to be reasonable, not oppressive. If you
+            genuinely believe a provision is unclear or unfair, the first step
+            is a measured conversation.
+          </p>
         </section>
 
         <PolicyFooter isDark />

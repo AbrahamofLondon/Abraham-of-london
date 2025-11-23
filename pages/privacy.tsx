@@ -1,303 +1,395 @@
 // pages/privacy.tsx
 import * as React from "react";
+import Head from "next/head";
+import Link from "next/link";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
+import { getPageTitle, siteConfig } from "@/lib/siteConfig";
 
 const PrivacyPage: NextPage = () => {
+  const pageTitle = "Privacy";
+
   return (
-    <Layout title="Privacy Policy">
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <section className="space-y-8">
-          <header className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-              Governance · Data Protection
-            </p>
-            <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-              Privacy Policy
-            </h1>
-            <p className="text-sm text-gold/70">
-              Last updated: {new Date().toLocaleDateString("en-GB")}
-            </p>
-            <p className="mt-2 text-sm text-gray-200">
-              Abraham of London (“we”, “us”, “our”) is committed to handling your
-              personal information with integrity, restraint, and transparency.
-              This policy explains what we collect, how we use it, and the rights
-              you have under UK data protection law.
-            </p>
-          </header>
+    <Layout title={pageTitle}>
+      <Head>
+        <title>{getPageTitle(pageTitle)}</title>
+        <meta
+          name="description"
+          content="How Abraham of London collects, uses, and protects personal information across this platform and related services."
+        />
+      </Head>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              1. Who We Are
-            </h2>
-            <p className="text-sm text-gray-200">
-              Abraham of London is a UK-based personal brand and advisory
-              platform focused on faith, leadership, fatherhood, and strategy.
-              For the purposes of data protection law, we act as the{" "}
-              <strong className="font-semibold text-cream">
-                Data Controller
-              </strong>{" "}
-              for this website and associated communications.
-            </p>
-            <p className="text-sm text-gray-200">
-              <span className="font-semibold text-cream">Contact:</span>{" "}
-              info@abrahamoflondon.org
-            </p>
-          </section>
+      <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16 lg:py-20 text-sm leading-relaxed text-gray-200">
+        <header className="mb-10 border-b border-gold/30 pb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+            Governance · Privacy
+          </p>
+          <h1 className="mt-3 font-serif text-3xl font-semibold text-cream sm:text-4xl">
+            Privacy Policy
+          </h1>
+          <p className="mt-3 max-w-2xl text-gold/70">
+            This Privacy Policy explains how we handle personal information at
+            Abraham of London, across this site and related services. It is
+            written in plain language so you can understand what we do and what
+            we don&apos;t.
+          </p>
+          <p className="mt-2 text-xs text-gray-400">
+            Last updated: {new Date().getFullYear()}
+          </p>
+        </header>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              2. What We Collect
-            </h2>
-            <p className="text-sm text-gray-200">
-              We collect the minimum data needed to operate the platform and stay
-              in touch with people who intentionally engage.
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                <span className="font-semibold text-cream">
-                  Information you provide directly:
-                </span>{" "}
-                name, email address, messages through contact forms, newsletter
-                sign-ups, event registrations, and consultation requests.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">
-                  Information collected automatically:
-                </span>{" "}
-                IP address, browser and device details, pages visited, time spent
-                on site, and referring URLs.
-              </li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              We do <strong className="font-semibold text-cream">not</strong>{" "}
-              intentionally collect special category data (e.g. health, religion,
-              political opinions) via this website. If you choose to disclose such
-              information in a message, you do so voluntarily.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              3. How We Use Your Information
-            </h2>
-            <p className="text-sm text-gray-200">
-              We use your personal data for clear and limited purposes:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>To send newsletters and editorial updates you subscribed to.</li>
-              <li>
-                To deliver transactional emails (e.g. confirmation emails, resource
-                links) via{" "}
-                <span className="font-semibold text-cream">Resend</span>.
-              </li>
-              <li>
-                To manage mailing lists and campaigns via{" "}
-                <span className="font-semibold text-cream">Buttondown</span>.
-              </li>
-              <li>
-                To respond to enquiries, speaking requests, or consulting
-                approaches.
-              </li>
-              <li>
-                To maintain security, monitor performance, and improve the user
-                experience.
-              </li>
-              <li>To comply with legal, regulatory, or accounting obligations.</li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              We do <strong className="font-semibold text-cream">not</strong> sell,
-              rent, or trade your personal data.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              4. Legal Bases for Processing
-            </h2>
-            <p className="text-sm text-gray-200">
-              Under UK GDPR, we rely on the following legal bases:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                <span className="font-semibold text-cream">Consent:</span> for
-                newsletters and non-essential updates.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">Contract:</span> when
-                you download resources, register for an event, or request services.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">
-                  Legitimate interests:
-                </span>{" "}
-                to run the platform, understand what’s being used, and protect
-                against abuse, in a way that does not override your rights.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">
-                  Legal obligations:
-                </span>{" "}
-                where we must retain records or respond to lawful requests.
-              </li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              5. Service Providers (Processors)
-            </h2>
-            <p className="text-sm text-gray-200">
-              We use trusted third-party processors to operate the platform:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                <span className="font-semibold text-cream">Resend</span> – sending
-                transactional and system emails.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">Buttondown</span> –
-                managing email newsletter subscriptions.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">
-                  Hosting & infrastructure
-                </span>{" "}
-                – such as Netlify or Vercel for serving the website.
-              </li>
-              <li>
-                <span className="font-semibold text-cream">Analytics</span> – such
-                as Plausible (privacy-first) and/or Google Analytics for
-                high-level traffic insights.
-              </li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              These providers process data on our behalf under written terms and
-              are expected to maintain appropriate security and compliance
-              standards.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              6. International Transfers
-            </h2>
-            <p className="text-sm text-gray-200">
-              Some service providers may process data outside the UK. Where this
-              happens, we rely on mechanisms such as adequacy decisions, Standard
-              Contractual Clauses (SCCs), or equivalent safeguards provided by the
-              vendor.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              7. Data Retention
-            </h2>
-            <p className="text-sm text-gray-200">
-              We keep personal data only for as long as it is reasonably required:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Newsletter subscriptions – until you unsubscribe or your address
-                bounces repeatedly.
-              </li>
-              <li>
-                Contact enquiries – normally up to 24 months, unless they form
-                part of an ongoing engagement.
-              </li>
-              <li>
-                Analytics – in line with retention periods set in the analytics
-                tool.
-              </li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              You can request deletion sooner where applicable (see your rights
-              below).
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              8. Your Rights
-            </h2>
-            <p className="text-sm text-gray-200">
-              Under UK data protection law, you have the right to:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Request access to the personal data we hold about you.</li>
-              <li>Ask us to correct inaccurate or incomplete data.</li>
-              <li>Request deletion of your personal data in certain cases.</li>
-              <li>
-                Object to or request restriction of processing in specific
-                circumstances.
-              </li>
-              <li>
-                Withdraw consent at any time where processing is based on consent.
-              </li>
-              <li>
-                Request data portability for information you have provided to us
-                where technically feasible.
-              </li>
-            </ul>
-            <p className="text-sm text-gray-200">
-              To exercise any of these rights, contact{" "}
+        {/* 1. Who we are */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            1. Who we are
+          </h2>
+          <p>
+            &quot;Abraham of London&quot; refers to a family of platforms and
+            ventures led by Abraham Adaramola, including but not limited to
+            public writing, events, and related advisory and community work.
+          </p>
+          <p>
+            For the purposes of data protection, the primary contact for this
+            site is:
+          </p>
+          <ul className="ml-5 list-disc space-y-1 text-gray-200">
+            <li>Abraham of London (United Kingdom)</li>
+            <li>
+              Email:{" "}
               <a
-                href="mailto:info@abrahamoflondon.org"
+                href={`mailto:${siteConfig.email}`}
                 className="text-softGold underline underline-offset-2 hover:text-amber-200"
               >
-                info@abrahamoflondon.org
+                {siteConfig.email}
               </a>
-              .
-            </p>
-          </section>
+            </li>
+          </ul>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              9. Cookies & Tracking
-            </h2>
-            <p className="text-sm text-gray-200">
-              See our{" "}
+        {/* 2. What this policy covers */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            2. What this policy covers
+          </h2>
+          <p>This policy applies to:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>This website and its content.</li>
+            <li>
+              Email communications, including newsletters (via Buttondown) and
+              transactional emails (via Resend or similar providers).
+            </li>
+            <li>
+              Contact form submissions and event registrations processed through
+              this site.
+            </li>
+          </ul>
+          <p>
+            It does not replace tailored contractual terms for specific paid
+            engagements, which may contain additional privacy or confidentiality
+            obligations.
+          </p>
+        </section>
+
+        {/* 3. Information we collect */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            3. Information we collect
+          </h2>
+          <p>We collect information in three main ways:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
+              <strong>Information you provide directly</strong> – for example:
+              <ul className="ml-5 mt-1 list-disc space-y-1 text-gray-200">
+                <li>Newsletter sign-ups (name, email, preferences).</li>
+                <li>
+                  Contact form submissions (name, email, subject, message
+                  content).
+                </li>
+                <li>
+                  Event or consultation enquiries (basic personal and
+                  organisational details).
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Usage and analytics data</strong> – high-level information
+              about how you interact with the site (pages visited, time on
+              page, referrer) via analytics tools or server logs.
+            </li>
+            <li>
+              <strong>Transactional / system data</strong> – e.g. confirmation
+              emails, subscription status, or basic engagement metrics such as
+              opens and clicks for newsletters.
+            </li>
+          </ul>
+        </section>
+
+        {/* 4. How we use your information */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            4. How we use your information
+          </h2>
+          <p>We use the information we collect to:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Send newsletters and editorial content you have requested.</li>
+            <li>Respond to enquiries and manage event or call requests.</li>
+            <li>
+              Improve content, structure, and usability of the site based on
+              aggregated behaviour.
+            </li>
+            <li>
+              Maintain appropriate records for governance, risk, and compliance
+              where necessary.
+            </li>
+          </ul>
+          <p>
+            We do <strong>not</strong> sell your personal data and we do{" "}
+            <strong>not</strong> share it with third parties for their own
+            marketing.
+          </p>
+        </section>
+
+        {/* 5. Legal bases */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            5. Legal bases for processing
+          </h2>
+          <p>
+            Where applicable law (including UK GDPR) requires a legal basis for
+            processing, we typically rely on:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
+              <strong>Consent</strong> – for example, where you subscribe to a
+              newsletter.
+            </li>
+            <li>
+              <strong>Legitimate interests</strong> – e.g. maintaining site
+              security, improving content, or keeping basic communication
+              records where this does not override your rights.
+            </li>
+            <li>
+              <strong>Contractual necessity</strong> – where processing is
+              required to enter into or perform a contract or agreed
+              engagement.
+            </li>
+          </ul>
+        </section>
+
+        {/* 6. Cookies & tracking */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            6. Cookies & tracking technologies
+          </h2>
+          <p>
+            We may use cookies and similar technologies to support basic site
+            functionality, analytics, and security. For a more detailed view of
+            the types of cookies in use, and your options, please see our{" "}
+            <Link
+              href="/cookies"
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              Cookie Policy
+            </Link>
+            .
+          </p>
+          <p>
+            You can typically control cookies via your browser settings, and in
+            some cases via on-site controls where implemented.
+          </p>
+        </section>
+
+        {/* 7. Email providers: Buttondown & Resend */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            7. Email delivery: Buttondown & Resend
+          </h2>
+          <p>
+            We use third-party services to handle email delivery and list
+            management, including:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
+              <strong>Buttondown</strong> – for newsletters and curated email
+              dispatches.
+            </li>
+            <li>
+              <strong>Resend</strong> – for transactional or system emails (for
+              example, confirmations, notifications, or one-off messages from
+              forms).
+            </li>
+          </ul>
+          <p>
+            These providers process your email address (and sometimes associated
+            engagement data such as opens or clicks) so we can understand what
+            is useful and manage subscriptions effectively.
+          </p>
+          <p>
+            You can unsubscribe from newsletters at any time by using the link
+            included in each email. Transactional or service messages may
+            continue where reasonably necessary (for example, a confirmation of
+            a request you initiated).
+          </p>
+        </section>
+
+        {/* 8. Sharing and transfers */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            8. When we share information
+          </h2>
+          <p>
+            We may share limited personal information with trusted service
+            providers who support this site and related work, such as:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Hosting and infrastructure providers.</li>
+            <li>Email and newsletter delivery platforms.</li>
+            <li>Analytics or security tools.</li>
+          </ul>
+          <p>
+            Where such sharing occurs, it is done on a need-to-know basis and
+            under appropriate contractual safeguards where required by law.
+          </p>
+        </section>
+
+        {/* 9. Data retention */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            9. How long we keep your information
+          </h2>
+          <p>
+            We keep personal information only for as long as reasonably
+            necessary for the purposes described in this policy, or as required
+            by law, regulation, or good governance practice.
+          </p>
+          <p>Broadly:</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
+              Newsletter data is retained while you remain subscribed and for a
+              limited period afterwards for audit and suppression purposes.
+            </li>
+            <li>
+              Contact form submissions and related correspondence may be kept as
+              part of our communication records and risk management, especially
+              where serious matters have been discussed.
+            </li>
+          </ul>
+        </section>
+
+        {/* 10. Your rights */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            10. Your rights
+          </h2>
+          <p>
+            Depending on your location and applicable law, you may have rights
+            such as:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Access to the personal data we hold about you.</li>
+            <li>Correction of inaccurate or incomplete data.</li>
+            <li>Erasure of certain data, subject to legal obligations.</li>
+            <li>
+              Restriction of processing in certain circumstances, or objection
+              to specific uses.
+            </li>
+            <li>
+              Portability of data you provided, where technically feasible and
+              legally required.
+            </li>
+          </ul>
+          <p>
+            To exercise any of these rights, contact us at{" "}
+            <a
+              href={`mailto:${siteConfig.email}`}
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              {siteConfig.email}
+            </a>
+            . We may need to confirm your identity before actioning a request.
+          </p>
+        </section>
+
+        {/* 11. Security */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            11. Security
+          </h2>
+          <p>
+            We take reasonable steps to protect personal information from
+            unauthorised access, loss, or misuse. No system is perfectly
+            secure, but we aim for sensible, proportionate safeguards for the
+            scale and sensitivity of the data we handle.
+          </p>
+          <p>
+            For more detail on our approach, see our{" "}
+            <Link
+              href="/security"
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              Security Overview
+            </Link>
+            , which outlines our general stance on security, resilience, and
+            responsible handling of systems.
+          </p>
+        </section>
+
+        {/* 12. Children */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            12. Children
+          </h2>
+          <p>
+            This site is primarily aimed at adults. We do not knowingly collect
+            personal information from children without appropriate parental or
+            guardian involvement. If you believe a child has provided us with
+            personal information without consent, please contact us and we will
+            review promptly.
+          </p>
+        </section>
+
+        {/* 13. Changes */}
+        <section className="mb-8 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            13. Changes to this policy
+          </h2>
+          <p>
+            We may update this policy from time to time to reflect changes in
+            law, practice, or the services we offer. The &quot;Last updated&quot;
+            date above reflects the most recent revision.
+          </p>
+          <p>
+            Where changes are significant, we may highlight them on the site or
+            via email where appropriate.
+          </p>
+        </section>
+
+        {/* 14. Contact */}
+        <section className="mb-12 space-y-2">
+          <h2 className="font-serif text-xl font-semibold text-cream">
+            14. Contact and concerns
+          </h2>
+          <p>
+            If you have questions or concerns about this policy or how your data
+            is handled, you can contact:
+          </p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>
+              Email:{" "}
               <a
-                href="/cookies"
+                href={`mailto:${siteConfig.email}`}
                 className="text-softGold underline underline-offset-2 hover:text-amber-200"
               >
-                Cookie Policy
-              </a>{" "}
-              for details on how we use cookies and similar technologies.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              10. Security
-            </h2>
-            <p className="text-sm text-gray-200">
-              We use appropriate technical and organisational measures to protect
-              your data, including HTTPS, restricted access, and secure third-party
-              providers. See our{" "}
-              <a
-                href="/security"
-                className="text-softGold underline underline-offset-2 hover:text-amber-200"
-              >
-                Security Policy
-              </a>{" "}
-              for more detail.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              11. Changes to This Policy
-            </h2>
-            <p className="text-sm text-gray-200">
-              We may update this Privacy Policy from time to time. The “Last
-              updated” date at the top of this page will always show the current
-              version. Significant changes may also be signposted in the
-              newsletter or via a site notice.
-            </p>
-          </section>
+                {siteConfig.email}
+              </a>
+            </li>
+          </ul>
+          <p className="mt-2 text-xs text-gray-400">
+            This document is for information only and does not constitute legal
+            advice. Where you require formal legal guidance, you should consult
+            a qualified professional.
+          </p>
         </section>
 
         <PolicyFooter isDark />
