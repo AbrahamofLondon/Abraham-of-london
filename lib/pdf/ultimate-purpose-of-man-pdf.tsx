@@ -1,4 +1,6 @@
 // lib/pdf/ultimate-purpose-of-man-pdf.tsx
+/* eslint-disable jsx-a11y/alt-text */
+
 import React from "react";
 import {
   Document,
@@ -330,7 +332,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       {/* Footer */}
       <View style={styles.footer} fixed>
-        <Text style={styles.smallBrand}>Abraham of London · Strategic Editorials</Text>
+        <Text style={styles.smallBrand}>
+          Abraham of London · Strategic Editorials
+        </Text>
         <Text
           style={styles.pageNumber}
           render={({ pageNumber, totalPages }) =>
@@ -340,7 +344,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </View>
     </Page>
 
-    {/* PAGE 2: Ancient Lives, Jesus, Worldviews (condensed but styled) */}
+    {/* PAGE 2: Ancient Lives, Jesus, Worldviews */}
     <Page size="A4" style={styles.page}>
       <Text style={styles.h2}>
         2. ANCIENT LIVES — WHAT PURPOSE LOOKS LIKE UNDER PRESSURE
@@ -457,7 +461,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
 
       <View style={styles.footer} fixed>
-        <Text style={styles.smallBrand}>Abraham of London · Strategic Editorials</Text>
+        <Text style={styles.smallBrand}>
+          Abraham of London · Strategic Editorials
+        </Text>
         <Text
           style={styles.pageNumber}
           render={({ pageNumber, totalPages }) =>
@@ -713,7 +719,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
 
       <View style={styles.footer} fixed>
-        <Text style={styles.smallBrand}>Abraham of London · Strategic Editorials</Text>
+        <Text style={styles.smallBrand}>
+          Abraham of London · Strategic Editorials
+        </Text>
         <Text
           style={styles.pageNumber}
           render={({ pageNumber, totalPages }) =>

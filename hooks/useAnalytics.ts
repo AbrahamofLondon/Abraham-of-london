@@ -1,6 +1,5 @@
-/* eslint-disable prefer-rest-params */
 // hooks/useAnalytics.ts
-import { useEffect, useCallback } from 'react'; // Fixed import
+import { useEffect, useCallback } from 'react';
 
 interface AnalyticsEvent {
   event: string;
@@ -36,6 +35,7 @@ export function useAnalytics() {
     // Enhanced gtag function
     if (!window.gtag) {
       window.gtag = function () {
+        // eslint-disable-next-line prefer-rest-params
         window.dataLayer.push(arguments);
       };
     }
@@ -67,7 +67,7 @@ export function useAnalytics() {
   }, []);
 
   const trackEvent = useCallback(
-    (event: string, params: Record<string, any> = {}) => {
+    (event: string, params: Record<string, unknown> = {}) => {
       if (typeof window === "undefined" || !window.gtag) {
         // Fallback logging for development
         if (process.env.NODE_ENV === "development") {
@@ -105,7 +105,7 @@ export function useAnalytics() {
   );
 
   const trackPageView = useCallback(
-    (pageName: string, additionalParams: Record<string, any> = {}) => {
+    (pageName: string, additionalParams: Record<string, unknown> = {}) => {
       if (typeof window === "undefined" || !window.gtag) return;
 
       const pageParams: PageViewParams = {
@@ -123,7 +123,7 @@ export function useAnalytics() {
   );
 
   const trackError = useCallback(
-    (error: Error, context: Record<string, any> = {}) => {
+    (error: Error, context: Record<string, unknown> = {}) => {
       trackEvent("error_occurred", {
         error_message: error.message,
         error_stack: error.stack,
@@ -135,7 +135,7 @@ export function useAnalytics() {
   );
 
   const trackPerformance = useCallback(
-    (metricName: string, value: number, context: Record<string, any> = {}) => {
+    (metricName: string, value: number, context: Record<string, unknown> = {}) => {
       trackEvent("performance_metric", {
         metric_name: metricName,
         metric_value: value,

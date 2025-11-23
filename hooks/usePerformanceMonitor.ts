@@ -1,5 +1,5 @@
 // hooks/usePerformanceMonitor.ts
-import { useEffect, useRef, useCallback } from 'react'; // Fixed import
+import { useEffect, useRef, useCallback } from 'react';
 
 interface PerformanceMetrics {
   componentName: string;
@@ -24,8 +24,8 @@ export function usePerformanceMonitor(componentName: string) {
 
   // Measure component mount time
   useEffect(() => {
-    mountTimeRef.current = performance.now();
     const mountTime = performance.now();
+    mountTimeRef.current = mountTime;
 
     // Log mount performance
     const entry: PerformanceEntry = {
@@ -168,7 +168,9 @@ export function usePagePerformanceMonitor(pageName: string) {
       const lcpObserver = new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         const lastEntry = entries[entries.length - 1];
-        largestContentfulPaintRef.current = lastEntry?.startTime || 0;
+        if (lastEntry) {
+          largestContentfulPaintRef.current = lastEntry.startTime;
+        }
       });
 
       try {
@@ -177,8 +179,8 @@ export function usePagePerformanceMonitor(pageName: string) {
           type: "largest-contentful-paint",
           buffered: true,
         });
-      } catch (e) {
-        console.warn("Performance Observer not supported:", e);
+      } catch (error) {
+        console.warn("Performance Observer not supported:", error);
       }
 
       return () => {
@@ -186,6 +188,8 @@ export function usePagePerformanceMonitor(pageName: string) {
         lcpObserver.disconnect();
       };
     }
+
+    return undefined;
   }, [pageName]);
 
   const getPageMetrics = useCallback(() => {
