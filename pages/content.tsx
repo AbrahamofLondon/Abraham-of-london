@@ -24,7 +24,22 @@ type ContentKind =
   | "print"
   | "resource";
 
-type ContentResource = {
+interface BaseContentMeta {
+  slug?: string;
+  title: string;
+  date?: string;
+  excerpt?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  featured?: boolean;
+  readTime?: number;
+  _raw?: {
+    flattenedPath?: string;
+  };
+}
+
+interface ContentResource {
   kind: ContentKind;
   title: string;
   slug: string;
@@ -33,12 +48,88 @@ type ContentResource = {
   excerpt?: string;
   description?: string;
   category?: string;
-  tags?: string[];
-};
+  tags: string[];
+  featured?: boolean;
+  readTime?: number;
+}
 
 interface ContentPageProps {
   items: ContentResource[];
+  featuredItems: ContentResource[];
 }
+
+// ---------------------------------------------------------------------------
+// Icons
+// ---------------------------------------------------------------------------
+
+const ContentIcons: Record<ContentKind, string> = {
+  blog: "📝",
+  book: "📚",
+  download: "⬇️",
+  event: "🗓️",
+  print: "🖨️",
+  resource: "💎",
+};
+
+const ArrowIcon = () => (
+  <svg 
+    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    stroke="currentColor"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth={2} 
+      d="M14 5l7 7m0 0l-7 7m7-7H3" 
+    />
+  </svg>
+);
+
+// ---------------------------------------------------------------------------
+// Helper Functions
+// ---------------------------------------------------------------------------
+
+const getSlug = (item: BaseContentMeta): string | undefined => {
+  return item.slug ||
+    item._raw?.flattenedPath?.replace(/^(blog|books|downloads|events|prints|resources)\//, "") ||
+    item.title?.toLowerCase().replace(/\s+/g, "-");
+};
+
+const getHref = (kind: ContentKind, slug: string): string => {
+  if (kind === "blog") return `/${slug}`;
+  return `/${kind}s/${slug}`;
+};
+
+const processContentItems = (
+  items: BaseContentMeta[], 
+  kind: ContentKind, 
+  defaultCategory?: string
+): ContentResource[] => {
+  const processed: ContentResource[] = [];
+
+  items.forEach((item) => {
+    const slug = getSlug(item);
+    if (item.title && slug) {
+      processed.push({
+        kind,
+        title: item.title,
+        slug,
+        href: getHref(kind, slug),
+        date: item.date,
+        excerpt: item.excerpt,
+        description: item.description,
+        category: item.category || defaultCategory,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.readTime,
+      });
+    }
+  });
+
+  return processed;
+};
 
 // ---------------------------------------------------------------------------
 // SSG
@@ -50,227 +141,98 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   console.log("============================================");
 
   try {
-    const items: ContentResource[] = [];
+    const allItems: ContentResource[] = [];
 
-    // ---------------- BLOG POSTS (pages/[slug].tsx) ----------------
+    // Process blog posts
     try {
       const posts = getAllPostsMeta?.() || [];
-      console.log(`[content] Found ${posts.length} raw posts`);
-
-      posts.forEach((p: any) => {
-        const slug: string | undefined =
-          p.slug ||
-          p._raw?.flattenedPath?.replace(/^blog\//, "") ||
-          p.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (p.title && slug) {
-          console.log(`[content] Adding blog post: ${p.title} (slug: ${slug})`);
-          items.push({
-            kind: "blog",
-            title: p.title,
-            slug,
-            // IMPORTANT: blog posts live at /[slug], not /blog/[slug]
-            href: `/${slug}`,
-            date: p.date,
-            excerpt: p.excerpt,
-            description: p.description,
-            category: p.category,
-            tags: p.tags || [],
-          });
-        } else {
-          console.log("[content] Skipping post - missing title or slug", {
-            title: p.title,
-            slug,
-          });
-        }
-      });
+      const processedPosts = processContentItems(posts, "blog", "Blog");
+      allItems.push(...processedPosts);
+      console.log(`[content] Processed ${processedPosts.length} blog posts`);
     } catch (err) {
       console.error("[content] Error fetching posts:", err);
     }
 
-    // ---------------- BOOKS ----------------
+    // Process books
     try {
       const books = getAllBooksMeta?.() || [];
-      console.log(`[content] Found ${books.length} books`);
-
-      books.forEach((b: any) => {
-        const slug: string | undefined =
-          b.slug ||
-          b._raw?.flattenedPath?.replace(/^books\//, "") ||
-          b.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (b.title && slug) {
-          items.push({
-            kind: "book",
-            title: b.title,
-            slug,
-            href: `/books/${slug}`,
-            date: b.date,
-            excerpt: b.excerpt,
-            category: "Books",
-            tags: b.tags || [],
-          });
-        }
-      });
+      const processedBooks = processContentItems(books, "book", "Books");
+      allItems.push(...processedBooks);
+      console.log(`[content] Processed ${processedBooks.length} books`);
     } catch (err) {
       console.error("[content] Error fetching books:", err);
     }
 
-    // ---------------- DOWNLOADS ----------------
+    // Process downloads
     try {
       const downloads = getAllDownloadsMeta?.() || [];
-      console.log(`[content] Found ${downloads.length} downloads`);
-
-      downloads.forEach((d: any) => {
-        const slug: string | undefined =
-          d.slug ||
-          d._raw?.flattenedPath?.replace(/^downloads\//, "") ||
-          d.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (d.title && slug) {
-          items.push({
-            kind: "download",
-            title: d.title,
-            slug,
-            href: `/downloads/${slug}`,
-            date: d.date,
-            excerpt: d.excerpt,
-            description: d.description,
-            category: d.category || "Downloads",
-            tags: d.tags || [],
-          });
-        }
-      });
+      const processedDownloads = processContentItems(downloads, "download", "Downloads");
+      allItems.push(...processedDownloads);
+      console.log(`[content] Processed ${processedDownloads.length} downloads`);
     } catch (err) {
       console.error("[content] Error fetching downloads:", err);
     }
 
-    // ---------------- EVENTS ----------------
+    // Process events
     try {
       const events = getAllContent?.("events") || [];
-      console.log(`[content] Found ${events.length} events`);
-
-      events.forEach((e: any) => {
-        const slug: string | undefined =
-          e.slug ||
-          e._raw?.flattenedPath?.replace(/^events\//, "") ||
-          e.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (e.title && slug) {
-          items.push({
-            kind: "event",
-            title: e.title,
-            slug,
-            href: `/events/${slug}`,
-            date: e.eventDate || e.date,
-            excerpt: e.excerpt,
-            description: e.description,
-            category: "Events",
-            tags: e.tags || [],
-          });
-        }
-      });
+      const processedEvents = processContentItems(events, "event", "Events");
+      allItems.push(...processedEvents);
+      console.log(`[content] Processed ${processedEvents.length} events`);
     } catch (err) {
       console.error("[content] Error fetching events:", err);
     }
 
-    // ---------------- PRINTS ----------------
+    // Process prints
     try {
       const prints = getAllContent?.("prints") || [];
-      console.log(`[content] Found ${prints.length} prints via getAllContent`);
-
-      prints.forEach((p: any) => {
-        const slug: string | undefined =
-          p.slug ||
-          p._raw?.flattenedPath?.replace(/^prints\//, "") ||
-          p.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (p.title && slug) {
-          console.log(`[content] Adding print: ${p.title} (slug: ${slug})`);
-          items.push({
-            kind: "print",
-            title: p.title,
-            slug,
-            href: `/prints/${slug}`,
-            date: p.date,
-            excerpt: p.excerpt,
-            description: p.description,
-            category: "Printables",
-            tags: p.tags || [],
-          });
-        }
-      });
+      const processedPrints = processContentItems(prints, "print", "Printables");
+      allItems.push(...processedPrints);
+      console.log(`[content] Processed ${processedPrints.length} prints`);
     } catch (err) {
       console.error("[content] Error fetching prints:", err);
     }
 
-    // ---------------- GENERIC RESOURCES ----------------
+    // Process resources
     try {
       const resources = getAllContent?.("resources") || [];
-      console.log(`[content] Found ${resources.length} resources`);
-
-      resources.forEach((r: any) => {
-        const slug: string | undefined =
-          r.slug ||
-          r._raw?.flattenedPath?.replace(/^resources\//, "") ||
-          r.title?.toLowerCase().replace(/\s+/g, "-");
-
-        if (r.title && slug) {
-          items.push({
-            kind: "resource",
-            title: r.title,
-            slug,
-            href: `/resources/${slug}`,
-            date: r.date,
-            excerpt: r.excerpt,
-            description: r.description,
-            category: "Resources",
-            tags: r.tags || [],
-          });
-        }
-      });
+      const processedResources = processContentItems(resources, "resource", "Resources");
+      allItems.push(...processedResources);
+      console.log(`[content] Processed ${processedResources.length} resources`);
     } catch (err) {
       console.error("[content] Error fetching resources:", err);
     }
 
-    console.log("[content] ========================================");
-    console.log(`[content] Total items collected: ${items.length}`);
-    console.log(
-      `[content] Breakdown - Blog: ${
-        items.filter((i) => i.kind === "blog").length
-      }, Books: ${
-        items.filter((i) => i.kind === "book").length
-      }, Downloads: ${
-        items.filter((i) => i.kind === "download").length
-      }, Events: ${
-        items.filter((i) => i.kind === "event").length
-      }, Prints: ${
-        items.filter((i) => i.kind === "print").length
-      }, Resources: ${
-        items.filter((i) => i.kind === "resource").length
-      }`,
-    );
-    console.log("[content] ========================================");
-
-    // Sort newest first by date
-    const sorted = items.slice().sort((a, b) => {
+    // Sort by date (newest first)
+    const sortedItems = allItems.sort((a, b) => {
       if (!a.date && !b.date) return 0;
       if (!a.date) return 1;
       if (!b.date) return -1;
-      return a.date < b.date ? 1 : -1;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
-    // JSON-safe serialization
-    const safeItems = JSON.parse(JSON.stringify(sorted));
+    // Get featured items
+    const featuredItems = sortedItems.filter(item => item.featured).slice(0, 3);
+
+    console.log("[content] ========================================");
+    console.log(`[content] Total items: ${sortedItems.length}`);
+    console.log(`[content] Featured items: ${featuredItems.length}`);
+    console.log("[content] ========================================");
 
     return {
-      props: { items: safeItems },
+      props: { 
+        items: JSON.parse(JSON.stringify(sortedItems)),
+        featuredItems: JSON.parse(JSON.stringify(featuredItems))
+      },
       revalidate: 3600,
     };
   } catch (error) {
     console.error("[content] Critical error in getStaticProps:", error);
     return {
-      props: { items: [] },
+      props: { 
+        items: [], 
+        featuredItems: [] 
+      },
       revalidate: 3600,
     };
   }
@@ -280,130 +242,309 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 // Component
 // ---------------------------------------------------------------------------
 
-export default function ContentPage({ items }: ContentPageProps) {
-  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
-    "all",
-  );
+const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
-  const total = items.length;
-  const blogCount = items.filter((i) => i.kind === "blog").length;
-  const bookCount = items.filter((i) => i.kind === "book").length;
-  const downloadCount = items.filter((i) => i.kind === "download").length;
-  const eventCount = items.filter((i) => i.kind === "event").length;
-  const printCount = items.filter((i) => i.kind === "print").length;
-  const resourceCount = items.filter((i) => i.kind === "resource").length;
+  // Statistics for filters
+  const contentStats = {
+    all: items.length,
+    blog: items.filter((i) => i.kind === "blog").length,
+    book: items.filter((i) => i.kind === "book").length,
+    download: items.filter((i) => i.kind === "download").length,
+    event: items.filter((i) => i.kind === "event").length,
+    print: items.filter((i) => i.kind === "print").length,
+    resource: items.filter((i) => i.kind === "resource").length,
+  };
 
-  const filtered =
-    activeFilter === "all"
-      ? items
-      : items.filter((i) => i.kind === activeFilter);
-
-  const filters = [
-    { key: "all" as const, label: "All Content", count: total },
-    { key: "blog" as const, label: "Blog", count: blogCount },
-    { key: "book" as const, label: "Books", count: bookCount },
-    { key: "download" as const, label: "Downloads", count: downloadCount },
-    { key: "event" as const, label: "Events", count: eventCount },
-    { key: "print" as const, label: "Prints", count: printCount },
-    { key: "resource" as const, label: "Resources", count: resourceCount },
+  const filters: Array<{ key: ContentKind | "all"; label: string; count: number }> = [
+    { key: "all", label: "All Content", count: contentStats.all },
+    { key: "blog", label: "Blog Posts", count: contentStats.blog },
+    { key: "book", label: "Books", count: contentStats.book },
+    { key: "download", label: "Downloads", count: contentStats.download },
+    { key: "event", label: "Events", count: contentStats.event },
+    { key: "print", label: "Printables", count: contentStats.print },
+    { key: "resource", label: "Resources", count: contentStats.resource },
   ];
+
+  // Filter and search logic
+  const filteredItems = items.filter((item) => {
+    const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
+    const matchesSearch = searchQuery === "" || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return matchesFilter && matchesSearch;
+  });
+
+  const getKindColor = (kind: ContentKind): string => {
+    const colors = {
+      blog: "from-blue-500/20 to-blue-600/20 border-blue-500/30",
+      book: "from-purple-500/20 to-purple-600/20 border-purple-500/30",
+      download: "from-green-500/20 to-green-600/20 border-green-500/30",
+      event: "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30",
+      print: "from-pink-500/20 to-pink-600/20 border-pink-500/30",
+      resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-500/30",
+    };
+    return colors[kind];
+  };
+
+  const getKindBadgeColor = (kind: ContentKind): string => {
+    const colors = {
+      blog: "border-blue-500/30 text-blue-400 bg-blue-500/10",
+      book: "border-purple-500/30 text-purple-400 bg-purple-500/10",
+      download: "border-green-500/30 text-green-400 bg-green-500/10",
+      event: "border-yellow-500/30 text-yellow-400 bg-yellow-500/10",
+      print: "border-pink-500/30 text-pink-400 bg-pink-500/10",
+      resource: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
+    };
+    return colors[kind];
+  };
 
   return (
     <Layout title="Strategic Insights & Resources">
       <Head>
-        <title>Strategic Insights &amp; Resources | Abraham of London</title>
+        <title>Strategic Insights & Resources | Abraham of London</title>
         <meta
           name="description"
-          content="Explore essays, books, downloads, events, and resources for fathers, founders, and leaders building enduring legacies."
+          content="Master strategic thinking with essays, books, tools, and resources for fathers, founders, and leaders building enduring legacies."
         />
+        <meta name="keywords" content="strategy, leadership, legacy building, fatherhood, entrepreneurship, resources" />
       </Head>
 
-      <div className="relative min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black px-4 py-16">
-        <div className="relative z-10 mx-auto max-w-7xl">
-          {/* Header */}
-          <header className="mb-12 text-center">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
-              Content Hub
-            </p>
-            <h1 className="mb-4 font-serif text-4xl font-light text-white sm:text-5xl lg:text-6xl">
-              Strategic Insights &amp; Resources
-            </h1>
-            <p className="mx-auto max-w-2xl text-gray-300">
-              Everything you need to build legacy: essays, downloads, events,
-              and tools for fathers, founders, and leaders.
-            </p>
-          </header>
-
-          {/* Filter Pills */}
-          <div className="mb-12 flex flex-wrap justify-center gap-3">
-            {filters.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                onClick={() => setActiveFilter(filter.key)}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                  activeFilter === filter.key
-                    ? "border-yellow-600/60 bg-yellow-600 text-gray-900 shadow-lg shadow-yellow-600/30"
-                    : "border-white/10 bg-gray-900/80 text-gray-100 hover:border-yellow-600/40 hover:bg-gray-800"
-                }`}
-              >
-                {filter.label}
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
-                    activeFilter === filter.key
-                      ? "bg-gray-900/20 text-gray-900"
-                      : "bg-white/10 text-gray-400"
-                  }`}
-                >
-                  {filter.count}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Content Grid */}
-          {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-10 text-center text-gray-300">
-              <p className="mb-2 text-lg">No content found for this filter.</p>
-              {total === 0 && (
-                <p className="text-sm text-gray-500">
-                  Check build logs for data fetching errors.
+      <div className="min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden px-4 py-20 lg:py-28">
+          <div className="absolute inset-0 bg-gradient-to-r from-softGold/5 to-transparent" />
+          <div className="relative mx-auto max-w-7xl">
+            <div className="grid lg:grid-cols-2 lg:gap-16">
+              <div className="flex flex-col justify-center">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-2 text-sm text-softGold">
+                  <span>✨</span>
+                  <span>Premium Content Hub</span>
+                </div>
+                
+                <h1 className="mb-6 font-serif text-4xl font-light text-white sm:text-5xl lg:text-6xl">
+                  Build Your <span className="bg-gradient-to-r from-softGold to-yellow-200 bg-clip-text text-transparent">Legacy</span> With Strategic Wisdom
+                </h1>
+                
+                <p className="mb-8 text-xl leading-relaxed text-gray-300">
+                  Curated essays, tools, and resources for fathers, founders, and leaders committed to 
+                  building enduring impact across generations.
                 </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <button 
+                    onClick={() => document.getElementById('content-grid')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25"
+                  >
+                    <span className="relative z-10">Explore Resources</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity group-hover:opacity-100" />
+                  </button>
+                  
+                  <button 
+                    onClick={() => setActiveFilter('download')}
+                    className="group rounded-lg border border-softGold/30 bg-black/40 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10 hover:shadow-lg hover:shadow-yellow-500/10"
+                  >
+                    <span className="flex items-center gap-2">
+                      Free Downloads
+                      <ArrowIcon />
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="mt-12 lg:mt-0">
+                <div className="grid grid-cols-2 gap-6">
+                  {filters.slice(1).map((filter) => (
+                    <div 
+                      key={filter.key}
+                      className={`group cursor-pointer rounded-2xl border bg-gradient-to-br ${getKindColor(filter.key as ContentKind)} p-6 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-2xl`}
+                      onClick={() => setActiveFilter(filter.key as ContentKind)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">
+                          {ContentIcons[filter.key as ContentKind]}
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-white">{filter.count}</div>
+                          <div className="text-sm text-gray-300">{filter.label}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Section */}
+        {featuredItems.length > 0 && (
+          <section className="px-4 py-16">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-12 text-center">
+                <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
+                  Featured <span className="text-softGold">Essentials</span>
+                </h2>
+                <p className="mt-4 text-gray-400">Handpicked resources to get you started</p>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-3">
+                {featuredItems.map((item) => (
+                  <div 
+                    key={item.slug}
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/30 hover:shadow-2xl"
+                  >
+                    <div className="absolute top-6 right-6 text-2xl">
+                      {ContentIcons[item.kind]}
+                    </div>
+                    
+                    <div className="mb-4">
+                      <span className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(item.kind)} text-white`}>
+                        {item.kind}
+                      </span>
+                    </div>
+
+                    <h3 className="mb-4 font-serif text-xl font-light text-white group-hover:text-softGold">
+                      <Link href={item.href}>{item.title}</Link>
+                    </h3>
+
+                    {item.excerpt && (
+                      <p className="mb-6 line-clamp-3 text-gray-300">{item.excerpt}</p>
+                    )}
+
+                    <Link 
+                      href={item.href}
+                      className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-3"
+                    >
+                      Explore Resource
+                      <ArrowIcon />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Main Content Grid */}
+        <section id="content-grid" className="px-4 py-16">
+          <div className="mx-auto max-w-7xl">
+            {/* Controls */}
+            <div className="mb-12">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                {/* Search */}
+                <div className="flex-1">
+                  <div className="relative max-w-md">
+                    <input
+                      type="text"
+                      placeholder="Search resources, tools, insights..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-6 py-4 text-white placeholder-gray-400 backdrop-blur-sm transition-all focus:border-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold/20"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      🔍
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex flex-wrap gap-3">
+                  {filters.map((filter) => (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => setActiveFilter(filter.key)}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                        activeFilter === filter.key
+                          ? "border-softGold bg-softGold text-black shadow-lg shadow-yellow-500/30"
+                          : "border-white/10 bg-black/40 text-gray-100 hover:border-softGold/40 hover:bg-gray-800"
+                      }`}
+                    >
+                      <span className="text-xs">
+                        {ContentIcons[filter.key as ContentKind] || "📁"}
+                      </span>
+                      {filter.label}
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${
+                        activeFilter === filter.key
+                          ? "bg-black/20 text-black"
+                          : "bg-white/10 text-gray-400"
+                      }`}>
+                        {filter.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="mb-8 flex items-center justify-between">
+              <div className="text-gray-400">
+                Showing {filteredItems.length} of {items.length} resources
+              </div>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-sm text-softGold hover:text-yellow-400"
+                >
+                  Clear search
+                </button>
               )}
             </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((item) => {
-                const displayExcerpt = item.description || item.excerpt || "";
-                const kindBadgeColors: Record<string, string> = {
-                  blog: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-                  book: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-                  download:
-                    "bg-green-500/10 text-green-400 border-green-500/30",
-                  event:
-                    "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
-                  print: "bg-pink-500/10 text-pink-400 border-pink-500/30",
-                  resource:
-                    "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
-                };
 
-                return (
+            {/* Content Grid */}
+            {filteredItems.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-16 text-center">
+                <div className="mb-4 text-6xl">🔍</div>
+                <h3 className="mb-2 text-xl font-semibold text-white">No resources found</h3>
+                <p className="mb-6 text-gray-400">
+                  {searchQuery 
+                    ? `No results for "${searchQuery}". Try different keywords.`
+                    : `No ${activeFilter !== 'all' ? activeFilter + ' ' : ''}resources available.`
+                  }
+                </p>
+                {(searchQuery || activeFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveFilter("all");
+                    }}
+                    className="rounded-lg bg-softGold px-6 py-2 font-semibold text-black transition-all hover:shadow-lg hover:shadow-yellow-500/25"
+                  >
+                    Show all resources
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredItems.map((item) => (
                   <article
                     key={`${item.kind}-${item.slug}`}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-1 hover:border-yellow-600/40 hover:shadow-2xl"
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/40 hover:shadow-2xl"
                   >
-                    <div className="flex flex-1 flex-col p-6">
-                      <div className="mb-3 flex items-center justify-between gap-2">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wider ${
-                            kindBadgeColors[item.kind] ||
-                            "bg-gray-500/10 text-gray-400 border-gray-500/30"
-                          }`}
-                        >
-                          {item.kind}
-                        </span>
+                    {/* Gradient overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${getKindColor(item.kind)} opacity-0 transition-opacity group-hover:opacity-10`} />
+                    
+                    <div className="relative flex flex-1 flex-col p-6">
+                      {/* Header */}
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-lg">
+                            {ContentIcons[item.kind]}
+                          </div>
+                          <span className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(item.kind)}`}>
+                            {item.kind}
+                          </span>
+                        </div>
+                        
                         {item.date && (
-                          <time className="text-xs text-gray-500">
+                          <time className="flex-shrink-0 text-xs text-gray-500">
                             {new Date(item.date).toLocaleDateString("en-GB", {
                               day: "2-digit",
                               month: "short",
@@ -413,31 +554,70 @@ export default function ContentPage({ items }: ContentPageProps) {
                         )}
                       </div>
 
-                      <h2 className="mb-3 font-serif text-xl font-light text-white group-hover:text-yellow-600">
-                        <Link href={item.href}>{item.title}</Link>
-                      </h2>
+                      {/* Content */}
+                      <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
+                        <Link href={item.href} className="hover:underline">
+                          {item.title}
+                        </Link>
+                      </h3>
 
-                      {displayExcerpt && (
-                        <p className="mb-4 line-clamp-3 text-sm text-gray-300">
-                          {displayExcerpt}
+                      {(item.description || item.excerpt) && (
+                        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-300">
+                          {item.description || item.excerpt}
                         </p>
                       )}
 
-                      {item.category && (
-                        <div className="mt-auto pt-2">
-                          <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400">
-                            {item.category}
-                          </span>
+                      {/* Footer */}
+                      <div className="mt-auto pt-4">
+                        <div className="flex items-center justify-between">
+                          {item.category && (
+                            <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400">
+                              {item.category}
+                            </span>
+                          )}
+                          
+                          <Link 
+                            href={item.href}
+                            className="inline-flex items-center text-sm font-medium text-softGold transition-all hover:gap-2"
+                          >
+                            Read more
+                            <ArrowIcon />
+                          </Link>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </article>
-                );
-              })}
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="px-4 py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="rounded-2xl border border-softGold/20 bg-gradient-to-r from-softGold/5 to-yellow-600/5 px-8 py-12 backdrop-blur-sm">
+              <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
+                Ready to Build Your Legacy?
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-gray-300">
+                Join founders, fathers, and leaders who are already transforming their approach 
+                to strategy and legacy building.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
+                <button className="rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25">
+                  Get Started Today
+                </button>
+                <button className="rounded-lg border border-softGold/30 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10">
+                  Book a Strategy Call
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        </section>
       </div>
     </Layout>
   );
-}
+};
+
+export default ContentPage;
