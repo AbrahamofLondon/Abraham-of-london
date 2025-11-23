@@ -1,4 +1,3 @@
-// components/mdx-components.tsx
 // Canonical MDX component map – used by all MDX pages (posts, books, downloads, etc.)
 
 import * as React from "react";
@@ -16,7 +15,7 @@ interface MdxComponentProps {
 
 const H1 = ({ children, ...rest }: MdxComponentProps) => (
   <h1
-    className="mt-6 mb-4 font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+    className="mt-10 mb-6 font-serif text-3xl sm:text-4xl font-semibold tracking-tight text-gray-50"
     {...rest}
   >
     {children}
@@ -25,7 +24,7 @@ const H1 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H2 = ({ children, ...rest }: MdxComponentProps) => (
   <h2
-    className="mt-6 mb-3 font-serif text-2xl font-semibold tracking-tight text-white"
+    className="mt-8 mb-4 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-gray-50"
     {...rest}
   >
     {children}
@@ -34,7 +33,7 @@ const H2 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H3 = ({ children, ...rest }: MdxComponentProps) => (
   <h3
-    className="mt-5 mb-2 font-serif text-xl font-semibold text-white"
+    className="mt-7 mb-3 font-serif text-xl sm:text-2xl font-semibold text-gray-50"
     {...rest}
   >
     {children}
@@ -43,7 +42,7 @@ const H3 = ({ children, ...rest }: MdxComponentProps) => (
 
 const H4 = ({ children, ...rest }: MdxComponentProps) => (
   <h4
-    className="mt-4 mb-2 text-base font-semibold text-gray-100"
+    className="mt-6 mb-3 text-base font-semibold text-gray-100"
     {...rest}
   >
     {children}
@@ -52,7 +51,7 @@ const H4 = ({ children, ...rest }: MdxComponentProps) => (
 
 const P = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
-    className={`my-4 text-[0.95rem] leading-relaxed text-gray-200 ${className}`.trim()}
+    className={`my-5 text-[1.02rem] sm:text-[1.06rem] leading-[1.9] text-gray-100 ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -74,26 +73,32 @@ const Em = ({ children, ...rest }: MdxComponentProps) => (
 /* ------------------------------ Lists & misc ------------------------------- */
 
 const Ul = ({ children, ...rest }: MdxComponentProps) => (
-  <ul className="my-4 ml-6 list-disc space-y-1 text-gray-200" {...rest}>
+  <ul
+    className="my-5 ml-6 list-disc space-y-2 text-[1.02rem] leading-relaxed text-gray-100"
+    {...rest}
+  >
     {children}
   </ul>
 );
 
 const Ol = ({ children, ...rest }: MdxComponentProps) => (
-  <ol className="my-4 ml-6 list-decimal space-y-1 text-gray-200" {...rest}>
+  <ol
+    className="my-5 ml-6 list-decimal space-y-2 text-[1.02rem] leading-relaxed text-gray-100"
+    {...rest}
+  >
     {children}
   </ol>
 );
 
 const Li = ({ children, ...rest }: MdxComponentProps) => (
-  <li className="leading-relaxed text-gray-200" {...rest}>
+  <li className="leading-relaxed text-gray-100" {...rest}>
     {children}
   </li>
 );
 
 const Blockquote = ({ children, ...rest }: MdxComponentProps) => (
   <blockquote
-    className="my-6 border-l-4 border-softGold/70 bg-white/5 px-4 py-3 text-[0.95rem] italic text-gray-100"
+    className="my-8 border-l-4 border-softGold/70 bg-white/5 px-5 py-4 text-[1rem] leading-relaxed italic text-gray-100 rounded-r-2xl"
     {...rest}
   >
     {children}
@@ -113,7 +118,7 @@ const Code = ({ children, ...rest }: MdxComponentProps) => (
 
 const Pre = ({ children, ...rest }: MdxComponentProps) => (
   <pre
-    className="my-4 overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/90 p-4 text-[0.85rem] text-slate-100"
+    className="my-6 overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/90 p-4 text-[0.85rem] text-slate-100"
     {...rest}
   >
     {children}
@@ -148,7 +153,15 @@ const MdxImage = (props: ImageProps) => {
     <img
       src={String(src)}
       alt={alt ? String(alt) : ""}
-      className={`my-6 h-auto w-full max-w-3xl rounded-2xl border border-slate-800/70 bg-slate-900/60 object-cover ${className}`.trim()}
+      className={`
+        my-10 mx-auto
+        w-full max-w-3xl max-h-[520px]
+        rounded-3xl border border-slate-800/70
+        bg-slate-900/60
+        object-contain
+        shadow-xl shadow-black/40
+        ${className}
+      `.trim()}
       {...rest}
     />
   );
@@ -174,7 +187,7 @@ const PullLine = ({
   ...rest
 }: MdxComponentProps) => (
   <p
-    className={`my-6 border-y border-softGold/50 py-3 text-center font-serif text-lg italic text-softGold ${className}`.trim()}
+    className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg sm:text-xl italic text-softGold ${className}`.trim()}
     {...rest}
   >
     {children}
@@ -201,9 +214,6 @@ const HeroEyebrow = ({
 
 /* ---------------------- Utility / semantic MDX blocks --------------------- */
 
-/**
- * JsonLd – allows MDX to inject structured data.
- */
 const JsonLdBlock = ({ children, ...rest }: MdxComponentProps) => {
   const data = (rest as { data?: unknown }).data ?? children;
   if (!data) return null;
@@ -238,7 +248,7 @@ const CalloutBlock = ({
   return (
     <div
       className={(
-        "my-4 rounded-2xl border px-4 py-3 text-sm " +
+        "my-6 rounded-2xl border px-5 py-4 text-sm " +
         tone +
         " " +
         className
@@ -250,9 +260,6 @@ const CalloutBlock = ({
   );
 };
 
-/**
- * Note – softer, secondary emphasis block.
- */
 const NoteBlock = ({
   children,
   className = "",
@@ -260,8 +267,8 @@ const NoteBlock = ({
 }: MdxComponentProps) => (
   <div
     className={(
-      "my-4 rounded-xl border border-slate-700 bg-slate-900/80 " +
-      "px-4 py-3 text-xs text-gray-200 " +
+      "my-5 rounded-xl border border-slate-700 bg-slate-900/80 " +
+      "px-4 py-3 text-xs sm:text-sm text-gray-200 " +
       className
     ).trim()}
     {...rest}
@@ -270,22 +277,15 @@ const NoteBlock = ({
   </div>
 );
 
-/**
- * Rule – horizontal rule used in MDX (`<Rule />` and `<hr />`).
- */
 const RuleBlock = ({ className = "", ...rest }: MdxComponentProps) => (
   <hr
     className={(
-      "my-8 mx-auto w-full border-t border-softGold/40 " + className
+      "my-10 mx-auto w-full border-t border-softGold/40 " + className
     ).trim()}
     {...rest}
   />
 );
 
-/**
- * Caption – for image captions / small explanatory text.
- * Usage in MDX: <Caption>Photo of …</Caption>
- */
 const CaptionBlock = ({
   children,
   className = "",
@@ -293,7 +293,7 @@ const CaptionBlock = ({
 }: MdxComponentProps) => (
   <p
     className={(
-      "mt-2 text-center text-[0.75rem] italic text-gray-500 " +
+      "mt-2 text-center text-[0.8rem] italic text-gray-500 " +
       className
     ).trim()}
     {...rest}
@@ -306,10 +306,6 @@ interface BadgeBlockProps extends MdxComponentProps {
   tone?: "primary" | "accent" | "neutral";
 }
 
-/**
- * Badge – small pill for tags / labels in posts.
- * Usage in MDX: <Badge tone="primary">Fatherhood</Badge>
- */
 const BadgeBlock = ({
   children,
   tone = "neutral",
@@ -338,10 +334,6 @@ const BadgeBlock = ({
   );
 };
 
-/**
- * BadgeRow – row layout for multiple badges.
- * Usage: <BadgeRow><Badge>One</Badge><Badge>Two</Badge></BadgeRow>
- */
 const BadgeRowBlock = ({
   children,
   className = "",
@@ -357,16 +349,13 @@ const BadgeRowBlock = ({
   </div>
 );
 
-/**
- * Quote – stylised pull quote, often with author.
- */
 interface QuoteProps extends MdxComponentProps {
   author?: React.ReactNode;
 }
 
 const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
   <figure
-    className="my-6 border-l-2 border-softGold/80 pl-4 text-sm text-gray-200"
+    className="my-7 border-l-2 border-softGold/80 pl-4 text-sm text-gray-200"
     {...rest}
   >
     <div className="italic">{children}</div>
@@ -378,16 +367,13 @@ const QuoteBlock = ({ children, author, ...rest }: QuoteProps) => (
   </figure>
 );
 
-/**
- * Verse – Scripture or key line with reference.
- */
 interface VerseProps extends MdxComponentProps {
   refText?: React.ReactNode;
 }
 
 const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   <div
-    className="my-4 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
+    className="my-5 rounded-lg bg-slate-900/80 px-4 py-3 text-sm text-gray-100"
     {...rest}
   >
     <p className="italic">{children}</p>
@@ -399,12 +385,9 @@ const VerseBlock = ({ children, refText, ...rest }: VerseProps) => (
   </div>
 );
 
-/**
- * ShareRow – simple flex row for share buttons / CTAs.
- */
 const ShareRow = ({ children, ...rest }: MdxComponentProps) => (
   <div
-    className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm"
+    className="mt-8 flex flex-wrap items-center gap-3 border-t border-slate-700 pt-4 text-sm"
     {...rest}
   >
     {children}
@@ -420,9 +403,6 @@ interface DownloadCardBlockProps extends MdxComponentProps {
   description?: React.ReactNode;
 }
 
-/**
- * DownloadCard – compact card for a single downloadable resource.
- */
 const DownloadCardBlock = ({
   title,
   heading,
@@ -440,7 +420,7 @@ const DownloadCardBlock = ({
 
   return (
     <article
-      className="my-4 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/90 p-4 text-gray-100 shadow-soft-elevated"
+      className="my-5 flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900/90 p-4 text-gray-100 shadow-soft-elevated"
       {...rest}
     >
       <div>
@@ -478,9 +458,6 @@ interface ResourcesCTABlockProps extends MdxComponentProps {
   description?: React.ReactNode;
 }
 
-/**
- * ResourcesCTA – end-of-article block to push downloads, events, etc.
- */
 const ResourcesCTABlock = ({
   title,
   heading,
@@ -499,7 +476,7 @@ const ResourcesCTABlock = ({
 
   return (
     <section
-      className="mt-10 rounded-2xl border border-softGold/40 bg-black/60 p-6"
+      className="mt-12 rounded-2xl border border-softGold/40 bg-black/60 p-6"
       {...rest}
     >
       <h3 className="font-serif text-lg font-semibold text-slate-50">
@@ -527,62 +504,18 @@ const ResourcesCTABlock = ({
 
 interface BrandFrameWrapperProps extends MdxComponentProps {
   children?: React.ReactNode;
-  variant?: string;
-  mode?: string;
-  purpose?: string;
-  forPrint?: boolean;
 }
 
 /**
- * BrandFrameWrapper
- *
- * - On the web, we DO NOT want a huge empty A4-style frame at the top of posts.
- * - By default, we render a compact, tasteful highlight card.
- * - Only when explicitly flagged as print/PDF do we render the full BrandFrame.
- *
- * MDX rules:
- *   - Normal blog use:      <BrandFrame>Some line</BrandFrame>  → small highlight block
- *   - Print / PDF layouts:  <BrandFrame variant="print">…</BrandFrame>
- *                            or <BrandFrame forPrint>…</BrandFrame>
+ * BrandFrameWrapper – guard against empty usage in MDX.
  */
 const BrandFrameWrapper = (props: BrandFrameWrapperProps) => {
-  const { children, variant, mode, purpose, forPrint, className, ...rest } =
-    props;
+  const { children, ...rest } = props;
 
   const hasChildren = React.Children.count(children) > 0;
-
-  const printFlag =
-    forPrint ||
-    ["print", "pdf", "download"].includes(
-      String(variant || mode || purpose || "").toLowerCase(),
-    );
-
-  // If explicitly marked for print/PDF, render the full BrandFrame
-  if (printFlag) {
-    return (
-      <BrandFrame {...rest} variant={variant} mode={mode} purpose={purpose}>
-        {children}
-      </BrandFrame>
-    );
-  }
-
-  // No children = nothing to show (prevents giant empty frames)
   if (!hasChildren) return null;
 
-  // Default web behaviour: compact premium callout, not full-page frame
-  return (
-    <div
-      className={(
-        "my-8 rounded-3xl border border-softGold/35 bg-black/40 " +
-        "px-6 py-5 text-center shadow-soft-elevated " +
-        (className ?? "")
-      ).trim()}
-    >
-      <p className="font-serif text-lg leading-snug text-softGold">
-        {children}
-      </p>
-    </div>
-  );
+  return <BrandFrame {...rest}>{children}</BrandFrame>;
 };
 
 interface EmbossedBrandMarkWrapperProps {

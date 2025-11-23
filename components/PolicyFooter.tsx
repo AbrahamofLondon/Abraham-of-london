@@ -28,7 +28,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
 
       <div className="flex flex-wrap justify-center gap-4 text-sm font-medium">
         <Link
-          href="/privacy-policy"
+          href="/privacy"
           className={`${link} underline underline-offset-2`}
         >
           Privacy Policy
@@ -37,7 +37,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
         <span className={text}>•</span>
 
         <Link
-          href="/terms-of-service"
+          href="/terms"
           className={`${link} underline underline-offset-2`}
         >
           Terms of Service
@@ -46,7 +46,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
         <span className={text}>•</span>
 
         <Link
-          href="/cookie-policy"
+          href="/cookies"
           className={`${link} underline underline-offset-2`}
         >
           Cookie Policy
@@ -55,7 +55,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
         <span className={text}>•</span>
 
         <Link
-          href="/security-policy"
+          href="/security"
           className={`${link} underline underline-offset-2`}
         >
           Security Policy
@@ -64,7 +64,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
         <span className={text}>•</span>
 
         <Link
-          href="/accessibility-statement"
+          href="/accessibility"
           className={`${link} underline underline-offset-2`}
         >
           Accessibility Statement

@@ -162,7 +162,7 @@ export default function Footer(): JSX.Element {
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Main footer content */}
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-          {/* Brand */}
+          {/* Brand section */}
           <motion.div
             className="lg:col-span-1"
             initial={{ opacity: 0, y: 20 }}
@@ -218,7 +218,7 @@ export default function Footer(): JSX.Element {
             </div>
           </motion.div>
 
-          {/* Sections */}
+          {/* Navigation sections */}
           {footerSections.map((section, index) => (
             <motion.div
               key={section.title}
@@ -249,7 +249,7 @@ export default function Footer(): JSX.Element {
           ))}
         </div>
 
-        {/* Bottom strip */}
+        {/* Bottom section */}
         <motion.div
           className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-gold/20 pt-8 lg:flex-row"
           initial={{ opacity: 0 }}
@@ -272,34 +272,22 @@ export default function Footer(): JSX.Element {
               Governance
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
-              <Link
-                href="/privacy-policy"
-                className="transition-colors hover:text-gold"
-              >
+              <Link href="/privacy" className="transition-colors hover:text-gold">
                 Privacy Policy
               </Link>
-              <Link
-                href="/terms-of-service"
-                className="transition-colors hover:text-gold"
-              >
+              <Link href="/terms" className="transition-colors hover:text-gold">
                 Terms of Service
               </Link>
-              <Link
-                href="/cookie-policy"
-                className="transition-colors hover:text-gold"
-              >
+              <Link href="/cookies" className="transition-colors hover:text-gold">
                 Cookie Policy
               </Link>
               <Link
-                href="/accessibility-statement"
+                href="/accessibility"
                 className="transition-colors hover:text-gold"
               >
                 Accessibility
               </Link>
-              <Link
-                href="/security-policy"
-                className="transition-colors hover:text-gold"
-              >
+              <Link href="/security" className="transition-colors hover:text-gold">
                 Security
               </Link>
             </div>
