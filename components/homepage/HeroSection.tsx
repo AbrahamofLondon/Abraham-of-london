@@ -1,3 +1,4 @@
+// components/HeroSection.tsx
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,10 +15,11 @@ function Eyebrow({
     <span
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
-        "border border-lightGrey/70 bg-warmWhite/80 px-3 py-1",
+        "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
         "text-xs uppercase tracking-wide font-semibold",
-        "text-slate-800 dark:text-cream",
-        className,
+        "text-[color:var(--color-on-secondary)] opacity-70",
+        "dark:text-[color:var(--color-on-primary)] dark:opacity-80",
+        className
       )}
     >
       {children}
@@ -67,19 +69,21 @@ function normalizeLocal(src?: string | null): string | undefined {
 }
 
 /**
- * Maps the AspectRatio prop to the corresponding Tailwind class.
+ * Maps the AspectRatio prop to responsive, clamped heights.
+ * Height is the thing that was blowing up the layout.
  */
 function getAspectClass(aspect: AspectRatio): string {
   switch (aspect) {
     case "square":
-      return "aspect-[1/1]";
+      return "h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]";
     case "wide":
-      return "aspect-[16/9]";
+      return "h-[200px] sm:h-[230px] md:h-[260px] lg:h-[300px]";
     case "cover-wide":
-      return "aspect-[21/9]";
+      return "h-[180px] sm:h-[210px] md:h-[240px] lg:h-[280px]";
     case "book":
     default:
-      return "aspect-[2/3]";
+      // Portrait / book-style, but sensibly capped
+      return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px]";
   }
 }
 
@@ -111,9 +115,11 @@ export default function HeroSection({
   const posterSrc = normalizeLocal(poster) || imgSrc;
 
   // 2. --- Dynamic Class Generation (with clsx) ---
+
+  // The frame now has a clamped height and max width, so it never becomes a skyscraper.
   const frameClasses = clsx(
-    "relative w-full overflow-hidden rounded-2xl",
-    "shadow-lg shadow-black/5",
+    "relative overflow-hidden rounded-2xl shadow-lg shadow-black/15",
+    "max-w-[520px] w-full mx-auto",
     getAspectClass(coverAspect),
     {
       "p-2 sm:p-3 md:p-4 bg-warmWhite border border-lightGrey/70":
@@ -122,7 +128,7 @@ export default function HeroSection({
   );
 
   const mediaClasses = clsx(
-    "absolute inset-0 h-full w-full",
+    "h-full w-full", // parent defines the box; media just fills it
     coverFit === "contain" ? "object-contain" : "object-cover",
     {
       "object-left": coverPosition === "left",
@@ -156,7 +162,7 @@ export default function HeroSection({
           </h1>
 
           {subtitle && (
-            <p className="mt-4 max-w-prose text-base leading-relaxed text-slate-700 dark:text-gray-200">
+            <p className="mt-4 max-w-prose text-[color:var(--color-on-secondary)] opacity-85 dark:text-[color:var(--color-on-primary)] dark:opacity-85">
               {subtitle}
             </p>
           )}
@@ -205,7 +211,7 @@ export default function HeroSection({
           {/* Media: Video or Image Fallback */}
           {hasVideo ? (
             <video
-              className={mediaClasses}
+              className={clsx("block", mediaClasses)}
               autoPlay
               muted
               loop
@@ -228,10 +234,13 @@ export default function HeroSection({
             <Image
               src={imgSrc}
               alt={title || "Hero image illustrating the page content"}
-              fill
+              // IMPORTANT: we do NOT use fill here. The parent box controls size.
+              fill={false}
+              width={800}
+              height={1200}
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
-              className={mediaClasses}
+              className={clsx("block", mediaClasses)}
             />
           )}
         </div>
