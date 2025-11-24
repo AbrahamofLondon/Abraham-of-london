@@ -10,6 +10,8 @@ export type HeroBannerKey =
   | "books"
   | "downloads"
   | "fathering"
+  | "consulting"
+  | "chathamRooms"
   | "generic";
 
 export interface HeroBannerCta {
@@ -43,7 +45,10 @@ export interface HeroBannerConfig {
   meta?: Record<string, unknown>;
 }
 
+// -----------------------------------------------------------------------------
 // Default hero used as fallback
+// -----------------------------------------------------------------------------
+
 const DEFAULT_HERO: HeroBannerConfig = {
   key: "generic",
   title: "Abraham of London",
@@ -63,7 +68,10 @@ const DEFAULT_HERO: HeroBannerConfig = {
   enabled: true,
 };
 
+// -----------------------------------------------------------------------------
 // Concrete registry
+// -----------------------------------------------------------------------------
+
 export const HERO_BANNERS: HeroBannerConfig[] = [
   {
     key: "home",
@@ -160,9 +168,52 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     },
     enabled: true,
   },
+  // NEW: Consulting hero
+  {
+    key: "consulting",
+    route: "/consulting",
+    title: "Faith-rooted strategy for founders, boards, and builders.",
+    subtitle: "Advisory & Consulting",
+    description:
+      "I work with leaders who refuse to outsource responsibility — men and women who carry weight for families, organisations, and nations. The work sits at the intersection of strategy, governance, and character.",
+    backgroundImage: "/assets/images/abraham-of-london-banner.webp",
+    accent: "neutral",
+    primaryCta: {
+      label: "Request a consultation",
+      href: "/contact",
+    },
+    secondaryCta: {
+      label: "View upcoming salons",
+      href: "/events",
+    },
+    enabled: true,
+  },
+  // NEW: Chatham Rooms hero
+  {
+    key: "chathamRooms",
+    route: "/chatham-rooms",
+    title: "Private, off-record rooms for honest leaders and heavy fathers.",
+    subtitle: "The Chatham Rooms",
+    description:
+      "The Chatham Rooms are small, curated conversations held under Chatham House Rule — where founders, executives, and fathers can speak plainly about power, family, faith, and consequence without performance or optics.",
+    backgroundImage: "/assets/images/abraham-of-london-banner.webp",
+    accent: "gold",
+    primaryCta: {
+      label: "Enquire about invitation",
+      href: "/contact",
+    },
+    secondaryCta: {
+      label: "See upcoming rooms",
+      href: "/events",
+    },
+    enabled: true,
+  },
 ];
 
-// Helper: find hero by key
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
 export function getHeroBannerByKey(
   key: HeroBannerKey | string,
 ): HeroBannerConfig {
@@ -170,7 +221,6 @@ export function getHeroBannerByKey(
   return HERO_BANNERS.find((b) => b.key === normalized) ?? DEFAULT_HERO;
 }
 
-// Helper: find hero by route (e.g. "/books")
 export function getHeroBannerForRoute(route: string): HeroBannerConfig {
   const cleanRoute = route.split("?")[0].split("#")[0] || "/";
   return (

@@ -7,6 +7,7 @@ import { ArrowRight, CheckCircle, Users, Target, Globe } from "lucide-react";
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import RouteHero from "@/components/RouteHero";
 
 export default function ConsultingPage(): JSX.Element {
   return (
@@ -15,83 +16,12 @@ export default function ConsultingPage(): JSX.Element {
       transparentHeader
       className="bg-gradient-to-b from-charcoal to-black"
     >
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-amber-200/5" />
-
-        <div className="relative mx-auto max-w-6xl px-4 py-12 md:py-16 sm:px-6 lg:px-8">
-          <motion.header
-            className="mb-8 max-w-3xl md:mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <motion.p
-              className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              Advisory & Consulting
-            </motion.p>
-
-            <motion.h1
-              className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl xl:text-6xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Faith-rooted strategy for
-              <span className="block bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent">
-                founders, boards, and builders.
-              </span>
-            </motion.h1>
-
-            <motion.p
-              className="mt-4 text-base leading-relaxed text-gold/70 md:mt-6 sm:text-lg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              I work with leaders who refuse to outsource responsibility — men
-              and women who carry weight for families, organisations, and
-              nations. The work sits at the intersection of strategy, governance,
-              and character.
-            </motion.p>
-
-            <motion.div
-              className="mt-6 flex flex-col gap-3 md:mt-8 sm:flex-row sm:gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Link
-                href="/contact"
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-gold to-amber-200 px-6 py-3 text-base font-semibold text-charcoal shadow-2xl transition-all hover:shadow-3xl sm:px-8 sm:py-4 sm:text-lg"
-              >
-                <span className="relative z-10">Request a consultation</span>
-                <motion.div
-                  className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.8 }}
-                />
-              </Link>
-
-              <Link
-                href="/events"
-                className="rounded-xl border border-gold/40 px-6 py-3 text-base font-semibold text-gold transition-all hover:border-gold hover:bg-gold/10 sm:px-8 sm:py-4 sm:text-lg"
-              >
-                View upcoming salons
-              </Link>
-            </motion.div>
-          </motion.header>
-        </div>
-      </section>
+      {/* Unified hero driven by hero-banners.ts */}
+      <RouteHero bannerKey="consulting" />
 
       {/* Mandate + Strategic Funnel */}
       <section className="border-t border-gold/15 bg-charcoal/90">
-        <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 md:pb-10 md:pt-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-8 md:pb-10 md:pt-10">
           <MandateStatement />
         </div>
 
