@@ -9,10 +9,10 @@
 /* 1. Global Base Colors                                                      */
 /* -------------------------------------------------------------------------- */
 
-/* Light mode base – and we reuse these for dark as well */
+/* LIGHT as default */
 :root {
-  --aol-bg: #f5f5f4;      /* warm off-white */
-  --aol-text: #111827;    /* slate-900 */
+  --aol-bg: #f5f5f4;        /* warm off-white */
+  --aol-text: #111827;      /* slate-900 */
 
   --color-soft-gold: #d6b26a;
   --color-deep-charcoal: #0b0d10;
@@ -27,18 +27,18 @@
   --color-cream: #fdfaf5;
 }
 
-/* IMPORTANT: dark mode uses the SAME base colors for now */
+/* DARK – plain, high-contrast */
 html.dark {
-  --aol-bg: #f5f5f4;
-  --aol-text: #111827;
+  --aol-bg: #020617;        /* slate-950 */
+  --aol-text: #f9fafb;      /* near-white */
 
   --color-bg: var(--aol-bg);
-  --color-bg-muted: #e5e7eb;
+  --color-bg-muted: #020617;
   --color-fg: var(--aol-text);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. Base Reset & Body                                                       */
+/* 2. Base reset & body                                                       */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -63,19 +63,19 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Dark mode now identical to light in terms of background/text */
+/* Make sure dark actually flips background/text */
 html.dark body {
   background-color: var(--aol-bg);
   color: var(--aol-text);
 }
 
-/* Text selection */
+/* Selection */
 ::selection {
   background-color: rgba(214, 178, 106, 0.35);
   color: var(--aol-text);
 }
 
-/* Ensure main uses page background */
+/* Main should inherit */
 main {
   min-height: 100vh;
 }
@@ -104,7 +104,7 @@ a:focus-visible {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Layout Shell & Hero                                                     */
+/* 3. Layout shell / hero                                                     */
 /* -------------------------------------------------------------------------- */
 
 .page-shell {
@@ -113,9 +113,9 @@ a:focus-visible {
   color: var(--aol-text);
 }
 
-/* hero-vignette now just a very subtle light wash */
+/* Hero background – just a soft wash */
 .hero-vignette {
-  background: linear-gradient(135deg, #fafafa, #e5e7eb);
+  background-color: var(--aol-bg);
 }
 
 /* Section divider */
@@ -126,11 +126,17 @@ a:focus-visible {
 /* Cards */
 .lux-card {
   border-radius: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.12);
   background-color: #ffffff;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
+html.dark .lux-card {
+  background-color: #020617;
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Hover */
 .lux-card-hover {
   transition:
     transform 0.25s ease,
@@ -159,15 +165,22 @@ a:focus-visible {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+html.dark .lux-pill {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Active pill */
 .lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.9);
+  border-color: rgba(214, 178, 106, 0.95);
   background-color: #d6b26a;
   color: #111827;
   box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 4. Typography & Prose                                                      */
+/* 4. Typography & prose                                                      */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -181,26 +194,34 @@ h6 {
   font-weight: 700;
 }
 
-/* Default body copy uses the base text color */
-p {
+/* Generic body copy */
+p,
+li {
   color: var(--aol-text);
 }
 
-/* Tailwind typography plugin defaults */
+/* Tailwind typography defaults */
 .prose {
   @apply text-slate-800;
 }
 
-.dark .prose {
-  @apply text-slate-800;
+/* Dark prose – white on dark */
+html.dark .prose {
+  @apply text-slate-100;
 }
 
-.dark .prose a {
+html.dark .prose a {
   @apply text-softGold underline-offset-2 hover:underline;
 }
 
+/* Ensure images in prose look nice */
+.prose img {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+}
+
 /* -------------------------------------------------------------------------- */
-/* 5. Header Interaction / Utility                                            */
+/* 5. Header offset utility                                                   */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
@@ -208,7 +229,7 @@ body.has-fixed-header main {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 6. Print & Reduced Motion                                                  */
+/* 6. Print & reduced motion                                                  */
 /* -------------------------------------------------------------------------- */
 
 @media print {
