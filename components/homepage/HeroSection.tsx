@@ -147,7 +147,7 @@ export default function HeroSection({
         "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]",
       )}
       role="region"
-      aria-label="Featured content section",
+      aria-label="Featured content section"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-16">
         {/* LEFT: copy -------------------------------------------------------- */}

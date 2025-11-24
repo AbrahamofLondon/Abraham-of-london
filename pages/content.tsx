@@ -68,12 +68,12 @@ interface ContentPageProps {
 // ---------------------------------------------------------------------------
 
 const ContentIcons: Record<ContentKind, string> = {
-  blog: "📝",
-  book: "📚",
-  download: ⬇️",
-  event: "🗓️",
-  print: "🖨️",
-  resource: "💎",
+  blog: "Blog",
+  book: "Book",
+  download: "↓",
+  event: "Event",
+  print: "Print",
+  resource: "Resource",
 };
 
 const ArrowIcon = () => (

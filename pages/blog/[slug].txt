@@ -48,12 +48,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0
-      ? String(tags[0])
-      : "Article");
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
 
   const canonicalTitle = title || "Abraham of London";
-
   const displayDescription = description || excerpt || "";
 
   return (
@@ -65,7 +62,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
-      {/* Controlled hero – keeps cover under control */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -77,7 +73,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
-      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
@@ -123,7 +118,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
       fallback: "blocking",
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error("Error generating static paths for /[slug]:", err);
     return { paths: [], fallback: "blocking" };
   }
@@ -157,10 +151,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!meta.title) return { notFound: true };
 
-    // Strip non-serialisable values
-    const jsonSafeMeta = JSON.parse(
-      JSON.stringify(meta),
-    ) as PageMeta;
+    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
     const mdxSource = await serialize(content || "", {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
@@ -174,7 +165,6 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
       revalidate: 3600,
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error("Error in getStaticProps for /[slug]:", err);
     return { notFound: true };
   }

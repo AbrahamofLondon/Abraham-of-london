@@ -1,104 +1,96 @@
 // components/ArticleHero.tsx
 import * as React from "react";
-import Image from "next/image";
 import clsx from "clsx";
+import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
 
 type ArticleHeroProps = {
-  title?: string;
+  title?: string | null;
   subtitle?: string | null;
-  category?: string | number | null;
+  category?: string | null;
   date?: string | null;
   readTime?: string | number | null;
   coverImage?: string | null;
+  coverAspect?: CoverAspect;
+  coverFit?: "cover" | "contain"; // kept for future, currently always "contain"
 };
 
-function formatPretty(date?: string | null): string {
-  if (!date) return "";
-  const d = new Date(date);
-  if (Number.isNaN(d.valueOf())) return date;
+function formatDate(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return null;
   return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
     year: "numeric",
+    month: "short",
+    day: "2-digit",
   }).format(d);
 }
 
-export default function ArticleHero({
-  title,
-  subtitle,
-  category,
-  date,
-  readTime,
-  coverImage,
-}: ArticleHeroProps) {
-  const displayReadTime =
-    typeof readTime === "number" ? `${readTime} min read` : readTime || "";
+export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
+  const {
+    title = "",
+    subtitle,
+    category,
+    date,
+    readTime,
+    coverImage,
+    coverAspect = "book",
+  } = props;
+
+  const dateLabel = formatDate(date);
+  const readLabel =
+    typeof readTime === "number"
+      ? `${readTime} min read`
+      : typeof readTime === "string" && readTime.trim()
+      ? readTime
+      : null;
+
+  const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
 
   return (
-    <header className="border-b border-white/10 bg-black/80 px-4 pt-20 pb-10">
-      <div className="mx-auto flex max-w-5xl flex-col gap-8 lg:flex-row lg:items-start">
-        {/* LEFT – meta + titles */}
+    <section
+      className={clsx(
+        "border-b border-white/10 bg-gradient-to-b",
+        "from-black via-[#050608] to-[#050608]",
+      )}
+    >
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 pt-10 md:flex-row md:items-start md:pb-12 md:pt-12 lg:px-0">
+        {/* LEFT: copy */}
         <div className="flex-1">
           {category && (
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
-              {String(category)}
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-softGold/80">
+              {category}
             </p>
           )}
 
-          {title && (
-            <h1 className="mb-3 font-serif text-3xl font-light text-warmWhite md:text-4xl">
-              {title}
-            </h1>
+          <h1 className="font-serif text-[clamp(2.1rem,3.2vw,3rem)] font-semibold leading-tight text-cream">
+            {title}
+          </h1>
+
+          {subtitle && (
+            <p className="mt-4 max-w-xl text-sm md:text-base text-slate-200/90 leading-relaxed">
+              {subtitle}
+            </p>
           )}
 
-          {(subtitle || date || displayReadTime) && (
-            <div className="space-y-4 text-sm text-gray-300">
-              {subtitle && (
-                <p className="max-w-xl leading-relaxed">{subtitle}</p>
-              )}
-
-              {(date || displayReadTime) && (
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                  {date && (
-                    <span className="inline-flex items-center gap-1">
-                      <span className="inline-block h-2 w-2 rounded-full bg-softGold" />
-                      <time dateTime={date}>{formatPretty(date)}</time>
-                    </span>
-                  )}
-
-                  {displayReadTime && (
-                    <>
-                      <span className="text-softGold/50">•</span>
-                      <span>{displayReadTime}</span>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+          {metaBits && (
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+              {metaBits}
+            </p>
           )}
         </div>
 
-        {/* RIGHT – capped book cover */}
+        {/* RIGHT: controlled cover frame */}
         {coverImage && (
-          <div className="flex flex-none justify-center lg:justify-end">
-            <div
-              className={clsx(
-                "relative w-full max-w-[380px] sm:max-w-[430px] md:max-w-[480px]",
-                "rounded-3xl border border-softGold/50 bg-black/60 p-3 shadow-2xl shadow-black/50",
-              )}
-            >
-              <Image
-                src={coverImage}
-                alt={title || "Article cover"}
-                width={800}
-                height={1200}
-                priority
-                className="h-auto w-full rounded-2xl object-contain"
-              />
-            </div>
+          <div className="w-full max-w-md md:flex-1 md:max-w-sm">
+            <CoverFrame
+              src={coverImage}
+              alt={title}
+              aspect={coverAspect}
+              priority
+            />
           </div>
         )}
       </div>
-    </header>
+    </section>
   );
 }
