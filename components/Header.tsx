@@ -59,7 +59,7 @@ const COLOR_SYSTEM = {
     },
     text: {
       primary: "text-white",
-      secondary: "text-white/70",
+      secondary: "text-white/80", // slightly brighter for clarity
       accent: "text-softGold",
     },
     interactive: {
@@ -150,6 +150,36 @@ const useBodyScrollLock = (isLocked: boolean) => {
   }, [isLocked]);
 };
 
+/**
+ * NEW: Resolve the actual theme from the <html> class ("dark" / not),
+ * so the header text / shell always match the real mode.
+ */
+const useResolvedTheme = (initialTheme: "light" | "dark") => {
+  const [theme, setTheme] = React.useState<"light" | "dark">(initialTheme);
+
+  React.useEffect(() => {
+    const getTheme = (): "light" | "dark" =>
+      document.documentElement.classList.contains("dark") ? "dark" : "light";
+
+    // Initial resolve on mount
+    setTheme(getTheme());
+
+    // Observe class changes on <html> so we react when ThemeToggle flips
+    const observer = new MutationObserver(() => {
+      setTheme(getTheme());
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, [initialTheme]);
+
+  return theme;
+};
+
 // --- Enhanced Components ---
 
 interface NavLinkProps {
@@ -179,7 +209,7 @@ const NavLink: React.FC<NavLinkProps> = ({
 
   const activeStyles = isActive
     ? isMobile
-      ? "bg-white/10 dark:bg-black/10"
+      ? "bg-white/10 dark:bg-black/20"
       : ""
     : "";
 
@@ -195,7 +225,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         <div className="flex flex-col">
           <span className="font-semibold">{item.label}</span>
           {isMobile && item.description && (
-            <span className="text-sm opacity-70 mt-1">{item.description}</span>
+            <span className="mt-1 text-sm opacity-75">{item.description}</span>
           )}
         </div>
       </Link>
@@ -273,6 +303,10 @@ export default function Header({
     setIsMounted(true);
   }, []);
 
+  // NEW: resolve real theme instead of trusting initialTheme blindly
+  const theme = useResolvedTheme(initialTheme);
+  const colors = COLOR_SYSTEM[theme];
+
   // Enhanced active route detection
   const isActive = React.useCallback(
     (route: RouteId): boolean => {
@@ -286,13 +320,11 @@ export default function Header({
   );
 
   // Dynamic styling
-  const colors = COLOR_SYSTEM[initialTheme];
-  const shellStyle = scrolled || !transparent 
-    ? colors.shell.normal 
-    : colors.shell.transparent;
+  const shellStyle =
+    scrolled || !transparent ? colors.shell.normal : colors.shell.transparent;
 
-  const headerHeight = scrolled 
-    ? HEADER_HEIGHTS.desktop.scrolled 
+  const headerHeight = scrolled
+    ? HEADER_HEIGHTS.desktop.scrolled
     : HEADER_HEIGHTS.desktop.normal;
 
   const brandClass = `
@@ -338,7 +370,7 @@ export default function Header({
                 key={item.route}
                 item={item}
                 isActive={isActive(item.route)}
-                theme={initialTheme}
+                theme={theme}
                 variant="desktop"
               />
             ))}
@@ -347,10 +379,10 @@ export default function Header({
           {/* Desktop Actions */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-4 border-r border-current/20 pr-6">
-              <ContactButton type="email" value={email} theme={initialTheme} />
-              <ContactButton type="phone" value={phone} theme={initialTheme} />
+              <ContactButton type="email" value={email} theme={theme} />
+              <ContactButton type="phone" value={phone} theme={theme} />
             </div>
-            
+
             <Link
               href={getRoutePath("contact")}
               className="rounded-full bg-softGold px-6 py-2.5 text-base font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50"
@@ -359,7 +391,7 @@ export default function Header({
             >
               Enquire
             </Link>
-            
+
             <ThemeToggle />
           </div>
         </div>
@@ -374,7 +406,7 @@ export default function Header({
             aria-controls="mobile-nav"
             aria-label="Toggle navigation menu"
             className={`inline-flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
-              initialTheme === "dark"
+              theme === "dark"
                 ? "bg-white/10 text-white hover:bg-white/20"
                 : "bg-black/5 text-deepCharcoal hover:bg-black/10"
             }`}
@@ -413,9 +445,9 @@ export default function Header({
           <motion.div
             id="mobile-nav"
             className={`fixed inset-0 top-[var(--header-height)] md:hidden ${
-              initialTheme === "dark" 
-                ? "bg-charcoal/95 backdrop-blur-2xl" 
-                : "bg-white/95 backdrop-blur-2xl"
+              theme === "dark"
+                ? "bg-charcoal/95 text-white backdrop-blur-2xl"
+                : "bg-white/95 text-deepCharcoal backdrop-blur-2xl"
             }`}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -429,7 +461,7 @@ export default function Header({
                     key={item.route}
                     item={item}
                     isActive={isActive(item.route)}
-                    theme={initialTheme}
+                    theme={theme}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
@@ -439,26 +471,30 @@ export default function Header({
               {/* Mobile Contact Actions */}
               <div className="mt-auto space-y-4 pt-8">
                 <div className="flex gap-6">
-                  <ContactButton 
-                    type="email" 
-                    value={email} 
-                    theme={initialTheme}
+                  <ContactButton
+                    type="email"
+                    value={email}
+                    theme={theme}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
-                  <ContactButton 
-                    type="phone" 
-                    value={phone} 
-                    theme={initialTheme}
+                  <ContactButton
+                    type="phone"
+                    value={phone}
+                    theme={theme}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
                 </div>
-                
+
                 <Link
                   href={getRoutePath("contact")}
                   onClick={() => setIsOpen(false)}
-                  className="block w-full rounded-xl bg-softGold px-6 py-4 text-center text-base font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25"
+                  className={`block w-full rounded-xl px-6 py-4 text-center text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
+                    theme === "dark"
+                      ? "bg-softGold text-deepCharcoal"
+                      : "bg-softGold text-deepCharcoal"
+                  }`}
                   prefetch={true}
                 >
                   Enquire Now
@@ -474,14 +510,16 @@ export default function Header({
         :root {
           --header-height: ${headerHeight};
         }
-        
+
         main {
           padding-top: var(--header-height);
         }
 
         @media (max-width: 767px) {
           :root {
-            --header-height: ${scrolled ? HEADER_HEIGHTS.mobile.scrolled : HEADER_HEIGHTS.mobile.normal};
+            --header-height: ${
+              scrolled ? HEADER_HEIGHTS.mobile.scrolled : HEADER_HEIGHTS.mobile.normal
+            };
           }
         }
       `}</style>
