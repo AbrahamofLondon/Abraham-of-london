@@ -18,10 +18,6 @@ import {
 import mdxComponents from "@/components/mdx-components";
 import { getAllBooks, getBookBySlug } from "@/lib/books";
 
-/**
- * Shape we actually need on the page – kept loose to avoid
- * fighting with server-side types.
- */
 type SerializableBook = {
   slug: string;
   title?: string;
@@ -43,10 +39,6 @@ type SerializableBook = {
 type BookPageProps = {
   book: SerializableBook;
 };
-
-/* -------------------------------------------------------------------------- */
-/*  Premium Components                                                        */
-/* -------------------------------------------------------------------------- */
 
 const ReadingProgressBar = () => {
   const [progress, setProgress] = useState(0);
@@ -76,7 +68,7 @@ const ReadingProgressBar = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-black/20">
+    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-aol-surface/50 dark:bg-black/20">
       <div
         className="h-full bg-gradient-to-r from-softGold to-forest transition-all duration-150"
         style={{ width: `${progress}%` }}
@@ -85,7 +77,7 @@ const ReadingProgressBar = () => {
   );
 };
 
-const PremiumDivider = () => (
+const SignatureDivider = () => (
   <div className="relative my-12 h-px">
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-softGold/40 to-transparent" />
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -93,10 +85,6 @@ const PremiumDivider = () => (
     </div>
   </div>
 );
-
-/* -------------------------------------------------------------------------- */
-/*  Static paths                                                              */
-/* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const books = await Promise.resolve(getAllBooks());
@@ -119,10 +107,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Static props – fully JSON-safe                                            */
-/* -------------------------------------------------------------------------- */
-
 export const getStaticProps: GetStaticProps<BookPageProps> = async (ctx) => {
   const slugParam = ctx.params?.slug;
   const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam ?? "";
@@ -137,7 +121,6 @@ export const getStaticProps: GetStaticProps<BookPageProps> = async (ctx) => {
     return { notFound: true };
   }
 
-  // Make every Date a string so Next.js can serialise it
   const serialised = JSON.parse(
     JSON.stringify(rawBook, (_key, value) =>
       value instanceof Date ? value.toISOString() : value,
@@ -152,19 +135,13 @@ export const getStaticProps: GetStaticProps<BookPageProps> = async (ctx) => {
   };
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Page component                                                            */
-/* -------------------------------------------------------------------------- */
-
 export default function BookPage(
   props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
   const { book } = props;
 
-  // Default status by slug – extend as needed
   const defaultStatusBySlug: Record<string, string> = {
     "fathering-without-fear": "In Development",
-    // Add other books here as they come online
   };
 
   const {
@@ -223,17 +200,14 @@ export default function BookPage(
 
       <ReadingProgressBar />
 
-      {/* Premium Background Canvas */}
-      <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-black via-deepCharcoal to-black" />
+      <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-deepCharcoal via-black to-black/90 dark:to-forest/20" />
 
-      {/* Animated background elements */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/4 h-1/2 w-1/2 animate-pulse rounded-full bg-softGold/5 blur-3xl" />
         <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 animate-pulse rounded-full bg-forest/5 blur-3xl" />
       </div>
 
       <main className="relative z-10">
-        {/* Enhanced Breadcrumb */}
         <nav className="fixed top-20 left-8 z-30 hidden xl:block">
           <div className="flex items-center gap-3 text-sm text-gray-400">
             <Link
@@ -256,7 +230,7 @@ export default function BookPage(
                 <span className="text-softGold/40">→</span>
                 <div className="group flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-softGold/20" />
-                  <span className="max-w-[200px] truncate text-gray-300">
+                  <span className="max-w-[200px] truncate text-aol-text">
                     {title}
                   </span>
                 </div>
@@ -265,13 +239,11 @@ export default function BookPage(
           </div>
         </nav>
 
-        {/* PREMIUM HERO SECTION */}
         <section className="relative flex min-h-screen items-center justify-center px-4 pt-20 pb-10">
           <div className="absolute inset-0 bg-gradient-to-br from-deepCharcoal via-black to-forest/20" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20" />
 
           <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-12 lg:grid lg:grid-cols-2 lg:items-center">
-            {/* Cover Art */}
             <div className="flex justify-center lg:justify-end">
               <div className="group relative">
                 <div className="absolute -inset-4 rounded-3xl bg-softGold/20 blur-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -329,7 +301,6 @@ export default function BookPage(
               </div>
             </div>
 
-            {/* Book Metadata */}
             <div className="flex flex-col justify-center text-center lg:text-left">
               <div className="mb-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 {category && (
@@ -506,18 +477,17 @@ export default function BookPage(
           </div>
         </section>
 
-        {/* PREMIUM CONTENT SECTION */}
         <section id="book-content" className="relative -mt-20 px-4 pb-20">
           <div className="mx-auto max-w-4xl">
-            <div className="overflow-hidden rounded-3xl border border-white/20 bg-white/95 shadow-2xl shadow-black/30 backdrop-blur-xl">
-              <div className="border-b border-gray-100/50 bg-gradient-to-r from-white to-gray-50/80 px-8 py-8">
+            <div className="overflow-hidden rounded-3xl border border-aol-border-subtle bg-aol-surface shadow-2xl shadow-black/30 backdrop-blur-xl">
+              <div className="border-b border-aol-border-subtle bg-aol-surface dark:bg-charcoal px-8 py-8">
                 {excerpt && (
                   <div className="mx-auto max-w-3xl text-center">
-                    <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-gray-500">
+                    <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-aol-muted">
                       <div className="h-2 w-2 rounded-full bg-softGold" />
                       Project Synopsis
                     </div>
-                    <p className="text-lg font-light leading-relaxed text-gray-700">
+                    <p className="text-lg font-light leading-relaxed text-aol-text">
                       {excerpt}
                     </p>
                   </div>
@@ -527,15 +497,15 @@ export default function BookPage(
               <div className="px-8 py-12">
                 {hasMdxSource ? (
                   <article
-                    className="prose prose-lg max-w-none 
-                    prose-headings:font-serif prose-headings:text-deepCharcoal prose-headings:font-light
-                    prose-p:text-gray-700 prose-p:leading-relaxed
-                    prose-a:text-forest prose-a:no-underline hover:prose-a:underline
+                    className="prose prose-lg max-w-none prose-invert:!text-aol-text
+                    prose-headings:font-serif prose-headings:!text-aol-text prose-headings:font-light
+                    prose-p:!text-aol-text prose-p:leading-relaxed
+                    prose-a:!text-softGold prose-a:no-underline hover:prose-a:underline
                     prose-blockquote:border-l-softGold prose-blockquote:bg-softGold/5 prose-blockquote:px-6 prose-blockquote:py-4
                     prose-img:rounded-xl prose-img:shadow-lg
-                    prose-strong:text-deepCharcoal prose-strong:font-semibold
-                    prose-code:rounded prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1
-                    prose-pre:bg-black prose-pre:text-gray-200"
+                    prose-strong:!text-aol-text prose-strong:font-semibold
+                    prose-code:rounded prose-code:bg-aol-surface/80 prose-code:px-2 prose-code:py-1 prose-code:!text-deepCharcoal
+                    prose-pre:bg-deepCharcoal prose-pre:text-gray-200 dark:prose-code:!text-softGold dark:prose-code:bg-deepCharcoal/80"
                   >
                     <MDXRemote
                       {...(mdxSource as MDXRemoteSerializeResult)}
@@ -543,7 +513,7 @@ export default function BookPage(
                     />
                   </article>
                 ) : content ? (
-                  <article className="prose prose-lg max-w-none whitespace-pre-wrap text-deepCharcoal prose-headings:font-serif prose-a:text-forest">
+                  <article className="prose prose-lg max-w-none whitespace-pre-wrap text-aol-text prose-headings:font-serif prose-a:text-softGold">
                     {String(content)}
                   </article>
                 ) : (
@@ -563,10 +533,10 @@ export default function BookPage(
                         />
                       </svg>
                     </div>
-                    <h3 className="mb-4 font-serif text-2xl font-light text-deepCharcoal">
+                    <h3 className="mb-4 font-serif text-2xl font-light text-aol-text">
                       Manuscript in Progress
                     </h3>
-                    <p className="mx-auto max-w-md leading-relaxed text-gray-600">
+                    <p className="mx-auto max-w-md leading-relaxed text-aol-muted">
                       Full details for this book are being carefully
                       crafted. The foundation is set—now we&apos;re
                       building the complete vision.
@@ -574,7 +544,7 @@ export default function BookPage(
                   </div>
                 )}
 
-                <PremiumDivider />
+                <SignatureDivider />
 
                 <section className="relative mt-16 overflow-hidden rounded-2xl bg-gradient-to-br from-deepCharcoal via-black to-forest/90 p-12 text-center text-white">
                   <div className="absolute inset-0 opacity-10">

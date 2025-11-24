@@ -1,22 +1,20 @@
 // pages/[slug].tsx
-import * as React from "react";
-import Head from "next/head";
-import type { GetStaticPaths, GetStaticProps } from "next";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
+import * as React from 'react';
+import Head from 'next/head';
+import type { GetStaticPaths, GetStaticProps } from 'next';
+import { MDXRemote, type MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
 
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post";
-import ArticleHero from "@/components/ArticleHero";
+import Layout from '@/components/Layout';
+import mdxComponents from '@/components/mdx-components';
+import { getAllPosts, getPostBySlug } from '@/lib/posts';
+import { getAllContent, getContentBySlug } from '@/lib/mdx';
+import type { PostMeta } from '@/types/post';
+import ArticleHero from '@/components/ArticleHero';
 
 type PageMeta = PostMeta & {
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
+  coverAspect?: 'book' | 'wide' | 'square';
+  coverFit?: 'cover' | 'contain';
 };
 
 type PageProps = {
@@ -24,14 +22,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// These are the *actual* Contentlayer types you have.
-const PRIMARY_COLLECTION = "Post";
-const FALLBACK_COLLECTIONS = ["Print", "Resource"] as const;
-const COLLECTIONS = [PRIMARY_COLLECTION, ...FALLBACK_COLLECTIONS];
-
-// -----------------------------------------------------------------------------
-// Page component
-// -----------------------------------------------------------------------------
+const PRIMARY_COLLECTION = 'Post';
+const FALLBACK_COLLECTIONS = ['Print', 'Resource'] as const;
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   const {
@@ -48,13 +40,12 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   } = meta;
 
   const displaySubtitle = excerpt || description || undefined;
-
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : 'Article');
 
-  const canonicalTitle = title || "Abraham of London";
-  const displayDescription = description || excerpt || "";
+  const canonicalTitle = title || 'Abraham of London';
+  const displayDescription = description || excerpt || '';
 
   return (
     <Layout title={canonicalTitle}>
@@ -65,7 +56,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
-      {/* Shared article hero */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -77,7 +67,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
-      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
@@ -104,70 +93,68 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
 export default ContentPage;
 
-// -----------------------------------------------------------------------------
-// SSG – paths
-// -----------------------------------------------------------------------------
-
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const allItems: any[] = [];
+    const allItems: unknown[] = [];
 
-    // Gather slugs from Post, Print, Resource
-    for (const key of COLLECTIONS) {
+    const posts = await getAllPosts();
+    allItems.push(...posts);
+
+    for (const key of FALLBACK_COLLECTIONS) {
       const items = getAllContent(key) ?? [];
       allItems.push(...items);
     }
 
     const seen = new Set<string>();
-    const paths =
-      allItems
-        .filter((item) => item?.slug)
-        .map((item) => String(item.slug))
-        .filter((slug) => {
-          if (seen.has(slug)) return false;
-          seen.add(slug);
-          return true;
-        })
-        .map((slug) => ({ params: { slug } }));
+    const paths = allItems
+      .filter((item: any) => item?.slug)
+      .map((item: any) => String(item.slug))
+      .filter((slug) => {
+        if (seen.has(slug)) return false;
+        seen.add(slug);
+        return true;
+      })
+      .map((slug) => ({ params: { slug } }));
 
     return {
       paths,
-      fallback: "blocking",
+      fallback: 'blocking',
     };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static paths for /[slug]:", err);
-    return { paths: [], fallback: "blocking" };
+  } catch (err: unknown) {
+    console.error('Error generating static paths for /[slug]:', err);
+    return { paths: [], fallback: 'blocking' };
   }
 };
-
-// -----------------------------------------------------------------------------
-// SSG – props
-// -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slugParam = params?.slug;
     const slug =
-      typeof slugParam === "string"
+      typeof slugParam === 'string'
         ? slugParam
         : Array.isArray(slugParam)
         ? slugParam[0]
-        : "";
+        : '';
 
     if (!slug) return { notFound: true };
 
     let data: (PageMeta & { content?: string }) | null = null;
 
-    // Try Post first, then Print, then Resource
-    for (const key of COLLECTIONS) {
-      const candidate = getContentBySlug(key, slug, {
-        withContent: true,
-      }) as (PageMeta & { content?: string }) | null;
+    const postCandidate = await getPostBySlug(slug);
+    if (postCandidate) {
+      data = postCandidate as PageMeta & { content?: string };
+    }
 
-      if (candidate) {
-        data = candidate;
-        break;
+    if (!data) {
+      for (const key of FALLBACK_COLLECTIONS) {
+        const candidate = getContentBySlug(key, slug, {
+          withContent: true,
+        }) as (PageMeta & { content?: string }) | null;
+
+        if (candidate) {
+          data = candidate;
+          break;
+        }
       }
     }
 
@@ -179,10 +166,9 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     if (!meta.title) return { notFound: true };
 
-    // JSON-safe meta for hydration
     const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
-    const mdxSource = await serialize(content || "", {
+    const mdxSource = await serialize(content || '', {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
     });
 
@@ -193,9 +179,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       },
       revalidate: 3600,
     };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error in getStaticProps for /[slug]:", err);
+  } catch (err: unknown) {
+    console.error('Error in getStaticProps for /[slug]:', err);
     return { notFound: true };
   }
 };

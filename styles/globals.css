@@ -6,57 +6,57 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* BASE TOKENS – LIGHT + CINEMATIC DARK (FIXED CONTRAST)                     */
+/* BASE TOKENS – LIGHT + CINEMATIC DARK (Fixed Syntax)                       */
 /* -------------------------------------------------------------------------- */
 
 /* Light theme defaults (High Contrast) */
 :root {
-  --aol-bg: #f9fafb; /* Lighter off-white for better contrast */
-  --aol-surface: #ffffff;
-  --aol-text: #111827; /* Dark text */
-  --aol-muted: #4b5563;
-  --aol-softGold: #d6b26a;
-  --aol-border-subtle: rgba(148, 163, 184, 0.35);
+  --aol-bg: #f9fafb; /* Lighter off-white for better contrast */
+  --aol-surface: #ffffff;
+  --aol-text: #111827; /* Dark text */
+  --aol-muted: #4b5563;
+  --aol-softGold: #d6b26a;
+  --aol-border-subtle: rgba(148, 163, 184, 0.35);
 }
 
 /* Dark theme overrides – driven by next-themes .dark class on <html> (Smooth, Cinematic) */
 html.dark {
-  --aol-bg: #050608; /* Deep cinematic background */
-  --aol-surface: #0b0d10;
-  --aol-text: #f9fafb; /* Light text */
-  --aol-muted: #cbd5f5;
-  --aol-softGold: #d6b26a;
-  --aol-border-subtle: rgba(71, 85, 105, 0.5); /* Stronger dark border contrast */
+  --aol-bg: #050608; /* Deep cinematic background */
+  --aol-surface: #0b0d10;
+  --aol-text: #f9fafb; /* Light text */
+  --aol-muted: #cbd5f5;
+  --aol-softGold: #d6b26a;
+  --aol-border-subtle: rgba(71, 85, 105, 0.5);
 }
 
 /* -------------------------------------------------------------------------- */
-/* RESET & BASE                                                                */
+/* RESET & BASE                                                               */
 /* -------------------------------------------------------------------------- */
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-  min-height: 100vh;
-  margin: 0;
-  background-color: var(--aol-bg); /* Use theme-defined background */
-  color: var(--aol-text); /* Use theme-defined text color */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out; /* Smooth theme transition */
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 main {
-  min-height: 100vh;
+  min-height: 100vh;
 }
 
 /* Media */
@@ -65,95 +65,95 @@ picture,
 video,
 canvas,
 svg {
-  display: block;
-  max-width: 100%;
+  display: block;
+  max-width: 100%;
 }
 
 /* Links */
 a {
-  color: inherit;
-  text-decoration: none;
-  text-decoration-skip-ink: auto;
-  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  color: inherit;
+  text-decoration: none;
+  text-decoration-skip-ink: auto;
+  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 a:focus-visible {
-  outline: 2px solid var(--aol-softGold);
-  outline-offset: 2px;
+  outline: 2px solid var(--aol-softGold);
+  outline-offset: 2px;
 }
 
-/* Text selection (FIXED CONTRAST) */
+/* Text selection */
 ::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: var(--aol-text); /* Text selection color now adapts to the theme text color */
+  background-color: rgba(214, 178, 106, 0.35);
+  color: var(--aol-text);
 }
 
 /* -------------------------------------------------------------------------- */
-/* PAGE SHELL & CARDS (FIXED GRADIENT SUBTLETY)                                */
+/* PAGE SHELL & CARDS                                                         */
 /* -------------------------------------------------------------------------- */
 
 .page-shell {
-  min-height: 100vh;
-  color: var(--aol-text);
-  background-color: var(--aol-bg);
+  min-height: 100vh;
+  color: var(--aol-text);
+  background-color: var(--aol-bg);
 }
 
-/* Only apply full cinematic gradient in dark mode (REDUCED OPACITY FOR SMOOTHNESS/LEGIBILITY) */
+/* Only apply full cinematic gradient in dark mode */
 html.dark .page-shell {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.12), transparent 60%), /* Reduced Gold Opacity */
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.25), #050608); /* Reduced Forest Opacity */
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.12), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.25), #050608);
 }
 
 .section-divider {
-  border-top: 1px solid var(--aol-border-subtle);
+  border-top: 1px solid var(--aol-border-subtle);
 }
 
 .lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Slightly less border transparency */
-  background-color: var(--aol-surface); /* Use surface variable for consistency */
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(18px); /* Increased blur for glass effect */
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--aol-surface);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(18px);
 }
 
 .lux-card-hover {
-  transition:
-    transform 0.35s ease-out, /* Smoother transition */
-    box-shadow 0.35s ease-out,
-    border-color 0.35s ease-out;
+  transition:
+    transform 0.35s ease-out,
+    box-shadow 0.35s ease-out,
+    border-color 0.35s ease-out;
 }
 
 .lux-card-hover:hover {
-  transform: translateY(-4px); /* Slight elevation */
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85); /* Deeper shadow */
-  border-color: rgba(214, 178, 106, 0.7);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  border-color: rgba(214, 178, 106, 0.7);
 }
 
 /* Pills */
 .lux-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid var(--aol-border-subtle); /* Use subtle border variable */
-  background-color: rgba(11, 13, 16, 0.95); /* Deeper/Cleaner pill background */
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--aol-text); /* Inherit theme text color */
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(16px); /* Deeper blur */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--aol-border-subtle);
+  background-color: rgba(11, 13, 16, 0.95);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--aol-text);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(16px);
 }
 
 .lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.9);
-  background-color: var(--aol-softGold);
-  color: #111827; /* Always dark text on gold for high contrast */
+  border-color: rgba(214, 178, 106, 0.9);
+  background-color: var(--aol-softGold);
+  color: #111827;
 }
 
 /* -------------------------------------------------------------------------- */
-/* TYPOGRAPHY                                                                */
+/* TYPOGRAPHY                                                                 */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -162,138 +162,138 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  font-weight: 700;
-  color: var(--aol-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-weight: 700;
+  color: var(--aol-text);
 }
 
 p {
-  color: var(--aol-text);
+  color: var(--aol-text);
 }
 
 /* -------------------------------------------------------------------------- */
-/* MDX / PROSE (FIXED LEGIBILITY ACROSS THEMES)                                  */
+/* MDX / PROSE                                                                */
 /* -------------------------------------------------------------------------- */
 
 .prose {
-  max-width: none;
-  color: var(--aol-text); /* Base text color uses the theme variable */
-  font-size: 1.0625rem;
-  line-height: 1.75;
+  max-width: none;
+  color: var(--aol-text);
+  font-size: 1.0625rem;
+  line-height: 1.75;
 }
 
 .prose p,
 .prose li {
-  color: var(--aol-text);
-  line-height: 1.75;
+  color: var(--aol-text);
+  line-height: 1.75;
 }
 
 .prose h1,
 .prose h2,
 .prose h3,
 .prose h4 {
-  color: var(--aol-text); /* Headings use the theme variable */
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  color: var(--aol-text);
+  letter-spacing: -0.03em;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 .prose strong {
-  color: var(--aol-text);
-  font-weight: 600;
+  color: var(--aol-text);
+  font-weight: 600;
 }
 
 /* Links inside prose – gold accent */
 .prose a {
-  color: var(--aol-softGold);
-  font-weight: 500;
-  text-decoration: none;
+  color: var(--aol-softGold);
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .prose a:hover {
-  color: var(--aol-text); /* Hover color for light/dark text */
-  text-decoration: underline;
+  color: var(--aol-text);
+  text-decoration: underline;
 }
 
 /* Blockquotes */
 .prose blockquote {
-  border-left: 4px solid var(--aol-softGold);
-  background-color: rgba(148, 163, 184, 0.1); /* Subtler light mode background */
-  color: var(--aol-text);
-  padding: 0.75rem 0.75rem 0.75rem 1rem;
-  margin: 1.75rem 0;
-  border-radius: 0 1rem 1rem 0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid var(--aol-softGold);
+  background-color: rgba(148, 163, 184, 0.1);
+  color: var(--aol-text);
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  margin: 1.75rem 0;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Dark mode blockquote (FIXED BACKGROUND CONTRAST) */
+/* Dark mode blockquote */
 html.dark .prose blockquote {
-  background-color: rgba(15, 23, 42, 0.8);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+  background-color: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
 }
 
 .prose ul li::marker,
 .prose ol li::marker {
-  color: var(--aol-softGold);
+  color: var(--aol-softGold);
 }
 
 .prose hr {
-  border-color: var(--aol-border-subtle); /* Use subtle border variable */
-  margin: 2.5rem 0;
+  border-color: var(--aol-border-subtle);
+  margin: 2.5rem 0;
 }
 
 .prose code {
-  color: var(--aol-text); /* Changed from gold to text color for high contrast */
-  background-color: rgba(148, 163, 184, 0.15); /* Subtler light mode background */
-  border-radius: 6px; /* Slightly smaller radius for in-line code */
-  padding: 0.15rem 0.4rem;
-  font-size: 0.85em;
+  color: var(--aol-text);
+  background-color: rgba(148, 163, 184, 0.15);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85em;
 }
 
-/* Dark mode code (FIXED BACKGROUND CONTRAST) */
+/* Dark mode code */
 html.dark .prose code {
-  color: var(--aol-softGold); /* Gold for high visibility in dark code blocks */
-  background-color: rgba(0, 0, 0, 0.6);
+  color: var(--aol-softGold);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .prose pre {
-  background-color: rgba(148, 163, 184, 0.08); /* Subtler light mode background */
-  color: var(--aol-text);
-  border-radius: 1.25rem;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  background-color: rgba(148, 163, 184, 0.08);
+  color: var(--aol-text);
+  border-radius: 1.25rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-/* Dark mode pre (FIXED BACKGROUND CONTRAST) */
+/* Dark mode pre */
 html.dark .prose pre {
-  background-color: rgba(0, 0, 0, 0.85); /* Deep dark background */
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
 /* -------------------------------------------------------------------------- */
-/* HEADER UTIL                                                                */
+/* HEADER UTIL                                                                */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
-  padding-top: 5rem;
+  padding-top: 5rem;
 }
 
 /* -------------------------------------------------------------------------- */
-/* PRINT & REDUCED MOTION                                                      */
+/* PRINT & REDUCED MOTION                                                     */
 /* -------------------------------------------------------------------------- */
 
 @media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
