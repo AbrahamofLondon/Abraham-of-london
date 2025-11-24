@@ -24,14 +24,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-/**
- * Content collections that are allowed to live at the root:
- *  - Post      → insights / essays
- *  - Print     → long-form
- *  - Resource  → misc resources
- *  - Book      → book pages if they have slugs
- */
-const COLLECTIONS: string[] = ["Post", "Print", "Resource", "Book"];
+// PRIMARY content collection for Insights
+const PRIMARY_COLLECTION = "posts";
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -91,6 +85,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
               prose-ul:text-slate-800 prose-ol:text-slate-800
               prose-blockquote:border-l-softGold prose-blockquote:text-slate-900
+              prose-hr:border-t border-slate-200
               prose-img:rounded-xl prose-img:shadow-lg
 
               dark:prose-headings:text-slate-50
@@ -99,6 +94,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               dark:prose-ul:text-slate-100
               dark:prose-ol:text-slate-100
               dark:prose-blockquote:text-slate-50
+              dark:prose-hr:border-slate-700
             `}
           >
             <MDXRemote {...mdxSource} components={mdxComponents} />
@@ -117,15 +113,10 @@ export default ContentPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const allItems: any[] = [];
-
-    for (const key of COLLECTIONS) {
-      const items = getAllContent(key) ?? [];
-      allItems.push(...items);
-    }
+    const items = getAllContent(PRIMARY_COLLECTION) ?? [];
 
     const paths =
-      allItems
+      items
         .filter((item: any) => item?.slug)
         .map((item: any) => ({
           params: { slug: String(item.slug) },
@@ -160,10 +151,17 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!slug) return { notFound: true };
 
+    // Try multiple collections; prefer posts (Insights)
+    const collectionsToTry = [
+      "posts",   // Insights (primary)
+      "pages",   // standalone essays / pages
+      "print",   // long-form prints
+      "resource" // misc resources
+    ];
+
     let data: (PageMeta & { content?: string }) | null = null;
 
-    // Try each collection until we find a match
-    for (const key of COLLECTIONS) {
+    for (const key of collectionsToTry) {
       const candidate = getContentBySlug(key, slug, {
         withContent: true,
       }) as (PageMeta & { content?: string }) | null;
@@ -174,11 +172,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
       }
     }
 
-    if (!data || !data.title) {
-      return { notFound: true };
-    }
+    if (!data) return { notFound: true };
 
     const { content, ...meta } = data;
+
+    if (!meta.title) return { notFound: true };
 
     const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 

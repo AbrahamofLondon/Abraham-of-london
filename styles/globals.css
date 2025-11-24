@@ -6,39 +6,39 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* 1. Global Base Colors                                                      */
+/* Luxury Theme Tokens                                                        */
 /* -------------------------------------------------------------------------- */
 
-/* LIGHT as default */
+/* Dark mode (canonical) */
 :root {
-  --aol-bg: #f5f5f4;        /* warm off-white */
-  --aol-text: #111827;      /* slate-900 */
-
+  --color-background: #050608;
+  --color-foreground: #f9fafb;
   --color-soft-gold: #d6b26a;
   --color-deep-charcoal: #0b0d10;
   --color-charcoal: #15171c;
   --color-forest: #0e3b33;
+  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
 
-  --color-bg: var(--aol-bg);
-  --color-bg-muted: #e5e7eb;
-  --color-fg: var(--aol-text);
+  /* Legacy tokens */
+  --color-bg: #050608;
+  --color-bg-muted: #0b0d10;
+  --color-fg: #f9fafb;
   --color-softGold: #d6b26a;
   --color-deepCharcoal: #0b0d10;
   --color-cream: #fdfaf5;
 }
 
-/* DARK – plain, high-contrast */
-html.dark {
-  --aol-bg: #020617;        /* slate-950 */
-  --aol-text: #f9fafb;      /* near-white */
-
-  --color-bg: var(--aol-bg);
-  --color-bg-muted: #020617;
-  --color-fg: var(--aol-text);
+/* Light mode overrides (html gets .dark from ThemeProvider) */
+html:not(.dark) {
+  --color-background: #f9fafb;
+  --color-foreground: #111827;
+  --color-bg: #f9fafb;
+  --color-bg-muted: #f3f4f6;
+  --color-fg: #111827;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. Base reset & body                                                       */
+/* Global base                                                                */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -52,35 +52,46 @@ html {
 }
 
 body {
-  @apply antialiased;
   min-height: 100vh;
   margin: 0;
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
+  @apply antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Make sure dark actually flips background/text */
+/* DARK MODE BODY – LUXURY GRADIENT RESTORED */
 html.dark body {
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
+  background:
+    radial-gradient(circle at top, rgba(214, 178, 106, 0.10), transparent 55%),
+    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #050608);
+  color: var(--color-foreground);
 }
 
-/* Selection */
+/* LIGHT MODE BODY – CLEAN, HIGH CONTRAST */
+html:not(.dark) body {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+/* Text selection */
 ::selection {
   background-color: rgba(214, 178, 106, 0.35);
-  color: var(--aol-text);
+  color: #fdfdfb;
 }
 
-/* Main should inherit */
+html:not(.dark) ::selection {
+  background-color: rgba(214, 178, 106, 0.30);
+  color: #111827;
+}
+
+/* Make sure main uses the body background by default */
 main {
   min-height: 100vh;
 }
 
-/* Media normalisation */
+/* Generic media normalisation */
 img,
 picture,
 video,
@@ -104,39 +115,45 @@ a:focus-visible {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Layout shell / hero                                                     */
+/* Layout Shell & Cards                                                       */
 /* -------------------------------------------------------------------------- */
 
-.page-shell {
+/* Page shell */
+html.dark .page-shell {
   min-height: 100vh;
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
+  color: #f9fafb;
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.14), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.32), #050608);
 }
 
-/* Hero background – just a soft wash */
-.hero-vignette {
-  background-color: var(--aol-bg);
+html:not(.dark) .page-shell {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  color: #111827;
 }
 
-/* Section divider */
+/* Optional: subtle divider styling used across sections */
 .section-divider {
   border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-/* Cards */
-.lux-card {
+/* Luxury cards – primary card style */
+html.dark .lux-card {
   border-radius: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+}
+
+html:not(.dark) .lux-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.06);
   background-color: #ffffff;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-html.dark .lux-card {
-  background-color: #020617;
-  border-color: rgba(148, 163, 184, 0.5);
-}
-
-/* Hover */
 .lux-card-hover {
   transition:
     transform 0.25s ease,
@@ -144,43 +161,57 @@ html.dark .lux-card {
     border-color 0.25s ease;
 }
 
-.lux-card-hover:hover {
+html.dark .lux-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
-  border-color: rgba(214, 178, 106, 0.6);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
+  border-color: rgba(214, 178, 106, 0.4);
 }
 
-/* Pills */
-.lux-pill {
+html:not(.dark) .lux-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(214, 178, 106, 0.35);
+}
+
+/* Filter pills */
+html.dark .lux-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(15, 23, 42, 0.85);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background-color: #f9fafb;
+  color: #f9fafb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+}
+
+html:not(.dark) .lux-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background-color: #ffffff;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: #111827;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-html.dark .lux-pill {
-  background-color: #020617;
-  color: #e5e7eb;
-  border-color: rgba(148, 163, 184, 0.5);
-}
-
-/* Active pill */
-.lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.95);
-  background-color: #d6b26a;
-  color: #111827;
-  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
+/* Hero vignette helper for big headers (dark only) */
+html.dark .hero-vignette {
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.16), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #050608);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 4. Typography & prose                                                      */
+/* Typography                                                                 */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -194,34 +225,89 @@ h6 {
   font-weight: 700;
 }
 
-/* Generic body copy */
-p,
-li {
-  color: var(--aol-text);
+/* Strong readable body copy */
+html.dark p {
+  color: #e5e7eb;
 }
 
-/* Tailwind typography defaults */
+html:not(.dark) p {
+  color: #374151;
+}
+
+/* -------------------------------------------------------------------------- */
+/* MDX / Prose                                                                */
+/* -------------------------------------------------------------------------- */
+
+/* Tailwind prose helpers */
 .prose {
   @apply text-slate-800;
 }
 
-/* Dark prose – white on dark */
-html.dark .prose {
+.dark .prose {
   @apply text-slate-100;
 }
 
-html.dark .prose a {
+.dark .prose a {
   @apply text-softGold underline-offset-2 hover:underline;
 }
 
-/* Ensure images in prose look nice */
-.prose img {
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+/* High-end custom prose class (optional, used by Article pages) */
+.prose-lux {
+  max-width: none;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+html.dark .prose-lux {
+  color: #e5e7eb;
+}
+
+html:not(.dark) .prose-lux {
+  color: #374151;
+}
+
+.prose-lux p,
+.prose-lux li {
+  line-height: 1.75;
+}
+
+html.dark .prose-lux h1,
+html.dark .prose-lux h2,
+html.dark .prose-lux h3,
+html.dark .prose-lux h4,
+html:not(.dark) .prose-lux h1,
+html:not(.dark) .prose-lux h2,
+html:not(.dark) .prose-lux h3,
+html:not(.dark) .prose-lux h4 {
+  letter-spacing: -0.03em;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+.prose-lux h1 {
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  margin-bottom: 1.5rem;
+}
+
+.prose-lux h2 {
+  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-lux h3 {
+  font-size: clamp(1.4rem, 2vw, 1.7rem);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-lux h4 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* -------------------------------------------------------------------------- */
-/* 5. Header offset utility                                                   */
+/* Header interaction                                                         */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
@@ -229,7 +315,7 @@ body.has-fixed-header main {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 6. Print & reduced motion                                                  */
+/* Print & Reduced Motion                                                     */
 /* -------------------------------------------------------------------------- */
 
 @media print {

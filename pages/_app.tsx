@@ -11,7 +11,7 @@ function usePageView() {
 
   useEffect(() => {
     const handleRouteChange = (_url: string) => {
-      // Hook analytics here later if you want
+      // analytics hook stub
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);
@@ -25,11 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
   usePageView();
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem={false}
-    >
+    <ThemeProvider attribute="class" defaultTheme="dark">
       <Component {...pageProps} />
     </ThemeProvider>
   );
