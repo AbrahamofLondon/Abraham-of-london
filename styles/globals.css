@@ -6,31 +6,45 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* 1. GLOBAL BASE COLORS (SIMPLE, HIGH CONTRAST)                              */
+/* 1. Base Color Tokens                                                       */
 /* -------------------------------------------------------------------------- */
 
-/* Light mode base (default) */
+/* Light mode base */
 :root {
-  --aol-bg: #f5f5f4;        /* warm near-white */
+  /* App-wide */
+  --aol-bg: #f5f5f4;        /* warm off-white */
   --aol-text: #111827;      /* slate-900 */
-  --aol-muted: #4b5563;     /* slate-600 */
-  --aol-border-subtle: rgba(15, 23, 42, 0.12);
 
-  /* Brand tokens */
-  --color-softGold: #d6b26a;
+  /* Brand accents */
   --color-soft-gold: #d6b26a;
+  --color-deep-charcoal: #0b0d10;
+  --color-charcoal: #15171c;
+  --color-forest: #0e3b33;
+  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.18);
+
+  /* Legacy tokens */
+  --color-bg: var(--aol-bg);
+  --color-bg-muted: #e5e7eb;
+  --color-fg: var(--aol-text);
+  --color-softGold: #d6b26a;
+  --color-deepCharcoal: #0b0d10;
+  --color-cream: #fdfaf5;
 }
 
-/* Dark mode base (html carries .dark) */
+/* Dark mode overrides – driven by .dark on <html> */
 html.dark {
   --aol-bg: #020617;        /* slate-950 */
-  --aol-text: #f9fafb;      /* near-white */
-  --aol-muted: #9ca3af;     /* slate-400 */
-  --aol-border-subtle: rgba(148, 163, 184, 0.4);
+  --aol-text: #f9fafb;      /* almost white */
+
+  --color-bg: #020617;
+  --color-bg-muted: #020617;
+  --color-fg: #f9fafb;
+
+  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. BASE RESET                                                              */
+/* 2. Base Reset & Body                                                       */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -44,6 +58,7 @@ html {
 }
 
 body {
+  @apply antialiased;
   min-height: 100vh;
   margin: 0;
   background-color: var(--aol-bg);
@@ -54,12 +69,29 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Make sure main can grow */
+/* Dark mode gets the cinematic gradient, but text still high-contrast */
+html.dark body {
+  background:
+    radial-gradient(circle at top, rgba(214, 178, 106, 0.12), transparent 55%),
+    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #020617);
+}
+
+/* Text selection */
+::selection {
+  background-color: rgba(214, 178, 106, 0.35);
+  color: var(--aol-text);
+}
+
+html.dark ::selection {
+  color: #f9fafb;
+}
+
+/* Make sure main uses the body background by default */
 main {
   min-height: 100vh;
 }
 
-/* Media normalisation */
+/* Generic media normalisation */
 img,
 picture,
 video,
@@ -78,23 +110,111 @@ a {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--color-softGold);
+  outline: 2px solid var(--color-soft-gold);
   outline-offset: 2px;
 }
 
-/* Text selection */
-::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: #111827;
+/* -------------------------------------------------------------------------- */
+/* 3. Layout Shell & Hero Surfaces                                            */
+/* -------------------------------------------------------------------------- */
+
+/* Default page shell follows body colours */
+.page-shell {
+  min-height: 100vh;
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
 }
 
-html.dark ::selection {
-  background-color: rgba(214, 178, 106, 0.45);
+/* Dark mode enrichment */
+html.dark .page-shell {
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.28), #020617);
   color: #f9fafb;
 }
 
+/* Hero vignette: light, clean in light mode; cinematic only in dark */
+.hero-vignette {
+  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+}
+
+html.dark .hero-vignette {
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.18), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #020617);
+}
+
+/* Section divider */
+.section-divider {
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Luxury cards */
+.lux-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .lux-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+}
+
+.lux-card-hover {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.lux-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(214, 178, 106, 0.5);
+}
+
+html.dark .lux-card-hover:hover {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Filter pills */
+.lux-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.lux-pill {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background-color: #f9fafb;
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .lux-pill {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(15, 23, 42, 0.85);
+  color: #f9fafb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.lux-pill-active {
+  border-color: rgba(214, 178, 106, 0.8);
+  background-color: #d6b26a;
+  color: #111827;
+  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
+}
+
 /* -------------------------------------------------------------------------- */
-/* 3. TYPOGRAPHY & PROSE (GLOBAL)                                            */
+/* 4. Typography & Prose                                                      */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -108,157 +228,87 @@ h6 {
   font-weight: 700;
 }
 
-/* Paragraph defaults – high contrast in both modes */
+/* Body copy */
 p {
   color: var(--aol-text);
 }
 
 html.dark p {
-  color: #e5e7eb; /* slate-200 */
+  color: #e5e7eb;
 }
 
-/* Base prose wrapper (Tailwind Typography handles most details) */
+/* Generic prose (Tailwind typography plugin) */
 .prose {
-  max-width: 65ch;
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: #1f2937; /* gray-800 */
+  @apply text-slate-800;
 }
 
-.prose p,
-.prose li {
-  color: #1f2937;
+.dark .prose {
+  @apply text-slate-100;
 }
 
-.prose a {
-  color: #3730a3; /* indigo-800 */
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.prose a:hover {
-  color: #111827;
-  text-decoration: underline;
-}
-
-/* Dark-mode prose – pair with `dark:prose-invert` */
-html.dark .prose,
-html.dark .prose.prose-invert {
-  color: #e5e7eb;
-}
-
-html.dark .prose p,
-html.dark .prose li {
-  color: #e5e7eb;
-}
-
-html.dark .prose a,
 .dark .prose a {
-  color: var(--color-softGold);
-  text-decoration: none;
-  text-underline-offset: 2px;
+  @apply text-softGold underline-offset-2 hover:underline;
 }
 
-html.dark .prose a:hover,
-.dark .prose a:hover {
-  color: #fef3c7;
-  text-decoration: underline;
-}
-
-/* Keep .prose-lux as an alias so old components don’t break */
+/* “Lux” prose variant for feature articles if you still use it */
 .prose-lux {
   max-width: none;
   font-size: 1.0625rem;
   line-height: 1.75;
 }
 
-/* -------------------------------------------------------------------------- */
-/* 4. LAYOUT SHELL & CARDS                                                    */
-/* -------------------------------------------------------------------------- */
-
-.page-shell {
-  min-height: 100vh;
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
+html:not(.dark) .prose-lux {
+  color: #374151;
 }
 
-/* Simple divider used across sections */
-.section-divider {
-  border-top: 1px solid var(--aol-border-subtle);
+html:not(.dark) .prose-lux p,
+html:not(.dark) .prose-lux li {
+  color: #374151;
 }
 
-/* Luxury cards – neutral but branded */
-.lux-card {
-  border-radius: 1rem;
-  border: 1px solid var(--aol-border-subtle);
-  background-color: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(10px);
-}
-
-html.dark .lux-card {
-  background-color: rgba(15, 23, 42, 0.9);
-  border-color: rgba(148, 163, 184, 0.4);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
-}
-
-/* Hover */
-.lux-card-hover {
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.lux-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: rgba(214, 178, 106, 0.6);
-}
-
-/* Filter pills */
-.lux-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid var(--aol-border-subtle);
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--aol-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-html.dark .lux-pill {
-  background-color: rgba(15, 23, 42, 0.85);
-  color: #f9fafb;
-  border-color: rgba(148, 163, 184, 0.6);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-}
-
-.lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.8);
-  background-color: #d6b26a;
+html:not(.dark) .prose-lux h1,
+html:not(.dark) .prose-lux h2,
+html:not(.dark) .prose-lux h3,
+html:not(.dark) .prose-lux h4 {
   color: #111827;
-  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
+  letter-spacing: -0.03em;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-/* Optional hero vignette – keep subtle */
-.hero-vignette {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.16), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.18), transparent 55%);
+html.dark .prose-lux {
+  color: #f3f4f6;
+}
+
+html.dark .prose-lux p,
+html.dark .prose-lux li {
+  color: #f3f4f6;
+}
+
+html.dark .prose-lux h1,
+html.dark .prose-lux h2,
+html.dark .prose-lux h3,
+html.dark .prose-lux h4 {
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+.prose-lux ul li::marker,
+.prose-lux ol li::marker {
+  color: var(--color-soft-gold);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 5. HEADER, PRINT, REDUCED MOTION                                           */
+/* 5. Header Interaction                                                      */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
   padding-top: 5rem;
 }
+
+/* -------------------------------------------------------------------------- */
+/* 6. Print & Reduced Motion                                                  */
+/* -------------------------------------------------------------------------- */
 
 @media print {
   * {

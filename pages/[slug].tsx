@@ -14,10 +14,6 @@ import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
 type PageMeta = PostMeta & {
   coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
@@ -28,8 +24,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// Primary collection for flat pages / essays
-const PRIMARY_COLLECTION = "pages";
+// Primary collection for articles / blog posts
+const PRIMARY_COLLECTION = "Post";
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -67,7 +63,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
-      {/* Shared article / essay hero */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -79,11 +74,27 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
-      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          {/* Rely on Tailwind Typography + dark:prose-invert for color handling */}
-          <div className="prose prose-lg max-w-none sm:prose-xl dark:prose-invert">
+          <div
+            className={`
+              prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-slate-900
+              prose-p:text-slate-800 prose-p:leading-relaxed
+              prose-strong:text-slate-900 prose-strong:font-semibold
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-slate-800 prose-ol:text-slate-800
+              prose-blockquote:border-l-softGold prose-blockquote:text-slate-900
+              prose-img:rounded-xl prose-img:shadow-lg
+
+              dark:prose-headings:text-slate-50
+              dark:prose-p:text-slate-100
+              dark:prose-strong:text-slate-50
+              dark:prose-ul:text-slate-100
+              dark:prose-ol:text-slate-100
+              dark:prose-blockquote:text-slate-50
+            `}
+          >
             <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
         </article>
@@ -138,12 +149,12 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!slug) return { notFound: true };
 
-    // Try several collections so different content types can live at root
+    // Try several collections so various long-form pieces can live at root.
     const collectionsToTry = [
-      "pages",    // essays / static pages
-      "posts",    // blog posts / insights
-      "print",    // long-form prints
-      "resource", // misc resources
+      "Post",     // blog / insights
+      "Print",    // long-form essays / prints
+      "Resource", // guides, frameworks
+      "Book",     // if any book pages are MDX-driven
     ];
 
     let data: (PageMeta & { content?: string }) | null = null;
@@ -159,13 +170,14 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
       }
     }
 
-    if (!data) return { notFound: true };
+    if (!data) {
+      return { notFound: true };
+    }
 
     const { content, ...meta } = data;
 
     if (!meta.title) return { notFound: true };
 
-    // Strip non-serialisable values
     const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
     const mdxSource = await serialize(content || "", {

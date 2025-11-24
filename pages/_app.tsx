@@ -6,14 +6,14 @@ import { useEffect } from "react";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 
-// Optional: simple hook to instrument page views later (GA, Plausible, etc.)
+// Simple hook for analytics later
 function usePageView() {
   const router = useRouter();
 
   useEffect(() => {
     const handleRouteChange = (_url: string) => {
-      // Plug in analytics here if/when needed
-      // e.g. window.gtag("config", GA_ID, { page_path: _url });
+      // Plug GA / Plausible here later
+      // console.log("Page view:", _url);
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);
