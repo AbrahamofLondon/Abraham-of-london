@@ -34,7 +34,7 @@ const HEADER_HEIGHTS = {
   mobile: { normal: "5rem", scrolled: "3.75rem" },
 } as const;
 
-// --- Enhanced Color System with Better Dark Mode Contrast ---
+// --- Enhanced Color System with Movement-Activated Glow ---
 
 const COLOR_SYSTEM = {
   light: {
@@ -51,6 +51,11 @@ const COLOR_SYSTEM = {
       hover: "hover:text-softGold hover:scale-105 hover:font-semibold",
       active: "text-softGold scale-105 font-bold",
     },
+    glow: {
+      // Minimal glow for light mode
+      normal: "",
+      active: "drop-shadow-[0_0_4px_rgba(0,0,0,0.1)]",
+    },
   },
   dark: {
     shell: {
@@ -58,13 +63,18 @@ const COLOR_SYSTEM = {
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-white font-bold",
-      secondary: "text-white/90 font-semibold",
-      accent: "text-softGold font-extrabold",
+      primary: "text-white font-bold glow-text",
+      secondary: "text-white/90 font-semibold glow-text",
+      accent: "text-softGold font-extrabold glow-text",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold",
-      active: "text-softGold scale-105 font-extrabold",
+      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold glow-active",
+      active: "text-softGold scale-105 font-extrabold glow-active",
+    },
+    glow: {
+      // Enhanced glow for dark mode
+      normal: "glow-text",
+      active: "glow-active",
     },
   },
 } as const;
@@ -177,12 +187,45 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   return theme;
 };
 
+// Movement detection hook for glow effects
+const useMovementDetection = (enabled: boolean = true): boolean => {
+  const [isMoving, setIsMoving] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!enabled) return;
+
+    let movementTimer: NodeJS.Timeout;
+    const handleMovement = (): void => {
+      setIsMoving(true);
+      clearTimeout(movementTimer);
+      movementTimer = setTimeout(() => setIsMoving(false), 2000); // Glow for 2 seconds after movement
+    };
+
+    // Listen for various movement indicators
+    const events = ["mousemove", "scroll", "touchstart", "keydown"];
+    
+    events.forEach(event => {
+      window.addEventListener(event, handleMovement, { passive: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, handleMovement);
+      });
+      clearTimeout(movementTimer);
+    };
+  }, [enabled]);
+
+  return isMoving;
+};
+
 // --- Enhanced Components ---
 
 interface NavLinkProps {
   item: NavItem;
   isActive: boolean;
   theme: "light" | "dark";
+  isMovementDetected: boolean;
   onClick?: () => void;
   variant?: "desktop" | "mobile";
 }
@@ -191,6 +234,7 @@ const NavLink: React.FC<NavLinkProps> = ({
   item,
   isActive,
   theme,
+  isMovementDetected,
   onClick,
   variant = "desktop",
 }) => {
@@ -202,6 +246,7 @@ const NavLink: React.FC<NavLinkProps> = ({
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.hover}
     ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-base"}
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
   `;
 
   const activeStyles = isActive
@@ -247,6 +292,7 @@ interface ContactButtonProps {
   type: "email" | "phone";
   value: string;
   theme: "light" | "dark";
+  isMovementDetected: boolean;
   onClick?: () => void;
   variant?: "desktop" | "mobile";
 }
@@ -255,6 +301,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
   type,
   value,
   theme,
+  isMovementDetected,
   onClick,
   variant = "desktop",
 }) => {
@@ -270,6 +317,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     ${colors.text.secondary}
     ${colors.interactive.hover}
     ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-base font-medium"}
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
   `;
 
   return (
@@ -295,6 +343,7 @@ export default function Header({
   const [isMounted, setIsMounted] = React.useState(false);
   const scrolled = useScrollDetection(SCROLL_THRESHOLD);
   const currentPath = useCurrentPath();
+  const isMovementDetected = useMovementDetection();
 
   useBodyScrollLock(isOpen);
 
@@ -327,6 +376,7 @@ export default function Header({
     font-serif transition-all duration-300
     ${scrolled ? "text-[1.5rem] md:text-[1.85rem]" : "text-2xl md:text-3.5xl"}
     ${colors.text.accent}
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
     tracking-tight leading-tight
   `;
 
@@ -368,6 +418,7 @@ export default function Header({
                 item={item}
                 isActive={isActive(item.route)}
                 theme={theme}
+                isMovementDetected={isMovementDetected}
                 variant="desktop"
               />
             ))}
@@ -376,13 +427,25 @@ export default function Header({
           {/* Desktop Actions */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-4 border-r border-current/20 pr-6">
-              <ContactButton type="email" value={email} theme={theme} />
-              <ContactButton type="phone" value={phone} theme={theme} />
+              <ContactButton 
+                type="email" 
+                value={email} 
+                theme={theme} 
+                isMovementDetected={isMovementDetected}
+              />
+              <ContactButton 
+                type="phone" 
+                value={phone} 
+                theme={theme} 
+                isMovementDetected={isMovementDetected}
+              />
             </div>
 
             <Link
               href={getRoutePath("contact")}
-              className="rounded-full bg-softGold px-6 py-2.5 font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50"
+              className={`rounded-full bg-softGold px-6 py-2.5 font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 ${
+                theme === "dark" && isMovementDetected ? "shadow-lg shadow-softGold/30" : ""
+              }`}
               aria-label="Go to contact form"
               prefetch={true}
             >
@@ -406,7 +469,7 @@ export default function Header({
               theme === "dark"
                 ? "bg-white/15 text-white hover:bg-white/25"
                 : "bg-black/10 text-deepCharcoal hover:bg-black/20"
-            }`}
+            } ${theme === "dark" && isMovementDetected ? "glow-active" : ""}`}
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -459,6 +522,7 @@ export default function Header({
                     item={item}
                     isActive={isActive(item.route)}
                     theme={theme}
+                    isMovementDetected={isMovementDetected}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
@@ -472,6 +536,7 @@ export default function Header({
                     type="email"
                     value={email}
                     theme={theme}
+                    isMovementDetected={isMovementDetected}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
@@ -479,6 +544,7 @@ export default function Header({
                     type="phone"
                     value={phone}
                     theme={theme}
+                    isMovementDetected={isMovementDetected}
                     onClick={() => setIsOpen(false)}
                     variant="mobile"
                   />
@@ -491,7 +557,7 @@ export default function Header({
                     theme === "dark"
                       ? "bg-softGold text-deepCharcoal"
                       : "bg-softGold text-deepCharcoal"
-                  }`}
+                  } ${theme === "dark" && isMovementDetected ? "shadow-lg shadow-softGold/30" : ""}`}
                   prefetch={true}
                 >
                   Enquire Now
@@ -502,7 +568,7 @@ export default function Header({
         )}
       </AnimatePresence>
 
-      {/* Global Styles */}
+      {/* Global Styles with Glow Effects */}
       <style jsx global>{`
         :root {
           --header-height: ${headerHeight};
@@ -510,6 +576,25 @@ export default function Header({
 
         main {
           padding-top: var(--header-height);
+        }
+
+        /* Glow effects for dark mode readability */
+        .glow-text {
+          transition: text-shadow 0.3s ease, filter 0.3s ease;
+        }
+
+        .glow-active {
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
+                       0 0 20px rgba(255, 255, 255, 0.2),
+                       0 0 30px rgba(255, 255, 255, 0.1);
+          filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+        }
+
+        /* Smooth transitions for all interactive elements */
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
         }
 
         @media (max-width: 767px) {
