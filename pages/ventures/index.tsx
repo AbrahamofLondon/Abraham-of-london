@@ -1,5 +1,6 @@
 // pages/ventures/index.tsx
 
+import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -153,7 +154,9 @@ const VenturesPage: NextPage = () => {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-gray-400">Advisory &amp; systems</dt>
+                    <dt className="text-xs text-gray-400">
+                      Advisory &amp; systems
+                    </dt>
                     <dd className="mt-1 font-serif text-lg">Alomarada</dd>
                   </div>
                   <div>
@@ -282,6 +285,7 @@ const VenturesPage: NextPage = () => {
                   doesn&apos;t ship.
                 </p>
               </div>
+
               <div className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-forest/20">
                   <TrendingUp className="h-6 w-6 text-forest/90" />
@@ -295,6 +299,7 @@ const VenturesPage: NextPage = () => {
                   hard questions.
                 </p>
               </div>
+
               <div className="text-center">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-softGold/15">
                   <Users className="h-6 w-6 text-softGold" />

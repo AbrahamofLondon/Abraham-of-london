@@ -24,7 +24,7 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-const COLLECTION_KEY = "pages"; // ⬅️ change if your collection key is different
+const COLLECTION_KEY = "pages";
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -44,18 +44,17 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
     coverFit,
   } = meta;
 
-  const displaySubtitle =
-    excerpt || description || undefined;
+  const displaySubtitle = excerpt || description || undefined;
 
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+    (Array.isArray(tags) && tags.length > 0
+      ? String(tags[0])
+      : "Article");
 
-  const canonicalTitle =
-    title || "Abraham of London";
+  const canonicalTitle = title || "Abraham of London";
 
-  const displayDescription =
-    description || excerpt || "";
+  const displayDescription = description || excerpt || "";
 
   return (
     <Layout title={canonicalTitle}>
@@ -66,6 +65,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
+      {/* Controlled hero – keeps cover under control */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -77,7 +77,8 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
-      <main className="bg-charcoal">
+      {/* Content body */}
+      <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
             className="
@@ -109,17 +110,20 @@ export default ContentPage;
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const items = getAllContent(COLLECTION_KEY) ?? [];
-    const paths = items
-      .filter((item: any) => item?.slug)
-      .map((item: any) => ({
-        params: { slug: String(item.slug) },
-      }));
+
+    const paths =
+      items
+        .filter((item: any) => item?.slug)
+        .map((item: any) => ({
+          params: { slug: String(item.slug) },
+        })) ?? [];
 
     return {
       paths,
       fallback: "blocking",
     };
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error("Error generating static paths for /[slug]:", err);
     return { paths: [], fallback: "blocking" };
   }
@@ -129,7 +133,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // SSG – props
 // -----------------------------------------------------------------------------
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({
+  params,
+}) => {
   try {
     const slugParam = params?.slug;
     const slug =
@@ -168,6 +174,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       revalidate: 3600,
     };
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error("Error in getStaticProps for /[slug]:", err);
     return { notFound: true };
   }

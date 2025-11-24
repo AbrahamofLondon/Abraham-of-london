@@ -3,21 +3,16 @@ import * as React from "react";
 import Image from "next/image";
 import clsx from "clsx";
 
-export type ArticleHeroAspect = "book" | "wide" | "auto";
-
-export type ArticleHeroProps = {
+type ArticleHeroProps = {
   title?: string;
-  subtitle?: string;
-  category?: string | number | (string | number)[];
-  date?: string;
-  readTime?: string | number;
+  subtitle?: string | null;
+  category?: string | number | null;
+  date?: string | null;
+  readTime?: string | number | null;
   coverImage?: string | null;
-  coverAspect?: ArticleHeroAspect;
-  coverFit?: "cover" | "contain";
 };
 
-/** Simple guard for date formatting. */
-function formatPretty(date?: string): string {
+function formatPretty(date?: string | null): string {
   if (!date) return "";
   const d = new Date(date);
   if (Number.isNaN(d.valueOf())) return date;
@@ -28,13 +23,6 @@ function formatPretty(date?: string): string {
   }).format(d);
 }
 
-function normalizeLocal(src?: string | null): string | undefined {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return src;
-  const clean = src.replace(/^\/+/, "");
-  return `/${clean}`;
-}
-
 export default function ArticleHero({
   title,
   subtitle,
@@ -42,98 +30,75 @@ export default function ArticleHero({
   date,
   readTime,
   coverImage,
-  coverAspect = "book",
-  coverFit = "contain",
 }: ArticleHeroProps) {
-  const catLabel = Array.isArray(category)
-    ? String(category[0] ?? "")
-    : category
-    ? String(category)
-    : undefined;
-
-  const coverSrc = normalizeLocal(coverImage);
-  const hasCover = Boolean(coverSrc);
-
-  const aspectClass =
-    coverAspect === "wide"
-      ? "aspect-[16/9]"
-      : coverAspect === "auto"
-      ? ""
-      : "aspect-[2/3]"; // default book
+  const displayReadTime =
+    typeof readTime === "number" ? `${readTime} min read` : readTime || "";
 
   return (
-    <section className="border-b border-white/10 bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 pt-10 lg:flex-row lg:items-start lg:pb-14 lg:pt-12">
-        {/* LEFT: text -------------------------------------------------------- */}
+    <header className="border-b border-white/10 bg-black/80 px-4 pt-20 pb-10">
+      <div className="mx-auto flex max-w-5xl flex-col gap-8 lg:flex-row lg:items-start">
+        {/* LEFT – meta + titles */}
         <div className="flex-1">
-          {catLabel && (
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-softGold">
-              {catLabel}
+          {category && (
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
+              {String(category)}
             </p>
           )}
 
           {title && (
-            <h1 className="font-serif text-3xl font-light leading-tight sm:text-4xl lg:text-5xl">
+            <h1 className="mb-3 font-serif text-3xl font-light text-warmWhite md:text-4xl">
               {title}
             </h1>
           )}
 
-          {subtitle && (
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-gray-200 sm:text-base">
-              {subtitle}
-            </p>
+          {(subtitle || date || displayReadTime) && (
+            <div className="space-y-4 text-sm text-gray-300">
+              {subtitle && (
+                <p className="max-w-xl leading-relaxed">{subtitle}</p>
+              )}
+
+              {(date || displayReadTime) && (
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                  {date && (
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block h-2 w-2 rounded-full bg-softGold" />
+                      <time dateTime={date}>{formatPretty(date)}</time>
+                    </span>
+                  )}
+
+                  {displayReadTime && (
+                    <>
+                      <span className="text-softGold/50">•</span>
+                      <span>{displayReadTime}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           )}
-
-          <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-400">
-            {date && (
-              <div className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-softGold" />
-                <time dateTime={date}>{formatPretty(date)}</time>
-              </div>
-            )}
-
-            {readTime && (
-              <div className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-softGold/70" />
-                <span>
-                  {typeof readTime === "number"
-                    ? `${readTime} min read`
-                    : readTime}
-                </span>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* RIGHT: cover ------------------------------------------------------ */}
-        {hasCover && (
-          <div className="flex justify-center lg:flex-shrink-0 lg:pt-1">
+        {/* RIGHT – capped book cover */}
+        {coverImage && (
+          <div className="flex flex-none justify-center lg:justify-end">
             <div
               className={clsx(
-                "relative w-full max-w-[360px] sm:max-w-[420px] md:max-w-[460px]",
-                "rounded-2xl border border-softGold/40 bg-black/70 p-3",
-                "shadow-[0_18px_45px_rgba(0,0,0,0.75)]",
+                "relative w-full max-w-[380px] sm:max-w-[430px] md:max-w-[480px]",
+                "rounded-3xl border border-softGold/50 bg-black/60 p-3 shadow-2xl shadow-black/50",
               )}
             >
-              <div className={clsx("relative w-full", aspectClass)}>
-                <Image
-                  src={coverSrc!}
-                  alt={title || "Article cover"}
-                  width={800}
-                  height={1200}
-                  priority
-                  className={clsx(
-                    "h-auto w-full rounded-xl",
-                    coverFit === "cover"
-                      ? "object-cover"
-                      : "object-contain",
-                  )}
-                />
-              </div>
+              <Image
+                src={coverImage}
+                alt={title || "Article cover"}
+                width={800}
+                height={1200}
+                priority
+                className="h-auto w-full rounded-2xl object-contain"
+              />
             </div>
           </div>
         )}
       </div>
-    </section>
+    </header>
   );
 }

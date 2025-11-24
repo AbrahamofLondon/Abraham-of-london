@@ -24,7 +24,6 @@ type ContentKind =
   | "print"
   | "resource";
 
-// More flexible interface that matches what getAllContent returns
 interface RawContentItem {
   slug?: string;
   title?: string;
@@ -42,7 +41,6 @@ interface RawContentItem {
   eventDate?: string;
   // Download-specific fields
   fileSize?: string;
-  // Any other potential fields
   [key: string]: unknown;
 }
 
@@ -72,7 +70,7 @@ interface ContentPageProps {
 const ContentIcons: Record<ContentKind, string> = {
   blog: "📝",
   book: "📚",
-  download: "⬇️",
+  download: ⬇️",
   event: "🗓️",
   print: "🖨️",
   resource: "💎",
@@ -94,7 +92,6 @@ const ArrowIcon = () => (
   </svg>
 );
 
-// Fixed order + labels for grouped view
 const kindOrder: ContentKind[] = [
   "blog",
   "book",
@@ -115,24 +112,24 @@ const kindLabels: Record<ContentKind, string> = {
 
 const getKindColor = (kind: ContentKind): string => {
   const colors: Record<ContentKind, string> = {
-    blog: "from-blue-500/20 to-blue-600/20 border-blue-500/30",
-    book: "from-purple-500/20 to-purple-600/20 border-purple-500/30",
-    download: "from-green-500/20 to-green-600/20 border-green-500/30",
-    event: "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30",
-    print: "from-pink-500/20 to-pink-600/20 border-pink-500/30",
-    resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-500/30",
+    blog: "from-blue-500/20 to-blue-600/20 border-blue-400/40",
+    book: "from-purple-500/20 to-purple-600/20 border-purple-400/40",
+    download: "from-green-500/20 to-green-600/20 border-green-400/40",
+    event: "from-yellow-500/20 to-yellow-600/20 border-yellow-400/40",
+    print: "from-pink-500/20 to-pink-600/20 border-pink-400/40",
+    resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-400/40",
   };
   return colors[kind];
 };
 
 const getKindBadgeColor = (kind: ContentKind): string => {
   const colors: Record<ContentKind, string> = {
-    blog: "border-blue-500/30 text-blue-400 bg-blue-500/10",
-    book: "border-purple-500/30 text-purple-400 bg-purple-500/10",
-    download: "border-green-500/30 text-green-400 bg-green-500/10",
-    event: "border-yellow-500/30 text-yellow-400 bg-yellow-500/10",
-    print: "border-pink-500/30 text-pink-400 bg-pink-500/10",
-    resource: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
+    blog: "border-blue-400/40 text-blue-300 bg-blue-500/15",
+    book: "border-purple-400/40 text-purple-300 bg-purple-500/15",
+    download: "border-green-400/40 text-green-300 bg-green-500/15",
+    event: "border-yellow-400/40 text-yellow-200 bg-yellow-500/15",
+    print: "border-pink-400/40 text-pink-300 bg-pink-500/15",
+    resource: "border-cyan-400/40 text-cyan-300 bg-cyan-500/15",
   };
   return colors[kind];
 };
@@ -141,12 +138,6 @@ const getKindBadgeColor = (kind: ContentKind): string => {
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Normalise slug from different sources:
- * - Prefer explicit `slug` field
- * - Fallback to `_raw.flattenedPath` with leading collection stripped
- * - Last resort: basic slugified title
- */
 const getSlug = (item: RawContentItem): string | undefined => {
   const stripCollectionPrefix = (value: string) =>
     value.replace(/^(blog|books|downloads|events|prints|resources)\//, "");
@@ -170,11 +161,6 @@ const getSlug = (item: RawContentItem): string | undefined => {
   return undefined;
 };
 
-/**
- * Build href paths aligned with your routing:
- * - Blog posts live at root: "/{slug}" (handled by pages/[slug].tsx)
- * - Others follow "/{kind}s/{slug}"
- */
 const getHref = (kind: ContentKind, slug: string): string => {
   if (kind === "blog") return `/${slug}`;
   return `/${kind}s/${slug}`;
@@ -191,21 +177,21 @@ const processContentItems = (
     const slug = getSlug(item);
     const title = item.title || "Untitled";
 
-    if (slug) {
-      processed.push({
-        kind,
-        title,
-        slug,
-        href: getHref(kind, slug),
-        date: item.date || item.eventDate,
-        excerpt: item.excerpt,
-        description: item.description,
-        category: item.category || defaultCategory,
-        tags: item.tags || [],
-        featured: item.featured || false,
-        readTime: item.readTime,
-      });
-    }
+    if (!slug) return;
+
+    processed.push({
+      kind,
+      title,
+      slug,
+      href: getHref(kind, slug),
+      date: item.date || item.eventDate,
+      excerpt: item.excerpt,
+      description: item.description,
+      category: item.category || defaultCategory,
+      tags: item.tags || [],
+      featured: item.featured || false,
+      readTime: item.readTime,
+    });
   });
 
   return processed;
@@ -218,7 +204,6 @@ const processContentItems = (
 function ContentCard({ item }: { item: ContentResource }) {
   const description = item.description || item.excerpt || "";
 
-  // Context-aware CTA label – small UX lift
   const ctaLabel =
     item.kind === "download"
       ? "View & Download"
@@ -231,13 +216,12 @@ function ContentCard({ item }: { item: ContentResource }) {
   return (
     <article
       key={`${item.kind}-${item.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/40 hover:shadow-2xl"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/12 bg-black/55 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/50 hover:shadow-2xl"
     >
-      {/* Gradient overlay */}
       <div
         className={`absolute inset-0 bg-gradient-to-br ${getKindColor(
           item.kind,
-        )} opacity-0 transition-opacity group-hover:opacity-10`}
+        )} opacity-0 transition-opacity group-hover:opacity-15`}
       />
 
       <div className="relative flex flex-1 flex-col p-6">
@@ -255,7 +239,7 @@ function ContentCard({ item }: { item: ContentResource }) {
           </div>
 
           {item.date && (
-            <time className="flex-shrink-0 text-xs text-gray-500">
+            <time className="flex-shrink-0 text-xs text-gray-400">
               {new Date(item.date).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
@@ -273,7 +257,7 @@ function ContentCard({ item }: { item: ContentResource }) {
         </h3>
 
         {description && (
-          <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-300">
+          <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-100">
             {description}
           </p>
         )}
@@ -282,14 +266,14 @@ function ContentCard({ item }: { item: ContentResource }) {
         <div className="mt-auto pt-4">
           <div className="flex items-center justify-between">
             {item.category && (
-              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-400">
+              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200">
                 {item.category}
               </span>
             )}
 
             <Link
               href={item.href}
-              className="inline-flex items-center text-sm font-medium text-softGold transition-all hover:gap-2"
+              className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-2"
             >
               {ctaLabel}
               <ArrowIcon />
@@ -404,7 +388,6 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       console.error("[content] Error fetching resources:", err);
     }
 
-    // Sort by date (newest first)
     const sortedItems = allItems.sort((a, b) => {
       if (!a.date && !b.date) return 0;
       if (!a.date) return 1;
@@ -412,7 +395,6 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
-    // Featured
     const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 3);
 
     console.log("[content] ========================================");
@@ -446,7 +428,6 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
   );
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  // Stats
   const contentStats = {
     all: items.length,
     blog: items.filter((i) => i.kind === "blog").length,
@@ -471,7 +452,6 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     { key: "resource", label: "Resources", count: contentStats.resource },
   ];
 
-  // Filter + search
   const filteredItems = items.filter((item) => {
     const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
     if (!matchesFilter) return false;
@@ -487,7 +467,6 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     );
   });
 
-  // Group for "all" view (respects search)
   const groupedByKind: Record<ContentKind, ContentResource[]> = {
     blog: [],
     book: [],
@@ -501,7 +480,6 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     groupedByKind[item.kind].push(item);
   }
 
-  // Handle keyboard events for accessibility
   const handleKeyDown = (
     event: React.KeyboardEvent,
     filterKey: ContentKind | "all",
@@ -526,14 +504,14 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
         />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-black via-deepCharcoal to-black">
+      <div className="min-h-screen bg-[#050608]">
         {/* Hero */}
         <section className="relative overflow-hidden px-4 py-20 lg:py-28">
-          <div className="absolute inset-0 bg-gradient-to-r from-softGold/5 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-softGold/8 via-transparent to-transparent" />
           <div className="relative mx-auto max-w-7xl">
             <div className="grid lg:grid-cols-2 lg:gap-16">
               <div className="flex flex-col justify-center">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/10 px-4 py-2 text-sm text-softGold">
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-softGold/40 bg-softGold/15 px-4 py-2 text-sm text-softGold">
                   <span>✨</span>
                   <span>Content Hub</span>
                 </div>
@@ -546,7 +524,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   With Strategic Wisdom
                 </h1>
 
-                <p className="mb-8 text-xl leading-relaxed text-gray-300">
+                <p className="mb-8 text-xl leading-relaxed text-gray-100">
                   Curated essays, tools, and resources for fathers, founders,
                   and leaders committed to building enduring impact across
                   generations.
@@ -569,7 +547,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   <button
                     type="button"
                     onClick={() => setActiveFilter("download")}
-                    className="group rounded-lg border border-softGold/30 bg-black/40 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10 hover:shadow-lg hover:shadow-yellow-500/10"
+                    className="group rounded-lg border border-softGold/40 bg-black/60 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 hover:shadow-lg hover:shadow-yellow-500/10"
                   >
                     <span className="flex items-center gap-2">
                       Free Downloads
@@ -604,7 +582,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                           <div className="text-2xl font-bold text-white">
                             {filter.count}
                           </div>
-                          <div className="text-sm text-gray-300">
+                          <div className="text-sm text-gray-200">
                             {filter.label}
                           </div>
                         </div>
@@ -625,7 +603,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
                   Featured <span className="text-softGold">Essentials</span>
                 </h2>
-                <p className="mt-4 text-gray-400">
+                <p className="mt-4 text-gray-200">
                   Handpicked resources to get you started
                 </p>
               </div>
@@ -634,7 +612,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 {featuredItems.map((item) => (
                   <div
                     key={item.slug}
-                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/30 hover:shadow-2xl"
+                    className="group relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/8 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/40 hover:shadow-2xl"
                   >
                     <div className="absolute top-6 right-6 text-2xl">
                       {ContentIcons[item.kind]}
@@ -655,7 +633,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                     </h3>
 
                     {item.excerpt && (
-                      <p className="mb-6 line-clamp-3 text-gray-300">
+                      <p className="mb-6 line-clamp-3 text-gray-100">
                         {item.excerpt}
                       </p>
                     )}
@@ -688,7 +666,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                       placeholder="Search resources, tools, insights..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-6 py-4 text-white placeholder-gray-400 backdrop-blur-sm transition-all focus:border-softGold/50 focus:outline-none focus:ring-2 focus:ring-softGold/20"
+                      className="w-full rounded-2xl border border-white/12 bg-black/60 px-6 py-4 text-white placeholder-gray-400 backdrop-blur-sm transition-all focus:border-softGold/60 focus:outline-none focus:ring-2 focus:ring-softGold/25"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                       🔍
@@ -706,7 +684,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                       className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black ${
                         activeFilter === filter.key
                           ? "border-softGold bg-softGold text-black shadow-lg shadow-yellow-500/30"
-                          : "border-white/10 bg-black/40 text-gray-100 hover:border-softGold/40 hover:bg-gray-800"
+                          : "border-white/12 bg-black/55 text-gray-100 hover:border-softGold/50 hover:bg-gray-900"
                       }`}
                     >
                       <span className="text-xs">
@@ -718,8 +696,8 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs ${
                           activeFilter === filter.key
-                            ? "bg-black/20 text-black"
-                            : "bg-white/10 text-gray-400"
+                            ? "bg-black/10 text-black"
+                            : "bg-white/10 text-gray-300"
                         }`}
                       >
                         {filter.count}
@@ -731,15 +709,15 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
             </div>
 
             {/* Result summary */}
-            <div className="mb-8 flex items-center justify-between">
-              <div className="text-gray-400">
+            <div className="mb-8 flex items-center justify-between text-sm text-gray-300">
+              <div>
                 Showing {filteredItems.length} of {items.length} resources
               </div>
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="text-sm text-softGold hover:text-yellow-400 focus:outline-none focus:underline"
+                  className="text-softGold hover:text-yellow-300 focus:outline-none focus:underline"
                 >
                   Clear search
                 </button>
@@ -748,12 +726,12 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
 
             {/* Grid / grouped content */}
             {filteredItems.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-black/40 px-6 py-16 text-center">
+              <div className="rounded-2xl border border-white/12 bg-black/55 px-6 py-16 text-center">
                 <div className="mb-4 text-6xl">🔍</div>
                 <h3 className="mb-2 text-xl font-semibold text-white">
                   No resources found
                 </h3>
-                <p className="mb-6 text-gray-400">
+                <p className="mb-6 text-gray-300">
                   {searchQuery
                     ? `No results for "${searchQuery}". Try different keywords.`
                     : `No ${
@@ -821,11 +799,11 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
         {/* CTA */}
         <section className="px-4 py-20">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="rounded-2xl border border-softGold/20 bg-gradient-to-r from-softGold/5 to-yellow-600/5 px-8 py-12 backdrop-blur-sm">
+            <div className="rounded-2xl border border-softGold/25 bg-gradient-to-r from-softGold/10 to-yellow-600/10 px-8 py-12 backdrop-blur-sm">
               <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
                 Ready to Build Your Legacy?
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-gray-300">
+              <p className="mx-auto mt-4 max-w-2xl text-gray-100">
                 Join founders, fathers, and leaders who are already transforming
                 their approach to strategy and legacy building.
               </p>
@@ -838,7 +816,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 </button>
                 <button
                   type="button"
-                  className="rounded-lg border border-softGold/30 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/10 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+                  className="rounded-lg border border-softGold/40 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
                 >
                   Book a Strategy Call
                 </button>

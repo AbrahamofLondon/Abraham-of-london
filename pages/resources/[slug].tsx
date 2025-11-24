@@ -9,7 +9,7 @@ import {
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 
-import SiteLayout from "@/components/SiteLayout";
+import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
@@ -18,7 +18,6 @@ interface Params extends ParsedUrlQuery {
   slug: string;
 }
 
-// Shape of the content returned for a single resource
 interface ResourceEntry extends PostMeta {
   content?: string | null;
 }
@@ -34,48 +33,63 @@ interface ResourcePageProps {
 // Page component
 // ----------------------------------------------------------------------
 
-export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
+export default function ResourcePage({
+  meta,
+  mdxSource,
+}: ResourcePageProps): JSX.Element {
   const { title, excerpt, coverImage, date } = meta;
 
   const displayDate =
     date && !Number.isNaN(new Date(date).valueOf())
-      ? new Date(date).toLocaleDateString("en-GB")
+      ? new Date(date).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
       : "";
 
+  const pageTitle = title ?? "Resource";
+  const description = excerpt ?? meta.description ?? "";
+
   return (
-    <SiteLayout
-      pageTitle={title}
-      metaDescription={excerpt || undefined}
-      ogImage={typeof coverImage === "string" ? coverImage : undefined}
-      ogType="article"
-    >
-      <article className="mx-auto max-w-3xl px-4 py-12 prose prose-slate dark:prose-invert">
+    <Layout title={pageTitle} className="bg-charcoal">
+      <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
         <header className="mb-8">
           {displayDate && (
-            <p className="text-sm text-gray-500">
-              {displayDate}
-            </p>
+            <p className="text-sm text-gray-400">{displayDate}</p>
           )}
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            {title}
+          <h1 className="mt-2 font-serif text-3xl font-light text-cream sm:text-4xl">
+            {pageTitle}
           </h1>
-          {excerpt && (
-            <p className="mt-3 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-              {excerpt}
+          {description && (
+            <p className="mt-3 max-w-2xl text-base text-gray-300">
+              {description}
             </p>
           )}
-          {coverImage && (
-            <div className="mt-6">
-              {/* Optional: add <Image /> for a visual cover if you want */}
-            </div>
+          {coverImage && typeof coverImage === "string" && (
+            <div className="mt-6" />
+            // If/when you want a framed cover here, we can drop in
+            // the same brand frame pattern as the article hero.
           )}
         </header>
 
-        <div className="mt-8">
+        <div
+          className="
+            prose prose-lg max-w-none
+            prose-headings:font-serif prose-headings:text-cream
+            prose-p:text-gray-200 prose-p:leading-relaxed
+            prose-strong:text-cream prose-strong:font-semibold
+            prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+            prose-ul:text-gray-200 prose-ol:text-gray-200
+            prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
+            prose-hr:border-t border-white/10
+            prose-img:rounded-xl prose-img:shadow-lg
+          "
+        >
           <MDXRemote {...mdxSource} components={mdxComponents} />
         </div>
-      </article>
-    </SiteLayout>
+      </main>
+    </Layout>
   );
 }
 
@@ -85,7 +99,6 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
   try {
-    // getAllContent is untyped, so assert to the shape we need here
     const resources = getAllContent("resources") as Array<
       PostMeta & { slug: string }
     >;

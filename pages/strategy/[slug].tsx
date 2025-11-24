@@ -8,13 +8,13 @@ import type {
 import Head from "next/head";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+
 import Layout from "@/components/Layout";
-import { mdxComponents } from "@/components/mdx-components";
-// Assuming the unified data fetcher is now correctly robust in lib/mdx.ts
-import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug, type RawContentEntry } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-const CONTENT_TYPE = "strategy";
+const COLLECTION = "strategy";
 
 type Props = {
   source: Awaited<ReturnType<typeof serialize>>;
@@ -22,42 +22,51 @@ type Props = {
 };
 
 // ------------------------------------------------------------------
-// ✅ FIX: getStaticPaths (Ensures we only build paths for discoverable content)
+// getStaticPaths
 // ------------------------------------------------------------------
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Relying on getAllContent to only return PostMeta objects for successfully read files
-  const allContent = getAllContent(CONTENT_TYPE);
-  const paths = allContent.map((item) => ({
-    params: { slug: item.slug.toLowerCase() },
-  }));
+  const allContent = getAllContent(COLLECTION);
 
-  return { paths: paths, fallback: false };
+  const paths =
+    allContent?.map((item) => ({
+      params: { slug: String(item.slug).toLowerCase() },
+    })) ?? [];
+
+  return { paths, fallback: false };
 };
 
 // ------------------------------------------------------------------
-// ✅ FIX: getStaticProps (Ensures serialization safety)
+// getStaticProps
 // ------------------------------------------------------------------
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = params!.slug as string;
-  // This call now relies on the robust file system checks in the updated lib/mdx.ts
-  const { content, ...rawFrontmatter } = getContentBySlug(CONTENT_TYPE, slug, {
-    withContent: true,
-  });
+  const slugParam = params?.slug;
+  const slug =
+    typeof slugParam === "string"
+      ? slugParam
+      : Array.isArray(slugParam)
+      ? slugParam[0]
+      : "";
 
-  if (!content) {
-    // If the content file exists but is empty, or if getContentBySlug returned a minimal object (safe state)
-    // then this slug should not have been requested by getStaticPaths, but we handle it anyway.
+  if (!slug) return { notFound: true };
+
+  const entry = getContentBySlug(COLLECTION, slug, {
+    withContent: true,
+  }) as RawContentEntry | null;
+
+  if (!entry || !entry.content) {
     return { notFound: true };
   }
 
-  // CRITICAL FIX: Ensure ALL fields are serialized safely by relying on the null coalescing
-  // already implemented in the lib/mdx.ts function.
-  const frontmatter = JSON.parse(JSON.stringify(rawFrontmatter));
+  const { content, ...rawFrontmatter } = entry;
 
+  const frontmatter = JSON.parse(JSON.stringify(rawFrontmatter)) as PostMeta;
   const mdxSource = await serialize(content, { scope: frontmatter });
 
   return {
-    props: { source: mdxSource, frontmatter: frontmatter },
+    props: {
+      source: mdxSource,
+      frontmatter,
+    },
     revalidate: 3600,
   };
 };
@@ -68,22 +77,56 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 export default function StrategyPage({
   source,
   frontmatter,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+  const title = frontmatter.title ?? "Strategy Note";
+  const description = frontmatter.excerpt ?? frontmatter.description ?? title;
+
   return (
-    <Layout pageTitle={frontmatter.title}>
+    <Layout title={title} className="bg-charcoal">
       <Head>
-        <title>{frontmatter.title} | Abraham of London</title>
-        {/* Use optional chaining or null coalescing on excerpt, though getStaticProps should clean it */}
-        <meta
-          name="description"
-          content={frontmatter.excerpt ?? frontmatter.title}
-        />
+        <title>{title} | Abraham of London</title>
+        {description && <meta name="description" content={description} />}
       </Head>
-      <article className="container mx-auto px-4 py-12 prose max-w-none">
-        <h1>{frontmatter.title}</h1>
-        {/* CRITICAL: MDXRemote must be called with a valid source, guaranteed by the content check above */}
-        <MDXRemote {...source} components={mdxComponents} />
-      </article>
+
+      <main>
+        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
+          <header className="mb-8">
+            {frontmatter.date && (
+              <p className="text-sm text-gray-400">
+                {new Date(frontmatter.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+            <h1 className="mt-2 font-serif text-3xl font-light text-cream sm:text-4xl">
+              {title}
+            </h1>
+            {frontmatter.excerpt && (
+              <p className="mt-3 max-w-2xl text-base text-gray-300">
+                {frontmatter.excerpt}
+              </p>
+            )}
+          </header>
+
+          <div
+            className="
+              prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-cream
+              prose-p:text-gray-200 prose-p:leading-relaxed
+              prose-strong:text-cream prose-strong:font-semibold
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-gray-200 prose-ol:text-gray-200
+              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
+              prose-hr:border-t border-white/10
+              prose-img:rounded-xl prose-img:shadow-lg
+            "
+          >
+            <MDXRemote {...source} components={mdxComponents} />
+          </div>
+        </article>
+      </main>
     </Layout>
   );
 }
