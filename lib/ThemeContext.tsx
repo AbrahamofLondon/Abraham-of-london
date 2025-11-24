@@ -1,7 +1,11 @@
-// Generic, SSR-safe theme context stub
-// app/contexts/ThemeContext.tsx (and any other ThemeContext entry points)
+// lib/ThemeContext.tsx
+// Single source of truth theme context that wraps `next-themes`
 
 import * as React from "react";
+import {
+  ThemeProvider as NextThemeProvider,
+  useTheme as useNextTheme,
+} from "next-themes";
 
 export type ThemeName = "light" | "dark";
 
@@ -11,37 +15,68 @@ export interface ThemeContextValue {
   setTheme: (theme: ThemeName) => void;
 }
 
-const defaultValue: ThemeContextValue = {
-  theme: "light",
-  resolvedTheme: "light",
-  // No-op: theming is intentionally stubbed for now.
-  // Kept side-effect free to stay SSR-safe and lint-friendly.
-  setTheme: () => {
-    // intentionally empty
-  },
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined,
+);
+
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: ThemeName;
+  storageKey?: string; // kept for compatibility, not used directly
 };
 
-const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  /** Kept for compatibility with previous usage (ignored) */
-  defaultTheme?: string;
-  /** Kept for compatibility with previous usage (ignored) */
-  storageKey?: string;
-}
-
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Always provide the static default; no throwing, no browser-only APIs
+/**
+ * Outer provider: lets `next-themes` manage <html class="dark"> etc.
+ */
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = "dark",
+}) => {
   return (
-    <ThemeContext.Provider value={defaultValue}>
-      {children}
-    </ThemeContext.Provider>
+    <NextThemeProvider
+      attribute="class"
+      defaultTheme={defaultTheme}
+      enableSystem={false}
+    >
+      <InnerThemeProvider>{children}</InnerThemeProvider>
+    </NextThemeProvider>
   );
 };
 
-// CRITICAL: must never throw during SSR / prerender
+/**
+ * Inner provider: exposes a clean, typed ThemeContext
+ * to the rest of the app, backed by `next-themes`.
+ */
+const InnerThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { theme, resolvedTheme, setTheme } = useNextTheme();
+
+  const value: ThemeContextValue = {
+    theme: (theme as ThemeName) || "dark",
+    resolvedTheme: (resolvedTheme as ThemeName) || "dark",
+    setTheme: (t: ThemeName) => setTheme(t),
+  };
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+};
+
+/**
+ * Safe hook: if someone forgets the provider, we degrade
+ * to a dark default instead of throwing during SSR.
+ */
 export function useTheme(): ThemeContextValue {
-  // If no provider is mounted, React will still return `defaultValue`
-  return React.useContext(ThemeContext);
+  const ctx = React.useContext(ThemeContext);
+  if (!ctx) {
+    return {
+      theme: "dark",
+      resolvedTheme: "dark",
+      setTheme: () => {
+        // no-op fallback – but in normal app flow this shouldn't run
+      },
+    };
+  }
+  return ctx;
 }
