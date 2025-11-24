@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 
-// --- Utility Components ---
+// --- Utility Components ------------------------------------------------------
 
 /** Small “eyebrow” pill used above the H1 */
 function Eyebrow({
@@ -16,10 +16,10 @@ function Eyebrow({
       className={clsx(
         "inline-flex items-center gap-2 rounded-full",
         "border border-lightGrey/70 bg-warmWhite/70 px-3 py-1",
-        "text-xs uppercase tracking-wide font-semibold",
-        "text-[color:var(--color-on-secondary)] opacity-70",
-        "dark:text-[color:var(--color-on-primary)] dark:opacity-80",
-        className
+        "text-xs font-semibold uppercase tracking-wide",
+        "text-deepCharcoal/80",
+        "dark:border-lightGrey/60 dark:bg-black/60 dark:text-cream/85",
+        className,
       )}
     >
       {children}
@@ -27,11 +27,12 @@ function Eyebrow({
   );
 }
 
-// --- Type Definitions ---
+// --- Types -------------------------------------------------------------------
 
 type Cta = { href: string; label: string; ariaLabel?: string };
 type VideoSource = { src: string; type: string };
-type AspectRatio = "book" | "wide" | "square" | "cover-wide";
+
+export type HeroAspectRatio = "book" | "wide" | "square" | "cover-wide";
 
 type HeroProps = {
   title?: string;
@@ -39,40 +40,29 @@ type HeroProps = {
   primaryCta?: Cta;
   secondaryCta?: Cta;
 
-  /** Image shown when no video or as poster fallback */
   coverImage?: string | null;
-  /** Aspect ratio: 'book' (2/3), 'wide' (16/9), 'square' (1/1), 'cover-wide' (21/9) */
-  coverAspect?: AspectRatio;
-  /** 'contain' (book covers) or 'cover' (edge-to-edge) */
+  coverAspect?: HeroAspectRatio;
   coverFit?: "contain" | "cover";
-  /** object position for Image/Video */
   coverPosition?: "left" | "center" | "right" | "top";
 
-  /** Optional autoplaying looped background video */
   videoSources?: VideoSource[] | null;
-  /** Poster image for the video (defaults to coverImage) */
   poster?: string | null;
 
   eyebrow?: string;
 };
 
-// --- Utilities ---
+// --- Utilities ---------------------------------------------------------------
 
-/**
- * Normalizes a URL path: ensures relative paths start with a slash.
- */
+/** Normalises local vs absolute URLs. */
 function normalizeLocal(src?: string | null): string | undefined {
   if (!src) return undefined;
   if (/^https?:\/\//i.test(src)) return src;
-  const cleanSrc = src.replace(/^\/+/, "");
-  return `/${cleanSrc}`;
+  const clean = src.replace(/^\/+/, "");
+  return `/${clean}`;
 }
 
-/**
- * Maps the AspectRatio prop to responsive, clamped heights.
- * Height is the thing that was blowing up the layout.
- */
-function getAspectClass(aspect: AspectRatio): string {
+/** Height clamp – stops the hero visual from becoming a skyscraper. */
+function getAspectClass(aspect: HeroAspectRatio): string {
   switch (aspect) {
     case "square":
       return "h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]";
@@ -82,23 +72,22 @@ function getAspectClass(aspect: AspectRatio): string {
       return "h-[180px] sm:h-[210px] md:h-[240px] lg:h-[280px]";
     case "book":
     default:
-      // Portrait / book-style, but sensibly capped
       return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px]";
   }
 }
 
-// --- Main Component ---
+// --- Main Component ----------------------------------------------------------
 
 export default function HeroSection({
-  title = "When the System Breaks You: Finding Purpose in Pain",
-  subtitle = "Win the only battle you fully control — the one inside your chest.",
-  eyebrow = "Featured Insight",
+  title = "Faith-rooted strategy for founders, boards, and leaders.",
+  subtitle = "I work with leaders who refuse to outsource responsibility — men and women who carry real weight for families, organisations, and nations.",
+  eyebrow = "Advisory & Consulting",
   primaryCta = {
-    href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-    label: "Get the free teaser",
-    ariaLabel: "Download the Fathering Without Fear Teaser PDF",
+    href: "/contact",
+    label: "Request a consultation",
+    ariaLabel: "Request a consultation",
   },
-  secondaryCta = { href: "/blog", label: "Read the latest insights" },
+  secondaryCta = { href: "/events", label: "View upcoming salons" },
 
   coverImage,
   coverAspect = "book",
@@ -108,72 +97,74 @@ export default function HeroSection({
   videoSources = [],
   poster = null,
 }: HeroProps) {
-  // 1. --- Core Data and Fallbacks ---
+  // 1. Core data & fallbacks --------------------------------------------------
   const defaultImage = "/assets/images/abraham-of-london-banner.webp";
-  const imgSrc = normalizeLocal(coverImage) || normalizeLocal(defaultImage)!;
-  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
-  const posterSrc = normalizeLocal(poster) || imgSrc;
+  const imgSrc = normalizeLocal(coverImage) ?? normalizeLocal(defaultImage)!;
 
-  // 2. --- Dynamic Class Generation (with clsx) ---
+  const hasVideo =
+    Array.isArray(videoSources) && videoSources.length > 0;
+  const posterSrc = normalizeLocal(poster) ?? imgSrc;
 
-  // The frame now has a clamped height and max width, so it never becomes a skyscraper.
+  // 2. Layout classes ---------------------------------------------------------
   const frameClasses = clsx(
-    "relative overflow-hidden rounded-2xl shadow-lg shadow-black/15",
+    "relative overflow-hidden rounded-2xl shadow-lg shadow-black/20",
     "max-w-[520px] w-full mx-auto",
     getAspectClass(coverAspect),
     {
       "p-2 sm:p-3 md:p-4 bg-warmWhite border border-lightGrey/70":
         coverFit === "contain",
-    }
+    },
   );
 
   const mediaClasses = clsx(
-    "h-full w-full", // parent defines the box; media just fills it
+    "h-full w-full",
     coverFit === "contain" ? "object-contain" : "object-cover",
     {
       "object-left": coverPosition === "left",
       "object-right": coverPosition === "right",
       "object-top": coverPosition === "top",
       "object-center": coverPosition === "center",
-    }
+    },
   );
 
+  // 3. Render -----------------------------------------------------------------
   return (
     <section
       className={clsx(
-        "relative overflow-hidden bg-white dark:bg-black",
+        "relative overflow-hidden",
+        "bg-white text-deepCharcoal",
+        "dark:bg-black dark:text-cream",
         "before:pointer-events-none before:absolute before:inset-0",
         "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
-        "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
+        "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]",
       )}
       role="region"
       aria-label="Featured content section"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-16">
-        {/* LEFT: copy */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-12 md:grid-cols-2 md:gap-14 md:py-16">
+        {/* LEFT: copy -------------------------------------------------------- */}
         <div className="relative z-[1]">
           {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
 
           <h1
             id="hero-title"
-            className="font-serif text-[clamp(2rem,3.6vw,3.25rem)] font-semibold leading-[1.08] text-deepCharcoal dark:text-cream [text-wrap:balance]"
+            className="font-serif text-[clamp(2.1rem,3.5vw,3.25rem)] font-semibold leading-[1.08] [text-wrap:balance]"
           >
             {title}
           </h1>
 
           {subtitle && (
-            <p className="mt-4 max-w-prose text-[color:var(--color-on-secondary)] opacity-85 dark:text-[color:var(--color-on-primary)] dark:opacity-85">
+            <p className="mt-4 max-w-prose text-sm sm:text-base text-slate-800/90 dark:text-slate-100/90">
               {subtitle}
             </p>
           )}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            {/* Primary CTA */}
             {primaryCta && (
               <Link
                 href={primaryCta.href}
                 aria-label={
-                  primaryCta.ariaLabel || `Go to ${primaryCta.label}`
+                  primaryCta.ariaLabel ?? `Go to ${primaryCta.label}`
                 }
                 className="aol-btn"
               >
@@ -181,14 +172,13 @@ export default function HeroSection({
               </Link>
             )}
 
-            {/* Secondary CTA */}
             {secondaryCta && (
               <Link
                 href={secondaryCta.href}
                 aria-label={
-                  secondaryCta.ariaLabel || `Go to ${secondaryCta.label}`
+                  secondaryCta.ariaLabel ?? `Go to ${secondaryCta.label}`
                 }
-                className="rounded-full border border-lightGrey bg-warmWhite px-4 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-[.98] focus:outline-none focus-visible:ring-2"
+                className="rounded-full border border-lightGrey bg-warmWhite px-4 py-2 text-sm font-semibold text-deepCharcoal transition hover:brightness-[.98] focus:outline-none focus-visible:ring-2 dark:border-cream/40 dark:bg-transparent dark:text-cream/90"
               >
                 {secondaryCta.label}
               </Link>
@@ -196,9 +186,8 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* RIGHT: visual media container */}
+        {/* RIGHT: visual media container ------------------------------------ */}
         <div className={frameClasses}>
-          {/* Gradient veil for cover-fit visuals */}
           {coverFit === "cover" && (
             <div
               aria-hidden
@@ -208,7 +197,6 @@ export default function HeroSection({
             />
           )}
 
-          {/* Media: Video or Image Fallback */}
           {hasVideo ? (
             <video
               className={clsx("block", mediaClasses)}
@@ -228,25 +216,22 @@ export default function HeroSection({
                   type={s.type}
                 />
               ))}
-              {/* Poster will act as ultimate fallback */}
             </video>
           ) : (
             <Image
               src={imgSrc}
               alt={title || "Hero image illustrating the page content"}
-              // IMPORTANT: we do NOT use fill here. The parent box controls size.
-              fill={false}
               width={800}
-              height={1200}
+              height={1200} // portrait-ish; actual size controlled by CSS
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
-              className={clsx("block", mediaClasses)}
+              className={clsx("block rounded-xl", mediaClasses)}
             />
           )}
         </div>
       </div>
 
-      {/* Decorative grid dots */}
+      {/* Decorative grid dots at the bottom */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(rgba(0,0,0,0.06)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-30"

@@ -3,23 +3,21 @@ import * as React from "react";
 import Image from "next/image";
 import clsx from "clsx";
 
-type Aspect = "book" | "wide" | "square";
+export type ArticleHeroAspect = "book" | "wide" | "auto";
 
-export interface ArticleHeroProps {
+export type ArticleHeroProps = {
   title?: string;
-  subtitle?: string | null;
-  category?: string | string[] | null;
-  date?: string | null;
-  readTime?: string | number | null;
-
+  subtitle?: string;
+  category?: string | number | (string | number)[];
+  date?: string;
+  readTime?: string | number;
   coverImage?: string | null;
-  coverAspect?: Aspect;
+  coverAspect?: ArticleHeroAspect;
   coverFit?: "cover" | "contain";
-  coverPosition?: "top" | "center" | "left" | "right";
-}
+};
 
-/** Simple date pretty-printer (date-only safe) */
-function formatPretty(date?: string | null): string {
+/** Simple guard for date formatting. */
+function formatPretty(date?: string): string {
   if (!date) return "";
   const d = new Date(date);
   if (Number.isNaN(d.valueOf())) return date;
@@ -30,16 +28,11 @@ function formatPretty(date?: string | null): string {
   }).format(d);
 }
 
-function aspectClass(aspect: Aspect = "book"): string {
-  switch (aspect) {
-    case "wide":
-      return "aspect-[16/9]";
-    case "square":
-      return "aspect-[1/1]";
-    case "book":
-    default:
-      return "aspect-[2/3]";
-  }
+function normalizeLocal(src?: string | null): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  const clean = src.replace(/^\/+/, "");
+  return `/${clean}`;
 }
 
 export default function ArticleHero({
@@ -51,97 +44,92 @@ export default function ArticleHero({
   coverImage,
   coverAspect = "book",
   coverFit = "contain",
-  coverPosition = "center",
-}: ArticleHeroProps): JSX.Element {
-  const hasCover =
-    typeof coverImage === "string" && coverImage.trim().length > 0;
-
+}: ArticleHeroProps) {
   const catLabel = Array.isArray(category)
-    ? category.filter(Boolean).join(" · ")
-    : category ?? "Article";
+    ? String(category[0] ?? "")
+    : category
+    ? String(category)
+    : undefined;
 
-  const readTimeLabel =
-    typeof readTime === "number" ? `${readTime} min read` : readTime ?? "";
+  const coverSrc = normalizeLocal(coverImage);
+  const hasCover = Boolean(coverSrc);
+
+  const aspectClass =
+    coverAspect === "wide"
+      ? "aspect-[16/9]"
+      : coverAspect === "auto"
+      ? ""
+      : "aspect-[2/3]"; // default book
 
   return (
-    <section className="relative border-b border-white/10 bg-gradient-to-b from-black via-deepCharcoal to-charcoal/90">
-      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-4 pb-12 pt-20 md:flex-row md:items-center md:gap-12 lg:px-0">
-        {/* LEFT: text */}
+    <section className="border-b border-white/10 bg-gradient-to-b from-black via-deepCharcoal to-black text-white">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 pt-10 lg:flex-row lg:items-start lg:pb-14 lg:pt-12">
+        {/* LEFT: text -------------------------------------------------------- */}
         <div className="flex-1">
           {catLabel && (
-            <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-softGold">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-softGold">
               {catLabel}
             </p>
           )}
 
           {title && (
-            <h1 className="font-serif text-3xl font-light leading-tight text-cream sm:text-4xl md:text-5xl">
+            <h1 className="font-serif text-3xl font-light leading-tight sm:text-4xl lg:text-5xl">
               {title}
             </h1>
           )}
 
-          {(date || readTimeLabel) && (
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-300">
-              {date && (
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                  <time
-                    dateTime={date}
-                    className="uppercase tracking-[0.18em]"
-                  >
-                    {formatPretty(date)}
-                  </time>
-                </div>
-              )}
-
-              {date && readTimeLabel && (
-                <span className="text-softGold/50">•</span>
-              )}
-
-              {readTimeLabel && (
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-softGold" />
-                  <span className="uppercase tracking-[0.18em]">
-                    {readTimeLabel}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
           {subtitle && (
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-200">
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-gray-200 sm:text-base">
               {subtitle}
             </p>
           )}
+
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-400">
+            {date && (
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-2 w-2 rounded-full bg-softGold" />
+                <time dateTime={date}>{formatPretty(date)}</time>
+              </div>
+            )}
+
+            {readTime && (
+              <div className="flex items-center gap-2">
+                <span className="inline-block h-2 w-2 rounded-full bg-softGold/70" />
+                <span>
+                  {typeof readTime === "number"
+                    ? `${readTime} min read`
+                    : readTime}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* RIGHT: cover – only rendered when we actually have one */}
+        {/* RIGHT: cover ------------------------------------------------------ */}
         {hasCover && (
-          <div
-            className={clsx(
-              "relative w-full max-w-xs flex-1 md:max-w-sm",
-              aspectClass(coverAspect),
-            )}
-          >
-            <div className="absolute inset-0 overflow-hidden rounded-2xl border border-softGold/40 bg-black/60 shadow-2xl shadow-black/50">
-              <Image
-                src={coverImage as string}
-                alt={title || "Cover image"}
-                fill
-                sizes="(max-width: 1024px) 60vw, 320px"
-                className={clsx(
-                  "h-full w-full",
-                  coverFit === "contain" ? "object-contain" : "object-cover",
-                  {
-                    "object-top": coverPosition === "top",
-                    "object-left": coverPosition === "left",
-                    "object-right": coverPosition === "right",
-                    "object-center": coverPosition === "center",
-                  },
-                )}
-                priority
-              />
+          <div className="flex justify-center lg:flex-shrink-0 lg:pt-1">
+            <div
+              className={clsx(
+                "relative w-full max-w-[360px] sm:max-w-[420px] md:max-w-[460px]",
+                "rounded-2xl border border-softGold/40 bg-black/70 p-3",
+                "shadow-[0_18px_45px_rgba(0,0,0,0.75)]",
+              )}
+            >
+              <div className={clsx("relative w-full", aspectClass)}>
+                <Image
+                  src={coverSrc!}
+                  alt={title || "Article cover"}
+                  width={800}
+                  height={1200}
+                  priority
+                  className={clsx(
+                    "h-auto w-full rounded-xl",
+                    coverFit === "cover"
+                      ? "object-cover"
+                      : "object-contain",
+                  )}
+                />
+              </div>
             </div>
           </div>
         )}
