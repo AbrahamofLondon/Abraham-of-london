@@ -34,7 +34,7 @@ const HEADER_HEIGHTS = {
   mobile: { normal: "5rem", scrolled: "3.75rem" },
 } as const;
 
-// --- Enhanced Color System ---
+// --- Enhanced Color System with Better Dark Mode Contrast ---
 
 const COLOR_SYSTEM = {
   light: {
@@ -43,39 +43,39 @@ const COLOR_SYSTEM = {
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-deepCharcoal",
-      secondary: "text-deepCharcoal/70",
-      accent: "text-softGold",
+      primary: "text-deepCharcoal font-semibold", // Added font weight
+      secondary: "text-deepCharcoal/80 font-medium", // Increased opacity + weight
+      accent: "text-softGold font-bold",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105",
-      active: "text-softGold scale-105",
+      hover: "hover:text-softGold hover:scale-105 hover:font-semibold", // Added weight on hover
+      active: "text-softGold scale-105 font-bold", // Bolder active state
     },
   },
   dark: {
     shell: {
-      normal: "bg-charcoal/95 border-white/10 shadow-lg backdrop-blur-xl",
+      normal: "bg-charcoal/98 border-white/15 shadow-2xl backdrop-blur-xl", // Increased contrast
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-white",
-      secondary: "text-white/80", // slightly brighter for clarity
-      accent: "text-softGold",
+      primary: "text-white font-bold", // Bolder in dark mode
+      secondary: "text-white/90 font-semibold", // Higher contrast + weight
+      accent: "text-softGold font-extrabold", // Extra bold for accent
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105",
-      active: "text-softGold scale-105",
+      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold", // Extra bold on hover
+      active: "text-softGold scale-105 font-extrabold", // Extra bold active
     },
   },
 } as const;
 
 // --- Custom Hooks ---
 
-const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
+const useScrollDetection = (threshold: number = SCROLL_THRESHOLD): boolean => {
   const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = (): void => {
       const isScrolled = window.scrollY > threshold;
       setScrolled(isScrolled);
     };
@@ -89,18 +89,18 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
   return scrolled;
 };
 
-const useCurrentPath = () => {
+const useCurrentPath = (): string => {
   const [currentPath, setCurrentPath] = React.useState("/");
 
   React.useEffect(() => {
-    const updatePath = () => {
+    const updatePath = (): void => {
       setCurrentPath(window.location.pathname || "/");
     };
 
     updatePath();
 
-    const handleNavigation = () => setTimeout(updatePath, 10);
-    const handleClick = (e: MouseEvent) => {
+    const handleNavigation = (): void => setTimeout(updatePath, 10);
+    const handleClick = (e: MouseEvent): void => {
       const target = e.target as HTMLElement;
       const link = target.closest("a[href]");
       if (link?.getAttribute("href")?.startsWith("/")) {
@@ -120,7 +120,7 @@ const useCurrentPath = () => {
   return currentPath;
 };
 
-const useBodyScrollLock = (isLocked: boolean) => {
+const useBodyScrollLock = (isLocked: boolean): void => {
   React.useEffect(() => {
     if (!isLocked) return;
 
@@ -150,21 +150,15 @@ const useBodyScrollLock = (isLocked: boolean) => {
   }, [isLocked]);
 };
 
-/**
- * NEW: Resolve the actual theme from the <html> class ("dark" / not),
- * so the header text / shell always match the real mode.
- */
-const useResolvedTheme = (initialTheme: "light" | "dark") => {
+const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   const [theme, setTheme] = React.useState<"light" | "dark">(initialTheme);
 
   React.useEffect(() => {
     const getTheme = (): "light" | "dark" =>
       document.documentElement.classList.contains("dark") ? "dark" : "light";
 
-    // Initial resolve on mount
     setTheme(getTheme());
 
-    // Observe class changes on <html> so we react when ThemeToggle flips
     const observer = new MutationObserver(() => {
       setTheme(getTheme());
     });
@@ -204,12 +198,12 @@ const NavLink: React.FC<NavLinkProps> = ({
     transition-all duration-300 ease-out
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.hover}
-    ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-base font-medium"}
+    ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-base"}
   `;
 
   const activeStyles = isActive
     ? isMobile
-      ? "bg-white/10 dark:bg-black/20"
+      ? "bg-white/15 dark:bg-black/25" // Enhanced contrast for active mobile items
       : ""
     : "";
 
@@ -223,9 +217,11 @@ const NavLink: React.FC<NavLinkProps> = ({
         prefetch={true}
       >
         <div className="flex flex-col">
-          <span className="font-semibold">{item.label}</span>
+          <span className={isMobile ? "font-bold" : ""}>{item.label}</span>
           {isMobile && item.description && (
-            <span className="mt-1 text-sm opacity-75">{item.description}</span>
+            <span className={`mt-1 text-sm ${colors.text.secondary}`}>
+              {item.description}
+            </span>
           )}
         </div>
       </Link>
@@ -270,7 +266,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     flex items-center gap-2 transition-all duration-300
     ${colors.text.secondary}
     ${colors.interactive.hover}
-    ${isMobile ? "text-base py-2 px-3" : "text-base"}
+    ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-base font-medium"}
   `;
 
   return (
@@ -303,11 +299,9 @@ export default function Header({
     setIsMounted(true);
   }, []);
 
-  // NEW: resolve real theme instead of trusting initialTheme blindly
   const theme = useResolvedTheme(initialTheme);
   const colors = COLOR_SYSTEM[theme];
 
-  // Enhanced active route detection
   const isActive = React.useCallback(
     (route: RouteId): boolean => {
       if (!isMounted) return false;
@@ -327,10 +321,12 @@ export default function Header({
     ? HEADER_HEIGHTS.desktop.scrolled
     : HEADER_HEIGHTS.desktop.normal;
 
+  // Enhanced brand styling with better typography hierarchy
   const brandClass = `
-    font-serif font-bold transition-all duration-300
-    ${scrolled ? "text-[1.35rem] md:text-[1.75rem]" : "text-2xl md:text-3xl"}
+    font-serif transition-all duration-300
+    ${scrolled ? "text-[1.5rem] md:text-[1.85rem]" : "text-2xl md:text-3.5xl"}
     ${colors.text.accent}
+    tracking-tight leading-tight
   `;
 
   // Contact info
@@ -359,7 +355,8 @@ export default function Header({
           className={brandClass}
           prefetch={true}
         >
-          Abraham of London
+          <span className="font-extrabold">Abraham</span>
+          <span className="font-bold"> of London</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -385,7 +382,7 @@ export default function Header({
 
             <Link
               href={getRoutePath("contact")}
-              className="rounded-full bg-softGold px-6 py-2.5 text-base font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50"
+              className="rounded-full bg-softGold px-6 py-2.5 font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50"
               aria-label="Go to contact form"
               prefetch={true}
             >
@@ -407,8 +404,8 @@ export default function Header({
             aria-label="Toggle navigation menu"
             className={`inline-flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
               theme === "dark"
-                ? "bg-white/10 text-white hover:bg-white/20"
-                : "bg-black/5 text-deepCharcoal hover:bg-black/10"
+                ? "bg-white/15 text-white hover:bg-white/25"
+                : "bg-black/10 text-deepCharcoal hover:bg-black/20"
             }`}
             whileTap={{ scale: 0.95 }}
           >
@@ -446,8 +443,8 @@ export default function Header({
             id="mobile-nav"
             className={`fixed inset-0 top-[var(--header-height)] md:hidden ${
               theme === "dark"
-                ? "bg-charcoal/95 text-white backdrop-blur-2xl"
-                : "bg-white/95 text-deepCharcoal backdrop-blur-2xl"
+                ? "bg-charcoal/98 text-white backdrop-blur-2xl"
+                : "bg-white/98 text-deepCharcoal backdrop-blur-2xl"
             }`}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -490,7 +487,7 @@ export default function Header({
                 <Link
                   href={getRoutePath("contact")}
                   onClick={() => setIsOpen(false)}
-                  className={`block w-full rounded-xl px-6 py-4 text-center text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
+                  className={`block w-full rounded-xl px-6 py-4 text-center font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
                     theme === "dark"
                       ? "bg-softGold text-deepCharcoal"
                       : "bg-softGold text-deepCharcoal"
