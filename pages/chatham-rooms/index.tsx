@@ -6,23 +6,98 @@ import { Shield, Users, BookOpen, ArrowRight, CheckCircle2 } from "lucide-react"
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
-import RouteHero from "@/components/RouteHero";
 
 export default function ChathamRoomsPage(): JSX.Element {
   return (
     <Layout
       title="The Chatham Rooms"
       transparentHeader
-      className="bg-gradient-to-b from-charcoal to-black"
+      // force a dark canvas; do NOT rely on light theme here
+      className="bg-[#050608] text-cream"
     >
-      {/* Unified hero driven by hero-banners.ts */}
-      <RouteHero bannerKey="chathamRooms" />
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-amber-200/10" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+          <motion.header
+            className="mb-8 max-w-3xl md:mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <motion.p
+              className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              The Chatham Rooms
+            </motion.p>
+
+            <motion.h1
+              className="mt-4 font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-5xl xl:text-6xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              Private, off-record rooms for
+              <span className="block bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent">
+                honest leaders and heavy fathers.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              className="mt-4 text-base leading-relaxed text-gold/85 sm:text-lg md:mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              The Chatham Rooms are small, curated conversations held under
+              Chatham House Rule — where founders, executives, and fathers can
+              speak plainly about power, family, faith, and consequence without
+              performance or optics.
+            </motion.p>
+
+            <motion.div
+              className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4 md:mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Link
+                href="/events"
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-gold to-amber-200 px-6 py-3 text-base font-semibold text-charcoal shadow-2xl transition-all hover:shadow-3xl sm:px-8 sm:py-4 sm:text-lg"
+              >
+                <span className="relative z-10">See upcoming rooms</span>
+                <motion.div
+                  className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.8 }}
+                />
+              </Link>
+
+              <Link
+                href="/contact"
+                className="rounded-xl border border-gold/60 px-6 py-3 text-base font-semibold text-gold transition-all hover:border-gold hover:bg-gold/10 sm:px-8 sm:py-4 sm:text-lg"
+              >
+                Enquire about invitation
+              </Link>
+            </motion.div>
+          </motion.header>
+        </div>
+      </section>
 
       {/* Mandate Statement */}
-      <MandateStatement />
+      <section className="border-t border-gold/20 bg-[#050608]">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+          <MandateStatement />
+        </div>
+      </section>
 
       {/* What It Is */}
-      <section className="py-12 md:py-16">
+      <section className="bg-[#050608] py-12 md:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="grid gap-8 md:gap-12 lg:grid-cols-[3fr,2fr]"
@@ -43,7 +118,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               </motion.h2>
 
               <motion.p
-                className="mb-6 text-base leading-relaxed text-gold/70 md:mb-8 md:text-lg"
+                className="mb-6 text-base leading-relaxed text-gold/90 md:mb-8 md:text-lg"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -69,7 +144,7 @@ export default function ChathamRoomsPage(): JSX.Element {
                 ].map((item, index) => (
                   <motion.li
                     key={item}
-                    className="flex items-center gap-4 text-gold/70"
+                    className="flex items-center gap-4 text-gold/90"
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -83,20 +158,20 @@ export default function ChathamRoomsPage(): JSX.Element {
             </div>
 
             <motion.aside
-              className="rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/5 to-gold/10 p-6 md:p-8"
+              className="rounded-2xl border border-gold/40 bg-gradient-to-br from-gold/10 to-gold/15 p-6 text-cream md:p-8"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
-              <h3 className="mb-4 font-serif text-lg font-semibold text-cream md:text-xl">
+              <h3 className="mb-4 font-serif text-lg font-semibold md:text-xl">
                 Who is it for?
               </h3>
-              <p className="mb-4 text-sm leading-relaxed text-gold/80 md:mb-6 md:text-base">
+              <p className="mb-4 text-sm leading-relaxed text-cream/90 md:mb-6 md:text-base">
                 The Rooms are designed for leaders who cannot afford fantasy:
               </p>
-              <ul className="mb-4 space-y-2 text-sm text-gold/80 md:mb-6 md:space-y-3 md:text-base">
+              <ul className="mb-4 space-y-2 text-sm text-cream/90 md:mb-6 md:space-y-3 md:text-base">
                 {[
                   "Founders and owners, not just employees.",
                   "Fathers navigating complex, real-world family realities.",
@@ -104,14 +179,14 @@ export default function ChathamRoomsPage(): JSX.Element {
                 ].map((item, index) => (
                   <li
                     key={index}
-                    className="flex items-start gap-3 text-gold/80"
+                    className="flex items-start gap-3"
                   >
                     <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <p className="text-sm text-gold/80 md:text-base">
+              <p className="text-sm text-cream/90 md:text-base">
                 Admission is by invitation or referral. The goal is not prestige
                 for its own sake, but protection of the conversation — so the
                 right people can finally talk honestly.
@@ -122,7 +197,7 @@ export default function ChathamRoomsPage(): JSX.Element {
       </section>
 
       {/* Format & Principles */}
-      <section className="py-12 md:py-16">
+      <section className="bg-[#050608] py-12 md:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0 }}
@@ -144,7 +219,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               {[
                 {
                   icon: Shield,
-                  title: "Under the rule",
+                  title: "Under the Rule",
                   description:
                     "What is said in the room can be used outside, but identities and affiliations are never attributed. Leaders need one place where honesty is not a risk to reputation.",
                 },
@@ -163,7 +238,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               ].map((principle, index) => (
                 <motion.div
                   key={principle.title}
-                  className="group rounded-2xl border border-gold/20 bg-charcoal/60 p-6 backdrop-blur transition-all hover:border-gold/40 hover:bg-charcoal/70 md:p-8"
+                  className="group rounded-2xl border border-gold/30 bg-charcoal/80 p-6 text-cream backdrop-blur transition-all hover:border-gold/50 hover:bg-charcoal/90 md:p-8"
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -171,10 +246,10 @@ export default function ChathamRoomsPage(): JSX.Element {
                   whileHover={{ y: -5 }}
                 >
                   <principle.icon className="mb-4 h-10 w-10 text-gold md:h-12 md:w-12" />
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-gold/80 md:text-lg">
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-gold/90 md:text-lg">
                     {principle.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gold/70 md:text-base">
+                  <p className="text-sm leading-relaxed text-cream/90 md:text-base">
                     {principle.description}
                   </p>
                 </motion.div>
@@ -182,13 +257,13 @@ export default function ChathamRoomsPage(): JSX.Element {
             </div>
 
             <motion.div
-              className="mt-8 rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/5 to-gold/10 p-6 md:mt-12 md:p-8"
+              className="mt-8 rounded-2xl border border-gold/40 bg-gradient-to-br from-gold/10 to-gold/15 p-6 text-cream md:mt-12 md:p-8"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <p className="mb-4 text-base text-gold/80 md:mb-6 md:text-lg">
+              <p className="mb-4 text-base text-cream/90 md:mb-6 md:text-lg">
                 If you would like to propose a Room in your city, or host a
                 closed session for your board, eldership, or leadership team,
                 send a short context note with stakes, desired outcomes, and who
@@ -196,7 +271,7 @@ export default function ChathamRoomsPage(): JSX.Element {
               </p>
               <Link
                 href="/contact"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/60 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal md:px-6 md:py-3 md:text-base sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold/70 px-4 py-2 text-sm font-semibold text-gold transition-all hover:bg-gold hover:text-charcoal md:px-6 md:py-3 md:text-base sm:w-auto"
               >
                 Propose a room
                 <ArrowRight className="h-4 w-4" />

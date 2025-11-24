@@ -1,7 +1,6 @@
 // lib/hero-banners.ts
 // -----------------------------------------------------------------------------
 // Central registry for hero banner configurations (no JSX here).
-// This keeps "which hero do we show on which page?" out of components.
 // -----------------------------------------------------------------------------
 
 export type HeroBannerKey =
@@ -10,8 +9,6 @@ export type HeroBannerKey =
   | "books"
   | "downloads"
   | "fathering"
-  | "consulting"
-  | "chathamRooms"
   | "generic";
 
 export interface HeroBannerCta {
@@ -27,9 +24,9 @@ export interface HeroBannerConfig {
   route?: string;
   /** Main heading text */
   title: string;
-  /** Optional secondary strapline */
+  /** Optional secondary strapline (used as eyebrow or subtitle) */
   subtitle?: string;
-  /** Short descriptive copy */
+  /** Short descriptive copy (used as body copy under the title) */
   description?: string;
   /** Background image path (public/…) */
   backgroundImage?: string;
@@ -51,19 +48,20 @@ export interface HeroBannerConfig {
 
 const DEFAULT_HERO: HeroBannerConfig = {
   key: "generic",
+  route: "/",
   title: "Abraham of London",
-  subtitle: "Faithful strategy for fathers, founders, and board-level leaders.",
+  subtitle: "Faith · Strategy · Fatherhood",
   description:
     "Strategy, fatherhood, and marketplace leadership held together in one integrated conversation.",
   backgroundImage: "/assets/images/abraham-of-london-banner.webp",
   accent: "gold",
   primaryCta: {
-    label: "Explore strategy thinking",
-    href: "/strategy/sample-strategy",
+    label: "Explore strategic insights",
+    href: "/content",
   },
   secondaryCta: {
-    label: "Preview upcoming books",
-    href: "/books",
+    label: "View downloads",
+    href: "/downloads",
   },
   enabled: true,
 };
@@ -76,15 +74,15 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
   {
     key: "home",
     route: "/",
-    title: "Building strategy your grandchildren will thank you for.",
+    title: "When the system breaks you, purpose keeps you standing.",
     subtitle: "Legacy-first thinking from London to Lagos.",
     description:
       "From board decisions to the quiet work of fatherhood, the mandate is the same: build in truth, protect what matters, and leave something worth inheriting.",
     backgroundImage: "/assets/images/abraham-of-london-banner.webp",
     accent: "gold",
     primaryCta: {
-      label: "Start with strategy",
-      href: "/strategy",
+      label: "Start with the latest insight",
+      href: "/content",
     },
     secondaryCta: {
       label: "See legacy tools",
@@ -94,30 +92,30 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
   },
   {
     key: "strategy",
-    route: "/strategy",
-    title: "Strategy that honours both heaven and the balance sheet.",
-    subtitle: "Advisory for boards, founders, and investors.",
+    route: "/consulting",
+    title: "Faith-rooted strategy for founders, boards, and builders.",
+    subtitle: "Advisory & consulting",
     description:
-      "We help you navigate complexity, de-risk decisions, and build structures that can survive storms — not just funding rounds.",
-    backgroundImage: "/assets/images/abraham-of-london-banner.webp",
+      "Structured, accountable advisory at the intersection of strategy, governance, and character — for leaders who carry real weight.",
+    backgroundImage: "/assets/images/london-skyline-gold.webp",
     accent: "neutral",
     primaryCta: {
-      label: "View strategy notes",
-      href: "/strategy/sample-strategy",
+      label: "Request a consultation",
+      href: "/contact",
     },
     secondaryCta: {
-      label: "Enquire about advisory",
-      href: "/contact",
+      label: "View upcoming salons",
+      href: "/events",
     },
     enabled: true,
   },
   {
     key: "books",
     route: "/books",
-    title: "Fathering Without Fear & other forthcoming works.",
-    subtitle: "Books for men who refuse to outsource responsibility.",
+    title: "Fathering Without Fear, and other forthcoming works.",
+    subtitle: "Books & manuscripts",
     description:
-      "Explore upcoming projects that blend story, theology, and strategy for fathers, founders, and leaders.",
+      "Forthcoming titles that blend story, theology, and strategy for fathers, founders, and leaders who refuse to outsource responsibility.",
     backgroundImage: "/assets/images/writing-desk.webp",
     accent: "gold",
     primaryCta: {
@@ -125,8 +123,8 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
       href: "/books",
     },
     secondaryCta: {
-      label: "Join the list",
-      href: "/downloads/brotherhood-covenant",
+      label: "Download the teaser",
+      href: "/downloads/Fathering_Without_Fear_Teaser-Mobile",
     },
     enabled: true,
   },
@@ -134,13 +132,13 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     key: "downloads",
     route: "/downloads",
     title: "Legacy tools you can put on the table tonight.",
-    subtitle: "Covenants, liturgies, and strategic cue-cards.",
+    subtitle: "Downloads & printables",
     description:
-      "Download practical, print-ready tools for boardrooms, family tables, and brotherhood circles.",
+      "Covenants, liturgies, and strategic cue-cards for boardrooms, family tables, and brotherhood circles.",
     backgroundImage: "/assets/images/abraham-of-london-banner.webp",
     accent: "neutral",
     primaryCta: {
-      label: "See all downloads",
+      label: "View all downloads",
       href: "/downloads",
     },
     secondaryCta: {
@@ -153,65 +151,25 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
     key: "fathering",
     route: "/strategy/fathering-without-fear",
     title: "Fathering Without Fear.",
-    subtitle: "Rebuilding the courage to stay, lead, and bless.",
+    subtitle: "A long-term work on courage, consequence, and legacy.",
     description:
-      "A long-term project on fatherhood, legacy, and the quiet resilience required to hold your post when systems fail you.",
+      "Rebuilding the courage to stay, lead, and bless — when legal systems, markets, and culture cut against fathers.",
     backgroundImage: "/assets/images/abraham-of-london-banner.webp",
     accent: "gold",
     primaryCta: {
-      label: "Read the teaser",
+      label: "Read the core essay",
       href: "/strategy/fathering-without-fear",
     },
     secondaryCta: {
-      label: "Download family altar liturgy",
+      label: "Download the family altar liturgy",
       href: "/downloads/family-altar-liturgy",
-    },
-    enabled: true,
-  },
-  // NEW: Consulting hero
-  {
-    key: "consulting",
-    route: "/consulting",
-    title: "Faith-rooted strategy for founders, boards, and builders.",
-    subtitle: "Advisory & Consulting",
-    description:
-      "I work with leaders who refuse to outsource responsibility — men and women who carry weight for families, organisations, and nations. The work sits at the intersection of strategy, governance, and character.",
-    backgroundImage: "/assets/images/abraham-of-london-banner.webp",
-    accent: "neutral",
-    primaryCta: {
-      label: "Request a consultation",
-      href: "/contact",
-    },
-    secondaryCta: {
-      label: "View upcoming salons",
-      href: "/events",
-    },
-    enabled: true,
-  },
-  // NEW: Chatham Rooms hero
-  {
-    key: "chathamRooms",
-    route: "/chatham-rooms",
-    title: "Private, off-record rooms for honest leaders and heavy fathers.",
-    subtitle: "The Chatham Rooms",
-    description:
-      "The Chatham Rooms are small, curated conversations held under Chatham House Rule — where founders, executives, and fathers can speak plainly about power, family, faith, and consequence without performance or optics.",
-    backgroundImage: "/assets/images/abraham-of-london-banner.webp",
-    accent: "gold",
-    primaryCta: {
-      label: "Enquire about invitation",
-      href: "/contact",
-    },
-    secondaryCta: {
-      label: "See upcoming rooms",
-      href: "/events",
     },
     enabled: true,
   },
 ];
 
 // -----------------------------------------------------------------------------
-// Helpers
+// Helper: find hero by key
 // -----------------------------------------------------------------------------
 
 export function getHeroBannerByKey(
@@ -221,6 +179,7 @@ export function getHeroBannerByKey(
   return HERO_BANNERS.find((b) => b.key === normalized) ?? DEFAULT_HERO;
 }
 
+// Helper: find hero by route (e.g. "/books")
 export function getHeroBannerForRoute(route: string): HeroBannerConfig {
   const cleanRoute = route.split("?")[0].split("#")[0] || "/";
   return (
