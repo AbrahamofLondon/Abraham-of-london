@@ -1,19 +1,19 @@
 // pages/content.tsx
-import type { GetStaticProps } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
 
-// Existing data helpers
+// Existing data helpers - added safe access patterns
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
 import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
-// Types
+// Enhanced Types with Strict Validation
 // ---------------------------------------------------------------------------
 
 type ContentKind =
@@ -24,6 +24,7 @@ type ContentKind =
   | "print"
   | "resource";
 
+// Strict interface definitions with optional properties properly marked
 interface RawContentItem {
   slug?: string;
   title?: string;
@@ -41,9 +42,9 @@ interface RawContentItem {
   eventDate?: string;
   // Download-specific fields
   fileSize?: string;
-  [key: string]: unknown;
 }
 
+// Primary content resource interface with required fields
 interface ContentResource {
   kind: ContentKind;
   title: string;
@@ -64,21 +65,58 @@ interface ContentPageProps {
 }
 
 // ---------------------------------------------------------------------------
-// Icons / helpers
+// Safe Icon Components with Proper Typing
 // ---------------------------------------------------------------------------
 
-const ContentIcons: Record<ContentKind, string> = {
-  blog: "Blog",
-  book: "Book",
-  download: "↓",
-  event: "Event",
-  print: "Print",
-  resource: "Resource",
+// Individual icon components for better type safety
+const BlogIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12" />
+  </svg>
+);
+
+const BookIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+  </svg>
+);
+
+const DownloadIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const EventIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+);
+
+const PrintIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+  </svg>
+);
+
+const ResourceIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  </svg>
+);
+
+const ContentIcons: Record<ContentKind, React.ReactElement> = {
+  blog: <BlogIcon />,
+  book: <BookIcon />,
+  download: <DownloadIcon />,
+  event: <EventIcon />,
+  print: <PrintIcon />,
+  resource: <ResourceIcon />,
 };
 
-const ArrowIcon = () => (
+const ArrowIcon: React.FC<{ className?: string }> = ({ className = "ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" }) => (
   <svg
-    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+    className={className}
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -91,6 +129,10 @@ const ArrowIcon = () => (
     />
   </svg>
 );
+
+// ---------------------------------------------------------------------------
+// Constants with Type Assertions
+// ---------------------------------------------------------------------------
 
 const kindOrder: ContentKind[] = [
   "blog",
@@ -108,7 +150,7 @@ const kindLabels: Record<ContentKind, string> = {
   event: "Events",
   print: "Printables",
   resource: "Resources",
-};
+} as const;
 
 const getKindColor = (kind: ContentKind): string => {
   const colors: Record<ContentKind, string> = {
@@ -119,7 +161,7 @@ const getKindColor = (kind: ContentKind): string => {
     print: "from-pink-500/20 to-pink-600/20 border-pink-400/40",
     resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-400/40",
   };
-  return colors[kind];
+  return colors[kind] ?? "from-gray-500/20 to-gray-600/20 border-gray-400/40";
 };
 
 const getKindBadgeColor = (kind: ContentKind): string => {
@@ -131,34 +173,39 @@ const getKindBadgeColor = (kind: ContentKind): string => {
     print: "border-pink-400/40 text-pink-300 bg-pink-500/15",
     resource: "border-cyan-400/40 text-cyan-300 bg-cyan-500/15",
   };
-  return colors[kind];
+  return colors[kind] ?? "border-gray-400/40 text-gray-300 bg-gray-500/15";
 };
 
 // ---------------------------------------------------------------------------
-// Shared helpers
+// Safe Helper Functions with Error Boundaries
 // ---------------------------------------------------------------------------
 
 const getSlug = (item: RawContentItem): string | undefined => {
-  const stripCollectionPrefix = (value: string) =>
-    value.replace(/^(blog|books|downloads|events|prints|resources)\//, "");
+  try {
+    const stripCollectionPrefix = (value: string) =>
+      value.replace(/^(blog|books|downloads|events|prints|resources)\//, "");
 
-  if (item.slug && typeof item.slug === "string") {
-    return stripCollectionPrefix(item.slug);
+    if (item.slug && typeof item.slug === "string") {
+      return stripCollectionPrefix(item.slug);
+    }
+
+    if (item._raw?.flattenedPath) {
+      return stripCollectionPrefix(item._raw.flattenedPath);
+    }
+
+    if (item.title) {
+      return item.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    return undefined;
+  } catch (error) {
+    console.error("[getSlug] Error processing slug:", error);
+    return undefined;
   }
-
-  if (item._raw?.flattenedPath) {
-    return stripCollectionPrefix(item._raw.flattenedPath);
-  }
-
-  if (item.title) {
-    return item.title
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
-
-  return undefined;
 };
 
 const getHref = (kind: ContentKind, slug: string): string => {
@@ -174,34 +221,46 @@ const processContentItems = (
   const processed: ContentResource[] = [];
 
   items.forEach((item) => {
-    const slug = getSlug(item);
-    const title = item.title || "Untitled";
+    try {
+      const slug = getSlug(item);
+      const title = item.title || "Untitled";
 
-    if (!slug) return;
+      if (!slug) {
+        console.warn(`[processContentItems] Skipping item with no slug: ${title}`);
+        return;
+      }
 
-    processed.push({
-      kind,
-      title,
-      slug,
-      href: getHref(kind, slug),
-      date: item.date || item.eventDate,
-      excerpt: item.excerpt,
-      description: item.description,
-      category: item.category || defaultCategory,
-      tags: item.tags || [],
-      featured: item.featured || false,
-      readTime: item.readTime,
-    });
+      processed.push({
+        kind,
+        title,
+        slug,
+        href: getHref(kind, slug),
+        date: item.date || item.eventDate,
+        excerpt: item.excerpt,
+        description: item.description,
+        category: item.category || defaultCategory,
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        featured: Boolean(item.featured),
+        readTime: item.readTime,
+      });
+    } catch (error) {
+      console.error("[processContentItems] Error processing item:", error);
+    }
   });
 
   return processed;
 };
 
 // ---------------------------------------------------------------------------
-// Card component
+// Enhanced Case Components with Proper Prop Typing
 // ---------------------------------------------------------------------------
 
-function ContentCard({ item }: { item: ContentResource }) {
+interface ContentCaseProps {
+  item: ContentResource;
+  variant?: "default" | "featured" | "compact";
+}
+
+const ContentCase: React.FC<ContentCaseProps> = ({ item, variant = "default" }) => {
   const description = item.description || item.excerpt || "";
 
   const ctaLabel =
@@ -213,11 +272,80 @@ function ContentCard({ item }: { item: ContentResource }) {
       ? "View Book"
       : "Read more";
 
+  if (variant === "featured") {
+    return (
+      <article className="group relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/8 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/40 hover:shadow-2xl">
+        <div className="absolute top-6 right-6 text-2xl">
+          {ContentIcons[item.kind]}
+        </div>
+
+        <div className="mb-4">
+          <span
+            className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
+              item.kind,
+            )} text-white`}
+          >
+            {item.kind}
+          </span>
+        </div>
+
+        <h3 className="mb-4 font-serif text-xl font-light text-white group-hover:text-softGold">
+          <Link href={item.href} className="hover:underline">
+            {item.title}
+          </Link>
+        </h3>
+
+        {description && (
+          <p className="mb-6 line-clamp-3 text-gray-100">
+            {description}
+          </p>
+        )}
+
+        <Link
+          href={item.href}
+          className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-3"
+        >
+          Explore Resource
+          <ArrowIcon />
+        </Link>
+      </article>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <article className="group flex items-center gap-4 rounded-xl border border-white/8 bg-black/40 p-4 transition-all hover:border-softGold/30 hover:bg-black/60">
+        <div className="flex-shrink-0">
+          <div className={`rounded-lg p-2 ${getKindBadgeColor(item.kind)}`}>
+            {ContentIcons[item.kind]}
+          </div>
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <h4 className="truncate font-medium text-white group-hover:text-softGold">
+            <Link href={item.href} className="hover:underline">
+              {item.title}
+            </Link>
+          </h4>
+          {item.date && (
+            <time className="text-xs text-gray-400">
+              {new Date(item.date).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </time>
+          )}
+        </div>
+        
+        <ArrowIcon />
+      </article>
+    );
+  }
+
+  // Default case variant
   return (
-    <article
-      key={`${item.kind}-${item.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/12 bg-black/55 shadow-lg transition-all hover:-translate-y-2 hover:border-softGold/50 hover:shadow-2xl"
-    >
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/12 bg-black/55 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/50 hover:shadow-2xl">
       <div
         className={`absolute inset-0 bg-gradient-to-br ${getKindColor(
           item.kind,
@@ -228,7 +356,9 @@ function ContentCard({ item }: { item: ContentResource }) {
         {/* Header */}
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="text-lg">{ContentIcons[item.kind]}</div>
+            <div className={`rounded-lg p-2 ${getKindBadgeColor(item.kind)}`}>
+              {ContentIcons[item.kind]}
+            </div>
             <span
               className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
                 item.kind,
@@ -250,26 +380,35 @@ function ContentCard({ item }: { item: ContentResource }) {
         </div>
 
         {/* Content */}
-        <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
-          <Link href={item.href} className="hover:underline">
-            {item.title}
-          </Link>
-        </h3>
+        <div className="flex-1">
+          <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
+            <Link href={item.href} className="hover:underline">
+              {item.title}
+            </Link>
+          </h3>
 
-        {description && (
-          <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-100">
-            {description}
-          </p>
-        )}
+          {description && (
+            <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-100">
+              {description}
+            </p>
+          )}
+        </div>
 
         {/* Footer */}
         <div className="mt-auto pt-4">
           <div className="flex items-center justify-between">
-            {item.category && (
-              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200">
-                {item.category}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {item.category && (
+                <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200">
+                  {item.category}
+                </span>
+              )}
+              {item.readTime && (
+                <span className="text-xs text-gray-400">
+                  {typeof item.readTime === 'number' ? `${item.readTime} min` : item.readTime}
+                </span>
+              )}
+            </div>
 
             <Link
               href={item.href}
@@ -283,10 +422,82 @@ function ContentCard({ item }: { item: ContentResource }) {
       </div>
     </article>
   );
-}
+};
 
 // ---------------------------------------------------------------------------
-// SSG
+// Section Components with Strict Prop Types
+// ---------------------------------------------------------------------------
+
+interface ContentSectionProps {
+  title: string;
+  subtitle?: string;
+  items: ContentResource[];
+  variant?: "grid" | "list" | "featured";
+  columns?: 2 | 3 | 4;
+}
+
+const ContentSection: React.FC<ContentSectionProps> = ({ 
+  title, 
+  subtitle, 
+  items, 
+  variant = "grid",
+  columns = 3 
+}) => {
+  if (!items.length) return null;
+
+  const gridClass = {
+    2: "md:grid-cols-2",
+    3: "md:grid-cols-2 lg:grid-cols-3",
+    4: "md:grid-cols-2 lg:grid-cols-4"
+  }[columns];
+
+  return (
+    <section className="py-8">
+      <header className="mb-6">
+        <h2 className="font-serif text-2xl font-light text-white">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="mt-2 text-gray-300">{subtitle}</p>
+        )}
+      </header>
+
+      {variant === "featured" ? (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {items.map((item) => (
+            <ContentCase
+              key={`${item.kind}-${item.slug}`}
+              item={item}
+              variant="featured"
+            />
+          ))}
+        </div>
+      ) : variant === "list" ? (
+        <div className="space-y-3">
+          {items.map((item) => (
+            <ContentCase
+              key={`${item.kind}-${item.slug}`}
+              item={item}
+              variant="compact"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className={`grid gap-6 ${gridClass}`}>
+          {items.map((item) => (
+            <ContentCase
+              key={`${item.kind}-${item.slug}`}
+              item={item}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Safe SSG with Comprehensive Error Handling
 // ---------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
@@ -297,102 +508,89 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   try {
     const allItems: ContentResource[] = [];
 
+    // Safe data fetching with proper error handling
+    const safeGetData = async <T,>(
+      dataFetcher: (() => T) | undefined,
+      dataName: string
+    ): Promise<T[]> => {
+      try {
+        if (!dataFetcher || typeof dataFetcher !== 'function') {
+          console.warn(`[content] ${dataName} fetcher is not available`);
+          return [];
+        }
+        const data = dataFetcher();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error(`[content] Error fetching ${dataName}:`, error);
+        return [];
+      }
+    };
+
     // Blog posts
-    try {
-      const posts = getAllPostsMeta?.() || [];
-      const processedPosts = processContentItems(
-        posts as unknown as RawContentItem[],
-        "blog",
-        "Blog",
-      );
-      allItems.push(...processedPosts);
-      console.log(`[content] Processed ${processedPosts.length} blog posts`);
-    } catch (err) {
-      console.error("[content] Error fetching posts:", err);
-    }
+    const posts = await safeGetData(getAllPostsMeta, "blog posts");
+    const processedPosts = processContentItems(
+      posts as unknown as RawContentItem[],
+      "blog",
+      "Blog",
+    );
+    allItems.push(...processedPosts);
 
     // Books
-    try {
-      const books = getAllBooksMeta?.() || [];
-      const processedBooks = processContentItems(
-        books as unknown as RawContentItem[],
-        "book",
-        "Books",
-      );
-      allItems.push(...processedBooks);
-      console.log(`[content] Processed ${processedBooks.length} books`);
-    } catch (err) {
-      console.error("[content] Error fetching books:", err);
-    }
+    const books = await safeGetData(getAllBooksMeta, "books");
+    const processedBooks = processContentItems(
+      books as unknown as RawContentItem[],
+      "book",
+      "Books",
+    );
+    allItems.push(...processedBooks);
 
     // Downloads
-    try {
-      const downloads = getAllDownloadsMeta?.() || [];
-      const processedDownloads = processContentItems(
-        downloads as unknown as RawContentItem[],
-        "download",
-        "Downloads",
-      );
-      allItems.push(...processedDownloads);
-      console.log(
-        `[content] Processed ${processedDownloads.length} downloads`,
-      );
-    } catch (err) {
-      console.error("[content] Error fetching downloads:", err);
-    }
+    const downloads = await safeGetData(getAllDownloadsMeta, "downloads");
+    const processedDownloads = processContentItems(
+      downloads as unknown as RawContentItem[],
+      "download",
+      "Downloads",
+    );
+    allItems.push(...processedDownloads);
 
     // Events
-    try {
-      const events = getAllContent?.("events") || [];
-      const eventsAsRaw = events as unknown as RawContentItem[];
-      const processedEvents = processContentItems(
-        eventsAsRaw,
-        "event",
-        "Events",
-      );
-      allItems.push(...processedEvents);
-      console.log(`[content] Processed ${processedEvents.length} events`);
-    } catch (err) {
-      console.error("[content] Error fetching events:", err);
-    }
+    const events = await safeGetData(() => getAllContent?.("events"), "events");
+    const processedEvents = processContentItems(
+      events as unknown as RawContentItem[],
+      "event",
+      "Events",
+    );
+    allItems.push(...processedEvents);
 
     // Prints
-    try {
-      const prints = getAllContent?.("prints") || [];
-      const printsAsRaw = prints as unknown as RawContentItem[];
-      const processedPrints = processContentItems(
-        printsAsRaw,
-        "print",
-        "Printables",
-      );
-      allItems.push(...processedPrints);
-      console.log(`[content] Processed ${processedPrints.length} prints`);
-    } catch (err) {
-      console.error("[content] Error fetching prints:", err);
-    }
+    const prints = await safeGetData(() => getAllContent?.("prints"), "prints");
+    const processedPrints = processContentItems(
+      prints as unknown as RawContentItem[],
+      "print",
+      "Printables",
+    );
+    allItems.push(...processedPrints);
 
     // Resources
-    try {
-      const resources = getAllContent?.("resources") || [];
-      const resourcesAsRaw = resources as unknown as RawContentItem[];
-      const processedResources = processContentItems(
-        resourcesAsRaw,
-        "resource",
-        "Resources",
-      );
-      allItems.push(...processedResources);
-      console.log(
-        `[content] Processed ${processedResources.length} resources`,
-      );
-    } catch (err) {
-      console.error("[content] Error fetching resources:", err);
-    }
+    const resources = await safeGetData(() => getAllContent?.("resources"), "resources");
+    const processedResources = processContentItems(
+      resources as unknown as RawContentItem[],
+      "resource",
+      "Resources",
+    );
+    allItems.push(...processedResources);
 
+    // Safe sorting with date validation
     const sortedItems = allItems.sort((a, b) => {
-      if (!a.date && !b.date) return 0;
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      
+      // Handle invalid dates
+      if (isNaN(dateA) && isNaN(dateB)) return 0;
+      if (isNaN(dateA)) return 1;
+      if (isNaN(dateB)) return -1;
+      
+      return dateB - dateA;
     });
 
     const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 3);
@@ -407,28 +605,30 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
         items: JSON.parse(JSON.stringify(sortedItems)),
         featuredItems: JSON.parse(JSON.stringify(featuredItems)),
       },
-      revalidate: 3600,
+      revalidate: 3600, // 1 hour
     };
   } catch (error) {
     console.error("[content] Critical error in getStaticProps:", error);
     return {
-      props: { items: [], featuredItems: [] },
+      props: { 
+        items: [], 
+        featuredItems: [] 
+      },
       revalidate: 3600,
     };
   }
 };
 
 // ---------------------------------------------------------------------------
-// Component
+// Main Component with Proper Typing
 // ---------------------------------------------------------------------------
 
-const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
-  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
-    "all",
-  );
+const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  const contentStats = {
+  // Safe content statistics calculation
+  const contentStats = React.useMemo(() => ({
     all: items.length,
     blog: items.filter((i) => i.kind === "blog").length,
     book: items.filter((i) => i.kind === "book").length,
@@ -436,7 +636,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     event: items.filter((i) => i.kind === "event").length,
     print: items.filter((i) => i.kind === "print").length,
     resource: items.filter((i) => i.kind === "resource").length,
-  };
+  }), [items]);
 
   const filters: Array<{
     key: ContentKind | "all";
@@ -452,34 +652,45 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     { key: "resource", label: "Resources", count: contentStats.resource },
   ];
 
-  const filteredItems = items.filter((item) => {
-    const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
-    if (!matchesFilter) return false;
+  // Safe filtering with search
+  const filteredItems = React.useMemo(() => {
+    return items.filter((item) => {
+      const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
+      if (!matchesFilter) return false;
 
-    if (!searchQuery) return true;
+      if (!searchQuery.trim()) return true;
 
-    const q = searchQuery.toLowerCase();
-    return (
-      item.title.toLowerCase().includes(q) ||
-      item.excerpt?.toLowerCase().includes(q) ||
-      item.description?.toLowerCase().includes(q) ||
-      item.tags.some((tag) => tag.toLowerCase().includes(q))
-    );
-  });
+      const query = searchQuery.toLowerCase().trim();
+      return (
+        item.title.toLowerCase().includes(query) ||
+        item.excerpt?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    });
+  }, [items, activeFilter, searchQuery]);
 
-  const groupedByKind: Record<ContentKind, ContentResource[]> = {
-    blog: [],
-    book: [],
-    download: [],
-    event: [],
-    print: [],
-    resource: [],
-  };
+  // Safe grouping by kind
+  const groupedByKind: Record<ContentKind, ContentResource[]> = React.useMemo(() => {
+    const initial: Record<ContentKind, ContentResource[]> = {
+      blog: [],
+      book: [],
+      download: [],
+      event: [],
+      print: [],
+      resource: [],
+    };
 
-  for (const item of filteredItems) {
-    groupedByKind[item.kind].push(item);
-  }
+    for (const item of filteredItems) {
+      if (initial[item.kind]) {
+        initial[item.kind].push(item);
+      }
+    }
 
+    return initial;
+  }, [filteredItems]);
+
+  // Safe keyboard handler
   const handleKeyDown = (
     event: React.KeyboardEvent,
     filterKey: ContentKind | "all",
@@ -487,6 +698,14 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setActiveFilter(filterKey);
+    }
+  };
+
+  // Safe scroll handler
+  const handleExploreClick = () => {
+    const contentGrid = document.getElementById("content-grid");
+    if (contentGrid) {
+      contentGrid.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -505,7 +724,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
       </Head>
 
       <div className="min-h-screen bg-[#050608]">
-        {/* Hero */}
+        {/* Hero Section */}
         <section className="relative overflow-hidden px-4 py-20 lg:py-28">
           <div className="absolute inset-0 bg-gradient-to-r from-softGold/8 via-transparent to-transparent" />
           <div className="relative mx-auto max-w-7xl">
@@ -533,12 +752,8 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 <div className="flex flex-wrap gap-4">
                   <button
                     type="button"
-                    onClick={() =>
-                      document
-                        .getElementById("content-grid")
-                        ?.scrollIntoView({ behavior: "smooth" })
-                    }
-                    className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25"
+                    onClick={handleExploreClick}
+                    className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold"
                   >
                     <span className="relative z-10">Explore Resources</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity group-hover:opacity-100" />
@@ -547,7 +762,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   <button
                     type="button"
                     onClick={() => setActiveFilter("download")}
-                    className="group rounded-lg border border-softGold/40 bg-black/60 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 hover:shadow-lg hover:shadow-yellow-500/10"
+                    className="group rounded-lg border border-softGold/40 bg-black/60 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 hover:shadow-lg hover:shadow-yellow-500/10 focus:outline-none focus:ring-2 focus:ring-softGold"
                   >
                     <span className="flex items-center gap-2">
                       Free Downloads
@@ -557,19 +772,15 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                 </div>
               </div>
 
-              {/* Stats */}
+              {/* Stats Grid */}
               <div className="mt-12 lg:mt-0">
                 <div className="grid grid-cols-2 gap-6">
                   {filters.slice(1).map((filter) => (
                     <button
                       key={filter.key}
                       type="button"
-                      onClick={() =>
-                        setActiveFilter(filter.key as ContentKind | "all")
-                      }
-                      onKeyDown={(e) =>
-                        handleKeyDown(e, filter.key as ContentKind | "all")
-                      }
+                      onClick={() => setActiveFilter(filter.key)}
+                      onKeyDown={(e) => handleKeyDown(e, filter.key)}
                       className={`group rounded-2xl border bg-gradient-to-br ${getKindColor(
                         filter.key as ContentKind,
                       )} p-6 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black`}
@@ -595,64 +806,21 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
           </div>
         </section>
 
-        {/* Featured */}
+        {/* Featured Section */}
         {featuredItems.length > 0 && (
           <section className="px-4 py-16">
             <div className="mx-auto max-w-7xl">
-              <div className="mb-12 text-center">
-                <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
-                  Featured <span className="text-softGold">Essentials</span>
-                </h2>
-                <p className="mt-4 text-gray-200">
-                  Handpicked resources to get you started
-                </p>
-              </div>
-
-              <div className="grid gap-8 lg:grid-cols-3">
-                {featuredItems.map((item) => (
-                  <div
-                    key={item.slug}
-                    className="group relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/8 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/40 hover:shadow-2xl"
-                  >
-                    <div className="absolute top-6 right-6 text-2xl">
-                      {ContentIcons[item.kind]}
-                    </div>
-
-                    <div className="mb-4">
-                      <span
-                        className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
-                          item.kind,
-                        )} text-white`}
-                      >
-                        {item.kind}
-                      </span>
-                    </div>
-
-                    <h3 className="mb-4 font-serif text-xl font-light text-white group-hover:text-softGold">
-                      <Link href={item.href}>{item.title}</Link>
-                    </h3>
-
-                    {item.excerpt && (
-                      <p className="mb-6 line-clamp-3 text-gray-100">
-                        {item.excerpt}
-                      </p>
-                    )}
-
-                    <Link
-                      href={item.href}
-                      className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-3"
-                    >
-                      Explore Resource
-                      <ArrowIcon />
-                    </Link>
-                  </div>
-                ))}
-              </div>
+              <ContentSection
+                title="Featured Essentials"
+                subtitle="Handpicked resources to get you started"
+                items={featuredItems}
+                variant="featured"
+              />
             </div>
           </section>
         )}
 
-        {/* Main Content */}
+        {/* Main Content Grid */}
         <section id="content-grid" className="px-4 py-16">
           <div className="mx-auto max-w-7xl">
             {/* Controls */}
@@ -674,7 +842,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   </div>
                 </div>
 
-                {/* Filter pills */}
+                {/* Filter Pills */}
                 <div className="flex flex-wrap gap-3">
                   {filters.map((filter) => (
                     <button
@@ -688,9 +856,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                       }`}
                     >
                       <span className="text-xs">
-                        {filter.key === "all"
-                          ? "📁"
-                          : ContentIcons[filter.key as ContentKind]}
+                        {filter.key === "all" ? "📁" : ContentIcons[filter.key as ContentKind]}
                       </span>
                       {filter.label}
                       <span
@@ -708,7 +874,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
               </div>
             </div>
 
-            {/* Result summary */}
+            {/* Result Summary */}
             <div className="mb-8 flex items-center justify-between text-sm text-gray-300">
               <div>
                 Showing {filteredItems.length} of {items.length} resources
@@ -724,7 +890,7 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
               )}
             </div>
 
-            {/* Grid / grouped content */}
+            {/* Content Display */}
             {filteredItems.length === 0 ? (
               <div className="rounded-2xl border border-white/12 bg-black/55 px-6 py-16 text-center">
                 <div className="mb-4 text-6xl">🔍</div>
@@ -759,44 +925,29 @@ const ContentPage: React.FC<ContentPageProps> = ({ items, featuredItems }) => {
                   if (!group.length) return null;
 
                   return (
-                    <section key={kind}>
-                      <header className="mb-4 flex items-center justify-between">
-                        <h2 className="flex items-center gap-2 font-serif text-2xl font-light text-white">
-                          <span>{ContentIcons[kind]}</span>
-                          <span>{kindLabels[kind]}</span>
-                        </h2>
-                        <span className="text-xs uppercase tracking-[0.2em] text-gray-400">
-                          {group.length} item
-                          {group.length !== 1 ? "s" : ""}
-                        </span>
-                      </header>
-                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {group.map((item) => (
-                          <ContentCard
-                            key={`${item.kind}-${item.slug}`}
-                            item={item}
-                          />
-                        ))}
-                      </div>
-                    </section>
+                    <ContentSection
+                      key={kind}
+                      title={kindLabels[kind]}
+                      items={group}
+                      variant="grid"
+                      columns={3}
+                    />
                   );
                 })}
               </div>
             ) : (
-              // Flat grid for a specific filter
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredItems.map((item) => (
-                  <ContentCard
-                    key={`${item.kind}-${item.slug}`}
-                    item={item}
-                  />
-                ))}
-              </div>
+              // Flat grid for specific filter
+              <ContentSection
+                title={kindLabels[activeFilter]}
+                items={filteredItems}
+                variant="grid"
+                columns={3}
+              />
             )}
           </div>
         </section>
 
-        {/* CTA */}
+        {/* CTA Section */}
         <section className="px-4 py-20">
           <div className="mx-auto max-w-4xl text-center">
             <div className="rounded-2xl border border-softGold/25 bg-gradient-to-r from-softGold/10 to-yellow-600/10 px-8 py-12 backdrop-blur-sm">
