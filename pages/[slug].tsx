@@ -24,7 +24,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-const PRIMARY_COLLECTION = "posts"; // assume posts are the main root slugs
+// Collections we’ll search – adjust names if your MDX layer uses different ones
+const COLLECTIONS = ["pages", "posts", "Post", "print", "resource"];
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -76,24 +77,18 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
-            className={`
+            className="
               prose prose-lg max-w-none
-              prose-headings:font-serif prose-headings:text-slate-900
-              prose-p:text-slate-800 prose-p:leading-relaxed
-              prose-strong:text-slate-900 prose-strong:font-semibold
+              prose-headings:font-serif
+              prose-headings:text-slate-100
+              prose-p:text-slate-100 prose-p:leading-relaxed
+              prose-strong:text-slate-100 prose-strong:font-semibold
               prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-slate-800 prose-ol:text-slate-800
-              prose-blockquote:border-l-softGold prose-blockquote:text-slate-900
+              prose-ul:text-slate-100 prose-ol:text-slate-100
+              prose-blockquote:border-l-softGold prose-blockquote:text-slate-100
               prose-hr:border-t border-white/10
               prose-img:rounded-xl prose-img:shadow-lg
-
-              dark:prose-headings:text-slate-50
-              dark:prose-p:text-slate-100
-              dark:prose-strong:text-slate-50
-              dark:prose-ul:text-slate-100
-              dark:prose-ol:text-slate-100
-              dark:prose-blockquote:text-slate-50
-            `}
+            "
           >
             <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
@@ -111,14 +106,24 @@ export default ContentPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const items = getAllContent(PRIMARY_COLLECTION) ?? [];
+    const allItems: any[] = [];
 
+    for (const key of COLLECTIONS) {
+      const items = getAllContent(key) ?? [];
+      allItems.push(...items);
+    }
+
+    const seen = new Set<string>();
     const paths =
-      items
-        .filter((item: any) => item?.slug)
-        .map((item: any) => ({
-          params: { slug: String(item.slug) },
-        })) ?? [];
+      allItems
+        .filter((item) => item?.slug)
+        .map((item) => String(item.slug))
+        .filter((slug) => {
+          if (seen.has(slug)) return false;
+          seen.add(slug);
+          return true;
+        })
+        .map((slug) => ({ params: { slug } }));
 
     return {
       paths,
@@ -135,9 +140,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // SSG – props
 // -----------------------------------------------------------------------------
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({
-  params,
-}) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slugParam = params?.slug;
     const slug =
@@ -149,34 +152,20 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!slug) return { notFound: true };
 
-    // Try multiple collections defensively; ignore failures.
-    const collectionsToTry = [
-      "posts",     // main blog / insights
-      "pages",     // essays / flat pages
-      "prints",    // long-form PDFs (if any)
-      "resources", // misc resources
-    ];
-
     let data: (PageMeta & { content?: string }) | null = null;
 
-    for (const key of collectionsToTry) {
-      try {
-        const candidate = getContentBySlug(key, slug, {
-          withContent: true,
-        }) as (PageMeta & { content?: string }) | null;
+    for (const key of COLLECTIONS) {
+      const candidate = getContentBySlug(key, slug, {
+        withContent: true,
+      }) as (PageMeta & { content?: string }) | null;
 
-        if (candidate) {
-          data = candidate;
-          break;
-        }
-      } catch {
-        // unknown collection key or other internal error – try next
+      if (candidate) {
+        data = candidate;
+        break;
       }
     }
 
-    if (!data) {
-      return { notFound: true };
-    }
+    if (!data) return { notFound: true };
 
     const { content, ...meta } = data;
 

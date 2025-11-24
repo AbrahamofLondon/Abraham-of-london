@@ -6,30 +6,20 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* Base light/dark tokens – keep it simple & high-contrast                    */
+/* BASE TOKENS – SINGLE, HIGH-CONTRAST DARK THEME                             */
 /* -------------------------------------------------------------------------- */
 
-/* Light mode defaults */
 :root {
-  --aol-bg: #f9fafb;            /* neutral light */
-  --aol-bg-muted: #e5e7eb;
-  --aol-text: #111827;          /* slate-900 */
-  --aol-text-muted: #4b5563;    /* slate-600 */
-  --aol-gold: #d6b26a;
-  --aol-border-subtle: rgba(15, 23, 42, 0.12);
-}
-
-/* Dark mode overrides – driven by html.dark (next-themes) */
-html.dark {
-  --aol-bg: #020617;            /* slate-950 */
-  --aol-bg-muted: #020617;
-  --aol-text: #f9fafb;          /* almost white */
-  --aol-text-muted: #e5e7eb;    /* soft white */
-  --aol-border-subtle: rgba(148, 163, 184, 0.4);
+  --aol-bg: #050608;          /* deep cinematic background */
+  --aol-surface: #0b0d10;
+  --aol-text: #f9fafb;        /* near-white */
+  --aol-muted: #cbd5f5;
+  --aol-softGold: #d6b26a;
+  --aol-border-subtle: rgba(148, 163, 184, 0.35);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Reset & base                                                               */
+/* RESET & BASE                                                               */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -43,8 +33,8 @@ html {
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
+  margin: 0;
   background-color: var(--aol-bg);
   color: var(--aol-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -53,18 +43,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Make sure main fills and inherits background */
 main {
   min-height: 100vh;
 }
 
-/* Text selection */
-::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: var(--aol-text);
-}
-
-/* Media normalisation */
+/* Media */
 img,
 picture,
 video,
@@ -83,45 +66,38 @@ a {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--aol-gold);
+  outline: 2px solid var(--aol-softGold);
   outline-offset: 2px;
 }
 
+/* Text selection */
+::selection {
+  background-color: rgba(214, 178, 106, 0.35);
+  color: #0b0d10;
+}
+
 /* -------------------------------------------------------------------------- */
-/* Layout shell & hero wrappers                                               */
+/* PAGE SHELL & CARDS                                                         */
 /* -------------------------------------------------------------------------- */
 
 .page-shell {
   min-height: 100vh;
-  background-color: var(--aol-bg);
   color: var(--aol-text);
+  background:
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.18), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #050608);
 }
 
-/* Hero sections (About / Consulting / Chatham / Books etc.) */
-.hero-vignette {
-  background-color: var(--aol-bg);
-  color: var(--aol-text);
-}
-
-/* Section divider */
 .section-divider {
   border-top: 1px solid var(--aol-border-subtle);
 }
 
-/* -------------------------------------------------------------------------- */
-/* Cards, pills, chips                                                        */
-/* -------------------------------------------------------------------------- */
-
 .lux-card {
   border-radius: 1rem;
-  border: 1px solid var(--aol-border-subtle);
-  background-color: var(--aol-bg-muted);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
-}
-
-html.dark .lux-card {
-  background-color: #020617;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
 }
 
 .lux-card-hover {
@@ -133,39 +109,34 @@ html.dark .lux-card {
 
 .lux-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.28);
-  border-color: rgba(214, 178, 106, 0.6);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8);
+  border-color: rgba(214, 178, 106, 0.5);
 }
 
-/* Filter pills (content hub etc.) */
+/* Pills */
 .lux-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  border: 1px solid var(--aol-border-subtle);
-  background-color: var(--aol-bg-muted);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(15, 23, 42, 0.9);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--aol-text);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-}
-
-html.dark .lux-pill {
-  background-color: #020617;
   color: #f9fafb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
 }
 
 .lux-pill-active {
   border-color: rgba(214, 178, 106, 0.8);
-  background-color: var(--aol-gold);
+  background-color: var(--aol-softGold);
   color: #111827;
-  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Typography                                                                 */
+/* TYPOGRAPHY                                                                 */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -177,128 +148,93 @@ h6 {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-weight: 700;
-  color: var(--aol-text);
+  color: #fefce8;
 }
 
-/* Paragraphs & list items – enforce readability globally */
-p,
-li {
-  color: var(--aol-text-muted);
-}
-
-html.dark p,
-html.dark li {
+p {
   color: #e5e7eb;
 }
 
 /* -------------------------------------------------------------------------- */
-/* MDX / prose content                                                        */
+/* MDX / PROSE                                                               */
 /* -------------------------------------------------------------------------- */
 
-/* Base prose for light background (used by `prose` class) */
 .prose {
-  @apply max-w-none text-base leading-relaxed;
-  color: var(--aol-text);
+  max-width: none;
+  color: #e5e7eb;
+  font-size: 1.0625rem;
+  line-height: 1.75;
 }
 
 .prose p,
 .prose li {
-  color: var(--aol-text-muted);
+  color: #e5e7eb;
+  line-height: 1.75;
 }
 
 .prose h1,
 .prose h2,
 .prose h3,
 .prose h4 {
-  color: var(--aol-text);
+  color: #fefce8;
   letter-spacing: -0.03em;
   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 .prose strong {
-  color: var(--aol-text);
+  color: #fefce8;
   font-weight: 600;
 }
 
 .prose a {
-  color: #1d4ed8;
-  text-decoration: none;
+  color: var(--aol-softGold);
   font-weight: 500;
+  text-decoration: none;
 }
 
 .prose a:hover {
-  color: #1e40af;
+  color: #fefce8;
   text-decoration: underline;
 }
 
 .prose blockquote {
-  border-left: 4px solid var(--aol-gold);
-  background-color: #f9fafb;
-  color: var(--aol-text-muted);
+  border-left: 4px solid rgba(214, 178, 106, 0.9);
+  background-color: rgba(15, 23, 42, 0.8);
+  color: #f9fafb;
   padding: 0.75rem 0.75rem 0.75rem 1rem;
   margin: 1.75rem 0;
   border-radius: 0 1rem 1rem 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+.prose ul li::marker,
+.prose ol li::marker {
+  color: var(--aol-softGold);
+}
+
+.prose hr {
+  border-color: #374151;
+  margin: 2.5rem 0;
 }
 
 .prose code {
-  color: #92400e;
-  background-color: #fef3c7;
+  color: var(--aol-softGold);
+  background-color: rgba(0, 0, 0, 0.55);
   border-radius: 999px;
   padding: 0.15rem 0.4rem;
   font-size: 0.85em;
 }
 
 .prose pre {
-  background-color: #111827;
-  color: #e5e7eb;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #f9fafb;
   border-radius: 1.25rem;
   padding: 1rem 1.5rem;
-}
-
-/* Dark-mode override (when body is on dark background) */
-html.dark .prose {
-  color: #e5e7eb;
-}
-
-html.dark .prose p,
-html.dark .prose li {
-  color: #e5e7eb;
-}
-
-html.dark .prose h1,
-html.dark .prose h2,
-html.dark .prose h3,
-html.dark .prose h4 {
-  color: #f9fafb;
-}
-
-html.dark .prose strong {
-  color: #f9fafb;
-}
-
-html.dark .prose a {
-  color: var(--aol-gold);
-}
-
-html.dark .prose a:hover {
-  color: #fefce8;
-}
-
-html.dark .prose blockquote {
-  border-left: 4px solid rgba(214, 178, 106, 0.9);
-  background-color: #020617;
-  color: #f9fafb;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
-}
-
-html.dark .prose code {
-  color: var(--aol-gold);
-  background-color: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Header / layout helpers                                                    */
+/* HEADER UTIL                                                                */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
@@ -306,8 +242,15 @@ body.has-fixed-header main {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Reduced motion & print                                                     */
+/* PRINT & REDUCED MOTION                                                     */
 /* -------------------------------------------------------------------------- */
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -315,12 +258,5 @@ body.has-fixed-header main {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 }
