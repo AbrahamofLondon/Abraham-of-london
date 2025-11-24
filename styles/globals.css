@@ -6,39 +6,30 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* Luxury Theme Tokens                                                        */
+/* Base light/dark tokens – keep it simple & high-contrast                    */
 /* -------------------------------------------------------------------------- */
 
-/* Dark mode (canonical) */
+/* Light mode defaults */
 :root {
-  --color-background: #050608;
-  --color-foreground: #f9fafb;
-  --color-soft-gold: #d6b26a;
-  --color-deep-charcoal: #0b0d10;
-  --color-charcoal: #15171c;
-  --color-forest: #0e3b33;
-  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
-
-  /* Legacy tokens */
-  --color-bg: #050608;
-  --color-bg-muted: #0b0d10;
-  --color-fg: #f9fafb;
-  --color-softGold: #d6b26a;
-  --color-deepCharcoal: #0b0d10;
-  --color-cream: #fdfaf5;
+  --aol-bg: #f9fafb;            /* neutral light */
+  --aol-bg-muted: #e5e7eb;
+  --aol-text: #111827;          /* slate-900 */
+  --aol-text-muted: #4b5563;    /* slate-600 */
+  --aol-gold: #d6b26a;
+  --aol-border-subtle: rgba(15, 23, 42, 0.12);
 }
 
-/* Light mode overrides (html gets .dark from ThemeProvider) */
-html:not(.dark) {
-  --color-background: #f9fafb;
-  --color-foreground: #111827;
-  --color-bg: #f9fafb;
-  --color-bg-muted: #f3f4f6;
-  --color-fg: #111827;
+/* Dark mode overrides – driven by html.dark (next-themes) */
+html.dark {
+  --aol-bg: #020617;            /* slate-950 */
+  --aol-bg-muted: #020617;
+  --aol-text: #f9fafb;          /* almost white */
+  --aol-text-muted: #e5e7eb;    /* soft white */
+  --aol-border-subtle: rgba(148, 163, 184, 0.4);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Global base                                                                */
+/* Reset & base                                                               */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -52,46 +43,28 @@ html {
 }
 
 body {
-  min-height: 100vh;
   margin: 0;
-  @apply antialiased;
+  min-height: 100vh;
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* DARK MODE BODY – LUXURY GRADIENT RESTORED */
-html.dark body {
-  background:
-    radial-gradient(circle at top, rgba(214, 178, 106, 0.10), transparent 55%),
-    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #050608);
-  color: var(--color-foreground);
-}
-
-/* LIGHT MODE BODY – CLEAN, HIGH CONTRAST */
-html:not(.dark) body {
-  background-color: #f9fafb;
-  color: #111827;
+/* Make sure main fills and inherits background */
+main {
+  min-height: 100vh;
 }
 
 /* Text selection */
 ::selection {
   background-color: rgba(214, 178, 106, 0.35);
-  color: #fdfdfb;
+  color: var(--aol-text);
 }
 
-html:not(.dark) ::selection {
-  background-color: rgba(214, 178, 106, 0.30);
-  color: #111827;
-}
-
-/* Make sure main uses the body background by default */
-main {
-  min-height: 100vh;
-}
-
-/* Generic media normalisation */
+/* Media normalisation */
 img,
 picture,
 video,
@@ -110,48 +83,45 @@ a {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--color-soft-gold);
+  outline: 2px solid var(--aol-gold);
   outline-offset: 2px;
 }
 
 /* -------------------------------------------------------------------------- */
-/* Layout Shell & Cards                                                       */
+/* Layout shell & hero wrappers                                               */
 /* -------------------------------------------------------------------------- */
 
-/* Page shell */
-html.dark .page-shell {
+.page-shell {
   min-height: 100vh;
-  color: #f9fafb;
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.14), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.32), #050608);
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
 }
 
-html:not(.dark) .page-shell {
-  min-height: 100vh;
-  background-color: #f9fafb;
-  color: #111827;
+/* Hero sections (About / Consulting / Chatham / Books etc.) */
+.hero-vignette {
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
 }
 
-/* Optional: subtle divider styling used across sections */
+/* Section divider */
 .section-divider {
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  border-top: 1px solid var(--aol-border-subtle);
 }
 
-/* Luxury cards – primary card style */
+/* -------------------------------------------------------------------------- */
+/* Cards, pills, chips                                                        */
+/* -------------------------------------------------------------------------- */
+
+.lux-card {
+  border-radius: 1rem;
+  border: 1px solid var(--aol-border-subtle);
+  background-color: var(--aol-bg-muted);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+}
+
 html.dark .lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background-color: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
-}
-
-html:not(.dark) .lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background-color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background-color: #020617;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 .lux-card-hover {
@@ -161,53 +131,37 @@ html:not(.dark) .lux-card {
     border-color 0.25s ease;
 }
 
-html.dark .lux-card-hover:hover {
+.lux-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
-  border-color: rgba(214, 178, 106, 0.4);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.28);
+  border-color: rgba(214, 178, 106, 0.6);
 }
 
-html:not(.dark) .lux-card-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: rgba(214, 178, 106, 0.35);
+/* Filter pills (content hub etc.) */
+.lux-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--aol-border-subtle);
+  background-color: var(--aol-bg-muted);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--aol-text);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
 }
 
-/* Filter pills */
 html.dark .lux-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background-color: rgba(15, 23, 42, 0.85);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  background-color: #020617;
   color: #f9fafb;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(12px);
 }
 
-html:not(.dark) .lux-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background-color: #ffffff;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+.lux-pill-active {
+  border-color: rgba(214, 178, 106, 0.8);
+  background-color: var(--aol-gold);
   color: #111827;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-/* Hero vignette helper for big headers (dark only) */
-html.dark .hero-vignette {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.16), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #050608);
+  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -223,91 +177,128 @@ h6 {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-weight: 700;
+  color: var(--aol-text);
 }
 
-/* Strong readable body copy */
-html.dark p {
+/* Paragraphs & list items – enforce readability globally */
+p,
+li {
+  color: var(--aol-text-muted);
+}
+
+html.dark p,
+html.dark li {
   color: #e5e7eb;
 }
 
-html:not(.dark) p {
-  color: #374151;
-}
-
 /* -------------------------------------------------------------------------- */
-/* MDX / Prose                                                                */
+/* MDX / prose content                                                        */
 /* -------------------------------------------------------------------------- */
 
-/* Tailwind prose helpers */
+/* Base prose for light background (used by `prose` class) */
 .prose {
-  @apply text-slate-800;
+  @apply max-w-none text-base leading-relaxed;
+  color: var(--aol-text);
 }
 
-.dark .prose {
-  @apply text-slate-100;
+.prose p,
+.prose li {
+  color: var(--aol-text-muted);
 }
 
-.dark .prose a {
-  @apply text-softGold underline-offset-2 hover:underline;
-}
-
-/* High-end custom prose class (optional, used by Article pages) */
-.prose-lux {
-  max-width: none;
-  font-size: 1.0625rem;
-  line-height: 1.75;
-}
-
-html.dark .prose-lux {
-  color: #e5e7eb;
-}
-
-html:not(.dark) .prose-lux {
-  color: #374151;
-}
-
-.prose-lux p,
-.prose-lux li {
-  line-height: 1.75;
-}
-
-html.dark .prose-lux h1,
-html.dark .prose-lux h2,
-html.dark .prose-lux h3,
-html.dark .prose-lux h4,
-html:not(.dark) .prose-lux h1,
-html:not(.dark) .prose-lux h2,
-html:not(.dark) .prose-lux h3,
-html:not(.dark) .prose-lux h4 {
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--aol-text);
   letter-spacing: -0.03em;
   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-.prose-lux h1 {
-  font-size: clamp(2.25rem, 3vw, 3rem);
-  margin-bottom: 1.5rem;
+.prose strong {
+  color: var(--aol-text);
+  font-weight: 600;
 }
 
-.prose-lux h2 {
-  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
+.prose a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.prose-lux h3 {
-  font-size: clamp(1.4rem, 2vw, 1.7rem);
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
+.prose a:hover {
+  color: #1e40af;
+  text-decoration: underline;
 }
 
-.prose-lux h4 {
-  font-size: 1.1rem;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+.prose blockquote {
+  border-left: 4px solid var(--aol-gold);
+  background-color: #f9fafb;
+  color: var(--aol-text-muted);
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  margin: 1.75rem 0;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.prose code {
+  color: #92400e;
+  background-color: #fef3c7;
+  border-radius: 999px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85em;
+}
+
+.prose pre {
+  background-color: #111827;
+  color: #e5e7eb;
+  border-radius: 1.25rem;
+  padding: 1rem 1.5rem;
+}
+
+/* Dark-mode override (when body is on dark background) */
+html.dark .prose {
+  color: #e5e7eb;
+}
+
+html.dark .prose p,
+html.dark .prose li {
+  color: #e5e7eb;
+}
+
+html.dark .prose h1,
+html.dark .prose h2,
+html.dark .prose h3,
+html.dark .prose h4 {
+  color: #f9fafb;
+}
+
+html.dark .prose strong {
+  color: #f9fafb;
+}
+
+html.dark .prose a {
+  color: var(--aol-gold);
+}
+
+html.dark .prose a:hover {
+  color: #fefce8;
+}
+
+html.dark .prose blockquote {
+  border-left: 4px solid rgba(214, 178, 106, 0.9);
+  background-color: #020617;
+  color: #f9fafb;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .prose code {
+  color: var(--aol-gold);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Header interaction                                                         */
+/* Header / layout helpers                                                    */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
@@ -315,15 +306,8 @@ body.has-fixed-header main {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Print & Reduced Motion                                                     */
+/* Reduced motion & print                                                     */
 /* -------------------------------------------------------------------------- */
-
-@media print {
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -331,5 +315,12 @@ body.has-fixed-header main {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

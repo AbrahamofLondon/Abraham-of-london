@@ -24,8 +24,7 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// PRIMARY content collection for Insights
-const PRIMARY_COLLECTION = "posts";
+const PRIMARY_COLLECTION = "posts"; // assume posts are the main root slugs
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -85,7 +84,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
               prose-ul:text-slate-800 prose-ol:text-slate-800
               prose-blockquote:border-l-softGold prose-blockquote:text-slate-900
-              prose-hr:border-t border-slate-200
+              prose-hr:border-t border-white/10
               prose-img:rounded-xl prose-img:shadow-lg
 
               dark:prose-headings:text-slate-50
@@ -94,7 +93,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               dark:prose-ul:text-slate-100
               dark:prose-ol:text-slate-100
               dark:prose-blockquote:text-slate-50
-              dark:prose-hr:border-slate-700
             `}
           >
             <MDXRemote {...mdxSource} components={mdxComponents} />
@@ -151,28 +149,34 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!slug) return { notFound: true };
 
-    // Try multiple collections; prefer posts (Insights)
+    // Try multiple collections defensively; ignore failures.
     const collectionsToTry = [
-      "posts",   // Insights (primary)
-      "pages",   // standalone essays / pages
-      "print",   // long-form prints
-      "resource" // misc resources
+      "posts",     // main blog / insights
+      "pages",     // essays / flat pages
+      "prints",    // long-form PDFs (if any)
+      "resources", // misc resources
     ];
 
     let data: (PageMeta & { content?: string }) | null = null;
 
     for (const key of collectionsToTry) {
-      const candidate = getContentBySlug(key, slug, {
-        withContent: true,
-      }) as (PageMeta & { content?: string }) | null;
+      try {
+        const candidate = getContentBySlug(key, slug, {
+          withContent: true,
+        }) as (PageMeta & { content?: string }) | null;
 
-      if (candidate) {
-        data = candidate;
-        break;
+        if (candidate) {
+          data = candidate;
+          break;
+        }
+      } catch {
+        // unknown collection key or other internal error – try next
       }
     }
 
-    if (!data) return { notFound: true };
+    if (!data) {
+      return { notFound: true };
+    }
 
     const { content, ...meta } = data;
 

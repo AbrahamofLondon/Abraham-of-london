@@ -1,6 +1,4 @@
 // lib/ThemeContext.tsx
-// Single source of truth theme context that wraps `next-themes`
-
 import * as React from "react";
 import {
   ThemeProvider as NextThemeProvider,
@@ -22,12 +20,9 @@ const ThemeContext = React.createContext<ThemeContextValue | undefined>(
 type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: ThemeName;
-  storageKey?: string; // kept for compatibility, not used directly
+  storageKey?: string;
 };
 
-/**
- * Outer provider: lets `next-themes` manage <html class="dark"> etc.
- */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = "dark",
@@ -43,10 +38,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   );
 };
 
-/**
- * Inner provider: exposes a clean, typed ThemeContext
- * to the rest of the app, backed by `next-themes`.
- */
 const InnerThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -63,10 +54,6 @@ const InnerThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-/**
- * Safe hook: if someone forgets the provider, we degrade
- * to a dark default instead of throwing during SSR.
- */
 export function useTheme(): ThemeContextValue {
   const ctx = React.useContext(ThemeContext);
   if (!ctx) {
@@ -74,7 +61,7 @@ export function useTheme(): ThemeContextValue {
       theme: "dark",
       resolvedTheme: "dark",
       setTheme: () => {
-        // no-op fallback – but in normal app flow this shouldn't run
+        // fallback no-op – should not be hit in normal flow
       },
     };
   }
