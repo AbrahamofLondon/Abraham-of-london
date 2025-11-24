@@ -24,8 +24,10 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// Collections we’ll search – adjust names if your MDX layer uses different ones
-const COLLECTIONS = ["pages", "posts", "Post", "print", "resource"];
+// These are the *actual* Contentlayer types you have.
+const PRIMARY_COLLECTION = "Post";
+const FALLBACK_COLLECTIONS = ["Print", "Resource"] as const;
+const COLLECTIONS = [PRIMARY_COLLECTION, ...FALLBACK_COLLECTIONS];
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -63,6 +65,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
+      {/* Shared article hero */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -74,6 +77,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
+      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
@@ -108,6 +112,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const allItems: any[] = [];
 
+    // Gather slugs from Post, Print, Resource
     for (const key of COLLECTIONS) {
       const items = getAllContent(key) ?? [];
       allItems.push(...items);
@@ -154,6 +159,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     let data: (PageMeta & { content?: string }) | null = null;
 
+    // Try Post first, then Print, then Resource
     for (const key of COLLECTIONS) {
       const candidate = getContentBySlug(key, slug, {
         withContent: true,
@@ -165,7 +171,9 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       }
     }
 
-    if (!data) return { notFound: true };
+    if (!data) {
+      return { notFound: true };
+    }
 
     const { content, ...meta } = data;
 
