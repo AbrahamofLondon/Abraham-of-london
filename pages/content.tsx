@@ -3,7 +3,6 @@ import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 
@@ -14,7 +13,7 @@ import { getAllBooksMeta } from "@/lib/server/books-data";
 import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
-// Design & Data Types (Refined)
+// Design & Data Types
 // ---------------------------------------------------------------------------
 
 type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
@@ -57,21 +56,24 @@ interface ContentPageProps {
 // Icon System with Subtle Motion
 // ---------------------------------------------------------------------------
 
-const StyledIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
-  children, 
-  className = "h-6 w-6" 
+const StyledIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = "h-6 w-6",
 }) => (
-  // Soft, deliberate transition for quality feel
   <div className={`transform transition-all duration-700 ease-in-out ${className}`}>
     {children}
   </div>
 );
 
-// Standard icons with thinner strokeWidth for elegance
 const BlogIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12"
+      />
     </svg>
   </StyledIcon>
 );
@@ -79,7 +81,12 @@ const BlogIcon = ({ className }: { className?: string }) => (
 const BookIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+      />
     </svg>
   </StyledIcon>
 );
@@ -87,7 +94,12 @@ const BookIcon = ({ className }: { className?: string }) => (
 const DownloadIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+      />
     </svg>
   </StyledIcon>
 );
@@ -95,7 +107,12 @@ const DownloadIcon = ({ className }: { className?: string }) => (
 const EventIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
     </svg>
   </StyledIcon>
 );
@@ -103,7 +120,12 @@ const EventIcon = ({ className }: { className?: string }) => (
 const PrintIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+      />
     </svg>
   </StyledIcon>
 );
@@ -111,7 +133,12 @@ const PrintIcon = ({ className }: { className?: string }) => (
 const ResourceIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.2}
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
     </svg>
   </StyledIcon>
 );
@@ -123,12 +150,7 @@ const ArrowIcon = ({ className = "ml-3 h-4 w-4" }: { className?: string }) => (
     viewBox="0 0 24 24"
     stroke="currentColor"
   >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5} // Slightly thicker for presence
-      d="M14 5l7 7m0 0l-7 7m7-7H3"
-    />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
   </svg>
 );
 
@@ -142,26 +164,25 @@ const ContentIcons: Record<ContentKind, React.ReactElement> = {
 };
 
 // ---------------------------------------------------------------------------
-// Aesthetic System (Re-termed for Class)
+// Aesthetic System
 // ---------------------------------------------------------------------------
 
 const kindOrder: ContentKind[] = ["blog", "book", "download", "event", "print", "resource"];
 
 const kindLabels: Record<ContentKind, string> = {
   blog: "Strategic Essays",
-  book: "Curated Volumes", 
-  download: "Essential Tools", // Gentler term
-  event: "Master Classes",
-  print: "Artisan Prints",
-  resource: "Core Resources", // Gentler term
+  book: "Curated Volumes",
+  download: "Execution Tools",
+  event: "Live Sessions",
+  print: "Print Editions",
+  resource: "Core Resources",
 } as const;
 
-// Renamed from getKindAura to getKindSubtleGradient
 const getKindSubtleGradient = (kind: ContentKind): string => {
   const gradients: Record<ContentKind, string> = {
     blog: "bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10",
     book: "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10",
-    download: "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-red-500/10", 
+    download: "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-red-500/10",
     event: "bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-red-500/10",
     print: "bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-cyan-500/10",
     resource: "bg-gradient-to-br from-cyan-500/10 via-sky-500/5 to-blue-500/10",
@@ -169,14 +190,12 @@ const getKindSubtleGradient = (kind: ContentKind): string => {
   return gradients[kind] ?? "bg-gradient-to-br from-gray-500/10 via-gray-400/5 to-gray-600/10";
 };
 
-// Renamed from getKindEssence to getKindHighlight
 const getKindHighlight = (kind: ContentKind): string => {
   const highlights: Record<ContentKind, string> = {
-    // Reduced opacity on backgrounds for a cleaner, softer look
     blog: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10 shadow-emerald-500/15",
     book: "text-violet-300 border-violet-400/30 bg-violet-500/10 shadow-violet-500/15",
     download: "text-amber-300 border-amber-400/30 bg-amber-500/10 shadow-amber-500/15",
-    event: "text-rose-300 border-rose-400/30 bg-rose-500/10 shadow-rose-500/15", 
+    event: "text-rose-300 border-rose-400/30 bg-rose-500/10 shadow-rose-500/15",
     print: "text-indigo-300 border-indigo-400/30 bg-indigo-500/10 shadow-indigo-500/15",
     resource: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10 shadow-cyan-500/15",
   };
@@ -184,7 +203,7 @@ const getKindHighlight = (kind: ContentKind): string => {
 };
 
 // ---------------------------------------------------------------------------
-// Refined Glassmorphic Component
+// Glassmorphic Card
 // ---------------------------------------------------------------------------
 
 interface GlassCardProps {
@@ -194,79 +213,56 @@ interface GlassCardProps {
   softGlow?: boolean;
 }
 
-const GlassCard: React.FC<GlassCardProps> = ({ 
-  children, 
-  className = "", 
-  hoverEffect = true, // Renamed 'hover' to 'hoverEffect'
-  softGlow = false // Renamed 'glow' to 'softGlow'
+const GlassCard: React.FC<GlassCardProps> = ({
+  children,
+  className = "",
+  hoverEffect = true,
+  softGlow = false,
 }) => (
-  <div className={`
-    relative overflow-hidden rounded-3xl 
-    // Refined base glass/blur effect
-    bg-white/[0.04] backdrop-blur-3xl
-    border border-white/10
-    shadow-2xl shadow-black/40
-    // Gentle light-sweep animation on hover
-    before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-100%]
-    hover:before:translate-x-[100%] hover:before:transition-transform hover:before:duration-1000
-    ${hoverEffect ? 'transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60' : ''} // Softer scale up
-    ${softGlow ? 'after:absolute after:inset-0 after:bg-gradient-to-br after:from-softGold/10 after:via-transparent after:to-softGold/5 after:opacity-0 after:transition-opacity after:duration-700 hover:after:opacity-100' : ''}
-    ${className}
-  `}>
-    {/* Inner transparent hover layer for depth */}
+  <div
+    className={`
+      relative overflow-hidden rounded-3xl 
+      bg-white/[0.04] backdrop-blur-3xl
+      border border-white/10
+      shadow-2xl shadow-black/40
+      before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-100%]
+      hover:before:translate-x-[100%] hover:before:transition-transform hover:before:duration-1000
+      ${hoverEffect ? "transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60" : ""}
+      ${
+        softGlow
+          ? "after:absolute after:inset-0 after:bg-gradient-to-br after:from-softGold/10 after:via-transparent after:to-softGold/5 after:opacity-0 after:transition-opacity after:duration-700 hover:after:opacity-100"
+          : ""
+      }
+      ${className}
+    `}
+  >
     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
-    <div className="relative z-10 h-full">
-      {children}
-    </div>
+    <div className="relative z-10 h-full">{children}</div>
   </div>
 );
 
 // ---------------------------------------------------------------------------
-// Animated Background Masterpiece (Kept as is for Stunning UX)
+// Background
 // ---------------------------------------------------------------------------
 
 const CosmicBackground: React.FC = () => {
   return (
     <>
-      {/* Base Cosmic Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#1A1A2E] to-[#16213E]" />
-      
-      {/* Animated Nebula */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#050608] via-[#050814] to-[#020617]" />
+
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-softGold/5 rounded-full blur-3xl animate-pulse delay-500" />
+        <div className="absolute top-1/4 left-1/4 h-80 w-80 rounded-full bg-purple-500/8 blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 h-72 w-72 rounded-full bg-cyan-500/8 blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/3 h-64 w-64 rounded-full bg-softGold/8 blur-3xl" />
       </div>
 
-      {/* Floating Particles */}
-      {[...Array(15)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute animate-float"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${i * 2}s`,
-            animationDuration: `${15 + Math.random() * 20}s`,
-          }}
-        >
-          <div 
-            className="w-1 h-1 bg-softGold/40 rounded-full blur-sm"
-            style={{
-              transform: `scale(${0.5 + Math.random() * 1.5})`,
-            }}
-          />
-        </div>
-      ))}
-
-      {/* Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
     </>
   );
 };
 
 // ---------------------------------------------------------------------------
-// Safe Helper Functions (Kept as is for Build Safety)
+// Safe Helper Functions
 // ---------------------------------------------------------------------------
 
 const getSlug = (item: RawContentItem): string | undefined => {
@@ -344,81 +340,81 @@ const processContentItems = (
 // Signature Content Components
 // ---------------------------------------------------------------------------
 
-interface SignatureCardProps { // Renamed MasterpieceCard to SignatureCard
+interface SignatureCardProps {
   item: ContentResource;
   variant?: "featured" | "elegant" | "minimal";
   index?: number;
 }
 
-const SignatureCard: React.FC<SignatureCardProps> = ({ 
-  item, 
-  variant = "elegant",
-  index = 0
-}) => {
-  const [_isHovered, _setIsHovered] = React.useState(false);
+const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant", index = 0 }) => {
   const description = item.description || item.excerpt || "";
 
-  const ctaLabels = {
-    download: "Acquire Resource",
-    event: "Join Experience", 
-    book: "Explore Volume",
-    blog: "Read Discourse",
-    print: "View Artistry",
-    resource: "Access Wisdom"
+  const ctaLabels: Record<ContentKind, string> = {
+    blog: "Read the essay",
+    book: "Explore the volume",
+    download: "Download the toolkit",
+    event: "View the session",
+    print: "View the print",
+    resource: "Open the resource",
   };
 
-  const ctaLabel = ctaLabels[item.kind] || "Discover";
+  const ctaLabel = ctaLabels[item.kind] ?? "Open";
 
   if (variant === "featured") {
     return (
       <GlassCard softGlow hoverEffect>
-        <div 
-          className="p-8 h-full flex flex-col relative group"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          {/* Animated Background Aura */}
-          <div className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(item.kind)} opacity-0 group-hover:opacity-100 transition-opacity duration-1000`} />
-          
-          <div className="relative z-10 flex flex-col h-full">
-            <div className="flex items-start justify-between mb-6">
-              <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindHighlight(item.kind)} transform group-hover:scale-110 transition-transform duration-500`}>
+        <div className="group relative flex h-full flex-col p-8" style={{ animationDelay: `${index * 100}ms` }}>
+          <div
+            className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(
+              item.kind,
+            )} opacity-0 transition-opacity duration-1000 group-hover:opacity-100`}
+          />
+          <div className="relative z-10 flex h-full flex-col">
+            <div className="mb-6 flex items-start justify-between">
+              <div
+                className={`transform rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
+                  item.kind,
+                )} transition-transform duration-500 group-hover:scale-110`}
+              >
                 {ContentIcons[item.kind]}
               </div>
-              <div className="text-right space-y-2">
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full border backdrop-blur-sm ${getKindHighlight(item.kind)}`}>
-                  {kindLabels[item.kind]} {/* Use the gentler label here */}
+              <div className="space-y-2 text-right">
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
+                    item.kind,
+                  )}`}
+                >
+                  {kindLabels[item.kind]}
                 </span>
                 {item.date && (
-                  <time className="block text-xs text-gray-400 font-light">
+                  <time className="block text-xs font-light text-gray-400">
                     {new Date(item.date).toLocaleDateString("en-GB", {
                       day: "2-digit",
                       month: "short",
-                      year: 'numeric'
+                      year: "numeric",
                     })}
                   </time>
                 )}
               </div>
             </div>
 
-            <h3 className="font-serif text-2xl lg:text-3xl text-white mb-4 leading-tight group-hover:text-softGold transition-colors duration-500">
+            <h3 className="mb-4 font-serif text-2xl leading-tight text-white transition-colors duration-500 group-hover:text-softGold lg:text-3xl">
               {item.title}
             </h3>
 
             {description && (
-              <p className="text-gray-300 mb-6 line-clamp-3 flex-grow leading-relaxed">
-                {description}
-              </p>
+              <p className="mb-6 flex-grow leading-relaxed text-gray-300 line-clamp-3">{description}</p>
             )}
 
-            <div className="mt-auto pt-6 border-t border-white/10">
+            <div className="mt-auto border-t border-white/10 pt-6">
               <Link
                 href={item.href}
-                className="group/link inline-flex items-center text-sm font-semibold text-softGold transition-all duration-700 hover:gap-4" // Increased transition for class
+                className="group/link inline-flex items-center text-sm font-semibold text-softGold transition-all duration-700 hover:gap-4"
               >
                 <span className="bg-gradient-to-r from-softGold to-amber-200 bg-clip-text text-transparent">
                   {ctaLabel}
                 </span>
-                <ArrowIcon className={`transform group-hover:translate-x-2 group-hover:scale-110`} />
+                <ArrowIcon className="transform group-hover:translate-x-2 group-hover:scale-110" />
               </Link>
             </div>
           </div>
@@ -430,20 +426,24 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
   // Elegant variant (default)
   return (
     <GlassCard hoverEffect>
-      <div 
-        className="p-6 h-full flex flex-col relative group"
-      >
-        {/* Interactive Background */}
-        <div className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(item.kind)} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+      <div className="group relative flex h-full flex-col p-6">
+        <div
+          className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(
+            item.kind,
+          )} opacity-0 transition-opacity duration-700 group-hover:opacity-100`}
+        />
 
-        <div className="relative z-10 flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className={`p-2 rounded-xl border backdrop-blur-sm ${getKindHighlight(item.kind)} transform group-hover:scale-110 transition-transform duration-500`}>
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="mb-4 flex items-start justify-between">
+            <div
+              className={`transform rounded-xl border p-2 backdrop-blur-sm ${getKindHighlight(
+                item.kind,
+              )} transition-transform duration-500 group-hover:scale-110`}
+            >
               {ContentIcons[item.kind]}
             </div>
             {item.date && (
-              <time className="text-xs text-gray-400 font-light flex-shrink-0 ml-2">
+              <time className="ml-2 flex-shrink-0 text-xs font-light text-gray-400">
                 {new Date(item.date).toLocaleDateString("en-GB", {
                   day: "2-digit",
                   month: "short",
@@ -452,35 +452,33 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
             )}
           </div>
 
-          {/* Category */}
           <div className="mb-3">
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full border backdrop-blur-sm ${getKindHighlight(item.kind)}`}>
-              {kindLabels[item.kind]} {/* Use the gentler label here */}
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
+                item.kind,
+              )}`}
+            >
+              {kindLabels[item.kind]}
             </span>
           </div>
 
-          {/* Title */}
-          <h3 className="font-serif text-xl text-white mb-3 line-clamp-2 leading-tight group-hover:text-softGold transition-colors duration-500">
+          <h3 className="mb-3 line-clamp-2 font-serif text-xl leading-tight text-white transition-colors duration-500 group-hover:text-softGold">
             {item.title}
           </h3>
 
-          {/* Description */}
           {description && (
-            <p className="text-gray-300 text-sm mb-4 line-clamp-3 flex-grow leading-relaxed">
-              {description}
-            </p>
+            <p className="mb-4 flex-grow text-sm leading-relaxed text-gray-300 line-clamp-3">{description}</p>
           )}
 
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+          <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
             <div className="flex items-center gap-3">
               {item.readTime && (
-                <span className="text-xs text-gray-400 font-light">
-                  {typeof item.readTime === 'number' ? `${item.readTime}min` : item.readTime}
+                <span className="text-xs font-light text-gray-400">
+                  {typeof item.readTime === "number" ? `${item.readTime} min` : item.readTime}
                 </span>
               )}
               {item.category && (
-                <span className="text-xs text-gray-400 font-light border-l border-white/20 pl-3">
+                <span className="border-l border-white/20 pl-3 text-xs font-light text-gray-400">
                   {item.category}
                 </span>
               )}
@@ -490,7 +488,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
               className="group/link inline-flex items-center text-xs font-semibold text-softGold transition-all duration-700 hover:gap-2"
             >
               {ctaLabel}
-              <ArrowIcon className={`h-3 w-3 transform group-hover:translate-x-1`} />
+              <ArrowIcon className="h-3 w-3 transform group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
@@ -500,21 +498,21 @@ const SignatureCard: React.FC<SignatureCardProps> = ({
 };
 
 // ---------------------------------------------------------------------------
-// Ultimate SSG (Kept as is for Build Safety/Logic)
+// SSG
 // ---------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  console.log("🌌 [content] Building ultimate experience...");
+  console.log("🌌 [content] Building content library...");
 
   try {
     const allItems: ContentResource[] = [];
 
     const safeGetData = async <T,>(
       dataFetcher: (() => T) | undefined,
-      dataName: string
+      dataName: string,
     ): Promise<T[]> => {
       try {
-        if (!dataFetcher || typeof dataFetcher !== 'function') {
+        if (!dataFetcher || typeof dataFetcher !== "function") {
           console.warn(`[content] ${dataName} fetcher unavailable`);
           return [];
         }
@@ -526,14 +524,29 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       }
     };
 
-    // Parallel data fetching for performance
     const contentFetchers = [
       { kind: "blog" as ContentKind, data: safeGetData(getAllPostsMeta, "blog posts"), category: "Essays" },
-      { kind: "book" as ContentKind, data: safeGetData(getAllBooksMeta, "books"), category: "Volumes" }, // Renamed
-      { kind: "download" as ContentKind, data: safeGetData(getAllDownloadsMeta, "downloads"), category: "Tools" },
-      { kind: "event" as ContentKind, data: safeGetData(() => getAllContent?.("events"), "events"), category: "Classes" }, // Renamed
-      { kind: "print" as ContentKind, data: safeGetData(() => getAllContent?.("prints"), "prints"), category: "Artistry" }, // Renamed
-      { kind: "resource" as ContentKind, data: safeGetData(() => getAllContent?.("resources"), "resources"), category: "Wisdom" }, // Renamed
+      { kind: "book" as ContentKind, data: safeGetData(getAllBooksMeta, "books"), category: "Volumes" },
+      {
+        kind: "download" as ContentKind,
+        data: safeGetData(getAllDownloadsMeta, "downloads"),
+        category: "Tools",
+      },
+      {
+        kind: "event" as ContentKind,
+        data: safeGetData(() => getAllContent?.("events"), "events"),
+        category: "Sessions",
+      },
+      {
+        kind: "print" as ContentKind,
+        data: safeGetData(() => getAllContent?.("prints"), "prints"),
+        category: "Prints",
+      },
+      {
+        kind: "resource" as ContentKind,
+        data: safeGetData(() => getAllContent?.("resources"), "resources"),
+        category: "Resources",
+      },
     ];
 
     await Promise.all(
@@ -546,24 +559,23 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
         } catch (error) {
           console.error(`💥 [content] Failed to process ${kind}:`, error);
         }
-      })
+      }),
     );
 
-    // Premium sorting with validation
     const sortedItems = allItems.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      if (isNaN(dateA) && isNaN(dateB)) return 0;
-      if (isNaN(dateA)) return 1;
-      if (isNaN(dateB)) return -1;
+      if (Number.isNaN(dateA) && Number.isNaN(dateB)) return 0;
+      if (Number.isNaN(dateA)) return 1;
+      if (Number.isNaN(dateB)) return -1;
       return dateB - dateA;
     });
 
     const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 4);
 
-    console.log("🎊 [content] Ultimate build completed:", {
+    console.log("[content] Build completed:", {
       total: sortedItems.length,
-      featured: featuredItems.length
+      featured: featuredItems.length,
     });
 
     return {
@@ -583,11 +595,10 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 };
 
 // ---------------------------------------------------------------------------
-// The Signature Experience Component
+// Page Component
 // ---------------------------------------------------------------------------
 
 const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
-  const router = useRouter();
   const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isScrolled, setIsScrolled] = React.useState(false);
@@ -600,29 +611,29 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Content statistics
-  const contentStats = React.useMemo(() => ({
-    all: items.length,
-    blog: items.filter((i) => i.kind === "blog").length,
-    book: items.filter((i) => i.kind === "book").length,
-    download: items.filter((i) => i.kind === "download").length,
-    event: items.filter((i) => i.kind === "event").length,
-    print: items.filter((i) => i.kind === "print").length,
-    resource: items.filter((i) => i.kind === "resource").length,
-  }), [items]);
+  const contentStats = React.useMemo(
+    () => ({
+      all: items.length,
+      blog: items.filter((i) => i.kind === "blog").length,
+      book: items.filter((i) => i.kind === "book").length,
+      download: items.filter((i) => i.kind === "download").length,
+      event: items.filter((i) => i.kind === "event").length,
+      print: items.filter((i) => i.kind === "print").length,
+      resource: items.filter((i) => i.kind === "resource").length,
+    }),
+    [items],
+  );
 
-  // Filter labels now use the gentler 'kindLabels' for consistency and elegance
-  const signatureFilters = [ // Renamed luxuryFilters to signatureFilters
-    { key: "all" as const, label: "All Masterpieces", count: contentStats.all, icon: "🌌" },
-    { key: "blog" as const, label: kindLabels.blog, count: contentStats.blog, icon: "📝" },
-    { key: "book" as const, label: kindLabels.book, count: contentStats.book, icon: "📚" },
-    { key: "download" as const, label: kindLabels.download, count: contentStats.download, icon: "🛠️" },
-    { key: "event" as const, label: kindLabels.event, count: contentStats.event, icon: "🎓" },
-    { key: "print" as const, label: kindLabels.print, count: contentStats.print, icon: "🎨" },
-    { key: "resource" as const, label: kindLabels.resource, count: contentStats.resource, icon: "💎" },
+  const signatureFilters = [
+    { key: "all" as const, label: "All Content", count: contentStats.all, icon: "◎" },
+    { key: "blog" as const, label: kindLabels.blog, count: contentStats.blog, icon: "✒︎" },
+    { key: "book" as const, label: kindLabels.book, count: contentStats.book, icon: "◆" },
+    { key: "download" as const, label: kindLabels.download, count: contentStats.download, icon: "▢" },
+    { key: "event" as const, label: kindLabels.event, count: contentStats.event, icon: "◦" },
+    { key: "print" as const, label: kindLabels.print, count: contentStats.print, icon: "✧" },
+    { key: "resource" as const, label: kindLabels.resource, count: contentStats.resource, icon: "✶" },
   ];
 
-  // Filtering logic kept as is for build safety
   const filteredItems = React.useMemo(() => {
     return items.filter((item) => {
       const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
@@ -641,9 +652,14 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
   const groupedByKind = React.useMemo(() => {
     const initial: Record<ContentKind, ContentResource[]> = {
-      blog: [], book: [], download: [], event: [], print: [], resource: []
+      blog: [],
+      book: [],
+      download: [],
+      event: [],
+      print: [],
+      resource: [],
     };
-    filteredItems.forEach(item => initial[item.kind].push(item));
+    filteredItems.forEach((item) => initial[item.kind].push(item));
     return initial;
   }, [filteredItems]);
 
@@ -656,124 +672,125 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
   if (!mounted) {
     return (
-      <Layout title="Strategic Insights & Resources">
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-softGold text-xl">Loading Masterpieces...</div>
+      <Layout title="Content Library">
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="text-lg text-softGold">Loading content…</div>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout title="The Wisdom Atelier">
+    <Layout title="Content Library">
       <Head>
-        <title>The Wisdom Atelier | Abraham of London</title>
-        <meta name="description" content="Experience curated strategic wisdom, essential tools, and core resources in an unparalleled digital sanctuary for visionary leaders." />
-        <meta name="keywords" content="strategy, leadership, legacy, wisdom, resources, insights, mastery" /> {/* Updated keywords */}
+        <title>Content Library | Abraham of London</title>
+        <meta
+          name="description"
+          content="A curated library of essays, volumes, tools, sessions, prints, and resources for leaders building enduring work and legacy."
+        />
+        <meta
+          name="keywords"
+          content="strategy, leadership, legacy, wisdom, resources, essays, tools, Abraham of London"
+        />
       </Head>
 
-      <div className="min-h-screen bg-black text-white overflow-hidden relative">
-        {/* Cosmic Background */}
+      <div className="relative min-h-screen overflow-hidden bg-black text-white">
         <div className="fixed inset-0 -z-10">
           <CosmicBackground />
         </div>
 
-        {/* Signature Hero Experience */}
-        <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black/80" />
-          
-          <div className="relative z-10 max-w-6xl mx-auto text-center">
-            {/* Subtle Identifier */}
-            <div className="inline-flex items-center gap-3 rounded-full border border-softGold/30 bg-softGold/10 px-8 py-4 mb-12 backdrop-blur-2xl">
-              <div className="w-2 h-2 bg-softGold rounded-full animate-pulse" />
-              <span className="text-softGold text-sm font-light tracking-widest uppercase">THE WISDOM ATELIER</span>
-              <div className="w-2 h-2 bg-softGold rounded-full animate-pulse" />
+        {/* Hero */}
+        <section className="relative flex min-h-screen items-center justify-center px-4 pt-20">
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black/85" />
+
+          <div className="relative z-10 mx-auto max-w-6xl text-center">
+            <div className="mb-10 inline-flex items-center gap-3 rounded-full border border-softGold/30 bg-softGold/10 px-8 py-3 backdrop-blur-2xl">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-softGold" />
+              <span className="text-xs font-medium tracking-[0.25em] text-softGold">
+                THE WISDOM ATELIER
+              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-softGold" />
             </div>
 
-            {/* Masterpiece Heading */}
-            <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl font-light text-white mb-8 leading-none">
-              Craft
+            <h1 className="mb-6 font-serif text-5xl font-light leading-tight text-white md:text-6xl lg:text-7xl">
+              A Content Library
               <span className="block bg-gradient-to-r from-softGold via-yellow-200 to-amber-200 bg-clip-text text-transparent">
-                Legacy
+                Built for Serious Leaders
               </span>
             </h1>
 
-            {/* Poetic Subtitle */}
-            <p className="text-2xl md:text-3xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed font-light">
-              Where strategic wisdom meets artistic excellence. 
-              <span className="block text-softGold/80">Curated masterpieces for visionary leaders.</span>
+            <p className="mx-auto mb-14 max-w-3xl text-lg font-light leading-relaxed text-gray-300 md:text-xl">
+              Essays, frameworks, tools, and resources designed to help you think clearly, act
+              decisively, and build work that endures.
             </p>
 
-            {/* Signature Action Cluster */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
+            <div className="mb-16 flex flex-col items-center justify-center gap-5 sm:flex-row sm:justify-center">
               <button
                 onClick={() => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })}
-                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-6 font-semibold text-black transition-all duration-700 hover:scale-[1.05] hover:shadow-3xl hover:shadow-yellow-500/30" // Softer scale
+                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-4 text-base font-semibold text-black transition-all duration-700 hover:scale-[1.04] hover:shadow-2xl hover:shadow-yellow-500/30"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative z-10 flex items-center gap-4 text-lg">
-                  Enter the Atelier
-                  <ArrowIcon className="transform group-hover:translate-x-2 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <span className="relative z-10 flex items-center gap-3">
+                  Browse the Library
+                  <ArrowIcon className="h-4 w-4 transform group-hover:translate-x-2 group-hover:scale-110" />
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveFilter("download")}
-                className="group rounded-full border-2 border-softGold/50 bg-black/40 px-12 py-6 font-semibold text-softGold backdrop-blur-2xl transition-all duration-700 hover:bg-softGold/10 hover:border-softGold/80 hover:scale-105"
+                className="group rounded-full border-2 border-softGold/50 bg-black/40 px-12 py-4 text-base font-semibold text-softGold backdrop-blur-2xl transition-all duration-700 hover:bg-softGold/10 hover:border-softGold/80 hover:scale-[1.03]"
               >
-                <span className="flex items-center gap-3 text-lg">
-                  Access Essential Tools {/* Gentler term */}
-                  <span className="text-amber-200">✨</span>
+                <span className="flex items-center gap-3">
+                  Jump to Tools
+                  <span className="text-sm text-amber-200">for execution</span>
                 </span>
               </button>
             </div>
 
-            {/* Elegant Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+            {/* Stats */}
+            <div className="mx-auto grid max-w-3xl grid-cols-2 gap-6 md:grid-cols-4">
               {signatureFilters.slice(1, 5).map((filter) => (
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className="group text-left p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl transition-all duration-700 hover:scale-110 hover:bg-white/10 hover:border-softGold/30"
+                  className="group rounded-3xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-2xl transition-all duration-700 hover:scale-[1.04] hover:border-softGold/40 hover:bg-white/10"
                 >
-                  <div className="text-3xl mb-3 transform group-hover:scale-125 transition-transform duration-500">
-                    {filter.icon}
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">{filter.count}</div>
-                  <div className="text-sm text-gray-400 font-light leading-tight">{filter.label}</div>
+                  <div className="mb-3 text-2xl text-softGold">{filter.icon}</div>
+                  <div className="mb-1 text-2xl font-semibold text-white">{filter.count}</div>
+                  <div className="text-xs font-light leading-snug text-gray-400">{filter.label}</div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Subtle Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-softGold/60 text-sm font-light tracking-widest">EXPLORE</div>
-              <div className="w-px h-16 bg-gradient-to-b from-softGold to-transparent" />
+              <div className="text-xs font-light tracking-[0.3em] text-softGold/70">SCROLL</div>
+              <div className="h-12 w-px bg-gradient-to-b from-softGold to-transparent" />
             </div>
           </div>
         </section>
 
-        {/* Featured Masterpieces Gallery */}
+        {/* Featured */}
         {featuredItems.length > 0 && (
-          <section className="relative py-32 px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-20">
-                <h2 className="font-serif text-5xl md:text-6xl text-white mb-6">
-                  Curated <span className="text-softGold">Excellence</span>
+          <section className="relative px-4 py-24">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-16 text-center">
+                <h2 className="mb-4 font-serif text-3xl text-white md:text-4xl">
+                  Editor’s <span className="text-softGold">Selection</span>
                 </h2>
-                <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                  Hand-selected strategic masterpieces of unparalleled quality and transformative impact
+                <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-gray-400 md:text-base">
+                  A small set of pieces worth starting with if you are meeting this library for the
+                  first time.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+              <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
                 {featuredItems.map((item, index) => (
                   <div
                     key={item.slug}
-                    className="transform transition-all duration-1000 hover:-translate-y-2" // Softer hover
-                    style={{ animationDelay: `${index * 200}ms` }}
+                    className="transform transition-all duration-1000 hover:-translate-y-2"
+                    style={{ animationDelay: `${index * 150}ms` }}
                   >
                     <SignatureCard item={item} variant="featured" index={index} />
                   </div>
@@ -783,52 +800,58 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
           </section>
         )}
 
-        {/* Main Gallery Experience */}
-        <section id="gallery" className="relative py-32 px-4">
-          <div className="max-w-7xl mx-auto">
-            {/* Sticky Signature Header */}
-            <div className={`sticky top-24 z-50 mb-16 transition-all duration-700 ${
-              isScrolled 
-                ? 'bg-black/90 backdrop-blur-3xl rounded-3xl p-8 shadow-3xl border border-white/10'  // Increased blur
-                : ''
-            }`}>
-              <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-                {/* Elegant Search */}
-                <div className="flex-1 max-w-lg">
+        {/* Main Gallery */}
+        <section id="gallery" className="relative px-4 py-28">
+          <div className="mx-auto max-w-7xl">
+            <div
+              className={`sticky top-24 z-50 mb-16 transition-all duration-700 ${
+                isScrolled
+                  ? "rounded-3xl border border-white/10 bg-black/90 p-6 shadow-3xl backdrop-blur-3xl md:p-8"
+                  : ""
+              }`}
+            >
+              <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+                <div className="max-w-lg flex-1">
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search wisdom, tools, masterpieces..."
+                      placeholder="Search essays, tools, sessions, resources…"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-8 py-5 text-white placeholder-gray-400 backdrop-blur-2xl transition-all duration-500 focus:border-softGold/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-softGold/25 text-lg"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base text-white placeholder-gray-400 backdrop-blur-2xl transition-all duration-500 focus:border-softGold/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-softGold/25"
                     />
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                       </svg>
                     </div>
                   </div>
                 </div>
 
-                {/* Signature Filter Tabs */}
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-end">
+                <div className="flex flex-wrap justify-center gap-3 lg:justify-end">
                   {signatureFilters.map((filter) => (
                     <button
                       key={filter.key}
                       onClick={() => setActiveFilter(filter.key)}
                       onKeyDown={(e) => handleKeyDown(e, filter.key)}
-                      className={`flex items-center gap-4 rounded-full border-2 px-6 py-4 text-base font-medium transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black ${
+                      className={`flex items-center gap-3 rounded-full border-2 px-5 py-3 text-xs font-medium transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black md:text-sm ${
                         activeFilter === filter.key
                           ? "border-softGold bg-softGold text-black shadow-2xl shadow-yellow-500/40 transform scale-105"
-                          : "border-white/10 bg-white/5 text-gray-300 hover:border-softGold/40 hover:bg-white/10 hover:scale-[1.02]" // Softer scale
+                          : "border-white/10 bg-white/5 text-gray-300 hover:border-softGold/40 hover:bg-white/10 hover:scale-[1.02]"
                       }`}
                     >
-                      <span className="text-lg">{filter.icon}</span>
-                      {filter.label}
-                      <span className={`rounded-full px-3 py-1 text-sm ${
-                        activeFilter === filter.key ? "bg-black/20 text-black" : "bg-white/10 text-gray-400"
-                      }`}>
+                      <span className="text-base">{filter.icon}</span>
+                      <span>{filter.label}</span>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[0.7rem] ${
+                          activeFilter === filter.key ? "bg-black/20 text-black" : "bg-white/10 text-gray-400"
+                        }`}
+                      >
                         {filter.count}
                       </span>
                     </button>
@@ -839,14 +862,12 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
             {/* Gallery Content */}
             {filteredItems.length === 0 ? (
-              <GlassCard className="text-center p-16" hoverEffect={false}>
-                <div className="text-7xl mb-6">🌌</div>
-                <h3 className="font-serif text-3xl text-white mb-4">No Masterpieces Found</h3>
-                <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                  {searchQuery 
-                    ? `No results for "${searchQuery}". Refine your search.`
-                    : `No ${activeFilter !== "all" ? kindLabels[activeFilter] : "content"} available.`
-                  }
+              <GlassCard className="p-16 text-center" hoverEffect={false}>
+                <h3 className="mb-4 font-serif text-2xl text-white md:text-3xl">No results found</h3>
+                <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-gray-400 md:text-base">
+                  {searchQuery
+                    ? `Nothing matched “${searchQuery}”. Try a different term or clear the filters.`
+                    : `There is no content in this category yet.`}
                 </p>
                 {(searchQuery || activeFilter !== "all") && (
                   <button
@@ -854,33 +875,36 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                       setSearchQuery("");
                       setActiveFilter("all");
                     }}
-                    className="rounded-full bg-softGold px-8 py-4 font-semibold text-black transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/25 text-lg"
+                    className="rounded-full bg-softGold px-10 py-3 text-sm font-semibold text-black transition-all duration-500 hover:scale-[1.03] hover:shadow-2xl hover:shadow-yellow-500/25 md:text-base"
                   >
-                    Show All Masterpieces
+                    Reset filters
                   </button>
                 )}
               </GlassCard>
             ) : activeFilter === "all" ? (
-              // Grouped Gallery View
-              <div className="space-y-24">
+              <div className="space-y-20">
                 {kindOrder.map((kind) => {
                   const group = groupedByKind[kind];
                   if (!group.length) return null;
 
                   return (
-                    <div key={kind} className="space-y-12">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-serif text-4xl text-white flex items-center gap-6">
-                          <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindHighlight(kind)}`}>
+                    <div key={kind} className="space-y-10">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="flex items-center gap-4 font-serif text-2xl text-white md:text-3xl">
+                          <span
+                            className={`rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
+                              kind,
+                            )}`}
+                          >
                             {ContentIcons[kind]}
-                          </div>
+                          </span>
                           {kindLabels[kind]}
                         </h3>
-                        <span className="text-lg text-gray-400 font-light">
-                          {group.length} masterpiece{group.length !== 1 ? 's' : ''}
+                        <span className="text-sm font-light text-gray-400 md:text-base">
+                          {group.length} item{group.length !== 1 ? "s" : ""}
                         </span>
                       </div>
-                      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                      <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
                         {group.map((item) => (
                           <SignatureCard key={item.slug} item={item} variant="elegant" />
                         ))}
@@ -890,20 +914,23 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                 })}
               </div>
             ) : (
-              // Single Category View
               <div>
-                <div className="flex items-center justify-between mb-12">
-                  <h3 className="font-serif text-4xl text-white flex items-center gap-6">
-                    <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindHighlight(activeFilter)}`}>
-                      {ContentIcons[activeFilter]}
-                    </div>
-                    {kindLabels[activeFilter]}
+                <div className="mb-10 flex items-center justify-between gap-4">
+                  <h3 className="flex items-center gap-4 font-serif text-2xl text-white md:text-3xl">
+                    <span
+                      className={`rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
+                        activeFilter as ContentKind,
+                      )}`}
+                    >
+                      {ContentIcons[activeFilter as ContentKind]}
+                    </span>
+                    {kindLabels[activeFilter as ContentKind]}
                   </h3>
-                  <span className="text-lg text-gray-400">
-                    {filteredItems.length} masterpiece{filteredItems.length !== 1 ? 's' : ''}
+                  <span className="text-sm text-gray-400 md:text-base">
+                    {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
                   </span>
                 </div>
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
                   {filteredItems.map((item) => (
                     <SignatureCard key={item.slug} item={item} variant="elegant" />
                   ))}
@@ -913,26 +940,27 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
           </div>
         </section>
 
-        {/* Signature CTA Experience */}
-        <section className="relative py-40 px-4">
-          <div className="max-w-5xl mx-auto text-center">
-            <GlassCard className="p-16 md:p-20" softGlow hoverEffect={false}>
-              <h2 className="font-serif text-5xl md:text-6xl text-white mb-8">
-                Begin Your <span className="text-softGold">Legacy</span> Journey
+        {/* Closing CTA */}
+        <section className="relative px-4 py-32">
+          <div className="mx-auto max-w-5xl text-center">
+            <GlassCard className="px-8 py-14 md:px-16 md:py-18" softGlow hoverEffect={false}>
+              <h2 className="mb-6 font-serif text-3xl text-white md:text-4xl">
+                Turn insight into <span className="text-softGold">decisive action</span>
               </h2>
-              <p className="text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-                Join visionary leaders and founders in our exclusive atelier, 
-                where strategic wisdom transforms into enduring legacy.
+              <p className="mx-auto mb-10 max-w-3xl text-sm leading-relaxed text-gray-300 md:text-lg">
+                If you are building something that must stand the test of time, this library is a starting
+                point—not the finish line. When you are ready, we can work together on the specifics of your
+                context, your market, and your mandate.
               </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <button className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-14 py-6 font-semibold text-black transition-all duration-700 hover:scale-[1.05] hover:shadow-3xl hover:shadow-yellow-500/30 text-lg">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="relative z-10">Commence Your Journey</span>
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
+                <button className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-4 text-sm font-semibold text-black transition-all duration-700 hover:scale-[1.04] hover:shadow-2xl hover:shadow-yellow-500/30 md:text-base">
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <span className="relative z-10">Discuss a mandate</span>
                 </button>
-                <button className="group rounded-full border-2 border-softGold/50 bg-transparent px-14 py-6 font-semibold text-softGold transition-all duration-700 hover:bg-softGold/10 hover:scale-105 text-lg">
-                  <span className="flex items-center gap-4">
-                    Book Private Session
-                    <ArrowIcon className="transform group-hover:translate-x-1" />
+                <button className="group rounded-full border-2 border-softGold/60 bg-transparent px-12 py-4 text-sm font-semibold text-softGold transition-all duration-700 hover:bg-softGold/10 hover:scale-[1.03] md:text-base">
+                  <span className="flex items-center gap-3">
+                    Request a private session
+                    <ArrowIcon className="h-4 w-4 transform group-hover:translate-x-1" />
                   </span>
                 </button>
               </div>
@@ -941,49 +969,37 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         </section>
       </div>
 
-      {/* Global Signature Animations and Styling */}
+      {/* Global tweaks specific to this page */}
       <style jsx global>{`
-        @keyframes float {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg) scale(1);
-            opacity: 0.7;
-          }
-          33% { 
-            transform: translateY(-30px) rotate(120deg) scale(1.1);
-            opacity: 1;
-          }
-          66% { 
-            transform: translateY(15px) rotate(240deg) scale(0.9);
-            opacity: 0.5;
-          }
-        }
-        
-        .animate-float {
-          animation: float 20s ease-in-out infinite;
-        }
-
-        /* Custom scrollbar - using softGold palette */
+        /* Subtle scrollbar using existing palette */
         ::-webkit-scrollbar {
           width: 8px;
         }
-        
+
         ::-webkit-scrollbar-track {
-          background: #0A0A0A;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, var(--color-softGold), var(--color-softGold-light));
-          border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, var(--color-softGold-light), var(--color-softGold));
+          background: #050608;
         }
 
-        /* Selection styling - using softGold palette */
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(
+            180deg,
+            var(--aol-softGold),
+            rgba(214, 178, 106, 0.6)
+          );
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(
+            180deg,
+            rgba(214, 178, 106, 0.8),
+            var(--aol-softGold)
+          );
+        }
+
         ::selection {
-          background: var(--color-softGold-selection);
-          color: var(--color-softGold-light);
+          background: rgba(214, 178, 106, 0.35);
+          color: #050608;
         }
       `}</style>
     </Layout>
