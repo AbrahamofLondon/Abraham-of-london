@@ -5,6 +5,7 @@ import type {
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -32,7 +33,27 @@ type DownloadPageProps = {
   featured?: boolean;
 };
 
-function normaliseDownload(raw: any, slugFallback: string) {
+interface RawDownload {
+  slug?: unknown;
+  title?: unknown;
+  excerpt?: unknown;
+  description?: unknown;
+  coverImage?: unknown;
+  heroImage?: unknown;
+  downloadFile?: unknown;
+  fileUrl?: unknown;
+  fileSize?: unknown;
+  category?: unknown;
+  type?: unknown;
+  tags?: unknown;
+  date?: unknown;
+  readTime?: unknown;
+  body?: unknown;
+  content?: unknown;
+  featured?: unknown;
+}
+
+function normaliseDownload(raw: RawDownload, slugFallback: string) {
   const safeSlug = String(raw?.slug ?? slugFallback);
   const title = String(raw?.title ?? "Untitled download");
 
@@ -294,7 +315,7 @@ export default function DownloadPage(
           {/* Additional Resources */}
           <div className="mt-12 text-center">
             <p className="text-slate-400 mb-4">Explore more premium resources</p>
-            <a
+            <Link
               href="/downloads"
               className="inline-flex items-center gap-2 rounded-full border border-slate-600 bg-slate-800/50 px-6 py-3 text-slate-300 transition-all hover:border-slate-500 hover:bg-slate-700/50 hover:scale-105"
             >
@@ -302,7 +323,7 @@ export default function DownloadPage(
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
               View All Resources
-            </a>
+            </Link>
           </div>
         </div>
       </main>

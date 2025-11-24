@@ -1,6 +1,7 @@
 // pages/downloads/index.tsx
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import Layout from "@/components/Layout";
 import DownloadCard from "@/components/downloads/DownloadCard";
 import { getAllDownloads } from "@/lib/downloads";
@@ -22,7 +23,23 @@ type DownloadsIndexProps = {
   downloads: NormalisedDownload[];
 };
 
-function normaliseDownload(raw: any): NormalisedDownload {
+interface RawDownload {
+  slug?: unknown;
+  title?: unknown;
+  excerpt?: unknown;
+  description?: unknown;
+  coverImage?: unknown;
+  downloadFile?: unknown;
+  fileUrl?: unknown;
+  fileSize?: unknown;
+  category?: unknown;
+  type?: unknown;
+  tags?: unknown;
+  date?: unknown;
+  featured?: unknown;
+}
+
+function normaliseDownload(raw: RawDownload): NormalisedDownload {
   const slug = String(raw?.slug ?? "").trim() || "untitled";
   const title = String(raw?.title ?? "Untitled download");
 
@@ -160,18 +177,18 @@ export default function DownloadsIndexPage(
                   Our curated assets are integrated throughout the site. Explore blog posts and book pages to discover relevant resources.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
+                  <Link
                     href="/content"
                     className="rounded-full bg-slate-900 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:scale-105"
                   >
                     Explore Insights
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/books"
                     className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-all hover:border-slate-400 hover:scale-105"
                   >
                     Browse Books
-                  </a>
+                  </Link>
                 </div>
               </div>
             </section>
