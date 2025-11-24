@@ -1,3 +1,4 @@
+// components/BlogPostCard.tsx
 "use client";
 
 import Link from "next/link";
@@ -49,9 +50,8 @@ function formatDateISOToGB(iso?: string | null): string | null {
 }
 
 function normalisePostSlug(raw: string): string {
-  const s = (raw || "").toString().trim().replace(/^\/+|\/+$/g, "");
-  // keep the slug itself clean, but DO NOT strip the blog prefix from the URL
-  return s.replace(/^blog\//i, "");
+  // IMPORTANT: do NOT strip 'blog/' etc – just trim slashes
+  return (raw || "").toString().trim().replace(/^\/+|\/+$/g, "");
 }
 
 export default function BlogPostCard({
@@ -63,8 +63,7 @@ export default function BlogPostCard({
   const [coverIndex, setCoverIndex] = useState(0);
 
   const slug = normalisePostSlug(post.slug);
-  // IMPORTANT: always link to /blog/[slug] so we hit the blog route, not /[slug]
-  const href = `/blog/${slug}`;
+  const href = `/${slug}`;
 
   // Build ordered list of possible cover images
   const coverCandidates = useMemo(() => {
@@ -220,7 +219,7 @@ export default function BlogPostCard({
             </p>
           ) : null}
 
-          {/* Author and metadata - premium layout */}
+          {/* Author and metadata */}
           <div className="flex items-center justify-between border-t border-gray-100/50 pt-4">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -254,7 +253,6 @@ export default function BlogPostCard({
               </div>
             </div>
 
-            {/* Premium arrow indicator */}
             <div className="transform translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-softGold/10 transition-colors group-hover:bg-softGold/20">
                 <svg
@@ -274,7 +272,7 @@ export default function BlogPostCard({
             </div>
           </div>
 
-          {/* Tags - premium styling */}
+          {/* Tags */}
           {post.tags && post.tags.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
               {post.tags.slice(0, 3).map((t, i) => (
@@ -294,7 +292,6 @@ export default function BlogPostCard({
           ) : null}
         </div>
 
-        {/* Premium bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 h-1 origin-left transform scale-x-0 bg-gradient-to-r from-softGold/0 via-softGold to-forest/0 transition-transform duration-500 group-hover:scale-x-100" />
       </Link>
     </article>
