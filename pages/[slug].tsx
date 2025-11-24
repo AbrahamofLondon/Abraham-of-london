@@ -1,7 +1,7 @@
-// pages/[slug].tsx
+// pages/insights/[slug].tsx
 import * as React from "react";
-import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
+import Head from "next/head";
 import {
   MDXRemote,
   type MDXRemoteSerializeResult,
@@ -24,14 +24,16 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// Primary collection for articles / blog posts
-const PRIMARY_COLLECTION = "Post";
+const COLLECTION = "Post";
 
 // -----------------------------------------------------------------------------
-// Page component
+// Component
 // -----------------------------------------------------------------------------
 
-function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
+export default function InsightPage({
+  meta,
+  mdxSource,
+}: PageProps): JSX.Element {
   const {
     title,
     description,
@@ -46,10 +48,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   } = meta;
 
   const displaySubtitle = excerpt || description || undefined;
-
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Insight");
 
   const canonicalTitle = title || "Abraham of London";
   const displayDescription = description || excerpt || "";
@@ -84,15 +85,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               prose-strong:text-slate-900 prose-strong:font-semibold
               prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
               prose-ul:text-slate-800 prose-ol:text-slate-800
-              prose-blockquote:border-l-softGold prose-blockquote:text-slate-900
               prose-img:rounded-xl prose-img:shadow-lg
-
-              dark:prose-headings:text-slate-50
-              dark:prose-p:text-slate-100
-              dark:prose-strong:text-slate-50
-              dark:prose-ul:text-slate-100
-              dark:prose-ol:text-slate-100
-              dark:prose-blockquote:text-slate-50
             `}
           >
             <MDXRemote {...mdxSource} components={mdxComponents} />
@@ -103,32 +96,24 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   );
 }
 
-export default ContentPage;
-
 // -----------------------------------------------------------------------------
 // SSG – paths
 // -----------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const items = getAllContent(PRIMARY_COLLECTION) ?? [];
+  const items = getAllContent(COLLECTION) ?? [];
 
-    const paths =
-      items
-        .filter((item: any) => item?.slug)
-        .map((item: any) => ({
-          params: { slug: String(item.slug) },
-        })) ?? [];
+  const paths =
+    items
+      .filter((item: any) => item?.slug)
+      .map((item: any) => ({
+        params: { slug: String(item.slug) },
+      })) ?? [];
 
-    return {
-      paths,
-      fallback: "blocking",
-    };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating static paths for /[slug]:", err);
-    return { paths: [], fallback: "blocking" };
-  }
+  return {
+    paths,
+    fallback: "blocking",
+  };
 };
 
 // -----------------------------------------------------------------------------
@@ -138,62 +123,34 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<PageProps> = async ({
   params,
 }) => {
-  try {
-    const slugParam = params?.slug;
-    const slug =
-      typeof slugParam === "string"
-        ? slugParam
-        : Array.isArray(slugParam)
-        ? slugParam[0]
-        : "";
+  const slugParam = params?.slug;
+  const slug =
+    typeof slugParam === "string"
+      ? slugParam
+      : Array.isArray(slugParam)
+      ? slugParam[0]
+      : "";
 
-    if (!slug) return { notFound: true };
+  if (!slug) return { notFound: true };
 
-    // Try several collections so various long-form pieces can live at root.
-    const collectionsToTry = [
-      "Post",     // blog / insights
-      "Print",    // long-form essays / prints
-      "Resource", // guides, frameworks
-      "Book",     // if any book pages are MDX-driven
-    ];
+  const data = getContentBySlug(COLLECTION, slug, {
+    withContent: true,
+  }) as (PageMeta & { content?: string }) | null;
 
-    let data: (PageMeta & { content?: string }) | null = null;
+  if (!data || !data.title) return { notFound: true };
 
-    for (const key of collectionsToTry) {
-      const candidate = getContentBySlug(key, slug, {
-        withContent: true,
-      }) as (PageMeta & { content?: string }) | null;
+  const { content, ...meta } = data;
+  const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
-      if (candidate) {
-        data = candidate;
-        break;
-      }
-    }
+  const mdxSource = await serialize(content || "", {
+    scope: jsonSafeMeta as unknown as Record<string, unknown>,
+  });
 
-    if (!data) {
-      return { notFound: true };
-    }
-
-    const { content, ...meta } = data;
-
-    if (!meta.title) return { notFound: true };
-
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
-
-    const mdxSource = await serialize(content || "", {
-      scope: jsonSafeMeta as unknown as Record<string, unknown>,
-    });
-
-    return {
-      props: {
-        meta: jsonSafeMeta,
-        mdxSource,
-      },
-      revalidate: 3600,
-    };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Error in getStaticProps for /[slug]:", err);
-    return { notFound: true };
-  }
+  return {
+    props: {
+      meta: jsonSafeMeta,
+      mdxSource,
+    },
+    revalidate: 3600,
+  };
 };

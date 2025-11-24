@@ -6,23 +6,19 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* 1. Base Color Tokens                                                       */
+/* 1. Global Base Colors                                                      */
 /* -------------------------------------------------------------------------- */
 
-/* Light mode base */
+/* Light mode base – and we reuse these for dark as well */
 :root {
-  /* App-wide */
-  --aol-bg: #f5f5f4;        /* warm off-white */
-  --aol-text: #111827;      /* slate-900 */
+  --aol-bg: #f5f5f4;      /* warm off-white */
+  --aol-text: #111827;    /* slate-900 */
 
-  /* Brand accents */
   --color-soft-gold: #d6b26a;
   --color-deep-charcoal: #0b0d10;
   --color-charcoal: #15171c;
   --color-forest: #0e3b33;
-  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.18);
 
-  /* Legacy tokens */
   --color-bg: var(--aol-bg);
   --color-bg-muted: #e5e7eb;
   --color-fg: var(--aol-text);
@@ -31,16 +27,14 @@
   --color-cream: #fdfaf5;
 }
 
-/* Dark mode overrides – driven by .dark on <html> */
+/* IMPORTANT: dark mode uses the SAME base colors for now */
 html.dark {
-  --aol-bg: #020617;        /* slate-950 */
-  --aol-text: #f9fafb;      /* almost white */
+  --aol-bg: #f5f5f4;
+  --aol-text: #111827;
 
-  --color-bg: #020617;
-  --color-bg-muted: #020617;
-  --color-fg: #f9fafb;
-
-  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --color-bg: var(--aol-bg);
+  --color-bg-muted: #e5e7eb;
+  --color-fg: var(--aol-text);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -69,11 +63,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Dark mode gets the cinematic gradient, but text still high-contrast */
+/* Dark mode now identical to light in terms of background/text */
 html.dark body {
-  background:
-    radial-gradient(circle at top, rgba(214, 178, 106, 0.12), transparent 55%),
-    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.25), #020617);
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
 }
 
 /* Text selection */
@@ -82,16 +75,12 @@ html.dark body {
   color: var(--aol-text);
 }
 
-html.dark ::selection {
-  color: #f9fafb;
-}
-
-/* Make sure main uses the body background by default */
+/* Ensure main uses page background */
 main {
   min-height: 100vh;
 }
 
-/* Generic media normalisation */
+/* Media normalisation */
 img,
 picture,
 video,
@@ -115,33 +104,18 @@ a:focus-visible {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Layout Shell & Hero Surfaces                                            */
+/* 3. Layout Shell & Hero                                                     */
 /* -------------------------------------------------------------------------- */
 
-/* Default page shell follows body colours */
 .page-shell {
   min-height: 100vh;
   background-color: var(--aol-bg);
   color: var(--aol-text);
 }
 
-/* Dark mode enrichment */
-html.dark .page-shell {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.12), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.28), #020617);
-  color: #f9fafb;
-}
-
-/* Hero vignette: light, clean in light mode; cinematic only in dark */
+/* hero-vignette now just a very subtle light wash */
 .hero-vignette {
-  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
-}
-
-html.dark .hero-vignette {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.18), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #020617);
+  background: linear-gradient(135deg, #fafafa, #e5e7eb);
 }
 
 /* Section divider */
@@ -149,19 +123,12 @@ html.dark .hero-vignette {
   border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
 
-/* Luxury cards */
+/* Cards */
 .lux-card {
   border-radius: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   background-color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-html.dark .lux-card {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background-color: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .lux-card-hover {
@@ -173,15 +140,11 @@ html.dark .lux-card {
 
 .lux-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: rgba(214, 178, 106, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  border-color: rgba(214, 178, 106, 0.6);
 }
 
-html.dark .lux-card-hover:hover {
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
-}
-
-/* Filter pills */
+/* Pills */
 .lux-pill {
   display: inline-flex;
   align-items: center;
@@ -190,24 +153,14 @@ html.dark .lux-card-hover:hover {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-}
-
-.lux-pill {
   border: 1px solid rgba(15, 23, 42, 0.12);
   background-color: #f9fafb;
   color: #111827;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-html.dark .lux-pill {
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background-color: rgba(15, 23, 42, 0.85);
-  color: #f9fafb;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .lux-pill-active {
-  border-color: rgba(214, 178, 106, 0.8);
+  border-color: rgba(214, 178, 106, 0.9);
   background-color: #d6b26a;
   color: #111827;
   box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
@@ -228,78 +181,26 @@ h6 {
   font-weight: 700;
 }
 
-/* Body copy */
+/* Default body copy uses the base text color */
 p {
   color: var(--aol-text);
 }
 
-html.dark p {
-  color: #e5e7eb;
-}
-
-/* Generic prose (Tailwind typography plugin) */
+/* Tailwind typography plugin defaults */
 .prose {
   @apply text-slate-800;
 }
 
 .dark .prose {
-  @apply text-slate-100;
+  @apply text-slate-800;
 }
 
 .dark .prose a {
   @apply text-softGold underline-offset-2 hover:underline;
 }
 
-/* “Lux” prose variant for feature articles if you still use it */
-.prose-lux {
-  max-width: none;
-  font-size: 1.0625rem;
-  line-height: 1.75;
-}
-
-html:not(.dark) .prose-lux {
-  color: #374151;
-}
-
-html:not(.dark) .prose-lux p,
-html:not(.dark) .prose-lux li {
-  color: #374151;
-}
-
-html:not(.dark) .prose-lux h1,
-html:not(.dark) .prose-lux h2,
-html:not(.dark) .prose-lux h3,
-html:not(.dark) .prose-lux h4 {
-  color: #111827;
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
-html.dark .prose-lux {
-  color: #f3f4f6;
-}
-
-html.dark .prose-lux p,
-html.dark .prose-lux li {
-  color: #f3f4f6;
-}
-
-html.dark .prose-lux h1,
-html.dark .prose-lux h2,
-html.dark .prose-lux h3,
-html.dark .prose-lux h4 {
-  color: #ffffff;
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
-.prose-lux ul li::marker,
-.prose-lux ol li::marker {
-  color: var(--color-soft-gold);
-}
-
 /* -------------------------------------------------------------------------- */
-/* 5. Header Interaction                                                      */
+/* 5. Header Interaction / Utility                                            */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
