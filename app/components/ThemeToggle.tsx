@@ -4,19 +4,14 @@
 import * as React from "react";
 import type { ButtonHTMLAttributes } from "react";
 
-export type ThemeMode = "light" | "dark";
+import { useTheme } from "@/lib/ThemeContext";
+import type { ThemeName } from "@/lib/ThemeContext";
+
+export type ThemeMode = ThemeName;
 
 export interface ThemeToggleProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange"> {
   variant?: "icon" | "button";
-}
-
-function getInitialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem("theme");
-  if (stored === "light" || stored === "dark") return stored;
-  if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
-  return "light";
 }
 
 export function ThemeToggle({
@@ -24,28 +19,21 @@ export function ThemeToggle({
   className = "",
   ...buttonProps
 }: ThemeToggleProps): JSX.Element {
-  const [theme, setTheme] = React.useState<ThemeMode>(() => getInitialTheme());
+  const { resolvedTheme, setTheme } = useTheme();
 
-  React.useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
+  // fall back to "dark" to match defaultTheme
+  const theme: ThemeMode = (resolvedTheme as ThemeMode) || "dark";
 
   const toggleTheme = (): void => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center rounded-full border border-lightGrey " +
-    "bg-warmWhite px-2 py-2 text-sm text-deepCharcoal shadow-sm " +
-    "transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 " +
-    "focus:ring-forest focus:ring-offset-2";
+    "inline-flex items-center justify-center rounded-full border border-slate-400 " +
+    "bg-white px-2 py-2 text-sm text-slate-900 shadow-sm " +
+    "transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 " +
+    "focus:ring-forest focus:ring-offset-2 dark:bg-slate-900 " +
+    "dark:text-slate-100 dark:border-slate-500 dark:hover:bg-slate-800";
 
   const icon = theme === "light" ? "☀️" : "🌙";
   const label = theme === "light" ? "Use dark theme" : "Use light theme";
