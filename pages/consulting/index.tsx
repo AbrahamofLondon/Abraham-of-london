@@ -41,7 +41,7 @@ export default function ConsultingPage(): JSX.Element {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              Data-driven strategy for
+              Data-inspired strategy for
               <span className="block bg-gradient-to-r from-gold to-amber-200 bg-clip-text text-transparent">
                 founders, boards, and builders.
               </span>

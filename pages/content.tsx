@@ -3,28 +3,22 @@ import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout";
 
-// Existing data helpers - added safe access patterns
+// Existing data helpers
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
 import { getAllContent } from "@/lib/mdx";
 
 // ---------------------------------------------------------------------------
-// Enhanced Types with Strict Validation
+// Luxury Types
 // ---------------------------------------------------------------------------
 
-type ContentKind =
-  | "blog"
-  | "book"
-  | "download"
-  | "event"
-  | "print"
-  | "resource";
+type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
 
-// Strict interface definitions with optional properties properly marked
 interface RawContentItem {
   slug?: string;
   title?: string;
@@ -35,16 +29,11 @@ interface RawContentItem {
   tags?: string[];
   featured?: boolean;
   readTime?: string | number;
-  _raw?: {
-    flattenedPath?: string;
-  };
-  // Event-specific fields
+  _raw?: { flattenedPath?: string };
   eventDate?: string;
-  // Download-specific fields
   fileSize?: string;
 }
 
-// Primary content resource interface with required fields
 interface ContentResource {
   kind: ContentKind;
   title: string;
@@ -65,43 +54,79 @@ interface ContentPageProps {
 }
 
 // ---------------------------------------------------------------------------
-// Safe Icon Components with Proper Typing
+// Luxury Icon System with Micro-Interactions
 // ---------------------------------------------------------------------------
 
-// Individual icon components for better type safety
-const BlogIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12" />
-  </svg>
+const LuxuryIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
+  children, 
+  className = "h-6 w-6" 
+}) => (
+  <div className={`transform transition-all duration-500 ease-out ${className}`}>
+    {children}
+  </div>
 );
 
-const BookIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-  </svg>
+const BlogIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12" />
+    </svg>
+  </LuxuryIcon>
 );
 
-const DownloadIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
+const BookIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  </LuxuryIcon>
 );
 
-const EventIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
+const DownloadIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  </LuxuryIcon>
 );
 
-const PrintIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-  </svg>
+const EventIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  </LuxuryIcon>
 );
 
-const ResourceIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+const PrintIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+    </svg>
+  </LuxuryIcon>
+);
+
+const ResourceIcon = ({ className }: { className?: string }) => (
+  <LuxuryIcon className={className}>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  </LuxuryIcon>
+);
+
+const ArrowIcon = ({ className = "ml-3 h-4 w-4" }: { className?: string }) => (
+  <svg
+    className={`transform transition-all duration-500 ease-out ${className}`}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M14 5l7 7m0 0l-7 7m7-7H3"
+    />
   </svg>
 );
 
@@ -114,70 +139,127 @@ const ContentIcons: Record<ContentKind, React.ReactElement> = {
   resource: <ResourceIcon />,
 };
 
-const ArrowIcon: React.FC<{ className?: string }> = ({ className = "ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M14 5l7 7m0 0l-7 7m7-7H3"
-    />
-  </svg>
+// ---------------------------------------------------------------------------
+// Ultimate Design System
+// ---------------------------------------------------------------------------
+
+const kindOrder: ContentKind[] = ["blog", "book", "download", "event", "print", "resource"];
+
+const kindLabels: Record<ContentKind, string> = {
+  blog: "Strategic Essays",
+  book: "Curated Volumes", 
+  download: "Premium Tools",
+  event: "Master Classes",
+  print: "Artisan Prints",
+  resource: "Wisdom Resources",
+} as const;
+
+const getKindAura = (kind: ContentKind): string => {
+  const auras: Record<ContentKind, string> = {
+    blog: "bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20",
+    book: "bg-gradient-to-br from-violet-500/20 via-purple-500/10 to-fuchsia-500/20",
+    download: "bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20", 
+    event: "bg-gradient-to-br from-rose-500/20 via-pink-500/10 to-red-500/20",
+    print: "bg-gradient-to-br from-indigo-500/20 via-blue-500/10 to-cyan-500/20",
+    resource: "bg-gradient-to-br from-cyan-500/20 via-sky-500/10 to-blue-500/20",
+  };
+  return auras[kind] ?? "bg-gradient-to-br from-gray-500/20 via-gray-400/10 to-gray-600/20";
+};
+
+const getKindEssence = (kind: ContentKind): string => {
+  const essences: Record<ContentKind, string> = {
+    blog: "text-emerald-300 border-emerald-400/40 bg-emerald-500/15 shadow-emerald-500/25",
+    book: "text-violet-300 border-violet-400/40 bg-violet-500/15 shadow-violet-500/25",
+    download: "text-amber-300 border-amber-400/40 bg-amber-500/15 shadow-amber-500/25",
+    event: "text-rose-300 border-rose-400/40 bg-rose-500/15 shadow-rose-500/25", 
+    print: "text-indigo-300 border-indigo-400/40 bg-indigo-500/15 shadow-indigo-500/25",
+    resource: "text-cyan-300 border-cyan-400/40 bg-cyan-500/15 shadow-cyan-500/25",
+  };
+  return essences[kind] ?? "text-gray-300 border-gray-400/40 bg-gray-500/15 shadow-gray-500/25";
+};
+
+// ---------------------------------------------------------------------------
+// Luxury Components
+// ---------------------------------------------------------------------------
+
+interface CrystalCardProps {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+  glow?: boolean;
+}
+
+const CrystalCard: React.FC<CrystalCardProps> = ({ 
+  children, 
+  className = "", 
+  hover = true,
+  glow = false
+}) => (
+  <div className={`
+    relative overflow-hidden rounded-3xl 
+    bg-gradient-to-br from-white/[0.08] to-white/[0.02]
+    backdrop-blur-2xl
+    border border-white/10
+    shadow-2xl shadow-black/30
+    before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent before:translate-x-[-100%]
+    hover:before:translate-x-[100%] hover:before:transition-transform hover:before:duration-1000
+    ${hover ? 'transition-all duration-700 hover:scale-105 hover:shadow-3xl hover:shadow-black/40' : ''}
+    ${glow ? 'after:absolute after:inset-0 after:bg-gradient-to-br after:from-softGold/10 after:via-transparent after:to-softGold/5 after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100' : ''}
+    ${className}
+  `}>
+    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+    <div className="relative z-10 h-full">
+      {children}
+    </div>
+  </div>
 );
 
 // ---------------------------------------------------------------------------
-// Constants with Type Assertions
+// Animated Background Masterpiece
 // ---------------------------------------------------------------------------
 
-const kindOrder: ContentKind[] = [
-  "blog",
-  "book",
-  "download",
-  "event",
-  "print",
-  "resource",
-];
+const CosmicBackground: React.FC = () => {
+  return (
+    <>
+      {/* Base Cosmic Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#1A1A2E] to-[#16213E]" />
+      
+      {/* Animated Nebula */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-softGold/5 rounded-full blur-3xl animate-pulse delay-500" />
+      </div>
 
-const kindLabels: Record<ContentKind, string> = {
-  blog: "Blog Posts",
-  book: "Books",
-  download: "Downloads",
-  event: "Events",
-  print: "Printables",
-  resource: "Resources",
-} as const;
+      {/* Floating Particles */}
+      {[...Array(15)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-float"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${i * 2}s`,
+            animationDuration: `${15 + Math.random() * 20}s`,
+          }}
+        >
+          <div 
+            className="w-1 h-1 bg-softGold/40 rounded-full blur-sm"
+            style={{
+              transform: `scale(${0.5 + Math.random() * 1.5})`,
+            }}
+          />
+        </div>
+      ))}
 
-const getKindColor = (kind: ContentKind): string => {
-  const colors: Record<ContentKind, string> = {
-    blog: "from-blue-500/20 to-blue-600/20 border-blue-400/40",
-    book: "from-purple-500/20 to-purple-600/20 border-purple-400/40",
-    download: "from-green-500/20 to-green-600/20 border-green-400/40",
-    event: "from-yellow-500/20 to-yellow-600/20 border-yellow-400/40",
-    print: "from-pink-500/20 to-pink-600/20 border-pink-400/40",
-    resource: "from-cyan-500/20 to-cyan-600/20 border-cyan-400/40",
-  };
-  return colors[kind] ?? "from-gray-500/20 to-gray-600/20 border-gray-400/40";
-};
-
-const getKindBadgeColor = (kind: ContentKind): string => {
-  const colors: Record<ContentKind, string> = {
-    blog: "border-blue-400/40 text-blue-300 bg-blue-500/15",
-    book: "border-purple-400/40 text-purple-300 bg-purple-500/15",
-    download: "border-green-400/40 text-green-300 bg-green-500/15",
-    event: "border-yellow-400/40 text-yellow-200 bg-yellow-500/15",
-    print: "border-pink-400/40 text-pink-300 bg-pink-500/15",
-    resource: "border-cyan-400/40 text-cyan-300 bg-cyan-500/15",
-  };
-  return colors[kind] ?? "border-gray-400/40 text-gray-300 bg-gray-500/15";
+      {/* Grid Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
+    </>
+  );
 };
 
 // ---------------------------------------------------------------------------
-// Safe Helper Functions with Error Boundaries
+// Safe Helper Functions
 // ---------------------------------------------------------------------------
 
 const getSlug = (item: RawContentItem): string | undefined => {
@@ -252,270 +334,185 @@ const processContentItems = (
 };
 
 // ---------------------------------------------------------------------------
-// Enhanced Case Components with Proper Prop Typing
+// Ultimate Content Components
 // ---------------------------------------------------------------------------
 
-interface ContentCaseProps {
+interface MasterpieceCardProps {
   item: ContentResource;
-  variant?: "default" | "featured" | "compact";
+  variant?: "featured" | "elegant" | "minimal";
+  index?: number;
 }
 
-const ContentCase: React.FC<ContentCaseProps> = ({ item, variant = "default" }) => {
+const MasterpieceCard: React.FC<MasterpieceCardProps> = ({ 
+  item, 
+  variant = "elegant",
+  index = 0
+}) => {
+  const [isHovered, setIsHovered] = React.useState(false);
   const description = item.description || item.excerpt || "";
 
-  const ctaLabel =
-    item.kind === "download"
-      ? "View & Download"
-      : item.kind === "event"
-      ? "View Event"
-      : item.kind === "book"
-      ? "View Book"
-      : "Read more";
+  const ctaLabels = {
+    download: "Acquire Resource",
+    event: "Join Experience", 
+    book: "Explore Volume",
+    blog: "Read Discourse",
+    print: "View Artistry",
+    resource: "Access Wisdom"
+  };
+
+  const ctaLabel = ctaLabels[item.kind] || "Discover";
 
   if (variant === "featured") {
     return (
-      <article className="group relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/8 to-white/0 p-8 backdrop-blur-sm transition-all hover:border-softGold/40 hover:shadow-2xl">
-        <div className="absolute top-6 right-6 text-2xl">
-          {ContentIcons[item.kind]}
-        </div>
-
-        <div className="mb-4">
-          <span
-            className={`inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
-              item.kind,
-            )} text-white`}
-          >
-            {item.kind}
-          </span>
-        </div>
-
-        <h3 className="mb-4 font-serif text-xl font-light text-white group-hover:text-softGold">
-          <Link href={item.href} className="hover:underline">
-            {item.title}
-          </Link>
-        </h3>
-
-        {description && (
-          <p className="mb-6 line-clamp-3 text-gray-100">
-            {description}
-          </p>
-        )}
-
-        <Link
-          href={item.href}
-          className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-3"
+      <CrystalCard glow hover>
+        <div 
+          className="p-8 h-full flex flex-col relative group"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{ animationDelay: `${index * 100}ms` }}
         >
-          Explore Resource
-          <ArrowIcon />
-        </Link>
-      </article>
-    );
-  }
+          {/* Animated Background Aura */}
+          <div className={`absolute inset-0 rounded-3xl ${getKindAura(item.kind)} opacity-0 group-hover:opacity-100 transition-opacity duration-1000`} />
+          
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="flex items-start justify-between mb-6">
+              <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindEssence(item.kind)} transform group-hover:scale-110 transition-transform duration-500`}>
+                {ContentIcons[item.kind]}
+              </div>
+              <div className="text-right space-y-2">
+                <span className={`text-sm font-semibold px-3 py-1 rounded-full border backdrop-blur-sm ${getKindEssence(item.kind)}`}>
+                  {item.kind}
+                </span>
+                {item.date && (
+                  <time className="block text-xs text-gray-400 font-light">
+                    {new Date(item.date).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: 'numeric'
+                    })}
+                  </time>
+                )}
+              </div>
+            </div>
 
-  if (variant === "compact") {
-    return (
-      <article className="group flex items-center gap-4 rounded-xl border border-white/8 bg-black/40 p-4 transition-all hover:border-softGold/30 hover:bg-black/60">
-        <div className="flex-shrink-0">
-          <div className={`rounded-lg p-2 ${getKindBadgeColor(item.kind)}`}>
-            {ContentIcons[item.kind]}
+            <h3 className="font-serif text-2xl lg:text-3xl text-white mb-4 leading-tight group-hover:text-softGold transition-colors duration-500">
+              {item.title}
+            </h3>
+
+            {description && (
+              <p className="text-gray-300 mb-6 line-clamp-3 flex-grow leading-relaxed">
+                {description}
+              </p>
+            )}
+
+            <div className="mt-auto pt-6 border-t border-white/10">
+              <Link
+                href={item.href}
+                className="group/link inline-flex items-center text-sm font-semibold text-softGold transition-all duration-500 hover:gap-4"
+              >
+                <span className="bg-gradient-to-r from-softGold to-amber-200 bg-clip-text text-transparent">
+                  {ctaLabel}
+                </span>
+                <ArrowIcon className={`transform ${isHovered ? 'translate-x-2 scale-110' : ''}`} />
+              </Link>
+            </div>
           </div>
         </div>
-        
-        <div className="flex-1 min-w-0">
-          <h4 className="truncate font-medium text-white group-hover:text-softGold">
-            <Link href={item.href} className="hover:underline">
-              {item.title}
-            </Link>
-          </h4>
-          {item.date && (
-            <time className="text-xs text-gray-400">
-              {new Date(item.date).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}
-            </time>
-          )}
-        </div>
-        
-        <ArrowIcon />
-      </article>
+      </CrystalCard>
     );
   }
 
-  // Default case variant
+  // Elegant variant (default)
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/12 bg-black/55 shadow-lg transition-all hover:-translate-y-1 hover:border-softGold/50 hover:shadow-2xl">
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${getKindColor(
-          item.kind,
-        )} opacity-0 transition-opacity group-hover:opacity-15`}
-      />
+    <CrystalCard hover>
+      <div 
+        className="p-6 h-full flex flex-col relative group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Interactive Background */}
+        <div className={`absolute inset-0 rounded-3xl ${getKindAura(item.kind)} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
-      <div className="relative flex flex-1 flex-col p-6">
-        {/* Header */}
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`rounded-lg p-2 ${getKindBadgeColor(item.kind)}`}>
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className={`p-2 rounded-xl border backdrop-blur-sm ${getKindEssence(item.kind)} transform group-hover:scale-110 transition-transform duration-500`}>
               {ContentIcons[item.kind]}
             </div>
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${getKindBadgeColor(
-                item.kind,
-              )}`}
-            >
+            {item.date && (
+              <time className="text-xs text-gray-400 font-light flex-shrink-0 ml-2">
+                {new Date(item.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                })}
+              </time>
+            )}
+          </div>
+
+          {/* Category */}
+          <div className="mb-3">
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full border backdrop-blur-sm ${getKindEssence(item.kind)}`}>
               {item.kind}
             </span>
           </div>
 
-          {item.date && (
-            <time className="flex-shrink-0 text-xs text-gray-400">
-              {new Date(item.date).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}
-            </time>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1">
-          <h3 className="mb-3 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-softGold">
-            <Link href={item.href} className="hover:underline">
-              {item.title}
-            </Link>
+          {/* Title */}
+          <h3 className="font-serif text-xl text-white mb-3 line-clamp-2 leading-tight group-hover:text-softGold transition-colors duration-500">
+            {item.title}
           </h3>
 
+          {/* Description */}
           {description && (
-            <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-100">
+            <p className="text-gray-300 text-sm mb-4 line-clamp-3 flex-grow leading-relaxed">
               {description}
             </p>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="mt-auto pt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+            <div className="flex items-center gap-3">
+              {item.readTime && (
+                <span className="text-xs text-gray-400 font-light">
+                  {typeof item.readTime === 'number' ? `${item.readTime}min` : item.readTime}
+                </span>
+              )}
               {item.category && (
-                <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs text-gray-200">
+                <span className="text-xs text-gray-400 font-light border-l border-white/20 pl-3">
                   {item.category}
                 </span>
               )}
-              {item.readTime && (
-                <span className="text-xs text-gray-400">
-                  {typeof item.readTime === 'number' ? `${item.readTime} min` : item.readTime}
-                </span>
-              )}
             </div>
-
             <Link
               href={item.href}
-              className="inline-flex items-center text-sm font-semibold text-softGold transition-all hover:gap-2"
+              className="group/link inline-flex items-center text-xs font-semibold text-softGold transition-all duration-500 hover:gap-2"
             >
               {ctaLabel}
-              <ArrowIcon />
+              <ArrowIcon className={`h-3 w-3 transform ${isHovered ? 'translate-x-1' : ''}`} />
             </Link>
           </div>
         </div>
       </div>
-    </article>
+    </CrystalCard>
   );
 };
 
 // ---------------------------------------------------------------------------
-// Section Components with Strict Prop Types
-// ---------------------------------------------------------------------------
-
-interface ContentSectionProps {
-  title: string;
-  subtitle?: string;
-  items: ContentResource[];
-  variant?: "grid" | "list" | "featured";
-  columns?: 2 | 3 | 4;
-}
-
-const ContentSection: React.FC<ContentSectionProps> = ({ 
-  title, 
-  subtitle, 
-  items, 
-  variant = "grid",
-  columns = 3 
-}) => {
-  if (!items.length) return null;
-
-  const gridClass = {
-    2: "md:grid-cols-2",
-    3: "md:grid-cols-2 lg:grid-cols-3",
-    4: "md:grid-cols-2 lg:grid-cols-4"
-  }[columns];
-
-  return (
-    <section className="py-8">
-      <header className="mb-6">
-        <h2 className="font-serif text-2xl font-light text-white">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="mt-2 text-gray-300">{subtitle}</p>
-        )}
-      </header>
-
-      {variant === "featured" ? (
-        <div className="grid gap-6 lg:grid-cols-3">
-          {items.map((item) => (
-            <ContentCase
-              key={`${item.kind}-${item.slug}`}
-              item={item}
-              variant="featured"
-            />
-          ))}
-        </div>
-      ) : variant === "list" ? (
-        <div className="space-y-3">
-          {items.map((item) => (
-            <ContentCase
-              key={`${item.kind}-${item.slug}`}
-              item={item}
-              variant="compact"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className={`grid gap-6 ${gridClass}`}>
-          {items.map((item) => (
-            <ContentCase
-              key={`${item.kind}-${item.slug}`}
-              item={item}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// Safe SSG with Comprehensive Error Handling
+// Ultimate SSG
 // ---------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  console.log("============================================");
-  console.log("[content] getStaticProps STARTING");
-  console.log("============================================");
+  console.log("🌌 [content] Building ultimate experience...");
 
   try {
     const allItems: ContentResource[] = [];
 
-    // Safe data fetching with proper error handling
     const safeGetData = async <T,>(
       dataFetcher: (() => T) | undefined,
       dataName: string
     ): Promise<T[]> => {
       try {
         if (!dataFetcher || typeof dataFetcher !== 'function') {
-          console.warn(`[content] ${dataName} fetcher is not available`);
+          console.warn(`[content] ${dataName} fetcher unavailable`);
           return [];
         }
         const data = dataFetcher();
@@ -526,108 +523,81 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       }
     };
 
-    // Blog posts
-    const posts = await safeGetData(getAllPostsMeta, "blog posts");
-    const processedPosts = processContentItems(
-      posts as unknown as RawContentItem[],
-      "blog",
-      "Blog",
-    );
-    allItems.push(...processedPosts);
+    // Parallel data fetching for performance
+    const contentFetchers = [
+      { kind: "blog" as ContentKind, data: safeGetData(getAllPostsMeta, "blog posts"), category: "Essays" },
+      { kind: "book" as ContentKind, data: safeGetData(getAllBooksMeta, "books"), category: "Books" },
+      { kind: "download" as ContentKind, data: safeGetData(getAllDownloadsMeta, "downloads"), category: "Tools" },
+      { kind: "event" as ContentKind, data: safeGetData(() => getAllContent?.("events"), "events"), category: "Events" },
+      { kind: "print" as ContentKind, data: safeGetData(() => getAllContent?.("prints"), "prints"), category: "Prints" },
+      { kind: "resource" as ContentKind, data: safeGetData(() => getAllContent?.("resources"), "resources"), category: "Resources" },
+    ];
 
-    // Books
-    const books = await safeGetData(getAllBooksMeta, "books");
-    const processedBooks = processContentItems(
-      books as unknown as RawContentItem[],
-      "book",
-      "Books",
+    await Promise.all(
+      contentFetchers.map(async ({ kind, data, category }) => {
+        try {
+          const items = await data;
+          const processed = processContentItems(items as unknown as RawContentItem[], kind, category);
+          allItems.push(...processed);
+          console.log(`✨ [content] Processed ${processed.length} ${kind}`);
+        } catch (error) {
+          console.error(`💥 [content] Failed to process ${kind}:`, error);
+        }
+      })
     );
-    allItems.push(...processedBooks);
 
-    // Downloads
-    const downloads = await safeGetData(getAllDownloadsMeta, "downloads");
-    const processedDownloads = processContentItems(
-      downloads as unknown as RawContentItem[],
-      "download",
-      "Downloads",
-    );
-    allItems.push(...processedDownloads);
-
-    // Events
-    const events = await safeGetData(() => getAllContent?.("events"), "events");
-    const processedEvents = processContentItems(
-      events as unknown as RawContentItem[],
-      "event",
-      "Events",
-    );
-    allItems.push(...processedEvents);
-
-    // Prints
-    const prints = await safeGetData(() => getAllContent?.("prints"), "prints");
-    const processedPrints = processContentItems(
-      prints as unknown as RawContentItem[],
-      "print",
-      "Printables",
-    );
-    allItems.push(...processedPrints);
-
-    // Resources
-    const resources = await safeGetData(() => getAllContent?.("resources"), "resources");
-    const processedResources = processContentItems(
-      resources as unknown as RawContentItem[],
-      "resource",
-      "Resources",
-    );
-    allItems.push(...processedResources);
-
-    // Safe sorting with date validation
+    // Premium sorting with validation
     const sortedItems = allItems.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      
-      // Handle invalid dates
       if (isNaN(dateA) && isNaN(dateB)) return 0;
       if (isNaN(dateA)) return 1;
       if (isNaN(dateB)) return -1;
-      
       return dateB - dateA;
     });
 
-    const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 3);
+    const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 4);
 
-    console.log("[content] ========================================");
-    console.log(`[content] Total items: ${sortedItems.length}`);
-    console.log(`[content] Featured items: ${featuredItems.length}`);
-    console.log("[content] ========================================");
+    console.log("🎊 [content] Ultimate build completed:", {
+      total: sortedItems.length,
+      featured: featuredItems.length
+    });
 
     return {
       props: {
         items: JSON.parse(JSON.stringify(sortedItems)),
         featuredItems: JSON.parse(JSON.stringify(featuredItems)),
       },
-      revalidate: 3600, // 1 hour
+      revalidate: 3600,
     };
   } catch (error) {
-    console.error("[content] Critical error in getStaticProps:", error);
+    console.error("💢 [content] Critical build error:", error);
     return {
-      props: { 
-        items: [], 
-        featuredItems: [] 
-      },
+      props: { items: [], featuredItems: [] },
       revalidate: 3600,
     };
   }
 };
 
 // ---------------------------------------------------------------------------
-// Main Component with Proper Typing
+// The Ultimate Experience Component
 // ---------------------------------------------------------------------------
 
 const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
-  // Safe content statistics calculation
+  React.useEffect(() => {
+    setMounted(true);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Premium statistics
   const contentStats = React.useMemo(() => ({
     all: items.length,
     blog: items.filter((i) => i.kind === "blog").length,
@@ -638,26 +608,21 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
     resource: items.filter((i) => i.kind === "resource").length,
   }), [items]);
 
-  const filters: Array<{
-    key: ContentKind | "all";
-    label: string;
-    count: number;
-  }> = [
-    { key: "all", label: "All Content", count: contentStats.all },
-    { key: "blog", label: "Blog Posts", count: contentStats.blog },
-    { key: "book", label: "Books", count: contentStats.book },
-    { key: "download", label: "Downloads", count: contentStats.download },
-    { key: "event", label: "Events", count: contentStats.event },
-    { key: "print", label: "Printables", count: contentStats.print },
-    { key: "resource", label: "Resources", count: contentStats.resource },
+  const luxuryFilters = [
+    { key: "all" as const, label: "All Masterpieces", count: contentStats.all, icon: "🌌" },
+    { key: "blog" as const, label: "Strategic Essays", count: contentStats.blog, icon: "📝" },
+    { key: "book" as const, label: "Curated Volumes", count: contentStats.book, icon: "📚" },
+    { key: "download" as const, label: "Premium Tools", count: contentStats.download, icon: "🛠️" },
+    { key: "event" as const, label: "Master Classes", count: contentStats.event, icon: "🎓" },
+    { key: "print" as const, label: "Artisan Prints", count: contentStats.print, icon: "🎨" },
+    { key: "resource" as const, label: "Wisdom Resources", count: contentStats.resource, icon: "💎" },
   ];
 
-  // Safe filtering with search
+  // Ultimate filtering
   const filteredItems = React.useMemo(() => {
     return items.filter((item) => {
       const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
       if (!matchesFilter) return false;
-
       if (!searchQuery.trim()) return true;
 
       const query = searchQuery.toLowerCase().trim();
@@ -670,202 +635,196 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
     });
   }, [items, activeFilter, searchQuery]);
 
-  // Safe grouping by kind
-  const groupedByKind: Record<ContentKind, ContentResource[]> = React.useMemo(() => {
+  const groupedByKind = React.useMemo(() => {
     const initial: Record<ContentKind, ContentResource[]> = {
-      blog: [],
-      book: [],
-      download: [],
-      event: [],
-      print: [],
-      resource: [],
+      blog: [], book: [], download: [], event: [], print: [], resource: []
     };
-
-    for (const item of filteredItems) {
-      if (initial[item.kind]) {
-        initial[item.kind].push(item);
-      }
-    }
-
+    filteredItems.forEach(item => initial[item.kind].push(item));
     return initial;
   }, [filteredItems]);
 
-  // Safe keyboard handler
-  const handleKeyDown = (
-    event: React.KeyboardEvent,
-    filterKey: ContentKind | "all",
-  ) => {
+  const handleKeyDown = (event: React.KeyboardEvent, filterKey: ContentKind | "all") => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setActiveFilter(filterKey);
     }
   };
 
-  // Safe scroll handler
-  const handleExploreClick = () => {
-    const contentGrid = document.getElementById("content-grid");
-    if (contentGrid) {
-      contentGrid.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  if (!mounted) {
+    return (
+      <Layout title="Strategic Insights & Resources">
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-softGold text-xl">Loading Masterpieces...</div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <Layout title="Strategic Insights & Resources">
+    <Layout title="The Wisdom Atelier">
       <Head>
-        <title>Strategic Insights &amp; Resources | Abraham of London</title>
-        <meta
-          name="description"
-          content="Master strategic thinking with essays, books, tools, and resources for fathers, founders, and leaders building enduring legacies."
-        />
-        <meta
-          name="keywords"
-          content="strategy, leadership, legacy building, fatherhood, entrepreneurship, resources"
-        />
+        <title>The Wisdom Atelier | Abraham of London</title>
+        <meta name="description" content="Experience curated strategic wisdom, premium tools, and master resources in an unparalleled digital sanctuary for visionary leaders." />
+        <meta name="keywords" content="strategy, leadership, legacy, wisdom, luxury, premium, resources" />
       </Head>
 
-      <div className="min-h-screen bg-[#050608]">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden px-4 py-20 lg:py-28">
-          <div className="absolute inset-0 bg-gradient-to-r from-softGold/8 via-transparent to-transparent" />
-          <div className="relative mx-auto max-w-7xl">
-            <div className="grid lg:grid-cols-2 lg:gap-16">
-              <div className="flex flex-col justify-center">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-softGold/40 bg-softGold/15 px-4 py-2 text-sm text-softGold">
-                  <span>✨</span>
-                  <span>Content Hub</span>
-                </div>
+      <div className="min-h-screen bg-black text-white overflow-hidden relative">
+        {/* Cosmic Background */}
+        <div className="fixed inset-0 -z-10">
+          <CosmicBackground />
+        </div>
 
-                <h1 className="mb-6 font-serif text-4xl font-light text-white sm:text-5xl lg:text-6xl">
-                  Build Your{" "}
-                  <span className="bg-gradient-to-r from-softGold to-yellow-200 bg-clip-text text-transparent">
-                    Legacy
-                  </span>{" "}
-                  With Strategic Wisdom
-                </h1>
+        {/* Ultimate Hero Experience */}
+        <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black/80" />
+          
+          <div className="relative z-10 max-w-6xl mx-auto text-center">
+            {/* Luxury Identifier */}
+            <div className="inline-flex items-center gap-3 rounded-full border border-softGold/30 bg-softGold/10 px-8 py-4 mb-12 backdrop-blur-2xl">
+              <div className="w-2 h-2 bg-softGold rounded-full animate-pulse" />
+              <span className="text-softGold text-sm font-light tracking-widest uppercase">THE WISDOM ATELIER</span>
+              <div className="w-2 h-2 bg-softGold rounded-full animate-pulse" />
+            </div>
 
-                <p className="mb-8 text-xl leading-relaxed text-gray-100">
-                  Curated essays, tools, and resources for fathers, founders,
-                  and leaders committed to building enduring impact across
-                  generations.
-                </p>
+            {/* Masterpiece Heading */}
+            <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl font-light text-white mb-8 leading-none">
+              Craft
+              <span className="block bg-gradient-to-r from-softGold via-yellow-200 to-amber-200 bg-clip-text text-transparent">
+                Legacy
+              </span>
+            </h1>
 
-                <div className="flex flex-wrap gap-4">
-                  <button
-                    type="button"
-                    onClick={handleExploreClick}
-                    className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold"
-                  >
-                    <span className="relative z-10">Explore Resources</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity group-hover:opacity-100" />
-                  </button>
+            {/* Poetic Subtitle */}
+            <p className="text-2xl md:text-3xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed font-light">
+              Where strategic wisdom meets artistic excellence. 
+              <span className="block text-softGold/80">Curated masterpieces for visionary leaders.</span>
+            </p>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter("download")}
-                    className="group rounded-lg border border-softGold/40 bg-black/60 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 hover:shadow-lg hover:shadow-yellow-500/10 focus:outline-none focus:ring-2 focus:ring-softGold"
-                  >
-                    <span className="flex items-center gap-2">
-                      Free Downloads
-                      <ArrowIcon />
-                    </span>
-                  </button>
-                </div>
-              </div>
+            {/* Premium Action Cluster */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
+              <button
+                onClick={() => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })}
+                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-6 font-semibold text-black transition-all duration-700 hover:scale-110 hover:shadow-3xl hover:shadow-yellow-500/30"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative z-10 flex items-center gap-4 text-lg">
+                  Enter the Atelier
+                  <ArrowIcon className="transform group-hover:translate-x-2 group-hover:scale-110" />
+                </span>
+              </button>
 
-              {/* Stats Grid */}
-              <div className="mt-12 lg:mt-0">
-                <div className="grid grid-cols-2 gap-6">
-                  {filters.slice(1).map((filter) => (
-                    <button
-                      key={filter.key}
-                      type="button"
-                      onClick={() => setActiveFilter(filter.key)}
-                      onKeyDown={(e) => handleKeyDown(e, filter.key)}
-                      className={`group rounded-2xl border bg-gradient-to-br ${getKindColor(
-                        filter.key as ContentKind,
-                      )} p-6 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-2xl">
-                          {ContentIcons[filter.key as ContentKind]}
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-white">
-                            {filter.count}
-                          </div>
-                          <div className="text-sm text-gray-200">
-                            {filter.label}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button
+                onClick={() => setActiveFilter("download")}
+                className="group rounded-full border-2 border-softGold/50 bg-black/40 px-12 py-6 font-semibold text-softGold backdrop-blur-2xl transition-all duration-700 hover:bg-softGold/10 hover:border-softGold/80 hover:scale-105"
+              >
+                <span className="flex items-center gap-3 text-lg">
+                  Access Premium Tools
+                  <span className="text-amber-200">✨</span>
+                </span>
+              </button>
+            </div>
+
+            {/* Elegant Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+              {luxuryFilters.slice(1, 5).map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                  className="group text-left p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl transition-all duration-700 hover:scale-110 hover:bg-white/10 hover:border-softGold/30"
+                >
+                  <div className="text-3xl mb-3 transform group-hover:scale-125 transition-transform duration-500">
+                    {filter.icon}
+                  </div>
+                  <div className="text-2xl font-bold text-white mb-1">{filter.count}</div>
+                  <div className="text-sm text-gray-400 font-light leading-tight">{filter.label}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Luxury Scroll Indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-softGold/60 text-sm font-light tracking-widest">EXPLORE</div>
+              <div className="w-px h-16 bg-gradient-to-b from-softGold to-transparent" />
             </div>
           </div>
         </section>
 
-        {/* Featured Section */}
+        {/* Featured Masterpieces Gallery */}
         {featuredItems.length > 0 && (
-          <section className="px-4 py-16">
-            <div className="mx-auto max-w-7xl">
-              <ContentSection
-                title="Featured Essentials"
-                subtitle="Handpicked resources to get you started"
-                items={featuredItems}
-                variant="featured"
-              />
+          <section className="relative py-32 px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-20">
+                <h2 className="font-serif text-5xl md:text-6xl text-white mb-6">
+                  Curated <span className="text-softGold">Excellence</span>
+                </h2>
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                  Hand-selected strategic masterpieces of unparalleled quality and transformative impact
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+                {featuredItems.map((item, index) => (
+                  <div
+                    key={item.slug}
+                    className="transform transition-all duration-1000 hover:-translate-y-3"
+                    style={{ animationDelay: `${index * 200}ms` }}
+                  >
+                    <MasterpieceCard item={item} variant="featured" index={index} />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
-        {/* Main Content Grid */}
-        <section id="content-grid" className="px-4 py-16">
-          <div className="mx-auto max-w-7xl">
-            {/* Controls */}
-            <div className="mb-12">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                {/* Search */}
-                <div className="flex-1">
-                  <div className="relative max-w-md">
+        {/* Main Gallery Experience */}
+        <section id="gallery" className="relative py-32 px-4">
+          <div className="max-w-7xl mx-auto">
+            {/* Sticky Luxury Header */}
+            <div className={`sticky top-24 z-50 mb-16 transition-all duration-700 ${
+              isScrolled 
+                ? 'bg-black/80 backdrop-blur-2xl rounded-3xl p-8 shadow-3xl border border-white/10' 
+                : ''
+            }`}>
+              <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+                {/* Premium Search */}
+                <div className="flex-1 max-w-lg">
+                  <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search resources, tools, insights..."
+                      placeholder="Search wisdom, tools, masterpieces..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-2xl border border-white/12 bg-black/60 px-6 py-4 text-white placeholder-gray-400 backdrop-blur-sm transition-all focus:border-softGold/60 focus:outline-none focus:ring-2 focus:ring-softGold/25"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-8 py-5 text-white placeholder-gray-400 backdrop-blur-2xl transition-all duration-500 focus:border-softGold/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-softGold/25 text-lg"
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      🔍
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
                   </div>
                 </div>
 
-                {/* Filter Pills */}
-                <div className="flex flex-wrap gap-3">
-                  {filters.map((filter) => (
+                {/* Luxury Filter Tabs */}
+                <div className="flex flex-wrap gap-4 justify-center lg:justify-end">
+                  {luxuryFilters.map((filter) => (
                     <button
                       key={filter.key}
-                      type="button"
                       onClick={() => setActiveFilter(filter.key)}
-                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black ${
+                      onKeyDown={(e) => handleKeyDown(e, filter.key)}
+                      className={`flex items-center gap-4 rounded-full border-2 px-6 py-4 text-base font-medium transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black ${
                         activeFilter === filter.key
-                          ? "border-softGold bg-softGold text-black shadow-lg shadow-yellow-500/30"
-                          : "border-white/12 bg-black/55 text-gray-100 hover:border-softGold/50 hover:bg-gray-900"
+                          ? "border-softGold bg-softGold text-black shadow-2xl shadow-yellow-500/40 transform scale-105"
+                          : "border-white/10 bg-white/5 text-gray-300 hover:border-softGold/40 hover:bg-white/10 hover:scale-105"
                       }`}
                     >
-                      <span className="text-xs">
-                        {filter.key === "all" ? "📁" : ContentIcons[filter.key as ContentKind]}
-                      </span>
+                      <span className="text-lg">{filter.icon}</span>
                       {filter.label}
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          activeFilter === filter.key
-                            ? "bg-black/10 text-black"
-                            : "bg-white/10 text-gray-300"
-                        }`}
-                      >
+                      <span className={`rounded-full px-3 py-1 text-sm ${
+                        activeFilter === filter.key ? "bg-black/20 text-black" : "bg-white/10 text-gray-400"
+                      }`}>
                         {filter.count}
                       </span>
                     </button>
@@ -874,108 +833,155 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
               </div>
             </div>
 
-            {/* Result Summary */}
-            <div className="mb-8 flex items-center justify-between text-sm text-gray-300">
-              <div>
-                Showing {filteredItems.length} of {items.length} resources
-              </div>
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="text-softGold hover:text-yellow-300 focus:outline-none focus:underline"
-                >
-                  Clear search
-                </button>
-              )}
-            </div>
-
-            {/* Content Display */}
+            {/* Gallery Content */}
             {filteredItems.length === 0 ? (
-              <div className="rounded-2xl border border-white/12 bg-black/55 px-6 py-16 text-center">
-                <div className="mb-4 text-6xl">🔍</div>
-                <h3 className="mb-2 text-xl font-semibold text-white">
-                  No resources found
-                </h3>
-                <p className="mb-6 text-gray-300">
-                  {searchQuery
-                    ? `No results for "${searchQuery}". Try different keywords.`
-                    : `No ${
-                        activeFilter !== "all" ? `${activeFilter} ` : ""
-                      }resources available.`}
+              <CrystalCard className="text-center p-16">
+                <div className="text-7xl mb-6">🌌</div>
+                <h3 className="text-3xl font-serif text-white mb-4">No Masterpieces Found</h3>
+                <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                  {searchQuery 
+                    ? `No results for "${searchQuery}". Refine your search.`
+                    : `No ${activeFilter !== "all" ? kindLabels[activeFilter] : "content"} available.`
+                  }
                 </p>
                 {(searchQuery || activeFilter !== "all") && (
                   <button
-                    type="button"
                     onClick={() => {
                       setSearchQuery("");
                       setActiveFilter("all");
                     }}
-                    className="rounded-lg bg-softGold px-6 py-2 font-semibold text-black transition-all hover:shadow-lg hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+                    className="rounded-full bg-softGold px-8 py-4 font-semibold text-black transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/25 text-lg"
                   >
-                    Show all resources
+                    Show All Masterpieces
                   </button>
                 )}
-              </div>
+              </CrystalCard>
             ) : activeFilter === "all" ? (
-              // Grouped view for "All"
-              <div className="space-y-12">
+              // Grouped Gallery View
+              <div className="space-y-24">
                 {kindOrder.map((kind) => {
                   const group = groupedByKind[kind];
                   if (!group.length) return null;
 
                   return (
-                    <ContentSection
-                      key={kind}
-                      title={kindLabels[kind]}
-                      items={group}
-                      variant="grid"
-                      columns={3}
-                    />
+                    <div key={kind} className="space-y-12">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-serif text-4xl text-white flex items-center gap-6">
+                          <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindEssence(kind)}`}>
+                            {ContentIcons[kind]}
+                          </div>
+                          {kindLabels[kind]}
+                        </h3>
+                        <span className="text-lg text-gray-400 font-light">
+                          {group.length} masterpiece{group.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        {group.map((item) => (
+                          <MasterpieceCard key={item.slug} item={item} variant="elegant" />
+                        ))}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
             ) : (
-              // Flat grid for specific filter
-              <ContentSection
-                title={kindLabels[activeFilter]}
-                items={filteredItems}
-                variant="grid"
-                columns={3}
-              />
+              // Single Category View
+              <div>
+                <div className="flex items-center justify-between mb-12">
+                  <h3 className="font-serif text-4xl text-white flex items-center gap-6">
+                    <div className={`p-3 rounded-2xl border backdrop-blur-sm ${getKindEssence(activeFilter)}`}>
+                      {ContentIcons[activeFilter]}
+                    </div>
+                    {kindLabels[activeFilter]}
+                  </h3>
+                  <span className="text-lg text-gray-400">
+                    {filteredItems.length} masterpiece{filteredItems.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filteredItems.map((item) => (
+                    <MasterpieceCard key={item.slug} item={item} variant="elegant" />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="px-4 py-20">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="rounded-2xl border border-softGold/25 bg-gradient-to-r from-softGold/10 to-yellow-600/10 px-8 py-12 backdrop-blur-sm">
-              <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
-                Ready to Build Your Legacy?
+        {/* Ultimate CTA Experience */}
+        <section className="relative py-40 px-4">
+          <div className="max-w-5xl mx-auto text-center">
+            <CrystalCard className="p-16 md:p-20" glow>
+              <h2 className="font-serif text-5xl md:text-6xl text-white mb-8">
+                Begin Your <span className="text-softGold">Legacy</span> Journey
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-gray-100">
-                Join founders, fathers, and leaders who are already transforming
-                their approach to strategy and legacy building.
+              <p className="text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+                Join visionary leaders and founders in our exclusive atelier, 
+                where strategic wisdom transforms into enduring legacy.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <button
-                  type="button"
-                  className="rounded-lg bg-gradient-to-r from-softGold to-yellow-600 px-8 py-4 font-semibold text-black transition-all hover:shadow-2xl hover:shadow-yellow-500/25 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
-                >
-                  Get Started Today
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <button className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-14 py-6 font-semibold text-black transition-all duration-700 hover:scale-110 hover:shadow-3xl hover:shadow-yellow-500/30 text-lg">
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="relative z-10">Commence Your Journey</span>
                 </button>
-                <button
-                  type="button"
-                  className="rounded-lg border border-softGold/40 px-8 py-4 font-semibold text-softGold transition-all hover:bg-softGold/15 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
-                >
-                  Book a Strategy Call
+                <button className="group rounded-full border-2 border-softGold/50 bg-transparent px-14 py-6 font-semibold text-softGold transition-all duration-700 hover:bg-softGold/10 hover:scale-105 text-lg">
+                  <span className="flex items-center gap-4">
+                    Book Private Session
+                    <ArrowIcon className="transform group-hover:translate-x-1" />
+                  </span>
                 </button>
               </div>
-            </div>
+            </CrystalCard>
           </div>
         </section>
       </div>
+
+      {/* Global Luxury Animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg) scale(1);
+            opacity: 0.7;
+          }
+          33% { 
+            transform: translateY(-30px) rotate(120deg) scale(1.1);
+            opacity: 1;
+          }
+          66% { 
+            transform: translateY(15px) rotate(240deg) scale(0.9);
+            opacity: 0.5;
+          }
+        }
+        
+        .animate-float {
+          animation: float 20s ease-in-out infinite;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #0A0A0A;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #D4AF37, #F7EF8A);
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #F7EF8A, #D4AF37);
+        }
+
+        /* Selection styling */
+        ::selection {
+          background: rgba(212, 175, 55, 0.3);
+          color: #F7EF8A;
+        }
+      `}</style>
     </Layout>
   );
 };
