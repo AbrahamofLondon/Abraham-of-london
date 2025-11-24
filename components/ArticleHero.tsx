@@ -1,9 +1,9 @@
 // components/ArticleHero.tsx
 import * as React from "react";
 import clsx from "clsx";
-import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
+import { CoverFrame, type CoverAspect, type CoverFit } from "@/components/media/CoverFrame";
 
-type ArticleHeroProps = {
+interface ArticleHeroProps {
   title?: string | null;
   subtitle?: string | null;
   category?: string | null;
@@ -11,82 +11,84 @@ type ArticleHeroProps = {
   readTime?: string | number | null;
   coverImage?: string | null;
   coverAspect?: CoverAspect;
-  coverFit?: "cover" | "contain"; // kept for future, currently always "contain"
-};
+  coverFit?: CoverFit;
+}
 
-function formatDate(iso?: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
+function formatDate(date?: string | null): string | null {
+  if (!date) return null;
+  const d = new Date(date);
   if (Number.isNaN(d.valueOf())) return null;
   return new Intl.DateTimeFormat("en-GB", {
-    year: "numeric",
-    month: "short",
     day: "2-digit",
+    month: "short",
+    year: "numeric",
   }).format(d);
 }
 
-export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
-  const {
-    title = "",
-    subtitle,
-    category,
-    date,
-    readTime,
-    coverImage,
-    coverAspect = "book",
-  } = props;
-
-  const dateLabel = formatDate(date);
-  const readLabel =
+export default function ArticleHero({
+  title,
+  subtitle,
+  category,
+  date,
+  readTime,
+  coverImage,
+  coverAspect = "book",
+  coverFit = "contain",
+}: ArticleHeroProps): JSX.Element {
+  const dateText = formatDate(date);
+  const readText =
     typeof readTime === "number"
       ? `${readTime} min read`
       : typeof readTime === "string" && readTime.trim()
       ? readTime
       : null;
 
-  const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
+  const metaParts = [dateText, readText].filter(Boolean);
+  const metaText = metaParts.join(" • ");
+
+  const hasCover = typeof coverImage === "string" && coverImage.trim().length > 0;
 
   return (
     <section
       className={clsx(
-        "border-b border-white/10 bg-gradient-to-b",
-        "from-black via-[#050608] to-[#050608]",
+        "border-b border-white/10",
+        "bg-[radial-gradient(circle_at_top,rgba(214,178,106,0.18),transparent_55%),#050608]",
       )}
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 pt-10 md:flex-row md:items-start md:pb-12 md:pt-12 lg:px-0">
-        {/* LEFT: copy */}
-        <div className="flex-1">
+      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-4 pb-10 pt-10 md:flex-row md:items-center md:gap-12 md:pb-12 md:pt-14 lg:px-0">
+        {/* LEFT: text */}
+        <div className="flex-1 space-y-4">
           {category && (
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-softGold/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80">
               {category}
             </p>
           )}
 
-          <h1 className="font-serif text-[clamp(2.1rem,3.2vw,3rem)] font-semibold leading-tight text-cream">
+          <h1 className="font-serif text-3xl leading-tight text-cream sm:text-4xl md:text-[2.6rem]">
             {title}
           </h1>
 
           {subtitle && (
-            <p className="mt-4 max-w-xl text-sm md:text-base text-slate-200/90 leading-relaxed">
+            <p className="max-w-prose text-sm sm:text-base text-gray-200/95">
               {subtitle}
             </p>
           )}
 
-          {metaBits && (
-            <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-              {metaBits}
+          {metaText && (
+            <p className="pt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
+              {metaText}
             </p>
           )}
         </div>
 
-        {/* RIGHT: controlled cover frame */}
-        {coverImage && (
-          <div className="w-full max-w-md md:flex-1 md:max-w-sm">
+        {/* RIGHT: controlled cover */}
+        {hasCover && (
+          <div className="flex-1 md:flex md:justify-end">
             <CoverFrame
               src={coverImage}
-              alt={title}
+              alt={title ?? "Article cover"}
               aspect={coverAspect}
-              priority
+              fit={coverFit}
             />
           </div>
         )}

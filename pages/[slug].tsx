@@ -1,305 +1,177 @@
 // pages/[slug].tsx
-// Dynamic blog post route – reads MDX from content/posts (or Posts/blog)
-// and works both locally (Windows) and on Netlify (Linux).
-
-import type {
-  GetStaticPaths,
-  GetStaticProps,
-  InferGetStaticPropsType,
-} from "next";
+import * as React from "react";
 import Head from "next/head";
-import Image from "next/image";
-import Layout from "@/components/Layout";
-
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
-
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { mdxComponents } from "@/components/mdx-components";
 
-type FrontMatter = {
-  type?: string;
-  title?: string;
-  slug?: string;
-  date?: string | Date;
-  author?: string;
-  excerpt?: string;
-  readTime?: string;
-  category?: string;
-  tags?: string[];
-  coverImage?: string;
-  [key: string]: unknown;
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import ArticleHero from "@/components/ArticleHero";
+
+type PageMeta = PostMeta & {
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
 };
 
-type PostPageProps = {
-  slug: string;
-  frontMatter: {
-    title: string;
-    slug: string;
-    date: string | null;
-    author: string | null;
-    excerpt: string | null;
-    readTime: string | null;
-    category: string | null;
-    tags: string[] | null;
-    coverImage: string | null;
-  };
-  mdxSource: MDXRemoteSerializeResult | null;
-  content: string | null;
+type PageProps = {
+  meta: PageMeta;
+  mdxSource: MDXRemoteSerializeResult;
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Helpers: robustly locate the posts directory                              */
-/* -------------------------------------------------------------------------- */
+const COLLECTION_KEY = "pages";
 
-function resolvePostsDir(): string | null {
-  const contentRoot = path.join(process.cwd(), "content");
+// -----------------------------------------------------------------------------
+// Page component
+// -----------------------------------------------------------------------------
 
-  const candidates = ["posts", "Posts", "blog", "Blog"];
+function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
+  const {
+    title,
+    description,
+    excerpt,
+    category,
+    tags,
+    date,
+    readTime,
+    coverImage,
+    coverAspect,
+    coverFit,
+  } = meta;
 
-  for (const dir of candidates) {
-    const full = path.join(contentRoot, dir);
-    if (fs.existsSync(full) && fs.statSync(full).isDirectory()) {
-      console.log(`[posts] Using directory: ${full}`);
-      return full;
-    }
-  }
+  const displaySubtitle = excerpt || description || undefined;
 
-  console.warn(
-    "[posts] No posts directory found. Checked:",
-    candidates.map((d) => path.join(contentRoot, d)).join(", "),
-  );
-  return null;
-}
+  const primaryCategory =
+    category ||
+    (Array.isArray(tags) && tags.length > 0
+      ? String(tags[0])
+      : "Article");
 
-const POSTS_DIR = resolvePostsDir();
-
-function listPostFiles(): string[] {
-  if (!POSTS_DIR || !fs.existsSync(POSTS_DIR)) return [];
-  return fs
-    .readdirSync(POSTS_DIR)
-    .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
-}
-
-function readFrontMatter(filePath: string): {
-  frontMatter: FrontMatter;
-  content: string;
-} {
-  const raw = fs.readFileSync(filePath, "utf8");
-  const { data, content } = matter(raw);
-  return {
-    frontMatter: data as FrontMatter,
-    content,
-  };
-}
-
-function effectiveSlugFromFile(fileName: string): string {
-  if (!POSTS_DIR) return fileName.replace(/\.mdx?$/, "");
-  const fullPath = path.join(POSTS_DIR, fileName);
-  const { frontMatter } = readFrontMatter(fullPath);
-
-  const fmSlug =
-    typeof frontMatter.slug === "string" && frontMatter.slug.trim().length
-      ? frontMatter.slug.trim()
-      : null;
-
-  return fmSlug ?? fileName.replace(/\.mdx?$/, "");
-}
-
-function findPostFileBySlug(slug: string): string | null {
-  if (!POSTS_DIR) return null;
-  const files = listPostFiles();
-  for (const file of files) {
-    const eff = effectiveSlugFromFile(file);
-    if (eff === slug) {
-      return path.join(POSTS_DIR, file);
-    }
-  }
-  return null;
-}
-
-/* -------------------------------------------------------------------------- */
-/*  getStaticPaths                                                            */
-/* -------------------------------------------------------------------------- */
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  if (!POSTS_DIR) {
-    return {
-      paths: [],
-      fallback: "blocking",
-    };
-  }
-
-  const files = listPostFiles();
-
-  const paths = files.map((file) => ({
-    params: { slug: effectiveSlugFromFile(file) },
-  }));
-
-  console.log(
-    "[posts] getStaticPaths slugs:",
-    paths.map((p) => p.params.slug),
-  );
-
-  return {
-    paths,
-    fallback: "blocking",
-  };
-};
-
-/* -------------------------------------------------------------------------- */
-/*  getStaticProps                                                            */
-/* -------------------------------------------------------------------------- */
-
-export const getStaticProps: GetStaticProps<PostPageProps> = async (ctx) => {
-  try {
-    const slugParam = ctx.params?.slug;
-    const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam || "";
-
-    if (!slug || !POSTS_DIR) {
-      console.warn("[posts] Missing slug or POSTS_DIR");
-      return { notFound: true };
-    }
-
-    const filePath = findPostFileBySlug(slug);
-    if (!filePath) {
-      console.warn("[posts] No file found for slug:", slug);
-      return { notFound: true };
-    }
-
-    const { frontMatter, content } = readFrontMatter(filePath);
-
-    const rawDate = frontMatter.date ?? null;
-    const date =
-      rawDate instanceof Date
-        ? rawDate.toISOString()
-        : typeof rawDate === "string"
-        ? rawDate
-        : null;
-
-    const fm = {
-      title: (frontMatter.title ?? slug) as string,
-      slug,
-      date,
-      author: (frontMatter.author as string) ?? null,
-      excerpt: (frontMatter.excerpt as string) ?? null,
-      readTime: (frontMatter.readTime as string) ?? null,
-      category: (frontMatter.category as string) ?? null,
-      tags: Array.isArray(frontMatter.tags)
-        ? (frontMatter.tags as string[])
-        : null,
-      coverImage:
-        typeof frontMatter.coverImage === "string"
-          ? frontMatter.coverImage
-          : null,
-    };
-
-    let mdxSource: MDXRemoteSerializeResult | null = null;
-
-    if (content && content.trim().length) {
-      try {
-        mdxSource = await serialize(content, {
-          mdxOptions: {
-            remarkPlugins: [],
-            rehypePlugins: [],
-          },
-        });
-      } catch (err) {
-        console.error("[posts] MDX serialize failed for slug:", slug, err);
-        // Fall back to raw content rendering
-        mdxSource = null;
-      }
-    }
-
-    return {
-      props: {
-        slug,
-        frontMatter: fm,
-        mdxSource,
-        content: content || null,
-      },
-      revalidate: 3600,
-    };
-  } catch (err) {
-    console.error("[posts] getStaticProps crashed:", err);
-    // Fail safe – if something unexpected happens, don't kill the whole export
-    return { notFound: true };
-  }
-};
-
-/* -------------------------------------------------------------------------- */
-/*  Page component                                                            */
-/* -------------------------------------------------------------------------- */
-
-export default function PostPage({
-  frontMatter,
-  mdxSource,
-  content,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  const pageTitle = frontMatter.title || "Article";
+  const canonicalTitle = title || "Abraham of London";
+  const displayDescription = description || excerpt || "";
 
   return (
-    <Layout title={pageTitle}>
+    <Layout title={canonicalTitle}>
       <Head>
-        <title>{pageTitle} | Abraham of London</title>
-        {frontMatter.excerpt && (
-          <meta name="description" content={frontMatter.excerpt} />
+        <title>{canonicalTitle} | Abraham of London</title>
+        {displayDescription && (
+          <meta name="description" content={displayDescription} />
         )}
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <header className="mb-6">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
-            {frontMatter.category || "Article"}
-          </p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-deepCharcoal sm:text-4xl">
-            {frontMatter.title}
-          </h1>
-          {(frontMatter.date || frontMatter.readTime) && (
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-              {frontMatter.date && (
-                <span>
-                  <span aria-hidden>📅 </span>
-                  {new Intl.DateTimeFormat("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  }).format(new Date(frontMatter.date))}
-                </span>
-              )}
-              {frontMatter.readTime && (
-                <>
-                  <span aria-hidden>•</span>
-                  <span>{frontMatter.readTime}</span>
-                </>
-              )}
-            </div>
-          )}
-        </header>
+      <ArticleHero
+        title={title}
+        subtitle={displaySubtitle}
+        category={primaryCategory}
+        date={date}
+        readTime={readTime}
+        coverImage={coverImage as string | undefined}
+        coverAspect={coverAspect}
+        coverFit={coverFit}
+      />
 
-        {frontMatter.coverImage && (
-          <div className="mb-8 overflow-hidden rounded-2xl border border-lightGrey">
-            <Image
-              src={frontMatter.coverImage}
-              alt={frontMatter.title}
-              width={1200}
-              height={630}
-              className="h-auto w-full object-cover"
-              priority={false}
-            />
+      <main>
+        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
+          <div
+            className="
+              prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-cream
+              prose-p:text-gray-200 prose-p:leading-relaxed
+              prose-strong:text-cream prose-strong:font-semibold
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-gray-200 prose-ol:text-gray-200
+              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
+              prose-hr:border-t border-white/10
+              prose-img:rounded-xl prose-img:shadow-lg
+            "
+          >
+            <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
-        )}
-
-        <article className="prose prose-sm max-w-none text-gray-800 prose-headings:font-serif prose-a:text-forest dark:prose-invert">
-          {mdxSource ? (
-            <MDXRemote {...mdxSource} components={mdxComponents as any} />
-          ) : content ? (
-            <p>{content}</p>
-          ) : null}
         </article>
       </main>
     </Layout>
   );
 }
+
+export default ContentPage;
+
+// -----------------------------------------------------------------------------
+// SSG – paths
+// -----------------------------------------------------------------------------
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  try {
+    const items = getAllContent(COLLECTION_KEY) ?? [];
+
+    const paths =
+      items
+        .filter((item: any) => item?.slug)
+        .map((item: any) => ({
+          params: { slug: String(item.slug) },
+        })) ?? [];
+
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("Error generating static paths for /[slug]:", err);
+    return { paths: [], fallback: "blocking" };
+  }
+};
+
+// -----------------------------------------------------------------------------
+// SSG – props
+// -----------------------------------------------------------------------------
+
+export const getStaticProps: GetStaticProps<PageProps> = async ({
+  params,
+}) => {
+  try {
+    const slugParam = params?.slug;
+    const slug =
+      typeof slugParam === "string"
+        ? slugParam
+        : Array.isArray(slugParam)
+        ? slugParam[0]
+        : "";
+
+    if (!slug) return { notFound: true };
+
+    const data = getContentBySlug(COLLECTION_KEY, slug, {
+      withContent: true,
+    }) as (PageMeta & { content?: string }) | null;
+
+    if (!data) return { notFound: true };
+
+    const { content, ...meta } = data;
+
+    if (!meta.title) return { notFound: true };
+
+    const jsonSafeMeta = JSON.parse(
+      JSON.stringify(meta),
+    ) as PageMeta;
+
+    const mdxSource = await serialize(content || "", {
+      scope: jsonSafeMeta as unknown as Record<string, unknown>,
+    });
+
+    return {
+      props: {
+        meta: jsonSafeMeta,
+        mdxSource,
+      },
+      revalidate: 3600,
+    };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("Error in getStaticProps for /[slug]:", err);
+    return { notFound: true };
+  }
+};
