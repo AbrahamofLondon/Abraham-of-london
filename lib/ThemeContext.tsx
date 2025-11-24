@@ -1,38 +1,66 @@
 // lib/ThemeContext.tsx
+"use client";
+
 import * as React from "react";
 
-export type ThemeName = "light" | "dark";
+type Theme = "light" | "dark";
 
-export interface ThemeContextValue {
-  theme: ThemeName;
-  resolvedTheme: ThemeName;
-  setTheme: (theme: ThemeName) => void;
+interface ThemeContextValue {
+  theme: Theme;
+  resolvedTheme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
-const defaultValue: ThemeContextValue = {
-  theme: "dark",
-  resolvedTheme: "dark",
-  setTheme: () => {
-    // no-op – theming is disabled for now
-  },
-};
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined
+);
 
-const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = React.useState<Theme>("dark");
+  const [mounted, setMounted] = React.useState(false);
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  defaultTheme?: string;
-  storageKey?: string;
-}
+  // Initialize theme from localStorage
+  React.useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem("theme") as Theme | null;
+    if (stored === "light" || stored === "dark") {
+      setThemeState(stored);
+      document.documentElement.classList.toggle("dark", stored === "dark");
+    } else {
+      // Default to dark
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  return (
-    <ThemeContext.Provider value={defaultValue}>
-      {children}
-    </ThemeContext.Provider>
+  const setTheme = React.useCallback((newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  }, []);
+
+  const value = React.useMemo(
+    () => ({
+      theme,
+      resolvedTheme: theme,
+      setTheme,
+    }),
+    [theme, setTheme]
   );
-};
+
+  // Prevent flash of unstyled content
+  if (!mounted) {
+    return <div style={{ visibility: "hidden" }}>{children}</div>;
+  }
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+}
 
 export function useTheme(): ThemeContextValue {
-  return React.useContext(ThemeContext);
+  const context = React.useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
+  return context;
 }

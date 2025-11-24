@@ -48,12 +48,11 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
   return (
     <section
       className={clsx(
-        "border-b border-slate-200/20 dark:border-white/10",
-        "bg-white dark:bg-[#0a0b0d]",
+        "border-b border-gray-200 bg-white dark:border-white/10 dark:bg-[#0a0b0d]"
       )}
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16 md:flex-row md:items-start md:gap-16 md:py-20 lg:px-8">
-        {/* LEFT: copy - more space, better contrast */}
+        {/* LEFT: Content - More space */}
         <div className="flex-1">
           {category && (
             <p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#D6B26A]">
@@ -75,7 +74,7 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
           )}
         </div>
 
-        {/* RIGHT: smaller cover image */}
+        {/* RIGHT: Smaller cover image */}
         {coverImage && (
           <div className="w-48 shrink-0 md:w-56">
             <CoverFrame
