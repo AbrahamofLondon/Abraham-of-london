@@ -1,66 +1,66 @@
-// lib/ThemeContext.tsx
-"use client";
-
+// lib/ThemeContext.ts
 import * as React from "react";
 
-type Theme = "light" | "dark";
+export type ThemeName = "light" | "dark";
 
-interface ThemeContextValue {
-  theme: Theme;
-  resolvedTheme: Theme;
-  setTheme: (theme: Theme) => void;
+export interface ThemeContextValue {
+  theme: ThemeName;
+  resolvedTheme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
 }
 
-const ThemeContext = React.createContext<ThemeContextValue | undefined>(
-  undefined
-);
+const defaultValue: ThemeContextValue = {
+  theme: "dark",
+  resolvedTheme: "dark",
+  // No-op by default; real function is provided in the provider below
+  setTheme: () => {
+    // intentionally empty
+  },
+};
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = React.useState<Theme>("dark");
-  const [mounted, setMounted] = React.useState(false);
+const ThemeContext = React.createContext<ThemeContextValue>(defaultValue);
 
-  // Initialize theme from localStorage
+export interface ThemeProviderProps {
+  children: React.ReactNode;
+  /** Optional initial theme; defaults to "dark" */
+  defaultTheme?: ThemeName;
+  /** Kept for compatibility with old API – currently unused */
+  storageKey?: string;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = "dark",
+}) => {
+  const [theme, setTheme] = React.useState<ThemeName>(defaultTheme);
+
+  // Apply the `dark` class to <html> – this is what Tailwind uses
   React.useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored === "light" || stored === "dark") {
-      setThemeState(stored);
-      document.documentElement.classList.toggle("dark", stored === "dark");
+    if (typeof document === "undefined") return;
+
+    const root = document.documentElement;
+
+    if (theme === "dark") {
+      root.classList.add("dark");
     } else {
-      // Default to dark
-      document.documentElement.classList.add("dark");
+      root.classList.remove("dark");
     }
-  }, []);
+  }, [theme]);
 
-  const setTheme = React.useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-  }, []);
-
-  const value = React.useMemo(
+  const value = React.useMemo<ThemeContextValue>(
     () => ({
       theme,
       resolvedTheme: theme,
       setTheme,
     }),
-    [theme, setTheme]
+    [theme],
   );
-
-  // Prevent flash of unstyled content
-  if (!mounted) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>;
-  }
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
-}
+};
 
 export function useTheme(): ThemeContextValue {
-  const context = React.useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
-  }
-  return context;
+  return React.useContext(ThemeContext);
 }
