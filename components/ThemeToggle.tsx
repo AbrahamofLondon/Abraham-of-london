@@ -1,191 +1,83 @@
-// components/ThemeToggle.tsx
-"use client";
-
+// lib/ThemeContext.tsx
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon, Sparkles } from "lucide-react";
 
-import { useTheme } from "@/lib/ThemeContext";
+export type ThemeName = "light" | "dark";
 
-interface ThemeToggleProps {
-  className?: string;
-  size?: "sm" | "md" | "lg";
+export interface ThemeContextValue {
+  theme: ThemeName;
+  resolvedTheme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
 }
 
-export default function ThemeToggle({
-  className = "",
-  size = "md",
-}: ThemeToggleProps): JSX.Element {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
+const ThemeContext = React.createContext<ThemeContextValue>({
+  theme: "dark",
+  resolvedTheme: "dark",
+  setTheme: () => {
+    // noop default
+  },
+});
 
-  // Avoid hydration mismatch by waiting for client
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: ThemeName;
+  storageKey?: string;
+}
+
+const STORAGE_KEY_FALLBACK = "aol-theme";
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = "dark",
+  storageKey = STORAGE_KEY_FALLBACK,
+}) => {
+  const [theme, setThemeState] = React.useState<ThemeName>(defaultTheme);
+
+  // On mount: read from localStorage, or use defaultTheme
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (typeof window === "undefined" || typeof document === "undefined") return;
 
-  const isDark = mounted ? resolvedTheme === "dark" : true;
+    const stored = window.localStorage.getItem(storageKey);
+    let initial: ThemeName = defaultTheme;
 
-  const sizeClasses: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
-    sm: "w-12 h-6",
-    md: "w-16 h-8",
-    lg: "w-20 h-10",
-  };
+    if (stored === "light" || stored === "dark") {
+      initial = stored;
+    }
 
-  const iconSizes: Record<NonNullable<ThemeToggleProps["size"]>, number> = {
-    sm: 12,
-    md: 16,
-    lg: 20,
-  };
+    setThemeState(initial);
 
-  const toggleTheme = React.useCallback(() => {
-    setTheme(isDark ? "light" : "dark");
-  }, [isDark, setTheme]);
+    const root = document.documentElement;
+    if (initial === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [defaultTheme, storageKey]);
 
-  return (
-    <motion.button
-      className={`
-        relative ${sizeClasses[size]} rounded-full border-2 border-gold/30 
-        bg-gradient-to-br from-charcoal/80 to-charcoal shadow-lg 
-        backdrop-blur-sm transition-all duration-500 
-        hover:border-gold/60 hover:shadow-xl
-        focus:outline-none focus:ring-2 focus:ring-gold/50 focus:ring-offset-2 focus:ring-offset-charcoal
-        ${className}
-      `}
-      onClick={toggleTheme}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      whileTap={{ scale: 0.95 }}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      type="button"
-    >
-      {/* Background gradient */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold/10 via-transparent to-gold/5 opacity-0 transition-opacity duration-500 hover:opacity-100" />
+  const setTheme = React.useCallback(
+    (next: ThemeName) => {
+      setThemeState(next);
+      if (typeof window === "undefined" || typeof document === "undefined") return;
 
-      {/* Track */}
-      <div className="relative h-full w-full overflow-hidden rounded-full">
-        {/* Animated background particles */}
-        <AnimatePresence>
-          {isHovered && (
-            <>
-              <motion.div
-                className="absolute top-1 left-2 h-1 w-1 rounded-full bg-gold"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.1 }}
-              />
-              <motion.div
-                className="absolute bottom-2 right-4 h-0.5 w-0.5 rounded-full bg-gold"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.2 }}
-              />
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Thumb */}
-        <motion.div
-          className={`
-            absolute top-1/2 -translate-y-1/2
-            flex items-center justify-center
-            rounded-full bg-gradient-to-br from-gold to-amber-200
-            shadow-lg
-            ${
-              size === "sm"
-                ? "h-4 w-4"
-                : size === "md"
-                ? "h-6 w-6"
-                : "h-8 w-8"
-            }
-          `}
-          initial={false}
-          animate={{
-            x: isDark
-              ? size === "sm"
-                ? 2
-                : size === "md"
-                ? 4
-                : 6
-              : size === "sm"
-              ? 26
-              : size === "md"
-              ? 34
-              : 42,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 30,
-          }}
-        >
-          {/* Sparkle effect */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Sparkles
-                  size={iconSizes[size] - 8}
-                  className="text-charcoal/80"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Sun/Moon Icons */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isDark ? "moon" : "sun"}
-              initial={{ scale: 0, rotate: -90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, rotate: 90 }}
-              transition={{ duration: 0.2 }}
-              className="absolute"
-            >
-              {isDark ? (
-                <Moon
-                  size={iconSizes[size] - 4}
-                  className="text-charcoal"
-                  fill="currentColor"
-                />
-              ) : (
-                <Sun size={iconSizes[size] - 4} className="text-charcoal" />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Background stars for dark mode */}
-        <AnimatePresence>
-          {isDark && (
-            <motion.div
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="absolute top-1 left-4 h-0.5 w-0.5 rounded-full bg-gold/60" />
-              <div className="absolute top-3 right-2 h-0.5 w-0.5 rounded-full bg-gold/40" />
-              <div className="absolute bottom-2 left-6 h-0.5 w-0.5 rounded-full bg-gold/50" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Hover glow effect */}
-      <motion.div
-        className="absolute inset-0 rounded-full bg-gold/20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
-      />
-    </motion.button>
+      const root = document.documentElement;
+      if (next === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+      window.localStorage.setItem(storageKey, next);
+    },
+    [storageKey],
   );
+
+  const value: ThemeContextValue = {
+    theme,
+    resolvedTheme: theme,
+    setTheme,
+  };
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+};
+
+export function useTheme(): ThemeContextValue {
+  return React.useContext(ThemeContext);
 }

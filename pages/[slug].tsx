@@ -65,7 +65,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         )}
       </Head>
 
-      {/* Shared article hero */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -77,23 +76,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
-      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          <div
-            className="
-              prose prose-lg max-w-none
-              prose-headings:font-serif
-              prose-headings:text-slate-100
-              prose-p:text-slate-100 prose-p:leading-relaxed
-              prose-strong:text-slate-100 prose-strong:font-semibold
-              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-slate-100 prose-ol:text-slate-100
-              prose-blockquote:border-l-softGold prose-blockquote:text-slate-100
-              prose-hr:border-t border-white/10
-              prose-img:rounded-xl prose-img:shadow-lg
-            "
-          >
+          <div className="prose prose-lg max-w-none prose-img:rounded-xl prose-img:shadow-lg">
             <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
         </article>
@@ -114,8 +99,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     // Gather slugs from Post, Print, Resource
     for (const key of COLLECTIONS) {
-      const items = getAllContent(key) ?? [];
-      allItems.push(...items);
+      try {
+        const items = getAllContent(key) ?? [];
+        allItems.push(...items);
+      } catch {
+        // if lib/mdx throws for a collection key, ignore and move on
+      }
     }
 
     const seen = new Set<string>();
@@ -161,13 +150,17 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     // Try Post first, then Print, then Resource
     for (const key of COLLECTIONS) {
-      const candidate = getContentBySlug(key, slug, {
-        withContent: true,
-      }) as (PageMeta & { content?: string }) | null;
+      try {
+        const candidate = getContentBySlug(key, slug, {
+          withContent: true,
+        }) as (PageMeta & { content?: string }) | null;
 
-      if (candidate) {
-        data = candidate;
-        break;
+        if (candidate) {
+          data = candidate;
+          break;
+        }
+      } catch {
+        // lib/mdx may throw for unknown collection keys – ignore
       }
     }
 

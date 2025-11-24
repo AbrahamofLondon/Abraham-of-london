@@ -6,39 +6,20 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* Luxury Theme Tokens                                                        */
+/* BASE TOKENS – SINGLE, HIGH-CONTRAST DARK THEME                             */
 /* -------------------------------------------------------------------------- */
 
 :root {
-  /* Dark theme (default) */
-  --color-background: #050608;
-  --color-foreground: #ffffff;
-  --color-soft-gold: #d6b26a;
-  --color-deep-charcoal: #0b0d10;
-  --color-charcoal: #15171c;
-  --color-forest: #0e3b33;
-  --shadow-soft-elevated: 0 10px 28px rgba(0, 0, 0, 0.45);
-
-  /* Legacy tokens */
-  --color-bg: #050608;
-  --color-bg-muted: #0b0d10;
-  --color-fg: #ffffff;
-  --color-softGold: #d6b26a;
-  --color-deepCharcoal: #0b0d10;
-  --color-cream: #fdfaf5;
-}
-
-/* Light mode override */
-html:not(.dark) {
-  --color-background: #ffffff;
-  --color-foreground: #111827;
-  --color-bg: #ffffff;
-  --color-bg-muted: #f3f4f6;
-  --color-fg: #111827;
+  --aol-bg: #050608;          /* deep cinematic background */
+  --aol-surface: #0b0d10;
+  --aol-text: #f9fafb;        /* near-white */
+  --aol-muted: #cbd5f5;
+  --aol-softGold: #d6b26a;
+  --aol-border-subtle: rgba(148, 163, 184, 0.35);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Base reset                                                                 */
+/* RESET & BASE                                                               */
 /* -------------------------------------------------------------------------- */
 
 *,
@@ -54,42 +35,19 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--aol-bg);
+  color: var(--aol-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* DARK MODE BODY */
-html.dark body {
-  background:
-    radial-gradient(circle at top, rgba(214, 178, 106, 0.08), transparent 55%),
-    radial-gradient(circle at bottom, rgba(14, 59, 51, 0.20), #050608);
-  color: #ffffff;
-}
-
-/* LIGHT MODE BODY - CRITICAL FIX */
-html:not(.dark) body {
-  background: #ffffff;
-  color: #111827;
-}
-
-/* Text selection */
-::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: #ffffff;
-}
-
-html:not(.dark) ::selection {
-  background-color: rgba(214, 178, 106, 0.35);
-  color: #111827;
-}
-
-/* Make sure main uses the body background by default */
 main {
   min-height: 100vh;
 }
 
-/* Generic media normalisation */
+/* Media */
 img,
 picture,
 video,
@@ -108,49 +66,38 @@ a {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--color-soft-gold);
+  outline: 2px solid var(--aol-softGold);
   outline-offset: 2px;
 }
 
+/* Text selection */
+::selection {
+  background-color: rgba(214, 178, 106, 0.35);
+  color: #0b0d10;
+}
+
 /* -------------------------------------------------------------------------- */
-/* Layout Shell & Cards                                                       */
+/* PAGE SHELL & CARDS                                                         */
 /* -------------------------------------------------------------------------- */
 
-/* Page shell - DARK mode */
-html.dark .page-shell {
+.page-shell {
   min-height: 100vh;
-  color: #ffffff;
+  color: var(--aol-text);
   background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.12), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.28), #050608);
+    radial-gradient(circle at top left, rgba(214, 178, 106, 0.18), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.36), #050608);
 }
 
-/* Page shell - LIGHT mode */
-html:not(.dark) .page-shell {
-  background-color: #ffffff;
-  color: #111827;
-}
-
-/* Section divider */
 .section-divider {
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  border-top: 1px solid var(--aol-border-subtle);
 }
 
-/* Luxury cards - DARK mode */
-html.dark .lux-card {
+.lux-card {
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background-color: rgba(15, 23, 42, 0.75);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px);
-}
-
-/* Luxury cards - LIGHT mode */
-html:not(.dark) .lux-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(214, 178, 106, 0.25);
-  background-color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
 }
 
 .lux-card-hover {
@@ -160,65 +107,36 @@ html:not(.dark) .lux-card {
     border-color 0.25s ease;
 }
 
-html.dark .lux-card-hover:hover {
+.lux-card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
-  border-color: rgba(214, 178, 106, 0.4);
-}
-
-html:not(.dark) .lux-card-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8);
   border-color: rgba(214, 178, 106, 0.5);
 }
 
-/* Filter pills - DARK mode */
-html.dark .lux-pill {
+/* Pills */
+.lux-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(15, 23, 42, 0.9);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  color: #f9fafb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(12px);
-}
-
-/* Filter pills - LIGHT mode */
-html:not(.dark) .lux-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(214, 178, 106, 0.3);
-  background-color: #f9fafb;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #111827;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .lux-pill-active {
   border-color: rgba(214, 178, 106, 0.8);
-  background-color: #d6b26a;
+  background-color: var(--aol-softGold);
   color: #111827;
-  box-shadow: 0 10px 26px rgba(214, 178, 106, 0.35);
-}
-
-/* Hero vignette - DARK mode only */
-html.dark .hero-vignette {
-  background:
-    radial-gradient(circle at top left, rgba(214, 178, 106, 0.14), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.32), #050608);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Typography                                                                 */
+/* TYPOGRAPHY                                                                 */
 /* -------------------------------------------------------------------------- */
 
 h1,
@@ -227,196 +145,96 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   font-weight: 700;
+  color: #fefce8;
 }
 
-/* CRITICAL FIX: Better contrast for dark mode */
-html.dark p {
-  color: #f3f4f6;
-}
-
-html:not(.dark) p {
-  color: #374151;
+p {
+  color: #e5e7eb;
 }
 
 /* -------------------------------------------------------------------------- */
-/* High-End Prose for MDX                                                     */
+/* MDX / PROSE                                                                */
 /* -------------------------------------------------------------------------- */
 
-/* DARK MODE PROSE */
-html.dark .prose-lux {
+.prose {
   max-width: none;
-  color: #f3f4f6;
+  color: #e5e7eb;
   font-size: 1.0625rem;
   line-height: 1.75;
 }
 
-html.dark .prose-lux p,
-html.dark .prose-lux li {
-  color: #f3f4f6;
+.prose p,
+.prose li {
+  color: #e5e7eb;
   line-height: 1.75;
 }
 
-html.dark .prose-lux h1,
-html.dark .prose-lux h2,
-html.dark .prose-lux h3,
-html.dark .prose-lux h4 {
-  color: #ffffff;
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: #fefce8;
   letter-spacing: -0.03em;
   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-html.dark .prose-lux strong {
-  color: #ffffff;
+.prose strong {
+  color: #fefce8;
   font-weight: 600;
 }
 
-html.dark .prose-lux em {
-  color: #f9fafb;
-}
-
-html.dark .prose-lux a {
-  color: var(--color-soft-gold);
-  text-decoration: none;
+.prose a {
+  color: var(--aol-softGold);
   font-weight: 500;
+  text-decoration: none;
 }
 
-html.dark .prose-lux a:hover {
+.prose a:hover {
   color: #fefce8;
   text-decoration: underline;
 }
 
-html.dark .prose-lux blockquote {
-  border-left: 4px solid rgba(214, 178, 106, 0.8);
-  background-color: rgba(15, 23, 42, 0.65);
-  color: #ffffff;
+.prose blockquote {
+  border-left: 4px solid rgba(214, 178, 106, 0.9);
+  background-color: rgba(15, 23, 42, 0.8);
+  color: #f9fafb;
   padding: 0.75rem 0.75rem 0.75rem 1rem;
   margin: 1.75rem 0;
   border-radius: 0 1rem 1rem 0;
-  box-shadow: var(--shadow-soft-elevated);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
 }
 
-html.dark .prose-lux code {
-  color: var(--color-soft-gold);
-  background-color: rgba(0, 0, 0, 0.45);
-  border-radius: 999px;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.85em;
+.prose ul li::marker,
+.prose ol li::marker {
+  color: var(--aol-softGold);
 }
 
-html.dark .prose-lux pre {
-  background-color: rgba(0, 0, 0, 0.72);
-  color: #ffffff;
-  border-radius: 1.25rem;
-  padding: 1rem 1.5rem;
-  box-shadow: var(--shadow-soft-elevated);
-}
-
-/* LIGHT MODE PROSE */
-html:not(.dark) .prose-lux {
-  max-width: none;
-  color: #374151;
-  font-size: 1.0625rem;
-  line-height: 1.75;
-}
-
-html:not(.dark) .prose-lux p,
-html:not(.dark) .prose-lux li {
-  color: #374151;
-  line-height: 1.75;
-}
-
-html:not(.dark) .prose-lux h1,
-html:not(.dark) .prose-lux h2,
-html:not(.dark) .prose-lux h3,
-html:not(.dark) .prose-lux h4 {
-  color: #111827;
-  letter-spacing: -0.03em;
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
-html:not(.dark) .prose-lux strong {
-  color: #111827;
-  font-weight: 600;
-}
-
-html:not(.dark) .prose-lux a {
-  color: #92400e;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-html:not(.dark) .prose-lux a:hover {
-  color: var(--color-soft-gold);
-  text-decoration: underline;
-}
-
-html:not(.dark) .prose-lux blockquote {
-  border-left: 4px solid var(--color-soft-gold);
-  background-color: #f9fafb;
-  color: #374151;
-  padding: 0.75rem 0.75rem 0.75rem 1rem;
-  margin: 1.75rem 0;
-  border-radius: 0 1rem 1rem 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-}
-
-html:not(.dark) .prose-lux code {
-  color: #92400e;
-  background-color: #fef3c7;
-  border-radius: 999px;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.85em;
-}
-
-html:not(.dark) .prose-lux pre {
-  background-color: #1f2937;
-  color: #f3f4f6;
-  border-radius: 1.25rem;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.prose-lux h1 {
-  font-size: clamp(2.25rem, 3vw, 3rem);
-  margin-bottom: 1.5rem;
-}
-
-.prose-lux h2 {
-  font-size: clamp(1.75rem, 2.4vw, 2.25rem);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.prose-lux h3 {
-  font-size: clamp(1.4rem, 2vw, 1.7rem);
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-.prose-lux h4 {
-  font-size: 1.1rem;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.prose-lux ul li::marker,
-.prose-lux ol li::marker {
-  color: var(--color-soft-gold);
-}
-
-.prose-lux hr {
+.prose hr {
   border-color: #374151;
   margin: 2.5rem 0;
 }
 
-html:not(.dark) .prose-lux hr {
-  border-color: #e5e7eb;
+.prose code {
+  color: var(--aol-softGold);
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85em;
+}
+
+.prose pre {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #f9fafb;
+  border-radius: 1.25rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
 /* -------------------------------------------------------------------------- */
-/* Header interaction                                                         */
+/* HEADER UTIL                                                                */
 /* -------------------------------------------------------------------------- */
 
 body.has-fixed-header main {
@@ -424,7 +242,7 @@ body.has-fixed-header main {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Print & Reduced Motion                                                     */
+/* PRINT & REDUCED MOTION                                                     */
 /* -------------------------------------------------------------------------- */
 
 @media print {
