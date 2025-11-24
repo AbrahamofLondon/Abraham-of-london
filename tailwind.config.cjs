@@ -10,10 +10,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Defined colors for use in utility classes
         softGold: "#d6b26a",
         deepCharcoal: "#0b0d10",
         charcoal: "#15171c",
         forest: "#0e3b33",
+        // Using semantic names to be consistent with the CSS variables
+        'aol-bg': 'var(--aol-bg)', 
+        'aol-surface': 'var(--aol-surface)',
+        'aol-text': 'var(--aol-text)',
       },
       fontFamily: {
         sans: [
@@ -30,95 +35,65 @@ module.exports = {
         "glow-gold": "0 10px 40px rgba(214, 178, 106, 0.3)",
       },
       backgroundImage: {
+        // Keeping the gradient for dark mode utility classes
         "luxury-diagonal":
           "radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%), radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608)",
       },
+      // --- TYPOGRAPHY FIX: Use simple contrast classes and let global CSS handle theme colors ---
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
             maxWidth: "none",
-            color: theme("colors.gray.800"),
-            p: { color: theme("colors.gray.800") },
-            li: { color: theme("colors.gray.800") },
+            // General text color should inherit from the body (which uses --aol-text)
+            color: theme("colors.gray.900"), // Default dark for light mode
+            'p, li, em': { color: theme("colors.gray.900") },
             strong: {
-              color: theme("colors.gray.900"),
+              color: theme("colors.black"),
               fontWeight: 600,
             },
-            em: { color: theme("colors.gray.800") },
-            h1: {
-              color: theme("colors.gray.900"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
-            h2: {
-              color: theme("colors.gray.900"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
-            h3: {
-              color: theme("colors.gray.900"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
-            h4: {
-              color: theme("colors.gray.900"),
+            'h1, h2, h3, h4': {
+              color: theme("colors.black"),
               fontFamily: theme("fontFamily.serif").join(","),
             },
             a: {
-              color: theme("colors.indigo.700"),
+              color: theme("colors.softGold"), // Using defined softGold
               textDecoration: "none",
               fontWeight: "500",
               "&:hover": {
-                color: theme("colors.indigo.900"),
+                color: theme("colors.deepCharcoal"), // Dark text on hover in light mode
                 textDecoration: "underline",
               },
             },
             blockquote: {
               color: theme("colors.gray.800"),
-              borderLeftColor: theme("colors.gray.300"),
+              borderLeftColor: theme("colors.softGold"),
               backgroundColor: theme("colors.gray.50"),
             },
             "ul > li::marker, ol > li::marker": {
-              color: theme("colors.gray.500"),
+              color: theme("colors.softGold"),
             },
             hr: {
               borderColor: theme("colors.gray.200"),
             },
-            code: {
-              color: theme("colors.pink.700"),
-              backgroundColor: theme("colors.gray.100"),
-            },
-            pre: {
-              backgroundColor: theme("colors.gray.900"),
-              color: theme("colors.gray.100"),
+            'code, pre': {
+              color: theme("colors.deepCharcoal"), 
+              backgroundColor: theme("colors.gray.100"), 
             },
           },
         },
+        // --- INVERT FIX: Adjust colors to dark mode friendly but still generic ---
         invert: {
           css: {
             maxWidth: "none",
-            color: theme("colors.slate.100"),
-            p: { color: theme("colors.slate.100") },
-            li: { color: theme("colors.slate.100") },
-            strong: { color: theme("colors.slate.50") },
-            em: { color: theme("colors.slate.100") },
-            h1: {
+            // General text color for dark mode
+            'color, p, li, em': { color: theme("colors.slate.100") }, 
+            strong: { color: theme("colors.white") },
+            'h1, h2, h3, h4': {
               color: theme("colors.white"),
               fontFamily: theme("fontFamily.serif").join(","),
             },
-            h2: {
-              color: theme("colors.slate.50"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
-            h3: {
-              color: theme("colors.slate.50"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
-            h4: {
-              color: theme("colors.slate.50"),
-              fontFamily: theme("fontFamily.serif").join(","),
-            },
             a: {
-              color: theme("colors.softGold"),
-              textDecoration: "none",
-              fontWeight: "500",
+              color: theme("colors.softGold"), // Gold link for dark mode
               "&:hover": {
                 color: theme("colors.amber.200"),
                 textDecoration: "underline",
@@ -127,7 +102,7 @@ module.exports = {
             blockquote: {
               color: theme("colors.slate.100"),
               borderLeftColor: theme("colors.softGold"),
-              backgroundColor: "rgba(255, 255, 255, 0.03)",
+              backgroundColor: "rgba(255, 255, 255, 0.05)", // Increased transparency for clean look
             },
             "ul > li::marker, ol > li::marker": {
               color: theme("colors.softGold"),
@@ -137,10 +112,10 @@ module.exports = {
             },
             code: {
               color: theme("colors.softGold"),
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backgroundColor: "rgba(255, 255, 255, 0.08)", // Light background for contrast
             },
             pre: {
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              backgroundColor: "rgba(0, 0, 0, 0.6)", // Slightly lighter background for pre to avoid pitch black
               color: theme("colors.slate.100"),
             },
           },
