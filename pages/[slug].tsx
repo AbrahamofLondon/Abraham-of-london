@@ -14,9 +14,12 @@ import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 
+type CoverAspect = "book" | "wide" | "square";
+type CoverFit = "cover" | "contain";
+
 type PageMeta = PostMeta & {
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
+  coverAspect?: CoverAspect;
+  coverFit?: CoverFit;
 };
 
 type PageProps = {
@@ -26,12 +29,16 @@ type PageProps = {
 
 const COLLECTION_KEY = "pages";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
+
 // -----------------------------------------------------------------------------
 // Page component
 // -----------------------------------------------------------------------------
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   const {
+    slug,
     title,
     description,
     excerpt,
@@ -48,12 +55,12 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0
-      ? String(tags[0])
-      : "Article");
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
 
   const canonicalTitle = title || "Abraham of London";
   const displayDescription = description || excerpt || "";
+  const canonicalPath = slug ? `/${slug}` : "";
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
 
   return (
     <Layout title={canonicalTitle}>
@@ -61,6 +68,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         <title>{canonicalTitle} | Abraham of London</title>
         {displayDescription && (
           <meta name="description" content={displayDescription} />
+        )}
+        {canonicalPath && (
+          <link rel="canonical" href={canonicalUrl} />
         )}
       </Head>
 
@@ -78,17 +88,17 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
-            className="
-              prose prose-lg max-w-none
+            className={`
+              prose prose-lg prose-invert prose-lux max-w-none
               prose-headings:font-serif prose-headings:text-cream
-              prose-p:text-gray-200 prose-p:leading-relaxed
+              prose-p:text-slate-100 prose-p:leading-relaxed
               prose-strong:text-cream prose-strong:font-semibold
               prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-gray-200 prose-ol:text-gray-200
-              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
-              prose-hr:border-t border-white/10
+              prose-ul:text-slate-100 prose-ol:text-slate-100
+              prose-blockquote:border-l-softGold prose-blockquote:text-slate-100
+              prose-hr:border-t prose-hr:border-white/10
               prose-img:rounded-xl prose-img:shadow-lg
-            "
+            `}
           >
             <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
@@ -130,9 +140,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // SSG – props
 // -----------------------------------------------------------------------------
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({
-  params,
-}) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slugParam = params?.slug;
     const slug =
@@ -150,21 +158,20 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({
 
     if (!data) return { notFound: true };
 
-    const { content, ...meta } = data;
+    const { content = "", ...meta } = data;
 
     if (!meta.title) return { notFound: true };
 
-    const jsonSafeMeta = JSON.parse(
-      JSON.stringify(meta),
-    ) as PageMeta;
+    // Ensure meta is JSON-serialisable
+    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
-    const mdxSource = await serialize(content || "", {
+    const mdxSource = await serialize(content, {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
     });
 
     return {
       props: {
-        meta: jsonSafeMeta,
+        meta: { ...jsonSafeMeta, slug },
         mdxSource,
       },
       revalidate: 3600,
