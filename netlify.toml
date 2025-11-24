@@ -1,3 +1,5 @@
+# netlify.toml
+
 [build]
   command = "pnpm run build:netlify"
   publish = ".next"
@@ -15,7 +17,10 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Security headers
+# ✅ NO manual page redirects to .html
+# Next.js plugin will wire up SSR/ISR/dynamic routes correctly.
+
+# Security headers (fine to keep)
 [[headers]]
   for = "/*"
   [headers.values]
@@ -23,7 +28,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache static assets
+# Cache static assets (also fine)
 [[headers]]
   for = "/_next/static/*"
   [headers.values]

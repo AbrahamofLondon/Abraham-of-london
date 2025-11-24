@@ -7,81 +7,65 @@ import { Sun, Moon, Sparkles } from "lucide-react";
 
 import { useTheme } from "@/lib/ThemeContext";
 
-export interface ThemeToggleProps {
+interface ThemeToggleProps {
   className?: string;
   size?: "sm" | "md" | "lg";
 }
 
-const SIZE_CLASSES: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
-  sm: "w-12 h-6",
-  md: "w-16 h-8",
-  lg: "w-20 h-10",
-};
-
-const ICON_SIZES: Record<NonNullable<ThemeToggleProps["size"]>, number> = {
-  sm: 12,
-  md: 16,
-  lg: 20,
-};
-
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({
+export default function ThemeToggle({
   className = "",
   size = "md",
-}: ThemeToggleProps) => {
+}: ThemeToggleProps): JSX.Element {
   const { resolvedTheme, setTheme } = useTheme();
-
   const [isHovered, setIsHovered] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
-  // Avoid hydration mismatch – only trust resolvedTheme on client
+  // Avoid hydration mismatch by waiting for client
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
+  const sizeClasses: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
+    sm: "w-12 h-6",
+    md: "w-16 h-8",
+    lg: "w-20 h-10",
+  };
+
+  const iconSizes: Record<NonNullable<ThemeToggleProps["size"]>, number> = {
+    sm: 12,
+    md: 16,
+    lg: 20,
+  };
+
   const toggleTheme = React.useCallback(() => {
     setTheme(isDark ? "light" : "dark");
   }, [isDark, setTheme]);
 
-  const thumbTranslateX = isDark
-    ? size === "sm"
-      ? 2
-      : size === "md"
-      ? 4
-      : 6
-    : size === "sm"
-    ? 26
-    : size === "md"
-    ? 34
-    : 42;
-
-  const thumbSizeClass =
-    size === "sm" ? "h-4 w-4" : size === "md" ? "h-6 w-6" : "h-8 w-8";
-
   return (
     <motion.button
-      type="button"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className={`
+        relative ${sizeClasses[size]} rounded-full border-2 border-softGold/30 
+        bg-gradient-to-br from-charcoal/80 to-charcoal shadow-lg 
+        backdrop-blur-sm transition-all duration-500 
+        hover:border-softGold/60 hover:shadow-xl
+        focus:outline-none focus:ring-2 focus:ring-softGold/50 focus:ring-offset-2 focus:ring-offset-charcoal
+        ${className}
+      `}
       onClick={toggleTheme}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       whileTap={{ scale: 0.95 }}
-      className={`
-        relative ${SIZE_CLASSES[size]} rounded-full border-2 border-softGold/30 
-        bg-gradient-to-br from-charcoal/80 to-charcoal shadow-lg 
-        backdrop-blur-sm transition-all duration-500 
-        hover:border-softGold/60 hover:shadow-xl
-        focus:outline-none focus:ring-2 focus:ring-softGold/50 
-        focus:ring-offset-2 focus:ring-offset-charcoal
-        ${className}
-      `}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      type="button"
     >
-      {/* Background gradient accent */}
+      {/* Background gradient */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-softGold/10 via-transparent to-softGold/5 opacity-0 transition-opacity duration-500 hover:opacity-100" />
 
+      {/* Track */}
       <div className="relative h-full w-full overflow-hidden rounded-full">
-        {/* Small particles on hover */}
+        {/* Animated background particles */}
         <AnimatePresence>
           {isHovered && (
             <>
@@ -110,13 +94,35 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
             flex items-center justify-center
             rounded-full bg-gradient-to-br from-softGold to-amber-200
             shadow-lg
-            ${thumbSizeClass}
+            ${
+              size === "sm"
+                ? "h-4 w-4"
+                : size === "md"
+                ? "h-6 w-6"
+                : "h-8 w-8"
+            }
           `}
           initial={false}
-          animate={{ x: thumbTranslateX }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          animate={{
+            x: isDark
+              ? size === "sm"
+                ? 2
+                : size === "md"
+                ? 4
+                : 6
+              : size === "sm"
+              ? 26
+              : size === "md"
+              ? 34
+              : 42,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 30,
+          }}
         >
-          {/* Sparkle on hover */}
+          {/* Sparkle effect */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
@@ -126,14 +132,14 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
                 transition={{ duration: 0.3 }}
               >
                 <Sparkles
-                  size={ICON_SIZES[size] - 8}
+                  size={iconSizes[size] - 8}
                   className="text-charcoal/80"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Icon */}
+          {/* Sun/Moon Icons */}
           <AnimatePresence mode="wait">
             <motion.div
               key={isDark ? "moon" : "sun"}
@@ -145,21 +151,18 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
             >
               {isDark ? (
                 <Moon
-                  size={ICON_SIZES[size] - 4}
+                  size={iconSizes[size] - 4}
                   className="text-charcoal"
                   fill="currentColor"
                 />
               ) : (
-                <Sun
-                  size={ICON_SIZES[size] - 4}
-                  className="text-charcoal"
-                />
+                <Sun size={iconSizes[size] - 4} className="text-charcoal" />
               )}
             </motion.div>
           </AnimatePresence>
         </motion.div>
 
-        {/* Stars in dark mode */}
+        {/* Background stars for dark mode */}
         <AnimatePresence>
           {isDark && (
             <motion.div
@@ -176,7 +179,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Hover glow */}
+      {/* Hover glow effect */}
       <motion.div
         className="absolute inset-0 rounded-full bg-softGold/20"
         initial={{ opacity: 0 }}
@@ -185,7 +188,4 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       />
     </motion.button>
   );
-};
-
-// ✅ Default export so `import ThemeToggle from "@/components/ThemeToggle"` works
-export default ThemeToggle;
+}
