@@ -43,28 +43,28 @@ const COLOR_SYSTEM = {
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-deepCharcoal font-semibold", // Added font weight
-      secondary: "text-deepCharcoal/80 font-medium", // Increased opacity + weight
+      primary: "text-deepCharcoal font-semibold",
+      secondary: "text-deepCharcoal/80 font-medium",
       accent: "text-softGold font-bold",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105 hover:font-semibold", // Added weight on hover
-      active: "text-softGold scale-105 font-bold", // Bolder active state
+      hover: "hover:text-softGold hover:scale-105 hover:font-semibold",
+      active: "text-softGold scale-105 font-bold",
     },
   },
   dark: {
     shell: {
-      normal: "bg-charcoal/98 border-white/15 shadow-2xl backdrop-blur-xl", // Increased contrast
+      normal: "bg-charcoal/98 border-white/15 shadow-2xl backdrop-blur-xl",
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-white font-bold", // Bolder in dark mode
-      secondary: "text-white/90 font-semibold", // Higher contrast + weight
-      accent: "text-softGold font-extrabold", // Extra bold for accent
+      primary: "text-white font-bold",
+      secondary: "text-white/90 font-semibold",
+      accent: "text-softGold font-extrabold",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold", // Extra bold on hover
-      active: "text-softGold scale-105 font-extrabold", // Extra bold active
+      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold",
+      active: "text-softGold scale-105 font-extrabold",
     },
   },
 } as const;
@@ -81,7 +81,7 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD): boolean => {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [threshold]);
@@ -99,7 +99,10 @@ const useCurrentPath = (): string => {
 
     updatePath();
 
-    const handleNavigation = (): void => setTimeout(updatePath, 10);
+    const handleNavigation = (): void => {
+      setTimeout(updatePath, 10);
+    };
+
     const handleClick = (e: MouseEvent): void => {
       const target = e.target as HTMLElement;
       const link = target.closest("a[href]");
@@ -203,7 +206,7 @@ const NavLink: React.FC<NavLinkProps> = ({
 
   const activeStyles = isActive
     ? isMobile
-      ? "bg-white/15 dark:bg-black/25" // Enhanced contrast for active mobile items
+      ? "bg-white/15 dark:bg-black/25"
       : ""
     : "";
 
@@ -313,7 +316,6 @@ export default function Header({
     [currentPath, isMounted],
   );
 
-  // Dynamic styling
   const shellStyle =
     scrolled || !transparent ? colors.shell.normal : colors.shell.transparent;
 
@@ -321,7 +323,6 @@ export default function Header({
     ? HEADER_HEIGHTS.desktop.scrolled
     : HEADER_HEIGHTS.desktop.normal;
 
-  // Enhanced brand styling with better typography hierarchy
   const brandClass = `
     font-serif transition-all duration-300
     ${scrolled ? "text-[1.5rem] md:text-[1.85rem]" : "text-2xl md:text-3.5xl"}
@@ -329,7 +330,6 @@ export default function Header({
     tracking-tight leading-tight
   `;
 
-  // Contact info
   const email = siteConfig.email || "info@abrahamoflondon.org";
   const phone = siteConfig.phone?.toString().trim() || "+442086225909";
 
