@@ -14,12 +14,13 @@ import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 
-type CoverAspect = "book" | "wide" | "square";
-type CoverFit = "cover" | "contain";
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 
 type PageMeta = PostMeta & {
-  coverAspect?: CoverAspect;
-  coverFit?: CoverFit;
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
 };
 
 type PageProps = {
@@ -27,10 +28,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-const COLLECTION_KEY = "pages";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
+// Primary collection for flat pages / essays
+const PRIMARY_COLLECTION = "pages";
 
 // -----------------------------------------------------------------------------
 // Page component
@@ -38,7 +37,6 @@ const SITE_URL =
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   const {
-    slug,
     title,
     description,
     excerpt,
@@ -59,8 +57,6 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
   const canonicalTitle = title || "Abraham of London";
   const displayDescription = description || excerpt || "";
-  const canonicalPath = slug ? `/${slug}` : "";
-  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
 
   return (
     <Layout title={canonicalTitle}>
@@ -69,11 +65,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         {displayDescription && (
           <meta name="description" content={displayDescription} />
         )}
-        {canonicalPath && (
-          <link rel="canonical" href={canonicalUrl} />
-        )}
       </Head>
 
+      {/* Shared article / essay hero */}
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -85,21 +79,11 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
+      {/* Content body */}
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          <div
-            className={`
-              prose prose-lg prose-invert prose-lux max-w-none
-              prose-headings:font-serif prose-headings:text-cream
-              prose-p:text-slate-100 prose-p:leading-relaxed
-              prose-strong:text-cream prose-strong:font-semibold
-              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-slate-100 prose-ol:text-slate-100
-              prose-blockquote:border-l-softGold prose-blockquote:text-slate-100
-              prose-hr:border-t prose-hr:border-white/10
-              prose-img:rounded-xl prose-img:shadow-lg
-            `}
-          >
+          {/* Rely on Tailwind Typography + dark:prose-invert for color handling */}
+          <div className="prose prose-lg max-w-none sm:prose-xl dark:prose-invert">
             <MDXRemote {...mdxSource} components={mdxComponents} />
           </div>
         </article>
@@ -116,7 +100,7 @@ export default ContentPage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const items = getAllContent(COLLECTION_KEY) ?? [];
+    const items = getAllContent(PRIMARY_COLLECTION) ?? [];
 
     const paths =
       items
@@ -140,7 +124,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // SSG – props
 // -----------------------------------------------------------------------------
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PageProps> = async ({
+  params,
+}) => {
   try {
     const slugParam = params?.slug;
     const slug =
@@ -152,26 +138,43 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     if (!slug) return { notFound: true };
 
-    const data = getContentBySlug(COLLECTION_KEY, slug, {
-      withContent: true,
-    }) as (PageMeta & { content?: string }) | null;
+    // Try several collections so different content types can live at root
+    const collectionsToTry = [
+      "pages",    // essays / static pages
+      "posts",    // blog posts / insights
+      "print",    // long-form prints
+      "resource", // misc resources
+    ];
+
+    let data: (PageMeta & { content?: string }) | null = null;
+
+    for (const key of collectionsToTry) {
+      const candidate = getContentBySlug(key, slug, {
+        withContent: true,
+      }) as (PageMeta & { content?: string }) | null;
+
+      if (candidate) {
+        data = candidate;
+        break;
+      }
+    }
 
     if (!data) return { notFound: true };
 
-    const { content = "", ...meta } = data;
+    const { content, ...meta } = data;
 
     if (!meta.title) return { notFound: true };
 
-    // Ensure meta is JSON-serialisable
+    // Strip non-serialisable values
     const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
-    const mdxSource = await serialize(content, {
+    const mdxSource = await serialize(content || "", {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
     });
 
     return {
       props: {
-        meta: { ...jsonSafeMeta, slug },
+        meta: jsonSafeMeta,
         mdxSource,
       },
       revalidate: 3600,

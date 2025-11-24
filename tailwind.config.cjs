@@ -33,27 +33,21 @@ module.exports = {
           "radial-gradient(circle at top left, rgba(214, 178, 106, 0.22), transparent 55%), radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.5), #050608)",
       },
 
-      // Global typography – now supports BOTH light and dark.
+      // Global typography – supports BOTH light and dark.
       typography: ({ theme }) => ({
-        // LIGHT BACKGROUND (html:not(.dark))
+        // LIGHT BACKGROUND (default)
         DEFAULT: {
           css: {
             maxWidth: "none",
             color: theme("colors.gray.800"),
 
-            p: {
-              color: theme("colors.gray.800"),
-            },
-            li: {
-              color: theme("colors.gray.800"),
-            },
+            p: { color: theme("colors.gray.800") },
+            li: { color: theme("colors.gray.800") },
             strong: {
               color: theme("colors.gray.900"),
               fontWeight: 600,
             },
-            em: {
-              color: theme("colors.gray.800"),
-            },
+            em: { color: theme("colors.gray.800") },
 
             h1: {
               color: theme("colors.gray.900"),
@@ -108,24 +102,16 @@ module.exports = {
           },
         },
 
-        // DARK BACKGROUND (use with class "prose prose-invert")
+        // DARK BACKGROUND (use with `prose-invert`)
         invert: {
           css: {
             maxWidth: "none",
             color: theme("colors.slate.100"),
 
-            p: {
-              color: theme("colors.slate.100"),
-            },
-            li: {
-              color: theme("colors.slate.100"),
-            },
-            strong: {
-              color: theme("colors.slate.50"),
-            },
-            em: {
-              color: theme("colors.slate.100"),
-            },
+            p: { color: theme("colors.slate.100") },
+            li: { color: theme("colors.slate.100") },
+            strong: { color: theme("colors.slate.50") },
+            em: { color: theme("colors.slate.100") },
 
             h1: {
               color: theme("colors.white"),
