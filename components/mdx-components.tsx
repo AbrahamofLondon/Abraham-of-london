@@ -149,21 +149,21 @@ const MdxImage = (props: ImageProps) => {
   if (!src) return null;
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={String(src)}
-      alt={alt ? String(alt) : ""}
-      className={`
-        my-10 mx-auto
-        w-full max-w-3xl max-h-[520px]
-        rounded-3xl border border-slate-800/70
-        bg-slate-900/60
-        object-contain
-        shadow-xl shadow-black/40
-        ${className}
-      `.trim()}
-      {...rest}
-    />
+    <figure className="my-8 flex justify-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={String(src)}
+        alt={alt ? String(alt) : ""}
+        className={(
+          "block h-auto w-auto max-w-full " +       // no forced full-width stretch
+          "max-h-[420px] sm:max-h-[460px] md:max-h-[500px] " + // HARD HEIGHT CAP
+          "rounded-2xl border border-slate-800/70 bg-slate-900/60 " +
+          "object-contain shadow-soft-elevated " +
+          className
+        ).trim()}
+        {...rest}
+      />
+    </figure>
   );
 };
 
