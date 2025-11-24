@@ -5,6 +5,8 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Sparkles } from "lucide-react";
 
+import { useTheme } from "@/lib/ThemeContext";
+
 interface ThemeToggleProps {
   className?: string;
   size?: "sm" | "md" | "lg";
@@ -14,8 +16,16 @@ export default function ThemeToggle({
   className = "",
   size = "md",
 }: ThemeToggleProps): JSX.Element {
-  const [isDark, setIsDark] = React.useState(true);
+  const { resolvedTheme, setTheme } = useTheme();
   const [isHovered, setIsHovered] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  // Avoid hydration mismatch by waiting for client
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted ? resolvedTheme === "dark" : true;
 
   const sizeClasses: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
     sm: "w-12 h-6",
@@ -29,45 +39,9 @@ export default function ThemeToggle({
     lg: 20,
   };
 
-  const applyTheme = React.useCallback((dark: boolean) => {
-    if (typeof window === "undefined") return;
-
-    const root = document.documentElement;
-    if (dark) {
-      root.classList.add("dark");
-      window.localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      window.localStorage.setItem("theme", "light");
-    }
-  }, []);
-
-  // Initialise from localStorage / system preference
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const stored = window.localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") {
-      const dark = stored === "dark";
-      setIsDark(dark);
-      applyTheme(dark);
-      return;
-    }
-
-    const prefersDark = window.matchMedia?.(
-      "(prefers-color-scheme: dark)",
-    ).matches;
-    setIsDark(prefersDark);
-    applyTheme(prefersDark);
-  }, [applyTheme]);
-
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      applyTheme(next);
-      return next;
-    });
-  };
+  const toggleTheme = React.useCallback(() => {
+    setTheme(isDark ? "light" : "dark");
+  }, [isDark, setTheme]);
 
   return (
     <motion.button

@@ -1,18 +1,19 @@
 // pages/_app.tsx
 import type { AppProps } from "next/app";
-import { ThemeProvider } from "next-themes";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import "@/styles/globals.css";
+import { ThemeProvider } from "@/lib/ThemeContext";
 
+// Optional: simple hook to instrument page views later (GA, Plausible, etc.)
 function usePageView() {
   const router = useRouter();
 
   useEffect(() => {
     const handleRouteChange = (_url: string) => {
-      // Hook in GA / Plausible / whatever later
-      // console.log("Page view:", _url);
+      // Plug in analytics here if/when needed
+      // e.g. window.gtag("config", GA_ID, { page_path: _url });
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);
@@ -22,11 +23,11 @@ function usePageView() {
   }, [router.events]);
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }: AppProps) {
   usePageView();
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark">
+    <ThemeProvider defaultTheme="dark">
       <Component {...pageProps} />
     </ThemeProvider>
   );
