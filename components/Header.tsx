@@ -2,134 +2,135 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Moon, Sun, Menu, X } from "lucide-react";
-import ThemeToggle from "@/components/ThemeToggle"; // ✅ use shared toggle
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Phone, Mail } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
-// ❌ REMOVED DUPLICATE ThemeToggle DEFINITION - it's already imported above!
+// --- Enhanced Types & Constants ---
 
 type HeaderProps = {
-  variant?: "light" | "dark";
-  /** When true, header starts transparent and only solidifies on scroll */
+  initialTheme?: "light" | "dark";
   transparent?: boolean;
 };
 
 type NavItem = {
   route: RouteId;
   label: string;
+  description?: string;
 };
 
-// ✅ Single source of truth for where nav items point
-const NAV: NavItem[] = [
-  { route: "booksIndex", label: "Books" },
-  { route: "contentIndex", label: "Insights" },
-  { route: "ventures", label: "Ventures" },
-  { route: "about", label: "About" },
-  { route: "contact", label: "Contact" },
+const NAV_ITEMS: NavItem[] = [
+  { route: "booksIndex", label: "Books", description: "Curated volumes" },
+  { route: "contentIndex", label: "Insights", description: "Strategic wisdom" },
+  { route: "ventures", label: "Ventures", description: "Business pursuits" },
+  { route: "about", label: "About", description: "My journey" },
+  { route: "contact", label: "Contact", description: "Get in touch" },
 ];
 
-// Define proper type for siteConfig phone property
-interface SiteConfigWithPhone {
-  email?: string;
-  phone?: string | number;
-}
+const SCROLL_THRESHOLD = 8;
+const HEADER_HEIGHTS = {
+  desktop: { normal: "5rem", scrolled: "4rem" },
+  mobile: { normal: "5rem", scrolled: "3.75rem" },
+} as const;
 
-export default function Header({
-  variant = "light",
-  transparent = false,
-}: HeaderProps): JSX.Element {
-  const [open, setOpen] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
-  const [currentPath, setCurrentPath] = React.useState<string>("/");
-  const [isMounted, setIsMounted] = React.useState(false);
+// --- Enhanced Color System ---
 
-  // Mark component as mounted to avoid SSR mismatches
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Initialize theme from localStorage or system preference
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const theme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (theme === 'dark' || (!theme && systemPrefersDark)) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.style.colorScheme = 'light';
-    }
-  }, []);
-
-  // Derive active link from currentPath (kept in sync with location)
-  const isActive = React.useCallback(
-    (route: RouteId) => {
-      if (!isMounted) return false;
-      const href = getRoutePath(route);
-      const p = currentPath || "";
-      if (href === "/") return p === "/";
-      return p === href || p.startsWith(href + "/");
+const COLOR_SYSTEM = {
+  light: {
+    shell: {
+      normal: "bg-white/95 border-black/10 shadow-lg backdrop-blur-xl",
+      transparent: "bg-transparent border-transparent",
     },
-    [currentPath, isMounted],
-  );
+    text: {
+      primary: "text-deepCharcoal",
+      secondary: "text-deepCharcoal/70",
+      accent: "text-softGold",
+    },
+    interactive: {
+      hover: "hover:text-softGold hover:scale-105",
+      active: "text-softGold scale-105",
+    },
+  },
+  dark: {
+    shell: {
+      normal: "bg-charcoal/95 border-white/10 shadow-lg backdrop-blur-xl",
+      transparent: "bg-transparent border-transparent",
+    },
+    text: {
+      primary: "text-white",
+      secondary: "text-white/70",
+      accent: "text-softGold",
+    },
+    interactive: {
+      hover: "hover:text-softGold hover:scale-105",
+      active: "text-softGold scale-105",
+    },
+  },
+} as const;
 
-  // Track scroll depth for header styling - SAFE version
+// --- Custom Hooks ---
+
+const useScrollDetection = (threshold: number = SCROLL_THRESHOLD) => {
+  const [scrolled, setScrolled] = React.useState(false);
+
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const onScroll = () => {
-      requestAnimationFrame(() => {
-        setScrolled(window.scrollY > 8);
-      });
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > threshold;
+      setScrolled(isScrolled);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
 
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [threshold]);
 
-  // Track current path on client and keep it in sync with SPA navigation - SAFE version
+  return scrolled;
+};
+
+const useCurrentPath = () => {
+  const [currentPath, setCurrentPath] = React.useState("/");
+
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
     const updatePath = () => {
       setCurrentPath(window.location.pathname || "/");
     };
 
     updatePath();
 
-    const handlePopState = () => {
-      setTimeout(updatePath, 10);
-    };
-
+    const handleNavigation = () => setTimeout(updatePath, 10);
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a[href]");
-      if (link && link.getAttribute("href")?.startsWith("/")) {
+      if (link?.getAttribute("href")?.startsWith("/")) {
         setTimeout(updatePath, 50);
       }
     };
 
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("popstate", handleNavigation);
     document.addEventListener("click", handleClick, true);
 
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("popstate", handleNavigation);
       document.removeEventListener("click", handleClick, true);
     };
   }, []);
 
-  // Lock body scroll while mobile menu open
-  React.useEffect(() => {
-    if (typeof window === "undefined" || !open) return;
+  return currentPath;
+};
 
-    const originalStyle = window.getComputedStyle(document.body).position;
-    const originalOverflow = window.getComputedStyle(document.body).overflow;
+const useBodyScrollLock = (isLocked: boolean) => {
+  React.useEffect(() => {
+    if (!isLocked) return;
+
+    const originalStyle = {
+      position: window.getComputedStyle(document.body).position,
+      top: window.getComputedStyle(document.body).top,
+      left: window.getComputedStyle(document.body).left,
+      right: window.getComputedStyle(document.body).right,
+      overflow: window.getComputedStyle(document.body).overflow,
+    };
     const scrollY = window.scrollY;
 
     document.body.style.position = "fixed";
@@ -139,250 +140,348 @@ export default function Header({
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.position = originalStyle;
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalStyle.position;
+      document.body.style.top = originalStyle.top;
+      document.body.style.left = originalStyle.left;
+      document.body.style.right = originalStyle.right;
+      document.body.style.overflow = originalStyle.overflow;
       window.scrollTo(0, scrollY);
     };
-  }, [open]);
+  }, [isLocked]);
+};
 
-  // Shell behaviour:
-  // - If transparent=false: behaves as before (solid white/black, light shadow on scroll)
-  // - If transparent=true: starts transparent, only solid + shadow once scrolled
-  const lightShell = scrolled || !transparent
-    ? "bg-white/85 border-black/10 shadow-sm"
-    : "bg-transparent border-transparent";
+// --- Enhanced Components ---
 
-  const darkShell = scrolled || !transparent
-    ? "bg-black/60 border-white/10 shadow-sm"
-    : "bg-transparent border-transparent";
+interface NavLinkProps {
+  item: NavItem;
+  isActive: boolean;
+  theme: "light" | "dark";
+  onClick?: () => void;
+  variant?: "desktop" | "mobile";
+}
 
-  const shell =
-    variant === "dark"
-      ? `${darkShell} text-cream`
-      : `${lightShell} text-deepCharcoal`;
+const NavLink: React.FC<NavLinkProps> = ({
+  item,
+  isActive,
+  theme,
+  onClick,
+  variant = "desktop",
+}) => {
+  const colors = COLOR_SYSTEM[theme];
+  const isMobile = variant === "mobile";
 
-  const linkBase =
-    variant === "dark"
-      ? "text-cream opacity-80 hover:opacity-100 hover:text-cream"
-      : "text-deepCharcoal opacity-80 hover:opacity-100 hover:text-deepCharcoal";
+  const baseStyles = `
+    transition-all duration-300 ease-out
+    ${colors.text.primary}
+    ${isActive ? colors.interactive.active : colors.interactive.hover}
+    ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-base font-medium"}
+  `;
 
-  const underlineActive = variant === "dark" ? "bg-cream" : "bg-deepCharcoal";
+  const activeStyles = isActive
+    ? isMobile
+      ? "bg-white/10 dark:bg-black/10"
+      : ""
+    : "";
 
-  // Fix TypeScript warning by using proper typing
-  const siteConfigWithPhone = siteConfig as SiteConfigWithPhone;
-  const EMAIL = siteConfigWithPhone?.email || "info@abrahamoflondon.org";
-  const PHONE = siteConfigWithPhone?.phone?.toString().trim() || "+442086225909";
+  return (
+    <li className={isMobile ? "w-full" : "relative"}>
+      <Link
+        href={getRoutePath(item.route)}
+        onClick={onClick}
+        className={`block ${baseStyles} ${activeStyles}`}
+        aria-current={isActive ? "page" : undefined}
+        prefetch={true}
+      >
+        <div className="flex flex-col">
+          <span className="font-semibold">{item.label}</span>
+          {isMobile && item.description && (
+            <span className="text-sm opacity-70 mt-1">{item.description}</span>
+          )}
+        </div>
+      </Link>
+      {!isMobile && (
+        <motion.span
+          aria-hidden="true"
+          className={`absolute -bottom-1 left-0 h-0.5 ${
+            isActive ? "bg-softGold" : "bg-transparent"
+          }`}
+          initial={{ width: 0 }}
+          animate={{ width: isActive ? "100%" : 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        />
+      )}
+    </li>
+  );
+};
 
-  const brandClass = [
-    "font-serif font-bold transition-all duration-200",
-    scrolled ? "text-[1.35rem] md:text-[1.75rem]" : "text-2xl md:text-3xl",
-    variant === "dark" ? "text-cream" : "text-deepCharcoal",
-  ].join(" ");
+interface ContactButtonProps {
+  type: "email" | "phone";
+  value: string;
+  theme: "light" | "dark";
+  onClick?: () => void;
+  variant?: "desktop" | "mobile";
+}
 
-  const headerStyle = React.useMemo(
-    () =>
-      ({
-        ["--header-h"]: scrolled ? "4rem" : "5rem",
-      } as React.CSSProperties & {
-        ["--header-h"]?: string;
-      }),
-    [scrolled],
+const ContactButton: React.FC<ContactButtonProps> = ({
+  type,
+  value,
+  theme,
+  onClick,
+  variant = "desktop",
+}) => {
+  const colors = COLOR_SYSTEM[theme];
+  const isMobile = variant === "mobile";
+
+  const href = type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
+  const label = type === "email" ? "Email" : "Call";
+  const Icon = type === "email" ? Mail : Phone;
+
+  const baseStyles = `
+    flex items-center gap-2 transition-all duration-300
+    ${colors.text.secondary}
+    ${colors.interactive.hover}
+    ${isMobile ? "text-base py-2 px-3" : "text-base"}
+  `;
+
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      className={baseStyles}
+      aria-label={`${label} Abraham`}
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+    </a>
+  );
+};
+
+// --- Main Header Component ---
+
+export default function Header({
+  initialTheme = "light",
+  transparent = false,
+}: HeaderProps): JSX.Element {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+  const scrolled = useScrollDetection(SCROLL_THRESHOLD);
+  const currentPath = useCurrentPath();
+
+  useBodyScrollLock(isOpen);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Enhanced active route detection
+  const isActive = React.useCallback(
+    (route: RouteId): boolean => {
+      if (!isMounted) return false;
+      const href = getRoutePath(route);
+      const path = currentPath || "";
+      if (href === "/") return path === "/";
+      return path === href || path.startsWith(`${href}/`);
+    },
+    [currentPath, isMounted],
   );
 
-  // Don't render motion effects during SSR to avoid hydration mismatches
+  // Dynamic styling
+  const colors = COLOR_SYSTEM[initialTheme];
+  const shellStyle = scrolled || !transparent 
+    ? colors.shell.normal 
+    : colors.shell.transparent;
+
+  const headerHeight = scrolled 
+    ? HEADER_HEIGHTS.desktop.scrolled 
+    : HEADER_HEIGHTS.desktop.normal;
+
+  const brandClass = `
+    font-serif font-bold transition-all duration-300
+    ${scrolled ? "text-[1.35rem] md:text-[1.75rem]" : "text-2xl md:text-3xl"}
+    ${colors.text.accent}
+  `;
+
+  // Contact info
+  const email = siteConfig.email || "info@abrahamoflondon.org";
+  const phone = siteConfig.phone?.toString().trim() || "+442086225909";
+
   const MotionHeader = isMounted ? motion.header : "header";
 
   return (
     <MotionHeader
-      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur supports-[backdrop-filter]:bg-opacity-60 ${shell}`}
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${shellStyle}`}
       {...(isMounted && {
-        initial: { y: -100, opacity: 0 },
+        initial: { y: -20, opacity: 0 },
         animate: { y: 0, opacity: 1 },
-        transition: { type: "spring", stiffness: 100, damping: 20 },
+        transition: { duration: 0.4, ease: "easeOut" },
       })}
       role="navigation"
-      aria-label="Primary"
-      style={headerStyle}
+      aria-label="Primary navigation"
+      style={{ height: headerHeight }}
     >
-      <nav
-        className="mx-auto flex max-w-7xl items-center justify-between px-4"
-        style={{ height: scrolled ? "3.75rem" : "5rem" }}
-      >
-        {/* Brand */}
+      <nav className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6">
+        {/* Brand Logo */}
         <Link
           href={getRoutePath("home")}
-          aria-label="Home"
+          aria-label="Abraham of London - Home"
           className={brandClass}
           prefetch={true}
         >
           Abraham of London
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden items-center gap-6 md:flex">
-          <ul className="flex items-center gap-6">
-            {NAV.map((item) => (
-              <li key={item.route} className="relative">
-                <Link
-                  href={getRoutePath(item.route)}
-                  className={`text-sm font-medium transition-colors ${linkBase}`}
-                  aria-current={isActive(item.route) ? "page" : undefined}
-                  prefetch={true}
-                >
-                  {item.label}
-                </Link>
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all ${
-                    isActive(item.route) ? `w-full ${underlineActive}` : "w-0"
-                  }`}
-                />
-              </li>
+        {/* Desktop Navigation */}
+        <div className="hidden items-center gap-8 md:flex">
+          <ul className="flex items-center gap-8">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.route}
+                item={item}
+                isActive={isActive(item.route)}
+                theme={initialTheme}
+                variant="desktop"
+              />
             ))}
           </ul>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <a
-              href={`mailto:${EMAIL}`}
-              className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
-              aria-label="Email Abraham"
-            >
-              Email
-            </a>
-            {PHONE && (
-              <a
-                href={`tel:${PHONE.replace(/\s+/g, "")}`}
-                className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
-                aria-label="Call Abraham"
-              >
-                Call
-              </a>
-            )}
+          {/* Desktop Actions */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 border-r border-current/20 pr-6">
+              <ContactButton type="email" value={email} theme={initialTheme} />
+              <ContactButton type="phone" value={phone} theme={initialTheme} />
+            </div>
+            
             <Link
               href={getRoutePath("contact")}
-              className="rounded-full bg-gold px-5 py-2 text-sm font-semibold text-charcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+              className="rounded-full bg-softGold px-6 py-2.5 text-base font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50"
               aria-label="Go to contact form"
               prefetch={true}
             >
               Enquire
             </Link>
+            
             <ThemeToggle />
           </div>
         </div>
 
-        {/* Mobile controls */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Mobile Controls */}
+        <div className="flex items-center gap-3 md:hidden">
           <ThemeToggle />
-          <button
+          <motion.button
             type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-expanded={isOpen}
             aria-controls="mobile-nav"
-            className={`inline-flex items-center justify-center rounded-md border p-2 ${
-              variant === "dark"
-                ? "border-white/20 text-cream hover:bg-white/10"
-                : "border-black/20 text-deepCharcoal hover:bg-black/10"
-            } transition-colors`}
+            aria-label="Toggle navigation menu"
+            className={`inline-flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
+              initialTheme === "dark"
+                ? "bg-white/10 text-white hover:bg-white/20"
+                : "bg-black/5 text-deepCharcoal hover:bg-black/10"
+            }`}
+            whileTap={{ scale: 0.95 }}
           >
-            <span className="sr-only">Toggle navigation</span>
-            {!open ? (
-              <Menu className="h-5 w-5" />
-            ) : (
-              <X className="h-5 w-5" />
-            )}
-          </button>
+            <AnimatePresence mode="wait" initial={false}>
+              {isOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X className="h-5 w-5" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu className="h-5 w-5" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
       </nav>
 
-      {/* Mobile drawer */}
-      {open && (
-        <div
-          id="mobile-nav"
-          className={`md:hidden ${
-            variant === "dark" ? "bg-black/95" : "bg-white/95"
-          } border-t ${
-            variant === "dark" ? "border-white/10" : "border-black/10"
-          } backdrop-blur`}
-        >
-          <nav
-            className="mx-auto max-w-7xl px-4 py-4"
-            aria-label="Mobile Primary"
+      {/* Mobile Navigation Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            id="mobile-nav"
+            className={`fixed inset-0 top-[var(--header-height)] md:hidden ${
+              initialTheme === "dark" 
+                ? "bg-charcoal/95 backdrop-blur-2xl" 
+                : "bg-white/95 backdrop-blur-2xl"
+            }`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <ul className="grid gap-2">
-              {NAV.map((item) => (
-                <li key={item.route}>
-                  <Link
-                    href={getRoutePath(item.route)}
-                    onClick={() => setOpen(false)}
-                    className={`block rounded-md px-3 py-2 text-base font-medium transition-colors ${
-                      isActive(item.route)
-                        ? variant === "dark"
-                          ? "bg-white/10 text-cream"
-                          : "bg-black/5 text-deepCharcoal"
-                        : variant === "dark"
-                        ? "text-cream opacity-80 hover:opacity-100 hover:bg-white/10 hover:text-cream"
-                        : "text-deepCharcoal opacity-80 hover:opacity-100 hover:bg-black/5 hover:text-deepCharcoal"
-                    }`}
-                    aria-current={isActive(item.route) ? "page" : undefined}
-                    prefetch={true}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-              <li className="flex items-center gap-4 px-3 pt-3">
-                <a
-                  href={`mailto:${EMAIL}`}
-                  onClick={() => setOpen(false)}
-                  className={`text-base underline-offset-4 hover:underline ${
-                    variant === "dark"
-                      ? "text-cream opacity-90 hover:opacity-100"
-                      : "text-deepCharcoal opacity-90 hover:opacity-100"
-                  }`}
-                >
-                  Email
-                </a>
-                {PHONE && (
-                  <a
-                    href={`tel:${PHONE.replace(/\s+/g, "")}`}
-                    onClick={() => setOpen(false)}
-                    className={`text-base underline-offset-4 hover:underline ${
-                      variant === "dark"
-                        ? "text-cream opacity-90 hover:opacity-100"
-                        : "text-deepCharcoal opacity-90 hover:opacity-100"
-                    }`}
-                  >
-                    Call
-                  </a>
-                )}
-              </li>
-              <li className="pt-2">
+            <nav className="flex h-full flex-col px-6 py-8" aria-label="Mobile navigation">
+              <ul className="space-y-2">
+                {NAV_ITEMS.map((item) => (
+                  <NavLink
+                    key={item.route}
+                    item={item}
+                    isActive={isActive(item.route)}
+                    theme={initialTheme}
+                    onClick={() => setIsOpen(false)}
+                    variant="mobile"
+                  />
+                ))}
+              </ul>
+
+              {/* Mobile Contact Actions */}
+              <div className="mt-auto space-y-4 pt-8">
+                <div className="flex gap-6">
+                  <ContactButton 
+                    type="email" 
+                    value={email} 
+                    theme={initialTheme}
+                    onClick={() => setIsOpen(false)}
+                    variant="mobile"
+                  />
+                  <ContactButton 
+                    type="phone" 
+                    value={phone} 
+                    theme={initialTheme}
+                    onClick={() => setIsOpen(false)}
+                    variant="mobile"
+                  />
+                </div>
+                
                 <Link
                   href={getRoutePath("contact")}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-full bg-gold px-5 py-2 text-center text-sm font-semibold text-charcoal transition hover:brightness-95 focus:outline-none focus-visible:ring-2"
+                  onClick={() => setIsOpen(false)}
+                  className="block w-full rounded-xl bg-softGold px-6 py-4 text-center text-base font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25"
                   prefetch={true}
                 >
-                  Enquire
+                  Enquire Now
                 </Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      )}
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Offset main by header height var - FIXED for Next.js */}
+      {/* Global Styles */}
       <style jsx global>{`
-        main {
-          padding-top: var(--header-h, 5rem);
+        :root {
+          --header-height: ${headerHeight};
         }
+        
+        main {
+          padding-top: var(--header-height);
+        }
+
         @media (max-width: 767px) {
-          header[role="navigation"] {
-            --header-h: ${scrolled ? "3.5rem" : "4rem"};
+          :root {
+            --header-height: ${scrolled ? HEADER_HEIGHTS.mobile.scrolled : HEADER_HEIGHTS.mobile.normal};
           }
         }
       `}</style>
