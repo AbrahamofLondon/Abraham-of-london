@@ -1,9 +1,9 @@
 // components/ArticleHero.tsx
 import * as React from "react";
 import clsx from "clsx";
-import { CoverFrame, type CoverAspect, type CoverFit } from "@/components/media/CoverFrame";
+import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
 
-interface ArticleHeroProps {
+type ArticleHeroProps = {
   title?: string | null;
   subtitle?: string | null;
   category?: string | null;
@@ -11,84 +11,78 @@ interface ArticleHeroProps {
   readTime?: string | number | null;
   coverImage?: string | null;
   coverAspect?: CoverAspect;
-  coverFit?: CoverFit;
-}
+  coverFit?: "cover" | "contain";
+};
 
-function formatDate(date?: string | null): string | null {
-  if (!date) return null;
-  const d = new Date(date);
+function formatDate(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return null;
   return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
     year: "numeric",
+    month: "short",
+    day: "2-digit",
   }).format(d);
 }
 
-export default function ArticleHero({
-  title,
-  subtitle,
-  category,
-  date,
-  readTime,
-  coverImage,
-  coverAspect = "book",
-  coverFit = "contain",
-}: ArticleHeroProps): JSX.Element {
-  const dateText = formatDate(date);
-  const readText =
+export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
+  const {
+    title = "",
+    subtitle,
+    category,
+    date,
+    readTime,
+    coverImage,
+    coverAspect = "book",
+  } = props;
+
+  const dateLabel = formatDate(date);
+  const readLabel =
     typeof readTime === "number"
       ? `${readTime} min read`
       : typeof readTime === "string" && readTime.trim()
       ? readTime
       : null;
-
-  const metaParts = [dateText, readText].filter(Boolean);
-  const metaText = metaParts.join(" • ");
-
-  const hasCover = typeof coverImage === "string" && coverImage.trim().length > 0;
+  const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
 
   return (
     <section
       className={clsx(
-        "border-b border-white/10",
-        "bg-[radial-gradient(circle_at_top,rgba(214,178,106,0.18),transparent_55%),#050608]",
+        "border-b border-white/10 bg-gradient-to-b",
+        "from-black via-[#050608] to-[#050608]",
       )}
     >
-      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-4 pb-10 pt-10 md:flex-row md:items-center md:gap-12 md:pb-12 md:pt-14 lg:px-0">
-        {/* LEFT: text */}
-        <div className="flex-1 space-y-4">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-12 pt-8 md:flex-row md:items-center md:gap-12 md:pb-16 md:pt-12 lg:px-8">
+        {/* LEFT: copy - now takes more space */}
+        <div className="flex-1 md:max-w-2xl">
           {category && (
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#D6B26A]">
               {category}
             </p>
           )}
-
-          <h1 className="font-serif text-3xl leading-tight text-cream sm:text-4xl md:text-[2.6rem]">
+          <h1 className="font-serif text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-[1.15] text-white">
             {title}
           </h1>
-
           {subtitle && (
-            <p className="max-w-prose text-sm sm:text-base text-gray-200/95">
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-gray-200 md:text-lg">
               {subtitle}
             </p>
           )}
-
-          {metaText && (
-            <p className="pt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
-              {metaText}
+          {metaBits && (
+            <p className="mt-6 text-xs font-medium uppercase tracking-[0.16em] text-gray-400">
+              {metaBits}
             </p>
           )}
         </div>
 
-        {/* RIGHT: controlled cover */}
-        {hasCover && (
-          <div className="flex-1 md:flex md:justify-end">
+        {/* RIGHT: controlled cover frame - now smaller */}
+        {coverImage && (
+          <div className="w-full shrink-0 md:w-64 lg:w-72">
             <CoverFrame
               src={coverImage}
-              alt={title ?? "Article cover"}
+              alt={title}
               aspect={coverAspect}
-              fit={coverFit}
+              priority
             />
           </div>
         )}

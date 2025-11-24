@@ -3,79 +3,60 @@ import * as React from "react";
 import Image from "next/image";
 import clsx from "clsx";
 
-export type CoverAspect = "book" | "wide" | "square";
-export type CoverFit = "cover" | "contain";
+export type CoverAspect = "book" | "square" | "wide";
 
 export interface CoverFrameProps {
-  src?: string | null;
-  alt?: string;
+  src: string;
+  alt: string;
   aspect?: CoverAspect;
-  fit?: CoverFit;
+  className?: string;
+  priority?: boolean;
 }
 
 /**
- * Normalises a local/remote src into something Next/Image can use.
+ * Reduced padding-bottom values for more reasonable cover sizes
  */
-function normalizeLocal(src?: string | null): string | undefined {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return src;
-  const clean = src.replace(/^\/+/, "");
-  return `/${clean}`;
-}
-
-function getHeightClasses(aspect: CoverAspect): string {
+function getAspectPadding(aspect: CoverAspect): string {
   switch (aspect) {
     case "square":
-      return "h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]";
+      return "pb-[100%]"; // 1:1
     case "wide":
-      return "h-[200px] sm:h-[230px] md:h-[260px] lg:h-[300px]";
+      return "pb-[56.25%]"; // 16:9
     case "book":
     default:
-      // Portrait / book style, but capped.
-      return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px]";
+      return "pb-[133%]"; // Slightly shorter than 2:3 for better proportion
   }
 }
 
 /**
- * A single, opinionated frame for book / article / download covers.
- * Any place that wants a “big cover” should go through this, so the
- * site never gets random skyscraper images again.
+ * Shared frame for all large cover images with improved sizing
  */
 export function CoverFrame({
   src,
   alt,
   aspect = "book",
-  fit = "cover",
-}: CoverFrameProps): JSX.Element | null {
-  const imgSrc =
-    normalizeLocal(src) ?? "/assets/images/writing-desk.webp";
-
-  if (!imgSrc) return null;
-
-  const frameClasses = clsx(
-    "aol-cover-frame",
-    "relative overflow-hidden rounded-2xl",
-    "border border-softGold/30 bg-black/40",
-    "shadow-soft-elevated",
-    "mx-auto w-full max-w-[360px] md:max-w-[420px]",
-    getHeightClasses(aspect),
-  );
-
-  const imgClasses = clsx(
-    "h-full w-full",
-    fit === "contain" ? "object-contain" : "object-cover",
-  );
-
+  className,
+  priority = false,
+}: CoverFrameProps) {
   return (
-    <div className={frameClasses}>
-      <Image
-        src={imgSrc}
-        alt={alt || "Cover image"}
-        fill
-        sizes="(max-width: 768px) 70vw, 420px"
-        className={imgClasses}
-        priority={false}
-      />
+    <div
+      className={clsx(
+        "mx-auto w-full",
+        "rounded-lg border border-[rgba(214,178,106,0.6)] bg-black/40",
+        "shadow-[0_12px_28px_rgba(0,0,0,0.6)] overflow-hidden",
+        className,
+      )}
+    >
+      <div className={clsx("relative w-full", getAspectPadding(aspect))}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes="(max-width: 768px) 90vw, (max-width: 1024px) 256px, 288px"
+          className="object-contain"
+        />
+      </div>
     </div>
   );
 }
