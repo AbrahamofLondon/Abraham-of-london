@@ -14,7 +14,7 @@ export interface CoverFrameProps {
 }
 
 /**
- * Reduced padding-bottom values for more reasonable cover sizes
+ * MUCH smaller aspect ratios
  */
 function getAspectPadding(aspect: CoverAspect): string {
   switch (aspect) {
@@ -24,12 +24,12 @@ function getAspectPadding(aspect: CoverAspect): string {
       return "pb-[56.25%]"; // 16:9
     case "book":
     default:
-      return "pb-[133%]"; // Slightly shorter than 2:3 for better proportion
+      return "pb-[140%]"; // Reduced from 150%
   }
 }
 
 /**
- * Shared frame for all large cover images with improved sizing
+ * Simplified frame - no more giant covers
  */
 export function CoverFrame({
   src,
@@ -41,9 +41,9 @@ export function CoverFrame({
   return (
     <div
       className={clsx(
-        "mx-auto w-full",
-        "rounded-lg border border-[rgba(214,178,106,0.6)] bg-black/40",
-        "shadow-[0_12px_28px_rgba(0,0,0,0.6)] overflow-hidden",
+        "relative w-full overflow-hidden",
+        "rounded-md border border-[#D6B26A]/50",
+        "bg-black/30 shadow-lg",
         className,
       )}
     >
@@ -53,7 +53,7 @@ export function CoverFrame({
           alt={alt}
           fill
           priority={priority}
-          sizes="(max-width: 768px) 90vw, (max-width: 1024px) 256px, 288px"
+          sizes="(max-width: 768px) 192px, 224px"
           className="object-contain"
         />
       </div>

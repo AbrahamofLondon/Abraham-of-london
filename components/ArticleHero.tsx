@@ -48,36 +48,36 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
   return (
     <section
       className={clsx(
-        "border-b border-white/10 bg-gradient-to-b",
-        "from-black via-[#050608] to-[#050608]",
+        "border-b border-slate-200/20 dark:border-white/10",
+        "bg-white dark:bg-[#0a0b0d]",
       )}
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-12 pt-8 md:flex-row md:items-center md:gap-12 md:pb-16 md:pt-12 lg:px-8">
-        {/* LEFT: copy - now takes more space */}
-        <div className="flex-1 md:max-w-2xl">
+      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16 md:flex-row md:items-start md:gap-16 md:py-20 lg:px-8">
+        {/* LEFT: copy - more space, better contrast */}
+        <div className="flex-1">
           {category && (
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#D6B26A]">
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#D6B26A]">
               {category}
             </p>
           )}
-          <h1 className="font-serif text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-[1.15] text-white">
+          <h1 className="mb-8 font-serif text-4xl font-bold leading-[1.2] text-gray-900 dark:text-white md:text-5xl">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-gray-200 md:text-lg">
+            <p className="mb-8 text-lg leading-relaxed text-gray-700 dark:text-gray-100 md:text-xl">
               {subtitle}
             </p>
           )}
           {metaBits && (
-            <p className="mt-6 text-xs font-medium uppercase tracking-[0.16em] text-gray-400">
+            <p className="text-sm font-medium uppercase tracking-wide text-gray-600 dark:text-gray-300">
               {metaBits}
             </p>
           )}
         </div>
 
-        {/* RIGHT: controlled cover frame - now smaller */}
+        {/* RIGHT: smaller cover image */}
         {coverImage && (
-          <div className="w-full shrink-0 md:w-64 lg:w-72">
+          <div className="w-48 shrink-0 md:w-56">
             <CoverFrame
               src={coverImage}
               alt={title}
