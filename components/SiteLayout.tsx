@@ -313,7 +313,8 @@ export default function SiteLayout({
           className={`flex min-h-screen flex-col bg-warmWhite text-soft-charcoal antialiased ${className}`}
           data-lang={lang} // cannot set <html lang> here; this is just an annotation
         >
-          <Header variant="light" />
+          {/* FIX: Changed from variant="light" to initialTheme="light" */}
+          <Header initialTheme="light" />
           <main
             id={skipToContentId}
             className="flex-1 focus:outline-none"
