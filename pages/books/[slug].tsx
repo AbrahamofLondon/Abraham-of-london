@@ -5,6 +5,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Layout from "@/components/Layout";
 
 // Import your custom MDX components
@@ -17,14 +18,14 @@ import type { BookMeta } from "@/types/index";
 
 type PageProps = {
   meta: BookMeta;
-  mdxSource: any; // MDXRemoteSerializeResult
+  mdxSource: MDXRemoteSerializeResult | null; // FIXED: Proper type instead of 'any'
 };
 
-// Create components object for MDX
+// Create components object for MDX with proper typing
 const mdxComponents = {
-  Quote,
-  Callout,
-  Divider,
+  Quote: Quote as React.ComponentType<any>,
+  Callout: Callout as React.ComponentType<any>,
+  Divider: Divider as React.ComponentType<any>,
 };
 
 export default function BookPage({ meta, mdxSource }: PageProps) {
@@ -194,7 +195,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     ''
   ).trim();
 
-  let mdxSource = null;
+  let mdxSource: MDXRemoteSerializeResult | null = null;
   
   if (cleanContent) {
     try {
