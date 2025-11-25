@@ -7,7 +7,7 @@ import { Menu, X, Phone, Mail } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
-// --- Enhanced Types & Constants ---
+// --- Enhanced Types & Constants ------------------------------------------------
 
 type HeaderProps = {
   initialTheme?: "light" | "dark";
@@ -29,12 +29,14 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const SCROLL_THRESHOLD = 8;
+
+// slightly tighter heights on mobile so the hero isn’t crushed
 const HEADER_HEIGHTS = {
   desktop: { normal: "5rem", scrolled: "4rem" },
-  mobile: { normal: "5rem", scrolled: "3.75rem" },
+  mobile: { normal: "4.25rem", scrolled: "3.5rem" },
 } as const;
 
-// --- Enhanced Color System with Movement-Activated Glow ---
+// --- Color System with subtle glow in dark mode --------------------------------
 
 const COLOR_SYSTEM = {
   light: {
@@ -52,7 +54,6 @@ const COLOR_SYSTEM = {
       active: "text-softGold scale-105 font-bold",
     },
     glow: {
-      // Minimal glow for light mode
       normal: "",
       active: "drop-shadow-[0_0_4px_rgba(0,0,0,0.1)]",
     },
@@ -72,14 +73,13 @@ const COLOR_SYSTEM = {
       active: "text-softGold scale-105 font-extrabold glow-active",
     },
     glow: {
-      // Enhanced glow for dark mode
       normal: "glow-text",
       active: "glow-active",
     },
   },
 } as const;
 
-// --- Custom Hooks ---
+// --- Hooks ---------------------------------------------------------------------
 
 const useScrollDetection = (threshold: number = SCROLL_THRESHOLD): boolean => {
   const [scrolled, setScrolled] = React.useState(false);
@@ -137,12 +137,13 @@ const useBodyScrollLock = (isLocked: boolean): void => {
   React.useEffect(() => {
     if (!isLocked) return;
 
+    const computed = window.getComputedStyle(document.body);
     const originalStyle = {
-      position: window.getComputedStyle(document.body).position,
-      top: window.getComputedStyle(document.body).top,
-      left: window.getComputedStyle(document.body).left,
-      right: window.getComputedStyle(document.body).right,
-      overflow: window.getComputedStyle(document.body).overflow,
+      position: computed.position,
+      top: computed.top,
+      left: computed.left,
+      right: computed.right,
+      overflow: computed.overflow,
     };
     const scrollY = window.scrollY;
 
@@ -187,29 +188,29 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   return theme;
 };
 
-// Movement detection hook for glow effects
+// detect user movement to “wake up” glow for a short period
 const useMovementDetection = (enabled: boolean = true): boolean => {
   const [isMoving, setIsMoving] = React.useState(false);
 
   React.useEffect(() => {
     if (!enabled) return;
 
-    let movementTimer: NodeJS.Timeout;
+    let movementTimer: ReturnType<typeof setTimeout>;
+
     const handleMovement = (): void => {
       setIsMoving(true);
       clearTimeout(movementTimer);
-      movementTimer = setTimeout(() => setIsMoving(false), 2000); // Glow for 2 seconds after movement
+      movementTimer = setTimeout(() => setIsMoving(false), 2000);
     };
 
-    // Listen for various movement indicators
-    const events = ["mousemove", "scroll", "touchstart", "keydown"];
-    
-    events.forEach(event => {
+    const events: (keyof WindowEventMap)[] = ["mousemove", "scroll", "touchstart", "keydown"];
+
+    events.forEach((event) => {
       window.addEventListener(event, handleMovement, { passive: true });
     });
 
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         window.removeEventListener(event, handleMovement);
       });
       clearTimeout(movementTimer);
@@ -219,7 +220,7 @@ const useMovementDetection = (enabled: boolean = true): boolean => {
   return isMoving;
 };
 
-// --- Enhanced Components ---
+// --- Components ----------------------------------------------------------------
 
 interface NavLinkProps {
   item: NavItem;
@@ -245,7 +246,7 @@ const NavLink: React.FC<NavLinkProps> = ({
     transition-all duration-300 ease-out
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.hover}
-    ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-base"}
+    ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-sm lg:text-base"}
     ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
   `;
 
@@ -267,16 +268,14 @@ const NavLink: React.FC<NavLinkProps> = ({
         <div className="flex flex-col">
           <span className={isMobile ? "font-bold" : ""}>{item.label}</span>
           {isMobile && item.description && (
-            <span className={`mt-1 text-sm ${colors.text.secondary}`}>
-              {item.description}
-            </span>
+            <span className={`mt-1 text-sm ${colors.text.secondary}`}>{item.description}</span>
           )}
         </div>
       </Link>
       {!isMobile && (
         <motion.span
           aria-hidden="true"
-          className={`absolute -bottom-1 left-0 h-0.5 ${
+          className={`pointer-events-none absolute -bottom-1 left-0 h-0.5 ${
             isActive ? "bg-softGold" : "bg-transparent"
           }`}
           initial={{ width: 0 }}
@@ -316,24 +315,19 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     flex items-center gap-2 transition-all duration-300
     ${colors.text.secondary}
     ${colors.interactive.hover}
-    ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-base font-medium"}
+    ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-sm lg:text-base font-medium"}
     ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
   `;
 
   return (
-    <a
-      href={href}
-      onClick={onClick}
-      className={baseStyles}
-      aria-label={`${label} Abraham`}
-    >
+    <a href={href} onClick={onClick} className={baseStyles} aria-label={`${label} Abraham`}>
       <Icon className="h-4 w-4" />
       <span>{label}</span>
     </a>
   );
 };
 
-// --- Main Header Component ---
+// --- Main Header --------------------------------------------------------------
 
 export default function Header({
   initialTheme = "light",
@@ -341,18 +335,18 @@ export default function Header({
 }: HeaderProps): JSX.Element {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
+
   const scrolled = useScrollDetection(SCROLL_THRESHOLD);
   const currentPath = useCurrentPath();
   const isMovementDetected = useMovementDetection();
+  const theme = useResolvedTheme(initialTheme);
+  const colors = COLOR_SYSTEM[theme];
 
   useBodyScrollLock(isOpen);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const theme = useResolvedTheme(initialTheme);
-  const colors = COLOR_SYSTEM[theme];
 
   const isActive = React.useCallback(
     (route: RouteId): boolean => {
@@ -374,7 +368,7 @@ export default function Header({
 
   const brandClass = `
     font-serif transition-all duration-300
-    ${scrolled ? "text-[1.5rem] md:text-[1.85rem]" : "text-2xl md:text-3.5xl"}
+    ${scrolled ? "text-[1.35rem] md:text-[1.85rem]" : "text-[1.6rem] md:text-[2.15rem]"}
     ${colors.text.accent}
     ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
     tracking-tight leading-tight
@@ -383,7 +377,7 @@ export default function Header({
   const email = siteConfig.email || "info@abrahamoflondon.org";
   const phone = siteConfig.phone?.toString().trim() || "+442086225909";
 
-  const MotionHeader = isMounted ? motion.header : "header";
+  const MotionHeader = isMounted ? motion.header : ("header" as any);
 
   return (
     <MotionHeader
@@ -405,13 +399,13 @@ export default function Header({
           className={brandClass}
           prefetch={true}
         >
-          <span className="font-extrabold">Abraham</span>
-          <span className="font-bold"> of London</span>
+          <span className="font-extrabold">Abraham</span>{" "}
+          <span className="font-bold">of London</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-8 md:flex">
-          <ul className="flex items-center gap-8">
+        <div className="hidden items-center gap-6 lg:gap-8 md:flex">
+          <ul className="flex items-center gap-6 lg:gap-8">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.route}
@@ -425,25 +419,25 @@ export default function Header({
           </ul>
 
           {/* Desktop Actions */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 border-r border-current/20 pr-6">
-              <ContactButton 
-                type="email" 
-                value={email} 
-                theme={theme} 
+          <div className="flex items-center gap-4 lg:gap-6">
+            <div className="hidden items-center gap-4 border-r border-current/20 pr-4 lg:flex lg:pr-6">
+              <ContactButton
+                type="email"
+                value={email}
+                theme={theme}
                 isMovementDetected={isMovementDetected}
               />
-              <ContactButton 
-                type="phone" 
-                value={phone} 
-                theme={theme} 
+              <ContactButton
+                type="phone"
+                value={phone}
+                theme={theme}
                 isMovementDetected={isMovementDetected}
               />
             </div>
 
             <Link
               href={getRoutePath("contact")}
-              className={`rounded-full bg-softGold px-6 py-2.5 font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 ${
+              className={`hidden rounded-full bg-softGold px-5 py-2.5 text-sm font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block lg:px-6 ${
                 theme === "dark" && isMovementDetected ? "shadow-lg shadow-softGold/30" : ""
               }`}
               aria-label="Go to contact form"
@@ -465,7 +459,7 @@ export default function Header({
             aria-expanded={isOpen}
             aria-controls="mobile-nav"
             aria-label="Toggle navigation menu"
-            className={`inline-flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
               theme === "dark"
                 ? "bg-white/15 text-white hover:bg-white/25"
                 : "bg-black/10 text-deepCharcoal hover:bg-black/20"
@@ -553,7 +547,7 @@ export default function Header({
                 <Link
                   href={getRoutePath("contact")}
                   onClick={() => setIsOpen(false)}
-                  className={`block w-full rounded-xl px-6 py-4 text-center font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
+                  className={`block w-full rounded-xl px-6 py-4 text-center text-sm font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
                     theme === "dark"
                       ? "bg-softGold text-deepCharcoal"
                       : "bg-softGold text-deepCharcoal"
@@ -568,7 +562,7 @@ export default function Header({
         )}
       </AnimatePresence>
 
-      {/* Global Styles with Glow Effects */}
+      {/* Global header styles */}
       <style jsx global>{`
         :root {
           --header-height: ${headerHeight};
@@ -585,16 +579,9 @@ export default function Header({
 
         .glow-active {
           text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
-                       0 0 20px rgba(255, 255, 255, 0.2),
-                       0 0 30px rgba(255, 255, 255, 0.1);
+            0 0 20px rgba(255, 255, 255, 0.2),
+            0 0 30px rgba(255, 255, 255, 0.1);
           filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
-        }
-
-        /* Smooth transitions for all interactive elements */
-        .transition-all {
-          transition-property: all;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 300ms;
         }
 
         @media (max-width: 767px) {

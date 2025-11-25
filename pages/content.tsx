@@ -1,4 +1,3 @@
-// pages/content.tsx
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -6,7 +5,6 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 
-// Existing data helpers
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
@@ -53,16 +51,14 @@ interface ContentPageProps {
 }
 
 // ---------------------------------------------------------------------------
-// Icon System with Subtle Motion
+// Icons
 // ---------------------------------------------------------------------------
 
 const StyledIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = "h-6 w-6",
 }) => (
-  <div className={`transform transition-all duration-700 ease-in-out ${className}`}>
-    {children}
-  </div>
+  <div className={`transform transition-all duration-700 ease-in-out ${className}`}>{children}</div>
 );
 
 const BlogIcon = ({ className }: { className?: string }) => (
@@ -225,18 +221,21 @@ const GlassCard: React.FC<GlassCardProps> = ({
       bg-white/[0.04] backdrop-blur-3xl
       border border-white/10
       shadow-2xl shadow-black/40
-      before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-100%]
+      before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-100%]
       hover:before:translate-x-[100%] hover:before:transition-transform hover:before:duration-1000
-      ${hoverEffect ? "transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60" : ""}
+      ${
+        hoverEffect
+          ? "transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60"
+          : ""
+      }
       ${
         softGlow
-          ? "after:absolute after:inset-0 after:bg-gradient-to-br after:from-softGold/10 after:via-transparent after:to-softGold/5 after:opacity-0 after:transition-opacity after:duration-700 hover:after:opacity-100"
+          ? "after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-br after:from-softGold/10 after:via-transparent after:to-softGold/5 after:opacity-0 after:transition-opacity after:duration-700 hover:after:opacity-100"
           : ""
       }
       ${className}
     `}
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
     <div className="relative z-10 h-full">{children}</div>
   </div>
 );
@@ -262,7 +261,7 @@ const CosmicBackground: React.FC = () => {
 };
 
 // ---------------------------------------------------------------------------
-// Safe Helper Functions
+// Helpers
 // ---------------------------------------------------------------------------
 
 const getSlug = (item: RawContentItem): string | undefined => {
@@ -337,7 +336,7 @@ const processContentItems = (
 };
 
 // ---------------------------------------------------------------------------
-// Signature Content Components
+// Signature Cards
 // ---------------------------------------------------------------------------
 
 interface SignatureCardProps {
@@ -363,9 +362,12 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
   if (variant === "featured") {
     return (
       <GlassCard softGlow hoverEffect>
-        <div className="group relative flex h-full flex-col p-8" style={{ animationDelay: `${index * 100}ms` }}>
+        <div
+          className="group relative flex h-full flex-col p-8"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
           <div
-            className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(
+            className={`pointer-events-none absolute inset-0 rounded-3xl ${getKindSubtleGradient(
               item.kind,
             )} opacity-0 transition-opacity duration-1000 group-hover:opacity-100`}
           />
@@ -414,7 +416,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
                 <span className="bg-gradient-to-r from-softGold to-amber-200 bg-clip-text text-transparent">
                   {ctaLabel}
                 </span>
-                <ArrowIcon className="transform group-hover:translate-x-2 group-hover:scale-110" />
+                <ArrowIcon className="h-4 w-4 transform group-hover:translate-x-2 group-hover:scale-110" />
               </Link>
             </div>
           </div>
@@ -428,7 +430,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
     <GlassCard hoverEffect>
       <div className="group relative flex h-full flex-col p-6">
         <div
-          className={`absolute inset-0 rounded-3xl ${getKindSubtleGradient(
+          className={`pointer-events-none absolute inset-0 rounded-3xl ${getKindSubtleGradient(
             item.kind,
           )} opacity-0 transition-opacity duration-700 group-hover:opacity-100`}
         />
@@ -467,7 +469,9 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
           </h3>
 
           {description && (
-            <p className="mb-4 flex-grow text-sm leading-relaxed text-gray-300 line-clamp-3">{description}</p>
+            <p className="mb-4 flex-grow text-sm leading-relaxed text-gray-300 line-clamp-3">
+              {description}
+            </p>
           )}
 
           <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
@@ -670,10 +674,18 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
     }
   };
 
+  const scrollToGallery = () => {
+    if (typeof window === "undefined") return;
+    const target = document.getElementById("gallery");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   if (!mounted) {
     return (
       <Layout title="Content Library">
-        <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="flex min-height-screen items-center justify-center bg-black">
           <div className="text-lg text-softGold">Loading content…</div>
         </div>
       </Layout>
@@ -705,7 +717,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
           <div className="relative z-10 mx-auto max-w-6xl text-center">
             <div className="mb-10 inline-flex items-center gap-3 rounded-full border border-softGold/30 bg-softGold/10 px-8 py-3 backdrop-blur-2xl">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-softGold" />
+              <span className="relative flex h-1.5 w-1.5 items-center justify-center">
+                <span className="absolute h-3 w-3 animate-ping rounded-full bg-softGold/40" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-softGold" />
+              </span>
               <span className="text-xs font-medium tracking-[0.25em] text-softGold">
                 THE WISDOM ATELIER
               </span>
@@ -726,7 +741,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
             <div className="mb-16 flex flex-col items-center justify-center gap-5 sm:flex-row sm:justify-center">
               <button
-                onClick={() => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })}
+                type="button"
+                onClick={scrollToGallery}
                 className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-4 text-base font-semibold text-black transition-all duration-700 hover:scale-[1.04] hover:shadow-2xl hover:shadow-yellow-500/30"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -737,7 +753,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
               </button>
 
               <button
-                onClick={() => setActiveFilter("download")}
+                type="button"
+                onClick={() => {
+                  setActiveFilter("download");
+                  scrollToGallery();
+                }}
                 className="group rounded-full border-2 border-softGold/50 bg-black/40 px-12 py-4 text-base font-semibold text-softGold backdrop-blur-2xl transition-all duration-700 hover:bg-softGold/10 hover:border-softGold/80 hover:scale-[1.03]"
               >
                 <span className="flex items-center gap-3">
@@ -752,7 +772,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
               {signatureFilters.slice(1, 5).map((filter) => (
                 <button
                   key={filter.key}
-                  onClick={() => setActiveFilter(filter.key)}
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter(filter.key);
+                    scrollToGallery();
+                  }}
                   className="group rounded-3xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-2xl transition-all duration-700 hover:scale-[1.04] hover:border-softGold/40 hover:bg-white/10"
                 >
                   <div className="mb-3 text-2xl text-softGold">{filter.icon}</div>
@@ -763,10 +787,13 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             </div>
           </div>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          {/* Scroll indicator – raised a bit so it’s not cut off on mobile */}
+          <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2">
             <div className="flex flex-col items-center gap-2">
               <div className="text-xs font-light tracking-[0.3em] text-softGold/70">SCROLL</div>
-              <div className="h-12 w-px bg-gradient-to-b from-softGold to-transparent" />
+              <div className="flex h-12 items-start justify-center">
+                <div className="w-px bg-gradient-to-b from-softGold to-transparent" />
+              </div>
             </div>
           </div>
         </section>
@@ -801,10 +828,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         )}
 
         {/* Main Gallery */}
-        <section id="gallery" className="relative px-4 py-28">
+        <section id="gallery" data-library-start className="relative px-4 py-28">
           <div className="mx-auto max-w-7xl">
             <div
-              className={`sticky top-24 z-50 mb-16 transition-all duration-700 ${
+              className={`sticky top-24 z-40 mb-16 transition-all duration-700 ${
                 isScrolled
                   ? "rounded-3xl border border-white/10 bg-black/90 p-6 shadow-3xl backdrop-blur-3xl md:p-8"
                   : ""
@@ -819,8 +846,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-base text-white placeholder-gray-400 backdrop-blur-2xl transition-all duration-500 focus:border-softGold/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-softGold/25"
+                      aria-label="Search content library"
                     />
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
+                    <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
@@ -837,6 +865,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                   {signatureFilters.map((filter) => (
                     <button
                       key={filter.key}
+                      type="button"
                       onClick={() => setActiveFilter(filter.key)}
                       onKeyDown={(e) => handleKeyDown(e, filter.key)}
                       className={`flex items-center gap-3 rounded-full border-2 px-5 py-3 text-xs font-medium transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black md:text-sm ${
@@ -844,6 +873,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                           ? "border-softGold bg-softGold text-black shadow-2xl shadow-yellow-500/40 transform scale-105"
                           : "border-white/10 bg-white/5 text-gray-300 hover:border-softGold/40 hover:bg-white/10 hover:scale-[1.02]"
                       }`}
+                      aria-pressed={activeFilter === filter.key}
+                      aria-label={`${filter.label} (${filter.count})`}
                     >
                       <span className="text-base">{filter.icon}</span>
                       <span>{filter.label}</span>
@@ -871,6 +902,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                 </p>
                 {(searchQuery || activeFilter !== "all") && (
                   <button
+                    type="button"
                     onClick={() => {
                       setSearchQuery("");
                       setActiveFilter("all");
@@ -953,11 +985,17 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                 context, your market, and your mandate.
               </p>
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
-                <button className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-4 text-sm font-semibold text-black transition-all duration-700 hover:scale-[1.04] hover:shadow-2xl hover:shadow-yellow-500/30 md:text-base">
+                <button
+                  type="button"
+                  className="group relative overflow-hidden rounded-full bg-gradient-to-r from-softGold to-amber-500 px-12 py-4 text-sm font-semibold text-black transition-all duration-700 hover:scale-[1.04] hover:shadow-2xl hover:shadow-yellow-500/30 md:text-base"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-softGold opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <span className="relative z-10">Discuss a mandate</span>
                 </button>
-                <button className="group rounded-full border-2 border-softGold/60 bg-transparent px-12 py-4 text-sm font-semibold text-softGold transition-all duration-700 hover:bg-softGold/10 hover:scale-[1.03] md:text-base">
+                <button
+                  type="button"
+                  className="group rounded-full border-2 border-softGold/60 bg-transparent px-12 py-4 text-sm font-semibold text-softGold transition-all duration-700 hover:bg-softGold/10 hover:scale-[1.03] md:text-base"
+                >
                   <span className="flex items-center gap-3">
                     Request a private session
                     <ArrowIcon className="h-4 w-4 transform group-hover:translate-x-1" />
@@ -971,7 +1009,6 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
 
       {/* Global tweaks specific to this page */}
       <style jsx global>{`
-        /* Subtle scrollbar using existing palette */
         ::-webkit-scrollbar {
           width: 8px;
         }
