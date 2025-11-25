@@ -1,10 +1,10 @@
-// pages/[slug].tsx
+// pages/[slug].tsx (WIRED WITH COMMENTS)
 import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
+  MDXRemote,
+  type MDXRemoteSerializeResult,
 } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
@@ -13,15 +13,18 @@ import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
+// IMPORT FIX: Import the Comments component
+import Comments from "@/components/Comments"; 
+
 
 type PageMeta = PostMeta & {
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
 };
 
 type PageProps = {
-  meta: PageMeta;
-  mdxSource: MDXRemoteSerializeResult;
+  meta: PageMeta;
+  mdxSource: MDXRemoteSerializeResult;
 };
 
 const COLLECTION_KEY = "pages";
@@ -31,141 +34,158 @@ const COLLECTION_KEY = "pages";
 // -----------------------------------------------------------------------------
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
-  const {
-    title,
-    description,
-    excerpt,
-    category,
-    tags,
-    date,
-    readTime,
-    coverImage,
-    coverAspect,
-    coverFit,
-  } = meta;
+  const {
+    title,
+    description,
+    excerpt,
+    category,
+    tags,
+    date,
+    readTime,
+    coverImage,
+    coverAspect,
+    coverFit,
+    // Determine if this content type should show comments
+    kind // Assuming 'kind' field exists in PostMeta or can be inferred/added
+  } = meta as any; // Cast meta to any to avoid strict type issues on inferred properties
 
-  const displaySubtitle = excerpt || description || undefined;
+  const displaySubtitle = excerpt || description || undefined;
 
-  const primaryCategory =
-    category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+  const primaryCategory =
+    category ||
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
 
-  const canonicalTitle = title || "Abraham of London";
-  const displayDescription = description || excerpt || "";
+  const canonicalTitle = title || "Abraham of London";
+  const displayDescription = description || excerpt || "";
 
-  return (
-    <Layout title={canonicalTitle}>
-      <Head>
-        <title>{canonicalTitle} | Abraham of London</title>
-        {displayDescription && (
-          <meta name="description" content={displayDescription} />
-        )}
-      </Head>
+  // Logic to determine if comments should be shown (e.g., only on 'Post' or 'Blog')
+  const showComments = kind === 'Post' || primaryCategory === 'Article'; 
 
-      <ArticleHero
-        title={title}
-        subtitle={displaySubtitle}
-        category={primaryCategory}
-        date={date}
-        readTime={readTime}
-        coverImage={coverImage as string | undefined}
-        coverAspect={coverAspect}
-        coverFit={coverFit}
-      />
 
-      <main>
-        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          <div
-            className="
-              prose prose-lg max-w-none
-              prose-headings:font-serif prose-headings:text-cream
-              prose-p:text-gray-200 prose-p:leading-relaxed
-              prose-strong:text-cream prose-strong:font-semibold
-              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-gray-200 prose-ol:text-gray-200
-              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
-              prose-hr:border-t border-white/10
-              prose-img:rounded-xl prose-img:shadow-lg
-            "
-          >
-            <MDXRemote {...mdxSource} components={mdxComponents} />
-          </div>
-        </article>
-      </main>
-    </Layout>
-  );
+  return (
+    <Layout title={canonicalTitle}>
+      <Head>
+        <title>{canonicalTitle} | Abraham of London</title>
+        {displayDescription && (
+          <meta name="description" content={displayDescription} />
+        )}
+      </Head>
+
+      <ArticleHero
+        title={title}
+        subtitle={displaySubtitle}
+        category={primaryCategory}
+        date={date}
+        readTime={readTime}
+        coverImage={coverImage as string | undefined}
+        coverAspect={coverAspect}
+        coverFit={coverFit}
+      />
+
+      <main>
+        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
+          <div
+            className="
+              prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-cream
+              prose-p:text-gray-200 prose-p:leading-relaxed
+              prose-strong:text-cream prose-strong:font-semibold
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-gray-200 prose-ol:text-gray-200
+              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
+              prose-hr:border-t border-white/10
+              prose-img:rounded-xl prose-img:shadow-lg
+            "
+          >
+            <MDXRemote {...mdxSource} components={mdxComponents} />
+          </div>
+          
+          {/* INTEGRATION FIX: Render the Comments component after the article */}
+          {showComments && (
+            <div className="mt-20 pt-8 border-t border-aol-border-subtle">
+              <Comments 
+                issueTerm="pathname" // Link issue to the current URL path
+                label="discussion" // Optional label for GitHub issue
+                className="pb-16"
+              />
+            </div>
+          )}
+        </article>
+      </main>
+    </Layout>
+  );
 }
 
 export default ContentPage;
 
 // -----------------------------------------------------------------------------
-// SSG – paths
+// SSG – paths (Unchanged)
 // -----------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const items = getAllContent(COLLECTION_KEY) ?? [];
+  try {
+    const items = getAllContent(COLLECTION_KEY) ?? [];
 
-    const paths =
-      items
-        .filter((item: any) => item?.slug)
-        .map((item: any) => ({
-          params: { slug: String(item.slug) },
-        })) ?? [];
+    const paths =
+      items
+        .filter((item: any) => item?.slug)
+        .map((item: any) => ({
+          params: { slug: String(item.slug) },
+        })) ?? [];
 
-    return {
-      paths,
-      fallback: "blocking",
-    };
-  } catch (err) {
-    console.error("Error generating static paths for /[slug]:", err);
-    return { paths: [], fallback: "blocking" };
-  }
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (err) {
+    console.error("Error generating static paths for /[slug]:", err);
+    return { paths: [], fallback: "blocking" };
+  }
 };
 
 // -----------------------------------------------------------------------------
-// SSG – props
+// SSG – props (Unchanged)
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({
-  params,
+  params,
 }) => {
-  try {
-    const slugParam = params?.slug;
-    const slug =
-      typeof slugParam === "string"
-        ? slugParam
-        : Array.isArray(slugParam)
-        ? slugParam[0]
-        : "";
+  try {
+    const slugParam = params?.slug;
+    const slug =
+      typeof slugParam === "string"
+        ? slugParam
+        : Array.isArray(slugParam)
+        ? slugParam[0]
+        : "";
 
-    if (!slug) return { notFound: true };
+    if (!slug) return { notFound: true };
 
-    const data = getContentBySlug(COLLECTION_KEY, slug, {
-      withContent: true,
-    }) as (PageMeta & { content?: string }) | null;
+    const data = getContentBySlug(COLLECTION_KEY, slug, {
+      withContent: true,
+    }) as (PageMeta & { content?: string }) | null;
 
-    if (!data) return { notFound: true };
+    if (!data) return { notFound: true };
 
-    const { content, ...meta } = data;
+    const { content, ...meta } = data;
 
-    if (!meta.title) return { notFound: true };
+    if (!meta.title) return { notFound: true };
 
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
-    const mdxSource = await serialize(content || "", {
-      scope: jsonSafeMeta as unknown as Record<string, unknown>,
-    });
+    const mdxSource = await serialize(content || "", {
+      scope: jsonSafeMeta as unknown as Record<string, unknown>,
+    });
 
-    return {
-      props: {
-        meta: jsonSafeMeta,
-        mdxSource,
-      },
-      revalidate: 3600,
-    };
-  } catch (err) {
-    console.error("Error in getStaticProps for /[slug]:", err);
-    return { notFound: true };
-  }
+    return {
+      props: {
+        meta: jsonSafeMeta,
+        mdxSource,
+      },
+      revalidate: 3600,
+    };
+  } catch (err) {
+    console.error("Error in getStaticProps for /[slug]:", err);
+    return { notFound: true };
+  }
 };
