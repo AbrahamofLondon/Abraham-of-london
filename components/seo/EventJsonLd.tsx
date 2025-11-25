@@ -1,11 +1,21 @@
 import React from "react";
 
+export interface EventOffer {
+  "@type": "Offer";
+  url?: string;
+  price?: string | number;
+  priceCurrency?: string;
+  availability?: string;
+  validFrom?: string;
+  description?: string;
+}
+
 export type EventJsonLdProps = {
   name: string;
-  startDate: string;         // ISO
-  endDate?: string;          // ISO
-  eventStatus?: string;      // e.g., "https://schema.org/EventScheduled"
-  eventAttendanceMode?: string; // e.g., "https://schema.org/OfflineEventAttendanceMode"
+  startDate: string;
+  endDate?: string;
+  eventStatus?: string;
+  eventAttendanceMode?: string;
   location: {
     "@type": "Place";
     name: string;
@@ -21,7 +31,7 @@ export type EventJsonLdProps = {
   image?: string | string[];
   description?: string;
   organizer?: { "@type": "Organization" | "Person"; name: string; url?: string };
-  offers?: any[];
+  offers?: EventOffer[];
   url?: string;
 };
 
@@ -34,7 +44,6 @@ export default function EventJsonLd(props: EventJsonLdProps) {
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );

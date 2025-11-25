@@ -1,4 +1,3 @@
-// components/ui/Button.tsx
 import * as React from "react";
 import clsx from "clsx";
 import Link from "next/link";
@@ -6,20 +5,25 @@ import Link from "next/link";
 type Variant = "primary" | "secondary" | "ghost";
 type Size = "sm" | "md" | "lg";
 
-type Props = {
+interface BaseProps {
   variant?: Variant;
   size?: Size;
   className?: string;
   children: React.ReactNode;
   href?: string;
-} & Omit<
+}
+
+type ButtonProps = BaseProps & Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   "className" | "color" | "href"
-> &
-  Omit<
-    React.AnchorHTMLAttributes<HTMLAnchorElement>,
-    "className" | "color" | "href"
-  >;
+>;
+
+type AnchorProps = BaseProps & Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  "className" | "color" | "href"
+>;
+
+type Props = ButtonProps | AnchorProps;
 
 const variantCls: Record<Variant, string> = {
   primary:
@@ -58,29 +62,34 @@ export default function Button({
       /^https?:\/\//i.test(href) ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:");
+    
+    const anchorProps = rest as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+    
     if (isExternal) {
       return (
         <a
           href={href}
           className={classes}
-          {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+          {...anchorProps}
         >
           {children}
         </a>
       );
     }
-    // Internal route → Next Link
+    
     return (
-      <Link href={href} className={classes} {...(rest as any)}>
+      <Link href={href} className={classes} {...anchorProps}>
         {children}
       </Link>
     );
   }
 
+  const buttonProps = rest as React.ButtonHTMLAttributes<HTMLButtonElement>;
+  
   return (
     <button
       className={classes}
-      {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      {...buttonProps}
     >
       {children}
     </button>

@@ -260,18 +260,18 @@ export default function Comments({
 
       if (
         "addListener" in mql &&
-        typeof (mql as any).addListener === "function"
+        typeof (mql as { addListener?: unknown }).addListener === "function"
       ) {
-        (mql as any).addListener(onChange);
+        (mql as { addListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void }).addListener(onChange);
       }
 
       mqCleanup = () => {
         mql.removeEventListener?.("change", onChange);
         if (
           "removeListener" in mql &&
-          typeof (mql as any).removeListener === "function"
+          typeof (mql as { removeListener?: unknown }).removeListener === "function"
         ) {
-          (mql as any).removeListener(onChange);
+          (mql as { removeListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void }).removeListener(onChange);
         }
       };
 

@@ -9,13 +9,13 @@ export type Testimonial = {
   name: string;
   role?: string;
   company?: string;
-  href?: string;         // optional source link
-  avatar?: string;       // /public path
-  logo?: string;         // company logo /public path
+  href?: string; // optional source link
+  avatar?: string; // /public path
+  logo?: string; // company logo /public path
   rating?: 1 | 2 | 3 | 4 | 5;
-  metric?: string;       // e.g. "Team alignment in 1 session"
-  verified?: boolean;    // shows a check badge
-  date?: string;         // ISO
+  metric?: string; // e.g. "Team alignment in 1 session"
+  verified?: boolean; // shows a check badge
+  date?: string; // ISO string
 };
 
 type Props = {
@@ -27,6 +27,50 @@ type Props = {
   className?: string;
   limit?: number;
 };
+
+// --- JSON-LD schema types ---------------------------------------------------
+
+interface SchemaAuthor {
+  "@type": "Person";
+  name: string;
+  jobTitle?: string;
+}
+
+interface SchemaRating {
+  "@type": "Rating";
+  ratingValue: number;
+  bestRating: number;
+  worstRating: number;
+}
+
+interface SchemaPublisher {
+  "@type": "Organization";
+  name: string;
+}
+
+interface SchemaReview {
+  "@type": "Review";
+  reviewBody: string;
+  author: SchemaAuthor;
+  reviewRating?: SchemaRating;
+  publisher?: SchemaPublisher;
+  datePublished?: string;
+  url?: string;
+}
+
+interface SchemaListItem {
+  "@type": "ListItem";
+  position: number;
+  item: SchemaReview;
+}
+
+interface SchemaItemList {
+  "@context": "https://schema.org";
+  "@type": "ItemList";
+  itemListElement: SchemaListItem[];
+}
+
+// ---------------------------------------------------------------------------
 
 const DEFAULT_ITEMS: Testimonial[] = [
   {
@@ -82,16 +126,27 @@ export default function TestimonialsSection({
       ? "bg-white/10 border border-white/10 text-cream"
       : "bg-white ring-1 ring-black/10 text-deepCharcoal";
 
-  const subText = variant === "dark" ? "text-[color:var(--color-on-primary)/0.8]" : "text-[color:var(--color-on-secondary)/0.8]";
+  const subText =
+    variant === "dark"
+      ? "text-[color:var(--color-on-primary)/0.8]"
+      : "text-[color:var(--color-on-secondary)/0.8]";
 
   // JSON-LD (Review list)
-  const ldJson = React.useMemo(() => {
-    const reviews = data.map((t) => {
-      const review: any = {
+  const ldJson = React.useMemo<SchemaItemList>(() => {
+    const reviews: SchemaReview[] = data.map((t) => {
+      const review: SchemaReview = {
         "@type": "Review",
         reviewBody: t.quote,
-        author: { "@type": "Person", name: t.name, ...(t.role ? { jobTitle: t.role } : {}) },
+        author: {
+          "@type": "Person",
+          name: t.name,
+        },
       };
+
+      if (t.role) {
+        review.author.jobTitle = t.role;
+      }
+
       if (t.rating) {
         review.reviewRating = {
           "@type": "Rating",
@@ -100,21 +155,35 @@ export default function TestimonialsSection({
           worstRating: 1,
         };
       }
+
       if (t.company) {
-        review.publisher = { "@type": "Organization", name: t.company };
+        review.publisher = {
+          "@type": "Organization",
+          name: t.company,
+        };
       }
-      if (t.date) review.datePublished = t.date;
-      if (t.href) review.url = t.href;
+
+      if (t.date) {
+        review.datePublished = t.date;
+      }
+
+      if (t.href) {
+        review.url = t.href;
+      }
+
       return review;
     });
+
+    const itemListElement: SchemaListItem[] = reviews.map((review, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: review,
+    }));
+
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      itemListElement: reviews.map((r, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        item: r,
-      })),
+      itemListElement,
     };
   }, [data]);
 
@@ -168,14 +237,13 @@ export default function TestimonialsSection({
               {data.map((t, i) => (
                 <motion.figure
                   key={`${t.name}-${t.role ?? "role"}-${i}`}
-                  className={clsx(
-                    "rounded-2xl shadow-md p-6 relative overflow-hidden",
-                    card
-                  )}
+                  className={clsx("rounded-2xl shadow-md p-6 relative overflow-hidden", card)}
                   initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
                   whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
-                  transition={reduceMotion ? undefined : { duration: 0.45, delay: i * 0.06 }}
+                  transition={
+                    reduceMotion ? undefined : { duration: 0.45, delay: i * 0.06 }
+                  }
                 >
                   {/* Header: avatar / logo / rating / verified */}
                   <div className="mb-4 flex items-center justify-between">
@@ -206,17 +274,26 @@ export default function TestimonialsSection({
                       </div>
                     </div>
                     {typeof t.rating === "number" && (
-                      <div className="flex items-center gap-0.5" aria-label={`${t.rating} out of 5`}>
-                        {[1,2,3,4,5].map(n => <Star key={n} filled={n <= (t.rating as number)} />)}
+                      <div
+                        className="flex items-center gap-0.5"
+                        aria-label={`${t.rating} out of 5`}
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star key={n} filled={n <= t.rating!} />
+                        ))}
                       </div>
                     )}
                   </div>
 
                   {/* Quote */}
                   <blockquote className="text-base leading-relaxed">
-                    <span aria-hidden className="sr-only">“</span>
+                    <span aria-hidden className="sr-only">
+                      “
+                    </span>
                     <span className="block line-clamp-6">{t.quote}</span>
-                    <span aria-hidden className="sr-only">”</span>
+                    <span aria-hidden className="sr-only">
+                      ”
+                    </span>
                   </blockquote>
 
                   {/* Footer: metric chip + source */}

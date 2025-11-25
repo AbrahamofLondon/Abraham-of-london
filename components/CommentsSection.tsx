@@ -1,4 +1,3 @@
-// components/CommentsSection.tsx
 "use client";
 
 import * as React from "react";
@@ -32,9 +31,9 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
     );
   }
 
-  const pageId = slug || typeof window !== "undefined"
+  const pageId = slug || (typeof window !== "undefined"
     ? window.location.pathname
-    : "";
+    : "");
 
   return (
     <section className="mt-16">
@@ -47,7 +46,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         strategy="lazyOnload"
         onLoad={() => {
           try {
-            const anyWindow = window as any;
+            const anyWindow = window as unknown as { HYVOR_TALK?: { init: (config: unknown) => void } };
             if (!anyWindow.HYVOR_TALK) return;
             anyWindow.HYVOR_TALK.init({
               websiteId,

@@ -2,7 +2,6 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Users, Shield, Target, ArrowRight, Star, Zap, Heart } from "lucide-react";
 import Layout from "@/components/Layout";

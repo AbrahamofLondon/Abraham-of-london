@@ -1,5 +1,3 @@
-// pages/events/[slug].tsx
-
 import type {
   GetStaticPaths,
   GetStaticProps,
@@ -65,7 +63,7 @@ function toSerializable<T>(value: T): T {
 
 /** Normalise event fields into a serialisable shape */
 function serialiseEvent(event: EventMeta): EventMetaSerialized {
-  const anyEv = event as any;
+  const anyEv = event as Record<string, unknown>;
 
   const dateRaw = anyEv.date ?? anyEv.startDate ?? null;
   const date =
@@ -84,15 +82,15 @@ function serialiseEvent(event: EventMeta): EventMetaSerialized {
 
   return {
     slug: String(anyEv.slug ?? "").trim(),
-    title: anyEv.title ?? "",
+    title: anyEv.title as string | undefined ?? "",
     date,
-    time: anyEv.time ?? null,
-    location: anyEv.location ?? anyEv.venue ?? null,
-    description: anyEv.description ?? anyEv.excerpt ?? null,
+    time: anyEv.time as string | null | undefined ?? null,
+    location: anyEv.location as string | null | undefined ?? (anyEv.venue as string | null | undefined) ?? null,
+    description: anyEv.description as string | null | undefined ?? (anyEv.excerpt as string | null | undefined) ?? null,
     heroImage,
     coverImage:
       typeof anyEv.coverImage === "string" ? anyEv.coverImage : heroImage,
-    tags: Array.isArray(anyEv.tags) ? anyEv.tags : null,
+    tags: Array.isArray(anyEv.tags) ? anyEv.tags as string[] : null,
   };
 }
 
@@ -105,18 +103,19 @@ function serialiseResources(
 ): EventResourcesSerialized | null {
   if (!resources || typeof resources !== "object") return null;
 
-  const anyRes = resources as any;
+  const anyRes = resources as Record<string, unknown>;
 
-  const toRel = (item: any): RelatedResourceSerialized => {
+  const toRel = (item: unknown): RelatedResourceSerialized => {
     if (!item || typeof item !== "object") return {};
+    const itemObj = item as Record<string, unknown>;
     return {
-      slug: item.slug ?? null,
-      title: item.title ?? null,
-      description: item.description ?? item.excerpt ?? null,
+      slug: itemObj.slug as string | null | undefined ?? null,
+      title: itemObj.title as string | null | undefined ?? null,
+      description: itemObj.description as string | null | undefined ?? (itemObj.excerpt as string | null | undefined) ?? null,
       coverImage:
-        typeof item.coverImage === "string" ? item.coverImage : null,
-      href: typeof item.href === "string" ? item.href : null,
-      kind: item.kind ?? null,
+        typeof itemObj.coverImage === "string" ? itemObj.coverImage : null,
+      href: typeof itemObj.href === "string" ? itemObj.href : null,
+      kind: itemObj.kind as string | null | undefined ?? null,
     };
   };
 

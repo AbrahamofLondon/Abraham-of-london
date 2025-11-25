@@ -31,6 +31,7 @@ export interface BaseContentMeta {
   readTime?: string;
   published?: boolean;
   draft?: boolean;
+  featured?: boolean; // Added featured property
 }
 
 // ----- Posts -----
@@ -39,6 +40,21 @@ export interface PostMeta extends BaseContentMeta {
   canonicalUrl?: string;
   series?: string;
   seriesOrder?: number;
+}
+
+// ----- Books -----
+export interface BookMeta extends BaseContentMeta {
+  isbn?: string;
+  publisher?: string;
+  publishedDate?: string;
+  pages?: number;
+  language?: string;
+  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
+  price?: string;
+  purchaseLink?: string;
+  rating?: number;
+  status?: "published" | "draft" | "scheduled";
+  content?: string; // Add content property for MDX
 }
 
 // ----- Downloads (from local module) -----

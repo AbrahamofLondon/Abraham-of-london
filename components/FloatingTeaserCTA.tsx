@@ -1,5 +1,3 @@
-// components/FloatingTeaserCTA.tsx
-
 "use client";
 import * as React from "react";
 import TeaserRequest from "@/components/TeaserRequest";
@@ -28,7 +26,7 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
   }
 
   const handleBackdropClick = (
-    e: React.MouseEvent<HTMLDivElement>,
+    e: React.MouseEvent<HTMLButtonElement>,
   ): void => {
     // Only close if the click is on the overlay itself, not inside the dialog
     if (e.target === e.currentTarget) {
@@ -37,7 +35,7 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
   };
 
   const handleBackdropKeyDown = (
-    e: React.KeyboardEvent<HTMLDivElement>,
+    e: React.KeyboardEvent<HTMLButtonElement>,
   ): void => {
     if (e.key === "Escape") {
       snooze();
@@ -67,14 +65,13 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
           aria-modal="true"
           id="teaser-cta-panel"
           className="fixed inset-0 z-50 flex items-end justify-end bg-black/20 backdrop-blur-[1px]"
-          onClick={handleBackdropClick}
-          onKeyDown={handleBackdropKeyDown}
         >
-          {/* Backdrop – just closes, no event typing needed */}
+          {/* Backdrop – now properly typed as button */}
           <button
             type="button"
             className="absolute inset-0 cursor-default"
-            onClick={() => snooze()}
+            onClick={handleBackdropClick}
+            onKeyDown={handleBackdropKeyDown}
             aria-label="Close teaser dialog"
           />
 

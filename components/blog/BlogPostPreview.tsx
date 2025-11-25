@@ -1,4 +1,3 @@
-// components/blog/BlogPostPreview.tsx
 import Link from "next/link";
 import Image from "next/image";
 import type { PostMeta } from "@/types/post";
@@ -88,13 +87,13 @@ const getSafeImageUrl = (image: CoverImageLike): string => {
 };
 
 // Type guard to check if object has coverImage property
-const hasCoverImage = (post: any): post is { coverImage: CoverImageLike } => {
-  return "coverImage" in post;
+const hasCoverImage = (post: unknown): post is { coverImage: CoverImageLike } => {
+  return typeof post === "object" && post !== null && "coverImage" in post;
 };
 
 // Type guard to check if object has readTime property
-const hasReadTime = (post: any): post is { readTime: string } => {
-  return "readTime" in post && typeof post.readTime === "string";
+const hasReadTime = (post: unknown): post is { readTime: string } => {
+  return typeof post === "object" && post !== null && "readTime" in post && typeof (post as { readTime: unknown }).readTime === "string";
 };
 
 export default function BlogPostPreview({

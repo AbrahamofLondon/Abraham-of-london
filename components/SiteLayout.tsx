@@ -1,12 +1,9 @@
-// components/SiteLayout.tsx
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { getPageTitle, absUrl } from "@/lib/siteConfig"; // Added absUrl import
+import { getPageTitle, absUrl } from "@/lib/siteConfig";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-// ---------- Types ----------
 
 interface MetaTag {
   name?: string;
@@ -45,8 +42,6 @@ interface SiteLayoutProps {
   errorBoundary?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
-// ---------- Defaults ----------
-
 const DEFAULT_CONFIG = {
   viewport: "width=device-width, initial-scale=1.0, viewport-fit=cover",
   charset: "UTF-8",
@@ -56,18 +51,23 @@ const DEFAULT_CONFIG = {
   twitterCard: "summary_large_image" as const,
 } as const;
 
-// ---------- Error Boundary ----------
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
 
-class LayoutErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: any) {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+class LayoutErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
@@ -108,8 +108,6 @@ class LayoutErrorBoundary extends React.Component<
   }
 }
 
-// ---------- Skip Link ----------
-
 const SkipToContent: React.FC<{ targetId: string }> = ({ targetId }) => (
   <a
     href={`#${targetId}`}
@@ -118,8 +116,6 @@ const SkipToContent: React.FC<{ targetId: string }> = ({ targetId }) => (
     Skip to main content
   </a>
 );
-
-// ---------- Main Layout ----------
 
 export default function SiteLayout({
   pageTitle,
@@ -174,14 +170,11 @@ export default function SiteLayout({
     ogImage || "/assets/images/social/twitter-image.jpg"
   );
 
-  // Base meta tags (excluding viewport/charset, which are explicit)
   const defaultMetaTags: MetaTag[] = React.useMemo(
     () => [
       { name: "description", content: defaultDescription },
       { name: "robots", content: robotsContent },
       { name: "theme-color", content: themeColor },
-
-      // Open Graph
       { property: "og:title", content: fullTitle },
       { property: "og:type", content: ogType },
       { property: "og:url", content: fullCanonicalUrl },
@@ -189,8 +182,6 @@ export default function SiteLayout({
       { property: "og:description", content: defaultDescription },
       { property: "og:site_name", content: "Abraham of London" },
       { property: "og:locale", content: "en_GB" },
-
-      // Twitter
       { name: "twitter:card", content: twitterCard },
       { name: "twitter:title", content: fullTitle },
       { name: "twitter:description", content: defaultDescription },
@@ -256,12 +247,10 @@ export default function SiteLayout({
   return (
     <>
       <Head>
-        {/* Primary meta */}
         <title>{fullTitle}</title>
         <meta charSet={charset} />
         <meta name="viewport" content={viewport} />
 
-        {/* Meta tags */}
         {allMetaTags.map((tag, index) => (
           <meta
             key={tag.key || `meta-${tag.name || tag.property || index}`}
@@ -271,7 +260,6 @@ export default function SiteLayout({
           />
         ))}
 
-        {/* Link tags */}
         {allLinkTags.map((tag, index) => (
           <link
             key={tag.key || `link-${tag.rel}-${index}`}
@@ -282,7 +270,6 @@ export default function SiteLayout({
           />
         ))}
 
-        {/* Preload self-hosted Inter (matches your @font-face path) */}
         <link
           rel="preload"
           href="/fonts/Inter-Variable.woff2"
@@ -291,7 +278,6 @@ export default function SiteLayout({
           crossOrigin="anonymous"
           key="font-preload-inter"
         />
-        {/* Add Playfair preload if you want */}
         <link
           rel="preload"
           href="/fonts/PlayfairDisplay-Variable.woff2"
@@ -302,18 +288,15 @@ export default function SiteLayout({
         />
       </Head>
 
-      {/* Structured data lives in the head/body boundary */}
       {structuredDataScript}
 
-      {/* Accessibility */}
       <SkipToContent targetId={skipToContentId} />
 
       <ErrorBoundary>
         <div
           className={`flex min-h-screen flex-col bg-warmWhite text-soft-charcoal antialiased ${className}`}
-          data-lang={lang} // cannot set <html lang> here; this is just an annotation
+          data-lang={lang}
         >
-          {/* FIX: Changed from variant="light" to initialTheme="light" */}
           <Header initialTheme="light" />
           <main
             id={skipToContentId}
@@ -328,8 +311,6 @@ export default function SiteLayout({
     </>
   );
 }
-
-// ---------- Hooks / Helpers ----------
 
 export function usePageMetadata(
   title: string,

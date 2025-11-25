@@ -1,5 +1,5 @@
 import * as React from "react";
-import ShareButtons, { ShareButtonsPresets } from "./ShareButtons";
+import ShareButtons from "./ShareButtons";
 
 export interface ShareRowProps {
   url: string;

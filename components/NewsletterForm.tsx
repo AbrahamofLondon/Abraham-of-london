@@ -1,4 +1,3 @@
-// components/NewsletterForm.tsx
 "use client";
 
 import * as React from "react";
@@ -11,15 +10,17 @@ export interface NewsletterFormProps {
   buttonText?: string;
 }
 
+type NewsletterResponse = {
+  message?: string;
+};
+
 export default function NewsletterForm({
   variant = "default",
   placeholder = "you@example.com",
   buttonText = "Subscribe",
 }: NewsletterFormProps) {
   const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">(
-    "idle",
-  );
+  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">("idle");
   const [msg, setMsg] = React.useState("");
   const [hp, setHp] = React.useState(""); // honeypot
   const abortRef = React.useRef<AbortController | null>(null);
@@ -57,7 +58,6 @@ export default function NewsletterForm({
     abortRef.current = controller;
 
     try {
-      // HOT-FIX: send both shapes so either backend contract is satisfied
       const r = await fetch("/api/newsletter", {
         method: "POST",
         headers: {
@@ -72,9 +72,15 @@ export default function NewsletterForm({
         signal: controller.signal,
       });
 
-      const data = await r.json().catch(() => ({} as any));
+      let data: NewsletterResponse = {};
+      try {
+        data = (await r.json()) as NewsletterResponse;
+      } catch {
+        data = {};
+      }
+
       const message =
-        typeof data?.message === "string"
+        typeof data.message === "string"
           ? data.message
           : r.ok
           ? "You’re subscribed. Welcome!"
@@ -88,8 +94,9 @@ export default function NewsletterForm({
         setStatus("err");
         setMsg(message);
       }
-    } catch (err: any) {
-      if (err?.name === "AbortError") return;
+    } catch (err) {
+      const error = err as { name?: string };
+      if (error?.name === "AbortError") return;
       setStatus("err");
       setMsg("Network error. Please try again.");
     }

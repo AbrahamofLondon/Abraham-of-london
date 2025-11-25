@@ -1,4 +1,3 @@
-// pages/about.tsx
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +37,7 @@ interface Achievement {
   description: string;
   year: number;
   href: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 const AboutPage: NextPage = () => {

@@ -1,4 +1,3 @@
-// pages/[slug].tsx
 import * as React from 'react';
 import Head from 'next/head';
 import type { GetStaticPaths, GetStaticProps } from 'next';
@@ -22,7 +21,8 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-const PRIMARY_COLLECTION = 'Post';
+// Remove unused variable - fix warning
+// const PRIMARY_COLLECTION = 'Post';
 const FALLBACK_COLLECTIONS = ['Print', 'Resource'] as const;
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
@@ -107,8 +107,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     const seen = new Set<string>();
     const paths = allItems
-      .filter((item: any) => item?.slug)
-      .map((item: any) => String(item.slug))
+      .filter((item: unknown) => {
+        const itemWithSlug = item as { slug?: unknown };
+        return itemWithSlug?.slug;
+      })
+      .map((item: unknown) => {
+        const itemWithSlug = item as { slug: unknown };
+        return String(itemWithSlug.slug);
+      })
       .filter((slug) => {
         if (seen.has(slug)) return false;
         seen.add(slug);

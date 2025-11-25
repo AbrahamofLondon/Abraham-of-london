@@ -1,5 +1,5 @@
-// components/events/mdx-components.tsx
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Rule from "@/components/mdx/Rule";
 
@@ -93,18 +93,38 @@ const A: React.FC<AnchorProps> = ({ href = "#", children, ...rest }) => {
   );
 };
 
-type ImgProps = React.ImgHTMLAttributes<HTMLImageElement>;
+type ImgProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+  src?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+};
 
-// FIXED: Added proper alt text handling
-const Img: React.FC<ImgProps> = ({ alt = "", ...props }) => (
-  <img
-    {...props}
-    alt={alt}
-    className={
-      "my-6 w-full rounded-xl border border-lightGrey bg-warmWhite object-contain " +
-      (props.className || "")
-    }
-  />
+// FIXED: Replaced img with Next.js Image component
+const Img: React.FC<ImgProps> = ({ 
+  src, 
+  alt = "", 
+  width = 800, 
+  height = 400,
+  ...props 
+}) => (
+  <div className="my-6 w-full rounded-xl border border-lightGrey bg-warmWhite overflow-hidden">
+    {src ? (
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={`rounded-xl object-contain ${props.className || ""}`}
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R"
+      />
+    ) : (
+      <div className="flex h-48 items-center justify-center text-gray-500">
+        Image not found
+      </div>
+    )}
+  </div>
 );
 
 /* -------------------------------------------------------------------------- */

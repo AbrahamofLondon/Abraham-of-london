@@ -1,3 +1,4 @@
+// pages/content.tsx
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
@@ -23,7 +24,7 @@ interface RawContentItem {
   excerpt?: string;
   description?: string;
   category?: string;
-  tags?: string[];
+  tags?: (string | number)[]; // Fixed: Allow numbers in tags
   featured?: boolean;
   readTime?: string | number;
   _raw?: { flattenedPath?: string };
@@ -314,6 +315,11 @@ const processContentItems = (
         return;
       }
 
+      // Convert all tags to strings
+      const tags = Array.isArray(item.tags) 
+        ? item.tags.map(tag => String(tag)) // Fixed: Convert numbers to strings
+        : [];
+
       processed.push({
         kind,
         title,
@@ -323,7 +329,7 @@ const processContentItems = (
         excerpt: item.excerpt,
         description: item.description,
         category: item.category || defaultCategory,
-        tags: Array.isArray(item.tags) ? item.tags : [],
+        tags, // Now this will always be string[]
         featured: Boolean(item.featured),
         readTime: item.readTime,
       });
@@ -505,50 +511,54 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
 // SSG
 // ---------------------------------------------------------------------------
 
+const safeGetData = async (
+  dataFetcher: (() => RawContentItem[] | undefined) | undefined,
+  dataName: string,
+): Promise<RawContentItem[]> => {
+  try {
+    if (!dataFetcher || typeof dataFetcher !== "function") {
+      console.warn(`[content] ${dataName} fetcher unavailable`);
+      return [];
+    }
+    const data = dataFetcher();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error(`[content] Error fetching ${dataName}:`, error);
+    return [];
+  }
+};
+
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   console.log("🌌 [content] Building content library...");
 
   try {
     const allItems: ContentResource[] = [];
 
-    const safeGetData = async <T,>(
-      dataFetcher: (() => T) | undefined,
-      dataName: string,
-    ): Promise<T[]> => {
-      try {
-        if (!dataFetcher || typeof dataFetcher !== "function") {
-          console.warn(`[content] ${dataName} fetcher unavailable`);
-          return [];
-        }
-        const data = dataFetcher();
-        return Array.isArray(data) ? data : [];
-      } catch (error) {
-        console.error(`[content] Error fetching ${dataName}:`, error);
-        return [];
-      }
-    };
-
-    const contentFetchers = [
-      { kind: "blog" as ContentKind, data: safeGetData(getAllPostsMeta, "blog posts"), category: "Essays" },
-      { kind: "book" as ContentKind, data: safeGetData(getAllBooksMeta, "books"), category: "Volumes" },
+    const contentFetchers: {
+      kind: ContentKind;
+      data: Promise<RawContentItem[]>;
+      category: string;
+    }[] = [
+      { kind: "blog", data: safeGetData(getAllPostsMeta, "blog posts"), category: "Essays" },
+      { kind: "book", data: safeGetData(getAllBooksMeta, "books"), category: "Volumes" },
       {
-        kind: "download" as ContentKind,
+        kind: "download",
         data: safeGetData(getAllDownloadsMeta, "downloads"),
         category: "Tools",
       },
       {
-        kind: "event" as ContentKind,
-        data: safeGetData(() => getAllContent?.("events"), "events"),
+        kind: "event",
+        data: safeGetData(() => getAllContent?.("events") ?? [], "events"),
         category: "Sessions",
       },
       {
-        kind: "print" as ContentKind,
-        data: safeGetData(() => getAllContent?.("prints"), "prints"),
+        kind: "print",
+        data: safeGetData(() => getAllContent?.("prints") ?? [], "prints"),
         category: "Prints",
       },
       {
-        kind: "resource" as ContentKind,
-        data: safeGetData(() => getAllContent?.("resources"), "resources"),
+        kind: "resource",
+        data: safeGetData(() => getAllContent?.("resources") ?? [], "resources"),
         category: "Resources",
       },
     ];
@@ -557,7 +567,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       contentFetchers.map(async ({ kind, data, category }) => {
         try {
           const items = await data;
-          const processed = processContentItems(items as unknown as RawContentItem[], kind, category);
+          const processed = processContentItems(items, kind, category);
           allItems.push(...processed);
           console.log(`✨ [content] Processed ${processed.length} ${kind}`);
         } catch (error) {
@@ -685,7 +695,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
   if (!mounted) {
     return (
       <Layout title="Content Library">
-        <div className="flex min-height-screen items-center justify-center bg-black">
+        <div className="flex min-h-screen items-center justify-center bg-black">
           <div className="text-lg text-softGold">Loading content…</div>
         </div>
       </Layout>
@@ -735,8 +745,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             </h1>
 
             <p className="mx-auto mb-14 max-w-3xl text-lg font-light leading-relaxed text-gray-300 md:text-xl">
-              Essays, frameworks, tools, and resources designed to help you think clearly, act
-              decisively, and build work that endures.
+              Essays, frameworks, tools, and resources designed to help you think clearly, act decisively, and
+              build work that endures.
             </p>
 
             <div className="mb-16 flex flex-col items-center justify-center gap-5 sm:flex-row sm:justify-center">
@@ -787,7 +797,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             </div>
           </div>
 
-          {/* Scroll indicator – raised a bit so it’s not cut off on mobile */}
+          {/* Scroll indicator */}
           <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2">
             <div className="flex flex-col items-center gap-2">
               <div className="text-xs font-light tracking-[0.3em] text-softGold/70">SCROLL</div>
@@ -804,11 +814,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center">
                 <h2 className="mb-4 font-serif text-3xl text-white md:text-4xl">
-                  Editor’s <span className="text-softGold">Selection</span>
+                  Editor's <span className="text-softGold">Selection</span>
                 </h2>
                 <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-gray-400 md:text-base">
-                  A small set of pieces worth starting with if you are meeting this library for the
-                  first time.
+                  A small set of pieces worth starting with if you are meeting this library for the first time.
                 </p>
               </div>
 
@@ -897,7 +906,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                 <h3 className="mb-4 font-serif text-2xl text-white md:text-3xl">No results found</h3>
                 <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-gray-400 md:text-base">
                   {searchQuery
-                    ? `Nothing matched “${searchQuery}”. Try a different term or clear the filters.`
+                    ? `Nothing matched "${searchQuery}". Try a different term or clear the filters.`
                     : `There is no content in this category yet.`}
                 </p>
                 {(searchQuery || activeFilter !== "all") && (
@@ -1018,20 +1027,12 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         }
 
         ::-webkit-scrollbar-thumb {
-          background: linear-gradient(
-            180deg,
-            var(--aol-softGold),
-            rgba(214, 178, 106, 0.6)
-          );
+          background: linear-gradient(180deg, var(--aol-softGold), rgba(214, 178, 106, 0.6));
           border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(
-            180deg,
-            rgba(214, 178, 106, 0.8),
-            var(--aol-softGold)
-          );
+          background: linear-gradient(180deg, rgba(214, 178, 106, 0.8), var(--aol-softGold));
         }
 
         ::selection {

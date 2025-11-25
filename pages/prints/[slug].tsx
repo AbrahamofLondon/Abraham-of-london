@@ -1,4 +1,3 @@
-// pages/prints/[slug].tsx
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +37,8 @@ export const getStaticProps: GetStaticProps<PrintPageProps> = async ({
   const print: PrintDocument = JSON.parse(JSON.stringify(doc));
 
   // Contentlayer stores MDX source on body.raw
-  const rawMdx: string = (doc as any).body?.raw ?? "";
+  const docWithBody = doc as PrintDocument & { body?: { raw?: string } };
+  const rawMdx: string = docWithBody.body?.raw ?? "";
 
   const contentSource =
     rawMdx.trim().length > 0
@@ -148,10 +148,7 @@ export default function PrintPage({ print, contentSource }: PrintPageProps) {
           {/* Body */}
           <article className="rounded-3xl border border-slate-700/70 bg-[#050608]/95 px-5 py-8 text-slate-100 shadow-2xl shadow-black/60 sm:px-10 sm:py-10">
             {contentSource ? (
-              <div
-                className="prose-lux"
-                >
-
+              <div className="prose-lux">
                 <MDXRemote {...contentSource} components={mdxComponents} />
               </div>
             ) : (

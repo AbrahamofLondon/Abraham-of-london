@@ -4,8 +4,10 @@
 
 import React from "react";
 import { MDXRemote } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
-export type MDXComponents = Record<string, React.ComponentType<any>>;
+export type MDXComponent = React.ComponentType<Record<string, unknown>>;
+export type MDXComponents = Record<string, MDXComponent>;
 
 // Minimal default shortcodes/components map; extend upstream as needed.
 const defaultComponents: MDXComponents = {
@@ -16,7 +18,7 @@ const defaultComponents: MDXComponents = {
 
 export interface MDXRendererProps {
   /** The serialized MDX object (result of next-mdx-remote/serialize). */
-  source: any;
+  source: MDXRemoteSerializeResult;
   /** Optional component override map (merged over defaults). */
   components?: MDXComponents;
   /** Optional className for a wrapping element. */
@@ -44,16 +46,19 @@ export default function MDXRenderer({
     );
   }
 
-  const merged = { ...defaultComponents, ...(components || {}) };
+  const merged: MDXComponents = { ...defaultComponents, ...(components || {}) };
 
   const content = <MDXRemote {...source} components={merged} />;
 
   if (prose) {
     return (
-      <article className={["prose prose-lg max-w-none", className].filter(Boolean).join(" ")}>
+      <article
+        className={["prose prose-lg max-w-none", className].filter(Boolean).join(" ")}
+      >
         {content}
       </article>
     );
-    }
+  }
+
   return <div className={className}>{content}</div>;
 }

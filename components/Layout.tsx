@@ -17,7 +17,7 @@ export default function Layout({
   children,
   title,
   pageTitle,
-  transparentHeader = false,
+  transparentHeader: _transparentHeader = false, // kept for API compatibility, intentionally unused
   className = "",
 }: LayoutProps): JSX.Element {
   const effectiveTitle = getPageTitle(title ?? pageTitle);
@@ -34,15 +34,10 @@ export default function Layout({
         <meta name="color-scheme" content="dark" />
       </Head>
 
-      {/* Use Header component with proper props */}
       <LuxuryNavbar variant="dark" transparent={false} />
-      
-      {/* Main content - Header component handles the padding via CSS */}
-      <main className="flex-1">
-        {children}
-      </main>
-      
-      {/* Footer */}
+
+      <main className="flex-1">{children}</main>
+
       <Footer />
     </div>
   );

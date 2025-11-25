@@ -20,6 +20,14 @@ type NavItem = {
   description?: string;
 };
 
+interface OriginalStyle {
+  position: string;
+  top: string;
+  left: string;
+  right: string;
+  overflow: string;
+}
+
 const NAV_ITEMS: NavItem[] = [
   { route: "booksIndex", label: "Books", description: "Curated volumes" },
   { route: "contentIndex", label: "Insights", description: "Strategic wisdom" },
@@ -30,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
 
 const SCROLL_THRESHOLD = 8;
 
-// slightly tighter heights on mobile so the hero isn’t crushed
+// slightly tighter heights on mobile so the hero isn't crushed
 const HEADER_HEIGHTS = {
   desktop: { normal: "5rem", scrolled: "4rem" },
   mobile: { normal: "4.25rem", scrolled: "3.5rem" },
@@ -138,7 +146,7 @@ const useBodyScrollLock = (isLocked: boolean): void => {
     if (!isLocked) return;
 
     const computed = window.getComputedStyle(document.body);
-    const originalStyle = {
+    const originalStyle: OriginalStyle = {
       position: computed.position,
       top: computed.top,
       left: computed.left,
@@ -188,7 +196,7 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   return theme;
 };
 
-// detect user movement to “wake up” glow for a short period
+// detect user movement to "wake up" glow for a short period
 const useMovementDetection = (enabled: boolean = true): boolean => {
   const [isMoving, setIsMoving] = React.useState(false);
 
@@ -377,7 +385,7 @@ export default function Header({
   const email = siteConfig.email || "info@abrahamoflondon.org";
   const phone = siteConfig.phone?.toString().trim() || "+442086225909";
 
-  const MotionHeader = isMounted ? motion.header : ("header" as any);
+  const MotionHeader = isMounted ? motion.header : "header";
 
   return (
     <MotionHeader

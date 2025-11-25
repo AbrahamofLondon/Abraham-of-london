@@ -1,4 +1,3 @@
-// components/HighQImage.tsx
 import * as React from "react";
 import NextImage, { ImageProps } from "next/image";
 
@@ -36,7 +35,7 @@ export default function HighQImage({
       quality={quality}
       sizes={finalSizes}
       priority={finalPriority}
-      loading={finalLoading as any}
+      loading={finalLoading}
       {...rest}
     />
   );

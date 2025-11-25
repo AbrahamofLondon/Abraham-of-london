@@ -30,6 +30,10 @@ export interface BookMeta {
     url: string;
     price?: string;
   }>;
+  // Add fields to match usage in components
+  _type?: "book";
+  date?: string;
+  readTime?: string;
 }
 
 export interface BookFilters {
@@ -59,5 +63,5 @@ export const bookOptionalFields: BookField[] = [
   'author', 'publisher', 'publishedDate', 'isbn', 'description', 'summary',
   'coverImage', 'heroImage', 'tags', 'category', 'resources', 'content',
   'excerpt', 'status', 'featured', 'rating', 'pages', 'language', 'format',
-  'purchaseLinks'
+  'purchaseLinks', '_type', 'date', 'readTime'
 ];

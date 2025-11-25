@@ -1,65 +1,132 @@
 // lib/books.ts
-// Facade over the server-side books loader, returning fully-typed Book objects.
+// Fully safe, typed, and without duplicate exports.
 
 import {
   getAllBooksMeta,
   getBookBySlug as getBookDocBySlug,
 } from "@/lib/server/books-data";
 
-export interface Book {
-  slug: string;
-  title: string;
-  excerpt?: string;
-  coverImage?: string;
-  date?: string;
-  author?: string | null;
-  readTime?: string | null;
-  [key: string]: unknown;
+import type { BookMeta } from "@/types/index";
+
+/**
+ * Safely convert any value to string or return undefined
+ */
+function safeString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
 /**
- * Normalise raw meta into a strongly-typed Book.
- * Ensures title is always a non-empty string.
+ * Safely convert any value to number or return undefined
  */
-function normaliseBookMeta(raw: Record<string, unknown>): Book {
-  const slug = String(raw.slug ?? "").trim();
-  const title =
-    typeof raw.title === "string" && raw.title.trim().length
-      ? raw.title
-      : "Untitled";
+function safeNumber(value: unknown): number | undefined {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+}
 
-  const book: Book = {
+/**
+ * Safely convert any value to boolean or return undefined
+ */
+function safeBoolean(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    return value.toLowerCase() === 'true';
+  }
+  return undefined;
+}
+
+/**
+ * Safely convert any value to array or return undefined
+ */
+function safeArray(value: unknown): string[] | undefined {
+  return Array.isArray(value) ? value.filter(item => typeof item === 'string') : undefined;
+}
+
+/**
+ * Normalise raw meta into a strongly-typed BookMeta.
+ * Ensures all fields are either properly typed or omitted (undefined)
+ */
+function normaliseBookMeta(raw: Record<string, unknown>): BookMeta {
+  const slug = safeString(raw.slug) || "";
+  const title = safeString(raw.title) || "Untitled";
+
+  return {
+    // Required fields
     slug,
     title,
-    excerpt:
-      typeof raw.excerpt === "string" ? raw.excerpt : undefined,
-    coverImage:
-      typeof raw.coverImage === "string" ? raw.coverImage : undefined,
-    date: typeof raw.date === "string" ? raw.date : undefined,
-    author:
-      typeof (raw as any).author === "string"
-        ? (raw as any).author
-        : null,
-    readTime:
-      typeof (raw as any).readTime === "string"
-        ? (raw as any).readTime
-        : null,
-    // keep the rest of the fields available for consumers that need them
-    ...raw,
+    
+    // Optional string fields
+    excerpt: safeString(raw.excerpt),
+    coverImage: safeString(raw.coverImage),
+    date: safeString(raw.date),
+    author: safeString(raw.author),
+    readTime: safeString(raw.readTime),
+    subtitle: safeString(raw.subtitle),
+    description: safeString(raw.description),
+    lastModified: safeString(raw.lastModified),
+    category: safeString(raw.category),
+    isbn: safeString(raw.isbn),
+    publisher: safeString(raw.publisher),
+    publishedDate: safeString(raw.publishedDate),
+    language: safeString(raw.language),
+    price: safeString(raw.price),
+    purchaseLink: safeString(raw.purchaseLink),
+    
+    // Optional boolean fields
+    featured: safeBoolean(raw.featured),
+    published: safeBoolean(raw.published),
+    draft: safeBoolean(raw.draft),
+    
+    // Optional array fields
+    tags: safeArray(raw.tags),
+    
+    // Optional number fields
+    pages: safeNumber(raw.pages),
+    rating: safeNumber(raw.rating),
+    
+    // Optional typed fields
+    format: safeString(raw.format) as "hardcover" | "paperback" | "ebook" | "audiobook" | undefined,
   };
-
-  return book;
 }
 
-/** All books as fully-typed Book[] – safe for UI use. */
-export function getAllBooks(): Book[] {
-  const metas = getAllBooksMeta() as Record<string, unknown>[];
-  return metas.map((meta) => normaliseBookMeta(meta));
+/**
+ * Convert any object to Record<string, unknown> safely
+ */
+function toSafeRecord(obj: any): Record<string, unknown> {
+  if (!obj || typeof obj !== 'object') return {};
+  
+  const record: Record<string, unknown> = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    record[key] = value;
+  });
+  return record;
 }
 
-/** Single book by slug, or undefined if not found. */
-export function getBookBySlug(slug: string): Book | undefined {
+/**
+ * Get raw book data as plain objects for tooling/debugging
+ */
+export function getRawBooks(): Record<string, unknown>[] {
+  const books = getAllBooksMeta();
+  return books.map(toSafeRecord);
+}
+
+/**
+ * Fully typed & normalised books for UI components.
+ */
+export function getAllBooks(): BookMeta[] {
+  const rawBooks = getRawBooks();
+  return rawBooks.map(normaliseBookMeta);
+}
+
+/**
+ * Fetch a single book by slug.
+ */
+export function getBookBySlug(slug: string): BookMeta | undefined {
   const raw = getBookDocBySlug(slug);
   if (!raw) return undefined;
-  return normaliseBookMeta(raw as Record<string, unknown>);
+  
+  return normaliseBookMeta(toSafeRecord(raw));
 }
