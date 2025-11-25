@@ -2,17 +2,14 @@
 import * as React from "react";
 
 export interface CalloutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   type?: "info" | "success" | "warning" | "danger" | "note";
   title?: string;
   icon?: React.ReactNode;
   className?: string;
+  [key: string]: unknown; // Allow any additional props
 }
 
-/**
- * Callout - Highlighted block for key ideas, warnings, and important notes
- * Usage in MDX: <Callout type="warning">Important notice</Callout>
- */
 const Callout: React.FC<CalloutProps> = ({
   children,
   type = "info",
@@ -55,7 +52,6 @@ const Callout: React.FC<CalloutProps> = ({
   }[type];
 
   const displayIcon = icon || config.icon;
-
   return (
     <div
       className={[

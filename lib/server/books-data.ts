@@ -16,12 +16,70 @@ export type BookWithContent = BookMeta & {
   content: string;
 };
 
-// Mdx meta that may also carry book-specific fields defined in SharedBookMeta
-type BookishMdxMeta = MdxMeta & Partial<SharedBookMeta>;
-type BookishMdxDocument = MdxDocument & { content: string } & Partial<SharedBookMeta>;
+// MDX meta that may also carry book-specific fields defined in SharedBookMeta
+type BookishMdxMeta = MdxMeta &
+  Partial<SharedBookMeta> & {
+    publishDate?: string; // allow alternate date field
+  };
 
-const orNull = <T>(value: T | undefined | null): T | null =>
-  value ?? null;
+type BookishMdxDocument = MdxDocument &
+  { content: string } &
+  Partial<SharedBookMeta>;
+
+/**
+ * Safely convert any value to string or return undefined
+ */
+function safeString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
+}
+
+/**
+ * Safely convert any value to number or return undefined
+ */
+function safeNumber(value: unknown): number | undefined {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+}
+
+/**
+ * Safely convert any value to boolean or return undefined
+ */
+function safeBoolean(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const lower = value.toLowerCase().trim();
+    if (lower === "true") return true;
+    if (lower === "false") return false;
+  }
+  return undefined;
+}
+
+/**
+ * Safely convert any value to array of strings or return undefined
+ */
+function safeArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const filtered = value.filter((item) => typeof item === "string") as string[];
+  return filtered.length > 0 ? filtered : undefined;
+}
+
+/**
+ * Safely convert a value into the allowed status enum or undefined
+ */
+function safeStatus(
+  value: unknown,
+): "draft" | "published" | "scheduled" | undefined {
+  if (value === "draft" || value === "published" || value === "scheduled") {
+    return value;
+  }
+  return undefined;
+}
 
 /**
  * Map generic MDX meta into a fully shaped BookMeta.
@@ -30,38 +88,53 @@ const orNull = <T>(value: T | undefined | null): T | null =>
 function fromMdxMeta(meta: MdxMeta): BookMeta {
   const m = meta as BookishMdxMeta;
 
+  // Handle different date fields - prefer date, then publishDate
+  const date = safeString(m.date) || safeString(m.publishDate);
+
   return {
     // Core identifiers
-    slug: orNull(m.slug),
-    title: orNull(m.title),
-    subtitle: orNull(m.subtitle),
-    description: orNull(m.description),
+    slug: safeString(m.slug) || "",
+    title: safeString(m.title) || "Untitled",
 
-    // Dates
-    date: orNull(m.date),
-    lastModified: orNull(m.lastModified),
-    publishedDate: orNull(m.publishedDate),
+    // Optional string fields
+    subtitle: safeString(m.subtitle),
+    description: safeString(m.description),
+    excerpt: safeString(m.excerpt),
+    coverImage: safeString(m.coverImage),
+    date,
+    author: safeString(m.author),
+    readTime: safeString(m.readTime),
+    lastModified: safeString(m.lastModified),
+    category: safeString(m.category),
+    isbn: safeString(m.isbn),
+    publisher: safeString(m.publisher),
+    publishedDate: safeString(m.publishedDate),
+    language: safeString(m.language),
+    price: safeString(m.price),
+    purchaseLink: safeString(m.purchaseLink),
 
-    // Display / categorisation
-    excerpt: orNull(m.excerpt),
-    coverImage: m.coverImage ?? null,
-    category: orNull(m.category),
-    tags: m.tags ?? null,
-    draft: m.draft ?? null,
-    featured: m.featured ?? null,
-    status: orNull(m.status),
+    // Optional array fields
+    tags: safeArray(m.tags),
 
-    // Book-specific fields
-    author: orNull(m.author),
-    readTime: m.readTime ?? null,
-    isbn: orNull(m.isbn),
-    publisher: orNull(m.publisher),
-    pages: m.pages ?? null,
-    language: orNull(m.language),
-    format: orNull(m.format),
-    price: orNull(m.price),
-    purchaseLink: orNull(m.purchaseLink),
-    rating: m.rating ?? null,
+    // Optional number fields
+    pages: safeNumber(m.pages),
+    rating: safeNumber(m.rating),
+
+    // Optional boolean fields
+    featured: safeBoolean(m.featured),
+    published: safeBoolean(m.published),
+    draft: safeBoolean(m.draft),
+
+    // Optional typed fields
+    format: safeString(m.format) as
+      | "hardcover"
+      | "paperback"
+      | "ebook"
+      | "audiobook"
+      | undefined,
+
+    // Status – enforce union type
+    status: safeStatus(m.status),
   };
 }
 
@@ -72,7 +145,7 @@ function fromMdxDocument(doc: MdxDocument): BookWithContent {
   const bookDoc = doc as BookishMdxDocument;
   const { content, ...rest } = bookDoc;
   const meta = fromMdxMeta(rest);
-  return { ...meta, content };
+  return { ...meta, content: typeof content === "string" ? content : "" };
 }
 
 /**
