@@ -3,17 +3,31 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { MDXRemote } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 import Layout from "@/components/Layout";
+
+// Import your custom MDX components
+import Quote from "@/components/Quote";
+import Callout from "@/components/Callout";
+import Divider from "@/components/Divider";
 
 import { getAllBooksMeta, getBookBySlug } from "@/lib/server/books-data";
 import type { BookMeta } from "@/types/index";
 
 type PageProps = {
   meta: BookMeta;
-  content: string | null;
+  mdxSource: any; // MDXRemoteSerializeResult
 };
 
-export default function BookPage({ meta, content }: PageProps) {
+// Create components object for MDX
+const mdxComponents = {
+  Quote,
+  Callout,
+  Divider,
+};
+
+export default function BookPage({ meta, mdxSource }: PageProps) {
   const {
     title,
     subtitle,
@@ -132,12 +146,10 @@ export default function BookPage({ meta, content }: PageProps) {
           </div>
         )}
 
-        {/* CONTENT */}
+        {/* CONTENT - Using MDXRemote instead of dangerouslySetInnerHTML */}
         <section className="prose prose-invert prose-lg max-w-none">
-          {content ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
+          {mdxSource ? (
+            <MDXRemote {...mdxSource} components={mdxComponents} />
           ) : (
             <p className="text-gray-400 italic">
               Full content for this book is not yet available.
@@ -173,6 +185,30 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     return { notFound: true };
   }
 
+  // Clean the content - remove import statements
+  let cleanContent = book.content || '';
+  
+  // Remove import statements from MDX content
+  cleanContent = cleanContent.replace(
+    /^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm, 
+    ''
+  ).trim();
+
+  let mdxSource = null;
+  
+  if (cleanContent) {
+    try {
+      mdxSource = await serialize(cleanContent, {
+        mdxOptions: {
+          remarkPlugins: [],
+          rehypePlugins: [],
+        },
+      });
+    } catch (error) {
+      console.error(`Error serializing MDX for ${slug}:`, error);
+    }
+  }
+
   return {
     props: {
       meta: {
@@ -202,7 +238,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
         draft: book.draft ?? null,
         status: book.status ?? null,
       },
-      content: book.content ?? null,
+      mdxSource,
     },
   };
 };
