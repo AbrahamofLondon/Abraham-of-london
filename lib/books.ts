@@ -1,12 +1,15 @@
 // lib/books.ts
-// Fully safe, typed, and without duplicate exports.
-
 import {
   getAllBooksMeta,
   getBookBySlug as getBookDocBySlug,
 } from "@/lib/server/books-data";
 
 import type { BookMeta } from "@/types/index";
+
+// Extended type that includes content
+export type BookWithContent = BookMeta & {
+  content?: string;
+};
 
 /**
  * Safely convert any value to string or return undefined
@@ -47,7 +50,6 @@ function safeArray(value: unknown): string[] | undefined {
 
 /**
  * Normalise raw meta into a strongly-typed BookMeta.
- * Ensures all fields are either properly typed or omitted (undefined)
  */
 function normaliseBookMeta(raw: Record<string, unknown>): BookMeta {
   const slug = safeString(raw.slug) || "";
@@ -122,11 +124,20 @@ export function getAllBooks(): BookMeta[] {
 }
 
 /**
- * Fetch a single book by slug.
+ * Fetch a single book by slug with content.
  */
-export function getBookBySlug(slug: string): BookMeta | undefined {
+export function getBookBySlug(slug: string): BookWithContent | undefined {
   const raw = getBookDocBySlug(slug);
   if (!raw) return undefined;
   
-  return normaliseBookMeta(toSafeRecord(raw));
+  const record = toSafeRecord(raw);
+  const meta = normaliseBookMeta(record);
+  
+  // Extract content if it exists
+  const content = safeString(raw.content);
+  
+  return {
+    ...meta,
+    content,
+  };
 }
