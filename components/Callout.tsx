@@ -7,7 +7,7 @@ export interface CalloutProps {
   title?: string;
   icon?: React.ReactNode;
   className?: string;
-  [key: string]: unknown; // Allow any additional props
+  [key: string]: unknown;
 }
 
 const Callout: React.FC<CalloutProps> = ({
@@ -20,34 +20,39 @@ const Callout: React.FC<CalloutProps> = ({
 }) => {
   const config = {
     info: {
-      border: "border-blue-200",
-      background: "bg-blue-50/80",
-      text: "text-blue-900",
+      border: "border-blue-400/30",
+      background: "bg-blue-400/10",
+      text: "text-blue-300",
       icon: "💡",
+      titleColor: "text-blue-200",
     },
     success: {
-      border: "border-emerald-200",
-      background: "bg-emerald-50/80",
-      text: "text-emerald-900",
+      border: "border-emerald-400/30",
+      background: "bg-emerald-400/10",
+      text: "text-emerald-300",
       icon: "✅",
+      titleColor: "text-emerald-200",
     },
     warning: {
-      border: "border-amber-200",
-      background: "bg-amber-50/80",
-      text: "text-amber-900",
+      border: "border-amber-400/30",
+      background: "bg-amber-400/10",
+      text: "text-amber-300",
       icon: "⚠️",
+      titleColor: "text-amber-200",
     },
     danger: {
-      border: "border-red-200",
-      background: "bg-red-50/80",
-      text: "text-red-900",
+      border: "border-red-400/30",
+      background: "bg-red-400/10",
+      text: "text-red-300",
       icon: "🚫",
+      titleColor: "text-red-200",
     },
     note: {
-      border: "border-gray-200",
-      background: "bg-gray-50/80",
-      text: "text-gray-800",
+      border: "border-gray-400/30",
+      background: "bg-gray-400/10",
+      text: "text-gray-300",
       icon: "📝",
+      titleColor: "text-gray-200",
     },
   }[type];
 
@@ -55,7 +60,7 @@ const Callout: React.FC<CalloutProps> = ({
   return (
     <div
       className={[
-        "my-6 rounded-xl border p-4",
+        "my-6 rounded-lg border p-4",
         config.border,
         config.background,
         config.text,
@@ -71,7 +76,9 @@ const Callout: React.FC<CalloutProps> = ({
         )}
         <div className="flex-1 min-w-0">
           {title && (
-            <h4 className="mb-2 font-semibold leading-tight">{title}</h4>
+            <h4 className={`mb-2 font-semibold leading-tight ${config.titleColor}`}>
+              {title}
+            </h4>
           )}
           <div className="text-[0.95rem] leading-relaxed [&>:first-child]:mt-0 [&>:last-child]:mb-0">
             {children}
