@@ -2,6 +2,8 @@
 import type { NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
+import Link from "next/link";
+
 import Layout from "@/components/Layout";
 import NewsletterForm from "@/components/NewsletterForm";
 
@@ -9,68 +11,19 @@ const SubscribePage: NextPage = () => {
   const pageTitle =
     "Join the Founding Readers Circle | Abraham of London";
   const pageDescription =
-    "Early access to The Architecture of Human Purpose Canon for fathers, founders, builders, and institutional architects shaping the future of civilisation.";
-
-  // ---------------------------------------------------------------------------
-  // Share logic – used for “Share this Prelude…” CTA
-  // ---------------------------------------------------------------------------
-  const [copied, setCopied] = React.useState(false);
-
-  const canonicalPreludeUrl =
-    "https://www.abrahamoflondon.org/books/the-architecture-of-human-purpose";
-
-  const handleShareClick = async () => {
-    const shareUrl = canonicalPreludeUrl;
-    const shareText =
-      "THE ARCHITECTURE OF HUMAN PURPOSE — Prelude MiniBook. Read the Prelude here:";
-
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({
-          title: "The Architecture of Human Purpose — Prelude",
-          text: shareText,
-          url: shareUrl,
-        });
-        return;
-      }
-
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.clipboard?.writeText
-      ) {
-        await navigator.clipboard.writeText(shareUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2500);
-        return;
-      }
-
-      if (typeof window !== "undefined") {
-        window.open(shareUrl, "_blank", "noopener,noreferrer");
-      }
-    } catch {
-      // user cancelled or share failed – no need to surface an error
-    }
-  };
+    "Early access to The Architecture of Human Purpose Canon for fathers, founders, builders, and institutional architects shaping the future of civilization.";
 
   return (
     <Layout pageTitle={pageTitle}>
       <Head>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
-
         <meta property="og:title" content={pageTitle} />
-        <meta
-          property="og:description"
-          content={pageDescription}
-        />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta
-          name="twitter:description"
-          content={pageDescription}
-        />
+        <meta name="twitter:description" content={pageDescription} />
       </Head>
 
       <main className="min-h-screen bg-charcoal text-cream">
@@ -88,9 +41,9 @@ const SubscribePage: NextPage = () => {
             </h1>
 
             <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-300 sm:text-xl">
-              For builders, reformers, and institutional architects
-              ready to shape the conversation around human purpose,
-              governance, and civilisational design.
+              For the builders, reformers, and institutional architects ready to
+              shape the conversation around human purpose and civilizational
+              design.
             </p>
           </div>
 
@@ -104,7 +57,7 @@ const SubscribePage: NextPage = () => {
                   Founding Reader Benefits
                 </h2>
 
-                <div className="space-y-6 text-sm leading-relaxed text-gray-300">
+                <div className="space-y-6">
                   <div className="flex gap-4">
                     <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-softGold/20">
                       <span className="text-sm text-softGold">1</span>
@@ -113,11 +66,10 @@ const SubscribePage: NextPage = () => {
                       <h3 className="mb-1 font-semibold text-cream">
                         Exclusive Early Access
                       </h3>
-                      <p>
-                        Receive chapter previews and high-level
-                        frameworks before public release, with
-                        commentary on how to deploy them in real
-                        leadership contexts.
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Receive chapter previews and frameworks months before
+                        public release, with direct author commentary on
+                        implementation.
                       </p>
                     </div>
                   </div>
@@ -130,11 +82,10 @@ const SubscribePage: NextPage = () => {
                       <h3 className="mb-1 font-semibold text-cream">
                         Founder-Only Masterclasses
                       </h3>
-                      <p>
-                        Live, implementation-focused sessions on
-                        purpose, governance, institutional design, and
-                        power — not theory for theory’s sake, but
-                        strategy for deployment.
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Live sessions diving deep into the frameworks, tools,
+                        and implementation strategies for personal and
+                        organizational transformation.
                       </p>
                     </div>
                   </div>
@@ -147,11 +98,10 @@ const SubscribePage: NextPage = () => {
                       <h3 className="mb-1 font-semibold text-cream">
                         Strategic Community Access
                       </h3>
-                      <p>
-                        Connect with fathers, founders, and
-                        system-builders who are serious about
-                        designing families, organisations, and
-                        institutions that outlast them.
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Connect with other builders, reformers, and
+                        institutional architects in private conversations that
+                        shape the future.
                       </p>
                     </div>
                   </div>
@@ -164,40 +114,34 @@ const SubscribePage: NextPage = () => {
                       <h3 className="mb-1 font-semibold text-cream">
                         Permanent Founding Status
                       </h3>
-                      <p>
-                        Your name recorded in the Canon’s founding
-                        registry and lifetime priority access to
-                        Abraham of London and{" "}
-                        <span className="italic">
-                          Fathering Without Fear
-                        </span>{" "}
-                        initiatives.
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Your name in the official canon registry and lifetime
+                        priority access to all Abraham of London initiatives.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Urgency Indicator – fixed copy, no random */}
+                {/* Urgency Indicator */}
                 <div className="mt-8 rounded-lg border border-softGold/20 bg-softGold/10 p-4">
                   <div className="flex items-center gap-3">
                     <div className="h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-softGold" />
-                    <p className="text-xs font-semibold text-softGold">
-                      The Founding Readers Circle is capped at 1,000
-                      serious builders to preserve depth, focus, and
-                      access.
+                    <p className="text-sm font-semibold text-softGold">
+                      Limited to first 1,000 members •{" "}
+                      {Math.floor(Math.random() * 100) + 750} spots remaining
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Testimonial / Social Proof */}
+              {/* Testimonial/Endorsement Placeholder */}
               <div className="rounded-2xl border border-gray-600/30 bg-black/30 p-6">
                 <blockquote className="space-y-3">
                   <p className="text-sm italic leading-relaxed text-gray-300">
-                    “This isn’t another motivational framework. It’s
-                    the missing architecture for understanding why
-                    people, organisations, and entire civilizations
-                    either align and flourish — or drift and collapse.”
+                    &quot;The frameworks in this canon provide the missing
+                    architecture for understanding why civilizations succeed or
+                    fail. Essential reading for anyone building institutions
+                    meant to last generations.&quot;
                   </p>
                   <footer className="text-xs text-gray-400">
                     — Early Reader, Institutional Architect
@@ -214,94 +158,78 @@ const SubscribePage: NextPage = () => {
                     Secure Your Founding Access
                   </h2>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Enter your best email to receive the Prelude
-                    MiniBook and join the Founding Readers Circle as we
-                    bring{" "}
-                    <span className="italic">
-                      The Architecture of Human Purpose
-                    </span>{" "}
-                    into the world.
+                    Enter your email to receive immediate access to the Prelude
+                    MiniBook and join the exclusive Founding Readers Circle.
                   </p>
                 </div>
 
+                {/* Enhanced Form Section */}
                 <div className="space-y-6">
-                  <div className="rounded-lg border border-softGold/10 bg-gradient-to-r from-softGold/5 to-transparent p-4 text-sm text-gray-300">
+                  <div className="rounded-lg border border-softGold/10 bg-gradient-to-r from-softGold/5 to-transparent p-4">
                     <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-cream">
-                      You’ll receive:
+                      What You&apos;ll Receive Immediately:
                     </h3>
-                    <ul className="space-y-1">
-                      <li>• Prelude MiniBook (PDF) — immediate access</li>
-                      <li>
-                        • Founding Reader welcome briefing and context
-                      </li>
-                      <li>
-                        • Early access to the first Canon frameworks
-                      </li>
-                      <li>
-                        • Invitation to the first strategic masterclass
-                      </li>
+                    <ul className="space-y-1 text-sm text-gray-300">
+                      <li>• The Architecture of Human Purpose Prelude (PDF)</li>
+                      <li>• Founding Reader welcome package</li>
+                      <li>• Early access to Chapter 1 frameworks</li>
+                      <li>• Invitation to first masterclass</li>
                     </ul>
                   </div>
 
-                  <div className="mt-4">
-                    <NewsletterForm
-                      variant="premium"
-                      buttonText="Join the Founding Readers Circle →"
-                    />
-                  </div>
+                  <NewsletterForm
+                    variant="premium"
+                    buttonText="Join the Founding Readers Circle →"
+                  />
 
-                  {/* Trust indicators */}
-                  <div className="border-t border-gray-600/30 pt-4 text-center text-xs text-gray-400">
-                    <div className="mb-2 flex items-center justify-center gap-4">
-                      <span>No spam</span>
+                  {/* Trust Indicators */}
+                  <div className="space-y-3 border-t border-gray-600/30 pt-4 text-center">
+                    <div className="flex items-center justify-center gap-6 text-xs text-gray-400">
+                      <span>No Spam</span>
                       <span>•</span>
-                      <span>One-click unsubscribe</span>
+                      <span>One-Click Unsubscribe</span>
                       <span>•</span>
-                      <span>Strategic, not noisy</span>
+                      <span>Priority Support</span>
                     </div>
-                    <p className="text-gray-500">
+                    <p className="text-xs text-gray-500">
                       By joining, you agree to our{" "}
-                      <a
+                      <Link
                         href="/privacy"
                         className="text-softGold hover:underline"
                       >
                         Privacy Policy
-                      </a>{" "}
-                      and consent to receive occasional strategic
-                      updates.
+                      </Link>{" "}
+                      and consent to receive strategic updates.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Why this matters now */}
+              {/* Additional Value Proposition */}
               <div className="rounded-2xl border border-gray-600/30 bg-black/30 p-6">
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-cream">
-                  Why this matters now
+                  Why This Matters Now:
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li className="flex items-start gap-2">
                     <span className="mt-1 text-softGold">•</span>
                     <span>
-                      We are living through the most significant power
-                      realignment since Rome — largely hidden behind
-                      entertainment and convenience.
+                      We&apos;re living through the most significant power
+                      realignment since the Roman Empire.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="mt-1 text-softGold">•</span>
                     <span>
-                      Most frameworks address symptoms. The Canon
-                      addresses architecture — purpose, governance,
-                      moral order, and destiny.
+                      The frameworks for understanding civilization are outdated
+                      and incomplete.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="mt-1 text-softGold">•</span>
                     <span>
-                      Those who master alignment now will quietly
-                      define how families, organisations, and nations
-                      are built in the next century.
+                      Those who master this architecture will shape the next
+                      century.
                     </span>
                   </li>
                 </ul>
@@ -309,41 +237,14 @@ const SubscribePage: NextPage = () => {
             </div>
           </div>
 
-          {/* Bottom CTA + Share block */}
-          <div className="space-y-8 border-t border-gray-600/30 pt-12 text-center">
+          {/* Bottom CTA Section */}
+          <div className="border-t border-gray-600/30 pt-12 text-center">
             <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-400">
-              The Founding Readers Circle is not a fan club; it is a
-              working coalition of men and women who refuse to drift
-              with the age. If you sense that mandate, this is your
-              invitation.
+              The Founding Readers Circle is intentionally limited to ensure
+              meaningful engagement and strategic focus. This is more than a
+              newsletter—it's the beginning of a movement to rebuild the
+              architecture of human purpose.
             </p>
-
-            {/* Share CTA */}
-            <div className="mx-auto max-w-xl rounded-2xl border border-softGold/25 bg-black/40 p-6 text-sm">
-              <p className="mb-3 flex items-center justify-center gap-2 text-[color:var(--color-on-secondary)/0.9]">
-                <span role="img" aria-label="note">
-                  📝
-                </span>
-                <span>
-                  <strong>Share this Prelude</strong> with one person
-                  who is ready for alignment.
-                </span>
-              </p>
-              <button
-                type="button"
-                onClick={handleShareClick}
-                className="inline-flex items-center gap-2 rounded-full bg-softGold px-5 py-2 text-sm font-semibold text-black transition hover:bg-softGold/90"
-              >
-                <span>Share the Prelude</span>
-                <span aria-hidden>↗</span>
-              </button>
-              {copied && (
-                <p className="mt-2 text-xs text-softGold/80">
-                  Link copied. Send it to the one person who came to
-                  mind immediately.
-                </p>
-              )}
-            </div>
           </div>
         </section>
       </main>

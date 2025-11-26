@@ -1,6 +1,7 @@
 // pages/resources/index.tsx
 import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
+import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -21,6 +22,17 @@ interface ResourcesPageProps {
   resources: ResourceMeta[];
 }
 
+// Shape of MDX content for resources
+interface RawResourceMeta {
+  slug: string;
+  title: string;
+  description?: string | null;
+  date?: string | null;
+  readtime?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
+}
+
 const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
   const pageTitle = "Strategic Resources | Abraham of London";
   const pageDescription =
@@ -28,6 +40,10 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 
   return (
     <Layout pageTitle={pageTitle}>
+      <Head>
+        <meta name="description" content={pageDescription} />
+      </Head>
+
       <main className="min-h-screen bg-charcoal text-cream">
         <section className="mx-auto max-w-5xl px-6 py-16 lg:py-24">
           {/* Header */}
@@ -137,13 +153,14 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
-  // Assuming your mdx helper can filter by collection/type
-  const all = getAllContent("resources") as ResourceMeta[];
+  const all = getAllContent("resources") as RawResourceMeta[];
 
-  const resources = all.map((r) => ({
-    ...r,
+  const resources: ResourceMeta[] = all.map((r) => ({
+    slug: r.slug,
+    title: r.title,
     description: r.description ?? null,
-    readtime: (r as any).readtime ?? null, // legacy field name
+    date: r.date ?? null,
+    readtime: r.readtime ?? null,
     coverImage: r.coverImage ?? null,
     tags: r.tags ?? null,
   }));
@@ -152,7 +169,6 @@ export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
     props: {
       resources,
     },
-    // small ISR to keep it fresh if you add more
     revalidate: 60,
   };
 };

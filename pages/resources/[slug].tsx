@@ -31,6 +31,20 @@ interface ResourcePageProps {
   mdxSource: MDXRemoteSerializeResult;
 }
 
+// Shape of what comes back from MDX for resources
+interface RawResourceDoc {
+  slug: string;
+  title: string;
+  description?: string | null;
+  date?: string | null;
+  author?: string | null;
+  readtime?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
+  downloadUrl?: string | null;
+  content: string;
+}
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
@@ -87,7 +101,8 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
             <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-400">
               {author && (
                 <span>
-                  By <span className="font-semibold text-gray-200">{author}</span>
+                  By{" "}
+                  <span className="font-semibold text-gray-200">{author}</span>
                 </span>
               )}
               {date && (
@@ -212,13 +227,14 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
   params,
 }) => {
   const slug = String(params?.slug);
-  const doc = getContentBySlug("resources", slug);
+
+  const doc = getContentBySlug("resources", slug) as RawResourceDoc | null;
 
   if (!doc) {
     return { notFound: true };
   }
 
-  const { content, ...meta } = doc;
+  const { content, ...rawMeta } = doc;
 
   const mdxSource = await serialize(content, {
     mdxOptions: {
@@ -227,15 +243,15 @@ export const getStaticProps: GetStaticProps<ResourcePageProps> = async ({
   });
 
   const typedMeta: ResourceMeta = {
-    slug: meta.slug,
-    title: meta.title,
-    description: meta.description ?? null,
-    date: meta.date ?? null,
-    author: meta.author ?? null,
-    readtime: (meta as any).readtime ?? meta.readtime ?? null,
-    coverImage: meta.coverImage ?? null,
-    tags: meta.tags ?? null,
-    downloadUrl: (meta as any).downloadUrl ?? null,
+    slug: rawMeta.slug,
+    title: rawMeta.title,
+    description: rawMeta.description ?? null,
+    date: rawMeta.date ?? null,
+    author: rawMeta.author ?? null,
+    readtime: rawMeta.readtime ?? null,
+    coverImage: rawMeta.coverImage ?? null,
+    tags: rawMeta.tags ?? null,
+    downloadUrl: rawMeta.downloadUrl ?? null,
   };
 
   return {
