@@ -218,7 +218,7 @@ const CanonLandingPage: NextPage = () => {
           </div>
         </section>
 
-        {/* FEATURED CANON MATERIALS (IMAGES WIRED) */}
+        {/* FEATURED CANON MATERIALS (IMAGES + ROUTES) */}
         <section className="border-b border-softGold/20 py-20">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-10 text-center">
@@ -235,74 +235,113 @@ const CanonLandingPage: NextPage = () => {
             <div className="grid gap-8 md:grid-cols-3">
               {/* 1. Canon Introduction Letter */}
               <div className="flex flex-col rounded-3xl border border-softGold/25 bg-black/40 p-4">
-                <div className="relative mb-4 overflow-hidden rounded-2xl">
-                  <Image
-                    src="/assets/images/canon/canon-intro-letter-cover.jpg"
-                    alt="The Canon: A Letter from the Author — cover"
-                    width={400}
-                    height={600}
-                    className="h-auto w-full object-cover"
-                  />
+                <Link
+                  href="/canon/canon-introduction-letter"
+                  className="group flex flex-1 flex-col"
+                >
+                  <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
+                    <Image
+                      src="/assets/images/canon/canon-intro-letter-cover.jpg"
+                      alt="The Canon: A Letter from the Author — cover"
+                      width={400}
+                      height={600}
+                      className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
+                    The Canon: A Letter from the Author
+                  </h3>
+                  <p className="mb-3 text-sm leading-relaxed text-gray-300">
+                    A formal public letter setting the assignment, tone, and
+                    demand of the Canon for builders, fathers, mothers, leaders,
+                    and reformers.
+                  </p>
+                  <p className="mb-4 text-xs uppercase tracking-[0.18em] text-softGold/80">
+                    FOUNDATIONAL ORIENTATION
+                  </p>
+                </Link>
+                <div className="mt-2">
+                  <Link
+                    href="/canon/canon-introduction-letter"
+                    className="inline-block rounded-full bg-softGold px-5 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-softGold/90"
+                  >
+                    Read Letter →
+                  </Link>
                 </div>
-                <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
-                  The Canon: A Letter from the Author
-                </h3>
-                <p className="mb-3 text-sm leading-relaxed text-gray-300">
-                  A formal public letter setting the assignment, tone, and
-                  demand of the Canon for builders, fathers, mothers, leaders,
-                  and reformers.
-                </p>
-                <p className="text-xs uppercase tracking-[0.18em] text-softGold/80">
-                  FOUNDATIONAL ORIENTATION
-                </p>
               </div>
 
               {/* 2. The Builder's Catechism */}
               <div className="flex flex-col rounded-3xl border border-softGold/25 bg-black/40 p-4">
-                <div className="relative mb-4 overflow-hidden rounded-2xl">
-                  <Image
-                    src="/assets/images/canon/builders-catechism-cover.jpg"
-                    alt="The Builder's Catechism — cover"
-                    width={400}
-                    height={600}
-                    className="h-auto w-full object-cover"
-                  />
+                <Link
+                  href="/canon/builders-catechism"
+                  className="group flex flex-1 flex-col"
+                >
+                  <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
+                    <Image
+                      src="/assets/images/canon/builders-catechism-cover.jpg"
+                      alt="The Builder's Catechism — cover"
+                      width={400}
+                      height={600}
+                      className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
+                    The Builder&apos;s Catechism
+                  </h3>
+                  <p className="mb-3 text-sm leading-relaxed text-gray-300">
+                    A systematic Q&amp;A for builders, fathers, and
+                    civilisation-carriers — short, sharp, doctrinal, and
+                    uncompromising.
+                  </p>
+                  <p className="mb-4 text-xs uppercase tracking-[0.18em] text-softGold/80">
+                    DOCTRINAL SPINE
+                  </p>
+                </Link>
+                <div className="mt-2">
+                  <Link
+                    href="/canon/builders-catechism"
+                    className="inline-block rounded-full bg-softGold px-5 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-softGold/90"
+                  >
+                    Read Catechism →
+                  </Link>
                 </div>
-                <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
-                  The Builder&apos;s Catechism
-                </h3>
-                <p className="mb-3 text-sm leading-relaxed text-gray-300">
-                  A systematic Q&amp;A for builders, fathers, and
-                  civilisation-carriers — short, sharp, doctrinal, and
-                  uncompromising.
-                </p>
-                <p className="text-xs uppercase tracking-[0.18em] text-softGold/80">
-                  DOCTRINAL SPINE
-                </p>
               </div>
 
               {/* 3. Campaign / New Era of Builders */}
               <div className="flex flex-col rounded-3xl border border-softGold/25 bg-black/40 p-4">
-                <div className="relative mb-4 overflow-hidden rounded-2xl">
-                  <Image
-                    src="/assets/images/canon/canon-campaign-cover.jpg"
-                    alt="The Canon — A New Era of Builders — campaign cover"
-                    width={400}
-                    height={600}
-                    className="h-auto w-full object-cover"
-                  />
+                <Link
+                  href="/canon/canon-campaign"
+                  className="group flex flex-1 flex-col"
+                >
+                  <div className="relative mb-4 overflow-hidden rounded-2xl border border-softGold/20">
+                    <Image
+                      src="/assets/images/canon/canon-campaign-cover.jpg"
+                      alt="The Canon — A New Era of Builders — campaign cover"
+                      width={400}
+                      height={600}
+                      className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
+                    The Canon — A New Era of Builders
+                  </h3>
+                  <p className="mb-3 text-sm leading-relaxed text-gray-300">
+                    A cinematic declaration announcing the rise of a disciplined
+                    remnant of builders who will rebuild from the foundations
+                    up.
+                  </p>
+                  <p className="mb-4 text-xs uppercase tracking-[0.18em] text-softGold/80">
+                    CAMPAIGN STANDARD
+                  </p>
+                </Link>
+                <div className="mt-2">
+                  <Link
+                    href="/canon/canon-campaign"
+                    className="inline-block rounded-full bg-softGold px-5 py-2 text-xs font-semibold text-deepCharcoal transition hover:bg-softGold/90"
+                  >
+                    Read Campaign →
+                  </Link>
                 </div>
-                <h3 className="mb-1 font-serif text-lg font-semibold text-cream">
-                  The Canon — A New Era of Builders
-                </h3>
-                <p className="mb-3 text-sm leading-relaxed text-gray-300">
-                  A cinematic statement image anchoring the campaign — ten
-                  volumes, one assignment: rebuild civilisation from the
-                  foundations up.
-                </p>
-                <p className="text-xs uppercase tracking-[0.18em] text-softGold/80">
-                  CAMPAIGN STANDARD
-                </p>
               </div>
             </div>
           </div>
