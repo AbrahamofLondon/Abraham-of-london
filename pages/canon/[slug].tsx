@@ -28,18 +28,37 @@ interface CanonPageProps {
 // ----------------------------------------------------------------------
 
 const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
-  const { title, excerpt, coverImage, date } = meta;
+  const { title, excerpt, description, date } = meta;
+
   const metaDescription =
-    excerpt || meta.description || "Canon document from Abraham of London.";
+    excerpt ||
+    description ||
+    "Canon document from Abraham of London.";
+
+  // Optional: formatted date for display
+  const displayDate =
+    date && !Number.isNaN(new Date(date).getTime())
+      ? new Date(date).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
 
   return (
-    <SiteLayout
-      pageTitle={title}
-      metaDescription={metaDescription}
-      coverImage={coverImage}
-      date={date}
-    >
-      <article className="prose prose-invert prose-lg max-w-3xl mx-auto py-10 md:py-16 prose-headings:font-serif prose-headings:text-cream prose-strong:text-cream prose-a:text-softGold">
+    <SiteLayout pageTitle={title} metaDescription={metaDescription}>
+      <article className="mx-auto max-w-3xl py-10 md:py-16 prose prose-invert prose-lg prose-headings:font-serif prose-headings:text-cream prose-strong:text-cream prose-a:text-softGold">
+        <header className="mb-8 border-b border-gray-700 pb-4">
+          <h1 className="font-serif text-3xl font-bold text-cream md:text-4xl">
+            {title}
+          </h1>
+          {displayDate && (
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+              {displayDate}
+            </p>
+          )}
+        </header>
+
         <MDXRemote {...mdxSource} components={mdxComponents} />
       </article>
     </SiteLayout>
@@ -53,7 +72,7 @@ export default CanonPage;
 // ----------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  // assumes your MDX helper already knows about the "canon" folder
+  // Assumes your MDX helper knows about the "canon" folder
   const canonItems = await getAllContent("canon");
 
   const paths =
