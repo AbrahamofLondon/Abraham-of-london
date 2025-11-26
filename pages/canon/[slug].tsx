@@ -35,7 +35,6 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
     description ||
     "Canon document from Abraham of London.";
 
-  // Optional: formatted date for display
   const displayDate =
     date && !Number.isNaN(new Date(date).getTime())
       ? new Date(date).toLocaleDateString("en-GB", {
@@ -47,7 +46,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
 
   return (
     <SiteLayout pageTitle={title} metaDescription={metaDescription}>
-      <article className="mx-auto max-w-3xl py-10 md:py-16 prose prose-invert prose-lg prose-headings:font-serif prose-headings:text-cream prose-strong:text-cream prose-a:text-softGold">
+      <article className="prose prose-invert prose-lg mx-auto max-w-3xl py-10 md:py-16 prose-headings:font-serif prose-headings:text-cream prose-strong:text-cream prose-a:text-softGold">
         <header className="mb-8 border-b border-gray-700 pb-4">
           <h1 className="font-serif text-3xl font-bold text-cream md:text-4xl">
             {title}
@@ -72,7 +71,7 @@ export default CanonPage;
 // ----------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  // Assumes your MDX helper knows about the "canon" folder
+  // This assumes /content/canon/*.mdx and that getAllContent knows "canon"
   const canonItems = await getAllContent("canon");
 
   const paths =
@@ -101,15 +100,28 @@ export const getStaticProps: GetStaticProps<CanonPageProps, Params> = async ({
 
   const { meta, content } = doc;
 
-  const mdxSource = await serialize(content, {
+  // 🔧 Strip import lines from MDX before serialisation (Callout, Divider, etc.)
+  const rawContent = content ?? "";
+  const cleanContent = rawContent
+    .replace(
+      /^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm,
+      "",
+    )
+    .trim();
+
+  const mdxSource = await serialize(cleanContent, {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
+      rehypePlugins: [],
     },
   });
 
+  // Defensive: ensure meta is JSON-serialisable
+  const safeMeta = JSON.parse(JSON.stringify(meta)) as PostMeta;
+
   return {
     props: {
-      meta,
+      meta: safeMeta,
       mdxSource,
     },
   };
