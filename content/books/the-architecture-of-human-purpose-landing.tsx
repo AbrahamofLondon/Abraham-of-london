@@ -49,10 +49,13 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
 
               <p className="mb-8 max-w-xl text-sm leading-relaxed text-gray-300 sm:text-base">
                 Human flourishing is not random. It is{" "}
-                <span className="font-semibold text-softGold">architectural</span>.  
-                This limited-release Prelude introduces the hidden patterns that govern purpose,
-                identity, civilisation, and destiny — drawn from the forthcoming multi-volume Canon
-                by <span className="font-semibold">Abraham of London</span>.
+                <span className="font-semibold text-softGold">
+                  architectural
+                </span>
+                . This limited-release Prelude introduces the hidden patterns
+                that govern purpose, identity, civilisation, and destiny —
+                drawn from the forthcoming multi-volume Canon by{" "}
+                <span className="font-semibold">Abraham of London</span>.
               </p>
 
               <div className="mb-10 flex flex-col gap-4 sm:flex-row">
@@ -94,18 +97,23 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                     WHAT THIS PRELUDE IS
                   </p>
                   <p className="mb-4 text-sm leading-relaxed text-gray-200">
-                    Not a motivational pamphlet. Not a self-help tract.  
-                    A deliberate **entry point** into a larger Canon that unites theology, history,
-                    systems thinking, governance, and institutional design for those who still carry
+                    Not a motivational pamphlet. Not a self-help tract. A
+                    deliberate <strong>entry point</strong> into a larger Canon
+                    that unites theology, history, systems thinking, governance,
+                    and institutional design for those who still carry
                     responsibility in an age of drift.
                   </p>
                   <div className="mt-4 rounded-2xl border border-softGold/30 bg-black/60 p-4 text-xs text-gray-300">
-                    <p className="mb-1 font-semibold text-softGold">In one line:</p>
+                    <p className="mb-1 font-semibold text-softGold">
+                      In one line:
+                    </p>
                     <p>
-                      <span className="font-medium text-white">Civilisation is human purpose,</span>{" "}
-                      structured and scaled across generations.  
-                      This Prelude hands you the language and the lens before the full frameworks are
-                      released.
+                      <span className="font-medium text-white">
+                        Civilisation is human purpose,
+                      </span>{" "}
+                      structured and scaled across generations. This Prelude
+                      hands you the language and the lens before the full
+                      frameworks are released.
                     </p>
                   </div>
                 </div>
@@ -124,9 +132,9 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                   <span className="text-softGold">Responsibility</span>
                 </h2>
                 <p className="max-w-xl text-sm leading-relaxed text-gray-300 md:text-base">
-                  This work is written for those who quietly shoulder weight in their homes,
-                  organisations, and nations — and refuse to pretend that “business as usual” is
-                  working.
+                  This work is written for those who quietly shoulder weight in
+                  their homes, organisations, and nations — and refuse to
+                  pretend that “business as usual” is working.
                 </p>
               </div>
               <p className="text-xs font-medium uppercase tracking-[0.26em] text-softGold/80">
@@ -160,7 +168,9 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                   <h3 className="mb-2 text-sm font-semibold text-softGold md:text-base">
                     {item.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-300">{item.body}</p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
@@ -176,9 +186,9 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                 <span className="text-softGold">Prelude</span>
               </h2>
               <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
-                Seven tightly written movements walk you through the structural logic of human
-                purpose, institutional order, and civilisational destiny — without yet opening the
-                full vault of frameworks.
+                Seven tightly written movements walk you through the structural
+                logic of human purpose, institutional order, and civilisational
+                destiny — without yet opening the full vault of frameworks.
               </p>
             </div>
 
@@ -216,18 +226,122 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                   <h3 className="mb-2 text-sm font-semibold text-softGold md:text-base">
                     {item.title}
                   </h3>
-                  <p className="flex-1 text-sm leading-relaxed text-gray-300">{item.body}</p>
+                  <p className="flex-1 text-sm leading-relaxed text-gray-300">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
 
             <div className="mt-10 rounded-3xl border border-softGold/30 bg-black/70 p-5 text-center text-sm text-gray-200 md:p-6 md:text-base">
               <p className="mb-2 font-serif text-lg text-softGold md:text-xl">
-                “Civilisation is human purpose, structured and scaled across generations.”
+                “Civilisation is human purpose, structured and scaled across
+                generations.”
               </p>
               <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
                 EXCERPT · THE ARCHITECTURE OF HUMAN PURPOSE
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FUTURE VOLUMES: ARCHITECT'S TREASURY & MASTER EDITION */}
+        <section className="relative border-t border-white/10 bg-black/90 px-4 py-16 md:py-20">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-8 text-center">
+              <h2 className="mb-3 font-serif text-2xl text-white md:text-3xl">
+                Beyond the Prelude:{" "}
+                <span className="text-softGold">Canon Volumes Ahead</span>
+              </h2>
+              <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
+                The Prelude is the doorway. The Canon itself includes deeper
+                volumes designed for those who will not simply consume ideas,
+                but govern, build, and reform. Two of those pillars are{" "}
+                <span className="font-semibold text-softGold">
+                  the Architect’s Treasury
+                </span>{" "}
+                and{" "}
+                <span className="font-semibold text-softGold">
+                  the Master Edition
+                </span>
+                .
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Volume X — Architect's Treasury */}
+              <div className="rounded-3xl border border-softGold/40 bg-black/70 p-6 backdrop-blur-xl">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-softGold">
+                  VOLUME X · THE ARCHITECT’S TREASURY
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-200">
+                  Here ends the age of intuition. <br />
+                  Here begins the age of intention.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  Here the blueprint is unveiled — clear, structured,
+                  disciplined, complete.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  For those who will shape nations, command institutions, father
+                  generations, and build what time cannot break.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  <span className="font-semibold text-softGold">
+                    Volume X is the Architect’s Treasury.
+                  </span>
+                </p>
+                <p className="mb-2 text-sm leading-relaxed text-gray-300">
+                  The diagrams are not decoration. They are weapons.
+                </p>
+                <p className="mb-2 text-sm leading-relaxed text-gray-300">
+                  The frameworks are not theories. They are engines.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  The models are not abstractions. They are anchors.
+                </p>
+                <p className="text-sm leading-relaxed text-gray-200">
+                  The future belongs to those who understand the architecture
+                  behind human destiny.
+                </p>
+              </div>
+
+              {/* Master Edition — Inheritance */}
+              <div className="rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-softGold">
+                  MASTER EDITION · INHERITANCE VOLUME
+                </p>
+                <p className="mb-3 text-sm leading-relaxed text-gray-200">
+                  Civilisation is not saved by the loud, but by the aligned.
+                </p>
+                <p className="mb-2 text-sm leading-relaxed text-gray-300">
+                  Not by those who react, but by those who design.
+                </p>
+                <p className="mb-2 text-sm leading-relaxed text-gray-300">
+                  Not by those who rage, but by those who build.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  <span className="font-semibold text-softGold">
+                    This is your inheritance: the Master Edition.
+                  </span>
+                </p>
+                <p className="mb-1 text-sm leading-relaxed text-gray-300">
+                  Guard it.
+                </p>
+                <p className="mb-1 text-sm leading-relaxed text-gray-300">
+                  Deploy it.
+                </p>
+                <p className="mb-1 text-sm leading-relaxed text-gray-300">
+                  Teach it.
+                </p>
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  Strengthen it.
+                </p>
+                <p className="text-sm leading-relaxed text-gray-200">
+                  For the age of chaos is loud, but the age of builders is
+                  rising.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -241,25 +355,40 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                 <span className="text-softGold">Founding Readers Circle</span>
               </h2>
               <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
-                The Canon is entering final editorial review. A small circle will walk with it from
-                the beginning — not as spectators, but as co-labourers in alignment and build-out.
+                The Canon is entering final editorial review. A small circle
+                will walk with it from the beginning — not as spectators, but as
+                co-labourers in alignment and build-out.
               </p>
             </div>
 
             <div className="rounded-3xl border border-softGold/40 bg-black/70 p-6 backdrop-blur-2xl md:p-8">
               <ul className="mb-6 space-y-3 text-sm text-gray-200 md:text-base">
                 <li>• Private chapter previews and working drafts</li>
-                <li>• Closed-door masterclasses on purpose, governance, and civilisation</li>
+                <li>
+                  • Closed-door masterclasses on purpose, governance, and
+                  civilisation
+                </li>
                 <li>• First-release digital editions before public launch</li>
-                <li>• Strategic roundtable invitations (online and in select cities)</li>
-                <li>• Priority membership in the Abraham of London / Fathering Without Fear ecosystem</li>
-                <li>• Name recorded in the Canon’s <span className="font-semibold text-softGold">Founding Registry</span></li>
+                <li>
+                  • Strategic roundtable invitations (online and in select
+                  cities)
+                </li>
+                <li>
+                  • Priority membership in the Abraham of London / Fathering
+                  Without Fear ecosystem
+                </li>
+                <li>
+                  • Name recorded in the Canon’s{" "}
+                  <span className="font-semibold text-softGold">
+                    Founding Registry
+                  </span>
+                </li>
               </ul>
 
               <div className="mb-6 rounded-2xl border border-softGold/40 bg-softGold/10 p-4 text-xs text-softGold md:text-sm">
                 Membership is intentionally capped at{" "}
-                <span className="font-semibold">1,000</span> for depth, relationship, and legacy
-                impact — not volume.
+                <span className="font-semibold">1,000</span> for depth,
+                relationship, and legacy impact — not volume.
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -289,14 +418,13 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
               If You’ve Read This Far, You Are Not Average
             </h2>
             <p className="mb-6 text-sm leading-relaxed text-gray-300 md:text-base">
-              You were not born to numb yourself with distraction.  
-              You were not designed to drift through history as a spectator.  
-              You were not placed in this generation by accident.
+              You were not born to numb yourself with distraction. You were not
+              designed to drift through history as a spectator. You were not
+              placed in this generation by accident.
             </p>
             <p className="mb-6 text-sm leading-relaxed text-gray-300 md:text-base">
-              There is an architecture to purpose.  
-              There is an order beneath the noise.  
-              There is still time to build what outlasts you.
+              There is an architecture to purpose. There is an order beneath the
+              noise. There is still time to build what outlasts you.
             </p>
 
             <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
