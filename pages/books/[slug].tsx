@@ -1,4 +1,3 @@
-// pages/books/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
@@ -39,7 +38,6 @@ const mdxComponents = {
   Divider: Divider as React.ComponentType<MDXComponentProps>,
   a: ({ href, children, ...props }: AnchorProps) => {
     const safeHref = href ?? "#";
-    // Use Next Link for internal routes, plain anchor for external
     const isInternal =
       safeHref.startsWith("/") || safeHref.startsWith("#");
 
@@ -458,7 +456,6 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     }
   }
 
-  // Start from the book meta, then normalise JSON-unsafe values
   const safeMeta: BookMeta = {
     ...book,
     subtitle: book.subtitle ?? null,
