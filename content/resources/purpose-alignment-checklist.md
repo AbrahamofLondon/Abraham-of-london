@@ -1,0 +1,28 @@
+---
+date: "2025-01-07"
+title: "Purpose Alignment Checklist"
+description: "A diagnostic tool to help individuals and teams assess whether they are moving in structural alignment with purpose."
+type: Resource
+slug: "purpose-alignment-checklist"
+author: "Abraham of London"
+readtime: "2 mins"
+---
+
+# Purpose Alignment Checklist  
+**A quick diagnostic for clarity, order, and direction**
+
+Use this checklist as a monthly or quarterly audit for purpose-driven living.
+
+## Alignment Indicators
+
+- ☐ I know my current mandate  
+- ☐ My decisions align with my identity and values  
+- ☐ My relationships reinforce, not sabotage, my purpose  
+- ☐ My daily habits move me toward long-term outcomes  
+- ☐ My emotional environment is orderly, not chaotic  
+- ☐ I am building something that outlasts me  
+- ☐ I am growing in responsibility, not retreating into comfort  
+
+> Alignment produces acceleration. Misalignment produces exhaustion.
+
+Review this checklist whenever your pace or peace feels off.
