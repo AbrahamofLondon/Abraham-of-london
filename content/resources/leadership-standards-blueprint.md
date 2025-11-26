@@ -6,6 +6,8 @@ type: Resource
 slug: "leadership-standards-blueprint"
 author: "Abraham of London"
 readtime: "3 mins"
+coverImage: "/assets/images/resources/leadership-standards-blueprint.jpg"   # etc
+downloadUrl: "/assets/resources/pdfs/leadership-standards-blueprint.pdf"
 ---
 
 # Leadership Standards Blueprint  

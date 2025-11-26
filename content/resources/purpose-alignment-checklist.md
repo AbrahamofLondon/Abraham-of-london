@@ -1,11 +1,13 @@
 ---
-date: "2025-01-07"
+date: "2025-02-07"
 title: "Purpose Alignment Checklist"
 description: "A diagnostic tool to help individuals and teams assess whether they are moving in structural alignment with purpose."
 type: Resource
 slug: "purpose-alignment-checklist"
 author: "Abraham of London"
 readtime: "2 mins"
+coverImage: "/assets/images/resources/purpose-alignment-checklist.jpg"
+downloadUrl: "/assets/resources/pdfs/purpose-alignment-checklist.pdf"
 ---
 
 # Purpose Alignment Checklist  

@@ -1,11 +1,13 @@
 ---
-date: "2025-01-06"
+date: "2025-01-15"
 title: "Fatherhood Impact Framework"
 description: "A strategic model for fathers who want to shape identity, character, and destiny across generations."
 type: Resource
 slug: "fatherhood-impact-framework"
 author: "Abraham of London"
 readtime: "4 mins"
+coverImage: "/assets/images/resources/fatherhood-impact-framework.jpg"
+downloadUrl: "/assets/resources/pdfs/fatherhood-impact-framework.pdf"
 ---
 
 # Fatherhood Impact Framework  

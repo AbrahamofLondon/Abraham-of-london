@@ -6,6 +6,12 @@ type: Resource
 slug: "brotherhood-starter-kit"
 author: "Abraham of London"
 readtime: "2 mins"
+coverImage: "/assets/images/resources/brotherhood-starter-kit.jpg"
+downloadUrl: "/assets/resources/pdfs/brotherhood-starter-kit.pdf"
+tags:
+  - brotherhood
+  - leadership
+  - community
 ---
 
 # Brotherhood Starter Kit
