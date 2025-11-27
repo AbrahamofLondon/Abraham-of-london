@@ -362,10 +362,9 @@ export const Canon = defineDocumentType(() => ({
     draft: { type: "boolean", default: false },
     tags: { type: "list", of: { type: "string" }, default: [] },
     readTime: { type: "string", required: false },
-    // allow `type: Canon` in frontmatter without breaking anything
-    type: { type: "string", required: false },
-    // NEW: access control for Volume X etc.
-    accessLevel: { type: "string", default: "public" },
+
+    // NEW – used by Volume X
+    accessLevel: { type: "string", required: false, default: "public" },
     lockMessage: { type: "string", required: false },
   },
   computedFields: {
