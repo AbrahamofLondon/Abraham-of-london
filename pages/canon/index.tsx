@@ -1,152 +1,289 @@
 // pages/canon/index.tsx
 
-import type { NextPage } from "next";
-import Head from "next/head";
+import type { NextPage, GetStaticProps } from "next";
 import Link from "next/link";
 import * as React from "react";
 
-import Layout from "@/components/Layout";
-import { allCanons } from "contentlayer2/generated";
-import type { Canon } from "contentlayer2/generated";
+import SiteLayout from "@/components/SiteLayout";
+import { allCanons, type Canon } from ".contentlayer/generated";
 
-const sortCanon = (docs: Canon[]): Canon[] => {
-  return [...docs]
-    .filter((doc) => !doc.draft)
-    .sort((a, b) => {
-      const orderA = a.order ?? 999;
-      const orderB = b.order ?? 999;
-      if (orderA !== orderB) return orderA - orderB;
+interface CanonIndexItem {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  volumeNumber?: string | null;
+  order?: number | null;
+  featured?: boolean;
+  accessLevel?: string | null;
+  lockMessage?: string | null;
+  tags?: string[];
+}
 
-      const dateA = new Date(a.date ?? "1970-01-01").getTime();
-      const dateB = new Date(b.date ?? "1970-01-01").getTime();
-      return dateB - dateA; // newer first
-    });
-};
+interface CanonIndexProps {
+  featured?: CanonIndexItem | null;
+  campaign?: CanonIndexItem | null;
+  volumes: CanonIndexItem[];
+}
 
-const CanonIndexPage: NextPage = () => {
-  const canonDocs = sortCanon(allCanons);
-
+const CanonIndexPage: NextPage<CanonIndexProps> = ({
+  featured,
+  campaign,
+  volumes,
+}) => {
   return (
-    <Layout title="The Canon — Index">
-      <Head>
-        <title>The Canon — Abraham of London</title>
-        <meta
-          name="description"
-          content="Index of Canon volumes, preludes, and builder documents — for fathers, founders, reformers and civilisation-carriers."
-        />
-      </Head>
+    <SiteLayout
+      pageTitle="The Canon — Architecture of Human Purpose"
+      metaDescription="Explore the Canon: a ten-volume architecture of human purpose, civilisation, governance, and destiny."
+    >
+      <div className="mx-auto max-w-5xl px-4 py-10 text-gray-100">
+        {/* HERO */}
+        <header className="mb-10 border-b border-white/10 pb-8">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+            The Canon
+          </p>
+          <h1 className="mt-2 font-serif text-3xl font-semibold text-gray-50 sm:text-4xl">
+            The Canon — Architecture of Human Purpose
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
+            A multi-volume work for builders, fathers, mothers, reformers and
+            nation-shapers. This is not casual reading. It is an operating
+            architecture for civilisation, responsibility, and destiny.
+          </p>
+        </header>
 
-      <div className="bg-black text-white">
-        <section className="px-4 pb-12 pt-20 sm:pt-24">
-          <div className="mx-auto max-w-5xl">
-            <header className="mb-10 text-center">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-softGold/80">
-                THE CANON · PREVIEWS & VOLUMES
+        {/* CAMPAIGN CARD */}
+        {campaign && (
+          <section className="mb-10">
+            <div className="rounded-3xl border border-softGold/40 bg-black/70 p-6 backdrop-blur-xl">
+              <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold">
+                Campaign Prelude
               </p>
-              <h1 className="mb-4 font-serif text-3xl text-white sm:text-4xl">
-                The Canon — A New Era of Builders
-              </h1>
-              <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-300 sm:text-base">
-                A ten-volume architectural system for purpose, civilisation,
-                governance, and destiny. This index includes public previews,
-                campaign pages, catechisms, and restricted volumes for the Inner
-                Circle.
-              </p>
-            </header>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              {canonDocs.map((doc) => {
-                const href = `/canon/${doc.slug}`;
-                const isInnerCircle = doc.accessLevel === "inner-circle";
-
-                return (
-                  <article
-                    key={doc.slug}
-                    className="flex flex-col rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-transform duration-300 hover:-translate-y-1 hover:border-softGold/60 hover:bg-white/10"
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-softGold/80">
-                        {doc.volumeNumber
-                          ? `VOLUME ${doc.volumeNumber}`
-                          : "CANON DOCUMENT"}
-                      </p>
-                      {isInnerCircle && (
-                        <span className="rounded-full border border-softGold/60 bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-softGold">
-                          Inner Circle Only
-                        </span>
-                      )}
-                    </div>
-
-                    <h2 className="mb-2 font-serif text-lg text-white sm:text-xl">
-                      {doc.title}
-                    </h2>
-
-                    {doc.subtitle && (
-                      <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
-                        {doc.subtitle}
-                      </p>
-                    )}
-
-                    <p className="mb-4 flex-1 text-sm leading-relaxed text-gray-300">
-                      {doc.description || doc.excerpt}
-                    </p>
-
-                    {doc.tags && doc.tags.length > 0 && (
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {doc.tags.slice(0, 4).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full border border-white/15 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.16em] text-gray-400"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
-                      <span>
-                        {doc.date
-                          ? new Date(doc.date).toLocaleDateString("en-GB", {
-                              year: "numeric",
-                              month: "short",
-                              day: "2-digit",
-                            })
-                          : null}
-                      </span>
-                      {doc.readTime && (
-                        <span>{doc.readTime.replace(/read/i, "").trim()} read</span>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex justify-between gap-3">
-                      <Link
-                        href={href}
-                        className="inline-flex items-center rounded-full bg-softGold px-4 py-2 text-xs font-semibold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/30"
-                        prefetch
-                      >
-                        {isInnerCircle ? "View Locked Volume" : "Open Canon Page"}
-                      </Link>
-
-                      {isInnerCircle && (
-                        <Link
-                          href="/inner-circle"
-                          className="inline-flex items-center rounded-full border border-softGold/70 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10"
-                          prefetch
-                        >
-                          Join Inner Circle
-                        </Link>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+              <h2 className="font-serif text-xl font-semibold text-gray-50 sm:text-2xl">
+                {campaign.title}
+              </h2>
+              {campaign.subtitle && (
+                <p className="mt-1 text-sm text-gray-300">
+                  {campaign.subtitle}
+                </p>
+              )}
+              {(campaign.description || campaign.excerpt) && (
+                <p className="mt-3 text-sm leading-relaxed text-gray-300">
+                  {campaign.description || campaign.excerpt}
+                </p>
+              )}
+              <div className="mt-4">
+                <Link
+                  href={`/canon/${campaign.slug}`}
+                  className="inline-flex items-center rounded-full bg-softGold px-5 py-2 text-xs font-semibold text-deepCharcoal underline-offset-4 hover:bg-softGold/90"
+                >
+                  Read the Canon Campaign
+                </Link>
+              </div>
             </div>
+          </section>
+        )}
+
+        {/* FEATURED VOLUME */}
+        {featured && (
+          <section className="mb-10">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-softGold/70">
+              Featured Volume
+            </h2>
+            <CanonCard item={featured} />
+          </section>
+        )}
+
+        {/* ALL VOLUMES */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-gray-400">
+              All Canon Volumes
+            </h2>
           </div>
+
+          {volumes.length === 0 ? (
+            <p className="text-sm text-gray-400">
+              Canon volumes will appear here as they are released.
+            </p>
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2">
+              {volumes.map((item) => (
+                <CanonCard key={item.slug} item={item} />
+              ))}
+            </div>
+          )}
         </section>
       </div>
-    </Layout>
+    </SiteLayout>
   );
 };
 
 export default CanonIndexPage;
+
+// ----------------------------------------------------------------------
+// Components
+// ----------------------------------------------------------------------
+
+interface CanonCardProps {
+  item: CanonIndexItem;
+}
+
+const CanonCard: React.FC<CanonCardProps> = ({ item }) => {
+  const {
+    slug,
+    title,
+    subtitle,
+    excerpt,
+    description,
+    volumeNumber,
+    accessLevel = "public",
+    tags,
+  } = item;
+
+  const isInnerCircle = accessLevel !== "public";
+
+  return (
+    <article className="flex h-full flex-col rounded-3xl border border-white/10 bg-black/70 p-5 backdrop-blur-lg transition-transform duration-300 hover:-translate-y-1 hover:border-softGold/50">
+      <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-400">
+        <div className="inline-flex items-center gap-2">
+          {volumeNumber && (
+            <span className="rounded-full border border-white/20 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em]">
+              Volume {volumeNumber}
+            </span>
+          )}
+        </div>
+        {isInnerCircle && (
+          <span className="rounded-full border border-softGold/60 bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-softGold">
+            Inner Circle
+          </span>
+        )}
+      </div>
+
+      <h3 className="font-serif text-lg font-semibold text-gray-50 sm:text-xl">
+        {title}
+      </h3>
+
+      {subtitle && (
+        <p className="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-softGold/80">
+          {subtitle}
+        </p>
+      )}
+
+      {(description || excerpt) && (
+        <p className="mt-3 flex-1 text-sm leading-relaxed text-gray-300">
+          {description || excerpt}
+        </p>
+      )}
+
+      {tags && tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2 text-[0.7rem] text-gray-400">
+          {tags.slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-white/15 px-2 py-0.5 uppercase tracking-[0.16em]"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4">
+        <Link
+          href={`/canon/${slug}`}
+          className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-softGold hover:text-amber-200"
+        >
+          {isInnerCircle ? "View Locked Volume" : "Read Volume"}
+          <span className="ml-2 inline-block">↗</span>
+        </Link>
+      </div>
+    </article>
+  );
+};
+
+// ----------------------------------------------------------------------
+// Static props
+// ----------------------------------------------------------------------
+
+export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
+  // filter out drafts from index
+  const publishedCanons = allCanons.filter((c: Canon) => !c.draft);
+
+  const campaign = publishedCanons.find(
+    (c) => c.slug === "canon-campaign",
+  );
+
+  const featured = publishedCanons.find((c) => c.featured) ?? null;
+
+  const volumes = publishedCanons
+    .filter((c) => c.slug !== "canon-campaign")
+    .sort((a, b) => {
+      const aOrder = a.order ?? 999;
+      const bOrder = b.order ?? 999;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (a.title || "").localeCompare(b.title || "");
+    })
+    .map<CanonIndexItem>((c) => ({
+      slug: c.slug,
+      title: c.title,
+      subtitle: c.subtitle ?? null,
+      description: c.description ?? null,
+      excerpt: c.excerpt ?? null,
+      coverImage: c.coverImage ?? null,
+      volumeNumber: c.volumeNumber ?? null,
+      order: c.order ?? null,
+      featured: !!c.featured,
+      accessLevel: (c as Canon & { accessLevel?: string }).accessLevel ?? "public",
+      lockMessage: (c as Canon & { lockMessage?: string }).lockMessage ?? null,
+      tags: c.tags ?? [],
+    }));
+
+  return {
+    props: {
+      featured: featured
+        ? {
+            slug: featured.slug,
+            title: featured.title,
+            subtitle: featured.subtitle ?? null,
+            description: featured.description ?? null,
+            excerpt: featured.excerpt ?? null,
+            coverImage: featured.coverImage ?? null,
+            volumeNumber: featured.volumeNumber ?? null,
+            order: featured.order ?? null,
+            featured: !!featured.featured,
+            accessLevel:
+              (featured as Canon & { accessLevel?: string }).accessLevel ??
+              "public",
+            lockMessage:
+              (featured as Canon & { lockMessage?: string }).lockMessage ??
+              null,
+            tags: featured.tags ?? [],
+          }
+        : null,
+      campaign: campaign
+        ? {
+            slug: campaign.slug,
+            title: campaign.title,
+            subtitle: campaign.subtitle ?? null,
+            description: campaign.description ?? null,
+            excerpt: campaign.excerpt ?? null,
+            coverImage: campaign.coverImage ?? null,
+            volumeNumber: campaign.volumeNumber ?? null,
+            order: campaign.order ?? null,
+            featured: !!campaign.featured,
+            accessLevel:
+              (campaign as Canon & { accessLevel?: string }).accessLevel ??
+              "public",
+            lockMessage:
+              (campaign as Canon & { lockMessage?: string }).lockMessage ??
+              null,
+            tags: campaign.tags ?? [],
+          }
+        : null,
+      volumes,
+    },
+  };
+};
