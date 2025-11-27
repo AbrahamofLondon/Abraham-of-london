@@ -22,27 +22,52 @@ export interface RecaptchaConfig {
   allowedHostnames?: string[];
 }
 
+// Enhanced error types for better debugging
+export type RecaptchaErrorCode = 
+  | 'CONFIG_MISSING'
+  | 'INVALID_TOKEN'
+  | 'TOKEN_REUSE'
+  | 'TIMEOUT'
+  | 'ACTION_MISMATCH'
+  | 'HOSTNAME_MISMATCH'
+  | 'LOW_SCORE'
+  | 'API_FAILURE'
+  | 'NETWORK_ERROR'
+  | 'UNKNOWN';
+
+interface GoogleRecaptchaResponse {
+  success: boolean;
+  score?: number;
+  action?: string;
+  hostname?: string;
+  'error-codes'?: string[];
+  challenge_ts?: string;
+}
+
 const DEFAULT_CONFIG: RecaptchaConfig = {
   secretKey: process.env.RECAPTCHA_SECRET_KEY || "",
   minScore: parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5"),
   timeoutMs: parseInt(process.env.RECAPTCHA_TIMEOUT_MS || "5000", 10),
-  enabled:
-    process.env.NODE_ENV === "production" ||
-    process.env.RECAPTCHA_ENABLED === "true",
-  requiredActions: process.env.RECAPTCHA_REQUIRED_ACTIONS?.split(","),
-  allowedHostnames: process.env.RECAPTCHA_ALLOWED_HOSTNAMES?.split(","),
+  enabled: process.env.NODE_ENV === "production" || process.env.RECAPTCHA_ENABLED === "true",
+  requiredActions: process.env.RECAPTCHA_REQUIRED_ACTIONS?.split(",").filter(Boolean),
+  allowedHostnames: process.env.RECAPTCHA_ALLOWED_HOSTNAMES?.split(",").filter(Boolean),
 };
 
-// Replay-protection temporary cache
+// Replay-protection temporary cache with enhanced security
 class TokenCache {
   private cache = new Map<string, number>();
-  private readonly TTL = 2 * 60 * 1000; // 2 mins
+  private readonly TTL = 2 * 60 * 1000; // 2 minutes TTL
+  private readonly cleanupInterval = 5 * 60 * 1000; // 5 minutes cleanup
+
+  constructor() {
+    this.startCleanup();
+  }
 
   has(token: string): boolean {
-    const ts = this.cache.get(token);
-    if (!ts) return false;
+    const timestamp = this.cache.get(token);
+    if (!timestamp) return false;
 
-    if (Date.now() - ts > this.TTL) {
+    if (Date.now() - timestamp > this.TTL) {
       this.cache.delete(token);
       return false;
     }
@@ -53,25 +78,67 @@ class TokenCache {
     this.cache.set(token, Date.now());
   }
 
-  cleanup(): void {
+  private startCleanup(): void {
+    if (typeof setInterval !== 'undefined') {
+      setInterval(() => this.cleanup(), this.cleanupInterval);
+    }
+  }
+
+  private cleanup(): void {
     const now = Date.now();
-    for (const [token, ts] of this.cache.entries()) {
-      if (now - ts > this.TTL) this.cache.delete(token);
+    for (const [token, timestamp] of this.cache.entries()) {
+      if (now - timestamp > this.TTL) {
+        this.cache.delete(token);
+      }
     }
   }
 }
 
 const tokenCache = new TokenCache();
 
-// Unified error class
+// Enhanced error class with better typing
 export class RecaptchaError extends Error {
   constructor(
     message: string,
-    public code: string,
+    public code: RecaptchaErrorCode,
     public details?: unknown,
   ) {
     super(message);
     this.name = "RecaptchaError";
+    Object.setPrototypeOf(this, RecaptchaError.prototype);
+  }
+}
+
+// Validate configuration at startup
+function validateConfig(config: RecaptchaConfig): void {
+  if (config.enabled && !config.secretKey) {
+    throw new RecaptchaError(
+      "RECAPTCHA_SECRET_KEY is required when reCAPTCHA is enabled",
+      "CONFIG_MISSING"
+    );
+  }
+
+  if (config.minScore < 0 || config.minScore > 1) {
+    throw new RecaptchaError(
+      "RECAPTCHA_MIN_SCORE must be between 0 and 1",
+      "CONFIG_MISSING"
+    );
+  }
+}
+
+// Validate token format before processing
+function validateTokenFormat(token: string): void {
+  if (!token || typeof token !== 'string') {
+    throw new RecaptchaError("Token is required", "INVALID_TOKEN");
+  }
+
+  if (token.length < 50 || token.length > 5000) {
+    throw new RecaptchaError("Invalid token format", "INVALID_TOKEN");
+  }
+
+  // Basic pattern validation for reCAPTCHA tokens
+  if (!/^[a-zA-Z0-9_-]+$/.test(token)) {
+    throw new RecaptchaError("Token contains invalid characters", "INVALID_TOKEN");
   }
 }
 
@@ -81,6 +148,9 @@ export async function verifyRecaptcha(
   clientIp?: string,
 ): Promise<RecaptchaVerificationResult> {
   const config = DEFAULT_CONFIG;
+  
+  // Validate configuration
+  validateConfig(config);
 
   const result: RecaptchaVerificationResult = {
     success: false,
@@ -89,21 +159,20 @@ export async function verifyRecaptcha(
     errorCodes: [],
   };
 
-  // Bypass in development
+  // Bypass in development with security warning
   if (!config.enabled) {
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('reCAPTCHA is disabled in production - security risk');
+    }
     return { ...result, success: true, score: 1.0 };
   }
 
-  if (!config.secretKey) {
-    throw new RecaptchaError("Missing secret key", "CONFIG_MISSING");
-  }
+  // Validate token format
+  validateTokenFormat(token);
 
-  if (!token || token.length < 50) {
-    throw new RecaptchaError("Invalid token", "INVALID_TOKEN");
-  }
-
+  // Check for token reuse (replay attack protection)
   if (tokenCache.has(token)) {
-    throw new RecaptchaError("Token reuse detected", "TOKEN_REUSE");
+    throw new RecaptchaError("Token reuse detected - possible replay attack", "TOKEN_REUSE");
   }
 
   try {
@@ -113,7 +182,12 @@ export async function verifyRecaptcha(
     const params = new URLSearchParams();
     params.append("secret", config.secretKey);
     params.append("response", token);
-    if (clientIp) params.append("remoteip", clientIp);
+    if (clientIp) {
+      // Basic IP validation
+      if (/^[a-fA-F0-9.:]+$/.test(clientIp)) {
+        params.append("remoteip", clientIp);
+      }
+    }
 
     const response = await fetch(
       "https://www.google.com/recaptcha/api/siteverify",
@@ -129,63 +203,145 @@ export async function verifyRecaptcha(
 
     clearTimeout(timeoutId);
 
-    const data = await response.json();
+    if (!response.ok) {
+      throw new RecaptchaError(
+        `API responded with status ${response.status}`,
+        "API_FAILURE"
+      );
+    }
 
-    const success = Boolean(data.success);
-    const score = Number(data.score || 0);
+    const data: GoogleRecaptchaResponse = await response.json();
+
+    // Validate response structure
+    if (typeof data.success !== 'boolean') {
+      throw new RecaptchaError("Invalid API response format", "API_FAILURE");
+    }
+
+    const success = data.success;
+    const score = Number(data.score ?? 0);
     const action = data.action;
     const hostname = data.hostname;
-    const errorCodes = Array.isArray(data["error-codes"]) ? data["error-codes"] : [];
+    const errorCodes = Array.isArray(data['error-codes']) ? data['error-codes'] : [];
 
     Object.assign(result, { success, score, action, hostname, errorCodes });
 
     const reasons: string[] = [];
 
-    if (!success) reasons.push("API reported failure");
-    if (score < config.minScore) reasons.push("Low score");
-    if (expectedAction && action !== expectedAction)
+    // Comprehensive security checks
+    if (!success) {
+      reasons.push("API reported failure");
+    }
+
+    if (score < config.minScore) {
+      reasons.push(`Low score: ${score} < ${config.minScore}`);
+      // Security logging for suspicious activity
+      console.warn(`Low reCAPTCHA score detected: ${score} from IP: ${clientIp}`);
+    }
+
+    if (expectedAction && action !== expectedAction) {
+      reasons.push(`Action mismatch: expected ${expectedAction}, got ${action}`);
       throw new RecaptchaError("Action mismatch", "ACTION_MISMATCH");
-    if (
-      config.allowedHostnames?.length &&
-      hostname &&
-      !config.allowedHostnames.includes(hostname)
-    ) {
-      reasons.push("Hostname not allowed");
     }
 
-    if (errorCodes.length) {
-      reasons.push(...errorCodes);
+    if (config.allowedHostnames?.length && hostname && !config.allowedHostnames.includes(hostname)) {
+      reasons.push(`Hostname not allowed: ${hostname}`);
+      throw new RecaptchaError("Hostname mismatch", "HOSTNAME_MISMATCH");
     }
 
-    if (reasons.length) {
+    if (config.requiredActions?.length && action && !config.requiredActions.includes(action)) {
+      reasons.push(`Action not allowed: ${action}`);
+    }
+
+    if (errorCodes.length > 0) {
+      reasons.push(...errorCodes.map(code => `API error: ${code}`));
+    }
+
+    // Final decision
+    if (reasons.length > 0) {
       result.reasons = reasons;
       result.success = false;
+      
+      // Security event logging
+      console.warn(`reCAPTCHA verification failed: ${reasons.join(', ')}`, {
+        clientIp,
+        action,
+        score,
+        hostname
+      });
+      
       return result;
     }
 
+    // Success - add token to cache to prevent reuse
     tokenCache.add(token);
-    return result;
-  } catch (err: any) {
-    if (err.name === "AbortError") {
-      throw new RecaptchaError("Timeout", "TIMEOUT");
-    }
-    if (err instanceof RecaptchaError) throw err;
+    
+    // Log successful verification for audit trail
+    console.info(`reCAPTCHA verification successful`, {
+      score,
+      action,
+      hostname,
+      clientIp,
+      timestamp: result.timestamp
+    });
 
-    throw new RecaptchaError("Verification failed", "UNKNOWN", err);
+    return result;
+  } catch (error: unknown) {
+    // Proper error handling without 'any' type
+    if (error instanceof RecaptchaError) {
+      throw error;
+    }
+
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        throw new RecaptchaError("Verification timeout", "TIMEOUT");
+      }
+      
+      if ('code' in error && error.code === 'ECONNREFUSED') {
+        throw new RecaptchaError("Network connection failed", "NETWORK_ERROR");
+      }
+    }
+
+    // Fallback for unknown errors
+    throw new RecaptchaError(
+      "Verification failed",
+      "UNKNOWN",
+      error instanceof Error ? error.message : String(error)
+    );
   }
 }
 
-export function isRecaptchaValid(
+// Simplified version for boolean responses
+export async function isRecaptchaValid(
   token: string,
   expectedAction?: string,
   clientIp?: string,
 ): Promise<boolean> {
-  return verifyRecaptcha(token, expectedAction, clientIp)
-    .then((res) => res.success)
-    .catch(() => false);
+  try {
+    const result = await verifyRecaptcha(token, expectedAction, clientIp);
+    return result.success;
+  } catch (error: unknown) {
+    // Fail secure - return false on any error
+    console.error("reCAPTCHA validation error:", error);
+    return false;
+  }
 }
 
-// Cleanup
-if (typeof setInterval !== "undefined") {
-  setInterval(() => tokenCache.cleanup(), 5 * 60 * 1000);
+// Utility function to check if reCAPTCHA is configured
+export function isRecaptchaConfigured(): boolean {
+  return !!(process.env.RECAPTCHA_SECRET_KEY && process.env.RECAPTCHA_SECRET_KEY.length > 10);
+}
+
+// Health check function
+export async function checkRecaptchaHealth(): Promise<boolean> {
+  if (!isRecaptchaConfigured()) {
+    return false;
+  }
+
+  try {
+    // Test with a dummy token to check API connectivity
+    const result = await verifyRecaptcha('test-token', 'healthcheck');
+    return result.errorCodes.includes('invalid-input-response'); // Expected error for invalid token
+  } catch {
+    return false;
+  }
 }
