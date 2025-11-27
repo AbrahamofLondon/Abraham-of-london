@@ -1,55 +1,100 @@
-// pages/api/newsletter.tsx
+// pages/api/subscribe.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  subscribe,
+  type SubscriptionResult,
+  type SubscriptionPreferences,
+} from "@/lib/server/subscription";
+import { withSecurity } from "@/lib/apiGuard";
 
-interface NewsletterRequestBody {
+interface SubscribeRequestBody {
   email?: string;
-  name?: string;
+  preferences?: SubscriptionPreferences;
+  metadata?: Record<string, unknown>;
+  tags?: string[];
+  referrer?: string;
+  website?: string;        // honeypot
+  recaptchaToken?: string; // v3 token
 }
 
-interface NewsletterResponseBody {
-  ok: boolean;
-  message?: string;
-  error?: string;
-}
+type SubscribeResponseBody =
+  | SubscriptionResult
+  | {
+      ok?: boolean;
+      message: string;
+      error?: string;
+    };
 
-export default async function handler(
+async function subscribeHandler(
   req: NextApiRequest,
-  res: NextApiResponse<NewsletterResponseBody>,
-): Promise<void> {
+  res: NextApiResponse<SubscribeResponseBody>,
+) {
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    res
-      .status(405)
-      .json({ ok: false, error: `Method ${req.method ?? "UNKNOWN"} Not Allowed` });
-    return;
-  }
-
-  const body = (req.body ?? {}) as NewsletterRequestBody;
-  const email = (body.email ?? "").trim();
-  const name = (body.name ?? "").trim();
-
-  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    res.status(400).json({ ok: false, error: "Valid email is required" });
-    return;
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
   try {
-    // 🔒 Hook in your provider here (Resend, Mailchimp, ConvertKit, etc.)
-    // For now we just log and pretend we've subscribed them.
-    // eslint-disable-next-line no-console
-    console.log("Newsletter subscription:", { email, name });
+    const {
+      email,
+      preferences,
+      metadata,
+      tags,
+      referrer,
+    } = (req.body ?? {}) as SubscribeRequestBody;
 
-    res.status(200).json({
-      ok: true,
-      message: "You have been subscribed successfully.",
+    if (!email) {
+      return res.status(400).json({
+        ok: false,
+        message: "Email is required",
+        error: "MISSING_EMAIL",
+      });
+    }
+
+    const clientIp = getClientIp(req);
+
+    const result: SubscriptionResult = await subscribe(email, {
+      preferences,
+      metadata: {
+        ...metadata,
+        source: "api",
+        ip: clientIp,
+        userAgent: req.headers["user-agent"],
+        timestamp: new Date().toISOString(),
+      },
+      tags: tags || ["api-subscriber"],
+      referrer:
+        referrer ||
+        (req.headers.referer as string | undefined) ||
+        "direct",
     });
-  } catch (err) {
-    // Ensure err is used
-    // eslint-disable-next-line no-console
-    console.error("Newsletter API error:", err);
-    res.status(500).json({
+
+    const statusCode = result.ok ? 200 : result.status || 400;
+    return res.status(statusCode).json(result);
+  } catch (error: unknown) {
+    console.error("Subscription API error:", error);
+
+    return res.status(500).json({
       ok: false,
-      error: "Internal server error. Please try again later.",
+      message: "Internal server error",
+      error: "SERVER_ERROR",
     });
   }
 }
+
+function getClientIp(req: NextApiRequest): string | undefined {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  if (Array.isArray(forwardedFor)) return forwardedFor[0];
+  if (typeof forwardedFor === "string") return forwardedFor.split(",")[0].trim();
+
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string") return realIp;
+
+  return req.socket?.remoteAddress ?? undefined;
+}
+
+export default withSecurity(subscribeHandler, {
+  requireRecaptcha: true,
+  expectedAction: "generic_subscribe",
+  requireHoneypot: true,
+  honeypotFieldNames: ["website", "botField"],
+});

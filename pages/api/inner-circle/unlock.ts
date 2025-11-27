@@ -1,24 +1,44 @@
 // pages/api/inner-circle/unlock.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
+const INNER_CIRCLE_KEY = process.env.INNER_CIRCLE_KEY || "";
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST")
-    return res.status(405).json({ error: "Method Not Allowed" });
-
-  // TODO: replace with your real membership validation
-  const { key } = req.body;
-
-  if (key !== process.env.INNER_CIRCLE_MASTER_KEY) {
-    return res.status(401).json({ success: false, message: "Invalid Key" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
   }
 
-  // Set 7-day signed session
-  res.setHeader(
-    "Set-Cookie",
-    `innerCircleAccess=true; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${
-      7 * 24 * 60 * 60
-    }`
-  );
+  if (!INNER_CIRCLE_KEY) {
+    return res
+      .status(500)
+      .json({ ok: false, error: "INNER_CIRCLE_KEY not configured" });
+  }
 
-  return res.status(200).json({ success: true });
+  const { key } = req.body ?? {};
+
+  if (typeof key !== "string" || !key.trim()) {
+    return res.status(400).json({ ok: false, error: "Missing key" });
+  }
+
+  if (key.trim() !== INNER_CIRCLE_KEY) {
+    return res.status(401).json({ ok: false, error: "Invalid key" });
+  }
+
+  const isProd = process.env.NODE_ENV === "production";
+
+  // Secure, httpOnly cookie for gating
+  res.setHeader("Set-Cookie", [
+    [
+      "innerCircleAccess=true",
+      "Path=/",
+      `Max-Age=${60 * 60 * 24 * 30}`, // 30 days
+      "HttpOnly",
+      "SameSite=Lax",
+      isProd ? "Secure" : "",
+    ]
+      .filter(Boolean)
+      .join("; "),
+  ]);
+
+  return res.status(200).json({ ok: true });
 }

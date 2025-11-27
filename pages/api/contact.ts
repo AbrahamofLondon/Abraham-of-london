@@ -1,5 +1,6 @@
 // pages/api/contact.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { withSecurity } from "@/lib/apiGuard";
 
 interface OkResponse {
   ok: true;
@@ -22,6 +23,7 @@ interface ContactRequestBody {
   botField?: string;
   teaserOptIn?: boolean;
   newsletterOptIn?: boolean;
+  recaptchaToken?: string;
 }
 
 interface EmailPayload {
@@ -39,16 +41,14 @@ interface ResendResponse {
   body?: unknown;
 }
 
-// Regex for basic email format validation
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Public teaser paths (make sure both files exist under /public/downloads/)
 const TEASER_A4 = "/downloads/Fathering_Without_Fear_Teaser-A4.pdf";
 const TEASER_MOB = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf";
 
-export default async function handler(
+async function contactHandler(
   req: NextApiRequest,
-  res: NextApiResponse<ContactResponse>
+  res: NextApiResponse<ContactResponse>,
 ) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -56,20 +56,22 @@ export default async function handler(
   }
 
   try {
-    const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {}) as ContactRequestBody;
-    
-    // Input sanitization and limits
+    const rawBody = req.body;
+    const body: ContactRequestBody =
+      typeof rawBody === "string" ? safeParse(rawBody) : (rawBody || {});
+
+    // Input sanitisation and limits
     const name = String(body.name || "").trim().slice(0, 100);
     const email = String(body.email || "").trim().toLowerCase();
-    const subject = String(body.subject || "Website contact").trim().slice(0, 120);
+    const subject = String(body.subject || "Website contact")
+      .trim()
+      .slice(0, 120);
     const message = String(body.message || "").trim();
     const honeypot = String(body.botField || "").trim();
 
-    // New flags (checkboxes on the form / FloatingTeaserCTA, etc.)
     const teaserOptIn = !!body.teaserOptIn;
     const newsletterOptIn = !!body.newsletterOptIn;
 
-    // URLs for email content
     const SITE_URL =
       process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.URL ||
@@ -79,21 +81,29 @@ export default async function handler(
     const teaserA4Url = abs(SITE_URL, TEASER_A4);
     const teaserMobUrl = abs(SITE_URL, TEASER_MOB);
 
-    // --- Validation ---
+    // Primary honeypot (belt and braces on top of withSecurity)
     if (honeypot) {
-      return res.status(200).json({ ok: true, message: "Message sent successfully!" });
-    }
-    if (!email || !message) {
-      return res.status(400).json({ ok: false, message: "Required: email, message" });
-    }
-    if (!EMAIL_RE.test(email)) {
-      return res.status(400).json({ ok: false, message: "Invalid email format" });
-    }
-    if (message.length < 5) {
-      return res.status(400).json({ ok: false, message: "Message is too short" });
+      return res
+        .status(200)
+        .json({ ok: true, message: "Message sent successfully!" });
     }
 
-    // Dev logging
+    if (!email || !message) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Required: email, message" });
+    }
+    if (!EMAIL_RE.test(email)) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Invalid email format" });
+    }
+    if (message.length < 5) {
+      return res
+        .status(400)
+        .json({ ok: false, message: "Message is too short" });
+    }
+
     if (process.env.NODE_ENV !== "production") {
       const maskedEmail = email.replace(/^(.).+(@.*)$/, "$1***$2");
       console.log("[contact] submission:", {
@@ -106,19 +116,32 @@ export default async function handler(
       });
     }
 
-    // Optional email sending via Resend
     const provider = (process.env.CONTACT_PROVIDER || "").toLowerCase();
     if (provider === "resend") {
       const apiKey = process.env.RESEND_API_KEY;
-      const to = process.env.MAIL_TO || "info@abrahamoflondon.org";
-      const from = process.env.MAIL_FROM || "Abraham of London <no-reply@abrahamoflondon.org>";
-      
+      const to =
+        process.env.MAIL_TO || "info@abrahamoflondon.org";
+      const from =
+        process.env.MAIL_FROM ||
+        "Abraham of London <no-reply@abrahamoflondon.org>";
+
       if (!apiKey) {
-        return res.status(500).json({ ok: false, message: "Email provider not configured" });
+        return res.status(500).json({
+          ok: false,
+          message: "Email provider not configured",
+          error: "NO_PROVIDER",
+        });
       }
 
       // 1) Notify owner
-      const ownerHtml = ownerNoticeHtml({ name, email, subject, message, teaserOptIn, newsletterOptIn });
+      const ownerHtml = ownerNoticeHtml({
+        name,
+        email,
+        subject,
+        message,
+        teaserOptIn,
+        newsletterOptIn,
+      });
       const ownerResp = await sendViaResend({
         apiKey,
         from,
@@ -127,16 +150,27 @@ export default async function handler(
         html: ownerHtml,
         replyTo: { email, name: name || email },
       });
-      
+
       if (!ownerResp.ok) {
-        console.error("[contact] Resend owner send failed:", ownerResp.status, ownerResp.body);
-        // Continue to attempt auto-reply
+        console.error("[contact] Resend owner send failed:", {
+          status: ownerResp.status,
+          body: ownerResp.body,
+        });
+        // Continue to auto-reply
       }
 
       // 2) Auto-reply with teaser (if opted in)
       if (teaserOptIn) {
-        const autoHtml = teaserAutoReplyHtml({ teaserA4Url, teaserMobUrl, siteUrl: SITE_URL });
-        const autoText = teaserAutoReplyText({ teaserA4Url, teaserMobUrl, siteUrl: SITE_URL });
+        const autoHtml = teaserAutoReplyHtml({
+          teaserA4Url,
+          teaserMobUrl,
+          siteUrl: SITE_URL,
+        });
+        const autoText = teaserAutoReplyText({
+          teaserA4Url,
+          teaserMobUrl,
+          siteUrl: SITE_URL,
+        });
         const autoResp = await sendViaResend({
           apiKey,
           from,
@@ -145,13 +179,16 @@ export default async function handler(
           html: autoHtml,
           text: autoText,
         });
-        
+
         if (!autoResp.ok) {
-          console.error("[contact] Resend teaser auto-reply failed:", autoResp.status, autoResp.body);
+          console.error("[contact] Resend teaser auto-reply failed:", {
+            status: autoResp.status,
+            body: autoResp.body,
+          });
         }
       }
 
-      // 3) Newsletter opt-in (notify owner or integrate your ESP here)
+      // 3) Newsletter opt-in notification
       if (newsletterOptIn) {
         const nlHtml = `
         <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.5;color:#111">
@@ -160,7 +197,7 @@ export default async function handler(
           <p><strong>Email:</strong> ${escapeHtml(email)}</p>
           <p>Please add to the launch/chapters list.</p>
         </div>`.trim();
-        
+
         const nlResp = await sendViaResend({
           apiKey,
           from,
@@ -168,23 +205,29 @@ export default async function handler(
           subject: "Newsletter opt-in — Fathering Without Fear",
           html: nlHtml,
         });
-        
+
         if (!nlResp.ok) {
-          console.error("[contact] Resend newsletter note failed:", nlResp.status, nlResp.body);
+          console.error("[contact] Resend newsletter note failed:", {
+            status: nlResp.status,
+            body: nlResp.body,
+          });
         }
       }
     }
 
-    return res.status(200).json({ ok: true, message: "Message sent successfully!" });
+    return res
+      .status(200)
+      .json({ ok: true, message: "Message sent successfully!" });
   } catch (e) {
     console.error("[contact] handler error:", e);
-    return res.status(500).json({ ok: false, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ ok: false, message: "Internal Server Error" });
   }
 }
 
 /* ---------------- helpers ---------------- */
 
-/** Generates an absolute URL from a base site URL and a path. */
 function abs(site: string, p: string): string {
   if (!p) return site;
   try {
@@ -194,7 +237,6 @@ function abs(site: string, p: string): string {
   }
 }
 
-/** Safely parses a JSON string, returning an empty object on failure. */
 function safeParse(s: string): ContactRequestBody {
   try {
     return JSON.parse(s) as ContactRequestBody;
@@ -203,14 +245,11 @@ function safeParse(s: string): ContactRequestBody {
   }
 }
 
-/** Escapes HTML special characters for safe email template injection. */
 function escapeHtml(str: string): string {
   return String(str).replace(/[&<>"']/g, (m) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m,
   );
 }
-
-// --- Email Content Generators ---
 
 interface OwnerNoticeArgs {
   name: string;
@@ -221,7 +260,6 @@ interface OwnerNoticeArgs {
   newsletterOptIn: boolean;
 }
 
-/** HTML content for the owner notification email. */
 function ownerNoticeHtml(args: OwnerNoticeArgs): string {
   const { name, email, subject, message, teaserOptIn, newsletterOptIn } = args;
   return `
@@ -233,7 +271,9 @@ function ownerNoticeHtml(args: OwnerNoticeArgs): string {
     <p><strong>Teaser requested:</strong> ${teaserOptIn ? "Yes" : "No"}</p>
     <p><strong>Newsletter opt-in:</strong> ${newsletterOptIn ? "Yes" : "No"}</p>
     <p><strong>Message:</strong></p>
-    <pre style="white-space:pre-wrap; background-color: #f7f7f7; padding: 10px; border-radius: 5px;">${escapeHtml(message)}</pre>
+    <pre style="white-space:pre-wrap; background-color: #f7f7f7; padding: 10px; border-radius: 5px;">${escapeHtml(
+      message,
+    )}</pre>
   </div>`.trim();
 }
 
@@ -243,7 +283,6 @@ interface TeaserAutoReplyArgs {
   siteUrl: string;
 }
 
-/** HTML content for the auto-reply email with the teaser links. */
 function teaserAutoReplyHtml(args: TeaserAutoReplyArgs): string {
   const { teaserA4Url, teaserMobUrl, siteUrl } = args;
   return `
@@ -261,7 +300,6 @@ function teaserAutoReplyHtml(args: TeaserAutoReplyArgs): string {
   </div>`.trim();
 }
 
-/** Plain text content for the auto-reply email. */
 function teaserAutoReplyText(args: TeaserAutoReplyArgs): string {
   const { teaserA4Url, teaserMobUrl, siteUrl } = args;
   return `
@@ -281,8 +319,6 @@ Abraham of London
 `.trim();
 }
 
-// --- Resend API Integration ---
-
 interface SendViaResendArgs {
   apiKey: string;
   from: string;
@@ -293,15 +329,15 @@ interface SendViaResendArgs {
   replyTo?: { email: string; name?: string };
 }
 
-/** Sends an email using the Resend API. */
 async function sendViaResend(args: SendViaResendArgs): Promise<ResendResponse> {
   const { apiKey, from, to, subject, html, text, replyTo } = args;
   const payload: EmailPayload = { from, to, subject, html };
-  
+
   if (text) payload.text = text;
-  
   if (replyTo?.email) {
-    payload.reply_to = replyTo.name ? `${replyTo.name} <${replyTo.email}>` : replyTo.email;
+    payload.reply_to = replyTo.name
+      ? `${replyTo.name} <${replyTo.email}>`
+      : replyTo.email;
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -319,10 +355,18 @@ async function sendViaResend(args: SendViaResendArgs): Promise<ResendResponse> {
   } catch {
     body = null;
   }
-  
+
   return {
     ok: response.ok,
     status: response.status,
     body,
   };
 }
+
+// 🔐 export with guard
+export default withSecurity(contactHandler, {
+  requireRecaptcha: true,
+  expectedAction: "contact_form",
+  // contact already has its own honeypot; we don't need a second one
+  requireHoneypot: false,
+});
