@@ -1,38 +1,45 @@
 // components/GlossaryTerm.tsx
 import * as React from "react";
 
-export interface GlossaryTermProps {
-  children: React.ReactNode;
+type GlossaryTermProps = {
   term: string;
-  definition?: string;
   code?: string;
-}
-
-const GlossaryTerm: React.FC<GlossaryTermProps> = ({ 
-  children, 
-  term, 
-  definition,
-  code 
-}) => {
-  return (
-    <span 
-      className="glossary-term inline-flex items-baseline group relative cursor-help border-b border-dotted border-softGold/50"
-      data-term={term}
-      data-code={code}
-    >
-      <span className="text-cream font-medium">{children}</span>
-      
-      {/* Tooltip on hover */}
-      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-charcoal border border-softGold/30 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 min-w-[200px] max-w-[300px] text-sm">
-        <div className="font-mono text-xs text-softGold mb-1">{code}</div>
-        <div className="font-semibold text-cream mb-1">{term}</div>
-        {definition && (
-          <div className="text-gray-300 leading-tight">{definition}</div>
-        )}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-softGold/30"></div>
-      </div>
-    </span>
-  );
+  children: React.ReactNode;
 };
 
-export default GlossaryTerm;
+export default function GlossaryTerm({
+  term,
+  code,
+  children,
+}: GlossaryTermProps): JSX.Element {
+  return (
+    <section
+      className="
+        mt-4 rounded-xl border
+        border-slate-300/70 bg-slate-50/90
+        px-4 py-3 shadow-sm
+        dark:border-slate-700/80 dark:bg-slate-900/85
+      "
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-semibold tracking-wide text-slate-900 dark:text-slate-50 sm:text-base">
+          {term}
+        </h3>
+        {code ? (
+          <span
+            className="
+              rounded-full px-2.5 py-0.5 text-xs font-semibold
+              bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/30
+              dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/40
+            "
+          >
+            {code}
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+        {children}
+      </p>
+    </section>
+  );
+}
