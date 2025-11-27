@@ -211,7 +211,12 @@ const useMovementDetection = (enabled: boolean = true): boolean => {
       movementTimer = setTimeout(() => setIsMoving(false), 2000);
     };
 
-    const events: (keyof WindowEventMap)[] = ["mousemove", "scroll", "touchstart", "keydown"];
+    const events: (keyof WindowEventMap)[] = [
+      "mousemove",
+      "scroll",
+      "touchstart",
+      "keydown",
+    ];
 
     events.forEach((event) => {
       window.addEventListener(event, handleMovement, { passive: true });
@@ -255,7 +260,11 @@ const NavLink: React.FC<NavLinkProps> = ({
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.hover}
     ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-sm lg:text-base"}
-    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    ${
+      theme === "dark" && isMovementDetected
+        ? colors.glow.active
+        : colors.glow.normal
+    }
   `;
 
   const activeStyles = isActive
@@ -271,12 +280,14 @@ const NavLink: React.FC<NavLinkProps> = ({
         onClick={onClick}
         className={`block ${baseStyles} ${activeStyles}`}
         aria-current={isActive ? "page" : undefined}
-        prefetch={true}
+        prefetch
       >
         <div className="flex flex-col">
           <span className={isMobile ? "font-bold" : ""}>{item.label}</span>
           {isMobile && item.description && (
-            <span className={`mt-1 text-sm ${colors.text.secondary}`}>{item.description}</span>
+            <span className={`mt-1 text-sm ${colors.text.secondary}`}>
+              {item.description}
+            </span>
           )}
         </div>
       </Link>
@@ -323,12 +334,25 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     flex items-center gap-2 transition-all duration-300
     ${colors.text.secondary}
     ${colors.interactive.hover}
-    ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-sm lg:text-base font-medium"}
-    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    ${
+      isMobile
+        ? "text-base py-2 px-3 font-semibold"
+        : "text-sm lg:text-base font-medium"
+    }
+    ${
+      theme === "dark" && isMovementDetected
+        ? colors.glow.active
+        : colors.glow.normal
+    }
   `;
 
   return (
-    <a href={href} onClick={onClick} className={baseStyles} aria-label={`${label} Abraham`}>
+    <a
+      href={href}
+      onClick={onClick}
+      className={baseStyles}
+      aria-label={`${label} Abraham`}
+    >
       <Icon className="h-4 w-4" />
       <span>{label}</span>
     </a>
@@ -376,9 +400,17 @@ export default function Header({
 
   const brandClass = `
     font-serif transition-all duration-300
-    ${scrolled ? "text-[1.35rem] md:text-[1.85rem]" : "text-[1.6rem] md:text-[2.15rem]"}
+    ${
+      scrolled
+        ? "text-[1.35rem] md:text-[1.85rem]"
+        : "text-[1.6rem] md:text-[2.15rem]"
+    }
     ${colors.text.accent}
-    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    ${
+      theme === "dark" && isMovementDetected
+        ? colors.glow.active
+        : colors.glow.normal
+    }
     tracking-tight leading-tight
   `;
 
@@ -405,7 +437,7 @@ export default function Header({
           href={getRoutePath("home")}
           aria-label="Abraham of London - Home"
           className={brandClass}
-          prefetch={true}
+          prefetch
         >
           <span className="font-extrabold">Abraham</span>{" "}
           <span className="font-bold">of London</span>
@@ -443,13 +475,29 @@ export default function Header({
               />
             </div>
 
+            {/* NEW: Canon Prelude CTA */}
+            <Link
+              href="/books/the-architecture-of-human-purpose-landing"
+              className={`hidden rounded-full border border-softGold/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block ${
+                theme === "dark" && isMovementDetected
+                  ? "shadow-lg shadow-softGold/30"
+                  : ""
+              }`}
+              aria-label="The Canon Prelude – Architecture of Human Purpose"
+              prefetch
+            >
+              Canon Prelude
+            </Link>
+
             <Link
               href={getRoutePath("contact")}
               className={`hidden rounded-full bg-softGold px-5 py-2.5 text-sm font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block lg:px-6 ${
-                theme === "dark" && isMovementDetected ? "shadow-lg shadow-softGold/30" : ""
+                theme === "dark" && isMovementDetected
+                  ? "shadow-lg shadow-softGold/30"
+                  : ""
               }`}
               aria-label="Go to contact form"
-              prefetch={true}
+              prefetch
             >
               Enquire
             </Link>
@@ -516,7 +564,10 @@ export default function Header({
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <nav className="flex h-full flex-col px-6 py-8" aria-label="Mobile navigation">
+            <nav
+              className="flex h-full flex-col px-6 py-8"
+              aria-label="Mobile navigation"
+            >
               <ul className="space-y-2">
                 {NAV_ITEMS.map((item) => (
                   <NavLink
@@ -530,6 +581,22 @@ export default function Header({
                   />
                 ))}
               </ul>
+
+              {/* Mobile Canon Prelude CTA */}
+              <div className="mt-6">
+                <Link
+                  href="/books/the-architecture-of-human-purpose-landing"
+                  onClick={() => setIsOpen(false)}
+                  className={`block w-full rounded-xl border border-softGold/70 bg-black/5 px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.22em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10 hover:shadow-lg hover:shadow-softGold/25 ${
+                    theme === "dark" && isMovementDetected
+                      ? "shadow-lg shadow-softGold/30"
+                      : ""
+                  }`}
+                  prefetch
+                >
+                  Canon Prelude
+                </Link>
+              </div>
 
               {/* Mobile Contact Actions */}
               <div className="mt-auto space-y-4 pt-8">
@@ -559,8 +626,12 @@ export default function Header({
                     theme === "dark"
                       ? "bg-softGold text-deepCharcoal"
                       : "bg-softGold text-deepCharcoal"
-                  } ${theme === "dark" && isMovementDetected ? "shadow-lg shadow-softGold/30" : ""}`}
-                  prefetch={true}
+                  } ${
+                    theme === "dark" && isMovementDetected
+                      ? "shadow-lg shadow-softGold/30"
+                      : ""
+                  }`}
+                  prefetch
                 >
                   Enquire Now
                 </Link>
@@ -595,7 +666,9 @@ export default function Header({
         @media (max-width: 767px) {
           :root {
             --header-height: ${
-              scrolled ? HEADER_HEIGHTS.mobile.scrolled : HEADER_HEIGHTS.mobile.normal
+              scrolled
+                ? HEADER_HEIGHTS.mobile.scrolled
+                : HEADER_HEIGHTS.mobile.normal
             };
           }
         }
