@@ -1,8 +1,9 @@
-// pages/api/downloads.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+// app/api/downloads/route.ts
+import { NextResponse } from "next/server";
 import { allDownloads } from "contentlayer/generated";
 
-type DownloadItem = {
+// Define proper types to avoid 'any'
+interface DownloadDocument {
   slug: string;
   title: string;
   subtitle?: string | null;
@@ -11,13 +12,28 @@ type DownloadItem = {
   date: string;
   tags: string[];
   coverImage?: string | null;
-  // File-related fields (if present in frontmatter)
   file?: string | null;
   pdfPath?: string | null;
   downloadFile?: string | null;
   fileUrl?: string | null;
   url: string;
-};
+}
+
+interface DownloadItem {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  date: string;
+  tags: string[];
+  coverImage?: string | null;
+  file?: string | null;
+  pdfPath?: string | null;
+  downloadFile?: string | null;
+  fileUrl?: string | null;
+  url: string;
+}
 
 type DownloadsResponse =
   | { ok: true; count: number; items: DownloadItem[] }
@@ -31,7 +47,7 @@ function safeDate(input: unknown): string {
   return d.toISOString().split("T")[0]!;
 }
 
-function mapDownload(doc: (typeof allDownloads)[number]): DownloadItem {
+function mapDownload(doc: DownloadDocument): DownloadItem {
   return {
     slug: doc.slug,
     title: doc.title,
@@ -41,57 +57,57 @@ function mapDownload(doc: (typeof allDownloads)[number]): DownloadItem {
     date: safeDate(doc.date),
     tags: doc.tags ?? [],
     coverImage: doc.coverImage ?? null,
-    file: (doc as any).file ?? null,
-    pdfPath: (doc as any).pdfPath ?? null,
-    downloadFile: (doc as any).downloadFile ?? null,
-    fileUrl: (doc as any).fileUrl ?? null,
+    file: doc.file ?? null,
+    pdfPath: doc.pdfPath ?? null,
+    downloadFile: doc.downloadFile ?? null,
+    fileUrl: doc.fileUrl ?? null,
     url: doc.url ?? `/downloads/${doc.slug}`,
   };
 }
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<DownloadsResponse>,
-): void {
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader(
-    "Cache-Control",
-    "public, s-maxage=600, stale-while-revalidate=600",
-  );
+export async function GET(request: Request): Promise<NextResponse<DownloadsResponse>> {
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get("slug");
+
+  // Set cache headers
+  const headers = {
+    "Content-Type": "application/json",
+    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
+  };
 
   // Single download by slug
-  if (req.method === "GET" && typeof req.query.slug === "string") {
-    const slug = req.query.slug.trim();
-    const found = allDownloads.find((d) => d.slug === slug);
+  if (slug && typeof slug === "string") {
+    const found = allDownloads.find((d) => d.slug === slug.trim()) as DownloadDocument | undefined;
 
     if (!found) {
-      res.status(404).json({ ok: false, error: "Download not found" });
-      return;
+      return NextResponse.json({ ok: false, error: "Download not found" }, { status: 404, headers });
     }
 
-    res.status(200).json({ ok: true, item: mapDownload(found) });
-    return;
+    return NextResponse.json({ ok: true, item: mapDownload(found) }, { headers });
   }
 
   // List of downloads (default)
-  if (req.method === "GET") {
-    const items = allDownloads
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime(),
-      )
-      .map(mapDownload);
+  const items = allDownloads
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map(doc => mapDownload(doc as DownloadDocument));
 
-    res.status(200).json({
-      ok: true,
-      count: items.length,
-      items,
-    });
-    return;
-  }
+  return NextResponse.json({
+    ok: true,
+    count: items.length,
+    items,
+  }, { headers });
+}
 
-  // Method not allowed
-  res.setHeader("Allow", "GET");
-  res.status(405).json({ ok: false, error: "Method not allowed" });
+// Handle other methods
+export async function POST(): Promise<NextResponse<DownloadsResponse>> {
+  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
+}
+
+export async function PUT(): Promise<NextResponse<DownloadsResponse>> {
+  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
+}
+
+export async function DELETE(): Promise<NextResponse<DownloadsResponse>> {
+  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
 }

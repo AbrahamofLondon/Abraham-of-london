@@ -7,7 +7,7 @@ interface ContactFormData {
   email: string;
   subject: string;
   message: string;
-  website: string; // honeypot (renamed from botField)
+  website: string; // honeypot field
   teaserOptIn: boolean;
   newsletterOptIn: boolean;
 }
@@ -24,7 +24,7 @@ export default function ContactForm(): JSX.Element {
     email: "",
     subject: "",
     message: "",
-    website: "", // honeypot - renamed to match security expectations
+    website: "", // honeypot - hidden from users
     teaserOptIn: false,
     newsletterOptIn: false,
   });
@@ -40,15 +40,25 @@ export default function ContactForm(): JSX.Element {
     return submitAttempts >= 3 && (now - lastSubmitTime) < 60000;
   }, [submitAttempts, lastSubmitTime]);
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) {
-    const { name, value, type, checked } = e.target;
+  // Separate handlers for different input types
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
-  }
+  };
+
+  // Separate handler for checkbox changes
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
 
   // Enhanced form validation
   function validateForm(): string | null {
@@ -121,14 +131,15 @@ export default function ContactForm(): JSX.Element {
         if (form.website.trim() !== "") {
           // Pretend success for bots
           setStatus("Thank you for your message! We'll get back to you soon.");
-          setForm(prev => ({
-            ...prev,
+          setForm({
             name: "",
             email: "",
             subject: "",
             message: "",
             website: "",
-          }));
+            teaserOptIn: false,
+            newsletterOptIn: false,
+          });
           setSubmitting(false);
           return;
         }
@@ -160,8 +171,8 @@ export default function ContactForm(): JSX.Element {
         },
         body: JSON.stringify({
           ...sanitizedData,
-          recaptchaToken, // ✅ Now properly included
-          website: sanitizedData.website, // ✅ Honeypot field with correct name
+          recaptchaToken,
+          website: sanitizedData.website, // Honeypot field
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
         }),
@@ -249,9 +260,9 @@ export default function ContactForm(): JSX.Element {
         <input
           id="website-field"
           type="text"
-          name="website" {/* ✅ Changed from botField to website */}
+          name="website"
           value={form.website}
-          onChange={handleChange}
+          onChange={handleInputChange}
           autoComplete="off"
           tabIndex={-1}
         />
@@ -262,7 +273,7 @@ export default function ContactForm(): JSX.Element {
         <input
           name="name"
           value={form.name}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border border-gray-700 bg-black/40 p-3 text-gray-200 focus:border-softGold focus:ring-1 focus:ring-softGold transition-colors"
           placeholder="Your name *"
           required
@@ -277,7 +288,7 @@ export default function ContactForm(): JSX.Element {
           name="email"
           type="email"
           value={form.email}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border border-gray-700 bg-black/40 p-3 text-gray-200 focus:border-softGold focus:ring-1 focus:ring-softGold transition-colors"
           placeholder="Your email *"
           required
@@ -290,7 +301,7 @@ export default function ContactForm(): JSX.Element {
         <input
           name="subject"
           value={form.subject}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border border-gray-700 bg-black/40 p-3 text-gray-200 focus:border-softGold focus:ring-1 focus:ring-softGold transition-colors"
           placeholder="Subject"
           maxLength={200}
@@ -302,7 +313,7 @@ export default function ContactForm(): JSX.Element {
         <textarea
           name="message"
           value={form.message}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border border-gray-700 bg-black/40 p-3 text-gray-200 focus:border-softGold focus:ring-1 focus:ring-softGold transition-colors resize-vertical"
           placeholder="Your message *"
           rows={5}
@@ -322,7 +333,7 @@ export default function ContactForm(): JSX.Element {
             type="checkbox"
             name="teaserOptIn"
             checked={form.teaserOptIn}
-            onChange={handleChange}
+            onChange={handleCheckboxChange}
             disabled={submitting || isRateLimited}
             className="rounded border-gray-600 bg-black/40 text-softGold focus:ring-softGold focus:ring-2 focus:ring-offset-2 focus:ring-offset-black"
           />
@@ -334,7 +345,7 @@ export default function ContactForm(): JSX.Element {
             type="checkbox"
             name="newsletterOptIn"
             checked={form.newsletterOptIn}
-            onChange={handleChange}
+            onChange={handleCheckboxChange}
             disabled={submitting || isRateLimited}
             className="rounded border-gray-600 bg-black/40 text-softGold focus:ring-softGold focus:ring-2 focus:ring-offset-2 focus:ring-offset-black"
           />

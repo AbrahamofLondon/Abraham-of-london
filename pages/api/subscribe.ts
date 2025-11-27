@@ -5,7 +5,6 @@ import {
   type SubscriptionResult,
   type SubscriptionPreferences,
 } from "@/lib/server/subscription";
-import { withSecurity } from "@/lib/apiGuard";
 import { verifyRecaptcha } from "@/lib/verifyRecaptcha";
 
 interface SubscribeRequestBody {
@@ -14,8 +13,8 @@ interface SubscribeRequestBody {
   metadata?: Record<string, unknown>;
   tags?: string[];
   referrer?: string;
-  website?: string;        // honeypot
-  confirm_email?: string;  // additional honeypot
+  website?: string;
+  confirm_email?: string;
   recaptchaToken?: string;
   source?: string;
   userAgent?: string;
@@ -29,12 +28,11 @@ interface SubscribeResponseBody {
   status?: number;
 }
 
-// Rate limiting store (in production, use Redis)
+// Simple in-memory rate limiting
 const rateLimitStore = new Map<string, { count: number; lastAttempt: number }>();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const MAX_ATTEMPTS = 5;
 
-// Email validation regex
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 function validateEmail(email: string): { isValid: boolean; error?: string } {
@@ -52,17 +50,6 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
     return { isValid: false, error: "Please enter a valid email address" };
   }
 
-  // Check for disposable email domains
-  const disposableDomains = [
-    'tempmail.com', 'guerrillamail.com', 'mailinator.com', 
-    '10minutemail.com', 'yopmail.com', 'throwaway.com'
-  ];
-  
-  const domain = trimmedEmail.split('@')[1];
-  if (disposableDomains.some(d => domain.includes(d))) {
-    return { isValid: false, error: "Please use a permanent email address" };
-  }
-
   return { isValid: true };
 }
 
@@ -75,7 +62,6 @@ function checkRateLimit(identifier: string): { allowed: boolean; remaining?: num
     return { allowed: true, remaining: MAX_ATTEMPTS - 1 };
   }
 
-  // Clean old records
   if (now - record.lastAttempt > RATE_LIMIT_WINDOW) {
     rateLimitStore.set(identifier, { count: 1, lastAttempt: now });
     return { allowed: true, remaining: MAX_ATTEMPTS - 1 };
@@ -100,7 +86,41 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // Cleanup every hour
 
-async function subscribeHandler(
+function getClientIp(req: NextApiRequest): string {
+  const headers = req.headers;
+  
+  // Cloudflare
+  const cfConnectingIp = headers['cf-connecting-ip'];
+  if (cfConnectingIp && typeof cfConnectingIp === 'string') {
+    return cfConnectingIp;
+  }
+
+  // Standard headers
+  const forwardedFor = headers['x-forwarded-for'];
+  if (forwardedFor) {
+    if (Array.isArray(forwardedFor)) {
+      return forwardedFor[0].split(',')[0].trim();
+    }
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  const realIp = headers['x-real-ip'];
+  if (realIp && typeof realIp === 'string') {
+    return realIp;
+  }
+
+  const forwarded = headers['forwarded'];
+  if (forwarded && typeof forwarded === 'string') {
+    const forPart = forwarded.split(';').find(part => part.trim().startsWith('for='));
+    if (forPart) {
+      return forPart.split('=')[1].trim();
+    }
+  }
+
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SubscribeResponseBody>,
 ) {
@@ -119,8 +139,8 @@ async function subscribeHandler(
       metadata,
       tags,
       referrer,
-      website, // honeypot
-      confirm_email, // additional honeypot
+      website,
+      confirm_email,
       recaptchaToken,
       source = "unknown",
       userAgent,
@@ -178,8 +198,12 @@ async function subscribeHandler(
       });
     }
 
+    let recaptchaScore = 0;
+    
     try {
       const recaptchaResult = await verifyRecaptcha(recaptchaToken, "generic_subscribe", clientIp);
+      recaptchaScore = recaptchaResult.score;
+      
       if (!recaptchaResult.success) {
         console.warn("reCAPTCHA verification failed", {
           email: cleanEmail,
@@ -219,7 +243,7 @@ async function subscribeHandler(
         ip: clientIp,
         userAgent: userAgent || req.headers["user-agent"],
         timestamp: timestamp || new Date().toISOString(),
-        recaptchaScore: recaptchaResult.score,
+        recaptchaScore: recaptchaScore,
       },
       tags: tags || ["api-subscriber"],
       referrer: referrer || (req.headers.referer as string | undefined) || "direct",
@@ -245,7 +269,6 @@ async function subscribeHandler(
   } catch (error: unknown) {
     console.error("Subscription API error:", error);
 
-    // Don't expose internal errors to clients
     return res.status(500).json({
       ok: false,
       message: "An unexpected error occurred. Please try again later.",
@@ -253,47 +276,3 @@ async function subscribeHandler(
     });
   }
 }
-
-function getClientIp(req: NextApiRequest): string {
-  // Comprehensive IP extraction
-  const headers = req.headers;
-  
-  // Cloudflare
-  const cfConnectingIp = headers['cf-connecting-ip'];
-  if (cfConnectingIp && typeof cfConnectingIp === 'string') {
-    return cfConnectingIp;
-  }
-
-  // Standard headers
-  const forwardedFor = headers['x-forwarded-for'];
-  if (forwardedFor) {
-    if (Array.isArray(forwardedFor)) {
-      return forwardedFor[0].split(',')[0].trim();
-    }
-    return forwardedFor.split(',')[0].trim();
-  }
-
-  const realIp = headers['x-real-ip'];
-  if (realIp && typeof realIp === 'string') {
-    return realIp;
-  }
-
-  const forwarded = headers['forwarded'];
-  if (forwarded && typeof forwarded === 'string') {
-    const forPart = forwarded.split(';').find(part => part.trim().startsWith('for='));
-    if (forPart) {
-      return forPart.split('=')[1].trim();
-    }
-  }
-
-  // Fallback to socket (least reliable)
-  return req.socket?.remoteAddress || 'unknown';
-}
-
-export default withSecurity(subscribeHandler, {
-  requireRecaptcha: true,
-  expectedAction: "generic_subscribe",
-  requireHoneypot: true,
-  honeypotFieldNames: ["website", "confirm_email", "botField"],
-  minRecaptchaScore: 0.3,
-});

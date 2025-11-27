@@ -4,9 +4,6 @@ import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-// ❌ DO NOT import runtime helpers or TS types here.
-// contentlayer config is pure JS, not TS, and should only define schemas.
-
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -63,7 +60,11 @@ export const Post = defineDocumentType(() => ({
     coverAspect: { type: "string", required: false },
     coverFit: { type: "string", required: false },
     coverPosition: { type: "string", required: false },
-    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
+    relatedDownloads: {
+      type: "list",
+      of: { type: "string" },
+      required: false,
+    },
     resources: { type: "json", required: false },
     keyInsights: { type: "json", required: false },
     authorNote: { type: "string", required: false },
@@ -113,7 +114,7 @@ export const Download = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false }, // legacy field
+    readtime: { type: "string", required: false }, // legacy casing
     category: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     file: { type: "string", required: false },
@@ -128,7 +129,7 @@ export const Download = defineDocumentType(() => ({
     fileUrl: { type: "string", default: "" },
     type: { type: "string", default: "download" },
 
-    // NEW – align with canon toolkits
+    // extra flags / URLs used by Canon toolkits, etc.
     featured: { type: "boolean", default: false },
     draft: { type: "boolean", default: false },
     downloadUrl: { type: "string", default: "" },
@@ -329,8 +330,7 @@ export const Resource = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readtime: { type: "string", required: false }, // legacy
-    // NEW – proper casing used in canon-campaign etc.
-    readTime: { type: "string", required: false },
+    readTime: { type: "string", required: false }, // canonical
     subtitle: { type: "string", required: false },
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -386,7 +386,7 @@ export const Canon = defineDocumentType(() => ({
     tags: { type: "list", of: { type: "string" }, default: [] },
     readTime: { type: "string", required: false },
 
-    // NEW – used by Volume X / Inner Circle
+    // Inner Circle / restricted-access controls
     accessLevel: { type: "string", required: false, default: "public" },
     lockMessage: { type: "string", required: false },
   },
@@ -420,7 +420,7 @@ export default makeSource({
     esbuildOptions: (options) => {
       options.loader = {
         ...(options.loader || {}),
-        ".mdx": "tsx", // Treat MDX as TSX
+        ".mdx": "tsx", // allow JSX in MDX
       };
       options.alias = {
         ...(options.alias || {}),
