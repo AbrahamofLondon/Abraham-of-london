@@ -92,6 +92,7 @@ const footerSections = [
     links: [
       { label: "Home", href: "/" },
       { label: "Content", href: "/content" },
+      { label: "The Canon", href: "/canon" }, // 👈 Canon landing
       { label: "Downloads", href: "/downloads" },
       { label: "Events", href: "/events" },
       { label: "Ventures", href: "/ventures" },
@@ -103,7 +104,14 @@ const footerSections = [
       { label: "Fatherhood Frameworks", href: "/content" },
       { label: "Founder Tools", href: "/downloads" },
       { label: "Leadership Resources", href: "/content" },
-      { label: "Book Manuscripts", href: "/content" },
+      {
+        label: "Canon Campaign",
+        href: "/canon/canon-campaign",
+      }, // 👈 campaign / marketing prelude
+      {
+        label: "Volume X — Arc of Future Civilisation",
+        href: "/canon/volume-x-the-arc-of-future-civilisation",
+      }, // 👈 Volume X preview
     ],
   },
   {
