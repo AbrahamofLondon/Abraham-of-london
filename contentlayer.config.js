@@ -1,19 +1,11 @@
-// contentlayer.config.mjs (or .js depending on your setup)
+// contentlayer.config.mjs
 import path from "node:path";
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-import {
-  getAllCanon,
-  getCanonBySlug,
-  getCanonCampaign,
-  getCanonMasterIndex,
-  getCanonVolumeX,
-  getCanonVolumes,
-  getFeaturedCanon,
-  type CanonDoc,
-} from "@/lib/server/canon-data";
+// ❌ DO NOT import runtime helpers or TS types here.
+// contentlayer config is pure JS, not TS, and should only define schemas.
 
 // -----------------------------------------------------------------------------
 // Helpers
