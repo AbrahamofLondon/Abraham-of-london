@@ -1,10 +1,10 @@
 // pages/books/the-architecture-of-human-purpose-landing.tsx
 
+import * as React from "react";
 import type { NextPage } from "next";
-import Head from "next/head";
 import Link from "next/link";
 
-import Layout from "@/components/Layout";
+import SiteLayout from "@/components/SiteLayout";
 
 const PAGE_TITLE = "The Architecture of Human Purpose";
 const PAGE_DESCRIPTION =
@@ -12,16 +12,17 @@ const PAGE_DESCRIPTION =
 
 const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
   return (
-    <Layout title={PAGE_TITLE}>
-      <Head>
-        <title>{PAGE_TITLE} | Abraham of London</title>
-        <meta name="description" content={PAGE_DESCRIPTION} />
-        <meta
-          name="keywords"
-          content="purpose, civilisation, governance, leadership, theology, strategic frameworks, institutional design, Abraham of London"
-        />
-      </Head>
-
+    <SiteLayout
+      pageTitle={PAGE_TITLE}
+      metaDescription={PAGE_DESCRIPTION}
+      metaTags={[
+        {
+          name: "keywords",
+          content:
+            "purpose, civilisation, governance, leadership, theology, strategic frameworks, institutional design, Abraham of London",
+        },
+      ]}
+    >
       <div className="relative min-h-screen bg-black text-white">
         {/* Background wash */}
         <div className="pointer-events-none absolute inset-0 -z-10">
@@ -271,7 +272,7 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
               {/* Volume X — Architect's Treasury */}
               <div className="rounded-3xl border border-softGold/40 bg-black/70 p-6 backdrop-blur-xl">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-softGold">
-                  VOLUME X · THE ARCHITECT’S TREASURY
+                  VOLUME X · THE ARCHITEST’S TREASURY
                 </p>
                 <p className="mb-4 text-sm leading-relaxed text-gray-200">
                   Here ends the age of intuition. <br />
@@ -291,13 +292,22 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
                   </span>
                 </p>
                 <p className="mb-2 text-sm leading-relaxed text-gray-300">
-                  The diagrams are not decoration. They are weapons.
+                  <span className="font-semibold text-softGold">
+                    The diagrams are not decoration.
+                  </span>{" "}
+                  They are weapons.
                 </p>
                 <p className="mb-2 text-sm leading-relaxed text-gray-300">
-                  The frameworks are not theories. They are engines.
+                  <span className="font-semibold text-softGold">
+                    The frameworks are not theories.
+                  </span>{" "}
+                  They are engines.
                 </p>
                 <p className="mb-4 text-sm leading-relaxed text-gray-300">
-                  The models are not abstractions. They are anchors.
+                  <span className="font-semibold text-softGold">
+                    The models are not abstractions.
+                  </span>{" "}
+                  They are anchors.
                 </p>
                 <p className="text-sm leading-relaxed text-gray-200">
                   The future belongs to those who understand the architecture
@@ -449,7 +459,7 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
           </div>
         </section>
       </div>
-    </Layout>
+    </SiteLayout>
   );
 };
 
