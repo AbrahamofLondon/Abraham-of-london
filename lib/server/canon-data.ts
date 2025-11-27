@@ -1,8 +1,7 @@
 // lib/server/canon-data.ts
 // Server-side helpers for Canon content (Contentlayer-powered)
 
-import type { Canon } from "contentlayer/generated";
-import { allCanons } from "contentlayer/generated";
+import { allCanons, type Canon } from "contentlayer/generated";
 
 export type CanonDoc = Canon;
 
@@ -80,8 +79,7 @@ export function getCanonMasterIndex(): CanonDoc | null {
 export function getCanonVolumeX(): CanonDoc | null {
   return (
     allCanons.find(
-      (c) =>
-        c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
+      (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
     ) ?? null
   );
 }

@@ -26,7 +26,7 @@ export type UnifiedContentType =
   | "resource"
   | "page"
   | "print"
-  | "canon"
+  | "canon" // kept in the union for future-proofing, even though we surface Canon as resources
   | "other";
 
 export type UnifiedSource =
@@ -70,8 +70,16 @@ export interface UnifiedContent {
   seoTitle?: string;
   seoDescription?: string;
 
+  /** where this originally came from */
   source: UnifiedSource;
+  /** basic published flag (drafts filtered out) */
   published: boolean;
+
+  /** optional extra flags that some UIs may use */
+  featured?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
+  order?: number;
 }
 
 // Internal loose object type (no `any`)
@@ -111,6 +119,11 @@ function getString(obj: ContentLike, key: string): string | undefined {
     return trimmed.length > 0 ? trimmed : undefined;
   }
   return undefined;
+}
+
+function getNumber(obj: ContentLike, key: string): number | undefined {
+  const v = obj[key];
+  return typeof v === "number" && !Number.isNaN(v) ? v : undefined;
 }
 
 function getDateLike(
@@ -196,7 +209,6 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
       title,
       type: "blog",
 
-      // unified layer is meta-oriented; MDX body is rendered in page components
       content: undefined,
       description: excerpt,
 
@@ -215,6 +227,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 
       source: "posts",
       published: draft !== true,
+      featured: getBoolean(post, "featured"),
     };
   });
 }
@@ -271,6 +284,7 @@ async function getEventContent(): Promise<UnifiedContent[]> {
 
       source: "events",
       published: (status ?? "published") !== "draft",
+      featured: getBoolean(event, "featured"),
     };
   });
 }
@@ -286,7 +300,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
     const rawSlug =
       getString(book, "slug") ??
       getString(book, "id") ??
-      getString(book, "_id") ??
+      getString(book, "._id") ??
       getString(book, "title") ??
       "";
     const slug = normaliseSlug(rawSlug, "books");
@@ -304,7 +318,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
       title,
       type: "book",
 
-      content: undefined, // meta only; full body loaded in /books/[slug]
+      content: undefined,
       description: excerpt,
 
       author:
@@ -324,6 +338,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 
       source: "books",
       published: draft !== true && (status ?? "published") !== "draft",
+      featured: getBoolean(book, "featured"),
     };
   });
 }
@@ -376,6 +391,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 
       source: "downloads",
       published: (status ?? "published") !== "draft",
+      featured: getBoolean(d, "featured"),
     };
   });
 }
@@ -428,16 +444,32 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
 
       source: "resources",
       published: (status ?? "published") !== "draft",
+      featured: getBoolean(r, "featured"),
     };
   });
 }
 
 // ---------------------------------------------------------------------------
 // CANON CONTENT  →  /canon/[slug]
+// NOTE: surfaced as type "resource" so it appears in existing hubs that expect resources.
 // ---------------------------------------------------------------------------
 
 async function getCanonContent(): Promise<UnifiedContent[]> {
-  const canons = toContentArray(allCanons as unknown as ContentLike[]);
+  const canonsRaw = toContentArray(allCanons as unknown as ContentLike[]);
+
+  // Sort by `order` if present, otherwise by title
+  const canons = [...canonsRaw].sort((a, b) => {
+    const aOrder = getNumber(a, "order");
+    const bOrder = getNumber(b, "order");
+
+    if (aOrder != null && bOrder != null) return aOrder - bOrder;
+    if (aOrder != null) return -1;
+    if (bOrder != null) return 1;
+
+    const aTitle = (getString(a, "title") ?? "").toLowerCase();
+    const bTitle = (getString(b, "title") ?? "").toLowerCase();
+    return aTitle.localeCompare(bTitle);
+  });
 
   return canons.map((c): UnifiedContent => {
     const rawSlug =
@@ -458,7 +490,9 @@ async function getCanonContent(): Promise<UnifiedContent[]> {
     return {
       slug,
       title,
-      type: "canon",
+      // IMPORTANT: surface Canon in unified feeds as "resource"
+      // so all your existing resource-driven hubs and /content pages pick it up.
+      type: "resource",
 
       content: undefined,
       description: excerpt,
@@ -466,7 +500,7 @@ async function getCanonContent(): Promise<UnifiedContent[]> {
       author: getString(c, "author"),
       date: getDateLike(c, "date"),
       updatedAt: getDateLike(c, "updatedAt"),
-      category: undefined,
+      category: "Canon",
       tags: getStringArray(c, "tags"),
 
       printSettings: undefined,
@@ -476,6 +510,10 @@ async function getCanonContent(): Promise<UnifiedContent[]> {
 
       source: "canon",
       published: draft !== true,
+      featured: getBoolean(c, "featured"),
+      accessLevel: getString(c, "accessLevel"),
+      lockMessage: getString(c, "lockMessage"),
+      order: getNumber(c, "order"),
     };
   });
 }
@@ -516,7 +554,7 @@ async function getStrategyContent(): Promise<UnifiedContent[]> {
       author: getString(s, "author"),
       date: getDateLike(s, "date"),
       updatedAt: getDateLike(s, "updatedAt"),
-      category: getString(s, "category"),
+      category: getString(s, "category") ?? "Strategy",
       tags: getStringArray(s, "tags"),
 
       printSettings: undefined,
@@ -526,6 +564,7 @@ async function getStrategyContent(): Promise<UnifiedContent[]> {
 
       source: "strategies",
       published: (status ?? "published") !== "draft",
+      featured: getBoolean(s, "featured"),
     };
   });
 }
@@ -642,6 +681,7 @@ async function getPrintContent(): Promise<UnifiedContent[]> {
       published:
         (available ?? true) &&
         (status ?? "published") !== "draft",
+      featured: getBoolean(p, "featured"),
     };
   });
 }

@@ -14,8 +14,7 @@ import rehypeSlug from "rehype-slug";
 
 import SiteLayout from "@/components/SiteLayout";
 import mdxComponents from "@/components/mdx-components";
-import { allCanons } from ".contentlayer/generated";
-import type { Canon } from ".contentlayer/generated";
+import { allCanons, type Canon } from "contentlayer/generated";
 
 interface CanonPageMeta {
   title: string;
@@ -139,9 +138,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
                 "This volume is reserved for Inner Circle members."}
             </p>
 
-            {excerpt && (
-              <p className="mt-3 text-gray-200">{excerpt}</p>
-            )}
+            {excerpt && <p className="mt-3 text-gray-200">{excerpt}</p>}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Link
@@ -193,7 +190,11 @@ export const getStaticProps: GetStaticProps<CanonPageProps> = async ({
 }) => {
   const slugParam = params?.slug;
   const slug =
-    typeof slugParam === "string" ? slugParam : Array.isArray(slugParam) ? slugParam[0] : "";
+    typeof slugParam === "string"
+      ? slugParam
+      : Array.isArray(slugParam)
+      ? slugParam[0]
+      : "";
 
   const canon = allCanons.find((c: Canon) => c.slug === slug);
 
@@ -244,5 +245,6 @@ export const getStaticProps: GetStaticProps<CanonPageProps> = async ({
       },
       mdxSource,
     },
+    revalidate: 3600,
   };
 };
