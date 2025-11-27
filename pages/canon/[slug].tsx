@@ -53,11 +53,13 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
     lockMessage,
     tags,
     readTime,
+    slug,
+    volumeNumber,
   } = meta;
 
   // TODO: plug in real membership check here when you wire auth
   const hasInnerCircleAccess = false;
-  const isLocked = accessLevel !== "public" && !hasInnerCircleAccess;
+  const isLocked = accessLevel === "inner-circle" && !hasInnerCircleAccess;
 
   const displayDescription =
     description ||
@@ -67,13 +69,20 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
 
   const pageTitle = `${title} | The Canon | Abraham of London`;
 
+  const label = (() => {
+    if (volumeNumber) return `Canon Volume ${volumeNumber}`;
+    if (slug === "canon-master-index-preview") return "Canon Prelude";
+    if (slug === "canon-campaign") return "Canon Campaign";
+    return "Canon Document";
+  })();
+
   return (
     <SiteLayout pageTitle={pageTitle} metaDescription={displayDescription}>
       <article className="mx-auto max-w-3xl py-10 text-gray-100">
         {/* HEADER */}
         <header className="mb-8">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
-            Canon Volume
+            {label}
           </p>
 
           <h1 className="mt-2 font-serif text-3xl font-semibold text-gray-50 sm:text-4xl">
@@ -110,7 +119,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
               </div>
             )}
 
-            {accessLevel !== "public" && (
+            {accessLevel === "inner-circle" && (
               <span className="inline-flex items-center rounded-full border border-softGold/70 bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-softGold">
                 Inner Circle Only
               </span>
@@ -138,7 +147,11 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
                 "This volume is reserved for Inner Circle members."}
             </p>
 
-            {excerpt && <p className="mt-3 text-gray-200">{excerpt}</p>}
+            {excerpt && (
+              <p className="mt-3 text-gray-200 leading-relaxed">
+                {excerpt}
+              </p>
+            )}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Link
@@ -154,7 +167,17 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
             </div>
           </section>
         ) : (
-          <div className="prose prose-invert prose-slate max-w-none prose-headings:font-serif prose-headings:text-gray-50 prose-a:text-softGold">
+          <div
+            className="
+              prose prose-sm sm:prose-base
+              prose-invert prose-slate max-w-none
+              prose-headings:font-serif prose-headings:text-gray-50
+              prose-a:text-softGold
+              prose-strong:text-cream
+              prose-p:leading-relaxed
+              prose-li:leading-relaxed
+            "
+          >
             <MDXRemote
               {...mdxSource}
               components={
@@ -193,8 +216,8 @@ export const getStaticProps: GetStaticProps<CanonPageProps> = async ({
     typeof slugParam === "string"
       ? slugParam
       : Array.isArray(slugParam)
-      ? slugParam[0]
-      : "";
+        ? slugParam[0]
+        : "";
 
   const canon = allCanons.find((c: Canon) => c.slug === slug);
 
