@@ -1,16 +1,17 @@
-// lib/canon.ts
-// Centralised helpers for Canon content (Contentlayer-powered)
+// lib/server/canon-data.ts
+// Server-side helpers for Canon content (Contentlayer-powered)
 
+import type { Canon } from "contentlayer/generated";
 import { allCanons } from "contentlayer/generated";
 
-export * from "./server/canon-data";
+export type CanonDoc = Canon;
 
 type CanonFilterOptions = {
   includeDrafts?: boolean;
 };
 
 function sortCanon(a: CanonDoc, b: CanonDoc): number {
-  // 1) Explicit order field if both have it
+  // 1) Explicit numeric order if both have it
   if (typeof a.order === "number" && typeof b.order === "number") {
     if (a.order !== b.order) return a.order - b.order;
   }
@@ -37,7 +38,7 @@ export function getAllCanon(opts?: CanonFilterOptions): CanonDoc[] {
 }
 
 /**
- * Featured Canon docs – for hero/primary grid.
+ * Featured Canon docs – for hero / primary grids.
  */
 export function getFeaturedCanon(): CanonDoc[] {
   return getAllCanon()
@@ -79,7 +80,8 @@ export function getCanonMasterIndex(): CanonDoc | null {
 export function getCanonVolumeX(): CanonDoc | null {
   return (
     allCanons.find(
-      (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
+      (c) =>
+        c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
     ) ?? null
   );
 }

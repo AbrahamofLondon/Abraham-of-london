@@ -4,6 +4,17 @@ import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
+import {
+  getAllCanon,
+  getCanonBySlug,
+  getCanonCampaign,
+  getCanonMasterIndex,
+  getCanonVolumeX,
+  getCanonVolumes,
+  getFeaturedCanon,
+  type CanonDoc,
+} from "@/lib/server/canon-data";
+
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
