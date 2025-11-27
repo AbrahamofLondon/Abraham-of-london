@@ -2,25 +2,15 @@ import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
+import GlossaryTerm from "@/components/GlossaryTerm";
+import CanonReference from "@/components/CanonReference";
 
-// Safe component imports with fallbacks
-let GlossaryTerm: React.ComponentType<any> = () => null;
-let CanonReference: React.ComponentType<any> = () => null;
-
-try {
-  // Try to import the components - they should exist now
-  const GlossaryTermModule = require("@/components/GlossaryTerm");
-  GlossaryTerm = GlossaryTermModule.default || GlossaryTermModule;
-} catch (error) {
-  console.warn("GlossaryTerm component not found, using fallback");
-}
-
-try {
-  const CanonReferenceModule = require("@/components/CanonReference");
-  CanonReference = CanonReferenceModule.default || CanonReferenceModule;
-} catch (error) {
-  console.warn("CanonReference component not found, using fallback");
-}
+// Shared prop type used by MDX wrapper components
+export type MdxComponentProps = React.PropsWithChildren<
+  Omit<React.HTMLAttributes<HTMLElement>, "title"> & {
+    className?: string;
+  }
+>;
 
 /* ----------------------------- Basic typography ---------------------------- */
 
@@ -660,6 +650,7 @@ export const mdxComponents = {
   Callout: CalloutBlock,
   Note: NoteBlock,
   Rule: RuleBlock,
+  Divider: RuleBlock, // <Divider /> in MDX
   hr: RuleBlock,
   Caption: CaptionBlock,
   Badge: BadgeBlock,
@@ -675,7 +666,7 @@ export const mdxComponents = {
   EmbossedBrandMark: EmbossedBrandMarkWrapper,
   EmbossedSign: EmbossedSignWrapper,
 
-  // The components that were causing build failures - now with safe fallbacks
+  // Extra components exposed to MDX
   GlossaryTerm,
   CanonReference,
 };

@@ -1,26 +1,36 @@
-// pages/canon/[slug].tsx
-
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import type { ParsedUrlQuery } from "querystring";
+import type { GetStaticPaths, GetStaticProps } from "next";
 import * as React from "react";
+import Link from "next/link";
 import {
   MDXRemote,
   type MDXRemoteSerializeResult,
+  type MDXRemoteProps,
 } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 
 import SiteLayout from "@/components/SiteLayout";
 import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx";
-import type { PostMeta } from "@/types/post";
-
-interface Params extends ParsedUrlQuery {
-  slug: string;
-}
+import { allCanons } from ".contentlayer/generated";
 
 interface CanonPageProps {
-  meta: PostMeta;
+  meta: {
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    excerpt?: string | null;
+    slug: string;
+    coverImage?: string | null;
+    volumeNumber?: string | null;
+    order?: number | null;
+    featured?: boolean;
+    draft?: boolean;
+    tags?: string[];
+    readTime?: string | null;
+    accessLevel?: string | null;
+    lockMessage?: string | null;
+  };
   mdxSource: MDXRemoteSerializeResult;
 }
 
@@ -28,102 +38,148 @@ interface CanonPageProps {
 // Page component
 // ----------------------------------------------------------------------
 
-const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
-  const { title, excerpt, description, date } = meta;
+export default function CanonPage({ meta, mdxSource }: CanonPageProps) {
+  const {
+    title,
+    subtitle,
+    excerpt,
+    accessLevel = "public",
+    lockMessage,
+  } = meta;
 
-  const metaDescription =
-    excerpt ||
-    description ||
-    "Canon document from Abraham of London.";
+  // TODO: plug in real membership check here
+  const hasInnerCircleAccess = false;
+  const isLocked = accessLevel !== "public" && !hasInnerCircleAccess;
 
-  const displayDate =
-    date && !Number.isNaN(new Date(date).getTime())
-      ? new Date(date).toLocaleDateString("en-GB", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : null;
+  const displayDescription =
+    excerpt || subtitle || "Canon volume from the Architecture of Human Purpose.";
 
   return (
-    <SiteLayout pageTitle={title} metaDescription={metaDescription}>
-      <article className="prose prose-invert prose-lg mx-auto max-w-3xl py-10 md:py-16 prose-headings:font-serif prose-headings:text-cream prose-strong:text-cream prose-a:text-softGold">
-        <header className="mb-8 border-b border-gray-700 pb-4">
-          <h1 className="font-serif text-3xl font-bold text-cream md:text-4xl">
+    <SiteLayout pageTitle={title} metaDescription={displayDescription}>
+      <article className="mx-auto max-w-3xl py-10">
+        <header className="mb-8">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+            Canon Volume
+          </p>
+          <h1 className="mt-2 font-serif text-3xl sm:text-4xl font-semibold text-gray-50">
             {title}
           </h1>
-          {displayDate && (
-            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
-              {displayDate}
-            </p>
+          {subtitle && (
+            <p className="mt-2 text-sm text-gray-300">{subtitle}</p>
+          )}
+
+          {accessLevel !== "public" && (
+            <div className="mt-4 inline-flex items-center rounded-full border border-softGold/70 bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-softGold">
+              Inner Circle Only
+            </div>
           )}
         </header>
 
-        <MDXRemote {...mdxSource} components={mdxComponents} />
+        {isLocked ? (
+          <section className="mt-6 rounded-2xl border border-softGold/50 bg-black/70 p-6 text-sm text-gray-100">
+            <p className="text-base font-medium text-softGold">
+              {lockMessage ||
+                "This volume is reserved for Inner Circle members."}
+            </p>
+
+            {excerpt && (
+              <p className="mt-3 text-gray-200">
+                {excerpt}
+              </p>
+            )}
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link
+                href="/inner-circle"
+                className="inline-flex items-center rounded-full bg-softGold px-5 py-2 text-xs font-semibold text-deepCharcoal underline-offset-4 hover:bg-softGold/90"
+              >
+                Join the Inner Circle
+              </Link>
+              <p className="text-[0.75rem] text-gray-400">
+                Inner Circle members receive full access to all Canon volumes,
+                private reflections, and strategy briefings.
+              </p>
+            </div>
+          </section>
+        ) : (
+          <div className="prose prose-invert max-w-none">
+            <MDXRemote
+              {...mdxSource}
+              components={mdxComponents as unknown as MDXRemoteProps["components"]}
+            />
+          </div>
+        )}
       </article>
     </SiteLayout>
   );
-};
-
-export default CanonPage;
+}
 
 // ----------------------------------------------------------------------
 // Static generation
 // ----------------------------------------------------------------------
 
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  // Adjust the collection key here to match your mdx helper if needed
-  const items = await getAllContent("canon");
-
-  const paths =
-    items?.map((doc: { slug: string }) => ({
-      params: { slug: doc.slug },
-    })) ?? [];
-
+export const getStaticPaths: GetStaticPaths = async () => {
   return {
-    paths,
+    paths: allCanons.map((canon) => ({
+      params: { slug: canon.slug },
+    })),
     fallback: false,
   };
 };
 
-export const getStaticProps: GetStaticProps<CanonPageProps, Params> = async ({
+export const getStaticProps: GetStaticProps<CanonPageProps> = async ({
   params,
 }) => {
-  if (!params?.slug) {
+  const slug = params?.slug as string;
+
+  const canon = allCanons.find((c) => c.slug === slug);
+
+  if (!canon) {
     return { notFound: true };
   }
 
-  // Same collection key as above
-  const doc = await getContentBySlug("canon", params.slug);
-
-  if (!doc) {
-    return { notFound: true };
-  }
-
-  const { meta, content } = doc;
-
-  // Strip import lines from MDX content before serialization
-  const rawContent = content ?? "";
-  const cleanContent = rawContent
-    .replace(
-      /^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm,
-      "",
-    )
-    .trim();
-
-  const mdxSource = await serialize(cleanContent, {
+  // Serialize MDX body
+  const mdxSource = await serialize(canon.body.raw, {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
-      rehypePlugins: [],
+      rehypePlugins: [rehypeSlug],
     },
   });
 
-  // Ensure meta is JSON-serialisable for Next
-  const safeMeta = JSON.parse(JSON.stringify(meta)) as PostMeta;
+  const {
+    title,
+    subtitle,
+    description,
+    excerpt,
+    coverImage,
+    volumeNumber,
+    order,
+    featured,
+    draft,
+    tags,
+    readTime,
+    accessLevel,
+    lockMessage,
+  } = canon;
 
   return {
     props: {
-      meta: safeMeta,
+      meta: {
+        title,
+        subtitle: subtitle ?? null,
+        description: description ?? null,
+        excerpt: excerpt ?? null,
+        slug: canon.slug,
+        coverImage: coverImage ?? null,
+        volumeNumber: volumeNumber ?? null,
+        order: order ?? null,
+        featured: !!featured,
+        draft: !!draft,
+        tags: tags ?? [],
+        readTime: readTime ?? null,
+        accessLevel: accessLevel ?? "public",
+        lockMessage: lockMessage ?? null,
+      },
       mdxSource,
     },
   };
