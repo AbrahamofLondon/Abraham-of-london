@@ -17,7 +17,7 @@ import rehypeSlug from "rehype-slug";
 import SiteLayout from "@/components/SiteLayout";
 import mdxComponents from "@/components/mdx-components";
 import { allCanons, type Canon } from "contentlayer/generated";
-import { Lock } from "lucide-react";
+import LockClosedIcon from "@/components/icons/LockClosedIcon";
 
 /* ------------------------------------------------------------------------------------
    TYPES
@@ -49,10 +49,9 @@ interface CanonPageProps {
    ACCESS CONTROL (stub)
 ------------------------------------------------------------------------------------ */
 
-// TODO: replace this with real auth / membership logic when you wire Inner Circle
+// TODO: replace with real auth / cookie check later
 const hasInnerCircleAccess = false;
-
-const isLockedDoc = (level?: string | null): boolean =>
+const isLockedDoc = (level?: string) =>
   level === "inner-circle" && !hasInnerCircleAccess;
 
 /* ------------------------------------------------------------------------------------
@@ -74,7 +73,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
     volumeNumber,
   } = meta;
 
-  const locked = isLockedDoc(accessLevel ?? "public");
+  const locked = isLockedDoc(accessLevel);
 
   const displayDescription =
     description ||
@@ -86,38 +85,40 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
 
   const label = (() => {
     if (volumeNumber) return `Canon Volume ${volumeNumber}`;
-    if (slug === "canon-master-index-preview") return "Canon Master Index";
-    if (slug === "canon-campaign") return "Canon Campaign Prelude";
+    if (slug === "canon-master-index-preview") return "Canon Prelude";
+    if (slug === "canon-campaign") return "Canon Campaign";
     return "Canon Document";
   })();
 
   return (
     <SiteLayout pageTitle={pageTitle} metaDescription={displayDescription}>
-      <article className="mx-auto max-w-3xl px-4 py-12 text-gray-100">
+      <article className="mx-auto max-w-3xl px-4 py-12">
         {/* HEADER */}
         <header className="mb-10">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold">
             {label}
           </p>
 
-          <h1 className="mt-3 font-serif text-3xl text-gray-100 sm:text-4xl">
+          <h1 className="mt-3 font-serif text-3xl text-gray-900 dark:text-gray-100 sm:text-4xl">
             {title}
           </h1>
 
           {subtitle && (
-            <p className="mt-2 text-sm text-gray-300">{subtitle}</p>
+            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+              {subtitle}
+            </p>
           )}
 
           {displayDescription && (
-            <p className="mt-4 text-sm leading-relaxed text-gray-300">
+            <p className="mt-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
               {displayDescription}
             </p>
           )}
 
           {/* META */}
-          <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+          <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
             {readTime && (
-              <span className="rounded-full border border-white/15 px-3 py-1 uppercase tracking-[0.16em]">
+              <span className="rounded-full border border-gray-300 px-3 py-1 uppercase tracking-[0.16em] dark:border-gray-700">
                 {readTime}
               </span>
             )}
@@ -127,7 +128,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
                 {tags.slice(0, 5).map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full border border-white/15 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.12em]"
+                    className="rounded-full border border-gray-300 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.12em] dark:border-gray-700"
                   >
                     {tag}
                   </span>
@@ -144,7 +145,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
                   tracking-[0.12em] text-softGold
                 "
               >
-                <Lock className="h-3.5 w-3.5" />
+                <LockClosedIcon className="h-3.5 w-3.5" />
                 Inner Circle Only
               </span>
             )}
@@ -153,7 +154,7 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
 
         {/* COVER IMAGE */}
         {coverImage && (
-          <figure className="mb-10 overflow-hidden rounded-2xl border border-white/15 bg-white/5">
+          <figure className="mb-10 overflow-hidden rounded-2xl border border-gray-300 dark:border-gray-700">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={coverImage}
@@ -168,8 +169,8 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
           <section
             className="
               mt-8 rounded-2xl border border-softGold/50
-              bg-black/70 backdrop-blur
-              p-6 text-sm text-gray-100
+              bg-white/70 dark:bg-gray-900/70
+              backdrop-blur p-6 text-sm text-gray-800 dark:text-gray-100
             "
           >
             <p className="text-base font-semibold text-softGold">
@@ -178,26 +179,26 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
             </p>
 
             {excerpt && (
-              <p className="mt-4 leading-relaxed text-gray-200">
+              <p className="mt-4 leading-relaxed text-gray-900 dark:text-gray-200">
                 {excerpt}
               </p>
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <Link
-                href="/subscribe"
+                href="/inner-circle"
                 className="
                   inline-flex items-center rounded-full bg-softGold
-                  px-5 py-2 text-xs font-semibold text-deepCharcoal
+                  px-5 py-2 text-xs font-semibold text-black
                   transition hover:bg-softGold/90
                 "
               >
                 Join the Inner Circle
               </Link>
 
-              <p className="text-xs text-gray-400">
-                Inner Circle access will initially be managed manually. After
-                subscribing, watch your email for private access instructions.
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Members receive full access to Canon volumes, private
+                reflections, and strategy briefings.
               </p>
             </div>
           </section>
@@ -205,15 +206,15 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
           /* PUBLIC MDX CONTENT */
           <div
             className="
-              prose prose-base sm:prose-lg prose-invert
+              prose prose-sm sm:prose-base
               max-w-none
-              text-gray-100
-              prose-headings:font-serif
-              prose-headings:text-gray-50
+              text-gray-800 dark:text-gray-100
+              underline-offset-4
               prose-a:text-softGold
-              prose-strong:text-gray-50
-              prose-p:leading-relaxed
-              prose-li:leading-relaxed
+              prose-invert:prose-a:text-softGold
+              prose-headings:font-serif
+              prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+              prose-strong:text-gray-900 dark:prose-strong:text-gray-100
               prose-blockquote:border-softGold
             "
           >

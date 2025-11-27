@@ -77,12 +77,16 @@ export const Post = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
     },
     url: {
       type: "string",
       resolve: (doc) =>
-        generateUrl(doc.slug || generateSlug(doc._raw.flattenedPath, "blog"), "blog"),
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
+          "blog",
+        ),
     },
     readingTime: {
       type: "number",
@@ -109,7 +113,7 @@ export const Download = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false },
+    readtime: { type: "string", required: false }, // legacy field
     category: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     file: { type: "string", required: false },
@@ -123,6 +127,11 @@ export const Download = defineDocumentType(() => ({
     downloadFile: { type: "string", required: false, default: "" },
     fileUrl: { type: "string", default: "" },
     type: { type: "string", default: "download" },
+
+    // NEW – align with canon toolkits
+    featured: { type: "boolean", default: false },
+    draft: { type: "boolean", default: false },
+    downloadUrl: { type: "string", default: "" },
   },
   computedFields: {
     slug: {
@@ -168,12 +177,16 @@ export const Book = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
     },
     url: {
       type: "string",
       resolve: (doc) =>
-        generateUrl(doc.slug || generateSlug(doc._raw.flattenedPath, "books"), "books"),
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
+          "books",
+        ),
     },
   },
 }));
@@ -205,12 +218,16 @@ export const Event = defineDocumentType(() => ({
   computedFields: {
     slug: {
       type: "string",
-      resolve: (doc) => doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
     },
     url: {
       type: "string",
       resolve: (doc) =>
-        generateUrl(doc.slug || generateSlug(doc._raw.flattenedPath, "events"), "events"),
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
+          "events",
+        ),
     },
     isUpcoming: {
       type: "boolean",
@@ -311,7 +328,9 @@ export const Resource = defineDocumentType(() => ({
     description: { type: "string", required: false },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
-    readtime: { type: "string", required: false },
+    readtime: { type: "string", required: false }, // legacy
+    // NEW – proper casing used in canon-campaign etc.
+    readTime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -320,6 +339,7 @@ export const Resource = defineDocumentType(() => ({
     fileUrl: { type: "string", default: "" },
     downloadUrl: { type: "string", default: "" },
     featured: { type: "boolean", default: false },
+    draft: { type: "boolean", default: false },
   },
   computedFields: {
     slug: {
@@ -366,7 +386,7 @@ export const Canon = defineDocumentType(() => ({
     tags: { type: "list", of: { type: "string" }, default: [] },
     readTime: { type: "string", required: false },
 
-    // NEW – used by Volume X
+    // NEW – used by Volume X / Inner Circle
     accessLevel: { type: "string", required: false, default: "public" },
     lockMessage: { type: "string", required: false },
   },

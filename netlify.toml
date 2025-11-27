@@ -1,5 +1,3 @@
-# netlify.toml
-
 [build]
   command = "pnpm run build:netlify"
   publish = ".next"
@@ -7,7 +5,7 @@
 [build.environment]
   NODE_VERSION = "20.11.1"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_SITE_URL = "https://abrahamoflondon.org"
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
 
 [functions]
   node_bundler = "esbuild"
@@ -17,18 +15,13 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ✅ NO manual page redirects to .html
-# Next.js plugin will wire up SSR/ISR/dynamic routes correctly.
-
-# Security headers (fine to keep)
+# SECURITY HEADERS (do not conflict with middleware)
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache static assets (also fine)
 [[headers]]
   for = "/_next/static/*"
   [headers.values]

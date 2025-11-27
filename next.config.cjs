@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
 const { withContentlayer } = require("contentlayer2").nextContentlayer;
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
   trailingSlash: true,
@@ -14,30 +14,16 @@ const nextConfig = {
 
   compress: true,
   poweredByHeader: false,
-  generateEtags: false,
 
-  // ✅ Do NOT let ESLint fail production builds (Netlify)
   eslint: {
     ignoreDuringBuilds: true,
   },
 
   async redirects() {
     return [
-      {
-        source: "/blog",
-        destination: "/content",
-        permanent: true,
-      },
-      {
-        source: "/books",
-        destination: "/content",
-        permanent: true,
-      },
-      {
-        source: "/articles",
-        destination: "/content",
-        permanent: true,
-      },
+      { source: "/blog", destination: "/content", permanent: true },
+      { source: "/books", destination: "/content", permanent: true },
+      { source: "/articles", destination: "/content", permanent: true },
     ];
   },
 
@@ -46,14 +32,7 @@ const nextConfig = {
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
     ];
