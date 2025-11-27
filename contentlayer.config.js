@@ -81,6 +81,8 @@ export const Post = defineDocumentType(() => ({
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
     draft: { type: "boolean", default: false },
+    featured: { type: "boolean", default: false },
+    layout: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -180,6 +182,7 @@ export const Book = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     readTime: { type: "string", required: false },
     description: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
     // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -187,6 +190,8 @@ export const Book = defineDocumentType(() => ({
     author: { type: "string", default: "" },
     publisher: { type: "string", default: "" },
     isbn: { type: "string", default: "" },
+    draft: { type: "boolean", default: false },
+    featured: { type: "boolean", default: false },
   },
   computedFields: {
     slug: {
@@ -369,12 +374,15 @@ export const Resource = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readtime: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
     // Legacy fields
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
     resourceType: { type: "string", default: "document" },
     fileUrl: { type: "string", default: "" },
+    downloadUrl: { type: "string", default: "" },
+    featured: { type: "boolean", default: false },
   },
   computedFields: {
     slug: {
@@ -393,13 +401,58 @@ export const Resource = defineDocumentType(() => ({
   },
 }));
 
+// CANON DOCUMENTS (content/canon/**/*) - NEW!
+export const Canon = defineDocumentType(() => ({
+  name: "Canon",
+  filePathPattern: `canon/**/*.{md,mdx}`,
+  contentType: "mdx",
+  fields: {
+    title: {
+      type: "string",
+      required: true,
+      default: "Untitled Canon Document",
+    },
+    date: {
+      type: "date",
+      required: true,
+      default: new Date().toISOString().split("T")[0],
+    },
+    slug: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
+    description: { type: "string", required: false },
+    excerpt: { type: "string", default: "" },
+    author: { type: "string", default: "Abraham of London" },
+    coverImage: { type: "string", default: "" },
+    volumeNumber: { type: "string", required: false },
+    order: { type: "number", required: false },
+    featured: { type: "boolean", default: false },
+    draft: { type: "boolean", default: false },
+    tags: { type: "list", of: { type: "string" }, default: [] },
+  },
+  computedFields: {
+    slug: {
+      type: "string",
+      resolve: (doc) =>
+        doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
+    },
+    url: {
+      type: "string",
+      resolve: (doc) =>
+        generateUrl(
+          doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
+          "canon",
+        ),
+    },
+  },
+}));
+
 // -----------------------------------------------------------------------------
 // makeSource
 // -----------------------------------------------------------------------------
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource],
+  documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource, Canon],
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
