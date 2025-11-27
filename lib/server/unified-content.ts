@@ -1,7 +1,18 @@
 // lib/server/unified-content.ts
-// Unified content loader — safe for static export / Netlify builds.
+// Unified content loader — built directly on Contentlayer.
+// Safe for static export / Netlify builds (no fs, no window/document).
 
 import type { ReactNode } from "react";
+import {
+  allPosts,
+  allEvents,
+  allBooks,
+  allDownloads,
+  allResources,
+  allPrints,
+  allCanons,
+  allStrategies,
+} from "contentlayer/generated";
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -15,16 +26,19 @@ export type UnifiedContentType =
   | "resource"
   | "page"
   | "print"
+  | "canon"
   | "other";
 
 export type UnifiedSource =
-  | "mdx"
+  | "posts"
   | "events"
   | "books"
   | "downloads"
   | "resources"
+  | "prints"
+  | "canon"
+  | "strategies"
   | "pages"
-  | "print"
   | "static"
   | "unknown";
 
@@ -80,26 +94,6 @@ function normaliseSlug(base: string, prefix?: string): string {
   return clean.startsWith(`${prefix}/`) ? clean : `${prefix}/${clean}`;
 }
 
-async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
-  try {
-    return await fn();
-  } catch {
-    return null;
-  }
-}
-
-// Generic “maybe async” resolver
-async function resolveMaybeAsync<T>(
-  fn?: () => T | Promise<T>,
-): Promise<T | null> {
-  if (!fn) return null;
-  try {
-    return await Promise.resolve(fn());
-  } catch {
-    return null;
-  }
-}
-
 // Safely coerce to array of ContentLike
 function toContentArray(value: unknown): ContentLike[] {
   if (!Array.isArray(value)) return [];
@@ -149,45 +143,65 @@ function getBoolean(obj: ContentLike, key: string): boolean | undefined {
   return typeof v === "boolean" ? v : undefined;
 }
 
+// Generic “maybe async” resolver – used only for legacy pages-data
+async function resolveMaybeAsync<T>(
+  fn?: () => T | Promise<T>,
+): Promise<T | null> {
+  if (!fn) return null;
+  try {
+    return await Promise.resolve(fn());
+  } catch {
+    return null;
+  }
+}
+
+// Legacy safe importer – used only for pages-data
+async function safeImport<T>(fn: () => Promise<T>): Promise<T | null> {
+  try {
+    return await fn();
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // BLOG CONTENT  →  /blog/[slug]
 // ---------------------------------------------------------------------------
 
 async function getMdxContent(): Promise<UnifiedContent[]> {
-  const postsModule = await safeImport(
-    () => import("@/lib/server/posts-data" as string),
-  );
-  if (!postsModule) return [];
-
-  const getAllPosts =
-    (postsModule as { getAllPosts?: () => ContentLike[] | Promise<ContentLike[]> })
-      .getAllPosts;
-
-  const postsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(getAllPosts);
-  const posts = toContentArray(postsRaw ?? []);
+  const posts = toContentArray(allPosts as unknown as ContentLike[]);
 
   return posts.map((post): UnifiedContent => {
     const rawSlug =
       getString(post, "slug") ?? getString(post, "_id") ?? "";
     const slug = normaliseSlug(rawSlug, "blog");
-
     const draft = getBoolean(post, "draft");
+
+    const title = getString(post, "title") ?? slug;
+    const excerpt =
+      getString(post, "excerpt") ??
+      getString(post, "description") ??
+      getString(post, "summary");
+
+    const seoTitle =
+      getString(post, "ogTitle") ??
+      title;
+    const seoDescription =
+      getString(post, "ogDescription") ??
+      excerpt ??
+      getString(post, "socialCaption");
 
     return {
       slug,
-      title: getString(post, "title") ?? slug,
+      title,
       type: "blog",
 
-      content: (post["content"] as ReactNode | undefined) ?? undefined,
-      description:
-        getString(post, "excerpt") ??
-        getString(post, "description") ??
-        getString(post, "summary"),
+      // unified layer is meta-oriented; MDX body is rendered in page components
+      content: undefined,
+      description: excerpt,
 
       author: getString(post, "author"),
-      date:
-        getDateLike(post, "date") ??
-        getDateLike(post, "publishedAt"),
+      date: getDateLike(post, "date"),
       updatedAt:
         getDateLike(post, "updated") ??
         getDateLike(post, "updatedAt"),
@@ -196,16 +210,10 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 
       printSettings: undefined,
 
-      seoTitle:
-        getString(post, "seoTitle") ??
-        getString(post, "title") ??
-        slug,
-      seoDescription:
-        getString(post, "seoDescription") ??
-        getString(post, "excerpt") ??
-        getString(post, "description"),
+      seoTitle,
+      seoDescription,
 
-      source: "mdx",
+      source: "posts",
       published: draft !== true,
     };
   });
@@ -216,19 +224,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getEventContent(): Promise<UnifiedContent[]> {
-  const eventsModule = await safeImport(
-    () => import("@/lib/server/events-data" as string),
-  );
-  if (!eventsModule) return [];
-
-  const getAllEvents =
-    (eventsModule as { getAllEvents?: () => ContentLike[] | Promise<ContentLike[]> })
-      .getAllEvents;
-
-  const eventsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
-    getAllEvents,
-  );
-  const events = toContentArray(eventsRaw ?? []);
+  const events = toContentArray(allEvents as unknown as ContentLike[]);
 
   return events.map((event): UnifiedContent => {
     const rawSlug =
@@ -239,25 +235,27 @@ async function getEventContent(): Promise<UnifiedContent[]> {
       "";
     const slug = normaliseSlug(rawSlug, "events");
 
+    const title = getString(event, "title") ?? slug;
+    const excerpt =
+      getString(event, "excerpt") ??
+      getString(event, "summary") ??
+      getString(event, "description");
+
     const status = getString(event, "status");
 
     return {
       slug,
-      title: getString(event, "title") ?? slug,
+      title,
       type: "event",
 
-      content:
-        (event["content"] as ReactNode | undefined) ??
-        getString(event, "description"),
-      description:
-        getString(event, "excerpt") ??
-        getString(event, "summary") ??
-        getString(event, "description"),
+      content: undefined,
+      description: excerpt,
 
       author:
         getString(event, "speaker") ??
         getString(event, "host"),
       date:
+        getDateLike(event, "eventDate") ??
         getDateLike(event, "date") ??
         getDateLike(event, "startDate"),
       updatedAt: getDateLike(event, "updatedAt"),
@@ -268,15 +266,8 @@ async function getEventContent(): Promise<UnifiedContent[]> {
 
       printSettings: undefined,
 
-      seoTitle:
-        getString(event, "seoTitle") ??
-        getString(event, "title") ??
-        slug,
-      seoDescription:
-        getString(event, "seoDescription") ??
-        getString(event, "excerpt") ??
-        getString(event, "summary") ??
-        getString(event, "description"),
+      seoTitle: title,
+      seoDescription: excerpt,
 
       source: "events",
       published: (status ?? "published") !== "draft",
@@ -289,19 +280,7 @@ async function getEventContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getBookContent(): Promise<UnifiedContent[]> {
-  const booksModule = await safeImport(
-    () => import("@/lib/server/books-data" as string),
-  );
-  if (!booksModule) return [];
-
-  const getAllBooksMeta =
-    (booksModule as { getAllBooksMeta?: () => ContentLike[] | Promise<ContentLike[]> })
-      .getAllBooksMeta;
-
-  const booksRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
-    getAllBooksMeta,
-  );
-  const books = toContentArray(booksRaw ?? []);
+  const books = toContentArray(allBooks as unknown as ContentLike[]);
 
   return books.map((book): UnifiedContent => {
     const rawSlug =
@@ -312,17 +291,21 @@ async function getBookContent(): Promise<UnifiedContent[]> {
       "";
     const slug = normaliseSlug(rawSlug, "books");
 
+    const title = getString(book, "title") ?? slug;
+    const excerpt =
+      getString(book, "excerpt") ??
+      getString(book, "description");
+
     const status = getString(book, "status");
+    const draft = getBoolean(book, "draft");
 
     return {
       slug,
-      title: getString(book, "title") ?? slug,
+      title,
       type: "book",
 
       content: undefined, // meta only; full body loaded in /books/[slug]
-      description:
-        getString(book, "excerpt") ??
-        getString(book, "description"),
+      description: excerpt,
 
       author:
         getString(book, "author") ??
@@ -336,17 +319,11 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 
       printSettings: book["printSettings"] as PrintSettings | undefined,
 
-      seoTitle:
-        getString(book, "seoTitle") ??
-        getString(book, "title") ??
-        slug,
-      seoDescription:
-        getString(book, "seoDescription") ??
-        getString(book, "excerpt") ??
-        getString(book, "description"),
+      seoTitle: title,
+      seoDescription: excerpt,
 
       source: "books",
-      published: (status ?? "published") !== "draft",
+      published: draft !== true && (status ?? "published") !== "draft",
     };
   });
 }
@@ -356,20 +333,9 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getDownloadContent(): Promise<UnifiedContent[]> {
-  const downloadsModule = await safeImport(
-    () => import("@/lib/server/downloads-data" as string),
+  const downloads = toContentArray(
+    allDownloads as unknown as ContentLike[],
   );
-  if (!downloadsModule) return [];
-
-  const getAllDownloadsMeta =
-    (downloadsModule as {
-      getAllDownloadsMeta?: () => ContentLike[] | Promise<ContentLike[]>;
-    }).getAllDownloadsMeta;
-
-  const downloadsRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
-    getAllDownloadsMeta,
-  );
-  const downloads = toContentArray(downloadsRaw ?? []);
 
   return downloads.map((d): UnifiedContent => {
     const rawSlug =
@@ -380,17 +346,20 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
       "";
     const slug = normaliseSlug(rawSlug, "downloads");
 
+    const title = getString(d, "title") ?? slug;
+    const excerpt =
+      getString(d, "excerpt") ??
+      getString(d, "description");
+
     const status = getString(d, "status");
 
     return {
       slug,
-      title: getString(d, "title") ?? slug,
+      title,
       type: "download",
 
       content: undefined,
-      description:
-        getString(d, "excerpt") ??
-        getString(d, "description"),
+      description: excerpt,
 
       author: getString(d, "author"),
       date:
@@ -402,14 +371,8 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 
       printSettings: d["printSettings"] as PrintSettings | undefined,
 
-      seoTitle:
-        getString(d, "seoTitle") ??
-        getString(d, "title") ??
-        slug,
-      seoDescription:
-        getString(d, "seoDescription") ??
-        getString(d, "excerpt") ??
-        getString(d, "description"),
+      seoTitle: title,
+      seoDescription: excerpt,
 
       source: "downloads",
       published: (status ?? "published") !== "draft",
@@ -422,20 +385,9 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getResourceContent(): Promise<UnifiedContent[]> {
-  const resourcesModule = await safeImport(
-    () => import("@/lib/server/resources-data" as string),
+  const resources = toContentArray(
+    allResources as unknown as ContentLike[],
   );
-  if (!resourcesModule) return [];
-
-  const getAllResources =
-    (resourcesModule as {
-      getAllResources?: () => ContentLike[] | Promise<ContentLike[]>;
-    }).getAllResources;
-
-  const resourcesRaw = await resolveMaybeAsync<ContentLike[] | unknown>(
-    getAllResources,
-  );
-  const resources = toContentArray(resourcesRaw ?? []);
 
   return resources.map((r): UnifiedContent => {
     const rawSlug =
@@ -446,17 +398,20 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
       "";
     const slug = normaliseSlug(rawSlug, "resources");
 
+    const title = getString(r, "title") ?? slug;
+    const excerpt =
+      getString(r, "excerpt") ??
+      getString(r, "description");
+
     const status = getString(r, "status");
 
     return {
       slug,
-      title: getString(r, "title") ?? slug,
+      title,
       type: "resource",
 
-      content: (r["content"] as ReactNode | undefined) ?? undefined,
-      description:
-        getString(r, "excerpt") ??
-        getString(r, "description"),
+      content: undefined,
+      description: excerpt,
 
       author: getString(r, "author"),
       date:
@@ -468,14 +423,8 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
 
       printSettings: r["printSettings"] as PrintSettings | undefined,
 
-      seoTitle:
-        getString(r, "seoTitle") ??
-        getString(r, "title") ??
-        slug,
-      seoDescription:
-        getString(r, "seoDescription") ??
-        getString(r, "excerpt") ??
-        getString(r, "description"),
+      seoTitle: title,
+      seoDescription: excerpt,
 
       source: "resources",
       published: (status ?? "published") !== "draft",
@@ -484,7 +433,105 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// PAGES CONTENT  →  /[slug]
+// CANON CONTENT  →  /canon/[slug]
+// ---------------------------------------------------------------------------
+
+async function getCanonContent(): Promise<UnifiedContent[]> {
+  const canons = toContentArray(allCanons as unknown as ContentLike[]);
+
+  return canons.map((c): UnifiedContent => {
+    const rawSlug =
+      getString(c, "slug") ??
+      getString(c, "id") ??
+      getString(c, "_id") ??
+      getString(c, "title") ??
+      "";
+    const slug = normaliseSlug(rawSlug, "canon");
+
+    const title = getString(c, "title") ?? slug;
+    const excerpt =
+      getString(c, "excerpt") ??
+      getString(c, "description");
+
+    const draft = getBoolean(c, "draft");
+
+    return {
+      slug,
+      title,
+      type: "canon",
+
+      content: undefined,
+      description: excerpt,
+
+      author: getString(c, "author"),
+      date: getDateLike(c, "date"),
+      updatedAt: getDateLike(c, "updatedAt"),
+      category: undefined,
+      tags: getStringArray(c, "tags"),
+
+      printSettings: undefined,
+
+      seoTitle: title,
+      seoDescription: excerpt,
+
+      source: "canon",
+      published: draft !== true,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// STRATEGY CONTENT  →  /strategy/[slug] (treated as resources in unified view)
+// ---------------------------------------------------------------------------
+
+async function getStrategyContent(): Promise<UnifiedContent[]> {
+  const strategies = toContentArray(
+    allStrategies as unknown as ContentLike[],
+  );
+
+  return strategies.map((s): UnifiedContent => {
+    const rawSlug =
+      getString(s, "slug") ??
+      getString(s, "id") ??
+      getString(s, "_id") ??
+      getString(s, "title") ??
+      "";
+    const slug = normaliseSlug(rawSlug, "strategy");
+
+    const title = getString(s, "title") ?? slug;
+    const excerpt =
+      getString(s, "excerpt") ??
+      getString(s, "description");
+
+    const status = getString(s, "status");
+
+    return {
+      slug,
+      title,
+      type: "resource", // surfaces in content hubs under resources
+
+      content: undefined,
+      description: excerpt,
+
+      author: getString(s, "author"),
+      date: getDateLike(s, "date"),
+      updatedAt: getDateLike(s, "updatedAt"),
+      category: getString(s, "category"),
+      tags: getStringArray(s, "tags"),
+
+      printSettings: undefined,
+
+      seoTitle: title,
+      seoDescription: excerpt,
+
+      source: "strategies",
+      published: (status ?? "published") !== "draft",
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// PAGES CONTENT  →  /[slug]  (legacy MDX pages via pages-data)
 // ---------------------------------------------------------------------------
 
 async function getPageContent(): Promise<UnifiedContent[]> {
@@ -505,16 +552,23 @@ async function getPageContent(): Promise<UnifiedContent[]> {
   const slugs = getPageSlugs();
   const pages = slugs
     .map((slug) =>
-      getPageBySlug(slug, ["slug", "title", "description", "seoTitle", "seoDescription"]),
+      getPageBySlug(slug, [
+        "slug",
+        "title",
+        "description",
+        "seoTitle",
+        "seoDescription",
+      ]),
     )
     .filter((p): p is ContentLike => !!p);
 
   return pages.map((p): UnifiedContent => {
     const slug = cleanSlug(getString(p, "slug") ?? "");
+    const title = getString(p, "title") ?? slug;
 
     return {
       slug,
-      title: getString(p, "title") ?? slug,
+      title,
       type: "page",
 
       content: undefined,
@@ -530,8 +584,7 @@ async function getPageContent(): Promise<UnifiedContent[]> {
 
       seoTitle:
         getString(p, "seoTitle") ??
-        getString(p, "title") ??
-        slug,
+        title,
       seoDescription:
         getString(p, "seoDescription") ??
         getString(p, "description"),
@@ -543,13 +596,54 @@ async function getPageContent(): Promise<UnifiedContent[]> {
 }
 
 // ---------------------------------------------------------------------------
-// PRINT CONTENT  →  /print/[slug] (placeholder for now)
+// PRINT CONTENT  →  /prints/[slug]
 // ---------------------------------------------------------------------------
 
 async function getPrintContent(): Promise<UnifiedContent[]> {
-  // Intentionally returns [] until a real print-utils implementation
-  // is wired in without causing module-resolution failures.
-  return [];
+  const prints = toContentArray(allPrints as unknown as ContentLike[]);
+
+  return prints.map((p): UnifiedContent => {
+    const rawSlug =
+      getString(p, "slug") ??
+      getString(p, "id") ??
+      getString(p, "_id") ??
+      getString(p, "title") ??
+      "";
+    const slug = normaliseSlug(rawSlug, "prints");
+
+    const title = getString(p, "title") ?? slug;
+    const excerpt =
+      getString(p, "excerpt") ??
+      getString(p, "description");
+
+    const available = getBoolean(p, "available");
+    const status = getString(p, "status");
+
+    return {
+      slug,
+      title,
+      type: "print",
+
+      content: undefined,
+      description: excerpt,
+
+      author: undefined,
+      date: getDateLike(p, "date"),
+      updatedAt: getDateLike(p, "updatedAt"),
+      category: undefined,
+      tags: getStringArray(p, "tags"),
+
+      printSettings: p["printSettings"] as PrintSettings | undefined,
+
+      seoTitle: title,
+      seoDescription: excerpt,
+
+      source: "prints",
+      published:
+        (available ?? true) &&
+        (status ?? "published") !== "draft",
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -557,16 +651,27 @@ async function getPrintContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
-  const [mdx, events, books, downloads, resources, pages, prints] =
-    await Promise.all([
-      getMdxContent(),
-      getEventContent(),
-      getBookContent(),
-      getDownloadContent(),
-      getResourceContent(),
-      getPageContent(),
-      getPrintContent(),
-    ]);
+  const [
+    mdx,
+    events,
+    books,
+    downloads,
+    resources,
+    strategies,
+    canons,
+    pages,
+    prints,
+  ] = await Promise.all([
+    getMdxContent(),
+    getEventContent(),
+    getBookContent(),
+    getDownloadContent(),
+    getResourceContent(),
+    getStrategyContent(),
+    getCanonContent(),
+    getPageContent(),
+    getPrintContent(),
+  ]);
 
   return [
     ...mdx,
@@ -574,6 +679,8 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     ...books,
     ...downloads,
     ...resources,
+    ...strategies,
+    ...canons,
     ...pages,
     ...prints,
   ];
