@@ -3,19 +3,19 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import * as React from "react";
 
 import Layout from "@/components/Layout";
 
+const PAGE_TITLE = "The Architecture of Human Purpose";
+const PAGE_DESCRIPTION =
+  "A strategic Prelude for fathers, founders, policymakers, and nation-shapers. Discover the architecture behind human purpose, identity, civilisation and destiny.";
+
 const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
   return (
-    <Layout title="The Architecture of Human Purpose">
+    <Layout title={PAGE_TITLE}>
       <Head>
-        <title>The Architecture of Human Purpose | Abraham of London</title>
-        <meta
-          name="description"
-          content="A strategic Prelude for fathers, founders, policymakers, and nation-shapers. Discover the architecture behind human purpose, identity, civilisation and destiny."
-        />
+        <title>{PAGE_TITLE} | Abraham of London</title>
+        <meta name="description" content={PAGE_DESCRIPTION} />
         <meta
           name="keywords"
           content="purpose, civilisation, governance, leadership, theology, strategic frameworks, institutional design, Abraham of London"
@@ -178,12 +178,11 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
         </section>
 
         {/* WHAT YOU WILL ENCOUNTER */}
-        <section className="relative px-4 py-18 md:py-20">
+        <section className="relative px-4 py-16 md:py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-10 text-center">
               <h2 className="mb-3 font-serif text-2xl text-white md:text-3xl">
-                Inside the{" "}
-                <span className="text-softGold">Prelude</span>
+                Inside the <span className="text-softGold">Prelude</span>
               </h2>
               <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
                 Seven tightly written movements walk you through the structural
@@ -245,7 +244,7 @@ const ArchitectureOfHumanPurposeLandingPage: NextPage = () => {
           </div>
         </section>
 
-        {/* FUTURE VOLUMES: ARCHITECT'S TREASURY & MASTER EDITION */}
+        {/* FUTURE VOLUMES */}
         <section className="relative border-t border-white/10 bg-black/90 px-4 py-16 md:py-20">
           <div className="mx-auto max-w-5xl">
             <div className="mb-8 text-center">
