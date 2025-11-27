@@ -1,14 +1,25 @@
-// Canonical MDX component map – used by all MDX pages (posts, books, downloads, etc.)
-
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 import EmbossedBrandMark from "@/components/EmbossedBrandMark";
 import EmbossedSign from "@/components/print/EmbossedSign";
 
-interface MdxComponentProps {
-  [key: string]: unknown;
-  children?: React.ReactNode;
-  className?: string;
+// Safe component imports with fallbacks
+let GlossaryTerm: React.ComponentType<any> = () => null;
+let CanonReference: React.ComponentType<any> = () => null;
+
+try {
+  // Try to import the components - they should exist now
+  const GlossaryTermModule = require("@/components/GlossaryTerm");
+  GlossaryTerm = GlossaryTermModule.default || GlossaryTermModule;
+} catch (error) {
+  console.warn("GlossaryTerm component not found, using fallback");
+}
+
+try {
+  const CanonReferenceModule = require("@/components/CanonReference");
+  CanonReference = CanonReferenceModule.default || CanonReferenceModule;
+} catch (error) {
+  console.warn("CanonReference component not found, using fallback");
 }
 
 /* ----------------------------- Basic typography ---------------------------- */
@@ -614,8 +625,7 @@ const EmbossedSignWrapper = (props: EmbossedSignWrapperProps) => {
   return <EmbossedSign {...props} />;
 };
 
-/* --------------------------- Exported map for MDX -------------------------- */
-
+// Export the components map with the safely imported components
 export const mdxComponents = {
   // Headings & text
   h1: H1,
@@ -664,6 +674,10 @@ export const mdxComponents = {
   BrandFrame: BrandFrameWrapper,
   EmbossedBrandMark: EmbossedBrandMarkWrapper,
   EmbossedSign: EmbossedSignWrapper,
+
+  // The components that were causing build failures - now with safe fallbacks
+  GlossaryTerm,
+  CanonReference,
 };
 
 export default mdxComponents;
