@@ -30,6 +30,7 @@ interface OriginalStyle {
 
 const NAV_ITEMS: NavItem[] = [
   { route: "booksIndex", label: "Books", description: "Curated volumes" },
+  { route: "canonIndex", label: "Canon", description: "The 10-volume system" },
   { route: "contentIndex", label: "Insights", description: "Strategic wisdom" },
   { route: "ventures", label: "Ventures", description: "Business pursuits" },
   { route: "about", label: "About", description: "My journey" },
@@ -326,7 +327,8 @@ const ContactButton: React.FC<ContactButtonProps> = ({
   const colors = COLOR_SYSTEM[theme];
   const isMobile = variant === "mobile";
 
-  const href = type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
+  const href =
+    type === "email" ? `mailto:${value}` : `tel:${value.replace(/\s+/g, "")}`;
   const label = type === "email" ? "Email" : "Call";
   const Icon = type === "email" ? Mail : Phone;
 
@@ -475,7 +477,7 @@ export default function Header({
               />
             </div>
 
-            {/* NEW: Canon Prelude CTA */}
+            {/* Canon Prelude CTA */}
             <Link
               href="/books/the-architecture-of-human-purpose-landing"
               className={`hidden rounded-full border border-softGold/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block ${

@@ -1,5 +1,5 @@
 // lib/siteConfig.ts
-import { SiteConfig, SocialLink, defaultSocialLinks } from '@/types/config';
+import { SiteConfig, SocialLink, defaultSocialLinks } from "@/types/config";
 
 // Browser-safe site configuration + route & venture registry.
 // No fs, no Node-only APIs.
@@ -14,6 +14,7 @@ export type RouteId =
   | "blogIndex"
   | "contentIndex"
   | "booksIndex"
+  | "canonIndex"
   | "ventures"
   | "downloadsIndex"
   | "strategyLanding"
@@ -100,7 +101,7 @@ function normalisePath(raw: string): string {
 const PUBLIC_SITE_URL =
   (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(
     /\/+$/u,
-    ""
+    "",
   );
 
 const ALOMARADA_URL =
@@ -122,7 +123,8 @@ const INNOVATEHUB_URL =
 export const siteConfig: FullSiteConfig & SiteConfig = {
   siteUrl: PUBLIC_SITE_URL,
   title: "Abraham of London",
-  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  description:
+    "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
   author: "Abraham of London",
   email: "info@abrahamoflondon.org",
   phone: "+44 20 8622 5909",
@@ -134,17 +136,17 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
   brand: {
     values: [
       "Excellence in every detail",
-      "Innovation that matters", 
+      "Innovation that matters",
       "Integrity above all",
       "Collaboration for impact",
-      "Continuous learning and growth"
+      "Continuous learning and growth",
     ],
     principles: [
       "Quality over quantity",
       "User-centric design",
       "Sustainable business practices",
-      "Transparent communication"
-    ]
+      "Transparent communication",
+    ],
   },
 
   routes: {
@@ -172,6 +174,11 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
       id: "booksIndex",
       path: "/books",
       label: "Books",
+    },
+    canonIndex: {
+      id: "canonIndex",
+      path: "/canon",
+      label: "The Canon",
     },
     ventures: {
       id: "ventures",
@@ -232,7 +239,7 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
     const base = "Abraham of London";
     if (!pageTitle || typeof pageTitle !== "string") return base;
     return `${pageTitle} | ${base}`;
-  }
+  },
 };
 
 // --------- HELPERS ----------------------------------------------------------
@@ -257,17 +264,22 @@ export function internalHref(target: RouteId | string): string {
   if (typeof target === "string" && target in siteConfig.routes) {
     return getRoutePath(target as RouteId);
   }
-  
+
   // Handle string paths
   if (typeof target === "string") {
     // If it's already a proper path, normalize it
-    if (target.startsWith("/") || target.startsWith("#") || target.startsWith("mailto:") || target.startsWith("tel:")) {
+    if (
+      target.startsWith("/") ||
+      target.startsWith("#") ||
+      target.startsWith("mailto:") ||
+      target.startsWith("tel:")
+    ) {
       return target;
     }
     // Otherwise treat as path fragment
     return normalisePath(`/${target}`);
   }
-  
+
   // Handle RouteId directly
   return getRoutePath(target);
 }
@@ -276,19 +288,28 @@ export function internalHref(target: RouteId | string): string {
 export function absUrl(path: string | RouteId): string {
   const href = typeof path === "string" ? internalHref(path) : getRoutePath(path);
   if (/^https?:\/\//iu.test(href)) return href;
-  if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return href;
+  if (
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return href;
+  }
   return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
 }
 
 /** Check if a route is active (for navigation highlighting) */
-export function isActiveRoute(currentPath: string, target: RouteId | string): boolean {
+export function isActiveRoute(
+  currentPath: string,
+  target: RouteId | string,
+): boolean {
   const targetPath = internalHref(target);
   const normalizedCurrent = normalisePath(currentPath);
-  
+
   if (targetPath === "/") {
     return normalizedCurrent === "/";
   }
-  
+
   return normalizedCurrent.startsWith(targetPath);
 }
 
