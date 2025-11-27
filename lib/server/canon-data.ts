@@ -3,6 +3,7 @@
 
 import { allCanons, type Canon } from "contentlayer/generated";
 
+// Use the generated Canon type directly - no need to import from ../canon
 export type CanonDoc = Canon;
 
 type CanonFilterOptions = {

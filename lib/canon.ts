@@ -1,9 +1,10 @@
 // lib/canon.ts
 // Centralised helpers for Canon content (Contentlayer-powered)
 
-import { allCanons } from "contentlayer/generated";
+import { allCanons, type Canon } from "contentlayer/generated";
 
-export * from "./server/canon-data";
+// Use the generated Canon type directly
+export type CanonDoc = Canon;
 
 type CanonFilterOptions = {
   includeDrafts?: boolean;
@@ -30,7 +31,7 @@ function sortCanon(a: CanonDoc, b: CanonDoc): number {
 export function getAllCanon(opts?: CanonFilterOptions): CanonDoc[] {
   const includeDrafts = !!opts?.includeDrafts;
 
-  return allCanons
+  return (allCanons as CanonDoc[])
     .filter((c) => (includeDrafts ? true : !c.draft))
     .slice()
     .sort(sortCanon);
@@ -57,7 +58,7 @@ export function getCanonVolumes(): CanonDoc[] {
  */
 export function getCanonCampaign(): CanonDoc | null {
   return (
-    allCanons.find((c) => c.slug === "canon-campaign" && !c.draft) ?? null
+    (allCanons as CanonDoc[]).find((c) => c.slug === "canon-campaign" && !c.draft) ?? null
   );
 }
 
@@ -66,7 +67,7 @@ export function getCanonCampaign(): CanonDoc | null {
  */
 export function getCanonMasterIndex(): CanonDoc | null {
   return (
-    allCanons.find(
+    (allCanons as CanonDoc[]).find(
       (c) => c.slug === "canon-master-index-preview" && !c.draft,
     ) ?? null
   );
@@ -78,7 +79,7 @@ export function getCanonMasterIndex(): CanonDoc | null {
  */
 export function getCanonVolumeX(): CanonDoc | null {
   return (
-    allCanons.find(
+    (allCanons as CanonDoc[]).find(
       (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
     ) ?? null
   );
@@ -90,6 +91,9 @@ export function getCanonVolumeX(): CanonDoc | null {
 export function getCanonBySlug(slug: string): CanonDoc | null {
   const normalised = String(slug).trim().toLowerCase();
   return (
-    allCanons.find((c) => c.slug.toLowerCase() === normalised) ?? null
+    (allCanons as CanonDoc[]).find((c) => c.slug.toLowerCase() === normalised) ?? null
   );
 }
+
+// Re-export from server/canon-data
+export * from "./server/canon-data";
