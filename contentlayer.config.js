@@ -33,7 +33,7 @@ function generateUrl(slug: string, basePath: string): string {
 }
 
 // -----------------------------------------------------------------------------
-// Document types
+// Document types (keeping all your existing types exactly as they were)
 // -----------------------------------------------------------------------------
 
 export const Post = defineDocumentType(() => ({
@@ -287,7 +287,7 @@ export const Resource = defineDocumentType(() => ({
   },
 }));
 
-// CANON DOCUMENTS - UPDATED with readTime field
+// CANON DOCUMENTS - with readTime field added
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: `canon/**/*.{md,mdx}`,
@@ -306,7 +306,7 @@ export const Canon = defineDocumentType(() => ({
     featured: { type: "boolean", default: false },
     draft: { type: "boolean", default: false },
     tags: { type: "list", of: { type: "string" }, default: [] },
-    readTime: { type: "string", required: false }, // Added this field
+    readTime: { type: "string", required: false }, // Added field
   },
   computedFields: {
     slug: {
@@ -322,7 +322,7 @@ export const Canon = defineDocumentType(() => ({
 }));
 
 // -----------------------------------------------------------------------------
-// makeSource - UPDATED with proper esbuild configuration
+// makeSource - CRITICAL FIX: Configure esbuild to use tsx loader for MDX files
 // -----------------------------------------------------------------------------
 
 export default makeSource({
@@ -332,10 +332,13 @@ export default makeSource({
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],
     esbuildOptions: (options) => {
+      options.loader = {
+        ...options.loader,
+        '.mdx': 'tsx', // CRITICAL: Treat MDX files as TypeScript
+      };
       options.alias = {
         ...(options.alias ?? {}),
-        // Map @ alias to root directory to match your tsconfig
-        '@': process.cwd(),
+        '@': process.cwd(), // Map @ alias to root directory
       };
       return options;
     },
