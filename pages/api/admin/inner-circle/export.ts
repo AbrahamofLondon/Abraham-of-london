@@ -1,131 +1,94 @@
 // pages/api/admin/inner-circle/export.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import {
-  getInnerCirclePool,
-  type InnerCircleMemberStatus,
-} from "@/lib/server/innerCircleMembership";
-import {
-  checkRateLimit,
-  getClientIp,
+  rateLimit,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
+import { exportInnerCircleAdminSummary } from "@/lib/innerCircleMembership";
 
-interface ExportRow {
-  emailHashPrefix: string;
-  status: InnerCircleMemberStatus;
-  totalKeys: number;
-  firstIssuedAt: string;
-  lastIssuedAt: string;
-  latestKeySuffix: string;
+type AdminExportRow = {
+  created_at: string;
+  status: "active" | "pending" | "revoked";
+  key_suffix: string;
+  email_hash_prefix: string;
+  total_unlocks: number;
+};
+
+type AdminExportSuccess = {
+  ok: true;
+  rows: AdminExportRow[];
+};
+
+type AdminExportFailure = {
+  ok: false;
+  error: string;
+};
+
+type AdminExportResponse = AdminExportSuccess | AdminExportFailure;
+
+function getClientIp(req: NextApiRequest): string {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const remote = req.socket.remoteAddress;
+  return remote ?? "unknown";
 }
 
-type ExportResponse =
-  | { ok: true; rows: ExportRow[]; generatedAt: string }
-  | { ok: false; error: string };
+function isAuthorised(req: NextApiRequest): boolean {
+  const expectedToken = process.env.INNER_CIRCLE_ADMIN_TOKEN;
+  if (!expectedToken) return false;
 
-function requireAdminToken(req: NextApiRequest): boolean {
-  const expected = process.env.INNER_CIRCLE_ADMIN_TOKEN;
-  if (!expected) return false;
+  const incoming =
+    (req.headers["x-inner-circle-admin-token"] as string | undefined) ??
+    "";
 
-  const headerValue = req.headers["x-admin-token"];
-  if (typeof headerValue !== "string") return false;
-
-  return headerValue === expected;
+  return incoming.trim().length > 0 && incoming.trim() === expectedToken;
 }
 
-export default async function handler(
+export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExportResponse>,
+  res: NextApiResponse<AdminExportResponse>,
 ) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
+    return res
+      .status(405)
+      .json({ ok: false, error: "Method not allowed" });
   }
 
-  if (!requireAdminToken(req)) {
-    return res.status(401).json({ ok: false, error: "Unauthorized" });
-  }
-
-  // Rate-limit exports to avoid abuse (even with token)
   const ip = getClientIp(req);
-  const rate = checkRateLimit(ip, "inner-circle-admin-export", {
-    windowMs: 60_000,
-    max: 10,
+  const rlResult = rateLimit(ip, {
+    ...RATE_LIMIT_CONFIGS.API_GENERAL,
+    keyPrefix: "inner-circle-admin-export",
   });
 
-  if (!rate.allowed) {
-    if (rate.retryAfterMs !== undefined) {
-      res.setHeader(
-        "Retry-After",
-        String(Math.ceil(rate.retryAfterMs / 1000)),
-      );
-    }
-    return res
-      .status(429)
-      .json({ ok: false, error: "Too many export attempts. Try later." });
-  }
+  const rlHeaders = createRateLimitHeaders(rlResult);
+  Object.entries(rlHeaders).forEach(([key, value]) =>
+    res.setHeader(key, value),
+  );
 
-  try {
-    const pool = getInnerCirclePool();
-
-    const query = `
-      SELECT
-        agg.email_hash_prefix,
-        agg.status,
-        agg.total_keys,
-        agg.first_issued_at,
-        agg.last_issued_at,
-        latest.key_suffix AS latest_key_suffix
-      FROM (
-        SELECT
-          LEFT(email_hash, 12) AS email_hash_prefix,
-          status,
-          COUNT(*)       AS total_keys,
-          MIN(created_at) AS first_issued_at,
-          MAX(created_at) AS last_issued_at
-        FROM inner_circle_members
-        GROUP BY LEFT(email_hash, 12), status
-      ) AS agg
-      JOIN LATERAL (
-        SELECT key_suffix
-        FROM inner_circle_members m2
-        WHERE LEFT(m2.email_hash, 12) = agg.email_hash_prefix
-          AND m2.status = agg.status
-        ORDER BY m2.created_at DESC
-        LIMIT 1
-      ) AS latest ON TRUE
-      ORDER BY agg.last_issued_at DESC
-      LIMIT 2000;
-    `;
-
-    const dbRes = await pool.query<{
-      email_hash_prefix: string;
-      status: InnerCircleMemberStatus;
-      total_keys: number;
-      first_issued_at: Date;
-      last_issued_at: Date;
-      latest_key_suffix: string;
-    }>(query);
-
-    const rows: ExportRow[] = dbRes.rows.map((row) => ({
-      emailHashPrefix: row.email_hash_prefix,
-      status: row.status,
-      totalKeys: Number(row.total_keys),
-      firstIssuedAt: row.first_issued_at.toISOString(),
-      lastIssuedAt: row.last_issued_at.toISOString(),
-      latestKeySuffix: row.latest_key_suffix,
-    }));
-
-    return res.status(200).json({
-      ok: true,
-      rows,
-      generatedAt: new Date().toISOString(),
-    });
-  } catch (err: unknown) {
-    // No PII in logs, just high-level signal
-    // (the DB layer already logs deeper details if needed)
-    return res.status(500).json({
+  if (!rlResult.allowed) {
+    return res.status(429).json({
       ok: false,
-      error: "Failed to generate Inner Circle export",
+      error: "Too many admin export attempts. Please try again later.",
     });
   }
+
+  if (!isAuthorised(req)) {
+    return res
+      .status(401)
+      .json({ ok: false, error: "Unauthorised" });
+  }
+
+  const rows = exportInnerCircleAdminSummary();
+
+  // Only surface non-identifying, summarised data
+  return res.status(200).json({
+    ok: true,
+    rows,
+  });
 }

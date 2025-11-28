@@ -1,19 +1,26 @@
-import * as React from 'react';
-import Head from 'next/head';
-import type { GetStaticPaths, GetStaticProps } from 'next';
-import { MDXRemote, type MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { serialize } from 'next-mdx-remote/serialize';
+// pages/[slug].tsx
+import * as React from "react";
+import Head from "next/head";
+import type { GetStaticPaths, GetStaticProps } from "next";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 
-import Layout from '@/components/Layout';
-import mdxComponents from '@/components/mdx-components';
-import { getAllPosts, getPostBySlug } from '@/lib/posts';
-import { getAllContent, getContentBySlug } from '@/lib/mdx';
-import type { PostMeta } from '@/types/post';
-import ArticleHero from '@/components/ArticleHero';
+import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
+import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
+import type { PostMeta } from "@/types/post";
+import ArticleHero from "@/components/ArticleHero";
 
 type PageMeta = PostMeta & {
-  coverAspect?: 'book' | 'wide' | 'square';
-  coverFit?: 'cover' | 'contain';
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
+  accessLevel?: string;
+  lockMessage?: string | null;
+  slug?: string;
 };
 
 type PageProps = {
@@ -23,7 +30,15 @@ type PageProps = {
 
 // Remove unused variable - fix warning
 // const PRIMARY_COLLECTION = 'Post';
-const FALLBACK_COLLECTIONS = ['Print', 'Resource'] as const;
+const FALLBACK_COLLECTIONS = ["Print", "Resource"] as const;
+
+function hasInnerCircleCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .some((part) => part.startsWith("innerCircleAccess=true"));
+}
 
 function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   const {
@@ -37,15 +52,35 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
     coverImage,
     coverAspect,
     coverFit,
+    accessLevel,
+    lockMessage,
+    slug,
   } = meta;
+
+  const [hasAccess, setHasAccess] = React.useState(false);
+  const [checkedAccess, setCheckedAccess] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasAccess(hasInnerCircleCookie());
+    setCheckedAccess(true);
+  }, []);
 
   const displaySubtitle = excerpt || description || undefined;
   const primaryCategory =
     category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : 'Article');
+    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
 
-  const canonicalTitle = title || 'Abraham of London';
-  const displayDescription = description || excerpt || '';
+  const canonicalTitle = title || "Abraham of London";
+  const displayDescription = description || excerpt || "";
+
+  const isInnerCircle = accessLevel === "inner-circle";
+  const isLocked = isInnerCircle && (!checkedAccess || !hasAccess);
+
+  const effectiveSlug = slug || "";
+  const returnToPath = `/${effectiveSlug}`;
+  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
+    returnToPath,
+  )}`;
 
   return (
     <Layout title={canonicalTitle}>
@@ -67,6 +102,20 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
         coverFit={coverFit}
       />
 
+      {isInnerCircle && (
+        <section className="mx-auto w-full max-w-3xl px-4 pt-4 lg:px-0">
+          <div className="rounded-xl border border-softGold/70 bg-black/70 px-4 py-3 text-sm text-softGold">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-softGold/80">
+              Inner Circle
+            </p>
+            <p className="mt-1 text-cream">
+              {lockMessage ||
+                "This piece is catalogued as part of the Inner Circle canon. Full content is reserved for Inner Circle members."}
+            </p>
+          </div>
+        </section>
+      )}
+
       <main>
         <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
           <div
@@ -83,7 +132,25 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
               prose-img:rounded-xl prose-img:shadow-lg
             "
           >
-            <MDXRemote {...mdxSource} components={mdxComponents} />
+            {isInnerCircle && isLocked ? (
+              <div className="rounded-2xl border border-softGold/60 bg-black/70 px-6 py-10 text-center">
+                <h3 className="mb-3 font-serif text-2xl text-slate-50">
+                  Inner Circle Content
+                </h3>
+                <p className="mb-6 text-sm leading-relaxed text-slate-100">
+                  {lockMessage ||
+                    "This article is reserved for Inner Circle members. Unlock access to read the full piece and its strategic implications."}
+                </p>
+                <a
+                  href={joinUrl}
+                  className="inline-block rounded-full bg-softGold px-8 py-3 text-sm font-semibold text-black transition hover:bg-softGold/90"
+                >
+                  Join the Inner Circle
+                </a>
+              </div>
+            ) : (
+              <MDXRemote {...mdxSource} components={mdxComponents} />
+            )}
           </div>
         </article>
       </main>
@@ -92,6 +159,10 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 }
 
 export default ContentPage;
+
+// ---------------------------------------------------------------------------
+// Static generation
+// ---------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
@@ -124,11 +195,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
       paths,
-      fallback: 'blocking',
+      fallback: "blocking",
     };
   } catch (err: unknown) {
-    console.error('Error generating static paths for /[slug]:', err);
-    return { paths: [], fallback: 'blocking' };
+    // eslint-disable-next-line no-console
+    console.error("Error generating static paths for /[slug]:", err);
+    return { paths: [], fallback: "blocking" };
   }
 };
 
@@ -136,11 +208,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   try {
     const slugParam = params?.slug;
     const slug =
-      typeof slugParam === 'string'
+      typeof slugParam === "string"
         ? slugParam
         : Array.isArray(slugParam)
         ? slugParam[0]
-        : '';
+        : "";
 
     if (!slug) return { notFound: true };
 
@@ -172,9 +244,11 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     if (!meta.title) return { notFound: true };
 
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+    const jsonSafeMeta = JSON.parse(
+      JSON.stringify(meta),
+    ) as PageMeta;
 
-    const mdxSource = await serialize(content || '', {
+    const mdxSource = await serialize(content || "", {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,
     });
 
@@ -186,7 +260,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       revalidate: 3600,
     };
   } catch (err: unknown) {
-    console.error('Error in getStaticProps for /[slug]:', err);
+    // eslint-disable-next-line no-console
+    console.error("Error in getStaticProps for /[slug]:", err);
     return { notFound: true };
   }
 };

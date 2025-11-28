@@ -1,11 +1,15 @@
 // pages/api/inner-circle/unlock.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { normalizeKey } from "@/lib/server/innerCircleCrypto";
-import { validateMemberKey } from "@/lib/server/innerCircleMembership";
+
 import {
-  checkRateLimit,
-  getClientIp,
+  rateLimit,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
+import {
+  verifyInnerCircleKey,
+  recordInnerCircleUnlock,
+} from "@/lib/innerCircleMembership";
 
 type UnlockPostSuccess = {
   ok: true;
@@ -17,12 +21,12 @@ type UnlockPostFailure = {
   error: string;
 };
 
+type UnlockResponse = UnlockPostSuccess | UnlockPostFailure | void;
+
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
 
-function getMasterKey(): string {
-  const raw = process.env.INNER_CIRCLE_ACCESS_KEY ?? "";
-  return normalizeKey(raw);
-}
+// Optional master override key – lets you share a private “master” code
+const MASTER_KEY_ENV = "INNER_CIRCLE_ACCESS_KEY";
 
 function buildAccessCookie(): string {
   const isProd = process.env.NODE_ENV === "production";
@@ -36,114 +40,132 @@ function buildAccessCookie(): string {
 
   if (isProd) parts.push("Secure");
 
+  // 30 days – adjust if you like
   const maxAgeSeconds = 60 * 60 * 24 * 30;
   parts.push(`Max-Age=${maxAgeSeconds}`);
 
   return parts.join("; ");
 }
 
-async function checkKeyAgainstStore(key: string): Promise<boolean> {
-  const candidate = normalizeKey(key);
-  const masterKey = getMasterKey();
+function sanitiseReturnTo(raw: string | undefined): string {
+  if (!raw) return "/canon";
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return "/canon";
+  return trimmed;
+}
 
-  if (masterKey && candidate === masterKey) {
-    return true;
+function getClientIp(req: NextApiRequest): string {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
   }
+  const remote = req.socket.remoteAddress;
+  return remote ?? "unknown";
+}
 
-  return validateMemberKey(candidate);
+function isMasterKey(key: string): boolean {
+  const master = process.env[MASTER_KEY_ENV];
+  return Boolean(master && key === master);
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<UnlockPostSuccess | UnlockPostFailure | void>,
+  res: NextApiResponse<UnlockResponse>,
 ) {
-  if (req.method !== "GET" && req.method !== "POST") {
-    res.setHeader("Allow", "GET, POST");
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
-  }
-
-  // 🔐 IP rate-limit: max 50 unlock attempts / 10 minutes / IP
   const ip = getClientIp(req);
-  const rate = checkRateLimit(ip, "inner-circle-unlock", {
-    windowMs: 10 * 60_000,
-    max: 50,
+  const rlResult = rateLimit(ip, {
+    ...RATE_LIMIT_CONFIGS.AUTHENTICATION,
+    keyPrefix: "inner-circle-unlock",
   });
 
-  if (!rate.allowed) {
-    if (rate.retryAfterMs !== undefined) {
-      res.setHeader(
-        "Retry-After",
-        String(Math.ceil(rate.retryAfterMs / 1000)),
-      );
+  const rlHeaders = createRateLimitHeaders(rlResult);
+  Object.entries(rlHeaders).forEach(([key, value]) =>
+    res.setHeader(key, value),
+  );
+
+  if (!rlResult.allowed) {
+    if (req.method === "POST") {
+      return res.status(429).json({
+        ok: false,
+        error: "Too many attempts. Please try again later.",
+      });
     }
 
-    if (req.method === "GET") {
-      return res
-        .status(302)
-        .redirect("/inner-circle?error=too-many-attempts");
-    }
-
-    return res.status(429).json({
-      ok: false,
-      error: "Too many unlock attempts. Please try again later.",
-    });
+    return res
+      .status(302)
+      .redirect("/inner-circle?error=rate-limited");
   }
 
-  const returnToDefault = "/canon";
+  const method = req.method;
 
-  try {
-    if (req.method === "GET") {
-      const keyParam = normalizeKey(String(req.query.key ?? ""));
-      const returnToRaw = String(req.query.returnTo ?? returnToDefault);
+  if (method === "GET") {
+    const key = String(req.query.key ?? "");
+    const returnToRaw = String(req.query.returnTo ?? "/canon");
+    const returnTo = sanitiseReturnTo(returnToRaw);
 
-      const ok = keyParam ? await checkKeyAgainstStore(keyParam) : false;
-
-      if (!ok) {
-        return res.status(302).redirect("/inner-circle?error=invalid-key");
-      }
-
-      const returnTo =
-        returnToRaw.startsWith("/") && !returnToRaw.startsWith("//")
-          ? returnToRaw
-          : returnToDefault;
-
-      res.setHeader("Set-Cookie", buildAccessCookie());
-      return res.status(302).redirect(returnTo);
+    if (!key) {
+      return res
+        .status(302)
+        .redirect("/inner-circle?error=missing-key");
     }
 
-    const body = (req.body ?? {}) as {
+    const verification = verifyInnerCircleKey(key);
+    const isValidKey =
+      verification.valid || (!verification.valid && isMasterKey(key));
+
+    if (!isValidKey) {
+      return res
+        .status(302)
+        .redirect("/inner-circle?error=invalid-or-expired-key");
+    }
+
+    if (verification.valid) {
+      recordInnerCircleUnlock(key, ip);
+    }
+
+    res.setHeader("Set-Cookie", buildAccessCookie());
+    return res.status(302).redirect(returnTo);
+  }
+
+  if (method === "POST") {
+    const { key, returnTo: bodyReturnTo } = (req.body ?? {}) as {
       key?: string;
       returnTo?: string;
     };
 
-    const keyBody = normalizeKey(body.key ?? "");
-    const returnToRaw = body.returnTo ?? returnToDefault;
+    const safeKey = typeof key === "string" ? key.trim() : "";
+    const returnTo = sanitiseReturnTo(bodyReturnTo);
 
-    const ok = keyBody ? await checkKeyAgainstStore(keyBody) : false;
-
-    if (!ok) {
-      return res.status(400).json({ ok: false, error: "Invalid key" });
+    if (!safeKey) {
+      return res
+        .status(400)
+        .json({ ok: false, error: "Key is required" });
     }
 
-    const returnTo =
-      typeof returnToRaw === "string" &&
-      returnToRaw.startsWith("/") &&
-      !returnToRaw.startsWith("//")
-        ? returnToRaw
-        : returnToDefault;
+    const verification = verifyInnerCircleKey(safeKey);
+    const isValidKey =
+      verification.valid || (!verification.valid && isMasterKey(safeKey));
+
+    if (!isValidKey) {
+      return res
+        .status(400)
+        .json({ ok: false, error: "Invalid or expired key" });
+    }
+
+    if (verification.valid) {
+      recordInnerCircleUnlock(safeKey, ip);
+    }
 
     res.setHeader("Set-Cookie", buildAccessCookie());
-    return res.status(200).json({ ok: true, redirectTo: returnTo });
-  } catch {
-    if (req.method === "GET") {
-      return res
-        .status(302)
-        .redirect("/inner-circle?error=server-error");
-    }
-
-    return res.status(500).json({
-      ok: false,
-      error: "Inner Circle unlock is temporarily unavailable",
+    return res.status(200).json({
+      ok: true,
+      redirectTo: returnTo,
     });
   }
+
+  res.setHeader("Allow", "GET, POST");
+  return res
+    .status(405)
+    .json({ ok: false, error: "Method not allowed" });
 }

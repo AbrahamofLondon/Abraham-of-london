@@ -32,6 +32,17 @@ export interface RateLimitResult {
   windowMs: number;
 }
 
+// Combined rate limiting result for IP + Email
+export interface CombinedRateLimitResult {
+  ipResult: RateLimitResult;
+  emailResult: RateLimitResult | null;
+  ip: string;
+  email: string | null;
+  allowed: boolean;
+  hitIpLimit: boolean;
+  hitEmailLimit: boolean;
+}
+
 // Minimal Redis interfaces (vendor-neutral & no `any`)
 export interface BasicRedisMulti {
   incr(key: string): BasicRedisMulti;
@@ -345,6 +356,26 @@ export function getClientIp(req: NextApiRequest): string {
   return socketAddr;
 }
 
+// -------------------------------------------------------------------------
+// Email-based rate limiting helper
+// -------------------------------------------------------------------------
+
+/**
+ * Rate-limit based on email address for stricter protection
+ * Usage:
+ *   const result = rateLimitForEmail(email, "inner-circle-register-email", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL);
+ */
+export function rateLimitForEmail(
+  email: string,
+  label: string,
+  options: RateLimitOptions,
+): { result: RateLimitResult; email: string } {
+  const normalizedEmail = email.toLowerCase().trim();
+  const key = `${label}:${normalizedEmail}`;
+  const result = rateLimit(key, options);
+  return { result, email: normalizedEmail };
+}
+
 /**
  * Convenience helper: rate-limit based on client IP + logical label.
  * Usage:
@@ -359,6 +390,48 @@ export function rateLimitForRequestIp(
   const key = `${label}:${ip}`;
   const result = rateLimit(key, options);
   return { result, ip };
+}
+
+// -------------------------------------------------------------------------
+// Combined IP + Email rate limiting
+// -------------------------------------------------------------------------
+
+/**
+ * Combined rate limiting for both IP and email with comprehensive result
+ * Usage:
+ *   const { allowed, hitIpLimit, hitEmailLimit } = combinedRateLimit(req, email, "inner-circle", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER, RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL);
+ */
+export function combinedRateLimit(
+  req: NextApiRequest,
+  email: string | null,
+  label: string,
+  ipOptions: RateLimitOptions,
+  emailOptions?: RateLimitOptions,
+): CombinedRateLimitResult {
+  const { result: ipResult, ip } = rateLimitForRequestIp(req, label, ipOptions);
+  
+  let emailResult: RateLimitResult | null = null;
+  let normalizedEmail: string | null = null;
+  
+  if (email && emailOptions) {
+    const emailLimit = rateLimitForEmail(email, `${label}-email`, emailOptions);
+    emailResult = emailLimit.result;
+    normalizedEmail = emailLimit.email;
+  }
+
+  const hitIpLimit = !ipResult.allowed;
+  const hitEmailLimit = emailResult ? !emailResult.allowed : false;
+  const allowed = ipResult.allowed && (!emailResult || emailResult.allowed);
+
+  return {
+    ipResult,
+    emailResult,
+    ip,
+    email: normalizedEmail,
+    allowed,
+    hitIpLimit,
+    hitEmailLimit,
+  };
 }
 
 // -------------------------------------------------------------------------
@@ -395,6 +468,11 @@ export const RATE_LIMIT_CONFIGS = {
     limit: 20,
     windowMs: 15 * 60 * 1000, // 15 minutes per IP
     keyPrefix: "ic-reg",
+  },
+  INNER_CIRCLE_REGISTER_EMAIL: {
+    limit: 3,  // Stricter limit for same email attempts
+    windowMs: 60 * 60 * 1000, // 1 hour per email
+    keyPrefix: "ic-reg-email",
   },
   INNER_CIRCLE_UNLOCK: {
     limit: 50,

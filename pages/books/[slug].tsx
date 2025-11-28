@@ -45,8 +45,8 @@ type PageProps = {
 type MDXComponentProps = {
   children?: React.ReactNode;
   className?: string;
-  [key: string]: unknown;
-};
+  // eslint-disable-next-line @typescript-eslint/ban-types
+} & Record<string, unknown>;
 
 type AnchorProps = React.ComponentPropsWithoutRef<"a">;
 
@@ -81,11 +81,23 @@ const mdxComponents = {
 };
 
 // ---------------------------------------------------------------------------
-// Page component
+// Helpers
 // ---------------------------------------------------------------------------
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+
+function hasInnerCircleCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .some((part) => part.startsWith("innerCircleAccess=true"));
+}
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 
 export default function BookPage({ meta, mdxSource }: PageProps) {
   const {
@@ -111,6 +123,14 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
     slug,
   } = meta;
 
+  const [hasAccess, setHasAccess] = React.useState(false);
+  const [checkedAccess, setCheckedAccess] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasAccess(hasInnerCircleCookie());
+    setCheckedAccess(true);
+  }, []);
+
   const pageTitle = `${title} | Books`;
   const isInnerCircle = accessLevel === "inner-circle";
 
@@ -123,7 +143,12 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
         })
       : null;
 
-  const canonicalUrl = `${SITE_URL}/books/${slug}`;
+  const canonicalUrl = `${SITE_URL}/books/${slug ?? ""}`;
+  const isLocked = isInnerCircle && (!checkedAccess || !hasAccess);
+
+  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
+    `/books/${slug ?? ""}`,
+  )}`;
 
   return (
     <Layout title={pageTitle}>
@@ -215,7 +240,7 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
                 </p>
               )}
 
-              {/* Inner Circle info banner (non-blocking, UX only) */}
+              {/* Inner Circle info banner */}
               {isInnerCircle && (
                 <div className="mt-4 rounded-xl border border-softGold/70 bg-black/60 px-4 py-3 text-sm text-softGold">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-softGold/80">
@@ -341,7 +366,23 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
             prose-pre:border prose-pre:border-gray-700 prose-pre:bg-gray-900
           "
         >
-          {mdxSource ? (
+          {isInnerCircle && isLocked ? (
+            <div className="rounded-2xl border border-softGold/50 bg-black/70 px-6 py-10 text-center">
+              <h3 className="mb-3 font-serif text-2xl text-cream">
+                Inner Circle Volume
+              </h3>
+              <p className="mb-6 text-sm leading-relaxed text-gray-200">
+                {lockMessage ||
+                  "This manuscript is reserved for Inner Circle members. Unlock access to read the full volume and supporting material."}
+              </p>
+              <Link
+                href={joinUrl}
+                className="inline-block rounded-full bg-softGold px-8 py-3 text-sm font-semibold text-black transition hover:bg-softGold/90"
+              >
+                Join the Inner Circle
+              </Link>
+            </div>
+          ) : mdxSource ? (
             <MDXRemote {...mdxSource} components={mdxComponents} />
           ) : (
             <div className="rounded-2xl border-2 border-dashed border-gray-600 bg-charcoal/30 py-16 text-center">
@@ -415,7 +456,7 @@ type BookShareProps = {
 };
 
 function BookShare({ meta }: BookShareProps): JSX.Element {
-  const url = `${SITE_URL}/books/${meta.slug}`;
+  const url = `${SITE_URL}/books/${meta.slug ?? ""}`;
   const text = `“${meta.title}” — The Architecture of Human Purpose Canon`;
   const encodedUrl = encodeURIComponent(url);
   const encodedText = encodeURIComponent(text);
@@ -479,7 +520,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   }
 
   // Strip import lines from MDX content before serialization
-  const rawContent = book.content ?? "";
+  const rawContent = (book as { content?: string }).content ?? "";
   const cleanContent = rawContent
     .replace(
       /^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm,
