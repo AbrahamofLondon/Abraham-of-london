@@ -1,0 +1,57 @@
+name: Netlify — Preview & Deploy Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  netlify-build-check:
+    runs-on: ubuntu-22.04
+    env:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build (Netlify-safe)
+        run: pnpm run build:netlify:safe
+
+  trigger-netlify:
+    needs: netlify-build-check
+    runs-on: ubuntu-22.04
+    if: ${{ success() && github.event_name == 'pull_request' }}
+
+    steps:
+      - name: Call Netlify build hook (Preview)
+        run: |
+          if [ -z "${{ secrets.NETLIFY_BUILD_HOOK_URL }}" ]; then
+            echo "NETLIFY_BUILD_HOOK_URL not set; skipping hook."
+            exit 0
+          fi
+          curl -X POST -d '{}' "${{ secrets.NETLIFY_BUILD_HOOK_URL }}"

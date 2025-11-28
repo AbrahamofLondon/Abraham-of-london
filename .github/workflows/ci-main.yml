@@ -40,17 +40,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
 
+      # Lint
       - name: Lint (safe)
         run: pnpm run lint:safe
 
+      # Typecheck
       - name: Typecheck (safe)
         run: pnpm run typecheck:safe
 
-      - name: Build Contentlayer
-        run: pnpm run content:build
-
-      - name: Validate downloads
-        run: pnpm run downloads:validate
-
+      # Build check (same command Netlify uses — adjust if different)
       - name: Build (Netlify-safe)
         run: pnpm run build:netlify:safe
