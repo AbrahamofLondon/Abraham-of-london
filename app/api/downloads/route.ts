@@ -115,9 +115,15 @@ export async function GET(
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
 
-  // Derive IP from headers using shared helper
+  // Derive IP from headers using shared helper - COMPATIBLE VERSION
   const ip = getClientIp({
-    headers: Object.fromEntries(request.headers),
+    headers: (() => {
+      const headers: Record<string, string> = {};
+      request.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      return headers;
+    })(),
   });
 
   // Apply API-level rate limiting (read-only but still abusable)
