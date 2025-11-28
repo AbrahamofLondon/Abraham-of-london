@@ -20,8 +20,10 @@ concurrency:
 
 jobs:
   pdfs:
-    # Only skip if *this workflow itself* created the commit
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore(pdfs):') }}
+    # Skip only when this workflow's own PDF commit triggered the push
+    if: >
+      ${{ github.event_name != 'push' ||
+          !startsWith(github.event.head_commit.message, 'chore(pdfs):') }}
 
     runs-on: ubuntu-22.04
     env:
@@ -52,6 +54,8 @@ jobs:
         with:
           path: ${{ env.PUPPETEER_CACHE_DIR }}
           key: puppeteer-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            puppeteer-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
@@ -62,11 +66,16 @@ jobs:
       - name: Generate PDFs
         run: pnpm run pdfs
 
+      # OPTIONAL: if you add downloads:validate script later, you can run:
+      # - name: Validate downloads
+      #   run: pnpm run downloads:validate
+
       - name: Stage PDF-only changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Only stage PDFs and related files under public/downloads
           git add public/downloads || true
 
           if git diff --cached --quiet; then

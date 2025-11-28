@@ -148,6 +148,28 @@ export const Download = defineDocumentType(() => ({
           "downloads",
         ),
     },
+    // Canonical, normalised download URL for front-end + QC
+    downloadHref: {
+      type: "string",
+      resolve: (doc) => {
+        // 1. Explicit full URLs win
+        if (doc.downloadUrl) return doc.downloadUrl;
+        if (doc.fileUrl) return doc.fileUrl;
+
+        // 2. Legacy / filename-based fields – normalise into /downloads/...
+        const candidate =
+          doc.pdfPath ||
+          doc.downloadFile ||
+          doc.file ||
+          "";
+
+        if (!candidate) return "";
+
+        if (candidate.startsWith("/")) return candidate;
+
+        return `/downloads/${candidate}`.replace(/\/+/g, "/");
+      },
+    },
   },
 }));
 
