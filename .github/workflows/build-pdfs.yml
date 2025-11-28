@@ -1,4 +1,4 @@
-name: Build PDFs (Manual / Content Changes)
+name: Build & Commit PDFs
 
 on:
   push:
@@ -8,10 +8,11 @@ on:
       - "scripts/make-pdfs.mjs"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "public/downloads/**"
   workflow_dispatch: {}
 
 permissions:
-  contents: read   # read-only; NO writing to repo
+  contents: write
 
 concurrency:
   group: pdfs-${{ github.ref }}
@@ -19,8 +20,9 @@ concurrency:
 
 jobs:
   pdfs:
-    # never trigger on bot pushes
-    if: github.actor != 'github-actions[bot]'
+    # Only skip if *this workflow itself* created the commit
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(pdfs):') }}
+
     runs-on: ubuntu-22.04
     env:
       NODE_ENV: production
@@ -33,7 +35,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false  # cannot push
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -51,7 +52,6 @@ jobs:
         with:
           path: ${{ env.PUPPETEER_CACHE_DIR }}
           key: puppeteer-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: puppeteer-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
@@ -62,10 +62,17 @@ jobs:
       - name: Generate PDFs
         run: pnpm run pdfs
 
-      - name: Upload PDFs as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-pdfs
-          path: |
-            public/downloads/**/*.pdf
-          if-no-files-found: error
+      - name: Stage PDF-only changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add public/downloads || true
+
+          if git diff --cached --quiet; then
+            echo "No changes detected."
+            exit 0
+          fi
+
+          git commit -m "chore(pdfs): auto-generate PDFs [skip ci]"
+          git push
