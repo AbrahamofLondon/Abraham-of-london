@@ -74,6 +74,8 @@ export const Post = defineDocumentType(() => ({
     draft: { type: "boolean", default: false },
     featured: { type: "boolean", default: false },
     layout: { type: "string", required: false },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -114,7 +116,7 @@ export const Download = defineDocumentType(() => ({
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
     readTime: { type: "string", required: false },
-    readtime: { type: "string", required: false }, // legacy casing
+    readtime: { type: "string", required: false },
     category: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     file: { type: "string", required: false },
@@ -128,11 +130,11 @@ export const Download = defineDocumentType(() => ({
     downloadFile: { type: "string", required: false, default: "" },
     fileUrl: { type: "string", default: "" },
     type: { type: "string", default: "download" },
-
-    // extra flags / URLs used by Canon toolkits, etc.
     featured: { type: "boolean", default: false },
     draft: { type: "boolean", default: false },
     downloadUrl: { type: "string", default: "" },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -148,15 +150,12 @@ export const Download = defineDocumentType(() => ({
           "downloads",
         ),
     },
-    // Canonical, normalised download URL for front-end + QC
     downloadHref: {
       type: "string",
       resolve: (doc) => {
-        // 1. Explicit full URLs win
         if (doc.downloadUrl) return doc.downloadUrl;
         if (doc.fileUrl) return doc.fileUrl;
 
-        // 2. Legacy / filename-based fields – normalise into /downloads/...
         const candidate =
           doc.pdfPath ||
           doc.downloadFile ||
@@ -196,6 +195,8 @@ export const Book = defineDocumentType(() => ({
     isbn: { type: "string", default: "" },
     draft: { type: "boolean", default: false },
     featured: { type: "boolean", default: false },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -237,6 +238,8 @@ export const Event = defineDocumentType(() => ({
     },
     location: { type: "string", default: "" },
     registrationUrl: { type: "string", default: "" },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -284,6 +287,8 @@ export const Print = defineDocumentType(() => ({
     downloadFile: { type: "string", default: "" },
     price: { type: "string", default: "" },
     available: { type: "boolean", default: true },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -319,6 +324,8 @@ export const Strategy = defineDocumentType(() => ({
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
     tags: { type: "list", of: { type: "string" }, default: [] },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -351,8 +358,8 @@ export const Resource = defineDocumentType(() => ({
     description: { type: "string", required: false },
     slug: { type: "string", required: false },
     author: { type: "string", required: false },
-    readtime: { type: "string", required: false }, // legacy
-    readTime: { type: "string", required: false }, // canonical
+    readtime: { type: "string", required: false },
+    readTime: { type: "string", required: false },
     subtitle: { type: "string", required: false },
     excerpt: { type: "string", default: "" },
     coverImage: { type: "string", default: "" },
@@ -362,6 +369,8 @@ export const Resource = defineDocumentType(() => ({
     downloadUrl: { type: "string", default: "" },
     featured: { type: "boolean", default: false },
     draft: { type: "boolean", default: false },
+    accessLevel: { type: "string", required: false, default: "public" },
+    lockMessage: { type: "string", required: false },
   },
   computedFields: {
     slug: {
@@ -407,8 +416,6 @@ export const Canon = defineDocumentType(() => ({
     draft: { type: "boolean", default: false },
     tags: { type: "list", of: { type: "string" }, default: [] },
     readTime: { type: "string", required: false },
-
-    // Inner Circle / restricted-access controls
     accessLevel: { type: "string", required: false, default: "public" },
     lockMessage: { type: "string", required: false },
   },
@@ -442,7 +449,7 @@ export default makeSource({
     esbuildOptions: (options) => {
       options.loader = {
         ...(options.loader || {}),
-        ".mdx": "tsx", // allow JSX in MDX
+        ".mdx": "tsx",
       };
       options.alias = {
         ...(options.alias || {}),
