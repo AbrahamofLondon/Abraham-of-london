@@ -1,6 +1,8 @@
 // lib/email/sendInnerCircleEmail.ts
 /* eslint-disable no-console */
 
+import { maskEmail } from "@/lib/security";
+
 export type InnerCircleEmailPayload = {
   email: string;
   name?: string;
@@ -13,30 +15,79 @@ export async function sendInnerCircleEmail(
 ): Promise<void> {
   const { email, name, accessKey, unlockUrl } = payload;
   const env = process.env.NODE_ENV ?? "development";
+  const resendApiKey = process.env.RESEND_API_KEY;
 
-  // If no ESP configured, just log. This way you still see the key + link in logs.
-  if (!process.env.RESEND_API_KEY && env !== "test") {
-    console.log(
-      `[InnerCircle] Would send email to ${email} (no ESP configured).`,
+  // Primary admin address (site-level), with hardcoded fallback
+  const adminPrimary =
+    process.env.SITE_CONTACT_EMAIL || "info@abrahamoflondon.org";
+  const adminBackup = "seunadaramola@gmail.com";
+
+  // Ensure we always notify at least one working inbox
+  const adminRecipients = Array.from(
+    new Set(
+      [adminPrimary, adminBackup].filter(
+        (v): v is string => typeof v === "string" && v.trim().length > 0,
+      ),
+    ),
+  );
+
+  const safeEmail = maskEmail(email);
+
+  console.log("[InnerCircle] sendInnerCircleEmail called:", {
+    email: safeEmail,
+    hasName: Boolean(name),
+    hasAccessKey: !!accessKey,
+    env,
+  });
+
+  if (!resendApiKey) {
+    console.warn(
+      "[InnerCircle] RESEND_API_KEY not set. No emails will be sent.",
     );
-    console.log(`Name: ${name || "N/A"}`);
-    console.log(`Access key: ${accessKey}`);
+
+    if (env === "production") {
+      throw new Error(
+        "Email service not configured (RESEND_API_KEY missing).",
+      );
+    }
+
+    // Dev / non-prod: simulate without leaking full email
+    console.log(
+      `[InnerCircle][DEV] Would send Inner Circle email to ${safeEmail} (no ESP configured).`,
+    );
     console.log(`Unlock URL: ${unlockUrl}`);
     return;
   }
 
-  // OPTIONAL: hook up Resend when you're ready
-  /*
   const { Resend } = await import("resend");
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = new Resend(resendApiKey);
 
+  const html = renderInnerCircleHtml({ name, accessKey, unlockUrl });
+
+  // 1) Email to subscriber
   await resend.emails.send({
-    from: "Inner Circle <info@abrahamoflondon.org>",
+    from: `Inner Circle <${adminPrimary}>`,
     to: email,
     subject: "Your Inner Circle Access Key",
-    html: renderInnerCircleHtml({ name, accessKey, unlockUrl }),
+    html,
   });
-  */
+
+  // 2) Internal notification to admin(s) – primary + backup/fallback
+  await resend.emails.send({
+    from: `Inner Circle <${adminPrimary}>`,
+    to: adminRecipients,
+    subject: `New Inner Circle subscriber: ${safeEmail}`,
+    html: `
+      <p>New Inner Circle signup.</p>
+      <p><strong>Email (masked):</strong> ${safeEmail}</p>
+      <p><strong>Name:</strong> ${name || "(not provided)"}</p>
+    `,
+  });
+
+  console.log(
+    "[InnerCircle] Emails dispatched to subscriber and admin recipients:",
+    adminRecipients.map(maskEmail),
+  );
 }
 
 export function renderInnerCircleHtml(opts: {

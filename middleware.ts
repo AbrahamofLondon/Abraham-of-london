@@ -2,6 +2,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
+
 // Routes we never touch with gating logic (handled by Next/static pipeline)
 const SAFE_PREFIXES = [
   "/_next/",
@@ -13,12 +15,20 @@ const SAFE_PREFIXES = [
   "/api/webhooks/",
 ];
 
-// Publicly visible canon docs (everything else stays gated)
+// Publicly visible canon docs (everything else stays gated by default)
 const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
+  // NOTE: we removed "the-builders-catechism" so it is no longer public.
+  // "volume-i-foundations-of-purpose", // keep commented or move to FORCE_RESTRICTED_CANON if needed
+]);
+
+// Slugs that are ALWAYS gated, even if someone later adds them to PUBLIC_CANON.
+// This is your "access level restriction takes precedence" safety net.
+const FORCE_RESTRICTED_CANON = new Set<string>([
   "the-builders-catechism",
-  "volume-i-foundations-of-purpose", // Canon Volume I — Foundations of Purpose
+  // Add any others here that must NEVER be public:
+  // "volume-i-foundations-of-purpose",
 ]);
 
 function applySecurityHeaders(res: NextResponse): NextResponse {
@@ -70,11 +80,16 @@ export function middleware(req: NextRequest) {
     return applySecurityHeaders(res);
   }
 
-  // 3) Canon gating (inner circle)
+  // 3) Canon gating (Inner Circle)
   if (pathname.startsWith("/canon/")) {
     const slug = pathname.replace("/canon/", "").replace(/\/$/, "").trim();
-    const isPublic = PUBLIC_CANON.has(slug);
-    const hasAccess = req.cookies.get("innerCircleAccess")?.value === "true";
+
+    const hasAccess =
+      req.cookies.get(INNER_CIRCLE_COOKIE_NAME)?.value === "true";
+
+    const isForceRestricted = FORCE_RESTRICTED_CANON.has(slug);
+    // If it's force-restricted, it is NOT public. That wins over any conflicting flag.
+    const isPublic = !isForceRestricted && PUBLIC_CANON.has(slug);
 
     if (!isPublic && !hasAccess) {
       const url = req.nextUrl.clone();
