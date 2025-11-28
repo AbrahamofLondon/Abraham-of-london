@@ -18,6 +18,7 @@ const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
   "the-builders-catechism",
+  "volume-i-foundations-of-purpose" // Canon Volume I — Foundations of Purpose
 ]);
 
 // -----------------------------------------------------------------------------
@@ -54,7 +55,6 @@ function isMalicious(req: NextRequest): boolean {
     ".env",
     "server-status",
     ".git",
-    // if you ever expose a real /admin, remove "admin" from here
     "wp-login",
   ];
 
@@ -83,8 +83,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith("/canon/")) {
     const slug = pathname.replace("/canon/", "").replace(/\/$/, "").trim();
     const isPublic = PUBLIC_CANON.has(slug);
-    const hasAccess =
-      req.cookies.get("innerCircleAccess")?.value === "true";
+    const hasAccess = req.cookies.get("innerCircleAccess")?.value === "true";
 
     if (!isPublic && !hasAccess) {
       const url = req.nextUrl.clone();
