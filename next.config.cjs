@@ -6,8 +6,7 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
 
-  // IMPORTANT: do NOT use "output: 'export'" with API routes + middleware.
-  // Next will run in the normal (server) mode used by Netlify/Node.
+  // DO NOT use `output: 'export'` – you have API routes + middleware.
 
   images: {
     unoptimized: true,
@@ -19,7 +18,7 @@ const nextConfig = {
   poweredByHeader: false,
 
   eslint: {
-    // CI can still enforce lint; builds won't be blocked.
+    // CI still runs lint; builds won't be blocked by lint errors.
     ignoreDuringBuilds: true,
   },
 
