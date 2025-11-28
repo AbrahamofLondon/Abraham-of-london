@@ -33,10 +33,11 @@ type HealthResponse = {
 
 const startedAt = Date.now();
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader("Cache-Control", "no-store");
-  res.status(200).json({ status: "ok", time: new Date().toISOString() });
-}
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<HealthResponse>,
+) {
+  const now = Date.now();
 
   const counts = {
     posts: allPosts.length,
@@ -70,9 +71,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   };
 
   res.setHeader("Content-Type", "application/json");
-  res.setHeader(
-    "Cache-Control",
-    "public, s-maxage=60, stale-while-revalidate=60",
-  );
+  // IMPORTANT: matches your uptime workflow expectation
+  res.setHeader("Cache-Control", "no-store");
+
   res.status(200).json(payload);
 }
