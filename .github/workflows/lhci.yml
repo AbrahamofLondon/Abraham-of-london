@@ -2,7 +2,11 @@ name: Lighthouse
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
 
 jobs:
   lhci:
@@ -11,28 +15,36 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
-      - name: Install
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
 
-      - name: Prebuild checks
-        run: pnpm run content:build || true
+      # Optional but recommended: keep this as a real check.
+      - name: Prebuild content
+        run: pnpm run content:build
 
-      - name: Build
+      - name: Build Next.js app
         run: pnpm run build
 
-      - name: Start site
-        run: pnpm dlx wait-on@7 http://localhost:3000 & pnpm exec next start -p 3000 &
-      - name: Wait for site
+      - name: Start Next.js server
+        run: pnpm exec next start -p 3000 &
+      
+      - name: Wait for server
         run: pnpm dlx wait-on@7 http://localhost:3000
 
       - name: Lighthouse CI

@@ -1,13 +1,13 @@
-name: TW Autofix (manual)
+name: Prettier Patch (manual)
 
 on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  tw-autofix:
+  prettier-patch:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
 
-      - name: Prettier write (code + content only)
+      # Adjust globs to match what you want formatted
+      - name: Run Prettier (code + content only)
         run: |
           pnpm dlx prettier \
             "app/**/*.{js,jsx,ts,tsx,css,scss,md,mdx}" \
@@ -40,14 +41,19 @@ jobs:
             "content/**/*.{md,mdx}" \
             --write
 
-      - name: Commit if changed
+      - name: Create patch if there are changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: formatting (prettier + tailwind) [skip ci]"
-            git push
+          if ! git diff --quiet; then
+            git diff > prettier-fix.patch
+            echo "Created patch file:"
+            ls -l prettier-fix.patch
           else
-            echo "No changes."
+            echo "No changes to format."
           fi
+
+      - name: Upload patch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prettier-fix-patch
+          path: prettier-fix.patch
+          if-no-files-found: warn
