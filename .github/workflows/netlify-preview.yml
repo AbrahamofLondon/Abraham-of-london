@@ -1,4 +1,4 @@
-name: Netlify — Preview & Deploy Check
+name: Netlify — Preview Build Check
 
 on:
   pull_request:
@@ -48,7 +48,7 @@ jobs:
     if: ${{ success() && github.event_name == 'pull_request' }}
 
     steps:
-      - name: Call Netlify build hook (Preview)
+      - name: Trigger Netlify preview build hook (optional)
         run: |
           if [ -z "${{ secrets.NETLIFY_BUILD_HOOK_URL }}" ]; then
             echo "NETLIFY_BUILD_HOOK_URL not set; skipping hook."

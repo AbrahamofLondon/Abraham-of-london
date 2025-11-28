@@ -6,6 +6,7 @@ on:
     paths:
       - "content/**"
       - "scripts/make-pdfs.mjs"
+      - "scripts/generate-ultimate-purpose-of-man-pdf.tsx"
       - "package.json"
       - "pnpm-lock.yaml"
       - "public/downloads/**"
@@ -20,16 +21,12 @@ concurrency:
 
 jobs:
   pdfs:
-    # Skip only when this workflow's own PDF commit triggered the push
-    if: >
-      ${{ github.event_name != 'push' ||
-          !startsWith(github.event.head_commit.message, 'chore(pdfs):') }}
-
+    # avoid infinite loop on bot commits
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-22.04
     env:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
-      PUPPETEER_CACHE_DIR: ${{ runner.tool_cache }}/puppeteer
       PDF_ON_CI: "1"
 
     steps:
@@ -49,39 +46,23 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Cache Puppeteer Chromium
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PUPPETEER_CACHE_DIR }}
-          key: puppeteer-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            puppeteer-${{ runner.os }}-
-
-      - name: Install dependencies
+      - name: Install dependencies (full)
         run: pnpm install --frozen-lockfile=false
-
-      - name: Install Chrome for Puppeteer
-        run: pnpm dlx puppeteer browsers install chrome
 
       - name: Generate PDFs
         run: pnpm run pdfs
 
-      # OPTIONAL: if you add downloads:validate script later, you can run:
-      # - name: Validate downloads
-      #   run: pnpm run downloads:validate
+      - name: Validate downloads manifest (optional but good)
+        run: pnpm run downloads:validate
 
-      - name: Stage PDF-only changes
+      - name: Commit changes (if any)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Only stage PDFs and related files under public/downloads
-          git add public/downloads || true
-
-          if git diff --cached --quiet; then
-            echo "No changes detected."
-            exit 0
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(pdfs): auto-generate PDFs [skip ci]"
+            git push
+          else
+            echo "No PDF changes to commit."
           fi
-
-          git commit -m "chore(pdfs): auto-generate PDFs [skip ci]"
-          git push
