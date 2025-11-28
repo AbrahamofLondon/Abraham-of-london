@@ -1,6 +1,8 @@
+// middleware.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+// Routes we never touch with gating logic (handled by Next/static pipeline)
 const SAFE_PREFIXES = [
   "/_next/",
   "/favicon",
@@ -11,24 +13,38 @@ const SAFE_PREFIXES = [
   "/api/webhooks/",
 ];
 
-const PUBLIC_CANON = new Set([
+// Publicly visible canon docs (everything else stays gated)
+const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
   "the-builders-catechism",
 ]);
 
+// -----------------------------------------------------------------------------
+// Security headers (no blocking, just hardening)
+// -----------------------------------------------------------------------------
 function applySecurityHeaders(res: NextResponse): NextResponse {
-  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  res.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload",
+  );
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
-  res.headers.set("Referrer-Policy", "same-origin");
-  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  );
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   res.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
   res.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+
   return res;
 }
 
+// -----------------------------------------------------------------------------
+// Basic probe blocking (php/wp-admin/etc) – non-essential but harmless
+// -----------------------------------------------------------------------------
 function isMalicious(req: NextRequest): boolean {
   const url = req.nextUrl.pathname.toLowerCase();
 
@@ -38,67 +54,37 @@ function isMalicious(req: NextRequest): boolean {
     ".env",
     "server-status",
     ".git",
-    "admin",
-    "login",
-    "console",
+    // if you ever expose a real /admin, remove "admin" from here
+    "wp-login",
   ];
 
   return BAD_PATTERNS.some((p) => url.includes(p));
 }
 
-// 🔒 Simple in-memory rate limiter (best-effort, per edge runtime)
-const RATE_LIMIT_WINDOW_MS = 60_000; // 60s window
-const RATE_LIMIT_MAX = 60; // 60 requests/minute per IP
-
-const rateMap = new Map<string, { count: number; ts: number }>();
-
-function isRateLimited(ip: string | null): boolean {
-  if (!ip) return false;
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-
-  if (!entry || now - entry.ts > RATE_LIMIT_WINDOW_MS) {
-    rateMap.set(ip, { count: 1, ts: now });
-    return false;
-  }
-
-  entry.count += 1;
-  entry.ts = now;
-
-  if (entry.count > RATE_LIMIT_MAX) {
-    return true;
-  }
-
-  return false;
-}
-
+// -----------------------------------------------------------------------------
+// Middleware
+// -----------------------------------------------------------------------------
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // 1) Bypass for static / framework internals
   if (SAFE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    return applySecurityHeaders(res);
   }
 
+  // 2) Block obvious junk probes (no rate limiting)
   if (isMalicious(req)) {
-    return new NextResponse("Forbidden", { status: 403 });
+    const res = new NextResponse("Forbidden", { status: 403 });
+    return applySecurityHeaders(res);
   }
 
-  // 🔒 Apply basic rate limiting (per IP)
-  const ip =
-    req.ip ||
-    req.headers.get("x-real-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    null;
-
-  if (isRateLimited(ip)) {
-    return new NextResponse("Too Many Requests", { status: 429 });
-  }
-
-  // Canon gating
+  // 3) Canon gating (inner circle)
   if (pathname.startsWith("/canon/")) {
-    let slug = pathname.replace("/canon/", "").replace(/\/$/, "").trim();
+    const slug = pathname.replace("/canon/", "").replace(/\/$/, "").trim();
     const isPublic = PUBLIC_CANON.has(slug);
-    const hasAccess = req.cookies.get("innerCircleAccess")?.value === "true";
+    const hasAccess =
+      req.cookies.get("innerCircleAccess")?.value === "true";
 
     if (!isPublic && !hasAccess) {
       const url = req.nextUrl.clone();
@@ -108,19 +94,25 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  if (["POST", "PUT", "DELETE"].includes(req.method)) {
+  // 4) Basic CSRF-ish check for mutating methods
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
     const origin = req.headers.get("origin");
     const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL;
 
     if (origin && allowedOrigin && origin !== allowedOrigin) {
-      return new NextResponse("Invalid Origin", { status: 403 });
+      const res = new NextResponse("Invalid Origin", { status: 403 });
+      return applySecurityHeaders(res);
     }
   }
 
+  // 5) Default: allow request through, with security headers
   const res = NextResponse.next();
   return applySecurityHeaders(res);
 }
 
+// -----------------------------------------------------------------------------
+// Match all app routes except Next internals / obvious static assets
+// -----------------------------------------------------------------------------
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|favicon.png|sitemap.xml|robots.txt|assets/).*)",

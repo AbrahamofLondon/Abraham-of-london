@@ -9,6 +9,10 @@ import { getPageTitle, siteConfig } from "@/lib/siteConfig";
 
 const TermsPage: NextPage = () => {
   const pageTitle = "Terms";
+  const lastUpdated = React.useMemo(
+    () => new Date().toLocaleDateString("en-GB"),
+    [],
+  );
 
   return (
     <Layout title={pageTitle}>
@@ -20,7 +24,7 @@ const TermsPage: NextPage = () => {
         />
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:py-16 lg:py-20 text-sm leading-relaxed text-gray-200">
+      <main className="mx-auto max-w-4xl px-4 py-12 text-sm leading-relaxed text-gray-200 sm:py-16 lg:py-20">
         <header className="mb-10 border-b border-gold/30 pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
             Governance · Terms
@@ -29,13 +33,11 @@ const TermsPage: NextPage = () => {
             Terms of Service
           </h1>
           <p className="mt-3 max-w-2xl text-gold/70">
-            These Terms govern your use of this site and related content. By
-            using this site, you agree to act with good faith, common sense, and
+            These Terms govern your use of this site and its content. By using
+            this site, you agree to act with good faith, common sense, and
             respect for the boundaries set out below.
           </p>
-          <p className="mt-2 text-xs text-gray-400">
-            Last updated: {new Date().getFullYear()}
-          </p>
+          <p className="mt-2 text-xs text-gray-400">Last updated: {lastUpdated}</p>
         </header>
 
         {/* 1. Scope */}
@@ -47,8 +49,8 @@ const TermsPage: NextPage = () => {
           <ul className="ml-5 list-disc space-y-1">
             <li>This website, its content, and any resources made available.</li>
             <li>
-              Any newsletters or email content sent through this site to which
-              you have subscribed.
+              Any newsletters or editorial email content sent through this site
+              to which you have subscribed.
             </li>
             <li>
               Publicly available information about events, gatherings, and
@@ -57,8 +59,8 @@ const TermsPage: NextPage = () => {
           </ul>
           <p>
             Separate written agreements may apply to specific advisory,
-            consulting, or partnership engagements. In the event of conflict,
-            those agreements override these Terms for that specific engagement.
+            consulting, or partnership work. Where there is a conflict, those
+            agreements override these Terms for that specific engagement.
           </p>
         </section>
 
@@ -68,14 +70,16 @@ const TermsPage: NextPage = () => {
             2. No legal, financial, or professional advice
           </h2>
           <p>
-            Content on this site is provided for general information, reflection,
-            and education. It is not legal, financial, immigration, medical, or
+            Content on this site is provided for general information,
+            reflection, and education. It is{" "}
+            <strong>not</strong> legal, financial, immigration, medical, or
             other regulated professional advice.
           </p>
           <p>
-            Decisions with legal or financial consequence should be made with
-            proper professional counsel who understands your specific
-            circumstances.
+            Decisions with legal, financial, or life-altering consequences
+            should be made with proper professional counsel who understands your
+            specific circumstances. You remain responsible for the choices you
+            make.
           </p>
         </section>
 
@@ -88,8 +92,8 @@ const TermsPage: NextPage = () => {
           <ul className="ml-5 list-disc space-y-1">
             <li>Abuse, attack, or attempt to compromise the site or systems.</li>
             <li>
-              Scrape or harvest content or data in a way that breaches
-              applicable laws or these Terms.
+              Scrape, harvest, or mine content or data in a way that breaches
+              applicable laws, this policy, or basic decency.
             </li>
             <li>
               Impersonate others, misrepresent your identity, or submit content
@@ -100,6 +104,10 @@ const TermsPage: NextPage = () => {
               activity.
             </li>
           </ul>
+          <p>
+            If behaviour crosses these lines, access may be restricted and,
+            where necessary, relevant authorities or platforms may be informed.
+          </p>
         </section>
 
         {/* 4. Intellectual property */}
@@ -116,7 +124,7 @@ const TermsPage: NextPage = () => {
             You may quote or reference short excerpts with appropriate credit
             and, where practical, a link back to the original source. Wholesale
             copying, republication, or commercial exploitation of content
-            without permission is not permitted.
+            without explicit permission is not permitted.
           </p>
         </section>
 
@@ -127,12 +135,13 @@ const TermsPage: NextPage = () => {
           </h2>
           <p>
             This site may link to or integrate with third-party services (for
-            example, Buttondown for newsletters, Resend for email delivery,
+            example, Mailchimp for newsletters, Resend for email delivery,
             analytics platforms, or event tools).
           </p>
           <p>
             These services operate under their own terms and privacy policies.
-            You are responsible for reviewing those before using the services.
+            You are responsible for reviewing those before using any linked
+            services or platforms.
           </p>
         </section>
 
@@ -159,6 +168,16 @@ const TermsPage: NextPage = () => {
               Cookie Policy
             </Link>
             .
+          </p>
+          <p>
+            For technical controls, you can also review the{" "}
+            <Link
+              href="/security"
+              className="text-softGold underline underline-offset-2 hover:text-amber-200"
+            >
+              Security Policy
+            </Link>
+            , which sits alongside these Terms.
           </p>
         </section>
 
@@ -213,7 +232,7 @@ const TermsPage: NextPage = () => {
           </p>
           <p>
             Where court proceedings are necessary, the courts of England and
-            Wales will have non-exclusive jurisdiction, subject to any override
+            Wales will have non-exclusive jurisdiction, subject to any
             protections you may have as a consumer under local law.
           </p>
         </section>
@@ -239,9 +258,9 @@ const TermsPage: NextPage = () => {
             </li>
           </ul>
           <p className="mt-2 text-xs text-gray-400">
-            These Terms are intended to be reasonable, not oppressive. If you
-            genuinely believe a provision is unclear or unfair, the first step
-            is a measured conversation.
+            These Terms are intended to be firm but reasonable. If you genuinely
+            believe a provision is unclear or unfair in practice, the first step
+            is a measured conversation rather than escalation.
           </p>
         </section>
 

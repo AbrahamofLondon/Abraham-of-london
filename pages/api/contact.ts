@@ -1,6 +1,12 @@
 // pages/api/contact.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withSecurity } from "@/lib/apiGuard";
+import {
+  rateLimit,
+  RATE_LIMIT_CONFIGS,
+  createRateLimitHeaders,
+} from "@/lib/server/rateLimit";
+import { getRateLimitKey } from "@/lib/server/ip";
 
 interface OkResponse {
   ok: true;
@@ -55,6 +61,23 @@ async function contactHandler(
     return res.status(405).json({ ok: false, message: "Method Not Allowed" });
   }
 
+  // 🔒 Per-IP rate limiting (shared infra)
+  const rlKey = getRateLimitKey(
+    req,
+    RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix,
+  );
+  const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.CONTACT_FORM);
+  const rlHeaders = createRateLimitHeaders(rl);
+  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+  if (!rl.allowed) {
+    return res.status(429).json({
+      ok: false,
+      message: "Too many requests. Please slow down.",
+      error: "RATE_LIMITED",
+    });
+  }
+
   try {
     const rawBody = req.body;
     const body: ContactRequestBody =
@@ -106,6 +129,7 @@ async function contactHandler(
 
     if (process.env.NODE_ENV !== "production") {
       const maskedEmail = email.replace(/^(.).+(@.*)$/, "$1***$2");
+      // eslint-disable-next-line no-console
       console.log("[contact] submission:", {
         name: name || "—",
         email: maskedEmail,
@@ -119,8 +143,7 @@ async function contactHandler(
     const provider = (process.env.CONTACT_PROVIDER || "").toLowerCase();
     if (provider === "resend") {
       const apiKey = process.env.RESEND_API_KEY;
-      const to =
-        process.env.MAIL_TO || "info@abrahamoflondon.org";
+      const to = process.env.MAIL_TO || "info@abrahamoflondon.org";
       const from =
         process.env.MAIL_FROM ||
         "Abraham of London <no-reply@abrahamoflondon.org>";
@@ -152,6 +175,7 @@ async function contactHandler(
       });
 
       if (!ownerResp.ok) {
+        // eslint-disable-next-line no-console
         console.error("[contact] Resend owner send failed:", {
           status: ownerResp.status,
           body: ownerResp.body,
@@ -181,6 +205,7 @@ async function contactHandler(
         });
 
         if (!autoResp.ok) {
+          // eslint-disable-next-line no-console
           console.error("[contact] Resend teaser auto-reply failed:", {
             status: autoResp.status,
             body: autoResp.body,
@@ -207,6 +232,7 @@ async function contactHandler(
         });
 
         if (!nlResp.ok) {
+          // eslint-disable-next-line no-console
           console.error("[contact] Resend newsletter note failed:", {
             status: nlResp.status,
             body: nlResp.body,
@@ -219,6 +245,7 @@ async function contactHandler(
       .status(200)
       .json({ ok: true, message: "Message sent successfully!" });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error("[contact] handler error:", e);
     return res
       .status(500)
@@ -247,7 +274,15 @@ function safeParse(s: string): ContactRequestBody {
 
 function escapeHtml(str: string): string {
   return String(str).replace(/[&<>"']/g, (m) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as const)[m] || m,
+    (
+      {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      } as const
+    )[m] || m,
   );
 }
 
@@ -367,6 +402,5 @@ async function sendViaResend(args: SendViaResendArgs): Promise<ResendResponse> {
 export default withSecurity(contactHandler, {
   requireRecaptcha: true,
   expectedAction: "contact_form",
-  // contact already has its own honeypot; we don't need a second one
   requireHoneypot: false,
 });

@@ -1,8 +1,16 @@
 // app/api/downloads/route.ts
 import { NextResponse } from "next/server";
 import { allDownloads } from "contentlayer/generated";
+import {
+  rateLimitAsync,
+  RATE_LIMIT_CONFIGS,
+  createRateLimitHeaders,
+} from "@/lib/server/rateLimit";
+import { getClientIp, anonymizeIp } from "@/lib/server/ip";
 
-// Define proper types to avoid 'any'
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 interface DownloadDocument {
   slug: string;
   title: string;
@@ -16,7 +24,7 @@ interface DownloadDocument {
   pdfPath?: string | null;
   downloadFile?: string | null;
   fileUrl?: string | null;
-  url: string;
+  url?: string | null;
 }
 
 interface DownloadItem {
@@ -39,6 +47,16 @@ type DownloadsResponse =
   | { ok: true; count: number; items: DownloadItem[] }
   | { ok: true; item: DownloadItem }
   | { ok: false; error: string };
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const SECURITY_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "same-origin",
+};
 
 function safeDate(input: unknown): string {
   if (!input) return "1970-01-01";
@@ -65,49 +83,133 @@ function mapDownload(doc: DownloadDocument): DownloadItem {
   };
 }
 
-export async function GET(request: Request): Promise<NextResponse<DownloadsResponse>> {
-  const { searchParams } = new URL(request.url);
-  const slug = searchParams.get("slug");
-
-  // Set cache headers
-  const headers = {
-    "Content-Type": "application/json",
-    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
-  };
-
-  // Single download by slug
-  if (slug && typeof slug === "string") {
-    const found = allDownloads.find((d) => d.slug === slug.trim()) as DownloadDocument | undefined;
-
-    if (!found) {
-      return NextResponse.json({ ok: false, error: "Download not found" }, { status: 404, headers });
-    }
-
-    return NextResponse.json({ ok: true, item: mapDownload(found) }, { headers });
-  }
-
-  // List of downloads (default)
-  const items = allDownloads
-    .slice()
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .map(doc => mapDownload(doc as DownloadDocument));
-
-  return NextResponse.json({
-    ok: true,
-    count: items.length,
-    items,
-  }, { headers });
+// Very conservative slug validation – avoids path-style or script-y junk
+function isValidSlug(slug: string): boolean {
+  if (!slug) return false;
+  if (slug.length > 120) return false;
+  // allow a–z 0–9 - and /
+  return /^[a-zA-Z0-9\-\/]+$/.test(slug);
 }
 
-// Handle other methods
+// Helper for error responses with security headers
+function jsonError(
+  body: { ok: false; error: string },
+  status: number,
+  extraHeaders?: Record<string, string>,
+) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      ...SECURITY_HEADERS,
+      ...(extraHeaders || {}),
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/downloads
+// ---------------------------------------------------------------------------
+export async function GET(
+  request: Request,
+): Promise<NextResponse<DownloadsResponse>> {
+  const url = new URL(request.url);
+  const slugParam = url.searchParams.get("slug");
+
+  // Derive IP from headers using shared helper
+  const ip = getClientIp({
+    headers: Object.fromEntries(request.headers),
+  });
+
+  // Apply API-level rate limiting (read-only but still abusable)
+  const rlKey = `downloads:${ip}`;
+  const rlResult = await rateLimitAsync(rlKey, RATE_LIMIT_CONFIGS.API_GENERAL);
+  const rateHeaders = createRateLimitHeaders(rlResult);
+
+  const baseHeaders: Record<string, string> = {
+    ...SECURITY_HEADERS,
+    // cache for 10 mins, allow stale for 10 mins
+    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
+    ...rateHeaders,
+  };
+
+  if (!rlResult.allowed) {
+    // Minimal logging; anonymise IP
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[downloads] rate limit exceeded", { ip });
+    }
+
+    return jsonError(
+      {
+        ok: false,
+        error: "Too many requests. Please try again later.",
+      },
+      429,
+      rateHeaders,
+    );
+  }
+
+  // Single download fetch
+  if (slugParam && typeof slugParam === "string") {
+    const slug = slugParam.trim();
+
+    if (!isValidSlug(slug)) {
+      return jsonError(
+        { ok: false, error: "Invalid slug" },
+        400,
+        baseHeaders,
+      );
+    }
+
+    const found = allDownloads.find(
+      (d) => d.slug === slug,
+    ) as DownloadDocument | undefined;
+
+    if (!found) {
+      return NextResponse.json(
+        { ok: false, error: "Download not found" },
+        { status: 404, headers: baseHeaders },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        item: mapDownload(found),
+      },
+      { headers: baseHeaders },
+    );
+  }
+
+  // Full list of downloads
+  const items = allDownloads
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime(),
+    )
+    .map((doc) => mapDownload(doc as DownloadDocument));
+
+  return NextResponse.json(
+    {
+      ok: true,
+      count: items.length,
+      items,
+    },
+    { headers: baseHeaders },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Other methods – explicitly disallowed
+// ---------------------------------------------------------------------------
 export async function POST(): Promise<NextResponse<DownloadsResponse>> {
-  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
+  return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
 
 export async function PUT(): Promise<NextResponse<DownloadsResponse>> {
-  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
+  return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
 
 export async function DELETE(): Promise<NextResponse<DownloadsResponse>> {
-  return NextResponse.json({ ok: false, error: "Method not allowed" }, { status: 405 });
+  return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
