@@ -15,6 +15,8 @@
 // - We store only a SHA-256 hash and a short hash prefix.
 // - We NEVER store or export full keys; only their hash and suffix.
 // - Admin export is deliberately de-identified.
+// - Automatic data retention (1 year)
+// - GDPR-compliant deletion methods
 //
 // =======================================================================
 
@@ -75,6 +77,14 @@ export interface InnerCircleAdminExportRow {
 }
 
 // =======================================================================
+// Configuration & Constants
+// =======================================================================
+
+const DATA_RETENTION_DAYS = 365; // 1 year data retention
+const KEY_TTL_MS = 1000 * 60 * 60 * 24 * DATA_RETENTION_DAYS;
+const CLEANUP_INTERVAL_MS = 1000 * 60 * 60 * 24; // Daily cleanup
+
+// =======================================================================
 // In-memory store
 // =======================================================================
 
@@ -88,8 +98,6 @@ const keyHashIndex = new Map<
 
 // Fast index from emailHash -> member
 const emailHashIndex = new Map<string, string>(); // emailHash -> memberId
-
-const KEY_TTL_MS = 1000 * 60 * 60 * 24 * 365; // 1 year
 
 // =======================================================================
 // Helpers
@@ -143,6 +151,127 @@ function indexMember(member: InnerCircleMember): void {
 }
 
 // =======================================================================
+// Privacy & Data Protection Functions
+// =======================================================================
+
+/**
+ * Log privacy-related actions without storing PII
+ */
+function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}): void {
+  console.log(`🔒 Privacy Action: ${action}`, {
+    timestamp: new Date().toISOString(),
+    ...metadata,
+    // Never log raw PII in these logs
+  });
+}
+
+/**
+ * Automatic data cleanup for compliance with data retention policies
+ */
+export function cleanupOldData(): { deletedMembers: number; deletedKeys: number } {
+  const cutoff = Date.now() - (DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  let deletedMembers = 0;
+  let deletedKeys = 0;
+
+  for (let i = members.length - 1; i >= 0; i--) {
+    const member = members[i];
+    const lastActivity = new Date(member.lastSeenAt).getTime();
+    
+    if (lastActivity < cutoff) {
+      // Remove member and clean up indexes
+      logPrivacyAction('auto_cleanup_member', {
+        memberId: member.id,
+        emailHashPrefix: member.emailHashPrefix,
+        lastSeen: member.lastSeenAt
+      });
+      
+      members.splice(i, 1);
+      emailHashIndex.delete(member.emailHash);
+      deletedKeys += member.keys.length;
+      member.keys.forEach(key => keyHashIndex.delete(key.keyHash));
+      deletedMembers++;
+    }
+  }
+
+  if (deletedMembers > 0) {
+    logPrivacyAction('cleanup_completed', {
+      deletedMembers,
+      deletedKeys,
+      retentionDays: DATA_RETENTION_DAYS
+    });
+  }
+
+  return { deletedMembers, deletedKeys };
+}
+
+/**
+ * GDPR-compliant user deletion ("Right to Be Forgotten")
+ */
+export function deleteMemberByEmail(email: string): boolean {
+  const emailNormalised = normaliseEmail(email);
+  const emailHash = sha256Hex(emailNormalised);
+  const member = getMemberByEmailHash(emailHash);
+  
+  if (!member) {
+    logPrivacyAction('delete_member_not_found', {
+      emailHash: sha256Hex(emailHash) // Double hash for audit
+    });
+    return false;
+  }
+
+  logPrivacyAction('delete_member', {
+    memberId: member.id,
+    emailHashPrefix: member.emailHashPrefix,
+    keysCount: member.keys.length,
+    createdAt: member.createdAt
+  });
+
+  // Remove from all indexes
+  emailHashIndex.delete(member.emailHash);
+  member.keys.forEach(key => {
+    keyHashIndex.delete(key.keyHash);
+    logPrivacyAction('delete_key', {
+      keySuffix: key.keySuffix,
+      unlocks: key.totalUnlocks
+    });
+  });
+
+  // Remove from members array
+  const index = members.findIndex(m => m.id === member.id);
+  if (index !== -1) {
+    members.splice(index, 1);
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Get privacy-compliant statistics (no PII)
+ */
+export function getPrivacySafeStats() {
+  const now = Date.now();
+  const activeMembers = members.filter(m => 
+    m.keys.some(k => k.status === "active" && 
+      (now - new Date(k.createdAt).getTime()) < KEY_TTL_MS)
+  ).length;
+
+  const totalUnlocks = members.reduce((sum, m) => 
+    sum + m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0), 0
+  );
+
+  return {
+    totalMembers: members.length,
+    activeMembers,
+    totalKeys: keyHashIndex.size,
+    totalUnlocks,
+    dataRetentionDays: DATA_RETENTION_DAYS,
+    estimatedMemoryBytes: (members.length * 500) + (keyHashIndex.size * 100), // Rough estimate
+    lastCleanup: new Date().toISOString()
+  };
+}
+
+// =======================================================================
 // Public API
 // =======================================================================
 
@@ -161,6 +290,7 @@ export function createOrUpdateMemberAndIssueKey(
   const now = nowIso();
 
   let member = getMemberByEmailHash(emailHash);
+  const isNewMember = !member;
 
   if (!member) {
     member = {
@@ -176,6 +306,13 @@ export function createOrUpdateMemberAndIssueKey(
 
     members.push(member);
     indexMember(member);
+
+    logPrivacyAction('member_created', {
+      memberId: member.id,
+      emailHashPrefix: member.emailHashPrefix,
+      hasName: !!args.name,
+      context: args.context
+    });
   } else {
     member.lastSeenAt = now;
     if (args.name && args.name.trim().length > 0) {
@@ -184,6 +321,12 @@ export function createOrUpdateMemberAndIssueKey(
     if (args.ipAddress) {
       member.lastIp = args.ipAddress;
     }
+
+    logPrivacyAction('member_updated', {
+      memberId: member.id,
+      emailHashPrefix: member.emailHashPrefix,
+      context: args.context
+    });
   }
 
   const { key, keyHash, keySuffix } = generateAccessKey();
@@ -200,6 +343,13 @@ export function createOrUpdateMemberAndIssueKey(
   keyHashIndex.set(keyHash, {
     memberId: member.id,
     keyIndex: member.keys.length - 1,
+  });
+
+  logPrivacyAction('key_issued', {
+    memberId: member.id,
+    keySuffix,
+    isNewMember,
+    context: args.context
   });
 
   return {
@@ -284,6 +434,13 @@ export function recordInnerCircleUnlock(
     member.lastIp = ipAddress;
   }
   member.lastSeenAt = record.lastUsedAt;
+
+  logPrivacyAction('key_used', {
+    memberId: member.id,
+    keySuffix: record.keySuffix,
+    totalUnlocks: record.totalUnlocks,
+    hasIp: !!ipAddress
+  });
 }
 
 /**
@@ -291,6 +448,8 @@ export function recordInnerCircleUnlock(
  * NO raw emails. NO full keys. No reversible identifiers.
  */
 export function exportInnerCircleAdminSummary(): InnerCircleAdminExportRow[] {
+  logPrivacyAction('admin_export');
+
   const rows: InnerCircleAdminExportRow[] = [];
 
   members.forEach((member) => {
@@ -336,5 +495,33 @@ export function revokeInnerCircleKey(key: string): boolean {
   record.status = "revoked";
   record.lastUsedAt = nowIso();
 
+  logPrivacyAction('key_revoked', {
+    memberId: member.id,
+    keySuffix: record.keySuffix,
+    totalUnlocks: record.totalUnlocks
+  });
+
   return true;
+}
+
+// =======================================================================
+// Automatic Cleanup Setup
+// =======================================================================
+
+// Set up automatic cleanup on server start
+if (typeof process !== "undefined" && typeof setInterval !== "undefined") {
+  // Run cleanup daily
+  setInterval(cleanupOldData, CLEANUP_INTERVAL_MS);
+  
+  // Also run on startup
+  setTimeout(cleanupOldData, 5000);
+  
+  // Clean shutdown
+  process.on("SIGTERM", () => {
+    logPrivacyAction('shutdown', getPrivacySafeStats());
+  });
+  
+  process.on("SIGINT", () => {
+    logPrivacyAction('shutdown', getPrivacySafeStats());
+  });
 }

@@ -21,25 +21,29 @@ module.exports = {
     "next",
     "next/core-web-vitals",
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
+    // NOTE: we deliberately do NOT extend "plugin:@typescript-eslint/recommended"
+    // to avoid pulling in rules like '@typescript-eslint/ban-types' that are
+    // causing "Definition for rule ... was not found" in Netlify's environment.
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
   ],
   plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   rules: {
-    // TypeScript rules
+    // TypeScript rules – we control them manually instead of via preset
     "@typescript-eslint/no-unused-vars": [
       "warn",
-      { 
-        argsIgnorePattern: "^_", 
+      {
+        argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_"
+        caughtErrorsIgnorePattern: "^_",
       },
     ],
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unnecessary-type-constraint": "warn",
-    
+    // If Netlify still ever sees ban-types from anywhere, force it off
+    "@typescript-eslint/ban-types": "off",
+
     // React rules
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
@@ -65,26 +69,30 @@ module.exports = {
     "no-useless-escape": "warn",
     "no-irregular-whitespace": "error",
     "prefer-const": "warn",
-    
+
     // Import/export rules
     "import/no-anonymous-default-export": "off",
   },
 
   overrides: [
+    // Type declaration files – relax everything
     {
       files: ["**/*.d.ts"],
       rules: {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/no-unnecessary-type-constraint": "off",
+        "@typescript-eslint/ban-types": "off",
       },
     },
+    // TS / TSX project-wide constraints
     {
-      files: ["**/*.tsx", "**/*.ts"],
+      files: ["**/*.ts", "**/*.tsx"],
       rules: {
         "no-irregular-whitespace": "error",
       },
     },
+    // Pages and components – keep them strict on `any`
     {
       files: ["**/pages/**/*.tsx", "**/components/**/*.tsx"],
       rules: {
