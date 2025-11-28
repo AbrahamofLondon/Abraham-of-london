@@ -46,15 +46,6 @@ interface CanonPageProps {
 }
 
 /* ------------------------------------------------------------------------------------
-   ACCESS CONTROL (stub)
------------------------------------------------------------------------------------- */
-
-// TODO: replace with real auth / cookie check later
-const hasInnerCircleAccess = false;
-const isLockedDoc = (level?: string) =>
-  level === "inner-circle" && !hasInnerCircleAccess;
-
-/* ------------------------------------------------------------------------------------
    PAGE
 ------------------------------------------------------------------------------------ */
 
@@ -72,8 +63,6 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
     slug,
     volumeNumber,
   } = meta;
-
-  const locked = isLockedDoc(accessLevel);
 
   const displayDescription =
     description ||
@@ -164,67 +153,36 @@ const CanonPage: NextPage<CanonPageProps> = ({ meta, mdxSource }) => {
           </figure>
         )}
 
-        {/* LOCKED VIEW */}
-        {locked ? (
-          <section
-            className="
-              mt-8 rounded-2xl border border-softGold/50
-              bg-white/70 dark:bg-gray-900/70
-              backdrop-blur p-6 text-sm text-gray-800 dark:text-gray-100
-            "
-          >
-            <p className="text-base font-semibold text-softGold">
-              {lockMessage ||
-                "This volume is reserved for Inner Circle members."}
-            </p>
+        {/* MDX CONTENT – access is enforced by middleware */}
+        <div
+          className="
+            prose prose-sm sm:prose-base
+            max-w-none
+            text-gray-800 dark:text-gray-100
+            underline-offset-4
+            prose-a:text-softGold
+            prose-invert:prose-a:text-softGold
+            prose-headings:font-serif
+            prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+            prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+            prose-blockquote:border-softGold
+          "
+        >
+          <MDXRemote
+            {...mdxSource}
+            components={
+              mdxComponents as unknown as MDXRemoteProps["components"]
+            }
+          />
+        </div>
 
-            {excerpt && (
-              <p className="mt-4 leading-relaxed text-gray-900 dark:text-gray-200">
-                {excerpt}
-              </p>
-            )}
-
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <Link
-                href="/inner-circle"
-                className="
-                  inline-flex items-center rounded-full bg-softGold
-                  px-5 py-2 text-xs font-semibold text-black
-                  transition hover:bg-softGold/90
-                "
-              >
-                Join the Inner Circle
-              </Link>
-
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Members receive full access to Canon volumes, private
-                reflections, and strategy briefings.
-              </p>
-            </div>
-          </section>
-        ) : (
-          /* PUBLIC MDX CONTENT */
-          <div
-            className="
-              prose prose-sm sm:prose-base
-              max-w-none
-              text-gray-800 dark:text-gray-100
-              underline-offset-4
-              prose-a:text-softGold
-              prose-invert:prose-a:text-softGold
-              prose-headings:font-serif
-              prose-headings:text-gray-900 dark:prose-headings:text-gray-100
-              prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-              prose-blockquote:border-softGold
-            "
-          >
-            <MDXRemote
-              {...mdxSource}
-              components={
-                mdxComponents as unknown as MDXRemoteProps["components"]
-              }
-            />
-          </div>
+        {/* OPTIONAL: footnote for locked volumes if you want */
+        accessLevel === "inner-circle" && (
+          <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">
+            This document is part of the Inner Circle Canon sequence. If you
+            reached it via a direct link, you may be asked to authenticate on
+            other devices.
+          </p>
         )}
       </article>
     </SiteLayout>

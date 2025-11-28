@@ -33,11 +33,10 @@ type HealthResponse = {
 
 const startedAt = Date.now();
 
-export default function handler(
-  _req: NextApiRequest,
-  res: NextApiResponse<HealthResponse>,
-): void {
-  const now = Date.now();
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader("Cache-Control", "no-store");
+  res.status(200).json({ status: "ok", time: new Date().toISOString() });
+}
 
   const counts = {
     posts: allPosts.length,

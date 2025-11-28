@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
+import InnerCircleBadge from "@/components/InnerCircleBadge";
 
 export interface CanonSummary {
   slug: string;
@@ -13,7 +14,7 @@ export interface CanonSummary {
   readTime?: string | null;
   volumeNumber?: string | null;
   accessLevel?: string | null; // "public" | "inner-circle" | undefined
-  label?: string | null;       // e.g. "Volume X", "Campaign", "Featured"
+  label?: string | null; // e.g. "Volume X", "Campaign", "Featured"
 }
 
 interface CanonResourceCardProps {
@@ -25,8 +26,6 @@ interface CanonResourceCardProps {
   /** If true, visually emphasise the card (for hero/featured blocks). */
   highlight?: boolean;
 }
-
-const hasInnerCircleAccess = false; // TODO: wire up real auth later
 
 export default function CanonResourceCard({
   doc,
@@ -48,12 +47,10 @@ export default function CanonResourceCard({
 
   const targetHref = href || `/canon/${slug}`;
   const isInnerCircle = accessLevel === "inner-circle";
-  const locked = isInnerCircle && !hasInnerCircleAccess;
+  const locked = isInnerCircle; // UI lock – real gate is via middleware
 
   const displayLabel =
-    label ||
-    doc.label ||
-    (volumeNumber ? `Volume ${volumeNumber}` : undefined);
+    label || doc.label || (volumeNumber ? `Volume ${volumeNumber}` : undefined);
 
   const blurb = description || subtitle || "";
 
@@ -71,7 +68,7 @@ export default function CanonResourceCard({
           : "hover:border-softGold/70",
       ].join(" ")}
     >
-      {/* OPTIONAL COVER IMAGE */}
+      {/* COVER IMAGE (optional) */}
       {coverImage && (
         <div className="relative aspect-[3/1.6] w-full overflow-hidden border-b border-gray-200 dark:border-gray-800">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -80,7 +77,7 @@ export default function CanonResourceCard({
             alt={title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
-          {isInnerCircle && (
+          {locked && (
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
           )}
         </div>
@@ -101,13 +98,12 @@ export default function CanonResourceCard({
             </h3>
           </div>
 
-          {/* LOCK BADGE */}
-          {isInnerCircle && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-softGold/70 bg-softGold/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-softGold">
-              <LockClosedIcon className="h-3.5 w-3.5" />
-              Inner Circle
-            </span>
-          )}
+          {/* INNER CIRCLE BADGE (if gated) */}
+          <InnerCircleBadge
+            accessLevel={accessLevel ?? undefined}
+            className="shrink-0"
+            size="sm"
+          />
         </div>
 
         {/* BLURB */}
@@ -138,8 +134,15 @@ export default function CanonResourceCard({
             </div>
           )}
 
-          <span className="ml-auto text-[0.7rem] font-semibold text-softGold group-hover:underline">
-            {locked ? "Preview & Request Access" : "Open"}
+          <span className="ml-auto inline-flex items-center gap-1 text-[0.7rem] font-semibold text-softGold group-hover:underline">
+            {locked ? (
+              <>
+                <LockClosedIcon className="h-3 w-3" />
+                <span>Preview &amp; Request Access</span>
+              </>
+            ) : (
+              "Open"
+            )}
           </span>
         </div>
       </div>

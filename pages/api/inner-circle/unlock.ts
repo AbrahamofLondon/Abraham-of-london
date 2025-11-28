@@ -1,44 +1,88 @@
 // pages/api/inner-circle/unlock.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const INNER_CIRCLE_KEY = process.env.INNER_CIRCLE_KEY || "";
+type UnlockPostSuccess = {
+  ok: true;
+  redirectTo: string;
+};
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
+type UnlockPostFailure = {
+  ok: false;
+  error: string;
+};
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<UnlockPostSuccess | UnlockPostFailure | void>,
+) {
+  const accessKey = process.env.INNER_CIRCLE_ACCESS_KEY;
+  if (!accessKey) {
+    if (req.method === "POST") {
+      return res.status(500).json({
+        ok: false,
+        error: "Inner Circle is not configured on the server",
+      });
+    }
+    return res.status(500).end();
   }
 
-  if (!INNER_CIRCLE_KEY) {
-    return res
-      .status(500)
-      .json({ ok: false, error: "INNER_CIRCLE_KEY not configured" });
+  if (req.method === "GET") {
+    const key = String(req.query.key || "");
+    const returnToRaw = String(req.query.returnTo || "/canon");
+
+    if (!key || key !== accessKey) {
+      return res.status(302).redirect("/inner-circle?error=invalid-key");
+    }
+
+    const returnTo =
+      returnToRaw.startsWith("/") && !returnToRaw.startsWith("//")
+        ? returnToRaw
+        : "/canon";
+
+    res.setHeader("Set-Cookie", buildAccessCookie());
+    return res.status(302).redirect(returnTo);
   }
 
-  const { key } = req.body ?? {};
+  if (req.method === "POST") {
+    const { key, returnTo: bodyReturnTo } = (req.body ?? {}) as {
+      key?: string;
+      returnTo?: string;
+    };
 
-  if (typeof key !== "string" || !key.trim()) {
-    return res.status(400).json({ ok: false, error: "Missing key" });
+    if (!key || key !== accessKey) {
+      return res.status(400).json({ ok: false, error: "Invalid key" });
+    }
+
+    const returnTo =
+      typeof bodyReturnTo === "string" &&
+      bodyReturnTo.startsWith("/") &&
+      !bodyReturnTo.startsWith("//")
+        ? bodyReturnTo
+        : "/canon";
+
+    res.setHeader("Set-Cookie", buildAccessCookie());
+    return res.status(200).json({ ok: true, redirectTo: returnTo });
   }
 
-  if (key.trim() !== INNER_CIRCLE_KEY) {
-    return res.status(401).json({ ok: false, error: "Invalid key" });
-  }
+  res.setHeader("Allow", "GET, POST");
+  return res.status(405).json({ ok: false, error: "Method not allowed" });
+}
 
+function buildAccessCookie(): string {
   const isProd = process.env.NODE_ENV === "production";
 
-  // Secure, httpOnly cookie for gating
-  res.setHeader("Set-Cookie", [
-    [
-      "innerCircleAccess=true",
-      "Path=/",
-      `Max-Age=${60 * 60 * 24 * 30}`, // 30 days
-      "HttpOnly",
-      "SameSite=Lax",
-      isProd ? "Secure" : "",
-    ]
-      .filter(Boolean)
-      .join("; "),
-  ]);
+  const parts = [
+    "innerCircleAccess=true",
+    "Path=/",
+    "SameSite=Lax",
+    "HttpOnly",
+  ];
 
-  return res.status(200).json({ ok: true });
+  if (isProd) parts.push("Secure");
+
+  // 30 days – adjust if you like
+  const maxAgeSeconds = 60 * 60 * 24 * 30;
+  parts.push(`Max-Age=${maxAgeSeconds}`);
+
+  return parts.join("; ");
 }

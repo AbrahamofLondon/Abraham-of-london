@@ -18,12 +18,9 @@ const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
   "the-builders-catechism",
-  "volume-i-foundations-of-purpose" // Canon Volume I — Foundations of Purpose
+  "volume-i-foundations-of-purpose", // Canon Volume I — Foundations of Purpose
 ]);
 
-// -----------------------------------------------------------------------------
-// Security headers (no blocking, just hardening)
-// -----------------------------------------------------------------------------
 function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set(
     "Strict-Transport-Security",
@@ -43,9 +40,6 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   return res;
 }
 
-// -----------------------------------------------------------------------------
-// Basic probe blocking (php/wp-admin/etc) – non-essential but harmless
-// -----------------------------------------------------------------------------
 function isMalicious(req: NextRequest): boolean {
   const url = req.nextUrl.pathname.toLowerCase();
 
@@ -61,9 +55,6 @@ function isMalicious(req: NextRequest): boolean {
   return BAD_PATTERNS.some((p) => url.includes(p));
 }
 
-// -----------------------------------------------------------------------------
-// Middleware
-// -----------------------------------------------------------------------------
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -73,7 +64,7 @@ export function middleware(req: NextRequest) {
     return applySecurityHeaders(res);
   }
 
-  // 2) Block obvious junk probes (no rate limiting)
+  // 2) Block obvious junk probes
   if (isMalicious(req)) {
     const res = new NextResponse("Forbidden", { status: 403 });
     return applySecurityHeaders(res);
@@ -88,6 +79,7 @@ export function middleware(req: NextRequest) {
     if (!isPublic && !hasAccess) {
       const url = req.nextUrl.clone();
       url.pathname = "/inner-circle/locked";
+      url.searchParams.set("returnTo", pathname || "/canon");
       const res = NextResponse.redirect(url);
       return applySecurityHeaders(res);
     }
@@ -104,14 +96,10 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 5) Default: allow request through, with security headers
   const res = NextResponse.next();
   return applySecurityHeaders(res);
 }
 
-// -----------------------------------------------------------------------------
-// Match all app routes except Next internals / obvious static assets
-// -----------------------------------------------------------------------------
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|favicon.png|sitemap.xml|robots.txt|assets/).*)",

@@ -1,13 +1,13 @@
-// next.config.cjs
-const { withContentlayer } = require("contentlayer2").nextContentlayer;
+import * as contentlayer from "contentlayer2";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Use the pages router only; app router is archived for now
   reactStrictMode: true,
   trailingSlash: true,
 
-  // IMPORTANT: do NOT use "output: 'export'" with API routes + middleware.
-  // Next will run in the normal (server) mode used by Netlify/Node.
+  // Do NOT use "output: 'export'" with API routes + middleware
+  // Next will handle the correct mode automatically.
 
   images: {
     unoptimized: true,
@@ -19,7 +19,7 @@ const nextConfig = {
   poweredByHeader: false,
 
   eslint: {
-    // CI can still enforce lint; builds won't be blocked.
+    // CI can still run lint; builds won't be blocked by lint errors
     ignoreDuringBuilds: true,
   },
 
@@ -61,4 +61,6 @@ const nextConfig = {
   },
 };
 
-module.exports = withContentlayer(nextConfig);
+const { withContentlayer } = contentlayer.nextContentlayer;
+
+export default withContentlayer(nextConfig);
