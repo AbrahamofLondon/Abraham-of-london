@@ -23,6 +23,14 @@ import type { BookMeta } from "@/types/index";
 type ExtendedBookMeta = BookMeta & {
   accessLevel?: string | null;
   lockMessage?: string | null;
+  lastModified?: string | null;
+  format?: string | null;
+  pages?: number | null;
+  rating?: number | null;
+  published?: boolean | null;
+  status?: string | null;
+  price?: string | null;
+  purchaseLink?: string | null;
 };
 
 type PageProps = {
@@ -503,28 +511,28 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     date: book.date ?? null,
     author: book.author ?? null,
     readTime: book.readTime ?? null,
-    lastModified: (book as any).lastModified ?? null,
+    lastModified: book.lastModified ?? null,
     category: book.category ?? null,
     isbn: book.isbn ?? null,
     publisher: book.publisher ?? null,
     publishedDate: book.publishedDate ?? null,
     language: book.language ?? null,
-    price: (book as any).price ?? null,
-    purchaseLink: (book as any).purchaseLink ?? null,
+    price: book.price ?? null,
+    purchaseLink: book.purchaseLink ?? null,
     tags: book.tags ?? [],
-    format: (book as any).format ?? undefined,
-    pages: (book as any).pages ?? null,
-    rating: (book as any).rating ?? null,
+    format: book.format ?? null,
+    pages: book.pages ?? null,
+    rating: book.rating ?? null,
     featured: book.featured ?? false,
-    published: (book as any).published ?? false,
+    published: book.published ?? false,
     draft: book.draft ?? false,
-    status: (book as any).status ?? "draft",
+    status: book.status ?? "draft",
     accessLevel: book.accessLevel ?? null,
     lockMessage: book.lockMessage ?? null,
   };
 
   // Hard clean: remove all undefined values so Next.js can serialise safely
-  const record = safeMeta as unknown as Record<string, unknown>;
+  const record: Record<string, unknown> = { ...safeMeta };
   Object.keys(record).forEach((key) => {
     if (record[key] === undefined) {
       delete record[key];
@@ -533,8 +541,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
   return {
     props: {
-    meta: safeMeta,
-    mdxSource,
+      meta: safeMeta,
+      mdxSource,
     },
     revalidate: 3600, // 1 hour
   };
