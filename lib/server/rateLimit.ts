@@ -3,6 +3,12 @@
 // Advanced Rate Limiting - In-Memory & Redis Support (Hardened)
 // =========================================================================
 
+import type { NextApiRequest } from "next";
+
+// -------------------------------------------------------------------------
+// Types
+// -------------------------------------------------------------------------
+
 export interface RateLimitOptions {
   limit: number;
   windowMs: number;
@@ -41,6 +47,7 @@ export interface BasicRedisClient {
 // -------------------------------------------------------------------------
 // In-memory store with automatic cleanup
 // -------------------------------------------------------------------------
+
 class RateLimitStore {
   private store = new Map<string, RateLimitEntry>();
   private cleanupInterval: ReturnType<typeof setInterval> | null = null;
@@ -86,6 +93,7 @@ class RateLimitStore {
 // -------------------------------------------------------------------------
 // Redis-based rate limiting (optional, async)
 // -------------------------------------------------------------------------
+
 class RedisRateLimit {
   constructor(private redisClient: BasicRedisClient) {}
 
@@ -108,8 +116,7 @@ class RedisRateLimit {
 
       const rawResult = await multi.exec();
 
-      // Normalise redis result shape in a defensive way
-      // We expect something like: [ [err, incrCount], [err, "OK"], [err, "currentCount"] ]
+      // Expect something like: [ [err, incrCount], [err, "OK"], [err, "currentCount"] ]
       let count = 1;
 
       if (Array.isArray(rawResult)) {
@@ -121,7 +128,6 @@ class RedisRateLimit {
             count = num;
           }
         } else {
-          // Fallback: try last element
           const last = rawResult[rawResult.length - 1] as unknown;
           if (Array.isArray(last) && last.length >= 2) {
             const value = last[1] as unknown;
@@ -164,6 +170,7 @@ class RedisRateLimit {
 // -------------------------------------------------------------------------
 // Global memory store instance + clean shutdown
 // -------------------------------------------------------------------------
+
 const memoryStore = new RateLimitStore();
 
 if (typeof process !== "undefined" && typeof process.on === "function") {
@@ -174,10 +181,8 @@ if (typeof process !== "undefined" && typeof process.on === "function") {
 // -------------------------------------------------------------------------
 // Synchronous memory-based rate limiter (for Node/Netlify functions)
 // -------------------------------------------------------------------------
-export function rateLimit(
-  key: string,
-  options: RateLimitOptions,
-): RateLimitResult {
+
+export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult {
   const {
     limit,
     windowMs,
@@ -229,7 +234,6 @@ export function rateLimit(
   const elapsed = now - entry.first;
 
   if (elapsed > windowMs) {
-    // Reset the window
     const newEntry: RateLimitEntry = {
       count: 1,
       first: now,
@@ -274,6 +278,7 @@ export function rateLimit(
 // -------------------------------------------------------------------------
 // Async variant – proper Redis support
 // -------------------------------------------------------------------------
+
 export async function rateLimitAsync(
   key: string,
   options: RateLimitOptions,
@@ -293,6 +298,7 @@ export async function rateLimitAsync(
 // -------------------------------------------------------------------------
 // HTTP Headers helper (for API responses)
 // -------------------------------------------------------------------------
+
 export function createRateLimitHeaders(
   result: RateLimitResult,
 ): Record<string, string> {
@@ -312,8 +318,53 @@ export function createRateLimitHeaders(
 }
 
 // -------------------------------------------------------------------------
+// IP extraction helper (Netlify / proxies / Node)
+// -------------------------------------------------------------------------
+
+/**
+ * Best-effort IP extraction for API routes.
+ * Handles typical proxy headers used by Netlify and others.
+ */
+export function getClientIp(req: NextApiRequest): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length > 0) {
+    const parts = forwarded.split(",").map((p) => p.trim());
+    if (parts[0]) return parts[0];
+  }
+
+  const netlifyIpHeader = req.headers["x-nf-client-connection-ip"];
+  if (typeof netlifyIpHeader === "string" && netlifyIpHeader.length > 0) {
+    return netlifyIpHeader;
+  }
+
+  const socketAddr =
+    typeof req.socket?.remoteAddress === "string"
+      ? req.socket.remoteAddress
+      : "unknown";
+
+  return socketAddr;
+}
+
+/**
+ * Convenience helper: rate-limit based on client IP + logical label.
+ * Usage:
+ *   const result = rateLimitForRequestIp(req, "inner-circle-register", RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER);
+ */
+export function rateLimitForRequestIp(
+  req: NextApiRequest,
+  label: string,
+  options: RateLimitOptions,
+): { result: RateLimitResult; ip: string } {
+  const ip = getClientIp(req);
+  const key = `${label}:${ip}`;
+  const result = rateLimit(key, options);
+  return { result, ip };
+}
+
+// -------------------------------------------------------------------------
 // Pre-configured rate limit configurations
 // -------------------------------------------------------------------------
+
 export const RATE_LIMIT_CONFIGS = {
   TEASER_REQUEST: {
     limit: 5,
@@ -339,5 +390,20 @@ export const RATE_LIMIT_CONFIGS = {
     limit: 100,
     windowMs: 60 * 60 * 1000, // 1 hour
     keyPrefix: "api",
+  },
+  INNER_CIRCLE_REGISTER: {
+    limit: 20,
+    windowMs: 15 * 60 * 1000, // 15 minutes per IP
+    keyPrefix: "ic-reg",
+  },
+  INNER_CIRCLE_UNLOCK: {
+    limit: 50,
+    windowMs: 10 * 60 * 1000, // 10 minutes per IP
+    keyPrefix: "ic-unlock",
+  },
+  INNER_CIRCLE_ADMIN_EXPORT: {
+    limit: 10,
+    windowMs: 60 * 1000, // 1 minute per IP
+    keyPrefix: "ic-admin-export",
   },
 } as const;

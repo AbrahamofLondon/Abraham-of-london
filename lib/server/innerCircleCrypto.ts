@@ -1,69 +1,127 @@
-// lib/server/innerCircleCrypto.ts
-import crypto from "node:crypto";
+// lib/server/innerCircleMembership.ts
+/* eslint-disable no-console */
+import { Pool, type PoolClient } from "pg";
+import {
+  generateDisplayKey,
+  hashEmail,
+  hashKey,
+  normalizeEmail,
+} from "./innerCircleCrypto";
 
-const HASH_SECRET = process.env.INNER_CIRCLE_HASH_SECRET;
+export type InnerCircleMemberStatus = "active" | "replaced" | "revoked";
 
-/**
- * Normalise email for deterministic hashing
- */
-export function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
+export interface InnerCircleMember {
+  id: string;
+  emailHash: string;
+  keyHash: string;
+  keySuffix: string;
+  status: InnerCircleMemberStatus;
+  createdAt: string;
+  lastUsedAt: string | null;
 }
 
-function ensureHashSecret(): string {
-  if (!HASH_SECRET) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "[InnerCircle] INNER_CIRCLE_HASH_SECRET is not set. Refusing to operate in production.",
-      );
-    }
-    // Dev fallback: still deterministic but less secure.
-    // You should still set the real secret locally.
-    return "DEV-INNER-CIRCLE-HASH-SECRET";
-  }
-  return HASH_SECRET;
-}
+let pool: Pool | null = null;
 
-/**
- * HMAC-SHA256 with a secret so hashes are not reversible
- * even if someone dumps the DB.
- */
-function hmacSha256(value: string): string {
-  const secret = ensureHashSecret();
-  return crypto.createHmac("sha256", secret).update(value).digest("hex");
-}
+export function getInnerCirclePool(): Pool {
+  if (pool) return pool;
 
-export function hashEmail(email: string): string {
-  const normalized = normalizeEmail(email);
-  return hmacSha256(`email:${normalized}`);
-}
+  const connectionString =
+    process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL;
 
-export function normalizeKey(key: string): string {
-  return key.trim().toUpperCase();
-}
-
-export function hashKey(key: string): string {
-  const normalized = normalizeKey(key);
-  return hmacSha256(`key:${normalized}`);
-}
-
-/**
- * Generate a user-facing access key, e.g. "IC-7F3K-9L2P-X8Q4"
- * using only unambiguous chars.
- */
-export function generateDisplayKey(): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0,1,O,I
-  const bytes = crypto.randomBytes(12);
-  let raw = "";
-
-  for (let i = 0; i < 12; i += 1) {
-    const idx = bytes[i] % alphabet.length;
-    raw += alphabet[idx];
+  if (!connectionString) {
+    throw new Error(
+      "[InnerCircle] No INNER_CIRCLE_DB_URL (or DATABASE_URL) configured for membership store.",
+    );
   }
 
-  const part1 = raw.slice(0, 4);
-  const part2 = raw.slice(4, 8);
-  const part3 = raw.slice(8, 12);
+  pool = new Pool({
+    connectionString,
+    max: 5,
+    idleTimeoutMillis: 30_000,
+  });
 
-  return `IC-${part1}-${part2}-${part3}`;
+  return pool;
+}
+
+/**
+ * SQL schema (run once in your DB):
+ *
+ *  CREATE TABLE IF NOT EXISTS inner_circle_members (
+ *    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ *    email_hash TEXT NOT NULL,
+ *    key_hash   TEXT NOT NULL,
+ *    key_suffix TEXT NOT NULL,
+ *    status     TEXT NOT NULL DEFAULT 'active',
+ *    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ *    last_used_at TIMESTAMPTZ,
+ *    CONSTRAINT inner_circle_members_status_chk
+ *      CHECK (status IN ('active','replaced','revoked'))
+ *  );
+ *
+ *  CREATE INDEX IF NOT EXISTS idx_inner_circle_email_hash
+ *    ON inner_circle_members (email_hash);
+ *
+ *  CREATE INDEX IF NOT EXISTS idx_inner_circle_key_hash_active
+ *    ON inner_circle_members (key_hash, status);
+ */
+
+export async function issueMemberKeyForEmail(email: string): Promise<string> {
+  const normalizedEmail = normalizeEmail(email);
+  const emailHash = hashEmail(normalizedEmail);
+  const displayKey = generateDisplayKey();
+  const keyHash = hashKey(displayKey);
+  const keySuffix = displayKey.slice(-4);
+
+  const poolInstance = getInnerCirclePool();
+  const client: PoolClient = await poolInstance.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      "UPDATE inner_circle_members SET status = 'replaced' WHERE email_hash = $1 AND status = 'active'",
+      [emailHash],
+    );
+
+    await client.query(
+      `INSERT INTO inner_circle_members (email_hash, key_hash, key_suffix, status)
+       VALUES ($1, $2, $3, 'active')`,
+      [emailHash, keyHash, keySuffix],
+    );
+
+    await client.query("COMMIT");
+
+    return displayKey;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("[InnerCircle] Failed to issue member key:", err);
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export async function validateMemberKey(key: string): Promise<boolean> {
+  const poolInstance = getInnerCirclePool();
+  const keyHash = hashKey(key);
+
+  const res = await poolInstance.query<{ id: string }>(
+    "SELECT id FROM inner_circle_members WHERE key_hash = $1 AND status = 'active' LIMIT 1",
+    [keyHash],
+  );
+
+  const row = res.rows[0];
+  if (!row) {
+    return false;
+  }
+
+  poolInstance
+    .query("UPDATE inner_circle_members SET last_used_at = NOW() WHERE id = $1", [
+      row.id,
+    ])
+    .catch((err) => {
+      console.warn("[InnerCircle] Failed to update last_used_at:", err);
+    });
+
+  return true;
 }

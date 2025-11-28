@@ -2,6 +2,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { normalizeKey } from "@/lib/server/innerCircleCrypto";
 import { validateMemberKey } from "@/lib/server/innerCircleMembership";
+import {
+  checkRateLimit,
+  getClientIp,
+} from "@/lib/server/rateLimit";
 
 type UnlockPostSuccess = {
   ok: true;
@@ -32,7 +36,7 @@ function buildAccessCookie(): string {
 
   if (isProd) parts.push("Secure");
 
-  const maxAgeSeconds = 60 * 60 * 24 * 30; // 30 days
+  const maxAgeSeconds = 60 * 60 * 24 * 30;
   parts.push(`Max-Age=${maxAgeSeconds}`);
 
   return parts.join("; ");
@@ -42,12 +46,10 @@ async function checkKeyAgainstStore(key: string): Promise<boolean> {
   const candidate = normalizeKey(key);
   const masterKey = getMasterKey();
 
-  // 1) Master override key – for your personal use / trusted few.
   if (masterKey && candidate === masterKey) {
     return true;
   }
 
-  // 2) Membership store (random per-user keys)
   return validateMemberKey(candidate);
 }
 
@@ -60,6 +62,33 @@ export default async function handler(
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
+  // 🔐 IP rate-limit: max 50 unlock attempts / 10 minutes / IP
+  const ip = getClientIp(req);
+  const rate = checkRateLimit(ip, "inner-circle-unlock", {
+    windowMs: 10 * 60_000,
+    max: 50,
+  });
+
+  if (!rate.allowed) {
+    if (rate.retryAfterMs !== undefined) {
+      res.setHeader(
+        "Retry-After",
+        String(Math.ceil(rate.retryAfterMs / 1000)),
+      );
+    }
+
+    if (req.method === "GET") {
+      return res
+        .status(302)
+        .redirect("/inner-circle?error=too-many-attempts");
+    }
+
+    return res.status(429).json({
+      ok: false,
+      error: "Too many unlock attempts. Please try again later.",
+    });
+  }
+
   const returnToDefault = "/canon";
 
   try {
@@ -70,9 +99,7 @@ export default async function handler(
       const ok = keyParam ? await checkKeyAgainstStore(keyParam) : false;
 
       if (!ok) {
-        return res
-          .status(302)
-          .redirect("/inner-circle?error=invalid-key");
+        return res.status(302).redirect("/inner-circle?error=invalid-key");
       }
 
       const returnTo =
@@ -84,7 +111,6 @@ export default async function handler(
       return res.status(302).redirect(returnTo);
     }
 
-    // POST
     const body = (req.body ?? {}) as {
       key?: string;
       returnTo?: string;
@@ -108,8 +134,7 @@ export default async function handler(
 
     res.setHeader("Set-Cookie", buildAccessCookie());
     return res.status(200).json({ ok: true, redirectTo: returnTo });
-  } catch (err: unknown) {
-    // Hard fail closed: do not unlock on error.
+  } catch {
     if (req.method === "GET") {
       return res
         .status(302)
