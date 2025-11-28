@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: weekly
+      interval: weekly       # or "daily" if you want more aggressive updates
     open-pull-requests-limit: 5
     allow:
       - dependency-type: "direct"
