@@ -1,3 +1,4 @@
+// pages/books/[slug].tsx
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
@@ -15,8 +16,17 @@ import Divider from "@/components/Divider";
 import { getAllBooksMeta, getBookBySlug } from "@/lib/server/books-data";
 import type { BookMeta } from "@/types/index";
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type ExtendedBookMeta = BookMeta & {
+  accessLevel?: string | null;
+  lockMessage?: string | null;
+};
+
 type PageProps = {
-  meta: BookMeta;
+  meta: ExtendedBookMeta;
   mdxSource: MDXRemoteSerializeResult | null;
 };
 
@@ -66,6 +76,9 @@ const mdxComponents = {
 // Page component
 // ---------------------------------------------------------------------------
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+
 export default function BookPage({ meta, mdxSource }: PageProps) {
   const {
     title,
@@ -85,9 +98,13 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
     purchaseLink,
     publisher,
     tags,
+    accessLevel,
+    lockMessage,
+    slug,
   } = meta;
 
   const pageTitle = `${title} | Books`;
+  const isInnerCircle = accessLevel === "inner-circle";
 
   const catalogueDate =
     date && !Number.isNaN(new Date(date).getTime())
@@ -98,14 +115,17 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
         })
       : null;
 
+  const canonicalUrl = `${SITE_URL}/books/${slug}`;
+
   return (
-    <Layout pageTitle={pageTitle}>
+    <Layout title={pageTitle}>
       <Head>
         <title>{pageTitle}</title>
         <meta
           name="description"
           content={description ?? subtitle ?? title}
         />
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
       <article className="mx-auto max-w-6xl px-6 py-14 text-cream">
@@ -130,9 +150,17 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
           {/* Metadata - Right Column */}
           <div className="lg:col-span-3">
             <header className="mb-6">
-              <h1 className="mb-3 font-serif text-4xl font-bold text-cream">
-                {title}
-              </h1>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <h1 className="font-serif text-4xl font-bold text-cream">
+                  {title}
+                </h1>
+
+                {isInnerCircle && (
+                  <span className="inline-flex items-center rounded-full border border-softGold/70 bg-softGold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-softGold">
+                    Inner&nbsp;Circle&nbsp;Volume
+                  </span>
+                )}
+              </div>
 
               {subtitle && (
                 <p className="mb-4 text-xl text-gray-300">{subtitle}</p>
@@ -177,6 +205,19 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
                 <p className="mb-4 leading-relaxed text-gray-300">
                   {description}
                 </p>
+              )}
+
+              {/* Inner Circle info banner (non-blocking, UX only) */}
+              {isInnerCircle && (
+                <div className="mt-4 rounded-xl border border-softGold/70 bg-black/60 px-4 py-3 text-sm text-softGold">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-softGold/80">
+                    Inner Circle
+                  </p>
+                  <p className="mt-1 text-cream">
+                    {lockMessage ||
+                      "This volume is catalogued as part of the Inner Circle library. Full access is reserved for Inner Circle members."}
+                  </p>
+                </div>
               )}
             </header>
 
@@ -362,11 +403,8 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
 // ---------------------------------------------------------------------------
 
 type BookShareProps = {
-  meta: BookMeta;
+  meta: ExtendedBookMeta;
 };
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 function BookShare({ meta }: BookShareProps): JSX.Element {
   const url = `${SITE_URL}/books/${meta.slug}`;
@@ -426,7 +464,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = String(params?.slug);
-  const book = getBookBySlug(slug);
+  const book = getBookBySlug(slug) as ExtendedBookMeta | null;
 
   if (!book) {
     return { notFound: true };
@@ -456,7 +494,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     }
   }
 
-  const safeMeta: BookMeta = {
+  const safeMeta: ExtendedBookMeta = {
     ...book,
     subtitle: book.subtitle ?? null,
     description: book.description ?? null,
@@ -465,22 +503,24 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
     date: book.date ?? null,
     author: book.author ?? null,
     readTime: book.readTime ?? null,
-    lastModified: book.lastModified ?? null,
+    lastModified: (book as any).lastModified ?? null,
     category: book.category ?? null,
     isbn: book.isbn ?? null,
     publisher: book.publisher ?? null,
     publishedDate: book.publishedDate ?? null,
     language: book.language ?? null,
-    price: book.price ?? null,
-    purchaseLink: book.purchaseLink ?? null,
+    price: (book as any).price ?? null,
+    purchaseLink: (book as any).purchaseLink ?? null,
     tags: book.tags ?? [],
-    format: book.format ?? undefined,
-    pages: book.pages ?? null,
-    rating: book.rating ?? null,
+    format: (book as any).format ?? undefined,
+    pages: (book as any).pages ?? null,
+    rating: (book as any).rating ?? null,
     featured: book.featured ?? false,
-    published: book.published ?? false,
+    published: (book as any).published ?? false,
     draft: book.draft ?? false,
-    status: book.status ?? "draft",
+    status: (book as any).status ?? "draft",
+    accessLevel: book.accessLevel ?? null,
+    lockMessage: book.lockMessage ?? null,
   };
 
   // Hard clean: remove all undefined values so Next.js can serialise safely
@@ -493,8 +533,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
   return {
     props: {
-      meta: safeMeta,
-      mdxSource,
+    meta: safeMeta,
+    mdxSource,
     },
     revalidate: 3600, // 1 hour
   };

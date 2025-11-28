@@ -20,11 +20,12 @@ const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
   // NOTE: we removed "the-builders-catechism" so it is no longer public.
-  // "volume-i-foundations-of-purpose", // keep commented or move to FORCE_RESTRICTED_CANON if needed
+  // If you ever want a *canon* piece public by default, add its slug here.
+  // "volume-i-foundations-of-purpose",
 ]);
 
 // Slugs that are ALWAYS gated, even if someone later adds them to PUBLIC_CANON.
-// This is your "access level restriction takes precedence" safety net.
+// This is your "access-level restriction takes precedence" safety net.
 const FORCE_RESTRICTED_CANON = new Set<string>([
   "the-builders-catechism",
   // Add any others here that must NEVER be public:
@@ -70,8 +71,7 @@ export function middleware(req: NextRequest) {
 
   // 1) Bypass for static / framework internals
   if (SAFE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-    const res = NextResponse.next();
-    return applySecurityHeaders(res);
+    return applySecurityHeaders(NextResponse.next());
   }
 
   // 2) Block obvious junk probes
