@@ -274,7 +274,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: PageSpeed on PROD
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
             ${{ needs.resolve-base-url.outputs.PROD_URL }}/
@@ -288,7 +288,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: PageSpeed on PREVIEW
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
             ${{ needs.resolve-base-url.outputs.BASE_URL }}/
