@@ -15,7 +15,13 @@ import { getAllContent } from "@/lib/mdx";
 // Design & Data Types
 // ---------------------------------------------------------------------------
 
-type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
+type ContentKind =
+  | "blog"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource";
 
 interface RawContentItem {
   slug?: string;
@@ -55,16 +61,25 @@ interface ContentPageProps {
 // Icons
 // ---------------------------------------------------------------------------
 
-const StyledIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = "h-6 w-6",
-}) => (
-  <div className={`transform transition-all duration-700 ease-in-out ${className}`}>{children}</div>
+const StyledIcon: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = "h-6 w-6" }) => (
+  <div
+    className={`transform transition-all duration-700 ease-in-out ${className}`}
+  >
+    {children}
+  </div>
 );
 
 const BlogIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -77,7 +92,12 @@ const BlogIcon = ({ className }: { className?: string }) => (
 
 const BookIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -90,7 +110,12 @@ const BookIcon = ({ className }: { className?: string }) => (
 
 const DownloadIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -103,7 +128,12 @@ const DownloadIcon = ({ className }: { className?: string }) => (
 
 const EventIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -116,7 +146,12 @@ const EventIcon = ({ className }: { className?: string }) => (
 
 const PrintIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -129,7 +164,12 @@ const PrintIcon = ({ className }: { className?: string }) => (
 
 const ResourceIcon = ({ className }: { className?: string }) => (
   <StyledIcon className={className}>
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="stroke-current">
+    <svg
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="stroke-current"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -147,7 +187,12 @@ const ArrowIcon = ({ className = "ml-3 h-4 w-4" }: { className?: string }) => (
     viewBox="0 0 24 24"
     stroke="currentColor"
   >
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M14 5l7 7m0 0l-7 7m7-7H3"
+    />
   </svg>
 );
 
@@ -164,7 +209,14 @@ const ContentIcons: Record<ContentKind, React.ReactElement> = {
 // Aesthetic System
 // ---------------------------------------------------------------------------
 
-const kindOrder: ContentKind[] = ["blog", "book", "download", "event", "print", "resource"];
+const kindOrder: ContentKind[] = [
+  "blog",
+  "book",
+  "download",
+  "event",
+  "print",
+  "resource",
+];
 
 const kindLabels: Record<ContentKind, string> = {
   blog: "Strategic Essays",
@@ -179,24 +231,34 @@ const getKindSubtleGradient = (kind: ContentKind): string => {
   const gradients: Record<ContentKind, string> = {
     blog: "bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10",
     book: "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10",
-    download: "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-red-500/10",
+    download:
+      "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-red-500/10",
     event: "bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-red-500/10",
     print: "bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-cyan-500/10",
     resource: "bg-gradient-to-br from-cyan-500/10 via-sky-500/5 to-blue-500/10",
   };
-  return gradients[kind] ?? "bg-gradient-to-br from-gray-500/10 via-gray-400/5 to-gray-600/10";
+  return (
+    gradients[kind] ??
+    "bg-gradient-to-br from-gray-500/10 via-gray-400/5 to-gray-600/10"
+  );
 };
 
 const getKindHighlight = (kind: ContentKind): string => {
   const highlights: Record<ContentKind, string> = {
     blog: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10 shadow-emerald-500/15",
     book: "text-violet-300 border-violet-400/30 bg-violet-500/10 shadow-violet-500/15",
-    download: "text-amber-300 border-amber-400/30 bg-amber-500/10 shadow-amber-500/15",
+    download:
+      "text-amber-300 border-amber-400/30 bg-amber-500/10 shadow-amber-500/15",
     event: "text-rose-300 border-rose-400/30 bg-rose-500/10 shadow-rose-500/15",
-    print: "text-indigo-300 border-indigo-400/30 bg-indigo-500/10 shadow-indigo-500/15",
-    resource: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10 shadow-cyan-500/15",
+    print:
+      "text-indigo-300 border-indigo-400/30 bg-indigo-500/10 shadow-indigo-500/15",
+    resource:
+      "text-cyan-300 border-cyan-400/30 bg-cyan-500/10 shadow-cyan-500/15",
   };
-  return highlights[kind] ?? "text-gray-300 border-gray-400/30 bg-gray-500/10 shadow-gray-500/15";
+  return (
+    highlights[kind] ??
+    "text-gray-300 border-gray-400/30 bg-gray-500/10 shadow-gray-500/15"
+  );
 };
 
 // ---------------------------------------------------------------------------
@@ -301,7 +363,7 @@ const getHref = (kind: ContentKind, slug: string): string => {
 const processContentItems = (
   items: RawContentItem[],
   kind: ContentKind,
-  defaultCategory?: string,
+  defaultCategory?: string
 ): ContentResource[] => {
   const processed: ContentResource[] = [];
 
@@ -311,13 +373,15 @@ const processContentItems = (
       const title = item.title || "Untitled";
 
       if (!slug) {
-        console.warn(`[processContentItems] Skipping item with no slug: ${title}`);
+        console.warn(
+          `[processContentItems] Skipping item with no slug: ${title}`
+        );
         return;
       }
 
       // Convert all tags to strings
-      const tags = Array.isArray(item.tags) 
-        ? item.tags.map(tag => String(tag)) // Fixed: Convert numbers to strings
+      const tags = Array.isArray(item.tags)
+        ? item.tags.map((tag) => String(tag)) // Fixed: Convert numbers to strings
         : [];
 
       processed.push({
@@ -351,7 +415,11 @@ interface SignatureCardProps {
   index?: number;
 }
 
-const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant", index = 0 }) => {
+const SignatureCard: React.FC<SignatureCardProps> = ({
+  item,
+  variant = "elegant",
+  index = 0,
+}) => {
   const description = item.description || item.excerpt || "";
 
   const ctaLabels: Record<ContentKind, string> = {
@@ -374,14 +442,14 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
         >
           <div
             className={`pointer-events-none absolute inset-0 rounded-3xl ${getKindSubtleGradient(
-              item.kind,
+              item.kind
             )} opacity-0 transition-opacity duration-1000 group-hover:opacity-100`}
           />
           <div className="relative z-10 flex h-full flex-col">
             <div className="mb-6 flex items-start justify-between">
               <div
                 className={`transform rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
-                  item.kind,
+                  item.kind
                 )} transition-transform duration-500 group-hover:scale-110`}
               >
                 {ContentIcons[item.kind]}
@@ -389,7 +457,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
               <div className="space-y-2 text-right">
                 <span
                   className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
-                    item.kind,
+                    item.kind
                   )}`}
                 >
                   {kindLabels[item.kind]}
@@ -411,7 +479,9 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
             </h3>
 
             {description && (
-              <p className="mb-6 flex-grow leading-relaxed text-gray-300 line-clamp-3">{description}</p>
+              <p className="mb-6 flex-grow leading-relaxed text-gray-300 line-clamp-3">
+                {description}
+              </p>
             )}
 
             <div className="mt-auto border-t border-white/10 pt-6">
@@ -437,7 +507,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
       <div className="group relative flex h-full flex-col p-6">
         <div
           className={`pointer-events-none absolute inset-0 rounded-3xl ${getKindSubtleGradient(
-            item.kind,
+            item.kind
           )} opacity-0 transition-opacity duration-700 group-hover:opacity-100`}
         />
 
@@ -445,7 +515,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
           <div className="mb-4 flex items-start justify-between">
             <div
               className={`transform rounded-xl border p-2 backdrop-blur-sm ${getKindHighlight(
-                item.kind,
+                item.kind
               )} transition-transform duration-500 group-hover:scale-110`}
             >
               {ContentIcons[item.kind]}
@@ -463,7 +533,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
           <div className="mb-3">
             <span
               className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
-                item.kind,
+                item.kind
               )}`}
             >
               {kindLabels[item.kind]}
@@ -484,7 +554,9 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
             <div className="flex items-center gap-3">
               {item.readTime && (
                 <span className="text-xs font-light text-gray-400">
-                  {typeof item.readTime === "number" ? `${item.readTime} min` : item.readTime}
+                  {typeof item.readTime === "number"
+                    ? `${item.readTime} min`
+                    : item.readTime}
                 </span>
               )}
               {item.category && (
@@ -513,7 +585,7 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ item, variant = "elegant"
 
 const safeGetData = async (
   dataFetcher: (() => RawContentItem[] | undefined) | undefined,
-  dataName: string,
+  dataName: string
 ): Promise<RawContentItem[]> => {
   try {
     if (!dataFetcher || typeof dataFetcher !== "function") {
@@ -539,8 +611,16 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       data: Promise<RawContentItem[]>;
       category: string;
     }[] = [
-      { kind: "blog", data: safeGetData(getAllPostsMeta, "blog posts"), category: "Essays" },
-      { kind: "book", data: safeGetData(getAllBooksMeta, "books"), category: "Volumes" },
+      {
+        kind: "blog",
+        data: safeGetData(getAllPostsMeta, "blog posts"),
+        category: "Essays",
+      },
+      {
+        kind: "book",
+        data: safeGetData(getAllBooksMeta, "books"),
+        category: "Volumes",
+      },
       {
         kind: "download",
         data: safeGetData(getAllDownloadsMeta, "downloads"),
@@ -558,7 +638,10 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       },
       {
         kind: "resource",
-        data: safeGetData(() => getAllContent?.("resources") ?? [], "resources"),
+        data: safeGetData(
+          () => getAllContent?.("resources") ?? [],
+          "resources"
+        ),
         category: "Resources",
       },
     ];
@@ -573,7 +656,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
         } catch (error) {
           console.error(`💥 [content] Failed to process ${kind}:`, error);
         }
-      }),
+      })
     );
 
     const sortedItems = allItems.sort((a, b) => {
@@ -613,7 +696,9 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
 // ---------------------------------------------------------------------------
 
 const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
-  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">("all");
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
+    "all"
+  );
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
@@ -635,22 +720,58 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
       print: items.filter((i) => i.kind === "print").length,
       resource: items.filter((i) => i.kind === "resource").length,
     }),
-    [items],
+    [items]
   );
 
   const signatureFilters = [
-    { key: "all" as const, label: "All Content", count: contentStats.all, icon: "◎" },
-    { key: "blog" as const, label: kindLabels.blog, count: contentStats.blog, icon: "✒︎" },
-    { key: "book" as const, label: kindLabels.book, count: contentStats.book, icon: "◆" },
-    { key: "download" as const, label: kindLabels.download, count: contentStats.download, icon: "▢" },
-    { key: "event" as const, label: kindLabels.event, count: contentStats.event, icon: "◦" },
-    { key: "print" as const, label: kindLabels.print, count: contentStats.print, icon: "✧" },
-    { key: "resource" as const, label: kindLabels.resource, count: contentStats.resource, icon: "✶" },
+    {
+      key: "all" as const,
+      label: "All Content",
+      count: contentStats.all,
+      icon: "◎",
+    },
+    {
+      key: "blog" as const,
+      label: kindLabels.blog,
+      count: contentStats.blog,
+      icon: "✒︎",
+    },
+    {
+      key: "book" as const,
+      label: kindLabels.book,
+      count: contentStats.book,
+      icon: "◆",
+    },
+    {
+      key: "download" as const,
+      label: kindLabels.download,
+      count: contentStats.download,
+      icon: "▢",
+    },
+    {
+      key: "event" as const,
+      label: kindLabels.event,
+      count: contentStats.event,
+      icon: "◦",
+    },
+    {
+      key: "print" as const,
+      label: kindLabels.print,
+      count: contentStats.print,
+      icon: "✧",
+    },
+    {
+      key: "resource" as const,
+      label: kindLabels.resource,
+      count: contentStats.resource,
+      icon: "✶",
+    },
   ];
 
   const filteredItems = React.useMemo(() => {
     return items.filter((item) => {
-      const matchesFilter = activeFilter === "all" || item.kind === activeFilter;
+      const matchesFilter =
+        activeFilter === "all" || item.kind === activeFilter;
       if (!matchesFilter) return false;
       if (!searchQuery.trim()) return true;
 
@@ -677,7 +798,10 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
     return initial;
   }, [filteredItems]);
 
-  const handleKeyDown = (event: React.KeyboardEvent, filterKey: ContentKind | "all") => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent,
+    filterKey: ContentKind | "all"
+  ) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setActiveFilter(filterKey);
@@ -745,8 +869,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             </h1>
 
             <p className="mx-auto mb-14 max-w-3xl text-lg font-light leading-relaxed text-gray-300 md:text-xl">
-              Essays, frameworks, tools, and resources designed to help you think clearly, act decisively, and
-              build work that endures.
+              Essays, frameworks, tools, and resources designed to help you
+              think clearly, act decisively, and build work that endures.
             </p>
 
             <div className="mb-16 flex flex-col items-center justify-center gap-5 sm:flex-row sm:justify-center">
@@ -789,9 +913,15 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                   }}
                   className="group rounded-3xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-2xl transition-all duration-700 hover:scale-[1.04] hover:border-softGold/40 hover:bg-white/10"
                 >
-                  <div className="mb-3 text-2xl text-softGold">{filter.icon}</div>
-                  <div className="mb-1 text-2xl font-semibold text-white">{filter.count}</div>
-                  <div className="text-xs font-light leading-snug text-gray-400">{filter.label}</div>
+                  <div className="mb-3 text-2xl text-softGold">
+                    {filter.icon}
+                  </div>
+                  <div className="mb-1 text-2xl font-semibold text-white">
+                    {filter.count}
+                  </div>
+                  <div className="text-xs font-light leading-snug text-gray-400">
+                    {filter.label}
+                  </div>
                 </button>
               ))}
             </div>
@@ -800,7 +930,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
           {/* Scroll indicator */}
           <div className="absolute bottom-16 md:bottom-10 left-1/2 -translate-x-1/2">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xs font-light tracking-[0.3em] text-softGold/70">SCROLL</div>
+              <div className="text-xs font-light tracking-[0.3em] text-softGold/70">
+                SCROLL
+              </div>
               <div className="flex h-12 items-start justify-center">
                 <div className="w-px bg-gradient-to-b from-softGold to-transparent" />
               </div>
@@ -817,7 +949,8 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                   Editor's <span className="text-softGold">Selection</span>
                 </h2>
                 <p className="mx-auto max-w-2xl text-sm font-light leading-relaxed text-gray-400 md:text-base">
-                  A small set of pieces worth starting with if you are meeting this library for the first time.
+                  A small set of pieces worth starting with if you are meeting
+                  this library for the first time.
                 </p>
               </div>
 
@@ -828,7 +961,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                     className="transform transition-all duration-1000 hover:-translate-y-2"
                     style={{ animationDelay: `${index * 150}ms` }}
                   >
-                    <SignatureCard item={item} variant="featured" index={index} />
+                    <SignatureCard
+                      item={item}
+                      variant="featured"
+                      index={index}
+                    />
                   </div>
                 ))}
               </div>
@@ -837,7 +974,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         )}
 
         {/* Main Gallery */}
-        <section id="gallery" data-library-start className="relative px-4 py-28">
+        <section
+          id="gallery"
+          data-library-start
+          className="relative px-4 py-28"
+        >
           <div className="mx-auto max-w-7xl">
             <div
               className={`sticky top-24 z-40 mb-16 transition-all duration-700 ${
@@ -858,7 +999,12 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                       aria-label="Search content library"
                     />
                     <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -889,7 +1035,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                       <span>{filter.label}</span>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[0.7rem] ${
-                          activeFilter === filter.key ? "bg-black/20 text-black" : "bg-white/10 text-gray-400"
+                          activeFilter === filter.key
+                            ? "bg-black/20 text-black"
+                            : "bg-white/10 text-gray-400"
                         }`}
                       >
                         {filter.count}
@@ -903,7 +1051,9 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
             {/* Gallery Content */}
             {filteredItems.length === 0 ? (
               <GlassCard className="p-16 text-center" hoverEffect={false}>
-                <h3 className="mb-4 font-serif text-2xl text-white md:text-3xl">No results found</h3>
+                <h3 className="mb-4 font-serif text-2xl text-white md:text-3xl">
+                  No results found
+                </h3>
                 <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-gray-400 md:text-base">
                   {searchQuery
                     ? `Nothing matched "${searchQuery}". Try a different term or clear the filters.`
@@ -934,7 +1084,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                         <h3 className="flex items-center gap-4 font-serif text-2xl text-white md:text-3xl">
                           <span
                             className={`rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
-                              kind,
+                              kind
                             )}`}
                           >
                             {ContentIcons[kind]}
@@ -947,7 +1097,11 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                       </div>
                       <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
                         {group.map((item) => (
-                          <SignatureCard key={item.slug} item={item} variant="elegant" />
+                          <SignatureCard
+                            key={item.slug}
+                            item={item}
+                            variant="elegant"
+                          />
                         ))}
                       </div>
                     </div>
@@ -960,7 +1114,7 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                   <h3 className="flex items-center gap-4 font-serif text-2xl text-white md:text-3xl">
                     <span
                       className={`rounded-2xl border p-3 backdrop-blur-sm ${getKindHighlight(
-                        activeFilter as ContentKind,
+                        activeFilter as ContentKind
                       )}`}
                     >
                       {ContentIcons[activeFilter as ContentKind]}
@@ -968,12 +1122,17 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
                     {kindLabels[activeFilter as ContentKind]}
                   </h3>
                   <span className="text-sm text-gray-400 md:text-base">
-                    {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+                    {filteredItems.length} item
+                    {filteredItems.length !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
                   {filteredItems.map((item) => (
-                    <SignatureCard key={item.slug} item={item} variant="elegant" />
+                    <SignatureCard
+                      key={item.slug}
+                      item={item}
+                      variant="elegant"
+                    />
                   ))}
                 </div>
               </div>
@@ -984,13 +1143,19 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         {/* Closing CTA */}
         <section className="relative px-4 py-32">
           <div className="mx-auto max-w-5xl text-center">
-            <GlassCard className="px-8 py-14 md:px-16 md:py-18" softGlow hoverEffect={false}>
+            <GlassCard
+              className="px-8 py-14 md:px-16 md:py-18"
+              softGlow
+              hoverEffect={false}
+            >
               <h2 className="mb-6 font-serif text-3xl text-white md:text-4xl">
-                Turn insight into <span className="text-softGold">decisive action</span>
+                Turn insight into{" "}
+                <span className="text-softGold">decisive action</span>
               </h2>
               <p className="mx-auto mb-10 max-w-3xl text-sm leading-relaxed text-gray-300 md:text-lg">
-                If you are building something that must stand the test of time, this library is a starting
-                point—not the finish line. When you are ready, we can work together on the specifics of your
+                If you are building something that must stand the test of time,
+                this library is a starting point—not the finish line. When you
+                are ready, we can work together on the specifics of your
                 context, your market, and your mandate.
               </p>
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
@@ -1027,12 +1192,20 @@ const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
         }
 
         ::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, var(--aol-softGold), rgba(214, 178, 106, 0.6));
+          background: linear-gradient(
+            180deg,
+            var(--aol-softGold),
+            rgba(214, 178, 106, 0.6)
+          );
           border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, rgba(214, 178, 106, 0.8), var(--aol-softGold));
+          background: linear-gradient(
+            180deg,
+            rgba(214, 178, 106, 0.8),
+            var(--aol-softGold)
+          );
         }
 
         ::selection {

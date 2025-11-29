@@ -1,6 +1,6 @@
 // scripts/generate-ultimate-purpose-of-man-pdf.tsx
-import React from 'react';
-import fs from 'node:fs';
+import React from "react";
+import fs from "node:fs";
 import {
   Document,
   Page,
@@ -8,18 +8,18 @@ import {
   View,
   StyleSheet,
   pdf,
-} from '@react-pdf/renderer';
+} from "@react-pdf/renderer";
 
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'column',
-    backgroundColor: '#E4E4E4',
+    flexDirection: "column",
+    backgroundColor: "#E4E4E4",
     padding: 30,
   },
   title: {
     fontSize: 24,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 30,
   },
   section: {
@@ -46,13 +46,13 @@ const MyDocument = () => (
 
 // Main function to generate PDF
 async function generatePdf() {
-  console.log('[pdf] Starting PDF generation...');
+  console.log("[pdf] Starting PDF generation...");
 
-  const outputPath = './public/downloads/ultimate-purpose-of-man.pdf';
+  const outputPath = "./public/downloads/ultimate-purpose-of-man.pdf";
 
   try {
     // Ensure the output directory exists
-    const dir = './public/downloads';
+    const dir = "./public/downloads";
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -61,9 +61,9 @@ async function generatePdf() {
     const buffer = await pdf(<MyDocument />).toBuffer();
     fs.writeFileSync(outputPath, buffer);
 
-    console.log('[pdf] PDF generated successfully at:', outputPath);
+    console.log("[pdf] PDF generated successfully at:", outputPath);
   } catch (error) {
-    console.error('[pdf] Error generating PDF:', error);
+    console.error("[pdf] Error generating PDF:", error);
     process.exit(1);
   }
 }

@@ -4,5 +4,5 @@ export const safe = <T extends object>(o: T | undefined | null): T =>
     get(target, prop) {
       const v = (target as any)[prop];
       return v === undefined ? "" : v;
-    }
+    },
   });

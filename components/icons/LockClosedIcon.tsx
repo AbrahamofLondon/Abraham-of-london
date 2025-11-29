@@ -8,7 +8,7 @@ import { Lock } from "lucide-react";
  * Keeps all imports consistent at "@/components/icons/LockClosedIcon".
  */
 export default function LockClosedIcon(
-  props: SVGProps<SVGSVGElement>,
+  props: SVGProps<SVGSVGElement>
 ): JSX.Element {
   return <Lock {...props} />;
 }

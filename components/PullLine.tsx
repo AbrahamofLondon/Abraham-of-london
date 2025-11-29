@@ -1,8 +1,8 @@
 import { LineChart, LucideIcon } from "lucide-react"; // Using a default Lucide icon
 
 // Tailwind colors based on your BrandFrame
-const BRAND_ACCENT_COLOR = '#C5A352'; // muted-gold
-const BRAND_PRIMARY_COLOR = '#0B2E1F'; // deep-forest
+const BRAND_ACCENT_COLOR = "#C5A352"; // muted-gold
+const BRAND_PRIMARY_COLOR = "#0B2E1F"; // deep-forest
 
 interface PullLineProps {
   children: React.ReactNode;
@@ -21,13 +21,13 @@ export default function PullLine({
   color = BRAND_ACCENT_COLOR,
   className = "",
 }: PullLineProps) {
-  const isHex = color.startsWith('#');
+  const isHex = color.startsWith("#");
   const accentStyle = isHex ? { borderColor: color, color: color } : {};
 
   return (
     <div
       className={`my-8 px-6 py-4 border-l-4 font-serif text-lg leading-relaxed ${
-        isHex ? '' : `border-${color}-600 text-${color}-800`
+        isHex ? "" : `border-${color}-600 text-${color}-800`
       } ${className}`}
       style={accentStyle}
     >
@@ -38,9 +38,7 @@ export default function PullLine({
             style={{ color: BRAND_PRIMARY_COLOR }} // Use primary color for icon for contrast
           />
         )}
-        <div style={{ color: BRAND_PRIMARY_COLOR }}>
-          {children}
-        </div>
+        <div style={{ color: BRAND_PRIMARY_COLOR }}>{children}</div>
       </div>
     </div>
   );

@@ -3,7 +3,18 @@ export interface SocialLink {
   href: string;
   label: string;
   external?: boolean;
-  kind?: 'twitter' | 'linkedin' | 'github' | 'instagram' | 'youtube' | 'website' | 'tiktok' | 'facebook' | 'email' | 'phone' | 'whatsapp';
+  kind?:
+    | "twitter"
+    | "linkedin"
+    | "github"
+    | "instagram"
+    | "youtube"
+    | "website"
+    | "tiktok"
+    | "facebook"
+    | "email"
+    | "phone"
+    | "whatsapp";
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   priority?: number;
 }

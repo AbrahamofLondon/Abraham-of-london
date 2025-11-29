@@ -58,7 +58,9 @@ export function getCanonVolumes(): CanonDoc[] {
  */
 export function getCanonCampaign(): CanonDoc | null {
   return (
-    (allCanons as CanonDoc[]).find((c) => c.slug === "canon-campaign" && !c.draft) ?? null
+    (allCanons as CanonDoc[]).find(
+      (c) => c.slug === "canon-campaign" && !c.draft
+    ) ?? null
   );
 }
 
@@ -68,7 +70,7 @@ export function getCanonCampaign(): CanonDoc | null {
 export function getCanonMasterIndex(): CanonDoc | null {
   return (
     (allCanons as CanonDoc[]).find(
-      (c) => c.slug === "canon-master-index-preview" && !c.draft,
+      (c) => c.slug === "canon-master-index-preview" && !c.draft
     ) ?? null
   );
 }
@@ -80,7 +82,7 @@ export function getCanonMasterIndex(): CanonDoc | null {
 export function getCanonVolumeX(): CanonDoc | null {
   return (
     (allCanons as CanonDoc[]).find(
-      (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft,
+      (c) => c.slug === "volume-x-the-arc-of-future-civilisation" && !c.draft
     ) ?? null
   );
 }
@@ -91,7 +93,9 @@ export function getCanonVolumeX(): CanonDoc | null {
 export function getCanonBySlug(slug: string): CanonDoc | null {
   const normalised = String(slug).trim().toLowerCase();
   return (
-    (allCanons as CanonDoc[]).find((c) => c.slug.toLowerCase() === normalised) ?? null
+    (allCanons as CanonDoc[]).find(
+      (c) => c.slug.toLowerCase() === normalised
+    ) ?? null
   );
 }
 

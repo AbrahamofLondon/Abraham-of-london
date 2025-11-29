@@ -10,10 +10,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import Layout from "@/components/Layout";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import mdxComponents from "@/components/mdx-components";
 
@@ -61,8 +58,8 @@ function normaliseDownload(raw: RawDownload, slugFallback: string) {
     typeof raw?.coverImage === "string" && raw.coverImage.trim().length
       ? raw.coverImage
       : typeof raw?.heroImage === "string" && raw.heroImage.trim().length
-      ? raw.heroImage
-      : null;
+        ? raw.heroImage
+        : null;
 
   const fileUrl =
     typeof raw?.fileUrl === "string" && raw.fileUrl.trim().length
@@ -89,8 +86,8 @@ function normaliseDownload(raw: RawDownload, slugFallback: string) {
       typeof raw?.body === "string"
         ? raw.body
         : typeof raw?.content === "string"
-        ? raw.content
-        : "# Content coming soon\n\nThis download is being prepared.",
+          ? raw.content
+          : "# Content coming soon\n\nThis download is being prepared.",
   };
 }
 
@@ -117,13 +114,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
-  ctx,
+  ctx
 ) => {
   try {
     const slugParam = ctx.params?.slug;
     const slug = Array.isArray(slugParam)
       ? slugParam[0]
-      : (slugParam as string | undefined) ?? "";
+      : ((slugParam as string | undefined) ?? "");
 
     if (!slug) {
       return { notFound: true };
@@ -170,7 +167,7 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
 };
 
 export default function DownloadPage(
-  props: InferGetStaticPropsType<typeof getStaticProps>,
+  props: InferGetStaticPropsType<typeof getStaticProps>
 ) {
   const router = useRouter();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -186,7 +183,7 @@ export default function DownloadPage(
   const handleDownload = () => {
     if (props.fileUrl) {
       setIsDownloading(true);
-      window.open(props.fileUrl, '_blank');
+      window.open(props.fileUrl, "_blank");
     }
   };
 
@@ -196,8 +193,12 @@ export default function DownloadPage(
         <title>{pageTitle} | Abraham of London</title>
         {props.excerpt && <meta name="description" content={props.excerpt} />}
         <meta property="og:title" content={pageTitle} />
-        {props.excerpt && <meta property="og:description" content={props.excerpt} />}
-        {props.coverImage && <meta property="og:image" content={props.coverImage} />}
+        {props.excerpt && (
+          <meta property="og:description" content={props.excerpt} />
+        )}
+        {props.coverImage && (
+          <meta property="og:image" content={props.coverImage} />
+        )}
       </Head>
 
       <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -267,25 +268,50 @@ export default function DownloadPage(
                   disabled={isDownloading}
                   className={`inline-flex items-center gap-3 rounded-full px-8 py-4 text-base font-semibold text-white transition-all ${
                     isDownloading
-                      ? 'bg-emerald-600 cursor-not-allowed'
-                      : 'bg-amber-600 hover:bg-amber-500 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/25'
+                      ? "bg-emerald-600 cursor-not-allowed"
+                      : "bg-amber-600 hover:bg-amber-500 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/25"
                   }`}
                 >
                   {isDownloading ? (
                     <>
-                      <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <svg
+                        className="h-5 w-5 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
                       </svg>
                       Preparing Download...
                     </>
                   ) : (
                     <>
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
                       </svg>
                       Download Resource
-                      {props.fileSize ? ` (${props.fileSize})` : ''}
+                      {props.fileSize ? ` (${props.fileSize})` : ""}
                     </>
                   )}
                 </button>
@@ -296,7 +322,8 @@ export default function DownloadPage(
           {/* Enhanced Content */}
           <article className="rounded-2xl border border-slate-700 bg-slate-800/30 backdrop-blur-sm">
             <div className="p-8">
-              <div className="prose prose-lg max-w-none
+              <div
+                className="prose prose-lg max-w-none
                 prose-headings:font-serif prose-headings:text-white
                 prose-p:text-slate-300 prose-p:leading-relaxed
                 prose-strong:text-white prose-strong:font-semibold
@@ -306,7 +333,8 @@ export default function DownloadPage(
                 prose-hr:border-slate-600
                 prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700
                 prose-code:text-amber-300 prose-code:bg-slate-900/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                prose-img:rounded-xl prose-img:shadow-2xl">
+                prose-img:rounded-xl prose-img:shadow-2xl"
+              >
                 <MDXRemote {...props.mdxSource} components={mdxComponents} />
               </div>
             </div>
@@ -314,13 +342,25 @@ export default function DownloadPage(
 
           {/* Additional Resources */}
           <div className="mt-12 text-center">
-            <p className="text-slate-400 mb-4">Explore more premium resources</p>
+            <p className="text-slate-400 mb-4">
+              Explore more premium resources
+            </p>
             <Link
               href="/downloads"
               className="inline-flex items-center gap-2 rounded-full border border-slate-600 bg-slate-800/50 px-6 py-3 text-slate-300 transition-all hover:border-slate-500 hover:bg-slate-700/50 hover:scale-105"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
               View All Resources
             </Link>

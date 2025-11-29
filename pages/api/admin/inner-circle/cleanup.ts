@@ -18,7 +18,10 @@ type CleanupResponse = {
 
 const ADMIN_API_KEY = process.env.INNER_CIRCLE_ADMIN_KEY ?? "";
 
-function logCleanup(action: string, metadata: Record<string, unknown> = {}): void {
+function logCleanup(
+  action: string,
+  metadata: Record<string, unknown> = {}
+): void {
   console.log(`🧹 Inner Circle Cleanup: ${action}`, {
     timestamp: new Date().toISOString(),
     ...metadata,
@@ -27,7 +30,7 @@ function logCleanup(action: string, metadata: Record<string, unknown> = {}): voi
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<CleanupResponse>,
+  res: NextApiResponse<CleanupResponse>
 ): Promise<void> {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -35,7 +38,10 @@ export default async function handler(
     return;
   }
 
-  if (!ADMIN_API_KEY || req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY) {
+  if (
+    !ADMIN_API_KEY ||
+    req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY
+  ) {
     res.status(401).json({ ok: false, error: "Unauthorized" });
     return;
   }
@@ -44,7 +50,7 @@ export default async function handler(
   const rl = rateLimit(
     "inner-circle-admin-cleanup",
     RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_CLEANUP ??
-      RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT,
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT
   );
   const rlHeaders = createRateLimitHeaders(rl);
   Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
@@ -78,12 +84,15 @@ export default async function handler(
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Cleanup failed";
-    
+
     logCleanup("error", {
       error: errorMessage,
     });
 
-    if (errorMessage.includes('database') || errorMessage.includes('connection')) {
+    if (
+      errorMessage.includes("database") ||
+      errorMessage.includes("connection")
+    ) {
       res.status(503).json({
         ok: false,
         error: "Database temporarily unavailable. Please try again later.",

@@ -6,12 +6,12 @@ type Props = {
   title: string;
   author: string;
   slug: string;
-  coverImage: string;          // prefer a local /public path
+  coverImage: string; // prefer a local /public path
   excerpt?: string;
-  pdf?: string | null;         // local /public path recommended
-  epub?: string | null;        // local /public path recommended
+  pdf?: string | null; // local /public path recommended
+  epub?: string | null; // local /public path recommended
   className?: string;
-  priority?: boolean;          // optional; true only if above-the-fold
+  priority?: boolean; // optional; true only if above-the-fold
 };
 
 const DEFAULT_COVER = "/assets/images/default-book.jpg";

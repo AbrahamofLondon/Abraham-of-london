@@ -47,9 +47,7 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
 }) => {
   const sizeClass = PAGE_SIZES[pageSize] ?? PAGE_SIZES.A4;
   const printedOn =
-    typeof Date !== "undefined"
-      ? new Date().toLocaleDateString("en-GB")
-      : "";
+    typeof Date !== "undefined" ? new Date().toLocaleDateString("en-GB") : "";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-8 print:bg-white print:p-0">
@@ -70,9 +68,7 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
               </div>
             )}
             {subtitle && (
-              <div className="mt-0.5 text-xs text-gray-500">
-                {subtitle}
-              </div>
+              <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
             )}
           </div>
           <div className="text-right text-[10px] text-gray-500">

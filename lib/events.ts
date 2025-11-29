@@ -76,13 +76,11 @@ function normaliseEventMeta(raw: unknown): EventSummary {
     typeof ev.heroImage === "string"
       ? (ev.heroImage as string)
       : typeof ev.coverImage === "string"
-      ? (ev.coverImage as string)
-      : null;
+        ? (ev.coverImage as string)
+        : null;
 
   const coverImage =
-    typeof ev.coverImage === "string"
-      ? (ev.coverImage as string)
-      : heroImage;
+    typeof ev.coverImage === "string" ? (ev.coverImage as string) : heroImage;
 
   const tags = Array.isArray(ev.tags)
     ? (ev.tags as unknown[])
@@ -99,14 +97,14 @@ function normaliseEventMeta(raw: unknown): EventSummary {
       typeof ev.location === "string"
         ? (ev.location as string)
         : typeof ev.venue === "string"
-        ? (ev.venue as string)
-        : null,
+          ? (ev.venue as string)
+          : null,
     description:
       typeof ev.description === "string"
         ? (ev.description as string)
         : typeof ev.excerpt === "string"
-        ? (ev.excerpt as string)
-        : null,
+          ? (ev.excerpt as string)
+          : null,
     heroImage,
     coverImage,
     tags,

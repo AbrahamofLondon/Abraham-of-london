@@ -31,29 +31,38 @@ export function memoize<K extends string | number, V>(factory: (key: K) => V) {
 }
 
 /** Merge props safely (className last-wins; style shallow-merged). */
-export function mergeProps<T extends Record<string, unknown>, U extends Record<string, unknown>>(
-  a: T,
-  b: U
-): T & U {
+export function mergeProps<
+  T extends Record<string, unknown>,
+  U extends Record<string, unknown>,
+>(a: T, b: U): T & U {
   const out = { ...a, ...b } as T & U;
   const aClass = (a as Record<string, unknown>).className as string | undefined;
   const bClass = (b as Record<string, unknown>).className as string | undefined;
   if (aClass || bClass) {
     (out as Record<string, unknown>).className = cn(aClass, bClass);
   }
-  const aStyle = (a as Record<string, unknown>).style as React.CSSProperties | undefined;
-  const bStyle = (b as Record<string, unknown>).style as React.CSSProperties | undefined;
+  const aStyle = (a as Record<string, unknown>).style as
+    | React.CSSProperties
+    | undefined;
+  const bStyle = (b as Record<string, unknown>).style as
+    | React.CSSProperties
+    | undefined;
   if (aStyle || bStyle) {
-    (out as Record<string, unknown>).style = { ...(aStyle || {}), ...(bStyle || {}) };
+    (out as Record<string, unknown>).style = {
+      ...(aStyle || {}),
+      ...(bStyle || {}),
+    };
   }
   return out;
 }
 
 /** Polymorphic types (for components that accept an "as" prop). */
-export type ElementTypeProp = keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>;
+export type ElementTypeProp =
+  | keyof JSX.IntrinsicElements
+  | React.JSXElementConstructor<any>;
 
-export type PolymorphicProps<E extends ElementTypeProp, P> =
-  P & Omit<React.ComponentPropsWithRef<E>, keyof P | "as"> & { as?: E };
+export type PolymorphicProps<E extends ElementTypeProp, P> = P &
+  Omit<React.ComponentPropsWithRef<E>, keyof P | "as"> & { as?: E };
 
 export function forwardRefWithAs<P, DefaultTag extends ElementTypeProp = "div">(
   render: <E extends ElementTypeProp = DefaultTag>(
@@ -67,17 +76,20 @@ export function forwardRefWithAs<P, DefaultTag extends ElementTypeProp = "div">(
 }
 
 /** Client-only wrapper (SSR returns null). */
-export const ClientOnly: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({
-  children,
-  fallback = null,
-}) => {
+export const ClientOnly: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ children, fallback = null }) => {
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => setReady(true), []);
   return (ready ? children : fallback) as unknown as React.ReactElement;
 };
 
 /** No-op error boundary placeholder (keeps API surface stable). */
-export function tryRender(nodeFactory: () => React.ReactNode, fallback?: React.ReactNode) {
+export function tryRender(
+  nodeFactory: () => React.ReactNode,
+  fallback?: React.ReactNode
+) {
   try {
     return nodeFactory();
   } catch {

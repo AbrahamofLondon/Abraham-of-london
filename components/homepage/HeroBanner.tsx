@@ -31,7 +31,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       ? imageSrc
       : "/assets/images/abraham-of-london-banner.webp";
 
-  const hasImage = typeof resolvedImageSrc === "string" && resolvedImageSrc.length > 0;
+  const hasImage =
+    typeof resolvedImageSrc === "string" && resolvedImageSrc.length > 0;
 
   return (
     <section className="relative overflow-hidden bg-warmWhite">

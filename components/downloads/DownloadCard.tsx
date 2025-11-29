@@ -10,11 +10,11 @@ type DownloadCardProps = {
   excerpt: string | null;
   coverImage: string | null;
   fileHref: string | null;
-  
+
   // Optional metadata
   category?: string | null;
   size?: string;
-  
+
   className?: string;
 };
 
@@ -34,9 +34,9 @@ export default function DownloadCard({
   size,
   className,
 }: DownloadCardProps) {
-  
   const detailHref = `/downloads/${slug}`;
-  const finalImageSrc = (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
+  const finalImageSrc =
+    (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
 
   return (
     <article

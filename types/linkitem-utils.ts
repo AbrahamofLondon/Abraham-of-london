@@ -29,32 +29,32 @@ export const isInternalLink = (link: LinkItem): boolean => {
 };
 
 export const hasSubtitle = (
-  link: LinkItem,
+  link: LinkItem
 ): link is LinkItem & { sub: string } => {
   return !!link.sub;
 };
 
 export const hasIcon = (
-  link: LinkItem,
+  link: LinkItem
 ): link is LinkItem & { icon: string } => {
   return !!link.icon;
 };
 
 export const hasBadge = (
-  link: LinkItem,
+  link: LinkItem
 ): link is LinkItem & { badge: string } => {
   return !!link.badge;
 };
 
 export const hasChildren = (
-  link: LinkItem,
+  link: LinkItem
 ): link is LinkItem & { children: LinkItem[] } => {
   return !!link.children && link.children.length > 0;
 };
 
 // Factory functions
 export const createLinkItem = (
-  overrides: Partial<LinkItem> & { href: string; label: string },
+  overrides: Partial<LinkItem> & { href: string; label: string }
 ): LinkItem => ({
   external: overrides.href?.startsWith("http") ? true : undefined,
   ...overrides,
@@ -63,7 +63,7 @@ export const createLinkItem = (
 export const createExternalLink = (
   href: string,
   label: string,
-  options?: Partial<LinkItem>,
+  options?: Partial<LinkItem>
 ): LinkItem => ({
   href,
   label,
@@ -75,7 +75,7 @@ export const createExternalLink = (
 export const createInternalLink = (
   href: string,
   label: string,
-  options?: Partial<LinkItem>,
+  options?: Partial<LinkItem>
 ): LinkItem => ({
   href,
   label,
@@ -125,7 +125,7 @@ export const withAnalytics = (link: LinkItem, eventName: string): LinkItem => {
 export const withBadge = (
   link: LinkItem,
   badge: string,
-  variant: LinkItem["badgeVariant"] = "default",
+  variant: LinkItem["badgeVariant"] = "default"
 ): LinkItem => {
   return { ...link, badge, badgeVariant: variant };
 };
@@ -137,14 +137,14 @@ export const withIcon = (link: LinkItem, icon: string): LinkItem => {
 // Filtering and searching
 export const filterLinksByGroup = (
   links: LinkItem[],
-  group: string,
+  group: string
 ): LinkItem[] => {
   return links.filter((link) => link.group === group);
 };
 
 export const filterEnabledLinks = (links: LinkItem[]): LinkItem[] => {
   return links.filter(
-    (link) => !link.disabled && (link.condition ? link.condition() : true),
+    (link) => !link.disabled && (link.condition ? link.condition() : true)
   );
 };
 
@@ -158,19 +158,19 @@ export const searchLinks = (links: LinkItem[], query: string): LinkItem[] => {
     (link) =>
       link.label.toLowerCase().includes(lowerQuery) ||
       link.sub?.toLowerCase().includes(lowerQuery) ||
-      link.href.toLowerCase().includes(lowerQuery),
+      link.href.toLowerCase().includes(lowerQuery)
   );
 };
 
 // Navigation helpers
 export const getActiveLink = (
   links: LinkItem[],
-  currentPath: string,
+  currentPath: string
 ): LinkItem | undefined => {
   return links.find(
     (link) =>
       link.href === currentPath ||
-      (link.href !== "/" && currentPath.startsWith(link.href)),
+      (link.href !== "/" && currentPath.startsWith(link.href))
   );
 };
 
@@ -192,7 +192,7 @@ export const flattenLinkTree = (links: LinkItem[]): LinkItem[] => {
 
 export const getBreadcrumbs = (
   links: LinkItem[],
-  currentPath: string,
+  currentPath: string
 ): LinkItem[] => {
   const flattened = flattenLinkTree(links);
   const pathSegments = currentPath.split("/").filter(Boolean);

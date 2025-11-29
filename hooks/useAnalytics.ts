@@ -14,12 +14,12 @@ export function useAnalytics() {
     if (typeof window === "undefined") return;
 
     // Ensure dataLayer exists with proper type checking
-    if (!('dataLayer' in window)) {
+    if (!("dataLayer" in window)) {
       (window as any).dataLayer = [];
     }
 
     // Define a basic gtag shim if GA hasn't injected one yet
-    if (!('gtag' in window)) {
+    if (!("gtag" in window)) {
       (window as any).gtag = (...args: unknown[]) => {
         // Push into dataLayer in GA-compatible format
         (window as any).dataLayer.push(args);
@@ -91,7 +91,7 @@ export function useAnalytics() {
         });
       }
     },
-    [],
+    []
   );
 
   const trackPageView = useCallback(
@@ -107,7 +107,7 @@ export function useAnalytics() {
 
       (window as any).gtag("event", "page_view", pageParams);
     },
-    [],
+    []
   );
 
   const trackError = useCallback(
@@ -119,14 +119,14 @@ export function useAnalytics() {
         ...context,
       });
     },
-    [trackEvent],
+    [trackEvent]
   );
 
   const trackPerformance = useCallback(
     (
       metricName: string,
       value: number,
-      context: Record<string, unknown> = {},
+      context: Record<string, unknown> = {}
     ) => {
       trackEvent("performance_metric", {
         metric_name: metricName,
@@ -134,7 +134,7 @@ export function useAnalytics() {
         ...context,
       });
     },
-    [trackEvent],
+    [trackEvent]
   );
 
   return {

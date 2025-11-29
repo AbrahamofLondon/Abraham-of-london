@@ -56,7 +56,10 @@ function formatDateISOToGB(iso?: string | null): string | null {
 }
 
 function normalisePostSlug(raw: string): string {
-  return (raw || "").toString().trim().replace(/^\/+|\/+$/g, "");
+  return (raw || "")
+    .toString()
+    .trim()
+    .replace(/^\/+|\/+$/g, "");
 }
 
 // Enhanced shimmer effect component
@@ -107,16 +110,18 @@ export default function BlogPostCard({
     return candidates;
   }, [post.coverImage, post.heroImage, post.image]);
 
-  const cover = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+  const cover =
+    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
 
   const authorName =
     typeof post.author === "string"
       ? post.author
       : post.author?.name || "Abraham of London";
 
-  const authorPic = authorImageError 
+  const authorPic = authorImageError
     ? FALLBACK_AVATAR
-    : (typeof post.author !== "string" && post.author?.picture) || FALLBACK_AVATAR;
+    : (typeof post.author !== "string" && post.author?.picture) ||
+      FALLBACK_AVATAR;
 
   const dateText = formatDateISOToGB(post.date);
 
@@ -124,8 +129,8 @@ export default function BlogPostCard({
     typeof post.readTime === "number"
       ? `${post.readTime} min read`
       : typeof post.readTime === "string" && post.readTime.trim()
-      ? post.readTime
-      : null;
+        ? post.readTime
+        : null;
 
   // Enhanced size-based styling
   const sizeClasses = {
@@ -199,7 +204,7 @@ export default function BlogPostCard({
             onError={() => {
               setImageLoaded(false);
               setCoverIndex((prev) =>
-                prev + 1 < coverCandidates.length ? prev + 1 : prev,
+                prev + 1 < coverCandidates.length ? prev + 1 : prev
               );
             }}
           />
@@ -213,7 +218,7 @@ export default function BlogPostCard({
                 </span>
               </div>
             )}
-            
+
             {post.featured && (
               <div className="rounded-full border border-white/20 bg-gradient-to-r from-softGold to-amber-500 px-3 py-1.5 backdrop-blur-sm shadow-lg">
                 <span className="text-xs font-semibold uppercase tracking-wider text-white">
@@ -221,9 +226,11 @@ export default function BlogPostCard({
                 </span>
               </div>
             )}
-            
-            {post.status && post.status !== 'published' && (
-              <div className={`rounded-full border px-3 py-1.5 backdrop-blur-sm shadow-lg ${statusColors[post.status]}`}>
+
+            {post.status && post.status !== "published" && (
+              <div
+                className={`rounded-full border px-3 py-1.5 backdrop-blur-sm shadow-lg ${statusColors[post.status]}`}
+              >
                 <span className="text-xs font-semibold uppercase tracking-wider">
                   {post.status}
                 </span>
@@ -272,7 +279,9 @@ export default function BlogPostCard({
 
           {/* Enhanced excerpt */}
           {post.excerpt ? (
-            <p className={`mb-4 font-light leading-relaxed text-gray-600 ${currentSize.excerpt}`}>
+            <p
+              className={`mb-4 font-light leading-relaxed text-gray-600 ${currentSize.excerpt}`}
+            >
               {post.excerpt}
             </p>
           ) : null}

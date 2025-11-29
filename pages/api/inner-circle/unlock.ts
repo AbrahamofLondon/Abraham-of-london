@@ -39,7 +39,7 @@ function logUnlock(action: string, meta: Record<string, unknown> = {}): void {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<UnlockResponse>,
+  res: NextApiResponse<UnlockResponse>
 ): Promise<void> {
   if (req.method !== "GET" && req.method !== "POST") {
     res.setHeader("Allow", "GET, POST");
@@ -63,7 +63,7 @@ export default async function handler(
   // Rate limit
   const rl = rateLimit(
     `inner-circle-unlock:${ip}`,
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK,
+    RATE_LIMIT_CONFIGS.INNER_CIRCLE_UNLOCK
   );
   const rlHeaders = createRateLimitHeaders(rl);
   Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));

@@ -14,7 +14,7 @@ const InnerCircleResendPage: NextPage = () => {
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "success" | "error">(
-    "idle",
+    "idle"
   );
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
@@ -50,7 +50,7 @@ const InnerCircleResendPage: NextPage = () => {
         setStatus("error");
         setFeedback(
           data.error ||
-            "We couldn't resend your access email. Please try again shortly.",
+            "We couldn't resend your access email. Please try again shortly."
         );
         return;
       }
@@ -58,13 +58,13 @@ const InnerCircleResendPage: NextPage = () => {
       setStatus("success");
       setFeedback(
         data.message ||
-          "A fresh Inner Circle access email has been sent. Please check your inbox.",
+          "A fresh Inner Circle access email has been sent. Please check your inbox."
       );
     } catch (error) {
       console.error("Resend failed:", error);
       setStatus("error");
       setFeedback(
-        "Something went wrong while resending your access email. Please try again.",
+        "Something went wrong while resending your access email. Please try again."
       );
     } finally {
       setLoading(false);
@@ -110,8 +110,8 @@ const InnerCircleResendPage: NextPage = () => {
                 placeholder="you@example.com"
               />
               <p className="text-[11px] text-softGold/70">
-                Use the same email you registered with. If the message doesn&apos;t appear,
-                check your promotions or spam folder.
+                Use the same email you registered with. If the message
+                doesn&apos;t appear, check your promotions or spam folder.
               </p>
             </div>
 
@@ -148,8 +148,8 @@ const InnerCircleResendPage: NextPage = () => {
                   status === "success"
                     ? "border-emerald-500/60 bg-emerald-900/40 text-emerald-100"
                     : status === "error"
-                    ? "border-red-500/60 bg-red-900/40 text-red-100"
-                    : "border-softGold/40 bg-black/60 text-softGold/90",
+                      ? "border-red-500/60 bg-red-900/40 text-red-100"
+                      : "border-softGold/40 bg-black/60 text-softGold/90",
                 ].join(" ")}
               >
                 {feedback}

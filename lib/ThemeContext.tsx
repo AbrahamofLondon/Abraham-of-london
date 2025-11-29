@@ -53,7 +53,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       resolvedTheme: theme,
       setTheme,
     }),
-    [theme],
+    [theme]
   );
 
   return (

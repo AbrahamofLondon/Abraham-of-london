@@ -1,14 +1,19 @@
 // scripts/debug-print.mjs
-import { spawn } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-console.log('🔍 Debugging print utils with TypeScript...\n');
+console.log("🔍 Debugging print utils with TypeScript...\n");
 
 // Use tsx to run TypeScript directly
-const result = spawn('npx', ['tsx', '-e', `
+const result = spawn(
+  "npx",
+  [
+    "tsx",
+    "-e",
+    `
   try {
     const printUtils = require('../lib/server/print-utils.ts');
     
@@ -44,7 +49,10 @@ const result = spawn('npx', ['tsx', '-e', `
     console.log('❌ Error:', error.message);
     console.log('Stack:', error.stack);
   }
-`], {
-  stdio: 'inherit',
-  shell: true
-});
+`,
+  ],
+  {
+    stdio: "inherit",
+    shell: true,
+  }
+);

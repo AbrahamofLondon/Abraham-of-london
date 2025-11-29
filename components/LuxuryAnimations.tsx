@@ -16,10 +16,7 @@ export interface ParallaxProps {
   className?: string;
 }
 
-export const Parallax: React.FC<ParallaxProps> = ({
-  className,
-  children,
-}) => {
+export const Parallax: React.FC<ParallaxProps> = ({ className, children }) => {
   return <div className={className}>{children}</div>;
 };
 

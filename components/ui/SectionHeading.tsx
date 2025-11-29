@@ -30,13 +30,25 @@ export default function SectionHeading({
 
   return (
     <header className={wrapCls}>
-      <div className={clsx("flex items-start justify-between gap-3", align === "center" && "flex-col md:flex-row md:text-left")}>
-        <div className={clsx("max-w-3xl", align === "center" ? "mx-auto md:mx-0" : "")}>
+      <div
+        className={clsx(
+          "flex items-start justify-between gap-3",
+          align === "center" && "flex-col md:flex-row md:text-left"
+        )}
+      >
+        <div
+          className={clsx(
+            "max-w-3xl",
+            align === "center" ? "mx-auto md:mx-0" : ""
+          )}
+        >
           {eyebrow && (
             <p
               className={clsx(
                 "text-xs tracking-widest uppercase",
-                tone === "muted" ? "text-[color:var(--color-on-secondary)/0.6]" : "text-[color:var(--color-on-secondary)/0.7]"
+                tone === "muted"
+                  ? "text-[color:var(--color-on-secondary)/0.6]"
+                  : "text-[color:var(--color-on-secondary)/0.7]"
               )}
             >
               {eyebrow}
@@ -58,7 +70,11 @@ export default function SectionHeading({
           )}
         </div>
 
-        {kicker ? <div className={clsx(align === "center" ? "md:ml-auto" : "")}>{kicker}</div> : null}
+        {kicker ? (
+          <div className={clsx(align === "center" ? "md:ml-auto" : "")}>
+            {kicker}
+          </div>
+        ) : null}
       </div>
     </header>
   );

@@ -1,11 +1,11 @@
 // pages/books/index.tsx
-import React from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import Image from 'next/image';
-import Layout from '@/components/Layout';
-import { getAllBooks } from '@/lib/books';
-import type { BookMeta } from '@/types/index';
+import React from "react";
+import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+import Layout from "@/components/Layout";
+import { getAllBooks } from "@/lib/books";
+import type { BookMeta } from "@/types/index";
 
 interface BooksPageProps {
   books: BookMeta[];
@@ -17,31 +17,35 @@ interface BooksPageProps {
 // Enhanced Featured Book Card Component
 function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
-  
+
   return (
     <Link href={`/books/${book.slug}`} className="block group">
-      <div className="
+      <div
+        className="
         relative overflow-hidden rounded-2xl 
         bg-gradient-to-br from-charcoal-light to-charcoal-dark
         border border-gray-700/50
         transform transition-all duration-500
         group-hover:scale-[1.02] group-hover:border-softGold/30
         group-hover:shadow-2xl
-      ">
+      "
+      >
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-softGold/5 via-transparent to-softGold/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
+
         <div className="relative p-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Book Cover */}
             {book.coverImage && (
               <div className="flex-shrink-0">
                 <div className="relative group/image">
-                  <div className="
+                  <div
+                    className="
                     absolute -inset-4 bg-gradient-to-r from-softGold/20 to-softGold/10 
                     rounded-2xl blur-xl opacity-50 group-hover/image:opacity-75 
                     transition-opacity duration-500
-                  "></div>
+                  "
+                  ></div>
                   <Image
                     src={book.coverImage}
                     alt={book.title}
@@ -62,12 +66,14 @@ function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-4">
                 {isInnerCircle && (
-                  <span className="
+                  <span
+                    className="
                     inline-flex items-center gap-1.5
                     rounded-full border border-softGold/70 bg-softGold/10 
                     px-3 py-1 text-xs font-semibold uppercase 
                     tracking-[0.15em] text-softGold
-                  ">
+                  "
+                  >
                     <span>🔒</span>
                     Inner Circle
                   </span>
@@ -90,38 +96,40 @@ function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
               <div className="space-y-3 mb-6">
                 {book.author && (
                   <p className="text-gray-300">
-                    by <span className="font-semibold text-softGold">{book.author}</span>
+                    by{" "}
+                    <span className="font-semibold text-softGold">
+                      {book.author}
+                    </span>
                   </p>
                 )}
                 {book.readTime && (
-                  <p className="text-sm text-gray-400">
-                    {book.readTime}
-                  </p>
+                  <p className="text-sm text-gray-400">{book.readTime}</p>
                 )}
               </div>
 
               <p className="text-gray-300 leading-relaxed mb-6">
-                {book.excerpt || book.description || "A valuable resource for leaders and thinkers shaping the future."}
+                {book.excerpt ||
+                  book.description ||
+                  "A valuable resource for leaders and thinkers shaping the future."}
               </p>
 
               <div className="flex items-center justify-between">
-                <span className="
+                <span
+                  className="
                   inline-flex items-center gap-2 
                   text-softGold font-semibold 
                   group-hover:gap-3 transition-all duration-300
-                ">
+                "
+                >
                   Explore Volume
                   <span className="text-lg">→</span>
                 </span>
 
                 {book.date && (
-                  <time 
-                    className="text-sm text-gray-400"
-                    dateTime={book.date}
-                  >
-                    {new Date(book.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long'
+                  <time className="text-sm text-gray-400" dateTime={book.date}>
+                    {new Date(book.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
                     })}
                   </time>
                 )}
@@ -137,17 +145,19 @@ function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
 // Enhanced Regular Book Card Component
 function BookCard({ book, index }: { book: BookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
-  
+
   return (
     <Link href={`/books/${book.slug}`} className="block group">
-      <div className="
+      <div
+        className="
         h-full bg-charcoal-light border border-gray-700/50 
         rounded-2xl overflow-hidden
         transform transition-all duration-500
         group-hover:scale-105 group-hover:border-softGold/30
         group-hover:shadow-2xl
         flex flex-col
-      ">
+      "
+      >
         {/* Book Cover */}
         {book.coverImage && (
           <div className="relative h-48 overflow-hidden">
@@ -158,16 +168,18 @@ function BookCard({ book, index }: { book: BookMeta; index: number }) {
               className="object-cover transform group-hover:scale-110 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal-light via-transparent to-transparent"></div>
-            
+
             {/* Access Level Badge */}
             {isInnerCircle && (
               <div className="absolute top-4 right-4">
-                <span className="
+                <span
+                  className="
                   inline-flex items-center gap-1
                   rounded-full border border-softGold/70 bg-softGold/10 
                   px-2 py-1 text-xs font-semibold uppercase 
                   tracking-[0.15em] text-softGold
-                ">
+                "
+                >
                   <span className="text-xs">🔒</span>
                   Inner
                 </span>
@@ -192,36 +204,38 @@ function BookCard({ book, index }: { book: BookMeta; index: number }) {
             <div className="space-y-2 mb-4">
               {book.author && (
                 <p className="text-sm text-gray-300">
-                  by <span className="font-semibold text-softGold">{book.author}</span>
+                  by{" "}
+                  <span className="font-semibold text-softGold">
+                    {book.author}
+                  </span>
                 </p>
               )}
               {book.readTime && (
-                <p className="text-xs text-gray-400">
-                  {book.readTime}
-                </p>
+                <p className="text-xs text-gray-400">{book.readTime}</p>
               )}
             </div>
 
             <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-              {book.excerpt || book.description || "Essential reading for thoughtful leaders and builders."}
+              {book.excerpt ||
+                book.description ||
+                "Essential reading for thoughtful leaders and builders."}
             </p>
           </div>
 
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700/50">
-            <span className="
+            <span
+              className="
               inline-flex items-center gap-2 
               text-softGold text-sm font-semibold 
               group-hover:gap-3 transition-all duration-300
-            ">
+            "
+            >
               Read More
               <span className="text-lg">→</span>
             </span>
 
             {book.date && (
-              <time 
-                className="text-xs text-gray-400"
-                dateTime={book.date}
-              >
+              <time className="text-xs text-gray-400" dateTime={book.date}>
                 {new Date(book.date).getFullYear()}
               </time>
             )}
@@ -238,13 +252,16 @@ function EmptyState() {
     <div className="text-center py-20">
       <div className="max-w-md mx-auto">
         <div className="text-6xl mb-6">📚</div>
-        <h3 className="font-serif text-2xl text-cream mb-4">Library in Development</h3>
+        <h3 className="font-serif text-2xl text-cream mb-4">
+          Library in Development
+        </h3>
         <p className="text-gray-300 mb-6 leading-relaxed">
-          Our book collection is currently being curated with valuable insights, frameworks, 
-          and original works that will equip leaders and builders for the challenges ahead.
+          Our book collection is currently being curated with valuable insights,
+          frameworks, and original works that will equip leaders and builders
+          for the challenges ahead.
         </p>
         <div className="space-y-4">
-          <Link 
+          <Link
             href="/content"
             className="
               inline-block bg-softGold text-charcoal px-8 py-3 
@@ -266,25 +283,31 @@ function EmptyState() {
 
 export default function BooksPage({ books }: BooksPageProps) {
   const hasBooks = books && books.length > 0;
-  
+
   // Separate featured and regular books
-  const featuredBooks = books.filter(book => book.featured);
-  const regularBooks = books.filter(book => !book.featured);
+  const featuredBooks = books.filter((book) => book.featured);
+  const regularBooks = books.filter((book) => !book.featured);
 
   return (
-    <Layout 
-      title="Books & Publications" 
+    <Layout
+      title="Books & Publications"
       pageTitle="Books & Publications"
       transparentHeader={false}
     >
       <Head>
         <title>Books & Publications | Abraham of London</title>
-        <meta 
-          name="description" 
-          content="Curated book recommendations and publications from Abraham of London. Deep explorations of purpose, responsibility, and the architecture of enduring things." 
+        <meta
+          name="description"
+          content="Curated book recommendations and publications from Abraham of London. Deep explorations of purpose, responsibility, and the architecture of enduring things."
         />
-        <meta property="og:title" content="Books & Publications | Abraham of London" />
-        <meta property="og:description" content="Curated book recommendations and publications for thoughtful leaders and builders." />
+        <meta
+          property="og:title"
+          content="Books & Publications | Abraham of London"
+        />
+        <meta
+          property="og:description"
+          content="Curated book recommendations and publications for thoughtful leaders and builders."
+        />
         <meta property="og:type" content="website" />
       </Head>
 
@@ -292,7 +315,7 @@ export default function BooksPage({ books }: BooksPageProps) {
       <div className="relative bg-gradient-to-br from-charcoal via-charcoal-dark to-black min-h-[60vh] flex items-center justify-center overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-softGold/10 via-transparent to-transparent"></div>
-        
+
         {/* Animated Orbs */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-softGold/5 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-softGold/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -303,15 +326,15 @@ export default function BooksPage({ books }: BooksPageProps) {
               Library Collection
             </span>
           </div>
-          
+
           <h1 className="font-serif text-5xl lg:text-7xl font-light text-cream mb-6 leading-tight">
             Books &<br />
             <span className="text-softGold">Publications</span>
           </h1>
-          
+
           <p className="text-xl lg:text-2xl text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
-            Curated readings and original works for thoughtful leaders, builders, 
-            and those shaping the architecture of human purpose.
+            Curated readings and original works for thoughtful leaders,
+            builders, and those shaping the architecture of human purpose.
           </p>
         </div>
       </div>
@@ -325,7 +348,8 @@ export default function BooksPage({ books }: BooksPageProps) {
                 Featured Works
               </h2>
               <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                Essential reading for understanding purpose, civilisation, and the builder's calling
+                Essential reading for understanding purpose, civilisation, and
+                the builder's calling
               </p>
             </div>
 
@@ -366,15 +390,15 @@ export default function BooksPage({ books }: BooksPageProps) {
 export async function getStaticProps() {
   try {
     const books = await getAllBooks();
-    
+
     // Since we updated types/index.ts, BookMeta now includes accessLevel and lockMessage
     // We just need to ensure all data is serializable
-    const serializableBooks = books.map(book => ({
+    const serializableBooks = books.map((book) => ({
       ...book,
       // Required fields
       slug: book.slug,
       title: book.title,
-      
+
       // String fields that might be undefined
       excerpt: book.excerpt ?? null,
       description: book.description ?? null,
@@ -393,22 +417,22 @@ export async function getStaticProps() {
       purchaseLink: book.purchaseLink ?? null,
       accessLevel: book.accessLevel ?? null,
       lockMessage: book.lockMessage ?? null,
-      
+
       // Array fields
       tags: book.tags ?? [],
-      
+
       // Number fields
       pages: book.pages ?? null,
       rating: book.rating ?? null,
-      
+
       // Boolean fields
       featured: book.featured ?? false,
       published: book.published ?? false,
       draft: book.draft ?? false,
-      
+
       // Status field - use the existing BookMeta status type
       status: book.status ?? null,
-      
+
       // Format field
       format: book.format ?? null,
     }));
@@ -420,7 +444,7 @@ export async function getStaticProps() {
       revalidate: 60,
     };
   } catch (error) {
-    console.error('Error fetching books:', error);
+    console.error("Error fetching books:", error);
     return {
       props: {
         books: [],

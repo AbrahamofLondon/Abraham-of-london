@@ -32,12 +32,21 @@ export default function EventCard({
         </h3>
         {date ? (
           <p className="mt-1 text-sm text-gray-500">
-            {new Date(date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+            {new Date(date).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
           </p>
         ) : null}
-        {summary ? <p className="mt-3 text-sm text-gray-600">{summary}</p> : null}
+        {summary ? (
+          <p className="mt-3 text-sm text-gray-600">{summary}</p>
+        ) : null}
         <div className="mt-4">
-          <Link href={`/events/${slug}`} className="text-forest hover:underline text-sm font-medium">
+          <Link
+            href={`/events/${slug}`}
+            className="text-forest hover:underline text-sm font-medium"
+          >
             View details →
           </Link>
         </div>

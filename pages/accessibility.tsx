@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/siteConfig";
 const AccessibilityPage: NextPage = () => {
   const lastUpdated = React.useMemo(
     () => new Date().toLocaleDateString("en-GB"),
-    [],
+    []
   );
 
   return (

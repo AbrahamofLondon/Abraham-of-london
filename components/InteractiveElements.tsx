@@ -98,7 +98,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         <motion.div
           className={cn(
             "flex w-full flex-col gap-6 text-white",
-            textAlignClasses[textAlign],
+            textAlignClasses[textAlign]
           )}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,7 +107,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           {/* Eyebrow + status */}
           <div className="flex flex-wrap items-center gap-3">
             {eyebrow && (
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-softGold">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-400">
                 {eyebrow}
               </div>
             )}
@@ -147,7 +147,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               <button
                 type="button"
                 onClick={ctaOnClick}
-                className="inline-flex items-center gap-2 rounded-full bg-softGold px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-softGold/90 focus:outline-none focus:ring-2 focus:ring-softGold focus:ring-offset-2 focus:ring-offset-black"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
               >
                 {ctaText}
                 <ArrowRight className="h-4 w-4" />
@@ -161,10 +161,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     key={`${cta.text}-${cta.href}`}
                     href={cta.href}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide transition-all",
+                      "inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide transition-all focus:outline-none focus:ring-2 focus:ring-amber-500",
                       cta.variant === "outline"
-                        ? "border border-softGold/60 bg-black/20 text-softGold hover:bg-softGold/10"
-                        : "bg-white/10 text-white hover:bg-white/20",
+                        ? "border border-amber-500/60 bg-black/20 text-amber-400 hover:bg-amber-500/10"
+                        : "bg-white/10 text-white hover:bg-white/20"
                     )}
                   >
                     {cta.text}
@@ -186,4 +186,5 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   );
 };
 
+// Export as default for backward compatibility
 export default HeroBanner;

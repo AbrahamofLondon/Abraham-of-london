@@ -11,13 +11,7 @@ export function BrandLogo(props: BrandLogoProps): JSX.Element {
       aria-label="Abraham of London"
       {...props}
     >
-      <circle
-        cx="32"
-        cy="32"
-        r="30"
-        className="fill-forest"
-        strokeWidth={0}
-      />
+      <circle cx="32" cy="32" r="30" className="fill-forest" strokeWidth={0} />
       <text
         x="50%"
         y="50%"

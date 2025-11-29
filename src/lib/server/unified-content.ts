@@ -1,11 +1,11 @@
-src/lib/server/unified-content.ts
-import { getAllPages } from './pages-data';
-import { getAllDownloads } from './downloads-data';
-import { getAllEvents } from './events-data';
+src / lib / server / unified - content.ts;
+import { getAllPages } from "./pages-data";
+import { getAllDownloads } from "./downloads-data";
+import { getAllEvents } from "./events-data";
 
 export interface UnifiedContent {
   id: string;
-  type: 'page' | 'download' | 'event';
+  type: "page" | "download" | "event";
   slug: string;
   title: string;
   description?: string;
@@ -23,16 +23,16 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     const [pages, downloads, events] = await Promise.all([
       getAllPages(),
       getAllDownloads(),
-      getAllEvents()
+      getAllEvents(),
     ]);
 
     const unified: UnifiedContent[] = [];
 
     // Add pages
-    pages.forEach(page => {
+    pages.forEach((page) => {
       unified.push({
         id: `page-${page.slug}`,
-        type: 'page',
+        type: "page",
         slug: page.slug,
         title: page.title,
         description: page.description,
@@ -42,32 +42,32 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
         category: page.category,
         tags: page.tags,
         content: page.content,
-        url: `/${page.slug}`
+        url: `/${page.slug}`,
       });
     });
 
     // Add downloads
-    downloads.forEach(download => {
+    downloads.forEach((download) => {
       unified.push({
         id: `download-${download.slug}`,
-        type: 'download',
+        type: "download",
         slug: download.slug,
-        title: download.title || 'Untitled Download',
+        title: download.title || "Untitled Download",
         description: download.description || download.excerpt,
         excerpt: download.excerpt,
         date: download.date,
         author: download.author,
         category: download.category,
         tags: download.tags,
-        url: `/downloads/${download.slug}`
+        url: `/downloads/${download.slug}`,
       });
     });
 
     // Add events
-    events.forEach(event => {
+    events.forEach((event) => {
       unified.push({
         id: `event-${event.slug}`,
-        type: 'event',
+        type: "event",
         slug: event.slug,
         title: event.title,
         description: event.description,
@@ -76,7 +76,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
         author: event.author,
         category: event.category,
         tags: event.tags,
-        url: `/events/${event.slug}`
+        url: `/events/${event.slug}`,
       });
     });
 
@@ -89,31 +89,36 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
     return unified;
   } catch (error) {
-    console.error('[unified-content] Error fetching unified content:', error);
+    console.error("[unified-content] Error fetching unified content:", error);
     return [];
   }
 }
 
-export async function getUnifiedContentByType(type: UnifiedContent['type']): Promise<UnifiedContent[]> {
+export async function getUnifiedContentByType(
+  type: UnifiedContent["type"]
+): Promise<UnifiedContent[]> {
   const allContent = await getAllUnifiedContent();
-  return allContent.filter(item => item.type === type);
+  return allContent.filter((item) => item.type === type);
 }
 
-export async function searchUnifiedContent(query: string): Promise<UnifiedContent[]> {
+export async function searchUnifiedContent(
+  query: string
+): Promise<UnifiedContent[]> {
   const allContent = await getAllUnifiedContent();
   const lowerQuery = query.toLowerCase();
-  
-  return allContent.filter(item =>
-    item.title.toLowerCase().includes(lowerQuery) ||
-    item.description?.toLowerCase().includes(lowerQuery) ||
-    item.excerpt?.toLowerCase().includes(lowerQuery) ||
-    item.content?.toLowerCase().includes(lowerQuery) ||
-    item.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+
+  return allContent.filter(
+    (item) =>
+      item.title.toLowerCase().includes(lowerQuery) ||
+      item.description?.toLowerCase().includes(lowerQuery) ||
+      item.excerpt?.toLowerCase().includes(lowerQuery) ||
+      item.content?.toLowerCase().includes(lowerQuery) ||
+      item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );
 }
 
 export default {
   getAllUnifiedContent,
   getUnifiedContentByType,
-  searchUnifiedContent
+  searchUnifiedContent,
 };

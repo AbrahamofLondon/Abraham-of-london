@@ -10,13 +10,16 @@ export function ensureDir(dir: string): string | null {
     const abs = path.join(CONTENT_ROOT, dir);
     if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) return abs;
     return null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function listMdFiles(absDir: string): string[] {
-  return fs.readdirSync(absDir)
-    .filter(f => MD_EXTS.some(ext => f.toLowerCase().endsWith(ext)))
-    .map(f => path.join(absDir, f));
+  return fs
+    .readdirSync(absDir)
+    .filter((f) => MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext)))
+    .map((f) => path.join(absDir, f));
 }
 
 export function fileToSlug(filePath: string): string {
@@ -32,6 +35,6 @@ export function readFrontmatter(absFile: string) {
 }
 
 export function sortByDateDesc<T extends { date?: string }>(items: T[]): T[] {
-  const toKey = (d?: string) => d ? new Date(d).valueOf() : 0;
+  const toKey = (d?: string) => (d ? new Date(d).valueOf() : 0);
   return [...items].sort((a, b) => toKey(b.date) - toKey(a.date));
 }

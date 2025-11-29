@@ -86,7 +86,9 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
                     </div>
                   )}
 
-                  <div className={`flex flex-1 flex-col p-6 ${res.coverImage ? "" : "pt-8"}`}>
+                  <div
+                    className={`flex flex-1 flex-col p-6 ${res.coverImage ? "" : "pt-8"}`}
+                  >
                     <h2 className="mb-2 font-serif text-xl font-semibold tracking-tight text-cream">
                       {res.title}
                     </h2>

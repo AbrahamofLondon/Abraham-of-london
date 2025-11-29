@@ -73,7 +73,7 @@ export interface PrivacySafeStats {
 
 export interface InnerCircleStore {
   createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs,
+    args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey>;
 
   verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult>;
@@ -110,7 +110,11 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
+function generateAccessKey(): {
+  key: string;
+  keyHash: string;
+  keySuffix: string;
+} {
   const raw = crypto.randomBytes(20).toString("base64url");
   const key = raw.slice(0, 24);
   const keyHash = sha256Hex(key);
@@ -118,7 +122,10 @@ function generateAccessKey(): { key: string; keyHash: string; keySuffix: string 
   return { key, keyHash, keySuffix };
 }
 
-function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}): void {
+function logPrivacyAction(
+  action: string,
+  metadata: Record<string, unknown> = {}
+): void {
   console.log(`🔒 InnerCircle: ${action}`, {
     ts: new Date().toISOString(),
     ...metadata,
@@ -131,7 +138,10 @@ function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}
 
 class MemoryInnerCircleStore implements InnerCircleStore {
   private members: InnerCircleMember[] = [];
-  private keyHashIndex = new Map<string, { memberId: string; keyIndex: number }>();
+  private keyHashIndex = new Map<
+    string,
+    { memberId: string; keyIndex: number }
+  >();
   private emailHashIndex = new Map<string, string>();
   private lastCleanup = nowIso();
 
@@ -148,12 +158,15 @@ class MemoryInnerCircleStore implements InnerCircleStore {
   private indexMember(member: InnerCircleMember): void {
     this.emailHashIndex.set(member.emailHash, member.id);
     member.keys.forEach((key, idx) => {
-      this.keyHashIndex.set(key.keyHash, { memberId: member.id, keyIndex: idx });
+      this.keyHashIndex.set(key.keyHash, {
+        memberId: member.id,
+        keyIndex: idx,
+      });
     });
   }
 
   async createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs,
+    args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey> {
     const emailNormalised = normaliseEmail(args.email);
     const emailHash = sha256Hex(emailNormalised);
@@ -205,7 +218,10 @@ class MemoryInnerCircleStore implements InnerCircleStore {
     };
 
     member.keys.push(keyRecord);
-    this.keyHashIndex.set(keyHash, { memberId: member.id, keyIndex: member.keys.length - 1 });
+    this.keyHashIndex.set(keyHash, {
+      memberId: member.id,
+      keyIndex: member.keys.length - 1,
+    });
 
     logPrivacyAction("key_issued", {
       store: "memory",
@@ -250,7 +266,10 @@ class MemoryInnerCircleStore implements InnerCircleStore {
     };
   }
 
-  async recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void> {
+  async recordInnerCircleUnlock(
+    key: string,
+    ipAddress?: string
+  ): Promise<void> {
     const safeKey = key.trim();
     if (!safeKey) return;
 
@@ -327,7 +346,10 @@ class MemoryInnerCircleStore implements InnerCircleStore {
     return true;
   }
 
-  async cleanupOldData(): Promise<{ deletedMembers: number; deletedKeys: number }> {
+  async cleanupOldData(): Promise<{
+    deletedMembers: number;
+    deletedKeys: number;
+  }> {
     const cutoff = Date.now() - DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
     let deletedMembers = 0;
     let deletedKeys = 0;
@@ -362,15 +384,14 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       m.keys.some(
         (k) =>
           k.status === "active" &&
-          now - new Date(k.createdAt).getTime() < KEY_TTL_MS,
-      ),
+          now - new Date(k.createdAt).getTime() < KEY_TTL_MS
+      )
     ).length;
 
     const totalUnlocks = this.members.reduce(
       (sum, m) =>
-        sum +
-        m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0),
-      0,
+        sum + m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0),
+      0
     );
 
     return {
@@ -423,7 +444,7 @@ function getPool(): Pool {
     process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL ?? "";
   if (!conn) {
     throw new Error(
-      "[InnerCircle] No INNER_CIRCLE_DB_URL/DATABASE_URL configured.",
+      "[InnerCircle] No INNER_CIRCLE_DB_URL/DATABASE_URL configured."
     );
   }
 
@@ -438,7 +459,7 @@ function getPool(): Pool {
 
 class PostgresInnerCircleStore implements InnerCircleStore {
   private async withClient<T>(
-    fn: (client: PoolClient) => Promise<T>,
+    fn: (client: PoolClient) => Promise<T>
   ): Promise<T> {
     const pool = getPool();
     const client = await pool.connect();
@@ -450,7 +471,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
   }
 
   async createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs,
+    args: CreateOrUpdateMemberArgs
   ): Promise<IssuedKey> {
     const emailNormalised = normaliseEmail(args.email);
     const emailHash = sha256Hex(emailNormalised);
@@ -473,7 +494,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
           last_ip = COALESCE(NULLIF($4, ''), inner_circle_members.last_ip)
         RETURNING id
       `,
-        [emailHash, emailHashPrefix, args.name ?? "", args.ipAddress ?? ""],
+        [emailHash, emailHashPrefix, args.name ?? "", args.ipAddress ?? ""]
       );
 
       const memberId = memberRes.rows[0].id;
@@ -494,7 +515,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         )
         VALUES ($1, $2, $3, 'active', 0)
       `,
-        [memberId, keyHash, keySuffix],
+        [memberId, keyHash, keySuffix]
       );
 
       await client.query("COMMIT");
@@ -515,9 +536,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     };
   }
 
-  async verifyInnerCircleKey(
-    key: string,
-  ): Promise<VerifyInnerCircleKeyResult> {
+  async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
     const safeKey = key.trim();
     if (!safeKey) return { valid: false, reason: "missing-key" };
 
@@ -535,8 +554,8 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         WHERE k.key_hash = $1
         LIMIT 1
       `,
-        [keyHash],
-      ),
+        [keyHash]
+      )
     );
 
     const row = res.rows[0];
@@ -557,7 +576,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
 
   async recordInnerCircleUnlock(
     key: string,
-    ipAddress?: string,
+    ipAddress?: string
   ): Promise<void> {
     const safeKey = key.trim();
     if (!safeKey) return;
@@ -577,7 +596,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         WHERE key_hash = $1
         LIMIT 1
       `,
-        [keyHash],
+        [keyHash]
       );
 
       const row = keyRes.rows[0];
@@ -593,7 +612,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
             last_used_at = NOW()
         WHERE id = $1
       `,
-        [row.id],
+        [row.id]
       );
 
       await client.query(
@@ -603,7 +622,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
             last_ip = COALESCE($2, last_ip)
         WHERE id = $1
       `,
-        [row.member_id, ipAddress ?? null],
+        [row.member_id, ipAddress ?? null]
       );
 
       await client.query("COMMIT");
@@ -630,8 +649,8 @@ class PostgresInnerCircleStore implements InnerCircleStore {
             last_used_at = NOW()
         WHERE key_hash = $1
       `,
-        [keyHash],
-      ),
+        [keyHash]
+      )
     );
 
     return res.rowCount > 0;
@@ -647,14 +666,17 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         DELETE FROM inner_circle_members
         WHERE email_hash = $1
       `,
-        [emailHash],
-      ),
+        [emailHash]
+      )
     );
 
     return res.rowCount > 0;
   }
 
-  async cleanupOldData(): Promise<{ deletedMembers: number; deletedKeys: number }> {
+  async cleanupOldData(): Promise<{
+    deletedMembers: number;
+    deletedKeys: number;
+  }> {
     const result = await this.withClient(async (client) => {
       await client.query("BEGIN");
 
@@ -663,7 +685,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         SELECT id
         FROM inner_circle_members
         WHERE last_seen_at < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-      `,
+      `
       );
 
       const memberIds = oldMembers.rows.map((r) => r.id);
@@ -675,7 +697,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
           DELETE FROM inner_circle_keys
           WHERE member_id = ANY($1)
         `,
-          [memberIds],
+          [memberIds]
         );
         deletedKeys = keyDel.rowCount ?? 0;
 
@@ -684,7 +706,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
           DELETE FROM inner_circle_members
           WHERE id = ANY($1)
         `,
-          [memberIds],
+          [memberIds]
         );
       }
 
@@ -711,10 +733,14 @@ class PostgresInnerCircleStore implements InnerCircleStore {
     const client = await pool.connect();
     try {
       const [membersRes, keysRes, unlocksRes] = await Promise.all([
-        client.query<{ count: string }>("SELECT COUNT(*) AS count FROM inner_circle_members"),
-        client.query<{ count: string }>("SELECT COUNT(*) AS count FROM inner_circle_keys"),
+        client.query<{ count: string }>(
+          "SELECT COUNT(*) AS count FROM inner_circle_members"
+        ),
+        client.query<{ count: string }>(
+          "SELECT COUNT(*) AS count FROM inner_circle_keys"
+        ),
         client.query<{ total: string }>(
-          "SELECT COALESCE(SUM(total_unlocks), 0) AS total FROM inner_circle_keys",
+          "SELECT COALESCE(SUM(total_unlocks), 0) AS total FROM inner_circle_keys"
         ),
       ]);
 
@@ -730,7 +756,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         JOIN inner_circle_keys k ON k.member_id = m.id
         WHERE k.status = 'active'
           AND k.created_at > NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-      `,
+      `
       );
 
       return {
@@ -762,7 +788,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
         FROM inner_circle_keys k
         JOIN inner_circle_members m ON m.id = k.member_id
         ORDER BY k.created_at DESC
-      `,
+      `
       );
       return res.rows;
     } finally {
@@ -795,20 +821,20 @@ function getStore(): InnerCircleStore {
 
 // Public functions used by API routes
 export async function createOrUpdateMemberAndIssueKey(
-  args: CreateOrUpdateMemberArgs,
+  args: CreateOrUpdateMemberArgs
 ): Promise<IssuedKey> {
   return getStore().createOrUpdateMemberAndIssueKey(args);
 }
 
 export async function verifyInnerCircleKey(
-  key: string,
+  key: string
 ): Promise<VerifyInnerCircleKeyResult> {
   return getStore().verifyInnerCircleKey(key);
 }
 
 export async function recordInnerCircleUnlock(
   key: string,
-  ipAddress?: string,
+  ipAddress?: string
 ): Promise<void> {
   return getStore().recordInnerCircleUnlock(key, ipAddress);
 }
@@ -821,7 +847,10 @@ export async function deleteMemberByEmail(email: string): Promise<boolean> {
   return getStore().deleteMemberByEmail(email);
 }
 
-export async function cleanupOldData(): Promise<{ deletedMembers: number; deletedKeys: number }> {
+export async function cleanupOldData(): Promise<{
+  deletedMembers: number;
+  deletedKeys: number;
+}> {
   return getStore().cleanupOldData();
 }
 
@@ -829,6 +858,8 @@ export async function getPrivacySafeStats(): Promise<PrivacySafeStats> {
   return getStore().getPrivacySafeStats();
 }
 
-export async function exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
+export async function exportInnerCircleAdminSummary(): Promise<
+  InnerCircleAdminExportRow[]
+> {
   return getStore().exportInnerCircleAdminSummary();
 }

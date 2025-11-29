@@ -58,7 +58,8 @@ function fromMdxMeta(meta: MdxMeta): PrintMeta {
     slug: normalisePrintSlug(meta.slug),
     date: normaliseDate(anyMeta.date),
     description: anyMeta.description ?? meta.excerpt ?? undefined,
-    excerpt: anyMeta.excerpt ?? anyMeta.description ?? meta.excerpt ?? undefined,
+    excerpt:
+      anyMeta.excerpt ?? anyMeta.description ?? meta.excerpt ?? undefined,
     coverImage: anyMeta.coverImage ?? undefined,
     dimensions: anyMeta.dimensions ?? undefined,
     downloadFile: anyMeta.downloadFile ?? undefined,
@@ -99,7 +100,7 @@ export function getPrintBySlug(slug: string): PrintWithContent | null {
   try {
     const key = normalisePrintSlug(slug);
     const doc = getMdxDocumentBySlug("prints", key);
-    
+
     if (!doc) {
       return null;
     }

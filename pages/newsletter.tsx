@@ -40,8 +40,9 @@ export default function NewsletterPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                Curated wisdom for founders, fathers, and leaders building lasting legacies. Thoughtful
-                emails, sent when there is something genuinely worth your attention.
+                Curated wisdom for founders, fathers, and leaders building
+                lasting legacies. Thoughtful emails, sent when there is
+                something genuinely worth your attention.
               </motion.p>
             </div>
           </div>
@@ -63,8 +64,9 @@ export default function NewsletterPage() {
                       Why Join The Inner Circle?
                     </h2>
                     <p className="text-gold/70 leading-relaxed">
-                      Receive selective content that bridges ancient wisdom with modern leadership and
-                      fatherhood—delivered directly to your inbox, without noise or gimmicks.
+                      Receive selective content that bridges ancient wisdom with
+                      modern leadership and fatherhood—delivered directly to
+                      your inbox, without noise or gimmicks.
                     </p>
                   </div>
 
@@ -74,10 +76,13 @@ export default function NewsletterPage() {
                         <span className="text-gold text-sm">→</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-cream mb-2">Early Event Insight</h3>
+                        <h3 className="font-semibold text-cream mb-2">
+                          Early Event Insight
+                        </h3>
                         <p className="text-gold/60 text-sm leading-relaxed">
-                          Hear first about upcoming salons, workshops, and intimate gatherings. 
-                          Where capacity is limited, subscribers are often given early access to details.
+                          Hear first about upcoming salons, workshops, and
+                          intimate gatherings. Where capacity is limited,
+                          subscribers are often given early access to details.
                         </p>
                       </div>
                     </div>
@@ -87,10 +92,13 @@ export default function NewsletterPage() {
                         <span className="text-gold text-sm">→</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-cream mb-2">Exclusive Essays</h3>
+                        <h3 className="font-semibold text-cream mb-2">
+                          Exclusive Essays
+                        </h3>
                         <p className="text-gold/60 text-sm leading-relaxed">
-                          Deep-dive writings on leadership, legacy, fatherhood, and the art of meaningful
-                          conversation—often shared here before appearing anywhere else.
+                          Deep-dive writings on leadership, legacy, fatherhood,
+                          and the art of meaningful conversation—often shared
+                          here before appearing anywhere else.
                         </p>
                       </div>
                     </div>
@@ -100,10 +108,13 @@ export default function NewsletterPage() {
                         <span className="text-gold text-sm">→</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-cream mb-2">Private Resources</h3>
+                        <h3 className="font-semibold text-cream mb-2">
+                          Private Resources
+                        </h3>
                         <p className="text-gold/60 text-sm leading-relaxed">
-                          Access to curated reading lists, conversation frameworks, and tools for personal
-                          and family growth that are not broadly published.
+                          Access to curated reading lists, conversation
+                          frameworks, and tools for personal and family growth
+                          that are not broadly published.
                         </p>
                       </div>
                     </div>
@@ -113,17 +124,22 @@ export default function NewsletterPage() {
                         <span className="text-gold text-sm">→</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-cream mb-2">Community Insights</h3>
+                        <h3 className="font-semibold text-cream mb-2">
+                          Community Insights
+                        </h3>
                         <p className="text-gold/60 text-sm leading-relaxed">
-                          Occasional reflections drawn from the collective wisdom of founders, leaders, and
-                          fathers within our wider network—shared with discretion and respect.
+                          Occasional reflections drawn from the collective
+                          wisdom of founders, leaders, and fathers within our
+                          wider network—shared with discretion and respect.
                         </p>
                       </div>
                     </div>
                   </div>
 
                   <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
-                    <h4 className="font-serif font-semibold text-cream mb-3">What to Expect</h4>
+                    <h4 className="font-serif font-semibold text-cream mb-3">
+                      What to Expect
+                    </h4>
                     <ul className="text-gold/60 text-sm space-y-2">
                       <li className="flex items-center gap-2">
                         <span className="w-1 h-1 rounded-full bg-gold/40" />
@@ -139,7 +155,8 @@ export default function NewsletterPage() {
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="w-1 h-1 rounded-full bg-gold/40" />
-                        No routine list rental or sale; your attention is treated as a trust, not a commodity
+                        No routine list rental or sale; your attention is
+                        treated as a trust, not a commodity
                       </li>
                     </ul>
                   </div>
@@ -159,8 +176,9 @@ export default function NewsletterPage() {
                       Join The Inner Circle
                     </h3>
                     <p className="text-gold/70">
-                      Enter your email to receive curated insights and occasional invitations. You&apos;re
-                      free to leave at any time.
+                      Enter your email to receive curated insights and
+                      occasional invitations. You&apos;re free to leave at any
+                      time.
                     </p>
                   </div>
 
@@ -172,21 +190,21 @@ export default function NewsletterPage() {
 
                   <div className="mt-6 text-center space-y-2">
                     <p className="text-xs text-gold/40">
-                      By subscribing, you consent to receive email communications from Abraham of London
-                      about content, events, and related offerings.
+                      By subscribing, you consent to receive email
+                      communications from Abraham of London about content,
+                      events, and related offerings.
                     </p>
                     <p className="text-xs text-gold/40">
-                      You can unsubscribe at any time via the link in each email. For details on how we
-                      handle your data, please see our{" "}
-                      {/* FIXED: Replace <a> with <Link> */}
+                      You can unsubscribe at any time via the link in each
+                      email. For details on how we handle your data, please see
+                      our {/* FIXED: Replace <a> with <Link> */}
                       <Link
                         href="/privacy-policy"
                         className="underline underline-offset-2 text-gold hover:text-amber-200"
                       >
                         Privacy Policy
                       </Link>{" "}
-                      and{" "}
-                      {/* FIXED: Replace <a> with <Link> */}
+                      and {/* FIXED: Replace <a> with <Link> */}
                       <Link
                         href="/cookie-policy"
                         className="underline underline-offset-2 text-gold hover:text-amber-200"
@@ -202,20 +220,26 @@ export default function NewsletterPage() {
                 <div className="mt-8 space-y-4">
                   <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
                     <p className="text-gold/70 italic text-sm leading-relaxed mb-3">
-                      &quot;Abraham&apos;s newsletter is the one email I actually make time to read. The
-                      reflections on legacy and leadership have shifted how I show up at home and in the
+                      &quot;Abraham&apos;s newsletter is the one email I
+                      actually make time to read. The reflections on legacy and
+                      leadership have shifted how I show up at home and in the
                       boardroom.&quot;
                     </p>
-                    <p className="text-gold text-sm font-semibold">— Founder, Tech Company</p>
+                    <p className="text-gold text-sm font-semibold">
+                      — Founder, Tech Company
+                    </p>
                   </div>
 
                   <div className="rounded-2xl border border-gold/20 bg-gold/5 p-6">
                     <p className="text-gold/70 italic text-sm leading-relaxed mb-3">
-                      &quot;The curated nature of The Inner Circle means less noise and more depth. The
-                      invite-only gatherings I heard about through the list have been worth their weight
-                      in gold.&quot;
+                      &quot;The curated nature of The Inner Circle means less
+                      noise and more depth. The invite-only gatherings I heard
+                      about through the list have been worth their weight in
+                      gold.&quot;
                     </p>
-                    <p className="text-gold text-sm font-semibold">— CEO, Financial Services</p>
+                    <p className="text-gold text-sm font-semibold">
+                      — CEO, Financial Services
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -231,7 +255,8 @@ export default function NewsletterPage() {
                 Common Questions
               </h2>
               <p className="text-gold/70 max-w-2xl mx-auto">
-                A brief overview of what you are—and are not—signing up for when you join The Inner Circle.
+                A brief overview of what you are—and are not—signing up for when
+                you join The Inner Circle.
               </p>
             </div>
 
@@ -241,8 +266,9 @@ export default function NewsletterPage() {
                   How often will I receive emails?
                 </h3>
                 <p className="text-gold/70 text-sm leading-relaxed">
-                  Typically 1–2 times per month. Frequency may vary slightly depending on season and
-                  relevance, but the bias is firmly towards quality over volume.
+                  Typically 1–2 times per month. Frequency may vary slightly
+                  depending on season and relevance, but the bias is firmly
+                  towards quality over volume.
                 </p>
               </div>
 
@@ -251,8 +277,9 @@ export default function NewsletterPage() {
                   Is this different from event notifications?
                 </h3>
                 <p className="text-gold/70 text-sm leading-relaxed">
-                  Yes. While subscribers may receive earlier insight into selected events, the focus of The
-                  Inner Circle is depth: essays, reflections, and frameworks that stand on their own,
+                  Yes. While subscribers may receive earlier insight into
+                  selected events, the focus of The Inner Circle is depth:
+                  essays, reflections, and frameworks that stand on their own,
                   whether or not you attend any gathering.
                 </p>
               </div>
@@ -262,9 +289,10 @@ export default function NewsletterPage() {
                   Can I suggest topics or ask questions?
                 </h3>
                 <p className="text-gold/70 text-sm leading-relaxed">
-                  In many cases, yes. Replies to the newsletter are monitored, and topic suggestions from
-                  subscribers often influence future essays and dialogues. We cannot promise an individual
-                  response to every message, but all constructive feedback is reviewed.
+                  In many cases, yes. Replies to the newsletter are monitored,
+                  and topic suggestions from subscribers often influence future
+                  essays and dialogues. We cannot promise an individual response
+                  to every message, but all constructive feedback is reviewed.
                 </p>
               </div>
 
@@ -273,8 +301,8 @@ export default function NewsletterPage() {
                   What if I want to unsubscribe?
                 </h3>
                 <p className="text-gold/70 text-sm leading-relaxed">
-                  Every email includes a one-click unsubscribe link. If you prefer, you can also contact us
-                  using the details in our{" "}
+                  Every email includes a one-click unsubscribe link. If you
+                  prefer, you can also contact us using the details in our{" "}
                   {/* FIXED: Replace <a> with <Link> */}
                   <Link
                     href="/privacy-policy"
@@ -282,7 +310,8 @@ export default function NewsletterPage() {
                   >
                     Privacy Policy
                   </Link>
-                  , and we will action your request in line with applicable data protection laws.
+                  , and we will action your request in line with applicable data
+                  protection laws.
                 </p>
               </div>
 
@@ -291,10 +320,11 @@ export default function NewsletterPage() {
                   How is my data used?
                 </h3>
                 <p className="text-gold/70 text-sm leading-relaxed">
-                  Your email address is used to send you the newsletter and related communications you have
-                  opted into. We may also use high-level engagement metrics (opens, clicks) to refine what
-                  we send. We do not sell your data and handle it in accordance with our{" "}
-                  {/* FIXED: Replace <a> with <Link> */}
+                  Your email address is used to send you the newsletter and
+                  related communications you have opted into. We may also use
+                  high-level engagement metrics (opens, clicks) to refine what
+                  we send. We do not sell your data and handle it in accordance
+                  with our {/* FIXED: Replace <a> with <Link> */}
                   <Link
                     href="/privacy-policy"
                     className="underline underline-offset-2 text-gold hover:text-amber-200"

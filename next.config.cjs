@@ -24,9 +24,28 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Existing content funnels
       { source: "/blog", destination: "/content", permanent: true },
       { source: "/books", destination: "/content", permanent: true },
       { source: "/articles", destination: "/content", permanent: true },
+
+      // -------------------------------------------------------------------
+      // Canon / Book canonicalisation
+      // -------------------------------------------------------------------
+
+      // Old / marketing landing URL → canonical Book slug
+      {
+        source: "/books/the-architecture-of-human-purpose-landing",
+        destination: "/books/the-architecture-of-human-purpose",
+        permanent: true,
+      },
+
+      // Canon Volume I pretty path → actual slug handled by /[slug].tsx
+      {
+        source: "/canon/volume-i-foundations-of-purpose",
+        destination: "/volume-i-foundations-of-purpose",
+        permanent: true,
+      },
     ];
   },
 

@@ -47,8 +47,8 @@ function normaliseDownload(raw: RawDownload): NormalisedDownload {
     typeof raw?.excerpt === "string" && raw.excerpt.trim().length
       ? raw.excerpt
       : typeof raw?.description === "string" && raw.description.trim().length
-      ? raw.description
-      : null;
+        ? raw.description
+        : null;
 
   const coverImage =
     typeof raw?.coverImage === "string" && raw.coverImage.trim().length
@@ -59,8 +59,8 @@ function normaliseDownload(raw: RawDownload): NormalisedDownload {
     typeof raw?.downloadFile === "string" && raw.downloadFile.trim().length
       ? raw.downloadFile
       : typeof raw?.fileUrl === "string" && raw.fileUrl.trim().length
-      ? raw.fileUrl
-      : null;
+        ? raw.fileUrl
+        : null;
 
   const fileHref =
     fileHrefCandidate && fileHrefCandidate.startsWith("/")
@@ -76,17 +76,15 @@ function normaliseDownload(raw: RawDownload): NormalisedDownload {
     typeof raw?.category === "string" && raw.category.trim().length
       ? raw.category
       : typeof raw?.type === "string" && raw.type.trim().length
-      ? raw.type
-      : null;
+        ? raw.type
+        : null;
 
   const tags = Array.isArray(raw?.tags)
     ? raw.tags.filter((t: unknown) => typeof t === "string" && t.trim().length)
     : [];
 
   const date =
-    typeof raw?.date === "string" && raw.date.trim().length
-      ? raw.date
-      : null;
+    typeof raw?.date === "string" && raw.date.trim().length ? raw.date : null;
 
   const featured = Boolean(raw?.featured);
 
@@ -127,13 +125,14 @@ export const getStaticProps: GetStaticProps<DownloadsIndexProps> = async () => {
 };
 
 export default function DownloadsIndexPage(
-  props: InferGetStaticPropsType<typeof getStaticProps>,
+  props: InferGetStaticPropsType<typeof getStaticProps>
 ) {
   const title = "Curated Resources";
-  const description = "Essential tools and strategic assets for visionary leaders.";
+  const description =
+    "Essential tools and strategic assets for visionary leaders.";
 
-  const featuredDownloads = props.downloads.filter(d => d.featured);
-  const regularDownloads = props.downloads.filter(d => !d.featured);
+  const featuredDownloads = props.downloads.filter((d) => d.featured);
+  const regularDownloads = props.downloads.filter((d) => !d.featured);
 
   return (
     <Layout title={title}>
@@ -157,8 +156,9 @@ export default function DownloadsIndexPage(
               Strategic Assets
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-8 text-slate-600">
-              Curated tools, frameworks, and resources designed for exceptional leaders.
-              Each asset is crafted for immediate impact and lasting value.
+              Curated tools, frameworks, and resources designed for exceptional
+              leaders. Each asset is crafted for immediate impact and lasting
+              value.
             </p>
           </header>
 
@@ -166,15 +166,26 @@ export default function DownloadsIndexPage(
             <section className="rounded-2xl border border-slate-200 bg-white/60 p-8 backdrop-blur-sm">
               <div className="text-center">
                 <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-amber-100 p-2.5">
-                  <svg className="h-7 w-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    className="h-7 w-7 text-amber-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
                 </div>
                 <h2 className="mb-3 text-xl font-semibold text-slate-900">
                   Access Premium Resources
                 </h2>
                 <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                  Our curated assets are integrated throughout the site. Explore blog posts and book pages to discover relevant resources.
+                  Our curated assets are integrated throughout the site. Explore
+                  blog posts and book pages to discover relevant resources.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link

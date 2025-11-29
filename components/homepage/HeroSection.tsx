@@ -19,7 +19,7 @@ function Eyebrow({
         "text-xs uppercase tracking-wide font-semibold",
         "text-[color:var(--color-on-secondary)] opacity-70",
         "dark:text-[color:var(--color-on-primary)] dark:opacity-80",
-        className,
+        className
       )}
     >
       {children}
@@ -123,7 +123,7 @@ export default function HeroSection({
     {
       "p-2 sm:p-3 md:p-4 bg-warmWhite border border-lightGrey/70":
         coverFit === "contain",
-    },
+    }
   );
 
   const mediaClasses = clsx(
@@ -134,7 +134,7 @@ export default function HeroSection({
       "object-right": coverPosition === "right",
       "object-top": coverPosition === "top",
       "object-center": coverPosition === "center",
-    },
+    }
   );
 
   // 3. --- Render -------------------------------------------------------------
@@ -144,7 +144,7 @@ export default function HeroSection({
         "relative overflow-hidden bg-white dark:bg-black",
         "before:pointer-events-none before:absolute before:inset-0",
         "before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.14),transparent_60%)]",
-        "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]",
+        "dark:before:bg-[radial-gradient(80%_60%_at_50%_0%,rgba(212,175,55,.22),transparent_60%)]"
       )}
       role="region"
       aria-label="Featured content section"
@@ -220,11 +220,7 @@ export default function HeroSection({
               onContextMenu={(e) => e.preventDefault()}
             >
               {videoSources!.map((s) => (
-                <source
-                  key={s.src}
-                  src={normalizeLocal(s.src)}
-                  type={s.type}
-                />
+                <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
               ))}
             </video>
           ) : (

@@ -33,27 +33,67 @@ const PRESETS: Record<PresetKey, PresetData> = {
   leadership: {
     title: "Leadership Tools & Further Reading",
     reads: [
-      { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home", sub: "Order under pressure" },
-      { href: "/blog/the-brotherhood-code", label: "The Brotherhood Code", sub: "Build a band of standards" },
-      { href: "/blog/kingdom-strategies-for-a-loving-legacy", label: "Loving Legacy, Real Standards" },
+      {
+        href: "/blog/leadership-begins-at-home",
+        label: "Leadership Begins at Home",
+        sub: "Order under pressure",
+      },
+      {
+        href: "/blog/the-brotherhood-code",
+        label: "The Brotherhood Code",
+        sub: "Build a band of standards",
+      },
+      {
+        href: "/blog/kingdom-strategies-for-a-loving-legacy",
+        label: "Loving Legacy, Real Standards",
+      },
     ],
     downloads: [
-      { href: "/downloads/Leadership_Playbook.pdf", label: "Leadership Playbook (30•60•90)" },
-      { href: "/downloads/Weekly_Operating_Rhythm.pdf", label: "Weekly Operating Rhythm" },
-      { href: "/downloads/Board_Update_Onepager.pdf", label: "Board Update One-Pager" },
+      {
+        href: "/downloads/Leadership_Playbook.pdf",
+        label: "Leadership Playbook (30•60•90)",
+      },
+      {
+        href: "/downloads/Weekly_Operating_Rhythm.pdf",
+        label: "Weekly Operating Rhythm",
+      },
+      {
+        href: "/downloads/Board_Update_Onepager.pdf",
+        label: "Board Update One-Pager",
+      },
     ],
   },
   founders: {
     title: "Founder’s Toolkit",
     reads: [
-      { href: "/blog/reclaiming-the-narrative", label: "Reclaiming the Narrative", sub: "Signal over noise" },
-      { href: "/blog/out-of-context-truth", label: "Out of Context Truth", sub: "Clarity under fire" },
-      { href: "/blog/leadership-begins-at-home", label: "Leadership Begins at Home" },
+      {
+        href: "/blog/reclaiming-the-narrative",
+        label: "Reclaiming the Narrative",
+        sub: "Signal over noise",
+      },
+      {
+        href: "/blog/out-of-context-truth",
+        label: "Out of Context Truth",
+        sub: "Clarity under fire",
+      },
+      {
+        href: "/blog/leadership-begins-at-home",
+        label: "Leadership Begins at Home",
+      },
     ],
     downloads: [
-      { href: "/downloads/Entrepreneur_Operating_Pack.pdf", label: "Entrepreneur Operating Pack" },
-      { href: "/downloads/Entrepreneur_Survival_Checklist.pdf", label: "Entrepreneur Survival Checklist" },
-      { href: "/downloads/Communication_Script_BPF.pdf", label: "Communication Script (B•P•F)" },
+      {
+        href: "/downloads/Entrepreneur_Operating_Pack.pdf",
+        label: "Entrepreneur Operating Pack",
+      },
+      {
+        href: "/downloads/Entrepreneur_Survival_Checklist.pdf",
+        label: "Entrepreneur Survival Checklist",
+      },
+      {
+        href: "/downloads/Communication_Script_BPF.pdf",
+        label: "Communication Script (B•P•F)",
+      },
     ],
   },
 };
@@ -82,7 +122,10 @@ export default function EventResources(props: EventResourcesProps) {
       className={`mt-12 rounded-xl border border-lightGrey bg-warmWhite/60 p-5 md:p-6 shadow-card ${("className" in props && props.className) || ""}`}
       aria-labelledby="event-resources-title"
     >
-      <h3 id="event-resources-title" className="mb-4 font-serif text-2xl text-forest">
+      <h3
+        id="event-resources-title"
+        className="mb-4 font-serif text-2xl text-forest"
+      >
         {data.title}
       </h3>
 
@@ -96,15 +139,28 @@ export default function EventResources(props: EventResourcesProps) {
               {reads.map((r) => (
                 <li key={r.href}>
                   {isInternal(r.href) ? (
-                    <Link href={r.href} className="luxury-link text-forest" prefetch={false}>
+                    <Link
+                      href={r.href}
+                      className="luxury-link text-forest"
+                      prefetch={false}
+                    >
                       {r.label}
                     </Link>
                   ) : (
-                    <a href={r.href} className="luxury-link text-forest" target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={r.href}
+                      className="luxury-link text-forest"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       {r.label}
                     </a>
                   )}
-                  {r.sub && <span className="ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]">— {r.sub}</span>}
+                  {r.sub && (
+                    <span className="ml-2 text-sm text-[color:var(--color-on-secondary)/0.7]">
+                      — {r.sub}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -119,7 +175,12 @@ export default function EventResources(props: EventResourcesProps) {
             <ul className="space-y-2">
               {downloads.map((d) => (
                 <li key={d.href}>
-                  <a href={d.href} className="luxury-link text-forest" rel="noopener" download>
+                  <a
+                    href={d.href}
+                    className="luxury-link text-forest"
+                    rel="noopener"
+                    download
+                  >
                     {d.label}
                   </a>
                 </li>

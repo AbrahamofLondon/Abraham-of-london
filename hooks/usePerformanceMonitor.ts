@@ -1,5 +1,5 @@
 // hooks/usePerformanceMonitor.ts
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 interface PerformanceMetrics {
   componentName: string;
@@ -61,7 +61,7 @@ export function usePerformanceMonitor(componentName: string) {
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `📊 ${componentName} lifetime: ${totalLifeTime.toFixed(2)}ms, Renders: ${renderCountRef.current}`,
+          `📊 ${componentName} lifetime: ${totalLifeTime.toFixed(2)}ms, Renders: ${renderCountRef.current}`
         );
       }
     };
@@ -79,7 +79,7 @@ export function usePerformanceMonitor(componentName: string) {
       if (process.env.NODE_ENV === "development" && renderDuration > 16) {
         // Warn about slow renders (> 16ms = 60fps)
         console.warn(
-          `🐢 ${componentName} slow render: ${renderDuration.toFixed(2)}ms`,
+          `🐢 ${componentName} slow render: ${renderDuration.toFixed(2)}ms`
         );
       }
     }

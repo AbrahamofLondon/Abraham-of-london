@@ -101,12 +101,12 @@ type ImgProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 };
 
 // FIXED: Replaced img with Next.js Image component
-const Img: React.FC<ImgProps> = ({ 
-  src, 
-  alt = "", 
-  width = 800, 
+const Img: React.FC<ImgProps> = ({
+  src,
+  alt = "",
+  width = 800,
   height = 400,
-  ...props 
+  ...props
 }) => (
   <div className="my-6 w-full rounded-xl border border-lightGrey bg-warmWhite overflow-hidden">
     {src ? (
@@ -141,16 +141,14 @@ const Note: React.FC<NoteProps> = ({ title, tone = "info", children }) => {
     tone === "warning"
       ? "border-amber-300 bg-amber-50/80"
       : tone === "success"
-      ? "border-emerald-300 bg-emerald-50/80"
-      : "border-sky-300 bg-sky-50/80";
+        ? "border-emerald-300 bg-emerald-50/80"
+        : "border-sky-300 bg-sky-50/80";
 
   return (
     <aside
       className={`my-4 rounded-xl border px-4 py-3 text-sm text-gray-800 ${toneClasses}`}
     >
-      {title && (
-        <p className="mb-1 font-semibold text-deepCharcoal">{title}</p>
-      )}
+      {title && <p className="mb-1 font-semibold text-deepCharcoal">{title}</p>}
       <div>{children}</div>
     </aside>
   );

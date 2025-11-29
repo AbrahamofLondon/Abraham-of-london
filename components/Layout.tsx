@@ -23,7 +23,9 @@ export default function Layout({
   const effectiveTitle = getPageTitle(title ?? pageTitle);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-charcoal text-cream ${className}`}>
+    <div
+      className={`min-h-screen flex flex-col bg-charcoal text-cream ${className}`}
+    >
       <Head>
         <title>{effectiveTitle}</title>
         <meta

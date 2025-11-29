@@ -163,7 +163,7 @@ export const validateContentMeta = (meta: ContentMeta): string[] => {
 
   if (meta.slug && !/^[a-z0-9-]+$/.test(meta.slug)) {
     errors.push(
-      "Slug must contain only lowercase letters, numbers, and hyphens",
+      "Slug must contain only lowercase letters, numbers, and hyphens"
     );
   }
 
@@ -171,7 +171,7 @@ export const validateContentMeta = (meta: ContentMeta): string[] => {
 };
 
 export const sanitizeContentMeta = (
-  meta: Partial<ContentMeta>,
+  meta: Partial<ContentMeta>
 ): ContentMeta => {
   return {
     slug: meta.slug?.toLowerCase().trim() || "",
@@ -192,7 +192,7 @@ export const sanitizeContentMeta = (
 
 // Factory functions
 export const createContentMeta = (
-  overrides: Partial<ContentMeta> = {},
+  overrides: Partial<ContentMeta> = {}
 ): ContentMeta => ({
   slug: "",
   title: "",
@@ -200,7 +200,7 @@ export const createContentMeta = (
 });
 
 export const createContentDocument = (
-  overrides: Partial<ContentDocument> = {},
+  overrides: Partial<ContentDocument> = {}
 ): ContentDocument => ({
   slug: "",
   title: "",
@@ -211,14 +211,14 @@ export const createContentDocument = (
 // Utility functions
 export const getContentUrl = (
   content: ContentMeta,
-  basePath: string = "",
+  basePath: string = ""
 ): string => {
   return `${basePath}/${content.slug}`.replace(/\/+/g, "/");
 };
 
 export const getCoverImageUrl = (
   content: ContentMeta,
-  baseUrl: string = "",
+  baseUrl: string = ""
 ): string | undefined => {
   if (!content.coverImage) return undefined;
 
@@ -233,7 +233,7 @@ export const getCoverImageUrl = (
 };
 
 export const formatReadTime = (
-  readTime: string | number | undefined,
+  readTime: string | number | undefined
 ): string => {
   if (!readTime) return "";
 
@@ -246,7 +246,7 @@ export const formatReadTime = (
 
 export const sortContentByDate = (
   content: ContentMeta[],
-  order: "asc" | "desc" = "desc",
+  order: "asc" | "desc" = "desc"
 ): ContentMeta[] => {
   return content.sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
@@ -258,23 +258,23 @@ export const sortContentByDate = (
 
 export const filterContentByCategory = (
   content: ContentMeta[],
-  category: string,
+  category: string
 ): ContentMeta[] => {
   return content.filter(
     (item) =>
       item.category?.toLowerCase() === category.toLowerCase() ||
       item.categories?.some(
-        (cat) => cat.toLowerCase() === category.toLowerCase(),
-      ),
+        (cat) => cat.toLowerCase() === category.toLowerCase()
+      )
   );
 };
 
 export const filterContentByTag = (
   content: ContentMeta[],
-  tag: string,
+  tag: string
 ): ContentMeta[] => {
   return content.filter((item) =>
-    item.tags?.some((t) => t.toLowerCase() === tag.toLowerCase()),
+    item.tags?.some((t) => t.toLowerCase() === tag.toLowerCase())
   );
 };
 
@@ -286,7 +286,7 @@ export interface ContentGroup {
 }
 
 export const groupContentByCategory = (
-  content: ContentMeta[],
+  content: ContentMeta[]
 ): ContentGroup[] => {
   const groups: Record<string, ContentMeta[]> = {};
 

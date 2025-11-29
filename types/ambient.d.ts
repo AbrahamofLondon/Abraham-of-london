@@ -11,7 +11,7 @@ declare module "@/lib/siteConfig" {
     title?: string;
     email?: string;
     author?: string;
-    authorImage?: string;   // <- for BlogPostCard fallback
+    authorImage?: string; // <- for BlogPostCard fallback
     ogImage?: string;
     twitterImage?: string;
     socialLinks?: SocialLink[];
@@ -29,9 +29,14 @@ declare module "@/lib/ThemeContext.tsx" {
   import * as React from "react";
 
   export type ThemeName = "light" | "dark";
-  export function useTheme(): { theme: ThemeName; setTheme(t: ThemeName): void };
+  export function useTheme(): {
+    theme: ThemeName;
+    setTheme(t: ThemeName): void;
+  };
 
-  export const ThemeProvider: React.FC<React.PropsWithChildren<Record<string, never>>>;
+  export const ThemeProvider: React.FC<
+    React.PropsWithChildren<Record<string, never>>
+  >;
   const _default: any;
   export default _default;
 }
@@ -42,7 +47,12 @@ declare module "@/lib/ThemeContext.tsx" {
 declare module "@/lib/gtag.ts" {
   export const GA_TRACKING_ID: string;
   export function pageview(url: string): void;
-  export function event(opts: { action: string; category?: string; label?: string; value?: number }): void;
+  export function event(opts: {
+    action: string;
+    category?: string;
+    label?: string;
+    value?: number;
+  }): void;
   const _default: any;
   export default _default;
 }

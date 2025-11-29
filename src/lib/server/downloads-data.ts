@@ -1,4 +1,4 @@
-src/lib/server/downloads-data.ts
+src / lib / server / downloads - data.ts;
 // src/lib/server/downloads-data.ts
 // Server-only module: read front-matter for downloads (MD/MDX) safely.
 
@@ -61,13 +61,16 @@ const COMPATIBILITY_FIELDS: FieldKey[] = [
 
 function resolveDownloadPath(slug: string): string | null {
   const real = slug.replace(/\.mdx?$/i, "");
-  
+
   // Ensure downloads directory exists
   if (!fs.existsSync(downloadsDir)) {
-    console.warn("[downloads-data] Downloads directory does not exist:", downloadsDir);
+    console.warn(
+      "[downloads-data] Downloads directory does not exist:",
+      downloadsDir
+    );
     return null;
   }
-  
+
   for (const ext of exts) {
     const full = path.join(downloadsDir, `${real}${ext}`);
     if (fs.existsSync(full)) return full;
@@ -140,10 +143,13 @@ export function extractResourceSlugs(content: any): string[] {
 
 export function getDownloadSlugs(): string[] {
   if (!fs.existsSync(downloadsDir)) {
-    console.warn("[downloads-data] Downloads directory not found:", downloadsDir);
+    console.warn(
+      "[downloads-data] Downloads directory not found:",
+      downloadsDir
+    );
     return [];
   }
-  
+
   try {
     return fs
       .readdirSync(downloadsDir)
@@ -208,13 +214,17 @@ export function getDownloadBySlug(
           out.title = typeof fm.title === "string" ? fm.title.trim() : null;
           break;
         case "excerpt":
-          out.excerpt = typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
+          out.excerpt =
+            typeof fm.excerpt === "string" ? fm.excerpt.trim() : null;
           break;
         case "description":
           // Use excerpt as description if description not provided
-          out.description = typeof fm.description === "string" 
-            ? fm.description.trim() 
-            : (typeof fm.excerpt === "string" ? fm.excerpt.trim() : null);
+          out.description =
+            typeof fm.description === "string"
+              ? fm.description.trim()
+              : typeof fm.excerpt === "string"
+                ? fm.excerpt.trim()
+                : null;
           break;
         case "coverImage":
           out.coverImage = normalizeCoverImage(fm.coverImage);
@@ -311,14 +321,14 @@ export function getAllDownloads(
 ): DownloadMeta[] {
   const slugs = getDownloadSlugs();
   const items = slugs.map((s) => getDownloadBySlug(s, fields));
-  
+
   // Sort by title or slug
   items.sort((a, b) => {
     const at = (a.title || a.slug || "").toLowerCase();
     const bt = (b.title || b.slug || "").toLowerCase();
     return at.localeCompare(bt);
   });
-  
+
   return items;
 }
 
@@ -333,31 +343,35 @@ export function getAllContent(type: "downloads"): DownloadMeta[] {
 // Simple mock data fallback for development
 export const mockDownloads: DownloadMeta[] = [
   {
-    slug: 'entrepreneur-survival-checklist',
-    title: 'Entrepreneur Survival Checklist',
-    description: 'Essential checklist for entrepreneurs navigating challenging quarters',
-    excerpt: 'A comprehensive checklist to keep your head straight when everything breaks at once',
-    file: '/downloads/entrepreneur-survival-checklist.pdf',
-    coverImage: '/assets/images/downloads/checklist.jpg',
-    category: 'Business',
-    tags: ['entrepreneurship', 'checklist', 'survival'],
-    author: 'Abraham of London',
-    date: '2024-01-15',
-    readTime: '5 min'
+    slug: "entrepreneur-survival-checklist",
+    title: "Entrepreneur Survival Checklist",
+    description:
+      "Essential checklist for entrepreneurs navigating challenging quarters",
+    excerpt:
+      "A comprehensive checklist to keep your head straight when everything breaks at once",
+    file: "/downloads/entrepreneur-survival-checklist.pdf",
+    coverImage: "/assets/images/downloads/checklist.jpg",
+    category: "Business",
+    tags: ["entrepreneurship", "checklist", "survival"],
+    author: "Abraham of London",
+    date: "2024-01-15",
+    readTime: "5 min",
   },
   {
-    slug: 'brotherhood-covenant',
-    title: 'Brotherhood Covenant',
-    description: 'Template for creating committed brotherhood accountability circles',
-    excerpt: 'Transform casual men\'s groups into committed circles of accountability',
-    file: '/downloads/brotherhood-covenant.pdf',
-    coverImage: '/assets/images/downloads/covenant.jpg',
-    category: 'Community',
-    tags: ['brotherhood', 'accountability', 'men'],
-    author: 'Abraham of London',
-    date: '2024-01-10',
-    readTime: '10 min'
-  }
+    slug: "brotherhood-covenant",
+    title: "Brotherhood Covenant",
+    description:
+      "Template for creating committed brotherhood accountability circles",
+    excerpt:
+      "Transform casual men's groups into committed circles of accountability",
+    file: "/downloads/brotherhood-covenant.pdf",
+    coverImage: "/assets/images/downloads/covenant.jpg",
+    category: "Community",
+    tags: ["brotherhood", "accountability", "men"],
+    author: "Abraham of London",
+    date: "2024-01-10",
+    readTime: "10 min",
+  },
 ];
 
 export default {
@@ -367,7 +381,7 @@ export default {
   getAllDownloads,
   getAllContent,
   extractResourceSlugs,
-  mockDownloads
+  mockDownloads,
 };
 
 export type { FieldKey as DownloadFieldKey };

@@ -3,7 +3,13 @@
 
 import * as React from "react";
 
-type Platform = "twitter" | "linkedin" | "facebook" | "email" | "copy" | "whatsapp";
+type Platform =
+  | "twitter"
+  | "linkedin"
+  | "facebook"
+  | "email"
+  | "copy"
+  | "whatsapp";
 
 interface ShareButtonsProps {
   url: string;
@@ -14,7 +20,10 @@ interface ShareButtonsProps {
   _showLabels?: boolean; // Prefix with underscore to indicate unused
   platforms?: Platform[];
   onShare?: (platform: Platform | "native" | "validation", url: string) => void;
-  onError?: (error: Error, platform: Platform | "native" | "validation") => void;
+  onError?: (
+    error: Error,
+    platform: Platform | "native" | "validation"
+  ) => void;
 }
 
 // Platform configurations with brand colors
@@ -71,8 +80,18 @@ const PLATFORM_CONFIG: Record<
     name: "Email",
     color: "hover:bg-gray-600/20 focus:ring-gray-600",
     icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        />
       </svg>
     ),
     ariaLabel: "Share via Email",
@@ -81,8 +100,18 @@ const PLATFORM_CONFIG: Record<
     name: "Copy Link",
     color: "hover:bg-purple-500/20 focus:ring-purple-500",
     icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+        />
       </svg>
     ),
     ariaLabel: "Copy link to clipboard",
@@ -124,7 +153,10 @@ export default function ShareButtons({
 
   // Check if Web Share API is supported (client-only)
   React.useEffect(() => {
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function"
+    ) {
       setIsSupported(true);
     }
   }, []);
@@ -208,7 +240,8 @@ export default function ShareButtons({
   };
 
   const handleNativeShare = async () => {
-    if (!isSupported || typeof navigator === "undefined" || !navigator.share) return;
+    if (!isSupported || typeof navigator === "undefined" || !navigator.share)
+      return;
 
     try {
       await navigator.share({ title, url: resolvedUrl, text: title });
@@ -255,8 +288,18 @@ export default function ShareButtons({
           disabled={copied}
         >
           {copied ? (
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           ) : (
             config.icon
@@ -317,8 +360,18 @@ export default function ShareButtons({
             .trim()}
           aria-label="Share using native share dialog"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+            />
           </svg>
           {variant === "expanded" && <span className="text-sm">Share</span>}
         </button>

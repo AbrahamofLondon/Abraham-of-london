@@ -8,6 +8,9 @@ export const remarkPlugins = [remarkGfm];
 
 export const rehypePlugins = [
   rehypeSlug,
-  [rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["anchor"] } }],
-  [rehypeExternalLinks, { target: "_blank", rel: ["noopener","noreferrer"] }],
+  [
+    rehypeAutolinkHeadings,
+    { behavior: "wrap", properties: { className: ["anchor"] } },
+  ],
+  [rehypeExternalLinks, { target: "_blank", rel: ["noopener", "noreferrer"] }],
 ] as any[]; // next-mdx-remote/CL tolerate tuple form

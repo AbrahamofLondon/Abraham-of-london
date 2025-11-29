@@ -44,20 +44,24 @@ export default function Note({
       aria-label={title ?? "Note"}
     >
       {title && (
-        <div className={clsx(
-          "mb-1 font-semibold tracking-tight",
-          tone === "key" && "dark:font-bold", // Bolder in dark for key notes
-          tone === "caution" && "dark:font-bold" // Bolder in dark for cautions
-        )}>
+        <div
+          className={clsx(
+            "mb-1 font-semibold tracking-tight",
+            tone === "key" && "dark:font-bold", // Bolder in dark for key notes
+            tone === "caution" && "dark:font-bold" // Bolder in dark for cautions
+          )}
+        >
           {title}
         </div>
       )}
-      <div className={clsx(
-        "[&>p]:my-2",
-        "dark:[&>p]:font-medium", // Slightly bolder paragraphs in dark
-        "dark:[&>strong]:font-bold dark:[&>strong]:text-inherit", // Better strong text in dark
-        "dark:[&>code]:bg-white/10 dark:[&>code]:px-1 dark:[&>code]:rounded" // Code blocks in dark
-      )}>
+      <div
+        className={clsx(
+          "[&>p]:my-2",
+          "dark:[&>p]:font-medium", // Slightly bolder paragraphs in dark
+          "dark:[&>strong]:font-bold dark:[&>strong]:text-inherit", // Better strong text in dark
+          "dark:[&>code]:bg-white/10 dark:[&>code]:px-1 dark:[&>code]:rounded" // Code blocks in dark
+        )}
+      >
         {children}
       </div>
     </aside>

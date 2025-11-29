@@ -267,7 +267,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       <View style={styles.sectionSpacer} />
 
       {/* 1. The Garden */}
-      <Text style={styles.h2}>1. THE GARDEN — PURPOSE AS STRUCTURE, NOT MYTH</Text>
+      <Text style={styles.h2}>
+        1. THE GARDEN — PURPOSE AS STRUCTURE, NOT MYTH
+      </Text>
 
       <View style={styles.quoteBlock}>
         <Text style={styles.quoteText}>
@@ -286,7 +288,8 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Placed —</Text> location as intentionality
+            <Text style={styles.strong}>Placed —</Text> location as
+            intentionality
           </Text>
         </View>
         <View style={styles.bulletItem}>
@@ -298,21 +301,22 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given work —</Text> cultivate, govern, develop
+            <Text style={styles.strong}>Given work —</Text> cultivate, govern,
+            develop
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given boundaries —</Text> responsibility frames
-            freedom
+            <Text style={styles.strong}>Given boundaries —</Text> responsibility
+            frames freedom
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Given presence —</Text> fellowship with God as
-            operating environment
+            <Text style={styles.strong}>Given presence —</Text> fellowship with
+            God as operating environment
           </Text>
         </View>
       </View>
@@ -357,9 +361,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
 
       <Text style={styles.h3}>Job — Integrity under suffering</Text>
       <Text style={styles.bodyText}>
-        Purpose holds even when everything else collapses. Job’s story dismantles
-        the myth that purpose is proven only in success. It is proven in
-        faithfulness.
+        Purpose holds even when everything else collapses. Job’s story
+        dismantles the myth that purpose is proven only in success. It is proven
+        in faithfulness.
       </Text>
 
       <Text style={styles.h3}>Moses — Assignment after delay</Text>
@@ -428,20 +432,22 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Confucianism —</Text> order without a Father.
+            <Text style={styles.strong}>Confucianism —</Text> order without a
+            Father.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Islam —</Text> obedience without sonship.
+            <Text style={styles.strong}>Islam —</Text> obedience without
+            sonship.
           </Text>
         </View>
         <View style={styles.bulletItem}>
           <Text style={styles.bulletDot}>•</Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.strong}>Atheism —</Text> meaning manufactured from
-            meaninglessness.
+            <Text style={styles.strong}>Atheism —</Text> meaning manufactured
+            from meaninglessness.
           </Text>
         </View>
       </View>
@@ -568,7 +574,9 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </View>
 
       <View style={styles.sectionSpacer}>
-        <Text style={styles.h3}>• Charitable Systems — Love your neighbour</Text>
+        <Text style={styles.h3}>
+          • Charitable Systems — Love your neighbour
+        </Text>
         <Text style={styles.bodyText}>
           Christians were the first to build hospitals, orphanages, and
           structured charity — not as philanthropy, but as obedience.
@@ -615,12 +623,14 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
 
       <View style={styles.sectionSpacer} />
-      <Text style={styles.h2}>6. ECCLESIASTES — THE TWO-SENTENCE BLUEPRINT</Text>
+      <Text style={styles.h2}>
+        6. ECCLESIASTES — THE TWO-SENTENCE BLUEPRINT
+      </Text>
 
       <View style={styles.quoteBlock}>
         <Text style={styles.quoteText}>
-          “Fear God and keep His commandments… this is the whole duty of man.”
-          — Ecclesiastes 12:13
+          “Fear God and keep His commandments… this is the whole duty of man.” —
+          Ecclesiastes 12:13
         </Text>
       </View>
 
@@ -671,9 +681,7 @@ const UltimatePurposeOfManDocument: React.FC<{ coverImagePath: string }> = ({
       </Text>
 
       <Text style={styles.h3}>⚙️ The Garden Mandate Model</Text>
-      <Text style={styles.bodyText}>
-        Identity → Work → Influence → Culture
-      </Text>
+      <Text style={styles.bodyText}>Identity → Work → Influence → Culture</Text>
 
       <Text style={styles.h3}>⚙️ Ancient–Future Leadership Matrix</Text>
       <Text style={styles.bodyText}>

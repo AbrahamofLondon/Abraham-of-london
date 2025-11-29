@@ -23,8 +23,8 @@ const InnerCirclePage: NextPage = () => {
         <p className="mt-4 text-sm leading-relaxed text-gray-300 sm:text-base">
           The Inner Circle is a small, invitation-controlled cohort for those
           who want to work with the Canon at depth — fathers, founders,
-          policymakers, and reformers who intend to build with these
-          frameworks, not just read them.
+          policymakers, and reformers who intend to build with these frameworks,
+          not just read them.
         </p>
 
         <p className="mt-4 text-sm leading-relaxed text-gray-300 sm:text-base">

@@ -17,7 +17,15 @@ import {
 } from "lucide-react";
 import { siteConfig, type SocialLink } from "@/lib/siteConfig";
 
-const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+// Extended type that includes kind for icon mapping
+interface FooterSocialLink extends SocialLink {
+  kind?: string;
+}
+
+const iconMap: Record<
+  string,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
@@ -29,7 +37,7 @@ const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>
   whatsapp: MessageCircle,
 };
 
-const DEFAULT_SOCIALS: SocialLink[] = [
+const DEFAULT_SOCIALS: FooterSocialLink[] = [
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
@@ -92,7 +100,7 @@ const footerSections = [
     links: [
       { label: "Home", href: "/" },
       { label: "Content", href: "/content" },
-      { label: "The Canon", href: "/canon" }, // 👈 Canon landing
+      { label: "The Canon", href: "/canon" },
       { label: "Downloads", href: "/downloads" },
       { label: "Events", href: "/events" },
       { label: "Ventures", href: "/ventures" },
@@ -107,11 +115,11 @@ const footerSections = [
       {
         label: "Canon Campaign",
         href: "/canon/canon-campaign",
-      }, // 👈 campaign / marketing prelude
+      },
       {
         label: "Volume X — Arc of Future Civilisation",
         href: "/canon/volume-x-the-arc-of-future-civilisation",
-      }, // 👈 Volume X preview
+      },
     ],
   },
   {
@@ -130,11 +138,14 @@ export default function Footer(): JSX.Element {
   const title = siteConfig.title || "Abraham of London";
   const email = siteConfig.email || "info@abrahamoflondon.org";
 
-  const configSocials: SocialLink[] = Array.isArray(siteConfig.socialLinks)
-    ? siteConfig.socialLinks
+  const configSocials: FooterSocialLink[] = Array.isArray(siteConfig.socialLinks)
+    ? siteConfig.socialLinks.map(social => ({
+        ...social,
+        kind: (social as any).kind // Type assertion for existing social links
+      }))
     : [];
 
-  const byHref = new Map<string, SocialLink>();
+  const byHref = new Map<string, FooterSocialLink>();
   [...DEFAULT_SOCIALS, ...configSocials].forEach((item) => {
     const rawHref = typeof item.href === "string" ? item.href.trim() : "";
     if (!rawHref) return;
@@ -147,7 +158,8 @@ export default function Footer(): JSX.Element {
       (item.href.startsWith("http") &&
         !item.href.startsWith("mailto:") &&
         !item.href.startsWith("tel:"));
-    const Icon = item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
+    const Icon =
+      item.kind && iconMap[item.kind] ? iconMap[item.kind] : Sparkles;
 
     return {
       ...item,
@@ -280,13 +292,19 @@ export default function Footer(): JSX.Element {
               Governance
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-gold/50 lg:justify-end">
-              <Link href="/privacy" className="transition-colors hover:text-gold">
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-gold"
+              >
                 Privacy Policy
               </Link>
               <Link href="/terms" className="transition-colors hover:text-gold">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="transition-colors hover:text-gold">
+              <Link
+                href="/cookies"
+                className="transition-colors hover:text-gold"
+              >
                 Cookie Policy
               </Link>
               <Link
@@ -295,7 +313,10 @@ export default function Footer(): JSX.Element {
               >
                 Accessibility
               </Link>
-              <Link href="/security" className="transition-colors hover:text-gold">
+              <Link
+                href="/security"
+                className="transition-colors hover:text-gold"
+              >
                 Security
               </Link>
             </div>

@@ -90,13 +90,13 @@ export const getTwitterImageUrl = (imagePath?: string): string => {
 };
 
 export const getSocialUrl = (
-  platform: keyof SiteConfig["links"],
+  platform: keyof SiteConfig["links"]
 ): string | undefined => {
   return siteConfig.links[platform];
 };
 
 export const isSocialLinkConfigured = (
-  platform: keyof SiteConfig["links"],
+  platform: keyof SiteConfig["links"]
 ): boolean => {
   return !!siteConfig.links[platform];
 };
@@ -110,7 +110,7 @@ export const generateSeoConfig = (
     description: string;
     ogImage: string;
     twitterImage: string;
-  }> = {},
+  }> = {}
 ) => {
   return {
     title: overrides.title || siteConfig.title,

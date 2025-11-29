@@ -4,9 +4,5 @@ export default function PrintLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="print-layout min-h-screen bg-white">
-      {children}
-    </div>
-  );
+  return <div className="print-layout min-h-screen bg-white">{children}</div>;
 }

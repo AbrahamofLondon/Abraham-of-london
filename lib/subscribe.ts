@@ -23,7 +23,7 @@ export async function subscribe(
     metadata?: Record<string, unknown>;
     tags?: string[];
     referrer?: string;
-  } = {},
+  } = {}
 ): Promise<SubscriptionResult> {
   return coreSubscribe(email, options);
 }
@@ -36,7 +36,7 @@ export async function bulkSubscribe(
   options: {
     tags?: string[];
     batchSize?: number;
-  } = {},
+  } = {}
 ): Promise<{
   successful: string[];
   failed: Array<{ email: string; error: string }>;

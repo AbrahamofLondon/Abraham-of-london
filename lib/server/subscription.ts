@@ -57,7 +57,7 @@ function normalizeEmail(email: string): string {
 // ---------------------------------------------------------------------------
 
 async function subscribeToButtondown(
-  subscriber: SubscriberData,
+  subscriber: SubscriberData
 ): Promise<SubscriptionResult> {
   const API_KEY = process.env.BUTTONDOWN_API_KEY;
   const API_URL = "https://api.buttondown.email/v1/subscribers";
@@ -144,7 +144,7 @@ async function storeEmailLocally(email: string): Promise<void> {
   // In production, push into a queue / DB.
   console.log(
     "[Subscription] Storing email locally for later processing:",
-    email,
+    email
   );
 }
 
@@ -158,7 +158,7 @@ class RateLimiter {
   isRateLimited(
     identifier: string,
     maxAttempts: number,
-    windowMs: number,
+    windowMs: number
   ): boolean {
     const now = Date.now();
     const userAttempts = this.attempts.get(identifier) || [];
@@ -208,7 +208,7 @@ export async function subscribe(
     metadata?: SubscriberMetadata;
     tags?: string[];
     referrer?: string;
-  } = {},
+  } = {}
 ): Promise<SubscriptionResult> {
   // Normalise early so rate-limit key is predictable
   const normalizedEmail = normalizeEmail(email || "");
@@ -286,7 +286,7 @@ export async function bulkSubscribe(
   options: {
     tags?: string[];
     batchSize?: number;
-  } = {},
+  } = {}
 ): Promise<{
   successful: string[];
   failed: Array<{ email: string; error: string }>;
@@ -298,7 +298,7 @@ export async function bulkSubscribe(
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
     const results: SubscriptionResult[] = await Promise.all(
-      batch.map((addr) => subscribe(addr, { tags: options.tags })),
+      batch.map((addr) => subscribe(addr, { tags: options.tags }))
     );
 
     results.forEach((result, index) => {
@@ -327,9 +327,7 @@ export async function bulkSubscribe(
 // Unsubscribe (stub – implement real Buttondown call when needed)
 // ---------------------------------------------------------------------------
 
-export async function unsubscribe(
-  email: string,
-): Promise<SubscriptionResult> {
+export async function unsubscribe(email: string): Promise<SubscriptionResult> {
   const normalizedEmail = normalizeEmail(email || "");
 
   if (!normalizedEmail || !isValidEmail(normalizedEmail)) {

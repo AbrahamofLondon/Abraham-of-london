@@ -44,11 +44,7 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
 };
 
 // Cover image can be string or StaticImageData-like
-type CoverImageLike =
-  | string
-  | { src?: string | undefined }
-  | null
-  | undefined;
+type CoverImageLike = string | { src?: string | undefined } | null | undefined;
 
 // Safe image URL utility – supports string or StaticImageData-style objects
 const getSafeImageUrl = (image: CoverImageLike): string => {
@@ -87,13 +83,20 @@ const getSafeImageUrl = (image: CoverImageLike): string => {
 };
 
 // Type guard to check if object has coverImage property
-const hasCoverImage = (post: unknown): post is { coverImage: CoverImageLike } => {
+const hasCoverImage = (
+  post: unknown
+): post is { coverImage: CoverImageLike } => {
   return typeof post === "object" && post !== null && "coverImage" in post;
 };
 
 // Type guard to check if object has readTime property
 const hasReadTime = (post: unknown): post is { readTime: string } => {
-  return typeof post === "object" && post !== null && "readTime" in post && typeof (post as { readTime: unknown }).readTime === "string";
+  return (
+    typeof post === "object" &&
+    post !== null &&
+    "readTime" in post &&
+    typeof (post as { readTime: unknown }).readTime === "string"
+  );
 };
 
 export default function BlogPostPreview({

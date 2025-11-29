@@ -529,9 +529,10 @@ const HomePage: React.FC = () => {
               You&apos;re not here by accident.
             </h2>
             <p className="mx-auto mb-6 max-w-xl text-sm text-slate-900/90 md:text-base">
-              If you&apos;re still reading, you&apos;re the type of man who doesn&apos;t
-              flinch when it&apos;s time to take responsibility. Use the tools. Build
-              the systems. Protect the people who carry your name.
+              If you&apos;re still reading, you&apos;re the type of man who
+              doesn&apos;t flinch when it&apos;s time to take responsibility.
+              Use the tools. Build the systems. Protect the people who carry
+              your name.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link

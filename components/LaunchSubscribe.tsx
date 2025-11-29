@@ -18,14 +18,35 @@ export default function LaunchSubscribe() {
   }
 
   return (
-    <form onSubmit={submit} className="not-prose rounded-xl border border-lightGrey bg-warmWhite/70 p-4 shadow-card">
+    <form
+      onSubmit={submit}
+      className="not-prose rounded-xl border border-lightGrey bg-warmWhite/70 p-4 shadow-card"
+    >
       <div className="mb-2 font-semibold">Join the launch list</div>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input className="w-full rounded-lg border border-lightGrey px-3 py-2 text-sm" placeholder="Name (optional)" value={name} onChange={(e)=>setName(e.target.value)} />
-        <input className="w-full rounded-lg border border-lightGrey px-3 py-2 text-sm" type="email" required placeholder="you@example.com" value={email} onChange={(e)=>setEmail(e.target.value)} />
-        <button className="aol-btn rounded-full px-4 py-2" type="submit">Notify me</button>
+        <input
+          className="w-full rounded-lg border border-lightGrey px-3 py-2 text-sm"
+          placeholder="Name (optional)"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="w-full rounded-lg border border-lightGrey px-3 py-2 text-sm"
+          type="email"
+          required
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <button className="aol-btn rounded-full px-4 py-2" type="submit">
+          Notify me
+        </button>
       </div>
-      {ok && <p className="mt-2 text-xs text-forest">Welcome—watch your inbox for updates.</p>}
+      {ok && (
+        <p className="mt-2 text-xs text-forest">
+          Welcome—watch your inbox for updates.
+        </p>
+      )}
     </form>
   );
 }

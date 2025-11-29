@@ -106,8 +106,7 @@ function normaliseSlug(base: string, prefix?: string): string {
 function toContentArray(value: unknown): ContentLike[] {
   if (!Array.isArray(value)) return [];
   return value.filter(
-    (item): item is ContentLike =>
-      !!item && typeof item === "object",
+    (item): item is ContentLike => !!item && typeof item === "object"
   );
 }
 
@@ -126,10 +125,7 @@ function getNumber(obj: ContentLike, key: string): number | undefined {
   return typeof v === "number" && !Number.isNaN(v) ? v : undefined;
 }
 
-function getDateLike(
-  obj: ContentLike,
-  key: string,
-): string | Date | undefined {
+function getDateLike(obj: ContentLike, key: string): string | Date | undefined {
   const v = obj[key];
   if (v instanceof Date) return v;
   if (typeof v === "string") {
@@ -139,15 +135,10 @@ function getDateLike(
   return undefined;
 }
 
-function getStringArray(
-  obj: ContentLike,
-  key: string,
-): string[] | undefined {
+function getStringArray(obj: ContentLike, key: string): string[] | undefined {
   const v = obj[key];
   if (!Array.isArray(v)) return undefined;
-  const filtered = v.filter(
-    (item): item is string => typeof item === "string",
-  );
+  const filtered = v.filter((item): item is string => typeof item === "string");
   return filtered.length > 0 ? filtered : undefined;
 }
 
@@ -158,7 +149,7 @@ function getBoolean(obj: ContentLike, key: string): boolean | undefined {
 
 // Generic “maybe async” resolver – used only for legacy pages-data
 async function resolveMaybeAsync<T>(
-  fn?: () => T | Promise<T>,
+  fn?: () => T | Promise<T>
 ): Promise<T | null> {
   if (!fn) return null;
   try {
@@ -185,8 +176,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
   const posts = toContentArray(allPosts as unknown as ContentLike[]);
 
   return posts.map((post): UnifiedContent => {
-    const rawSlug =
-      getString(post, "slug") ?? getString(post, "_id") ?? "";
+    const rawSlug = getString(post, "slug") ?? getString(post, "_id") ?? "";
     const slug = normaliseSlug(rawSlug, "blog");
     const draft = getBoolean(post, "draft");
 
@@ -196,9 +186,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
       getString(post, "description") ??
       getString(post, "summary");
 
-    const seoTitle =
-      getString(post, "ogTitle") ??
-      title;
+    const seoTitle = getString(post, "ogTitle") ?? title;
     const seoDescription =
       getString(post, "ogDescription") ??
       excerpt ??
@@ -214,9 +202,7 @@ async function getMdxContent(): Promise<UnifiedContent[]> {
 
       author: getString(post, "author"),
       date: getDateLike(post, "date"),
-      updatedAt:
-        getDateLike(post, "updated") ??
-        getDateLike(post, "updatedAt"),
+      updatedAt: getDateLike(post, "updated") ?? getDateLike(post, "updatedAt"),
       category: getString(post, "category"),
       tags: getStringArray(post, "tags"),
 
@@ -264,17 +250,13 @@ async function getEventContent(): Promise<UnifiedContent[]> {
       content: undefined,
       description: excerpt,
 
-      author:
-        getString(event, "speaker") ??
-        getString(event, "host"),
+      author: getString(event, "speaker") ?? getString(event, "host"),
       date:
         getDateLike(event, "eventDate") ??
         getDateLike(event, "date") ??
         getDateLike(event, "startDate"),
       updatedAt: getDateLike(event, "updatedAt"),
-      category:
-        getString(event, "category") ??
-        getString(event, "type"),
+      category: getString(event, "category") ?? getString(event, "type"),
       tags: getStringArray(event, "tags"),
 
       printSettings: undefined,
@@ -307,8 +289,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 
     const title = getString(book, "title") ?? slug;
     const excerpt =
-      getString(book, "excerpt") ??
-      getString(book, "description");
+      getString(book, "excerpt") ?? getString(book, "description");
 
     const status = getString(book, "status");
     const draft = getBoolean(book, "draft");
@@ -321,12 +302,8 @@ async function getBookContent(): Promise<UnifiedContent[]> {
       content: undefined,
       description: excerpt,
 
-      author:
-        getString(book, "author") ??
-        getString(book, "primaryAuthor"),
-      date:
-        getDateLike(book, "publishedAt") ??
-        getDateLike(book, "date"),
+      author: getString(book, "author") ?? getString(book, "primaryAuthor"),
+      date: getDateLike(book, "publishedAt") ?? getDateLike(book, "date"),
       updatedAt: getDateLike(book, "updatedAt"),
       category: getString(book, "category"),
       tags: getStringArray(book, "tags"),
@@ -348,9 +325,7 @@ async function getBookContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getDownloadContent(): Promise<UnifiedContent[]> {
-  const downloads = toContentArray(
-    allDownloads as unknown as ContentLike[],
-  );
+  const downloads = toContentArray(allDownloads as unknown as ContentLike[]);
 
   return downloads.map((d): UnifiedContent => {
     const rawSlug =
@@ -362,9 +337,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
     const slug = normaliseSlug(rawSlug, "downloads");
 
     const title = getString(d, "title") ?? slug;
-    const excerpt =
-      getString(d, "excerpt") ??
-      getString(d, "description");
+    const excerpt = getString(d, "excerpt") ?? getString(d, "description");
 
     const status = getString(d, "status");
 
@@ -377,9 +350,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
       description: excerpt,
 
       author: getString(d, "author"),
-      date:
-        getDateLike(d, "date") ??
-        getDateLike(d, "publishedAt"),
+      date: getDateLike(d, "date") ?? getDateLike(d, "publishedAt"),
       updatedAt: getDateLike(d, "updatedAt"),
       category: getString(d, "category"),
       tags: getStringArray(d, "tags"),
@@ -401,9 +372,7 @@ async function getDownloadContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getResourceContent(): Promise<UnifiedContent[]> {
-  const resources = toContentArray(
-    allResources as unknown as ContentLike[],
-  );
+  const resources = toContentArray(allResources as unknown as ContentLike[]);
 
   return resources.map((r): UnifiedContent => {
     const rawSlug =
@@ -415,9 +384,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
     const slug = normaliseSlug(rawSlug, "resources");
 
     const title = getString(r, "title") ?? slug;
-    const excerpt =
-      getString(r, "excerpt") ??
-      getString(r, "description");
+    const excerpt = getString(r, "excerpt") ?? getString(r, "description");
 
     const status = getString(r, "status");
 
@@ -430,9 +397,7 @@ async function getResourceContent(): Promise<UnifiedContent[]> {
       description: excerpt,
 
       author: getString(r, "author"),
-      date:
-        getDateLike(r, "date") ??
-        getDateLike(r, "publishedAt"),
+      date: getDateLike(r, "date") ?? getDateLike(r, "publishedAt"),
       updatedAt: getDateLike(r, "updatedAt"),
       category: getString(r, "category"),
       tags: getStringArray(r, "tags"),
@@ -481,9 +446,7 @@ async function getCanonContent(): Promise<UnifiedContent[]> {
     const slug = normaliseSlug(rawSlug, "canon");
 
     const title = getString(c, "title") ?? slug;
-    const excerpt =
-      getString(c, "excerpt") ??
-      getString(c, "description");
+    const excerpt = getString(c, "excerpt") ?? getString(c, "description");
 
     const draft = getBoolean(c, "draft");
 
@@ -523,9 +486,7 @@ async function getCanonContent(): Promise<UnifiedContent[]> {
 // ---------------------------------------------------------------------------
 
 async function getStrategyContent(): Promise<UnifiedContent[]> {
-  const strategies = toContentArray(
-    allStrategies as unknown as ContentLike[],
-  );
+  const strategies = toContentArray(allStrategies as unknown as ContentLike[]);
 
   return strategies.map((s): UnifiedContent => {
     const rawSlug =
@@ -537,9 +498,7 @@ async function getStrategyContent(): Promise<UnifiedContent[]> {
     const slug = normaliseSlug(rawSlug, "strategy");
 
     const title = getString(s, "title") ?? slug;
-    const excerpt =
-      getString(s, "excerpt") ??
-      getString(s, "description");
+    const excerpt = getString(s, "excerpt") ?? getString(s, "description");
 
     const status = getString(s, "status");
 
@@ -575,16 +534,17 @@ async function getStrategyContent(): Promise<UnifiedContent[]> {
 
 async function getPageContent(): Promise<UnifiedContent[]> {
   const pagesModule = await safeImport(
-    () => import("@/lib/server/pages-data" as string),
+    () => import("@/lib/server/pages-data" as string)
   );
   if (!pagesModule) return [];
 
-  const getPageSlugs =
-    (pagesModule as { getPageSlugs?: () => string[] }).getPageSlugs;
-  const getPageBySlug =
-    (pagesModule as {
+  const getPageSlugs = (pagesModule as { getPageSlugs?: () => string[] })
+    .getPageSlugs;
+  const getPageBySlug = (
+    pagesModule as {
       getPageBySlug?: (slug: string, fields?: string[]) => ContentLike;
-    }).getPageBySlug;
+    }
+  ).getPageBySlug;
 
   if (!getPageSlugs || !getPageBySlug) return [];
 
@@ -597,7 +557,7 @@ async function getPageContent(): Promise<UnifiedContent[]> {
         "description",
         "seoTitle",
         "seoDescription",
-      ]),
+      ])
     )
     .filter((p): p is ContentLike => !!p);
 
@@ -621,12 +581,9 @@ async function getPageContent(): Promise<UnifiedContent[]> {
 
       printSettings: undefined,
 
-      seoTitle:
-        getString(p, "seoTitle") ??
-        title,
+      seoTitle: getString(p, "seoTitle") ?? title,
       seoDescription:
-        getString(p, "seoDescription") ??
-        getString(p, "description"),
+        getString(p, "seoDescription") ?? getString(p, "description"),
 
       source: "pages",
       published: true,
@@ -651,9 +608,7 @@ async function getPrintContent(): Promise<UnifiedContent[]> {
     const slug = normaliseSlug(rawSlug, "prints");
 
     const title = getString(p, "title") ?? slug;
-    const excerpt =
-      getString(p, "excerpt") ??
-      getString(p, "description");
+    const excerpt = getString(p, "excerpt") ?? getString(p, "description");
 
     const available = getBoolean(p, "available");
     const status = getString(p, "status");
@@ -678,9 +633,7 @@ async function getPrintContent(): Promise<UnifiedContent[]> {
       seoDescription: excerpt,
 
       source: "prints",
-      published:
-        (available ?? true) &&
-        (status ?? "published") !== "draft",
+      published: (available ?? true) && (status ?? "published") !== "draft",
       featured: getBoolean(p, "featured"),
     };
   });
@@ -727,7 +680,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 }
 
 export async function getUnifiedContentBySlug(
-  rawSlug: string,
+  rawSlug: string
 ): Promise<UnifiedContent | null> {
   const target = cleanSlug(rawSlug);
   const all = await getAllUnifiedContent();

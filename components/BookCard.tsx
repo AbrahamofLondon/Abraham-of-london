@@ -96,7 +96,7 @@ export default function BookCard(props: BookCardProps): JSX.Element {
             onError={() => {
               setImageLoaded(false);
               setCoverIndex((prev) =>
-                prev + 1 < coverCandidates.length ? prev + 1 : prev,
+                prev + 1 < coverCandidates.length ? prev + 1 : prev
               );
             }}
           />
@@ -116,9 +116,7 @@ export default function BookCard(props: BookCardProps): JSX.Element {
               {subtitle}
             </p>
           )}
-          {blurb && (
-            <p className="mb-4 text-sm text-gray-300">{blurb}</p>
-          )}
+          {blurb && <p className="mb-4 text-sm text-gray-300">{blurb}</p>}
 
           {safeProgress !== null && (
             <div className="mb-4">

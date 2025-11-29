@@ -51,7 +51,7 @@ export function json(
   body: unknown,
   status = 200,
   origin = "*",
-  extraHeaders: Record<string, string> = {},
+  extraHeaders: Record<string, string> = {}
 ): HandlerResponse {
   return {
     statusCode: status,
@@ -69,7 +69,7 @@ export function json(
 export function ok(
   message = "OK",
   extra: Record<string, unknown> = {},
-  origin = "*",
+  origin = "*"
 ): HandlerResponse {
   return json({ ok: true, message, ...extra }, 200, origin);
 }
@@ -77,7 +77,7 @@ export function ok(
 export function bad(
   message = "Bad Request",
   status = 400,
-  origin = "*",
+  origin = "*"
 ): HandlerResponse {
   return json({ ok: false, message }, status, origin);
 }
@@ -111,7 +111,7 @@ export async function readJson<T = Record<string, unknown>>(
     | {
         headers: Headers | Record<string, string | string[] | undefined>;
         body?: string | null;
-      },
+      }
 ): Promise<T> {
   // Extract content-type
   const getHeader = (name: string) => {
@@ -155,16 +155,18 @@ export async function readJson<T = Record<string, unknown>>(
    ============================================================================ */
 
 export function escapeHtml(str: string) {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    (
-      {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      } as const
-    )[m] || m,
+  return String(str).replace(
+    /[&<>"']/g,
+    (m) =>
+      (
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }) as const
+      )[m] || m
   );
 }
 
@@ -175,9 +177,16 @@ export function normalizeEmail(input: unknown): string | null {
 }
 
 /** Small guard for required fields; returns a list of missing keys */
-export function missingKeys(obj: Record<string, unknown>, keys: string[]): string[] {
+export function missingKeys(
+  obj: Record<string, unknown>,
+  keys: string[]
+): string[] {
   return keys.filter((k) => {
     const v = obj[k];
-    return v === undefined || v === null || (typeof v === "string" && v.trim() === "");
+    return (
+      v === undefined ||
+      v === null ||
+      (typeof v === "string" && v.trim() === "")
+    );
   });
 }

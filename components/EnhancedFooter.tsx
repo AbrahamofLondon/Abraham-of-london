@@ -9,14 +9,20 @@ interface EnhancedFooterProps {
   className?: string;
 }
 
+// Extended type that includes kind for emoji mapping
+interface SocialLinkWithKind extends SocialLink {
+  kind?: string;
+}
+
 export default function EnhancedFooter({
   variant = "light",
   className,
 }: EnhancedFooterProps) {
-  const config = siteConfig;
+  // Use type assertion to include the kind property
+  const config = siteConfig as any;
 
-  // Safely normalize social links
-  const socialLinks: SocialLink[] = Array.isArray(config.socialLinks)
+  // Safely normalize social links with kind property
+  const socialLinks: SocialLinkWithKind[] = Array.isArray(config.socialLinks)
     ? [...config.socialLinks]
     : [];
 
@@ -63,13 +69,55 @@ export default function EnhancedFooter({
     },
   ];
 
+  // Function to get emoji based on link properties
+  const getSocialEmoji = (link: SocialLinkWithKind): string => {
+    // If kind is explicitly provided, use it
+    if (link.kind) {
+      const kindMap: Record<string, string> = {
+        twitter: "𝕏",
+        linkedin: "💼",
+        github: "⚡",
+        instagram: "📸",
+        youtube: "🎥",
+        website: "🌐",
+        tiktok: "🎵",
+        facebook: "📘",
+        email: "✉️",
+        phone: "📞",
+        whatsapp: "💬",
+        medium: "📝",
+      };
+      return kindMap[link.kind] || "🔗";
+    }
+
+    // Fallback: infer from href or label
+    const href = link.href.toLowerCase();
+    const label = link.label.toLowerCase();
+
+    if (href.includes('twitter.com') || href.includes('x.com') || label.includes('twitter') || label.includes('x')) return "𝕏";
+    if (href.includes('linkedin.com') || label.includes('linkedin')) return "💼";
+    if (href.includes('github.com') || label.includes('github')) return "⚡";
+    if (href.includes('instagram.com') || label.includes('instagram')) return "📸";
+    if (href.includes('youtube.com') || label.includes('youtube')) return "🎥";
+    if (href.includes('tiktok.com') || label.includes('tiktok')) return "🎵";
+    if (href.includes('facebook.com') || label.includes('facebook')) return "📘";
+    if (href.startsWith('mailto:') || label.includes('email')) return "✉️";
+    if (href.startsWith('tel:') || label.includes('phone')) return "📞";
+    if (href.includes('whatsapp.com') || label.includes('whatsapp')) return "💬";
+    if (href.includes('medium.com') || label.includes('medium')) return "📝";
+
+    return "🔗";
+  };
+
   return (
-    <footer className={`${baseClasses} ${variantClasses[variant]} ${className || ''}`}>
+    <footer
+      className={`${baseClasses} ${variantClasses[variant]} ${className || ""}`}
+    >
       <div className="mx-auto max-w-7xl px-4">
         {/* Main Footer Content */}
         <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand Section */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -109,22 +157,7 @@ export default function EnhancedFooter({
                   viewport={{ once: true }}
                 >
                   <span className="text-lg font-medium">
-                    {link.kind === "twitter" && "𝕏"}
-                    {link.kind === "linkedin" && "💼"}
-                    {link.kind === "github" && "⚡"}
-                    {link.kind === "instagram" && "📸"}
-                    {link.kind === "youtube" && "🎥"}
-                    {link.kind === "website" && "🌐"}
-                    {link.kind === "tiktok" && "🎵"}
-                    {link.kind === "facebook" && "📘"}
-                    {link.kind === "email" && "✉️"}
-                    {link.kind === "phone" && "📞"}
-                    {link.kind === "whatsapp" && "💬"}
-                    {![
-                      "twitter", "linkedin", "github", "instagram", 
-                      "youtube", "website", "tiktok", "facebook",
-                      "email", "phone", "whatsapp"
-                    ].includes(link.kind || '') && "🔗"}
+                    {getSocialEmoji(link)}
                   </span>
                 </motion.a>
               ))}
@@ -133,7 +166,7 @@ export default function EnhancedFooter({
 
           {/* Links Sections */}
           {footerSections.map((section, sectionIndex) => (
-            <motion.div 
+            <motion.div
               key={section.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -145,11 +178,14 @@ export default function EnhancedFooter({
               </h4>
               <ul className="space-y-4">
                 {section.links.map((link, linkIndex) => (
-                  <motion.li 
+                  <motion.li
                     key={link.href}
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: (sectionIndex * 0.1) + (linkIndex * 0.05) }}
+                    transition={{
+                      duration: 0.4,
+                      delay: sectionIndex * 0.1 + linkIndex * 0.05,
+                    }}
                     viewport={{ once: true }}
                   >
                     <Link
@@ -167,7 +203,7 @@ export default function EnhancedFooter({
         </div>
 
         {/* Bottom Bar */}
-        <motion.div 
+        <motion.div
           className="border-t border-current/20 pt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -180,13 +216,6 @@ export default function EnhancedFooter({
                 {config.copyright ||
                   `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`}
               </p>
-
-              {config.companyNumber && (
-                <p className="mt-2 text-xs opacity-50">
-                  Company No: {config.companyNumber}
-                  {config.vatNumber && <> • VAT: {config.vatNumber}</>}
-                </p>
-              )}
             </div>
 
             <div className="flex items-center gap-8 text-sm font-medium opacity-70">

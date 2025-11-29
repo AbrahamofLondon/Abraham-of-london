@@ -26,8 +26,8 @@ export class WebSocketService {
 
   constructor(
     private url: string,
-    private opts: { 
-      debug?: boolean; 
+    private opts: {
+      debug?: boolean;
       autoConnect?: boolean;
       maxReconnectAttempts?: number;
     } = {}
@@ -40,7 +40,7 @@ export class WebSocketService {
 
   connect() {
     if (this.isOpen || this.socket) return;
-    
+
     try {
       this.socket = new WebSocket(this.url);
 
@@ -54,7 +54,7 @@ export class WebSocketService {
       this.socket.addEventListener("close", () => {
         this.isOpen = false;
         this.emit({ type: "disconnected", data: {} });
-        
+
         // Auto-reconnect logic
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           setTimeout(() => {
@@ -111,7 +111,7 @@ export class WebSocketService {
     const list = this.subscribers.get(key) ?? [];
     list.push(cb);
     this.subscribers.set(key, list);
-    
+
     // Return unsubscribe function
     return () => {
       const arr = this.subscribers.get(key) ?? [];
@@ -134,7 +134,8 @@ export class WebSocketService {
         this.emit({ type: "error", data: { error: err } });
       }
     } else {
-      if (this.opts.debug) console.warn("WebSocket not connected, cannot send message");
+      if (this.opts.debug)
+        console.warn("WebSocket not connected, cannot send message");
     }
   }
 
@@ -158,22 +159,22 @@ export class WebSocketService {
 // Optional singleton if you need a shared bus elsewhere
 export const ws = new WebSocketService(
   process.env.NEXT_PUBLIC_WS_URL || "wss://echo.websocket.org", // Using public echo server for demo
-  { 
-    debug: process.env.NODE_ENV === 'development',
+  {
+    debug: process.env.NODE_ENV === "development",
     autoConnect: false, // Let components control when to connect
-    maxReconnectAttempts: 5
+    maxReconnectAttempts: 5,
   }
 );
 
 // React hook for connection status
 export function useWebSocketStatus(): boolean {
   const [connected, setConnected] = useState(false);
-  
+
   useEffect(() => {
     const unsubscribeConnected = ws.on("connected", () => {
       setConnected(true);
     });
-    
+
     const unsubscribeDisconnected = ws.on("disconnected", () => {
       setConnected(false);
     });
@@ -192,18 +193,20 @@ export function useWebSocketStatus(): boolean {
       // at the application level.
     };
   }, []);
-  
+
   return connected;
 }
 
 // Additional utility hook for receiving messages
-export function useWebSocketMessages<T = any>(eventType?: string): WebSocketMessage[] {
+export function useWebSocketMessages<T = any>(
+  eventType?: string
+): WebSocketMessage[] {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
     const messageHandler = (message: WebSocketMessage) => {
       if (!eventType || message.type === eventType) {
-        setMessages(prev => [...prev, message]);
+        setMessages((prev) => [...prev, message]);
       }
     };
 

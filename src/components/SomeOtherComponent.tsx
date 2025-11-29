@@ -17,7 +17,7 @@ export default function SomeOtherComponent({
   const [itemList, setItemList] = React.useState<string[]>(items);
 
   const toggleItem = (item: string) => {
-    setActiveItems(prev => {
+    setActiveItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(item)) {
         newSet.delete(item);
@@ -32,7 +32,7 @@ export default function SomeOtherComponent({
 
   const handleAddItem = () => {
     const newItem = `Item ${itemList.length + 1}`;
-    setItemList(prev => [...prev, newItem]);
+    setItemList((prev) => [...prev, newItem]);
     onItemAction?.(newItem, "added");
   };
 
@@ -45,22 +45,24 @@ export default function SomeOtherComponent({
       <h3 className="text-xl font-semibold text-gray-900 mb-4">
         Interactive List Component
       </h3>
-      
+
       <div className="space-y-3 mb-6">
         {itemList.map((item) => (
           <div
             key={item}
             className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <span className={`font-medium ${
-              activeItems.has(item) ? "text-green-600" : "text-gray-700"
-            }`}>
+            <span
+              className={`font-medium ${
+                activeItems.has(item) ? "text-green-600" : "text-gray-700"
+              }`}
+            >
               {item}
               {activeItems.has(item) && (
                 <span className="ml-2 text-xs text-green-500">● Active</span>
               )}
             </span>
-            
+
             <div className="flex gap-2">
               <InteractiveElement
                 variant={activeItems.has(item) ? "secondary" : "primary"}
@@ -69,7 +71,7 @@ export default function SomeOtherComponent({
               >
                 {activeItems.has(item) ? "Deactivate" : "Activate"}
               </InteractiveElement>
-              
+
               <InteractiveElement
                 variant="ghost"
                 size="sm"
@@ -90,17 +92,16 @@ export default function SomeOtherComponent({
         >
           Add New Item
         </InteractiveElement>
-        
-        <InteractiveElement
-          variant="outline"
-          onClick={handleReset}
-        >
+
+        <InteractiveElement variant="outline" onClick={handleReset}>
           Reset All
         </InteractiveElement>
       </div>
 
       <div className="mt-4 text-xs text-gray-500">
-        <p>Total items: {itemList.length} | Active: {activeItems.size}</p>
+        <p>
+          Total items: {itemList.length} | Active: {activeItems.size}
+        </p>
       </div>
     </div>
   );

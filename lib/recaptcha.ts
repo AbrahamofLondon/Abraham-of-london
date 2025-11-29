@@ -2,11 +2,11 @@ export async function verifyRecaptcha(token: string): Promise<boolean> {
   // Early return if secret key is missing
   if (!process.env.RECAPTCHA_SECRET_KEY) {
     console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification");
-    return process.env.NODE_ENV !== 'production'; // Fail secure in production
+    return process.env.NODE_ENV !== "production"; // Fail secure in production
   }
 
   // Validate token format before making API call
-  if (!token || typeof token !== 'string' || token.length < 10) {
+  if (!token || typeof token !== "string" || token.length < 10) {
     console.error("Invalid reCAPTCHA token format");
     return false;
   }
@@ -38,15 +38,15 @@ export async function verifyRecaptcha(token: string): Promise<boolean> {
     }
 
     const data = await response.json();
-    
+
     // Validate response structure
-    if (typeof data.success !== 'boolean') {
+    if (typeof data.success !== "boolean") {
       console.error("Invalid reCAPTCHA response format");
       return false;
     }
 
-    const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE || '0.5');
-    const passed = data.success && (data.score >= minScore);
+    const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE || "0.5");
+    const passed = data.success && data.score >= minScore;
 
     // Security logging for suspicious scores
     if (data.success && data.score < 0.3) {
@@ -54,9 +54,8 @@ export async function verifyRecaptcha(token: string): Promise<boolean> {
     }
 
     return passed;
-
   } catch (error) {
-    if (error.name === 'AbortError') {
+    if (error.name === "AbortError") {
       console.error("reCAPTCHA verification timeout");
     } else {
       console.error("reCAPTCHA verification failed:", error);

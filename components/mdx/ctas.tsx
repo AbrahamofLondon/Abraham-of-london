@@ -63,17 +63,17 @@ export const LeadershipCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="leadership" {...props} />
 );
 
-export const BrotherhoodCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
-  <CTA presetKey="brotherhood" {...props} />
-);
+export const BrotherhoodCTA: React.FC<Omit<CTAProps, "presetKey">> = (
+  props
+) => <CTA presetKey="brotherhood" {...props} />;
 
 export const MentorshipCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="mentorship" {...props} />
 );
 
-export const FreeResourcesCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
-  <CTA presetKey="free-resources" {...props} />
-);
+export const FreeResourcesCTA: React.FC<Omit<CTAProps, "presetKey">> = (
+  props
+) => <CTA presetKey="free-resources" {...props} />;
 
 export const PremiumCTA: React.FC<Omit<CTAProps, "presetKey">> = (props) => (
   <CTA presetKey="premium" {...props} />

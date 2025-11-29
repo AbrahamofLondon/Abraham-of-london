@@ -34,7 +34,8 @@ function loadAllResourcesFromFs(): ResourceMeta[] {
       .trim()
       .replace(/^\/+|\/+$/g, "");
 
-    const title = (data.title as string | undefined) || slug || "Untitled resource";
+    const title =
+      (data.title as string | undefined) || slug || "Untitled resource";
 
     const category = (data.category as string | undefined) || undefined;
 
@@ -96,7 +97,9 @@ export function getResourceBySlug(slug: string): ResourceMeta | undefined {
 
 export function getResourcesBySlugs(slugs: string[]): ResourceMeta[] {
   const keys = new Set(slugs.map((s) => String(s || "").toLowerCase()));
-  return allResources().filter((r) => keys.has(String(r.slug || "").toLowerCase()));
+  return allResources().filter((r) =>
+    keys.has(String(r.slug || "").toLowerCase())
+  );
 }
 
 export function getAllContent(): ResourceMeta[] {

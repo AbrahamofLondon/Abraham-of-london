@@ -6,13 +6,9 @@ interface HeroEyebrowProps {
   className?: string;
 }
 
-export default function HeroEyebrow({ 
-  children, 
-  className = "" 
+export default function HeroEyebrow({
+  children,
+  className = "",
 }: HeroEyebrowProps) {
-  return (
-    <div className={`heroeyebrow ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`heroeyebrow ${className}`}>{children}</div>;
 }

@@ -46,8 +46,8 @@ const NotFoundPage: React.FC = () => {
               {attemptedPath}
             </code>
             <p className="mt-2 text-[11px] text-gray-400">
-              If this URL should exist, note it down – it helps when we&apos;re tightening
-              routes or migrating content.
+              If this URL should exist, note it down – it helps when we&apos;re
+              tightening routes or migrating content.
             </p>
           </div>
 

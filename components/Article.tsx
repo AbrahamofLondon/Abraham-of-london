@@ -26,15 +26,8 @@ function formatDateISOToGB(iso?: string | null): string | null {
 }
 
 export default function Article(props: ArticleProps) {
-  const {
-    title,
-    subtitle,
-    coverImage,
-    date,
-    category,
-    readTime,
-    children,
-  } = props;
+  const { title, subtitle, coverImage, date, category, readTime, children } =
+    props;
 
   const dateText = formatDateISOToGB(date);
 

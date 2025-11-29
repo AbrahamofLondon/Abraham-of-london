@@ -1,5 +1,5 @@
 // app/robots.txt/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const robots = `
@@ -14,7 +14,7 @@ Sitemap: https://www.abrahamoflondon.org/sitemap.xml
   return new NextResponse(robots, {
     status: 200,
     headers: {
-      'Content-Type': 'text/plain',
+      "Content-Type": "text/plain",
     },
   });
 }

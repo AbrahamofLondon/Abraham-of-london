@@ -2,10 +2,7 @@
 import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
@@ -209,8 +206,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       typeof slugParam === "string"
         ? slugParam
         : Array.isArray(slugParam)
-        ? slugParam[0]
-        : "";
+          ? slugParam[0]
+          : "";
 
     if (!slug) return { notFound: true };
 

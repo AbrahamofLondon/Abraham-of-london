@@ -22,9 +22,9 @@ type BookishMdxMeta = MdxMeta &
     publishDate?: string; // allow alternate date field
   };
 
-type BookishMdxDocument = MdxDocument &
-  { content: string } &
-  Partial<SharedBookMeta>;
+type BookishMdxDocument = MdxDocument & {
+  content: string;
+} & Partial<SharedBookMeta>;
 
 /**
  * Safely convert any value to string or return undefined
@@ -73,7 +73,7 @@ function safeArray(value: unknown): string[] | undefined {
  * Safely convert a value into the allowed status enum or undefined
  */
 function safeStatus(
-  value: unknown,
+  value: unknown
 ): "draft" | "published" | "scheduled" | undefined {
   if (value === "draft" || value === "published" || value === "scheduled") {
     return value;

@@ -47,9 +47,13 @@ export const trackEvent = (event: AnalyticsEvent): void => {
 
 export const trackPageView = (url: string): void => {
   if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "", {
-      page_path: url,
-    });
+    (window as any).gtag(
+      "config",
+      process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "",
+      {
+        page_path: url,
+      }
+    );
   }
 
   if (process.env.NODE_ENV === "development") {
@@ -59,7 +63,7 @@ export const trackPageView = (url: string): void => {
 
 export const trackFormSubmission = (
   formName: string,
-  success: boolean = true,
+  success: boolean = true
 ): void => {
   trackEvent({
     action: "form_submission",
@@ -71,7 +75,7 @@ export const trackFormSubmission = (
 
 export const trackDownload = (
   resourceName: string,
-  _resourceType: string,
+  _resourceType: string
 ): void => {
   trackEvent({
     action: "download",
@@ -82,7 +86,9 @@ export const trackDownload = (
 };
 
 // Simple server-side analytics for form submissions
-export const logFormSubmission = async (formData: FormSubmissionData): Promise<void> => {
+export const logFormSubmission = async (
+  formData: FormSubmissionData
+): Promise<void> => {
   const analyticsData = {
     timestamp: new Date().toISOString(),
     type: "form_submission",

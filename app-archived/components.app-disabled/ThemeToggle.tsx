@@ -48,13 +48,13 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     ? size === "sm"
       ? 2
       : size === "md"
-      ? 4
-      : 6
+        ? 4
+        : 6
     : size === "sm"
-    ? 26
-    : size === "md"
-    ? 34
-    : 42;
+      ? 26
+      : size === "md"
+        ? 34
+        : 42;
 
   const thumbSizeClass =
     size === "sm" ? "h-4 w-4" : size === "md" ? "h-6 w-6" : "h-8 w-8";
@@ -150,10 +150,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
                   fill="currentColor"
                 />
               ) : (
-                <Sun
-                  size={ICON_SIZES[size] - 4}
-                  className="text-charcoal"
-                />
+                <Sun size={ICON_SIZES[size] - 4} className="text-charcoal" />
               )}
             </motion.div>
           </AnimatePresence>

@@ -49,8 +49,8 @@ function fromMdxMeta(meta: MdxMeta): PostMeta {
     (typeof anyMeta.slug === "string" && anyMeta.slug.length > 0
       ? anyMeta.slug
       : typeof anyMeta._raw?.flattenedPath === "string"
-      ? anyMeta._raw.flattenedPath
-      : "") || "";
+        ? anyMeta._raw.flattenedPath
+        : "") || "";
 
   const slug = cleanSlug(rawSlug);
 
@@ -98,7 +98,7 @@ export function getAllPostsMeta(): PostMeta[] {
 /** Single post lookup by slug (with optional field filter, Next.js-style). */
 export function getPostBySlug(
   slug: string,
-  fields: string[] = [],
+  fields: string[] = []
 ): (PostMeta & { content?: string }) | null {
   const target = cleanSlug(slug);
   const doc =

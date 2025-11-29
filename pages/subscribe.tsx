@@ -8,8 +8,7 @@ import Layout from "@/components/Layout";
 import NewsletterForm from "@/components/NewsletterForm";
 
 const SubscribePage: NextPage = () => {
-  const pageTitle =
-    "Join the Founding Readers Circle | Abraham of London";
+  const pageTitle = "Join the Founding Readers Circle | Abraham of London";
   const pageDescription =
     "Early access to The Architecture of Human Purpose Canon for fathers, founders, builders, and institutional architects shaping the future of civilization.";
 

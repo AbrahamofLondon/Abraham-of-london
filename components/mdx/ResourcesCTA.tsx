@@ -29,7 +29,9 @@ function LinkChip({ item }: { item: LinkItem }) {
   const content = (
     <div className="flex flex-col gap-0.5 rounded-xl border border-lightGrey/70 bg-white/80 px-3 py-2 text-left shadow-sm transition hover:border-softGold/60 hover:bg-warmWhite/80">
       <div className="flex items-center gap-2">
-        {item.icon ? <span className="text-lg leading-none">{item.icon}</span> : null}
+        {item.icon ? (
+          <span className="text-lg leading-none">{item.icon}</span>
+        ) : null}
         <span className="text-sm font-semibold text-deepCharcoal">{label}</span>
         {badge && (
           <span className="ml-auto inline-flex items-center rounded-full bg-softGold/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-softGold">
@@ -61,13 +63,7 @@ function LinkChip({ item }: { item: LinkItem }) {
   );
 }
 
-function Section({
-  title,
-  items,
-}: {
-  title: string;
-  items?: LinkItem[];
-}) {
+function Section({ title, items }: { title: string; items?: LinkItem[] }) {
   if (!items || !items.length) return null;
 
   return (
@@ -110,10 +106,10 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
     config.theme === "fatherhood"
       ? "border-softGold/40 bg-warmWhite/80"
       : config.theme === "brotherhood"
-      ? "border-forest/30 bg-forest/3"
-      : config.theme === "leadership"
-      ? "border-deepCharcoal/25 bg-slate-900/2"
-      : "border-lightGrey bg-white/80";
+        ? "border-forest/30 bg-forest/3"
+        : config.theme === "leadership"
+          ? "border-deepCharcoal/25 bg-slate-900/2"
+          : "border-lightGrey bg-white/80";
 
   return (
     <section
@@ -131,7 +127,9 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
             {title}
           </h2>
           {description && (
-            <p className="mt-1 max-w-2xl text-sm text-gray-700">{description}</p>
+            <p className="mt-1 max-w-2xl text-sm text-gray-700">
+              {description}
+            </p>
           )}
         </div>
 
@@ -143,10 +141,14 @@ export default function ResourcesCTA(props: ResourcesCTAProps) {
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        {hasReads && <Section title="Recommended reading" items={config.reads} />}
+        {hasReads && (
+          <Section title="Recommended reading" items={config.reads} />
+        )}
         {hasDownloads && <Section title="Downloads" items={config.downloads} />}
         {hasActions && <Section title="Next steps" items={config.actions} />}
-        {hasRelated && <Section title="Related resources" items={config.related} />}
+        {hasRelated && (
+          <Section title="Related resources" items={config.related} />
+        )}
       </div>
     </section>
   );

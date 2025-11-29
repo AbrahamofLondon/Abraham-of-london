@@ -46,7 +46,7 @@ export default function ContactForm(): JSX.Element {
   }, [submitAttempts, lastSubmitTime]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -118,7 +118,7 @@ export default function ContactForm(): JSX.Element {
     if (isRateLimited) {
       setStatus("error");
       setStatusMessage(
-        "Too many submission attempts. Please try again in a minute.",
+        "Too many submission attempts. Please try again in a minute."
       );
       return;
     }
@@ -133,7 +133,9 @@ export default function ContactForm(): JSX.Element {
       // If honeypot is filled, pretend success and bail early
       if (form.botField.trim() !== "") {
         setStatus("success");
-        setStatusMessage("Thank you for your message! We'll get back to you soon.");
+        setStatusMessage(
+          "Thank you for your message! We'll get back to you soon."
+        );
         setForm({
           name: "",
           email: "",
@@ -159,7 +161,7 @@ export default function ContactForm(): JSX.Element {
       if (!recaptchaToken) {
         setStatus("error");
         setStatusMessage(
-          "Security verification failed. Please refresh the page and try again.",
+          "Security verification failed. Please refresh the page and try again."
         );
         setSubmitting(false);
         return;
@@ -181,7 +183,8 @@ export default function ContactForm(): JSX.Element {
           botField: sanitizedData.botField,
           recaptchaToken,
           timestamp: new Date().toISOString(),
-          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent : "",
         }),
         signal: controller.signal,
       });
@@ -192,7 +195,7 @@ export default function ContactForm(): JSX.Element {
         const errorText = await res.text();
         console.error(
           `Contact API responded with status ${res.status}:`,
-          errorText,
+          errorText
         );
 
         if (res.status === 429) {
@@ -204,7 +207,7 @@ export default function ContactForm(): JSX.Element {
         } else {
           setStatus("error");
           setStatusMessage(
-            "Submission failed. Please check your connection and try again.",
+            "Submission failed. Please check your connection and try again."
           );
         }
 
@@ -217,7 +220,7 @@ export default function ContactForm(): JSX.Element {
       if (!data?.ok) {
         setStatus("error");
         setStatusMessage(
-          data?.message || "Submission failed. Please try again.",
+          data?.message || "Submission failed. Please try again."
         );
       } else {
         setStatus("success");
@@ -241,13 +244,13 @@ export default function ContactForm(): JSX.Element {
         if (err.name === "AbortError") {
           setStatus("error");
           setStatusMessage(
-            "Request timeout. Please check your connection and try again.",
+            "Request timeout. Please check your connection and try again."
           );
         } else {
           console.error("[ContactForm] submit error:", err);
           setStatus("error");
           setStatusMessage(
-            "Network error. Please check your connection and try again.",
+            "Network error. Please check your connection and try again."
           );
         }
       } else {
@@ -388,8 +391,8 @@ export default function ContactForm(): JSX.Element {
         {submitting
           ? "Sending…"
           : isRateLimited
-          ? "Try Again Later"
-          : "Send Message"}
+            ? "Try Again Later"
+            : "Send Message"}
       </button>
 
       {/* Status */}

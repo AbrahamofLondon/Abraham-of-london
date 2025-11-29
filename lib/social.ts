@@ -2,15 +2,26 @@
 // Robust utilities for normalising social links coming from config or content.
 
 export type SocialPlatform =
-  | "x" | "twitter" | "instagram" | "facebook" | "linkedin" | "youtube"
-  | "whatsapp" | "tiktok" | "mail" | "email" | "phone" | "website" | "link";
+  | "x"
+  | "twitter"
+  | "instagram"
+  | "facebook"
+  | "linkedin"
+  | "youtube"
+  | "whatsapp"
+  | "tiktok"
+  | "mail"
+  | "email"
+  | "phone"
+  | "website"
+  | "link";
 
 export interface SocialLink {
-  href: string;                  // Fully-formed, safe URL or mailto:/tel:
-  kind?: SocialPlatform;         // Normalised platform key
-  label?: string;                // Human-readable label
-  external?: boolean;            // True for http(s) off-site links
-  icon?: string;                 // Optional icon id/name
+  href: string; // Fully-formed, safe URL or mailto:/tel:
+  kind?: SocialPlatform; // Normalised platform key
+  label?: string; // Human-readable label
+  external?: boolean; // True for http(s) off-site links
+  icon?: string; // Optional icon id/name
 }
 
 interface RawSocialItem {
@@ -53,7 +64,9 @@ const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
 };
 
 /** Base URL builders for common platforms given a handle/username */
-const PLATFORM_BUILDERS: Partial<Record<SocialPlatform, (h: string) => string>> = {
+const PLATFORM_BUILDERS: Partial<
+  Record<SocialPlatform, (h: string) => string>
+> = {
   twitter: (h) => `https://twitter.com/${stripAt(h)}`,
   instagram: (h) => `https://instagram.com/${stripAt(h)}`,
   facebook: (h) => `https://facebook.com/${stripAt(h)}`,
@@ -75,7 +88,9 @@ const PLATFORM_BUILDERS: Partial<Record<SocialPlatform, (h: string) => string>> 
 };
 
 function stripAt(v: string): string {
-  return String(v || "").trim().replace(/^@+/, "");
+  return String(v || "")
+    .trim()
+    .replace(/^@+/, "");
 }
 
 function normalisePlatform(input: unknown): SocialPlatform | undefined {
@@ -98,15 +113,18 @@ function isSafeHref(href: string): boolean {
 }
 
 /** Build href from handle when platform known; fall back to raw href */
-function coerceHref(
-  rawHref: unknown,
-  kind?: SocialPlatform,
-): string | null {
+function coerceHref(rawHref: unknown, kind?: SocialPlatform): string | null {
   const v = String(rawHref ?? "").trim();
   if (!v) return null;
 
   // Already a complete safe link?
-  if (v.startsWith("http://") || v.startsWith("https://") || v.startsWith("mailto:") || v.startsWith("tel:") || v.startsWith("/")) {
+  if (
+    v.startsWith("http://") ||
+    v.startsWith("https://") ||
+    v.startsWith("mailto:") ||
+    v.startsWith("tel:") ||
+    v.startsWith("/")
+  ) {
     return isSafeHref(v) ? v : null;
   }
 
@@ -158,7 +176,9 @@ function computeExternal(href: string): boolean {
 
 /** Public type guard */
 export function isSocialLink(x: unknown): x is SocialLink {
-  return !!x && typeof x === "object" && typeof (x as SocialLink).href === "string";
+  return (
+    !!x && typeof x === "object" && typeof (x as SocialLink).href === "string"
+  );
 }
 
 /** Coerce unknown shapes (array/object/primitive) into a clean SocialLink[] */
@@ -167,8 +187,8 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
   const arr: unknown[] = Array.isArray(input)
     ? input
     : input && typeof input === "object"
-    ? Object.values(input as Record<string, unknown>)
-    : [];
+      ? Object.values(input as Record<string, unknown>)
+      : [];
 
   const out: SocialLink[] = [];
 
@@ -190,8 +210,8 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
       typeof rawLabel === "string" && rawLabel.trim()
         ? rawLabel.trim()
         : kind
-        ? kind.charAt(0).toUpperCase() + kind.slice(1)
-        : "Social";
+          ? kind.charAt(0).toUpperCase() + kind.slice(1)
+          : "Social";
 
     const icon = typeof rawIcon === "string" ? rawIcon : undefined;
     const external =

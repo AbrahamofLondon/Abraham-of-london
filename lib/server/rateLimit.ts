@@ -59,7 +59,10 @@ export interface BasicRedisClient {
 // Privacy-conscious logging
 // -------------------------------------------------------------------------
 
-function logRateLimitAction(action: string, metadata: Record<string, unknown> = {}): void {
+function logRateLimitAction(
+  action: string,
+  metadata: Record<string, unknown> = {}
+): void {
   console.log(`🛡️ Rate Limit: ${action}`, {
     timestamp: new Date().toISOString(),
     ...metadata,
@@ -77,9 +80,12 @@ class RateLimitStore {
 
   constructor() {
     if (typeof setInterval !== "undefined") {
-      this.cleanupInterval = setInterval(() => {
-        this.cleanup();
-      }, 60 * 60 * 1000); // hourly
+      this.cleanupInterval = setInterval(
+        () => {
+          this.cleanup();
+        },
+        60 * 60 * 1000
+      ); // hourly
     }
   }
 
@@ -98,7 +104,7 @@ class RateLimitStore {
   private cleanup(): void {
     const now = Date.now();
     let cleaned = 0;
-    
+
     for (const [key, entry] of this.store.entries()) {
       if (now > entry.resetTime) {
         this.store.delete(key);
@@ -107,7 +113,7 @@ class RateLimitStore {
     }
 
     if (cleaned > 0) {
-      logRateLimitAction('store_cleanup', { cleanedEntries: cleaned });
+      logRateLimitAction("store_cleanup", { cleanedEntries: cleaned });
     }
   }
 
@@ -117,8 +123,8 @@ class RateLimitStore {
       this.cleanupInterval = null;
     }
     this.store.clear();
-    
-    logRateLimitAction('store_destroyed');
+
+    logRateLimitAction("store_destroyed");
   }
 }
 
@@ -132,7 +138,7 @@ class RedisRateLimit {
   async check(
     key: string,
     limit: number,
-    windowMs: number,
+    windowMs: number
   ): Promise<RateLimitResult> {
     const now = Date.now();
     const resetTime = now + windowMs;
@@ -184,8 +190,8 @@ class RedisRateLimit {
       };
     } catch (error) {
       // Fail open but log – do NOT block legitimate traffic because Redis died
-      logRateLimitAction('redis_error', { 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logRateLimitAction("redis_error", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       return {
@@ -215,7 +221,10 @@ if (typeof process !== "undefined" && typeof process.on === "function") {
 // Synchronous memory-based rate limiter (for Node/Netlify functions)
 // -------------------------------------------------------------------------
 
-export function rateLimit(key: string, options: RateLimitOptions): RateLimitResult {
+export function rateLimit(
+  key: string,
+  options: RateLimitOptions
+): RateLimitResult {
   const {
     limit,
     windowMs,
@@ -238,7 +247,7 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
 
   // Synchronous function cannot safely talk to Redis – enforce this
   if (useRedis && redisClient) {
-    logRateLimitAction('sync_redis_warning', { keyPrefix });
+    logRateLimitAction("sync_redis_warning", { keyPrefix });
   }
 
   const entry = memoryStore.get(storeKey);
@@ -282,11 +291,11 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
   }
 
   if (entry.count >= limit) {
-    logRateLimitAction('rate_limit_hit', { 
+    logRateLimitAction("rate_limit_hit", {
       key: storeKey,
       count: entry.count,
       limit,
-      windowMs 
+      windowMs,
     });
 
     return {
@@ -318,10 +327,15 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
 
 export async function rateLimitAsync(
   key: string,
-  options: RateLimitOptions,
+  options: RateLimitOptions
 ): Promise<RateLimitResult> {
-  const { useRedis = false, redisClient, limit, windowMs, keyPrefix = "rl" } =
-    options;
+  const {
+    useRedis = false,
+    redisClient,
+    limit,
+    windowMs,
+    keyPrefix = "rl",
+  } = options;
 
   if (useRedis && redisClient) {
     const redisLimiter = new RedisRateLimit(redisClient);
@@ -337,7 +351,7 @@ export async function rateLimitAsync(
 // -------------------------------------------------------------------------
 
 export function createRateLimitHeaders(
-  result: RateLimitResult,
+  result: RateLimitResult
 ): Record<string, string> {
   const headers: Record<string, string> = {
     "X-RateLimit-Limit": result.limit.toString(),
@@ -346,9 +360,7 @@ export function createRateLimitHeaders(
   };
 
   if (result.retryAfterMs > 0) {
-    headers["Retry-After"] = Math.ceil(
-      result.retryAfterMs / 1000,
-    ).toString();
+    headers["Retry-After"] = Math.ceil(result.retryAfterMs / 1000).toString();
   }
 
   return headers;
@@ -394,19 +406,19 @@ export function getClientIp(req: NextApiRequest): string {
 export function rateLimitForEmail(
   email: string,
   label: string,
-  options: RateLimitOptions,
+  options: RateLimitOptions
 ): { result: RateLimitResult; email: string } {
   const normalizedEmail = email.toLowerCase().trim();
   const key = `${label}:${normalizedEmail}`;
   const result = rateLimit(key, options);
-  
-  logRateLimitAction('email_rate_limit_check', {
+
+  logRateLimitAction("email_rate_limit_check", {
     label,
     allowed: result.allowed,
     remaining: result.remaining,
     // Never log the actual email
   });
-  
+
   return { result, email: normalizedEmail };
 }
 
@@ -418,19 +430,19 @@ export function rateLimitForEmail(
 export function rateLimitForRequestIp(
   req: NextApiRequest,
   label: string,
-  options: RateLimitOptions,
+  options: RateLimitOptions
 ): { result: RateLimitResult; ip: string } {
   const ip = getClientIp(req);
   const key = `${label}:${ip}`;
   const result = rateLimit(key, options);
-  
-  logRateLimitAction('ip_rate_limit_check', {
+
+  logRateLimitAction("ip_rate_limit_check", {
     label,
     allowed: result.allowed,
     remaining: result.remaining,
     // Never log the actual IP
   });
-  
+
   return { result, ip };
 }
 
@@ -448,13 +460,13 @@ export function combinedRateLimit(
   email: string | null,
   label: string,
   ipOptions: RateLimitOptions,
-  emailOptions?: RateLimitOptions,
+  emailOptions?: RateLimitOptions
 ): CombinedRateLimitResult {
   const { result: ipResult, ip } = rateLimitForRequestIp(req, label, ipOptions);
-  
+
   let emailResult: RateLimitResult | null = null;
   let normalizedEmail: string | null = null;
-  
+
   if (email && emailOptions) {
     const emailLimit = rateLimitForEmail(email, `${label}-email`, emailOptions);
     emailResult = emailLimit.result;
@@ -467,12 +479,12 @@ export function combinedRateLimit(
 
   // Log combined result for security monitoring
   if (!allowed) {
-    logRateLimitAction('combined_rate_limit_hit', {
+    logRateLimitAction("combined_rate_limit_hit", {
       label,
       hitIpLimit,
       hitEmailLimit,
       ipRemaining: ipResult.remaining,
-      emailRemaining: emailResult?.remaining
+      emailRemaining: emailResult?.remaining,
     });
   }
 
@@ -523,7 +535,7 @@ export const RATE_LIMIT_CONFIGS = {
     keyPrefix: "ic-reg",
   },
   INNER_CIRCLE_REGISTER_EMAIL: {
-    limit: 3,  // Stricter limit for same email attempts
+    limit: 3, // Stricter limit for same email attempts
     windowMs: 60 * 60 * 1000, // 1 hour per email
     keyPrefix: "ic-reg-email",
   },

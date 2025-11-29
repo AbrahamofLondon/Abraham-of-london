@@ -2,6 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
+import { safeString } from "@/lib/utils";
 
 type BookHeroProps = {
   title?: string | null;
@@ -53,8 +54,11 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
       : typeof readTime === "string" && readTime.trim()
       ? readTime
       : null;
-  
+
   const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
+
+  // Ensure title is always a string for the alt attribute
+  const safeTitle = safeString(title);
 
   return (
     <section
@@ -82,7 +86,7 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
           </div>
 
           <h1 className="mb-6 font-serif text-4xl font-bold leading-[1.2] text-gray-900 dark:text-white md:text-5xl">
-            {title}
+            {safeTitle}
           </h1>
 
           {subtitle && (
@@ -95,18 +99,25 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
           <div className="mb-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
             {publishedDate && (
               <div>
-                <strong className="text-deepCharcoal dark:text-cream">Published:</strong>{" "}
+                <strong className="text-deepCharcoal dark:text-cream">
+                  Published:
+                </strong>{" "}
                 {formatDate(publishedDate)}
               </div>
             )}
             {pages && (
               <div>
-                <strong className="text-deepCharcoal dark:text-cream">Pages:</strong> {pages}
+                <strong className="text-deepCharcoal dark:text-cream">
+                  Pages:
+                </strong>{" "}
+                {pages}
               </div>
             )}
             {format && (
               <div>
-                <strong className="text-deepCharcoal dark:text-cream">Format:</strong>{" "}
+                <strong className="text-deepCharcoal dark:text-cream">
+                  Format:
+                </strong>{" "}
                 <span className="capitalize">{format}</span>
               </div>
             )}
@@ -126,13 +137,13 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
               <div className="absolute -right-2 -top-2 h-full w-full rounded-lg bg-softGold/20 transform rotate-2 transition-transform group-hover:rotate-1" />
               <CoverFrame
                 src={coverImage}
-                alt={title}
+                alt={safeTitle}
                 aspect={coverAspect}
                 priority
                 className="relative z-10 transform transition-transform group-hover:scale-105 shadow-2xl"
               />
             </div>
-            
+
             {/* Book spine effect */}
             <div className="absolute -left-1 top-2 w-2 h-full bg-gradient-to-r from-gray-400/20 to-transparent rounded-l" />
           </div>

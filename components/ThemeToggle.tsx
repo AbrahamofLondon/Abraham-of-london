@@ -94,13 +94,7 @@ export default function ThemeToggle({
             flex items-center justify-center
             rounded-full bg-gradient-to-br from-softGold to-amber-200
             shadow-lg
-            ${
-              size === "sm"
-                ? "h-4 w-4"
-                : size === "md"
-                ? "h-6 w-6"
-                : "h-8 w-8"
-            }
+            ${size === "sm" ? "h-4 w-4" : size === "md" ? "h-6 w-6" : "h-8 w-8"}
           `}
           initial={false}
           animate={{
@@ -108,13 +102,13 @@ export default function ThemeToggle({
               ? size === "sm"
                 ? 2
                 : size === "md"
-                ? 4
-                : 6
+                  ? 4
+                  : 6
               : size === "sm"
-              ? 26
-              : size === "md"
-              ? 34
-              : 42,
+                ? 26
+                : size === "md"
+                  ? 34
+                  : 42,
           }}
           transition={{
             type: "spring",

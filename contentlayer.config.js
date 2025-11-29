@@ -88,7 +88,7 @@ export const Post = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "blog"),
-          "blog",
+          "blog"
         ),
     },
     readingTime: {
@@ -147,7 +147,7 @@ export const Download = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "downloads"),
-          "downloads",
+          "downloads"
         ),
     },
     downloadHref: {
@@ -156,11 +156,7 @@ export const Download = defineDocumentType(() => ({
         if (doc.downloadUrl) return doc.downloadUrl;
         if (doc.fileUrl) return doc.fileUrl;
 
-        const candidate =
-          doc.pdfPath ||
-          doc.downloadFile ||
-          doc.file ||
-          "";
+        const candidate = doc.pdfPath || doc.downloadFile || doc.file || "";
 
         if (!candidate) return "";
 
@@ -209,7 +205,7 @@ export const Book = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "books"),
-          "books",
+          "books"
         ),
     },
   },
@@ -252,7 +248,7 @@ export const Event = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "events"),
-          "events",
+          "events"
         ),
     },
     isUpcoming: {
@@ -301,7 +297,7 @@ export const Print = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "prints"),
-          "prints",
+          "prints"
         ),
     },
   },
@@ -338,7 +334,7 @@ export const Strategy = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "strategy"),
-          "strategy",
+          "strategy"
         ),
     },
   },
@@ -383,7 +379,7 @@ export const Resource = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "resources"),
-          "resources",
+          "resources"
         ),
     },
   },
@@ -430,7 +426,7 @@ export const Canon = defineDocumentType(() => ({
       resolve: (doc) =>
         generateUrl(
           doc.slug || generateSlug(doc._raw.flattenedPath, "canon"),
-          "canon",
+          "canon"
         ),
     },
   },
@@ -442,7 +438,16 @@ export const Canon = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: path.join(process.cwd(), "content"),
-  documentTypes: [Post, Download, Book, Event, Print, Strategy, Resource, Canon],
+  documentTypes: [
+    Post,
+    Download,
+    Book,
+    Event,
+    Print,
+    Strategy,
+    Resource,
+    Canon,
+  ],
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],

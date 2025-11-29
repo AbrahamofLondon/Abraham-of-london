@@ -70,27 +70,33 @@ function serialiseEvent(event: EventMeta): EventMetaSerialized {
     typeof dateRaw === "string"
       ? dateRaw
       : dateRaw instanceof Date
-      ? dateRaw.toISOString()
-      : null;
+        ? dateRaw.toISOString()
+        : null;
 
   const heroImage =
     typeof anyEv.heroImage === "string"
       ? anyEv.heroImage
       : typeof anyEv.coverImage === "string"
-      ? anyEv.coverImage
-      : null;
+        ? anyEv.coverImage
+        : null;
 
   return {
     slug: String(anyEv.slug ?? "").trim(),
-    title: anyEv.title as string | undefined ?? "",
+    title: (anyEv.title as string | undefined) ?? "",
     date,
-    time: anyEv.time as string | null | undefined ?? null,
-    location: anyEv.location as string | null | undefined ?? (anyEv.venue as string | null | undefined) ?? null,
-    description: anyEv.description as string | null | undefined ?? (anyEv.excerpt as string | null | undefined) ?? null,
+    time: (anyEv.time as string | null | undefined) ?? null,
+    location:
+      (anyEv.location as string | null | undefined) ??
+      (anyEv.venue as string | null | undefined) ??
+      null,
+    description:
+      (anyEv.description as string | null | undefined) ??
+      (anyEv.excerpt as string | null | undefined) ??
+      null,
     heroImage,
     coverImage:
       typeof anyEv.coverImage === "string" ? anyEv.coverImage : heroImage,
-    tags: Array.isArray(anyEv.tags) ? anyEv.tags as string[] : null,
+    tags: Array.isArray(anyEv.tags) ? (anyEv.tags as string[]) : null,
   };
 }
 
@@ -99,7 +105,7 @@ function serialiseEvent(event: EventMeta): EventMetaSerialized {
  * Accepts unknown because the underlying implementation is loose.
  */
 function serialiseResources(
-  resources: unknown,
+  resources: unknown
 ): EventResourcesSerialized | null {
   if (!resources || typeof resources !== "object") return null;
 
@@ -109,13 +115,16 @@ function serialiseResources(
     if (!item || typeof item !== "object") return {};
     const itemObj = item as Record<string, unknown>;
     return {
-      slug: itemObj.slug as string | null | undefined ?? null,
-      title: itemObj.title as string | null | undefined ?? null,
-      description: itemObj.description as string | null | undefined ?? (itemObj.excerpt as string | null | undefined) ?? null,
+      slug: (itemObj.slug as string | null | undefined) ?? null,
+      title: (itemObj.title as string | null | undefined) ?? null,
+      description:
+        (itemObj.description as string | null | undefined) ??
+        (itemObj.excerpt as string | null | undefined) ??
+        null,
       coverImage:
         typeof itemObj.coverImage === "string" ? itemObj.coverImage : null,
       href: typeof itemObj.href === "string" ? itemObj.href : null,
-      kind: itemObj.kind as string | null | undefined ?? null,
+      kind: (itemObj.kind as string | null | undefined) ?? null,
     };
   };
 
@@ -126,8 +135,7 @@ function serialiseResources(
   const linksSource = Array.isArray(anyRes.links) ? anyRes.links : [];
 
   return {
-    heading:
-      typeof anyRes.heading === "string" ? anyRes.heading : null,
+    heading: typeof anyRes.heading === "string" ? anyRes.heading : null,
     description:
       typeof anyRes.description === "string" ? anyRes.description : null,
     downloads: downloadsSource.map(toRel),
@@ -160,9 +168,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
   const slugParam = ctx.params?.slug;
-  const rawSlug = Array.isArray(slugParam)
-    ? slugParam[0]
-    : slugParam ?? "";
+  const rawSlug = Array.isArray(slugParam) ? slugParam[0] : (slugParam ?? "");
 
   const slug = String(rawSlug).trim();
 
@@ -180,7 +186,7 @@ export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
   let rawResources: unknown = null;
   try {
     rawResources = await Promise.resolve(
-      getEventResourcesSummary ? getEventResourcesSummary() : null,
+      getEventResourcesSummary ? getEventResourcesSummary() : null
     );
   } catch {
     rawResources = null;
@@ -209,8 +215,7 @@ export default function EventPage({
   const pageTitle = event.title || "Event";
 
   const displayDate =
-    event.date &&
-    new Date(event.date).toString() !== "Invalid Date"
+    event.date && new Date(event.date).toString() !== "Invalid Date"
       ? new Intl.DateTimeFormat("en-GB", {
           day: "2-digit",
           month: "short",
@@ -219,8 +224,7 @@ export default function EventPage({
       : null;
 
   const hasHeroImage =
-    typeof event.heroImage === "string" &&
-    event.heroImage.trim().length > 0;
+    typeof event.heroImage === "string" && event.heroImage.trim().length > 0;
 
   return (
     <Layout title={pageTitle}>
@@ -293,9 +297,7 @@ export default function EventPage({
                   {event.location && (
                     <>
                       <span className="text-white/30">•</span>
-                      <span className="line-clamp-1">
-                        {event.location}
-                      </span>
+                      <span className="line-clamp-1">{event.location}</span>
                     </>
                   )}
                 </div>
@@ -305,9 +307,7 @@ export default function EventPage({
                 </h1>
 
                 {event.time && (
-                  <p className="text-sm text-amber-100/90">
-                    ⏰ {event.time}
-                  </p>
+                  <p className="text-sm text-amber-100/90">⏰ {event.time}</p>
                 )}
 
                 {event.description && (
@@ -369,9 +369,7 @@ export default function EventPage({
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500">
                     Time
                   </p>
-                  <p className="mt-1 text-sm text-deepCharcoal">
-                    {event.time}
-                  </p>
+                  <p className="mt-1 text-sm text-deepCharcoal">{event.time}</p>
                 </div>
               )}
               {event.location && (
@@ -490,8 +488,8 @@ function RelatedResourceCard({
     typeof resource.href === "string" && resource.href.trim().length > 0
       ? resource.href
       : resource.slug
-      ? `/${resource.slug}`
-      : null;
+        ? `/${resource.slug}`
+        : null;
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     href ? (
@@ -532,9 +530,7 @@ function RelatedResourceCard({
           <p className="text-xs uppercase tracking-wide text-gray-500">
             {kindLabel}
           </p>
-          <h3 className="mt-1 font-serif text-lg text-deepCharcoal">
-            {title}
-          </h3>
+          <h3 className="mt-1 font-serif text-lg text-deepCharcoal">{title}</h3>
           {resource.description && (
             <p className="mt-2 line-clamp-3 text-sm text-gray-600">
               {resource.description}

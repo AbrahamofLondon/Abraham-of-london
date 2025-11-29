@@ -49,10 +49,10 @@ const getBadgeConfig = (badge: string | undefined) => {
   } as const;
 
   return badge
-    ? config[badge as keyof typeof config] ?? {
+    ? (config[badge as keyof typeof config] ?? {
         color: "bg-gray-100 text-gray-800 border-gray-200",
         label: badge,
-      }
+      })
     : null;
 };
 
@@ -129,7 +129,9 @@ const LinkItemComponent: React.FC<{
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className={`inline-flex flex-shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                  featured ? "bg-white/20 text-white border-white/30" : badgeConfig.color
+                  featured
+                    ? "bg-white/20 text-white border-white/30"
+                    : badgeConfig.color
                 }`}
               >
                 {badgeConfig.label}
@@ -182,8 +184,8 @@ const CategorySection: React.FC<{
           columns === 1
             ? "grid-cols-1"
             : columns === 2
-            ? "grid-cols-1 md:grid-cols-2"
-            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              ? "grid-cols-1 md:grid-cols-2"
+              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
         }`}
       >
         {items.map((item, index) => (
@@ -255,9 +257,7 @@ const CtaPresetComponent: React.FC<CtaPresetProps> = ({
           <h2 className="text-xl font-bold text-gray-900">{actualTitle}</h2>
         </div>
         {actualDescription && (
-          <p className="mt-2 text-center text-gray-600">
-            {actualDescription}
-          </p>
+          <p className="mt-2 text-center text-gray-600">{actualDescription}</p>
         )}
         <p className="mt-4 text-center text-gray-500">
           No content available for this preset.

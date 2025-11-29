@@ -1,7 +1,7 @@
 // components/homepage/AboutSection.tsx
 "use client";
 
-import React from 'react';
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -30,9 +30,9 @@ type AboutSectionProps = {
 
 const container = {
   hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1, 
-    transition: { when: "beforeChildren", staggerChildren: 0.1 } 
+  visible: {
+    opacity: 1,
+    transition: { when: "beforeChildren", staggerChildren: 0.1 },
   },
 } as const;
 
@@ -48,23 +48,24 @@ export default function AboutSection({
   bio,
   achievements = [],
   portraitSrc = "/assets/images/portrait.jpg",
-  portraitAlt = "Portrait of the author, Abraham of London", 
+  portraitAlt = "Portrait of the author, Abraham of London",
   priority = false,
   className,
 }: AboutSectionProps) {
   // Sort achievements once and cache them
-  const sortedAchievements = React.useMemo(() => { 
-    return achievements
-      .slice()
-      .sort((a, b) => b.year - a.year);
+  const sortedAchievements = React.useMemo(() => {
+    return achievements.slice().sort((a, b) => b.year - a.year);
   }, [achievements]);
 
   return (
-    <section 
-      id={id} 
-      className={clsx("container mx-auto max-w-6xl px-4 py-10 md:py-16", className)}
-      role="region" 
-      aria-labelledby="about-heading" 
+    <section
+      id={id}
+      className={clsx(
+        "container mx-auto max-w-6xl px-4 py-10 md:py-16",
+        className
+      )}
+      role="region"
+      aria-labelledby="about-heading"
     >
       <motion.div
         variants={container}
@@ -74,9 +75,9 @@ export default function AboutSection({
         className="grid grid-cols-1 gap-12 md:grid-cols-[280px,1fr] items-start"
       >
         {/* Portrait / Sidebar */}
-        <motion.aside 
-          variants={item} 
-          className="mx-auto md:mx-0 w-[240px] md:w-full md:max-w-[280px]" 
+        <motion.aside
+          variants={item}
+          className="mx-auto md:mx-0 w-[240px] md:w-full md:max-w-[280px]"
           aria-label="Author profile and contact links"
         >
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-black/10 bg-warmWhite shadow-2xl">
@@ -84,7 +85,7 @@ export default function AboutSection({
               src={portraitSrc}
               alt={portraitAlt}
               fill
-              sizes="(max-width: 768px) 240px, 280px" 
+              sizes="(max-width: 768px) 240px, 280px"
               priority={priority}
               className="object-cover transition-transform duration-500 hover:scale-[1.03]"
             />
@@ -104,18 +105,18 @@ export default function AboutSection({
         </motion.aside>
 
         {/* Main content */}
-        <motion.div 
-          variants={item} 
+        <motion.div
+          variants={item}
           className="max-w-none text-[color:var(--color-on-secondary)/0.9]"
         >
           {/* Main Heading */}
-          <h1 
-            id="about-heading" 
+          <h1
+            id="about-heading"
             className="font-serif text-3xl md:text-5xl font-bold mb-4 mt-0 text-forest"
           >
             About
           </h1>
-          
+
           {/* Biography */}
           <p className="mt-0 text-lg leading-relaxed">{bio}</p>
 
@@ -125,7 +126,7 @@ export default function AboutSection({
               <h2 className="font-serif text-2xl md:text-3xl font-semibold text-deepCharcoal dark:text-cream">
                 Key Highlights & Achievements
               </h2>
-              
+
               <ul className="mt-5 space-y-4">
                 {sortedAchievements.map((achievement, index) => {
                   const body = (
@@ -134,7 +135,7 @@ export default function AboutSection({
                       <div className="mt-0.5 shrink-0 rounded-full bg-forest/10 px-3 py-1 text-sm font-semibold text-forest dark:bg-forest/20">
                         {achievement.year}
                       </div>
-                      
+
                       {/* Title and Description */}
                       <div className="min-w-0">
                         <h3 className="font-semibold text-deepCharcoal text-lg dark:text-cream leading-snug">
@@ -148,9 +149,9 @@ export default function AboutSection({
                   );
 
                   return (
-                    <motion.li 
-                      key={`${achievement.title}-${achievement.year}-${index}`} 
-                      variants={item} 
+                    <motion.li
+                      key={`${achievement.title}-${achievement.year}-${index}`}
+                      variants={item}
                       aria-label={`${achievement.title} in ${achievement.year}`}
                     >
                       {achievement.href ? (
@@ -159,8 +160,16 @@ export default function AboutSection({
                           prefetch={false}
                           className="block focus:outline-none focus:ring-2 focus:ring-forest focus:ring-opacity-60 rounded-xl"
                           aria-label={`${achievement.title}: ${achievement.description}. Learn more.`}
-                          target={achievement.href.startsWith('http') ? "_blank" : undefined}
-                          rel={achievement.href.startsWith('http') ? "noopener noreferrer" : undefined}
+                          target={
+                            achievement.href.startsWith("http")
+                              ? "_blank"
+                              : undefined
+                          }
+                          rel={
+                            achievement.href.startsWith("http")
+                              ? "noopener noreferrer"
+                              : undefined
+                          }
                         >
                           {body}
                         </Link>

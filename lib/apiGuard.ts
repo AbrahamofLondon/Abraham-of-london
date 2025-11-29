@@ -18,7 +18,8 @@ interface ApiRequestBody {
 function getClientIp(req: NextApiRequest): string | undefined {
   const forwardedFor = req.headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) return forwardedFor[0];
-  if (typeof forwardedFor === "string") return forwardedFor.split(",")[0]?.trim();
+  if (typeof forwardedFor === "string")
+    return forwardedFor.split(",")[0]?.trim();
 
   const realIp = req.headers["x-real-ip"];
   if (typeof realIp === "string") return realIp;
@@ -27,8 +28,11 @@ function getClientIp(req: NextApiRequest): string | undefined {
 }
 
 export function withSecurity<T = unknown>(
-  handler: (req: NextApiRequest, res: NextApiResponse<T>) => unknown | Promise<unknown>,
-  options: GuardOptions = {},
+  handler: (
+    req: NextApiRequest,
+    res: NextApiResponse<T>
+  ) => unknown | Promise<unknown>,
+  options: GuardOptions = {}
 ): NextApiHandler<T> {
   const {
     requireRecaptcha = true,
@@ -69,8 +73,10 @@ export function withSecurity<T = unknown>(
     // reCAPTCHA v3 (using your verifyRecaptcha.ts)
     if (requireRecaptcha) {
       const body = req.body as ApiRequestBody;
-      const token = body.recaptchaToken || body.token || 
-                   (req.headers["x-recaptcha-token"] as string | undefined);
+      const token =
+        body.recaptchaToken ||
+        body.token ||
+        (req.headers["x-recaptcha-token"] as string | undefined);
 
       if (!token || typeof token !== "string") {
         res.status(400).json({} as T);

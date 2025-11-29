@@ -26,7 +26,7 @@ function logResend(action: string, meta: Record<string, unknown> = {}): void {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResendResponse>,
+  res: NextApiResponse<ResendResponse>
 ): Promise<void> {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -48,29 +48,29 @@ export default async function handler(
   const ipInfo = getClientIpWithAnalysis(req);
   const ip = ipInfo.ip;
 
-  const {
-    allowed,
-    hitIpLimit,
-    hitEmailLimit,
-    ipResult,
-    emailResult,
-  } = combinedRateLimit(
-    req,
-    sanitizedEmail,
-    "inner-circle-resend",
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_RESEND,
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_RESEND_EMAIL,
-  );
+  const { allowed, hitIpLimit, hitEmailLimit, ipResult, emailResult } =
+    combinedRateLimit(
+      req,
+      sanitizedEmail,
+      "inner-circle-resend",
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_RESEND,
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_RESEND_EMAIL
+    );
 
   if (!allowed) {
-    const headers = createRateLimitHeaders(hitIpLimit ? ipResult : emailResult!);
+    const headers = createRateLimitHeaders(
+      hitIpLimit ? ipResult : emailResult!
+    );
     Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
 
     const msg = hitEmailLimit
       ? "Too many email requests for this address. Try again later."
       : "Too many requests from this location. Try again later.";
 
-    logResend("rate_limited", { ip, emailHash: Buffer.from(sanitizedEmail).toString("base64") });
+    logResend("rate_limited", {
+      ip,
+      emailHash: Buffer.from(sanitizedEmail).toString("base64"),
+    });
 
     res.status(429).json({ ok: false, error: msg });
     return;
@@ -100,7 +100,7 @@ export default async function handler(
     });
 
     const unlockUrl = `${siteUrl}/api/inner-circle/unlock?key=${encodeURIComponent(
-      keyRecord.key,
+      keyRecord.key
     )}&returnTo=${encodeURIComponent(safeReturnTo)}`;
 
     await sendInnerCircleEmail({
@@ -118,7 +118,10 @@ export default async function handler(
       message: "We've resent your Inner Circle access email.",
     });
   } catch (err) {
-    logResend("error", { ip, error: err instanceof Error ? err.message : "unknown" });
+    logResend("error", {
+      ip,
+      error: err instanceof Error ? err.message : "unknown",
+    });
     res.status(500).json({
       ok: false,
       error: "Could not resend your key. Please try again later.",

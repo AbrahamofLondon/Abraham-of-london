@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -20,43 +16,16 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ],
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/content/*": [
-        "content/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/pages/*": [
-        "pages/*"
-      ],
-      "@/netlify/*": [
-        "netlify/*"
-      ],
-      "@/src/*": [
-        "src/*"
-      ]
+      "@/*": ["*"],
+      "@/components/*": ["components/*"],
+      "@/content/*": ["content/*"],
+      "@/lib/*": ["lib/*"],
+      "@/pages/*": ["pages/*"],
+      "@/netlify/*": ["netlify/*"],
+      "@/src/*": ["src/*"]
     },
-    "types": [
-      "node",
-      "react",
-      "react-dom",
-      "next",
-      "playwright"
-    ]
+    "types": ["node", "react", "react-dom", "next", "playwright"]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

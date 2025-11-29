@@ -4,8 +4,8 @@ import clsx from "clsx";
 type Logo = {
   src: string;
   alt: string;
-  size?: number;          // now honored by LogoTile
-  decorative?: boolean;   // optional, forwards to LogoTile
+  size?: number; // now honored by LogoTile
+  decorative?: boolean; // optional, forwards to LogoTile
 };
 
 type LogoWallProps = {
@@ -30,7 +30,9 @@ export default function LogoWall({
       role="list"
       aria-label={ariaLabel}
       className={clsx("grid justify-items-center", gapClass, className)}
-      style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${minSize}px, 1fr))` }}
+      style={{
+        gridTemplateColumns: `repeat(auto-fit, minmax(${minSize}px, 1fr))`,
+      }}
     >
       {logos.map((logo, idx) => (
         <div role="listitem" key={`${logo.src}-${idx}`}>

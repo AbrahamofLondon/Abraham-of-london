@@ -9,20 +9,20 @@ export interface SocialPlatform {
 
 export const socialPlatforms: Record<string, SocialPlatform> = {
   twitter: {
-    name: 'X (Twitter)',
-    baseUrl: 'https://x.com/',
-    icon: 'twitter'
+    name: "X (Twitter)",
+    baseUrl: "https://x.com/",
+    icon: "twitter",
   },
   linkedin: {
-    name: 'LinkedIn',
-    baseUrl: 'https://linkedin.com/in/',
-    icon: 'linkedin'
+    name: "LinkedIn",
+    baseUrl: "https://linkedin.com/in/",
+    icon: "linkedin",
   },
   github: {
-    name: 'GitHub',
-    baseUrl: 'https://github.com/',
-    icon: 'github'
-  }
+    name: "GitHub",
+    baseUrl: "https://github.com/",
+    icon: "github",
+  },
 } as const;
 
 export function getSocialUrl(platform: string, username: string): string {

@@ -2,6 +2,7 @@
 import * as React from "react";
 import clsx from "clsx";
 import { CoverFrame, type CoverAspect } from "@/components/media/CoverFrame";
+import { safeString } from "@/lib/utils"; // Import the utility
 
 type ArticleHeroProps = {
   title?: string | null;
@@ -45,6 +46,10 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
       : null;
   const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
 
+  // Use the safeString utility
+  const safeTitle = safeString(title);
+  const safeSubtitle = safeString(subtitle);
+
   return (
     <section
       className={clsx(
@@ -60,11 +65,11 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
             </p>
           )}
           <h1 className="mb-8 font-serif text-4xl font-bold leading-[1.2] text-gray-900 dark:text-white md:text-5xl">
-            {title}
+            {safeTitle}
           </h1>
           {subtitle && (
             <p className="mb-8 text-lg leading-relaxed text-gray-700 dark:text-gray-100 md:text-xl">
-              {subtitle}
+              {safeSubtitle}
             </p>
           )}
           {metaBits && (
@@ -79,7 +84,7 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
           <div className="w-48 shrink-0 md:w-56">
             <CoverFrame
               src={coverImage}
-              alt={title}
+              alt={safeTitle}
               aspect={coverAspect}
               priority
             />

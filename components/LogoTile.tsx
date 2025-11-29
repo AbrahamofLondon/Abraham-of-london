@@ -60,7 +60,12 @@ export default function LogoTile({
   );
 
   return href ? (
-    <Link href={href} className="inline-block" prefetch={false} aria-label={alt}>
+    <Link
+      href={href}
+      className="inline-block"
+      prefetch={false}
+      aria-label={alt}
+    >
       {Img}
     </Link>
   ) : (

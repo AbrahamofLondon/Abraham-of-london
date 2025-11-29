@@ -18,7 +18,10 @@ function collectPages(dir) {
       const rel = path.relative(ROOT, full);
 
       if (rel.startsWith("node_modules") || rel.startsWith(".next")) continue;
-      if (entry.isDirectory()) { stack.push(full); continue; }
+      if (entry.isDirectory()) {
+        stack.push(full);
+        continue;
+      }
       if (!/\.tsx?$/.test(entry.name)) continue;
 
       const base = path.basename(entry.name);

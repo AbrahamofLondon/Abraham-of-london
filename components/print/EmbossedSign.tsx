@@ -6,7 +6,10 @@ type Props = {
   className?: string;
 };
 
-export default function EmbossedSign({ text = "Abraham of London", className = "" }: Props) {
+export default function EmbossedSign({
+  text = "Abraham of London",
+  className = "",
+}: Props) {
   return (
     <div
       className={[

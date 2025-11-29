@@ -12,13 +12,13 @@ async function loadContentlayer() {
     ROOT,
     ".contentlayer",
     "generated",
-    "index.mjs",
+    "index.mjs"
   );
 
   if (!fs.existsSync(generatedPath)) {
     throw new Error(
       `Contentlayer output not found at ${generatedPath}. ` +
-        `Run "pnpm run content:build" before downloads:validate.`,
+        `Run "pnpm run content:build" before downloads:validate.`
     );
   }
 
@@ -27,7 +27,7 @@ async function loadContentlayer() {
   if (!mod.allDownloads) {
     throw new Error(
       "Contentlayer generated index does not export allDownloads. " +
-        "Check contentlayer.config.mjs and rebuild.",
+        "Check contentlayer.config.mjs and rebuild."
     );
   }
   return mod.allDownloads;
@@ -64,11 +64,7 @@ async function main() {
 
   // 1) For each Download, ensure its downloadHref exists if it points to /downloads
   for (const doc of allDownloads) {
-    const href =
-      doc.downloadHref ||
-      doc.downloadUrl ||
-      doc.fileUrl ||
-      "";
+    const href = doc.downloadHref || doc.downloadUrl || doc.fileUrl || "";
 
     if (!href) continue;
 
@@ -93,19 +89,11 @@ async function main() {
 
   const usedPaths = new Set(
     allDownloads
-      .map(
-        (doc) =>
-          doc.downloadHref ||
-          doc.downloadUrl ||
-          doc.fileUrl ||
-          "",
-      )
+      .map((doc) => doc.downloadHref || doc.downloadUrl || doc.fileUrl || "")
       .filter((href) => href.startsWith("/downloads/"))
       .map((href) =>
-        path.resolve(
-          path.join(publicRoot, href.replace(/^\/+/, "")),
-        ),
-      ),
+        path.resolve(path.join(publicRoot, href.replace(/^\/+/, "")))
+      )
   );
 
   for (const pdfPath of pdfFiles) {
@@ -122,7 +110,7 @@ async function main() {
       console.error("Missing files (referenced in MDX but not found on disk):");
       for (const m of missingFiles) {
         console.error(
-          ` - slug=${m.slug} | title="${m.title}" | href=${m.href} -> expected at ${m.diskPath}`,
+          ` - slug=${m.slug} | title="${m.title}" | href=${m.href} -> expected at ${m.diskPath}`
         );
       }
       console.error("");
@@ -139,7 +127,7 @@ async function main() {
     process.exit(1);
   } else {
     console.log(
-      "✅ Downloads validation passed: all Contentlayer links and public/downloads files are consistent.",
+      "✅ Downloads validation passed: all Contentlayer links and public/downloads files are consistent."
     );
   }
 }

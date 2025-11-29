@@ -11,7 +11,11 @@ import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug, type RawContentEntry } from "@/lib/mdx";
+import {
+  getAllContent,
+  getContentBySlug,
+  type RawContentEntry,
+} from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
 const COLLECTION = "strategy";
@@ -44,8 +48,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     typeof slugParam === "string"
       ? slugParam
       : Array.isArray(slugParam)
-      ? slugParam[0]
-      : "";
+        ? slugParam[0]
+        : "";
 
   if (!slug) return { notFound: true };
 

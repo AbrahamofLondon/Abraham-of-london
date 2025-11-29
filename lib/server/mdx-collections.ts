@@ -58,7 +58,7 @@ function listCollectionFiles(collection: string): string[] {
   return fs
     .readdirSync(dir)
     .filter((f) =>
-      MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext as string)),
+      MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext as string))
     )
     .map((f) => path.join(dir, f));
 }
@@ -71,9 +71,8 @@ function readRawDocs(collection: string): RawDoc[] {
 
     const base = path.basename(filePath).replace(/\.(mdx?|MDX?)$/, "");
     const fmSlug = data?.slug;
-    const slug = (typeof fmSlug === "string" && fmSlug.trim().length
-      ? fmSlug
-      : base
+    const slug = (
+      typeof fmSlug === "string" && fmSlug.trim().length ? fmSlug : base
     ).trim();
 
     return {
@@ -119,7 +118,7 @@ export function getMdxCollectionDocuments(collection: string): MdxDocument[] {
 /** Single document lookup by slug (case-insensitive). */
 export function getMdxDocumentBySlug(
   collection: string,
-  slug: string,
+  slug: string
 ): MdxDocument | null {
   const target = String(slug || "").toLowerCase();
   const docs = getMdxCollectionDocuments(collection);

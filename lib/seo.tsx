@@ -35,10 +35,13 @@ export interface BuiltSeo {
 }
 
 const SITE_NAME = "Abraham of London";
-const DEFAULT_DESC = "Insights, strategy, and leadership from Abraham of London.";
+const DEFAULT_DESC =
+  "Insights, strategy, and leadership from Abraham of London.";
 
 function getBaseUrl(): string {
-  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").trim();
+  const raw = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org"
+  ).trim();
   return raw.replace(/\/+$/, "");
 }
 

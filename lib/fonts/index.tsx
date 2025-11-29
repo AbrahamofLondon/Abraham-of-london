@@ -91,7 +91,10 @@ function makeFont(variable: string, fontFamily: string): FontLike {
 export const inter = makeFont("--font-inter", fontConfig.sans);
 export const playfair = makeFont("--font-playfair", fontConfig.serif);
 export const jetbrainsMono = makeFont("--font-mono", fontConfig.mono);
-export const sourceSerif = makeFont("--font-serif-alt", fontConfig["serif-alt"]);
+export const sourceSerif = makeFont(
+  "--font-serif-alt",
+  fontConfig["serif-alt"]
+);
 export const spaceGrotesk = makeFont("--font-display", fontConfig.display);
 export const customFont = makeFont("--font-custom", fontConfig.custom);
 

@@ -18,23 +18,22 @@ export default function SomeComponent({
   const [clickCount, setClickCount] = React.useState(0);
 
   const handleButtonClick = () => {
-    setClickCount(prev => prev + 1);
+    setClickCount((prev) => prev + 1);
   };
 
   return (
-    <div className={`p-6 rounded-lg border ${
-      variant === "featured" 
-        ? "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200" 
-        : "bg-white border-gray-200"
-    }`}>
+    <div
+      className={`p-6 rounded-lg border ${
+        variant === "featured"
+          ? "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200"
+          : "bg-white border-gray-200"
+      }`}
+    >
       <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
       <p className="text-gray-600 mb-6">{description}</p>
-      
+
       <div className="flex flex-wrap gap-4 items-center">
-        <Button
-          variant="primary"
-          onClick={handleButtonClick}
-        >
+        <Button variant="primary" onClick={handleButtonClick}>
           Click me! ({clickCount})
         </Button>
 
@@ -69,7 +68,7 @@ export default function SomeComponent({
       {clickCount > 0 && (
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
           <p className="text-green-800 text-sm">
-            Button clicked {clickCount} time{clickCount !== 1 ? 's' : ''}
+            Button clicked {clickCount} time{clickCount !== 1 ? "s" : ""}
           </p>
         </div>
       )}

@@ -56,7 +56,7 @@ interface TeaserResponse {
 // Security event logger
 function logSecurityEvent(
   event: string,
-  details: Record<string, unknown>,
+  details: Record<string, unknown>
 ): void {
   const timestamp = new Date().toISOString();
   // eslint-disable-next-line no-console
@@ -92,7 +92,10 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
   // Disposable email detection
   const domain = trimmedEmail.split("@")[1];
   if (DISPOSABLE_DOMAINS.some((d) => domain.includes(d))) {
-    logSecurityEvent("Disposable email detected", { email: trimmedEmail, domain });
+    logSecurityEvent("Disposable email detected", {
+      email: trimmedEmail,
+      domain,
+    });
     return { isValid: false, error: "Please use a permanent email address" };
   }
 
@@ -130,7 +133,7 @@ function validateName(name: string): { isValid: boolean; error?: string } {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<TeaserResponse>,
+  res: NextApiResponse<TeaserResponse>
 ): Promise<void> {
   // Set security headers
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -220,11 +223,11 @@ export default async function handler(
   // 🔒 Enhanced rate limiting
   const rateLimitKey = getRateLimitKey(
     req,
-    RATE_LIMIT_CONFIGS.TEASER_REQUEST.keyPrefix,
+    RATE_LIMIT_CONFIGS.TEASER_REQUEST.keyPrefix
   );
   const rateLimitResult = rateLimit(
     rateLimitKey,
-    RATE_LIMIT_CONFIGS.TEASER_REQUEST,
+    RATE_LIMIT_CONFIGS.TEASER_REQUEST
   );
 
   // Add rate limit headers to response
@@ -264,7 +267,7 @@ export default async function handler(
     recaptchaResult = await verifyRecaptcha(
       recaptchaToken,
       "teaser_request",
-      ip,
+      ip
     );
 
     if (!recaptchaResult.success) {

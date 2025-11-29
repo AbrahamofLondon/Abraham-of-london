@@ -137,9 +137,8 @@ export default function EventsPage({ events }: EventsPageProps) {
                   Past Events
                 </h2>
                 <p className="max-w-2xl text-gold/70">
-                  Browse through our previous gatherings and conversations.
-                  Many of these events recur seasonally or inform future
-                  programming.
+                  Browse through our previous gatherings and conversations. Many
+                  of these events recur seasonally or inform future programming.
                 </p>
               </div>
 
@@ -315,15 +314,11 @@ export async function getStaticProps() {
           time: safeString(event.time),
           location: safeString(event.location),
           description:
-            safeString(event.description) ||
-            safeString(event.excerpt) ||
-            null,
+            safeString(event.description) || safeString(event.excerpt) || null,
           heroImage,
           coverImage,
           tags: Array.isArray(event.tags)
-            ? event.tags.filter(
-                (tag): tag is string => typeof tag === "string",
-              )
+            ? event.tags.filter((tag): tag is string => typeof tag === "string")
             : [],
         };
       })

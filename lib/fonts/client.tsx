@@ -3,7 +3,14 @@
 
 import * as React from "react";
 import type { ReactElement } from "react";
-import { inter, playfair, jetbrainsMono, sourceSerif, spaceGrotesk, customFont } from "./index";
+import {
+  inter,
+  playfair,
+  jetbrainsMono,
+  sourceSerif,
+  spaceGrotesk,
+  customFont,
+} from "./index";
 
 /** Lightweight loader flag; avoids nuking SSR by keeping it client-only */
 export function useFontLoader(
@@ -21,7 +28,9 @@ export function useFontLoader(
         }
         setLoaded(true);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Font readiness check failed");
+        setError(
+          e instanceof Error ? e.message : "Font readiness check failed"
+        );
         setLoaded(true);
       }
     })();
@@ -33,7 +42,12 @@ export function useFontLoader(
 /** Optional: hide FOUT/FOIT with a fade-in once fonts are ready */
 export function withFonts<P extends object>(Component: React.ComponentType<P>) {
   return function FontProvider(props: P): ReactElement {
-    const { loaded, error } = useFontLoader(["sans", "serif", "mono", "display"]);
+    const { loaded, error } = useFontLoader([
+      "sans",
+      "serif",
+      "mono",
+      "display",
+    ]);
     const fontVariables = [
       inter.variable,
       playfair.variable,
@@ -44,7 +58,9 @@ export function withFonts<P extends object>(Component: React.ComponentType<P>) {
     ].join(" ");
 
     return (
-      <div className={`${fontVariables} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}>
+      <div
+        className={`${fontVariables} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+      >
         {error && (
           <div className="sr-only" aria-live="polite">
             Font loading issues; using fallbacks.

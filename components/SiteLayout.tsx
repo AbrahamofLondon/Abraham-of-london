@@ -61,7 +61,10 @@ interface ErrorBoundaryProps {
   fallback?: React.ReactNode;
 }
 
-class LayoutErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class LayoutErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -141,10 +144,7 @@ export default function SiteLayout({
   const router = useRouter();
   const currentPath = router.asPath || "/";
 
-  const fullTitle = React.useMemo(
-    () => getPageTitle(pageTitle),
-    [pageTitle]
-  );
+  const fullTitle = React.useMemo(() => getPageTitle(pageTitle), [pageTitle]);
 
   const fullCanonicalUrl = React.useMemo(
     () => canonicalUrl || absUrl(currentPath),
@@ -229,9 +229,8 @@ export default function SiteLayout({
     () =>
       [...defaultLinkTags, ...linkTags].filter(
         (tag, index, array) =>
-          array.findIndex(
-            (t) => t.rel === tag.rel && t.href === tag.href
-          ) === index
+          array.findIndex((t) => t.rel === tag.rel && t.href === tag.href) ===
+          index
       ),
     [defaultLinkTags, linkTags]
   );

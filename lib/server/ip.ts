@@ -20,10 +20,10 @@ const PRIVATE_IPV4 = [
   /^127\./,
 ];
 const PRIVATE_IPV6 = [
-  /^fc00:/,     // Unique local address
-  /^fd00:/,     // Unique local address
-  /^fe80:/,     // Link-local
-  /^::1$/,      // Loopback
+  /^fc00:/, // Unique local address
+  /^fd00:/, // Unique local address
+  /^fe80:/, // Link-local
+  /^::1$/, // Loopback
 ];
 
 const LOOPBACK = ["127.0.0.1", "::1", "localhost"];
@@ -148,7 +148,7 @@ function extractFirstValidIp(headerVal: string): string | null {
 // 8. MAIN: GET CLIENT IP
 // ----------------------------------------------------------------------------
 export function getClientIp(
-  req: NextApiRequest | { headers: Record<string, any> },
+  req: NextApiRequest | { headers: Record<string, any> }
 ): string {
   const headers = req.headers || {};
 
@@ -180,9 +180,7 @@ export function getClientIp(
 // ----------------------------------------------------------------------------
 // 9. GET CLIENT IP + ANALYSIS
 // ----------------------------------------------------------------------------
-export function getClientIpWithAnalysis(
-  req: NextApiRequest,
-): IpAnalysis {
+export function getClientIpWithAnalysis(req: NextApiRequest): IpAnalysis {
   const ip = getClientIp(req);
   return analyzeIp(ip, "header/proxy");
 }

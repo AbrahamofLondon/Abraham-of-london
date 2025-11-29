@@ -425,14 +425,12 @@ export function getCtaPreset(key?: string): CTAPreset | null {
 // Sort items by priority (lower = higher priority)
 export function getSortedItems(
   preset: CTAPreset,
-  category: keyof CTAPreset,
+  category: keyof CTAPreset
 ): LinkItem[] {
   const items = preset[category];
   if (!Array.isArray(items)) return [];
 
-  return [...items].sort(
-    (a, b) => (a.priority ?? 999) - (b.priority ?? 999),
-  );
+  return [...items].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
 }
 
 export function getThemeColors(theme: CTAPresetTheme = "default"): ThemeTokens {
@@ -466,9 +464,7 @@ export function getAllPresetItems(presetKey: CTAKey): LinkItem[] {
   });
 
   // Global sort by priority
-  return allItems.sort(
-    (a, b) => (a.priority ?? 999) - (b.priority ?? 999),
-  );
+  return allItems.sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -480,7 +476,7 @@ export function getAllPresetKeys(): CTAKey[] {
 }
 
 export function getPresetByTheme(
-  theme: NonNullable<CTAPreset["theme"]>,
+  theme: NonNullable<CTAPreset["theme"]>
 ): CTAPreset[] {
   return Object.values(CTA_PRESETS).filter((p) => p.theme === theme);
 }
@@ -498,7 +494,7 @@ export function getFeaturedItems(presetKey: CTAKey): LinkItem[] {
       if (Array.isArray(items)) {
         featured.push(...items.filter((item) => Boolean(item.badge)));
       }
-    },
+    }
   );
 
   return featured.slice(0, 4);
@@ -539,7 +535,8 @@ export function searchPresets(query: string): CTAPreset[] {
 
       return items.some((item) => {
         if (item.label.toLowerCase().includes(searchTerm)) return true;
-        if (item.sub && item.sub.toLowerCase().includes(searchTerm)) return true;
+        if (item.sub && item.sub.toLowerCase().includes(searchTerm))
+          return true;
         return false;
       });
     });
@@ -560,8 +557,7 @@ export function isLinkItem(obj: unknown): obj is LinkItem {
   if (!obj || typeof obj !== "object") return false;
   const candidate = obj as { href?: unknown; label?: unknown };
   return (
-    typeof candidate.href === "string" &&
-    typeof candidate.label === "string"
+    typeof candidate.href === "string" && typeof candidate.label === "string"
   );
 }
 
@@ -573,7 +569,7 @@ export function getPresetsByCategory(
   category: keyof Omit<
     CTAPreset,
     "title" | "description" | "theme" | "featured"
-  >,
+  >
 ): Record<CTAKey, LinkItem[]> {
   const result: Partial<Record<CTAKey, LinkItem[]>> = {};
 
@@ -585,9 +581,10 @@ export function getPresetsByCategory(
   return result as Record<CTAKey, LinkItem[]>;
 }
 
-export function validatePresetLinks(
-  presetKey: CTAKey,
-): { valid: boolean; brokenLinks: string[] } {
+export function validatePresetLinks(presetKey: CTAKey): {
+  valid: boolean;
+  brokenLinks: string[];
+} {
   const preset = CTA_PRESETS[presetKey];
   if (!preset) {
     return { valid: false, brokenLinks: ["Preset not found"] };
@@ -608,7 +605,7 @@ export function validatePresetLinks(
     items.forEach((item) => {
       if (!item.href || item.href === "#") {
         brokenLinks.push(
-          `${String(category)}: ${item.label} – Missing or invalid href`,
+          `${String(category)}: ${item.label} – Missing or invalid href`
         );
       }
     });

@@ -56,8 +56,8 @@ export default function ConsultingPage(): JSX.Element {
             >
               I work with leaders who refuse to outsource responsibility — men
               and women who carry weight for families, organisations, and
-              nations. The work sits at the intersection of strategy, governance,
-              and character.
+              nations. The work sits at the intersection of strategy,
+              governance, and character.
             </motion.p>
 
             <motion.div
@@ -205,8 +205,8 @@ export default function ConsultingPage(): JSX.Element {
                 transition={{ delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                I am not a motivational coach. I am a strategist and advisor. The
-                work is structured, documented, and accountable — but always
+                I am not a motivational coach. I am a strategist and advisor.
+                The work is structured, documented, and accountable — but always
                 anchored in conviction and integrity.
               </motion.p>
 
@@ -278,10 +278,7 @@ export default function ConsultingPage(): JSX.Element {
                   "Want strategy that respects both God and data",
                   "Are willing to be challenged, not entertained",
                 ].map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-3"
-                  >
+                  <li key={index} className="flex items-start gap-3">
                     <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-softGold" />
                     <span>{item}</span>
                   </li>

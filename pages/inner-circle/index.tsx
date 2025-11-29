@@ -26,9 +26,12 @@ const InnerCirclePage: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [accessKey, setAccessKey] = React.useState("");
-  const [registerState, setRegisterState] = React.useState<RegisterState>("idle");
+  const [registerState, setRegisterState] =
+    React.useState<RegisterState>("idle");
   const [unlockState, setUnlockState] = React.useState<UnlockState>("idle");
-  const [registerMessage, setRegisterMessage] = React.useState<string | null>(null);
+  const [registerMessage, setRegisterMessage] = React.useState<string | null>(
+    null
+  );
   const [unlockMessage, setUnlockMessage] = React.useState<string | null>(null);
   const [alreadyUnlocked, setAlreadyUnlocked] = React.useState(false);
 
@@ -49,7 +52,9 @@ const InnerCirclePage: NextPage = () => {
     setRegisterMessage(null);
 
     try {
-      trackEvent("inner_circle_register_submit", { email_domain: email.split("@")[1] ?? "" });
+      trackEvent("inner_circle_register_submit", {
+        email_domain: email.split("@")[1] ?? "",
+      });
 
       // If you have client-side reCAPTCHA, inject token here
       const body = {
@@ -65,7 +70,11 @@ const InnerCirclePage: NextPage = () => {
         body: JSON.stringify(body),
       });
 
-      const data = (await res.json()) as { ok: boolean; error?: string; message?: string };
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        message?: string;
+      };
 
       if (!data.ok) {
         setRegisterState("error");
@@ -80,7 +89,7 @@ const InnerCirclePage: NextPage = () => {
       setRegisterState("success");
       setRegisterMessage(
         data.message ??
-          "Check your inbox. We’ve sent your Inner Circle access key and unlock link.",
+          "Check your inbox. We’ve sent your Inner Circle access key and unlock link."
       );
       trackEvent("inner_circle_register_success", { status: res.status });
     } catch (err) {
@@ -155,7 +164,11 @@ const InnerCirclePage: NextPage = () => {
         body: JSON.stringify({ email, returnTo }),
       });
 
-      const data = (await res.json()) as { ok: boolean; error?: string; message?: string };
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        message?: string;
+      };
 
       if (!data.ok) {
         setRegisterState("error");
@@ -165,7 +178,8 @@ const InnerCirclePage: NextPage = () => {
 
       setRegisterState("success");
       setRegisterMessage(
-        data.message ?? "We’ve resent your Inner Circle email. Check your inbox.",
+        data.message ??
+          "We’ve resent your Inner Circle email. Check your inbox."
       );
     } catch (err) {
       setRegisterState("error");
@@ -191,8 +205,8 @@ const InnerCirclePage: NextPage = () => {
             Access the Canon Inner Circle
           </h1>
           <p className="mx-auto max-w-2xl text-sm text-softGold/80">
-            Register your email to receive a personal access key, then unlock this
-            device for full access to restricted Canon volumes.
+            Register your email to receive a personal access key, then unlock
+            this device for full access to restricted Canon volumes.
           </p>
           <p className="mt-2 text-xs text-softGold/70">{badgeText}</p>
         </header>
@@ -207,8 +221,8 @@ const InnerCirclePage: NextPage = () => {
               Request your Inner Circle key
             </h2>
             <p className="mt-2 text-xs text-softGold/80">
-              Use the email you already receive Abraham of London updates with. If
-              you&apos;re new, this will create a secure Inner Circle record.
+              Use the email you already receive Abraham of London updates with.
+              If you&apos;re new, this will create a secure Inner Circle record.
             </p>
 
             <form className="mt-5 space-y-4" onSubmit={handleRegister}>
@@ -269,8 +283,8 @@ const InnerCirclePage: NextPage = () => {
               </button>
 
               <p className="mt-2 text-[11px] text-softGold/70">
-                If you don&apos;t see the email in your inbox, check Promotions or
-                Spam. The key works only with the address you register here.
+                If you don&apos;t see the email in your inbox, check Promotions
+                or Spam. The key works only with the address you register here.
               </p>
             </form>
           </section>
@@ -325,8 +339,8 @@ const InnerCirclePage: NextPage = () => {
 
               <p className="mt-2 text-[11px] text-softGold/70">
                 Once unlocked, you can open restricted Canon volumes directly.
-                Access is stored only on this browser/device. You can revoke access
-                at any time by clearing cookies.
+                Access is stored only on this browser/device. You can revoke
+                access at any time by clearing cookies.
               </p>
             </form>
           </section>

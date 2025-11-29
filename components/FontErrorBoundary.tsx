@@ -20,7 +20,11 @@ export default class FontErrorBoundary extends React.Component<Props, State> {
 
   render(): React.ReactNode {
     if (this.state.hasError) {
-      return <div data-font-error className="text-sm text-gray-500">Font failed to load. Using fallback.</div>;
+      return (
+        <div data-font-error className="text-sm text-gray-500">
+          Font failed to load. Using fallback.
+        </div>
+      );
     }
     return this.props.children;
   }

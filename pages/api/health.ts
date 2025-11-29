@@ -35,7 +35,7 @@ const startedAt = Date.now();
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<HealthResponse>,
+  res: NextApiResponse<HealthResponse>
 ) {
   const now = Date.now();
 

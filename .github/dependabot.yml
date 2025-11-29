@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    labels: [ "dependencies" ]
+    labels: ["dependencies"]
     versioning-strategy: "increase"
 
   - package-ecosystem: "github-actions"
@@ -13,4 +13,4 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
-    labels: [ "dependencies", "actions" ]
+    labels: ["dependencies", "actions"]

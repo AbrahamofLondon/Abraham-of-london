@@ -6,7 +6,10 @@ export type SafeRenderProps = {
   fallback?: React.ReactNode;
 };
 
-export function SafeRender({ children, fallback }: SafeRenderProps): JSX.Element {
+export function SafeRender({
+  children,
+  fallback,
+}: SafeRenderProps): JSX.Element {
   if (children === null || typeof children === "undefined") {
     return <>{fallback ?? <div data-safe-fallback />}</>;
   }
@@ -21,14 +24,14 @@ export function withSafeFallback<P extends object>(
     try {
       return (
         <SafeRender fallback={fallback}>
-          <Component {...props as P & React.PropsWithChildren<unknown>} />
+          <Component {...(props as P & React.PropsWithChildren<unknown>)} />
         </SafeRender>
       );
     } catch {
       return <>{fallback ?? <div data-safe-fallback-error />}</>;
     }
   };
-  
+
   Wrapped.displayName = `WithSafeFallback(${Component.displayName || Component.name || "Component"})`;
   return Wrapped;
 }

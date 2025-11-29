@@ -55,7 +55,9 @@ const DEFAULT_SOCIALS: BareSocial[] = [
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) =>
-  href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:");
+  href.startsWith("mailto:") ||
+  href.startsWith("tel:") ||
+  href.startsWith("sms:");
 
 export default function SocialLinks({ className }: Props): JSX.Element | null {
   const configSocials: BareSocial[] = Array.isArray(siteConfig.socialLinks)
@@ -75,9 +77,7 @@ export default function SocialLinks({ className }: Props): JSX.Element | null {
     const rawLabel =
       (typeof item.label === "string" ? item.label.trim() : "") || href;
     const label =
-      rawLabel ||
-      href.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
-      "Link";
+      rawLabel || href.replace(/^https?:\/\//, "").replace(/\/$/, "") || "Link";
 
     return { href, label };
   });
@@ -85,7 +85,9 @@ export default function SocialLinks({ className }: Props): JSX.Element | null {
   if (!socials.length) return null;
 
   return (
-    <ul className={clsx("flex flex-wrap items-center gap-3 text-sm", className)}>
+    <ul
+      className={clsx("flex flex-wrap items-center gap-3 text-sm", className)}
+    >
       {socials.map(({ href, label }, i) => {
         if (!href) {
           return (
@@ -118,11 +120,7 @@ export default function SocialLinks({ className }: Props): JSX.Element | null {
         if (utility) {
           return (
             <li key={`${label}-${i}`}>
-              <a
-                href={href}
-                className="hover:underline"
-                aria-label={label}
-              >
+              <a href={href} className="hover:underline" aria-label={label}>
                 {label}
               </a>
             </li>

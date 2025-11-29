@@ -3,7 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Shield, Users, BookOpen, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Shield,
+  Users,
+  BookOpen,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
@@ -177,10 +183,7 @@ export default function ChathamRoomsPage(): JSX.Element {
                   "Fathers navigating complex, real-world family realities.",
                   "Elders, trustees, and community leaders with real consequence.",
                 ].map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-3"
-                  >
+                  <li key={index} className="flex items-start gap-3">
                     <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-softGold" />
                     <span>{item}</span>
                   </li>

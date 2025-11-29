@@ -20,7 +20,7 @@ export interface SendInnerCircleEmailArgs {
 }
 
 export async function sendInnerCircleEmail(
-  args: SendInnerCircleEmailArgs,
+  args: SendInnerCircleEmailArgs
 ): Promise<void> {
   if (!resend) {
     if (process.env.NODE_ENV !== "production") {
@@ -36,7 +36,8 @@ export async function sendInnerCircleEmail(
   }
 
   const fromAddress =
-    process.env.INNER_CIRCLE_FROM_EMAIL ?? "Inner Circle <innercircle@abrahamoflondon.org>";
+    process.env.INNER_CIRCLE_FROM_EMAIL ??
+    "Inner Circle <innercircle@abrahamoflondon.org>";
 
   const subject =
     args.mode === "resend"

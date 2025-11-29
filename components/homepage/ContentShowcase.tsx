@@ -11,7 +11,7 @@ import type { PostMeta, BookMeta } from "@/types/index";
 // Types
 // -----------------------------------------------------------------------------
 
-type ContentItem = 
+type ContentItem =
   | (PostMeta & { _type: "post" })
   | (BookMeta & { _type: "book" });
 
@@ -29,11 +29,15 @@ interface ContentShowcaseProps {
 // Type Guards
 // -----------------------------------------------------------------------------
 
-const isPostItem = (item: ContentItem): item is PostMeta & { _type: "post" } => {
+const isPostItem = (
+  item: ContentItem
+): item is PostMeta & { _type: "post" } => {
   return item._type === "post";
 };
 
-const isBookItem = (item: ContentItem): item is BookMeta & { _type: "book" } => {
+const isBookItem = (
+  item: ContentItem
+): item is BookMeta & { _type: "book" } => {
   return item._type === "book";
 };
 

@@ -12,7 +12,7 @@ export interface PrintMeta {
   heroImage: string | null;
   isChathamRoom: boolean;
   source: string;
-  kind: 'book' | 'download' | 'print';
+  kind: "book" | "download" | "print";
   content: string;
   published: boolean;
 }

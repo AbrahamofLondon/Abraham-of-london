@@ -13,15 +13,17 @@ interface BaseProps {
   href?: string;
 }
 
-type ButtonProps = BaseProps & Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  "className" | "color" | "href"
->;
+type ButtonProps = BaseProps &
+  Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    "className" | "color" | "href"
+  >;
 
-type AnchorProps = BaseProps & Omit<
-  React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  "className" | "color" | "href"
->;
+type AnchorProps = BaseProps &
+  Omit<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>,
+    "className" | "color" | "href"
+  >;
 
 type Props = ButtonProps | AnchorProps;
 
@@ -54,7 +56,7 @@ export default function Button({
     "disabled:opacity-60 disabled:cursor-not-allowed",
     variantCls[variant],
     sizeCls[size],
-    className,
+    className
   );
 
   if (href) {
@@ -62,21 +64,17 @@ export default function Button({
       /^https?:\/\//i.test(href) ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:");
-    
+
     const anchorProps = rest as React.AnchorHTMLAttributes<HTMLAnchorElement>;
-    
+
     if (isExternal) {
       return (
-        <a
-          href={href}
-          className={classes}
-          {...anchorProps}
-        >
+        <a href={href} className={classes} {...anchorProps}>
           {children}
         </a>
       );
     }
-    
+
     return (
       <Link href={href} className={classes} {...anchorProps}>
         {children}
@@ -85,12 +83,9 @@ export default function Button({
   }
 
   const buttonProps = rest as React.ButtonHTMLAttributes<HTMLButtonElement>;
-  
+
   return (
-    <button
-      className={classes}
-      {...buttonProps}
-    >
+    <button className={classes} {...buttonProps}>
       {children}
     </button>
   );

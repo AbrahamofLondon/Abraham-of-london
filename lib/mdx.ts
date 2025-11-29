@@ -8,15 +8,15 @@ import path from "path";
 import matter from "gray-matter";
 
 // Import Contentlayer generated types
-import { 
-  allPosts, 
-  allBooks, 
-  allDownloads, 
+import {
+  allPosts,
+  allBooks,
+  allDownloads,
   allEvents,
   allPrints,
   allStrategies,
   allResources,
-  allCanons 
+  allCanons,
 } from "contentlayer/generated";
 
 // Define Contentlayer document base interface
@@ -103,81 +103,81 @@ function readFileSafe(filePath: string): string | null {
 export function getAllContent(collection: string): RawContentEntry[] {
   // Try Contentlayer first for supported collections
   switch (collection.toLowerCase()) {
-    case 'blog':
-    case 'post':
-    case 'posts':
+    case "blog":
+    case "post":
+    case "posts":
       return (allPosts as PostDoc[])
         .filter((p) => !p.draft)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'book':
-    case 'books':
+
+    case "book":
+    case "books":
       return (allBooks as BookDoc[])
         .filter((b) => !b.draft)
         .sort((a, b) => a.title.localeCompare(b.title))
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'download':
-    case 'downloads':
+
+    case "download":
+    case "downloads":
       return (allDownloads as DownloadDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'event':
-    case 'events':
+
+    case "event":
+    case "events":
       return (allEvents as EventDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'print':
-    case 'prints':
+
+    case "print":
+    case "prints":
       return (allPrints as PrintDoc[])
         .filter((p) => p.available !== false)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'strategy':
-    case 'strategies':
+
+    case "strategy":
+    case "strategies":
       return (allStrategies as StrategyDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'resource':
-    case 'resources':
+
+    case "resource":
+    case "resources":
       return (allResources as ResourceDoc[])
         .sort((a, b) => a.title.localeCompare(b.title))
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
         }));
-    
-    case 'canon':
+
+    case "canon":
       return (allCanons as CanonDoc[])
         .filter((c) => !c.draft)
         .sort((a, b) => {
@@ -187,7 +187,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
           }
           return a.title.localeCompare(b.title);
         })
-        .map(doc => ({
+        .map((doc) => ({
           slug: doc.slug,
           content: doc.body.raw,
           ...doc,
@@ -228,50 +228,50 @@ export function getAllContent(collection: string): RawContentEntry[] {
 export function getContentBySlug(
   collection: string,
   slug: string,
-  options?: GetContentOptions,
+  options?: GetContentOptions
 ): RawContentEntry | null {
   const targetSlug = String(slug).trim();
 
   // Try Contentlayer first
   let doc: ContentlayerDoc | undefined;
   switch (collection.toLowerCase()) {
-    case 'blog':
-    case 'post':
-    case 'posts':
+    case "blog":
+    case "post":
+    case "posts":
       doc = (allPosts as PostDoc[]).find((p) => p.slug === targetSlug);
       break;
-    
-    case 'book':
-    case 'books':
+
+    case "book":
+    case "books":
       doc = (allBooks as BookDoc[]).find((b) => b.slug === targetSlug);
       break;
-    
-    case 'download':
-    case 'downloads':
+
+    case "download":
+    case "downloads":
       doc = (allDownloads as DownloadDoc[]).find((d) => d.slug === targetSlug);
       break;
-    
-    case 'event':
-    case 'events':
+
+    case "event":
+    case "events":
       doc = (allEvents as EventDoc[]).find((e) => e.slug === targetSlug);
       break;
-    
-    case 'print':
-    case 'prints':
+
+    case "print":
+    case "prints":
       doc = (allPrints as PrintDoc[]).find((p) => p.slug === targetSlug);
       break;
-    
-    case 'strategy':
-    case 'strategies':
+
+    case "strategy":
+    case "strategies":
       doc = (allStrategies as StrategyDoc[]).find((s) => s.slug === targetSlug);
       break;
-    
-    case 'resource':
-    case 'resources':
+
+    case "resource":
+    case "resources":
       doc = (allResources as ResourceDoc[]).find((r) => r.slug === targetSlug);
       break;
-    
-    case 'canon':
+
+    case "canon":
       doc = (allCanons as CanonDoc[]).find((c) => c.slug === targetSlug);
       break;
   }
@@ -315,8 +315,7 @@ export function getContentBySlug(
     const found =
       all.find(
         (entry) =>
-          entry.slug === targetSlug ||
-          entry.slug === targetSlug.toLowerCase(),
+          entry.slug === targetSlug || entry.slug === targetSlug.toLowerCase()
       ) || null;
     if (!found) return null;
 
@@ -371,7 +370,7 @@ export function getFeaturedCanon(): FeaturedCanonItem[] {
       }
       return a.title.localeCompare(b.title);
     })
-    .map(doc => ({
+    .map((doc) => ({
       slug: doc.slug,
       title: doc.title,
       subtitle: doc.subtitle,

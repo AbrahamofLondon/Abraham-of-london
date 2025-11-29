@@ -49,12 +49,12 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
 
 const getSafeImageUrl = (image: unknown): string => {
   if (!image) return "";
-  
+
   if (typeof image === "string") {
     const url = safeString(image);
     if (!url) return "";
     if (url.startsWith("/")) return url;
-    
+
     try {
       new URL(url);
       return url;
@@ -62,7 +62,7 @@ const getSafeImageUrl = (image: unknown): string => {
       return "";
     }
   }
-  
+
   if (typeof image === "object" && image !== null && "src" in image) {
     const candidate = safeString((image as { src?: string }).src);
     if (candidate?.startsWith("/")) return candidate;
@@ -73,7 +73,7 @@ const getSafeImageUrl = (image: unknown): string => {
       return "";
     }
   }
-  
+
   return "";
 };
 
@@ -114,7 +114,8 @@ export default function BookCard({
     return candidates;
   }, [book.coverImage]);
 
-  const cover = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+  const cover =
+    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
 
   // Size-based styling
   const sizeClasses = {
@@ -151,7 +152,9 @@ export default function BookCard({
       <Link href={href} className="block relative z-10 h-full" prefetch={false}>
         <div className="flex h-full flex-col">
           {/* Image container with premium overlay */}
-          <div className={`relative w-full overflow-hidden ${currentSize.image}`}>
+          <div
+            className={`relative w-full overflow-hidden ${currentSize.image}`}
+          >
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
             {/* Loading shimmer */}
@@ -172,7 +175,7 @@ export default function BookCard({
               onError={() => {
                 setImageLoaded(false);
                 setCoverIndex((prev) =>
-                  prev + 1 < coverCandidates.length ? prev + 1 : prev,
+                  prev + 1 < coverCandidates.length ? prev + 1 : prev
                 );
               }}
             />
@@ -215,7 +218,9 @@ export default function BookCard({
           </div>
 
           {/* Content container */}
-          <div className={`relative flex flex-col flex-1 ${currentSize.content}`}>
+          <div
+            className={`relative flex flex-col flex-1 ${currentSize.content}`}
+          >
             {/* Title with gradient hover effect */}
             <h3
               className={`mb-3 line-clamp-2 font-serif font-light leading-tight text-deepCharcoal transition-colors duration-300 group-hover:text-forest ${currentSize.title}`}
@@ -232,7 +237,9 @@ export default function BookCard({
 
             {/* Excerpt with improved typography */}
             {safeExcerpt && (
-              <p className={`mb-4 flex-1 font-light leading-relaxed text-gray-600 ${currentSize.excerpt}`}>
+              <p
+                className={`mb-4 flex-1 font-light leading-relaxed text-gray-600 ${currentSize.excerpt}`}
+              >
                 {safeExcerpt}
               </p>
             )}
@@ -244,17 +251,17 @@ export default function BookCard({
                 {book.status && (
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      book.status === 'published' 
-                        ? 'bg-green-100 text-green-800 border border-green-200'
-                        : book.status === 'draft'
-                        ? 'bg-gray-100 text-gray-800 border border-gray-200'
-                        : 'bg-blue-100 text-blue-800 border border-blue-200'
+                      book.status === "published"
+                        ? "bg-green-100 text-green-800 border border-green-200"
+                        : book.status === "draft"
+                          ? "bg-gray-100 text-gray-800 border border-gray-200"
+                          : "bg-blue-100 text-blue-800 border border-blue-200"
                     }`}
                   >
                     {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
                   </span>
                 )}
-                
+
                 {book.format && (
                   <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 border border-gray-200">
                     {book.format}
@@ -275,10 +282,9 @@ export default function BookCard({
                   )}
                   {book.readTime && (
                     <span className="text-xs font-light text-gray-500">
-                      {typeof book.readTime === 'number' 
-                        ? `${book.readTime} min read` 
-                        : book.readTime
-                      }
+                      {typeof book.readTime === "number"
+                        ? `${book.readTime} min read`
+                        : book.readTime}
                     </span>
                   )}
                 </div>

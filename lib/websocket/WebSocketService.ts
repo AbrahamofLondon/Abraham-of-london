@@ -156,7 +156,10 @@ export class WebSocketService {
       this.clearHeartbeat();
       this.emit("disconnected", event);
 
-      if (!this.isManualClose && this.reconnectCount < this.options.reconnectAttempts) {
+      if (
+        !this.isManualClose &&
+        this.reconnectCount < this.options.reconnectAttempts
+      ) {
         this.attemptReconnect();
       }
     };
@@ -195,7 +198,7 @@ export class WebSocketService {
   private attemptReconnect(): void {
     this.reconnectCount++;
     this.log(
-      `Attempting to reconnect (${this.reconnectCount}/${this.options.reconnectAttempts})...`,
+      `Attempting to reconnect (${this.reconnectCount}/${this.options.reconnectAttempts})...`
     );
 
     this.emit("reconnecting", {

@@ -34,7 +34,7 @@ export default function QuickActionBar({
           : "text-deepCharcoal/80 hover:text-forest hover:bg-white/80 hover:shadow-md hover:transform hover:scale-105"
         : active
           ? "bg-gradient-to-r from-cream to-cream/90 text-deepCharcoal shadow-lg transform scale-105"
-          : "text-cream/80 hover:text-cream hover:bg-cream/10 hover:shadow-md hover:transform hover:scale-105",
+          : "text-cream/80 hover:text-cream hover:bg-cream/10 hover:shadow-md hover:transform hover:scale-105"
     );
 
   const quickLinks = [
@@ -55,7 +55,7 @@ export default function QuickActionBar({
                 "font-medium px-3 py-1 rounded-full border",
                 variant === "light"
                   ? "text-deepCharcoal/60 border-deepCharcoal/20 bg-white/50"
-                  : "text-cream/60 border-cream/20 bg-cream/5",
+                  : "text-cream/60 border-cream/20 bg-cream/5"
               )}
             >
               Quick Access
@@ -79,7 +79,7 @@ export default function QuickActionBar({
                         "text-xs px-1.5 py-0.5 rounded-full font-bold",
                         variant === "light"
                           ? "bg-forest/20 text-forest"
-                          : "bg-cream/20 text-cream",
+                          : "bg-cream/20 text-cream"
                       )}
                     >
                       {link.badge}

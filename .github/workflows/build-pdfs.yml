@@ -2,7 +2,7 @@ name: Build & Commit PDFs
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "content/**"
       - "scripts/make-pdfs.mjs"

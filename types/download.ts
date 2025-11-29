@@ -73,7 +73,7 @@ export const isDownloadMeta = (meta: unknown): meta is DownloadMeta => {
 
 // Utility functions
 export const createDownloadItem = (
-  overrides: Partial<DownloadItem> = {},
+  overrides: Partial<DownloadItem> = {}
 ): DownloadItem => ({
   slug: "",
   title: "",
@@ -130,18 +130,18 @@ export interface DownloadCollection {
 }
 
 export const createDownloadCollection = (
-  downloads: DownloadItem[],
+  downloads: DownloadItem[]
 ): DownloadCollection => {
   const categories = Array.from(
-    new Set(downloads.map((d) => d.category).filter(Boolean)),
+    new Set(downloads.map((d) => d.category).filter(Boolean))
   ) as string[];
   const fileTypes = Array.from(
-    new Set(downloads.map((d) => getFileTypeCategory(d))),
+    new Set(downloads.map((d) => getFileTypeCategory(d)))
   );
 
   return {
     downloads: downloads.sort((a, b) =>
-      (a.title || "").localeCompare(b.title || ""),
+      (a.title || "").localeCompare(b.title || "")
     ),
     total: downloads.length,
     categories,

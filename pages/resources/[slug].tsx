@@ -2,10 +2,7 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import * as React from "react";
 import Head from "next/head";
-import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
-} from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
@@ -178,7 +175,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
               <div className="flex gap-2 text-xs">
                 <a
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                    url,
+                    url
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -188,7 +185,7 @@ export default function ResourcePage({ meta, mdxSource }: ResourcePageProps) {
                 </a>
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(
-                    `${title} · ${url}`,
+                    `${title} · ${url}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

@@ -18,21 +18,23 @@ interface TeaserFormData {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function TeaserRequest({ 
+export default function TeaserRequest({
   className = "",
-  variant = "default"
+  variant = "default",
 }: TeaserRequestProps) {
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [honeypot, setHoneypot] = React.useState("");
-  const [status, setStatus] = React.useState<"idle"|"success"|"error"|"loading">("idle");
+  const [status, setStatus] = React.useState<
+    "idle" | "success" | "error" | "loading"
+  >("idle");
   const [submitAttempts, setSubmitAttempts] = React.useState(0);
   const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
 
   // Rate limiting: max 3 submissions per minute
   const isRateLimited = React.useMemo(() => {
     const now = Date.now();
-    return submitAttempts >= 3 && (now - lastSubmitTime) < 60000;
+    return submitAttempts >= 3 && now - lastSubmitTime < 60000;
   }, [submitAttempts, lastSubmitTime]);
 
   function validateForm(): string | null {
@@ -70,7 +72,7 @@ export default function TeaserRequest({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (status === "loading") return;
 
     // Form validation
@@ -95,9 +97,7 @@ export default function TeaserRequest({
       // reCAPTCHA v3 for teaser requests
       const recaptchaToken = await Promise.race([
         getRecaptchaToken("teaser_request"),
-        new Promise<null>((resolve) => 
-          setTimeout(() => resolve(null), 5000)
-        )
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
       ]);
 
       if (!recaptchaToken) {
@@ -118,7 +118,7 @@ export default function TeaserRequest({
 
       const res = await fetch("/.netlify/functions/send-teaser", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -134,7 +134,7 @@ export default function TeaserRequest({
       if (!res.ok) {
         const errorText = await res.text();
         console.error(`Teaser API error ${res.status}:`, errorText);
-        
+
         if (res.status === 429) {
           throw new Error("Too many requests");
         } else if (res.status >= 500) {
@@ -148,27 +148,27 @@ export default function TeaserRequest({
       setEmail("");
       setName("");
       setHoneypot("");
-      
+
       // Update rate limiting
-      setSubmitAttempts(prev => prev + 1);
+      setSubmitAttempts((prev) => prev + 1);
       setLastSubmitTime(Date.now());
-      
+
       // Reset form after success
       setTimeout(() => setStatus("idle"), 5000);
     } catch (error) {
       console.error("Teaser request failed:", error);
-      setStatus("error"); 
+      setStatus("error");
     }
   }
 
   // Minimal variant for inline use
   if (variant === "minimal") {
     return (
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         className={[
           "flex flex-col gap-3 p-4 rounded-xl border border-gold/30 bg-charcoal/60 backdrop-blur-sm",
-          className
+          className,
         ].join(" ")}
         noValidate
       >
@@ -190,7 +190,10 @@ export default function TeaserRequest({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="teaser-email-minimal" className="block text-sm font-semibold text-cream">
+          <label
+            htmlFor="teaser-email-minimal"
+            className="block text-sm font-semibold text-cream"
+          >
             Get the FREE teaser
           </label>
           <input
@@ -210,11 +213,15 @@ export default function TeaserRequest({
           className="rounded-lg bg-gradient-to-r from-gold to-amber-200 px-4 py-2 text-sm font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
           disabled={status === "loading" || isRateLimited}
         >
-          {status === "loading" ? "Sending…" : isRateLimited ? "Try Again Later" : "Email me the teaser"}
+          {status === "loading"
+            ? "Sending…"
+            : isRateLimited
+              ? "Try Again Later"
+              : "Email me the teaser"}
         </button>
-        
+
         {status === "success" && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-xs text-green-400"
@@ -223,12 +230,14 @@ export default function TeaserRequest({
           </motion.p>
         )}
         {status === "error" && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-xs text-red-400"
           >
-            {isRateLimited ? "Too many attempts. Try again later." : "Please check your email and try again."}
+            {isRateLimited
+              ? "Too many attempts. Try again later."
+              : "Please check your email and try again."}
           </motion.p>
         )}
       </form>
@@ -238,10 +247,10 @@ export default function TeaserRequest({
   // Featured variant for prominent placement
   if (variant === "featured") {
     return (
-      <motion.div 
+      <motion.div
         className={[
           "rounded-2xl border border-gold/30 bg-gradient-to-br from-charcoal/80 to-charcoal/60 p-6 backdrop-blur-sm",
-          className
+          className,
         ].join(" ")}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -308,19 +317,23 @@ export default function TeaserRequest({
               />
             </div>
           </div>
-          
+
           <button
             type="submit"
             className="w-full rounded-xl bg-gradient-to-r from-gold to-amber-200 px-6 py-3 font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
             disabled={status === "loading" || isRateLimited}
           >
-            {status === "loading" ? "Sending…" : isRateLimited ? "Try Again Later" : "Get Free Teaser"}
+            {status === "loading"
+              ? "Sending…"
+              : isRateLimited
+                ? "Try Again Later"
+                : "Get Free Teaser"}
           </button>
         </form>
 
         <div className="mt-4 text-center">
           {status === "success" && (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-sm text-green-400"
@@ -329,12 +342,15 @@ export default function TeaserRequest({
             </motion.p>
           )}
           {status === "error" && (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-sm text-red-400"
             >
-              ❌ {isRateLimited ? "Too many attempts. Try again later." : "Something went wrong. Please try again."}
+              ❌{" "}
+              {isRateLimited
+                ? "Too many attempts. Try again later."
+                : "Something went wrong. Please try again."}
             </motion.p>
           )}
         </div>
@@ -348,11 +364,11 @@ export default function TeaserRequest({
 
   // Default variant
   return (
-    <form 
-      onSubmit={handleSubmit} 
+    <form
+      onSubmit={handleSubmit}
       className={[
         "rounded-xl border border-gold/20 bg-charcoal/60 p-4 backdrop-blur-sm",
-        className
+        className,
       ].join(" ")}
       noValidate
     >
@@ -376,7 +392,7 @@ export default function TeaserRequest({
       <div className="mb-3 font-semibold text-cream">
         Get the FREE teaser by email
       </div>
-      
+
       <div className="flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
@@ -402,12 +418,16 @@ export default function TeaserRequest({
           className="rounded-lg bg-gradient-to-r from-gold to-amber-200 px-4 py-2 text-sm font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal sm:whitespace-nowrap"
           disabled={status === "loading" || isRateLimited}
         >
-          {status === "loading" ? "Sending…" : isRateLimited ? "Try Again Later" : "Email me the teaser"}
+          {status === "loading"
+            ? "Sending…"
+            : isRateLimited
+              ? "Try Again Later"
+              : "Email me the teaser"}
         </button>
       </div>
-      
+
       {status === "success" && (
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="mt-2 text-xs text-green-400"
@@ -416,12 +436,14 @@ export default function TeaserRequest({
         </motion.p>
       )}
       {status === "error" && (
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="mt-2 text-xs text-red-400"
         >
-          {isRateLimited ? "Too many attempts. Try again later." : "Sorry—something went wrong. Please try again."}
+          {isRateLimited
+            ? "Too many attempts. Try again later."
+            : "Sorry—something went wrong. Please try again."}
         </motion.p>
       )}
     </form>

@@ -53,9 +53,10 @@ const CanonLandingPage: NextPage = () => {
               </h1>
 
               <p className="mx-auto mb-12 max-w-3xl text-xl leading-relaxed text-gray-300 lg:text-2xl">
-                <span className="text-softGold">Ten Volumes. One Architecture.</span>
-                <br />
-                A Blueprint Older Than Empires.
+                <span className="text-softGold">
+                  Ten Volumes. One Architecture.
+                </span>
+                <br />A Blueprint Older Than Empires.
               </p>
 
               <div className="mx-auto max-w-2xl space-y-6 text-lg leading-relaxed text-gray-300">

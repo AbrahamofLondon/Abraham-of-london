@@ -34,18 +34,18 @@ interface Venture {
 // Resolve external URLs safely with env overrides
 const ALOMARADA_URL = pickEnvUrl(
   [ENV_KEYS.ALOMARADA_URL],
-  "https://alomarada.com/",
+  "https://alomarada.com/"
 );
 
 const ENDURELUXE_URL = pickEnvUrl(
   [ENV_KEYS.ENDURELUXE_URL],
-  "https://alomarada.com/endureluxe",
+  "https://alomarada.com/endureluxe"
 );
 
 // Branded InnovateHub URL by default, with env overrides
 const INNOVATEHUB_URL = pickEnvUrl(
   [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
-  "https://innovatehub.abrahamoflondon.org",
+  "https://innovatehub.abrahamoflondon.org"
 );
 
 const ventures: Venture[] = [
@@ -118,8 +118,8 @@ const VenturesPage: NextPage = () => {
               </h1>
               <p className="mt-5 max-w-xl text-sm text-gray-200 md:text-base">
                 The writing, fatherhood work, and strategy conversations live at
-                the centre. These ventures carry that same spine into boardrooms,
-                gyms, communities, and build rooms across markets.
+                the centre. These ventures carry that same spine into
+                boardrooms, gyms, communities, and build rooms across markets.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-4 text-xs md:text-sm">
@@ -216,8 +216,8 @@ const VenturesPage: NextPage = () => {
                       venture.status === "Active"
                         ? "bg-green-100/10 text-emerald-200"
                         : venture.status === "Emerging"
-                        ? "bg-blue-100/10 text-sky-200"
-                        : "bg-amber-100/10 text-amber-200"
+                          ? "bg-blue-100/10 text-sky-200"
+                          : "bg-amber-100/10 text-amber-200"
                     }`}
                   >
                     {venture.status}
@@ -265,9 +265,9 @@ const VenturesPage: NextPage = () => {
                 How we choose what deserves a logo
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 md:text-base">
-                Not every good idea becomes a venture. There is a quiet filter in
-                the background that every initiative has to pass before it earns
-                the Abraham of London mark.
+                Not every good idea becomes a venture. There is a quiet filter
+                in the background that every initiative has to pass before it
+                earns the Abraham of London mark.
               </p>
             </div>
 
@@ -280,8 +280,8 @@ const VenturesPage: NextPage = () => {
                   Clear assignment
                 </h3>
                 <p className="text-sm text-gray-300">
-                  The work must serve a real person with a real problem, not just
-                  a vanity metric or a trend. If it doesn&apos;t serve, it
+                  The work must serve a real person with a real problem, not
+                  just a vanity metric or a trend. If it doesn&apos;t serve, it
                   doesn&apos;t ship.
                 </p>
               </div>
@@ -316,8 +316,8 @@ const VenturesPage: NextPage = () => {
             </div>
 
             <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 px-5 py-6 text-center text-sm text-gray-200 md:px-8">
-              If you&apos;re exploring aligned capital, strategic partnership, or
-              ecosystem collaboration around these ventures,{" "}
+              If you&apos;re exploring aligned capital, strategic partnership,
+              or ecosystem collaboration around these ventures,{" "}
               <Link
                 href="/contact"
                 className="font-semibold text-softGold underline-offset-4 hover:underline"

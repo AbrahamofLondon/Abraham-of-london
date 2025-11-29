@@ -89,7 +89,7 @@ declare module "contentlayer" {
 
 // MDX related types
 declare module "*.mdx" {
-  import { ComponentType } from '...';
+  import { ComponentType } from "...";
 
   interface MDXProps {
     components?: Record<string, ComponentType>;

@@ -4,15 +4,15 @@ import { getAllBooks, getBookBySlug } from "@/lib/books"; // Use the correct exp
 export async function debugBooks() {
   try {
     console.log("📚 Debugging books data...");
-    
+
     const allBooks = await getAllBooks();
     console.log(`Total books found: ${allBooks.length}`);
-    
+
     if (allBooks.length === 0) {
       console.log("❌ No books found at all!");
       return [];
     }
-    
+
     // Log all books to see what we have
     allBooks.forEach((book, index) => {
       console.log(`\n📖 Book ${index + 1}:`);
@@ -22,13 +22,13 @@ export async function debugBooks() {
       console.log(`   - Has excerpt: ${!!book.excerpt}`);
       console.log(`   - Has description: ${!!book.description}`);
     });
-    
+
     const problematicSlugs = [
       "fathering-without-fear",
-      "the-architecture-of-human-purpose", 
-      "the-fiction-adaptation"
+      "the-architecture-of-human-purpose",
+      "the-fiction-adaptation",
     ];
-    
+
     for (const slug of problematicSlugs) {
       console.log(`\n🔍 Checking book: ${slug}`);
       const book = await getBookBySlug(slug);
@@ -42,7 +42,7 @@ export async function debugBooks() {
       console.log(`   - Has title: ${!!book.title}`);
       console.log(`   - Has date: ${!!book.date}`);
     }
-    
+
     return allBooks;
   } catch (error) {
     console.error("💥 Error debugging books:", error);

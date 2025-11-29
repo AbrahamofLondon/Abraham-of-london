@@ -1,6 +1,12 @@
 // netlify/functions/ping.ts
 import type { Handler } from "@netlify/functions";
-import { ok, bad, handleOptions, methodNotAllowed, readJson } from "../../patches/fix/common/errors";
+import {
+  ok,
+  bad,
+  handleOptions,
+  methodNotAllowed,
+  readJson,
+} from "../../patches/fix/common/errors";
 
 export const handler: Handler = async (event) => {
   const origin = event.headers.origin || event.headers.Origin || "*";

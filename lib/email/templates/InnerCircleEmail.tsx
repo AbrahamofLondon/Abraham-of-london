@@ -76,7 +76,7 @@ export function InnerCircleEmail({
             </Text>
 
             <Text style={paragraph}>
-              With grace and resolve,  
+              With grace and resolve,
               <br />
               <span style={signature}>Abraham of London</span>
             </Text>
@@ -101,7 +101,8 @@ export function InnerCircleEmail({
 const body: React.CSSProperties = {
   backgroundColor: "#050509",
   color: "#f5f5f5",
-  fontFamily: '"system-ui", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontFamily:
+    '"system-ui", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 };
 
 const container: React.CSSProperties = {
@@ -110,8 +111,7 @@ const container: React.CSSProperties = {
   borderRadius: "20px",
   overflow: "hidden",
   border: "1px solid #a79a68",
-  background:
-    "radial-gradient(circle at top, #161622 0, #050509 60%)",
+  background: "radial-gradient(circle at top, #161622 0, #050509 60%)",
 };
 
 const header: React.CSSProperties = {
@@ -171,7 +171,8 @@ const codeBox: React.CSSProperties = {
 };
 
 const code: React.CSSProperties = {
-  fontFamily: '"JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+  fontFamily:
+    '"JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   fontSize: "13px",
   letterSpacing: "0.2em",
   textAlign: "center",

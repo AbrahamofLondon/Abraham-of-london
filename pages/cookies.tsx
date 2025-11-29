@@ -11,7 +11,7 @@ const TermsPage: NextPage = () => {
   const pageTitle = "Terms";
   const lastUpdated = React.useMemo(
     () => new Date().toLocaleDateString("en-GB"),
-    [],
+    []
   );
 
   return (
@@ -37,7 +37,9 @@ const TermsPage: NextPage = () => {
             this site, you agree to act with good faith, common sense, and
             respect for the boundaries set out below.
           </p>
-          <p className="mt-2 text-xs text-gray-400">Last updated: {lastUpdated}</p>
+          <p className="mt-2 text-xs text-gray-400">
+            Last updated: {lastUpdated}
+          </p>
         </header>
 
         {/* 1. Scope */}
@@ -47,7 +49,9 @@ const TermsPage: NextPage = () => {
           </h2>
           <p>These Terms apply to:</p>
           <ul className="ml-5 list-disc space-y-1">
-            <li>This website, its content, and any resources made available.</li>
+            <li>
+              This website, its content, and any resources made available.
+            </li>
             <li>
               Any newsletters or editorial email content sent through this site
               to which you have subscribed.
@@ -75,9 +79,9 @@ const TermsPage: NextPage = () => {
           </h2>
           <p>
             Content on this site is provided for general information,
-            reflection, and education. It is{" "}
-            <strong>not</strong> legal, financial, immigration, medical, or
-            other regulated professional advice.
+            reflection, and education. It is <strong>not</strong> legal,
+            financial, immigration, medical, or other regulated professional
+            advice.
           </p>
           <p>
             Decisions with legal, financial, or life-altering consequences
@@ -94,7 +98,9 @@ const TermsPage: NextPage = () => {
           </h2>
           <p>By using this site, you agree that you will not:</p>
           <ul className="ml-5 list-disc space-y-1">
-            <li>Abuse, attack, or attempt to compromise the site or systems.</li>
+            <li>
+              Abuse, attack, or attempt to compromise the site or systems.
+            </li>
             <li>
               Scrape, harvest, or mine content or data in a way that breaches
               applicable laws, this policy, or basic decency.

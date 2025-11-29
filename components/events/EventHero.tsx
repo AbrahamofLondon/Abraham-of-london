@@ -109,12 +109,24 @@ export default function EventHero({
   const { src, onError } = useCover(slug, heroImage);
 
   const aspectClass =
-    aspect === "square" ? "aspect-[1/1]" : aspect === "book" ? "aspect-[2/3]" : "aspect-[16/9]";
+    aspect === "square"
+      ? "aspect-[1/1]"
+      : aspect === "book"
+        ? "aspect-[2/3]"
+        : "aspect-[16/9]";
   const fitClass = fit === "contain" ? "object-contain" : "object-cover";
-  const posClass = position === "left" ? "object-left" : position === "right" ? "object-right" : "object-center";
+  const posClass =
+    position === "left"
+      ? "object-left"
+      : position === "right"
+        ? "object-right"
+        : "object-center";
   const framePadding = fit === "contain" ? "p-2 sm:p-3 md:p-4" : "";
   const frameBg = fit === "contain" ? "bg-warmWhite" : "bg-transparent";
-  const frameBorder = fit === "contain" ? "border border-lightGrey/70" : "border border-transparent";
+  const frameBorder =
+    fit === "contain"
+      ? "border border-lightGrey/70"
+      : "border border-transparent";
 
   return (
     <section className="bg-white">
@@ -123,7 +135,9 @@ export default function EventHero({
           <p className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-on-secondary)/0.6]">
             Chatham Rooms available
           </p>
-          <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl">{title}</h1>
+          <h1 className="font-serif text-4xl font-semibold text-deepCharcoal sm:text-5xl">
+            {title}
+          </h1>
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[color:var(--color-on-secondary)/0.7]">
             {date && <time dateTime={date}>{formatRange(date, endDate)}</time>}
@@ -135,11 +149,17 @@ export default function EventHero({
             )}
           </div>
 
-          {summary && <p className="mt-5 max-w-prose text-[color:var(--color-on-secondary)/0.85]">{summary}</p>}
+          {summary && (
+            <p className="mt-5 max-w-prose text-[color:var(--color-on-secondary)/0.85]">
+              {summary}
+            </p>
+          )}
         </div>
 
         {src && (
-          <div className={`relative w-full overflow-hidden rounded-2xl ${aspectClass} ${frameBg} ${framePadding} ${frameBorder} shadow-card`}>
+          <div
+            className={`relative w-full overflow-hidden rounded-2xl ${aspectClass} ${frameBg} ${framePadding} ${frameBorder} shadow-card`}
+          >
             <Image
               src={src}
               alt={title}

@@ -31,18 +31,20 @@ export default function NewsletterForm({
 }: NewsletterFormProps) {
   const [email, setEmail] = React.useState("");
   const [honeypot, setHoneypot] = React.useState(""); // Enhanced honeypot
-  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = React.useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [message, setMessage] = React.useState("");
   const [submitAttempts, setSubmitAttempts] = React.useState(0);
   const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
-  
+
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const statusRef = React.useRef<HTMLParagraphElement | null>(null);
 
   // Rate limiting: max 3 submissions per minute
   const isRateLimited = React.useMemo(() => {
     const now = Date.now();
-    return submitAttempts >= 3 && (now - lastSubmitTime) < 60000;
+    return submitAttempts >= 3 && now - lastSubmitTime < 60000;
   }, [submitAttempts, lastSubmitTime]);
 
   React.useEffect(() => {
@@ -89,7 +91,7 @@ export default function NewsletterForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (status === "loading") return;
 
     // Form validation
@@ -120,9 +122,7 @@ export default function NewsletterForm({
       // Enhanced reCAPTCHA v3 with timeout
       const recaptchaToken = await Promise.race([
         getRecaptchaToken("newsletter_signup"),
-        new Promise<null>((resolve) => 
-          setTimeout(() => resolve(null), 5000)
-        )
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
       ]);
 
       if (!recaptchaToken) {
@@ -160,7 +160,7 @@ export default function NewsletterForm({
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Newsletter API error ${response.status}:`, errorText);
-        
+
         if (response.status === 429) {
           throw new Error("Too many requests. Please try again later.");
         } else if (response.status >= 500) {
@@ -172,21 +172,21 @@ export default function NewsletterForm({
 
       let data: NewsletterResponse = {};
       try {
-        data = await response.json() as NewsletterResponse;
+        data = (await response.json()) as NewsletterResponse;
       } catch {
         throw new Error("Invalid server response");
       }
 
       const successMessage = data.message || "You're subscribed. Welcome!";
-      
+
       if (response.ok && data.ok !== false) {
         setStatus("success");
         setMessage(successMessage);
         setEmail("");
         setHoneypot("");
-        
+
         // Update rate limiting
-        setSubmitAttempts(prev => prev + 1);
+        setSubmitAttempts((prev) => prev + 1);
         setLastSubmitTime(Date.now());
       } else {
         throw new Error(data.error || "Subscription failed");
@@ -279,9 +279,15 @@ export default function NewsletterForm({
           onChange={(e) => setHoneypot(e.target.value)}
           className="hidden"
         />
-        
+
         {/* Additional hidden fields for advanced bot protection */}
-        <input type="text" name="confirm_email" autoComplete="off" tabIndex={-1} className="hidden" />
+        <input
+          type="text"
+          name="confirm_email"
+          autoComplete="off"
+          tabIndex={-1}
+          className="hidden"
+        />
       </div>
 
       <label htmlFor="newsletter-email" className="sr-only">
@@ -304,12 +310,16 @@ export default function NewsletterForm({
         maxLength={254}
       />
 
-      <button 
-        type="submit" 
-        disabled={isLoading || isRateLimited} 
+      <button
+        type="submit"
+        disabled={isLoading || isRateLimited}
         className={buttonClasses}
       >
-        {isLoading ? "Subscribing…" : isRateLimited ? "Try Again Later" : buttonText}
+        {isLoading
+          ? "Subscribing…"
+          : isRateLimited
+            ? "Try Again Later"
+            : buttonText}
       </button>
 
       <p
@@ -323,8 +333,8 @@ export default function NewsletterForm({
           isSuccess
             ? "text-green-600"
             : isError
-            ? "text-red-600"
-            : "text-transparent"
+              ? "text-red-600"
+              : "text-transparent"
         }`}
       >
         {message || " "}

@@ -51,13 +51,10 @@ export default function ContactEmail({
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://www.abrahamoflondon.org";
 
-  const metaSubmittedAt =
-    submittedAt || new Date().toISOString();
+  const metaSubmittedAt = submittedAt || new Date().toISOString();
 
   const metaIp = ipAnonymized || "unknown";
-  const metaUA = userAgentSnippet
-    ? clamp(userAgentSnippet, 140)
-    : undefined;
+  const metaUA = userAgentSnippet ? clamp(userAgentSnippet, 140) : undefined;
 
   return (
     <Html>
@@ -68,7 +65,8 @@ export default function ContactEmail({
       <Body
         style={{
           backgroundColor: "#f6f6f6",
-          fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
+          fontFamily:
+            "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
           margin: 0,
           padding: "16px 0",
         }}
@@ -120,11 +118,9 @@ export default function ContactEmail({
               >
                 <strong>Preferences:</strong>
                 <br />
-                Teaser requested:{" "}
-                {teaserOptIn ? "Yes" : "No"}
+                Teaser requested: {teaserOptIn ? "Yes" : "No"}
                 <br />
-                Mailing list opt-in:{" "}
-                {newsletterOptIn ? "Yes" : "No"}
+                Mailing list opt-in: {newsletterOptIn ? "Yes" : "No"}
               </Text>
             )}
 

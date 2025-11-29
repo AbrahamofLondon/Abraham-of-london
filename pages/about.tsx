@@ -4,7 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Moon, SunMedium, Target, Users, Shield, BookOpen, ArrowRight, Star, Award } from "lucide-react";
+import {
+  Moon,
+  SunMedium,
+  Target,
+  Users,
+  Shield,
+  BookOpen,
+  ArrowRight,
+  Star,
+  Award,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -53,7 +63,9 @@ const AboutPage: NextPage = () => {
         setIsDark(stored === "dark");
         return;
       }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia?.(
+        "(prefers-color-scheme: dark)"
+      ).matches;
       setIsDark(prefersDark);
     } catch {
       // ignore localStorage errors
@@ -82,7 +94,7 @@ const AboutPage: NextPage = () => {
   }
 
   // Theme classes
-  const shellClass = isDark 
+  const shellClass = isDark
     ? "min-h-screen bg-gradient-to-br from-deepCharcoal via-gray-900 to-black text-cream"
     : "min-h-screen bg-gradient-to-br from-warmWhite via-cream to-white text-ink";
 
@@ -105,55 +117,68 @@ const AboutPage: NextPage = () => {
   const achievements: Achievement[] = [
     {
       title: "Founded Fathering Without Fear Movement",
-      description: "Launched a global initiative helping thousands of men embrace intentional fatherhood and legacy building",
+      description:
+        "Launched a global initiative helping thousands of men embrace intentional fatherhood and legacy building",
       year: 2023,
       href: "/brands/fathering-without-fear",
-      icon: Users
+      icon: Users,
     },
     {
       title: "Published Entrepreneur Operating System",
-      description: "Developed comprehensive strategic frameworks used by 500+ founders and business leaders",
+      description:
+        "Developed comprehensive strategic frameworks used by 200+ founders and business leaders",
       year: 2023,
       href: "/downloads/entrepreneur-operating-pack",
-      icon: Target
+      icon: Target,
     },
     {
       title: "Established Brotherhood Covenant Network",
-      description: "Built accountability structures fostering authentic brotherhood among Christian men and leaders",
+      description:
+        "Built accountability structures fostering authentic brotherhood among Christian men and leaders",
       year: 2022,
       href: "/downloads/brotherhood-covenant",
-      icon: Shield
+      icon: Shield,
     },
     {
       title: "Created Family Altar Liturgy",
-      description: "Developed practical tools for integrating faith into daily family rhythms, used by hundreds of households",
+      description:
+        "Developed practical tools for integrating faith into daily family rhythms, used by hundreds of households",
       year: 2022,
       href: "/downloads/family-altar-liturgy",
-      icon: BookOpen
+      icon: BookOpen,
     },
     {
       title: "Launched Strategic Leadership Playbook",
-      description: "Authored comprehensive leadership frameworks for executives and organizational leaders",
+      description:
+        "Authored comprehensive leadership frameworks for executives and organizational leaders",
       year: 2021,
       href: "/downloads/leadership-playbook",
-      icon: Award
-    }
+      icon: Award,
+    },
   ];
 
   return (
     <Layout title="About">
       <Head>
-        <title>About | Abraham of London — Strategic Stewardship & Legacy Building</title>
-        <meta 
-          name="description" 
-          content="Learn about Abraham of London's mission to equip men with faith-rooted strategy, fatherhood tools, and legacy-building frameworks." 
+        <title>
+          About | Abraham of London — Strategic Stewardship & Legacy Building
+        </title>
+        <meta
+          name="description"
+          content="Learn about Abraham of London's mission to equip men with faith-rooted strategy, fatherhood tools, and legacy-building frameworks."
         />
-        <meta property="og:title" content="About Abraham of London — Strategic Stewardship & Legacy Building" />
-        <meta 
-          property="og:description" 
-          content="Equipping serious men and builders with faith-rooted strategy, fatherhood tools, and legacy frameworks for generational impact." 
+        <meta
+          property="og:title"
+          content="About Abraham of London — Strategic Stewardship & Legacy Building"
         />
-        <meta property="og:url" content="https://www.abrahamoflondon.org/about" />
+        <meta
+          property="og:description"
+          content="Equipping serious men and builders with faith-rooted strategy, fatherhood tools, and legacy frameworks for generational impact."
+        />
+        <meta
+          property="og:url"
+          content="https://www.abrahamoflondon.org/about"
+        />
         <meta property="og:type" content="website" />
         <meta name="theme-color" content={isDark ? "#0f172a" : "#f7f5ee"} />
         <link rel="canonical" href="https://www.abrahamoflondon.org/about" />
@@ -164,7 +189,9 @@ const AboutPage: NextPage = () => {
         <div className="max-w-6xl mx-auto px-4 pt-12">
           <div className="flex items-start justify-between gap-4 mb-12">
             <div>
-              <p className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}>
+              <p
+                className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}
+              >
                 Strategic Stewardship
               </p>
             </div>
@@ -196,7 +223,9 @@ const AboutPage: NextPage = () => {
         </div>
 
         {/* Hero Section */}
-        <section className={`py-20 ${isDark ? "bg-gradient-to-b from-black to-deepCharcoal" : "bg-gradient-to-b from-warmWhite to-cream"}`}>
+        <section
+          className={`py-20 ${isDark ? "bg-gradient-to-b from-black to-deepCharcoal" : "bg-gradient-to-b from-warmWhite to-cream"}`}
+        >
           <div className="max-w-6xl mx-auto px-4">
             <motion.div
               variants={containerVariants}
@@ -204,19 +233,22 @@ const AboutPage: NextPage = () => {
               animate="visible"
               className="text-center"
             >
-              <motion.h1 
+              <motion.h1
                 variants={itemVariants}
                 className={`font-serif text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 ${primaryTextClass}`}
               >
-                Building Fathers, 
-                <span className={`block mt-4 ${accentTextClass}`}>Founders & Faithful Leaders</span>
+                Building Fathers,
+                <span className={`block mt-4 ${accentTextClass}`}>
+                  Founders & Faithful Leaders
+                </span>
               </motion.h1>
-              <motion.p 
+              <motion.p
                 variants={itemVariants}
                 className={`text-xl max-w-3xl mx-auto leading-relaxed ${secondaryTextClass}`}
               >
-                Equipping serious men with faith-rooted strategy, tools, and frameworks for 
-                intentional fatherhood, disciplined leadership, and lasting legacy.
+                Equipping serious men with faith-rooted strategy, tools, and
+                frameworks for intentional fatherhood, disciplined leadership,
+                and lasting legacy.
               </motion.p>
             </motion.div>
           </div>
@@ -231,23 +263,29 @@ const AboutPage: NextPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
               >
-                <h2 className={`font-serif text-3xl md:text-4xl font-semibold mb-6 ${primaryTextClass}`}>
+                <h2
+                  className={`font-serif text-3xl md:text-4xl font-semibold mb-6 ${primaryTextClass}`}
+                >
                   Our Purpose
                 </h2>
-                <div className={`space-y-4 text-lg leading-relaxed ${secondaryTextClass}`}>
+                <div
+                  className={`space-y-4 text-lg leading-relaxed ${secondaryTextClass}`}
+                >
                   <p>
-                    Abraham of London exists to equip serious men and builders with faith-rooted 
-                    strategy, tools, and frameworks for intentional fatherhood, disciplined leadership, 
-                    and lasting legacy.
+                    Abraham of London exists to equip serious men and builders
+                    with faith-rooted strategy, tools, and frameworks for
+                    intentional fatherhood, disciplined leadership, and lasting
+                    legacy.
                   </p>
                   <p>
-                    In a world that often encourages drift and compromise, we provide language, 
-                    structure, and practical resources to help you build with clarity, courage, 
-                    and conviction.
+                    In a world that often encourages drift and compromise, we
+                    provide language, structure, and practical resources to help
+                    you build with clarity, courage, and conviction.
                   </p>
                   <p>
-                    Every strategy, tool, and framework is built on conservative Christian conviction. 
-                    We believe true leadership starts with submission to divine wisdom.
+                    Every strategy, tool, and framework is built on conservative
+                    Christian conviction. We believe true leadership starts with
+                    submission to divine wisdom.
                   </p>
                 </div>
 
@@ -273,20 +311,28 @@ const AboutPage: NextPage = () => {
                 transition={{ duration: 0.7, delay: 0.2 }}
                 className="relative"
               >
-                <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isDark ? "ring-1 ring-white/10" : "ring-1 ring-lightGrey"}`}>
+                <div
+                  className={`relative rounded-2xl overflow-hidden shadow-2xl ${isDark ? "ring-1 ring-white/10" : "ring-1 ring-lightGrey"}`}
+                >
                   <Image
-                    src="/assets/images/abraham-portrait.jpg"
+                    src="/assets/images/abraham-portrait.webp"
                     alt="Abraham of London - Founder and Strategic Leader"
                     width={600}
                     height={800}
                     className="w-full h-auto"
                     priority
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? "from-black/40 to-transparent" : "from-white/20 to-transparent"}`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t ${isDark ? "from-black/40 to-transparent" : "from-white/20 to-transparent"}`}
+                  />
                 </div>
-                <div className={`absolute -bottom-6 -left-6 px-6 py-3 rounded-lg shadow-lg ${isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"}`}>
+                <div
+                  className={`absolute -bottom-6 -left-6 px-6 py-3 rounded-lg shadow-lg ${isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"}`}
+                >
                   <p className="font-semibold">Abraham of London</p>
-                  <p className="text-sm opacity-90">Founder & Strategic Leader</p>
+                  <p className="text-sm opacity-90">
+                    Founder & Strategic Leader
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -302,11 +348,14 @@ const AboutPage: NextPage = () => {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h2 className={`font-serif text-3xl md:text-4xl font-semibold mb-4 ${primaryTextClass}`}>
+              <h2
+                className={`font-serif text-3xl md:text-4xl font-semibold mb-4 ${primaryTextClass}`}
+              >
                 Strategic Milestones
               </h2>
               <p className={`text-xl max-w-2xl mx-auto ${secondaryTextClass}`}>
-                Building tools and communities that empower men to lead with conviction and build lasting legacy
+                Building tools and communities that empower men to lead with
+                conviction and build lasting legacy
               </p>
             </motion.div>
 
@@ -321,16 +370,30 @@ const AboutPage: NextPage = () => {
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                      <IconComponent className={isDark ? "h-6 w-6 text-softGold" : "h-6 w-6 text-forest"} />
+                    <div
+                      className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                    >
+                      <IconComponent
+                        className={
+                          isDark
+                            ? "h-6 w-6 text-softGold"
+                            : "h-6 w-6 text-forest"
+                        }
+                      />
                     </div>
-                    <div className={`text-sm font-semibold mb-2 ${accentTextClass}`}>
+                    <div
+                      className={`text-sm font-semibold mb-2 ${accentTextClass}`}
+                    >
                       {achievement.year}
                     </div>
-                    <h3 className={`font-serif text-xl font-semibold mb-3 ${primaryTextClass}`}>
+                    <h3
+                      className={`font-serif text-xl font-semibold mb-3 ${primaryTextClass}`}
+                    >
                       {achievement.title}
                     </h3>
-                    <p className={`text-sm leading-relaxed mb-4 ${secondaryTextClass}`}>
+                    <p
+                      className={`text-sm leading-relaxed mb-4 ${secondaryTextClass}`}
+                    >
                       {achievement.description}
                     </p>
                     <Link
@@ -349,18 +412,18 @@ const AboutPage: NextPage = () => {
         {/* Mission & Values */}
         <section className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}>
           <div className="max-w-4xl mx-auto px-4">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`font-serif text-3xl md:text-4xl font-semibold text-center mb-12 ${primaryTextClass}`}
             >
               Our Guiding Principles
             </motion.h2>
-            
+
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 {siteConfig.brand.values.slice(0, 3).map((value, index) => (
-                  <motion.div 
+                  <motion.div
                     key={value}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -368,26 +431,38 @@ const AboutPage: NextPage = () => {
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                        <Star className={isDark ? "h-4 w-4 text-softGold" : "h-4 w-4 text-forest"} />
+                      <div
+                        className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                      >
+                        <Star
+                          className={
+                            isDark
+                              ? "h-4 w-4 text-softGold"
+                              : "h-4 w-4 text-forest"
+                          }
+                        />
                       </div>
-                      <h3 className={`text-xl font-semibold ${primaryTextClass}`}>{value}</h3>
+                      <h3
+                        className={`text-xl font-semibold ${primaryTextClass}`}
+                      >
+                        {value}
+                      </h3>
                     </div>
                     <p className={secondaryTextClass}>
-                      {value === "Faith-rooted leadership" && 
+                      {value === "Faith-rooted leadership" &&
                         "Every strategy and framework is built on conservative Christian conviction, believing true leadership starts with submission to divine wisdom."}
-                      {value === "Strategic discipline" && 
+                      {value === "Strategic discipline" &&
                         "We maintain rigorous focus on long-term objectives, avoiding distractions and staying committed to the core mission through disciplined execution."}
-                      {value === "Generational thinking" && 
+                      {value === "Generational thinking" &&
                         "Our work extends beyond immediate results to create lasting impact that benefits multiple generations and builds enduring legacy."}
                     </p>
                   </motion.div>
                 ))}
               </div>
-              
+
               <div className="space-y-6">
                 {siteConfig.brand.values.slice(3).map((value, index) => (
-                  <motion.div 
+                  <motion.div
                     key={value}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -395,17 +470,29 @@ const AboutPage: NextPage = () => {
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                        <Star className={isDark ? "h-4 w-4 text-softGold" : "h-4 w-4 text-forest"} />
+                      <div
+                        className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                      >
+                        <Star
+                          className={
+                            isDark
+                              ? "h-4 w-4 text-softGold"
+                              : "h-4 w-4 text-forest"
+                          }
+                        />
                       </div>
-                      <h3 className={`text-xl font-semibold ${primaryTextClass}`}>{value}</h3>
+                      <h3
+                        className={`text-xl font-semibold ${primaryTextClass}`}
+                      >
+                        {value}
+                      </h3>
                     </div>
                     <p className={secondaryTextClass}>
-                      {value === "Community focus" && 
+                      {value === "Community focus" &&
                         "We build ecosystems and brotherhoods that support growth, accountability, and shared success rather than individual achievement alone."}
-                      {value === "Excellence in execution" && 
+                      {value === "Excellence in execution" &&
                         "Every resource is battle-tested and designed for immediate practical application, delivering tangible results in business, family, and leadership."}
-                      {value === "Sustainable impact" && 
+                      {value === "Sustainable impact" &&
                         "We prioritize long-term value creation and responsible growth that benefits communities and preserves resources for future generations."}
                     </p>
                   </motion.div>
@@ -416,24 +503,27 @@ const AboutPage: NextPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className={`py-16 text-center ${isDark ? "bg-gradient-to-r from-forest to-softGold" : "bg-gradient-to-r from-forest to-forest/90"}`}>
+        <section
+          className={`py-16 text-center ${isDark ? "bg-gradient-to-r from-forest to-softGold" : "bg-gradient-to-r from-forest to-forest/90"}`}
+        >
           <div className="max-w-2xl mx-auto px-4">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-3xl md:text-4xl font-serif font-semibold mb-6 text-white"
             >
               Ready to Build With Purpose?
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-xl text-white/90 mb-8"
             >
-              Join hundreds of men already using these tools to lead with conviction and build lasting legacy.
+              Join hundreds of men already using these tools to lead with
+              conviction and build lasting legacy.
             </motion.p>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}

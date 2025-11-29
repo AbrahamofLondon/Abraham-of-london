@@ -19,18 +19,24 @@ export type EventJsonLdProps = {
   location: {
     "@type": "Place";
     name: string;
-    address?: string | {
-      "@type": "PostalAddress";
-      streetAddress?: string;
-      addressLocality?: string;
-      addressRegion?: string;
-      postalCode?: string;
-      addressCountry?: string;
-    };
+    address?:
+      | string
+      | {
+          "@type": "PostalAddress";
+          streetAddress?: string;
+          addressLocality?: string;
+          addressRegion?: string;
+          postalCode?: string;
+          addressCountry?: string;
+        };
   };
   image?: string | string[];
   description?: string;
-  organizer?: { "@type": "Organization" | "Person"; name: string; url?: string };
+  organizer?: {
+    "@type": "Organization" | "Person";
+    name: string;
+    url?: string;
+  };
   offers?: EventOffer[];
   url?: string;
 };

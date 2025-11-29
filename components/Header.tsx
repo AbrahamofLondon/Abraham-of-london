@@ -2,12 +2,24 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
 
-// --- Enhanced Types & Constants ------------------------------------------------
+// --- Self-contained Types & Constants ----------------------------------------
+
+type RouteId =
+  | "home"
+  | "about"
+  | "blogIndex"
+  | "contentIndex"
+  | "booksIndex"
+  | "canonIndex"
+  | "ventures"
+  | "downloadsIndex"
+  | "strategyLanding"
+  | "contact";
 
 type HeaderProps = {
   initialTheme?: "light" | "dark";
@@ -20,18 +32,34 @@ type NavItem = {
   description?: string;
 };
 
-interface OriginalStyle {
-  position: string;
-  top: string;
-  left: string;
-  right: string;
-  overflow: string;
-}
+// Local site configuration to avoid external dependencies
+const LOCAL_SITE_CONFIG = {
+  email: "info@abrahamoflondon.org",
+  phone: "+44 20 8622 5909",
+  routes: {
+    home: { path: "/" },
+    about: { path: "/about" },
+    blogIndex: { path: "/blog" },
+    contentIndex: { path: "/content" },
+    booksIndex: { path: "/books" },
+    canonIndex: { path: "/canon" },
+    ventures: { path: "/ventures" },
+    downloadsIndex: { path: "/downloads" },
+    strategyLanding: { path: "/strategy" },
+    contact: { path: "/contact" },
+  },
+} as const;
+
+// Safe route path resolver
+const getRoutePath = (route: RouteId): string => {
+  const routeConfig = LOCAL_SITE_CONFIG.routes[route];
+  return routeConfig?.path || "/";
+};
 
 const NAV_ITEMS: NavItem[] = [
   { route: "booksIndex", label: "Books", description: "Curated volumes" },
   { route: "canonIndex", label: "Canon", description: "The 10-volume system" },
-  { route: "contentIndex", label: "Insights", description: "Strategic wisdom" },
+  { route: "blogIndex", label: "Insights", description: "Strategic wisdom" },
   { route: "ventures", label: "Ventures", description: "Business pursuits" },
   { route: "about", label: "About", description: "My journey" },
   { route: "contact", label: "Contact", description: "Get in touch" },
@@ -39,13 +67,13 @@ const NAV_ITEMS: NavItem[] = [
 
 const SCROLL_THRESHOLD = 8;
 
-// slightly tighter heights on mobile so the hero isn't crushed
+// Responsive header heights
 const HEADER_HEIGHTS = {
   desktop: { normal: "5rem", scrolled: "4rem" },
   mobile: { normal: "4.25rem", scrolled: "3.5rem" },
 } as const;
 
-// --- Color System with subtle glow in dark mode --------------------------------
+// --- Color System with enhanced accessibility --------------------------------
 
 const COLOR_SYSTEM = {
   light: {
@@ -54,13 +82,13 @@ const COLOR_SYSTEM = {
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-deepCharcoal font-semibold",
-      secondary: "text-deepCharcoal/80 font-medium",
-      accent: "text-softGold font-bold",
+      primary: "text-gray-900 font-semibold",
+      secondary: "text-gray-700 font-medium",
+      accent: "text-amber-600 font-bold",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105 hover:font-semibold",
-      active: "text-softGold scale-105 font-bold",
+      hover: "hover:text-amber-600 hover:scale-105 hover:font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/50",
+      active: "text-amber-600 scale-105 font-bold",
     },
     glow: {
       normal: "",
@@ -69,26 +97,26 @@ const COLOR_SYSTEM = {
   },
   dark: {
     shell: {
-      normal: "bg-charcoal/98 border-white/15 shadow-2xl backdrop-blur-xl",
+      normal: "bg-gray-900/98 border-white/15 shadow-2xl backdrop-blur-xl",
       transparent: "bg-transparent border-transparent",
     },
     text: {
-      primary: "text-white font-bold glow-text",
-      secondary: "text-white/90 font-semibold glow-text",
-      accent: "text-softGold font-extrabold glow-text",
+      primary: "text-white font-bold",
+      secondary: "text-gray-300 font-semibold",
+      accent: "text-amber-400 font-extrabold",
     },
     interactive: {
-      hover: "hover:text-softGold hover:scale-105 hover:font-extrabold glow-active",
-      active: "text-softGold scale-105 font-extrabold glow-active",
+      hover: "hover:text-amber-400 hover:scale-105 hover:font-extrabold focus:outline-none focus:ring-2 focus:ring-amber-400/50",
+      active: "text-amber-400 scale-105 font-extrabold",
     },
     glow: {
-      normal: "glow-text",
-      active: "glow-active",
+      normal: "",
+      active: "drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]",
     },
   },
 } as const;
 
-// --- Hooks ---------------------------------------------------------------------
+// --- Enhanced Hooks -----------------------------------------------------------
 
 const useScrollDetection = (threshold: number = SCROLL_THRESHOLD): boolean => {
   const [scrolled, setScrolled] = React.useState(false);
@@ -99,75 +127,57 @@ const useScrollDetection = (threshold: number = SCROLL_THRESHOLD): boolean => {
       setScrolled(isScrolled);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    let ticking = false;
+    const scrollListener = (): void => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Check if window is available (SSR safety)
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", scrollListener, { passive: true });
+      handleScroll();
+
+      return () => window.removeEventListener("scroll", scrollListener);
+    }
   }, [threshold]);
 
   return scrolled;
 };
 
-const useCurrentPath = (): string => {
-  const [currentPath, setCurrentPath] = React.useState("/");
-
-  React.useEffect(() => {
-    const updatePath = (): void => {
-      setCurrentPath(window.location.pathname || "/");
-    };
-
-    updatePath();
-
-    const handleNavigation = (): void => {
-      setTimeout(updatePath, 10);
-    };
-
-    const handleClick = (e: MouseEvent): void => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a[href]");
-      if (link?.getAttribute("href")?.startsWith("/")) {
-        setTimeout(updatePath, 50);
-      }
-    };
-
-    window.addEventListener("popstate", handleNavigation);
-    document.addEventListener("click", handleClick, true);
-
-    return () => {
-      window.removeEventListener("popstate", handleNavigation);
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, []);
-
-  return currentPath;
-};
-
 const useBodyScrollLock = (isLocked: boolean): void => {
   React.useEffect(() => {
-    if (!isLocked) return;
+    if (!isLocked || typeof document === "undefined") return;
 
-    const computed = window.getComputedStyle(document.body);
-    const originalStyle: OriginalStyle = {
-      position: computed.position,
-      top: computed.top,
-      left: computed.left,
-      right: computed.right,
-      overflow: computed.overflow,
-    };
     const scrollY = window.scrollY;
+    const body = document.body;
 
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.overflow = "hidden";
+    // Store original styles
+    const originalStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      overflow: body.style.overflow,
+    };
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.position = originalStyle.position;
-      document.body.style.top = originalStyle.top;
-      document.body.style.left = originalStyle.left;
-      document.body.style.right = originalStyle.right;
-      document.body.style.overflow = originalStyle.overflow;
+      body.style.position = originalStyles.position;
+      body.style.top = originalStyles.top;
+      body.style.left = originalStyles.left;
+      body.style.right = originalStyles.right;
+      body.style.overflow = originalStyles.overflow;
       window.scrollTo(0, scrollY);
     };
   }, [isLocked]);
@@ -177,8 +187,10 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   const [theme, setTheme] = React.useState<"light" | "dark">(initialTheme);
 
   React.useEffect(() => {
-    const getTheme = (): "light" | "dark" =>
-      document.documentElement.classList.contains("dark") ? "dark" : "light";
+    const getTheme = (): "light" | "dark" => {
+      if (typeof document === "undefined") return initialTheme;
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    };
 
     setTheme(getTheme());
 
@@ -186,10 +198,12 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
       setTheme(getTheme());
     });
 
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+    if (typeof document !== "undefined") {
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+    }
 
     return () => observer.disconnect();
   }, [initialTheme]);
@@ -197,14 +211,15 @@ const useResolvedTheme = (initialTheme: "light" | "dark"): "light" | "dark" => {
   return theme;
 };
 
-// detect user movement to "wake up" glow for a short period
 const useMovementDetection = (enabled: boolean = true): boolean => {
   const [isMoving, setIsMoving] = React.useState(false);
 
   React.useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || typeof window === "undefined") {
+      return; // Fixed: return nothing instead of false
+    }
 
-    let movementTimer: ReturnType<typeof setTimeout>;
+    let movementTimer: NodeJS.Timeout;
 
     const handleMovement = (): void => {
       setIsMoving(true);
@@ -234,7 +249,7 @@ const useMovementDetection = (enabled: boolean = true): boolean => {
   return isMoving;
 };
 
-// --- Components ----------------------------------------------------------------
+// --- Enhanced Components -----------------------------------------------------
 
 interface NavLinkProps {
   item: NavItem;
@@ -261,11 +276,8 @@ const NavLink: React.FC<NavLinkProps> = ({
     ${colors.text.primary}
     ${isActive ? colors.interactive.active : colors.interactive.hover}
     ${isMobile ? "text-lg py-3 px-4 rounded-xl" : "text-sm lg:text-base"}
-    ${
-      theme === "dark" && isMovementDetected
-        ? colors.glow.active
-        : colors.glow.normal
-    }
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    focus:outline-none focus:ring-2 focus:ring-current/50 rounded-lg
   `;
 
   const activeStyles = isActive
@@ -281,7 +293,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         onClick={onClick}
         className={`block ${baseStyles} ${activeStyles}`}
         aria-current={isActive ? "page" : undefined}
-        prefetch
+        prefetch={true}
       >
         <div className="flex flex-col">
           <span className={isMobile ? "font-bold" : ""}>{item.label}</span>
@@ -296,7 +308,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         <motion.span
           aria-hidden="true"
           className={`pointer-events-none absolute -bottom-1 left-0 h-0.5 ${
-            isActive ? "bg-softGold" : "bg-transparent"
+            isActive ? "bg-amber-500" : "bg-transparent"
           }`}
           initial={{ width: 0 }}
           animate={{ width: isActive ? "100%" : 0 }}
@@ -336,16 +348,9 @@ const ContactButton: React.FC<ContactButtonProps> = ({
     flex items-center gap-2 transition-all duration-300
     ${colors.text.secondary}
     ${colors.interactive.hover}
-    ${
-      isMobile
-        ? "text-base py-2 px-3 font-semibold"
-        : "text-sm lg:text-base font-medium"
-    }
-    ${
-      theme === "dark" && isMovementDetected
-        ? colors.glow.active
-        : colors.glow.normal
-    }
+    ${isMobile ? "text-base py-2 px-3 font-semibold" : "text-sm lg:text-base font-medium"}
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    focus:outline-none focus:ring-2 focus:ring-current/50 rounded-lg
   `;
 
   return (
@@ -355,13 +360,13 @@ const ContactButton: React.FC<ContactButtonProps> = ({
       className={baseStyles}
       aria-label={`${label} Abraham`}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
       <span>{label}</span>
     </a>
   );
 };
 
-// --- Main Header --------------------------------------------------------------
+// --- Main Header Component ---------------------------------------------------
 
 export default function Header({
   initialTheme = "light",
@@ -371,7 +376,7 @@ export default function Header({
   const [isMounted, setIsMounted] = React.useState(false);
 
   const scrolled = useScrollDetection(SCROLL_THRESHOLD);
-  const currentPath = useCurrentPath();
+  const currentPath = usePathname();
   const isMovementDetected = useMovementDetection();
   const theme = useResolvedTheme(initialTheme);
   const colors = COLOR_SYSTEM[theme];
@@ -390,7 +395,7 @@ export default function Header({
       if (href === "/") return path === "/";
       return path === href || path.startsWith(`${href}/`);
     },
-    [currentPath, isMounted],
+    [currentPath, isMounted]
   );
 
   const shellStyle =
@@ -402,22 +407,13 @@ export default function Header({
 
   const brandClass = `
     font-serif transition-all duration-300
-    ${
-      scrolled
-        ? "text-[1.35rem] md:text-[1.85rem]"
-        : "text-[1.6rem] md:text-[2.15rem]"
-    }
+    ${scrolled ? "text-[1.35rem] md:text-[1.85rem]" : "text-[1.6rem] md:text-[2.15rem]"}
     ${colors.text.accent}
-    ${
-      theme === "dark" && isMovementDetected
-        ? colors.glow.active
-        : colors.glow.normal
-    }
-    tracking-tight leading-tight
+    ${theme === "dark" && isMovementDetected ? colors.glow.active : colors.glow.normal}
+    tracking-tight leading-tight focus:outline-none focus:ring-2 focus:ring-current/50 rounded-lg
   `;
 
-  const email = siteConfig.email || "info@abrahamoflondon.org";
-  const phone = siteConfig.phone?.toString().trim() || "+442086225909";
+  const { email, phone } = LOCAL_SITE_CONFIG;
 
   const MotionHeader = isMounted ? motion.header : "header";
 
@@ -429,7 +425,7 @@ export default function Header({
         animate: { y: 0, opacity: 1 },
         transition: { duration: 0.4, ease: "easeOut" },
       })}
-      role="navigation"
+      role="banner"
       aria-label="Primary navigation"
       style={{ height: headerHeight }}
     >
@@ -439,7 +435,7 @@ export default function Header({
           href={getRoutePath("home")}
           aria-label="Abraham of London - Home"
           className={brandClass}
-          prefetch
+          prefetch={true}
         >
           <span className="font-extrabold">Abraham</span>{" "}
           <span className="font-bold">of London</span>
@@ -480,26 +476,22 @@ export default function Header({
             {/* Canon Prelude CTA */}
             <Link
               href="/books/the-architecture-of-human-purpose-landing"
-              className={`hidden rounded-full border border-softGold/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block ${
-                theme === "dark" && isMovementDetected
-                  ? "shadow-lg shadow-softGold/30"
-                  : ""
+              className={`hidden rounded-full border border-amber-500/70 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-400 transition-all duration-300 hover:scale-105 hover:bg-amber-500/10 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 md:inline-block ${
+                theme === "dark" && isMovementDetected ? "shadow-lg shadow-amber-400/30" : ""
               }`}
               aria-label="The Canon Prelude – Architecture of Human Purpose"
-              prefetch
+              prefetch={true}
             >
               Canon Prelude
             </Link>
 
             <Link
               href={getRoutePath("contact")}
-              className={`hidden rounded-full bg-softGold px-5 py-2.5 text-sm font-bold text-deepCharcoal transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-softGold/50 md:inline-block lg:px-6 ${
-                theme === "dark" && isMovementDetected
-                  ? "shadow-lg shadow-softGold/30"
-                  : ""
+              className={`hidden rounded-full bg-amber-500 px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 md:inline-block lg:px-6 ${
+                theme === "dark" && isMovementDetected ? "shadow-lg shadow-amber-400/30" : ""
               }`}
               aria-label="Go to contact form"
-              prefetch
+              prefetch={true}
             >
               Enquire
             </Link>
@@ -520,8 +512,8 @@ export default function Header({
             className={`inline-flex h-10 w-10 items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
               theme === "dark"
                 ? "bg-white/15 text-white hover:bg-white/25"
-                : "bg-black/10 text-deepCharcoal hover:bg-black/20"
-            } ${theme === "dark" && isMovementDetected ? "glow-active" : ""}`}
+                : "bg-black/10 text-gray-900 hover:bg-black/20"
+            } ${theme === "dark" && isMovementDetected ? "drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : ""} focus:outline-none focus:ring-2 focus:ring-current/50`}
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -533,7 +525,7 @@ export default function Header({
                   exit={{ rotate: 90, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -543,7 +535,7 @@ export default function Header({
                   exit={{ rotate: -90, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5" aria-hidden="true" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -558,13 +550,16 @@ export default function Header({
             id="mobile-nav"
             className={`fixed inset-0 top-[var(--header-height)] md:hidden ${
               theme === "dark"
-                ? "bg-charcoal/98 text-white backdrop-blur-2xl"
-                : "bg-white/98 text-deepCharcoal backdrop-blur-2xl"
+                ? "bg-gray-900/98 text-white backdrop-blur-2xl"
+                : "bg-white/98 text-gray-900 backdrop-blur-2xl"
             }`}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation menu"
           >
             <nav
               className="flex h-full flex-col px-6 py-8"
@@ -589,12 +584,10 @@ export default function Header({
                 <Link
                   href="/books/the-architecture-of-human-purpose-landing"
                   onClick={() => setIsOpen(false)}
-                  className={`block w-full rounded-xl border border-softGold/70 bg-black/5 px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.22em] text-softGold transition-all duration-300 hover:scale-105 hover:bg-softGold/10 hover:shadow-lg hover:shadow-softGold/25 ${
-                    theme === "dark" && isMovementDetected
-                      ? "shadow-lg shadow-softGold/30"
-                      : ""
+                  className={`block w-full rounded-xl border border-amber-500/70 bg-black/5 dark:bg-white/5 px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-400 transition-all duration-300 hover:scale-105 hover:bg-amber-500/10 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    theme === "dark" && isMovementDetected ? "shadow-lg shadow-amber-400/30" : ""
                   }`}
-                  prefetch
+                  prefetch={true}
                 >
                   Canon Prelude
                 </Link>
@@ -624,16 +617,12 @@ export default function Header({
                 <Link
                   href={getRoutePath("contact")}
                   onClick={() => setIsOpen(false)}
-                  className={`block w-full rounded-xl px-6 py-4 text-center text-sm font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-softGold/25 ${
-                    theme === "dark"
-                      ? "bg-softGold text-deepCharcoal"
-                      : "bg-softGold text-deepCharcoal"
+                  className={`block w-full rounded-xl px-6 py-4 text-center text-sm font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    theme === "dark" ? "bg-amber-400 text-gray-900" : "bg-amber-500 text-white"
                   } ${
-                    theme === "dark" && isMovementDetected
-                      ? "shadow-lg shadow-softGold/30"
-                      : ""
+                    theme === "dark" && isMovementDetected ? "shadow-lg shadow-amber-400/30" : ""
                   }`}
-                  prefetch
+                  prefetch={true}
                 >
                   Enquire Now
                 </Link>
@@ -653,16 +642,10 @@ export default function Header({
           padding-top: var(--header-height);
         }
 
-        /* Glow effects for dark mode readability */
-        .glow-text {
-          transition: text-shadow 0.3s ease, filter 0.3s ease;
-        }
-
-        .glow-active {
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 255, 255, 0.2),
-            0 0 30px rgba(255, 255, 255, 0.1);
-          filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+        /* Enhanced focus styles for accessibility */
+        .focus-outline {
+          outline: 2px solid currentColor;
+          outline-offset: 2px;
         }
 
         @media (max-width: 767px) {
@@ -672,6 +655,15 @@ export default function Header({
                 ? HEADER_HEIGHTS.mobile.scrolled
                 : HEADER_HEIGHTS.mobile.normal
             };
+          }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
           }
         }
       `}</style>

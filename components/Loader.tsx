@@ -39,7 +39,10 @@ export default function LuxuryLoader({
   // Auto-hide only when *uncontrolled*
   React.useEffect(() => {
     if (show === undefined) {
-      const t = window.setTimeout(() => setInternalShow(false), autohideAfterMs);
+      const t = window.setTimeout(
+        () => setInternalShow(false),
+        autohideAfterMs
+      );
       return () => window.clearTimeout(t);
     }
   }, [show, autohideAfterMs]);
@@ -67,9 +70,7 @@ export default function LuxuryLoader({
           <motion.div
             // Spin for normal motion; gentle pulse for reduced motion
             animate={
-              prefersReducedMotion
-                ? { scale: [1, 1.06, 1] }
-                : { rotate: 360 }
+              prefersReducedMotion ? { scale: [1, 1.06, 1] } : { rotate: 360 }
             }
             transition={
               prefersReducedMotion

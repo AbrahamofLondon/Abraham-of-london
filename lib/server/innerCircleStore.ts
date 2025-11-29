@@ -61,7 +61,11 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
+function generateAccessKey(): {
+  key: string;
+  keyHash: string;
+  keySuffix: string;
+} {
   const raw = crypto.randomBytes(20).toString("base64url");
   const key = raw.slice(0, 24);
   const keyHash = sha256Hex(key);
@@ -69,7 +73,10 @@ function generateAccessKey(): { key: string; keyHash: string; keySuffix: string 
   return { key, keyHash, keySuffix };
 }
 
-function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}): void {
+function logPrivacyAction(
+  action: string,
+  metadata: Record<string, unknown> = {}
+): void {
   console.log(`🔒 InnerCircle: ${action}`, {
     ts: new Date().toISOString(),
     ...metadata,
@@ -84,7 +91,9 @@ class ServerInnerCircleStore {
   private lastCleanup = nowIso();
   private readonly DATA_RETENTION_DAYS = 365;
 
-  async createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
+  async createOrUpdateMemberAndIssueKey(
+    args: CreateOrUpdateMemberArgs
+  ): Promise<IssuedKey> {
     const emailNormalised = normaliseEmail(args.email);
     const emailHash = sha256Hex(emailNormalised);
     const emailHashPrefix = emailHash.slice(0, 10);
@@ -120,7 +129,7 @@ class ServerInnerCircleStore {
       keyHash,
       keySuffix,
       createdAt: now,
-      status: 'active' as InnerCircleStatus,
+      status: "active" as InnerCircleStatus,
       totalUnlocks: 0,
       lastUsedAt: null,
       memberId,
@@ -145,7 +154,7 @@ class ServerInnerCircleStore {
       key,
       keySuffix,
       createdAt: now,
-      status: 'active',
+      status: "active",
     };
   }
 
@@ -155,15 +164,16 @@ class ServerInnerCircleStore {
 
     const keyHash = sha256Hex(safeKey);
     const keyRecord = this.keys.get(keyHash);
-    
+
     if (!keyRecord) return { valid: false, reason: "not-found" };
-    if (keyRecord.status === 'revoked') return { valid: false, reason: "revoked" };
+    if (keyRecord.status === "revoked")
+      return { valid: false, reason: "revoked" };
 
     // Check expiration (365 days)
     const created = new Date(keyRecord.createdAt).getTime();
     const ageMs = Date.now() - created;
     const keyTtlMs = 1000 * 60 * 60 * 24 * this.DATA_RETENTION_DAYS;
-    
+
     if (ageMs > keyTtlMs) return { valid: false, reason: "expired" };
 
     return {
@@ -174,18 +184,21 @@ class ServerInnerCircleStore {
     };
   }
 
-  async recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void> {
+  async recordInnerCircleUnlock(
+    key: string,
+    ipAddress?: string
+  ): Promise<void> {
     const safeKey = key.trim();
     if (!safeKey) return;
 
     const keyHash = sha256Hex(safeKey);
     const keyRecord = this.keys.get(keyHash);
-    
+
     if (!keyRecord) return;
 
     keyRecord.totalUnlocks += 1;
     keyRecord.lastUsedAt = nowIso();
-    
+
     // Update member last seen
     const member = this.members.get(keyRecord.memberId);
     if (member) {
@@ -206,10 +219,10 @@ class ServerInnerCircleStore {
 
     const keyHash = sha256Hex(safeKey);
     const keyRecord = this.keys.get(keyHash);
-    
-    if (!keyRecord || keyRecord.status === 'revoked') return false;
 
-    keyRecord.status = 'revoked';
+    if (!keyRecord || keyRecord.status === "revoked") return false;
+
+    keyRecord.status = "revoked";
     keyRecord.lastUsedAt = nowIso();
 
     logPrivacyAction("server_key_revoked", {
@@ -224,7 +237,7 @@ class ServerInnerCircleStore {
     const emailNormalised = normaliseEmail(email);
     const emailHash = sha256Hex(emailNormalised);
     const memberId = this.emailToMember.get(emailHash);
-    
+
     if (!memberId) return false;
 
     // Remove all keys for this member
@@ -239,20 +252,25 @@ class ServerInnerCircleStore {
 
     logPrivacyAction("server_member_deleted", {
       memberId,
-      emailHash: emailHash.slice(0, 10) + '...',
+      emailHash: emailHash.slice(0, 10) + "...",
     });
 
     return true;
   }
 
-  async cleanupOldData(): Promise<{ deletedMembers: number; deletedKeys: number }> {
+  async cleanupOldData(): Promise<{
+    deletedMembers: number;
+    deletedKeys: number;
+  }> {
     const cutoff = Date.now() - this.DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
     let deletedMembers = 0;
     let deletedKeys = 0;
 
     // Clean up old keys
     for (const [keyHash, keyRecord] of this.keys.entries()) {
-      const lastUsed = keyRecord.lastUsedAt ? new Date(keyRecord.lastUsedAt).getTime() : new Date(keyRecord.createdAt).getTime();
+      const lastUsed = keyRecord.lastUsedAt
+        ? new Date(keyRecord.lastUsedAt).getTime()
+        : new Date(keyRecord.createdAt).getTime();
       if (lastUsed < cutoff) {
         this.keys.delete(keyHash);
         deletedKeys++;
@@ -270,7 +288,7 @@ class ServerInnerCircleStore {
             deletedKeys++;
           }
         }
-        
+
         this.emailToMember.delete(member.emailHash);
         this.members.delete(memberId);
         deletedMembers++;
@@ -292,13 +310,13 @@ class ServerInnerCircleStore {
   async getPrivacySafeStats(): Promise<PrivacySafeStats> {
     const totalMembers = this.members.size;
     const totalKeys = this.keys.size;
-    
+
     let totalUnlocks = 0;
     let activeMembers = 0;
 
     for (const keyRecord of this.keys.values()) {
       totalUnlocks += keyRecord.totalUnlocks;
-      if (keyRecord.status === 'active') {
+      if (keyRecord.status === "active") {
         // Check if key is not expired
         const created = new Date(keyRecord.createdAt).getTime();
         const ageMs = Date.now() - created;
@@ -337,7 +355,10 @@ class ServerInnerCircleStore {
     }
 
     // Sort by creation date, newest first
-    rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    rows.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
 
     return rows;
   }
@@ -354,15 +375,22 @@ export function getInnerCircleStore(): ServerInnerCircleStore {
 }
 
 // Export individual functions for API routes
-export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
+export async function createOrUpdateMemberAndIssueKey(
+  args: CreateOrUpdateMemberArgs
+): Promise<IssuedKey> {
   return getInnerCircleStore().createOrUpdateMemberAndIssueKey(args);
 }
 
-export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
+export async function verifyInnerCircleKey(
+  key: string
+): Promise<VerifyInnerCircleKeyResult> {
   return getInnerCircleStore().verifyInnerCircleKey(key);
 }
 
-export async function recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void> {
+export async function recordInnerCircleUnlock(
+  key: string,
+  ipAddress?: string
+): Promise<void> {
   return getInnerCircleStore().recordInnerCircleUnlock(key, ipAddress);
 }
 
@@ -374,7 +402,10 @@ export async function deleteMemberByEmail(email: string): Promise<boolean> {
   return getInnerCircleStore().deleteMemberByEmail(email);
 }
 
-export async function cleanupOldData(): Promise<{ deletedMembers: number; deletedKeys: number }> {
+export async function cleanupOldData(): Promise<{
+  deletedMembers: number;
+  deletedKeys: number;
+}> {
   return getInnerCircleStore().cleanupOldData();
 }
 
@@ -382,6 +413,8 @@ export async function getPrivacySafeStats(): Promise<PrivacySafeStats> {
   return getInnerCircleStore().getPrivacySafeStats();
 }
 
-export async function exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
+export async function exportInnerCircleAdminSummary(): Promise<
+  InnerCircleAdminExportRow[]
+> {
   return getInnerCircleStore().exportInnerCircleAdminSummary();
 }

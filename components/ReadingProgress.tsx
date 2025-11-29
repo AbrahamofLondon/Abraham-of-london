@@ -14,7 +14,10 @@ export default function ReadingProgress() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
-    <div aria-hidden className="fixed inset-x-0 top-0 z-[60] h-[3px] bg-transparent">
+    <div
+      aria-hidden
+      className="fixed inset-x-0 top-0 z-[60] h-[3px] bg-transparent"
+    >
       <div
         className="h-full bg-[var(--color-accent)] transition-[width] duration-150 ease-out"
         style={{ width: `${pct}%` }}

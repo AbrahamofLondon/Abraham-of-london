@@ -203,8 +203,17 @@ export default function TestimonialsSection({
   );
 
   const Check = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="text-softGold">
-      <path fill="currentColor" d="M9 16.2l-3.5-3.6-1.4 1.4L9 19 20 8l-1.4-1.4z" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="text-softGold"
+    >
+      <path
+        fill="currentColor"
+        d="M9 16.2l-3.5-3.6-1.4 1.4L9 19 20 8l-1.4-1.4z"
+      />
     </svg>
   );
 
@@ -228,7 +237,9 @@ export default function TestimonialsSection({
             {title}
           </motion.h2>
 
-          {subtitle && <p className={clsx("text-center mb-8", subText)}>{subtitle}</p>}
+          {subtitle && (
+            <p className={clsx("text-center mb-8", subText)}>{subtitle}</p>
+          )}
 
           {data.length === 0 ? (
             <p className={clsx("text-center", subText)}>No testimonials yet.</p>
@@ -237,12 +248,17 @@ export default function TestimonialsSection({
               {data.map((t, i) => (
                 <motion.figure
                   key={`${t.name}-${t.role ?? "role"}-${i}`}
-                  className={clsx("rounded-2xl shadow-md p-6 relative overflow-hidden", card)}
+                  className={clsx(
+                    "rounded-2xl shadow-md p-6 relative overflow-hidden",
+                    card
+                  )}
                   initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
                   whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={
-                    reduceMotion ? undefined : { duration: 0.45, delay: i * 0.06 }
+                    reduceMotion
+                      ? undefined
+                      : { duration: 0.45, delay: i * 0.06 }
                   }
                 >
                   {/* Header: avatar / logo / rating / verified */}
@@ -297,7 +313,12 @@ export default function TestimonialsSection({
                   </blockquote>
 
                   {/* Footer: metric chip + source */}
-                  <figcaption className={clsx("mt-4 text-xs flex items-center gap-3", subText)}>
+                  <figcaption
+                    className={clsx(
+                      "mt-4 text-xs flex items-center gap-3",
+                      subText
+                    )}
+                  >
                     {t.metric && (
                       <span className="rounded-full bg-softGold/15 text-deepCharcoal px-2 py-0.5">
                         {t.metric}
@@ -313,7 +334,11 @@ export default function TestimonialsSection({
                         Source
                       </a>
                     )}
-                    {t.date && <time dateTime={t.date}>{new Date(t.date).toLocaleDateString()}</time>}
+                    {t.date && (
+                      <time dateTime={t.date}>
+                        {new Date(t.date).toLocaleDateString()}
+                      </time>
+                    )}
                   </figcaption>
 
                   {t.logo && (

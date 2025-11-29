@@ -2,7 +2,16 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link"; // ADDED: Import Link
-import { Moon, SunMedium, Mail, Phone, MapPin, Clock, Users, Target } from "lucide-react";
+import {
+  Moon,
+  SunMedium,
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Users,
+  Target,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import { getPageTitle, siteConfig } from "@/lib/siteConfig";
 import PolicyFooter from "@/components/PolicyFooter";
@@ -21,7 +30,9 @@ const ContactPage = (): JSX.Element => {
         setIsDark(stored === "dark");
         return;
       }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia?.(
+        "(prefers-color-scheme: dark)"
+      ).matches;
       setIsDark(prefersDark);
     } catch {
       // ignore localStorage errors
@@ -86,7 +97,9 @@ const ContactPage = (): JSX.Element => {
           {/* Header with theme toggle */}
           <div className="flex items-start justify-between gap-4 mb-12">
             <div>
-              <p className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}>
+              <p
+                className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}
+              >
                 Strategic Partnership
               </p>
             </div>
@@ -118,15 +131,22 @@ const ContactPage = (): JSX.Element => {
 
           {/* Hero Section */}
           <header className="text-center mb-16">
-            <p className={`text-[0.7rem] font-semibold uppercase tracking-[0.24em] ${accentTextClass}`}>
+            <p
+              className={`text-[0.7rem] font-semibold uppercase tracking-[0.24em] ${accentTextClass}`}
+            >
               Begin the Dialogue
             </p>
-            <h1 className={`mt-4 font-serif text-4xl font-bold md:text-5xl ${primaryTextClass}`}>
+            <h1
+              className={`mt-4 font-serif text-4xl font-bold md:text-5xl ${primaryTextClass}`}
+            >
               Contact Abraham of London
             </h1>
-            <p className={`mt-6 max-w-2xl mx-auto text-lg leading-relaxed ${secondaryTextClass}`}>
-              For strategic advisory, fatherhood advocacy, legacy building, and venture leadership.
-              Enquiries are prioritised where there is clear alignment of vision, values, and impact.
+            <p
+              className={`mt-6 max-w-2xl mx-auto text-lg leading-relaxed ${secondaryTextClass}`}
+            >
+              For strategic advisory, fatherhood advocacy, legacy building, and
+              venture leadership. Enquiries are prioritised where there is clear
+              alignment of vision, values, and impact.
             </p>
           </header>
 
@@ -134,17 +154,29 @@ const ContactPage = (): JSX.Element => {
             {/* Contact Information Sidebar */}
             <div className="lg:col-span-1">
               <div className={`rounded-2xl border p-8 h-full ${cardClass}`}>
-                <h2 className={`font-serif text-2xl font-semibold mb-6 ${primaryTextClass}`}>
+                <h2
+                  className={`font-serif text-2xl font-semibold mb-6 ${primaryTextClass}`}
+                >
                   Direct Contact
                 </h2>
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                      <Mail className={isDark ? "h-5 w-5 text-softGold" : "h-5 w-5 text-forest"} />
+                    <div
+                      className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                    >
+                      <Mail
+                        className={
+                          isDark
+                            ? "h-5 w-5 text-softGold"
+                            : "h-5 w-5 text-forest"
+                        }
+                      />
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Email</h3>
+                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>
+                        Email
+                      </h3>
                       <a
                         href={`mailto:${siteConfig.email}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
@@ -155,11 +187,21 @@ const ContactPage = (): JSX.Element => {
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                      <Phone className={isDark ? "h-5 w-5 text-softGold" : "h-5 w-5 text-forest"} />
+                    <div
+                      className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                    >
+                      <Phone
+                        className={
+                          isDark
+                            ? "h-5 w-5 text-softGold"
+                            : "h-5 w-5 text-forest"
+                        }
+                      />
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Phone</h3>
+                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>
+                        Phone
+                      </h3>
                       <a
                         href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
@@ -170,32 +212,58 @@ const ContactPage = (): JSX.Element => {
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                      <MapPin className={isDark ? "h-5 w-5 text-softGold" : "h-5 w-5 text-forest"} />
+                    <div
+                      className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                    >
+                      <MapPin
+                        className={
+                          isDark
+                            ? "h-5 w-5 text-softGold"
+                            : "h-5 w-5 text-forest"
+                        }
+                      />
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Location</h3>
-                      <p className={`text-sm ${secondaryTextClass}`}>London, United Kingdom</p>
+                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>
+                        Location
+                      </h3>
+                      <p className={`text-sm ${secondaryTextClass}`}>
+                        London, United Kingdom
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}>
-                      <Clock className={isDark ? "h-5 w-5 text-softGold" : "h-5 w-5 text-forest"} />
+                    <div
+                      className={`rounded-lg p-3 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                    >
+                      <Clock
+                        className={
+                          isDark
+                            ? "h-5 w-5 text-softGold"
+                            : "h-5 w-5 text-forest"
+                        }
+                      />
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Response Time</h3>
+                      <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>
+                        Response Time
+                      </h3>
                       <p className={`text-sm ${secondaryTextClass}`}>
-                        We aim to respond to qualified enquiries within 2–3 business days. Depending on
-                        volume and strategic fit, we may not be able to reply to every message
-                        individually.
+                        We aim to respond to qualified enquiries within 2–3
+                        business days. Depending on volume and strategic fit, we
+                        may not be able to reply to every message individually.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className={`mt-8 pt-6 border-t ${isDark ? "border-white/10" : "border-lightGrey"}`}>
-                  <h3 className={`font-semibold mb-3 ${primaryTextClass}`}>Priority Consideration</h3>
+                <div
+                  className={`mt-8 pt-6 border-t ${isDark ? "border-white/10" : "border-lightGrey"}`}
+                >
+                  <h3 className={`font-semibold mb-3 ${primaryTextClass}`}>
+                    Priority Consideration
+                  </h3>
                   <ul className={`text-sm space-y-2 ${secondaryTextClass}`}>
                     <li className="flex items-center gap-2">
                       <Target className="h-3 w-3 text-softGold" />
@@ -214,15 +282,19 @@ const ContactPage = (): JSX.Element => {
 
                 <div
                   className={`mt-6 pt-4 border-t text-xs ${
-                    isDark ? "border-white/10 text-gray-400" : "border-lightGrey text-slate-600"
+                    isDark
+                      ? "border-white/10 text-gray-400"
+                      : "border-lightGrey text-slate-600"
                   }`}
                 >
                   <p className="mb-1">
-                    Submitting an enquiry does not create a client, advisory, or fiduciary relationship.
+                    Submitting an enquiry does not create a client, advisory, or
+                    fiduciary relationship.
                   </p>
                   <p>
-                    Please avoid including confidential, highly sensitive, or case-specific legal,
-                    financial, or medical details at this stage.
+                    Please avoid including confidential, highly sensitive, or
+                    case-specific legal, financial, or medical details at this
+                    stage.
                   </p>
                 </div>
               </div>
@@ -232,13 +304,16 @@ const ContactPage = (): JSX.Element => {
             <div className="lg:col-span-2">
               <div className={`rounded-2xl border p-8 ${cardClass}`}>
                 <div className="mb-8">
-                  <h2 className={`font-serif text-2xl font-semibold mb-3 ${primaryTextClass}`}>
+                  <h2
+                    className={`font-serif text-2xl font-semibold mb-3 ${primaryTextClass}`}
+                  >
                     Strategic Enquiry Form
                   </h2>
                   <p className={`text-sm ${secondaryTextClass}`}>
-                    For speaking invitations, strategic advisory, media enquiries, or collaboration
-                    opportunities. Responses are prioritised based on clarity of brief, timing, and
-                    strategic fit.
+                    For speaking invitations, strategic advisory, media
+                    enquiries, or collaboration opportunities. Responses are
+                    prioritised based on clarity of brief, timing, and strategic
+                    fit.
                   </p>
                 </div>
 
@@ -312,12 +387,22 @@ const ContactPage = (): JSX.Element => {
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ring-0 transition focus:ring-2 ${inputClass}`}
                     >
                       <option value="">Select an option</option>
-                      <option value="strategic-advisory">Strategic Advisory</option>
-                      <option value="speaking-engagement">Speaking Engagement</option>
+                      <option value="strategic-advisory">
+                        Strategic Advisory
+                      </option>
+                      <option value="speaking-engagement">
+                        Speaking Engagement
+                      </option>
                       <option value="media-interview">Media Interview</option>
-                      <option value="venture-partnership">Venture Partnership</option>
-                      <option value="fatherhood-advocacy">Fatherhood Advocacy</option>
-                      <option value="legacy-consulting">Legacy Consulting</option>
+                      <option value="venture-partnership">
+                        Venture Partnership
+                      </option>
+                      <option value="fatherhood-advocacy">
+                        Fatherhood Advocacy
+                      </option>
+                      <option value="legacy-consulting">
+                        Legacy Consulting
+                      </option>
                       <option value="other">Other</option>
                     </select>
                   </div>
@@ -338,8 +423,8 @@ const ContactPage = (): JSX.Element => {
                       placeholder="Provide context, objectives, timelines, stakeholders, and decision-makers involved."
                     />
                     <p className={`mt-2 text-xs ${secondaryTextClass}`}>
-                      Precision helps us assess strategic fit and determine whether we are the right
-                      counterpart for your enquiry.
+                      Precision helps us assess strategic fit and determine
+                      whether we are the right counterpart for your enquiry.
                     </p>
                   </div>
 
@@ -364,16 +449,15 @@ const ContactPage = (): JSX.Element => {
                   </div>
 
                   <p className={`mt-4 text-xs ${secondaryTextClass}`}>
-                    By submitting this form, you acknowledge that you have read our{" "}
-                    {/* FIXED: Replace <a> with <Link> */}
+                    By submitting this form, you acknowledge that you have read
+                    our {/* FIXED: Replace <a> with <Link> */}
                     <Link
                       href="/privacy-policy"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
                     >
                       Privacy Policy
                     </Link>{" "}
-                    and{" "}
-                    {/* FIXED: Replace <a> with <Link> */}
+                    and {/* FIXED: Replace <a> with <Link> */}
                     <Link
                       href="/terms-of-service"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
@@ -387,14 +471,17 @@ const ContactPage = (): JSX.Element => {
 
               {/* Additional Context Section */}
               <div className={`mt-8 rounded-2xl border p-6 ${cardClass}`}>
-                <h3 className={`font-serif text-lg font-semibold mb-3 ${primaryTextClass}`}>
+                <h3
+                  className={`font-serif text-lg font-semibold mb-3 ${primaryTextClass}`}
+                >
                   About Abraham of London
                 </h3>
                 <p className={`text-sm leading-relaxed ${secondaryTextClass}`}>
-                  Abraham of London curates a family of ventures focused on legacy building, fatherhood
-                  advocacy, and principled leadership. Through platforms such as Alomarada, InnovateHub,
-                  and Endureluxe, we bring together strategic advisory, founder support, and community
-                  initiatives aimed at durable impact.
+                  Abraham of London curates a family of ventures focused on
+                  legacy building, fatherhood advocacy, and principled
+                  leadership. Through platforms such as Alomarada, InnovateHub,
+                  and Endureluxe, we bring together strategic advisory, founder
+                  support, and community initiatives aimed at durable impact.
                 </p>
               </div>
             </div>

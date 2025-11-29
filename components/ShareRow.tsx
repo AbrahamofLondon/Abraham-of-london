@@ -31,13 +31,20 @@ export function ShareRow({
           Share this:
         </span>
       )}
-      
+
       <ShareButtons
         url={url}
         title={title}
         variant={variant}
         size="sm"
-        platforms={["twitter", "linkedin", "facebook", "whatsapp", "email", "copy"]}
+        platforms={[
+          "twitter",
+          "linkedin",
+          "facebook",
+          "whatsapp",
+          "email",
+          "copy",
+        ]}
         className="flex-1 justify-end"
       />
     </div>
@@ -45,7 +52,11 @@ export function ShareRow({
 }
 
 // Alternative minimal version for tight spaces
-export function MinimalShareRow({ url, title, className = "" }: ShareRowProps): JSX.Element {
+export function MinimalShareRow({
+  url,
+  title,
+  className = "",
+}: ShareRowProps): JSX.Element {
   return (
     <div className={["flex items-center gap-3", className].join(" ")}>
       <span className="text-xs text-gold/60 font-medium">Share:</span>

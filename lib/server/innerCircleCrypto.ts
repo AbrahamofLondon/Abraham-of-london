@@ -54,7 +54,7 @@ export function isValidKeyFormat(key: string): boolean {
  * Normalize key by removing hyphens and converting to uppercase
  */
 export function normalizeKey(key: string): string {
-  return key.replace(/-/g, '').toUpperCase();
+  return key.replace(/-/g, "").toUpperCase();
 }
 
 /**
@@ -82,13 +82,13 @@ export function generateVerifiedDisplayKey(
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const key = generateDisplayKey();
     const keyHash = hashKey(key);
-    
+
     if (!existingHashes.has(keyHash)) {
       return key;
     }
   }
-  
-  throw new Error('Failed to generate unique key after maximum attempts');
+
+  throw new Error("Failed to generate unique key after maximum attempts");
 }
 
 /**
@@ -97,8 +97,8 @@ export function generateVerifiedDisplayKey(
 export function constantTimeCompare(a: string, b: string): boolean {
   try {
     return crypto.timingSafeEqual(
-      Buffer.from(a, 'utf8'),
-      Buffer.from(b, 'utf8')
+      Buffer.from(a, "utf8"),
+      Buffer.from(b, "utf8")
     );
   } catch {
     return false;

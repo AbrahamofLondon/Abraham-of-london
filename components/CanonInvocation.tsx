@@ -12,7 +12,7 @@ export default function CanonInvocation({ className }: CanonInvocationProps) {
         "relative overflow-hidden rounded-3xl border border-softGold/25 bg-black/60 px-6 py-10 sm:px-10 sm:py-14",
         "shadow-[0_0_40px_rgba(0,0,0,0.65)]",
         "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top,_rgba(245,216,130,0.18),_transparent_55%)]",
-        className,
+        className
       )}
     >
       <div className="relative space-y-6">
@@ -29,9 +29,7 @@ export default function CanonInvocation({ className }: CanonInvocationProps) {
             Before kingdoms rose or crumbled into dust —
           </p>
 
-          <p className="font-semibold text-softGold">
-            Purpose was written.
-          </p>
+          <p className="font-semibold text-softGold">Purpose was written.</p>
 
           <p>
             It waited for builders.

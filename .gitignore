@@ -59,11 +59,11 @@ fix-parsing-errors.mjs.txt
 github-recovery-codes.txt
 
 # Build artifacts
-.next
-.contentlayer
+.next/
+.contentlayer/
 node_modules/
-.npm
-.pnpm-store
+.npm/
+.pnpm-store/
 .next-env.d.ts
 tsconfig.tsbuildinfo
 .pdfcache/

@@ -1,8 +1,8 @@
 // context/WebSocketContext.tsx
-'use client';
+"use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { WebSocketService } from '@/lib/websocket/WebSocketService';
+import React, { createContext, useContext, ReactNode } from "react";
+import { WebSocketService } from "@/lib/websocket/WebSocketService";
 
 const WebSocketContext = createContext<WebSocketService | null>(null);
 
@@ -12,14 +12,14 @@ interface WebSocketProviderProps {
   options?: { debug?: boolean };
 }
 
-export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ 
-  url, 
-  children, 
-  options 
+export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
+  url,
+  children,
+  options,
 }) => {
   // Create WebSocket instance only on client-side
   const wsInstance = React.useMemo(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return new WebSocketService(url, { autoConnect: true, ...options });
   }, [url, options]);
 
@@ -39,7 +39,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 export const useWebSocketContext = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
-    throw new Error('useWebSocketContext must be used within WebSocketProvider');
+    throw new Error(
+      "useWebSocketContext must be used within WebSocketProvider"
+    );
   }
   return context;
 };

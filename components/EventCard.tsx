@@ -20,16 +20,8 @@ type EventCardProps = {
 const EVENT_FALLBACK_COVER = "/assets/images/abraham-of-london-banner.webp";
 
 export default function EventCard(props: EventCardProps): JSX.Element {
-  const {
-    slug,
-    title,
-    date,
-    time,
-    location,
-    description,
-    status,
-    tags,
-  } = props;
+  const { slug, title, date, time, location, description, status, tags } =
+    props;
 
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [coverIndex, setCoverIndex] = React.useState(0);
@@ -80,7 +72,7 @@ export default function EventCard(props: EventCardProps): JSX.Element {
             onError={() => {
               setImageLoaded(false);
               setCoverIndex((prev) =>
-                prev + 1 < coverCandidates.length ? prev + 1 : prev,
+                prev + 1 < coverCandidates.length ? prev + 1 : prev
               );
             }}
           />

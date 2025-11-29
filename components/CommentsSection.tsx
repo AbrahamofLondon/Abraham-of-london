@@ -31,9 +31,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
     );
   }
 
-  const pageId = slug || (typeof window !== "undefined"
-    ? window.location.pathname
-    : "");
+  const pageId =
+    slug || (typeof window !== "undefined" ? window.location.pathname : "");
 
   return (
     <section className="mt-16">
@@ -46,7 +45,9 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
         strategy="lazyOnload"
         onLoad={() => {
           try {
-            const anyWindow = window as unknown as { HYVOR_TALK?: { init: (config: unknown) => void } };
+            const anyWindow = window as unknown as {
+              HYVOR_TALK?: { init: (config: unknown) => void };
+            };
             if (!anyWindow.HYVOR_TALK) return;
             anyWindow.HYVOR_TALK.init({
               websiteId,

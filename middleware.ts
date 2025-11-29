@@ -35,14 +35,14 @@ const FORCE_RESTRICTED_CANON = new Set<string>([
 function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set(
     "Strict-Transport-Security",
-    "max-age=63072000; includeSubDomains; preload",
+    "max-age=63072000; includeSubDomains; preload"
   );
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()"
   );
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   res.headers.set("Cross-Origin-Embedder-Policy", "require-corp");

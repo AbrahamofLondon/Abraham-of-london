@@ -42,10 +42,7 @@ const H3 = ({ children, ...rest }: MdxComponentProps) => (
 );
 
 const H4 = ({ children, ...rest }: MdxComponentProps) => (
-  <h4
-    className="mt-6 mb-3 text-base font-semibold text-gray-100"
-    {...rest}
-  >
+  <h4 className="mt-6 mb-3 text-base font-semibold text-gray-100" {...rest}>
     {children}
   </h4>
 );
@@ -182,11 +179,7 @@ const Grid = ({ children, className = "", ...rest }: MdxComponentProps) => (
 /**
  * PullLine – used for those single-line "punch" quotes in downloads/posts.
  */
-const PullLine = ({
-  children,
-  className = "",
-  ...rest
-}: MdxComponentProps) => (
+const PullLine = ({ children, className = "", ...rest }: MdxComponentProps) => (
   <p
     className={`my-8 border-y border-softGold/50 py-4 text-center font-serif text-lg sm:text-xl italic text-softGold ${className}`.trim()}
     {...rest}
@@ -219,8 +212,7 @@ const JsonLdBlock = ({ children, ...rest }: MdxComponentProps) => {
   const data = (rest as { data?: unknown }).data ?? children;
   if (!data) return null;
 
-  const json =
-    typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  const json = typeof data === "string" ? data : JSON.stringify(data, null, 2);
 
   return (
     <script
@@ -251,8 +243,8 @@ const CalloutBlock = ({
     effectiveTone === "warning" || effectiveTone === "danger"
       ? "border-amber-400/80 bg-amber-500/10 text-amber-100"
       : effectiveTone === "key"
-      ? "border-softGold/80 bg-softGold/15 text-gray-100"
-      : "border-softGold/50 bg-softGold/10 text-gray-100";
+        ? "border-softGold/80 bg-softGold/15 text-gray-100"
+        : "border-softGold/50 bg-softGold/10 text-gray-100";
 
   return (
     <div
@@ -290,8 +282,8 @@ const NoteBlock = ({
     tone === "warning"
       ? "border-amber-400/70 bg-amber-500/10 text-amber-50"
       : tone === "key"
-      ? "border-softGold/60 bg-softGold/10 text-gray-100"
-      : "border-slate-700 bg-slate-900/80 text-gray-200";
+        ? "border-softGold/60 bg-softGold/10 text-gray-100"
+        : "border-slate-700 bg-slate-900/80 text-gray-200";
 
   return (
     <div
@@ -329,8 +321,7 @@ const CaptionBlock = ({
 }: MdxComponentProps) => (
   <p
     className={(
-      "mt-2 text-center text-[0.8rem] italic text-gray-500 " +
-      className
+      "mt-2 text-center text-[0.8rem] italic text-gray-500 " + className
     ).trim()}
     {...rest}
   >
@@ -352,8 +343,8 @@ const BadgeBlock = ({
     tone === "primary"
       ? "bg-forest text-slate-50 border-forest/80"
       : tone === "accent"
-      ? "bg-softGold/90 text-deepCharcoal border-softGold"
-      : "bg-slate-800 text-gray-100 border-slate-600";
+        ? "bg-softGold/90 text-deepCharcoal border-softGold"
+        : "bg-slate-800 text-gray-100 border-slate-600";
 
   return (
     <span
@@ -376,9 +367,7 @@ const BadgeRowBlock = ({
   ...rest
 }: MdxComponentProps) => (
   <div
-    className={(
-      "mt-4 flex flex-wrap items-center gap-2 " + className
-    ).trim()}
+    className={("mt-4 flex flex-wrap items-center gap-2 " + className).trim()}
     {...rest}
   >
     {children}
@@ -434,8 +423,7 @@ interface ShareRowProps extends MdxComponentProps {
 const ShareRow = ({ children, text, hashtags, ...rest }: ShareRowProps) => {
   const hasChildren = React.Children.count(children) > 0;
   const baseText =
-    text ||
-    (typeof children === "string" ? (children as string) : undefined);
+    text || (typeof children === "string" ? (children as string) : undefined);
 
   const tags =
     typeof hashtags === "string"
@@ -502,9 +490,7 @@ const DownloadCardBlock = ({
           {displayTitle}
         </h4>
         {displayDescription && (
-          <p className="mt-2 text-sm text-gray-200">
-            {displayDescription}
-          </p>
+          <p className="mt-2 text-sm text-gray-200">{displayDescription}</p>
         )}
       </div>
 

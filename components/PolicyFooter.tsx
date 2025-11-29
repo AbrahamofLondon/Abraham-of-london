@@ -7,13 +7,14 @@ interface PolicyFooterProps {
   isDark?: boolean;
 }
 
-export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.Element {
+export default function PolicyFooter({
+  isDark = true,
+}: PolicyFooterProps): JSX.Element {
   const border = isDark ? "border-white/10" : "border-gray-300";
   const text = isDark ? "text-gold/70" : "text-slate-700";
-  const link =
-    isDark
-      ? "text-gold hover:text-amber-200"
-      : "text-forest hover:text-emerald-700";
+  const link = isDark
+    ? "text-gold hover:text-amber-200"
+    : "text-forest hover:text-emerald-700";
   const bg = isDark ? "bg-charcoal/60" : "bg-white";
   const email = siteConfig.email ?? "info@abrahamoflondon.org";
 
@@ -36,10 +37,7 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): JSX.
 
         <span className={text}>•</span>
 
-        <Link
-          href="/terms"
-          className={`${link} underline underline-offset-2`}
-        >
+        <Link href="/terms" className={`${link} underline underline-offset-2`}>
           Terms of Service
         </Link>
 

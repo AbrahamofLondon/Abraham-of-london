@@ -18,13 +18,13 @@ export default function CtaArt({ className }: Props) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [hasError, setHasError] = React.useState(false);
   const src = candidates[currentIndex];
-  
-  const fallbackBackground = 
+
+  const fallbackBackground =
     "linear-gradient(135deg, rgba(253,224,71,0.9), rgba(234,179,8,0.9))";
 
   const handleError = React.useCallback(() => {
     if (currentIndex + 1 < candidates.length) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex((prev) => prev + 1);
     } else {
       setHasError(true);
     }
@@ -41,9 +41,9 @@ export default function CtaArt({ className }: Props) {
     >
       {/* Graceful fallback if image fails */}
       {hasError || currentIndex >= candidates.length ? (
-        <div 
-          className="absolute inset-0" 
-          style={{ background: fallbackBackground }} 
+        <div
+          className="absolute inset-0"
+          style={{ background: fallbackBackground }}
         />
       ) : (
         <Image

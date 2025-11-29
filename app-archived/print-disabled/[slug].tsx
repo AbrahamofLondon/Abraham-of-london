@@ -1,5 +1,4 @@
-// app/print/[slug].tsx
-import { notFound } from "next/navigation";
+// app-archived/print-disabled/[slug].tsx
 import type { UnifiedContent } from "@/lib/server/unified-content";
 import { getUnifiedContentBySlug } from "@/lib/server/unified-content";
 
@@ -11,7 +10,6 @@ function formatDate(value: UnifiedContent["date"]): string | null {
   if (!value) return null;
 
   if (value instanceof Date) {
-    // ISO date → YYYY-MM-DD
     return value.toISOString().slice(0, 10);
   }
 
@@ -23,7 +21,15 @@ export default async function PrintPage({ params }: PrintPageProps) {
   const item = await getUnifiedContentBySlug(params.slug);
 
   if (!item || !item.published) {
-    notFound();
+    // Fallback 404 rendering
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">404 - Page Not Found</h1>
+          <p className="mt-2">The requested content could not be found.</p>
+        </div>
+      </div>
+    );
   }
 
   const dateLabel = formatDate(item.date);
@@ -35,18 +41,13 @@ export default async function PrintPage({ params }: PrintPageProps) {
           {item.title ?? params.slug}
         </h1>
 
-        {dateLabel && (
-          <p className="mt-1 text-sm text-gray-500">
-            {dateLabel}
-          </p>
-        )}
+        {dateLabel && <p className="mt-1 text-sm text-gray-500">{dateLabel}</p>}
       </header>
 
       {item.description && (
         <p className="mb-6 text-gray-700">{item.description}</p>
       )}
 
-      {/* Placeholder – real MDX/print layouts can replace this later */}
       <p className="text-sm text-gray-500">
         Print view placeholder for <code>{item.slug}</code>.
       </p>
@@ -54,7 +55,6 @@ export default async function PrintPage({ params }: PrintPageProps) {
   );
 }
 
-// Optional: keep this to avoid accidentally prebuilding all print pages
 export async function generateStaticParams() {
   return [];
 }

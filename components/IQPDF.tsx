@@ -1,7 +1,13 @@
 // components/IQPDF.tsx
 "use client";
 
-import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import clsx from "clsx";
 
 /**
@@ -75,7 +81,13 @@ function usePDFState(initialZoom: number) {
   }, []);
 
   const setStatusSuccess = useCallback((totalPages = 0) => {
-    setState((s) => ({ ...s, status: "success", totalPages, progress: 100, error: null }));
+    setState((s) => ({
+      ...s,
+      status: "success",
+      totalPages,
+      progress: 100,
+      error: null,
+    }));
   }, []);
 
   const setStatusError = useCallback((error: Error) => {
@@ -90,7 +102,10 @@ function usePDFState(initialZoom: number) {
   const setPage = useCallback((page: number) => {
     setState((s) => ({
       ...s,
-      currentPage: Math.max(1, Math.min(s.totalPages || 1, Math.floor(page || 1))),
+      currentPage: Math.max(
+        1,
+        Math.min(s.totalPages || 1, Math.floor(page || 1))
+      ),
     }));
   }, []);
 
@@ -160,7 +175,8 @@ function useResolvedPdfUrl(src: string, onError?: (e: Error) => void) {
       }
 
       // If site-relative, prefix with origin (client-only)
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
       const base = process.env.NEXT_PUBLIC_SITE_URL || origin || "";
       const clean = src.startsWith("/") ? src : `/${src}`;
       setPdfUrl(`${base}${clean}`);
@@ -219,7 +235,7 @@ const PDFControls = React.memo(function PDFControls({
       const page = parseInt(e.target.value, 10);
       if (!Number.isNaN(page)) onPageChange(page);
     },
-    [onPageChange],
+    [onPageChange]
   );
 
   const handlePageInputBlur = useCallback(() => {
@@ -251,12 +267,22 @@ const PDFControls = React.memo(function PDFControls({
             className={clsx(
               "rounded border border-gray-300 bg-white p-2",
               "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
-              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
             aria-label="Previous page"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -281,12 +307,22 @@ const PDFControls = React.memo(function PDFControls({
             className={clsx(
               "rounded border border-gray-300 bg-white p-2",
               "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
-              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
             aria-label="Next page"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -301,12 +337,22 @@ const PDFControls = React.memo(function PDFControls({
             className={clsx(
               "rounded border border-gray-300 bg-white p-2",
               "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
-              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
             aria-label="Zoom out"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 12H4"
+              />
             </svg>
           </button>
 
@@ -329,12 +375,22 @@ const PDFControls = React.memo(function PDFControls({
             className={clsx(
               "rounded border border-gray-300 bg-white p-2",
               "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50",
-              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
             aria-label="Zoom in"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
           </button>
         </div>
@@ -348,7 +404,7 @@ const PDFControls = React.memo(function PDFControls({
             download={title ? `${title}.pdf` : "document.pdf"}
             className={clsx(
               "rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium",
-              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
           >
             Download
@@ -360,7 +416,7 @@ const PDFControls = React.memo(function PDFControls({
             onClick={handlePrint}
             className={clsx(
               "rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium",
-              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2",
+              "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             )}
           >
             Print
@@ -373,7 +429,13 @@ const PDFControls = React.memo(function PDFControls({
 
 PDFControls.displayName = "PDFControls";
 
-function PDFLoadingState({ progress, loader }: { progress: number; loader?: React.ReactNode }) {
+function PDFLoadingState({
+  progress,
+  loader,
+}: {
+  progress: number;
+  loader?: React.ReactNode;
+}) {
   if (loader) return <>{loader}</>;
   return (
     <div
@@ -413,9 +475,12 @@ function PDFErrorState({
       <div className="mb-4 text-4xl text-red-500" aria-hidden="true">
         📄❌
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-red-800">Failed to Load Document</h3>
+      <h3 className="mb-2 text-lg font-semibold text-red-800">
+        Failed to Load Document
+      </h3>
       <p className="mb-4 max-w-md text-red-600">
-        {error.message || "Unable to load the PDF document. Please check the file URL and try again."}
+        {error.message ||
+          "Unable to load the PDF document. Please check the file URL and try again."}
       </p>
       {onRetry && (
         <button
@@ -504,7 +569,10 @@ const IQPDF = React.memo(function IQPDF({
     onZoomChange?.(state.zoom);
   }, [state.zoom, onZoomChange]);
 
-  const containerStyle = useMemo<React.CSSProperties>(() => ({ width, height }), [width, height]);
+  const containerStyle = useMemo<React.CSSProperties>(
+    () => ({ width, height }),
+    [width, height]
+  );
 
   // Loading state
   if (state.status === "loading") {
@@ -531,7 +599,10 @@ const IQPDF = React.memo(function IQPDF({
   // Main viewer
   return (
     <div
-      className={clsx("overflow-hidden rounded-lg border border-gray-300 bg-white", className)}
+      className={clsx(
+        "overflow-hidden rounded-lg border border-gray-300 bg-white",
+        className
+      )}
       style={containerStyle}
     >
       <PDFControls
@@ -571,7 +642,10 @@ const IQPDF = React.memo(function IQPDF({
             aria-label={`PDF document: ${title}`}
           />
         ) : (
-          <PDFErrorState error={new Error("PDF URL not available")} errorComponent={errorComponent} />
+          <PDFErrorState
+            error={new Error("PDF URL not available")}
+            errorComponent={errorComponent}
+          />
         )}
       </div>
     </div>
@@ -594,7 +668,9 @@ export const MinimalPDF = React.memo(function MinimalPDF(props: IQPDFProps) {
   );
 });
 
-export const PrintablePDF = React.memo(function PrintablePDF(props: IQPDFProps) {
+export const PrintablePDF = React.memo(function PrintablePDF(
+  props: IQPDFProps
+) {
   return (
     <IQPDF
       {...props}

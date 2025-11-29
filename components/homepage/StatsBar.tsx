@@ -153,7 +153,7 @@ function StatsBarComponent({ stats, health, className = "" }: StatsBarProps) {
         icon: <ResourcesIcon />,
       },
     ],
-    [stats],
+    [stats]
   );
 
   const formatNumber = React.useCallback((num: number): string => {
@@ -235,7 +235,7 @@ function StatsBarComponent({ stats, health, className = "" }: StatsBarProps) {
                     {formatNumber(
                       typeof stat.value === "number"
                         ? stat.value
-                        : parseInt(stat.value as string),
+                        : parseInt(stat.value as string)
                     )}
                     {stat.suffix}
                   </span>

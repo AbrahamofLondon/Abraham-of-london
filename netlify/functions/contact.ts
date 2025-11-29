@@ -40,7 +40,9 @@ function isJsonContentType(ct?: string | null) {
   return !!ct && /application\/json/i.test(ct);
 }
 
-function safeParseJson<T = unknown>(raw: string): { ok: true; data: T } | { ok: false; error: string } {
+function safeParseJson<T = unknown>(
+  raw: string
+): { ok: true; data: T } | { ok: false; error: string } {
   try {
     return { ok: true, data: JSON.parse(raw) as T };
   } catch {
@@ -48,7 +50,12 @@ function safeParseJson<T = unknown>(raw: string): { ok: true; data: T } | { ok: 
   }
 }
 
-function fail(statusCode: number, headers: Record<string, string>, error: string, code?: string) {
+function fail(
+  statusCode: number,
+  headers: Record<string, string>,
+  error: string,
+  code?: string
+) {
   return {
     statusCode,
     headers,
@@ -79,9 +86,11 @@ function validatePayload(p: ContactPayload) {
   const message = (p.message ?? "").toString().trim();
 
   if (!name) errors.push("name is required");
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("valid email is required");
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    errors.push("valid email is required");
   if (!subject) errors.push("subject is required");
-  if (!message || message.length < 10) errors.push("message must be at least 10 characters");
+  if (!message || message.length < 10)
+    errors.push("message must be at least 10 characters");
 
   // simple spam guard
   if (p.honeypot && String(p.honeypot).trim() !== "") {
@@ -96,7 +105,8 @@ function validatePayload(p: ContactPayload) {
 }
 
 async function verifyRecaptcha(token: string, remoteIp?: string) {
-  if (!RECAPTCHA_SECRET) return { ok: true, provider: "recaptcha", skipped: true };
+  if (!RECAPTCHA_SECRET)
+    return { ok: true, provider: "recaptcha", skipped: true };
   try {
     const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
@@ -107,13 +117,25 @@ async function verifyRecaptcha(token: string, remoteIp?: string) {
         ...(remoteIp ? { remoteip: remoteIp } : {}),
       }),
     });
-    const json = (await res.json()) as { success?: boolean; score?: number; "error-codes"?: string[] };
+    const json = (await res.json()) as {
+      success?: boolean;
+      score?: number;
+      "error-codes"?: string[];
+    };
     if (!json.success) {
-      return { ok: false, provider: "recaptcha", reason: (json["error-codes"] || ["verification_failed"]).join(",") };
+      return {
+        ok: false,
+        provider: "recaptcha",
+        reason: (json["error-codes"] || ["verification_failed"]).join(","),
+      };
     }
     // Optional score gating for reCAPTCHA v3
     if (typeof json.score === "number" && json.score < 0.4) {
-      return { ok: false, provider: "recaptcha", reason: `low_score:${json.score}` };
+      return {
+        ok: false,
+        provider: "recaptcha",
+        reason: `low_score:${json.score}`,
+      };
     }
     return { ok: true, provider: "recaptcha" };
   } catch (e) {
@@ -122,19 +144,30 @@ async function verifyRecaptcha(token: string, remoteIp?: string) {
 }
 
 async function verifyTurnstile(token: string, remoteIp?: string) {
-  if (!TURNSTILE_SECRET) return { ok: true, provider: "turnstile", skipped: true };
+  if (!TURNSTILE_SECRET)
+    return { ok: true, provider: "turnstile", skipped: true };
   try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      body: new URLSearchParams({
-        secret: TURNSTILE_SECRET,
-        response: token,
-        ...(remoteIp ? { remoteip: remoteIp } : {}),
-      }),
-    });
-    const json = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        body: new URLSearchParams({
+          secret: TURNSTILE_SECRET,
+          response: token,
+          ...(remoteIp ? { remoteip: remoteIp } : {}),
+        }),
+      }
+    );
+    const json = (await res.json()) as {
+      success?: boolean;
+      "error-codes"?: string[];
+    };
     if (!json.success) {
-      return { ok: false, provider: "turnstile", reason: (json["error-codes"] || ["verification_failed"]).join(",") };
+      return {
+        ok: false,
+        provider: "turnstile",
+        reason: (json["error-codes"] || ["verification_failed"]).join(","),
+      };
     }
     return { ok: true, provider: "turnstile" };
   } catch {
@@ -160,9 +193,15 @@ export const handler: Handler = async (event) => {
   }
 
   // Content-Type guard
-  const contentType = event.headers["content-type"] || event.headers["Content-Type"];
+  const contentType =
+    event.headers["content-type"] || event.headers["Content-Type"];
   if (!isJsonContentType(contentType)) {
-    return fail(415, headers, "Unsupported Media Type (expect application/json)", "ERR_CONTENT_TYPE");
+    return fail(
+      415,
+      headers,
+      "Unsupported Media Type (expect application/json)",
+      "ERR_CONTENT_TYPE"
+    );
   }
 
   // Body guards
@@ -184,23 +223,40 @@ export const handler: Handler = async (event) => {
   // Basic validation
   const { valid, errors, data } = validatePayload(payload);
   if (!valid) {
-    return fail(422, headers, `Validation error: ${errors.join(", ")}`, "ERR_VALIDATION");
+    return fail(
+      422,
+      headers,
+      `Validation error: ${errors.join(", ")}`,
+      "ERR_VALIDATION"
+    );
   }
 
   // Optional anti-bot verification
   const remoteIp =
-    (event.headers["x-forwarded-for"] || event.headers["X-Forwarded-For"] || "").split(",")[0]?.trim() || undefined;
+    (event.headers["x-forwarded-for"] || event.headers["X-Forwarded-For"] || "")
+      .split(",")[0]
+      ?.trim() || undefined;
 
   // Prefer Turnstile if present; fallback to reCAPTCHA if provided
   if (payload.turnstileToken) {
     const v = await verifyTurnstile(String(payload.turnstileToken), remoteIp);
     if (!v.ok && !v.skipped) {
-      return fail(403, headers, `Turnstile verification failed: ${v.reason}`, "ERR_TURNSTILE");
+      return fail(
+        403,
+        headers,
+        `Turnstile verification failed: ${v.reason}`,
+        "ERR_TURNSTILE"
+      );
     }
   } else if (payload.recaptchaToken) {
     const v = await verifyRecaptcha(String(payload.recaptchaToken), remoteIp);
     if (!v.ok && !v.skipped) {
-      return fail(403, headers, `reCAPTCHA verification failed: ${v.reason}`, "ERR_RECAPTCHA");
+      return fail(
+        403,
+        headers,
+        `reCAPTCHA verification failed: ${v.reason}`,
+        "ERR_RECAPTCHA"
+      );
     }
   }
 

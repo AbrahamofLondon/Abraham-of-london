@@ -62,26 +62,26 @@ export function isPrintAvailable(print: PrintDocument): boolean {
 /** Filter by tag (case-insensitive). */
 export function filterPrintsByTag(
   prints: PrintDocument[],
-  tag: string,
+  tag: string
 ): PrintDocument[] {
   const needle = tag.toLowerCase();
   return prints.filter(
     (print) =>
       Array.isArray(print.tags) &&
-      print.tags.some((t) => t.toLowerCase() === needle),
+      print.tags.some((t) => t.toLowerCase() === needle)
   );
 }
 
 /** Filter by category (case-insensitive). */
 export function filterPrintsByCategory(
   prints: PrintDocument[],
-  category: string,
+  category: string
 ): PrintDocument[] {
   const needle = category.toLowerCase();
   return prints.filter(
     (print) =>
       typeof print.category === "string" &&
-      print.category.toLowerCase() === needle,
+      print.category.toLowerCase() === needle
   );
 }
 

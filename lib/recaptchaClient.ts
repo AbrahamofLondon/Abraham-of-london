@@ -42,7 +42,7 @@ export class RecaptchaClientError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: unknown,
+    public details?: unknown
   ) {
     super(message);
     this.name = "RecaptchaClientError";
@@ -67,17 +67,17 @@ export class RecaptchaScriptError extends RecaptchaClientError {
 // Security: Validate site key format
 function validateSiteKey(siteKey: string): boolean {
   if (!siteKey || typeof siteKey !== "string") return false;
-  
+
   // reCAPTCHA site keys are typically 40 characters alphanumeric
   if (siteKey.length !== 40) return false;
-  
+
   // Basic format validation
   return /^[a-zA-Z0-9_-]+$/.test(siteKey);
 }
 
 function getSiteKey(): string {
   const key = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-  
+
   if (!key) {
     console.warn("[reCAPTCHA] NEXT_PUBLIC_RECAPTCHA_SITE_KEY not set");
     return "";
@@ -108,7 +108,10 @@ function injectScript(): Promise<void> {
   const siteKey = getSiteKey();
   if (!siteKey) {
     return Promise.reject(
-      new RecaptchaClientError("reCAPTCHA site key not configured", "CONFIG_MISSING"),
+      new RecaptchaClientError(
+        "reCAPTCHA site key not configured",
+        "CONFIG_MISSING"
+      )
     );
   }
 
@@ -117,8 +120,8 @@ function injectScript(): Promise<void> {
     return Promise.reject(
       new RecaptchaClientError(
         "Maximum reCAPTCHA initialization attempts exceeded",
-        "MAX_ATTEMPTS_EXCEEDED",
-      ),
+        "MAX_ATTEMPTS_EXCEEDED"
+      )
     );
   }
 
@@ -131,7 +134,7 @@ function injectScript(): Promise<void> {
 
     // Check if script already exists
     const existingScript = document.querySelector<HTMLScriptElement>(
-      `script[src^="${DEFAULT_CONFIG.scriptUrl}"]`,
+      `script[src^="${DEFAULT_CONFIG.scriptUrl}"]`
     );
 
     if (existingScript) {
@@ -146,7 +149,7 @@ function injectScript(): Promise<void> {
     script.async = true;
     script.defer = true;
     script.crossOrigin = "anonymous";
-    
+
     // Add integrity hash if available (for enhanced security)
     if (process.env.RECAPTCHA_SCRIPT_INTEGRITY_HASH) {
       script.integrity = process.env.RECAPTCHA_SCRIPT_INTEGRITY_HASH;
@@ -154,26 +157,28 @@ function injectScript(): Promise<void> {
 
     script.onload = (): void => {
       clearTimeout(timeoutId);
-      
+
       // Additional verification that grecaptcha is actually available
       setTimeout(() => {
         if (typeof window.grecaptcha === "undefined") {
           reject(
-            new RecaptchaScriptError("grecaptcha object not available after script load"),
+            new RecaptchaScriptError(
+              "grecaptcha object not available after script load"
+            )
           );
           return;
         }
-        
+
         if (typeof window.grecaptcha.ready !== "function") {
           reject(
-            new RecaptchaScriptError("grecaptcha.ready method not available"),
+            new RecaptchaScriptError("grecaptcha.ready method not available")
           );
           return;
         }
 
         if (typeof window.grecaptcha.execute !== "function") {
           reject(
-            new RecaptchaScriptError("grecaptcha.execute method not available"),
+            new RecaptchaScriptError("grecaptcha.execute method not available")
           );
           return;
         }
@@ -187,14 +192,16 @@ function injectScript(): Promise<void> {
     script.onerror = (event: string | Event): void => {
       clearTimeout(timeoutId);
       const error = new RecaptchaScriptError(
-        `Failed to load reCAPTCHA script: ${event}`,
+        `Failed to load reCAPTCHA script: ${event}`
       );
       console.error("[reCAPTCHA] Script load error:", error);
       reject(error);
     };
 
     // Security: Add nonce if available (for CSP compliance)
-    const cspNonce = document.querySelector('meta[property="csp-nonce"]')?.getAttribute('content');
+    const cspNonce = document
+      .querySelector('meta[property="csp-nonce"]')
+      ?.getAttribute("content");
     if (cspNonce) {
       script.nonce = cspNonce;
     }
@@ -211,9 +218,11 @@ export async function isRecaptchaAvailable(): Promise<boolean> {
 
   try {
     await injectScript();
-    return typeof window.grecaptcha !== "undefined" &&
-           typeof window.grecaptcha.ready === "function" &&
-           typeof window.grecaptcha.execute === "function";
+    return (
+      typeof window.grecaptcha !== "undefined" &&
+      typeof window.grecaptcha.ready === "function" &&
+      typeof window.grecaptcha.execute === "function"
+    );
   } catch {
     return false;
   }
@@ -241,8 +250,8 @@ export async function waitForRecaptchaReady(): Promise<void> {
         new RecaptchaClientError(
           "grecaptcha.ready failed",
           "READY_FAILED",
-          error,
-        ),
+          error
+        )
       );
     }
   });
@@ -253,13 +262,13 @@ export async function waitForRecaptchaReady(): Promise<void> {
  */
 export async function getRecaptchaToken(
   action: string,
-  retryCount: number = 0,
+  retryCount: number = 0
 ): Promise<string> {
   // Server-side rendering guard
   if (typeof window === "undefined") {
     throw new RecaptchaClientError(
       "getRecaptchaToken can only be called client-side",
-      "SERVER_SIDE_CALL",
+      "SERVER_SIDE_CALL"
     );
   }
 
@@ -267,7 +276,7 @@ export async function getRecaptchaToken(
   if (!action || typeof action !== "string") {
     throw new RecaptchaClientError(
       "Action parameter is required and must be a string",
-      "INVALID_ACTION",
+      "INVALID_ACTION"
     );
   }
 
@@ -275,7 +284,7 @@ export async function getRecaptchaToken(
   if (action.length > 50 || !/^[a-zA-Z0-9_-]+$/.test(action)) {
     throw new RecaptchaClientError(
       "Action must be alphanumeric and less than 50 characters",
-      "INVALID_ACTION_FORMAT",
+      "INVALID_ACTION_FORMAT"
     );
   }
 
@@ -283,7 +292,7 @@ export async function getRecaptchaToken(
   if (!siteKey) {
     throw new RecaptchaClientError(
       "reCAPTCHA site key not configured",
-      "CONFIG_MISSING",
+      "CONFIG_MISSING"
     );
   }
 
@@ -301,14 +310,14 @@ export async function getRecaptchaToken(
           .execute(siteKey, { action })
           .then((token: string) => {
             clearTimeout(timeoutId);
-            
+
             // Validate token format
             if (!token || typeof token !== "string" || token.length < 50) {
               reject(
                 new RecaptchaClientError(
                   "Invalid token received from reCAPTCHA",
-                  "INVALID_TOKEN_FORMAT",
-                ),
+                  "INVALID_TOKEN_FORMAT"
+                )
               );
               return;
             }
@@ -325,22 +334,27 @@ export async function getRecaptchaToken(
           .catch((error: unknown) => {
             clearTimeout(timeoutId);
             console.error("[reCAPTCHA] Token generation error:", error);
-            
+
             if (retryCount < DEFAULT_CONFIG.maxRetries) {
-              console.warn(`[reCAPTCHA] Retrying token generation (attempt ${retryCount + 1})`);
+              console.warn(
+                `[reCAPTCHA] Retrying token generation (attempt ${retryCount + 1})`
+              );
               // Recursive retry with exponential backoff
-              setTimeout(() => {
-                getRecaptchaToken(action, retryCount + 1)
-                  .then(resolve)
-                  .catch(reject);
-              }, Math.pow(2, retryCount) * 1000); // Exponential backoff: 1s, 2s, 4s...
+              setTimeout(
+                () => {
+                  getRecaptchaToken(action, retryCount + 1)
+                    .then(resolve)
+                    .catch(reject);
+                },
+                Math.pow(2, retryCount) * 1000
+              ); // Exponential backoff: 1s, 2s, 4s...
             } else {
               reject(
                 new RecaptchaClientError(
                   "Failed to generate reCAPTCHA token after retries",
                   "TOKEN_GENERATION_FAILED",
-                  error,
-                ),
+                  error
+                )
               );
             }
           });
@@ -350,8 +364,8 @@ export async function getRecaptchaToken(
           new RecaptchaClientError(
             "Unexpected error during token generation",
             "UNEXPECTED_ERROR",
-            error,
-          ),
+            error
+          )
         );
       }
     });
@@ -366,7 +380,7 @@ export async function getRecaptchaToken(
     throw new RecaptchaClientError(
       "Unknown error during reCAPTCHA token generation",
       "UNKNOWN_ERROR",
-      error,
+      error
     );
   }
 }
@@ -375,7 +389,7 @@ export async function getRecaptchaToken(
  * Safe wrapper that returns null instead of throwing for non-critical use cases
  */
 export async function getRecaptchaTokenSafe(
-  action: string,
+  action: string
 ): Promise<string | null> {
   try {
     return await getRecaptchaToken(action);
@@ -411,7 +425,7 @@ export function resetRecaptcha(): void {
 // Performance monitoring
 if (typeof window !== "undefined") {
   // Preload on idle callback for better performance
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     window.requestIdleCallback(() => {
       preloadRecaptcha();
     });

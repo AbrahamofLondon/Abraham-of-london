@@ -7,7 +7,7 @@ import PolicyFooter from "@/components/PolicyFooter";
 const SecurityPage: NextPage = () => {
   const lastUpdated = React.useMemo(
     () => new Date().toLocaleDateString("en-GB"),
-    [],
+    []
   );
 
   return (
@@ -96,8 +96,8 @@ const SecurityPage: NextPage = () => {
               </li>
               <li>
                 <strong>Inner Circle registration protection</strong> – dual
-                IP-based (20 attempts per 15 minutes) and email-based (3 attempts
-                per hour) rate limiting to prevent abuse.
+                IP-based (20 attempts per 15 minutes) and email-based (3
+                attempts per hour) rate limiting to prevent abuse.
               </li>
               <li>
                 Proper HTTP <code>429</code> responses with{" "}
@@ -137,8 +137,8 @@ const SecurityPage: NextPage = () => {
                 malformed data and logic errors.
               </li>
               <li>
-                <strong>Cryptographic validation</strong> for Inner Circle access
-                keys to prevent tampering and ensure integrity.
+                <strong>Cryptographic validation</strong> for Inner Circle
+                access keys to prevent tampering and ensure integrity.
               </li>
             </ul>
           </section>
@@ -194,9 +194,9 @@ const SecurityPage: NextPage = () => {
                 stored on this site.
               </li>
               <li>
-                <strong>Inner Circle privacy protection</strong> – email addresses
-                are stored as SHA-256 hashes, access keys are stored as
-                cryptographic hashes, and no raw personal data is retained in
+                <strong>Inner Circle privacy protection</strong> – email
+                addresses are stored as SHA-256 hashes, access keys are stored
+                as cryptographic hashes, and no raw personal data is retained in
                 accessible formats.
               </li>
               <li>
@@ -231,8 +231,9 @@ const SecurityPage: NextPage = () => {
                 GDPR-aware processing.
               </li>
               <li>
-                <strong>Inner Circle cryptographic key delivery</strong> – secure
-                email transmission of access keys with minimal data exposure.
+                <strong>Inner Circle cryptographic key delivery</strong> –
+                secure email transmission of access keys with minimal data
+                exposure.
               </li>
               <li>
                 Subscription flows are designed to prevent silent enrolment and

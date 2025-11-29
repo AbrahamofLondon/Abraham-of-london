@@ -19,9 +19,21 @@ type Props = {
 };
 
 const DEFAULT_ITEMS: Milestone[] = [
-  { year: 2022, title: "DADx Talk", detail: "Shared ideas on fatherhood and legacy." },
-  { year: 2026, title: "Best-selling Book", detail: "Broad international readership established." },
-  { year: 2027, title: "Leadership Award", detail: "Recognized for strategic impact." },
+  {
+    year: 2022,
+    title: "DADx Talk",
+    detail: "Shared ideas on fatherhood and legacy.",
+  },
+  {
+    year: 2026,
+    title: "Best-selling Book",
+    detail: "Broad international readership established.",
+  },
+  {
+    year: 2027,
+    title: "Leadership Award",
+    detail: "Recognized for strategic impact.",
+  },
 ];
 
 export default function MilestonesTimeline({
@@ -71,7 +83,9 @@ export default function MilestonesTimeline({
           </motion.h2>
 
           {data.length === 0 ? (
-            <p className={`mt-6 text-center ${subText}`}>No milestones to display (yet!).</p>
+            <p className={`mt-6 text-center ${subText}`}>
+              No milestones to display (yet!).
+            </p>
           ) : (
             <ol className="relative mt-10 border-l border-gray-200 pl-6 dark:border-white/15">
               {data.map((m, i) => (
@@ -81,7 +95,9 @@ export default function MilestonesTimeline({
                   initial={reduce ? undefined : { opacity: 0, x: -12 }}
                   whileInView={reduce ? undefined : { opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={reduce ? undefined : { duration: 0.4, delay: i * 0.06 }}
+                  transition={
+                    reduce ? undefined : { duration: 0.4, delay: i * 0.06 }
+                  }
                 >
                   <span
                     aria-hidden
@@ -95,8 +111,14 @@ export default function MilestonesTimeline({
                   {m.href && (
                     <a
                       href={m.href}
-                      target={/^https?:\/\//i.test(m.href) ? "_blank" : undefined}
-                      rel={/^https?:\/\//i.test(m.href) ? "noopener noreferrer" : undefined}
+                      target={
+                        /^https?:\/\//i.test(m.href) ? "_blank" : undefined
+                      }
+                      rel={
+                        /^https?:\/\//i.test(m.href)
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       className="mt-3 inline-flex items-center text-sm text-forest underline underline-offset-4 hover:no-underline"
                     >
                       Learn more

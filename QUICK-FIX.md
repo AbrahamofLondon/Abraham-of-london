@@ -15,6 +15,7 @@ import { getAllEvents, type Event } from "@/lib/events";
 ## Instant Fix (Choose One)
 
 ### Option 1: Enterprise Healing System (RECOMMENDED)
+
 ```bash
 # Scan first to see all issues
 npm run heal:scan
@@ -33,6 +34,7 @@ npm run typecheck
 ---
 
 ### Option 2: Manual Quick Fix
+
 ```powershell
 # One-line PowerShell fix
 (Get-Content "pages\events\index.tsx" -Raw) -replace '(\w+)\(\)([,\s}])', '$1$2' | Set-Content "pages\events\index.tsx" -Encoding UTF8
@@ -48,6 +50,7 @@ npm run typecheck
 ---
 
 ### Option 3: Simple Gremlins Fix
+
 ```bash
 npm run fix:gremlins
 npm run typecheck
@@ -62,6 +65,7 @@ npm run typecheck
 ## After Fixing
 
 ### Verify Everything Works
+
 ```bash
 # Check TypeScript
 npm run typecheck
@@ -74,6 +78,7 @@ npm run build
 ```
 
 ### View Reports
+
 - **Healing Report:** `repair-report-[timestamp].html` (if you used heal)
 - **Logs:** `repair-log-[timestamp].log`
 - **Backups:** `.repo-healing-[timestamp]/` or `.gremlin-backups/`
@@ -82,13 +87,13 @@ npm run build
 
 ## What Each Tool Does
 
-| Command | What It Fixes | Speed | Safety | When to Use |
-|---------|---------------|-------|--------|-------------|
-| `heal:scan` | Nothing (reports only) | Fast | 100% | Check what's broken |
-| `heal` | Everything | Medium | High | Fix all issues |
-| `heal:git` | Everything + uses git history | Slow | Highest | Complex issues |
-| `fix:gremlins` | Unicode + basic syntax | Fast | Medium | Quick cleanup |
-| Manual fix | Just import issue | Instant | Low | Urgent single fix |
+| Command        | What It Fixes                 | Speed   | Safety  | When to Use         |
+| -------------- | ----------------------------- | ------- | ------- | ------------------- |
+| `heal:scan`    | Nothing (reports only)        | Fast    | 100%    | Check what's broken |
+| `heal`         | Everything                    | Medium  | High    | Fix all issues      |
+| `heal:git`     | Everything + uses git history | Slow    | Highest | Complex issues      |
+| `fix:gremlins` | Unicode + basic syntax        | Fast    | Medium  | Quick cleanup       |
+| Manual fix     | Just import issue             | Instant | Low     | Urgent single fix   |
 
 ---
 

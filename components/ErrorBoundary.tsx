@@ -47,7 +47,7 @@ class ErrorBoundaryCore extends React.Component<
         role="alert"
         className={clsx(
           "rounded-lg border border-red-200 bg-red-50 p-4 text-red-800",
-          this.props.className,
+          this.props.className
         )}
       >
         <h3 className="mb-2 font-semibold">Something went wrong</h3>
@@ -85,7 +85,7 @@ class ErrorBoundaryCore extends React.Component<
 }
 
 export default function ErrorBoundary(
-  props: ErrorBoundaryProps,
+  props: ErrorBoundaryProps
 ): React.JSX.Element {
   const pathname = "";
   return <ErrorBoundaryCore key={pathname} {...props} />;

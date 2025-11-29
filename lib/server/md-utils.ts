@@ -37,7 +37,7 @@ export function listMdFiles(absDir: string): string[] {
     return fs
       .readdirSync(absDir)
       .filter((f) =>
-        MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext.toLowerCase())),
+        MD_EXTS.some((ext) => f.toLowerCase().endsWith(ext.toLowerCase()))
       )
       .map((f) => path.join(absDir, f));
   } catch {
@@ -71,8 +71,7 @@ export function readFrontmatter(absFile: string): {
  * Newest first.
  */
 export function sortByDateDesc<T extends { date?: string }>(items: T[]): T[] {
-  const toKey = (d?: string) =>
-    d ? new Date(d).valueOf() || 0 : 0;
+  const toKey = (d?: string) => (d ? new Date(d).valueOf() || 0 : 0);
 
   return [...items].sort((a, b) => toKey(b.date) - toKey(a.date));
 }

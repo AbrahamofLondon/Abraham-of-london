@@ -54,7 +54,7 @@ const TEASER_MOB = "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf";
 
 async function contactHandler(
   req: NextApiRequest,
-  res: NextApiResponse<ContactResponse>,
+  res: NextApiResponse<ContactResponse>
 ) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -62,10 +62,7 @@ async function contactHandler(
   }
 
   // 🔒 Per-IP rate limiting (shared infra)
-  const rlKey = getRateLimitKey(
-    req,
-    RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix,
-  );
+  const rlKey = getRateLimitKey(req, RATE_LIMIT_CONFIGS.CONTACT_FORM.keyPrefix);
   const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.CONTACT_FORM);
   const rlHeaders = createRateLimitHeaders(rl);
   Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
@@ -81,11 +78,15 @@ async function contactHandler(
   try {
     const rawBody = req.body;
     const body: ContactRequestBody =
-      typeof rawBody === "string" ? safeParse(rawBody) : (rawBody || {});
+      typeof rawBody === "string" ? safeParse(rawBody) : rawBody || {};
 
     // Input sanitisation and limits
-    const name = String(body.name || "").trim().slice(0, 100);
-    const email = String(body.email || "").trim().toLowerCase();
+    const name = String(body.name || "")
+      .trim()
+      .slice(0, 100);
+    const email = String(body.email || "")
+      .trim()
+      .toLowerCase();
     const subject = String(body.subject || "Website contact")
       .trim()
       .slice(0, 120);
@@ -273,16 +274,18 @@ function safeParse(s: string): ContactRequestBody {
 }
 
 function escapeHtml(str: string): string {
-  return String(str).replace(/[&<>"']/g, (m) =>
-    (
-      {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      } as const
-    )[m] || m,
+  return String(str).replace(
+    /[&<>"']/g,
+    (m) =>
+      (
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }) as const
+      )[m] || m
   );
 }
 
@@ -307,7 +310,7 @@ function ownerNoticeHtml(args: OwnerNoticeArgs): string {
     <p><strong>Newsletter opt-in:</strong> ${newsletterOptIn ? "Yes" : "No"}</p>
     <p><strong>Message:</strong></p>
     <pre style="white-space:pre-wrap; background-color: #f7f7f7; padding: 10px; border-radius: 5px;">${escapeHtml(
-      message,
+      message
     )}</pre>
   </div>`.trim();
 }

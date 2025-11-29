@@ -3,9 +3,9 @@
 import * as React from "react";
 
 type Props = {
-  heightClass?: string;   // e.g., "h-1"
-  colorClass?: string;    // e.g., "bg-emerald-600"
-  zIndexClass?: string;   // e.g., "z-50"
+  heightClass?: string; // e.g., "h-1"
+  colorClass?: string; // e.g., "bg-emerald-600"
+  zIndexClass?: string; // e.g., "z-50"
 };
 
 export default function ScrollProgress({
@@ -19,7 +19,8 @@ export default function ScrollProgress({
     const onScroll = () => {
       const el = document.documentElement;
       const scrollTop = el.scrollTop || document.body.scrollTop;
-      const scrollHeight = (el.scrollHeight || document.body.scrollHeight) - el.clientHeight;
+      const scrollHeight =
+        (el.scrollHeight || document.body.scrollHeight) - el.clientHeight;
       const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
       setProgress(Math.max(0, Math.min(100, pct)));
     };

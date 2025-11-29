@@ -53,7 +53,9 @@ export default function MDXRenderer({
   if (prose) {
     return (
       <article
-        className={["prose prose-lg max-w-none", className].filter(Boolean).join(" ")}
+        className={["prose prose-lg max-w-none", className]
+          .filter(Boolean)
+          .join(" ")}
       >
         {content}
       </article>

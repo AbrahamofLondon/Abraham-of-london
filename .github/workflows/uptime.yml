@@ -4,40 +4,40 @@ on:
   workflow_dispatch:
     inputs:
       use_preview:
-        description: 'Use latest Netlify preview deploy URL'
+        description: "Use latest Netlify preview deploy URL"
         required: false
-        default: 'false'
+        default: "false"
         type: choice
-        options: ['false', 'true']
+        options: ["false", "true"]
       preview_branch:
-        description: 'Restrict to this branch’s latest preview (optional)'
+        description: "Restrict to this branch’s latest preview (optional)"
         required: false
-        default: ''
+        default: ""
         type: string
       pr_number:
-        description: 'Restrict to this PR number’s latest preview (optional)'
+        description: "Restrict to this PR number’s latest preview (optional)"
         required: false
-        default: ''
+        default: ""
         type: string
       abort_if_missing_preview:
-        description: 'Fail if preview URL cannot be resolved'
+        description: "Fail if preview URL cannot be resolved"
         required: false
-        default: 'true'
+        default: "true"
         type: choice
-        options: ['false', 'true']
+        options: ["false", "true"]
       base_url:
-        description: 'Base URL when not using preview (or fallback)'
+        description: "Base URL when not using preview (or fallback)"
         required: false
-        default: 'https://www.abrahamoflondon.org'
+        default: "https://www.abrahamoflondon.org"
         type: string
       run_pagespeed:
-        description: 'Also run Lighthouse/PageSpeed'
+        description: "Also run Lighthouse/PageSpeed"
         required: false
-        default: 'false'
+        default: "false"
         type: choice
-        options: ['false', 'true']
+        options: ["false", "true"]
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: read
@@ -45,7 +45,7 @@ permissions:
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 concurrency:
   group: uptime-and-e2e-${{ github.ref }}

@@ -25,7 +25,9 @@ export type SocialItem = {
     | "youtube"
     | "mail"
     | "phone"
-    | "whatsapp";
+    | "whatsapp"
+    | "github"
+    | "medium";
 };
 
 type Props = {
@@ -34,8 +36,18 @@ type Props = {
   itemsOverride?: SocialItem[];
 };
 
-/* ---------- Defaults (your real accounts) ---------- */
+/* ---------- Stunning Default Items ---------- */
 const DEFAULT_ITEMS: SocialItem[] = [
+  {
+    href: "https://github.com/AbrahamofLondon",
+    label: "GitHub",
+    kind: "github",
+  },
+  {
+    href: "https://medium.com/@seunadaramola",
+    label: "Medium",
+    kind: "medium",
+  },
   {
     href: "https://tiktok.com/@abrahamoflondon",
     label: "TikTok",
@@ -52,11 +64,6 @@ const DEFAULT_ITEMS: SocialItem[] = [
     kind: "instagram",
   },
   {
-    href: "https://www.facebook.com/share/16tvsnTgRG/",
-    label: "Facebook",
-    kind: "facebook",
-  },
-  {
     href: "https://www.linkedin.com/in/abraham-adaramola-06630321/",
     label: "LinkedIn",
     kind: "linkedin",
@@ -71,32 +78,16 @@ const DEFAULT_ITEMS: SocialItem[] = [
     label: "Email",
     kind: "mail",
   },
-  {
-    href: "tel:+442086225909",
-    label: "Landline",
-    kind: "phone",
-  },
-  {
-    href: "https://wa.me/447496334022",
-    label: "WhatsApp",
-    kind: "whatsapp",
-  },
 ];
 
 /* ---------- Asset-based icons ---------- */
 
 type IconKind = NonNullable<SocialItem["kind"]>;
 
-/**
- * Convention: each kind maps to /assets/images/social/svg/{kind}.svg
- */
 function iconPathForKind(kind: IconKind): string {
   return `/assets/images/social/svg/${kind}.svg`;
 }
 
-/**
- * Brand colour accent per platform.
- */
 const BRAND_HEX: Record<IconKind, string> = {
   tiktok: "#010101",
   x: "#000000",
@@ -107,6 +98,8 @@ const BRAND_HEX: Record<IconKind, string> = {
   mail: "#EA4335",
   phone: "#16A34A",
   whatsapp: "#25D366",
+  github: "#181717",
+  medium: "#000000",
 };
 
 /* ---------- Helpers ---------- */
@@ -115,108 +108,149 @@ const isExternal = (href: string) => /^https?:\/\//i.test(href);
 const isUtility = (href: string) =>
   href.startsWith("mailto:") || href.startsWith("tel:");
 
-/**
- * Premium icon renderer with hover animations
- */
-function SocialIcon({
+/* ---------- Stunning Floating Icon Component ---------- */
+function FloatingSocialIcon({
   kind,
   label,
+  index,
 }: {
   kind: IconKind;
   label: string;
+  index: number;
 }): JSX.Element {
   const src = iconPathForKind(kind);
   const [isHovered, setIsHovered] = React.useState(false);
 
   return (
     <motion.span
-      className="relative inline-flex h-6 w-6 items-center justify-center overflow-hidden"
+      className="relative inline-flex h-16 w-16 items-center justify-center rounded-2xl"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ scale: 1.1 }}
-      transition={{ type: "spring", stiffness: 400 }}
+      whileHover={{ 
+        scale: 1.15,
+        y: -8,
+        transition: { type: "spring", stiffness: 400, damping: 10 }
+      }}
+      whileTap={{ scale: 0.95 }}
+      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        transition: { 
+          delay: index * 0.1,
+          type: "spring",
+          stiffness: 300,
+          damping: 24
+        }
+      }}
     >
-      <Image
-        src={src}
-        alt={label}
-        fill
-        sizes="24px"
-        className="object-contain transition-all duration-300"
+      {/* Animated background glow */}
+      <motion.span
+        className="absolute inset-0 rounded-2xl bg-gradient-to-br from-gold/20 to-amber-200/20 opacity-0 blur-md"
+        animate={{ 
+          opacity: isHovered ? 1 : 0,
+          scale: isHovered ? 1.2 : 1
+        }}
+        transition={{ duration: 0.3 }}
       />
+      
+      {/* Main icon container */}
+      <motion.span
+        className={cn(
+          "relative z-10 flex h-12 w-12 items-center justify-center rounded-xl border-2 backdrop-blur-xl",
+          "border-gold/40 bg-gradient-to-br from-white/90 to-cream/80 shadow-2xl",
+          "hover:border-gold/80 hover:from-gold/20 hover:to-amber-200/30"
+        )}
+        animate={{
+          rotate: isHovered ? 5 : 0,
+        }}
+      >
+        <Image
+          src={src}
+          alt={label}
+          width={24}
+          height={24}
+          className="transition-all duration-300"
+          style={{
+            filter: isHovered ? "brightness(1.2) contrast(1.1)" : "none"
+          }}
+        />
+      </motion.span>
 
-      {/* Hover glow effect */}
+      {/* Floating label */}
       <AnimatePresence>
         {isHovered && (
           <motion.span
-            className="absolute inset-0 rounded-full bg-current opacity-20"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 0.2 }}
-            exit={{ scale: 1, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          />
+            className="absolute -bottom-8 left-1/2 z-20 whitespace-nowrap rounded-lg bg-charcoal/90 px-3 py-1 text-xs font-medium text-cream backdrop-blur-xl"
+            initial={{ opacity: 0, y: 10, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 5, x: "-50%" }}
+            transition={{ duration: 0.2 }}
+          >
+            {label}
+          </motion.span>
         )}
       </AnimatePresence>
     </motion.span>
   );
 }
 
-/**
- * Premium fallback icon
- */
-function DefaultLinkIcon({ label }: { label: string }): JSX.Element {
-  return (
-    <motion.span
-      aria-hidden="true"
-      className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-gold to-amber-200 text-[10px] font-bold text-charcoal shadow-sm"
-      whileHover={{ scale: 1.1, rotate: 5 }}
-      transition={{ type: "spring", stiffness: 400 }}
-    >
-      {label.charAt(0).toUpperCase()}
-    </motion.span>
-  );
-}
-
-/* ---------- Component ---------- */
+/* ---------- Stunning Main Component ---------- */
 export default function SocialFollowStrip({
   variant = "dark",
   className,
   itemsOverride,
 }: Props): JSX.Element {
   const items = (itemsOverride?.length ? itemsOverride : DEFAULT_ITEMS).filter(
-    (it): it is SocialItem => Boolean(it),
+    (it): it is SocialItem => Boolean(it)
   );
 
-  // Luxury panel styling
+  // Luxury glass morphism panel
   const panelBase = cn(
-    "rounded-3xl border-2 shadow-2xl backdrop-blur-xl transition-all duration-500",
-    "bg-gradient-to-br from-charcoal/95 to-black/95 border-gold/20",
-    "hover:border-gold/40 hover:shadow-3xl",
+    "relative rounded-3xl border shadow-2xl backdrop-blur-2xl overflow-hidden",
+    "bg-gradient-to-br from-charcoal/80 to-black/90 border-gold/30",
+    "hover:border-gold/60 hover:shadow-3xl transition-all duration-700"
   );
 
-  // Premium pill styling
-  const pillBase = cn(
-    "group relative inline-flex items-center gap-3 rounded-2xl border-2 px-4 py-3",
-    "text-sm font-medium transition-all duration-300 overflow-hidden",
-    "border-gold/30 bg-gradient-to-r from-gold/5 to-gold/10",
-    "hover:border-gold/60 hover:from-gold/10 hover:to-gold/20 hover:shadow-lg",
+  // Animated background particles
+  const ParticleBackground = () => (
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute h-1 w-1 rounded-full bg-gold/20"
+          initial={{
+            x: Math.random() * 100 + "%",
+            y: Math.random() * 100 + "%",
+          }}
+          animate={{
+            y: [null, -30, 0],
+            opacity: [0.2, 0.8, 0.2],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 2,
+          }}
+        />
+      ))}
+    </div>
   );
 
-  const textColor = variant === "dark" ? "text-cream" : "text-charcoal";
-  const subColor = variant === "dark" ? "text-gold/70" : "text-gold/80";
-
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
+        delayChildren: 0.3,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
@@ -230,99 +264,68 @@ export default function SocialFollowStrip({
 
   return (
     <motion.section
-      className={cn(
-        "mx-auto my-16 max-w-6xl px-4 sm:px-6 lg:px-8",
-        className,
-      )}
+      className={cn("mx-auto my-20 max-w-4xl px-4 sm:px-6 lg:px-8", className)}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
     >
       <motion.div
         className={panelBase}
-        whileHover={{ y: -2 }}
-        transition={{ type: "spring", stiffness: 300 }}
+        whileHover={{ y: -5 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="flex flex-col gap-8 px-8 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-12 sm:py-10">
-          {/* Premium text block */}
-          <motion.div
-            className="max-w-xl space-y-3"
+        <ParticleBackground />
+        
+        <div className="relative z-10 px-8 py-12 sm:px-12 sm:py-16">
+          {/* Premium header */}
+          <motion.div 
+            className="text-center mb-12"
             variants={itemVariants}
           >
-            <motion.p
-              className="text-xs font-bold uppercase tracking-[0.3em] text-gold"
-              variants={itemVariants}
-            >
-              Join The Inner Circle
-            </motion.p>
+            <motion.div
+              className="mx-auto mb-6 h-1 w-24 bg-gradient-to-r from-gold to-amber-200 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: 96 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            />
+            
             <motion.h3
               className={cn(
-                "font-serif text-2xl leading-tight sm:text-3xl",
-                textColor,
+                "font-serif text-3xl sm:text-4xl font-bold mb-4",
+                "bg-gradient-to-r from-gold via-amber-200 to-gold bg-clip-text text-transparent"
               )}
               variants={itemVariants}
             >
-              Connect with{" "}
-              <span className="bg-gradient-to-r from-gold to-amber-200 bg-clip-text font-bold text-transparent">
-                Abraham of London
-              </span>
+              Join the Inner Circle
             </motion.h3>
+            
             <motion.p
-              className={cn("text-sm leading-relaxed", subColor)}
+              className={cn(
+                "text-lg leading-relaxed max-w-2xl mx-auto",
+                variant === "dark" ? "text-cream/80" : "text-charcoal/80"
+              )}
               variants={itemVariants}
             >
-              Exclusive insights, strategic frameworks, and real conversations
-              across platforms that matter. No fluff, just signal.
+              Connect with Abraham across platforms for exclusive insights on faith, 
+              strategy, and legacy building. No algorithms, just authentic conversation.
             </motion.p>
           </motion.div>
 
-          {/* Animated social pills */}
-          <motion.nav
-            aria-label="Social links"
-            className="flex flex-wrap justify-center gap-3 sm:justify-end"
+          {/* Stunning social grid */}
+          <motion.div
+            className="flex flex-wrap justify-center gap-6 sm:gap-8"
             variants={containerVariants}
           >
-            {items.map(({ href, label, kind }) => {
+            {items.map(({ href, label, kind }, index) => {
               const iconKind = kind as IconKind | undefined;
-              const accentColor = iconKind ? BRAND_HEX[iconKind] : undefined;
-
-              const IconNode = iconKind ? (
-                <SocialIcon kind={iconKind} label={label} />
-              ) : (
-                <DefaultLinkIcon label={label} />
-              );
 
               const content = (
-                <motion.span
-                  className={pillBase}
-                  style={accentColor ? { color: accentColor } : undefined}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -2,
-                    transition: { type: "spring", stiffness: 400 },
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {/* Animated background */}
-                  <motion.span
-                    className="absolute inset-0 bg-gradient-to-r from-gold/20 to-amber-200/20 opacity-0 group-hover:opacity-100"
-                    initial={false}
-                    transition={{ duration: 0.3 }}
-                  />
-
-                  {/* Border glow */}
-                  <motion.span
-                    className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-gold to-amber-200 opacity-0 group-hover:opacity-20"
-                    initial={false}
-                    transition={{ duration: 0.3 }}
-                  />
-
-                  {IconNode}
-                  <span className="relative z-10 font-medium text-current">
-                    {label}
-                  </span>
-                </motion.span>
+                <FloatingSocialIcon 
+                  kind={iconKind!} 
+                  label={label} 
+                  index={index}
+                />
               );
 
               const external = isExternal(href);
@@ -354,20 +357,26 @@ export default function SocialFollowStrip({
                 </motion.div>
               );
             })}
-          </motion.nav>
-        </div>
+          </motion.div>
 
-        {/* Premium footer note */}
-        <motion.div
-          className="border-t border-gold/20 px-8 py-4 sm:px-12"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          <p className={cn("text-center text-xs", subColor)}>
-            Real conversations about faith, strategy, and legacy building
-          </p>
-        </motion.div>
+          {/* Premium footer */}
+          <motion.div
+            className="mt-12 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+          >
+            <motion.p
+              className={cn(
+                "text-sm font-light tracking-wide",
+                variant === "dark" ? "text-gold/60" : "text-gold/70"
+              )}
+              whileHover={{ scale: 1.02 }}
+            >
+              Building legacies that outlive us
+            </motion.p>
+          </motion.div>
+        </div>
       </motion.div>
     </motion.section>
   );

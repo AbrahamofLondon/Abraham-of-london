@@ -27,7 +27,10 @@ export type RegisterResponse = Success | Failure;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
-function logRegistration(action: string, meta: Record<string, unknown> = {}): void {
+function logRegistration(
+  action: string,
+  meta: Record<string, unknown> = {}
+): void {
   // Strip PII if you want; keeping it simple here
   // eslint-disable-next-line no-console
   console.log(`[InnerCircle:Register] ${action}`, {
@@ -38,7 +41,7 @@ function logRegistration(action: string, meta: Record<string, unknown> = {}): vo
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<RegisterResponse>,
+  res: NextApiResponse<RegisterResponse>
 ): Promise<void> {
   if (req.method !== "POST") {
     logRegistration("method_not_allowed", { method: req.method });
@@ -85,7 +88,11 @@ export default async function handler(
 
   // reCAPTCHA check
   try {
-    const result = await verifyRecaptcha(recaptchaToken, "inner_circle_register", ip);
+    const result = await verifyRecaptcha(
+      recaptchaToken,
+      "inner_circle_register",
+      ip
+    );
     if (!result.success || result.score < 0.2) {
       logRegistration("recaptcha_failed", {
         ip,
@@ -120,22 +127,19 @@ export default async function handler(
       : "/canon";
 
   // Rate limit (IP + email)
-  const {
-    allowed,
-    hitIpLimit,
-    hitEmailLimit,
-    ipResult,
-    emailResult,
-  } = combinedRateLimit(
-    req,
-    sanitizedEmail,
-    "inner-circle-register",
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER,
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL,
-  );
+  const { allowed, hitIpLimit, hitEmailLimit, ipResult, emailResult } =
+    combinedRateLimit(
+      req,
+      sanitizedEmail,
+      "inner-circle-register",
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER,
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL
+    );
 
   if (!allowed) {
-    const headers = createRateLimitHeaders(hitIpLimit ? ipResult : emailResult!);
+    const headers = createRateLimitHeaders(
+      hitIpLimit ? ipResult : emailResult!
+    );
     Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
 
     const msg = hitEmailLimit
@@ -172,7 +176,7 @@ export default async function handler(
     });
 
     const unlockUrl = `${siteUrl}/api/inner-circle/unlock?key=${encodeURIComponent(
-      keyRecord.key,
+      keyRecord.key
     )}&returnTo=${encodeURIComponent(safeReturnTo)}`;
 
     await sendInnerCircleEmail({

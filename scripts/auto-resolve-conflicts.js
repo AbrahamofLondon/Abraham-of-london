@@ -6,18 +6,42 @@ const MODE = process.argv.includes("--theirs") ? "theirs" : "ours";
 const DRY = process.argv.includes("--dry-run");
 
 // same sources as the checker
-const SOURCE_DIRS = ["app","components","lib","src","scripts","styles","netlify","patches","types","pages","config"];
-const IGNORE_DIRS = ["node_modules",".next",".netlify",".contentlayer",".turbo",".cache",".git","dist","build","public"];
+const SOURCE_DIRS = [
+  "app",
+  "components",
+  "lib",
+  "src",
+  "scripts",
+  "styles",
+  "netlify",
+  "patches",
+  "types",
+  "pages",
+  "config",
+];
+const IGNORE_DIRS = [
+  "node_modules",
+  ".next",
+  ".netlify",
+  ".contentlayer",
+  ".turbo",
+  ".cache",
+  ".git",
+  "dist",
+  "build",
+  "public",
+];
 const MARKER_START = /^\s*<<<<<<<.*$/m;
-const MARKER_MID   = /^\s*=======$/m;
-const MARKER_END   = /^\s*>>>>>>>.*$/m;
+const MARKER_MID = /^\s*=======$/m;
+const MARKER_END = /^\s*>>>>>>>.*$/m;
 
 function walk(dir) {
   const out = [];
   if (!fs.existsSync(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, e.name);
-    if (IGNORE_DIRS.some(d => full.includes(path.sep + d + path.sep))) continue;
+    if (IGNORE_DIRS.some((d) => full.includes(path.sep + d + path.sep)))
+      continue;
     if (e.isDirectory()) out.push(...walk(full));
     else out.push(full);
   }
@@ -63,7 +87,9 @@ function processFile(file) {
   } else {
     fs.copyFileSync(file, file + ".bak");
     fs.writeFileSync(file, text, "utf8");
-    console.log(`resolved: ${file} (${MODE}), backup: ${path.basename(file)}.bak`);
+    console.log(
+      `resolved: ${file} (${MODE}), backup: ${path.basename(file)}.bak`
+    );
   }
   return true;
 }
@@ -78,4 +104,6 @@ for (const f of files) {
     console.warn(`skip ${f}: ${e.message}`);
   }
 }
-console.log(`Done. ${count} file(s) ${DRY ? "would be " : ""}resolved using "${MODE}".`);
+console.log(
+  `Done. ${count} file(s) ${DRY ? "would be " : ""}resolved using "${MODE}".`
+);

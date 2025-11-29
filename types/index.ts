@@ -90,7 +90,9 @@ export interface PostData {
 
 // ----- Type guards -----
 export function isBookMeta(content: ContentMeta): content is BookMeta {
-  return typeof (content as BookMeta).isbn === "string" || "publisher" in content;
+  return (
+    typeof (content as BookMeta).isbn === "string" || "publisher" in content
+  );
 }
 
 export function isPostMeta(content: ContentMeta): content is PostMeta {
@@ -102,13 +104,17 @@ export function isPostMeta(content: ContentMeta): content is PostMeta {
 }
 
 export function isStrategyMeta(content: ContentMeta): content is StrategyMeta {
-  return "difficulty" in content || Array.isArray((content as StrategyMeta).tools);
+  return (
+    "difficulty" in content || Array.isArray((content as StrategyMeta).tools)
+  );
 }
 
 export function isDownloadMeta(
   content: ContentMeta
 ): content is import("./download").DownloadMeta {
-  return typeof (content as import("./download").DownloadMeta).file === "string";
+  return (
+    typeof (content as import("./download").DownloadMeta).file === "string"
+  );
 }
 
 // ----- Utility types -----

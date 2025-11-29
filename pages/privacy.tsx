@@ -11,7 +11,7 @@ const PrivacyPage: NextPage = () => {
   const pageTitle = "Privacy";
   const lastUpdated = React.useMemo(
     () => new Date().toLocaleDateString("en-GB"),
-    [],
+    []
   );
 
   return (
@@ -35,10 +35,12 @@ const PrivacyPage: NextPage = () => {
           <p className="mt-3 max-w-2xl text-gold/70">
             This Privacy Policy explains how we handle personal information at
             Abraham of London across this site and related services. It is
-            written in plain language so you can see what we do, what we don&apos;t,
-            and what your options are.
+            written in plain language so you can see what we do, what we
+            don&apos;t, and what your options are.
           </p>
-          <p className="mt-2 text-xs text-gray-400">Last updated: {lastUpdated}</p>
+          <p className="mt-2 text-xs text-gray-400">
+            Last updated: {lastUpdated}
+          </p>
         </header>
 
         {/* 1. Who we are */}
@@ -51,7 +53,9 @@ const PrivacyPage: NextPage = () => {
             ventures led by Abraham Adaramola, including (but not limited to)
             public writing, events, advisory work, and community initiatives.
           </p>
-          <p>For data protection purposes, the primary contact for this site is:</p>
+          <p>
+            For data protection purposes, the primary contact for this site is:
+          </p>
           <ul className="ml-5 list-disc space-y-1 text-gray-200">
             <li>Abraham of London (United Kingdom)</li>
             <li>
@@ -89,10 +93,10 @@ const PrivacyPage: NextPage = () => {
             </li>
           </ul>
           <p>
-            It does <strong>not</strong> replace written terms for specific
-            paid engagements or advisory relationships. Where a formal contract
-            is in place, its privacy and confidentiality terms will take
-            precedence for that work.
+            It does <strong>not</strong> replace written terms for specific paid
+            engagements or advisory relationships. Where a formal contract is in
+            place, its privacy and confidentiality terms will take precedence
+            for that work.
           </p>
         </section>
 
@@ -106,7 +110,9 @@ const PrivacyPage: NextPage = () => {
             <li>
               <strong>Information you provide directly</strong>, for example:
               <ul className="ml-5 mt-1 list-disc space-y-1 text-gray-200">
-                <li>Newsletter sign-ups (name, email, high-level preferences).</li>
+                <li>
+                  Newsletter sign-ups (name, email, high-level preferences).
+                </li>
                 <li>
                   Contact form submissions (name, email, subject, and what you
                   choose to write).
@@ -178,8 +184,8 @@ const PrivacyPage: NextPage = () => {
             5. Legal bases for processing
           </h2>
           <p>
-            Where UK GDPR or similar data protection laws apply, we rely on
-            one or more of the following legal bases:
+            Where UK GDPR or similar data protection laws apply, we rely on one
+            or more of the following legal bases:
           </p>
           <ul className="ml-5 list-disc space-y-1">
             <li>
@@ -194,12 +200,13 @@ const PrivacyPage: NextPage = () => {
             </li>
             <li>
               <strong>Contractual necessity</strong> – where processing is
-              required to enter into or perform a contract or agreed
-              engagement with you.
+              required to enter into or perform a contract or agreed engagement
+              with you.
             </li>
             <li>
-              <strong>Inner Circle operations</strong> – processing necessary for
-              providing exclusive content and community access to registered members.
+              <strong>Inner Circle operations</strong> – processing necessary
+              for providing exclusive content and community access to registered
+              members.
             </li>
           </ul>
         </section>
@@ -252,12 +259,13 @@ const PrivacyPage: NextPage = () => {
             </li>
             <li>
               <strong>Inner Circle access emails</strong> – cryptographic key
-              delivery and exclusive content notifications via secure email providers.
+              delivery and exclusive content notifications via secure email
+              providers.
             </li>
           </ul>
           <p>
-            These providers process your email address and basic engagement
-            data (such as opens and clicks) so we can deliver messages, manage
+            These providers process your email address and basic engagement data
+            (such as opens and clicks) so we can deliver messages, manage
             opt-outs, and understand what is useful.
           </p>
           <p>
@@ -302,7 +310,8 @@ const PrivacyPage: NextPage = () => {
           <ul className="ml-5 list-disc space-y-1">
             <li>
               Newsletter data is retained while you remain subscribed and for a
-              limited period afterwards for audit, suppression, and record-keeping.
+              limited period afterwards for audit, suppression, and
+              record-keeping.
             </li>
             <li>
               Contact form submissions and related correspondence may be kept as
@@ -342,9 +351,7 @@ const PrivacyPage: NextPage = () => {
               Portability of certain data you have provided, where technically
               feasible and legally required.
             </li>
-            <li>
-              Withdrawal of consent for processing based on consent.
-            </li>
+            <li>Withdrawal of consent for processing based on consent.</li>
           </ul>
           <p>
             To exercise any of these rights, contact us at{" "}
@@ -404,8 +411,8 @@ const PrivacyPage: NextPage = () => {
           </h2>
           <p>
             We may update this policy to reflect changes in law, practice, or
-            the services we offer. The &quot;Last updated&quot; date above
-            shows the most recent revision.
+            the services we offer. The &quot;Last updated&quot; date above shows
+            the most recent revision.
           </p>
           <p>
             Where changes are significant, we may highlight them on the site or,

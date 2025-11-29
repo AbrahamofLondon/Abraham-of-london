@@ -95,7 +95,7 @@ function isValidSlug(slug: string): boolean {
 function jsonError(
   body: { ok: false; error: string },
   status: number,
-  extraHeaders?: Record<string, string>,
+  extraHeaders?: Record<string, string>
 ) {
   return NextResponse.json(body, {
     status,
@@ -110,7 +110,7 @@ function jsonError(
 // GET /api/downloads
 // ---------------------------------------------------------------------------
 export async function GET(
-  request: Request,
+  request: Request
 ): Promise<NextResponse<DownloadsResponse>> {
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
@@ -150,7 +150,7 @@ export async function GET(
         error: "Too many requests. Please try again later.",
       },
       429,
-      rateHeaders,
+      rateHeaders
     );
   }
 
@@ -159,21 +159,17 @@ export async function GET(
     const slug = slugParam.trim();
 
     if (!isValidSlug(slug)) {
-      return jsonError(
-        { ok: false, error: "Invalid slug" },
-        400,
-        baseHeaders,
-      );
+      return jsonError({ ok: false, error: "Invalid slug" }, 400, baseHeaders);
     }
 
-    const found = allDownloads.find(
-      (d) => d.slug === slug,
-    ) as DownloadDocument | undefined;
+    const found = allDownloads.find((d) => d.slug === slug) as
+      | DownloadDocument
+      | undefined;
 
     if (!found) {
       return NextResponse.json(
         { ok: false, error: "Download not found" },
-        { status: 404, headers: baseHeaders },
+        { status: 404, headers: baseHeaders }
       );
     }
 
@@ -182,17 +178,14 @@ export async function GET(
         ok: true,
         item: mapDownload(found),
       },
-      { headers: baseHeaders },
+      { headers: baseHeaders }
     );
   }
 
   // Full list of downloads
   const items = allDownloads
     .slice()
-    .sort(
-      (a, b) =>
-        new Date(b.date).getTime() - new Date(a.date).getTime(),
-    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .map((doc) => mapDownload(doc as DownloadDocument));
 
   return NextResponse.json(
@@ -201,7 +194,7 @@ export async function GET(
       count: items.length,
       items,
     },
-    { headers: baseHeaders },
+    { headers: baseHeaders }
   );
 }
 

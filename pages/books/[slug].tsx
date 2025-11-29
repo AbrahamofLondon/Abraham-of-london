@@ -70,8 +70,8 @@ const mdxComponents = {
 
     if (isInternal) {
       return (
-        <Link 
-          href={safeHref} 
+        <Link
+          href={safeHref}
           className="text-softGold hover:text-softGold/80 transition-colors duration-200 underline underline-offset-4"
           {...props}
         >
@@ -103,7 +103,8 @@ type BookShareProps = {
 };
 
 function BookShare({ meta }: BookShareProps): JSX.Element {
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
   const url = `${SITE_URL}/books/${meta.slug ?? ""}`;
   const text = `"${meta.title}" by Abraham of London`;
   const encodedUrl = encodeURIComponent(url);
@@ -113,23 +114,23 @@ function BookShare({ meta }: BookShareProps): JSX.Element {
     {
       name: "LinkedIn",
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      icon: "👔"
+      icon: "👔",
     },
     {
       name: "X",
       url: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
-      icon: "🐦"
+      icon: "🐦",
     },
     {
       name: "WhatsApp",
       url: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
-      icon: "💬"
+      icon: "💬",
     },
     {
       name: "Email",
       url: `mailto:?subject=${encodedText}&body=${encodedText}%0A%0A${encodedUrl}`,
-      icon: "✉️"
-    }
+      icon: "✉️",
+    },
   ];
 
   return (
@@ -204,27 +205,29 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
       }
       setCheckedAccess(true);
     };
-    
+
     checkAccess();
   }, []);
 
   const pageTitle = `${title} | Books | Abraham of London`;
   const isInnerCircle = accessLevel === "inner-circle";
 
-  const catalogueDate = date && !Number.isNaN(new Date(date).getTime())
-    ? new Date(date).toLocaleDateString("en-GB", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
+  const catalogueDate =
+    date && !Number.isNaN(new Date(date).getTime())
+      ? new Date(date).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
   const canonicalUrl = `${SITE_URL}/books/${slug ?? ""}`;
   const isLocked = isInnerCircle && (!checkedAccess || !hasAccess);
 
   const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
-    `/books/${slug ?? ""}`,
+    `/books/${slug ?? ""}`
   )}`;
 
   // Enhanced metadata display
@@ -237,29 +240,32 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
     { label: "Rating", value: rating ? `${rating}/5` : null },
     { label: "Category", value: category },
     { label: "Price", value: price },
-  ].filter(item => item.value);
+  ].filter((item) => item.value);
 
   return (
     <Layout title={pageTitle}>
       <Head>
         <title>{pageTitle}</title>
-        <meta
-          name="description"
-          content={description ?? subtitle ?? title}
-        />
+        <meta name="description" content={description ?? subtitle ?? title} />
         <link rel="canonical" href={canonicalUrl} />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content={title} />
-        <meta property="og:description" content={description ?? subtitle ?? ""} />
+        <meta
+          property="og:description"
+          content={description ?? subtitle ?? ""}
+        />
         <meta property="og:type" content="book" />
         <meta property="og:url" content={canonicalUrl} />
         {coverImage && <meta property="og:image" content={coverImage} />}
-        
+
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description ?? subtitle ?? ""} />
+        <meta
+          name="twitter:description"
+          content={description ?? subtitle ?? ""}
+        />
         {coverImage && <meta name="twitter:image" content={coverImage} />}
       </Head>
 
@@ -277,11 +283,13 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
               <div className="flex items-start justify-center lg:col-span-1">
                 {coverImage && (
                   <div className="relative group">
-                    <div className="
+                    <div
+                      className="
                       absolute -inset-4 bg-gradient-to-r from-softGold/20 to-softGold/10 
                       rounded-2xl blur-xl opacity-50 group-hover:opacity-75 
                       transition-opacity duration-500
-                    "></div>
+                    "
+                    ></div>
                     <div className="relative">
                       <Image
                         src={coverImage}
@@ -297,11 +305,13 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
                         priority
                       />
                       {/* Shine effect */}
-                      <div className="
+                      <div
+                        className="
                         absolute inset-0 rounded-xl 
                         bg-gradient-to-tr from-transparent via-white/5 to-transparent 
                         opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                      "></div>
+                      "
+                      ></div>
                     </div>
                   </div>
                 )}
@@ -318,13 +328,15 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
                       </h1>
 
                       {isInnerCircle && (
-                        <span className="
+                        <span
+                          className="
                           inline-flex items-center rounded-full 
                           border border-softGold/70 bg-softGold/10 
                           px-4 py-2 text-sm font-semibold uppercase 
                           tracking-[0.18em] text-softGold
                           transform hover:scale-105 transition-transform duration-200
-                        ">
+                        "
+                        >
                           <span className="mr-2">🔒</span>
                           Inner Circle Volume
                         </span>
@@ -342,7 +354,10 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
                   <div className="mb-6 space-y-3">
                     {author && (
                       <p className="text-lg text-gray-300">
-                        By <span className="font-semibold text-softGold">{author}</span>
+                        By{" "}
+                        <span className="font-semibold text-softGold">
+                          {author}
+                        </span>
                       </p>
                     )}
 
@@ -364,21 +379,25 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
 
                   {/* Description */}
                   {description && (
-                    <p className="
+                    <p
+                      className="
                       mb-6 text-lg leading-relaxed text-gray-300 
                       border-l-4 border-softGold/50 pl-4
-                    ">
+                    "
+                    >
                       {description}
                     </p>
                   )}
 
                   {/* Enhanced Inner Circle Banner */}
                   {isInnerCircle && (
-                    <div className="
+                    <div
+                      className="
                       rounded-2xl border border-softGold/50 bg-black/40 
                       p-6 backdrop-blur-sm
                       transform hover:scale-[1.02] transition-transform duration-300
-                    ">
+                    "
+                    >
                       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80 mb-2">
                         🔒 Inner Circle Exclusive
                       </p>
@@ -448,7 +467,8 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
 
         {/* Content Section */}
         <div className="mx-auto max-w-4xl px-6 pb-20">
-          <section className="
+          <section
+            className="
             prose prose-invert prose-lg max-w-none
             prose-headings:font-serif prose-headings:text-cream
             prose-h1:mb-8 prose-h1:text-4xl prose-h1:font-bold prose-h1:leading-tight
@@ -471,14 +491,17 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
             prose-pre:rounded-xl prose-pre:p-6
             prose-table:border-gray-600 prose-td:border-gray-600
             prose-th:bg-gray-800 prose-th:text-cream
-          ">
+          "
+          >
             {isInnerCircle && isLocked ? (
-              <div className="
+              <div
+                className="
                 rounded-2xl border-2 border-softGold/50 
                 bg-gradient-to-br from-black/70 to-charcoal/90 
                 px-8 py-16 text-center backdrop-blur-sm
                 transform hover:scale-[1.01] transition-transform duration-500
-              ">
+              "
+              >
                 <div className="max-w-md mx-auto">
                   <div className="text-6xl mb-6">🔒</div>
                   <h3 className="font-serif text-3xl text-cream mb-4">
@@ -507,11 +530,13 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
             ) : mdxSource ? (
               <MDXRemote {...mdxSource} components={mdxComponents} />
             ) : (
-              <div className="
+              <div
+                className="
                 rounded-2xl border-2 border-dashed border-gray-600 
                 bg-charcoal/30 py-20 text-center
                 transform hover:scale-[1.01] transition-transform duration-500
-              ">
+              "
+              >
                 <div className="max-w-md mx-auto">
                   <div className="text-6xl mb-6">📖</div>
                   <h3 className="font-serif text-3xl text-cream mb-4">
@@ -543,10 +568,12 @@ export default function BookPage({ meta, mdxSource }: PageProps) {
           {/* Enhanced Additional Info */}
           {(publisher || (tags && tags.length > 0)) && (
             <div className="mt-20 border-t border-gray-700 pt-12">
-              <h3 className="
+              <h3
+                className="
                 font-serif text-2xl font-semibold text-cream mb-8 
                 text-center
-              ">
+              "
+              >
                 Book Details
               </h3>
               <div className="grid gap-8 md:grid-cols-2">
@@ -621,10 +648,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   // Strip import lines from MDX content before serialization
   const rawContent = (book as { content?: string }).content ?? "";
   const cleanContent = rawContent
-    .replace(
-      /^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm,
-      "",
-    )
+    .replace(/^import\s+.*?\s+from\s+["'][^"']+["'];?\s*$/gm, "")
     .trim();
 
   let mdxSource: MDXRemoteSerializeResult | null = null;

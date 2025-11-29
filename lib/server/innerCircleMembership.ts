@@ -25,10 +25,10 @@ import crypto from "node:crypto";
 export type InnerCircleStatus = "pending" | "active" | "revoked";
 
 export interface InnerCircleKeyRecord {
-  keyHash: string;           // SHA-256 of the full key
-  keySuffix: string;         // last 4 chars, for admin reference only
-  createdAt: string;         // ISO string
-  lastUsedAt?: string;       // ISO string
+  keyHash: string; // SHA-256 of the full key
+  keySuffix: string; // last 4 chars, for admin reference only
+  createdAt: string; // ISO string
+  lastUsedAt?: string; // ISO string
   status: InnerCircleStatus;
   totalUnlocks: number;
   lastIp?: string;
@@ -36,8 +36,8 @@ export interface InnerCircleKeyRecord {
 
 export interface InnerCircleMember {
   id: string;
-  emailHash: string;         // SHA-256 hex
-  emailHashPrefix: string;   // first 10 chars of emailHash
+  emailHash: string; // SHA-256 hex
+  emailHashPrefix: string; // first 10 chars of emailHash
   name?: string;
   createdAt: string;
   lastSeenAt: string;
@@ -53,7 +53,7 @@ export interface CreateOrUpdateMemberArgs {
 }
 
 export interface IssuedKey {
-  key: string;               // full key (only returned once, to caller)
+  key: string; // full key (only returned once, to caller)
   keySuffix: string;
   createdAt: string;
   status: InnerCircleStatus;
@@ -169,7 +169,7 @@ function indexMember(member: InnerCircleMember): void {
  */
 function logPrivacyAction(
   action: string,
-  metadata: Record<string, unknown> = {},
+  metadata: Record<string, unknown> = {}
 ): void {
   // eslint-disable-next-line no-console
   console.log(`🔒 Privacy Action: ${action}`, {
@@ -181,7 +181,10 @@ function logPrivacyAction(
 /**
  * Automatic data cleanup for compliance with data retention policies
  */
-export function cleanupOldData(): { deletedMembers: number; deletedKeys: number } {
+export function cleanupOldData(): {
+  deletedMembers: number;
+  deletedKeys: number;
+} {
   const cutoff = Date.now() - DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
   let deletedMembers = 0;
   let deletedKeys = 0;
@@ -267,8 +270,8 @@ export function getPrivacySafeStats(): PrivacySafeStats {
     m.keys.some(
       (k) =>
         k.status === "active" &&
-        now - new Date(k.createdAt).getTime() < KEY_TTL_MS,
-    ),
+        now - new Date(k.createdAt).getTime() < KEY_TTL_MS
+    )
   ).length;
 
   const totalUnlocks = members.reduce(
@@ -277,7 +280,7 @@ export function getPrivacySafeStats(): PrivacySafeStats {
       m.keys.reduce((keySum, k) => {
         return keySum + k.totalUnlocks;
       }, 0),
-    0,
+    0
   );
 
   return {
@@ -301,7 +304,7 @@ export function getPrivacySafeStats(): PrivacySafeStats {
  * Returns the full key exactly once, for emailing to the user.
  */
 export function createOrUpdateMemberAndIssueKey(
-  args: CreateOrUpdateMemberArgs,
+  args: CreateOrUpdateMemberArgs
 ): IssuedKey {
   const emailNormalised = normaliseEmail(args.email);
   const emailHash = sha256Hex(emailNormalised);
@@ -384,9 +387,7 @@ export function createOrUpdateMemberAndIssueKey(
  * Verify a supplied key WITHOUT mutating the store.
  * Use recordInnerCircleUnlock to record successful usage.
  */
-export function verifyInnerCircleKey(
-  key: string,
-): VerifyInnerCircleKeyResult {
+export function verifyInnerCircleKey(key: string): VerifyInnerCircleKeyResult {
   const safeKey = key.trim();
   if (!safeKey) {
     return { valid: false, reason: "missing-key" };
@@ -430,10 +431,7 @@ export function verifyInnerCircleKey(
 /**
  * Record a successful unlock event for analytics / governance.
  */
-export function recordInnerCircleUnlock(
-  key: string,
-  ipAddress?: string,
-): void {
+export function recordInnerCircleUnlock(key: string, ipAddress?: string): void {
   const safeKey = key.trim();
   if (!safeKey) return;
 

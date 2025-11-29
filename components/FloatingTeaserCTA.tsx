@@ -31,7 +31,7 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
   }
 
   const handleBackdropClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
+    e: React.MouseEvent<HTMLButtonElement>
   ): void => {
     if (e.target === e.currentTarget) {
       snooze();
@@ -39,7 +39,7 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
   };
 
   const handleBackdropKeyDown = (
-    e: React.KeyboardEvent<HTMLButtonElement>,
+    e: React.KeyboardEvent<HTMLButtonElement>
   ): void => {
     if (e.key === "Escape") {
       snooze();

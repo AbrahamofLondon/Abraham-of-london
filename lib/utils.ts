@@ -10,6 +10,18 @@ export function cn(
 }
 
 // -----------------------------------------------------------------------------
+// Safe string conversion for TypeScript compatibility
+// -----------------------------------------------------------------------------
+
+/**
+ * Safely convert any string-like value to a string, handling null/undefined.
+ * Useful for HTML attributes that require strings but props allow null.
+ */
+export function safeString(value: string | null | undefined): string {
+  return value ?? "";
+}
+
+// -----------------------------------------------------------------------------
 // Environment URL helpers
 // -----------------------------------------------------------------------------
 
@@ -24,10 +36,7 @@ export const ENV_KEYS = {
  * Pick the first defined environment URL from a list of env keys.
  * Falls back to the provided default if none are set.
  */
-export function pickEnvUrl(
-  keys: readonly string[],
-  fallback: string,
-): string {
+export function pickEnvUrl(keys: readonly string[], fallback: string): string {
   for (const key of keys) {
     const value = process.env[key];
     if (typeof value === "string" && value.trim().length > 0) {
@@ -87,7 +96,7 @@ export function resolveCoverImage(input: HasCoverFields): string | null {
   ];
 
   const chosen = candidates.find(
-    (val) => typeof val === "string" && val.trim().length > 0,
+    (val) => typeof val === "string" && val.trim().length > 0
   );
 
   return chosen ?? null;

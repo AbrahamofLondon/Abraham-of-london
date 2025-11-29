@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { RefreshCw, MessageCircle, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  RefreshCw,
+  MessageCircle,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 type IssueTerm = "pathname" | "url" | "title" | "og:title" | (string & {});
 
@@ -86,7 +91,7 @@ export default function Comments({
         containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
       frame?.contentWindow?.postMessage(
         { type: "set-theme", theme },
-        UTTERANCES_ORIGIN,
+        UTTERANCES_ORIGIN
       );
     } catch {
       // Ignore errors if the iframe is not fully ready.
@@ -97,7 +102,7 @@ export default function Comments({
   const handleRetry = React.useCallback(() => {
     setError(null);
     setLoading(true);
-    setRetryCount(prev => prev + 1);
+    setRetryCount((prev) => prev + 1);
     // Force remount by resetting readyToMount
     setReadyToMount(false);
     setTimeout(() => setReadyToMount(true), 100);
@@ -111,7 +116,7 @@ export default function Comments({
       // Check repo validity before attempting to mount
       if (!isRepoValid) {
         setError(
-          'Invalid "repo" format. Use "owner/repo", e.g. "AbrahamofLondon/abrahamoflondon-comments".',
+          'Invalid "repo" format. Use "owner/repo", e.g. "AbrahamofLondon/abrahamoflondon-comments".'
         );
         setLoading(false);
         return () => {};
@@ -136,7 +141,7 @@ export default function Comments({
       // Error handling for script loading failure
       const onError = () => {
         setError(
-          "Comments failed to load. Ensure the repo exists (public), Issues are enabled, and the Utterances app has access.",
+          "Comments failed to load. Ensure the repo exists (public), Issues are enabled, and the Utterances app has access."
         );
         setLoading(false);
         setSuccess(false);
@@ -156,7 +161,7 @@ export default function Comments({
             setError(null);
           }
         },
-        Math.max(50, pollMs),
+        Math.max(50, pollMs)
       );
 
       // Timeout to declare load failure if iframe never appears
@@ -165,7 +170,7 @@ export default function Comments({
           const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
           if (!hasFrame) onError();
         },
-        Math.max(1000, timeoutMs),
+        Math.max(1000, timeoutMs)
       );
 
       // Cleanup function to stop timers and remove event listeners
@@ -184,7 +189,7 @@ export default function Comments({
       pollMs,
       timeoutMs,
       retryCount, // Include retryCount to trigger remount on retry
-    ],
+    ]
   );
 
   // Lazy loading logic (Intersection Observer)
@@ -210,7 +215,7 @@ export default function Comments({
           io.disconnect();
         }
       },
-      { root: null, rootMargin, threshold },
+      { root: null, rootMargin, threshold }
     );
     io.observe(host);
     return () => io.disconnect();
@@ -262,16 +267,32 @@ export default function Comments({
         "addListener" in mql &&
         typeof (mql as { addListener?: unknown }).addListener === "function"
       ) {
-        (mql as { addListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void }).addListener(onChange);
+        (
+          mql as {
+            addListener: (
+              callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void
+            ) => void;
+          }
+        ).addListener(onChange);
       }
 
       mqCleanup = () => {
         mql.removeEventListener?.("change", onChange);
         if (
           "removeListener" in mql &&
-          typeof (mql as { removeListener?: unknown }).removeListener === "function"
+          typeof (mql as { removeListener?: unknown }).removeListener ===
+            "function"
         ) {
-          (mql as { removeListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void) => void }).removeListener(onChange);
+          (
+            mql as {
+              removeListener: (
+                callback: (
+                  this: MediaQueryList,
+                  ev: MediaQueryListEvent
+                ) => void
+              ) => void;
+            }
+          ).removeListener(onChange);
         }
       };
 
@@ -302,10 +323,15 @@ export default function Comments({
         "mt-16 rounded-lg border border-aol-border bg-white dark:bg-aol-dark dark:border-aol-dark-border",
         "shadow-sm transition-all duration-200",
         className || "",
-      ].join(" ").trim()}
+      ]
+        .join(" ")
+        .trim()}
     >
       <div className="px-6 py-4 border-b border-aol-border dark:border-aol-dark-border">
-        <h2 id="comments-title" className="text-lg font-semibold text-aol-text dark:text-aol-dark-text flex items-center gap-2">
+        <h2
+          id="comments-title"
+          className="text-lg font-semibold text-aol-text dark:text-aol-dark-text flex items-center gap-2"
+        >
           <MessageCircle className="h-5 w-5" />
           Comments
         </h2>
@@ -314,17 +340,15 @@ export default function Comments({
         </p>
       </div>
 
-      <div 
-        key={pageKey} 
-        ref={containerRef} 
+      <div
+        key={pageKey}
+        ref={containerRef}
         className="min-h-[200px] transition-opacity duration-300"
       />
 
       {/* Loading State */}
       {loading && !error && (
-        <div className="px-6 py-8">
-          {placeholder || defaultPlaceholder}
-        </div>
+        <div className="px-6 py-8">{placeholder || defaultPlaceholder}</div>
       )}
 
       {/* Error State */}

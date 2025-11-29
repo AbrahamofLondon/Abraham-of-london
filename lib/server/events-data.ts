@@ -26,7 +26,7 @@ export type EventMeta = {
   description?: string;
   category?: string;
   tags?: string[];
-  href?: string;        // /events/[slug]
+  href?: string; // /events/[slug]
   resources?: EventResources;
   [key: string]: unknown;
 };
@@ -36,7 +36,9 @@ export type EventMeta = {
 // ------------------------------
 
 function normaliseSlug(raw: unknown): string {
-  const s = String(raw ?? "").trim().toLowerCase();
+  const s = String(raw ?? "")
+    .trim()
+    .toLowerCase();
 
   if (!s) return "";
 
@@ -67,7 +69,7 @@ function loadAllEventsFromFs(): EventMeta[] {
     const slug = normaliseSlug(rawSlug);
 
     const title =
-      (data.title as string | undefined && String(data.title).trim()) ||
+      ((data.title as string | undefined) && String(data.title).trim()) ||
       slug ||
       "Untitled event";
 
@@ -180,9 +182,7 @@ export function getEventBySlug(slug: string): EventMeta | undefined {
   const key = normaliseSlug(slug);
   if (!key) return undefined;
 
-  return allEvents().find(
-    (e) => normaliseSlug(e.slug) === key,
-  );
+  return allEvents().find((e) => normaliseSlug(e.slug) === key);
 }
 
 export function getEventsBySlugs(slugs: string[]): EventMeta[] {

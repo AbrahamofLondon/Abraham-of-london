@@ -71,6 +71,8 @@ export interface FullSiteConfig {
   phone: string;
   /** Copyright information */
   copyright?: string;
+  /** Company registration number */
+  companyNumber?: string;
   /** Optional social links used across the site */
   socialLinks?: SocialLink[];
   /** Default author avatar used across blog cards, etc. */
@@ -98,11 +100,9 @@ function normalisePath(raw: string): string {
 
 // --------- URL CONSTANTS (BROWSER-SAFE) -------------------------------------
 
-const PUBLIC_SITE_URL =
-  (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(
-    /\/+$/u,
-    "",
-  );
+const PUBLIC_SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org"
+).replace(/\/+$/u, "");
 
 const ALOMARADA_URL =
   process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com";
@@ -128,10 +128,25 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
   author: "Abraham of London",
   email: "info@abrahamoflondon.org",
   phone: "+44 20 8622 5909",
+  companyNumber: "11549053",
   copyright: `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`,
   authorImage: "/assets/images/profile-portrait.webp",
 
-  socialLinks: defaultSocialLinks,
+  socialLinks: [
+    ...defaultSocialLinks,
+    {
+      href: "https://github.com/Abrahamo",
+      label: "GitHub",
+      kind: "github",
+      external: true,
+    },
+    {
+      href: "https://medium.com/@seunadaramola",
+      label: "Medium",
+      kind: "medium",
+      external: true,
+    },
+  ],
 
   brand: {
     values: [
@@ -286,7 +301,8 @@ export function internalHref(target: RouteId | string): string {
 
 /** Build an absolute URL safely (for OG tags, emails, sitemaps, etc.). */
 export function absUrl(path: string | RouteId): string {
-  const href = typeof path === "string" ? internalHref(path) : getRoutePath(path);
+  const href =
+    typeof path === "string" ? internalHref(path) : getRoutePath(path);
   if (/^https?:\/\//iu.test(href)) return href;
   if (
     href.startsWith("#") ||
@@ -301,7 +317,7 @@ export function absUrl(path: string | RouteId): string {
 /** Check if a route is active (for navigation highlighting) */
 export function isActiveRoute(
   currentPath: string,
-  target: RouteId | string,
+  target: RouteId | string
 ): boolean {
   const targetPath = internalHref(target);
   const normalizedCurrent = normalisePath(currentPath);

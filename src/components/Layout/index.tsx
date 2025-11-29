@@ -1,6 +1,6 @@
-src/components/Layout/index.tsx
-import React from 'react';
-import Head from 'next/head';
+src / components / Layout / index.tsx;
+import React from "react";
+import Head from "next/head";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,11 +9,11 @@ interface LayoutProps {
   siteTagline?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ 
-  children, 
+const Layout: React.FC<LayoutProps> = ({
+  children,
   title,
   siteTitle = "Abraham of London",
-  siteTagline = "Faith-rooted strategy for fathers, founders, and board-level leaders"
+  siteTagline = "Faith-rooted strategy for fathers, founders, and board-level leaders",
 }) => {
   return (
     <>
@@ -22,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta name="description" content={siteTagline} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
         {/* Header would go here */}
         <main>{children}</main>

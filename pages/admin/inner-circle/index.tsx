@@ -62,7 +62,7 @@ const AdminInnerCirclePage: NextPage = () => {
       setStats(data.stats ?? null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unexpected error loading data.",
+        err instanceof Error ? err.message : "Unexpected error loading data."
       );
     } finally {
       setLoading(false);
@@ -71,11 +71,23 @@ const AdminInnerCirclePage: NextPage = () => {
 
   const handleDownloadCsv = () => {
     if (!rows.length) return;
-    const header = ["created_at", "status", "key_suffix", "email_hash_prefix", "total_unlocks"];
+    const header = [
+      "created_at",
+      "status",
+      "key_suffix",
+      "email_hash_prefix",
+      "total_unlocks",
+    ];
     const lines = [
       header.join(","),
       ...rows.map((r) =>
-        [r.created_at, r.status, r.key_suffix, r.email_hash_prefix, r.total_unlocks].join(","),
+        [
+          r.created_at,
+          r.status,
+          r.key_suffix,
+          r.email_hash_prefix,
+          r.total_unlocks,
+        ].join(",")
       ),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
@@ -95,8 +107,8 @@ const AdminInnerCirclePage: NextPage = () => {
             Inner Circle · Admin Dashboard
           </h1>
           <p className="mt-1 text-xs text-softGold/80">
-            Privacy-safe overview of Inner Circle keys and membership. Raw emails
-            and full keys are never shown here.
+            Privacy-safe overview of Inner Circle keys and membership. Raw
+            emails and full keys are never shown here.
           </p>
         </header>
 
@@ -134,11 +146,7 @@ const AdminInnerCirclePage: NextPage = () => {
           </div>
         </section>
 
-        {error && (
-          <p className="mb-4 text-xs text-red-400">
-            {error}
-          </p>
-        )}
+        {error && <p className="mb-4 text-xs text-red-400">{error}</p>}
 
         {stats && (
           <section className="mb-6 grid gap-3 rounded-2xl border border-softGold/30 bg-black/50 p-4 text-xs text-softGold/80 sm:grid-cols-3">

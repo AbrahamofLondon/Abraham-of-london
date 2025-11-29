@@ -44,7 +44,7 @@ export function CoverFrame({
         "relative w-full overflow-hidden",
         "rounded-md border border-[#D6B26A]/50",
         "bg-black/30 shadow-lg",
-        className,
+        className
       )}
     >
       <div className={clsx("relative w-full", getAspectPadding(aspect))}>

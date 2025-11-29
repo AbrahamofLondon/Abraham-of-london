@@ -176,19 +176,19 @@ export const staggeredTransition = (delay: number = 0.1) =>
     duration: 0.5,
     delay,
     ease: "easeOut",
-  } as const satisfies DurationConfig);
+  }) as const satisfies DurationConfig;
 
 export const staggeredSpringTransition = (delay: number = 0.1) =>
   ({
     ...springTransition,
     delay,
-  } as const satisfies SpringConfig & { delay: number });
+  }) as const satisfies SpringConfig & { delay: number };
 
 export const staggeredFastSpringTransition = (delay: number = 0.05) =>
   ({
     ...fastSpringTransition,
     delay,
-  } as const satisfies SpringConfig & { delay: number });
+  }) as const satisfies SpringConfig & { delay: number };
 
 // =============================================================================
 // COMPOSITE TRANSITIONS
@@ -225,7 +225,7 @@ export const createSpringTransition = (
   stiffness: number = 100,
   damping: number = 20,
   mass: number = 1,
-  delay?: number,
+  delay?: number
 ): SpringConfig => ({
   type: "spring",
   stiffness,
@@ -238,7 +238,7 @@ export const createDurationTransition = (
   duration: number = 0.5,
   ease: EasingName | CubicBezier = "easeOut",
   delay?: number,
-  repeat?: number | "Infinity",
+  repeat?: number | "Infinity"
 ): DurationConfig => ({
   duration,
   ease,
@@ -250,7 +250,9 @@ export const createStaggeredTransition =
   <T extends TransitionLike>(base: T, staggerDelay: number = 0.1) =>
   (index: number): T & { delay: number } => ({
     ...base,
-    delay: (base as any).delay ? (base as any).delay + index * staggerDelay : index * staggerDelay,
+    delay: (base as any).delay
+      ? (base as any).delay + index * staggerDelay
+      : index * staggerDelay,
   });
 
 // =============================================================================

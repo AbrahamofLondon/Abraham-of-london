@@ -20,14 +20,16 @@ interface UseRecaptchaResult {
 
 export function useRecaptcha(): UseRecaptchaResult {
   const [state, setState] = React.useState<RecaptchaState>(() =>
-    SITE_KEY ? "idle" : "error",
+    SITE_KEY ? "idle" : "error"
   );
   const [error, setError] = React.useState<string | null>(null);
 
-  const config = React.useMemo((): RecaptchaConfig => ({
-    enabled: !!SITE_KEY,
-    siteKey: SITE_KEY,
-  }), []);
+  const config = React.useMemo((): RecaptchaConfig => {
+    return {
+      enabled: !!SITE_KEY,
+      siteKey: SITE_KEY,
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!config.enabled) {
@@ -37,15 +39,15 @@ export function useRecaptcha(): UseRecaptchaResult {
     }
 
     if (typeof window === "undefined") return;
-    
-    // Use the existing Window type from your global.d.ts
+
+    // Use type assertion
     const win = window as Window & {
       grecaptcha?: {
         ready(cb: () => void): void;
         execute(siteKey: string, options: { action: string }): Promise<string>;
       };
     };
-    
+
     // Check if grecaptcha is already available
     if (win.grecaptcha) {
       win.grecaptcha.ready(() => setState("ready"));
@@ -53,7 +55,7 @@ export function useRecaptcha(): UseRecaptchaResult {
     }
 
     const existing = document.querySelector<HTMLScriptElement>(
-      'script[data-recaptcha="v3"]',
+      'script[data-recaptcha="v3"]'
     );
     if (existing) {
       setState("loading");
@@ -70,7 +72,7 @@ export function useRecaptcha(): UseRecaptchaResult {
     setState("loading");
     const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(
-      config.siteKey!,
+      config.siteKey!
     )}`;
     script.async = true;
     script.defer = true;
@@ -99,44 +101,52 @@ export function useRecaptcha(): UseRecaptchaResult {
     };
   }, [config.enabled, config.siteKey]);
 
-  const execute = React.useCallback(async (action: string): Promise<string | null> => {
-    if (!config.enabled || !config.siteKey) {
-      console.warn("reCAPTCHA not enabled or missing site key");
-      return null;
-    }
-    
-    if (typeof window === "undefined") {
-      console.warn("reCAPTCHA not available on server");
-      return null;
-    }
+  const execute = React.useCallback(
+    async (action: string): Promise<string | null> => {
+      if (!config.enabled || !config.siteKey) {
+        console.warn("reCAPTCHA not enabled or missing site key");
+        return null;
+      }
 
-    const win = window as Window & {
-      grecaptcha?: {
-        execute(siteKey: string, options: { action: string }): Promise<string>;
+      if (typeof window === "undefined") {
+        console.warn("reCAPTCHA not available on server");
+        return null;
+      }
+
+      const win = window as Window & {
+        grecaptcha?: {
+          execute(
+            siteKey: string,
+            options: { action: string }
+          ): Promise<string>;
+        };
       };
-    };
-    
-    if (!win.grecaptcha) {
-      console.warn("reCAPTCHA not loaded");
-      return null;
-    }
-    
-    try {
-      const token = await win.grecaptcha.execute(config.siteKey, { action });
-      return token;
-    } catch (error) {
-      console.error("reCAPTCHA execution failed:", error);
-      return null;
-    }
-  }, [config.enabled, config.siteKey]);
 
-  return React.useMemo(() => ({
-    state,
-    error,
-    execute,
-    isReady: state === "ready",
-    isEnabled: config.enabled,
-  }), [state, error, execute, config.enabled]);
+      if (!win.grecaptcha) {
+        console.warn("reCAPTCHA not loaded");
+        return null;
+      }
+
+      try {
+        const token = await win.grecaptcha.execute(config.siteKey, { action });
+        return token;
+      } catch (err) {
+        console.error("reCAPTCHA execution failed:", err);
+        return null;
+      }
+    },
+    [config.enabled, config.siteKey]
+  );
+
+  return React.useMemo(() => {
+    return {
+      state,
+      error,
+      execute,
+      isReady: state === "ready",
+      isEnabled: config.enabled,
+    };
+  }, [state, error, execute, config.enabled]);
 }
 
 export default useRecaptcha;

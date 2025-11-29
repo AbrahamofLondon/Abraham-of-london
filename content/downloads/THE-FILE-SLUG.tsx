@@ -2,7 +2,9 @@
 
 import BrandFrame from "../../components/print/BrandFrame";
 import * as React from "react";
-{/* Add any other imports needed here */}
+{
+  /* Add any other imports needed here */
+}
 
 // --- Metadata Definition (REQUIRED for ContentLayer) ---
 export const metadata = {
@@ -14,7 +16,7 @@ export const metadata = {
   readTime: "X min",
   category: "Correct Category",
   type: "download",
-  subtitle: "A concise description of the download."
+  subtitle: "A concise description of the download.",
 };
 
 const TheComponentName = () => {
@@ -27,10 +29,10 @@ const TheComponentName = () => {
       {/* Ensure ALL existing C-style comments (//) inside this
         return block are changed to JSX block comments ({/* ... * /})
       */}
-      
+
       {/* Start of Download Content */}
       <p>This is the content of the download.</p>
-      
+
       {/* End of Download Content */}
     </BrandFrame>
   );

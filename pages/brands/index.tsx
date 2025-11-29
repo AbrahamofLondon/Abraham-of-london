@@ -3,7 +3,15 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Users, Shield, Target, ArrowRight, Star, Zap, Heart } from "lucide-react";
+import {
+  Users,
+  Shield,
+  Target,
+  ArrowRight,
+  Star,
+  Zap,
+  Heart,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import { getPageTitle } from "@/lib/siteConfig";
 
@@ -27,43 +35,46 @@ export default function BrandsIndex() {
     {
       id: "fathering-without-fear",
       title: "Fathering Without Fear",
-      description: "A movement for men committed to intentional fatherhood, courageous love, and multi-generational legacy. We provide frameworks, communities, and resources for fathers who refuse to outsource their responsibility.",
+      description:
+        "A movement for men committed to intentional fatherhood, courageous love, and multi-generational legacy. We provide frameworks, communities, and resources for fathers who refuse to outsource their responsibility.",
       href: "/brands/fathering-without-fear",
       status: "active",
       foundingYear: 2020,
       focus: ["Fatherhood", "Legacy", "Family Leadership"],
       icon: <Shield className="h-8 w-8" />,
       color: "from-blue-600/20 to-cyan-400/10",
-      cta: "Join the Movement"
+      cta: "Join the Movement",
     },
     {
       id: "brotherhood-covenant",
       title: "Brotherhood Covenant",
-      description: "Structured circles of men committed to sharpening, accountability, and honour – not just casual friendship. We build brotherhoods that last through seasons of challenge and celebration.",
+      description:
+        "Structured circles of men committed to sharpening, accountability, and honour – not just casual friendship. We build brotherhoods that last through seasons of challenge and celebration.",
       href: "/brands/brotherhood-covenant",
       status: "active",
       foundingYear: 2021,
       focus: ["Brotherhood", "Accountability", "Spiritual Growth"],
       icon: <Users className="h-8 w-8" />,
       color: "from-emerald-600/20 to-green-400/10",
-      cta: "Explore Brotherhood"
+      cta: "Explore Brotherhood",
     },
     {
       id: "legacy-builders",
       title: "Legacy Builders",
-      description: "For founders and leaders building beyond their lifetime. We provide strategic frameworks for legacy planning, succession, and creating organizations that outlive their founders.",
+      description:
+        "For founders and leaders building beyond their lifetime. We provide strategic frameworks for legacy planning, succession, and creating organizations that outlive their founders.",
       href: "/brands/legacy-builders",
       status: "building",
       foundingYear: 2023,
       focus: ["Legacy Planning", "Succession", "Multi-generational Impact"],
       icon: <Target className="h-8 w-8" />,
       color: "from-purple-600/20 to-pink-400/10",
-      cta: "Build Legacy"
-    }
+      cta: "Build Legacy",
+    },
   ];
 
-  const activeBrands = brands.filter(brand => brand.status === "active");
-  const buildingBrands = brands.filter(brand => brand.status === "building");
+  const activeBrands = brands.filter((brand) => brand.status === "active");
+  const buildingBrands = brands.filter((brand) => brand.status === "building");
 
   return (
     <Layout title={pageTitle}>
@@ -80,13 +91,13 @@ export default function BrandsIndex() {
         <section className="relative overflow-hidden border-b border-gold/20">
           <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-amber-200/5" />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <motion.div 
+            <motion.div
               className="text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <motion.p 
+              <motion.p
                 className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70 mb-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -94,7 +105,7 @@ export default function BrandsIndex() {
               >
                 Strategic Movements
               </motion.p>
-              <motion.h1 
+              <motion.h1
                 className="font-serif text-4xl font-bold text-cream sm:text-5xl lg:text-6xl mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -102,14 +113,15 @@ export default function BrandsIndex() {
               >
                 Brands & Movements
               </motion.h1>
-              <motion.p 
+              <motion.p
                 className="mx-auto max-w-2xl text-lg text-gold/70 leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                Expressions of a single conviction: men who lead, love, and build
-                with fear of God and respect for legacy. Each movement carries a distinct mission.
+                Expressions of a single conviction: men who lead, love, and
+                build with fear of God and respect for legacy. Each movement
+                carries a distinct mission.
               </motion.p>
             </motion.div>
           </div>
@@ -118,7 +130,7 @@ export default function BrandsIndex() {
         {/* Active Brands */}
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <motion.div 
+            <motion.div
               className="mb-12 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -132,8 +144,9 @@ export default function BrandsIndex() {
                 Active Brands
               </h2>
               <p className="text-gold/70 max-w-2xl mx-auto">
-                These movements have matured through years of refinement and community building. 
-                Each represents a pillar of the Abraham of London vision.
+                These movements have matured through years of refinement and
+                community building. Each represents a pillar of the Abraham of
+                London vision.
               </p>
             </motion.div>
 
@@ -149,7 +162,7 @@ export default function BrandsIndex() {
         {buildingBrands.length > 0 && (
           <section className="py-16 border-t border-gold/20">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-              <motion.div 
+              <motion.div
                 className="mb-12 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -163,14 +176,20 @@ export default function BrandsIndex() {
                   Building Phase
                 </h2>
                 <p className="text-gold/70 max-w-2xl mx-auto">
-                  These movements are currently being developed and refined. 
-                  Early access and founding member opportunities may be available.
+                  These movements are currently being developed and refined.
+                  Early access and founding member opportunities may be
+                  available.
                 </p>
               </motion.div>
 
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {buildingBrands.map((brand, index) => (
-                  <BrandCard key={brand.id} brand={brand} index={index} isBuilding={true} />
+                  <BrandCard
+                    key={brand.id}
+                    brand={brand}
+                    index={index}
+                    isBuilding={true}
+                  />
                 ))}
               </div>
             </div>
@@ -180,7 +199,7 @@ export default function BrandsIndex() {
         {/* CTA Section */}
         <section className="py-16 border-t border-gold/20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div 
+            <motion.div
               className="rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 to-gold/10 p-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -190,8 +209,9 @@ export default function BrandsIndex() {
                 Start Your Own Movement
               </h2>
               <p className="text-gold/70 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
-                Have a vision for a movement that aligns with our values of faith, 
-                fatherhood, and legacy? Let's explore how we can build together.
+                Have a vision for a movement that aligns with our values of
+                faith, fatherhood, and legacy? Let's explore how we can build
+                together.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
@@ -216,7 +236,7 @@ export default function BrandsIndex() {
         {/* Values Section */}
         <section className="py-16 border-t border-gold/20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <motion.div 
+            <motion.div
               className="text-center mb-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -226,8 +246,9 @@ export default function BrandsIndex() {
                 Our Movement DNA
               </h2>
               <p className="text-gold/70 max-w-2xl mx-auto">
-                Every brand under the Abraham of London umbrella shares these core principles 
-                that define our approach and distinguish our impact.
+                Every brand under the Abraham of London umbrella shares these
+                core principles that define our approach and distinguish our
+                impact.
               </p>
             </motion.div>
 
@@ -236,18 +257,21 @@ export default function BrandsIndex() {
                 {
                   icon: <Shield className="h-8 w-8" />,
                   title: "Faith-Rooted",
-                  description: "Built on biblical principles and spiritual foundation, not just business models or trends."
+                  description:
+                    "Built on biblical principles and spiritual foundation, not just business models or trends.",
                 },
                 {
                   icon: <Users className="h-8 w-8" />,
                   title: "Community-Focused",
-                  description: "Designed to build genuine connection and accountability, not just audiences or customers."
+                  description:
+                    "Designed to build genuine connection and accountability, not just audiences or customers.",
                 },
                 {
                   icon: <Target className="h-8 w-8" />,
                   title: "Legacy-Minded",
-                  description: "Focused on multi-generational impact and sustainable transformation, not quick wins."
-                }
+                  description:
+                    "Focused on multi-generational impact and sustainable transformation, not quick wins.",
+                },
               ].map((value, index) => (
                 <motion.div
                   key={value.title}
@@ -276,13 +300,13 @@ export default function BrandsIndex() {
 }
 
 // Brand Card Component
-function BrandCard({ 
-  brand, 
-  index, 
-  isBuilding = false 
-}: { 
-  brand: Brand; 
-  index: number; 
+function BrandCard({
+  brand,
+  index,
+  isBuilding = false,
+}: {
+  brand: Brand;
+  index: number;
   isBuilding?: boolean;
 }) {
   return (
@@ -295,12 +319,14 @@ function BrandCard({
     >
       <Link href={brand.href} className="block h-full">
         <div className={`h-2 bg-gradient-to-r ${brand.color}`} />
-        
+
         <div className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`rounded-xl p-3 bg-gradient-to-br ${brand.color} text-gold`}>
+              <div
+                className={`rounded-xl p-3 bg-gradient-to-br ${brand.color} text-gold`}
+              >
                 {brand.icon}
               </div>
               <div>

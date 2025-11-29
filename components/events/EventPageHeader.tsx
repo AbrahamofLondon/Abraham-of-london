@@ -7,7 +7,12 @@ type Props = {
   summary?: string | null;
 };
 
-export default function EventPageHeader({ title, date, location, summary }: Props): JSX.Element {
+export default function EventPageHeader({
+  title,
+  date,
+  location,
+  summary,
+}: Props): JSX.Element {
   return (
     <header className="mb-8 border-b border-gray-200 pb-6">
       <h1 className="font-serif text-3xl text-deepCharcoal">{title}</h1>

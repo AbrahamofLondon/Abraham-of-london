@@ -23,17 +23,17 @@ export interface SocialLink {
 export interface SiteBrand {
   name: string;
   tagline?: string;
-  logo?: string;            // path to raster logo
-  logoSvg?: string;         // path to SVG logo
+  logo?: string; // path to raster logo
+  logoSvg?: string; // path to SVG logo
   favicon?: string;
-  primaryColor?: string;    // CSS var or hex
+  primaryColor?: string; // CSS var or hex
   accentColor?: string;
 }
 
 export interface SiteAuthor {
   name: string;
   title?: string;
-  image?: string;           // avatar image path
+  image?: string; // avatar image path
   email?: string;
 }
 
@@ -46,7 +46,7 @@ export interface SeoDefaults {
 }
 
 export interface SiteConfig {
-  url: string;              // canonical origin without trailing slash
+  url: string; // canonical origin without trailing slash
   brand: SiteBrand;
   author: SiteAuthor;
   socials: SocialLink[];
@@ -140,6 +140,7 @@ export const siteConfig: SiteConfig = {
 };
 
 // Convenience getters
-export const authorImage = siteConfig.author.image || "/assets/images/profile-portrait.webp";
+export const authorImage =
+  siteConfig.author.image || "/assets/images/profile-portrait.webp";
 export const canonicalUrl = (path = "/") =>
   `${siteConfig.url}${path.startsWith("/") ? path : `/${path}`}`;

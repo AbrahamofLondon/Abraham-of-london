@@ -1,5 +1,5 @@
 // Import Link at the top of the file with other imports
-import Link from 'next/link';
+import Link from "next/link";
 
 export const metadata = {
   title: "Strategy | Abraham of London",

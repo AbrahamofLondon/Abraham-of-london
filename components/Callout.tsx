@@ -76,7 +76,9 @@ const Callout: React.FC<CalloutProps> = ({
         )}
         <div className="flex-1 min-w-0">
           {title && (
-            <h4 className={`mb-2 font-semibold leading-tight ${config.titleColor}`}>
+            <h4
+              className={`mb-2 font-semibold leading-tight ${config.titleColor}`}
+            >
               {title}
             </h4>
           )}

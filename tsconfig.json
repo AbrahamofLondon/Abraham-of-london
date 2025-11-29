@@ -1,69 +1,53 @@
-// tsconfig.json
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "es2022"],
-    "jsx": "preserve",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
-    "allowJs": false,
-    "skipLibCheck": true,
-    "noEmit": true,
-
-    // Relaxed Type-safety to prevent build failures
-    "strict": false,
-    "strictNullChecks": false, // Changed from true to false
-    "noUncheckedIndexedAccess": false, // Add this if missing
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-
-    // Module interop
-    "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-
-    // Aliases
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["*", "src/*"],
-      "contentlayer/generated": ["./.contentlayer/generated"]
-    },
-
+    "jsx": "preserve",
+    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
+      ]
+    },
+    "strictNullChecks": true
   },
   "include": [
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "lib/**/*.ts",
-    "lib/**/*.tsx",
-    "pages/**/*.ts",
-    "pages/**/*.tsx",
-    "config/**/*.ts",
-    "config/**/*.tsx",
-    "hooks/**/*.ts",
-    "hooks/**/*.tsx",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
     ".next/types/**/*.ts",
     ".contentlayer/generated"
   ],
   "exclude": [
     "node_modules",
     ".next",
+    "out",
     "public",
-    "tests",
-    "scripts",
-    "patches",
-    "netlify",
-    "emails",
-    "src",
-    "pages/api/ws/**",
-    "pages/resources/**",
-    "pages/strategy/**",
-    "pages/downloads/**"
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }

@@ -19,7 +19,10 @@ interface SearchPaletteProps {
   onClose: () => void;
 }
 
-export default function SearchPalette({ open, onClose }: SearchPaletteProps): JSX.Element | null {
+export default function SearchPalette({
+  open,
+  onClose,
+}: SearchPaletteProps): JSX.Element | null {
   const [query, setQuery] = React.useState("");
   const [items, setItems] = React.useState<SearchItem[] | null>(null);
   const [fuse, setFuse] = React.useState<Fuse<SearchItem> | null>(null);
@@ -36,7 +39,7 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
   // lazy-load the index on first open
   React.useEffect(() => {
     if (!open || items) return;
-    
+
     const loadSearchIndex = async (): Promise<void> => {
       try {
         const res = await fetch("/api/search-index");
@@ -63,27 +66,27 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "Escape") onClose();
     };
-    
+
     if (open) {
       document.addEventListener("keydown", handleKeyDown);
     }
-    
+
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
   // lock background scroll while open
   React.useEffect(() => {
     if (!open) return;
-    
+
     const scrollY = window.scrollY;
     const { style } = document.documentElement;
-    
+
     style.position = "fixed";
     style.top = `-${scrollY}px`;
     style.left = "0";
     style.right = "0";
     style.width = "100%";
-    
+
     return () => {
       style.position = "";
       style.top = "";
@@ -102,7 +105,9 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
     });
   };
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+  const handleInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ): void => {
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -126,7 +131,9 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleBackdropKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
+  const handleBackdropKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>
+  ): void => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onClose();
@@ -135,9 +142,13 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
 
   if (!open) return null;
 
-  const results = query.trim() && fuse
-    ? fuse.search(query).slice(0, 12).map((r) => r.item)
-    : (items || []).slice(0, 12);
+  const results =
+    query.trim() && fuse
+      ? fuse
+          .search(query)
+          .slice(0, 12)
+          .map((r) => r.item)
+      : (items || []).slice(0, 12);
 
   return (
     <div
@@ -195,14 +206,16 @@ export default function SearchPalette({ open, onClose }: SearchPaletteProps): JS
                   </div>
                   <div className="mt-1 font-medium">{result.title}</div>
                   {result.snippet && (
-                    <div className="mt-0.5 line-clamp-2 text-xs opacity-80">{result.snippet}</div>
+                    <div className="mt-0.5 line-clamp-2 text-xs opacity-80">
+                      {result.snippet}
+                    </div>
                   )}
                 </Link>
               </li>
             ))
           )}
         </ul>
-        
+
         <div className="flex items-center justify-between border-t border-neutral-200 px-3 py-2 text-xs text-neutral-500 dark:border-neutral-800">
           <span>Tip: Use ↑ ↓ and Enter</span>
           <span>Esc to close</span>

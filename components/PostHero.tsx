@@ -76,8 +76,8 @@ export default function PostHero({
     coverAspect === "square"
       ? "aspect-[1/1]"
       : coverAspect === "wide"
-      ? "aspect-[16/9]"
-      : "aspect-[2/3]"; // book/portrait
+        ? "aspect-[16/9]"
+        : "aspect-[2/3]"; // book/portrait
 
   // Fit / position
   const fitClass = coverFit === "contain" ? "object-contain" : "object-cover";
@@ -85,14 +85,16 @@ export default function PostHero({
     coverPosition === "left"
       ? "object-left"
       : coverPosition === "right"
-      ? "object-right"
-      : "object-center";
+        ? "object-right"
+        : "object-center";
 
   // Add padding + neutral background when we use `contain`
   const framePadding = coverFit === "contain" ? "p-2 sm:p-3 md:p-4" : "";
   const frameBg = coverFit === "contain" ? "bg-warmWhite" : "bg-transparent";
   const frameBorder =
-    coverFit === "contain" ? "border border-lightGrey/70" : "border border-transparent";
+    coverFit === "contain"
+      ? "border border-lightGrey/70"
+      : "border border-transparent";
 
   return (
     <section className="bg-white dark:bg-black">

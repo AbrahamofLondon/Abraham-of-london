@@ -23,7 +23,9 @@ export type BasicDoc = {
 export function indexBySlug<T extends BasicDoc>(docs: T[]): Record<string, T> {
   const out: Record<string, T> = {};
   for (const d of docs || []) {
-    const key = String(d.slug || "").trim().toLowerCase();
+    const key = String(d.slug || "")
+      .trim()
+      .toLowerCase();
     if (key) out[key] = d;
   }
   return out;
@@ -31,7 +33,7 @@ export function indexBySlug<T extends BasicDoc>(docs: T[]): Record<string, T> {
 
 export function sortByDate<T extends { date?: string }>(docs: T[]): T[] {
   return [...(docs || [])].sort(
-    (a, b) => +new Date(b.date || 0) - +new Date(a.date || 0),
+    (a, b) => +new Date(b.date || 0) - +new Date(a.date || 0)
   );
 }
 
@@ -143,8 +145,8 @@ function mapCanons(): SearchDoc[] {
     .map((c) => ({
       type: "canon" as const,
       slug: c.slug,
-      href: c.url,             // e.g. /canon/canon-campaign
-      url: absUrl(c.url),      // full absolute URL for OG / external use
+      href: c.url, // e.g. /canon/canon-campaign
+      url: absUrl(c.url), // full absolute URL for OG / external use
       title: c.title ?? "Untitled Canon Document",
       date: c.date ?? null,
       excerpt: c.excerpt ?? c.description ?? null,

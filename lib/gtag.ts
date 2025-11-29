@@ -23,7 +23,10 @@ export const pageview = (url: string): void => {
   window.gtag("config", GA_MEASUREMENT_ID, { page_path: url });
 };
 
-export const event = (action: string, params: Record<string, unknown> = {}): void => {
+export const event = (
+  action: string,
+  params: Record<string, unknown> = {}
+): void => {
   if (typeof window === "undefined") return;
   if (!window.gtag) return;
   window.gtag("event", action, params);

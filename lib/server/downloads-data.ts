@@ -10,7 +10,7 @@ import path from "node:path";
 import matter from "gray-matter";
 
 export interface DownloadMeta {
-  slug: string;          // URL slug (filename without extension)
+  slug: string; // URL slug (filename without extension)
   title: string;
   excerpt?: string;
   category?: string;

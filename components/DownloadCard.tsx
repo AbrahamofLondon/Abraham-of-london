@@ -6,13 +6,9 @@ interface DownloadCardProps {
   className?: string;
 }
 
-export default function DownloadCard({ 
-  children, 
-  className = "" 
+export default function DownloadCard({
+  children,
+  className = "",
 }: DownloadCardProps) {
-  return (
-    <div className={`${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${className}`}>{children}</div>;
 }

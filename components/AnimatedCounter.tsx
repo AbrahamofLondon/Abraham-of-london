@@ -55,7 +55,8 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
   return (
     <span className={`font-mono ${className}`}>
-      {count.toLocaleString()}{suffix}
+      {count.toLocaleString()}
+      {suffix}
     </span>
   );
 };

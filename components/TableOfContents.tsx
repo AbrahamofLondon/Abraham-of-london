@@ -40,7 +40,9 @@ export function TableOfContents({
                   "w-full text-left text-xs transition-colors",
                   item.level > 1 ? "pl-4" : "",
                   item.level > 2 ? "pl-8" : "",
-                  isActive ? "text-forest font-semibold" : "text-muted-foreground",
+                  isActive
+                    ? "text-forest font-semibold"
+                    : "text-muted-foreground",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -49,7 +51,10 @@ export function TableOfContents({
                   if (typeof document !== "undefined") {
                     const target = document.getElementById(id);
                     if (target) {
-                      target.scrollIntoView({ behavior: "smooth", block: "start" });
+                      target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                     }
                   }
                 }}

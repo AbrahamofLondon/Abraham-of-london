@@ -49,7 +49,7 @@ const DISPOSABLE_DOMAINS = [
 // Security event logger
 function logSecurityEvent(
   event: string,
-  details: Record<string, unknown>,
+  details: Record<string, unknown>
 ): void {
   const timestamp = new Date().toISOString();
   // eslint-disable-next-line no-console
@@ -113,7 +113,7 @@ function validateName(name: string): { isValid: boolean; error?: string } {
 async function subscribeToMailchimp(
   email: string,
   name?: string,
-  tags: string[] = [],
+  tags: string[] = []
 ): Promise<{ success: boolean; error?: string }> {
   const API_KEY = process.env.MAILCHIMP_API_KEY;
   const API_SERVER = process.env.MAILCHIMP_API_SERVER;
@@ -217,7 +217,7 @@ async function sendNotificationToAbraham(subscriberData: {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<NewsletterResponseBody>,
+  res: NextApiResponse<NewsletterResponseBody>
 ): Promise<void> {
   // Security headers
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -303,9 +303,12 @@ export default async function handler(
   // 🔒 Shared per-IP rate limiting
   const rlKey = getRateLimitKey(
     req,
-    RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE.keyPrefix,
+    RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE.keyPrefix
   );
-  const rateLimitResult = rateLimit(rlKey, RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE);
+  const rateLimitResult = rateLimit(
+    rlKey,
+    RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE
+  );
 
   const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
   Object.entries(rateLimitHeaders).forEach(([key, value]) => {
@@ -341,7 +344,7 @@ export default async function handler(
     recaptchaResult = await verifyRecaptcha(
       recaptchaToken,
       "newsletter_signup",
-      ip,
+      ip
     );
 
     if (!recaptchaResult.success) {
@@ -390,8 +393,7 @@ export default async function handler(
       res.status(400).json({
         ok: false,
         error:
-          mailchimpResult.error ||
-          "Failed to subscribe. Please try again.",
+          mailchimpResult.error || "Failed to subscribe. Please try again.",
       });
       return;
     }

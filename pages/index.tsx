@@ -65,7 +65,7 @@ const fallbackFeaturedPosts: HomePagePost[] = [
       "Life's deepest storms don't wait for your consent. What you build before the rain determines if you'll still be standing after it passes.",
     tag: "Resilience",
     readTime: "8 min",
-    image: "/assets/images/storm-finds-you-preview.jpg",
+    image: "/assets/images/blog/when-storm-finds-you.jpg",
     featured: true,
   },
   {
@@ -75,7 +75,7 @@ const fallbackFeaturedPosts: HomePagePost[] = [
       "Noah was a listener, a builder, and a father. Patterns for today's man who still believes in covenant and consequence.",
     tag: "Fatherhood",
     readTime: "12 min",
-    image: "/assets/images/noah-lessons-preview.jpg",
+    image: "/assets/images/blog/lessons-from-noah.jpg",
     featured: true,
   },
   {
@@ -85,7 +85,7 @@ const fallbackFeaturedPosts: HomePagePost[] = [
       "How to build circles of accountability that withstand pressure and produce legacy.",
     tag: "Brotherhood",
     readTime: "6 min",
-    image: "/assets/images/brotherhood-code-preview.jpg",
+    image: "/assets/images/blog/the-brotherhood-code.jpg",
     featured: false,
   },
 ];
@@ -98,11 +98,12 @@ const featuredBooks = [
     status: "In Development",
     blurb:
       "A real memoir before it becomes an ecosystem – a father navigating injustice, identity, legacy, and the system that hoped he'd disappear quietly.",
-    coverImage: "/assets/images/book-fathering-without-fear.jpg",
+    coverImage: "/assets/images/books/fathering-without-fear.jpg",
     progress: 65,
   },
 ];
 
+// REMOVED DUPLICATE featuredEvents - KEEPING ONLY THIS ONE
 const featuredEvents = [
   {
     slug: "leadership-workshop",
@@ -112,7 +113,7 @@ const featuredEvents = [
     blurb:
       "A masterclass on strategy for founders and leaders who want clarity, not clichés.",
     status: "Limited Spots",
-    image: "/assets/images/event-leadership-workshop.jpg",
+    image: "/assets/images/events/leadership-workshop.jpg",
   },
   {
     slug: "fathers-and-futures",
@@ -122,7 +123,7 @@ const featuredEvents = [
     blurb:
       "A live virtual conversation exploring fatherhood, system shocks, and building legacy in a culture fighting against both.",
     status: "Free Access",
-    image: "/assets/images/event-fathers-futures.jpg",
+    image: "/assets/images/events/default.jpg",
   },
 ];
 
@@ -189,15 +190,15 @@ const corePillars = [
 // Venture URLs
 const alomaradaUrl = pickEnvUrl(
   [ENV_KEYS.ALOMARADA_URL],
-  "https://alomarada.com/",
+  "https://alomarada.com/"
 );
 const endureluxeUrl = pickEnvUrl(
   [ENV_KEYS.ENDURELUXE_URL],
-  "https://alomarada.com/endureluxe",
+  "https://alomarada.com/endureluxe"
 );
 const innovateHubUrl = pickEnvUrl(
   [ENV_KEYS.INNOVATEHUB_URL, ENV_KEYS.INNOVATEHUB_ALT_URL],
-  "https://alomarada.com/hub",
+  "https://alomarada.com/hub"
 );
 
 const ventures = [
@@ -242,7 +243,7 @@ const ventures = [
 // "Start here" tiles mapped to existing content
 const startHereTiles = [
   {
-    label: "If you’re a father",
+    label: "If you're a father",
     title: "Lead at home first",
     description:
       "Start with principles, presence, and patterns your children can feel — not just speeches they can quote.",
@@ -251,7 +252,7 @@ const startHereTiles = [
     icon: Crown,
   },
   {
-    label: "If you’re a founder",
+    label: "If you're a founder",
     title: "Build with discipline",
     description:
       "Move from firefighting to operating cadence. Simple, repeatable tools for founders who carry real weight.",
@@ -260,7 +261,7 @@ const startHereTiles = [
     icon: Target,
   },
   {
-    label: "If you’re a board-level leader",
+    label: "If you're a board-level leader",
     title: "Think in systems",
     description:
       "Clarify narrative, focus on value, and steward trust with clean, board-ready communication.",
@@ -302,7 +303,7 @@ const scaleIn = {
 // ============================================================================
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // For now we don’t pull live posts here; we rely on fallbackFeaturedPosts.
+  // For now we don't pull live posts here; we rely on fallbackFeaturedPosts.
   return {
     props: { posts: [] },
     revalidate: 3600,
@@ -383,7 +384,7 @@ const HomePage: React.FC<HomePageProps> = () => {
               consequence, and covenant.
             </>
           }
-          backgroundImage="/assets/images/abraham-of-london-banner.webp"
+          backgroundImage="/assets/images/abraham-of-london-banner@2560.webp"
           overlayOpacity={0.5}
           height="100vh"
           ctaText="Start with the right tools"
@@ -440,12 +441,12 @@ const HomePage: React.FC<HomePageProps> = () => {
 
           <div className="mt-2 flex flex-col gap-2 text-sm text-gray-300 md:mt-0 md:text-right">
             <p>
-              <span className="font-semibold text-softGold">Who it’s for:</span>{" "}
+              <span className="font-semibold text-softGold">Who it's for:</span>{" "}
               fathers, founders, and board-level leaders.
             </p>
             <p>
               <span className="font-semibold text-softGold">
-                What you’ll get:
+                What you'll get:
               </span>{" "}
               field-ready frameworks, not vague motivation.
             </p>
@@ -473,7 +474,7 @@ const HomePage: React.FC<HomePageProps> = () => {
               Start Where It Matters Most
             </h2>
             <p className="mx-auto max-w-3xl text-lg text-gray-300">
-              Whether you’re leading a home, a company, or a boardroom, start
+              Whether you're leading a home, a company, or a boardroom, start
               with one concrete move you can make this week.
             </p>
           </motion.div>
@@ -963,9 +964,7 @@ const HomePage: React.FC<HomePageProps> = () => {
                       </span>
                     </div>
 
-                    <p className="mb-4 text-sm text-gray-300">
-                      {event.blurb}
-                    </p>
+                    <p className="mb-4 text-sm text-gray-300">{event.blurb}</p>
 
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1 text-xs text-gray-400">
@@ -1040,8 +1039,8 @@ const HomePage: React.FC<HomePageProps> = () => {
                           venture.status === "Active"
                             ? "bg-green-100 text-green-800"
                             : venture.status === "Emerging"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-amber-100 text-amber-800"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-amber-100 text-amber-800"
                         }`}
                       >
                         {venture.status}
@@ -1115,8 +1114,8 @@ const HomePage: React.FC<HomePageProps> = () => {
                 className="mx-auto mb-8 max-w-2xl text-xl text-gray-300"
               >
                 Occasional, high-signal emails with new frameworks, case
-                studies, and private invites — designed for men who would
-                rather build in reality than posture online.
+                studies, and private invites — designed for men who would rather
+                build in reality than posture online.
               </motion.p>
 
               <motion.div variants={fadeInUp} className="mx-auto max-w-md">

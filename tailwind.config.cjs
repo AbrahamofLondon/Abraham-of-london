@@ -16,9 +16,9 @@ module.exports = {
         charcoal: "#15171c",
         forest: "#0e3b33",
         // Using semantic names to be consistent with the CSS variables
-        'aol-bg': 'var(--aol-bg)', 
-        'aol-surface': 'var(--aol-surface)',
-        'aol-text': 'var(--aol-text)',
+        "aol-bg": "var(--aol-bg)",
+        "aol-surface": "var(--aol-surface)",
+        "aol-text": "var(--aol-text)",
       },
       fontFamily: {
         sans: [
@@ -46,12 +46,12 @@ module.exports = {
             maxWidth: "none",
             // General text color should inherit from the body (which uses --aol-text)
             color: theme("colors.gray.900"), // Default dark for light mode
-            'p, li, em': { color: theme("colors.gray.900") },
+            "p, li, em": { color: theme("colors.gray.900") },
             strong: {
               color: theme("colors.black"),
               fontWeight: 600,
             },
-            'h1, h2, h3, h4': {
+            "h1, h2, h3, h4": {
               color: theme("colors.black"),
               fontFamily: theme("fontFamily.serif").join(","),
             },
@@ -75,9 +75,9 @@ module.exports = {
             hr: {
               borderColor: theme("colors.gray.200"),
             },
-            'code, pre': {
-              color: theme("colors.deepCharcoal"), 
-              backgroundColor: theme("colors.gray.100"), 
+            "code, pre": {
+              color: theme("colors.deepCharcoal"),
+              backgroundColor: theme("colors.gray.100"),
             },
           },
         },
@@ -86,9 +86,9 @@ module.exports = {
           css: {
             maxWidth: "none",
             // General text color for dark mode
-            'color, p, li, em': { color: theme("colors.slate.100") }, 
+            "color, p, li, em": { color: theme("colors.slate.100") },
             strong: { color: theme("colors.white") },
-            'h1, h2, h3, h4': {
+            "h1, h2, h3, h4": {
               color: theme("colors.white"),
               fontFamily: theme("fontFamily.serif").join(","),
             },

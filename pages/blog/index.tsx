@@ -1,6 +1,6 @@
-import React from 'react';
-import Head from 'next/head';
-import Layout from '@/components/Layout';
+import React from "react";
+import Head from "next/head";
+import Layout from "@/components/Layout";
 
 interface Book {
   id: string;
@@ -17,16 +17,16 @@ interface BooksPageProps {
 
 export default function BooksPage({ books = [] }: BooksPageProps) {
   return (
-    <Layout 
-      title="Books" 
+    <Layout
+      title="Books"
       pageTitle="Recommended Books"
       transparentHeader={false}
     >
       <Head>
         <title>Recommended Books | Abraham of London</title>
-        <meta 
-          name="description" 
-          content="Curated book recommendations from Abraham of London." 
+        <meta
+          name="description"
+          content="Curated book recommendations from Abraham of London."
         />
       </Head>
 
@@ -45,7 +45,7 @@ export default function BooksPage({ books = [] }: BooksPageProps) {
         {books && books.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {books.map((book) => (
-              <article 
+              <article
                 key={book.id}
                 className="bg-charcoal-light border border-gold/20 rounded-lg overflow-hidden hover:border-gold/40 transition-colors group"
               >
@@ -79,7 +79,7 @@ export async function getStaticProps() {
     // Your data fetching logic here
     // Example:
     const books: Book[] = []; // Replace with actual data fetching
-    
+
     return {
       props: {
         books,
@@ -87,7 +87,7 @@ export async function getStaticProps() {
       revalidate: 60,
     };
   } catch (error) {
-    console.error('Error fetching books:', error);
+    console.error("Error fetching books:", error);
     // Return empty props to prevent build failure
     return {
       props: {

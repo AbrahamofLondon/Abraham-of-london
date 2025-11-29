@@ -22,7 +22,10 @@ declare global {
   interface Window {
     gtag: (...args: unknown[]) => void;
     dataLayer: unknown[];
-    plausible?: (event: string, options?: { props: Record<string, any> }) => void;
+    plausible?: (
+      event: string,
+      options?: { props: Record<string, any> }
+    ) => void;
   }
 
   // API response types
@@ -52,7 +55,7 @@ declare global {
   }
 
   // Missing module declarations
-  declare module '...' {
+  declare module "..." {
     export const useTheme: any;
     export const motion: any;
     export const useRouter: any;
@@ -85,7 +88,7 @@ declare global {
   }
 
   // Netlify Functions
-  declare module '@netlify/functions' {
+  declare module "@netlify/functions" {
     export interface Handler {
       (event: any, context?: any): Promise<any>;
     }
@@ -97,11 +100,11 @@ declare global {
   }
 
   // External libraries
-  declare module 'fuse.js';
-  declare module 'ws';
-  declare module 'rehype-autolink-headings';
-  declare module 'rehype-external-links';
-  declare module '@react-email/components';
+  declare module "fuse.js";
+  declare module "ws";
+  declare module "rehype-autolink-headings";
+  declare module "rehype-external-links";
+  declare module "@react-email/components";
 
   // Environment variables (extended with your actual env vars)
   namespace NodeJS {

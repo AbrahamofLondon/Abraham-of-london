@@ -29,7 +29,7 @@ const ADMIN_API_KEY = process.env.INNER_CIRCLE_ADMIN_KEY ?? "";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<AdminExportResponse>,
+  res: NextApiResponse<AdminExportResponse>
 ): Promise<void> {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -37,14 +37,17 @@ export default async function handler(
     return;
   }
 
-  if (!ADMIN_API_KEY || req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY) {
+  if (
+    !ADMIN_API_KEY ||
+    req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY
+  ) {
     res.status(401).json({ ok: false, error: "Unauthorized" });
     return;
   }
 
   const rl = rateLimit(
     "inner-circle-admin-export",
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT,
+    RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT
   );
   const rlHeaders = createRateLimitHeaders(rl);
   Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));

@@ -173,7 +173,7 @@ export const HERO_BANNERS: HeroBannerConfig[] = [
 // -----------------------------------------------------------------------------
 
 export function getHeroBannerByKey(
-  key: HeroBannerKey | string,
+  key: HeroBannerKey | string
 ): HeroBannerConfig {
   const normalized = key as HeroBannerKey;
   return HERO_BANNERS.find((b) => b.key === normalized) ?? DEFAULT_HERO;
@@ -184,7 +184,7 @@ export function getHeroBannerForRoute(route: string): HeroBannerConfig {
   const cleanRoute = route.split("?")[0].split("#")[0] || "/";
   return (
     HERO_BANNERS.find(
-      (b) => b.route && b.route.toLowerCase() === cleanRoute.toLowerCase(),
+      (b) => b.route && b.route.toLowerCase() === cleanRoute.toLowerCase()
     ) ?? DEFAULT_HERO
   );
 }

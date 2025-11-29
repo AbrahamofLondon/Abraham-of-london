@@ -9,7 +9,7 @@ declare module "@/types/post" {
     subtitle?: string;
     tags?: string[];
     author?: string;
-    status?: 'published' | 'draft' | 'archived';
+    status?: "published" | "draft" | "archived";
     featured?: boolean;
     image?: string;
     imageAlt?: string;
@@ -29,7 +29,7 @@ declare module "@/types/post" {
     subtitle?: string;
     tags?: string[];
     author?: string;
-    status?: 'published' | 'draft' | 'archived';
+    status?: "published" | "draft" | "archived";
     featured?: boolean;
     image?: string;
     imageAlt?: string;

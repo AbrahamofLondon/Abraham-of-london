@@ -13,9 +13,9 @@ export default function CTA({ floatingOnMobile = true }: Props) {
   useEffect(() => {
     // Check for iOS safe area support
     if (typeof window !== "undefined") {
-      const safeAreaTest = getComputedStyle(document.documentElement).getPropertyValue(
-        "--satest"
-      );
+      const safeAreaTest = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--satest");
       setHasSafeArea(!!safeAreaTest);
     }
   }, []);
@@ -27,10 +27,16 @@ export default function CTA({ floatingOnMobile = true }: Props) {
         aria-label="Call +44 208 622 5909"
         className="grid h-12 w-12 place-items-center rounded-full border border-black/10 bg-white text-emerald-700 shadow ring-1 ring-black/5 transition-colors hover:bg-emerald-50"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path 
-            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.55 2.61a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 7 7l.56-1.16a2 2 0 0 1 2.11-.45c.84.25 1.71.43 2.61.55A2 2 0 0 1 22 16.92Z" 
-            stroke="currentColor" 
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.55 2.61a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 7 7l.56-1.16a2 2 0 0 1 2.11-.45c.84.25 1.71.43 2.61.55A2 2 0 0 1 22 16.92Z"
+            stroke="currentColor"
             strokeWidth="2"
           />
         </svg>

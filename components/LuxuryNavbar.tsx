@@ -3,28 +3,61 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-
 import ThemeToggle from "@/components/ThemeToggle";
-import { siteConfig, getRoutePath, type RouteId } from "@/lib/siteConfig";
+
+// Self-contained types and configuration
+type RouteId =
+  | "home"
+  | "about"
+  | "blogIndex"
+  | "contentIndex"
+  | "booksIndex"
+  | "canonIndex"
+  | "ventures"
+  | "downloadsIndex"
+  | "strategyLanding"
+  | "contact";
 
 type LuxuryNavbarProps = {
   variant?: "light" | "dark";
   transparent?: boolean;
 };
 
+// Local route configuration
+const LOCAL_ROUTES: Record<RouteId, string> = {
+  home: "/",
+  about: "/about",
+  blogIndex: "/blog",
+  contentIndex: "/content",
+  booksIndex: "/books",
+  canonIndex: "/canon",
+  ventures: "/ventures",
+  downloadsIndex: "/downloads",
+  strategyLanding: "/strategy",
+  contact: "/contact",
+};
+
+// Local site configuration
+const LOCAL_CONFIG = {
+  email: "info@abrahamoflondon.org",
+  phone: "+442086225909",
+  title: "Abraham of London",
+};
+
+// Safe route path resolver
+const getRoutePath = (route: RouteId): string => {
+  return LOCAL_ROUTES[route] || "/";
+};
+
 const NAV_ITEMS: { route: RouteId; label: string }[] = [
   { route: "booksIndex", label: "Books" },
-  { route: "contentIndex", label: "Insights" },
+  { route: "blogIndex", label: "Insights" },
   { route: "ventures", label: "Ventures" },
   { route: "about", label: "About" },
   { route: "contact", label: "Contact" },
 ];
-
-interface SiteConfigWithPhone {
-  email?: string;
-  phone?: string | number;
-}
 
 export default function LuxuryNavbar({
   variant = "dark",
@@ -32,8 +65,9 @@ export default function LuxuryNavbar({
 }: LuxuryNavbarProps): JSX.Element {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-  const [path, setPath] = React.useState<string>("/");
   const [mounted, setMounted] = React.useState(false);
+
+  const currentPath = usePathname();
 
   // Mark mounted to avoid SSR/CSR mismatch
   React.useEffect(() => {
@@ -49,41 +83,21 @@ export default function LuxuryNavbar({
       setScrolled(isScrolled);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Track current path for active states
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const updatePath = () => {
-      setPath(window.location.pathname || "/");
-    };
-
-    updatePath();
-
-    const onPopState = () => {
-      setTimeout(updatePath, 10);
-    };
-
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      const link = target?.closest("a[href]");
-      if (link && link.getAttribute("href")?.startsWith("/")) {
-        setTimeout(updatePath, 50);
+    let ticking = false;
+    const scrollListener = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener("popstate", onPopState);
-    document.addEventListener("click", onClick, true);
+    window.addEventListener("scroll", scrollListener, { passive: true });
+    handleScroll();
 
-    return () => {
-      window.removeEventListener("popstate", onPopState);
-      document.removeEventListener("click", onClick, true);
-    };
+    return () => window.removeEventListener("scroll", scrollListener);
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -92,19 +106,39 @@ export default function LuxuryNavbar({
 
     if (!isOpen) return;
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const scrollY = window.scrollY;
+    const body = document.body;
+
+    // Store original styles
+    const originalStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      overflow: body.style.overflow,
+    };
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = prevOverflow;
+      body.style.position = originalStyles.position;
+      body.style.top = originalStyles.top;
+      body.style.left = originalStyles.left;
+      body.style.right = originalStyles.right;
+      body.style.overflow = originalStyles.overflow;
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
   const isActive = (route: RouteId) => {
     if (!mounted) return false;
     const href = getRoutePath(route);
-    if (href === "/") return path === "/";
-    return path === href || path.startsWith(href + "/");
+    if (href === "/") return currentPath === "/";
+    return currentPath === href || currentPath?.startsWith(href + "/");
   };
 
   const isDarkVariant = variant === "dark";
@@ -112,57 +146,58 @@ export default function LuxuryNavbar({
   const headerShell =
     scrolled || !transparent
       ? isDarkVariant
-        ? "bg-black/70 border-b border-gold/20 backdrop-blur-md"
-        : "bg-white/90 border-b border-black/10 backdrop-blur-md"
-      : "bg-transparent";
+        ? "bg-black/95 border-b border-amber-500/20 backdrop-blur-xl shadow-2xl"
+        : "bg-white/95 border-b border-gray-200/80 backdrop-blur-xl shadow-lg"
+      : "bg-transparent border-transparent";
 
-  const linkBase =
-    isDarkVariant
-      ? "text-cream/80 hover:text-gold"
-      : "text-deepCharcoal/80 hover:text-deepCharcoal";
+  const linkBase = isDarkVariant
+    ? "text-gray-100 hover:text-amber-400 transition-colors duration-300"
+    : "text-gray-700 hover:text-gray-900 transition-colors duration-300";
 
-  const activeUnderline = isDarkVariant ? "bg-gold" : "bg-deepCharcoal";
+  const activeUnderline = isDarkVariant ? "bg-amber-500" : "bg-gray-900";
 
-  const siteConfigWithPhone = siteConfig as SiteConfigWithPhone;
-  const EMAIL = siteConfigWithPhone?.email || "info@abrahamoflondon.org";
-  const PHONE =
-    siteConfigWithPhone?.phone?.toString().trim() || "+442086225909";
+  const mobileNavBackground = isDarkVariant
+    ? "bg-gray-900/98 border-amber-500/20 backdrop-blur-2xl"
+    : "bg-white/98 border-gray-200/80 backdrop-blur-2xl";
+
+  const EMAIL = LOCAL_CONFIG.email;
+  const PHONE = LOCAL_CONFIG.phone;
 
   return (
     <>
       <header
-        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${headerShell}`}
+        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ease-out ${headerShell}`}
       >
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between">
             {/* Brand */}
             <Link
               href={getRoutePath("home")}
-              className="font-serif text-2xl font-bold text-gold transition-opacity hover:opacity-80"
-              prefetch
+              className="font-serif text-2xl font-bold text-amber-500 transition-all duration-300 hover:scale-105 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded-lg"
+              prefetch={true}
             >
               Abraham of London
             </Link>
 
             {/* Desktop nav */}
             <div className="hidden items-center gap-8 lg:flex">
-              <ul className="flex items-center gap-6">
+              <ul className="flex items-center gap-8">
                 {NAV_ITEMS.map((item) => (
                   <li key={item.route} className="relative">
                     <Link
                       href={getRoutePath(item.route)}
-                      className={`text-sm font-medium transition-colors ${linkBase}`}
+                      className={`text-sm font-semibold tracking-wide ${linkBase} focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded-lg px-2 py-1`}
                       aria-current={isActive(item.route) ? "page" : undefined}
-                      prefetch
+                      prefetch={true}
                     >
                       {item.label}
                     </Link>
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none absolute -bottom-1 left-0 block h-[2px] transition-all ${
+                      className={`pointer-events-none absolute -bottom-1 left-0 block h-0.5 transition-all duration-300 ${
                         isActive(item.route)
                           ? `w-full ${activeUnderline}`
-                          : "w-0"
+                          : "w-0 opacity-0"
                       }`}
                     />
                   </li>
@@ -171,25 +206,25 @@ export default function LuxuryNavbar({
             </div>
 
             {/* Desktop actions */}
-            <div className="hidden items-center gap-4 lg:flex">
+            <div className="hidden items-center gap-6 lg:flex">
               <a
                 href={`mailto:${EMAIL}`}
-                className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+                className={`text-sm font-medium underline-offset-4 hover:underline ${linkBase} transition-all duration-300`}
               >
                 Email
               </a>
               {PHONE && (
                 <a
                   href={`tel:${PHONE.replace(/\s+/g, "")}`}
-                  className={`text-sm underline-offset-4 hover:underline ${linkBase}`}
+                  className={`text-sm font-medium underline-offset-4 hover:underline ${linkBase} transition-all duration-300`}
                 >
                   Call
                 </a>
               )}
               <Link
                 href={getRoutePath("contact")}
-                className="rounded-full bg-gold px-6 py-2 text-sm font-semibold text-charcoal transition-all hover:bg-amber-200 focus:outline-none focus-visible:ring-2"
-                prefetch
+                className="rounded-full bg-amber-500 px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 focus:ring-offset-black"
+                prefetch={true}
               >
                 Enquire
               </Link>
@@ -197,19 +232,25 @@ export default function LuxuryNavbar({
             </div>
 
             {/* Mobile controls */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-3 lg:hidden">
               <ThemeToggle size="sm" />
               <button
                 type="button"
                 onClick={() => setIsOpen((o) => !o)}
-                className={`p-2 ${
-                  isDarkVariant ? "text-cream" : "text-deepCharcoal"
-                } transition-colors hover:text-gold`}
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  isDarkVariant
+                    ? "text-gray-100 hover:bg-white/10 hover:text-amber-400"
+                    : "text-gray-700 hover:bg-black/5 hover:text-gray-900"
+                } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
                 aria-label="Toggle menu"
                 aria-expanded={isOpen}
                 aria-controls="mobile-nav"
               >
-                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </button>
             </div>
           </div>
@@ -218,42 +259,62 @@ export default function LuxuryNavbar({
           {isOpen && (
             <div
               id="mobile-nav"
-              className={`lg:hidden border-t backdrop-blur-md ${
-                isDarkVariant
-                  ? "border-gold/20 bg-black/95"
-                  : "border-black/10 bg-white/95"
-              }`}
+              className={`lg:hidden border-t backdrop-blur-xl transition-all duration-300 ${mobileNavBackground}`}
             >
-              <div className="space-y-4 px-4 py-6">
+              <div className="space-y-1 px-4 py-6">
                 {NAV_ITEMS.map((item) => (
                   <Link
                     key={item.route}
                     href={getRoutePath(item.route)}
                     onClick={() => setIsOpen(false)}
-                    className={`block rounded-md px-2 py-2 text-base font-medium transition-colors ${
+                    className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${
                       isActive(item.route)
                         ? isDarkVariant
-                          ? "bg-white/10 text-cream"
-                          : "bg-black/5 text-deepCharcoal"
+                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                          : "bg-amber-500/10 text-gray-900 border border-amber-500/20"
                         : isDarkVariant
-                        ? "text-cream/80 hover:text-gold hover:bg-white/10"
-                        : "text-deepCharcoal/80 hover:text-deepCharcoal hover:bg-black/5"
-                    }`}
+                          ? "text-gray-100 hover:text-amber-400 hover:bg-white/10 border border-transparent"
+                          : "text-gray-700 hover:text-gray-900 hover:bg-black/5 border border-transparent"
+                    } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
                     aria-current={isActive(item.route) ? "page" : undefined}
-                    prefetch
+                    prefetch={true}
                   >
                     {item.label}
                   </Link>
                 ))}
 
-                <div className="pt-3">
+                <div className="pt-4 space-y-3">
+                  <a
+                    href={`mailto:${EMAIL}`}
+                    onClick={() => setIsOpen(false)}
+                    className={`block rounded-lg px-4 py-3 text-base font-semibold text-center transition-all duration-300 ${
+                      isDarkVariant
+                        ? "bg-gray-800 text-gray-100 hover:bg-gray-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
+                  >
+                    Email Us
+                  </a>
+                  {PHONE && (
+                    <a
+                      href={`tel:${PHONE.replace(/\s+/g, "")}`}
+                      onClick={() => setIsOpen(false)}
+                      className={`block rounded-lg px-4 py-3 text-base font-semibold text-center transition-all duration-300 ${
+                        isDarkVariant
+                          ? "bg-gray-800 text-gray-100 hover:bg-gray-700"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
+                    >
+                      Call Us
+                    </a>
+                  )}
                   <Link
                     href={getRoutePath("contact")}
                     onClick={() => setIsOpen(false)}
-                    className="block rounded-full bg-gold px-6 py-3 text-center text-sm font-semibold text-charcoal transition-all hover:bg-amber-200 focus:outline-none focus-visible:ring-2"
-                    prefetch
+                    className="block rounded-full bg-amber-500 px-6 py-4 text-center text-base font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2"
+                    prefetch={true}
                   >
-                    Enquire
+                    Enquire Now
                   </Link>
                 </div>
               </div>
@@ -262,7 +323,7 @@ export default function LuxuryNavbar({
         </nav>
       </header>
 
-      {/* Padding for fixed header */}
+      {/* Enhanced global styles */}
       <style jsx global>{`
         main {
           padding-top: 5rem;
@@ -270,6 +331,30 @@ export default function LuxuryNavbar({
         @media (max-width: 1024px) {
           main {
             padding-top: 5rem;
+          }
+        }
+
+        /* Smooth scrolling for the whole site */
+        html {
+          scroll-behavior: smooth;
+        }
+
+        /* Focus styles for accessibility */
+        *:focus-visible {
+          outline: 2px solid #f59e0b;
+          outline-offset: 2px;
+        }
+
+        /* Reduced motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+          
+          html {
+            scroll-behavior: auto;
           }
         }
       `}</style>
