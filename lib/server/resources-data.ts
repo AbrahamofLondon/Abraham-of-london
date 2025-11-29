@@ -15,7 +15,7 @@ export type ResourceMeta = {
   description?: string;
   date?: string;
   tags?: string[];
-  href?: string;  // /resources/[slug]
+  href?: string; // /resources/[slug]
   [key: string]: unknown;
 };
 
@@ -34,10 +34,7 @@ function loadAllResourcesFromFs(): ResourceMeta[] {
       .trim()
       .replace(/^\/+|\/+$/g, "");
 
-    const title =
-      (data.title as string | undefined) ||
-      slug ||
-      "Untitled resource";
+    const title = (data.title as string | undefined) || slug || "Untitled resource";
 
     const category = (data.category as string | undefined) || undefined;
 
@@ -47,13 +44,15 @@ function loadAllResourcesFromFs(): ResourceMeta[] {
       (data.description as string | undefined) ||
       undefined;
 
-    const description =
-      (data.description as string | undefined) || undefined;
+    const description = (data.description as string | undefined) || undefined;
 
     const date = (data.date as string | undefined) || undefined;
 
     const tags = Array.isArray(data.tags)
-      ? data.tags.map((t: unknown) => String(t))
+      ? data.tags.map((t: unknown) => {
+          if (t === null || t === undefined) return "";
+          return typeof t === "string" ? t : String(t);
+        })
       : undefined;
 
     return {
@@ -92,16 +91,12 @@ export function getResourceSlugs(): string[] {
 
 export function getResourceBySlug(slug: string): ResourceMeta | undefined {
   const key = String(slug || "").toLowerCase();
-  return allResources().find(
-    (r) => String(r.slug || "").toLowerCase() === key,
-  );
+  return allResources().find((r) => String(r.slug || "").toLowerCase() === key);
 }
 
 export function getResourcesBySlugs(slugs: string[]): ResourceMeta[] {
   const keys = new Set(slugs.map((s) => String(s || "").toLowerCase()));
-  return allResources().filter((r) =>
-    keys.has(String(r.slug || "").toLowerCase()),
-  );
+  return allResources().filter((r) => keys.has(String(r.slug || "").toLowerCase()));
 }
 
 export function getAllContent(): ResourceMeta[] {

@@ -1,55 +1,74 @@
 // pages/api/admin/inner-circle/export.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { exportInnerCircleAdminSummary } from "@/lib/innerCircleMembership";
+import {
+  rateLimit,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/server/rateLimit";
+import {
+  exportInnerCircleAdminSummary,
+  getPrivacySafeStats,
+} from "@/lib/innerCircleMembership";
 
 type AdminExportRow = {
   created_at: string;
-  status: "active" | "revoked";
+  status: string;
   key_suffix: string;
   email_hash_prefix: string;
   total_unlocks: number;
 };
 
-type AdminResponse =
-  | { ok: true; rows: AdminExportRow[] }
-  | { ok: false; error: string };
+type AdminExportResponse = {
+  ok: boolean;
+  rows?: AdminExportRow[];
+  stats?: Awaited<ReturnType<typeof getPrivacySafeStats>>;
+  error?: string;
+};
 
-const ADMIN_BEARER_TOKEN = process.env.INNER_CIRCLE_ADMIN_TOKEN;
+const ADMIN_API_KEY = process.env.INNER_CIRCLE_ADMIN_KEY ?? "";
 
-/**
- * Simple token-based protection for admin export.
- * Call with:
- *   Authorization: Bearer <INNER_CIRCLE_ADMIN_TOKEN>
- */
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<AdminResponse>,
-): void {
+  res: NextApiResponse<AdminExportResponse>,
+): Promise<void> {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     res.status(405).json({ ok: false, error: "Method not allowed" });
     return;
   }
 
-  if (!ADMIN_BEARER_TOKEN) {
-    res.status(500).json({
-      ok: false,
-      error: "Admin export is not configured (missing token).",
-    });
-    return;
-  }
-
-  const authHeader = req.headers.authorization ?? "";
-  const token =
-    typeof authHeader === "string" && authHeader.startsWith("Bearer ")
-      ? authHeader.slice(7).trim()
-      : "";
-
-  if (!token || token !== ADMIN_BEARER_TOKEN) {
+  if (!ADMIN_API_KEY || req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY) {
     res.status(401).json({ ok: false, error: "Unauthorized" });
     return;
   }
 
-  const rows = exportInnerCircleAdminSummary();
-  res.status(200).json({ ok: true, rows });
+  const rl = rateLimit(
+    "inner-circle-admin-export",
+    RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT,
+  );
+  const rlHeaders = createRateLimitHeaders(rl);
+  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+  if (!rl.allowed) {
+    res.status(429).json({ ok: false, error: "Rate limit exceeded" });
+    return;
+  }
+
+  try {
+    const [rows, stats] = await Promise.all([
+      exportInnerCircleAdminSummary(),
+      getPrivacySafeStats(),
+    ]);
+
+    res.status(200).json({
+      ok: true,
+      rows,
+      stats,
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to export summary",
+    });
+  }
 }

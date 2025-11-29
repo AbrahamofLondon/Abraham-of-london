@@ -7,19 +7,15 @@ import Layout from '@/components/Layout';
 import { getAllBooks } from '@/lib/books';
 import type { BookMeta } from '@/types/index';
 
-// Extended type to include missing properties
-interface ExtendedBookMeta extends BookMeta {
-  accessLevel?: string;
-  lockMessage?: string;
-  status?: string;
+interface BooksPageProps {
+  books: BookMeta[];
 }
 
-interface BooksPageProps {
-  books: ExtendedBookMeta[];
-}
+// Remove ExtendedBookMeta interface - use BookMeta directly since we updated types/index.ts
+// BookMeta now includes accessLevel and lockMessage from BaseContentMeta
 
 // Enhanced Featured Book Card Component
-function FeaturedBookCard({ book, index }: { book: ExtendedBookMeta; index: number }) {
+function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
   
   return (
@@ -139,7 +135,7 @@ function FeaturedBookCard({ book, index }: { book: ExtendedBookMeta; index: numb
 }
 
 // Enhanced Regular Book Card Component
-function BookCard({ book, index }: { book: ExtendedBookMeta; index: number }) {
+function BookCard({ book, index }: { book: BookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
   
   return (
@@ -371,8 +367,9 @@ export async function getStaticProps() {
   try {
     const books = await getAllBooks();
     
-    // Ensure ALL data is serializable - replace undefined with null
-    const serializableBooks: ExtendedBookMeta[] = books.map(book => ({
+    // Since we updated types/index.ts, BookMeta now includes accessLevel and lockMessage
+    // We just need to ensure all data is serializable
+    const serializableBooks = books.map(book => ({
       ...book,
       // Required fields
       slug: book.slug,
@@ -394,6 +391,8 @@ export async function getStaticProps() {
       language: book.language ?? null,
       price: book.price ?? null,
       purchaseLink: book.purchaseLink ?? null,
+      accessLevel: book.accessLevel ?? null,
+      lockMessage: book.lockMessage ?? null,
       
       // Array fields
       tags: book.tags ?? [],
@@ -407,12 +406,10 @@ export async function getStaticProps() {
       published: book.published ?? false,
       draft: book.draft ?? false,
       
-      // Access level fields (with proper typing)
-      accessLevel: (book as any).accessLevel ?? null,
-      lockMessage: (book as any).lockMessage ?? null,
-      status: (book as any).status ?? null,
+      // Status field - use the existing BookMeta status type
+      status: book.status ?? null,
       
-      // Typed fields
+      // Format field
       format: book.format ?? null,
     }));
 
