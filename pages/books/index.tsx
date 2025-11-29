@@ -7,111 +7,19 @@ import Layout from '@/components/Layout';
 import { getAllBooks } from '@/lib/books';
 import type { BookMeta } from '@/types/index';
 
-interface BooksPageProps {
-  books: BookMeta[];
+// Extended type to include missing properties
+interface ExtendedBookMeta extends BookMeta {
+  accessLevel?: string;
+  lockMessage?: string;
+  status?: string;
 }
 
-export default function BooksPage({ books }: BooksPageProps) {
-  const hasBooks = books && books.length > 0;
-  
-  // Separate featured and regular books
-  const featuredBooks = books.filter(book => book.featured);
-  const regularBooks = books.filter(book => !book.featured);
-
-  return (
-    <Layout 
-      title="Books & Publications" 
-      pageTitle="Books & Publications"
-      transparentHeader={false}
-    >
-      <Head>
-        <title>Books & Publications | Abraham of London</title>
-        <meta 
-          name="description" 
-          content="Curated book recommendations and publications from Abraham of London. Deep explorations of purpose, responsibility, and the architecture of enduring things." 
-        />
-        <meta property="og:title" content="Books & Publications | Abraham of London" />
-        <meta property="og:description" content="Curated book recommendations and publications for thoughtful leaders and builders." />
-        <meta property="og:type" content="website" />
-      </Head>
-
-      {/* Enhanced Hero Section */}
-      <div className="relative bg-gradient-to-br from-charcoal via-charcoal-dark to-black min-h-[60vh] flex items-center justify-center overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-softGold/10 via-transparent to-transparent"></div>
-        
-        {/* Animated Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-softGold/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-softGold/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
-
-        <div className="relative text-center px-6 max-w-4xl mx-auto">
-          <div className="mb-6">
-            <span className="inline-block px-4 py-2 rounded-full bg-softGold/10 border border-softGold/30 text-softGold text-sm font-semibold uppercase tracking-[0.2em] mb-4">
-              Library Collection
-            </span>
-          </div>
-          
-          <h1 className="font-serif text-5xl lg:text-7xl font-light text-cream mb-6 leading-tight">
-            Books &<br />
-            <span className="text-softGold">Publications</span>
-          </h1>
-          
-          <p className="text-xl lg:text-2xl text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
-            Curated readings and original works for thoughtful leaders, builders, 
-            and those shaping the architecture of human purpose.
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-16 lg:py-24">
-        {/* Featured Books Section */}
-        {featuredBooks.length > 0 && (
-          <section className="mb-20">
-            <div className="text-center mb-12">
-              <h2 className="font-serif text-3xl lg:text-4xl text-cream mb-4">
-                Featured Works
-              </h2>
-              <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                Essential reading for understanding purpose, civilisation, and the builder's calling
-              </p>
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-2">
-              {featuredBooks.map((book, index) => (
-                <FeaturedBookCard key={book.slug} book={book} index={index} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* All Books Grid */}
-        {hasBooks ? (
-          <section>
-            <div className="text-center mb-12">
-              <h2 className="font-serif text-3xl lg:text-4xl text-cream mb-4">
-                Complete Collection
-              </h2>
-              <p className="text-lg text-gray-300">
-                All published works and recommended readings
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {regularBooks.map((book, index) => (
-                <BookCard key={book.slug} book={book} index={index} />
-              ))}
-            </div>
-          </section>
-        ) : (
-          <EmptyState />
-        )}
-      </div>
-    </Layout>
-  );
+interface BooksPageProps {
+  books: ExtendedBookMeta[];
 }
 
 // Enhanced Featured Book Card Component
-function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
+function FeaturedBookCard({ book, index }: { book: ExtendedBookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
   
   return (
@@ -231,7 +139,7 @@ function FeaturedBookCard({ book, index }: { book: BookMeta; index: number }) {
 }
 
 // Enhanced Regular Book Card Component
-function BookCard({ book, index }: { book: BookMeta; index: number }) {
+function BookCard({ book, index }: { book: ExtendedBookMeta; index: number }) {
   const isInnerCircle = book.accessLevel === "inner-circle";
   
   return (
@@ -360,12 +268,111 @@ function EmptyState() {
   );
 }
 
+export default function BooksPage({ books }: BooksPageProps) {
+  const hasBooks = books && books.length > 0;
+  
+  // Separate featured and regular books
+  const featuredBooks = books.filter(book => book.featured);
+  const regularBooks = books.filter(book => !book.featured);
+
+  return (
+    <Layout 
+      title="Books & Publications" 
+      pageTitle="Books & Publications"
+      transparentHeader={false}
+    >
+      <Head>
+        <title>Books & Publications | Abraham of London</title>
+        <meta 
+          name="description" 
+          content="Curated book recommendations and publications from Abraham of London. Deep explorations of purpose, responsibility, and the architecture of enduring things." 
+        />
+        <meta property="og:title" content="Books & Publications | Abraham of London" />
+        <meta property="og:description" content="Curated book recommendations and publications for thoughtful leaders and builders." />
+        <meta property="og:type" content="website" />
+      </Head>
+
+      {/* Enhanced Hero Section */}
+      <div className="relative bg-gradient-to-br from-charcoal via-charcoal-dark to-black min-h-[60vh] flex items-center justify-center overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-softGold/10 via-transparent to-transparent"></div>
+        
+        {/* Animated Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-softGold/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-softGold/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
+
+        <div className="relative text-center px-6 max-w-4xl mx-auto">
+          <div className="mb-6">
+            <span className="inline-block px-4 py-2 rounded-full bg-softGold/10 border border-softGold/30 text-softGold text-sm font-semibold uppercase tracking-[0.2em] mb-4">
+              Library Collection
+            </span>
+          </div>
+          
+          <h1 className="font-serif text-5xl lg:text-7xl font-light text-cream mb-6 leading-tight">
+            Books &<br />
+            <span className="text-softGold">Publications</span>
+          </h1>
+          
+          <p className="text-xl lg:text-2xl text-gray-300 font-light max-w-2xl mx-auto leading-relaxed">
+            Curated readings and original works for thoughtful leaders, builders, 
+            and those shaping the architecture of human purpose.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-16 lg:py-24">
+        {/* Featured Books Section */}
+        {featuredBooks.length > 0 && (
+          <section className="mb-20">
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-cream mb-4">
+                Featured Works
+              </h2>
+              <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+                Essential reading for understanding purpose, civilisation, and the builder's calling
+              </p>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+              {featuredBooks.map((book, index) => (
+                <FeaturedBookCard key={book.slug} book={book} index={index} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* All Books Grid */}
+        {hasBooks ? (
+          <section>
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-cream mb-4">
+                Complete Collection
+              </h2>
+              <p className="text-lg text-gray-300">
+                All published works and recommended readings
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {regularBooks.map((book, index) => (
+                <BookCard key={book.slug} book={book} index={index} />
+              ))}
+            </div>
+          </section>
+        ) : (
+          <EmptyState />
+        )}
+      </div>
+    </Layout>
+  );
+}
+
 export async function getStaticProps() {
   try {
     const books = await getAllBooks();
     
     // Ensure ALL data is serializable - replace undefined with null
-    const serializableBooks = books.map(book => ({
+    const serializableBooks: ExtendedBookMeta[] = books.map(book => ({
       ...book,
       // Required fields
       slug: book.slug,
@@ -400,9 +407,10 @@ export async function getStaticProps() {
       published: book.published ?? false,
       draft: book.draft ?? false,
       
-      // Access level fields
-      accessLevel: book.accessLevel ?? null,
-      lockMessage: book.lockMessage ?? null,
+      // Access level fields (with proper typing)
+      accessLevel: (book as any).accessLevel ?? null,
+      lockMessage: (book as any).lockMessage ?? null,
+      status: (book as any).status ?? null,
       
       // Typed fields
       format: book.format ?? null,
