@@ -1,37 +1,42 @@
 // pages/canon/index.tsx
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
-
+import { allCanons, type Canon } from "contentlayer/generated";
 import SiteLayout from "@/components/SiteLayout";
-import {
-  getCanonCampaign,
-  getCanonMasterIndex,
-  getCanonVolumes,
-  getFeaturedCanon,
-  type CanonDoc,
-} from "@/lib/server/canon-data";
-
-/* ------------------------------------------------------------------------------------
-   TYPES
------------------------------------------------------------------------------------- */
 
 interface CanonIndexProps {
-  campaign: CanonDoc | null;
-  masterIndex: CanonDoc | null;
-  volumes: CanonDoc[];
-  featured: CanonDoc[];
+  campaign: Canon | null;
+  masterIndex: Canon | null;
+  volumes: Canon[];
+  featured: Canon[];
 }
 
-/* ------------------------------------------------------------------------------------
-   CARD COMPONENT — dark/light safe, gated-safe, conversion optimised
------------------------------------------------------------------------------------- */
+// Contentlayer-based data functions
+function getCanonVolumes(): Canon[] {
+  return allCanons
+    .filter(doc => doc.volumeNumber && !doc.draft)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+}
 
+function getFeaturedCanon(): Canon[] {
+  return allCanons.filter(doc => doc.featured && !doc.draft);
+}
+
+function getCanonCampaign(): Canon | null {
+  return allCanons.find(doc => doc.slug === "canon-campaign") || null;
+}
+
+function getCanonMasterIndex(): Canon | null {
+  return allCanons.find(doc => doc.slug === "canon-master-index-preview") || null;
+}
+
+// CanonCard Component
 function CanonCard({
   doc,
   label,
   href,
 }: {
-  doc: CanonDoc;
+  doc: Canon;
   label?: string;
   href: string;
 }) {
@@ -84,10 +89,7 @@ function CanonCard({
   );
 }
 
-/* ------------------------------------------------------------------------------------
-   PAGE: CANON INDEX
------------------------------------------------------------------------------------- */
-
+// Page Component
 const CanonIndexPage: NextPage<CanonIndexProps> = ({
   campaign,
   masterIndex,
@@ -123,7 +125,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
             <CanonCard
               doc={campaign}
               label="Marketing Prelude"
-              href={`/resources/${campaign.slug}`}  // FIXED LINK
+              href={`/canon/${campaign.slug}`}
             />
           )}
 
