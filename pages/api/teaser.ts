@@ -1,18 +1,38 @@
 // pages/api/teaser.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { verifyRecaptcha, RecaptchaError, type RecaptchaVerificationResult } from "@/lib/verifyRecaptcha";
-import { rateLimit, createRateLimitHeaders, RATE_LIMIT_CONFIGS } from "@/lib/server/rateLimit";
-import { getClientIp, getClientIpWithAnalysis, getRateLimitKey, anonymizeIp } from "@/lib/server/ip";
+import {
+  verifyRecaptcha,
+  RecaptchaError,
+  type RecaptchaVerificationResult,
+} from "@/lib/verifyRecaptcha";
+import {
+  rateLimit,
+  createRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/server/rateLimit";
+import {
+  getClientIpWithAnalysis,
+  getRateLimitKey,
+  anonymizeIp,
+} from "@/lib/server/ip";
 
 // Email validation with comprehensive checks
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // Disposable email domains
 const DISPOSABLE_DOMAINS = [
-  'tempmail.com', 'guerrillamail.com', 'mailinator.com', 
-  '10minutemail.com', 'yopmail.com', 'throwaway.com',
-  'fakeinbox.com', 'trashmail.com', 'getairmail.com',
-  'maildrop.cc', 'disposableemail.com'
+  "tempmail.com",
+  "guerrillamail.com",
+  "mailinator.com",
+  "10minutemail.com",
+  "yopmail.com",
+  "throwaway.com",
+  "fakeinbox.com",
+  "trashmail.com",
+  "getairmail.com",
+  "maildrop.cc",
+  "disposableemail.com",
 ];
 
 interface TeaserRequestBody {
@@ -34,25 +54,31 @@ interface TeaserResponse {
 }
 
 // Security event logger
-function logSecurityEvent(event: string, details: Record<string, unknown>): void {
+function logSecurityEvent(
+  event: string,
+  details: Record<string, unknown>,
+): void {
   const timestamp = new Date().toISOString();
+  // eslint-disable-next-line no-console
   console.log(`[SECURITY] ${timestamp} - ${event}`, {
     ...details,
     // Don't log sensitive data in production
-    ...(process.env.NODE_ENV === 'production' && {
-      email: details.email ? `${(details.email as string).substring(0, 3)}...` : undefined,
+    ...(process.env.NODE_ENV === "production" && {
+      email: details.email
+        ? `${(details.email as string).substring(0, 3)}...`
+        : undefined,
       ip: details.ip ? anonymizeIp(details.ip as string) : undefined,
     }),
   });
 }
 
 function validateEmail(email: string): { isValid: boolean; error?: string } {
-  if (!email || typeof email !== 'string') {
+  if (!email || typeof email !== "string") {
     return { isValid: false, error: "Email is required" };
   }
 
   const trimmedEmail = email.trim().toLowerCase();
-  
+
   // Length validation
   if (trimmedEmail.length > 254) {
     return { isValid: false, error: "Email address is too long" };
@@ -64,21 +90,16 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
   }
 
   // Disposable email detection
-  const domain = trimmedEmail.split('@')[1];
-  if (DISPOSABLE_DOMAINS.some(d => domain.includes(d))) {
-    logSecurityEvent('Disposable email detected', { email: trimmedEmail, domain });
+  const domain = trimmedEmail.split("@")[1];
+  if (DISPOSABLE_DOMAINS.some((d) => domain.includes(d))) {
+    logSecurityEvent("Disposable email detected", { email: trimmedEmail, domain });
     return { isValid: false, error: "Please use a permanent email address" };
   }
 
   // Common fake email patterns
-  const fakePatterns = [
-    /^test@/i,
-    /^admin@/i,
-    /^user@/i,
-    /^demo@/i,
-  ];
+  const fakePatterns = [/^test@/i, /^admin@/i, /^user@/i, /^demo@/i];
 
-  if (fakePatterns.some(pattern => pattern.test(trimmedEmail))) {
+  if (fakePatterns.some((pattern) => pattern.test(trimmedEmail))) {
     return { isValid: false, error: "Please use a valid email address" };
   }
 
@@ -87,9 +108,9 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
 
 function validateName(name: string): { isValid: boolean; error?: string } {
   if (!name) return { isValid: true }; // Name is optional
-  
+
   const trimmedName = name.trim();
-  
+
   if (trimmedName.length > 100) {
     return { isValid: false, error: "Name is too long" };
   }
@@ -100,7 +121,7 @@ function validateName(name: string): { isValid: boolean; error?: string } {
     /(.)\1{10,}/, // Repeated characters
   ];
 
-  if (suspiciousPatterns.some(pattern => pattern.test(trimmedName))) {
+  if (suspiciousPatterns.some((pattern) => pattern.test(trimmedName))) {
     return { isValid: false, error: "Invalid name format" };
   }
 
@@ -112,36 +133,36 @@ export default async function handler(
   res: NextApiResponse<TeaserResponse>,
 ): Promise<void> {
   // Set security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
 
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    res.status(405).json({ 
-      ok: false, 
-      message: `Method ${req.method ?? "UNKNOWN"} Not Allowed` 
+    res.status(405).json({
+      ok: false,
+      message: `Method ${req.method ?? "UNKNOWN"} Not Allowed`,
     });
     return;
   }
 
   // Validate Content-Type
-  const contentType = req.headers['content-type'];
-  if (!contentType || !contentType.includes('application/json')) {
-    res.status(400).json({ 
-      ok: false, 
-      message: "Content-Type must be application/json" 
+  const contentType = req.headers["content-type"];
+  if (!contentType || !contentType.includes("application/json")) {
+    res.status(400).json({
+      ok: false,
+      message: "Content-Type must be application/json",
     });
     return;
   }
 
   let body: TeaserRequestBody;
   try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  } catch (error) {
-    res.status(400).json({ 
-      ok: false, 
-      message: "Invalid JSON body" 
+    body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch (_error) {
+    res.status(400).json({
+      ok: false,
+      message: "Invalid JSON body",
     });
     return;
   }
@@ -153,19 +174,19 @@ export default async function handler(
   const recaptchaToken = body.recaptchaToken || "";
   const source = body.source || "teaser_api";
   const userAgent = body.userAgent || req.headers["user-agent"] || "unknown";
-  
+
   const ipAnalysis = getClientIpWithAnalysis(req);
   const ip = ipAnalysis.ip;
 
   // Enhanced honeypot detection
   if (honeypot || confirmEmailHoneypot) {
-    logSecurityEvent('Honeypot triggered', { 
-      ip, 
-      email, 
-      honeypot, 
-      confirmEmailHoneypot 
+    logSecurityEvent("Honeypot triggered", {
+      ip,
+      email,
+      honeypot,
+      confirmEmailHoneypot,
     });
-    
+
     // Return success to confuse bots
     res.status(200).json({
       ok: true,
@@ -177,9 +198,9 @@ export default async function handler(
   // Email validation
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
-    res.status(400).json({ 
-      ok: false, 
-      message: emailValidation.error!,
+    res.status(400).json({
+      ok: false,
+      message: emailValidation.error ?? "Invalid email",
       errorCode: "INVALID_EMAIL",
     });
     return;
@@ -188,17 +209,23 @@ export default async function handler(
   // Name validation
   const nameValidation = validateName(name);
   if (!nameValidation.isValid) {
-    res.status(400).json({ 
-      ok: false, 
-      message: nameValidation.error!,
+    res.status(400).json({
+      ok: false,
+      message: nameValidation.error ?? "Invalid name",
       errorCode: "INVALID_NAME",
     });
     return;
   }
 
   // 🔒 Enhanced rate limiting
-  const rateLimitKey = getRateLimitKey(req, RATE_LIMIT_CONFIGS.TEASER_REQUEST.keyPrefix);
-  const rateLimitResult = rateLimit(rateLimitKey, RATE_LIMIT_CONFIGS.TEASER_REQUEST);
+  const rateLimitKey = getRateLimitKey(
+    req,
+    RATE_LIMIT_CONFIGS.TEASER_REQUEST.keyPrefix,
+  );
+  const rateLimitResult = rateLimit(
+    rateLimitKey,
+    RATE_LIMIT_CONFIGS.TEASER_REQUEST,
+  );
 
   // Add rate limit headers to response
   const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
@@ -207,13 +234,13 @@ export default async function handler(
   });
 
   if (!rateLimitResult.allowed) {
-    logSecurityEvent('Rate limit exceeded', { 
-      ip, 
-      email, 
+    logSecurityEvent("Rate limit exceeded", {
+      ip,
+      email,
       remaining: rateLimitResult.remaining,
       retryAfterMs: rateLimitResult.retryAfterMs,
     });
-    
+
     res.status(429).json({
       ok: false,
       message: "Too many requests. Please try again later.",
@@ -234,16 +261,20 @@ export default async function handler(
 
   let recaptchaResult: RecaptchaVerificationResult;
   try {
-    recaptchaResult = await verifyRecaptcha(recaptchaToken, "teaser_request", ip);
-    
+    recaptchaResult = await verifyRecaptcha(
+      recaptchaToken,
+      "teaser_request",
+      ip,
+    );
+
     if (!recaptchaResult.success) {
-      logSecurityEvent('reCAPTCHA failed', { 
-        ip, 
-        email, 
+      logSecurityEvent("reCAPTCHA failed", {
+        ip,
+        email,
         score: recaptchaResult.score,
         reasons: recaptchaResult.reasons,
       });
-      
+
       res.status(400).json({
         ok: false,
         message: "Security verification failed. Please try again.",
@@ -254,29 +285,28 @@ export default async function handler(
 
     // Additional score threshold check
     if (recaptchaResult.score < 0.3) {
-      logSecurityEvent('Low reCAPTCHA score', { 
-        ip, 
-        email, 
+      logSecurityEvent("Low reCAPTCHA score", {
+        ip,
+        email,
         score: recaptchaResult.score,
         action: recaptchaResult.action,
       });
-      
-      // You might want to require additional verification for low scores
-      // For now, we'll just log and proceed
+      // For now we allow but we have telemetry if abuse grows
     }
-  } catch (err) {
-    const error = err as RecaptchaError;
-    logSecurityEvent('reCAPTCHA error', { 
-      ip, 
-      email, 
-      error: error.message,
-      code: error.code,
+  } catch (error) {
+    const recaptchaError = error as RecaptchaError;
+
+    logSecurityEvent("reCAPTCHA error", {
+      ip,
+      email,
+      error: recaptchaError.message,
+      code: recaptchaError.code,
     });
-    
+
     res.status(400).json({
       ok: false,
       message: "Security check failed. Please refresh and try again.",
-      errorCode: error.code ?? "RECAPTCHA_ERROR",
+      errorCode: recaptchaError.code ?? "RECAPTCHA_ERROR",
     });
     return;
   }
@@ -284,22 +314,22 @@ export default async function handler(
   try {
     // TODO: Implement actual email sending with Resend/Mail provider
     // await sendTeaserEmail({ email, name, source });
-    
+
     // Log successful request
-    logSecurityEvent('Teaser request successful', {
+    logSecurityEvent("Teaser request successful", {
       ip: anonymizeIp(ip),
       email: `${email.substring(0, 3)}...`,
-      name: name ? `${name.substring(0, 1)}...` : 'not provided',
+      name: name ? `${name.substring(0, 1)}...` : "not provided",
       source,
       recaptchaScore: recaptchaResult.score,
       userAgent: userAgent.substring(0, 100), // Limit length
     });
 
-    // In development, log the details
     if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
       console.log("[TEASER] Request details:", {
         email,
-        name: name || 'not provided',
+        name: name || "not provided",
         ip: anonymizeIp(ip),
         source,
         timestamp: new Date().toISOString(),
@@ -312,12 +342,13 @@ export default async function handler(
       message: "Teaser sent! Please check your inbox.",
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("[TEASER] Email sending error:", error);
-    
-    logSecurityEvent('Teaser email failed', {
+
+    logSecurityEvent("Teaser email failed", {
       ip,
       email,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     });
 
     res.status(500).json({

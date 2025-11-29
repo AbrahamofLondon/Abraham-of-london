@@ -25,10 +25,10 @@ import crypto from "node:crypto";
 export type InnerCircleStatus = "pending" | "active" | "revoked";
 
 export interface InnerCircleKeyRecord {
-  keyHash: string; // SHA-256 of the full key
-  keySuffix: string; // last 4–5 chars, for admin reference only
-  createdAt: string; // ISO string
-  lastUsedAt?: string; // ISO string
+  keyHash: string;           // SHA-256 of the full key
+  keySuffix: string;         // last 4 chars, for admin reference only
+  createdAt: string;         // ISO string
+  lastUsedAt?: string;       // ISO string
   status: InnerCircleStatus;
   totalUnlocks: number;
   lastIp?: string;
@@ -36,8 +36,8 @@ export interface InnerCircleKeyRecord {
 
 export interface InnerCircleMember {
   id: string;
-  emailHash: string; // SHA-256 hex
-  emailHashPrefix: string; // first 10 chars of emailHash
+  emailHash: string;         // SHA-256 hex
+  emailHashPrefix: string;   // first 10 chars of emailHash
   name?: string;
   createdAt: string;
   lastSeenAt: string;
@@ -53,7 +53,7 @@ export interface CreateOrUpdateMemberArgs {
 }
 
 export interface IssuedKey {
-  key: string; // full key (only returned once, to caller)
+  key: string;               // full key (only returned once, to caller)
   keySuffix: string;
   createdAt: string;
   status: InnerCircleStatus;
@@ -76,6 +76,16 @@ export interface InnerCircleAdminExportRow {
   total_unlocks: number;
 }
 
+export interface PrivacySafeStats {
+  totalMembers: number;
+  activeMembers: number;
+  totalKeys: number;
+  totalUnlocks: number;
+  dataRetentionDays: number;
+  estimatedMemoryBytes: number;
+  lastCleanup: string;
+}
+
 // =======================================================================
 // Configuration & Constants
 // =======================================================================
@@ -91,10 +101,7 @@ const CLEANUP_INTERVAL_MS = 1000 * 60 * 60 * 24; // Daily cleanup
 const members: InnerCircleMember[] = [];
 
 // Fast index from keyHash -> member + key
-const keyHashIndex = new Map<
-  string,
-  { memberId: string; keyIndex: number }
->();
+const keyHashIndex = new Map<string, { memberId: string; keyIndex: number }>();
 
 // Fast index from emailHash -> member
 const emailHashIndex = new Map<string, string>(); // emailHash -> memberId
@@ -117,8 +124,11 @@ function generateId(): string {
     : sha256Hex(`${Date.now()}-${Math.random()}`).slice(0, 32);
 }
 
-function generateAccessKey(): { key: string; keyHash: string; keySuffix: string } {
-  // 20 random bytes -> base32-ish string, grouped for readability
+function generateAccessKey(): {
+  key: string;
+  keyHash: string;
+  keySuffix: string;
+} {
   const raw = crypto.randomBytes(20).toString("base64url"); // URL-safe
   const key = raw.slice(0, 24); // trim to a nice length
 
@@ -157,11 +167,14 @@ function indexMember(member: InnerCircleMember): void {
 /**
  * Log privacy-related actions without storing PII
  */
-function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}): void {
+function logPrivacyAction(
+  action: string,
+  metadata: Record<string, unknown> = {},
+): void {
+  // eslint-disable-next-line no-console
   console.log(`🔒 Privacy Action: ${action}`, {
     timestamp: new Date().toISOString(),
     ...metadata,
-    // Never log raw PII in these logs
   });
 }
 
@@ -169,35 +182,34 @@ function logPrivacyAction(action: string, metadata: Record<string, unknown> = {}
  * Automatic data cleanup for compliance with data retention policies
  */
 export function cleanupOldData(): { deletedMembers: number; deletedKeys: number } {
-  const cutoff = Date.now() - (DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const cutoff = Date.now() - DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
   let deletedMembers = 0;
   let deletedKeys = 0;
 
   for (let i = members.length - 1; i >= 0; i--) {
     const member = members[i];
     const lastActivity = new Date(member.lastSeenAt).getTime();
-    
+
     if (lastActivity < cutoff) {
-      // Remove member and clean up indexes
-      logPrivacyAction('auto_cleanup_member', {
+      logPrivacyAction("auto_cleanup_member", {
         memberId: member.id,
         emailHashPrefix: member.emailHashPrefix,
-        lastSeen: member.lastSeenAt
+        lastSeen: member.lastSeenAt,
       });
-      
+
       members.splice(i, 1);
       emailHashIndex.delete(member.emailHash);
       deletedKeys += member.keys.length;
-      member.keys.forEach(key => keyHashIndex.delete(key.keyHash));
+      member.keys.forEach((key) => keyHashIndex.delete(key.keyHash));
       deletedMembers++;
     }
   }
 
   if (deletedMembers > 0) {
-    logPrivacyAction('cleanup_completed', {
+    logPrivacyAction("cleanup_completed", {
       deletedMembers,
       deletedKeys,
-      retentionDays: DATA_RETENTION_DAYS
+      retentionDays: DATA_RETENTION_DAYS,
     });
   }
 
@@ -211,53 +223,61 @@ export function deleteMemberByEmail(email: string): boolean {
   const emailNormalised = normaliseEmail(email);
   const emailHash = sha256Hex(emailNormalised);
   const member = getMemberByEmailHash(emailHash);
-  
+
   if (!member) {
-    logPrivacyAction('delete_member_not_found', {
-      emailHash: sha256Hex(emailHash) // Double hash for audit
+    logPrivacyAction("delete_member_not_found", {
+      // Double hash for audit; still non-reversible
+      emailHash: sha256Hex(emailHash),
     });
     return false;
   }
 
-  logPrivacyAction('delete_member', {
+  logPrivacyAction("delete_member", {
     memberId: member.id,
     emailHashPrefix: member.emailHashPrefix,
     keysCount: member.keys.length,
-    createdAt: member.createdAt
+    createdAt: member.createdAt,
   });
 
-  // Remove from all indexes
   emailHashIndex.delete(member.emailHash);
-  member.keys.forEach(key => {
+  member.keys.forEach((key) => {
     keyHashIndex.delete(key.keyHash);
-    logPrivacyAction('delete_key', {
+    logPrivacyAction("delete_key", {
       keySuffix: key.keySuffix,
-      unlocks: key.totalUnlocks
+      unlocks: key.totalUnlocks,
     });
   });
 
-  // Remove from members array
-  const index = members.findIndex(m => m.id === member.id);
+  const index = members.findIndex((m) => m.id === member.id);
   if (index !== -1) {
     members.splice(index, 1);
     return true;
   }
-  
+
   return false;
 }
 
 /**
  * Get privacy-compliant statistics (no PII)
  */
-export function getPrivacySafeStats() {
+export function getPrivacySafeStats(): PrivacySafeStats {
   const now = Date.now();
-  const activeMembers = members.filter(m => 
-    m.keys.some(k => k.status === "active" && 
-      (now - new Date(k.createdAt).getTime()) < KEY_TTL_MS)
+
+  const activeMembers = members.filter((m) =>
+    m.keys.some(
+      (k) =>
+        k.status === "active" &&
+        now - new Date(k.createdAt).getTime() < KEY_TTL_MS,
+    ),
   ).length;
 
-  const totalUnlocks = members.reduce((sum, m) => 
-    sum + m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0), 0
+  const totalUnlocks = members.reduce(
+    (sum, m) =>
+      sum +
+      m.keys.reduce((keySum, k) => {
+        return keySum + k.totalUnlocks;
+      }, 0),
+    0,
   );
 
   return {
@@ -266,8 +286,8 @@ export function getPrivacySafeStats() {
     totalKeys: keyHashIndex.size,
     totalUnlocks,
     dataRetentionDays: DATA_RETENTION_DAYS,
-    estimatedMemoryBytes: (members.length * 500) + (keyHashIndex.size * 100), // Rough estimate
-    lastCleanup: new Date().toISOString()
+    estimatedMemoryBytes: members.length * 500 + keyHashIndex.size * 100, // rough
+    lastCleanup: new Date().toISOString(),
   };
 }
 
@@ -307,11 +327,11 @@ export function createOrUpdateMemberAndIssueKey(
     members.push(member);
     indexMember(member);
 
-    logPrivacyAction('member_created', {
+    logPrivacyAction("member_created", {
       memberId: member.id,
       emailHashPrefix: member.emailHashPrefix,
       hasName: !!args.name,
-      context: args.context
+      context: args.context,
     });
   } else {
     member.lastSeenAt = now;
@@ -322,10 +342,10 @@ export function createOrUpdateMemberAndIssueKey(
       member.lastIp = args.ipAddress;
     }
 
-    logPrivacyAction('member_updated', {
+    logPrivacyAction("member_updated", {
       memberId: member.id,
       emailHashPrefix: member.emailHashPrefix,
-      context: args.context
+      context: args.context,
     });
   }
 
@@ -345,11 +365,11 @@ export function createOrUpdateMemberAndIssueKey(
     keyIndex: member.keys.length - 1,
   });
 
-  logPrivacyAction('key_issued', {
+  logPrivacyAction("key_issued", {
     memberId: member.id,
     keySuffix,
     isNewMember,
-    context: args.context
+    context: args.context,
   });
 
   return {
@@ -429,17 +449,18 @@ export function recordInnerCircleUnlock(
 
   record.totalUnlocks += 1;
   record.lastUsedAt = nowIso();
+
   if (ipAddress) {
     record.lastIp = ipAddress;
     member.lastIp = ipAddress;
   }
   member.lastSeenAt = record.lastUsedAt;
 
-  logPrivacyAction('key_used', {
+  logPrivacyAction("key_used", {
     memberId: member.id,
     keySuffix: record.keySuffix,
     totalUnlocks: record.totalUnlocks,
-    hasIp: !!ipAddress
+    hasIp: !!ipAddress,
   });
 }
 
@@ -448,7 +469,7 @@ export function recordInnerCircleUnlock(
  * NO raw emails. NO full keys. No reversible identifiers.
  */
 export function exportInnerCircleAdminSummary(): InnerCircleAdminExportRow[] {
-  logPrivacyAction('admin_export');
+  logPrivacyAction("admin_export");
 
   const rows: InnerCircleAdminExportRow[] = [];
 
@@ -464,7 +485,6 @@ export function exportInnerCircleAdminSummary(): InnerCircleAdminExportRow[] {
     });
   });
 
-  // Sort newest first for admin convenience
   rows.sort((a, b) => {
     const tA = new Date(a.created_at).getTime();
     const tB = new Date(b.created_at).getTime();
@@ -475,8 +495,7 @@ export function exportInnerCircleAdminSummary(): InnerCircleAdminExportRow[] {
 }
 
 /**
- * Optional: revoke a key (not currently wired to any API route,
- * but available for future admin tooling).
+ * Optional: revoke a key (for future admin tooling).
  */
 export function revokeInnerCircleKey(key: string): boolean {
   const safeKey = key.trim();
@@ -495,33 +514,32 @@ export function revokeInnerCircleKey(key: string): boolean {
   record.status = "revoked";
   record.lastUsedAt = nowIso();
 
-  logPrivacyAction('key_revoked', {
+  logPrivacyAction("key_revoked", {
     memberId: member.id,
     keySuffix: record.keySuffix,
-    totalUnlocks: record.totalUnlocks
+    totalUnlocks: record.totalUnlocks,
   });
 
   return true;
 }
 
 // =======================================================================
-// Automatic Cleanup Setup
+// Automatic Cleanup Setup (server-side only)
 // =======================================================================
 
-// Set up automatic cleanup on server start
 if (typeof process !== "undefined" && typeof setInterval !== "undefined") {
   // Run cleanup daily
   setInterval(cleanupOldData, CLEANUP_INTERVAL_MS);
-  
-  // Also run on startup
+
+  // Also run shortly after startup
   setTimeout(cleanupOldData, 5000);
-  
-  // Clean shutdown
+
+  // Clean shutdown – wrap stats in an object so it matches Record<string, unknown>
   process.on("SIGTERM", () => {
-    logPrivacyAction('shutdown', getPrivacySafeStats());
+    logPrivacyAction("shutdown", { stats: getPrivacySafeStats() });
   });
-  
+
   process.on("SIGINT", () => {
-    logPrivacyAction('shutdown', getPrivacySafeStats());
+    logPrivacyAction("shutdown", { stats: getPrivacySafeStats() });
   });
 }

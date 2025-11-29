@@ -1,5 +1,6 @@
 // lib/security.ts
 import crypto from "crypto";
+import type { IncomingMessage } from "http";
 
 export function hashEmail(email: string): string {
   return crypto
@@ -16,7 +17,7 @@ export function maskEmail(email: string): string {
   return `${visible}***@${domain}`;
 }
 
-type RateLimitConfig = {
+export type RateLimitConfig = {
   windowMs: number;
   maxHits: number;
 };
@@ -52,14 +53,23 @@ export function checkRateLimit(key: string, config: RateLimitConfig): boolean {
   return false;
 }
 
+interface RequestWithHeaders {
+  headers: {
+    [key: string]: string | string[] | undefined;
+  };
+  socket?: {
+    remoteAddress?: string;
+  };
+}
+
 /**
  * Extract a best-effort client identifier (IP) from a Next API request.
  * We don't store it anywhere long-term; only for rate limiting in-memory.
  */
-export function getClientKeyFromReq(req: { headers: any; socket?: any }) {
+export function getClientKeyFromReq(req: RequestWithHeaders): string {
   const xf = req.headers["x-forwarded-for"];
   const raw =
-    (Array.isArray(xf) ? xf[0] : xf?.split(",")[0]) ||
+    (Array.isArray(xf) ? xf[0] : (xf as string | undefined)?.split(",")[0]) ||
     req.socket?.remoteAddress ||
     "unknown";
   return String(raw);

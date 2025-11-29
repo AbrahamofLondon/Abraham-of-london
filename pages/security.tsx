@@ -95,6 +95,11 @@ const SecurityPage: NextPage = () => {
                 (typically 3–5 attempts per 15 minutes).
               </li>
               <li>
+                <strong>Inner Circle registration protection</strong> – dual
+                IP-based (20 attempts per 15 minutes) and email-based (3 attempts
+                per hour) rate limiting to prevent abuse.
+              </li>
+              <li>
                 Proper HTTP <code>429</code> responses with{" "}
                 <code>Retry-After</code> guidance when limits are exceeded.
               </li>
@@ -130,6 +135,10 @@ const SecurityPage: NextPage = () => {
               <li>
                 Strong typing across the codebase (TypeScript) to reduce
                 malformed data and logic errors.
+              </li>
+              <li>
+                <strong>Cryptographic validation</strong> for Inner Circle access
+                keys to prevent tampering and ensure integrity.
               </li>
             </ul>
           </section>
@@ -185,6 +194,12 @@ const SecurityPage: NextPage = () => {
                 stored on this site.
               </li>
               <li>
+                <strong>Inner Circle privacy protection</strong> – email addresses
+                are stored as SHA-256 hashes, access keys are stored as
+                cryptographic hashes, and no raw personal data is retained in
+                accessible formats.
+              </li>
+              <li>
                 Security logs use anonymised IPs wherever possible, balancing
                 monitoring with privacy.
               </li>
@@ -214,6 +229,10 @@ const SecurityPage: NextPage = () => {
                 <span className="font-semibold text-cream">Mailchimp</span> for
                 newsletter and campaign delivery, with unsubscribe support and
                 GDPR-aware processing.
+              </li>
+              <li>
+                <strong>Inner Circle cryptographic key delivery</strong> – secure
+                email transmission of access keys with minimal data exposure.
               </li>
               <li>
                 Subscription flows are designed to prevent silent enrolment and
@@ -247,6 +266,10 @@ const SecurityPage: NextPage = () => {
               <li>
                 Rate limit breaches and honeypot triggers recorded as potential
                 abuse indicators.
+              </li>
+              <li>
+                <strong>Inner Circle access monitoring</strong> – cryptographic
+                key usage tracking without storing raw keys or personal data.
               </li>
               <li>
                 Logs are used for operational security and troubleshooting, not
@@ -304,6 +327,11 @@ const SecurityPage: NextPage = () => {
                 from this brand.
               </li>
               <li>
+                <strong>Protecting Inner Circle access keys</strong> – treating
+                cryptographic keys as sensitive credentials and not sharing them
+                publicly.
+              </li>
+              <li>
                 Using up-to-date browsers and operating systems with security
                 features enabled.
               </li>
@@ -340,6 +368,10 @@ const SecurityPage: NextPage = () => {
               <li>
                 Progressive hardening of headers, rate limits, logging, and bot
                 detection based on observed behaviour.
+              </li>
+              <li>
+                <strong>Cryptographic algorithm review</strong> – periodic
+                assessment of hashing and key generation methods.
               </li>
               <li>
                 Periodic review of this Security Policy to ensure it accurately

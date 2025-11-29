@@ -1,61 +1,51 @@
 // hooks/useAnalytics.ts
-import { useEffect, useCallback } from 'react';
-
-interface AnalyticsEvent {
-  event: string;
-  category?: string;
-  label?: string;
-  value?: number;
-  [key: string]: unknown;
-}
+import { useEffect, useCallback } from "react";
 
 interface PageViewParams {
   page_title?: string;
   page_location?: string;
+  page_path?: string;
   [key: string]: unknown;
 }
 
-declare global {
-  interface Window {
-    gtag: (...args: unknown[]) => void;
-    dataLayer: unknown[];
-  }
-}
-
 export function useAnalytics() {
-  // Initialize analytics
+  // Initialise analytics + auto page-view tracking
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Initialize dataLayer if it doesn't exist
-    if (!window.dataLayer) {
-      window.dataLayer = [];
+    // Ensure dataLayer exists with proper type checking
+    if (!('dataLayer' in window)) {
+      (window as any).dataLayer = [];
     }
 
-    // Enhanced gtag function
-    if (!window.gtag) {
-      window.gtag = function () {
-        // eslint-disable-next-line prefer-rest-params
-        window.dataLayer.push(arguments);
+    // Define a basic gtag shim if GA hasn't injected one yet
+    if (!('gtag' in window)) {
+      (window as any).gtag = (...args: unknown[]) => {
+        // Push into dataLayer in GA-compatible format
+        (window as any).dataLayer.push(args);
       };
     }
 
-    // Track page views automatically
     const trackPageView = () => {
+      if (typeof document === "undefined" || typeof window === "undefined") {
+        return;
+      }
+
       const pageParams: PageViewParams = {
         page_title: document.title,
         page_location: window.location.href,
         page_path: window.location.pathname,
       };
 
-      window.gtag("event", "page_view", pageParams);
+      (window as any).gtag("event", "page_view", pageParams);
     };
 
-    // Track initial page view
+    // Initial page view
     trackPageView();
 
-    // Track subsequent route changes (for SPAs)
+    // SPA-style navigation: basic support via popstate
     const handleRouteChange = () => {
+      // Small delay so title / URL stabilise
       setTimeout(trackPageView, 100);
     };
 
@@ -68,24 +58,24 @@ export function useAnalytics() {
 
   const trackEvent = useCallback(
     (event: string, params: Record<string, unknown> = {}) => {
-      if (typeof window === "undefined" || !window.gtag) {
-        // Fallback logging for development
+      if (typeof window === "undefined" || !(window as any).gtag) {
         if (process.env.NODE_ENV === "development") {
-          console.log("📊 Analytics Event:", event, params);
+          // Fallback logging in dev so you still see signals
+          console.log("📊 Analytics Event (fallback):", event, params);
         }
         return;
       }
 
-      const enhancedParams = {
+      const enhancedParams: Record<string, unknown> = {
         ...params,
         event_timestamp: new Date().toISOString(),
         user_agent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       };
 
-      window.gtag("event", event, enhancedParams);
+      (window as any).gtag("event", event, enhancedParams);
 
-      // Also send to custom analytics endpoint if needed
+      // Optional: also send to a custom analytics endpoint in production
       if (process.env.NODE_ENV === "production") {
         fetch("/api/analytics", {
           method: "POST",
@@ -97,7 +87,7 @@ export function useAnalytics() {
             ...enhancedParams,
           }),
         }).catch(() => {
-          // Silent fail for analytics
+          // Silent fail – analytics must never break UX
         });
       }
     },
@@ -106,18 +96,16 @@ export function useAnalytics() {
 
   const trackPageView = useCallback(
     (pageName: string, additionalParams: Record<string, unknown> = {}) => {
-      if (typeof window === "undefined" || !window.gtag) return;
+      if (typeof window === "undefined" || !(window as any).gtag) return;
 
       const pageParams: PageViewParams = {
         page_title: pageName,
-        page_location:
-          typeof window !== "undefined" ? window.location.href : "",
-        page_path:
-          typeof window !== "undefined" ? window.location.pathname : "",
+        page_location: window.location.href,
+        page_path: window.location.pathname,
         ...additionalParams,
       };
 
-      window.gtag("event", "page_view", pageParams);
+      (window as any).gtag("event", "page_view", pageParams);
     },
     [],
   );
@@ -135,7 +123,11 @@ export function useAnalytics() {
   );
 
   const trackPerformance = useCallback(
-    (metricName: string, value: number, context: Record<string, unknown> = {}) => {
+    (
+      metricName: string,
+      value: number,
+      context: Record<string, unknown> = {},
+    ) => {
       trackEvent("performance_metric", {
         metric_name: metricName,
         metric_value: value,

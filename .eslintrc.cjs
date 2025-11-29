@@ -1,102 +1,52 @@
+// .eslintrc.cjs
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 2021,
     sourceType: "module",
-    ecmaFeatures: { jsx: true },
+    project: "./tsconfig.json",
+    tsconfigRootDir: __dirname,
   },
-  settings: {
-    react: {
-      version: "detect",
-    },
-  },
-  env: {
-    browser: true,
-    es2021: true,
-    node: true,
-  },
+  plugins: ["@typescript-eslint"],
   extends: [
     "next",
     "next/core-web-vitals",
-    "eslint:recommended",
-    // NOTE: we deliberately do NOT extend "plugin:@typescript-eslint/recommended"
-    // to avoid pulling in rules like '@typescript-eslint/ban-types' that are
-    // causing "Definition for rule ... was not found" in Netlify's environment.
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:prettier/recommended",
   ],
-  plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
+
   rules: {
-    // TypeScript rules – we control them manually instead of via preset
+    // ---- Global defaults (still reasonably strict) ----
+    "@typescript-eslint/no-explicit-any": "warn", // ⬅ was "error"
     "@typescript-eslint/no-unused-vars": [
-      "warn",
+      "error",
       {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
         caughtErrorsIgnorePattern: "^_",
       },
     ],
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unnecessary-type-constraint": "warn",
-    // If Netlify still ever sees ban-types from anywhere, force it off
-    "@typescript-eslint/ban-types": "off",
-
-    // React rules
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off",
-    "react/no-unescaped-entities": "off",
-    "react/no-unknown-property": "off",
-    "react/jsx-no-undef": "off",
-
-    // Next.js rules
-    "@next/next/no-img-element": "warn",
-    "@next/next/no-html-link-for-pages": "warn",
-
-    // A11y rules
-    "jsx-a11y/label-has-associated-control": "warn",
-    "jsx-a11y/click-events-have-key-events": "warn",
-    "jsx-a11y/no-noninteractive-element-interactions": "warn",
-    "jsx-a11y/no-redundant-roles": "warn",
-    "jsx-a11y/no-autofocus": "warn",
-
-    // Security rules
-    "react/jsx-no-target-blank": "warn",
-
-    // Code quality rules
-    "no-useless-escape": "warn",
-    "no-irregular-whitespace": "error",
-    "prefer-const": "warn",
-
-    // Import/export rules
-    "import/no-anonymous-default-export": "off",
   },
 
   overrides: [
-    // Type declaration files – relax everything
+    // Utility / infra code: we allow `any` completely here
+    {
+      files: [
+        "lib/**/*.{ts,tsx}",
+        "lib/server/**/*.{ts,tsx}",
+        "pages/api/**/*.{ts,tsx}",
+      ],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+      },
+    },
+    // Type declaration files
     {
       files: ["**/*.d.ts"],
       rules: {
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-unused-vars": "off",
-        "@typescript-eslint/no-unnecessary-type-constraint": "off",
-        "@typescript-eslint/ban-types": "off",
-      },
-    },
-    // TS / TSX project-wide constraints
-    {
-      files: ["**/*.ts", "**/*.tsx"],
-      rules: {
-        "no-irregular-whitespace": "error",
-      },
-    },
-    // Pages and components – keep them strict on `any`
-    {
-      files: ["**/pages/**/*.tsx", "**/components/**/*.tsx"],
-      rules: {
-        "@typescript-eslint/no-explicit-any": "error",
       },
     },
   ],

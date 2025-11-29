@@ -56,6 +56,18 @@ export interface BasicRedisClient {
 }
 
 // -------------------------------------------------------------------------
+// Privacy-conscious logging
+// -------------------------------------------------------------------------
+
+function logRateLimitAction(action: string, metadata: Record<string, unknown> = {}): void {
+  console.log(`🛡️ Rate Limit: ${action}`, {
+    timestamp: new Date().toISOString(),
+    ...metadata,
+    // Never log full IPs or emails in production
+  });
+}
+
+// -------------------------------------------------------------------------
 // In-memory store with automatic cleanup
 // -------------------------------------------------------------------------
 
@@ -85,10 +97,17 @@ class RateLimitStore {
 
   private cleanup(): void {
     const now = Date.now();
+    let cleaned = 0;
+    
     for (const [key, entry] of this.store.entries()) {
       if (now > entry.resetTime) {
         this.store.delete(key);
+        cleaned++;
       }
+    }
+
+    if (cleaned > 0) {
+      logRateLimitAction('store_cleanup', { cleanedEntries: cleaned });
     }
   }
 
@@ -98,6 +117,8 @@ class RateLimitStore {
       this.cleanupInterval = null;
     }
     this.store.clear();
+    
+    logRateLimitAction('store_destroyed');
   }
 }
 
@@ -163,8 +184,9 @@ class RedisRateLimit {
       };
     } catch (error) {
       // Fail open but log – do NOT block legitimate traffic because Redis died
-      // eslint-disable-next-line no-console
-      console.error("Redis rate limit error:", error);
+      logRateLimitAction('redis_error', { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
 
       return {
         allowed: true,
@@ -216,10 +238,7 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
 
   // Synchronous function cannot safely talk to Redis – enforce this
   if (useRedis && redisClient) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "[rateLimit] Redis configured but sync rateLimit() was used. Use rateLimitAsync() instead.",
-    );
+    logRateLimitAction('sync_redis_warning', { keyPrefix });
   }
 
   const entry = memoryStore.get(storeKey);
@@ -263,6 +282,13 @@ export function rateLimit(key: string, options: RateLimitOptions): RateLimitResu
   }
 
   if (entry.count >= limit) {
+    logRateLimitAction('rate_limit_hit', { 
+      key: storeKey,
+      count: entry.count,
+      limit,
+      windowMs 
+    });
+
     return {
       allowed: false,
       remaining: 0,
@@ -373,6 +399,14 @@ export function rateLimitForEmail(
   const normalizedEmail = email.toLowerCase().trim();
   const key = `${label}:${normalizedEmail}`;
   const result = rateLimit(key, options);
+  
+  logRateLimitAction('email_rate_limit_check', {
+    label,
+    allowed: result.allowed,
+    remaining: result.remaining,
+    // Never log the actual email
+  });
+  
   return { result, email: normalizedEmail };
 }
 
@@ -389,6 +423,14 @@ export function rateLimitForRequestIp(
   const ip = getClientIp(req);
   const key = `${label}:${ip}`;
   const result = rateLimit(key, options);
+  
+  logRateLimitAction('ip_rate_limit_check', {
+    label,
+    allowed: result.allowed,
+    remaining: result.remaining,
+    // Never log the actual IP
+  });
+  
   return { result, ip };
 }
 
@@ -422,6 +464,17 @@ export function combinedRateLimit(
   const hitIpLimit = !ipResult.allowed;
   const hitEmailLimit = emailResult ? !emailResult.allowed : false;
   const allowed = ipResult.allowed && (!emailResult || emailResult.allowed);
+
+  // Log combined result for security monitoring
+  if (!allowed) {
+    logRateLimitAction('combined_rate_limit_hit', {
+      label,
+      hitIpLimit,
+      hitEmailLimit,
+      ipRemaining: ipResult.remaining,
+      emailRemaining: emailResult?.remaining
+    });
+  }
 
   return {
     ipResult,

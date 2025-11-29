@@ -19,11 +19,61 @@ import {
   allCanons 
 } from "contentlayer/generated";
 
+// Define Contentlayer document base interface
+interface ContentlayerDoc {
+  slug: string;
+  body: {
+    raw: string;
+  };
+  [key: string]: unknown;
+}
+
+interface PostDoc extends ContentlayerDoc {
+  date: string;
+  draft?: boolean;
+}
+
+interface BookDoc extends ContentlayerDoc {
+  title: string;
+  draft?: boolean;
+}
+
+interface DownloadDoc extends ContentlayerDoc {
+  date: string;
+}
+
+interface EventDoc extends ContentlayerDoc {
+  date: string;
+}
+
+interface PrintDoc extends ContentlayerDoc {
+  date: string;
+  available?: boolean;
+}
+
+interface StrategyDoc extends ContentlayerDoc {
+  date: string;
+}
+
+interface ResourceDoc extends ContentlayerDoc {
+  title: string;
+}
+
+interface CanonDoc extends ContentlayerDoc {
+  title: string;
+  subtitle?: string;
+  description?: string;
+  coverImage?: string;
+  url?: string;
+  draft?: boolean;
+  featured?: boolean;
+  order?: number;
+}
+
 export interface RawContentEntry {
   slug: string;
   content: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface GetContentOptions {
@@ -56,7 +106,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     case 'blog':
     case 'post':
     case 'posts':
-      return allPosts
+      return (allPosts as PostDoc[])
         .filter((p) => !p.draft)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .map(doc => ({
@@ -67,7 +117,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'book':
     case 'books':
-      return allBooks
+      return (allBooks as BookDoc[])
         .filter((b) => !b.draft)
         .sort((a, b) => a.title.localeCompare(b.title))
         .map(doc => ({
@@ -78,7 +128,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'download':
     case 'downloads':
-      return allDownloads
+      return (allDownloads as DownloadDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .map(doc => ({
           slug: doc.slug,
@@ -88,7 +138,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'event':
     case 'events':
-      return allEvents
+      return (allEvents as EventDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .map(doc => ({
           slug: doc.slug,
@@ -98,7 +148,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'print':
     case 'prints':
-      return allPrints
+      return (allPrints as PrintDoc[])
         .filter((p) => p.available !== false)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .map(doc => ({
@@ -109,7 +159,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'strategy':
     case 'strategies':
-      return allStrategies
+      return (allStrategies as StrategyDoc[])
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .map(doc => ({
           slug: doc.slug,
@@ -119,7 +169,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
     
     case 'resource':
     case 'resources':
-      return allResources
+      return (allResources as ResourceDoc[])
         .sort((a, b) => a.title.localeCompare(b.title))
         .map(doc => ({
           slug: doc.slug,
@@ -128,7 +178,7 @@ export function getAllContent(collection: string): RawContentEntry[] {
         }));
     
     case 'canon':
-      return allCanons
+      return (allCanons as CanonDoc[])
         .filter((c) => !c.draft)
         .sort((a, b) => {
           // Sort by order field if present, otherwise by title
@@ -183,46 +233,46 @@ export function getContentBySlug(
   const targetSlug = String(slug).trim();
 
   // Try Contentlayer first
-  let doc;
+  let doc: ContentlayerDoc | undefined;
   switch (collection.toLowerCase()) {
     case 'blog':
     case 'post':
     case 'posts':
-      doc = allPosts.find((p) => p.slug === targetSlug);
+      doc = (allPosts as PostDoc[]).find((p) => p.slug === targetSlug);
       break;
     
     case 'book':
     case 'books':
-      doc = allBooks.find((b) => b.slug === targetSlug);
+      doc = (allBooks as BookDoc[]).find((b) => b.slug === targetSlug);
       break;
     
     case 'download':
     case 'downloads':
-      doc = allDownloads.find((d) => d.slug === targetSlug);
+      doc = (allDownloads as DownloadDoc[]).find((d) => d.slug === targetSlug);
       break;
     
     case 'event':
     case 'events':
-      doc = allEvents.find((e) => e.slug === targetSlug);
+      doc = (allEvents as EventDoc[]).find((e) => e.slug === targetSlug);
       break;
     
     case 'print':
     case 'prints':
-      doc = allPrints.find((p) => p.slug === targetSlug);
+      doc = (allPrints as PrintDoc[]).find((p) => p.slug === targetSlug);
       break;
     
     case 'strategy':
     case 'strategies':
-      doc = allStrategies.find((s) => s.slug === targetSlug);
+      doc = (allStrategies as StrategyDoc[]).find((s) => s.slug === targetSlug);
       break;
     
     case 'resource':
     case 'resources':
-      doc = allResources.find((r) => r.slug === targetSlug);
+      doc = (allResources as ResourceDoc[]).find((r) => r.slug === targetSlug);
       break;
     
     case 'canon':
-      doc = allCanons.find((c) => c.slug === targetSlug);
+      doc = (allCanons as CanonDoc[]).find((c) => c.slug === targetSlug);
       break;
   }
 
@@ -236,7 +286,7 @@ export function getContentBySlug(
     if (options?.withContent === false) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { content: _omit, ...meta } = entry;
-      return meta as any;
+      return meta as RawContentEntry;
     }
 
     return entry;
@@ -273,7 +323,7 @@ export function getContentBySlug(
     if (options?.withContent === false) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { content: _omit, ...meta } = found;
-      return meta as any;
+      return meta as RawContentEntry;
     }
     return found;
   }
@@ -293,17 +343,27 @@ export function getContentBySlug(
   if (options?.withContent === false) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { content: _omit, ...meta } = entry;
-    return meta as any;
+    return meta as RawContentEntry;
   }
 
   return entry;
 }
 
+interface FeaturedCanonItem {
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  coverImage?: string;
+  url?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Get featured canon documents
  */
-export function getFeaturedCanon() {
-  return allCanons
+export function getFeaturedCanon(): FeaturedCanonItem[] {
+  return (allCanons as CanonDoc[])
     .filter((c) => !c.draft && c.featured)
     .sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {

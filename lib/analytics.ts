@@ -1,5 +1,4 @@
 // lib/analytics.ts
-
 /**
  * Simple analytics tracking for form submissions and user interactions
  */
@@ -10,6 +9,14 @@ export type AnalyticsEvent = {
   label?: string;
   value?: number;
 };
+
+interface FormSubmissionData {
+  name?: string;
+  email?: string;
+  subject?: string;
+  success: boolean;
+  error?: string;
+}
 
 export const trackEvent = (event: AnalyticsEvent): void => {
   // For Google Analytics 4
@@ -40,7 +47,7 @@ export const trackEvent = (event: AnalyticsEvent): void => {
 
 export const trackPageView = (url: string): void => {
   if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, {
+    (window as any).gtag("config", process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "", {
       page_path: url,
     });
   }
@@ -64,7 +71,7 @@ export const trackFormSubmission = (
 
 export const trackDownload = (
   resourceName: string,
-  resourceType: string,
+  _resourceType: string,
 ): void => {
   trackEvent({
     action: "download",
@@ -75,16 +82,7 @@ export const trackDownload = (
 };
 
 // Simple server-side analytics for form submissions
-export const logFormSubmission = async (formData: {
-  name?: string;
-  email?: string;
-  subject?: string;
-  success: boolean;
-  error?: string;
-}): Promise<void> => {
-  // In a real implementation, you might send this to your analytics service
-  // For now, we'll just log it and potentially send to a webhook
-
+export const logFormSubmission = async (formData: FormSubmissionData): Promise<void> => {
   const analyticsData = {
     timestamp: new Date().toISOString(),
     type: "form_submission",

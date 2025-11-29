@@ -83,6 +83,10 @@ const PrivacyPage: NextPage = () => {
               Contact form submissions, teaser requests, and event or call
               enquiries processed through this site.
             </li>
+            <li>
+              <strong>Inner Circle registration and access systems</strong>,
+              including membership management and cryptographic key issuance.
+            </li>
           </ul>
           <p>
             It does <strong>not</strong> replace written terms for specific
@@ -110,6 +114,10 @@ const PrivacyPage: NextPage = () => {
                 <li>
                   Event or consultation enquiries (basic personal and
                   organisational details you share).
+                </li>
+                <li>
+                  <strong>Inner Circle registration</strong> (email and name for
+                  access key issuance and community management).
                 </li>
               </ul>
             </li>
@@ -143,6 +151,11 @@ const PrivacyPage: NextPage = () => {
           <ul className="ml-5 list-disc space-y-1">
             <li>Send newsletters and editorial content you have requested.</li>
             <li>Respond to enquiries and manage event or call requests.</li>
+            <li>
+              <strong>Manage Inner Circle access</strong> – issue cryptographic
+              access keys, verify membership status, and provide exclusive
+              content to registered members.
+            </li>
             <li>
               Improve the structure, clarity, and usefulness of the site based
               on aggregated, non-identifying behaviour patterns.
@@ -183,6 +196,10 @@ const PrivacyPage: NextPage = () => {
               <strong>Contractual necessity</strong> – where processing is
               required to enter into or perform a contract or agreed
               engagement with you.
+            </li>
+            <li>
+              <strong>Inner Circle operations</strong> – processing necessary for
+              providing exclusive content and community access to registered members.
             </li>
           </ul>
         </section>
@@ -232,6 +249,10 @@ const PrivacyPage: NextPage = () => {
               <strong>Resend</strong> – for transactional or system emails (such
               as confirmations, teaser delivery, or internal notifications from
               forms).
+            </li>
+            <li>
+              <strong>Inner Circle access emails</strong> – cryptographic key
+              delivery and exclusive content notifications via secure email providers.
             </li>
           </ul>
           <p>
@@ -288,6 +309,12 @@ const PrivacyPage: NextPage = () => {
               part of communication records and risk management, particularly
               where serious or complex matters have been raised.
             </li>
+            <li>
+              <strong>Inner Circle membership data</strong> is retained for the
+              duration of your active membership plus a reasonable period for
+              audit and compliance purposes. Cryptographic keys and access
+              records are subject to automatic data retention policies.
+            </li>
           </ul>
         </section>
 
@@ -315,6 +342,9 @@ const PrivacyPage: NextPage = () => {
               Portability of certain data you have provided, where technically
               feasible and legally required.
             </li>
+            <li>
+              Withdrawal of consent for processing based on consent.
+            </li>
           </ul>
           <p>
             To exercise any of these rights, contact us at{" "}
@@ -335,8 +365,8 @@ const PrivacyPage: NextPage = () => {
           </h2>
           <p>
             We take reasonable steps to protect personal information from
-            unauthorised access, loss, or misuse, using a combination of
-            technical and organisational measures. No system is perfectly
+            unauthorized access, loss, or misuse, using a combination of
+            technical and organizational measures. No system is perfectly
             secure, but security is treated as a core design concern, not an
             afterthought.
           </p>

@@ -29,7 +29,7 @@ type PageProps = {
 };
 
 // Remove unused variable - fix warning
-// const PRIMARY_COLLECTION = 'Post';
+// const PRIMARY_COLLECTION = "Post";
 const FALLBACK_COLLECTIONS = ["Print", "Resource"] as const;
 
 function hasInnerCircleCookie(): boolean {
@@ -78,9 +78,7 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
   const effectiveSlug = slug || "";
   const returnToPath = `/${effectiveSlug}`;
-  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
-    returnToPath,
-  )}`;
+  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(returnToPath)}`;
 
   return (
     <Layout title={canonicalTitle}>
@@ -218,16 +216,23 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     let data: (PageMeta & { content?: string }) | null = null;
 
+    // First: try canonical Post
     const postCandidate = await getPostBySlug(slug);
     if (postCandidate) {
       data = postCandidate as PageMeta & { content?: string };
     }
 
+    // Fallback: other MDX collections (Print, Resource, etc.)
     if (!data) {
       for (const key of FALLBACK_COLLECTIONS) {
-        const candidate = getContentBySlug(key, slug, {
+        const raw = getContentBySlug(key, slug, {
           withContent: true,
-        }) as (PageMeta & { content?: string }) | null;
+        });
+
+        // TS: go through `unknown` to acknowledge this is an intentional cast
+        const candidate = raw
+          ? (raw as unknown as PageMeta & { content?: string })
+          : null;
 
         if (candidate) {
           data = candidate;
@@ -244,9 +249,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     if (!meta.title) return { notFound: true };
 
-    const jsonSafeMeta = JSON.parse(
-      JSON.stringify(meta),
-    ) as PageMeta;
+    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
 
     const mdxSource = await serialize(content || "", {
       scope: jsonSafeMeta as unknown as Record<string, unknown>,

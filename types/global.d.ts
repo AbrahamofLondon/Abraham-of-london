@@ -18,6 +18,13 @@ declare global {
     children: React.ReactNode;
   }
 
+  // Analytics global declarations
+  interface Window {
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
+    plausible?: (event: string, options?: { props: Record<string, any> }) => void;
+  }
+
   // API response types
   interface APIResponse<T = unknown> {
     success: boolean;
@@ -109,6 +116,8 @@ declare global {
       // Analytics
       ANALYTICS_ID?: string;
       NEXT_PUBLIC_GA_ID?: string;
+      NEXT_PUBLIC_GA_MEASUREMENT_ID?: string;
+      ANALYTICS_WEBHOOK_URL?: string;
 
       // Brand URLs
       NEXT_PUBLIC_INNOVATEHUB_URL?: string;

@@ -1,127 +1,106 @@
-// lib/server/innerCircleMembership.ts
-/* eslint-disable no-console */
-import { Pool, type PoolClient } from "pg";
-import {
-  generateDisplayKey,
-  hashEmail,
-  hashKey,
-  normalizeEmail,
-} from "./innerCircleCrypto";
+// lib/server/innerCircleCrypto.ts
 
-export type InnerCircleMemberStatus = "active" | "replaced" | "revoked";
+import crypto from "crypto";
 
-export interface InnerCircleMember {
-  id: string;
-  emailHash: string;
-  keyHash: string;
-  keySuffix: string;
-  status: InnerCircleMemberStatus;
-  createdAt: string;
-  lastUsedAt: string | null;
-}
-
-let pool: Pool | null = null;
-
-export function getInnerCirclePool(): Pool {
-  if (pool) return pool;
-
-  const connectionString =
-    process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error(
-      "[InnerCircle] No INNER_CIRCLE_DB_URL (or DATABASE_URL) configured for membership store.",
-    );
-  }
-
-  pool = new Pool({
-    connectionString,
-    max: 5,
-    idleTimeoutMillis: 30_000,
-  });
-
-  return pool;
+/**
+ * Normalise email before hashing – trim + lowercase
+ */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 /**
- * SQL schema (run once in your DB):
- *
- *  CREATE TABLE IF NOT EXISTS inner_circle_members (
- *    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
- *    email_hash TEXT NOT NULL,
- *    key_hash   TEXT NOT NULL,
- *    key_suffix TEXT NOT NULL,
- *    status     TEXT NOT NULL DEFAULT 'active',
- *    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
- *    last_used_at TIMESTAMPTZ,
- *    CONSTRAINT inner_circle_members_status_chk
- *      CHECK (status IN ('active','replaced','revoked'))
- *  );
- *
- *  CREATE INDEX IF NOT EXISTS idx_inner_circle_email_hash
- *    ON inner_circle_members (email_hash);
- *
- *  CREATE INDEX IF NOT EXISTS idx_inner_circle_key_hash_active
- *    ON inner_circle_members (key_hash, status);
+ * Hash email with SHA-256 (for lookups, not reversible).
  */
-
-export async function issueMemberKeyForEmail(email: string): Promise<string> {
-  const normalizedEmail = normalizeEmail(email);
-  const emailHash = hashEmail(normalizedEmail);
-  const displayKey = generateDisplayKey();
-  const keyHash = hashKey(displayKey);
-  const keySuffix = displayKey.slice(-4);
-
-  const poolInstance = getInnerCirclePool();
-  const client: PoolClient = await poolInstance.connect();
-
-  try {
-    await client.query("BEGIN");
-
-    await client.query(
-      "UPDATE inner_circle_members SET status = 'replaced' WHERE email_hash = $1 AND status = 'active'",
-      [emailHash],
-    );
-
-    await client.query(
-      `INSERT INTO inner_circle_members (email_hash, key_hash, key_suffix, status)
-       VALUES ($1, $2, $3, 'active')`,
-      [emailHash, keyHash, keySuffix],
-    );
-
-    await client.query("COMMIT");
-
-    return displayKey;
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error("[InnerCircle] Failed to issue member key:", err);
-    throw err;
-  } finally {
-    client.release();
-  }
+export function hashEmail(email: string): string {
+  const normalized = normalizeEmail(email);
+  return crypto.createHash("sha256").update(normalized, "utf8").digest("hex");
 }
 
-export async function validateMemberKey(key: string): Promise<boolean> {
-  const poolInstance = getInnerCirclePool();
-  const keyHash = hashKey(key);
+/**
+ * Hash an Inner Circle key with SHA-256.
+ */
+export function hashKey(key: string): string {
+  const normalized = normalizeKey(key);
+  return crypto.createHash("sha256").update(normalized, "utf8").digest("hex");
+}
 
-  const res = await poolInstance.query<{ id: string }>(
-    "SELECT id FROM inner_circle_members WHERE key_hash = $1 AND status = 'active' LIMIT 1",
-    [keyHash],
-  );
+/**
+ * Generate a high-entropy, human-readable display key.
+ *
+ * Example:  "A3F9-7C2B-1D8E-9F40"
+ */
+export function generateDisplayKey(): string {
+  // 16 bytes -> 32 hex chars -> 8 groups of 4 for readability
+  const raw = crypto.randomBytes(16).toString("hex").toUpperCase(); // e.g. "A3F97C2B1D8E9F40"
+  const groups: string[] = [];
 
-  const row = res.rows[0];
-  if (!row) {
-    return false;
+  for (let i = 0; i < raw.length; i += 4) {
+    groups.push(raw.slice(i, i + 4));
   }
 
-  poolInstance
-    .query("UPDATE inner_circle_members SET last_used_at = NOW() WHERE id = $1", [
-      row.id,
-    ])
-    .catch((err) => {
-      console.warn("[InnerCircle] Failed to update last_used_at:", err);
-    });
+  return groups.join("-");
+}
 
-  return true;
+/**
+ * Validate Inner Circle key format
+ */
+export function isValidKeyFormat(key: string): boolean {
+  const keyRegex = /^[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/;
+  return keyRegex.test(key);
+}
+
+/**
+ * Normalize key by removing hyphens and converting to uppercase
+ */
+export function normalizeKey(key: string): string {
+  return key.replace(/-/g, '').toUpperCase();
+}
+
+/**
+ * Get email hash prefix for safe display (first 8 chars)
+ */
+export function getEmailHashPrefix(email: string): string {
+  return hashEmail(email).substring(0, 8);
+}
+
+/**
+ * Get key suffix for safe display (last 4 chars)
+ */
+export function getKeySuffix(key: string): string {
+  const normalized = normalizeKey(key);
+  return normalized.slice(-4);
+}
+
+/**
+ * Generate a verified unique display key
+ */
+export function generateVerifiedDisplayKey(
+  existingHashes: Set<string> = new Set(),
+  maxAttempts: number = 10
+): string {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const key = generateDisplayKey();
+    const keyHash = hashKey(key);
+    
+    if (!existingHashes.has(keyHash)) {
+      return key;
+    }
+  }
+  
+  throw new Error('Failed to generate unique key after maximum attempts');
+}
+
+/**
+ * Constant-time comparison to prevent timing attacks
+ */
+export function constantTimeCompare(a: string, b: string): boolean {
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(a, 'utf8'),
+      Buffer.from(b, 'utf8')
+    );
+  } catch {
+    return false;
+  }
 }

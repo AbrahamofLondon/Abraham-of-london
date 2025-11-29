@@ -9,6 +9,12 @@ export type GuardOptions = {
   honeypotFieldNames?: string[];
 };
 
+interface ApiRequestBody {
+  recaptchaToken?: string;
+  token?: string;
+  [key: string]: unknown;
+}
+
 function getClientIp(req: NextApiRequest): string | undefined {
   const forwardedFor = req.headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) return forwardedFor[0];
@@ -20,7 +26,7 @@ function getClientIp(req: NextApiRequest): string | undefined {
   return req.socket?.remoteAddress ?? undefined;
 }
 
-export function withSecurity<T = any>(
+export function withSecurity<T = unknown>(
   handler: (req: NextApiRequest, res: NextApiResponse<T>) => unknown | Promise<unknown>,
   options: GuardOptions = {},
 ): NextApiHandler<T> {
@@ -42,17 +48,18 @@ export function withSecurity<T = any>(
     const origin = req.headers.origin;
     const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL;
     if (origin && allowedOrigin && origin !== allowedOrigin) {
-      // Don’t leak details
+      // Don't leak details
       res.status(403).json({} as T);
       return;
     }
 
     // Honeypot fields: if any are non-empty, silently succeed but drop
     if (requireHoneypot && req.body && typeof req.body === "object") {
+      const body = req.body as Record<string, unknown>;
       for (const field of honeypotFieldNames) {
-        const val = (req.body as Record<string, unknown>)[field];
+        const val = body[field];
         if (typeof val === "string" && val.trim().length > 0) {
-          // Pretend success, don’t process further
+          // Pretend success, don't process further
           res.status(200).json({} as T);
           return;
         }
@@ -61,10 +68,9 @@ export function withSecurity<T = any>(
 
     // reCAPTCHA v3 (using your verifyRecaptcha.ts)
     if (requireRecaptcha) {
-      const token =
-        (req.body as any)?.recaptchaToken ||
-        (req.body as any)?.token ||
-        (req.headers["x-recaptcha-token"] as string | undefined);
+      const body = req.body as ApiRequestBody;
+      const token = body.recaptchaToken || body.token || 
+                   (req.headers["x-recaptcha-token"] as string | undefined);
 
       if (!token || typeof token !== "string") {
         res.status(400).json({} as T);

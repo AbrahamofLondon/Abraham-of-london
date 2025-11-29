@@ -13,6 +13,19 @@ export interface SocialLink {
   icon?: string;                 // Optional icon id/name
 }
 
+interface RawSocialItem {
+  href?: string;
+  url?: string;
+  handle?: string;
+  kind?: string;
+  type?: string;
+  platform?: string;
+  label?: string;
+  name?: string;
+  icon?: string;
+  external?: boolean;
+}
+
 /** Map aliases → canonical platform keys */
 const PLATFORM_ALIASES: Record<string, SocialPlatform> = {
   x: "twitter",
@@ -61,7 +74,7 @@ const PLATFORM_BUILDERS: Partial<Record<SocialPlatform, (h: string) => string>> 
   whatsapp: (h) => buildWhatsApp(h),
 };
 
-function stripAt(v: string) {
+function stripAt(v: string): string {
   return String(v || "").trim().replace(/^@+/, "");
 }
 
@@ -105,7 +118,7 @@ function coerceHref(
 
   // If we know the platform and it's a handle, build URL
   if (kind && PLATFORM_BUILDERS[kind]) {
-    return PLATFORM_BUILDERS[kind]!(v);
+    return PLATFORM_BUILDERS[kind](v);
   }
 
   // If it looks like a bare domain, normalise to https
@@ -145,7 +158,7 @@ function computeExternal(href: string): boolean {
 
 /** Public type guard */
 export function isSocialLink(x: unknown): x is SocialLink {
-  return !!x && typeof x === "object" && typeof (x as any).href === "string";
+  return !!x && typeof x === "object" && typeof (x as SocialLink).href === "string";
 }
 
 /** Coerce unknown shapes (array/object/primitive) into a clean SocialLink[] */
@@ -162,11 +175,12 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
   for (const item of arr) {
     if (!item || typeof item !== "object") continue;
 
-    const rawHref = (item as any).href ?? (item as any).url ?? (item as any).handle ?? "";
-    const rawKind = (item as any).kind ?? (item as any).type ?? (item as any).platform;
-    const rawLabel = (item as any).label ?? (item as any).name;
-    const rawIcon = (item as any).icon;
-    const rawExternal = (item as any).external;
+    const raw = item as RawSocialItem;
+    const rawHref = raw.href ?? raw.url ?? raw.handle ?? "";
+    const rawKind = raw.kind ?? raw.type ?? raw.platform;
+    const rawLabel = raw.label ?? raw.name;
+    const rawIcon = raw.icon;
+    const rawExternal = raw.external;
 
     const kind = normalisePlatform(rawKind);
     const href = coerceHref(rawHref, kind);
