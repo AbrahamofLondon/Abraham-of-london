@@ -1,237 +1,179 @@
 // pages/inner-circle/index.tsx
 import * as React from "react";
-import type { FormEvent } from "react";
-import Link from "next/link";
-import SiteLayout from "@/components/SiteLayout";
+import type { NextPage } from "next";
+import Head from "next/head";
+import Layout from "@/components/Layout";
 
-type RegisterResponse = {
-  ok: boolean;
-  accessKey?: string;
-  unlockUrl?: string;
-  error?: string;
-};
+type RegisterResponse =
+  | { ok: true; message?: string }
+  | { ok: false; error: string };
 
-type UnlockResponse = {
-  ok: boolean;
-  unlocked?: boolean;
-  error?: string;
-};
+const InnerCirclePage: NextPage = () => {
+  const [email, setEmail] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
 
-const InnerCirclePage: React.FC = () => {
-  // Registration state
-  const [regEmail, setRegEmail] = React.useState("");
-  const [regLoading, setRegLoading] = React.useState(false);
-  const [regError, setRegError] = React.useState<string | null>(null);
-  const [regSuccess, setRegSuccess] = React.useState<string | null>(null);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  // Unlock state
-  const [accessKey, setAccessKey] = React.useState("");
-  const [unlockLoading, setUnlockLoading] = React.useState(false);
-  const [unlockError, setUnlockError] = React.useState<string | null>(null);
-  const [unlockSuccess, setUnlockSuccess] = React.useState<string | null>(null);
+    setError(null);
+    setSuccess(null);
 
-  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setRegError(null);
-    setRegSuccess(null);
-    setRegLoading(true);
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+
+    if (!trimmedEmail) {
+      setError("Please enter the email you use for the Inner Circle.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const res = await fetch("/api/inner-circle/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: regEmail }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          name: trimmedName || undefined,
+          // default return target – can be overridden later if needed
+          returnTo: "/canon",
+        }),
       });
 
-      const data = (await res.json()) as RegisterResponse;
+      let data: RegisterResponse;
+      try {
+        data = (await res.json()) as RegisterResponse;
+      } catch {
+        data = { ok: false, error: "Unexpected response from the server." };
+      }
 
-      if (!data.ok) {
-        setRegError(data.error ?? "Something went wrong.");
+      if (!res.ok || !data.ok) {
+        const message =
+          !data.ok && "error" in data && data.error
+            ? data.error
+            : "Something went wrong while registering. Please try again.";
+        setError(message);
+        setSuccess(null);
         return;
       }
 
-      setRegSuccess(
-        "Access key sent to your email. You can also paste it below to unlock this device.",
+      setSuccess(
+        data.message ??
+          "Registration successful. Check your inbox for your access key and unlock link.",
       );
-    } catch {
-      setRegError("Unexpected error. Please try again.");
+      setError(null);
+    } catch (err) {
+      // Network / unexpected errors
+      // eslint-disable-next-line no-console
+      console.error("[InnerCircle] register error:", err);
+      setError("Unable to reach the server. Please try again in a moment.");
+      setSuccess(null);
     } finally {
-      setRegLoading(false);
-    }
-  };
-
-  const handleUnlock = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setUnlockError(null);
-    setUnlockSuccess(null);
-    setUnlockLoading(true);
-
-    try {
-      const res = await fetch("/api/inner-circle/unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessKey }),
-      });
-
-      const data = (await res.json()) as UnlockResponse;
-
-      if (!data.ok) {
-        setUnlockError(data.error ?? "Invalid or expired access key.");
-        return;
-      }
-
-      setUnlockSuccess(
-        "Device unlocked for Inner Circle Canon access. You can now open restricted volumes.",
-      );
-    } catch {
-      setUnlockError("Unexpected error. Please try again.");
-    } finally {
-      setUnlockLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <SiteLayout pageTitle="Inner Circle">
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <header className="mb-10 text-center">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold">
-            Inner Circle
-          </p>
-          <h1 className="mt-3 font-serif text-3xl text-gray-900 dark:text-gray-100 sm:text-4xl">
-            Access the Canon Inner Circle
-          </h1>
-          <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
-            Register your email to receive a personal access key, then unlock
-            this device for full access to restricted Canon volumes.
-          </p>
-        </header>
+    <Layout title="Inner Circle Access">
+      <Head>
+        <title>Inner Circle Access | Abraham of London</title>
+        <meta
+          name="description"
+          content="Request or recover your Inner Circle access key and unlock link."
+        />
+      </Head>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {/* Registration panel */}
-          <section className="rounded-2xl border border-gray-200 bg-white/90 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900/80">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-softGold">
+      <main className="mx-auto max-w-2xl px-4 pb-16 pt-12 sm:pt-16 lg:pt-20">
+        <section className="space-y-8">
+          <header className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold/70">
+              Inner Circle · Access
+            </p>
+            <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
               Step 1 · Register
-            </h2>
-            <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">
+            </h1>
+            <p className="text-sm text-softGold/80">
               Enter the email you use for the Inner Circle. We&apos;ll send you
               an access key and unlock link.
             </p>
+          </header>
 
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="text-left">
-                <label
-                  htmlFor="inner-circle-email"
-                  className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-600 dark:text-gray-300"
-                >
-                  Email address
-                </label>
-                <input
-                  id="inner-circle-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={regEmail}
-                  onChange={(event) => setRegEmail(event.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-softGold focus:ring-1 focus:ring-softGold dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
-                />
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 rounded-2xl border border-softGold/30 bg-black/60 p-6 shadow-xl shadow-black/40 backdrop-blur"
+          >
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="block text-xs font-semibold uppercase tracking-[0.18em] text-softGold/80"
+              >
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-softGold/30 bg-black/60 px-3 py-2 text-sm text-cream outline-none transition focus:border-softGold focus:ring-1 focus:ring-softGold/60"
+                placeholder="you@example.com"
+              />
+              <p className="text-[11px] text-softGold/70">
+                Already a subscriber to the main newsletter? Use the same
+                email. If you don&apos;t see the email, check your promotions or
+                spam folder.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="name"
+                className="block text-xs font-semibold uppercase tracking-[0.18em] text-softGold/80"
+              >
+                Name <span className="text-softGold/60">(optional)</span>
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-lg border border-softGold/20 bg-black/50 px-3 py-2 text-sm text-cream outline-none transition focus:border-softGold focus:ring-1 focus:ring-softGold/60"
+                placeholder="What should we call you?"
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-lg border border-red-700/70 bg-red-900/30 px-3 py-2 text-xs text-red-100">
+                {error}
               </div>
+            )}
 
-              {regError && (
-                <p className="text-xs font-semibold text-red-500">
-                  {regError}
-                </p>
-              )}
+            {success && (
+              <div className="rounded-lg border border-emerald-600/70 bg-emerald-900/30 px-3 py-2 text-xs text-emerald-100">
+                {success}
+              </div>
+            )}
 
-              {regSuccess && (
-                <p className="text-xs font-semibold text-emerald-500">
-                  {regSuccess}
-                </p>
-              )}
-
+            <div className="pt-2">
               <button
                 type="submit"
-                disabled={regLoading}
-                className="inline-flex w-full items-center justify-center rounded-xl bg-softGold px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-softGold/90 disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center rounded-full bg-softGold px-6 py-2.5 text-sm font-semibold text-black transition hover:bg-softGold/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {regLoading ? "Sending..." : "Send Access Key"}
+                {isSubmitting ? "Sending access link…" : "Send access link"}
               </button>
-            </form>
-
-            <p className="mt-4 text-[0.7rem] text-gray-500 dark:text-gray-400">
-              Already a subscriber to the main newsletter? Use the same email.
-              If you don&apos;t see the email, check your promotions or spam
-              folder.
-            </p>
-          </section>
-
-          {/* Unlock panel */}
-          <section className="rounded-2xl border border-gray-200 bg-white/90 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900/80">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-softGold">
-              Step 2 · Unlock this device
-            </h2>
-            <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">
-              Paste the access key from your email. This will set a secure cookie
-              on this browser to unlock Inner Circle Canon volumes.
-            </p>
-
-            <form onSubmit={handleUnlock} className="space-y-4">
-              <div className="text-left">
-                <label
-                  htmlFor="inner-circle-access-key"
-                  className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-600 dark:text-gray-300"
-                >
-                  Access key
-                </label>
-                <input
-                  id="inner-circle-access-key"
-                  type="text"
-                  required
-                  value={accessKey}
-                  onChange={(event) => setAccessKey(event.target.value.trim())}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-softGold focus:ring-1 focus:ring-softGold dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
-                />
-              </div>
-
-              {unlockError && (
-                <p className="text-xs font-semibold text-red-500">
-                  {unlockError}
-                </p>
-              )}
-
-              {unlockSuccess && (
-                <p className="text-xs font-semibold text-emerald-500">
-                  {unlockSuccess}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={unlockLoading}
-                className="inline-flex w-full items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70 dark:bg-gray-100 dark:text-black dark:hover:bg-white"
-              >
-                {unlockLoading ? "Unlocking..." : "Unlock Canon Access"}
-              </button>
-            </form>
-
-            <p className="mt-4 text-[0.7rem] text-gray-500 dark:text-gray-400">
-              Once unlocked, you can open restricted Canon volumes directly.
-              Your access is stored only on this device/browser.
-            </p>
-
-            <p className="mt-3 text-[0.7rem] text-gray-500 dark:text-gray-400">
-              Need help?{" "}
-              <Link
-                href="/contact"
-                className="font-semibold text-softGold underline-offset-2 hover:underline"
-              >
-                Contact support
-              </Link>
-              .
-            </p>
-          </section>
-        </div>
-      </div>
-    </SiteLayout>
+            </div>
+          </form>
+        </section>
+      </main>
+    </Layout>
   );
 };
 
