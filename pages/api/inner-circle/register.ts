@@ -1,121 +1,157 @@
+// pages/api/inner-circle/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { sendInnerCircleEmail } from "@/lib/email/sendInnerCircleEmail";
 import {
-  rateLimit,
+  combinedRateLimit,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rateLimit";
+import {
+  createOrUpdateMemberAndIssueKey,
+  getPrivacySafeStats,
+} from "@/lib/innerCircleMembership";
 
-// Import the entire module to avoid TypeScript errors
-import * as membership from "@/lib/innerCircleMembership";
+type Success = { ok: true; message?: string };
+type Failure = { ok: false; error: string };
+type RegisterResponse = Success | Failure;
 
-type AdminExportRow = {
-  created_at: string;
-  status: string;
-  key_suffix: string;
-  email_hash_prefix: string;
-  total_unlocks: number;
-};
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
-type AdminExportResponse =
-  | {
-      ok: true;
-      rows: AdminExportRow[];
-      stats: Record<string, unknown>;
-    }
-  | {
-      ok: false;
-      error: string;
-    };
-
-// ---------------------------------------------------------------------------
-// Simple admin auth – shared secret via header
-// ---------------------------------------------------------------------------
-function isAuthorised(req: NextApiRequest): boolean {
-  const expected = process.env.INNER_CIRCLE_ADMIN_TOKEN;
-  if (!expected) return false;
-
-  const token = req.headers["x-admin-token"];
-  if (!token) return false;
-
-  if (Array.isArray(token)) {
-    return token.includes(expected);
-  }
-
-  return token === expected;
+function logRegistration(action: string, metadata?: unknown): void {
+  // eslint-disable-next-line no-console
+  console.log(`📝 InnerCircle register: ${action}`, {
+    timestamp: new Date().toISOString(),
+    metadata,
+  });
 }
 
-// ---------------------------------------------------------------------------
-// Handler
-// ---------------------------------------------------------------------------
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<AdminExportResponse>,
-): void {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
+  res: NextApiResponse<RegisterResponse>,
+): Promise<void> {
+  if (req.method !== "POST") {
+    logRegistration("method_not_allowed", { method: req.method });
+    res.setHeader("Allow", "POST");
     res.status(405).json({ ok: false, error: "Method not allowed" });
     return;
   }
 
-  if (!isAuthorised(req)) {
-    res.status(401).json({ ok: false, error: "Unauthorized" });
-    return;
-  }
+  try {
+    const { email, name, returnTo } = (req.body ?? {}) as {
+      email?: string;
+      name?: string;
+      returnTo?: string;
+    };
 
-  // Rate limit admin export using an existing conservative config
-  const rlKey = `admin-inner-circle-export:${
-    req.headers["x-admin-token"] ?? "unknown"
-  }`;
+    if (!email || !EMAIL_REGEX.test(email)) {
+      logRegistration("invalid_email", { hasEmail: !!email });
+      res.status(400).json({
+        ok: false,
+        error: "Please provide a valid email address.",
+      });
+      return;
+    }
 
-  const rlResult = rateLimit(rlKey, RATE_LIMIT_CONFIGS.TEASER_REQUEST);
-  const rlHeaders = createRateLimitHeaders(rlResult);
-  Object.entries(rlHeaders).forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      logRegistration("invalid_name", { hasName: !!name, length: name?.length });
+      res.status(400).json({
+        ok: false,
+        error: "Please provide a valid name (minimum 2 characters).",
+      });
+      return;
+    }
 
-  if (!rlResult.allowed) {
-    res.status(429).json({
-      ok: false,
-      error: "Too many requests. Please try again later.",
+    const sanitizedEmail = email.trim().toLowerCase();
+    const sanitizedName = name.trim();
+    const safeReturnTo =
+      typeof returnTo === "string" &&
+      returnTo.startsWith("/") &&
+      !returnTo.startsWith("//")
+        ? returnTo
+        : "/canon";
+
+    // Rate limiting (IP + email)
+    const {
+      allowed,
+      hitIpLimit,
+      hitEmailLimit,
+      ip,
+      ipResult,
+      emailResult,
+    } = combinedRateLimit(
+      req,
+      sanitizedEmail,
+      "inner-circle-register",
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER,
+      RATE_LIMIT_CONFIGS.INNER_CIRCLE_REGISTER_EMAIL,
+    );
+
+    if (!allowed) {
+      const headers = createRateLimitHeaders(hitIpLimit ? ipResult : emailResult!);
+      Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
+
+      const errorMessage = hitEmailLimit
+        ? "Too many registration attempts for this email. Please try again in an hour."
+        : "Too many attempts from your location. Please try again in 15 minutes.";
+
+      logRegistration("rate_limited", { ip, hitIpLimit, hitEmailLimit });
+      res.status(429).json({ ok: false, error: errorMessage });
+      return;
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      logRegistration("missing_site_url");
+      res.status(500).json({
+        ok: false,
+        error: "Inner Circle is not configured on the server.",
+      });
+      return;
+    }
+
+    // Issue key
+    const keyRecord = createOrUpdateMemberAndIssueKey({
+      email: sanitizedEmail,
+      name: sanitizedName,
+      ipAddress: ip,
+      context: "register",
     });
-    return;
+
+    const unlockUrl = `${siteUrl}/api/inner-circle/unlock?key=${encodeURIComponent(
+      keyRecord.key,
+    )}&returnTo=${encodeURIComponent(safeReturnTo)}`;
+
+    await sendInnerCircleEmail({
+      email: sanitizedEmail,
+      name: sanitizedName,
+      accessKey: keyRecord.key,
+      unlockUrl,
+    });
+
+    logRegistration("success", {
+      keySuffix: keyRecord.keySuffix,
+      hasName: !!sanitizedName,
+    });
+
+    // Optional: log stats for monitoring (privacy-safe)
+    const stats = getPrivacySafeStats();
+    logRegistration("stats_snapshot", stats);
+
+    res.status(200).json({
+      ok: true,
+      message: "Registration successful. Check your email for your access key.",
+    });
+  } catch (err) {
+    logRegistration("error", {
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    res.status(500).json({
+      ok: false,
+      error: "An unexpected error occurred. Please try again later.",
+    });
   }
+}
 
-  // -------------------------------------------------------------------------
-  // Try to call exportInnerCircleAdminSummary() and getPrivacySafeStats()
-  // if they exist. If not, degrade gracefully with empty data.
-  // -------------------------------------------------------------------------
-  let rows: AdminExportRow[] = [];
-
-  try {
-    const maybeExport = (membership as any).exportInnerCircleAdminSummary;
-    if (typeof maybeExport === "function") {
-      const result = maybeExport();
-      if (Array.isArray(result)) {
-        rows = result as AdminExportRow[];
-      }
-    }
-  } catch {
-    // Silent fail – admin export is best-effort; no PII should be exposed anyway
-    rows = [];
-  }
-
-  let stats: Record<string, unknown> = {};
-  try {
-    const maybeStats = (membership as any).getPrivacySafeStats;
-    if (typeof maybeStats === "function") {
-      const result = maybeStats();
-      if (result && typeof result === "object") {
-        stats = result as Record<string, unknown>;
-      }
-    }
-  } catch {
-    stats = {};
-  }
-
-  res.status(200).json({
-    ok: true,
-    rows,
-    stats,
-  });
+export async function getRegistrationStats() {
+  return getPrivacySafeStats();
 }

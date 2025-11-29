@@ -13,7 +13,7 @@ type UnlockResponse =
   | { ok: false; error: string };
 
 const InnerCircleAccessPage: NextPage = () => {
-  // STEP 1 – register
+  // Step 1 – register
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [registerError, setRegisterError] = React.useState<string | null>(null);
@@ -21,7 +21,7 @@ const InnerCircleAccessPage: NextPage = () => {
     React.useState<string | null>(null);
   const [isRegistering, setIsRegistering] = React.useState(false);
 
-  // STEP 2 – unlock
+  // Step 2 – unlock
   const [accessKey, setAccessKey] = React.useState("");
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
   const [unlockSuccess, setUnlockSuccess] =
@@ -32,7 +32,6 @@ const InnerCircleAccessPage: NextPage = () => {
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
-
     setRegisterError(null);
     setRegisterSuccess(null);
 
@@ -48,14 +47,12 @@ const InnerCircleAccessPage: NextPage = () => {
 
     try {
       const res = await fetch("/api/inner-circle/register", {
-        method: "POST", // ⬅ ensure POST (fixes 405)
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: trimmedEmail,
           name: trimmedName || undefined,
-          returnTo: "/canon", // default return target
+          returnTo: "/canon",
         }),
       });
 
@@ -67,11 +64,11 @@ const InnerCircleAccessPage: NextPage = () => {
       }
 
       if (!res.ok || !data.ok) {
-        const message =
+        const msg =
           !data.ok && "error" in data && data.error
             ? data.error
             : "Something went wrong while registering. Please try again.";
-        setRegisterError(message);
+        setRegisterError(msg);
         setRegisterSuccess(null);
         return;
       }
@@ -97,7 +94,6 @@ const InnerCircleAccessPage: NextPage = () => {
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
-
     setUnlockError(null);
     setUnlockSuccess(null);
 
@@ -112,9 +108,7 @@ const InnerCircleAccessPage: NextPage = () => {
     try {
       const res = await fetch("/api/inner-circle/unlock", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           key: trimmedKey,
           returnTo: "/canon",
@@ -129,11 +123,11 @@ const InnerCircleAccessPage: NextPage = () => {
       }
 
       if (!res.ok || !data.ok) {
-        const message =
+        const msg =
           !data.ok && "error" in data && data.error
             ? data.error
             : "Unable to unlock this device. Please check your key and try again.";
-        setUnlockError(message);
+        setUnlockError(msg);
         setUnlockSuccess(null);
         return;
       }
@@ -145,7 +139,6 @@ const InnerCircleAccessPage: NextPage = () => {
       setUnlockError(null);
 
       if (data.redirectTo) {
-        // soft navigation – no full reload
         window.location.href = data.redirectTo;
       }
     } catch (err) {
@@ -312,11 +305,13 @@ const InnerCircleAccessPage: NextPage = () => {
 
               <p className="text-[11px] text-softGold/70">
                 Once unlocked, you can open restricted Canon volumes directly on
-                this device. Your access is stored only on this
-                browser/device.
+                this device. Your access is stored only on this browser/device.
               </p>
               <p className="text-[11px] text-softGold/70">
-                Need help? <a href="/contact" className="underline">Contact support.</a>
+                Need help?{" "}
+                <a href="/contact" className="underline">
+                  Contact support.
+                </a>
               </p>
             </form>
           </section>
