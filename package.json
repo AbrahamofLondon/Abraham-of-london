@@ -49,6 +49,7 @@
     "@contentlayer/cli": "0.3.4",
     "@contentlayer/core": "npm:contentlayer2@0.5.8",
     "@netlify/functions": "5.1.0",
+    "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
     "@tailwindcss/typography": "0.5.19",
     "autoprefixer": "10.4.20",
@@ -82,6 +83,7 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.14.5",
+    "@react-email/components": "0.0.23",
     "@types/mdx": "^2.0.13",
     "@types/node": "20.11.30",
     "@types/pg": "8.15.6",
