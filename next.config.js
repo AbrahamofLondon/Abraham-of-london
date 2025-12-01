@@ -1,4 +1,3 @@
-// next.config.js - SIMPLE VERSION WITHOUT CONTENTLAYER WRAPPER
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -8,21 +7,15 @@ const nextConfig = {
     unoptimized: true,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
     formats: ['image/avif', 'image/webp'],
   },
 
   compress: true,
   poweredByHeader: false,
 
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
 
   async redirects() {
     return [

@@ -25,6 +25,12 @@ importers:
       '@react-pdf/renderer':
         specifier: 4.3.1
         version: 4.3.1(react@18.3.1)
+      '@tailwindcss/typography':
+        specifier: 0.5.19
+        version: 0.5.19(tailwindcss@3.4.14)
+      autoprefixer:
+        specifier: 10.4.20
+        version: 10.4.20(postcss@8.4.47)
       better-sqlite3:
         specifier: 12.5.0
         version: 12.5.0
@@ -35,7 +41,7 @@ importers:
         specifier: 0.5.8
         version: 0.5.8
       cross-env:
-        specifier: ^7.0.3
+        specifier: 7.0.3
         version: 7.0.3
       date-fns:
         specifier: 4.1.0
@@ -67,6 +73,9 @@ importers:
       pg-hstore:
         specifier: 2.3.4
         version: 2.3.4
+      postcss:
+        specifier: 8.4.47
+        version: 8.4.47
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -97,6 +106,9 @@ importers:
       tailwind-merge:
         specifier: 3.4.0
         version: 3.4.0
+      tailwindcss:
+        specifier: 3.4.14
+        version: 3.4.14
       ws:
         specifier: 8.18.3
         version: 8.18.3
@@ -107,9 +119,6 @@ importers:
       '@react-email/components':
         specifier: 0.0.23
         version: 0.0.23(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tailwindcss/typography':
-        specifier: 0.5.19
-        version: 0.5.19(tailwindcss@3.4.14)
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
@@ -134,9 +143,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: 8.46.4
         version: 8.46.4(eslint@9.39.1(jiti@1.21.7))(typescript@5.6.3)
-      autoprefixer:
-        specifier: 10.4.20
-        version: 10.4.20(postcss@8.4.47)
       baseline-browser-mapping:
         specifier: 2.8.30
         version: 2.8.30
@@ -152,18 +158,12 @@ importers:
       eslint-plugin-prettier:
         specifier: 5.5.4
         version: 5.5.4(eslint-config-prettier@9.1.2(eslint@9.39.1(jiti@1.21.7)))(eslint@9.39.1(jiti@1.21.7))(prettier@3.3.3)
-      postcss:
-        specifier: 8.4.47
-        version: 8.4.47
       prettier:
         specifier: 3.3.3
         version: 3.3.3
       rimraf:
         specifier: 6.0.1
         version: 6.0.1
-      tailwindcss:
-        specifier: 3.4.14
-        version: 3.4.14
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
