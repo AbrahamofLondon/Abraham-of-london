@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   
+  // NEW: Add experimental configuration for React Email
+  experimental: {
+    serverComponentsExternalPackages: ['@react-email/components'],
+  },
+  
   images: {
     unoptimized: true,
     dangerouslyAllowSVG: true,
