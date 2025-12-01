@@ -17,42 +17,16 @@ import Callout from "@/components/Callout";
 import Divider from "@/components/Divider";
 import { allBooks, type Book } from "contentlayer/generated";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
-
-// Slugs that should resolve to a canonical book slug
-const BOOK_SLUG_ALIASES: Record<string, string> = {
-  "the-architecture-of-human-purpose-landing":
-    "the-architecture-of-human-purpose",
-};
-
-// ---------------------------------------------------------------------------
-// Slug resolution
-// ---------------------------------------------------------------------------
-
-function resolveBookBySlug(
-  requestedSlug: string
-): { book: Book; canonicalSlug: string; requestedSlug: string } | null {
-  const canonicalSlug = BOOK_SLUG_ALIASES[requestedSlug] ?? requestedSlug;
-  const book = allBooks.find((b) => b.slug === canonicalSlug);
-  if (!book) return null;
-  return { book, canonicalSlug, requestedSlug };
-}
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Types                                                                     */
+/* -------------------------------------------------------------------------- */
 
 interface BookPageMeta {
   title: string;
   subtitle?: string | null;
   description?: string | null;
   excerpt?: string | null;
-  slug: string; // canonical slug
+  slug: string;
   coverImage?: string | null;
   author?: string | null;
   readTime?: string | null;
@@ -60,6 +34,8 @@ interface BookPageMeta {
   featured: boolean;
   draft: boolean;
   lastModified?: string | null;
+
+  // Extended metadata
   category?: string | null;
   isbn?: string | null;
   publisher?: string | null;
@@ -81,26 +57,60 @@ interface BookPageProps {
   mdxSource: MDXRemoteSerializeResult;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Slug normalisation & alias map                                            */
+/* -------------------------------------------------------------------------- */
 
-function removeUndefined<T extends Record<string, unknown>>(
-  obj: T
-): Partial<T> {
+/**
+ * Central place for marketing / legacy aliases.
+ * LEFT  = path segment in the URL
+ * RIGHT = canonical `Book.slug` in Contentlayer
+ *
+ * IMPORTANT:
+ * Do NOT add aliases here that already have their own dedicated page file
+ * under /pages/books, or you'll get Conflicting SSG paths.
+ */
+const BOOK_ALIAS_MAP: Record<string, string> = {
+  // Example (only if no dedicated /books/the-architecture-of-human-purpose-landing.tsx file exists):
+  // "the-architecture-of-human-purpose-landing": "the-architecture-of-human-purpose",
+};
+
+function normaliseSlugParam(param: string | string[] | undefined): string {
+  if (!param) return "";
+  return Array.isArray(param) ? param[0] : param;
+}
+
+/**
+ * Resolve a requested slug to the canonical Contentlayer book
+ * and the canonical slug.
+ */
+function resolveBookBySlug(
+  requestedSlug: string
+): { book: Book; canonicalSlug: string; requestedSlug: string } | null {
+  const trimmed = requestedSlug.trim();
+  const canonicalSlug = BOOK_ALIAS_MAP[trimmed] ?? trimmed;
+  const book = allBooks.find((b) => b.slug === canonicalSlug);
+  if (!book) return null;
+  return { book, canonicalSlug, requestedSlug: trimmed };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Helper: remove undefined                                                  */
+/* -------------------------------------------------------------------------- */
+
+function removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
   Object.keys(obj).forEach((key) => {
-    const value = obj[key];
-    if (value !== undefined) {
-      result[key as keyof T] = value;
+    if (obj[key] !== undefined) {
+      result[key as keyof T] = obj[key];
     }
   });
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// Enhanced MDX Components
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Enhanced MDX Components                                                   */
+/* -------------------------------------------------------------------------- */
 
 type MDXComponentProps = {
   children?: React.ReactNode;
@@ -109,7 +119,7 @@ type MDXComponentProps = {
 
 type AnchorProps = React.ComponentPropsWithoutRef<"a">;
 
-const enhancedMdxComponents: Record<string, React.ComponentType<any>> = {
+const enhancedMdxComponents = {
   ...mdxComponents,
   Quote: (props: MDXComponentProps) => (
     <div className="my-8">
@@ -156,15 +166,17 @@ const enhancedMdxComponents: Record<string, React.ComponentType<any>> = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Share Component
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Share Component                                                           */
+/* -------------------------------------------------------------------------- */
 
 type BookShareProps = {
   meta: BookPageMeta;
 };
 
 function BookShare({ meta }: BookShareProps): JSX.Element {
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
   const url = `${SITE_URL}/books/${meta.slug}`;
   const text = `"${meta.title}" by Abraham of London`;
   const encodedUrl = encodeURIComponent(url);
@@ -195,7 +207,7 @@ function BookShare({ meta }: BookShareProps): JSX.Element {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs uppercase tracking-[0.18em] text-gray-500 mr-2">
+      <span className="mr-2 text-xs uppercase tracking-[0.18em] text-gray-500">
         Share:
       </span>
       {shareButtons.map((button) => (
@@ -222,11 +234,11 @@ function BookShare({ meta }: BookShareProps): JSX.Element {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Page Component
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/*  Page Component                                                            */
+/* -------------------------------------------------------------------------- */
 
-const BookPage = ({ meta, mdxSource }: BookPageProps) => {
+const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
   const {
     title,
     subtitle,
@@ -268,11 +280,13 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
     checkAccess();
   }, []);
 
-  const pageTitle = `${title} | Books | Abraham of London`;
-  const desc =
-    description || excerpt || subtitle || "Book from Abraham of London.";
   const isInnerCircle = accessLevel === "inner-circle";
   const isLocked = isInnerCircle && (!checkedAccess || !hasAccess);
+
+  const displayDescription =
+    description || excerpt || subtitle || "Book from Abraham of London.";
+
+  const pageTitle = `${title} | Books | Abraham of London`;
 
   const catalogueDate =
     lastModified && !Number.isNaN(new Date(lastModified).getTime())
@@ -283,13 +297,14 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
         })
       : null;
 
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
   const canonicalUrl = `${SITE_URL}/books/${slug}`;
 
   const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
     `/books/${slug}`
   )}`;
 
-  // Enhanced metadata display
   const metadataItems = [
     { label: "Read time", value: readTime },
     { label: "Published", value: publishedDate },
@@ -302,15 +317,18 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
   ].filter((item) => item.value);
 
   return (
-    <SiteLayout pageTitle={pageTitle} metaDescription={desc}>
+    <SiteLayout pageTitle={pageTitle} metaDescription={displayDescription}>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={desc} />
+        <meta name="description" content={displayDescription} />
         <link rel="canonical" href={canonicalUrl} />
 
-        {/* OG */}
+        {/* Open Graph */}
         <meta property="og:title" content={title} />
-        <meta property="og:description" content={desc} />
+        <meta
+          property="og:description"
+          content={displayDescription ?? ""}
+        />
         <meta property="og:type" content="book" />
         <meta property="og:url" content={canonicalUrl} />
         {coverImage && <meta property="og:image" content={coverImage} />}
@@ -318,12 +336,15 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={desc} />
+        <meta
+          name="twitter:description"
+          content={displayDescription ?? ""}
+        />
         {coverImage && <meta name="twitter:image" content={coverImage} />}
       </Head>
 
       <article className="min-h-screen bg-gradient-to-b from-charcoal to-charcoal-dark text-cream">
-        {/* Enhanced Header Section */}
+        {/* Header Section */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/95 to-charcoal/90">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-softGold/5 via-transparent to-transparent" />
@@ -334,34 +355,34 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
               {/* Cover Image */}
               <div className="flex items-start justify-center lg:col-span-1">
                 {coverImage && (
-                  <div className="relative group">
-                    <div className="absolute -inset-4 bg-gradient-to-r from-softGold/20 to-softGold/10 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
+                  <div className="group relative">
+                    <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-softGold/20 to-softGold/10 blur-xl opacity-50 transition-opacity duration-500 group-hover:opacity-75" />
                     <div className="relative">
                       <Image
                         src={coverImage}
                         alt={title}
                         width={400}
                         height={560}
-                        className="h-auto w-full max-w-xs rounded-xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 border-2 border-softGold/30"
+                        className="h-auto w-full max-w-xs rounded-xl border-2 border-softGold/30 shadow-2xl transition-transform duration-500 group-hover:scale-105"
                         priority
                       />
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Metadata */}
+              {/* Metadata / Header Copy */}
               <div className="lg:col-span-2">
                 <header className="mb-8">
                   <div className="mb-6">
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <h1 className="font-serif text-4xl lg:text-5xl font-bold text-cream leading-tight">
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <h1 className="font-serif text-4xl font-bold leading-tight text-cream lg:text-5xl">
                         {title}
                       </h1>
 
                       {isInnerCircle && (
-                        <span className="inline-flex items-center rounded-full border border-softGold/70 bg-softGold/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-softGold transform hover:scale-105 transition-transform duration-200">
+                        <span className="inline-flex items-center rounded-full border border-softGold/70 bg-softGold/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-softGold transition-transform duration-200 hover:scale-105">
                           <span className="mr-2">🔒</span>
                           Inner Circle Volume
                         </span>
@@ -369,7 +390,7 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
                     </div>
 
                     {subtitle && (
-                      <p className="text-xl lg:text-2xl text-gray-300 font-light leading-relaxed">
+                      <p className="text-xl font-light leading-relaxed text-gray-300 lg:text-2xl">
                         {subtitle}
                       </p>
                     )}
@@ -389,13 +410,13 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                       {publisher && (
                         <span className="flex items-center gap-2">
-                          <span className="w-1 h-1 bg-softGold rounded-full" />
+                          <span className="h-1 w-1 rounded-full bg-softGold" />
                           Published by {publisher}
                         </span>
                       )}
                       {catalogueDate && (
                         <span className="flex items-center gap-2">
-                          <span className="w-1 h-1 bg-softGold rounded-full" />
+                          <span className="h-1 w-1 rounded-full bg-softGold" />
                           Added {catalogueDate}
                         </span>
                       )}
@@ -404,15 +425,15 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
 
                   {/* Description */}
                   {description && (
-                    <p className="mb-6 text-lg leading-relaxed text-gray-300 border-l-4 border-softGold/50 pl-4">
+                    <p className="mb-6 border-l-4 border-softGold/50 pl-4 text-lg leading-relaxed text-gray-300">
                       {description}
                     </p>
                   )}
 
                   {/* Inner Circle Banner */}
                   {isInnerCircle && (
-                    <div className="rounded-2xl border border-softGold/50 bg-black/40 p-6 backdrop-blur-sm transform hover:scale-[1.02] transition-transform duration-300">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80 mb-2">
+                    <div className="rounded-2xl border border-softGold/50 bg-black/40 p-6 backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02]">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-softGold/80">
                         🔒 Inner Circle Exclusive
                       </p>
                       <p className="text-cream leading-relaxed">
@@ -426,14 +447,14 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
                 {/* Metadata Grid */}
                 {metadataItems.length > 0 && (
                   <section className="mb-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                       {metadataItems.map((item, index) => (
                         <div
                           key={item.label}
-                          className="text-center p-4 rounded-xl bg-black/30 border border-gray-700/50 transform hover:scale-105 transition-all duration-200"
+                          className="transform rounded-xl border border-gray-700/50 bg-black/30 p-4 text-center transition-all duration-200 hover:scale-105"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
-                          <div className="text-sm font-semibold text-softGold mb-1">
+                          <div className="mb-1 text-sm font-semibold text-softGold">
                             {item.label}
                           </div>
                           <div className="text-lg font-medium text-cream">
@@ -452,14 +473,14 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
                       href={purchaseLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-softGold px-8 py-4 text-sm font-semibold text-black shadow-lg transition-all duration-300 hover:bg-softGold/90 hover:shadow-xl hover:scale-105 transform"
+                      className="transform inline-flex items-center gap-2 rounded-full bg-softGold px-8 py-4 text-sm font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:bg-softGold/90 hover:shadow-xl"
                     >
                       <span>🛒</span>
                       Purchase Book
                     </a>
                   )}
 
-                  <div className="flex-1 min-w-[200px]">
+                  <div className="min-w-[200px] flex-1">
                     <BookShare meta={meta} />
                   </div>
                 </div>
@@ -470,31 +491,54 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
 
         {/* Content Section */}
         <div className="mx-auto max-w-4xl px-6 pb-20">
-          <section className="prose prose-invert prose-lg max-w-none prose-headings:font-serif prose-headings:text-cream prose-h1:mb-8 prose-h1:text-4xl prose-h1:font-bold prose-h1:leading-tight prose-h2:mb-6 prose-h2:text-3xl prose-h2:font-semibold prose-h3:mb-4 prose-h3:text-2xl prose-h3:font-semibold prose-h4:mb-4 prose-h4:text-xl prose-h4:font-semibold prose-p:mb-6 prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-lg prose-strong:font-semibold prose-strong:text-cream prose-a:text-softGold prose-a:no-underline hover:prose-a:underline prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:mb-2 prose-li:leading-relaxed prose-blockquote:border-softGold prose-blockquote:border-l-4 prose-blockquote:bg-charcoal/50 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:italic prose-blockquote:text-gray-300 prose-blockquote:rounded-r-xl prose-blockquote:my-8 prose-hr:my-12 prose-hr:border-gray-600 prose-img:rounded-2xl prose-img:shadow-2xl prose-img:mx-auto prose-pre:border prose-pre:border-gray-700 prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:p-6 prose-table:border-gray-600 prose-td:border-gray-600 prose-th:bg-gray-800 prose-th:text-cream">
+          <section
+            className="
+              prose prose-invert prose-lg max-w-none
+              prose-headings:font-serif prose-headings:text-cream
+              prose-h1:mb-8 prose-h1:text-4xl prose-h1:font-bold prose-h1:leading-tight
+              prose-h2:mb-6 prose-h2:text-3xl prose-h2:font-semibold
+              prose-h3:mb-4 prose-h3:text-2xl prose-h3:font-semibold
+              prose-h4:mb-4 prose-h4:text-xl prose-h4:font-semibold
+              prose-p:mb-6 prose-p:text-lg prose-p:leading-relaxed prose-p:text-gray-200
+              prose-strong:font-semibold prose-strong:text-cream
+              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
+              prose-ul:text-gray-200 prose-ol:text-gray-200
+              prose-li:mb-2 prose-li:leading-relaxed
+              prose-blockquote:border-softGold prose-blockquote:border-l-4
+              prose-blockquote:bg-charcoal/50 prose-blockquote:pl-6
+              prose-blockquote:py-4 prose-blockquote:italic
+              prose-blockquote:text-gray-300 prose-blockquote:rounded-r-xl
+              prose-blockquote:my-8
+              prose-hr:my-12 prose-hr:border-gray-600
+              prose-img:mx-auto prose-img:rounded-2xl prose-img:shadow-2xl
+              prose-pre:border prose-pre:border-gray-700
+              prose-pre:bg-gray-900 prose-pre:p-6 prose-pre:rounded-xl
+              prose-table:border-gray-600 prose-td:border-gray-600
+              prose-th:bg-gray-800 prose-th:text-cream
+            "
+          >
             {isInnerCircle && isLocked ? (
-              <div className="rounded-2xl border-2 border-softGold/50 bg-gradient-to-br from-black/70 to-charcoal/90 px-8 py-16 text-center backdrop-blur-sm transform hover:scale-[1.01] transition-transform duration-500">
-                <div className="max-w-md mx-auto">
-                  <div className="text-6xl mb-6">🔒</div>
-                  <h3 className="font-serif text-3xl text-cream mb-4">
-                    Inner Circle Volume
-                  </h3>
-                  <p className="text-lg leading-relaxed text-gray-200 mb-8">
-                    {lockMessage ||
-                      "This manuscript is reserved for Inner Circle members. Unlock access to read the full volume and join a community of builders shaping the future."}
-                  </p>
-                  <Link
-                    href={joinUrl}
-                    className="inline-flex items-center gap-2 rounded-full bg-softGold px-8 py-4 text-sm font-semibold text-black transition-all duration-300 hover:bg-softGold/90 hover:scale-105 hover:shadow-xl transform"
-                  >
-                    <span>⚡</span>
-                    Join the Inner Circle
-                  </Link>
-                </div>
+              <div className="transform mx-auto max-w-md rounded-2xl border-2 border-softGold/50 bg-gradient-to-br from-black/70 to-charcoal/90 px-8 py-16 text-center backdrop-blur-sm transition-transform duration-500 hover:scale-[1.01]">
+                <div className="mb-6 text-6xl">🔒</div>
+                <h3 className="mb-4 font-serif text-3xl text-cream">
+                  Inner Circle Volume
+                </h3>
+                <p className="mb-8 text-lg leading-relaxed text-gray-200">
+                  {lockMessage ||
+                    "This manuscript is reserved for Inner Circle members. Unlock access to read the full volume and join a community of builders shaping the future."}
+                </p>
+                <Link
+                  href={joinUrl}
+                  className="transform inline-flex items-center gap-2 rounded-full bg-softGold px-8 py-4 text-sm font-semibold text-black transition-all duration-300 hover:scale-105 hover:bg-softGold/90 hover:shadow-xl"
+                >
+                  <span>⚡</span>
+                  Join the Inner Circle
+                </Link>
               </div>
             ) : (
               <MDXRemote
                 {...mdxSource}
-                components={enhancedMdxComponents}
+                components={enhancedMdxComponents as any}
               />
             )}
           </section>
@@ -502,13 +546,13 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
           {/* Additional Info */}
           {(publisher || (tags && tags.length > 0)) && (
             <div className="mt-20 border-t border-gray-700 pt-12">
-              <h3 className="font-serif text-2xl font-semibold text-cream mb-8 text-center">
+              <h3 className="mb-8 text-center font-serif text-2xl font-semibold text-cream">
                 Book Details
               </h3>
               <div className="grid gap-8 md:grid-cols-2">
                 {publisher && (
-                  <div className="text-center p-6 rounded-xl bg-black/30 border border-gray-700/50">
-                    <div className="text-sm font-semibold text-softGold mb-2">
+                  <div className="rounded-xl border border-gray-700/50 bg-black/30 p-6 text-center">
+                    <div className="mb-2 text-sm font-semibold text-softGold">
                       Publisher
                     </div>
                     <div className="text-lg text-cream">{publisher}</div>
@@ -516,15 +560,15 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
                 )}
 
                 {tags && tags.length > 0 && (
-                  <div className="text-center p-6 rounded-xl bg-black/30 border border-gray-700/50">
-                    <div className="text-sm font-semibold text-softGold mb-4">
+                  <div className="rounded-xl border border-gray-700/50 bg-black/30 p-6 text-center">
+                    <div className="mb-4 text-sm font-semibold text-softGold">
                       Tags & Categories
                     </div>
                     <div className="flex flex-wrap justify-center gap-2">
                       {tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-gray-600 bg-gray-700/50 px-4 py-2 text-sm text-gray-300 transform hover:scale-105 transition-transform duration-200"
+                          className="transform rounded-full border border-gray-600 bg-gray-700/50 px-4 py-2 text-sm text-gray-300 transition-transform duration-200 hover:scale-105"
                         >
                           {tag}
                         </span>
@@ -541,21 +585,32 @@ const BookPage = ({ meta, mdxSource }: BookPageProps) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// SSG
-// ---------------------------------------------------------------------------
+export default BookPage;
+
+/* -------------------------------------------------------------------------- */
+/*  Static Generation                                                         */
+/* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const basePaths = allBooks.map((book) => ({
-    params: { slug: book.slug },
-  }));
+  // Base slugs from content — one per Book document, excluding drafts
+  const baseSlugs = allBooks
+    .filter((b) => !b.draft)
+    .map((b) => b.slug);
 
-  const aliasPaths = Object.keys(BOOK_SLUG_ALIASES).map((alias) => ({
-    params: { slug: alias },
+  // Aliases that point to an existing base slug
+  const aliasSlugs = Object.entries(BOOK_ALIAS_MAP)
+    .filter(([, targetSlug]) => baseSlugs.includes(targetSlug))
+    .map(([alias]) => alias);
+
+  // Deduplicate everything to avoid Conflicting SSG paths
+  const uniqueSlugs = Array.from(new Set([...baseSlugs, ...aliasSlugs]));
+
+  const paths = uniqueSlugs.map((slug) => ({
+    params: { slug },
   }));
 
   return {
-    paths: [...basePaths, ...aliasPaths],
+    paths,
     fallback: false,
   };
 };
@@ -563,15 +618,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<BookPageProps> = async ({
   params,
 }) => {
-  const rawSlug = params?.slug;
-  const requestedSlug =
-    typeof rawSlug === "string"
-      ? rawSlug
-      : Array.isArray(rawSlug)
-      ? rawSlug[0]
-      : "";
-
-  const resolved = resolveBookBySlug(requestedSlug);
+  const rawSlug = normaliseSlugParam(params?.slug);
+  const resolved = resolveBookBySlug(rawSlug);
 
   if (!resolved) {
     return { notFound: true };
@@ -586,12 +634,13 @@ export const getStaticProps: GetStaticProps<BookPageProps> = async ({
     },
   });
 
+  // Build clean meta object without undefined values
   const cleanMeta = removeUndefined({
     title: book.title,
     subtitle: book.subtitle ?? null,
     description: book.description ?? null,
     excerpt: book.excerpt ?? null,
-    slug: canonicalSlug, // canonical, not alias
+    slug: canonicalSlug,
     coverImage: book.coverImage ?? null,
     author: book.author ?? "Abraham of London",
     readTime: book.readTime ?? null,
@@ -599,20 +648,22 @@ export const getStaticProps: GetStaticProps<BookPageProps> = async ({
     featured: !!book.featured,
     draft: !!book.draft,
     lastModified: book.lastModified ?? null,
-    category: book.category ?? null,
-    isbn: book.isbn ?? null,
-    publisher: book.publisher ?? null,
-    publishedDate: book.publishedDate ?? null,
-    language: book.language ?? null,
-    price: book.price ?? null,
-    purchaseLink: book.purchaseLink ?? null,
-    accessLevel: book.accessLevel ?? null,
-    lockMessage: book.lockMessage ?? null,
-    pages: book.pages ?? null,
-    rating: book.rating ?? null,
-    status: book.status ?? null,
-    format: book.format ?? null,
-    published: book.published ?? null,
+
+    // Extended fields
+    category: (book as any).category ?? null,
+    isbn: (book as any).isbn ?? null,
+    publisher: (book as any).publisher ?? null,
+    publishedDate: (book as any).publishedDate ?? null,
+    language: (book as any).language ?? null,
+    price: (book as any).price ?? null,
+    purchaseLink: (book as any).purchaseLink ?? null,
+    accessLevel: (book as any).accessLevel ?? null,
+    lockMessage: (book as any).lockMessage ?? null,
+    pages: (book as any).pages ?? null,
+    rating: (book as any).rating ?? null,
+    status: (book as any).status ?? null,
+    format: (book as any).format ?? null,
+    published: (book as any).published ?? null,
   });
 
   return {
@@ -620,8 +671,6 @@ export const getStaticProps: GetStaticProps<BookPageProps> = async ({
       meta: cleanMeta as BookPageMeta,
       mdxSource,
     },
-    revalidate: 3600, // 1 hour
+    revalidate: 3600,
   };
 };
-
-export default BookPage;
