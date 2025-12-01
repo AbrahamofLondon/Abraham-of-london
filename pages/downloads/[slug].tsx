@@ -50,6 +50,23 @@ interface RawDownload {
   featured?: unknown;
 }
 
+// Helper function to safely convert unknown to string or null
+function safeString(value: unknown): string | null {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim();
+  }
+  return null;
+}
+
+// Helper function to safely convert to string array or null
+function safeStringArray(value: unknown): string[] | null {
+  if (Array.isArray(value)) {
+    const stringArray = value.filter(item => typeof item === 'string' && item.trim().length > 0);
+    return stringArray.length > 0 ? stringArray : null;
+  }
+  return null;
+}
+
 function normaliseDownload(raw: RawDownload, slugFallback: string) {
   const safeSlug = String(raw?.slug ?? slugFallback);
   const title = String(raw?.title ?? "Untitled download");
@@ -71,14 +88,20 @@ function normaliseDownload(raw: RawDownload, slugFallback: string) {
       ? raw.fileSize
       : null;
 
+  // Use helper functions for type safety
+  const excerpt = safeString(raw?.excerpt ?? raw?.description);
+  const category = safeString(raw?.category);
+  const readTime = safeString(raw?.readTime);
+  const tags = safeStringArray(raw?.tags);
+
   return {
     slug: safeSlug,
     title,
-    excerpt: raw?.excerpt ?? raw?.description ?? null,
+    excerpt,
     coverImage,
-    category: raw?.category ?? null,
-    tags: Array.isArray(raw?.tags) ? raw.tags : null,
-    readTime: raw?.readTime ?? null,
+    category,
+    tags,
+    readTime,
     fileUrl,
     fileSize,
     featured: Boolean(raw?.featured),
@@ -148,14 +171,14 @@ export const getStaticProps: GetStaticProps<DownloadPageProps> = async (
       props: {
         slug: normalised.slug,
         title: normalised.title,
-        excerpt: normalised.excerpt,
-        coverImage: normalised.coverImage,
-        category: normalised.category,
-        tags: normalised.tags,
-        readTime: normalised.readTime,
-        fileUrl: normalised.fileUrl,
-        fileSize: normalised.fileSize,
-        featured: normalised.featured,
+        excerpt: normalised.excerpt ?? null, // Ensure null instead of undefined
+        coverImage: normalised.coverImage ?? null,
+        category: normalised.category ?? null,
+        tags: normalised.tags ?? null,
+        readTime: normalised.readTime ?? null,
+        fileUrl: normalised.fileUrl ?? null,
+        fileSize: normalised.fileSize ?? null,
+        featured: normalised.featured ?? false,
         mdxSource,
       },
       revalidate: 3600,
@@ -187,15 +210,20 @@ export default function DownloadPage(
     }
   };
 
+  // Safe access to props with fallbacks
+  const safeExcerpt = props.excerpt || "A premium resource from Abraham of London";
+  const safeCategory = props.category || "Resource";
+  const safeTags = props.tags || [];
+  const safeReadTime = props.readTime || "";
+  const safeFileSize = props.fileSize || "";
+
   return (
     <Layout title={pageTitle}>
       <Head>
         <title>{pageTitle} | Abraham of London</title>
-        {props.excerpt && <meta name="description" content={props.excerpt} />}
+        <meta name="description" content={safeExcerpt} />
         <meta property="og:title" content={pageTitle} />
-        {props.excerpt && (
-          <meta property="og:description" content={props.excerpt} />
-        )}
+        <meta property="og:description" content={safeExcerpt} />
         {props.coverImage && (
           <meta property="og:image" content={props.coverImage} />
         )}
@@ -228,21 +256,21 @@ export default function DownloadPage(
               {props.title}
             </h1>
 
-            {(props.category || props.readTime || props.tags?.length) && (
+            {(safeCategory || safeReadTime || safeTags.length > 0) && (
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                {props.category && (
+                {safeCategory && (
                   <span className="rounded-full bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-300">
-                    {props.category}
+                    {safeCategory}
                   </span>
                 )}
-                {props.readTime && (
+                {safeReadTime && (
                   <span className="rounded-full bg-slate-700 px-4 py-2 text-sm text-slate-300">
-                    {props.readTime}
+                    {safeReadTime}
                   </span>
                 )}
-                {props.tags?.length ? (
+                {safeTags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {props.tags.map((tag) => (
+                    {safeTags.map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full bg-slate-700/50 px-3 py-1.5 text-xs text-slate-400"
@@ -251,13 +279,13 @@ export default function DownloadPage(
                       </span>
                     ))}
                   </div>
-                ) : null}
+                )}
               </div>
             )}
 
-            {props.excerpt && (
+            {safeExcerpt && (
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                {props.excerpt}
+                {safeExcerpt}
               </p>
             )}
 
@@ -311,7 +339,7 @@ export default function DownloadPage(
                         />
                       </svg>
                       Download Resource
-                      {props.fileSize ? ` (${props.fileSize})` : ""}
+                      {safeFileSize ? ` (${safeFileSize})` : ""}
                     </>
                   )}
                 </button>

@@ -1,4 +1,4 @@
-src / lib / server / events - data.ts;
+// lib/server/events-data.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";

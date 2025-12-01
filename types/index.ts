@@ -1,48 +1,59 @@
 // types/index.ts
 
-// ----- Core site configuration -----
-export interface SiteConfig {
-  url: string;
-  title: string;
-  subtitle?: string;
-  description: string;
-  logo?: string;
-  socialLinks?: {
-    twitter?: string;
-    github?: string;
-    linkedin?: string;
-    email?: string;
-  };
-}
-
-// ----- Base content interface -----
+// ----- Base -----
 export interface BaseContentMeta {
   slug: string;
   title: string;
-  subtitle?: string;
-  excerpt?: string;
   description?: string;
+  excerpt?: string;
   date?: string;
-  lastModified?: string;
+  author?: string;
   category?: string;
   tags?: string[];
-  coverImage?: string;
-  author?: string;
-  readTime?: string;
-  published?: boolean;
-  draft?: boolean;
-  featured?: boolean;
-  // Add access control properties to base interface since they're used across content types
-  accessLevel?: "public" | "inner-circle" | "premium";
-  lockMessage?: string;
+  content?: string;
+  [key: string]: unknown;
 }
 
-// ----- Posts -----
-export interface PostMeta extends BaseContentMeta {
-  ogImage?: string;
-  canonicalUrl?: string;
-  series?: string;
-  seriesOrder?: number;
+// ----- Pages (from contentlayer) -----
+export type { Page } from "contentlayer/generated";
+
+// ----- Events -----
+export interface EventMeta extends BaseContentMeta {
+  endDate?: string;
+  location?: string;
+  venue?: string;
+  time?: string;
+  featured?: boolean;
+  registrationUrl?: string;
+  heroImage?: string;
+  coverImage?: string;
+}
+
+// ----- Downloads (from local module) -----
+export type { DownloadMeta, DownloadItem } from "./download";
+
+// Type guard for DownloadMeta
+export function isDownloadMeta(
+  content: any
+): content is import("./download").DownloadMeta {
+  return (
+    typeof content === "object" &&
+    content !== null &&
+    typeof content.slug === "string" &&
+    typeof content.title === "string" &&
+    // Check for download-specific properties (any one will do)
+    (typeof content.file === "string" || 
+     typeof content.filePath === "string" || 
+     typeof content.fileType === "string" ||
+     typeof content.fileSizeLabel === "string")
+  );
+}
+
+// ----- Strategy -----
+export interface StrategyMeta extends BaseContentMeta {
+  featured?: boolean;
+  featuredImage?: string;
+  updatedAt?: string;
 }
 
 // ----- Books -----
@@ -50,81 +61,113 @@ export interface BookMeta extends BaseContentMeta {
   isbn?: string;
   publisher?: string;
   publishedDate?: string;
-  pages?: number;
+  pageCount?: number;
   language?: string;
-  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
-  price?: string;
-  purchaseLink?: string;
+  buyLinks?: {
+    amazon?: string;
+    waterstones?: string;
+    [key: string]: string;
+  };
+  coverImage?: string;
   rating?: number;
-  status?: "published" | "draft" | "scheduled";
-  content?: string; // Add content property for MDX
 }
 
-// ----- Downloads (from local module) -----
-export type { DownloadItem, DownloadMeta } from "./download";
-
-// ----- Strategy -----
-export interface StrategyMeta extends BaseContentMeta {
-  difficulty?: "beginner" | "intermediate" | "advanced";
-  duration?: string;
-  tools?: string[];
-  outcomes?: string[];
+// ----- Resources -----
+export interface ResourceMeta extends BaseContentMeta {
+  type?: string;
+  fileSize?: string;
+  downloadUrl?: string;
+  thumbnail?: string;
+  featured?: boolean;
 }
 
-// ----- Generic content union -----
-export type ContentMeta =
-  | PostMeta
-  | BookMeta
-  | StrategyMeta
-  | import("./download").DownloadMeta
-  | BaseContentMeta;
+// ----- Content types -----
+export type ContentType = 
+  | "page" 
+  | "event" 
+  | "download" 
+  | "strategy" 
+  | "book" 
+  | "resource";
 
-// ----- Legacy compatibility -----
-export interface PostData {
+// ----- Unified content type -----
+export interface UnifiedContentItem {
+  id: string;
+  type: ContentType;
   slug: string;
   title: string;
-  subtitle?: string;
+  description?: string;
+  excerpt?: string;
+  date?: string;
+  author?: string;
+  category?: string;
+  tags?: string[];
   content?: string;
+  url: string;
   [key: string]: unknown;
 }
 
-// ----- Type guards -----
-export function isBookMeta(content: ContentMeta): content is BookMeta {
-  return (
-    typeof (content as BookMeta).isbn === "string" || "publisher" in content
-  );
-}
-
-export function isPostMeta(content: ContentMeta): content is PostMeta {
-  return (
-    "ogImage" in content ||
-    "series" in content ||
-    typeof (content as PostMeta).canonicalUrl === "string"
-  );
-}
-
-export function isStrategyMeta(content: ContentMeta): content is StrategyMeta {
-  return (
-    "difficulty" in content || Array.isArray((content as StrategyMeta).tools)
-  );
-}
-
-export function isDownloadMeta(
-  content: ContentMeta
-): content is import("./download").DownloadMeta {
-  return (
-    typeof (content as import("./download").DownloadMeta).file === "string"
-  );
-}
-
 // ----- Utility types -----
-export type ContentType = "posts" | "books" | "strategies" | "downloads";
-
-export interface ContentMap {
-  posts: PostMeta;
-  books: BookMeta;
-  strategies: StrategyMeta;
-  downloads: import("./download").DownloadMeta;
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
-export type ContentByType<T extends ContentType> = ContentMap[T];
+export interface SearchFilters {
+  type?: ContentType | ContentType[];
+  category?: string;
+  tags?: string[];
+  author?: string;
+  dateRange?: {
+    start?: string;
+    end?: string;
+  };
+  featured?: boolean;
+}
+
+// ----- Site configuration -----
+export interface SiteConfig {
+  title: string;
+  description: string;
+  url: string;
+  author: string;
+  email: string;
+  social: {
+    twitter?: string;
+    linkedin?: string;
+    instagram?: string;
+    youtube?: string;
+    github?: string;
+    [key: string]: string;
+  };
+  navigation: Array<{
+    label: string;
+    href: string;
+    external?: boolean;
+  }>;
+  footer: {
+    copyright: string;
+    links: Array<{
+      label: string;
+      href: string;
+      external?: boolean;
+    }>;
+  };
+}
+
+// ----- API response types -----
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+}

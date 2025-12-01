@@ -1,6 +1,8 @@
-src / lib / server / unified - content.ts;
+// src/lib/server/unified-content.ts
+// Unified view over pages, downloads, and events for search / discovery.
+
 import { getAllPages } from "./pages-data";
-import { getAllDownloads } from "./downloads-data";
+import { getAllDownloadsMeta } from "./downloads-data";
 import { getAllEvents } from "./events-data";
 
 export interface UnifiedContent {
@@ -18,18 +20,60 @@ export interface UnifiedContent {
   url: string;
 }
 
+// Minimal shapes so we don't fight types from the server modules
+type PageLike = {
+  slug: string;
+  title: string;
+  description?: string;
+  excerpt?: string;
+  date?: string;
+  author?: string;
+  readTime?: string;
+  category?: string;
+  tags?: string[];
+  content?: string;
+};
+
+type DownloadLike = {
+  slug: string;
+  title?: string;
+  description?: string;
+  excerpt?: string;
+  date?: string;
+  author?: string;
+  category?: string;
+  tags?: string[];
+};
+
+type EventLike = {
+  slug: string;
+  title: string;
+  description?: string;
+  excerpt?: string;
+  date: string;
+  author?: string;
+  category?: string;
+  tags?: string[];
+};
+
 export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
   try {
-    const [pages, downloads, events] = await Promise.all([
-      getAllPages(),
-      getAllDownloads(),
-      getAllEvents(),
+    const [pagesRaw, downloadsRaw, eventsRaw] = await Promise.all([
+      Promise.resolve(getAllPages()),
+      Promise.resolve(getAllDownloadsMeta()),
+      Promise.resolve(getAllEvents()),
     ]);
+
+    const pages = (pagesRaw ?? []) as PageLike[];
+    const downloads = (downloadsRaw ?? []) as DownloadLike[];
+    const events = (eventsRaw ?? []) as EventLike[];
 
     const unified: UnifiedContent[] = [];
 
-    // Add pages
-    pages.forEach((page) => {
+    // ---- Pages -------------------------------------------------------------
+    for (const page of pages) {
+      if (!page?.slug || !page?.title) continue;
+
       unified.push({
         id: `page-${page.slug}`,
         type: "page",
@@ -44,16 +88,23 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
         content: page.content,
         url: `/${page.slug}`,
       });
-    });
+    }
 
-    // Add downloads
-    downloads.forEach((download) => {
+    // ---- Downloads ---------------------------------------------------------
+    for (const download of downloads) {
+      if (!download?.slug) continue;
+
+      const title =
+        (typeof download.title === "string" && download.title.trim().length
+          ? download.title
+          : "Untitled Download");
+
       unified.push({
         id: `download-${download.slug}`,
         type: "download",
         slug: download.slug,
-        title: download.title || "Untitled Download",
-        description: download.description || download.excerpt,
+        title,
+        description: download.description ?? download.excerpt,
         excerpt: download.excerpt,
         date: download.date,
         author: download.author,
@@ -61,10 +112,12 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
         tags: download.tags,
         url: `/downloads/${download.slug}`,
       });
-    });
+    }
 
-    // Add events
-    events.forEach((event) => {
+    // ---- Events ------------------------------------------------------------
+    for (const event of events) {
+      if (!event?.slug || !event?.title) continue;
+
       unified.push({
         id: `event-${event.slug}`,
         type: "event",
@@ -78,9 +131,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
         tags: event.tags,
         url: `/events/${event.slug}`,
       });
-    });
+    }
 
-    // Sort by date (newest first)
+    // ---- Sort by date (newest first) --------------------------------------
     unified.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
@@ -107,14 +160,17 @@ export async function searchUnifiedContent(
   const allContent = await getAllUnifiedContent();
   const lowerQuery = query.toLowerCase();
 
-  return allContent.filter(
-    (item) =>
-      item.title.toLowerCase().includes(lowerQuery) ||
-      item.description?.toLowerCase().includes(lowerQuery) ||
-      item.excerpt?.toLowerCase().includes(lowerQuery) ||
-      item.content?.toLowerCase().includes(lowerQuery) ||
-      item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
-  );
+  return allContent.filter((item) => {
+    const inTitle = item.title.toLowerCase().includes(lowerQuery);
+    const inDescription = item.description?.toLowerCase().includes(lowerQuery);
+    const inExcerpt = item.excerpt?.toLowerCase().includes(lowerQuery);
+    const inContent = item.content?.toLowerCase().includes(lowerQuery);
+    const inTags = item.tags?.some((tag) =>
+      tag.toLowerCase().includes(lowerQuery)
+    );
+
+    return inTitle || inDescription || inExcerpt || inContent || inTags;
+  });
 }
 
 export default {

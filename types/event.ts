@@ -12,24 +12,40 @@ export type EventResources = {
 
 export type EventMeta = {
   slug: string;
+
+  // Core identity
   title?: string | null;
-  date?: string | null;
-  endDate?: string | null;
-  location?: string | null;
+  subtitle?: string | null;
   summary?: string | null;
   excerpt?: string | null;
+  description?: string | null;
+
+  // Timing
+  date?: string | null;
+  endDate?: string | null;
+
+  // Location / context
+  location?: string | null;
   chatham?: boolean | null;
+
+  // Taxonomy
   tags?: string[] | null;
-  resources?: EventResources | null;
+  category?: string | null;
+
+  // Media
   heroImage?: string | null;
   coverImage?: string | null;
-  // Optional presentation/CTA fields
-  subtitle?: string | null;
+
+  // CTA
   ctaHref?: string | null;
   ctaLabel?: string | null;
-  // Cross-compat
+
+  // Meta
   author?: string | null | { name?: string; image?: string };
   readTime?: string | null;
-  category?: string | null;
+  draft?: boolean | null;
+
+  // Extended content (for MDX-backed events)
   content?: string;
+  resources?: EventResources | null;
 };

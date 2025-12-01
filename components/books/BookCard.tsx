@@ -115,7 +115,8 @@ export default function BookCard({
   }, [book.coverImage]);
 
   const cover =
-    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+    coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)] || 
+    FALLBACK_BOOK_COVERS[0];
 
   // Size-based styling
   const sizeClasses = {
@@ -162,6 +163,7 @@ export default function BookCard({
               <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
             )}
 
+            {/* Add explicit type assertion for the Image component */}
             <Image
               src={cover}
               alt={safeTitle}

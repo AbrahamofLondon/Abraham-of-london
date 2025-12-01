@@ -1,18 +1,33 @@
 // types/resource.ts
+
 export interface ResourceMeta {
-  [key: string]: unknown;
   slug: string;
   title: string;
-  subtitle?: string;
+
+  // Description
   excerpt?: string;
-  date?: string;
   description?: string;
-  file?: string;
-  size?: string;
+
+  // Classification
   category?: string;
   tags?: string[];
-  featured?: boolean;
-  coverImage?: string;
-  pdfPath?: string;
+
+  // Link(s)
+  url?: string;                // primary external/internal link
+  external?: boolean;          // true if off-site
+  secondaryLinks?: {
+    label: string;
+    href: string;
+  }[];
+
+  // Media
+  coverImage?: string | { src?: string } | null;
+  heroImage?: string;
+
+  // Meta
+  author?: string;
+  date?: string;
   readTime?: string;
+  draft?: boolean;
+  featured?: boolean;
 }

@@ -1,5 +1,4 @@
-src / lib / server / pages - data.ts;
-// src/lib/server/pages-data.ts
+// lib/server/pages-data.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";

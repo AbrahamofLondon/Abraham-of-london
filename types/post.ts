@@ -1,4 +1,5 @@
 // types/post.ts
+
 export interface PostMeta {
   slug: string;
   title: string;
@@ -7,11 +8,16 @@ export interface PostMeta {
   author?: string;
   category?: string;
   tags?: string[];
-  // ✅ ADD THESE OPTIONAL PROPERTIES:
+
+  // Reading / presentation
   readTime?: string;
   coverImage?: string | { src?: string } | null;
-  // Add any other missing properties that your posts might have
-  published?: boolean;
-  description?: string;
   heroImage?: string;
+
+  // Editorial
+  published?: boolean;
+  draft?: boolean;
+
+  // SEO
+  description?: string;
 }

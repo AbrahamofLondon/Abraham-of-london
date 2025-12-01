@@ -1,7 +1,7 @@
 // pages/contact.tsx
 import * as React from "react";
 import Head from "next/head";
-import Link from "next/link"; // ADDED: Import Link
+import Link from "next/link";
 import {
   Moon,
   SunMedium,
@@ -11,6 +11,9 @@ import {
   Clock,
   Users,
   Target,
+  CheckCircle,
+  Shield,
+  Calendar,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { getPageTitle, siteConfig } from "@/lib/siteConfig";
@@ -20,6 +23,12 @@ const ContactPage = (): JSX.Element => {
   const pageTitle = "Contact Abraham of London";
   const [isDark, setIsDark] = React.useState(true);
   const [mounted, setMounted] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
+
+  // Safe phone number with fallback
+  const contactPhone =
+    (siteConfig as { phone?: string }).phone ?? "+44 20 8622 5909";
 
   // Theme management
   React.useEffect(() => {
@@ -49,6 +58,51 @@ const ContactPage = (): JSX.Element => {
       }
       return next;
     });
+  };
+
+  // Form submission handler
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const data = Object.fromEntries(formData.entries());
+
+      // Basic honeypot protection
+      if (data.website || data.middleName) {
+        console.log('Honeypot triggered');
+        return;
+      }
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        (event.target as HTMLFormElement).reset();
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reset submit status when form changes
+  const handleFormChange = () => {
+    if (submitStatus !== 'idle') {
+      setSubmitStatus('idle');
+    }
   };
 
   // Avoid hydration mismatch
@@ -81,6 +135,14 @@ const ContactPage = (): JSX.Element => {
     ? "bg-softGold text-deepCharcoal hover:bg-softGold/90 shadow-lg hover:shadow-softGold/25"
     : "bg-forest text-cream hover:bg-forest/90 shadow-lg hover:shadow-forest/25";
 
+  const successClass = isDark 
+    ? "border-green-500/30 bg-green-500/10 text-green-300"
+    : "border-green-500/30 bg-green-50 text-green-700";
+
+  const errorClass = isDark
+    ? "border-red-500/30 bg-red-500/10 text-red-300"
+    : "border-red-500/30 bg-red-50 text-red-700";
+
   return (
     <Layout title={pageTitle}>
       <Head>
@@ -90,6 +152,24 @@ const ContactPage = (): JSX.Element => {
           content="Connect with Abraham of London for strategic conversations around leadership, legacy, and principled ventures. Enquiries are considered based on clarity of brief and strategic fit."
         />
         <meta name="theme-color" content={isDark ? "#0f172a" : "#f7f5ee"} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ContactPage",
+              "name": "Contact Abraham of London",
+              "description": "Strategic partnership and advisory contact page",
+              "telephone": contactPhone,
+              "email": siteConfig.email,
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "London",
+                "addressCountry": "UK"
+              }
+            })
+          }}
+        />
       </Head>
 
       <div className={shellClass}>
@@ -150,6 +230,31 @@ const ContactPage = (): JSX.Element => {
             </p>
           </header>
 
+          {/* Submission Status Messages */}
+          {submitStatus === 'success' && (
+            <div className={`mb-6 rounded-xl border p-4 ${successClass}`}>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5" />
+                <div>
+                  <p className="font-semibold">Enquiry Submitted Successfully</p>
+                  <p className="text-sm mt-1">We'll respond within 2-3 business days. Thank you for your interest.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {submitStatus === 'error' && (
+            <div className={`mb-6 rounded-xl border p-4 ${errorClass}`}>
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5" />
+                <div>
+                  <p className="font-semibold">Submission Failed</p>
+                  <p className="text-sm mt-1">Please try again or email us directly at {siteConfig.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-12 lg:grid-cols-3">
             {/* Contact Information Sidebar */}
             <div className="lg:col-span-1">
@@ -203,10 +308,10 @@ const ContactPage = (): JSX.Element => {
                         Phone
                       </h3>
                       <a
-                        href={`tel:${siteConfig.phone.replace(/\s/g, "")}`}
+                        href={`tel:${contactPhone.replace(/\s/g, "")}`}
                         className={`text-sm hover:underline ${accentTextClass}`}
                       >
-                        {siteConfig.phone}
+                        {contactPhone}
                       </a>
                     </div>
                   </div>
@@ -274,7 +379,7 @@ const ContactPage = (): JSX.Element => {
                       Clear vision and execution capability
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="h-3 w-3 text-softGold">•</span>
+                      <Calendar className="h-3 w-3 text-softGold" />
                       Long-term impact potential
                     </li>
                   </ul>
@@ -317,14 +422,26 @@ const ContactPage = (): JSX.Element => {
                   </p>
                 </div>
 
-                <form method="post" action="/api/contact" className="space-y-6">
+                <form 
+                  method="post" 
+                  action="/api/contact" 
+                  className="space-y-6"
+                  onSubmit={handleSubmit}
+                  onChange={handleFormChange}
+                >
+                  {/* Honeypot fields - hidden from users */}
+                  <div className="hidden">
+                    <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                    <input type="text" name="middleName" tabIndex={-1} autoComplete="off" />
+                  </div>
+
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
                       <label
                         htmlFor="name"
                         className={`block text-sm font-semibold mb-2 ${primaryTextClass}`}
                       >
-                        Full Name
+                        Full Name *
                       </label>
                       <input
                         id="name"
@@ -334,6 +451,8 @@ const ContactPage = (): JSX.Element => {
                         autoComplete="name"
                         className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ring-0 transition focus:ring-2 ${inputClass}`}
                         placeholder="Your full name"
+                        minLength={2}
+                        maxLength={100}
                       />
                     </div>
 
@@ -342,7 +461,7 @@ const ContactPage = (): JSX.Element => {
                         htmlFor="email"
                         className={`block text-sm font-semibold mb-2 ${primaryTextClass}`}
                       >
-                        Email Address
+                        Email Address *
                       </label>
                       <input
                         id="email"
@@ -352,6 +471,7 @@ const ContactPage = (): JSX.Element => {
                         autoComplete="email"
                         className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ring-0 transition focus:ring-2 ${inputClass}`}
                         placeholder="your.email@example.com"
+                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                       />
                     </div>
                   </div>
@@ -361,7 +481,7 @@ const ContactPage = (): JSX.Element => {
                       htmlFor="subject"
                       className={`block text-sm font-semibold mb-2 ${primaryTextClass}`}
                     >
-                      Subject
+                      Subject *
                     </label>
                     <input
                       id="subject"
@@ -370,6 +490,8 @@ const ContactPage = (): JSX.Element => {
                       required
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ring-0 transition focus:ring-2 ${inputClass}`}
                       placeholder="Brief summary of your enquiry"
+                      minLength={5}
+                      maxLength={200}
                     />
                   </div>
 
@@ -378,7 +500,7 @@ const ContactPage = (): JSX.Element => {
                       htmlFor="enquiryType"
                       className={`block text-sm font-semibold mb-2 ${primaryTextClass}`}
                     >
-                      Type of Enquiry
+                      Type of Enquiry *
                     </label>
                     <select
                       id="enquiryType"
@@ -412,7 +534,7 @@ const ContactPage = (): JSX.Element => {
                       htmlFor="message"
                       className={`block text-sm font-semibold mb-2 ${primaryTextClass}`}
                     >
-                      Detailed Message
+                      Detailed Message *
                     </label>
                     <textarea
                       id="message"
@@ -421,6 +543,8 @@ const ContactPage = (): JSX.Element => {
                       required
                       className={`w-full rounded-xl border px-4 py-3 text-sm leading-relaxed outline-none ring-0 transition focus:ring-2 ${inputClass}`}
                       placeholder="Provide context, objectives, timelines, stakeholders, and decision-makers involved."
+                      minLength={20}
+                      maxLength={2000}
                     />
                     <p className={`mt-2 text-xs ${secondaryTextClass}`}>
                       Precision helps us assess strategic fit and determine
@@ -442,22 +566,30 @@ const ContactPage = (): JSX.Element => {
 
                     <button
                       type="submit"
-                      className={`inline-flex items-center rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-all duration-200 transform hover:-translate-y-0.5 hover:scale-105 ${buttonClass}`}
+                      disabled={isSubmitting}
+                      className={`inline-flex items-center rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-wide transition-all duration-200 transform hover:-translate-y-0.5 hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:hover:scale-100 ${buttonClass}`}
                     >
-                      Submit Strategic Enquiry
+                      {isSubmitting ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        'Submit Strategic Enquiry'
+                      )}
                     </button>
                   </div>
 
                   <p className={`mt-4 text-xs ${secondaryTextClass}`}>
                     By submitting this form, you acknowledge that you have read
-                    our {/* FIXED: Replace <a> with <Link> */}
+                    our{" "}
                     <Link
                       href="/privacy-policy"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}
                     >
                       Privacy Policy
                     </Link>{" "}
-                    and {/* FIXED: Replace <a> with <Link> */}
+                    and{" "}
                     <Link
                       href="/terms-of-service"
                       className={`underline underline-offset-2 ${accentTextClass} hover:opacity-90`}

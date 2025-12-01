@@ -6,21 +6,25 @@
   NODE_VERSION = "20.11.1"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+  NODE_ENV = "production"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@netlify/functions", "@netlify/emails"]
+  external_node_modules = ["@netlify/functions", "@netlify/emails", "better-sqlite3"]
   directory = "netlify/functions"
+  included_files = ["netlify/functions/**/*.ts"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# SECURITY HEADERS (do not conflict with middleware)
+# SECURITY HEADERS
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
 
 [[headers]]
   for = "/_next/static/*"

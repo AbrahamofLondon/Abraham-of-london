@@ -16,8 +16,10 @@ type CleanupResponse = {
   error?: string;
 };
 
+/** Admin auth key */
 const ADMIN_API_KEY = process.env.INNER_CIRCLE_ADMIN_KEY ?? "";
 
+/** Small helper */
 function logCleanup(
   action: string,
   metadata: Record<string, unknown> = {}
@@ -27,6 +29,14 @@ function logCleanup(
     ...metadata,
   });
 }
+
+/**
+ * Safely resolve the cleanup rate-limit config.
+ * Ensures TS never fails even if configs evolve.
+ */
+const CLEANUP_RATE_LIMIT =
+  (RATE_LIMIT_CONFIGS as Record<string, any>)["INNER_CIRCLE_ADMIN_CLEANUP"] ??
+  RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT;
 
 export default async function handler(
   req: NextApiRequest,
@@ -38,6 +48,7 @@ export default async function handler(
     return;
   }
 
+  // Admin authentication
   if (
     !ADMIN_API_KEY ||
     req.headers["x-inner-circle-admin-key"] !== ADMIN_API_KEY
@@ -47,13 +58,12 @@ export default async function handler(
   }
 
   // Rate limiting
-  const rl = rateLimit(
-    "inner-circle-admin-cleanup",
-    RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_CLEANUP ??
-      RATE_LIMIT_CONFIGS.INNER_CIRCLE_ADMIN_EXPORT
-  );
+  const rl = rateLimit("inner-circle-admin-cleanup", CLEANUP_RATE_LIMIT);
   const rlHeaders = createRateLimitHeaders(rl);
-  Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+  for (const [k, v] of Object.entries(rlHeaders)) {
+    res.setHeader(k, v);
+  }
 
   if (!rl.allowed) {
     res.status(429).json({ ok: false, error: "Rate limit exceeded" });
@@ -61,7 +71,6 @@ export default async function handler(
   }
 
   try {
-    // Use the server store directly
     const store = getInnerCircleStore();
 
     const [result, stats] = await Promise.all([
@@ -83,11 +92,10 @@ export default async function handler(
       stats,
     });
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Cleanup failed";
+    const errorMessage =
+      err instanceof Error ? err.message : "Cleanup failed";
 
-    logCleanup("error", {
-      error: errorMessage,
-    });
+    logCleanup("error", { error: errorMessage });
 
     if (
       errorMessage.includes("database") ||
@@ -98,10 +106,7 @@ export default async function handler(
         error: "Database temporarily unavailable. Please try again later.",
       });
     } else {
-      res.status(500).json({
-        ok: false,
-        error: errorMessage,
-      });
+      res.status(500).json({ ok: false, error: errorMessage });
     }
   }
 }

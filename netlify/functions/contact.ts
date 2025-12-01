@@ -1,5 +1,6 @@
 // netlify/functions/contact.ts
 import type { Handler } from "@netlify/functions";
+import { sendAppEmail } from "./_email";
 
 /* =========================
    CONFIG
@@ -9,9 +10,9 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "*")
   .map((s) => s.trim())
   .filter(Boolean);
 
-const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET?.trim(); // optional (Google reCAPTCHA v2/v3)
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET?.trim(); // optional (Cloudflare Turnstile)
-const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 64 * 1024); // 64KB default
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET?.trim();
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET?.trim();
+const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 64 * 1024);
 
 /* =========================
    CORS / HEADERS
@@ -68,12 +69,9 @@ type ContactPayload = {
   email?: string;
   subject?: string;
   message?: string;
-  // optional anti-spam
   honeypot?: string;
-  // optional captcha tokens
   recaptchaToken?: string;
   turnstileToken?: string;
-  // any extras
   [k: string]: unknown;
 };
 
@@ -92,7 +90,6 @@ function validatePayload(p: ContactPayload) {
   if (!message || message.length < 10)
     errors.push("message must be at least 10 characters");
 
-  // simple spam guard
   if (p.honeypot && String(p.honeypot).trim() !== "") {
     errors.push("honeypot must be empty");
   }
@@ -106,7 +103,7 @@ function validatePayload(p: ContactPayload) {
 
 async function verifyRecaptcha(token: string, remoteIp?: string) {
   if (!RECAPTCHA_SECRET)
-    return { ok: true, provider: "recaptcha", skipped: true };
+    return { ok: true, provider: "recaptcha", skipped: true as const };
   try {
     const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
@@ -129,7 +126,6 @@ async function verifyRecaptcha(token: string, remoteIp?: string) {
         reason: (json["error-codes"] || ["verification_failed"]).join(","),
       };
     }
-    // Optional score gating for reCAPTCHA v3
     if (typeof json.score === "number" && json.score < 0.4) {
       return {
         ok: false,
@@ -137,15 +133,15 @@ async function verifyRecaptcha(token: string, remoteIp?: string) {
         reason: `low_score:${json.score}`,
       };
     }
-    return { ok: true, provider: "recaptcha" };
-  } catch (e) {
-    return { ok: false, provider: "recaptcha", reason: "network_error" };
+    return { ok: true, provider: "recaptcha" as const };
+  } catch {
+    return { ok: false, provider: "recaptcha" as const, reason: "network_error" };
   }
 }
 
 async function verifyTurnstile(token: string, remoteIp?: string) {
   if (!TURNSTILE_SECRET)
-    return { ok: true, provider: "turnstile", skipped: true };
+    return { ok: true, provider: "turnstile", skipped: true as const };
   try {
     const res = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -169,9 +165,9 @@ async function verifyTurnstile(token: string, remoteIp?: string) {
         reason: (json["error-codes"] || ["verification_failed"]).join(","),
       };
     }
-    return { ok: true, provider: "turnstile" };
+    return { ok: true, provider: "turnstile" as const };
   } catch {
-    return { ok: false, provider: "turnstile", reason: "network_error" };
+    return { ok: false, provider: "turnstile" as const, reason: "network_error" };
   }
 }
 
@@ -182,17 +178,14 @@ export const handler: Handler = async (event) => {
   const origin = getCorsOrigin(event.headers.origin || event.headers.Origin);
   const headers = jsonHeaders(origin);
 
-  // Preflight
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers, body: "" };
   }
 
-  // Method guard
   if (event.httpMethod !== "POST") {
     return fail(405, headers, "Method Not Allowed", "ERR_METHOD");
   }
 
-  // Content-Type guard
   const contentType =
     event.headers["content-type"] || event.headers["Content-Type"];
   if (!isJsonContentType(contentType)) {
@@ -204,7 +197,6 @@ export const handler: Handler = async (event) => {
     );
   }
 
-  // Body guards
   const raw = event.body || "";
   if (!raw) {
     return fail(400, headers, "Missing request body", "ERR_NO_BODY");
@@ -213,14 +205,12 @@ export const handler: Handler = async (event) => {
     return fail(413, headers, "Payload too large", "ERR_TOO_LARGE");
   }
 
-  // Safe parse
   const parsed = safeParseJson<ContactPayload>(raw);
   if (!parsed.ok) {
     return fail(400, headers, parsed.error, "ERR_BAD_JSON");
   }
   const payload = parsed.data;
 
-  // Basic validation
   const { valid, errors, data } = validatePayload(payload);
   if (!valid) {
     return fail(
@@ -231,16 +221,17 @@ export const handler: Handler = async (event) => {
     );
   }
 
-  // Optional anti-bot verification
   const remoteIp =
-    (event.headers["x-forwarded-for"] || event.headers["X-Forwarded-For"] || "")
+    (event.headers["x-forwarded-for"] ||
+      event.headers["X-Forwarded-For"] ||
+      "")
+      .toString()
       .split(",")[0]
       ?.trim() || undefined;
 
-  // Prefer Turnstile if present; fallback to reCAPTCHA if provided
   if (payload.turnstileToken) {
     const v = await verifyTurnstile(String(payload.turnstileToken), remoteIp);
-    if (!v.ok && !v.skipped) {
+    if (!v.ok && !("skipped" in v && v.skipped)) {
       return fail(
         403,
         headers,
@@ -250,7 +241,7 @@ export const handler: Handler = async (event) => {
     }
   } else if (payload.recaptchaToken) {
     const v = await verifyRecaptcha(String(payload.recaptchaToken), remoteIp);
-    if (!v.ok && !v.skipped) {
+    if (!v.ok && !("skipped" in v && v.skipped)) {
       return fail(
         403,
         headers,
@@ -260,16 +251,24 @@ export const handler: Handler = async (event) => {
     }
   }
 
-  // === Your business logic goes here ===
-  // Example (pseudo):
-  // await sendEmail({
-  //   to: process.env.CONTACT_TO!,
-  //   from: process.env.CONTACT_FROM!,
-  //   subject: `[Contact] ${data.subject}`,
-  //   text: `From: ${data.name} <${data.email}>\n\n${data.message}`,
-  // });
+  // === Email / CRM wiring (best-effort, does NOT affect user response) ===
+  try {
+    await sendAppEmail({
+      // goes to MAIL_TO_PRIMARY + MAIL_TO_FALLBACK by default
+      subject: `[Contact] ${data.subject}`,
+      html: `
+        <p><strong>Name:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${data.message.replace(/\n/g, "<br>")}</p>
+      `,
+      text: `From: ${data.name} <${data.email}>\n\n${data.message}`,
+    });
+  } catch (err) {
+    console.error("Contact email send failed:", err);
+    // we deliberately do NOT fail the request here
+  }
 
-  // Success response (echo minimal safe fields)
   return {
     statusCode: 200,
     headers,

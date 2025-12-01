@@ -63,7 +63,8 @@ function toSerializable<T>(value: T): T {
 
 /** Normalise event fields into a serialisable shape */
 function serialiseEvent(event: EventMeta): EventMetaSerialized {
-  const anyEv = event as Record<string, unknown>;
+  // Cast through unknown first, then to Record<string, unknown>
+  const anyEv = event as unknown as Record<string, unknown>;
 
   const dateRaw = anyEv.date ?? anyEv.startDate ?? null;
   const date =
@@ -109,11 +110,11 @@ function serialiseResources(
 ): EventResourcesSerialized | null {
   if (!resources || typeof resources !== "object") return null;
 
-  const anyRes = resources as Record<string, unknown>;
+  const anyRes = resources as unknown as Record<string, unknown>;
 
   const toRel = (item: unknown): RelatedResourceSerialized => {
     if (!item || typeof item !== "object") return {};
-    const itemObj = item as Record<string, unknown>;
+    const itemObj = item as unknown as Record<string, unknown>;
     return {
       slug: (itemObj.slug as string | null | undefined) ?? null,
       title: (itemObj.title as string | null | undefined) ?? null,
@@ -186,7 +187,7 @@ export const getStaticProps: GetStaticProps<EventPageProps> = async (ctx) => {
   let rawResources: unknown = null;
   try {
     rawResources = await Promise.resolve(
-      getEventResourcesSummary ? getEventResourcesSummary() : null
+      getEventResourcesSummary ? getEventResourcesSummary(slug) : null
     );
   } catch {
     rawResources = null;

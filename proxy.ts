@@ -1,31 +1,28 @@
-// middleware.ts
+// proxy.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
 
 // Routes we never touch with gating logic (handled by Next/static pipeline)
-const SAFE_PREFIXES = [
+const SAFE_PREFIXES: string[] = [
   "/_next/",
   "/favicon",
   "/robots.txt",
   "/sitemap.xml",
   "/assets/",
   "/icons/",
-  "/api/webhooks/",
 ];
 
 // Publicly visible canon docs (everything else stays gated by default)
 const PUBLIC_CANON = new Set<string>([
   "canon-campaign",
   "canon-master-index-preview",
-  // NOTE: we removed "the-builders-catechism" so it is no longer public.
-  // If you ever want a *canon* piece public by default, add its slug here.
+  // If you later want a *canon* piece public by default, add its slug here:
   // "volume-i-foundations-of-purpose",
 ]);
 
 // Slugs that are ALWAYS gated, even if someone later adds them to PUBLIC_CANON.
-// This is your "access-level restriction takes precedence" safety net.
 const FORCE_RESTRICTED_CANON = new Set<string>([
   "the-builders-catechism",
   // Add any others here that must NEVER be public:
@@ -35,14 +32,14 @@ const FORCE_RESTRICTED_CANON = new Set<string>([
 function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set(
     "Strict-Transport-Security",
-    "max-age=63072000; includeSubDomains; preload"
+    "max-age=63072000; includeSubDomains; preload",
   );
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   );
   res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   res.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
@@ -66,7 +63,8 @@ function isMalicious(req: NextRequest): boolean {
   return BAD_PATTERNS.some((p) => url.includes(p));
 }
 
-export function middleware(req: NextRequest) {
+// Next 16 "proxy" entry point
+export function proxy(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
 
   // 1) Bypass for static / framework internals
@@ -100,7 +98,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 4) Basic CSRF-ish check for mutating methods
+  // 4) Basic origin check for mutating methods (APIs and forms)
   if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
     const origin = req.headers.get("origin");
     const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL;
@@ -115,8 +113,12 @@ export function middleware(req: NextRequest) {
   return applySecurityHeaders(res);
 }
 
+// Also export as "middleware" for backward compatibility with any imports
+export const middleware = proxy;
+
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|favicon.png|sitemap.xml|robots.txt|assets/).*)",
+    // Run on everything except Next internals & obvious static files
+    "/((?!_next/static|_next/image|favicon.ico|favicon.png|sitemap.xml|robots.txt|assets/|icons/).*)",
   ],
 };

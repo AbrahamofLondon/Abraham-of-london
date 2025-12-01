@@ -1,101 +1,157 @@
 // src/components/Navbar.tsx
-'use client'; // This component uses useState for mobile menu, so it's a Client Component
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false); // State for mobile menu toggle
+type NavLink = {
+  name: string;
+  href: string;
+};
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+const NAV_LINKS: NavLink[] = [
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Books", href: "/books" },
+  { name: "Blog", href: "/blog" },
+  { name: "Contact", href: "/contact" },
+];
+
+export default function Navbar(): JSX.Element {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const router = useRouter();
+
+  const toggleMenu = () => setIsOpen((prev) => !prev);
+
+  const isActive = (href: string) => {
+    if (href === "/") return router.pathname === "/";
+    return router.pathname.startsWith(href);
   };
-
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Books', href: '/books' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Contact', href: '/contact' },
-  ];
 
   return (
     <motion.nav
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed w-full z-50 bg-neutral-dark/90 backdrop-blur-sm shadow-lg py-4"
+      className="fixed inset-x-0 top-0 z-50 bg-neutral-dark/90 backdrop-blur-sm shadow-lg py-4"
+      aria-label="Primary"
     >
-      <div className="container-custom flex justify-between items-center">
-        {/* Logo/Site Title */}
-        <Link href="/" className="flex items-center space-x-2 text-2xl font-bold font-serif text-deep-gold hover:text-warm-gold transition-colors duration-200">
-          {/* Optional: Add a small logo image here */}
+      <div className="container-custom flex items-center justify-between">
+        {/* Logo / Brand */}
+        <Link
+          href="/"
+          className="flex items-center space-x-2 text-2xl font-serif font-bold text-deep-gold transition-colors duration-200 hover:text-warm-gold"
+        >
           <Image
-              src="/logo-placeholder.png" // Placeholder for your logo
-              alt="Fathering Without Fear Logo"
-              width={40}
-              height={40}
-              className="rounded-full"
+            src="/logo-placeholder.png" // swap to your real logo when ready
+            alt="Fathering Without Fear Logo"
+            width={40}
+            height={40}
+            className="rounded-full"
           />
           <span>Fathering Without Fear</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-lg font-sans text-off-white hover:text-warm-gold transition-colors duration-200"
-            >
-              {link.name}
-            </Link>
-          ))}
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center space-x-8">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={[
+                  "text-lg font-sans transition-colors duration-200",
+                  active
+                    ? "text-warm-gold"
+                    : "text-off-white hover:text-warm-gold",
+                ].join(" ")}
+                aria-current={active ? "page" : undefined}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Mobile Menu Button (Hamburger) */}
+        {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button
+            type="button"
             onClick={toggleMenu}
-            className="text-off-white hover:text-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold transition-colors duration-200 p-2 rounded"
+            className="rounded p-2 text-off-white transition-colors duration-200 hover:text-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold"
             aria-label="Toggle navigation"
+            aria-expanded={isOpen}
           >
             {isOpen ? (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              <svg
+                className="h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             ) : (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+              <svg
+                className="h-8 w-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16m-7 6h7"
+                />
               </svg>
             )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            key="mobile-nav"
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-neutral-dark pt-4 pb-8 border-t border-deep-navy/50"
+            transition={{ duration: 0.25 }}
+            className="md:hidden border-t border-deep-navy/50 bg-neutral-dark pt-4 pb-8"
           >
             <div className="flex flex-col items-center space-y-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={toggleMenu} // Close menu on link click
-                  className="text-xl font-sans text-off-white hover:text-warm-gold transition-colors duration-200 py-2"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={toggleMenu}
+                    className={[
+                      "py-2 text-xl font-sans transition-colors duration-200",
+                      active
+                        ? "text-warm-gold"
+                        : "text-off-white hover:text-warm-gold",
+                    ].join(" ")}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
           </motion.div>
         )}

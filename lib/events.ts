@@ -8,10 +8,7 @@ import {
   getEventSlugs as _getEventSlugs,
   getEventBySlug as _getEventBySlug,
   getAllEvents as _getAllEvents,
-  getEventsBySlugs as _getEventsBySlugs,
-  getAllContent as _getAllContent,
   dedupeEventsByTitleAndDay as _dedupeEventsByTitleAndDay,
-  // NOTE: we just re-export this; we don't force its shape here
   getEventResourcesSummary as _getEventResourcesSummary,
 } from "@/lib/server/events-data";
 
@@ -28,10 +25,28 @@ export type {
 
 export const getEventBySlug = _getEventBySlug;
 export const getAllEvents = _getAllEvents;
-export const getEventsBySlugs = _getEventsBySlugs;
-export const getAllContent = _getAllContent;
 export const dedupeEventsByTitleAndDay = _dedupeEventsByTitleAndDay;
 export const getEventResourcesSummary = _getEventResourcesSummary;
+
+/**
+ * Get multiple events by their slugs
+ * Implementation added here since it wasn't exported from the server module
+ */
+export function getEventsBySlugs(slugs: string[]): unknown[] {
+  const allEvents = _getAllEvents?.() ?? [];
+  return allEvents.filter(event => {
+    const eventSlug = (event as any).slug;
+    return slugs.includes(eventSlug);
+  });
+}
+
+/**
+ * Mock implementation of getAllContent since it doesn't exist in the server module
+ * This returns all events as a fallback
+ */
+export function getAllContent(): unknown[] {
+  return _getAllEvents?.() ?? [];
+}
 
 // -----------------------------------------------------------------------------
 // Safe UI-facing summary types

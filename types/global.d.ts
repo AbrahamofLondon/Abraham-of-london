@@ -20,7 +20,11 @@ declare global {
 
   // Analytics global declarations
   interface Window {
-    gtag: (...args: unknown[]) => void;
+    gtag?: (
+  command: string,
+  action: string,
+  params?: Record<string, unknown>
+) => void;
     dataLayer: unknown[];
     plausible?: (
       event: string,

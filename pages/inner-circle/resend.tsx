@@ -34,9 +34,7 @@ const InnerCircleResendPage: NextPage = () => {
     try {
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
           name: name || undefined,
@@ -75,6 +73,7 @@ const InnerCircleResendPage: NextPage = () => {
     <Layout title="Resend Inner Circle Access">
       <main className="mx-auto max-w-xl px-4 py-12 sm:py-16 lg:py-20">
         <section className="space-y-8">
+          {/* Header */}
           <header className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-softGold/70">
               Inner Circle · Access
@@ -83,15 +82,21 @@ const InnerCircleResendPage: NextPage = () => {
               Resend Your Inner Circle Access
             </h1>
             <p className="text-sm text-softGold/80">
-              If you&apos;ve already registered but can&apos;t find your email,
-              you can request a fresh access link here.
+              If you&apos;ve already registered but can&apos;t find your access
+              email, request a fresh one here.
             </p>
           </header>
 
+          {/* Form */}
           <form
             onSubmit={handleSubmit}
-            className="space-y-6 rounded-2xl border border-softGold/40 bg-black/70 p-6 shadow-lg backdrop-blur"
+            className="
+              space-y-6 rounded-2xl border border-softGold/40 
+              bg-black/70 p-6 shadow-lg backdrop-blur 
+              shadow-black/40
+            "
           >
+            {/* Email */}
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -106,15 +111,20 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-softGold/40 bg-black/60 px-3 py-2 text-sm text-cream outline-none ring-0 transition focus:border-softGold focus:ring-1 focus:ring-softGold/60"
+                className="
+                  w-full rounded-xl border border-softGold/40 bg-black/60 
+                  px-3 py-2 text-sm text-cream outline-none ring-0
+                  transition focus:border-softGold focus:ring-1 focus:ring-softGold/60
+                "
                 placeholder="you@example.com"
               />
               <p className="text-[11px] text-softGold/70">
                 Use the same email you registered with. If the message
-                doesn&apos;t appear, check your promotions or spam folder.
+                doesn&apos;t appear, check Promotions or Spam.
               </p>
             </div>
 
+            {/* Name (optional) */}
             <div className="space-y-2">
               <label
                 htmlFor="name"
@@ -128,19 +138,31 @@ const InnerCircleResendPage: NextPage = () => {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-softGold/30 bg-black/60 px-3 py-2 text-sm text-cream outline-none ring-0 transition focus:border-softGold/70 focus:ring-1 focus:ring-softGold/60"
+                className="
+                  w-full rounded-xl border border-softGold/30 bg-black/60 
+                  px-3 py-2 text-sm text-cream outline-none ring-0
+                  transition focus:border-softGold/70 focus:ring-1 focus:ring-softGold/60
+                "
                 placeholder="How should we address you?"
               />
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center rounded-full bg-softGold px-6 py-3 text-sm font-semibold text-black shadow-md transition hover:bg-softGold/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="
+                inline-flex w-full items-center justify-center 
+                rounded-full bg-softGold px-6 py-3 text-sm font-semibold 
+                text-black shadow-md transition 
+                hover:bg-softGold/90 
+                disabled:cursor-not-allowed disabled:opacity-60
+              "
             >
               {loading ? "Resending..." : "Resend access email"}
             </button>
 
+            {/* Feedback */}
             {feedback && (
               <div
                 className={[
@@ -157,10 +179,11 @@ const InnerCircleResendPage: NextPage = () => {
             )}
           </form>
 
+          {/* Footer note */}
           <p className="text-xs text-softGold/60">
             If you still don&apos;t receive the email after multiple attempts,
-            you can reply to any Abraham of London newsletter or contact us
-            through the main site and we&apos;ll assist you manually.
+            reply to any Abraham of London newsletter or contact us through the
+            main site—we’ll assist you manually.
           </p>
         </section>
       </main>

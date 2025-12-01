@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-// Import Contentlayer generated types
+// Import Contentlayer generated types and use them directly
 import {
   allPosts,
   allBooks,
@@ -17,58 +17,15 @@ import {
   allStrategies,
   allResources,
   allCanons,
-} from "contentlayer/generated";
-
-// Define Contentlayer document base interface
-interface ContentlayerDoc {
-  slug: string;
-  body: {
-    raw: string;
-  };
-  [key: string]: unknown;
-}
-
-interface PostDoc extends ContentlayerDoc {
-  date: string;
-  draft?: boolean;
-}
-
-interface BookDoc extends ContentlayerDoc {
-  title: string;
-  draft?: boolean;
-}
-
-interface DownloadDoc extends ContentlayerDoc {
-  date: string;
-}
-
-interface EventDoc extends ContentlayerDoc {
-  date: string;
-}
-
-interface PrintDoc extends ContentlayerDoc {
-  date: string;
-  available?: boolean;
-}
-
-interface StrategyDoc extends ContentlayerDoc {
-  date: string;
-}
-
-interface ResourceDoc extends ContentlayerDoc {
-  title: string;
-}
-
-interface CanonDoc extends ContentlayerDoc {
-  title: string;
-  subtitle?: string;
-  description?: string;
-  coverImage?: string;
-  url?: string;
-  draft?: boolean;
-  featured?: boolean;
-  order?: number;
-}
+  type PostDocument,
+  type BookDocument,
+  type DownloadDocument,
+  type EventDocument,
+  type PrintDocument,
+  type StrategyDocument,
+  type ResourceDocument,
+  type CanonDocument,
+} from "./contentlayer-helper";
 
 export interface RawContentEntry {
   slug: string;
@@ -106,91 +63,83 @@ export function getAllContent(collection: string): RawContentEntry[] {
     case "blog":
     case "post":
     case "posts":
-      return (allPosts as PostDoc[])
-        .filter((p) => !p.draft)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allPosts
+        .filter((p: PostDocument) => !p.draft)
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .map((doc: PostDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "book":
     case "books":
-      return (allBooks as BookDoc[])
-        .filter((b) => !b.draft)
-        .sort((a, b) => a.title.localeCompare(b.title))
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allBooks
+        .filter((b: BookDocument) => !b.draft)
+        .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+        .map((doc: BookDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "download":
     case "downloads":
-      return (allDownloads as DownloadDoc[])
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allDownloads
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .map((doc: DownloadDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "event":
     case "events":
-      return (allEvents as EventDoc[])
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allEvents
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .map((doc: EventDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "print":
     case "prints":
-      return (allPrints as PrintDoc[])
-        .filter((p) => p.available !== false)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allPrints
+        .filter((p: PrintDocument) => p.available !== false)
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .map((doc: PrintDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "strategy":
     case "strategies":
-      return (allStrategies as StrategyDoc[])
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allStrategies
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .map((doc: StrategyDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "resource":
     case "resources":
-      return (allResources as ResourceDoc[])
-        .sort((a, b) => a.title.localeCompare(b.title))
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+      return allResources
+        .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+        .map((doc: ResourceDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
 
     case "canon":
-      return (allCanons as CanonDoc[])
-        .filter((c) => !c.draft)
+      return allCanons
+        .filter((c: CanonDocument) => !c.draft)
         .sort((a, b) => {
           // Sort by order field if present, otherwise by title
           if (a.order !== undefined && b.order !== undefined) {
             return a.order - b.order;
           }
-          return a.title.localeCompare(b.title);
+          return (a.title || '').localeCompare(b.title || '');
         })
-        .map((doc) => ({
-          slug: doc.slug,
-          content: doc.body.raw,
+        .map((doc: CanonDocument) => ({
           ...doc,
+          content: doc.body.raw,
         }));
   }
 
@@ -228,59 +177,60 @@ export function getAllContent(collection: string): RawContentEntry[] {
 export function getContentBySlug(
   collection: string,
   slug: string,
-  options?: GetContentOptions
+  options: GetContentOptions = { withContent: true }
 ): RawContentEntry | null {
   const targetSlug = String(slug).trim();
 
   // Try Contentlayer first
-  let doc: ContentlayerDoc | undefined;
+  let doc: RawContentEntry | null = null;
+
   switch (collection.toLowerCase()) {
     case "blog":
     case "post":
     case "posts":
-      doc = (allPosts as PostDoc[]).find((p) => p.slug === targetSlug);
+      doc = allPosts.find((p: PostDocument) => p.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "book":
     case "books":
-      doc = (allBooks as BookDoc[]).find((b) => b.slug === targetSlug);
+      doc = allBooks.find((b: BookDocument) => b.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "download":
     case "downloads":
-      doc = (allDownloads as DownloadDoc[]).find((d) => d.slug === targetSlug);
+      doc = allDownloads.find((d: DownloadDocument) => d.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "event":
     case "events":
-      doc = (allEvents as EventDoc[]).find((e) => e.slug === targetSlug);
+      doc = allEvents.find((e: EventDocument) => e.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "print":
     case "prints":
-      doc = (allPrints as PrintDoc[]).find((p) => p.slug === targetSlug);
+      doc = allPrints.find((p: PrintDocument) => p.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "strategy":
     case "strategies":
-      doc = (allStrategies as StrategyDoc[]).find((s) => s.slug === targetSlug);
+      doc = allStrategies.find((s: StrategyDocument) => s.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "resource":
     case "resources":
-      doc = (allResources as ResourceDoc[]).find((r) => r.slug === targetSlug);
+      doc = allResources.find((r: ResourceDocument) => r.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
 
     case "canon":
-      doc = (allCanons as CanonDoc[]).find((c) => c.slug === targetSlug);
+      doc = allCanons.find((c: CanonDocument) => c.slug === targetSlug) as unknown as RawContentEntry || null;
       break;
   }
 
   if (doc) {
+    // Add content from body.raw
     const entry: RawContentEntry = {
-      slug: doc.slug,
-      content: doc.body.raw,
       ...doc,
+      content: (doc as any).body.raw,
     };
 
     if (options?.withContent === false) {
@@ -292,7 +242,7 @@ export function getContentBySlug(
     return entry;
   }
 
-  // Fallback to filesystem
+  // Fallback to filesystem for unknown collections
   const dir = resolveCollectionDir(collection);
   const candidates = [
     path.join(dir, `${targetSlug}.mdx`),
@@ -309,7 +259,7 @@ export function getContentBySlug(
     }
   }
 
-  // Fallback: search all entries
+  // If no exact file match, search all entries in the collection
   if (!filePath) {
     const all = getAllContent(collection);
     const found =
@@ -362,21 +312,37 @@ interface FeaturedCanonItem {
  * Get featured canon documents
  */
 export function getFeaturedCanon(): FeaturedCanonItem[] {
-  return (allCanons as CanonDoc[])
-    .filter((c) => !c.draft && c.featured)
+  return allCanons
+    .filter((c: CanonDocument) => !c.draft && c.featured)
     .sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order;
       }
-      return a.title.localeCompare(b.title);
+      return (a.title || '').localeCompare(b.title || '');
     })
-    .map((doc) => ({
+    .map((doc: CanonDocument) => ({
       slug: doc.slug,
-      title: doc.title,
+      title: doc.title || '',
       subtitle: doc.subtitle,
       description: doc.description,
       coverImage: doc.coverImage,
       url: doc.url,
-      ...doc,
     }));
+}
+
+/**
+ * Check if a collection is managed by Contentlayer
+ */
+export function isContentlayerCollection(collection: string): boolean {
+  const knownCollections = [
+    'blog', 'post', 'posts',
+    'book', 'books', 
+    'download', 'downloads',
+    'event', 'events',
+    'print', 'prints',
+    'strategy', 'strategies',
+    'resource', 'resources',
+    'canon'
+  ];
+  return knownCollections.includes(collection.toLowerCase());
 }

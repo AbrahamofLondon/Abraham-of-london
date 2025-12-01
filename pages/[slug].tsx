@@ -2,7 +2,10 @@
 import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps } from "next";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import {
+  MDXRemote,
+  type MDXRemoteSerializeResult,
+} from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
@@ -12,12 +15,29 @@ import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 
-type PageMeta = PostMeta & {
+type PageMeta = {
+  slug?: string;
+  title: string;
+  excerpt?: string | null;
+  description?: string | null;
+
+  // Unified optional metadata (many collections lack these)
+  category?: string | null;
+  tags?: string[] | null;
+  readTime?: string | null;
+  date?: string | null;
+
+  // Cover handling
+  coverImage?: string | { src?: string } | null;
   coverAspect?: "book" | "wide" | "square";
   coverFit?: "cover" | "contain";
+
+  // Inner Circle protection
   accessLevel?: string;
   lockMessage?: string | null;
-  slug?: string;
+
+  // Allow extra collection properties without breaking TS
+  [key: string]: unknown;
 };
 
 type PageProps = {
@@ -25,8 +45,6 @@ type PageProps = {
   mdxSource: MDXRemoteSerializeResult;
 };
 
-// Remove unused variable - fix warning
-// const PRIMARY_COLLECTION = "Post";
 const FALLBACK_COLLECTIONS = ["Print", "Resource"] as const;
 
 function hasInnerCircleCookie(): boolean {
@@ -63,9 +81,12 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
   }, []);
 
   const displaySubtitle = excerpt || description || undefined;
+
   const primaryCategory =
-    category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+    category ??
+    (Array.isArray(tags) && tags.length > 0
+      ? String(tags[0])
+      : "Article");
 
   const canonicalTitle = title || "Abraham of London";
   const displayDescription = description || excerpt || "";
@@ -75,7 +96,9 @@ function ContentPage({ meta, mdxSource }: PageProps): JSX.Element {
 
   const effectiveSlug = slug || "";
   const returnToPath = `/${effectiveSlug}`;
-  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(returnToPath)}`;
+  const joinUrl = `/inner-circle?returnTo=${encodeURIComponent(
+    returnToPath,
+  )}`;
 
   return (
     <Layout title={canonicalTitle}>
@@ -193,7 +216,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
       fallback: "blocking",
     };
   } catch (err: unknown) {
-    // eslint-disable-next-line no-console
     console.error("Error generating static paths for /[slug]:", err);
     return { paths: [], fallback: "blocking" };
   }
@@ -213,20 +235,19 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     let data: (PageMeta & { content?: string }) | null = null;
 
-    // First: try canonical Post
+    // 1) Try canonical Post first
     const postCandidate = await getPostBySlug(slug);
     if (postCandidate) {
       data = postCandidate as PageMeta & { content?: string };
     }
 
-    // Fallback: other MDX collections (Print, Resource, etc.)
+    // 2) Fallback: other MDX collections (Print, Resource, etc.)
     if (!data) {
       for (const key of FALLBACK_COLLECTIONS) {
         const raw = getContentBySlug(key, slug, {
           withContent: true,
         });
 
-        // TS: go through `unknown` to acknowledge this is an intentional cast
         const candidate = raw
           ? (raw as unknown as PageMeta & { content?: string })
           : null;
@@ -260,7 +281,6 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
       revalidate: 3600,
     };
   } catch (err: unknown) {
-    // eslint-disable-next-line no-console
     console.error("Error in getStaticProps for /[slug]:", err);
     return { notFound: true };
   }

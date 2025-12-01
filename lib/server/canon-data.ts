@@ -1,10 +1,10 @@
 // lib/server/canon-data.ts
 // Server-side helpers for Canon content (Contentlayer-powered)
 
-import { allCanons, type Canon } from "contentlayer/generated";
+import { allCanons, type CanonDocument } from "../contentlayer-helper";
 
-// Use the generated Canon type directly - no need to import from ../canon
-export type CanonDoc = Canon;
+// Use the CanonDocument type from our local helper
+export type CanonDoc = CanonDocument;
 
 type CanonFilterOptions = {
   includeDrafts?: boolean;
@@ -22,7 +22,7 @@ function sortCanon(a: CanonDoc, b: CanonDoc): number {
   if (aDate !== bDate) return bDate - aDate;
 
   // 3) Fallback by title for stability
-  return a.title.localeCompare(b.title);
+  return (a.title || "").localeCompare(b.title || "");
 }
 
 /**
@@ -50,7 +50,9 @@ export function getFeaturedCanon(): CanonDoc[] {
  * All numbered Canon volumes (those with a volumeNumber).
  */
 export function getCanonVolumes(): CanonDoc[] {
-  return getAllCanon().filter((c) => !!c.volumeNumber);
+  return getAllCanon().filter((c) => 
+    typeof c.volumeNumber === "number" && c.volumeNumber > 0
+  );
 }
 
 /**

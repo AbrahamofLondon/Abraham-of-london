@@ -406,6 +406,8 @@ export const Canon = defineDocumentType(() => ({
     excerpt: { type: "string", default: "" },
     author: { type: "string", default: "Abraham of London" },
     coverImage: { type: "string", default: "" },
+    coverAspect: { type: "string", required: false },  // <-- Add this
+    coverFit: { type: "string", required: false },      // <-- Add this
     volumeNumber: { type: "string", required: false },
     order: { type: "number", required: false },
     featured: { type: "boolean", default: false },

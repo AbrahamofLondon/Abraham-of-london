@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { HeroBanner } from "@/components/homepage/HeroBanner";
+import { HeroBanner } from "@/components/InteractiveElements";
 import NewsletterForm from "@/components/NewsletterForm";
 import { pickEnvUrl, ENV_KEYS } from "@/lib/utils";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";

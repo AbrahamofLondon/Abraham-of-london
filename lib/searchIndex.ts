@@ -6,7 +6,13 @@ import {
   allPrints,
   allResources,
   allCanons,
-} from "contentlayer/generated";
+  type PostDocument,
+  type BookDocument,
+  type DownloadDocument,
+  type PrintDocument,
+  type ResourceDocument,
+  type CanonDocument
+} from "./contentlayer-helper";
 import { absUrl } from "@/lib/siteConfig";
 
 // ----------------- Shared types & helpers -----------------
@@ -63,12 +69,12 @@ export interface SearchDoc {
 
 function mapPosts(): SearchDoc[] {
   return sortByDate(allPosts)
-    .filter((p) => !p.draft)
-    .map((p) => ({
+    .filter((p: PostDocument) => !p.draft)
+    .map((p: PostDocument) => ({
       type: "post" as const,
       slug: p.slug,
-      href: p.url,
-      url: absUrl(p.url),
+      href: p.url || `/blog/${p.slug}`,
+      url: absUrl(p.url || `/blog/${p.slug}`),
       title: p.title ?? "Untitled",
       date: p.date ?? null,
       excerpt: p.excerpt ?? p.description ?? null,
@@ -79,12 +85,12 @@ function mapPosts(): SearchDoc[] {
 
 function mapBooks(): SearchDoc[] {
   return sortByDate(allBooks)
-    .filter((b) => !b.draft)
-    .map((b) => ({
+    .filter((b: BookDocument) => !b.draft)
+    .map((b: BookDocument) => ({
       type: "book" as const,
       slug: b.slug,
-      href: b.url,
-      url: absUrl(b.url),
+      href: b.url || `/books/${b.slug}`,
+      url: absUrl(b.url || `/books/${b.slug}`),
       title: b.title ?? "Untitled Book",
       date: b.date ?? null,
       excerpt: b.excerpt ?? b.description ?? null,
@@ -94,11 +100,11 @@ function mapBooks(): SearchDoc[] {
 }
 
 function mapDownloads(): SearchDoc[] {
-  return sortByDate(allDownloads).map((d) => ({
+  return sortByDate(allDownloads).map((d: DownloadDocument) => ({
     type: "download" as const,
     slug: d.slug,
-    href: d.url,
-    url: absUrl(d.url),
+    href: d.url || `/downloads/${d.slug}`,
+    url: absUrl(d.url || `/downloads/${d.slug}`),
     title: d.title ?? "Untitled Download",
     date: d.date ?? null,
     excerpt: d.excerpt ?? d.description ?? null,
@@ -109,12 +115,12 @@ function mapDownloads(): SearchDoc[] {
 
 function mapPrints(): SearchDoc[] {
   return sortByDate(allPrints)
-    .filter((p) => p.available !== false)
-    .map((p) => ({
+    .filter((p: PrintDocument) => p.available !== false)
+    .map((p: PrintDocument) => ({
       type: "print" as const,
       slug: p.slug,
-      href: p.url,
-      url: absUrl(p.url),
+      href: p.url || `/prints/${p.slug}`,
+      url: absUrl(p.url || `/prints/${p.slug}`),
       title: p.title ?? "Untitled Print",
       date: p.date ?? null,
       excerpt: p.excerpt ?? p.description ?? null,
@@ -124,11 +130,11 @@ function mapPrints(): SearchDoc[] {
 }
 
 function mapResources(): SearchDoc[] {
-  return sortByDate(allResources).map((r) => ({
+  return sortByDate(allResources).map((r: ResourceDocument) => ({
     type: "resource" as const,
     slug: r.slug,
-    href: r.url,
-    url: absUrl(r.url),
+    href: r.url || `/resources/${r.slug}`,
+    url: absUrl(r.url || `/resources/${r.slug}`),
     title: r.title ?? "Untitled Resource",
     date: r.date ?? null,
     excerpt: r.excerpt ?? r.description ?? null,
@@ -137,17 +143,15 @@ function mapResources(): SearchDoc[] {
   }));
 }
 
-// *** THIS IS THE IMPORTANT BIT: CANON AS FIRST-CLASS ***
-
 function mapCanons(): SearchDoc[] {
   return sortByDate(allCanons)
-    .filter((c) => !c.draft)
-    .map((c) => ({
+    .filter((c: CanonDocument) => !c.draft)
+    .map((c: CanonDocument) => ({
       type: "canon" as const,
       slug: c.slug,
-      href: c.url, // e.g. /canon/canon-campaign
-      url: absUrl(c.url), // full absolute URL for OG / external use
-      title: c.title ?? "Untitled Canon Document",
+      href: c.url || `/canon/${c.slug}`,
+      url: absUrl(c.url || `/canon/${c.slug}`),
+      title: c.title ?? "Untitled Canon",
       date: c.date ?? null,
       excerpt: c.excerpt ?? c.description ?? null,
       tags: c.tags ?? [],
@@ -155,17 +159,39 @@ function mapCanons(): SearchDoc[] {
     }));
 }
 
-// ----------------- Public API -----------------
+// ----------------- Main search index -----------------
 
-export function buildSearchIndex(): { docs: SearchDoc[] } {
-  const docs: SearchDoc[] = [
+export function buildSearchIndex(): SearchDoc[] {
+  return [
     ...mapPosts(),
     ...mapBooks(),
     ...mapDownloads(),
     ...mapPrints(),
     ...mapResources(),
-    ...mapCanons(), // canon now first-class in the index
+    ...mapCanons(),
   ];
+}
 
-  return { docs };
+// Pre-built search index
+export const searchIndex: SearchDoc[] = buildSearchIndex();
+
+// Helper to search the index
+export function searchDocuments(query: string, limit: number = 20): SearchDoc[] {
+  const searchTerm = query.toLowerCase().trim();
+  if (!searchTerm) return searchIndex.slice(0, limit);
+
+  return searchIndex
+    .filter(doc => {
+      const searchableText = [
+        doc.title,
+        doc.excerpt,
+        doc.tags?.join(' '),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(searchTerm);
+    })
+    .slice(0, limit);
 }

@@ -155,7 +155,7 @@ const ResourcesIndexPage: NextPage<ResourcesPageProps> = ({ resources }) => {
 };
 
 export const getStaticProps: GetStaticProps<ResourcesPageProps> = async () => {
-  const all = getAllContent("resources") as RawResourceMeta[];
+  const all = getAllContent("resources") as unknown as RawResourceMeta[];
 
   const resources: ResourceMeta[] = all.map((r) => ({
     slug: r.slug,

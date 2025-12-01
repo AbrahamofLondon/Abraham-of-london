@@ -1,4 +1,4 @@
-src / components / NewsletterForm.tsx;
+
 import React, { useState } from "react";
 
 interface NewsletterFormProps {

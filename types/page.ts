@@ -15,4 +15,6 @@ export interface PageMeta {
     reads?: Array<{ href: string; title?: string }>;
   };
   content?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }

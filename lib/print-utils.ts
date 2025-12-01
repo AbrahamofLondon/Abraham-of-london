@@ -1,13 +1,13 @@
 // lib/print-utils.ts
 // Low-level helpers wired directly to Contentlayer's Print documents.
 
-import { allPrints, type Print } from "contentlayer/generated";
+import { allPrints, type PrintDocument as ContentlayerPrint } from "./contentlayer-helper";
 
-// Base type exported for lib/prints.ts to extend
-export type PrintDocument = Print;
+// Re-export the type for consistency
+export type PrintDocument = ContentlayerPrint;
 
 // Normalise a "slug" for a print from either frontmatter or file path
-function resolveSlug(print: Print): string {
+function resolveSlug(print: ContentlayerPrint): string {
   if (print.slug && print.slug.trim()) return print.slug;
 
   // Fallback: strip "prints/" from the flattened path
@@ -15,17 +15,34 @@ function resolveSlug(print: Print): string {
   return fromPath || "untitled-print";
 }
 
+// Validate print document
+function isValidPrint(print: ContentlayerPrint): boolean {
+  return Boolean(print && print.slug && print.title);
+}
+
 // ---------------------------------------------------------------------------
 // Data access
 // ---------------------------------------------------------------------------
 
 export function getAllPrintDocuments(): PrintDocument[] {
-  // Sort newest first by date
-  const sorted = [...allPrints].sort((a, b) => {
-    if (!a.date && !b.date) return 0;
-    if (!a.date) return 1;
-    if (!b.date) return -1;
-    return new Date(a.date) < new Date(b.date) ? 1 : -1;
+  // Filter valid prints and those that are available
+  const validPrints = allPrints.filter(print => 
+    isValidPrint(print) && print.available !== false
+  );
+
+  // Sort newest first by date, then by title for undated items
+  const sorted = validPrints.sort((a, b) => {
+    const dateA = a.date ? new Date(a.date).getTime() : 0;
+    const dateB = b.date ? new Date(b.date).getTime() : 0;
+    
+    if (dateA && dateB) {
+      return dateB - dateA; // Newest first
+    }
+    if (dateA && !dateB) return -1;
+    if (!dateA && dateB) return 1;
+    
+    // Both undated, sort by title
+    return (a.title || '').localeCompare(b.title || '');
   });
 
   // Attach a normalised slug to each record (without mutating originals)
@@ -40,12 +57,41 @@ export function getAllPrintSlugs(): string[] {
 }
 
 export function getPrintDocumentBySlug(slug: string): PrintDocument | null {
-  const match = allPrints.find((p) => resolveSlug(p) === slug);
-  return match ? { ...match, slug: resolveSlug(match) } : null;
+  const normalizedSlug = slug.trim();
+  const match = allPrints.find((p) => resolveSlug(p) === normalizedSlug);
+  
+  if (!match || match.available === false) {
+    return null;
+  }
+  
+  return { 
+    ...match, 
+    slug: resolveSlug(match) 
+  };
 }
 
 export function getPrintPaths(): { params: { slug: string } }[] {
   return getAllPrintSlugs().map((slug) => ({
     params: { slug },
   }));
+}
+
+// Additional utility functions
+export function getFeaturedPrints(): PrintDocument[] {
+  return getAllPrintDocuments().filter(print => 
+    print.available !== false
+  ).slice(0, 6); // Return first 6 available prints
+}
+
+export function getPrintsByTag(tag: string): PrintDocument[] {
+  return getAllPrintDocuments().filter(print => 
+    print.tags?.includes(tag)
+  );
+}
+
+export function getAllPrintTags(): string[] {
+  const allTags = getAllPrintDocuments().flatMap(print => 
+    print.tags || []
+  );
+  return Array.from(new Set(allTags)).sort();
 }

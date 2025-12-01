@@ -653,7 +653,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       )
     );
 
-    return res.rowCount > 0;
+    return (res.rowCount ?? 0) > 0;
   }
 
   async deleteMemberByEmail(email: string): Promise<boolean> {
@@ -670,7 +670,7 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       )
     );
 
-    return res.rowCount > 0;
+    return (res.rowCount ?? 0) > 0;
   }
 
   async cleanupOldData(): Promise<{
@@ -863,3 +863,4 @@ export async function exportInnerCircleAdminSummary(): Promise<
 > {
   return getStore().exportInnerCircleAdminSummary();
 }
+

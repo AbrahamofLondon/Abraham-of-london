@@ -1,13 +1,39 @@
 // lib/siteConfig.ts
-import { SiteConfig, SocialLink, defaultSocialLinks } from "@/types/config";
-
 // Browser-safe site configuration + route & venture registry.
 // No fs, no Node-only APIs.
 
-/**
- * Enumerate all "canonical" routes you actually support.
- * Add to this union instead of sprinkling string paths around the codebase.
- */
+// =======================================================
+// TYPE DEFINITIONS (MUST COME FIRST)
+// =======================================================
+
+export interface SocialLink {
+  href: string;
+  label: string;
+  kind?: string;
+  external?: boolean;
+}
+
+export interface BaseSiteConfig {
+  siteUrl: string;
+  title: string;
+  description: string;
+  author: string;
+  email: string;
+  phone: string;
+  copyright?: string;
+  companyNumber?: string;
+  socialLinks?: SocialLink[];
+  contact?: {
+    email: string;
+    phone?: string;
+  };
+  seo?: {
+    title: string;
+    description: string;
+  };
+  authorImage?: string;
+}
+
 export type RouteId =
   | "home"
   | "about"
@@ -20,29 +46,28 @@ export type RouteId =
   | "strategyLanding"
   | "contact";
 
-/**
- * Route configuration – minimal but explicit.
- */
 export interface RouteConfig {
   id: RouteId;
-  /** Canonical pathname, ALWAYS starting with "/" */
   path: string;
-  /** Optional human label (for nav) */
   label?: string;
 }
 
-/**
- * Brand values and principles
- */
+// =======================================================
+// BRAND CONFIG — UPDATED TO MATCH YOUR ABOUT PAGE
+// =======================================================
+
 export interface BrandConfig {
+  name: string;
+  tagline: string;
+  mission: string;
+
+  /** Values displayed in /about (faith-rooted, strategic, legacy-focused) */
   values: string[];
+
+  /** Optional extended principles */
   principles?: string[];
 }
 
-/**
- * Venture model used across the site (cards, landing pages, etc.).
- * This is what BrandCard expects via `import { Venture } from "@/lib/siteConfig"`.
- */
 export interface Venture {
   initials: string;
   title: string;
@@ -53,43 +78,17 @@ export interface Venture {
   themeColor?: string;
 }
 
-/**
- * Top-level site configuration.
- */
-export interface FullSiteConfig {
-  /** Public base URL (no trailing slash) */
-  siteUrl: string;
-  /** Brand/site title */
-  title: string;
-  /** Site description */
-  description: string;
-  /** Canonical author/owner name */
-  author: string;
-  /** Public contact email */
-  email: string;
-  /** Public contact phone */
-  phone: string;
-  /** Copyright information */
-  copyright?: string;
-  /** Company registration number */
-  companyNumber?: string;
-  /** Optional social links used across the site */
-  socialLinks?: SocialLink[];
-  /** Default author avatar used across blog cards, etc. */
-  authorImage?: string;
-  /** Brand values and principles */
+export interface FullSiteConfig extends BaseSiteConfig {
   brand: BrandConfig;
-  /** Canonical routes */
   routes: Record<RouteId, RouteConfig>;
-  /** Portfolio of ventures under the Abraham of London umbrella */
   ventures: Venture[];
-  /** Method to compose page titles consistently */
   getPageTitle: (pageTitle?: string) => string;
 }
 
-/**
- * Normalise a path – always leading slash, no trailing slash (except "/").
- */
+// =======================================================
+// UTILITY FUNCTIONS
+// =======================================================
+
 function normalisePath(raw: string): string {
   const s = String(raw || "").trim();
   if (!s) return "/";
@@ -98,7 +97,70 @@ function normalisePath(raw: string): string {
   return withLead.replace(/\/+$/u, "");
 }
 
-// --------- URL CONSTANTS (BROWSER-SAFE) -------------------------------------
+export function getRoutePath(id: RouteId): string {
+  const cfg = siteConfig.routes[id];
+  if (!cfg) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[siteConfig] Unknown route id: ${id}`);
+    }
+    return "/";
+  }
+  return normalisePath(cfg.path);
+}
+
+export function internalHref(target: RouteId | string): string {
+  if (typeof target === "string" && target in siteConfig.routes) {
+    return getRoutePath(target as RouteId);
+  }
+
+  if (typeof target === "string") {
+    if (
+      target.startsWith("/") ||
+      target.startsWith("#") ||
+      target.startsWith("mailto:") ||
+      target.startsWith("tel:")
+    ) {
+      return target;
+    }
+    return normalisePath(`/${target}`);
+  }
+
+  return getRoutePath(target);
+}
+
+export function absUrl(path: string | RouteId): string {
+  const href =
+    typeof path === "string" ? internalHref(path) : getRoutePath(path);
+  if (/^https?:\/\//iu.test(href)) return href;
+  if (
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return href;
+  }
+  return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
+}
+
+export function isActiveRoute(
+  currentPath: string,
+  target: RouteId | string
+): boolean {
+  const targetPath = internalHref(target);
+  const normalizedCurrent = normalisePath(currentPath);
+  if (targetPath === "/") return normalizedCurrent === "/";
+  return normalizedCurrent.startsWith(targetPath);
+}
+
+export function getPageTitle(pageTitle?: string): string {
+  const base = siteConfig.title || "Abraham of London";
+  if (!pageTitle || typeof pageTitle !== "string") return base;
+  return `${pageTitle} | ${base}`;
+}
+
+// =======================================================
+// CONSTANTS
+// =======================================================
 
 const PUBLIC_SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org"
@@ -115,12 +177,38 @@ const INNOVATEHUB_URL =
   process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL ||
   "https://innovatehub.abrahamoflondon.org";
 
-// --------- PRIMARY CONFIG OBJECT --------------------------------------------
+const defaultSocialLinks: SocialLink[] = [
+  {
+    href: "https://www.linkedin.com/in/seunadaramola",
+    label: "LinkedIn",
+    kind: "linkedin",
+    external: true,
+  },
+  {
+    href: "https://x.com/abrahamoflondon",
+    label: "X (Twitter)",
+    kind: "twitter",
+    external: true,
+  },
+  {
+    href: "https://medium.com/@seunadaramola",
+    label: "Medium",
+    kind: "medium",
+    external: true,
+  },
+  {
+    href: "https://github.com/AbrahamofLondon",
+    label: "GitHub",
+    kind: "github",
+    external: true,
+  },
+];
 
-/**
- * Single source of truth for site identity + routes + ventures.
- */
-export const siteConfig: FullSiteConfig & SiteConfig = {
+// =======================================================
+// FINAL SITE CONFIG (DROP-IN)
+// =======================================================
+
+export const siteConfig: FullSiteConfig = {
   siteUrl: PUBLIC_SITE_URL,
   title: "Abraham of London",
   description:
@@ -132,89 +220,56 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
   copyright: `© ${new Date().getFullYear()} Abraham of London. All rights reserved.`,
   authorImage: "/assets/images/profile-portrait.webp",
 
-  socialLinks: [
-    ...defaultSocialLinks,
-    {
-      href: "https://github.com/Abrahamo",
-      label: "GitHub",
-      kind: "github",
-      external: true,
-    },
-    {
-      href: "https://medium.com/@seunadaramola",
-      label: "Medium",
-      kind: "medium",
-      external: true,
-    },
-  ],
+  contact: {
+    email: "info@abrahamoflondon.org",
+    phone: "+44 20 8622 5909",
+  },
 
+  seo: {
+    title: "Abraham of London",
+    description:
+      "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders who refuse to outsource responsibility.",
+  },
+
+  socialLinks: defaultSocialLinks,
+
+  // =====================================================
+  // UPDATED BRAND BLOCK — matches About page precisely
+  // =====================================================
   brand: {
+    name: "Abraham of London",
+    tagline: "Building Fathers, Founders & Faithful Leaders",
+    mission:
+      "Equipping serious men with faith-rooted strategy, tools, and frameworks for intentional fatherhood, disciplined leadership, and generational legacy.",
+
     values: [
-      "Excellence in every detail",
-      "Innovation that matters",
-      "Integrity above all",
-      "Collaboration for impact",
-      "Continuous learning and growth",
+      "Faith-rooted leadership",
+      "Strategic discipline",
+      "Generational thinking",
+      "Community focus",
+      "Excellence in execution",
+      "Sustainable impact",
     ],
+
     principles: [
-      "Quality over quantity",
-      "User-centric design",
-      "Sustainable business practices",
-      "Transparent communication",
+      "Legacy over noise",
+      "Standards before sensations",
+      "Execution above excuses",
+      "Wisdom before ambition",
     ],
   },
 
   routes: {
-    home: {
-      id: "home",
-      path: "/",
-      label: "Home",
-    },
-    about: {
-      id: "about",
-      path: "/about",
-      label: "About",
-    },
-    blogIndex: {
-      id: "blogIndex",
-      path: "/blog",
-      label: "Insights",
-    },
-    contentIndex: {
-      id: "contentIndex",
-      path: "/content",
-      label: "All Content",
-    },
-    booksIndex: {
-      id: "booksIndex",
-      path: "/books",
-      label: "Books",
-    },
-    canonIndex: {
-      id: "canonIndex",
-      path: "/canon",
-      label: "The Canon",
-    },
-    ventures: {
-      id: "ventures",
-      path: "/ventures",
-      label: "Ventures",
-    },
-    downloadsIndex: {
-      id: "downloadsIndex",
-      path: "/downloads",
-      label: "Downloads",
-    },
-    strategyLanding: {
-      id: "strategyLanding",
-      path: "/strategy",
-      label: "Strategy",
-    },
-    contact: {
-      id: "contact",
-      path: "/contact",
-      label: "Contact",
-    },
+    home: { id: "home", path: "/", label: "Home" },
+    about: { id: "about", path: "/about", label: "About" },
+    blogIndex: { id: "blogIndex", path: "/blog", label: "Insights" },
+    contentIndex: { id: "contentIndex", path: "/content", label: "All Content" },
+    booksIndex: { id: "booksIndex", path: "/books", label: "Books" },
+    canonIndex: { id: "canonIndex", path: "/canon", label: "The Canon" },
+    ventures: { id: "ventures", path: "/ventures", label: "Ventures" },
+    downloadsIndex: { id: "downloadsIndex", path: "/downloads", label: "Downloads" },
+    strategyLanding: { id: "strategyLanding", path: "/strategy", label: "Strategy" },
+    contact: { id: "contact", path: "/contact", label: "Contact" },
   },
 
   ventures: [
@@ -225,14 +280,13 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
         "Board-level advisory, operating systems, and market-entry strategy for Africa-focused founders, boards, and institutions.",
       href: ALOMARADA_URL,
       cta: "Visit Alomarada.com",
-      muted: false,
       themeColor: "#0b2e1f",
     },
     {
       initials: "EL",
       title: "EndureLuxe",
       description:
-        "Durable luxury performance gear for people who train, build, and endure – without compromising on quality or aesthetics.",
+        "Durable luxury performance gear for people who train, build, and endure — without compromising quality or aesthetics.",
       href: ENDURELUXE_URL,
       cta: "Explore EndureLuxe",
       muted: true,
@@ -245,97 +299,13 @@ export const siteConfig: FullSiteConfig & SiteConfig = {
         "Tools, cohorts, and hands-on support for builders who want to test ideas, ship value, and stay accountable.",
       href: INNOVATEHUB_URL,
       cta: "Visit InnovateHub",
-      muted: false,
       themeColor: "#0b2e1f",
     },
   ],
 
-  getPageTitle: (pageTitle?: string): string => {
+  getPageTitle: (pageTitle?: string) => {
     const base = "Abraham of London";
     if (!pageTitle || typeof pageTitle !== "string") return base;
     return `${pageTitle} | ${base}`;
   },
 };
-
-// --------- HELPERS ----------------------------------------------------------
-
-/** Look up the canonical path for a given route id. */
-export function getRoutePath(id: RouteId): string {
-  const cfg = siteConfig.routes[id];
-  if (!cfg) {
-    if (process.env.NODE_ENV !== "production") {
-      // Fail loudly in dev so we don't ship broken links.
-      // eslint-disable-next-line no-console
-      console.warn(`[siteConfig] Unknown route id: ${id as string}`);
-    }
-    return "/";
-  }
-  return normalisePath(cfg.path);
-}
-
-/** Build an internal href from either a route id or a raw path. */
-export function internalHref(target: RouteId | string): string {
-  // Handle RouteId case first
-  if (typeof target === "string" && target in siteConfig.routes) {
-    return getRoutePath(target as RouteId);
-  }
-
-  // Handle string paths
-  if (typeof target === "string") {
-    // If it's already a proper path, normalize it
-    if (
-      target.startsWith("/") ||
-      target.startsWith("#") ||
-      target.startsWith("mailto:") ||
-      target.startsWith("tel:")
-    ) {
-      return target;
-    }
-    // Otherwise treat as path fragment
-    return normalisePath(`/${target}`);
-  }
-
-  // Handle RouteId directly
-  return getRoutePath(target);
-}
-
-/** Build an absolute URL safely (for OG tags, emails, sitemaps, etc.). */
-export function absUrl(path: string | RouteId): string {
-  const href =
-    typeof path === "string" ? internalHref(path) : getRoutePath(path);
-  if (/^https?:\/\//iu.test(href)) return href;
-  if (
-    href.startsWith("#") ||
-    href.startsWith("mailto:") ||
-    href.startsWith("tel:")
-  ) {
-    return href;
-  }
-  return `${siteConfig.siteUrl}${href === "/" ? "" : href}`;
-}
-
-/** Check if a route is active (for navigation highlighting) */
-export function isActiveRoute(
-  currentPath: string,
-  target: RouteId | string
-): boolean {
-  const targetPath = internalHref(target);
-  const normalizedCurrent = normalisePath(currentPath);
-
-  if (targetPath === "/") {
-    return normalizedCurrent === "/";
-  }
-
-  return normalizedCurrent.startsWith(targetPath);
-}
-
-/** Compose a page title consistently. */
-export function getPageTitle(pageTitle?: string): string {
-  const base = siteConfig.title || "Abraham of London";
-  if (!pageTitle || typeof pageTitle !== "string") return base;
-  return `${pageTitle} | ${base}`;
-}
-
-// Re-export types for convenience
-export type { SocialLink };
-export type { SiteConfig as BaseSiteConfig };

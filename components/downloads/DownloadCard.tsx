@@ -14,6 +14,7 @@ type DownloadCardProps = {
   // Optional metadata
   category?: string | null;
   size?: string;
+  featured?: boolean;
 
   className?: string;
 };
@@ -32,6 +33,7 @@ export default function DownloadCard({
   fileHref,
   category,
   size,
+  featured = false,
   className,
 }: DownloadCardProps) {
   const detailHref = `/downloads/${slug}`;
@@ -41,11 +43,23 @@ export default function DownloadCard({
   return (
     <article
       className={clsx(
-        "group relative overflow-hidden rounded-xl border border-lightGrey bg-white shadow-card transition hover:shadow-cardHover",
+        "group relative overflow-hidden rounded-xl border bg-white shadow-card transition-all duration-300",
         "flex flex-col",
+        featured 
+          ? "border-amber-200 hover:shadow-xl hover:border-amber-300" 
+          : "border-lightGrey hover:shadow-cardHover",
         className
       )}
     >
+      {/* Featured Badge */}
+      {featured && (
+        <div className="absolute top-3 left-3 z-10">
+          <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white shadow-sm">
+            Featured
+          </span>
+        </div>
+      )}
+
       {/* Image Link Block */}
       <Link
         href={detailHref}
@@ -59,15 +73,32 @@ export default function DownloadCard({
             alt={`Cover image for ${title}`}
             fill
             sizes="(max-width: 768px) 50vw, 300px"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className={clsx(
+              "object-cover transition-transform duration-300",
+              featured 
+                ? "group-hover:scale-[1.03]" 
+                : "group-hover:scale-[1.02]"
+            )}
             priority={false}
           />
+          {/* Gradient overlay for featured cards */}
+          {featured && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+          )}
         </div>
       </Link>
 
-      <div className="p-4 flex flex-col flex-grow">
+      <div className={clsx(
+        "flex flex-col flex-grow",
+        featured ? "p-6" : "p-4"
+      )}>
         {/* Title and Detail Link */}
-        <h3 className="font-serif text-lg font-semibold leading-snug text-deepCharcoal">
+        <h3 className={clsx(
+          "font-serif leading-snug text-deepCharcoal",
+          featured 
+            ? "text-xl font-semibold" 
+            : "text-lg font-semibold"
+        )}>
           <Link
             href={detailHref}
             prefetch={false}
@@ -78,9 +109,14 @@ export default function DownloadCard({
         </h3>
 
         {/* Metadata */}
-        <div className="mt-1 flex items-center text-xs text-gray-600 space-x-2">
+        <div className="mt-2 flex items-center text-xs text-gray-600 space-x-2">
           {category && (
-            <span className="rounded-full bg-warmWhite px-2 py-0.5">
+            <span className={clsx(
+              "rounded-full px-2 py-0.5",
+              featured 
+                ? "bg-amber-100 text-amber-800" 
+                : "bg-warmWhite text-gray-700"
+            )}>
               {category}
             </span>
           )}
@@ -93,16 +129,27 @@ export default function DownloadCard({
 
         {/* Excerpt */}
         {excerpt && (
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700 flex-grow">
+          <p className={clsx(
+            "line-clamp-3 leading-relaxed text-gray-700 flex-grow",
+            featured ? "mt-3 text-sm" : "mt-2 text-sm"
+          )}>
             {excerpt}
           </p>
         )}
 
         {/* CTA Buttons */}
-        <div className="mt-4 flex gap-3 flex-shrink-0">
+        <div className={clsx(
+          "flex gap-3 flex-shrink-0",
+          featured ? "mt-5" : "mt-4"
+        )}>
           <Link
             href={detailHref}
-            className="inline-flex items-center rounded-full border border-lightGrey px-3 py-1.5 text-sm font-medium text-deepCharcoal transition-colors hover:bg-warmWhite"
+            className={clsx(
+              "inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+              featured
+                ? "border-amber-300 text-deepCharcoal hover:bg-amber-50 hover:border-amber-400"
+                : "border-lightGrey text-deepCharcoal hover:bg-warmWhite"
+            )}
             prefetch={false}
             scroll={true}
           >
@@ -115,7 +162,12 @@ export default function DownloadCard({
               download
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center rounded-full bg-forest px-4 py-1.5 text-sm font-semibold text-cream transition-colors hover:bg-deepCharcoal"
+              className={clsx(
+                "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold text-cream transition-colors",
+                featured
+                  ? "bg-amber-600 hover:bg-amber-700"
+                  : "bg-forest hover:bg-deepCharcoal"
+              )}
             >
               Download
             </a>

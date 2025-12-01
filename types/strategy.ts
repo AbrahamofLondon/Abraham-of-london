@@ -1,16 +1,30 @@
 // types/strategy.ts
-// Minimal placeholders so imports compile. Flesh out when strategy content is wired.
 
-export type StrategyDoc = {
+export interface StrategyMeta {
   slug: string;
   title: string;
-  date?: string;
-  summary?: string;
-  tags?: string[];
-};
 
-export type StrategyLink = {
-  href: string;
-  label: string;
-  sub?: string;
-};
+  // Description / body meta
+  excerpt?: string;
+  description?: string;
+  readTime?: string;
+
+  // Classification
+  category?: string;         // e.g. "Market Entry", "Governance"
+  tags?: string[];
+  stage?: string;            // e.g. "concept", "playbook", "field-notes"
+
+  // Meta
+  author?: string;
+  date?: string;
+  draft?: boolean;
+  featured?: boolean;
+
+  // Media
+  coverImage?: string | { src?: string } | null;
+  heroImage?: string;
+
+  // Links / CTAs
+  ctaLabel?: string;
+  ctaHref?: string;
+}

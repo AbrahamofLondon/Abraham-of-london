@@ -6,131 +6,141 @@ import type {
   InferGetStaticPropsType,
 } from "next";
 import Head from "next/head";
-import { MDXRemote } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-import {
-  getAllContent,
-  getContentBySlug,
-  type RawContentEntry,
-} from "@/lib/mdx";
+import { getAllContent, getContentBySlug } from "@/lib/mdx";
 import type { PostMeta } from "@/types/post";
 
-const COLLECTION = "strategy";
+// Helper function to remove undefined values from an object
+function removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] !== undefined) {
+      result[key as keyof T] = obj[key];
+    }
+  });
+  return result;
+}
 
-type Props = {
-  source: Awaited<ReturnType<typeof serialize>>;
-  frontmatter: PostMeta;
-};
-
-// ------------------------------------------------------------------
-// getStaticPaths
-// ------------------------------------------------------------------
-export const getStaticPaths: GetStaticPaths = async () => {
-  const allContent = getAllContent(COLLECTION);
-
-  const paths =
-    allContent?.map((item) => ({
-      params: { slug: String(item.slug).toLowerCase() },
-    })) ?? [];
-
-  return { paths, fallback: false };
-};
-
-// ------------------------------------------------------------------
-// getStaticProps
-// ------------------------------------------------------------------
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slugParam = params?.slug;
-  const slug =
-    typeof slugParam === "string"
-      ? slugParam
-      : Array.isArray(slugParam)
-        ? slugParam[0]
-        : "";
-
-  if (!slug) return { notFound: true };
-
-  const entry = getContentBySlug(COLLECTION, slug, {
-    withContent: true,
-  }) as RawContentEntry | null;
-
-  if (!entry || !entry.content) {
-    return { notFound: true };
-  }
-
-  const { content, ...rawFrontmatter } = entry;
-
-  const frontmatter = JSON.parse(JSON.stringify(rawFrontmatter)) as PostMeta;
-  const mdxSource = await serialize(content, { scope: frontmatter });
-
-  return {
-    props: {
-      source: mdxSource,
-      frontmatter,
-    },
-    revalidate: 3600,
-  };
-};
-
-// ------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // Page Component
-// ------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
 export default function StrategyPage({
-  source,
   frontmatter,
+  mdxSource,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
-  const title = frontmatter.title ?? "Strategy Note";
-  const description = frontmatter.excerpt ?? frontmatter.description ?? title;
+  const safeFrontmatter = frontmatter ?? ({} as PostMeta);
+  const title = safeFrontmatter.title ?? "Strategy Note";
+
+  // Safe local narrow for description
+  const fm = safeFrontmatter as PostMeta & { description?: string | null };
+  const description = fm.excerpt ?? fm.description ?? title;
 
   return (
     <Layout title={title} className="bg-charcoal">
       <Head>
-        <title>{title} | Abraham of London</title>
-        {description && <meta name="description" content={description} />}
+        <title>{title}</title>
+        <meta name="description" content={description} />
       </Head>
 
-      <main>
-        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          <header className="mb-8">
-            {frontmatter.date && (
-              <p className="text-sm text-gray-400">
-                {new Date(frontmatter.date).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </p>
-            )}
-            <h1 className="mt-2 font-serif text-3xl font-light text-cream sm:text-4xl">
-              {title}
-            </h1>
-            {frontmatter.excerpt && (
-              <p className="mt-3 max-w-2xl text-base text-gray-300">
-                {frontmatter.excerpt}
-              </p>
-            )}
-          </header>
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20 text-cream">
+        <article className="prose prose-invert prose-lg max-w-none">
+          <h1 className="mb-8 font-serif text-4xl font-semibold text-cream">
+            {title}
+          </h1>
 
-          <div
-            className="
-              prose prose-lg max-w-none
-              prose-headings:font-serif prose-headings:text-cream
-              prose-p:text-gray-200 prose-p:leading-relaxed
-              prose-strong:text-cream prose-strong:font-semibold
-              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-gray-200 prose-ol:text-gray-200
-              prose-blockquote:border-l-softGold prose-blockquote:text-gray-100
-              prose-hr:border-t border-white/10
-              prose-img:rounded-xl prose-img:shadow-lg
-            "
-          >
-            <MDXRemote {...source} components={mdxComponents} />
-          </div>
+          {safeFrontmatter.date && (
+            <p className="mb-6 text-sm text-softGold/70">
+              {new Date(safeFrontmatter.date).toLocaleDateString("en-GB", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
+          )}
+
+          <MDXRemote {...mdxSource} components={mdxComponents} />
         </article>
       </main>
     </Layout>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Static Generation
+// ---------------------------------------------------------------------------
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = getAllContent("strategy") ?? [];
+
+  // Exclude placeholder / sample docs from being built
+  const paths =
+    posts
+      .filter(
+        (p) =>
+          p &&
+          typeof p.slug === "string" &&
+          p.slug !== "sample-strategy" && // <- kill the placeholder
+          !p.draft
+      )
+      .map((p) => ({
+        params: { slug: p.slug },
+      })) ?? [];
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps<{
+  frontmatter: PostMeta;
+  mdxSource: MDXRemoteSerializeResult;
+}> = async ({ params }) => {
+  const slug = String(params?.slug);
+
+  // Hard guard: never build the sample page
+  if (!slug || slug === "sample-strategy") {
+    return { notFound: true };
+  }
+
+  const file = getContentBySlug("strategy", slug);
+
+  if (!file) {
+    return { notFound: true };
+  }
+
+  const rawFrontmatter = (file.meta ?? {}) as PostMeta;
+
+  // Clean the frontmatter object to remove undefined values
+  const cleanFrontmatter = removeUndefined({
+    title: rawFrontmatter.title,
+    slug: rawFrontmatter.slug ?? slug,
+    excerpt: rawFrontmatter.excerpt,
+    description: rawFrontmatter.description,
+    date: rawFrontmatter.date,
+    tags: rawFrontmatter.tags ?? [],
+    draft: rawFrontmatter.draft ?? false,
+    featured: rawFrontmatter.featured ?? false,
+    // add other PostMeta fields here if you use them
+  });
+
+  // Build a TS-safe scope object for MDX
+  const scope: Record<string, unknown> = { ...cleanFrontmatter };
+
+  const mdxSource = await serialize(file.content, {
+    scope,
+  });
+
+  return {
+    props: {
+      frontmatter: cleanFrontmatter as PostMeta,
+      mdxSource,
+    },
+    revalidate: 60,
+  };
+};

@@ -1,5 +1,5 @@
 // scripts/generate-ultimate-purpose-of-man-pdf.tsx
-import React from "react";
+import * as React from "react";
 import fs from "node:fs";
 import {
   Document,
@@ -10,7 +10,8 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 
-// Create styles
+// ---------------- Styles ----------------
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -29,8 +30,9 @@ const styles = StyleSheet.create({
   },
 });
 
-// Create Document Component
-const MyDocument = () => (
+// ---------------- Document Component ----------------
+
+const MyDocument: React.FC = () => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
@@ -44,21 +46,26 @@ const MyDocument = () => (
   </Document>
 );
 
-// Main function to generate PDF
-async function generatePdf() {
+// ---------------- Main generator ----------------
+
+async function generatePdf(): Promise<void> {
   console.log("[pdf] Starting PDF generation...");
 
-  const outputPath = "./public/downloads/ultimate-purpose-of-man.pdf";
+  const outputDir = "./public/downloads";
+  const outputPath = `${outputDir}/ultimate-purpose-of-man.pdf`;
 
   try {
     // Ensure the output directory exists
-    const dir = "./public/downloads";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
     }
 
     // Render the PDF to a buffer and save it
-    const buffer = await pdf(<MyDocument />).toBuffer();
+    const instance = pdf(<MyDocument />);
+
+    // Typings for @react-pdf/renderer are looser; at runtime this is a Buffer.
+    const buffer = (await instance.toBuffer()) as unknown as Buffer;
+
     fs.writeFileSync(outputPath, buffer);
 
     console.log("[pdf] PDF generated successfully at:", outputPath);
@@ -69,4 +76,4 @@ async function generatePdf() {
 }
 
 // Run the generation
-generatePdf();
+void generatePdf();

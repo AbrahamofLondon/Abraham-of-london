@@ -1,3 +1,4 @@
+// pages/about.tsx
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -15,10 +16,14 @@ import {
   Star,
   Award,
 } from "lucide-react";
+
 import Layout from "@/components/Layout";
 import { siteConfig } from "@/lib/siteConfig";
 
-// Reuse your existing variants
+// ---------------------------------------------------------------------------
+// Animation variants
+// ---------------------------------------------------------------------------
+
 const containerVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
@@ -42,6 +47,10 @@ const itemVariants = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Types & data
+// ---------------------------------------------------------------------------
+
 interface Achievement {
   title: string;
   description: string;
@@ -49,6 +58,53 @@ interface Achievement {
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
+
+const achievements: Achievement[] = [
+  {
+    title: "Founded Fathering Without Fear Movement",
+    description:
+      "Launched a global initiative helping men embrace intentional fatherhood and legacy building.",
+    year: 2023,
+    href: "/brands/fathering-without-fear",
+    icon: Users,
+  },
+  {
+    title: "Published Entrepreneur Operating System",
+    description:
+      "Developed strategic operating frameworks used by founders and business leaders.",
+    year: 2023,
+    href: "/downloads/entrepreneur-operating-pack",
+    icon: Target,
+  },
+  {
+    title: "Established Brotherhood Covenant Network",
+    description:
+      "Built accountability structures that foster authentic brotherhood among Christian men.",
+    year: 2022,
+    href: "/downloads/brotherhood-covenant",
+    icon: Shield,
+  },
+  {
+    title: "Created Family Altar Liturgy",
+    description:
+      "Designed practical tools for integrating faith into daily family rhythms.",
+    year: 2022,
+    href: "/downloads/family-altar-liturgy",
+    icon: BookOpen,
+  },
+  {
+    title: "Launched Strategic Leadership Playbook",
+    description:
+      "Authored leadership frameworks for executives and organisational leaders.",
+    year: 2021,
+    href: "/downloads/leadership-playbook",
+    icon: Award,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 
 const AboutPage: NextPage = () => {
   const [isDark, setIsDark] = React.useState(true);
@@ -114,48 +170,11 @@ const AboutPage: NextPage = () => {
     ? "border-white/20 bg-transparent text-cream hover:bg-white/10"
     : "border-lightGrey bg-white text-ink hover:bg-warmWhite";
 
-  const achievements: Achievement[] = [
-    {
-      title: "Founded Fathering Without Fear Movement",
-      description:
-        "Launched a global initiative helping thousands of men embrace intentional fatherhood and legacy building",
-      year: 2023,
-      href: "/brands/fathering-without-fear",
-      icon: Users,
-    },
-    {
-      title: "Published Entrepreneur Operating System",
-      description:
-        "Developed comprehensive strategic frameworks used by 200+ founders and business leaders",
-      year: 2023,
-      href: "/downloads/entrepreneur-operating-pack",
-      icon: Target,
-    },
-    {
-      title: "Established Brotherhood Covenant Network",
-      description:
-        "Built accountability structures fostering authentic brotherhood among Christian men and leaders",
-      year: 2022,
-      href: "/downloads/brotherhood-covenant",
-      icon: Shield,
-    },
-    {
-      title: "Created Family Altar Liturgy",
-      description:
-        "Developed practical tools for integrating faith into daily family rhythms, used by hundreds of households",
-      year: 2022,
-      href: "/downloads/family-altar-liturgy",
-      icon: BookOpen,
-    },
-    {
-      title: "Launched Strategic Leadership Playbook",
-      description:
-        "Authored comprehensive leadership frameworks for executives and organizational leaders",
-      year: 2021,
-      href: "/downloads/leadership-playbook",
-      icon: Award,
-    },
-  ];
+    // Brand values from siteConfig (tolerant of older SiteConfig typings)
+  const brandCfg = (siteConfig as unknown as { brand?: { values?: string[] } }).brand;
+  const brandValues = brandCfg?.values ?? [];
+  const leftValues = brandValues.slice(0, Math.ceil(brandValues.length / 2));
+  const rightValues = brandValues.slice(Math.ceil(brandValues.length / 2));
 
   return (
     <Layout title="About">
@@ -186,8 +205,8 @@ const AboutPage: NextPage = () => {
 
       <div className={shellClass}>
         {/* Header with theme toggle */}
-        <div className="max-w-6xl mx-auto px-4 pt-12">
-          <div className="flex items-start justify-between gap-4 mb-12">
+        <div className="mx-auto max-w-6xl px-4 pt-12">
+          <div className="mb-12 flex items-start justify-between gap-4">
             <div>
               <p
                 className={`text-sm font-semibold uppercase tracking-[0.2em] ${accentTextClass}`}
@@ -196,7 +215,6 @@ const AboutPage: NextPage = () => {
               </p>
             </div>
 
-            {/* Theme Toggle */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -224,9 +242,13 @@ const AboutPage: NextPage = () => {
 
         {/* Hero Section */}
         <section
-          className={`py-20 ${isDark ? "bg-gradient-to-b from-black to-deepCharcoal" : "bg-gradient-to-b from-warmWhite to-cream"}`}
+          className={`py-20 ${
+            isDark
+              ? "bg-gradient-to-b from-black to-deepCharcoal"
+              : "bg-gradient-to-b from-warmWhite to-cream"
+          }`}
         >
-          <div className="max-w-6xl mx-auto px-4">
+          <div className="mx-auto max-w-6xl px-4">
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -235,16 +257,16 @@ const AboutPage: NextPage = () => {
             >
               <motion.h1
                 variants={itemVariants}
-                className={`font-serif text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 ${primaryTextClass}`}
+                className={`mb-6 font-serif text-4xl font-semibold md:text-5xl lg:text-6xl ${primaryTextClass}`}
               >
                 Building Fathers,
-                <span className={`block mt-4 ${accentTextClass}`}>
-                  Founders & Faithful Leaders
+                <span className={`mt-4 block ${accentTextClass}`}>
+                  Founders &amp; Faithful Leaders
                 </span>
               </motion.h1>
               <motion.p
                 variants={itemVariants}
-                className={`text-xl max-w-3xl mx-auto leading-relaxed ${secondaryTextClass}`}
+                className={`mx-auto max-w-3xl text-xl leading-relaxed ${secondaryTextClass}`}
               >
                 Equipping serious men with faith-rooted strategy, tools, and
                 frameworks for intentional fatherhood, disciplined leadership,
@@ -255,16 +277,18 @@ const AboutPage: NextPage = () => {
         </section>
 
         {/* Bio & Portrait Section */}
-        <section className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}>
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section
+          className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}
+        >
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="grid items-center gap-12 md:grid-cols-2">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
               >
                 <h2
-                  className={`font-serif text-3xl md:text-4xl font-semibold mb-6 ${primaryTextClass}`}
+                  className={`mb-6 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
                 >
                   Our Purpose
                 </h2>
@@ -274,17 +298,17 @@ const AboutPage: NextPage = () => {
                   <p>
                     Abraham of London exists to equip serious men and builders
                     with faith-rooted strategy, tools, and frameworks for
-                    intentional fatherhood, disciplined leadership, and lasting
-                    legacy.
+                    intentional fatherhood, disciplined leadership, and
+                    generational legacy.
                   </p>
                   <p>
-                    In a world that often encourages drift and compromise, we
-                    provide language, structure, and practical resources to help
-                    you build with clarity, courage, and conviction.
+                    In a culture that celebrates drift and distraction, we
+                    provide language, structure, and practical resources so you
+                    can build with clarity, courage, and conviction.
                   </p>
                   <p>
                     Every strategy, tool, and framework is built on conservative
-                    Christian conviction. We believe true leadership starts with
+                    Christian conviction. True leadership starts with
                     submission to divine wisdom.
                   </p>
                 </div>
@@ -312,26 +336,36 @@ const AboutPage: NextPage = () => {
                 className="relative"
               >
                 <div
-                  className={`relative rounded-2xl overflow-hidden shadow-2xl ${isDark ? "ring-1 ring-white/10" : "ring-1 ring-lightGrey"}`}
+                  className={`relative overflow-hidden rounded-2xl shadow-2xl ${
+                    isDark
+                      ? "ring-1 ring-white/10"
+                      : "ring-1 ring-lightGrey"
+                  }`}
                 >
                   <Image
                     src="/assets/images/abraham-portrait.webp"
                     alt="Abraham of London - Founder and Strategic Leader"
                     width={600}
                     height={800}
-                    className="w-full h-auto"
+                    className="h-auto w-full"
                     priority
                   />
                   <div
-                    className={`absolute inset-0 bg-gradient-to-t ${isDark ? "from-black/40 to-transparent" : "from-white/20 to-transparent"}`}
+                    className={`absolute inset-0 bg-gradient-to-t ${
+                      isDark
+                        ? "from-black/40 to-transparent"
+                        : "from-white/20 to-transparent"
+                    }`}
                   />
                 </div>
                 <div
-                  className={`absolute -bottom-6 -left-6 px-6 py-3 rounded-lg shadow-lg ${isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"}`}
+                  className={`absolute -bottom-6 -left-6 rounded-lg px-6 py-3 shadow-lg ${
+                    isDark ? "bg-softGold text-deepCharcoal" : "bg-forest text-cream"
+                  }`}
                 >
                   <p className="font-semibold">Abraham of London</p>
                   <p className="text-sm opacity-90">
-                    Founder & Strategic Leader
+                    Founder &amp; Strategic Leader
                   </p>
                 </div>
               </motion.div>
@@ -340,26 +374,32 @@ const AboutPage: NextPage = () => {
         </section>
 
         {/* Key Achievements */}
-        <section className={`py-16 ${isDark ? "bg-slate-900" : "bg-slate-50"}`}>
-          <div className="max-w-6xl mx-auto px-4">
+        <section
+          className={`py-16 ${
+            isDark ? "bg-slate-900" : "bg-slate-50"
+          }`}
+        >
+          <div className="mx-auto max-w-6xl px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              className="mb-12 text-center"
             >
               <h2
-                className={`font-serif text-3xl md:text-4xl font-semibold mb-4 ${primaryTextClass}`}
+                className={`mb-4 font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
               >
                 Strategic Milestones
               </h2>
-              <p className={`text-xl max-w-2xl mx-auto ${secondaryTextClass}`}>
-                Building tools and communities that empower men to lead with
-                conviction and build lasting legacy
+              <p
+                className={`mx-auto max-w-2xl text-xl ${secondaryTextClass}`}
+              >
+                Building tools and communities that help men lead with
+                conviction and build lasting legacy.
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {achievements.map((achievement, index) => {
                 const IconComponent = achievement.icon;
                 return (
@@ -371,7 +411,9 @@ const AboutPage: NextPage = () => {
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
                     <div
-                      className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                      className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl ${
+                        isDark ? "bg-softGold/10" : "bg-forest/10"
+                      }`}
                     >
                       <IconComponent
                         className={
@@ -382,17 +424,17 @@ const AboutPage: NextPage = () => {
                       />
                     </div>
                     <div
-                      className={`text-sm font-semibold mb-2 ${accentTextClass}`}
+                      className={`mb-2 text-sm font-semibold ${accentTextClass}`}
                     >
                       {achievement.year}
                     </div>
                     <h3
-                      className={`font-serif text-xl font-semibold mb-3 ${primaryTextClass}`}
+                      className={`mb-3 font-serif text-xl font-semibold ${primaryTextClass}`}
                     >
                       {achievement.title}
                     </h3>
                     <p
-                      className={`text-sm leading-relaxed mb-4 ${secondaryTextClass}`}
+                      className={`mb-4 text-sm leading-relaxed ${secondaryTextClass}`}
                     >
                       {achievement.description}
                     </p>
@@ -400,7 +442,7 @@ const AboutPage: NextPage = () => {
                       href={achievement.href}
                       className={`inline-flex items-center text-sm font-semibold hover:underline ${accentTextClass}`}
                     >
-                      Learn more <ArrowRight className="h-3 w-3 ml-1" />
+                      Learn more <ArrowRight className="ml-1 h-3 w-3" />
                     </Link>
                   </motion.div>
                 );
@@ -410,19 +452,21 @@ const AboutPage: NextPage = () => {
         </section>
 
         {/* Mission & Values */}
-        <section className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}>
-          <div className="max-w-4xl mx-auto px-4">
+        <section
+          className={`py-16 ${isDark ? "bg-deepCharcoal" : "bg-white"}`}
+        >
+          <div className="mx-auto max-w-4xl px-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`font-serif text-3xl md:text-4xl font-semibold text-center mb-12 ${primaryTextClass}`}
+              className={`mb-12 text-center font-serif text-3xl font-semibold md:text-4xl ${primaryTextClass}`}
             >
               Our Guiding Principles
             </motion.h2>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
-                {siteConfig.brand.values.slice(0, 3).map((value, index) => (
+                {leftValues.map((value, index) => (
                   <motion.div
                     key={value}
                     initial={{ opacity: 0, x: -20 }}
@@ -430,9 +474,11 @@ const AboutPage: NextPage = () => {
                     transition={{ delay: index * 0.1 }}
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="mb-3 flex items-center gap-3">
                       <div
-                        className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                        className={`rounded-lg p-2 ${
+                          isDark ? "bg-softGold/10" : "bg-forest/10"
+                        }`}
                       >
                         <Star
                           className={
@@ -450,18 +496,24 @@ const AboutPage: NextPage = () => {
                     </div>
                     <p className={secondaryTextClass}>
                       {value === "Faith-rooted leadership" &&
-                        "Every strategy and framework is built on conservative Christian conviction, believing true leadership starts with submission to divine wisdom."}
+                        "Every strategic decision and framework is anchored in Scripture and conservative Christian conviction."}
                       {value === "Strategic discipline" &&
-                        "We maintain rigorous focus on long-term objectives, avoiding distractions and staying committed to the core mission through disciplined execution."}
+                        "We prioritise focused execution over noise, distraction, and vanity metrics."}
                       {value === "Generational thinking" &&
-                        "Our work extends beyond immediate results to create lasting impact that benefits multiple generations and builds enduring legacy."}
+                        "We build with heirs in mind, not headlines—legacy over trend cycles."}
+                      {![
+                        "Faith-rooted leadership",
+                        "Strategic discipline",
+                        "Generational thinking",
+                      ].includes(value) &&
+                        "This value shapes how we build systems, relationships, and long-term impact."}
                     </p>
                   </motion.div>
                 ))}
               </div>
 
               <div className="space-y-6">
-                {siteConfig.brand.values.slice(3).map((value, index) => (
+                {rightValues.map((value, index) => (
                   <motion.div
                     key={value}
                     initial={{ opacity: 0, x: 20 }}
@@ -469,9 +521,11 @@ const AboutPage: NextPage = () => {
                     transition={{ delay: index * 0.1 }}
                     className={`rounded-2xl p-6 ${cardClass}`}
                   >
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="mb-3 flex items-center gap-3">
                       <div
-                        className={`rounded-lg p-2 ${isDark ? "bg-softGold/10" : "bg-forest/10"}`}
+                        className={`rounded-lg p-2 ${
+                          isDark ? "bg-softGold/10" : "bg-forest/10"
+                        }`}
                       >
                         <Star
                           className={
@@ -489,11 +543,17 @@ const AboutPage: NextPage = () => {
                     </div>
                     <p className={secondaryTextClass}>
                       {value === "Community focus" &&
-                        "We build ecosystems and brotherhoods that support growth, accountability, and shared success rather than individual achievement alone."}
+                        "We build brotherhoods and ecosystems that protect, sharpen, and strengthen men on the journey."}
                       {value === "Excellence in execution" &&
-                        "Every resource is battle-tested and designed for immediate practical application, delivering tangible results in business, family, and leadership."}
+                        "Every resource is built to be battle-tested, not performative—fit for real pressure and real responsibility."}
                       {value === "Sustainable impact" &&
-                        "We prioritize long-term value creation and responsible growth that benefits communities and preserves resources for future generations."}
+                        "We design for durability: spiritually, economically, and relationally, not quick wins."}
+                      {![
+                        "Community focus",
+                        "Excellence in execution",
+                        "Sustainable impact",
+                      ].includes(value) &&
+                        "This value informs how we show up, serve, and steward influence over time."}
                     </p>
                   </motion.div>
                 ))}
@@ -504,13 +564,17 @@ const AboutPage: NextPage = () => {
 
         {/* CTA Section */}
         <section
-          className={`py-16 text-center ${isDark ? "bg-gradient-to-r from-forest to-softGold" : "bg-gradient-to-r from-forest to-forest/90"}`}
+          className={`py-16 text-center ${
+            isDark
+              ? "bg-gradient-to-r from-forest to-softGold"
+              : "bg-gradient-to-r from-forest to-forest/90"
+          }`}
         >
-          <div className="max-w-2xl mx-auto px-4">
+          <div className="mx-auto max-w-2xl px-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl md:text-4xl font-serif font-semibold mb-6 text-white"
+              className="mb-6 font-serif text-3xl font-semibold text-white md:text-4xl"
             >
               Ready to Build With Purpose?
             </motion.h2>
@@ -518,10 +582,10 @@ const AboutPage: NextPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-xl text-white/90 mb-8"
+              className="mb-8 text-xl text-white/90"
             >
-              Join hundreds of men already using these tools to lead with
-              conviction and build lasting legacy.
+              Join men who are choosing conviction over convenience and
+              building families, ventures, and legacies that last.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -531,13 +595,13 @@ const AboutPage: NextPage = () => {
             >
               <Link
                 href="/downloads"
-                className="inline-flex items-center px-8 py-4 bg-white text-deepCharcoal font-semibold rounded-lg hover:bg-slate-100 transition-colors shadow-lg transform hover:-translate-y-0.5"
+                className="inline-flex items-center rounded-lg bg-white px-8 py-4 font-semibold text-deepCharcoal shadow-lg transition-colors hover:-translate-y-0.5 hover:bg-slate-100"
               >
                 Explore Resources
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-deepCharcoal transition-colors transform hover:-translate-y-0.5"
+                className="inline-flex items-center rounded-lg border-2 border-white px-8 py-4 font-semibold text-white transition-colors hover:-translate-y-0.5 hover:bg-white hover:text-deepCharcoal"
               >
                 Start a Conversation
               </Link>

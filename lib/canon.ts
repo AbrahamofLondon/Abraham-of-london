@@ -1,7 +1,7 @@
 // lib/canon.ts
 // Centralised helpers for Canon content (Contentlayer-powered)
 
-import { allCanons, type Canon } from "contentlayer/generated";
+import { allCanons, type Canon } from "../.contentlayer/generated";
 
 // Use the generated Canon type directly
 export type CanonDoc = Canon;
@@ -94,10 +94,11 @@ export function getCanonBySlug(slug: string): CanonDoc | null {
   const normalised = String(slug).trim().toLowerCase();
   return (
     (allCanons as CanonDoc[]).find(
-      (c) => c.slug.toLowerCase() === normalised
+      (c) => c.slug && c.slug.toLowerCase() === normalised
     ) ?? null
   );
 }
 
 // Re-export from server/canon-data
 export * from "./server/canon-data";
+

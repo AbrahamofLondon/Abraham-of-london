@@ -113,6 +113,16 @@ export class RecaptchaError extends Error {
   }
 }
 
+// Type guard for Node-style errors
+type NodeLikeError = Error & { code?: string };
+
+function isNodeLikeError(error: unknown): error is NodeLikeError {
+  return (
+    error instanceof Error &&
+    Object.prototype.hasOwnProperty.call(error, "code")
+  );
+}
+
 // Validate configuration at startup
 function validateConfig(config: RecaptchaConfig): void {
   if (config.enabled && !config.secretKey) {
@@ -192,11 +202,8 @@ export async function verifyRecaptcha(
     const params = new URLSearchParams();
     params.append("secret", config.secretKey);
     params.append("response", token);
-    if (clientIp) {
-      // Basic IP validation
-      if (/^[a-fA-F0-9.:]+$/.test(clientIp)) {
-        params.append("remoteip", clientIp);
-      }
+    if (clientIp && /^[a-fA-F0-9.:]+$/.test(clientIp)) {
+      params.append("remoteip", clientIp);
     }
 
     const response = await fetch(
@@ -222,7 +229,6 @@ export async function verifyRecaptcha(
 
     const data: GoogleRecaptchaResponse = await response.json();
 
-    // Validate response structure
     if (typeof data.success !== "boolean") {
       throw new RecaptchaError("Invalid API response format", "API_FAILURE");
     }
@@ -239,14 +245,12 @@ export async function verifyRecaptcha(
 
     const reasons: string[] = [];
 
-    // Comprehensive security checks
     if (!success) {
       reasons.push("API reported failure");
     }
 
     if (score < config.minScore) {
       reasons.push(`Low score: ${score} < ${config.minScore}`);
-      // Security logging for suspicious activity
       console.warn(
         `Low reCAPTCHA score detected: ${score} from IP: ${clientIp}`
       );
@@ -280,12 +284,10 @@ export async function verifyRecaptcha(
       reasons.push(...errorCodes.map((code) => `API error: ${code}`));
     }
 
-    // Final decision
     if (reasons.length > 0) {
       result.reasons = reasons;
       result.success = false;
 
-      // Security event logging
       console.warn(`reCAPTCHA verification failed: ${reasons.join(", ")}`, {
         clientIp,
         action,
@@ -296,10 +298,8 @@ export async function verifyRecaptcha(
       return result;
     }
 
-    // Success - add token to cache to prevent reuse
     tokenCache.add(token);
 
-    // Log successful verification for audit trail
     console.info(`reCAPTCHA verification successful`, {
       score,
       action,
@@ -310,22 +310,22 @@ export async function verifyRecaptcha(
 
     return result;
   } catch (error: unknown) {
-    // Proper error handling without 'any' type
     if (error instanceof RecaptchaError) {
       throw error;
     }
 
-    if (error instanceof Error) {
-      if (error.name === "AbortError") {
-        throw new RecaptchaError("Verification timeout", "TIMEOUT");
-      }
-
-      if ("code" in error && error.code === "ECONNREFUSED") {
-        throw new RecaptchaError("Network connection failed", "NETWORK_ERROR");
-      }
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new RecaptchaError("Verification timeout", "TIMEOUT");
     }
 
-    // Fallback for unknown errors
+    if (isNodeLikeError(error) && error.code === "ECONNREFUSED") {
+      throw new RecaptchaError(
+        "Network connection failed",
+        "NETWORK_ERROR",
+        error.message
+      );
+    }
+
     throw new RecaptchaError(
       "Verification failed",
       "UNKNOWN",
@@ -344,7 +344,6 @@ export async function isRecaptchaValid(
     const result = await verifyRecaptcha(token, expectedAction, clientIp);
     return result.success;
   } catch (error: unknown) {
-    // Fail secure - return false on any error
     console.error("reCAPTCHA validation error:", error);
     return false;
   }
@@ -365,9 +364,8 @@ export async function checkRecaptchaHealth(): Promise<boolean> {
   }
 
   try {
-    // Test with a dummy token to check API connectivity
     const result = await verifyRecaptcha("test-token", "healthcheck");
-    return result.errorCodes.includes("invalid-input-response"); // Expected error for invalid token
+    return result.errorCodes.includes("invalid-input-response");
   } catch {
     return false;
   }
