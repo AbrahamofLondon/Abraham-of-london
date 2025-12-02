@@ -109,8 +109,8 @@ import Callout from "@/components/Callout";
 
       <div className="canon-quote-block">
         <Quote>
-          “The Canon is not commentary.  
-          It is architecture.”
+          "The Canon is not commentary.  
+          It is architecture."
         </Quote>
       </div>
     </div>
@@ -182,7 +182,7 @@ import Callout from "@/components/Callout";
         <ul className="canon-bullet-list">
           <li>you feel a pull to rebuild what is broken</li>
           <li>you want to strengthen what is weak instead of criticising from the side-lines</li>
-          <li>you are willing to form what is formless instead of waiting for “someone”</li>
+          <li>you are willing to form what is formless instead of waiting for "someone"</li>
           <li>you want to lead with gravity, not performance</li>
           <li>you intend to father with vision, not vibes</li>
           <li>you long to govern with wisdom, not trend</li>
@@ -271,6 +271,8 @@ import Callout from "@/components/Callout";
     max-width: 78ch;
     margin: 0 auto;
     padding: 2.5rem 1.25rem 4rem;
+    color: var(--aol-text);
+    background-color: var(--aol-bg);
   }
 
   @media (min-width: 768px) {
@@ -290,8 +292,8 @@ import Callout from "@/components/Callout";
     border-radius: 1.75rem;
     padding: 2rem 1.5rem 2.25rem;
     background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 55%),
-      radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.24), #020617 80%);
-    color: #f9fafb;
+      radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.24), var(--aol-surface) 80%);
+    color: var(--aol-text);
     overflow: hidden;
   }
 
@@ -305,11 +307,17 @@ import Callout from "@/components/Callout";
     pointer-events: none;
   }
 
+  /* Dark mode hero background */
+  :global(html.dark) .canon-hero-inner {
+    background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(14, 59, 51, 0.25), var(--aol-bg) 80%);
+  }
+
   .canon-kicker {
     font-size: 0.7rem;
     letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: rgba(250, 250, 249, 0.7);
+    color: var(--aol-muted);
     margin-bottom: 0.75rem;
   }
 
@@ -319,7 +327,7 @@ import Callout from "@/components/Callout";
     line-height: 1.05;
     font-weight: 700;
     margin: 0;
-    background: linear-gradient(135deg, #f9fafb, #e5e7eb, #facc15);
+    background: linear-gradient(135deg, var(--aol-text), #e5e7eb, var(--aol-softGold));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -338,7 +346,7 @@ import Callout from "@/components/Callout";
     font-size: 0.95rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(249, 250, 251, 0.75);
+    color: var(--aol-muted);
   }
 
   .canon-tagline {
@@ -350,33 +358,34 @@ import Callout from "@/components/Callout";
     letter-spacing: 0.16em;
     text-transform: uppercase;
     margin-bottom: 1.25rem;
+    color: var(--aol-muted);
   }
 
   .canon-pill {
     padding: 0.35rem 0.65rem;
     border-radius: 999px;
-    border: 1px solid rgba(248, 250, 252, 0.18);
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(6px);
+    border: 1px solid var(--aol-border-subtle);
+    background: var(--aol-surface);
+    color: var(--aol-text);
   }
 
   .canon-dot {
     width: 0.3rem;
     height: 0.3rem;
     border-radius: 999px;
-    background: rgba(250, 250, 249, 0.65);
+    background: var(--aol-muted);
   }
 
   .canon-summary {
     font-size: 0.9rem;
     line-height: 1.6;
     max-width: 42rem;
-    color: rgba(249, 250, 251, 0.85);
+    color: var(--aol-text);
     margin-bottom: 1.5rem;
   }
 
   .canon-highlight {
-    color: #facc15;
+    color: var(--aol-softGold);
     font-weight: 600;
   }
 
@@ -395,15 +404,16 @@ import Callout from "@/components/Callout";
   .canon-hero-card {
     border-radius: 1rem;
     padding: 0.85rem 0.9rem;
-    background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96));
-    border: 1px solid rgba(148, 163, 184, 0.55);
+    background: var(--aol-surface);
+    border: 1px solid var(--aol-border-subtle);
+    color: var(--aol-text);
   }
 
   .canon-metric-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: rgba(148, 163, 184, 0.9);
+    color: var(--aol-muted);
     margin-bottom: 0.3rem;
   }
 
@@ -411,11 +421,12 @@ import Callout from "@/components/Callout";
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.15rem;
+    color: var(--aol-text);
   }
 
   .canon-metric-caption {
     font-size: 0.75rem;
-    color: rgba(203, 213, 225, 0.9);
+    color: var(--aol-muted);
     line-height: 1.45;
   }
 
@@ -433,7 +444,7 @@ import Callout from "@/components/Callout";
     font-size: 0.7rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: #a16207;
+    color: var(--aol-softGold);
     margin-bottom: 0.4rem;
   }
 
@@ -442,11 +453,7 @@ import Callout from "@/components/Callout";
     font-size: 1.55rem;
     line-height: 1.2;
     font-weight: 600;
-    color: #0f172a;
-  }
-
-  :global(html.dark) .canon-section-title {
-    color: #f9fafb;
+    color: var(--aol-text);
   }
 
   .canon-section-body {
@@ -464,21 +471,11 @@ import Callout from "@/components/Callout";
   .canon-copy {
     font-size: 0.94rem;
     line-height: 1.7;
-    color: #111827;
-  }
-
-  :global(html.dark) .canon-copy {
-    color: #e5e7eb;
+    color: var(--aol-text);
   }
 
   .canon-copy p + p {
     margin-top: 0.8rem;
-  }
-
-  /* QUOTE */
-
-  .canon-quote-block {
-    padding: 0.85rem 0 0.5rem;
   }
 
   /* CHIPS */
@@ -494,14 +491,9 @@ import Callout from "@/components/Callout";
     font-size: 0.75rem;
     padding: 0.4rem 0.7rem;
     border-radius: 999px;
-    border: 1px solid rgba(209, 213, 219, 0.8);
-    background: linear-gradient(to right, #f9fafb, #f3f4f6);
-  }
-
-  :global(html.dark) .canon-chip {
-    border-color: rgba(148, 163, 184, 0.8);
-    background: linear-gradient(to right, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95));
-    color: #e5e7eb;
+    border: 1px solid var(--aol-border-subtle);
+    background: var(--aol-surface);
+    color: var(--aol-text);
   }
 
   /* GRID & FEATURE CARDS */
@@ -524,26 +516,24 @@ import Callout from "@/components/Callout";
   .canon-feature-card {
     border-radius: 1.2rem;
     padding: 1rem 1rem 1.1rem;
-    border: 1px solid rgba(209, 213, 219, 0.9);
-    background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.95));
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-  }
-
-  :global(html.dark) .canon-feature-card {
-    border-color: rgba(75, 85, 99, 0.9);
-    background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.95));
+    border: 1px solid var(--aol-border-subtle);
+    background: var(--aol-surface);
+    color: var(--aol-text);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   }
 
   .canon-feature-card h3 {
     font-size: 0.9rem;
     font-weight: 600;
     margin: 0 0 0.35rem;
+    color: var(--aol-text);
   }
 
   .canon-feature-card p {
     font-size: 0.85rem;
     line-height: 1.6;
     margin: 0;
+    color: var(--aol-text);
   }
 
   .canon-feature-card-wide {
@@ -556,16 +546,11 @@ import Callout from "@/components/Callout";
     margin: 0.9rem 0 0;
     padding-left: 1rem;
     font-size: 0.9rem;
+    color: var(--aol-text);
   }
 
   .canon-bullet-list li {
     margin-bottom: 0.35rem;
-  }
-
-  /* CALLOUT WRAPPER */
-
-  .canon-callout {
-    font-size: 0.9rem;
   }
 
   /* BEGIN SECTION */
@@ -577,20 +562,16 @@ import Callout from "@/components/Callout";
   .canon-begin-card {
     border-radius: 1.25rem;
     padding: 1.1rem 1.1rem 1.3rem;
-    border: 1px solid rgba(209, 213, 219, 0.9);
-    background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+    border: 1px solid var(--aol-border-subtle);
+    background: var(--aol-surface);
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
-  }
-
-  :global(html.dark) .canon-begin-card {
-    border-color: rgba(75, 85, 99, 0.9);
-    background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.98));
+    color: var(--aol-text);
   }
 
   .canon-begin-card-accent {
-    background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), #020617);
+    background: radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), var(--aol-bg));
     border-color: rgba(250, 204, 21, 0.6);
   }
 
@@ -598,17 +579,14 @@ import Callout from "@/components/Callout";
     font-size: 0.7rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: #92400e;
-  }
-
-  :global(html.dark) .canon-begin-label {
-    color: #facc15;
+    color: var(--aol-softGold);
   }
 
   .canon-begin-title {
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
+    color: var(--aol-text);
   }
 
   .canon-begin-body {
@@ -616,6 +594,7 @@ import Callout from "@/components/Callout";
     line-height: 1.65;
     margin: 0.2rem 0 0.4rem;
     flex: 1;
+    color: var(--aol-text);
   }
 
   .canon-link {
@@ -626,11 +605,7 @@ import Callout from "@/components/Callout";
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: #92400e;
-  }
-
-  :global(html.dark) .canon-link {
-    color: #fbbf24;
+    color: var(--aol-softGold);
   }
 
   .canon-link::after {
@@ -643,8 +618,8 @@ import Callout from "@/components/Callout";
     padding: 0.55rem 0.9rem;
     border-radius: 999px;
     background: linear-gradient(to right, #facc15, #f97316);
-    color: #111827;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+    color: #111827; /* Intentionally dark text on gold button */
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
   }
 
   .canon-link-primary::after {
@@ -665,13 +640,9 @@ import Callout from "@/components/Callout";
     text-align: center;
     font-size: 0.94rem;
     line-height: 1.75;
-    color: #111827;
+    color: var(--aol-text);
     max-width: 45rem;
     margin: 0.5rem auto 0;
-  }
-
-  :global(html.dark) .canon-final-body {
-    color: #e5e7eb;
   }
 
   .canon-final-body p + p {
@@ -690,14 +661,11 @@ import Callout from "@/components/Callout";
     display: inline-flex;
     padding: 0.5rem 0.85rem;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.7);
-    background: radial-gradient(circle at top, rgba(250, 250, 249, 0.9), rgba(248, 250, 252, 0.95));
+    border: 1px solid var(--aol-border-subtle);
+    background: var(--aol-surface);
     font-size: 0.78rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-  }
-
-  :global(html.dark) .canon-final-pill {
-    background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96));
+    color: var(--aol-text);
   }
 `}</style>
