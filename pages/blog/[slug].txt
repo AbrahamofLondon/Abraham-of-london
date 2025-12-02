@@ -1,4 +1,4 @@
-// pages/[slug].tsx - UPDATED WITH BOOKS FIX
+// pages/[slug].tsx - COMPREHENSIVE FIX
 import * as React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -13,7 +13,8 @@ import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
 import { getAllPosts, getPostBySlug } from "@/lib/posts"; 
-import { getAllBooksMeta, getBookBySlug } from "@/lib/server/books-data"; // ADDED
+import { getAllBooksMeta, getBookBySlug } from "@/lib/server/books-data";
+import { getAllEvents } from "@/lib/events"; // ADD EVENTS IMPORT
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 import Comments from "@/components/Comments";
@@ -23,9 +24,11 @@ type PageMeta = PostMeta & {
   coverFit?: "cover" | "contain";
   toc?: boolean;
   related?: string[];
-  format?: "hardcover" | "paperback" | "ebook" | "audiobook"; // ADDED FOR BOOKS
-  isbn?: string; // ADDED FOR BOOKS
-  publisher?: string; // ADDED FOR BOOKS
+  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
+  isbn?: string;
+  publisher?: string;
+  time?: string; // For events
+  location?: string; // For events
 };
 
 type PageProps = {
@@ -35,11 +38,12 @@ type PageProps = {
   estimatedReadingTime?: number;
 };
 
-// Define collections - ADDED BOOKS
+// Define ALL collections
 const BLOG_COLLECTION = "Post";
-const BOOK_COLLECTION = "Book"; // NEW
-const FALLBACK_COLLECTIONS = ["Print", "Resource", "Page"] as const;
-const ALL_COLLECTIONS = [BLOG_COLLECTION, BOOK_COLLECTION, ...FALLBACK_COLLECTIONS];
+const BOOK_COLLECTION = "Book";
+const EVENT_COLLECTION = "Event"; // NEW
+const FALLBACK_COLLECTIONS = ["Print", "Resource", "Page", "Download"] as const;
+const ALL_COLLECTIONS = [BLOG_COLLECTION, BOOK_COLLECTION, EVENT_COLLECTION, ...FALLBACK_COLLECTIONS];
 
 // -----------------------------------------------------------------------------
 // Custom hook for reading progress
@@ -52,13 +56,8 @@ const useReadingProgress = () => {
       const article = document.querySelector("article");
       if (!article) return;
       
-      const articleRect = article.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      
       const scrolled = window.scrollY;
-      const totalHeight = documentHeight - windowHeight;
-      
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = totalHeight > 0 ? (scrolled / totalHeight) * 100 : 0;
       setProgress(Math.min(100, Math.max(0, progress)));
     };
@@ -74,6 +73,15 @@ const useReadingProgress = () => {
   }, []);
   
   return progress;
+};
+
+// -----------------------------------------------------------------------------
+// Helper: Calculate reading time from content
+// -----------------------------------------------------------------------------
+const calculateReadingTime = (content: string): number => {
+  const wordsPerMinute = 200;
+  const wordCount = content.split(/\s+/).length;
+  return Math.ceil(wordCount / wordsPerMinute);
 };
 
 // -----------------------------------------------------------------------------
@@ -97,9 +105,11 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
     coverFit,
     toc = false,
     related = [],
-    format, // BOOK SPECIFIC
-    isbn, // BOOK SPECIFIC
-    publisher, // BOOK SPECIFIC
+    format,
+    isbn,
+    publisher,
+    time,
+    location,
   } = meta;
 
   const displayReadTime = estimatedReadingTime || readTime || 5;
@@ -110,7 +120,8 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
     if (Array.isArray(tags) && tags.length > 0) {
       return typeof tags[0] === 'string' ? tags[0] : 'Article';
     }
-    return contentKind === BOOK_COLLECTION ? "Book" : "Article";
+    return contentKind === BOOK_COLLECTION ? "Book" : 
+           contentKind === EVENT_COLLECTION ? "Event" : "Article";
   }, [category, tags, contentKind]);
 
   const canonicalTitle = title || "Abraham of London";
@@ -119,6 +130,7 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
   const showComments = contentKind === BLOG_COLLECTION;
   const showTOC = toc && (contentKind === BLOG_COLLECTION || contentKind === BOOK_COLLECTION);
   const isBook = contentKind === BOOK_COLLECTION;
+  const isEvent = contentKind === EVENT_COLLECTION;
 
   return (
     <Layout title={canonicalTitle}>
@@ -129,7 +141,11 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
         {/* Open Graph Meta Tags */}
         <meta property="og:title" content={canonicalTitle} />
         <meta property="og:description" content={displayDescription} />
-        <meta property="og:type" content={isBook ? "book" : contentKind === BLOG_COLLECTION ? "article" : "website"} />
+        <meta property="og:type" content={
+          isBook ? "book" : 
+          isEvent ? "event" :
+          contentKind === BLOG_COLLECTION ? "article" : "website"
+        } />
         <meta property="og:url" content={`https://abrahamoflondon.com${router.asPath}`} />
         {coverImage && <meta property="og:image" content={coverImage as string} />}
         
@@ -139,7 +155,7 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
         <meta name="twitter:description" content={displayDescription} />
         {coverImage && <meta name="twitter:image" content={coverImage as string} />}
         
-        {/* Structured Data - Enhanced for Books */}
+        {/* Structured Data */}
         {isBook ? (
           <script
             type="application/ld+json"
@@ -165,6 +181,31 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
               })
             }}
           />
+        ) : isEvent ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Event",
+                name: canonicalTitle,
+                description: displayDescription,
+                image: coverImage,
+                startDate: date,
+                endDate: meta.endDate || date,
+                eventStatus: "https://schema.org/EventScheduled",
+                eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+                location: location ? {
+                  "@type": "Place",
+                  name: location
+                } : undefined,
+                organizer: {
+                  "@type": "Person",
+                  name: "Abraham of London"
+                }
+              })
+            }}
+          />
         ) : contentKind === BLOG_COLLECTION ? (
           <script
             type="application/ld+json"
@@ -186,6 +227,14 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
         ) : null}
       </Head>
 
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-1 z-50 bg-transparent">
+        <div 
+          className="h-full bg-gradient-to-r from-softGold to-amber-500 transition-all duration-200 ease-out"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+
       <ArticleHero
         title={title}
         subtitle={displaySubtitle}
@@ -195,10 +244,13 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
         coverImage={coverImage as string | undefined}
         coverAspect={coverAspect}
         coverFit={coverFit}
-        // ADD BOOK-SPECIFIC BADGE
         badges={isBook ? [
           { text: format || "Book", color: "amber" },
           ...(publisher ? [{ text: publisher, color: "gray" }] : [])
+        ] : isEvent ? [
+          { text: "Event", color: "emerald" },
+          ...(time ? [{ text: time, color: "blue" }] : []),
+          ...(location ? [{ text: location, color: "purple" }] : [])
         ] : []}
       />
 
@@ -222,9 +274,42 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
 
             <div className="flex-1 min-w-0">
               <article className="max-w-3xl mx-auto pb-16 pt-10">
+                {/* Event-specific metadata */}
+                {isEvent && (
+                  <div className="mb-8 p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {time && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Time:</span>
+                          <p className="text-aol-text dark:text-cream font-medium">{time}</p>
+                        </div>
+                      )}
+                      {location && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Location:</span>
+                          <p className="text-aol-text dark:text-cream font-medium">{location}</p>
+                        </div>
+                      )}
+                      {date && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Date:</span>
+                          <p className="text-aol-text dark:text-cream">
+                            {new Date(date).toLocaleDateString('en-GB', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Book-specific metadata */}
                 {isBook && (
-                  <div className="mb-8 p-6 bg-aol-bg-subtle dark:bg-gray-900 rounded-xl border border-aol-border-subtle">
+                  <div className="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {isbn && (
                         <div>
@@ -263,6 +348,26 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
                 <div className="prose prose-lg max-w-none dark:prose-invert">
                   <MDXRemote {...mdxSource} components={mdxComponents} />
                 </div>
+
+                {/* Event registration link */}
+                {isEvent && meta.registerLink && (
+                  <div className="mt-12 p-6 bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-xl border border-emerald-500/20">
+                    <h3 className="text-xl font-serif font-semibold text-aol-text dark:text-cream mb-4">
+                      Register for This Event
+                    </h3>
+                    <a
+                      href={meta.registerLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Register Now
+                    </a>
+                  </div>
+                )}
 
                 {/* Book purchase link */}
                 {isBook && meta.purchaseLink && (
@@ -312,133 +417,234 @@ function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: Pag
 export default ContentPage;
 
 // -----------------------------------------------------------------------------
-// SSG – paths
+// SSG – paths - FIXED VERSION
 // -----------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log('=== Generating static paths for [slug] ===');
+  
   try {
-    const allItems: Array<{ slug: string; collection?: string }> = [];
+    const allItems: Array<{ slug: string; collection: string }> = [];
 
-    // Fetch blog posts
-    const posts = await getAllPosts();
-    allItems.push(...posts.map(post => ({ 
-      slug: post.slug, 
-      collection: BLOG_COLLECTION 
-    })));
-
-    // Fetch books
-    const books = getAllBooksMeta();
-    allItems.push(...books.map(book => ({ 
-      slug: book.slug, 
-      collection: BOOK_COLLECTION 
-    })));
-
-    // Gather slugs from fallback collections
-    for (const key of FALLBACK_COLLECTIONS) {
-      const items = getAllContent(key) ?? [];
-      items.forEach(item => {
-        if (item?.slug) {
+    // 1. Fetch blog posts
+    try {
+      const posts = await getAllPosts();
+      console.log(`Found ${posts.length} blog posts`);
+      posts.forEach(post => {
+        if (post?.slug) {
           allItems.push({ 
-            slug: String(item.slug), 
-            collection: key 
+            slug: String(post.slug), 
+            collection: BLOG_COLLECTION 
           });
         }
       });
+    } catch (postErr) {
+      console.error('Error fetching posts:', postErr);
     }
 
-    // Deduplicate slugs
-    const seen = new Set<string>();
-    const paths = allItems
-      .filter(item => item?.slug)
-      .map(item => String(item.slug))
-      .filter(slug => {
-        if (seen.has(slug)) {
-          console.warn(`Duplicate slug detected: ${slug}`);
-          return false;
+    // 2. Fetch books
+    try {
+      const books = getAllBooksMeta();
+      console.log(`Found ${books.length} books`);
+      books.forEach(book => {
+        if (book?.slug) {
+          allItems.push({ 
+            slug: String(book.slug), 
+            collection: BOOK_COLLECTION 
+          });
         }
-        seen.add(slug);
-        return true;
-      })
-      .map(slug => ({ params: { slug } }));
+      });
+    } catch (bookErr) {
+      console.error('Error fetching books:', bookErr);
+    }
 
-    console.log(`Generated ${paths.length} static paths for /[slug]`);
+    // 3. Fetch events
+    try {
+      const events = getAllEvents();
+      console.log(`Found ${events.length} events`);
+      events.forEach(event => {
+        if (event?.slug) {
+          allItems.push({ 
+            slug: String(event.slug), 
+            collection: EVENT_COLLECTION 
+          });
+        }
+      });
+    } catch (eventErr) {
+      console.error('Error fetching events:', eventErr);
+    }
+
+    // 4. Fetch from fallback collections
+    for (const key of FALLBACK_COLLECTIONS) {
+      try {
+        const items = getAllContent(key) ?? [];
+        console.log(`Found ${items.length} items in ${key} collection`);
+        items.forEach(item => {
+          if (item?.slug) {
+            allItems.push({ 
+              slug: String(item.slug), 
+              collection: key 
+            });
+          }
+        });
+      } catch (collectionErr) {
+        console.error(`Error fetching ${key} collection:`, collectionErr);
+      }
+    }
+
+    console.log(`Total items collected: ${allItems.length}`);
+
+    // Deduplicate slugs - keep first occurrence
+    const seen = new Set<string>();
+    const uniqueItems = allItems.filter(item => {
+      if (!item.slug || seen.has(item.slug)) {
+        if (seen.has(item.slug)) {
+          console.warn(`Duplicate slug skipped: ${item.slug} (from ${item.collection})`);
+        }
+        return false;
+      }
+      seen.add(item.slug);
+      return true;
+    });
+
+    console.log(`Unique slugs: ${uniqueItems.length}`);
+
+    const paths = uniqueItems.map(item => ({
+      params: { slug: item.slug }
+    }));
+
+    console.log(`Generated ${paths.length} paths for static generation`);
     
+    // Sample output for debugging
+    if (paths.length > 0) {
+      console.log('Sample paths:', paths.slice(0, 5));
+    }
+
     return {
       paths,
       fallback: "blocking",
     };
   } catch (err) {
-    console.error("Error generating static paths for /[slug]:", err);
-    return { paths: [], fallback: "blocking" };
+    console.error("Critical error in getStaticPaths:", err);
+    // Return empty paths but allow blocking fallback
+    return { 
+      paths: [], 
+      fallback: "blocking" 
+    };
   }
 };
 
 // -----------------------------------------------------------------------------
-// SSG – props
+// SSG – props - FIXED VERSION
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
+  const slugParam = params?.slug;
+  const slug = typeof slugParam === "string" ? slugParam : 
+               Array.isArray(slugParam) ? slugParam[0] : "";
+
+  console.log(`\n=== getStaticProps for slug: "${slug}" ===`);
+
+  if (!slug) {
+    console.log('No slug provided, returning 404');
+    return { notFound: true };
+  }
+
   try {
-    const slugParam = params?.slug;
-    const slug = typeof slugParam === "string"
-      ? slugParam
-      : Array.isArray(slugParam)
-      ? slugParam[0]
-      : "";
-
-    if (!slug) {
-      return { notFound: true };
-    }
-
     let data: (PageMeta & { content?: string }) | null = null;
     let contentKind: string | null = null;
 
     // 1. Try Blog Post first
-    const postCandidate = await getPostBySlug(slug);
-    if (postCandidate) {
-      data = postCandidate as PageMeta & { content?: string };
-      contentKind = BLOG_COLLECTION;
+    console.log('Checking blog posts...');
+    try {
+      const postCandidate = await getPostBySlug(slug);
+      if (postCandidate) {
+        console.log(`Found as blog post: ${postCandidate.title}`);
+        data = postCandidate as PageMeta & { content?: string };
+        contentKind = BLOG_COLLECTION;
+      }
+    } catch (postErr) {
+      console.log(`No blog post found for "${slug}" or error:`, postErr.message);
     }
 
     // 2. Try Book second
     if (!data) {
-      const bookCandidate = getBookBySlug(slug);
-      if (bookCandidate) {
-        data = bookCandidate as PageMeta & { content?: string };
-        contentKind = BOOK_COLLECTION;
+      console.log('Checking books...');
+      try {
+        const bookCandidate = getBookBySlug(slug);
+        if (bookCandidate) {
+          console.log(`Found as book: ${bookCandidate.title}`);
+          data = bookCandidate as PageMeta & { content?: string };
+          contentKind = BOOK_COLLECTION;
+        }
+      } catch (bookErr) {
+        console.log(`No book found for "${slug}" or error:`, bookErr.message);
       }
     }
 
-    // 3. If no post or book found, try Fallback Collections
+    // 3. Try Event third
     if (!data) {
-      for (const key of FALLBACK_COLLECTIONS) {
-        const candidate = getContentBySlug(key, slug, {
-          withContent: true,
-        }) as (PageMeta & { content?: string }) | null;
+      console.log('Checking events...');
+      try {
+        // You'll need to create a getEventBySlug function similar to getBookBySlug
+        // For now, we'll check in the fallback collections
+        const events = getAllEvents();
+        const eventCandidate = events.find(event => event.slug === slug);
+        if (eventCandidate) {
+          console.log(`Found as event: ${eventCandidate.title}`);
+          // Convert event to PageMeta format
+          data = {
+            ...eventCandidate,
+            content: eventCandidate.content || "",
+          } as PageMeta & { content?: string };
+          contentKind = EVENT_COLLECTION;
+        }
+      } catch (eventErr) {
+        console.log(`No event found for "${slug}" or error:`, eventErr.message);
+      }
+    }
 
-        if (candidate) {
-          data = candidate;
-          contentKind = key;
-          break;
+    // 4. Try Fallback Collections
+    if (!data) {
+      console.log('Checking fallback collections...');
+      for (const key of FALLBACK_COLLECTIONS) {
+        try {
+          const candidate = getContentBySlug(key, slug, {
+            withContent: true,
+          }) as (PageMeta & { content?: string }) | null;
+
+          if (candidate) {
+            console.log(`Found in ${key} collection: ${candidate.title}`);
+            data = candidate;
+            contentKind = key;
+            break;
+          }
+        } catch (collectionErr) {
+          console.log(`Error checking ${key} collection:`, collectionErr.message);
         }
       }
     }
 
     if (!data || !contentKind) {
-      console.warn(`No content found for slug: ${slug}`);
+      console.log(`No content found for slug: "${slug}", returning 404`);
       return { notFound: true };
     }
 
-    const { content, ...meta } = data;
-
-    if (!meta.title) {
+    if (!data.title) {
+      console.log(`Content found but missing title for slug: "${slug}", returning 404`);
       return { notFound: true };
     }
 
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+    console.log(`Successfully loaded: ${data.title} (${contentKind})`);
+
+    const jsonSafeMeta = JSON.parse(JSON.stringify(data)) as PageMeta;
+    const { content, ...meta } = jsonSafeMeta;
+
+    // Calculate reading time if content exists
+    const estimatedReadingTime = content ? calculateReadingTime(content) : undefined;
 
     const mdxSource = await serialize(content || "", {
-      scope: jsonSafeMeta as unknown as Record<string, unknown>,
+      scope: meta as unknown as Record<string, unknown>,
       mdxOptions: {
         remarkPlugins: [],
         rehypePlugins: [],
@@ -448,14 +654,15 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
     return {
       props: {
-        meta: jsonSafeMeta,
+        meta,
         mdxSource,
         contentKind,
+        estimatedReadingTime,
       },
       revalidate: process.env.NODE_ENV === 'production' ? 3600 : 60,
     };
   } catch (err) {
-    console.error("Error in getStaticProps for /[slug]:", err);
+    console.error(`Error in getStaticProps for slug "${slug}":`, err);
     return { notFound: true };
   }
 };
