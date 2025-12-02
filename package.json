@@ -10,10 +10,10 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev",
-    "dev:safe": "npx cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
+    "dev:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next dev",
     "dev:content": "contentlayer2 build --watch",
     "start": "next start",
-    "start:safe": "npx cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
+    "start:safe": "cross-env NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 next start",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "typecheck:safe": "tsc --project tsconfig.json --noEmit --skipLibCheck",
     "lint": "next lint",
@@ -26,14 +26,14 @@
     "content:dev": "contentlayer2 build --watch",
     "guard:conflicts": "node scripts/check-conflicts.js",
     "build": "pnpm run guard:conflicts && pnpm run content:build && next build",
-    "build:safe": "npx cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run content:build && next build",
+    "build:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run content:build && next build",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
     "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer2 build && next build",
-    "build:ci": "pnpm run build:netlify:safe",
     "check": "pnpm run lint && pnpm run typecheck",
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
     "check:ci": "pnpm run check:safe",
+    "build:ci": "pnpm run build:netlify:safe",
     "prebuild": "pnpm run clean:build",
     "postbuild": "node -e \"console.log('Build completed successfully')\"",
     "postinstall": "contentlayer2 build",
@@ -42,8 +42,7 @@
     "downloads:validate": "node scripts/validate-downloads.mjs",
     "test:e2e": "pnpm dlx playwright test",
     "build:functions": "tsc --project tsconfig.functions.json --noEmit",
-    "debug:content": "node scripts/debug-content-routes.mjs",
-    "verify:packages": "pnpm list tailwindcss postcss autoprefixer @tailwindcss/typography && echo '✅ All packages found'"
+    "debug:content": "node scripts/debug-content-routes.mjs"
   },
   "dependencies": {
     "@contentlayer/cli": "0.3.4",
@@ -80,7 +79,10 @@
     "styled-jsx": "5.1.7",
     "tailwind-merge": "3.4.0",
     "tailwindcss": "3.4.14",
-    "ws": "8.18.3"
+    "ws": "8.18.3",
+    "typescript": "5.6.3",
+    "@types/react": "18.3.12",
+    "@types/node": "20.11.30"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.14.5",
