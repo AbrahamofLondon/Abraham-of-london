@@ -1,3 +1,4 @@
+// src/components/Divider.tsx
 import * as React from "react";
 
 export interface DividerProps {
@@ -6,16 +7,22 @@ export interface DividerProps {
   [key: string]: unknown;
 }
 
-const Divider: React.FC<DividerProps> = ({ label, className }) => {
+export default function Divider({
+  label,
+  className,
+  ...rest
+}: DividerProps): JSX.Element {
   if (!label) {
     return (
       <hr
         className={[
           "my-10 border-t border-gray-700/70",
+          "mx-auto max-w-3xl",
           className ?? "",
         ]
           .filter(Boolean)
           .join(" ")}
+        {...rest}
       />
     );
   }
@@ -23,17 +30,17 @@ const Divider: React.FC<DividerProps> = ({ label, className }) => {
   return (
     <div
       className={[
-        "my-10 flex items-center gap-4 text-xs uppercase tracking-[0.2em] text-gray-400",
+        "my-10 flex items-center gap-4 text-xs uppercase tracking-[0.18em] text-gray-400",
+        "mx-auto max-w-3xl",
         className ?? "",
       ]
         .filter(Boolean)
         .join(" ")}
+      {...rest}
     >
-      <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
-      <span>{label}</span>
-      <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-gray-600 to-transparent" />
+      <span className="h-px flex-1 bg-gray-700/80" />
+      <span className="whitespace-nowrap">{label}</span>
+      <span className="h-px flex-1 bg-gray-700/80" />
     </div>
   );
-};
-
-export default Divider;
+}

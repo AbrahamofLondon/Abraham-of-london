@@ -1,70 +1,82 @@
+// src/components/ArticleHero.tsx
 import * as React from "react";
 
-export type ArticleHeroProps = React.PropsWithChildren<{
-  title?: string;
+export type ArticleHeroProps = {
+  title: string;
   subtitle?: string | null;
-  eyebrow?: string | null;
-  readTime?: string | null;
+  description?: string | null;
   date?: string | null;
-  tags?: string[];
-  className?: string;
-  [key: string]: unknown;
-}>;
+  readTime?: string | null;
+  tags?: string[] | null;
+  category?: string | null;
+} & React.HTMLAttributes<HTMLDivElement>;
 
-const ArticleHero: React.FC<ArticleHeroProps> = ({
-  title,
-  subtitle,
-  eyebrow,
-  readTime,
-  date,
-  tags,
-  className,
-  children,
-}) => {
-  const displayTitle = title ?? "Untitled";
-  const displaySubtitle = subtitle ?? null;
+/**
+ * Primary hero header for long-form articles.
+ */
+export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
+  const {
+    title,
+    subtitle,
+    description,
+    date,
+    readTime,
+    tags,
+    category,
+    className,
+    ...rest
+  } = props;
 
   return (
-    <section
+    <header
       className={[
-        "mb-10 rounded-3xl border border-white/10 bg-gradient-to-b",
-        "from-charcoal via-charcoal/95 to-charcoal/90 px-6 py-10 sm:px-8",
-        "shadow-[0_18px_60px_rgba(0,0,0,0.7)]",
+        "mb-10 border-b border-white/5 pb-8",
+        "sm:mb-12 sm:pb-10",
         className ?? "",
       ]
         .filter(Boolean)
         .join(" ")}
+      {...rest}
     >
       {/* Eyebrow */}
-      {eyebrow && (
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-softGold/80">
-          {eyebrow}
-        </p>
-      )}
+      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-softGold/80">
+        Abraham of London · {category || "Essay"}
+      </p>
 
       {/* Title */}
-      <h1 className="mt-2 font-serif text-3xl font-semibold text-cream sm:text-4xl lg:text-[2.6rem] lg:leading-tight">
-        {displayTitle}
+      <h1 className="mt-3 font-serif text-3xl font-semibold text-cream sm:text-4xl md:text-5xl">
+        {title}
       </h1>
 
       {/* Subtitle */}
-      {displaySubtitle && (
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-200 sm:text-base">
-          {displaySubtitle}
+      {subtitle && (
+        <p className="mt-3 max-w-2xl text-sm text-gold/80 sm:text-base">
+          {subtitle}
+        </p>
+      )}
+
+      {/* Description/excerpt */}
+      {description && (
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-200 sm:text-base">
+          {description}
         </p>
       )}
 
       {/* Meta row */}
       {(date || readTime || (tags && tags.length > 0)) && (
-        <div className="mt-5 flex flex-wrap items-center gap-3 text-[0.75rem] text-gray-400">
+        <div className="mt-6 flex flex-wrap items-center gap-3 text-[0.75rem] text-gray-400">
           {date && (
-            <span className="rounded-full border border-gray-600/70 px-3 py-1">
-              {date}
+            <span className="rounded-full border border-gray-700/70 px-3 py-1">
+              {new Date(date).toLocaleDateString("en-GB", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
             </span>
           )}
 
           {readTime && (
-            <span className="rounded-full border border-gray-600/70 px-3 py-1 uppercase tracking-[0.18em]">
+            <span className="rounded-full border border-gray-700/70 px-3 py-1 uppercase tracking-[0.18em]">
               {readTime}
             </span>
           )}
@@ -83,11 +95,6 @@ const ArticleHero: React.FC<ArticleHeroProps> = ({
           )}
         </div>
       )}
-
-      {/* Optional extra content below meta (e.g. intro) */}
-      {children && <div className="mt-6 text-sm text-gray-200">{children}</div>}
-    </section>
+    </header>
   );
-};
-
-export default ArticleHero;
+}

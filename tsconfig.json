@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
+    "lib": ["dom", "dom.iterable", "es2022"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -24,24 +20,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*",
-        "*"
-      ],
-      "@/components/*": [
-        "src/components/*",
-        "components/*"
-      ],
-      "@/lib/*": [
-        "src/lib/*",
-        "lib/*"
-      ],
-      "@/types/*": [
-        "types/*"
-      ],
-      "contentlayer/generated": [
-        ".contentlayer/generated"
-      ]
+      "@/*": ["./*", "./src/*"]
     },
     "strictNullChecks": true
   },

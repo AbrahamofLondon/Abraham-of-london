@@ -1,6 +1,6 @@
 // pages/books/[slug].tsx
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,9 @@ import mdxComponents from "@/components/mdx-components";
 import Quote from "@/components/Quote";
 import Callout from "@/components/Callout";
 import Divider from "@/components/Divider";
-import { allBooks, type Book } from "contentlayer/generated";
+
+// ⬇️ THIS IS THE IMPORTANT LINE
+import { allBooks, type Book } from "@/lib/contentlayer-helper";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */

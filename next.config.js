@@ -1,11 +1,10 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-
-  // 已更新：将 `experimental.serverComponentsExternalPackages` 移至此处
-  serverExternalPackages: ['@react-email/components'],
-
+  serverExternalPackages: ['@react-email/components', 'better-sqlite3'],
+  
   images: {
     unoptimized: true,
     dangerouslyAllowSVG: true,
@@ -13,13 +12,16 @@ const nextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
     formats: ['image/avif', 'image/webp'],
   },
-
+  
   compress: true,
   poweredByHeader: false,
-
   typescript: { ignoreBuildErrors: true },
-  // 已移除：`eslint` 配置已废弃。如果要禁用，请在命令行或环境变量中设置。
-
+  
+  // Remove the 'turbo' option or use correct version
+  // experimental: {
+  //   turbo: undefined, // REMOVE THIS LINE
+  // },
+  
   async redirects() {
     return [
       { source: '/blog', destination: '/content', permanent: true },
@@ -37,7 +39,7 @@ const nextConfig = {
       },
     ];
   },
-
+  
   async headers() {
     const csp = [
       "default-src 'self';",
@@ -49,8 +51,8 @@ const nextConfig = {
       "frame-ancestors 'none';",
       "base-uri 'self';",
       "form-action 'self';",
-    ].join(' ')
-
+    ].join(' ');
+    
     return [
       {
         source: '/(.*)',
@@ -60,12 +62,28 @@ const nextConfig = {
           { key: 'Content-Security-Policy', value: csp },
         ],
       },
-    ]
+    ];
   },
-
+  
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-}
+  
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [
+        ...(config.externals || []),
+        { 'better-sqlite3': 'commonjs better-sqlite3' },
+      ];
+    }
+    
+    config.module = {
+      ...config.module,
+      exprContextCritical: false,
+    };
+    
+    return config;
+  },
+};
 
-export default nextConfig
+export default nextConfig;

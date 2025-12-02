@@ -1,7 +1,8 @@
 // lib/canon.ts
 // Centralised helpers for Canon content (Contentlayer-powered)
 
-import { allCanons, type Canon } from "../.contentlayer/generated";
+// FIXED: Import from contentlayer-helper instead of direct contentlayer path
+import { allCanons, type Canon } from "./contentlayer-helper";
 
 // Use the generated Canon type directly
 export type CanonDoc = Canon;
@@ -100,5 +101,5 @@ export function getCanonBySlug(slug: string): CanonDoc | null {
 }
 
 // Re-export from server/canon-data
+// Note: If this import fails, you might need to check that file too
 export * from "./server/canon-data";
-

@@ -1,95 +1,69 @@
+// src/components/Callout.tsx
 import * as React from "react";
 
-export type CalloutVariant = "note" | "warning" | "danger" | "info" | "success";
+export type CalloutVariant = "info" | "warning" | "danger" | "success" | "note";
 
-export interface CalloutProps extends React.PropsWithChildren {
+export interface CalloutProps {
   title?: string;
   variant?: CalloutVariant;
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
   className?: string;
-  [key: string]: unknown;
+  [key: string]: unknown; // tolerate extra MDX props
 }
 
-const variantConfig: Record<
-  CalloutVariant,
-  { label: string; icon: string; border: string; bg: string; text: string }
-> = {
-  note: {
-    label: "Note",
-    icon: "✳️",
-    border: "border-softGold/60",
-    bg: "bg-softGold/10",
-    text: "text-cream",
-  },
-  warning: {
-    label: "Warning",
-    icon: "⚠️",
-    border: "border-amber-400/70",
-    bg: "bg-amber-500/10",
-    text: "text-amber-50",
-  },
-  danger: {
-    label: "Caution",
-    icon: "⛔",
-    border: "border-red-500/70",
-    bg: "bg-red-500/10",
-    text: "text-red-50",
-  },
-  info: {
-    label: "Insight",
-    icon: "💡",
-    border: "border-sky-400/70",
-    bg: "bg-sky-500/10",
-    text: "text-sky-50",
-  },
-  success: {
-    label: "Focus",
-    icon: "✅",
-    border: "border-emerald-400/70",
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-50",
-  },
+const VARIANT_STYLES: Record<CalloutVariant, string> = {
+  info: "border-sky-500/70 bg-sky-950/40",
+  warning: "border-amber-500/80 bg-amber-950/40",
+  danger: "border-red-500/80 bg-red-950/40",
+  success: "border-emerald-500/80 bg-emerald-950/40",
+  note: "border-softGold/70 bg-softGold/5",
 };
 
-const Callout: React.FC<CalloutProps> = ({
+const VARIANT_ICON: Record<CalloutVariant, string> = {
+  info: "💡",
+  warning: "⚠️",
+  danger: "⛔",
+  success: "✅",
+  note: "✳️",
+};
+
+export default function Callout({
   title,
   variant = "note",
-  className,
   children,
-}) => {
-  const cfg = variantConfig[variant] ?? variantConfig.note;
+  icon,
+  className,
+  ...rest
+}: CalloutProps): JSX.Element {
+  const base = VARIANT_STYLES[variant] ?? VARIANT_STYLES.note;
+  const resolvedIcon = icon ?? VARIANT_ICON[variant] ?? VARIANT_ICON.note;
 
   return (
-    <aside
+    <div
       className={[
         "my-6 rounded-2xl border px-4 py-4 sm:px-5 sm:py-5",
-        "backdrop-blur-sm",
-        cfg.bg,
-        cfg.border,
+        "backdrop-blur-sm shadow-[0_20px_40px_rgba(0,0,0,0.55)]",
+        base,
         className ?? "",
       ]
         .filter(Boolean)
         .join(" ")}
+      {...rest}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 text-xl">{cfg.icon}</div>
+        <div className="mt-0.5 text-xl sm:text-2xl">{resolvedIcon}</div>
         <div className="space-y-1">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span
-              className={[
-                "text-[0.7rem] font-semibold uppercase tracking-[0.2em]",
-                cfg.text,
-              ].join(" ")}
-            >
-              {title ?? cfg.label}
-            </span>
-          </div>
-          <div className="text-sm leading-relaxed text-gray-200">
+          {title && (
+            <h3 className="font-semibold text-cream text-sm sm:text-base">
+              {title}
+            </h3>
+          )}
+          <div className="text-sm leading-relaxed text-gray-100 sm:text-[0.95rem]">
             {children}
           </div>
         </div>
       </div>
-    </aside>
+    </div>
   );
-};
-
-export default Callout;
+}

@@ -1,11 +1,11 @@
 // app/api/downloads/route.ts
 import { NextResponse } from "next/server";
-import { allDownloads } from "contentlayer/generated";
+import { allDownloads } from "@/lib/contentlayer-helper";
 import {
   rateLimitAsync,
   RATE_LIMIT_CONFIGS,
-  createRateLimitHeaders,
-} from "@/lib/server/rateLimit";
+  // …
+} from "@/lib/rate-limit";
 import { getClientIp, anonymizeIp } from "@/lib/server/ip";
 
 // ---------------------------------------------------------------------------

@@ -1,21 +1,11 @@
 // lib/contentlayer-helper.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Centralized Contentlayer imports to avoid path resolution issues
 
-import type { DocumentGen } from 'contentlayer2/core';
+// ============================================================================
+// 1. CORE TYPES
+// ============================================================================
 
-// Use dynamic import for ES modules instead of require()
-let contentlayerExports: any = {};
-
-// Initialize asynchronously
-try {
-  // Use dynamic import for ES modules
-  const module = await import('.contentlayer/generated');
-  contentlayerExports = module;
-} catch (error) {
-  console.warn('Contentlayer not available, using empty exports', error);
-}
-
-// Define proper TypeScript interfaces
 export interface ContentlayerDocument {
   _id: string;
   _raw: {
@@ -43,74 +33,211 @@ export interface ContentlayerDocument {
 
 export interface PostDocument extends ContentlayerDocument {
   type: 'Post';
+  category?: string;
+  author?: string;
+  readTime?: string;
+  featured?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface BookDocument extends ContentlayerDocument {
   type: 'Book';
+  subtitle?: string;
+  author?: string;
+  publisher?: string;
+  isbn?: string;
+  featured?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface DownloadDocument extends ContentlayerDocument {
   type: 'Download';
+  subtitle?: string;
+  author?: string;
+  file?: string;
+  pdfPath?: string;
+  downloadFile?: string;
+  fileUrl?: string;
+  downloadUrl?: string;
+  fileSize?: string;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface PrintDocument extends ContentlayerDocument {
   type: 'Print';
+  dimensions?: string;
+  price?: string;
   available?: boolean;
+  downloadFile?: string;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface ResourceDocument extends ContentlayerDocument {
   type: 'Resource';
+  resourceType?: string;
+  author?: string;
+  fileUrl?: string;
+  downloadUrl?: string;
+  featured?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface CanonDocument extends ContentlayerDocument {
   type: 'Canon';
-  featured?: boolean;
-  order?: number;
   subtitle?: string;
-  volumeNumber?: number;
+  author?: string;
+  coverAspect?: string;
+  coverFit?: string;
+  volumeNumber?: string;
+  order?: number;
+  featured?: boolean;
+  readTime?: string;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface EventDocument extends ContentlayerDocument {
   type: 'Event';
   eventDate?: string;
+  time?: string;
   location?: string;
+  registrationUrl?: string;
+  isUpcoming?: boolean;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
 export interface StrategyDocument extends ContentlayerDocument {
   type: 'Strategy';
   category?: string;
+  author?: string;
+  accessLevel?: string;
+  lockMessage?: string;
 }
 
-// Safe collection getters with proper typing
+// ============================================================================
+// 2. CONTENTLAYER EXPORTS LOADING (SYNCHRONOUS)
+// ============================================================================
+
+let contentlayerExports: any = {};
+
+// Try to load the generated contentlayer bundle synchronously
+// This is compatible with Next.js build process
+try {
+  // Path is relative to the project root (where .contentlayer folder is)
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  contentlayerExports = require('../.contentlayer/generated');
+} catch (error) {
+  // Only warn in development to avoid breaking builds
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    console.warn(
+      '[contentlayer-helper] .contentlayer/generated not found – using empty exports.',
+      'This is normal during the first build or if content hasn\'t been generated yet.'
+    );
+  }
+  // Fallback to empty object - content will be populated after contentlayer runs
+  contentlayerExports = {};
+}
+
+// ============================================================================
+// 3. SAFE COLLECTION GETTERS
+// ============================================================================
+
 function safeGetCollection<T>(collection: T[] | undefined, fallback: T[] = []): T[] {
   return Array.isArray(collection) ? collection : fallback;
 }
 
-// Export all collections with proper typing and safe access
-export const allPosts: PostDocument[] = safeGetCollection(contentlayerExports.allPosts);
-export const allBooks: BookDocument[] = safeGetCollection(contentlayerExports.allBooks);
-export const allDownloads: DownloadDocument[] = safeGetCollection(contentlayerExports.allDownloads);
-export const allEvents: EventDocument[] = safeGetCollection(contentlayerExports.allEvents);
-export const allPrints: PrintDocument[] = safeGetCollection(contentlayerExports.allPrints);
-export const allStrategies: StrategyDocument[] = safeGetCollection(contentlayerExports.allStrategies);
-export const allResources: ResourceDocument[] = safeGetCollection(contentlayerExports.allResources);
-export const allCanons: CanonDocument[] = safeGetCollection(contentlayerExports.allCanons);
-export const allDocuments: ContentlayerDocument[] = safeGetCollection(contentlayerExports.allDocuments);
-
-// Helper to get all non-draft documents
-export function getPublishedDocuments(): ContentlayerDocument[] {
-  return allDocuments.filter(doc => !doc.draft);
+function getCollection<T>(key: string, fallback: T[] = []): T[] {
+  const collection = contentlayerExports[key];
+  return safeGetCollection(collection, fallback);
 }
 
-// Export types
+// ============================================================================
+// 4. EXPORTED COLLECTIONS
+// ============================================================================
+
+// Main collections
+export const allPosts: PostDocument[] = getCollection('allPosts');
+export const allBooks: BookDocument[] = getCollection('allBooks');
+export const allDownloads: DownloadDocument[] = getCollection('allDownloads');
+export const allEvents: EventDocument[] = getCollection('allEvents');
+export const allPrints: PrintDocument[] = getCollection('allPrints');
+export const allStrategies: StrategyDocument[] = getCollection('allStrategies');
+export const allResources: ResourceDocument[] = getCollection('allResources');
+export const allCanons: CanonDocument[] = getCollection('allCanons');
+export const allDocuments: ContentlayerDocument[] = getCollection('allDocuments');
+
+// Combined collections for convenience
+export const allContent = [...allDocuments];
+export const allPublished = getCollection('allDocuments').filter(doc => !doc.draft);
+
+// ============================================================================
+// 5. HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get all non-draft documents sorted by date (newest first)
+ */
+export function getPublishedDocuments<T extends ContentlayerDocument>(docs: T[] = allDocuments): T[] {
+  return docs
+    .filter(doc => !doc.draft)
+    .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
+}
+
+/**
+ * Get documents by type
+ */
+export function getDocumentsByType<T extends ContentlayerDocument>(type: T['type']): T[] {
+  return allDocuments.filter(doc => doc.type === type) as T[];
+}
+
+/**
+ * Find document by slug
+ */
+export function getDocumentBySlug(slug: string, type?: string): ContentlayerDocument | undefined {
+  const candidates = type 
+    ? allDocuments.filter(doc => doc.type === type)
+    : allDocuments;
+  
+  return candidates.find(doc => doc.slug === slug);
+}
+
+/**
+ * Get featured documents
+ */
+export function getFeaturedDocuments(): ContentlayerDocument[] {
+  return allDocuments.filter(doc => 
+    (doc as any).featured === true && !doc.draft
+  );
+}
+
+/**
+ * Check if contentlayer is properly loaded
+ */
+export function isContentlayerLoaded(): boolean {
+  return Object.keys(contentlayerExports).length > 0;
+}
+
+// ============================================================================
+// 6. TYPE EXPORTS (for convenience)
+// ============================================================================
+
+// Lightweight type aliases
 export type Post = PostDocument;
 export type Book = BookDocument;
 export type Download = DownloadDocument;
 export type Event = EventDocument;
 export type Print = PrintDocument;
-export type Strategy = StrategyDocument;
 export type Resource = ResourceDocument;
 export type Canon = CanonDocument;
+export type Strategy = StrategyDocument;
+
+// Union type for all document types
 export type DocumentTypes = 
   | PostDocument 
   | BookDocument 
@@ -120,3 +247,36 @@ export type DocumentTypes =
   | StrategyDocument 
   | ResourceDocument 
   | CanonDocument;
+
+// Type guard helpers
+export function isPost(doc: ContentlayerDocument): doc is PostDocument {
+  return doc.type === 'Post';
+}
+
+export function isBook(doc: ContentlayerDocument): doc is BookDocument {
+  return doc.type === 'Book';
+}
+
+export function isDownload(doc: ContentlayerDocument): doc is DownloadDocument {
+  return doc.type === 'Download';
+}
+
+export function isEvent(doc: ContentlayerDocument): doc is EventDocument {
+  return doc.type === 'Event';
+}
+
+export function isPrint(doc: ContentlayerDocument): doc is PrintDocument {
+  return doc.type === 'Print';
+}
+
+export function isResource(doc: ContentlayerDocument): doc is ResourceDocument {
+  return doc.type === 'Resource';
+}
+
+export function isCanon(doc: ContentlayerDocument): doc is CanonDocument {
+  return doc.type === 'Canon';
+}
+
+export function isStrategy(doc: ContentlayerDocument): doc is StrategyDocument {
+  return doc.type === 'Strategy';
+}
