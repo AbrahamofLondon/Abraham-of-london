@@ -2,12 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  
-  // NEW: Add experimental configuration for React Email
-  experimental: {
-    serverComponentsExternalPackages: ['@react-email/components'],
-  },
-  
+
+  // 已更新：将 `experimental.serverComponentsExternalPackages` 移至此处
+  serverExternalPackages: ['@react-email/components'],
+
   images: {
     unoptimized: true,
     dangerouslyAllowSVG: true,
@@ -20,7 +18,7 @@ const nextConfig = {
   poweredByHeader: false,
 
   typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
+  // 已移除：`eslint` 配置已废弃。如果要禁用，请在命令行或环境变量中设置。
 
   async redirects() {
     return [
