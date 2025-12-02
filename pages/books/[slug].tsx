@@ -237,6 +237,20 @@ function BookShare({ meta }: BookShareProps): JSX.Element {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Safe access helper functions                                              */
+/* -------------------------------------------------------------------------- */
+
+function safeSplit(str: string | undefined | null, delimiter: string): string[] {
+  if (!str) return [];
+  return str.split(delimiter).map(s => s.trim());
+}
+
+function safeCookieAccess(): string {
+  if (typeof document === "undefined") return "";
+  return document.cookie || "";
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Page Component                                                            */
 /* -------------------------------------------------------------------------- */
 
@@ -249,7 +263,7 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
     coverImage,
     author,
     readTime,
-    tags,
+    tags = [], // Provide default value
     category,
     publishedDate,
     pages,
@@ -267,15 +281,23 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
 
   const [hasAccess, setHasAccess] = React.useState(false);
   const [checkedAccess, setCheckedAccess] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
+    setIsClient(true);
+    
     const checkAccess = () => {
       if (typeof document !== "undefined") {
-        const hasCookie = document.cookie
-          .split(";")
-          .map((part) => part.trim())
-          .some((part) => part.startsWith("innerCircleAccess=true"));
-        setHasAccess(hasCookie);
+        try {
+          const hasCookie = safeCookieAccess()
+            .split(";")
+            .map((part) => part.trim())
+            .some((part) => part.startsWith("innerCircleAccess=true"));
+          setHasAccess(hasCookie);
+        } catch (error) {
+          console.error("Error checking access:", error);
+          setHasAccess(false);
+        }
       }
       setCheckedAccess(true);
     };
@@ -307,6 +329,7 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
     `/books/${slug}`
   )}`;
 
+  // Safe metadata items with null checks
   const metadataItems = [
     { label: "Read time", value: readTime },
     { label: "Published", value: publishedDate },
@@ -316,7 +339,23 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
     { label: "Rating", value: rating ? `${rating}/5` : null },
     { label: "Category", value: category },
     { label: "Price", value: price },
-  ].filter((item) => item.value);
+  ].filter((item) => item.value != null && item.value !== "");
+
+  // Safe tag check
+  const hasTags = tags?.length > 0;
+
+  // Don't render until we're on the client to avoid hydration mismatch
+  if (!isClient && isInnerCircle) {
+    return (
+      <SiteLayout pageTitle={pageTitle} metaDescription={displayDescription}>
+        <div className="min-h-screen bg-charcoal flex items-center justify-center">
+          <div className="text-center text-gray-400">
+            Loading book...
+          </div>
+        </div>
+      </SiteLayout>
+    );
+  }
 
   return (
     <SiteLayout pageTitle={pageTitle} metaDescription={displayDescription}>
@@ -546,7 +585,7 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
           </section>
 
           {/* Additional Info */}
-          {(publisher || (tags && tags.length > 0)) && (
+          {(publisher || hasTags) && (
             <div className="mt-20 border-t border-gray-700 pt-12">
               <h3 className="mb-8 text-center font-serif text-2xl font-semibold text-cream">
                 Book Details
@@ -561,7 +600,7 @@ const BookPage = ({ meta, mdxSource }: BookPageProps): JSX.Element => {
                   </div>
                 )}
 
-                {tags && tags.length > 0 && (
+                {hasTags && (
                   <div className="rounded-xl border border-gray-700/50 bg-black/30 p-6 text-center">
                     <div className="mb-4 text-sm font-semibold text-softGold">
                       Tags & Categories
