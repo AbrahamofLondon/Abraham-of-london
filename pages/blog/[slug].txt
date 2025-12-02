@@ -2,121 +2,284 @@
 
 import * as React from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import type { GetStaticPaths, GetStaticProps } from "next";
 import {
-  MDXRemote,
-  type MDXRemoteSerializeResult,
+  MDXRemote,
+  type MDXRemoteSerializeResult,
 } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
-// Assuming you have separate fetchers for clarity and safety:
 import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
 import { getAllPosts, getPostBySlug } from "@/lib/posts"; 
 import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
-import Comments from "@/components/Comments"; // Imported Comments component
+import Comments from "@/components/Comments";
+import ReadingProgress from "@/components/ReadingProgress"; // NEW: Reading progress bar
+import TableOfContents from "@/components/TableOfContents"; // NEW: Optional TOC
+import ArticleFooter from "@/components/ArticleFooter"; // NEW: Related content, tags, etc.
+import ErrorBoundary from "@/components/ErrorBoundary"; // NEW: Safety wrapper
 
 type PageMeta = PostMeta & {
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
+  coverAspect?: "book" | "wide" | "square";
+  coverFit?: "cover" | "contain";
+  toc?: boolean; // NEW: Enable table of contents
+  related?: string[]; // NEW: Related content slugs
 };
 
 type PageProps = {
-  meta: PageMeta;
-  mdxSource: MDXRemoteSerializeResult;
-  contentKind: string; // NEW PROP: Pass the collection key
+  meta: PageMeta;
+  mdxSource: MDXRemoteSerializeResult;
+  contentKind: string;
+  estimatedReadingTime?: number; // NEW: More accurate reading time
 };
 
-// Define collections to check
+// Define collections
 const BLOG_COLLECTION = "Post";
-const FALLBACK_COLLECTIONS = ["Print", "Resource", "Page"] as const; // Added 'Page' for generic templates
+const FALLBACK_COLLECTIONS = ["Print", "Resource", "Page"] as const;
 const ALL_COLLECTIONS = [BLOG_COLLECTION, ...FALLBACK_COLLECTIONS];
+
+// -----------------------------------------------------------------------------
+// Custom hook for reading progress
+// -----------------------------------------------------------------------------
+const useReadingProgress = () => {
+  const [progress, setProgress] = React.useState(0);
+  
+  React.useEffect(() => {
+    const updateProgress = () => {
+      const article = document.querySelector("article");
+      if (!article) return;
+      
+      const articleRect = article.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      const scrolled = window.scrollY;
+      const totalHeight = documentHeight - windowHeight;
+      
+      const progress = totalHeight > 0 ? (scrolled / totalHeight) * 100 : 0;
+      setProgress(Math.min(100, Math.max(0, progress)));
+    };
+    
+    window.addEventListener("scroll", updateProgress);
+    window.addEventListener("resize", updateProgress);
+    updateProgress();
+    
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+    };
+  }, []);
+  
+  return progress;
+};
+
+// -----------------------------------------------------------------------------
+// Helper: Calculate reading time from content
+// -----------------------------------------------------------------------------
+const calculateReadingTime = (content: string): number => {
+  const wordsPerMinute = 200;
+  const wordCount = content.split(/\s+/).length;
+  return Math.ceil(wordCount / wordsPerMinute);
+};
 
 // -----------------------------------------------------------------------------
 // Page component
 // -----------------------------------------------------------------------------
 
-function ContentPage({ meta, mdxSource, contentKind }: PageProps): JSX.Element {
-  const {
-    title,
-    description,
-    excerpt,
-    category,
-    tags,
-    date,
-    readTime,
-    coverImage,
-    coverAspect,
-    coverFit,
-  } = meta;
+function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: PageProps): JSX.Element {
+  const router = useRouter();
+  const readingProgress = useReadingProgress();
+  
+  const {
+    title,
+    description,
+    excerpt,
+    category,
+    tags = [],
+    date,
+    readTime,
+    coverImage,
+    coverAspect,
+    coverFit,
+    toc = false, // Default to no TOC
+    related = [],
+  } = meta;
 
-  const displaySubtitle = excerpt || description || undefined;
+  // Use provided reading time or calculated one
+  const displayReadTime = estimatedReadingTime || readTime || 5;
+  
+  // Enhanced subtitle with fallback chain
+  const displaySubtitle = excerpt || description || undefined;
+  
+  // Determine primary category safely
+  const primaryCategory = React.useMemo(() => {
+    if (category) return category;
+    if (Array.isArray(tags) && tags.length > 0) {
+      return typeof tags[0] === 'string' ? tags[0] : 'Article';
+    }
+    return "Article";
+  }, [category, tags]);
 
-  const primaryCategory =
-    category ||
-    (Array.isArray(tags) && tags.length > 0 ? String(tags[0]) : "Article");
+  const canonicalTitle = title || "Abraham of London";
+  const displayDescription = description || excerpt || "";
+  
+  // Conditional rendering
+  const showComments = contentKind === BLOG_COLLECTION;
+  const showTOC = toc && contentKind === BLOG_COLLECTION; // Only show TOC for blogs if enabled
 
-  const canonicalTitle = title || "Abraham of London";
-  const displayDescription = description || excerpt || "";
+  return (
+    <ErrorBoundary>
+      <Layout title={canonicalTitle}>
+        <Head>
+          <title>{canonicalTitle} | Abraham of London</title>
+          <meta name="description" content={displayDescription} />
+          
+          {/* Open Graph Meta Tags */}
+          <meta property="og:title" content={canonicalTitle} />
+          <meta property="og:description" content={displayDescription} />
+          <meta property="og:type" content={contentKind === BLOG_COLLECTION ? "article" : "website"} />
+          <meta property="og:url" content={`https://abrahamoflondon.com${router.asPath}`} />
+          {coverImage && <meta property="og:image" content={coverImage as string} />}
+          
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={canonicalTitle} />
+          <meta name="twitter:description" content={displayDescription} />
+          {coverImage && <meta name="twitter:image" content={coverImage as string} />}
+          
+          {/* Structured Data for Blog Posts */}
+          {contentKind === BLOG_COLLECTION && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "BlogPosting",
+                  headline: canonicalTitle,
+                  description: displayDescription,
+                  image: coverImage,
+                  datePublished: date,
+                  author: {
+                    "@type": "Person",
+                    name: "Abraham of London"
+                  }
+                })
+              }}
+            />
+          )}
+        </Head>
 
-  // FIX: Conditional rendering based on contentKind
-  const showComments = contentKind === BLOG_COLLECTION; 
+        {/* Reading Progress Bar */}
+        <ReadingProgress progress={readingProgress} />
 
+        <ArticleHero
+          title={title}
+          subtitle={displaySubtitle}
+          category={primaryCategory}
+          date={date}
+          readTime={displayReadTime}
+          coverImage={coverImage as string | undefined}
+          coverAspect={coverAspect}
+          coverFit={coverFit}
+        />
 
-  return (
-    <Layout title={canonicalTitle}>
-      <Head>
-        <title>{canonicalTitle} | Abraham of London</title>
-        {displayDescription && (
-          <meta name="description" content={displayDescription} />
-        )}
-      </Head>
+        <main className="relative">
+          <div className="mx-auto w-full max-w-7xl px-4 lg:px-8">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+              {/* Sidebar for TOC (desktop only) */}
+              {showTOC && (
+                <aside className="lg:w-64 flex-shrink-0 hidden lg:block">
+                  <div className="sticky top-32">
+                    <TableOfContents 
+                      content={mdxSource.compiledSource}
+                      className="border-l-2 border-softGold pl-4"
+                    />
+                  </div>
+                </aside>
+              )}
 
-      <ArticleHero
-        title={title}
-        subtitle={displaySubtitle}
-        category={primaryCategory}
-        date={date}
-        readTime={readTime}
-        coverImage={coverImage as string | undefined}
-        coverAspect={coverAspect}
-        coverFit={coverFit}
-      />
+              {/* Main Content */}
+              <div className="flex-1 min-w-0">
+                <article className="max-w-3xl mx-auto pb-16 pt-10">
+                  <div
+                    className="
+                      prose prose-lg max-w-none
+                      prose-headings:font-serif prose-headings:text-aol-text dark:prose-headings:text-cream
+                      prose-headings:scroll-mt-24 /* For anchor links */
+                      prose-p:text-aol-text dark:prose-p:text-gray-200 prose-p:leading-relaxed prose-p:tracking-wide
+                      prose-strong:text-aol-text dark:prose-strong:text-cream prose-strong:font-semibold
+                      prose-a:text-softGold prose-a:no-underline hover:prose-a:text-amber-500 hover:prose-a:underline
+                      prose-a:transition-colors prose-a:duration-200
+                      prose-ul:text-aol-text dark:prose-ul:text-gray-200 prose-ol:text-aol-text dark:prose-ol:text-gray-200
+                      prose-blockquote:border-l-4 prose-blockquote:border-softGold 
+                      prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-aol-text dark:prose-blockquote:text-gray-100
+                      prose-hr:border-t-2 prose-hr:border-aol-border-subtle dark:prose-hr:border-white/10
+                      prose-img:rounded-2xl prose-img:shadow-2xl prose-img:transition-transform hover:prose-img:scale-[1.02]
+                      prose-code:text-softGold prose-code:bg-aol-bg-subtle dark:prose-code:bg-gray-800
+                      prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                      prose-pre:bg-aol-bg-subtle dark:prose-pre:bg-gray-900 prose-pre:shadow-lg
+                      prose-table:border prose-table:border-aol-border dark:prose-table:border-gray-700
+                      prose-th:bg-aol-bg-subtle dark:prose-th:bg-gray-800
+                      prose-td:border-t prose-td:border-aol-border dark:prose-td:border-gray-700
+                    "
+                  >
+                    <MDXRemote {...mdxSource} components={mdxComponents} />
+                  </div>
 
-      <main>
-        <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 lg:px-0">
-          <div
-            className="
-              prose prose-lg max-w-none
-              prose-headings:font-serif prose-headings:text-aol-text dark:prose-headings:text-cream
-              prose-p:text-aol-text dark:prose-p:text-gray-200 prose-p:leading-relaxed
-              prose-strong:text-aol-text dark:prose-strong:text-cream prose-strong:font-semibold
-              prose-a:text-softGold prose-a:no-underline hover:prose-a:underline
-              prose-ul:text-aol-text dark:prose-ul:text-gray-200 prose-ol:text-aol-text dark:prose-ol:text-gray-200
-              prose-blockquote:border-l-softGold prose-blockquote:text-aol-text dark:prose-blockquote:text-gray-100
-              prose-hr:border-t border-aol-border-subtle dark:prose-hr:border-white/10
-              prose-img:rounded-xl prose-img:shadow-lg
-            "
-          >
-            <MDXRemote {...mdxSource} components={mdxComponents} />
-          </div>
-          
-          {/* Render Comments section only for blog posts */}
-          {showComments && (
-            <div className="mt-20 pt-8 border-t border-aol-border-subtle">
-              <Comments 
-                issueTerm="pathname"
-                label="discussion" 
-                className="pb-16"
-              />
-            </div>
-          )}
-        </article>
-      </main>
-    </Layout>
-  );
+                  {/* Article Footer with tags, share buttons, etc. */}
+                  <ArticleFooter
+                    tags={Array.isArray(tags) ? tags : []}
+                    title={title}
+                    url={`https://abrahamoflondon.com${router.asPath}`}
+                    category={primaryCategory}
+                    date={date}
+                    related={related}
+                  />
+
+                  {/* Render Comments section only for blog posts */}
+                  {showComments && (
+                    <div className="mt-20 pt-10 border-t border-aol-border-subtle dark:border-white/10">
+                      <div className="max-w-2xl mx-auto">
+                        <h3 className="text-2xl font-serif font-semibold text-aol-text dark:text-cream mb-6">
+                          Join the Conversation
+                        </h3>
+                        <Comments 
+                          issueTerm="pathname"
+                          label="discussion" 
+                          theme="preferred_color_scheme"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </article>
+              </div>
+
+              {/* Optional right sidebar for related content on desktop */}
+              {related.length > 0 && (
+                <aside className="lg:w-72 flex-shrink-0 hidden lg:block">
+                  <div className="sticky top-32">
+                    <div className="bg-aol-bg-subtle dark:bg-gray-900 rounded-xl p-6 border border-aol-border-subtle">
+                      <h4 className="font-serif text-lg font-semibold text-aol-text dark:text-cream mb-4">
+                        Further Reading
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Explore related content
+                      </p>
+                      {/* Related content links would be fetched and rendered here */}
+                    </div>
+                  </div>
+                </aside>
+              )}
+            </div>
+          </div>
+        </main>
+      </Layout>
+    </ErrorBoundary>
+  );
 }
 
 export default ContentPage;
@@ -126,39 +289,45 @@ export default ContentPage;
 // -----------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const allItems: any[] = [];
+  try {
+    const allItems: Array<{ slug: string }> = [];
 
-    // FIX: Explicitly fetch blog posts using its dedicated utility
-    const posts = await getAllPosts(); 
-    allItems.push(...posts);
+    // Fetch blog posts using dedicated utility
+    const posts = await getAllPosts();
+    allItems.push(...posts.map(post => ({ slug: post.slug })));
 
-    // Gather slugs from fallback collections (optional, but safe)
-    for (const key of FALLBACK_COLLECTIONS) {
-      const items = getAllContent(key) ?? [];
-      allItems.push(...items);
-    }
+    // Gather slugs from fallback collections
+    for (const key of FALLBACK_COLLECTIONS) {
+      const items = getAllContent(key) ?? [];
+      items.forEach(item => {
+        if (item?.slug) {
+          allItems.push({ slug: String(item.slug) });
+        }
+      });
+    }
 
-    const seen = new Set<string>();
-    const paths =
-      allItems
-        .filter((item) => item?.slug)
-        .map((item) => String(item.slug))
-        .filter((slug) => {
-          if (seen.has(slug)) return false;
-          seen.add(slug);
-          return true;
-        })
-        .map((slug) => ({ params: { slug } }));
+    // Deduplicate slugs
+    const seen = new Set<string>();
+    const paths = allItems
+      .filter(item => item?.slug)
+      .map(item => String(item.slug))
+      .filter(slug => {
+        if (seen.has(slug)) return false;
+        seen.add(slug);
+        return true;
+      })
+      .map(slug => ({ params: { slug } }));
 
-    return {
-      paths,
-      fallback: "blocking",
-    };
-  } catch (err) {
-    console.error("Error generating static paths for /[slug]:", err);
-    return { paths: [], fallback: "blocking" };
-  }
+    console.log(`Generated ${paths.length} static paths for /[slug]`);
+    
+    return {
+      paths,
+      fallback: "blocking",
+    };
+  } catch (err) {
+    console.error("Error generating static paths for /[slug]:", err);
+    return { paths: [], fallback: "blocking" };
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -166,64 +335,88 @@ export const getStaticPaths: GetStaticPaths = async () => {
 // -----------------------------------------------------------------------------
 
 export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  try {
-    const slugParam = params?.slug;
-    const slug =
-      typeof slugParam === "string"
-        ? slugParam
-        : Array.isArray(slugParam)
-        ? slugParam[0]
-        : "";
+  try {
+    const slugParam = params?.slug;
+    const slug = typeof slugParam === "string"
+      ? slugParam
+      : Array.isArray(slugParam)
+      ? slugParam[0]
+      : "";
 
-    if (!slug) return { notFound: true };
-
-    let data: (PageMeta & { content?: string }) | null = null;
-    let contentKind: string | null = null; // Track content type
-
-    // 1. Try Blog Post first (Primary)
-    const postCandidate = await getPostBySlug(slug);
-    if (postCandidate) {
-        data = postCandidate as PageMeta & { content?: string };
-        contentKind = BLOG_COLLECTION;
+    if (!slug) {
+      return { notFound: true };
     }
 
-    // 2. If no post found, try Fallback Collections
-    if (!data) {
-      for (const key of FALLBACK_COLLECTIONS) {
-        const candidate = getContentBySlug(key, slug, {
-          withContent: true,
-        }) as (PageMeta & { content?: string }) | null;
+    let data: (PageMeta & { content?: string }) | null = null;
+    let contentKind: string | null = null;
 
-        if (candidate) {
-          data = candidate;
-          contentKind = key;
-          break;
-        }
-      }
-    }
+    // 1. Try Blog Post first (Primary)
+    const postCandidate = await getPostBySlug(slug);
+    if (postCandidate) {
+      data = postCandidate as PageMeta & { content?: string };
+      contentKind = BLOG_COLLECTION;
+    }
 
-    if (!data || !contentKind) return { notFound: true };
+    // 2. If no post found, try Fallback Collections
+    if (!data) {
+      for (const key of FALLBACK_COLLECTIONS) {
+        const candidate = getContentBySlug(key, slug, {
+          withContent: true,
+        }) as (PageMeta & { content?: string }) | null;
 
-    const { content, ...meta } = data;
+        if (candidate) {
+          data = candidate;
+          contentKind = key;
+          break;
+        }
+      }
+    }
 
-    if (!meta.title) return { notFound: true };
+    if (!data || !contentKind) {
+      console.warn(`No content found for slug: ${slug}`);
+      return { notFound: true };
+    }
 
-    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+    const { content, ...meta } = data;
 
-    const mdxSource = await serialize(content || "", {
-      scope: jsonSafeMeta as unknown as Record<string, unknown>,
-    });
+    if (!meta.title) {
+      return { notFound: true };
+    }
 
-    return {
-      props: {
-        meta: jsonSafeMeta,
-        mdxSource,
-        contentKind, // Pass the identified content type
-      },
-      revalidate: 3600,
-    };
-  } catch (err) {
-    console.error("Error in getStaticProps for /[slug]:", err);
-    return { notFound: true };
-  }
+    // Calculate more accurate reading time
+    const estimatedReadingTime = content ? calculateReadingTime(content) : undefined;
+
+    // Create JSON-safe meta
+    const jsonSafeMeta = JSON.parse(JSON.stringify(meta)) as PageMeta;
+
+    // Serialize MDX with enhanced options
+    const mdxSource = await serialize(content || "", {
+      scope: jsonSafeMeta as unknown as Record<string, unknown>,
+      mdxOptions: {
+        remarkPlugins: [
+          // Optional: Add remark plugins here
+          // require('remark-gfm'),
+          // require('remark-slug'),
+        ],
+        rehypePlugins: [
+          // Optional: Add rehype plugins here
+          // require('rehype-autolink-headings'),
+        ],
+      },
+      parseFrontmatter: false, // Already parsed
+    });
+
+    return {
+      props: {
+        meta: jsonSafeMeta,
+        mdxSource,
+        contentKind,
+        estimatedReadingTime,
+      },
+      revalidate: process.env.NODE_ENV === 'production' ? 3600 : 60,
+    };
+  } catch (err) {
+    console.error("Error in getStaticProps for /[slug]:", err);
+    return { notFound: true };
+  }
 };
