@@ -25,20 +25,25 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "src/*",
+        "*"
       ],
       "@/components/*": [
-        "src/components/*"
+        "src/components/*",
+        "components/*"
+      ],
+      "@/lib/*": [
+        "src/lib/*",
+        "lib/*"
+      ],
+      "@/types/*": [
+        "types/*"
       ],
       "contentlayer/generated": [
         ".contentlayer/generated"
       ]
     },
-    "strictNullChecks": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -46,9 +51,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".contentlayer/generated",
-    ".next/dev/types/**/*.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
