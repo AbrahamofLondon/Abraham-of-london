@@ -29,7 +29,7 @@
     "build:safe": "npx cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 pnpm run content:build && next build",
     "build:fast": "pnpm run content:build && next build",
     "build:netlify": "pnpm run guard:conflicts && pnpm run build:netlify:safe",
-    "build:netlify:safe": "CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer2 build && next build",
+    "build:netlify:safe": "cross-env CI=false NEXT_DISABLE_ESLINT=1 NEXT_DISABLE_TYPECHECK=1 contentlayer2 build && next build",
     "build:ci": "pnpm run build:netlify:safe",
     "check": "pnpm run lint && pnpm run typecheck",
     "check:safe": "pnpm run lint:safe && pnpm run typecheck:safe",
@@ -52,6 +52,9 @@
     "@react-email/components": "0.0.23",
     "@react-pdf/renderer": "4.3.1",
     "@tailwindcss/typography": "0.5.19",
+    "@types/node": "20.11.30",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
     "autoprefixer": "10.4.20",
     "better-sqlite3": "12.5.0",
     "clsx": "2.1.1",
@@ -79,16 +82,13 @@
     "styled-jsx": "5.1.7",
     "tailwind-merge": "3.4.0",
     "tailwindcss": "3.4.14",
+    "typescript": "5.6.3",
     "ws": "8.18.3"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "5.14.5",
-    "@react-email/components": "0.0.23",
     "@types/mdx": "^2.0.13",
-    "@types/node": "20.11.30",
     "@types/pg": "8.15.6",
-    "@types/react": "18.3.12",
-    "@types/react-dom": "18.3.1",
     "@types/ws": "8.5.10",
     "@typescript-eslint/eslint-plugin": "8.46.4",
     "@typescript-eslint/parser": "8.46.4",
@@ -99,8 +99,7 @@
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
-    "tsx": "^4.20.6",
-    "typescript": "5.6.3"
+    "tsx": "^4.20.6"
   },
   "pnpm": {
     "overrides": {
