@@ -1,5 +1,5 @@
 // lib/server/books-data.ts
-// Books under content/books/*
+// Books under content/books/* - COMPLETE UPDATED VERSION
 
 import {
   getMdxCollectionMeta,
@@ -20,6 +20,7 @@ export type BookWithContent = BookMeta & {
 type BookishMdxMeta = MdxMeta &
   Partial<SharedBookMeta> & {
     publishDate?: string; // allow alternate date field
+    releaseDate?: string; // another alternate for date
   };
 
 type BookishMdxDocument = MdxDocument & {
@@ -82,19 +83,40 @@ function safeStatus(
 }
 
 /**
+ * Safely convert format field
+ */
+function safeFormat(
+  value: unknown
+): "hardcover" | "paperback" | "ebook" | "audiobook" | undefined {
+  const validFormats = ["hardcover", "paperback", "ebook", "audiobook"];
+  if (typeof value === "string" && validFormats.includes(value.toLowerCase())) {
+    return value.toLowerCase() as typeof validFormats[number];
+  }
+  return undefined;
+}
+
+/**
  * Map generic MDX meta into a fully shaped BookMeta.
  * We assume MDX frontmatter matches a subset of SharedBookMeta.
  */
 function fromMdxMeta(meta: MdxMeta): BookMeta {
   const m = meta as BookishMdxMeta;
 
-  // Handle different date fields - prefer date, then publishDate
-  const date = safeString(m.date) || safeString(m.publishDate);
+  // Handle different date fields - prefer date, then publishDate, then releaseDate
+  const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
+  
+  // Ensure required fields have defaults
+  const slug = safeString(m.slug) || "";
+  const title = safeString(m.title) || "Untitled";
+  
+  if (!slug || !title) {
+    console.warn(`Book metadata missing slug or title: ${slug} - ${title}`);
+  }
 
   return {
-    // Core identifiers
-    slug: safeString(m.slug) || "",
-    title: safeString(m.title) || "Untitled",
+    // Core identifiers - REQUIRED
+    slug,
+    title,
 
     // Optional string fields
     subtitle: safeString(m.subtitle),
@@ -126,15 +148,15 @@ function fromMdxMeta(meta: MdxMeta): BookMeta {
     draft: safeBoolean(m.draft),
 
     // Optional typed fields
-    format: safeString(m.format) as
-      | "hardcover"
-      | "paperback"
-      | "ebook"
-      | "audiobook"
-      | undefined,
+    format: safeFormat(m.format),
 
     // Status – enforce union type
     status: safeStatus(m.status),
+    
+    // Additional fields that might be useful
+    series: safeString(m.series),
+    volume: safeNumber(m.volume),
+    edition: safeString(m.edition),
   };
 }
 
@@ -145,21 +167,283 @@ function fromMdxDocument(doc: MdxDocument): BookWithContent {
   const bookDoc = doc as BookishMdxDocument;
   const { content, ...rest } = bookDoc;
   const meta = fromMdxMeta(rest);
-  return { ...meta, content: typeof content === "string" ? content : "" };
+  return { 
+    ...meta, 
+    content: typeof content === "string" ? content : "" 
+  };
 }
 
 /**
  * All books – meta only.
  */
 export function getAllBooksMeta(): BookMeta[] {
-  const metas = getMdxCollectionMeta("books");
-  return metas.map((m) => fromMdxMeta(m));
+  try {
+    const metas = getMdxCollectionMeta("books");
+    if (!metas || !Array.isArray(metas)) {
+      console.warn("No books metadata found or metadata is not an array");
+      return [];
+    }
+    
+    const books = metas.map((m) => fromMdxMeta(m));
+    
+    // Filter out invalid books
+    const validBooks = books.filter(book => book.slug && book.title);
+    
+    console.log(`Found ${validBooks.length} valid books out of ${metas.length} total`);
+    return validBooks;
+  } catch (error) {
+    console.error("Error fetching all books meta:", error);
+    return [];
+  }
 }
 
 /**
  * Single book – meta + content.
  */
 export function getBookBySlug(slug: string): BookWithContent | null {
-  const doc = getMdxDocumentBySlug("books", slug);
-  return doc ? fromMdxDocument(doc) : null;
+  try {
+    if (!slug) {
+      console.error("getBookBySlug called with empty slug");
+      return null;
+    }
+    
+    const doc = getMdxDocumentBySlug("books", slug);
+    if (!doc) {
+      console.warn(`No book found for slug: ${slug}`);
+      return null;
+    }
+    
+    return fromMdxDocument(doc);
+  } catch (error) {
+    console.error(`Error fetching book by slug (${slug}):`, error);
+    return null;
+  }
 }
+
+/**
+ * Get all books with content - for comprehensive listing
+ */
+export function getAllBooks(): BookWithContent[] {
+  try {
+    const metas = getAllBooksMeta();
+    if (metas.length === 0) return [];
+    
+    const booksWithContent: BookWithContent[] = [];
+    
+    for (const meta of metas) {
+      const book = getBookBySlug(meta.slug);
+      if (book) {
+        booksWithContent.push(book);
+      }
+    }
+    
+    return booksWithContent;
+  } catch (error) {
+    console.error("Error fetching all books:", error);
+    return [];
+  }
+}
+
+/**
+ * Get books by category
+ */
+export function getBooksByCategory(category: string): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    const normalizedCategory = category.toLowerCase().trim();
+    
+    return books.filter(book => {
+      const bookCategory = book.category?.toLowerCase().trim();
+      return bookCategory === normalizedCategory;
+    });
+  } catch (error) {
+    console.error(`Error fetching books by category (${category}):`, error);
+    return [];
+  }
+}
+
+/**
+ * Get books by tag
+ */
+export function getBooksByTag(tag: string): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    const normalizedTag = tag.toLowerCase().trim();
+    
+    return books.filter(book => {
+      return book.tags?.some(t => t.toLowerCase().trim() === normalizedTag);
+    });
+  } catch (error) {
+    console.error(`Error fetching books by tag (${tag}):`, error);
+    return [];
+  }
+}
+
+/**
+ * Get featured books
+ */
+export function getFeaturedBooks(): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    return books.filter(book => book.featured === true);
+  } catch (error) {
+    console.error("Error fetching featured books:", error);
+    return [];
+  }
+}
+
+/**
+ * Get published books only (filter out drafts)
+ */
+export function getPublishedBooks(): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    return books.filter(book => book.draft !== true && book.status !== "draft");
+  } catch (error) {
+    console.error("Error fetching published books:", error);
+    return [];
+  }
+}
+
+/**
+ * Search books by title, description, or tags
+ */
+export function searchBooks(query: string): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    if (!normalizedQuery) return books;
+    
+    return books.filter(book => {
+      // Search in title
+      if (book.title.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in subtitle
+      if (book.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in description
+      if (book.description?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in excerpt
+      if (book.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      // Search in tags
+      if (book.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
+      
+      // Search in category
+      if (book.category?.toLowerCase().includes(normalizedQuery)) return true;
+      
+      return false;
+    });
+  } catch (error) {
+    console.error(`Error searching books (${query}):`, error);
+    return [];
+  }
+}
+
+/**
+ * Get recent books (sorted by date, newest first)
+ */
+export function getRecentBooks(limit?: number): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    
+    // Sort by date (newest first)
+    const sorted = books.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+    
+    return limit ? sorted.slice(0, limit) : sorted;
+  } catch (error) {
+    console.error("Error fetching recent books:", error);
+    return [];
+  }
+}
+
+/**
+ * Get books by format (hardcover, paperback, etc.)
+ */
+export function getBooksByFormat(format: string): BookMeta[] {
+  try {
+    const books = getAllBooksMeta();
+    const normalizedFormat = format.toLowerCase().trim();
+    
+    return books.filter(book => 
+      book.format?.toLowerCase().trim() === normalizedFormat
+    );
+  } catch (error) {
+    console.error(`Error fetching books by format (${format}):`, error);
+    return [];
+  }
+}
+
+/**
+ * Get all unique categories from books
+ */
+export function getAllBookCategories(): string[] {
+  try {
+    const books = getAllBooksMeta();
+    const categories = books
+      .map(book => book.category)
+      .filter((category): category is string => 
+        typeof category === "string" && category.trim().length > 0
+      );
+    
+    // Remove duplicates
+    return [...new Set(categories)];
+  } catch (error) {
+    console.error("Error fetching book categories:", error);
+    return [];
+  }
+}
+
+/**
+ * Get all unique tags from books
+ */
+export function getAllBookTags(): string[] {
+  try {
+    const books = getAllBooksMeta();
+    const allTags = books
+      .flatMap(book => book.tags || [])
+      .filter((tag): tag is string => typeof tag === "string");
+    
+    // Remove duplicates and sort alphabetically
+    return [...new Set(allTags)].sort();
+  } catch (error) {
+    console.error("Error fetching book tags:", error);
+    return [];
+  }
+}
+
+/**
+ * Get book slugs for static generation
+ */
+export function getAllBookSlugs(): string[] {
+  try {
+    const books = getAllBooksMeta();
+    return books.map(book => book.slug).filter(Boolean);
+  } catch (error) {
+    console.error("Error fetching book slugs:", error);
+    return [];
+  }
+}
+
+// Export everything
+export default {
+  getAllBooksMeta,
+  getBookBySlug,
+  getAllBooks,
+  getBooksByCategory,
+  getBooksByTag,
+  getFeaturedBooks,
+  getPublishedBooks,
+  searchBooks,
+  getRecentBooks,
+  getBooksByFormat,
+  getAllBookCategories,
+  getAllBookTags,
+  getAllBookSlugs,
+};

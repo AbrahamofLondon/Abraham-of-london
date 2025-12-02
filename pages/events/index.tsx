@@ -1,3 +1,4 @@
+// pages/events/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -19,11 +20,58 @@ interface EventListing {
   heroImage?: string | null;
   coverImage?: string | null;
   tags?: string[];
+  endDate?: string | null; // Added for multi-day events
 }
 
 interface EventsPageProps {
   events: EventListing[];
 }
+
+// Helper function to compare dates properly
+const compareDates = (dateString1: string, dateString2: string): number => {
+  // Use UTC dates to avoid timezone issues
+  const date1 = new Date(dateString1);
+  const date2 = new Date(dateString2);
+  
+  // Normalize to start of day in UTC
+  const utcDate1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
+  const utcDate2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
+  
+  return utcDate1 - utcDate2;
+};
+
+// Helper to check if event is in the future
+const isFutureEvent = (eventDate: string): boolean => {
+  const now = new Date();
+  const event = new Date(eventDate);
+  
+  // Compare using UTC to avoid timezone issues
+  const nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const eventUTC = Date.UTC(event.getFullYear(), event.getMonth(), event.getDate());
+  
+  // For multi-day events, check if endDate is in the future
+  return eventUTC >= nowUTC;
+};
+
+// Helper to check if event is currently happening (for multi-day events)
+const isCurrentEvent = (event: EventListing): boolean => {
+  if (!event.date) return false;
+  
+  const now = new Date();
+  const startDate = new Date(event.date);
+  const endDate = event.endDate ? new Date(event.endDate) : null;
+  
+  const nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const startUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  
+  if (!endDate) {
+    // Single day event - check if it's today
+    return startUTC === nowUTC;
+  }
+  
+  const endUTC = Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+  return nowUTC >= startUTC && nowUTC <= endUTC;
+};
 
 export default function EventsPage({ events }: EventsPageProps) {
   const pageTitle = "Events & Gatherings";
@@ -33,21 +81,32 @@ export default function EventsPage({ events }: EventsPageProps) {
     return [...events].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+      return dateB - dateA; // Most recent first
     });
   }, [events]);
 
-  // Separate into upcoming and past events
+  // Separate into upcoming and past events with proper date handling
   const now = new Date();
   const upcomingEvents = sortedEvents.filter((event) => {
     if (!event.date) return false;
-    return new Date(event.date) >= now;
+    
+    // Check if it's currently happening
+    if (isCurrentEvent(event)) return true;
+    
+    // Check if it's in the future
+    return isFutureEvent(event.date);
   });
 
   const pastEvents = sortedEvents.filter((event) => {
     if (!event.date) return false;
-    return new Date(event.date) < now;
+    
+    // Check if it's not current and not future
+    return !isCurrentEvent(event) && !isFutureEvent(event.date);
   });
+
+  // Add a "happening now" category
+  const currentEvents = upcomingEvents.filter(event => isCurrentEvent(event));
+  const futureEvents = upcomingEvents.filter(event => !isCurrentEvent(event));
 
   return (
     <Layout title={pageTitle}>
@@ -87,8 +146,40 @@ export default function EventsPage({ events }: EventsPageProps) {
           </div>
         </section>
 
+        {/* Current Events (if any) */}
+        {currentEvents.length > 0 && (
+          <section className="py-16">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <div className="mb-12">
+                <div className="mb-4 flex items-center gap-3">
+                  <h2 className="font-serif text-3xl font-bold text-cream">
+                    Happening Now
+                  </h2>
+                  <span className="animate-pulse rounded-full bg-amber-500/20 px-3 py-1 text-sm font-semibold text-amber-300">
+                    Live
+                  </span>
+                </div>
+                <p className="max-w-2xl text-gold/70">
+                  Events currently underway. Join us or follow along.
+                </p>
+              </div>
+
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {currentEvents.map((event, index) => (
+                  <EventCard 
+                    key={event.slug} 
+                    event={event} 
+                    index={index} 
+                    status="current"
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Upcoming Events */}
-        <section className="py-16">
+        <section className={`${currentEvents.length > 0 ? 'pt-8' : 'py-16'}`}>
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12">
               <h2 className="mb-4 font-serif text-3xl font-bold text-cream">
@@ -100,10 +191,15 @@ export default function EventsPage({ events }: EventsPageProps) {
               </p>
             </div>
 
-            {upcomingEvents.length > 0 ? (
+            {futureEvents.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {upcomingEvents.map((event, index) => (
-                  <EventCard key={event.slug} event={event} index={index} />
+                {futureEvents.map((event, index) => (
+                  <EventCard 
+                    key={event.slug} 
+                    event={event} 
+                    index={index} 
+                    status="upcoming"
+                  />
                 ))}
               </div>
             ) : (
@@ -147,7 +243,7 @@ export default function EventsPage({ events }: EventsPageProps) {
                     key={event.slug}
                     event={event}
                     index={index}
-                    isPast
+                    status="past"
                   />
                 ))}
               </div>
@@ -192,22 +288,62 @@ export default function EventsPage({ events }: EventsPageProps) {
 function EventCard({
   event,
   index,
-  isPast = false,
+  status = "upcoming",
 }: {
   event: EventListing;
   index: number;
-  isPast?: boolean;
+  status?: "current" | "upcoming" | "past";
 }) {
-  const displayDate = event.date
-    ? new Intl.DateTimeFormat("en-GB", {
+  const displayDate = React.useMemo(() => {
+    if (!event.date) return null;
+    
+    const startDate = new Date(event.date);
+    
+    if (event.endDate) {
+      const endDate = new Date(event.endDate);
+      const startFormatted = new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+      }).format(startDate);
+      
+      const endFormatted = new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
-      }).format(new Date(event.date))
-    : null;
+      }).format(endDate);
+      
+      return `${startFormatted} - ${endFormatted}`;
+    }
+    
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(startDate);
+  }, [event.date, event.endDate]);
 
   const hasImage = !!(event.heroImage || event.coverImage);
   const imageSrc = event.heroImage || event.coverImage || undefined;
+
+  const statusConfig = {
+    current: {
+      label: "Happening Now",
+      color: "bg-amber-500",
+      textColor: "text-amber-300",
+    },
+    upcoming: {
+      label: "Coming Soon",
+      color: "bg-emerald-500/20",
+      textColor: "text-emerald-300",
+    },
+    past: {
+      label: "Past Event",
+      color: "bg-gray-500/20",
+      textColor: "text-gray-300",
+    },
+  };
+
+  const config = statusConfig[status];
 
   return (
     <motion.article
@@ -228,10 +364,13 @@ function EventCard({
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-            {isPast && (
-              <div className="absolute right-4 top-4 rounded-full bg-charcoal/90 px-3 py-1 text-xs font-semibold text-gold">
-                Past Event
-              </div>
+            <div className="absolute right-4 top-4">
+              <span className={`rounded-full ${config.color} px-3 py-1 text-xs font-semibold ${config.textColor}`}>
+                {config.label}
+              </span>
+            </div>
+            {status === "current" && (
+              <div className="absolute inset-0 animate-pulse border-2 border-amber-400/30" />
             )}
           </div>
         )}
@@ -279,7 +418,7 @@ function EventCard({
 
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm font-semibold text-gold group-hover:underline">
-              View Details →
+              {status === "current" ? "Join Now →" : "View Details →"}
             </span>
           </div>
         </div>
@@ -288,7 +427,7 @@ function EventCard({
   );
 }
 
-// Static Generation – now uses getAllEventsSafe + resolveCoverImage
+// Static Generation
 export async function getStaticProps() {
   try {
     const rawEvents = getAllEventsSafe();
@@ -310,6 +449,7 @@ export async function getStaticProps() {
           slug,
           title: safeString(event.title) || "Untitled Event",
           date: safeString(event.date),
+          endDate: safeString((event as any).endDate), // Added endDate
           time: safeString(event.time),
           location: safeString(event.location),
           description:
