@@ -3,43 +3,38 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  serverExternalPackages: ['@react-email/components', 'better-sqlite3'],
-  
+  serverExternalPackages: ["@react-email/components", "better-sqlite3"],
+
   images: {
     unoptimized: true,
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
-    formats: ['image/avif', 'image/webp'],
+    contentDispositionType: "attachment",
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    formats: ["image/avif", "image/webp"],
   },
-  
+
   compress: true,
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: true },
-  
-  // Remove the 'turbo' option or use correct version
-  // experimental: {
-  //   turbo: undefined, // REMOVE THIS LINE
-  // },
-  
+
   async redirects() {
     return [
-      { source: '/blog', destination: '/content', permanent: true },
-      { source: '/books', destination: '/content', permanent: true },
-      { source: '/articles', destination: '/content', permanent: true },
+      // ❌ OLD: These were killing /blog and /books as proper index pages.
+      // { source: '/blog', destination: '/content', permanent: true },
+      // { source: '/books', destination: '/content', permanent: true },
+      // { source: '/articles', destination: '/content', permanent: true },
+
+      // ✅ Keep only what you actually still need.
       {
-        source: '/books/the-architecture-of-human-purpose-landing',
-        destination: '/books/the-architecture-of-human-purpose',
+        source: "/canon/volume-i-foundations-of-purpose",
+        destination: "/volume-i-foundations-of-purpose",
         permanent: true,
       },
-      {
-        source: '/canon/volume-i-foundations-of-purpose',
-        destination: '/volume-i-foundations-of-purpose',
-        permanent: true,
-      },
+      // IMPORTANT: we do NOT redirect the landing page any more.
+      // /books/the-architecture-of-human-purpose-landing is now a real page.
     ];
   },
-  
+
   async headers() {
     const csp = [
       "default-src 'self';",
@@ -51,37 +46,37 @@ const nextConfig = {
       "frame-ancestors 'none';",
       "base-uri 'self';",
       "form-action 'self';",
-    ].join(' ');
-    
+    ].join(" ");
+
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Content-Security-Policy', value: csp },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: csp },
         ],
       },
     ];
   },
-  
+
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === "production",
   },
-  
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = [
         ...(config.externals || []),
-        { 'better-sqlite3': 'commonjs better-sqlite3' },
+        { "better-sqlite3": "commonjs better-sqlite3" },
       ];
     }
-    
+
     config.module = {
       ...config.module,
       exprContextCritical: false,
     };
-    
+
     return config;
   },
 };

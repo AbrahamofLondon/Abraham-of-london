@@ -20,9 +20,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
     for (const post of safePosts) {
       if (Array.isArray(post.tags)) {
         for (const tag of post.tags) {
-          if (typeof tag === "string" && tag.trim()) {
-            tagSet.add(tag.trim());
-          }
+          if (typeof tag === "string" && tag.trim()) tagSet.add(tag.trim());
         }
       }
     }
@@ -34,7 +32,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   const filteredPosts = React.useMemo(() => {
     if (activeTag === "all") return safePosts;
     return safePosts.filter((post) =>
-      Array.isArray(post.tags) ? post.tags.includes(activeTag) : false,
+      Array.isArray(post.tags) ? post.tags.includes(activeTag) : false
     );
   }, [safePosts, activeTag]);
 
@@ -42,7 +40,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   const heroPost = hasPosts ? safePosts[0] : null;
 
   return (
-    <Layout title="Blog" pageTitle="Blog">
+    <Layout title="Blog" pageTitle="Blog" transparentHeader={false}>
       <Head>
         <title>Blog | Abraham of London</title>
         <meta
@@ -66,12 +64,9 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
           </p>
         </section>
 
-        {/* EMPTY STATE */}
         {!hasPosts && (
           <section className="rounded-2xl border border-dashed border-gold/30 bg-charcoal-light/40 p-8 text-center text-sm text-gray-200">
-            <h2 className="mb-2 font-semibold text-cream">
-              Essays are being prepared
-            </h2>
+            <h2 className="mb-2 font-semibold text-cream">Essays are being prepared</h2>
             <p className="mx-auto max-w-md">
               The first wave of essays and canon excerpts is in final edit. Check back
               soon, or join the Inner Circle to be notified when new writing goes live.
@@ -81,7 +76,6 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
         {hasPosts && (
           <div className="space-y-12">
-            {/* HERO POST + TAG FILTER */}
             {heroPost && (
               <section className="grid items-stretch gap-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
                 <HeroPostCard post={heroPost} />
@@ -92,13 +86,13 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
                   </h2>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <TagButton
+                    <FilterChip
                       label="All"
                       active={activeTag === "all"}
                       onClick={() => setActiveTag("all")}
                     />
                     {allTags.map((tag) => (
-                      <TagButton
+                      <FilterChip
                         key={tag}
                         label={tag}
                         active={activeTag === tag}
@@ -109,9 +103,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
                   <p className="mt-4 text-[0.7rem] text-gray-400">
                     Showing{" "}
-                    <span className="font-semibold text-gold">
-                      {filteredPosts.length}
-                    </span>{" "}
+                    <span className="font-semibold text-gold">{filteredPosts.length}</span>{" "}
                     {activeTag === "all" ? "posts" : `“${activeTag}” posts`}.
                   </p>
                 </aside>
@@ -139,12 +131,35 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   );
 };
 
-type HeroPostCardProps = { post: Post };
+type FilterChipProps = {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+};
+
+const FilterChip: React.FC<FilterChipProps> = ({ label, active, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={[
+      "rounded-full border px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] transition",
+      active
+        ? "border-gold bg-gold/10 text-gold"
+        : "border-gold/30 text-gray-300 hover:border-gold/60 hover:text-gold",
+    ].join(" ")}
+  >
+    {label}
+  </button>
+);
+
+type HeroPostCardProps = {
+  post: Post;
+};
 
 const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
   const { slug, title, excerpt, description, date, readTime, tags } = post;
   const href = `/${slug}`;
-  const copy = (description || excerpt || "") as string;
+  const copy = description || excerpt || "";
   const displayTags = Array.isArray(tags) ? tags.slice(0, 3) : [];
 
   return (
@@ -172,11 +187,13 @@ const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
               })}
             </span>
           )}
+
           {readTime && (
             <span className="rounded-full border border-gold/50 px-3 py-0.5 uppercase tracking-[0.18em] text-gold">
               {readTime}
             </span>
           )}
+
           {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {displayTags.map((tag) => (
@@ -205,12 +222,14 @@ const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
   );
 };
 
-type PostCardProps = { post: Post };
+type PostCardProps = {
+  post: Post;
+};
 
 const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const { slug, title, excerpt, description, date, readTime, tags } = post;
   const href = `/${slug}`;
-  const copy = (description || excerpt || "") as string;
+  const copy = description || excerpt || "";
   const displayTags = Array.isArray(tags) ? tags.slice(0, 2) : [];
 
   return (
@@ -258,27 +277,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
     </Link>
   );
 };
-
-type TagButtonProps = {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-};
-
-const TagButton: React.FC<TagButtonProps> = ({ label, active, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={[
-      "rounded-full border px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] transition",
-      active
-        ? "border-gold bg-gold/10 text-gold"
-        : "border-gold/30 text-gray-300 hover:border-gold/60 hover:text-gold",
-    ].join(" ")}
-  >
-    {label}
-  </button>
-);
 
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
   const posts = getAllPosts();

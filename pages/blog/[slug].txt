@@ -1,8 +1,9 @@
-// pages/[slug].tsx - COMPREHENSIVE FIX
+// pages/[slug].tsx
 import * as React from "react";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import type { GetStaticPaths, GetStaticProps } from "next";
+
 import {
   MDXRemote,
   type MDXRemoteSerializeResult,
@@ -10,659 +11,114 @@ import {
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { getAllContent, getContentBySlug } from "@/lib/mdx"; 
-import { getAllPosts, getPostBySlug } from "@/lib/posts"; 
-import { getAllBooksMeta, getBookBySlug } from "@/lib/server/books-data";
-import { getAllEvents } from "@/lib/events"; // ADD EVENTS IMPORT
-import type { PostMeta } from "@/types/post";
 import ArticleHero from "@/components/ArticleHero";
 import Comments from "@/components/Comments";
+import mdxComponents from "@/components/mdx-components";
 
-type PageMeta = PostMeta & {
-  coverAspect?: "book" | "wide" | "square";
-  coverFit?: "cover" | "contain";
-  toc?: boolean;
-  related?: string[];
-  format?: "hardcover" | "paperback" | "ebook" | "audiobook";
-  isbn?: string;
-  publisher?: string;
-  time?: string; // For events
-  location?: string; // For events
+import { getAllPosts, getPostBySlug } from "@/lib/content";
+import type { Post } from "contentlayer/generated";
+
+type PageMeta = {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  excerpt?: string | null;
+  date?: string | null;
+  coverImage?: string | null;
+  readTime?: string | null;
+  tags?: string[];
 };
 
 type PageProps = {
   meta: PageMeta;
-  mdxSource: MDXRemoteSerializeResult;
-  contentKind: string;
-  estimatedReadingTime?: number;
+  source: MDXRemoteSerializeResult;
 };
 
-// Define ALL collections
-const BLOG_COLLECTION = "Post";
-const BOOK_COLLECTION = "Book";
-const EVENT_COLLECTION = "Event"; // NEW
-const FALLBACK_COLLECTIONS = ["Print", "Resource", "Page", "Download"] as const;
-const ALL_COLLECTIONS = [BLOG_COLLECTION, BOOK_COLLECTION, EVENT_COLLECTION, ...FALLBACK_COLLECTIONS];
-
-// -----------------------------------------------------------------------------
-// Custom hook for reading progress
-// -----------------------------------------------------------------------------
-const useReadingProgress = () => {
-  const [progress, setProgress] = React.useState(0);
-  
-  React.useEffect(() => {
-    const updateProgress = () => {
-      const article = document.querySelector("article");
-      if (!article) return;
-      
-      const scrolled = window.scrollY;
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = totalHeight > 0 ? (scrolled / totalHeight) * 100 : 0;
-      setProgress(Math.min(100, Math.max(0, progress)));
-    };
-    
-    window.addEventListener("scroll", updateProgress);
-    window.addEventListener("resize", updateProgress);
-    updateProgress();
-    
-    return () => {
-      window.removeEventListener("scroll", updateProgress);
-      window.removeEventListener("resize", updateProgress);
-    };
-  }, []);
-  
-  return progress;
-};
-
-// -----------------------------------------------------------------------------
-// Helper: Calculate reading time from content
-// -----------------------------------------------------------------------------
-const calculateReadingTime = (content: string): number => {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
-};
-
-// -----------------------------------------------------------------------------
-// Page component
-// -----------------------------------------------------------------------------
-
-function ContentPage({ meta, mdxSource, contentKind, estimatedReadingTime }: PageProps): JSX.Element {
+const EssayPage: NextPage<PageProps> = ({ meta, source }) => {
   const router = useRouter();
-  const readingProgress = useReadingProgress();
-  
-  const {
-    title,
-    description,
-    excerpt,
-    category,
-    tags = [],
-    date,
-    readTime,
-    coverImage,
-    coverAspect,
-    coverFit,
-    toc = false,
-    related = [],
-    format,
-    isbn,
-    publisher,
-    time,
-    location,
-  } = meta;
 
-  const displayReadTime = estimatedReadingTime || readTime || 5;
-  const displaySubtitle = excerpt || description || undefined;
-  
-  const primaryCategory = React.useMemo(() => {
-    if (category) return category;
-    if (Array.isArray(tags) && tags.length > 0) {
-      return typeof tags[0] === 'string' ? tags[0] : 'Article';
-    }
-    return contentKind === BOOK_COLLECTION ? "Book" : 
-           contentKind === EVENT_COLLECTION ? "Event" : "Article";
-  }, [category, tags, contentKind]);
-
-  const canonicalTitle = title || "Abraham of London";
-  const displayDescription = description || excerpt || "";
-  
-  const showComments = contentKind === BLOG_COLLECTION;
-  const showTOC = toc && (contentKind === BLOG_COLLECTION || contentKind === BOOK_COLLECTION);
-  const isBook = contentKind === BOOK_COLLECTION;
-  const isEvent = contentKind === EVENT_COLLECTION;
+  if (router.isFallback) {
+    return (
+      <Layout title="Loading…">
+        <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+          <p className="text-sm text-gray-300">Loading essay…</p>
+        </main>
+      </Layout>
+    );
+  }
 
   return (
-    <Layout title={canonicalTitle}>
+    <Layout title={meta.title} description={meta.excerpt ?? undefined}>
       <Head>
-        <title>{canonicalTitle} | Abraham of London</title>
-        <meta name="description" content={displayDescription} />
-        
-        {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={canonicalTitle} />
-        <meta property="og:description" content={displayDescription} />
-        <meta property="og:type" content={
-          isBook ? "book" : 
-          isEvent ? "event" :
-          contentKind === BLOG_COLLECTION ? "article" : "website"
-        } />
-        <meta property="og:url" content={`https://abrahamoflondon.com${router.asPath}`} />
-        {coverImage && <meta property="og:image" content={coverImage as string} />}
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={canonicalTitle} />
-        <meta name="twitter:description" content={displayDescription} />
-        {coverImage && <meta name="twitter:image" content={coverImage as string} />}
-        
-        {/* Structured Data */}
-        {isBook ? (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Book",
-                name: canonicalTitle,
-                description: displayDescription,
-                image: coverImage,
-                datePublished: date,
-                author: {
-                  "@type": "Person",
-                  name: meta.author || "Abraham of London"
-                },
-                publisher: publisher ? {
-                  "@type": "Organization",
-                  name: publisher
-                } : undefined,
-                isbn: isbn,
-                bookFormat: format ? `https://schema.org/${format}` : undefined,
-                inLanguage: meta.language || "en-GB"
-              })
-            }}
-          />
-        ) : isEvent ? (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Event",
-                name: canonicalTitle,
-                description: displayDescription,
-                image: coverImage,
-                startDate: date,
-                endDate: meta.endDate || date,
-                eventStatus: "https://schema.org/EventScheduled",
-                eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-                location: location ? {
-                  "@type": "Place",
-                  name: location
-                } : undefined,
-                organizer: {
-                  "@type": "Person",
-                  name: "Abraham of London"
-                }
-              })
-            }}
-          />
-        ) : contentKind === BLOG_COLLECTION ? (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "BlogPosting",
-                headline: canonicalTitle,
-                description: displayDescription,
-                image: coverImage,
-                datePublished: date,
-                author: {
-                  "@type": "Person",
-                  name: "Abraham of London"
-                }
-              })
-            }}
-          />
-        ) : null}
+        <link
+          rel="canonical"
+          href={`https://www.abrahamoflondon.org/${meta.slug}`}
+        />
       </Head>
 
-      {/* Reading Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-1 z-50 bg-transparent">
-        <div 
-          className="h-full bg-gradient-to-r from-softGold to-amber-500 transition-all duration-200 ease-out"
-          style={{ width: `${readingProgress}%` }}
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
+        <ArticleHero
+          title={meta.title}
+          subtitle={meta.subtitle ?? undefined}
+          date={meta.date ?? undefined}
+          tags={meta.tags}
+          readTime={meta.readTime ?? undefined}
+          coverImage={meta.coverImage ?? undefined}
+          coverAspect="wide"
+          coverFit="cover"
         />
-      </div>
 
-      <ArticleHero
-        title={title}
-        subtitle={displaySubtitle}
-        category={primaryCategory}
-        date={date}
-        readTime={displayReadTime}
-        coverImage={coverImage as string | undefined}
-        coverAspect={coverAspect}
-        coverFit={coverFit}
-        badges={isBook ? [
-          { text: format || "Book", color: "amber" },
-          ...(publisher ? [{ text: publisher, color: "gray" }] : [])
-        ] : isEvent ? [
-          { text: "Event", color: "emerald" },
-          ...(time ? [{ text: time, color: "blue" }] : []),
-          ...(location ? [{ text: location, color: "purple" }] : [])
-        ] : []}
-      />
+        <article className="prose prose-invert prose-lg mt-10 max-w-none">
+          <MDXRemote {...source} components={mdxComponents} />
+        </article>
 
-      <main className="relative">
-        <div className="mx-auto w-full max-w-7xl px-4 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {showTOC && (
-              <aside className="lg:w-64 flex-shrink-0 hidden lg:block">
-                <div className="sticky top-32">
-                  <div className="border-l-2 border-softGold pl-4">
-                    <h3 className="font-semibold text-aol-text dark:text-cream mb-3">
-                      Contents
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      {isBook ? "Book chapters" : "Article sections"}
-                    </p>
-                  </div>
-                </div>
-              </aside>
-            )}
-
-            <div className="flex-1 min-w-0">
-              <article className="max-w-3xl mx-auto pb-16 pt-10">
-                {/* Event-specific metadata */}
-                {isEvent && (
-                  <div className="mb-8 p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {time && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Time:</span>
-                          <p className="text-aol-text dark:text-cream font-medium">{time}</p>
-                        </div>
-                      )}
-                      {location && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Location:</span>
-                          <p className="text-aol-text dark:text-cream font-medium">{location}</p>
-                        </div>
-                      )}
-                      {date && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Date:</span>
-                          <p className="text-aol-text dark:text-cream">
-                            {new Date(date).toLocaleDateString('en-GB', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Book-specific metadata */}
-                {isBook && (
-                  <div className="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {isbn && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">ISBN:</span>
-                          <p className="text-aol-text dark:text-cream">{isbn}</p>
-                        </div>
-                      )}
-                      {format && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Format:</span>
-                          <p className="text-aol-text dark:text-cream capitalize">{format}</p>
-                        </div>
-                      )}
-                      {publisher && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Publisher:</span>
-                          <p className="text-aol-text dark:text-cream">{publisher}</p>
-                        </div>
-                      )}
-                      {meta.publishedDate && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Published:</span>
-                          <p className="text-aol-text dark:text-cream">
-                            {new Date(meta.publishedDate).toLocaleDateString('en-GB', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="prose prose-lg max-w-none dark:prose-invert">
-                  <MDXRemote {...mdxSource} components={mdxComponents} />
-                </div>
-
-                {/* Event registration link */}
-                {isEvent && meta.registerLink && (
-                  <div className="mt-12 p-6 bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-xl border border-emerald-500/20">
-                    <h3 className="text-xl font-serif font-semibold text-aol-text dark:text-cream mb-4">
-                      Register for This Event
-                    </h3>
-                    <a
-                      href={meta.registerLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Register Now
-                    </a>
-                  </div>
-                )}
-
-                {/* Book purchase link */}
-                {isBook && meta.purchaseLink && (
-                  <div className="mt-12 p-6 bg-gradient-to-r from-softGold/10 to-amber-500/10 rounded-xl border border-softGold/20">
-                    <h3 className="text-xl font-serif font-semibold text-aol-text dark:text-cream mb-4">
-                      Get This Book
-                    </h3>
-                    <a
-                      href={meta.purchaseLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-softGold text-white rounded-lg hover:bg-amber-600 transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                      </svg>
-                      Purchase Now
-                    </a>
-                  </div>
-                )}
-
-                {/* Render Comments section only for blog posts */}
-                {showComments && (
-                  <div className="mt-20 pt-10 border-t border-aol-border-subtle dark:border-white/10">
-                    <div className="max-w-2xl mx-auto">
-                      <h3 className="text-2xl font-serif font-semibold text-aol-text dark:text-cream mb-6">
-                        Join the Conversation
-                      </h3>
-                      <Comments 
-                        issueTerm="pathname"
-                        label="discussion" 
-                        theme="preferred_color_scheme"
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                )}
-              </article>
-            </div>
-          </div>
-        </div>
+        <section className="mt-16 border-t border-white/10 pt-10">
+          <Comments slug={meta.slug} title={meta.title} />
+        </section>
       </main>
     </Layout>
   );
-}
-
-export default ContentPage;
-
-// -----------------------------------------------------------------------------
-// SSG – paths - FIXED VERSION
-// -----------------------------------------------------------------------------
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  console.log('=== Generating static paths for [slug] ===');
-  
-  try {
-    const allItems: Array<{ slug: string; collection: string }> = [];
-
-    // 1. Fetch blog posts
-    try {
-      const posts = await getAllPosts();
-      console.log(`Found ${posts.length} blog posts`);
-      posts.forEach(post => {
-        if (post?.slug) {
-          allItems.push({ 
-            slug: String(post.slug), 
-            collection: BLOG_COLLECTION 
-          });
-        }
-      });
-    } catch (postErr) {
-      console.error('Error fetching posts:', postErr);
-    }
-
-    // 2. Fetch books
-    try {
-      const books = getAllBooksMeta();
-      console.log(`Found ${books.length} books`);
-      books.forEach(book => {
-        if (book?.slug) {
-          allItems.push({ 
-            slug: String(book.slug), 
-            collection: BOOK_COLLECTION 
-          });
-        }
-      });
-    } catch (bookErr) {
-      console.error('Error fetching books:', bookErr);
-    }
-
-    // 3. Fetch events
-    try {
-      const events = getAllEvents();
-      console.log(`Found ${events.length} events`);
-      events.forEach(event => {
-        if (event?.slug) {
-          allItems.push({ 
-            slug: String(event.slug), 
-            collection: EVENT_COLLECTION 
-          });
-        }
-      });
-    } catch (eventErr) {
-      console.error('Error fetching events:', eventErr);
-    }
-
-    // 4. Fetch from fallback collections
-    for (const key of FALLBACK_COLLECTIONS) {
-      try {
-        const items = getAllContent(key) ?? [];
-        console.log(`Found ${items.length} items in ${key} collection`);
-        items.forEach(item => {
-          if (item?.slug) {
-            allItems.push({ 
-              slug: String(item.slug), 
-              collection: key 
-            });
-          }
-        });
-      } catch (collectionErr) {
-        console.error(`Error fetching ${key} collection:`, collectionErr);
-      }
-    }
-
-    console.log(`Total items collected: ${allItems.length}`);
-
-    // Deduplicate slugs - keep first occurrence
-    const seen = new Set<string>();
-    const uniqueItems = allItems.filter(item => {
-      if (!item.slug || seen.has(item.slug)) {
-        if (seen.has(item.slug)) {
-          console.warn(`Duplicate slug skipped: ${item.slug} (from ${item.collection})`);
-        }
-        return false;
-      }
-      seen.add(item.slug);
-      return true;
-    });
-
-    console.log(`Unique slugs: ${uniqueItems.length}`);
-
-    const paths = uniqueItems.map(item => ({
-      params: { slug: item.slug }
-    }));
-
-    console.log(`Generated ${paths.length} paths for static generation`);
-    
-    // Sample output for debugging
-    if (paths.length > 0) {
-      console.log('Sample paths:', paths.slice(0, 5));
-    }
-
-    return {
-      paths,
-      fallback: "blocking",
-    };
-  } catch (err) {
-    console.error("Critical error in getStaticPaths:", err);
-    // Return empty paths but allow blocking fallback
-    return { 
-      paths: [], 
-      fallback: "blocking" 
-    };
-  }
 };
 
-// -----------------------------------------------------------------------------
-// SSG – props - FIXED VERSION
-// -----------------------------------------------------------------------------
+export default EssayPage;
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  const slugParam = params?.slug;
-  const slug = typeof slugParam === "string" ? slugParam : 
-               Array.isArray(slugParam) ? slugParam[0] : "";
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = getAllPosts();
+  return {
+    paths: posts.map((post) => ({ params: { slug: post.slug } })),
+    fallback: false,
+  };
+};
 
-  console.log(`\n=== getStaticProps for slug: "${slug}" ===`);
+export const getStaticProps: GetStaticProps<PageProps> = async (context) => {
+  const slug = context.params?.slug as string;
+  const post = getPostBySlug(slug);
 
-  if (!slug) {
-    console.log('No slug provided, returning 404');
-    return { notFound: true };
-  }
+  if (!post) return { notFound: true };
 
-  try {
-    let data: (PageMeta & { content?: string }) | null = null;
-    let contentKind: string | null = null;
+  const mdxSource = await serialize(post.body.raw, {
+    mdxOptions: {
+      remarkPlugins: [],
+      rehypePlugins: [],
+    },
+  });
 
-    // 1. Try Blog Post first
-    console.log('Checking blog posts...');
-    try {
-      const postCandidate = await getPostBySlug(slug);
-      if (postCandidate) {
-        console.log(`Found as blog post: ${postCandidate.title}`);
-        data = postCandidate as PageMeta & { content?: string };
-        contentKind = BLOG_COLLECTION;
-      }
-    } catch (postErr) {
-      console.log(`No blog post found for "${slug}" or error:`, postErr.message);
-    }
+  const meta: PageMeta = {
+    slug: post.slug,
+    title: post.title,
+    subtitle: (post as Post & { subtitle?: string }).subtitle ?? null,
+    excerpt: post.excerpt ?? null,
+    date: post.date ?? null,
+    coverImage: post.coverImage ?? null,
+    readTime: (post as any).readTime ?? null,
+    tags: post.tags ?? [],
+  };
 
-    // 2. Try Book second
-    if (!data) {
-      console.log('Checking books...');
-      try {
-        const bookCandidate = getBookBySlug(slug);
-        if (bookCandidate) {
-          console.log(`Found as book: ${bookCandidate.title}`);
-          data = bookCandidate as PageMeta & { content?: string };
-          contentKind = BOOK_COLLECTION;
-        }
-      } catch (bookErr) {
-        console.log(`No book found for "${slug}" or error:`, bookErr.message);
-      }
-    }
-
-    // 3. Try Event third
-    if (!data) {
-      console.log('Checking events...');
-      try {
-        // You'll need to create a getEventBySlug function similar to getBookBySlug
-        // For now, we'll check in the fallback collections
-        const events = getAllEvents();
-        const eventCandidate = events.find(event => event.slug === slug);
-        if (eventCandidate) {
-          console.log(`Found as event: ${eventCandidate.title}`);
-          // Convert event to PageMeta format
-          data = {
-            ...eventCandidate,
-            content: eventCandidate.content || "",
-          } as PageMeta & { content?: string };
-          contentKind = EVENT_COLLECTION;
-        }
-      } catch (eventErr) {
-        console.log(`No event found for "${slug}" or error:`, eventErr.message);
-      }
-    }
-
-    // 4. Try Fallback Collections
-    if (!data) {
-      console.log('Checking fallback collections...');
-      for (const key of FALLBACK_COLLECTIONS) {
-        try {
-          const candidate = getContentBySlug(key, slug, {
-            withContent: true,
-          }) as (PageMeta & { content?: string }) | null;
-
-          if (candidate) {
-            console.log(`Found in ${key} collection: ${candidate.title}`);
-            data = candidate;
-            contentKind = key;
-            break;
-          }
-        } catch (collectionErr) {
-          console.log(`Error checking ${key} collection:`, collectionErr.message);
-        }
-      }
-    }
-
-    if (!data || !contentKind) {
-      console.log(`No content found for slug: "${slug}", returning 404`);
-      return { notFound: true };
-    }
-
-    if (!data.title) {
-      console.log(`Content found but missing title for slug: "${slug}", returning 404`);
-      return { notFound: true };
-    }
-
-    console.log(`Successfully loaded: ${data.title} (${contentKind})`);
-
-    const jsonSafeMeta = JSON.parse(JSON.stringify(data)) as PageMeta;
-    const { content, ...meta } = jsonSafeMeta;
-
-    // Calculate reading time if content exists
-    const estimatedReadingTime = content ? calculateReadingTime(content) : undefined;
-
-    const mdxSource = await serialize(content || "", {
-      scope: meta as unknown as Record<string, unknown>,
-      mdxOptions: {
-        remarkPlugins: [],
-        rehypePlugins: [],
-      },
-      parseFrontmatter: false,
-    });
-
-    return {
-      props: {
-        meta,
-        mdxSource,
-        contentKind,
-        estimatedReadingTime,
-      },
-      revalidate: process.env.NODE_ENV === 'production' ? 3600 : 60,
-    };
-  } catch (err) {
-    console.error(`Error in getStaticProps for slug "${slug}":`, err);
-    return { notFound: true };
-  }
+  return {
+    props: {
+      meta,
+      source: mdxSource,
+    },
+    revalidate: 3600,
+  };
 };
