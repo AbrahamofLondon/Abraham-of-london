@@ -8,6 +8,7 @@ import type { GetStaticProps } from "next";
 import Layout from "@/components/Layout";
 import NewsletterForm from "@/components/NewsletterForm";
 import MandateStatement from "@/components/MandateStatement";
+import { HeroBanner } from "@/components/InteractiveElements";
 
 type HomePageProps = {
   featuredPosts: any[];
@@ -122,7 +123,7 @@ interface StructuralCardProps {
   description: string;
   meta: string;
   href: string;
-  type: "post" | "book" | "event" | "download";
+  type: "post" | "event" | "book" | "download";
   featured?: boolean;
   delay?: number;
 }
@@ -408,8 +409,8 @@ const HomePage: React.FC<HomePageProps> = () => {
         />
       </div>
 
-      {/* HERO: BRAND + PHILOSOPHY  */}
-      <section className="relative min-h-screen overflow-hidden">
+      {/* HERO: HERO BANNER + ARCHITECTURE SNAPSHOT */}
+      <section className="relative overflow-hidden pt-10 pb-20 lg:pt-16">
         {/* Architectural Lines */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#3a3a3a]/25 to-transparent" />
@@ -419,50 +420,50 @@ const HomePage: React.FC<HomePageProps> = () => {
         </div>
 
         <div
-          className={`relative mx-auto max-w-7xl px-4 pt-28 pb-24 transition-all duration-1000 ${
+          className={`relative mx-auto max-w-7xl px-4 transition-all duration-1000 ${
             isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
-          <div className="grid gap-12 lg:grid-cols-[3fr,2fr] lg:items-center">
-            {/* Core Narrative */}
+          {/* HERO BANNER — PRIMARY VISUAL HERO */}
+          <div className="mb-12">
+            <HeroBanner />
+          </div>
+
+          {/* Under-banner architecture narrative */}
+          <div className="grid gap-12 pb-6 lg:grid-cols-[3fr,2fr] lg:items-start">
+            {/* Left: Core narrative + CTAs */}
             <div>
               {/* Badge */}
-              <div className="mb-8 inline-flex items-center gap-4">
+              <div className="mb-6 inline-flex items-center gap-4">
                 <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#d4af37]/40" />
                 <span className="text-xs uppercase tracking-[0.32em] text-[#d4af37]/80">
-                  Abraham of London · Canon & Craft
+                  Structural Canon · Abraham of London
                 </span>
                 <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#d4af37]/40" />
               </div>
 
-              <h1 className="mb-6 text-4xl font-light leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
-                Architectural thinking
-                <span className="mt-3 block text-[#d4af37]">
-                  for men who refuse to disappear.
-                </span>
+              <h1 className="mb-4 text-3xl font-light leading-[1.15] tracking-tight md:text-4xl">
+                Architectural thinking for fathers, founders, and leaders
+                building{" "}
+                <span className="text-[#d4af37]">homes, ventures, and institutions</span>{" "}
+                that outlast the storm.
               </h1>
 
-              <p className="mb-8 max-w-2xl text-lg leading-relaxed text-[#b3b3b3]">
-                A canon of structural frameworks for fathers, founders, and
-                leaders who insist on building homes, ventures, and
-                institutions that outlast culture swings, policy shocks, and
-                personal crisis.
-              </p>
-
-              <p className="mb-10 max-w-2xl text-sm uppercase tracking-[0.2em] text-[#777]">
-                Purpose · Civilisation · Governance · Fatherhood · Markets ·
-                Destiny
+              <p className="mb-8 max-w-2xl text-sm leading-relaxed text-[#b3b3b3]">
+                A canon of structural essays, volumes, tools, and gatherings
+                designed for men who refuse to disappear — and who insist on
+                building with purpose, governance, and destiny in view.
               </p>
 
               {/* CTAs */}
-              <div className="mb-12 flex flex-col justify-start gap-4 sm:flex-row">
+              <div className="mb-8 flex flex-col justify-start gap-4 sm:flex-row">
                 <button
                   onClick={handleHeroCTA}
-                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden px-10 py-4 text-base font-medium transition-all duration-300 hover:scale-[1.02]"
+                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden px-8 py-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f]" />
                   <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                  <span className="relative">Enter the Library</span>
+                  <span className="relative">Enter the Content Library</span>
                   <span className="relative transition-transform duration-300 group-hover:translate-x-2">
                     ↠
                   </span>
@@ -470,7 +471,7 @@ const HomePage: React.FC<HomePageProps> = () => {
 
                 <Link
                   href="/books/the-architecture-of-human-purpose-landing"
-                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#3a3a3a] px-10 py-4 text-base font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
+                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#3a3a3a] px-8 py-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#151515] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <span className="relative">Preview the Canon</span>
@@ -480,17 +481,15 @@ const HomePage: React.FC<HomePageProps> = () => {
                 </Link>
               </div>
 
-              {/* Micro trust strip */}
-              <div className="flex flex-wrap gap-6 text-xs text-[#666]">
-                <span>Multi-volume canon in development</span>
-                <span className="hidden h-4 w-px bg-[#333] sm:block" />
-                <span>Built from courtrooms, boardrooms, and crisis rooms</span>
-              </div>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#777]">
+                Purpose · Civilisation · Governance · Fatherhood · Markets ·
+                Destiny
+              </p>
             </div>
 
             {/* Right: Architecture Map Snapshot */}
             <div className="relative rounded-2xl border border-[#2a2a2a] bg-gradient-to-b from-[#050509] via-[#0f1015] to-[#050509] p-8">
-              <div className="mb-6 text-xs uppercase tracking-[0.22em] text-[#777]">
+              <div className="mb-4 text-xs uppercase tracking-[0.22em] text-[#777]">
                 The Architecture at a Glance
               </div>
 
@@ -524,8 +523,9 @@ const HomePage: React.FC<HomePageProps> = () => {
                       Structures
                     </div>
                     <p className="mt-1 text-[#cfcfcf]">
-                      Essays, tools, and playbooks translating philosophy into
-                      **operating systems** for fathers, founders, and leaders.
+                      Essays, tools, and playbooks translating philosophy into{" "}
+                      <span className="font-semibold">operating systems</span> for
+                      fathers, founders, and leaders.
                     </p>
                   </div>
                   <Link
@@ -573,16 +573,6 @@ const HomePage: React.FC<HomePageProps> = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-px bg-gradient-to-b from-[#d4af37]/60 to-transparent" />
-            <span className="text-xs uppercase tracking-[0.22em] text-[#666]">
-              Continue
-            </span>
           </div>
         </div>
       </section>
@@ -816,9 +806,7 @@ const HomePage: React.FC<HomePageProps> = () => {
         </div>
 
         <div className="relative mx-auto max-w-4xl px-4">
-          <div
-            className="relative overflow-hidden rounded-2xl border border-[#2a2a2a]"
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-[#2a2a2a]">
             <div
               className="pointer-events-none absolute inset-0 opacity-20"
               style={{
@@ -885,7 +873,7 @@ const HomePage: React.FC<HomePageProps> = () => {
               fatherhood.
             </p>
           </div>
-</div>
+        </div>
       </footer>
 
       {/* Interactive Overlay */}
@@ -915,7 +903,7 @@ const HomePage: React.FC<HomePageProps> = () => {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // Placeholder: hook up real content later
+  // Placeholder: hook up real data later if needed
   return {
     props: {
       featuredPosts: [],
