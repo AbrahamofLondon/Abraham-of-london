@@ -33,6 +33,7 @@ export type RecaptchaErrorCode =
   | "LOW_SCORE"
   | "API_FAILURE"
   | "NETWORK_ERROR"
+  | "RATE_LIMIT"
   | "UNKNOWN";
 
 interface GoogleRecaptchaResponse {
@@ -57,7 +58,9 @@ const DEFAULT_CONFIG: RecaptchaConfig = {
     process.env.RECAPTCHA_ALLOWED_HOSTNAMES?.split(",").filter(Boolean),
 };
 
-// Replay-protection temporary cache with enhanced security
+// -------------------------------------------------------------------------
+// Replay-protection cache (token-level)
+// -------------------------------------------------------------------------
 class TokenCache {
   private cache = new Map<string, number>();
   private readonly TTL = 2 * 60 * 1000; // 2 minutes TTL
@@ -100,7 +103,89 @@ class TokenCache {
 
 const tokenCache = new TokenCache();
 
-// Enhanced error class with better typing
+// -------------------------------------------------------------------------
+// IP / global rate limiting for the verifier itself
+// -------------------------------------------------------------------------
+
+interface RateBucket {
+  count: number;
+  resetAt: number;
+}
+
+const RATE_LIMIT_CONFIG = {
+  maxPerIpPerMinute: parseInt(
+    process.env.RECAPTCHA_MAX_PER_IP_PER_MINUTE || "30",
+    10
+  ),
+  maxGlobalPerMinute: parseInt(
+    process.env.RECAPTCHA_MAX_GLOBAL_PER_MINUTE || "1000",
+    10
+  ),
+};
+
+class RecaptchaRateLimiter {
+  private readonly windowMs = 60 * 1000; // 1 minute windows
+  private ipBuckets = new Map<string, RateBucket>();
+  private globalBucket: RateBucket = {
+    count: 0,
+    resetAt: Date.now() + this.windowMs,
+  };
+
+  check(ip?: string | null): void {
+    const now = Date.now();
+    const key = ip && ip.trim() ? ip : "anonymous";
+
+    // Global window reset
+    if (now > this.globalBucket.resetAt) {
+      this.globalBucket = { count: 0, resetAt: now + this.windowMs };
+    }
+
+    // Per-IP window reset
+    const existing = this.ipBuckets.get(key);
+    if (!existing || now > existing.resetAt) {
+      this.ipBuckets.set(key, { count: 0, resetAt: now + this.windowMs });
+    }
+
+    const bucket = this.ipBuckets.get(key)!;
+
+    // Enforce global limit first
+    if (this.globalBucket.count >= RATE_LIMIT_CONFIG.maxGlobalPerMinute) {
+      throw new RecaptchaError(
+        "Global reCAPTCHA verification rate limit exceeded",
+        "RATE_LIMIT",
+        { ip: key, scope: "global" }
+      );
+    }
+
+    // Enforce per-IP limit
+    if (bucket.count >= RATE_LIMIT_CONFIG.maxPerIpPerMinute) {
+      throw new RecaptchaError(
+        "Per-IP reCAPTCHA verification rate limit exceeded",
+        "RATE_LIMIT",
+        { ip: key, scope: "ip" }
+      );
+    }
+
+    // Increment counters only after passing checks
+    bucket.count += 1;
+    this.globalBucket.count += 1;
+  }
+
+  // Optional: simple snapshot for debugging / observability
+  snapshot() {
+    return {
+      global: { ...this.globalBucket },
+      ipBucketsSize: this.ipBuckets.size,
+    };
+  }
+}
+
+const rateLimiter = new RecaptchaRateLimiter();
+
+// -------------------------------------------------------------------------
+// Error class & helpers
+// -------------------------------------------------------------------------
+
 export class RecaptchaError extends Error {
   constructor(
     message: string,
@@ -123,7 +208,10 @@ function isNodeLikeError(error: unknown): error is NodeLikeError {
   );
 }
 
-// Validate configuration at startup
+// -------------------------------------------------------------------------
+// Validation helpers
+// -------------------------------------------------------------------------
+
 function validateConfig(config: RecaptchaConfig): void {
   if (config.enabled && !config.secretKey) {
     throw new RecaptchaError(
@@ -140,7 +228,6 @@ function validateConfig(config: RecaptchaConfig): void {
   }
 }
 
-// Validate token format before processing
 function validateTokenFormat(token: string): void {
   if (!token || typeof token !== "string") {
     throw new RecaptchaError("Token is required", "INVALID_TOKEN");
@@ -158,6 +245,10 @@ function validateTokenFormat(token: string): void {
     );
   }
 }
+
+// -------------------------------------------------------------------------
+// Core verification
+// -------------------------------------------------------------------------
 
 export async function verifyRecaptcha(
   token: string,
@@ -184,8 +275,25 @@ export async function verifyRecaptcha(
     return { ...result, success: true, score: 1.0 };
   }
 
-  // Validate token format
+  // Validate token format early (cheap)
   validateTokenFormat(token);
+
+  // Apply process-local rate limiting by IP / global
+  try {
+    rateLimiter.check(clientIp);
+  } catch (e) {
+    if (e instanceof RecaptchaError && e.code === "RATE_LIMIT") {
+      // Log minimal context, no raw IPs in production logs
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[reCAPTCHA] Rate limit hit", {
+          clientIp,
+          details: e.details,
+        });
+      }
+      throw e;
+    }
+    throw e;
+  }
 
   // Check for token reuse (replay attack protection)
   if (tokenCache.has(token)) {
@@ -334,6 +442,10 @@ export async function verifyRecaptcha(
   }
 }
 
+// -------------------------------------------------------------------------
+// Convenience wrappers
+// -------------------------------------------------------------------------
+
 // Simplified version for boolean responses
 export async function isRecaptchaValid(
   token: string,
@@ -364,6 +476,8 @@ export async function checkRecaptchaHealth(): Promise<boolean> {
   }
 
   try {
+    // This will fail token-format validation; we only care that the
+    // plumbing is wired, so treat "invalid-input-response" as success.
     const result = await verifyRecaptcha("test-token", "healthcheck");
     return result.errorCodes.includes("invalid-input-response");
   } catch {

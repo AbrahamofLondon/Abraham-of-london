@@ -1,157 +1,19 @@
-// pages/content/index.tsx
 import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
+import type { NextPage } from "next";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import {
-  getAllContent,
-  CONTENT_CATEGORIES,
   LIBRARY_AESTHETICS,
   SEASONAL_CURATIONS,
-  type AnyContent,
+  CONTENT_CATEGORIES,
 } from "@/lib/content";
 
-type CategoryKey = keyof typeof CONTENT_CATEGORIES;
-
-type ContentItem = AnyContent & {
-  aesthetic?: (typeof CONTENT_CATEGORIES)[CategoryKey];
-};
-
-type Props = {
-  items: ContentItem[];
-  featuredItems: ContentItem[];
-  categoryStats: Record<CategoryKey, number> & { all: number };
-};
-
 /* -------------------------------------------------------------------------- */
-/* HELPERS                                                                    */
+/* COMPONENTS                                                                 */
 /* -------------------------------------------------------------------------- */
 
-function getCategoryFromItem(item: ContentItem): CategoryKey {
-  const rawType = (item as any)._type as string | undefined;
-  const fallback = (item as any).type as string | undefined;
-  const kind = rawType ?? fallback;
-
-  switch (kind) {
-    case "Post":
-      return "POSTS";
-    case "Book":
-      return "BOOKS";
-    case "Event":
-      return "EVENTS";
-    case "Download":
-      return "DOWNLOADS";
-    case "Print":
-      return "PRINTS";
-    case "Resource":
-      return "RESOURCES";
-    case "Canon":
-      return "CANON";
-    default:
-      return "POSTS";
-  }
-}
-
-type ItemKind =
-  | "post"
-  | "book"
-  | "event"
-  | "download"
-  | "print"
-  | "resource"
-  | "canon";
-
-function getItemKind(item: ContentItem): ItemKind {
-  const rawType = (item as any)._type as string | undefined;
-  const fallback = (item as any).type as string | undefined;
-  const kind = (rawType ?? fallback ?? "Post").toString();
-
-  switch (kind) {
-    case "Post":
-      return "post";
-    case "Book":
-      return "book";
-    case "Event":
-      return "event";
-    case "Download":
-      return "download";
-    case "Print":
-      return "print";
-    case "Resource":
-      return "resource";
-    case "Canon":
-      return "canon";
-    default:
-      return "post";
-  }
-}
-
-function getItemAesthetic(item: ContentItem) {
-  const category = getCategoryFromItem(item);
-  return CONTENT_CATEGORIES[category];
-}
-
-function buildHref(item: ContentItem): string {
-  const url = (item as any).url as string | undefined;
-  if (url) return url;
-
-  const slug = (item as any).slug as string | undefined;
-  if (!slug) return "#";
-
-  const kind = (item as any)._type as string | undefined;
-
-  switch (kind) {
-    case "Post":
-      return `/${slug}`;
-    case "Book":
-      return `/books/${slug}`;
-    case "Download":
-      return `/downloads/${slug}`;
-    case "Event":
-      return `/events/${slug}`;
-    case "Print":
-      return `/prints/${slug}`;
-    case "Resource":
-      return `/resources/${slug}`;
-    case "Canon":
-      return `/canon/${slug}`;
-    default:
-      return `/${slug}`;
-  }
-}
-
-function formatDate(date?: string | null): string | null {
-  if (!date) return null;
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", {
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function getReadTime(item: ContentItem): string {
-  const explicit = (item as any).readTime ?? (item as any).readingTime;
-  if (explicit)
-    return `${explicit}`.includes("min") ? `${explicit}` : `${explicit} min`;
-
-  const raw = (item as any).body?.raw ?? (item as any).body?.code ?? "";
-  const wordCount = String(raw).split(/\s+/u).length;
-  const minutes = Math.max(1, Math.floor(wordCount / 200));
-  return `${minutes} min`;
-}
-
-/* -------------------------------------------------------------------------- */
-/* PRESENTATION COMPONENTS                                                    */
-/* -------------------------------------------------------------------------- */
-
-interface PersianOrnamentProps {
-  type: "header" | "divider";
-  color?: string;
-}
-
-const PersianOrnament: React.FC<PersianOrnamentProps> = ({
+const PersianOrnament: React.FC<{ type: "header" | "divider"; color?: string }> = ({
   type,
   color = LIBRARY_AESTHETICS.colors.primary.saffron,
 }) => {
@@ -169,9 +31,9 @@ const PersianOrnament: React.FC<PersianOrnamentProps> = ({
   }
 
   return (
-    <div className="my-8 flex items-center justify-center">
+    <div className="my-12 flex items-center justify-center">
       <div className="h-px flex-1" style={{ backgroundColor: `${color}30` }} />
-      <div className="mx-4 text-xl opacity-50" style={{ color }}>
+      <div className="mx-6 text-2xl opacity-50" style={{ color }}>
         𓆓
       </div>
       <div className="h-px flex-1" style={{ backgroundColor: `${color}30` }} />
@@ -179,389 +41,216 @@ const PersianOrnament: React.FC<PersianOrnamentProps> = ({
   );
 };
 
-interface CategoryPortalProps {
-  category:
-    | (typeof CONTENT_CATEGORIES)[CategoryKey]
-    | {
-        id: "all";
-        title: string;
-        description: string;
-        icon: string;
-        color: string;
-        signal: { subtle: string; texture: string };
-      };
-  count: number;
-  isActive: boolean;
-  onClick: () => void;
-}
+const PhilosophyPillar: React.FC<{
+  number: string;
+  title: string;
+  description: string;
+  color: string;
+  icon: string;
+}> = ({ number, title, description, color, icon }) => (
+  <div
+    className="relative overflow-hidden rounded-2xl border p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl"
+    style={{
+      borderColor: `${color}30`,
+      backgroundColor: "rgba(15,23,42,0.7)",
+      backdropFilter: "blur(10px)",
+    }}
+  >
+    {/* Glow effect */}
+    <div
+      className="absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-10 blur-2xl"
+      style={{ backgroundColor: color }}
+    />
 
-const CategoryPortal: React.FC<CategoryPortalProps> = ({
-  category,
-  count,
-  isActive,
-  onClick,
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`group relative overflow-hidden rounded-xl border p-5 text-left transition-all duration-300 ${
-        isActive ? "scale-[1.02] shadow-xl" : "hover:scale-[1.01] hover:shadow-lg"
-      }`}
-      style={{
-        borderColor: isActive ? category.color : `${category.color}30`,
-        backgroundColor: isActive ? `${category.color}15` : `${category.color}10`,
-        backgroundImage: isActive
-          ? `radial-gradient(circle at 20% 80%, ${category.color}18, transparent 55%)`
-          : "none",
-      }}
-    >
-      <div
-        className={`absolute inset-0 opacity-10 ${
-          isActive ? "opacity-20" : "group-hover:opacity-15"
-        }`}
-        style={{
-          backgroundImage:
-            "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.65))",
-        }}
-      />
-
-      <div className="relative">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-3xl opacity-80 transition-opacity group-hover:opacity-100">
-            {category.icon}
-          </div>
-          <div
-            className={`rounded-full px-2 py-1 text-sm transition-all ${
-              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-70"
-            }`}
-            style={{
-              backgroundColor: `${category.color}35`,
-              color: category.color,
-            }}
-          >
-            {count}
-          </div>
-        </div>
-
-        <h3
-          className="mb-1 text-lg font-semibold"
-          style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-        >
-          {category.title}
-        </h3>
-
-        <p
-          className="mb-3 line-clamp-2 text-sm opacity-75"
-          style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-        >
-          {category.description}
-        </p>
-
+    <div className="relative">
+      <div className="mb-6 flex items-start justify-between">
         <div
-          className={`text-xs italic transition-all ${
-            isActive ? "opacity-100" : "opacity-0 group-hover:opacity-70"
-          }`}
-          style={{ color: category.color }}
+          className="rounded-xl p-4"
+          style={{
+            backgroundColor: `${color}15`,
+            border: `1px solid ${color}30`,
+          }}
         >
-          {category.signal.subtle}
+          <div className="text-3xl">{icon}</div>
         </div>
-
         <div
-          className={`absolute -right-2 -bottom-2 h-10 w-10 rounded-full blur-md transition-all ${
-            isActive ? "opacity-30" : "opacity-0 group-hover:opacity-25"
-          }`}
-          style={{ backgroundColor: category.color }}
-        />
+          className="font-serif text-5xl font-light opacity-20"
+          style={{ color }}
+        >
+          {number}
+        </div>
       </div>
-    </button>
-  );
-};
 
-interface ManuscriptCardProps {
-  item: ContentItem;
-}
-
-/**
- * Category-aware luxury card for each content item.
- * Blogs, books, canon, downloads, events, prints, resources each carry their own “line” feel
- * while staying inside one visual language.
- */
-const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
-  const aesthetic = item.aesthetic ?? getItemAesthetic(item);
-  const href = buildHref(item);
-  const dateLabel = formatDate((item as any).date);
-  const readTime = getReadTime(item);
-  const kind = getItemKind(item);
-  const featured = Boolean((item as any).featured);
-
-  const title = (item as any).title;
-  const excerpt = (item as any).excerpt || (item as any).description;
-
-  // Per-kind micro-copy and CTA
-  let eyebrow = "";
-  let roleLabel = "";
-  let ctaLabel = "";
-  let metaTone = "";
-
-  switch (kind) {
-    case "post":
-      eyebrow = "Structural Essay";
-      roleLabel = "Essay";
-      ctaLabel = "Read essay";
-      metaTone = "On record.";
-      break;
-    case "book":
-      eyebrow = "Bound Volume";
-      roleLabel = "Book";
-      ctaLabel = "Open volume";
-      metaTone = "For slow reading.";
-      break;
-    case "canon":
-      eyebrow = "Canon Fragment";
-      roleLabel = "Canon";
-      ctaLabel = "Enter canon";
-      metaTone = "Core architecture.";
-      break;
-    case "download":
-      eyebrow = "Execution Tool";
-      roleLabel = "Tool";
-      ctaLabel = "Get tool";
-      metaTone = "Built to be used.";
-      break;
-    case "resource":
-      eyebrow = "Reference Asset";
-      roleLabel = "Resource";
-      ctaLabel = "Open resource";
-      metaTone = "For the serious reader.";
-      break;
-    case "event":
-      eyebrow = "Architectural Gathering";
-      roleLabel = "Event";
-      ctaLabel = "View gathering";
-      metaTone = "Limited room.";
-      break;
-    case "print":
-      eyebrow = "Print Edition";
-      roleLabel = "Print";
-      ctaLabel = "View print";
-      metaTone = "On the wall, not the feed.";
-      break;
-    default:
-      eyebrow = "Structural Piece";
-      roleLabel = "Structure";
-      ctaLabel = "Open";
-      metaTone = "Filed in the stacks.";
-      break;
-  }
-
-  return (
-    <Link href={href}>
-      <div
-        className="group relative h-full overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-        style={{
-          borderColor: `${aesthetic.color}35`,
-          backgroundColor: LIBRARY_AESTHETICS.colors.primary.parchment,
-          borderLeft: `4px solid ${aesthetic.color}`,
-        }}
+      <h3
+        className="mb-4 font-serif text-2xl font-medium"
+        style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
       >
-        {/* Left glow / spine */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{
-            background: `linear-gradient(to bottom, transparent, ${aesthetic.color}40, transparent)`,
-          }}
-        />
+        {title}
+      </h3>
 
-        {/* Soft texture overlay */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 0%, rgba(15,23,42,0.12), transparent 65%)",
-          }}
-        />
+      <p
+        className="leading-relaxed opacity-80"
+        style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+      >
+        {description}
+      </p>
+    </div>
+  </div>
+);
 
-        {/* Featured corner ribbon */}
-        {featured && (
-          <div className="absolute right-4 top-4 z-10">
-            <div
-              className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium"
-              style={{
-                backgroundColor: `${aesthetic.color}12`,
-                color: aesthetic.color,
-                border: `1px solid ${aesthetic.color}40`,
-              }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-current" />
-              Featured
-            </div>
-          </div>
-        )}
+const CurationStandard: React.FC<{
+  title: string;
+  description: string;
+  criteria: string[];
+  color: string;
+}> = ({ title, description, criteria, color }) => (
+  <div className="space-y-4">
+    <div className="flex items-center gap-4">
+      <div
+        className="h-3 w-3 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      <h4
+        className="font-serif text-xl font-medium"
+        style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+      >
+        {title}
+      </h4>
+    </div>
 
-        <div className="relative p-6">
-          {/* Header line */}
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="text-xl opacity-80">{aesthetic.icon}</div>
-                <span
-                  className="text-[10px] font-semibold uppercase tracking-[0.24em]"
-                  style={{ color: aesthetic.color }}
-                >
-                  {eyebrow}
-                </span>
-              </div>
+    <p
+      className="text-sm leading-relaxed opacity-80"
+      style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+    >
+      {description}
+    </p>
 
-              <div className="flex items-center gap-2 text-[11px] text-slate-700">
-                <span className="uppercase tracking-[0.18em] opacity-70">
-                  {roleLabel}
-                </span>
-                {metaTone && (
-                  <>
-                    <span>•</span>
-                    <span className="opacity-60 italic">{metaTone}</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Meta (date · read time / duration) */}
-            <div className="flex flex-col items-end gap-1 text-[11px] text-slate-700 opacity-70">
-              <div className="flex items-center gap-2">
-                {dateLabel && <span>{dateLabel}</span>}
-                {dateLabel && readTime && <span>•</span>}
-                {readTime && kind === "post" && <span>{readTime}</span>}
-              </div>
-              {kind === "event" && (item as any).location && (
-                <span className="truncate max-w-[10rem]">
-                  {(item as any).location}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Title */}
-          <h3
-            className="mb-3 font-serif text-xl font-semibold leading-tight group-hover:underline"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.lapis }}
-          >
-            {title}
-          </h3>
-
-          {/* Excerpt / description */}
-          {excerpt ? (
-            <p
-              className="mb-6 line-clamp-3 text-sm leading-relaxed"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.lapis }}
-            >
-              {excerpt}
-            </p>
-          ) : null}
-
-          {/* Footer */}
+    <ul className="space-y-2">
+      {criteria.map((criterion, idx) => (
+        <li key={idx} className="flex items-start gap-3">
           <div
-            className="flex items-center justify-between border-t pt-4"
-            style={{ borderColor: `${aesthetic.color}20` }}
+            className="mt-1 h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+          <span
+            className="text-sm opacity-70"
+            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
           >
-            <div className="flex flex-wrap items-center gap-2">
-              {Array.isArray((item as any).tags) &&
-                (item as any).tags.slice(0, 2).map((tag: string) => (
-                  <span
-                    key={tag}
-                    className="rounded-full px-2 py-1 text-[11px]"
-                    style={{
-                      backgroundColor: `${aesthetic.color}10`,
-                      color: aesthetic.color,
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-            </div>
+            {criterion}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
-            <div
-              className="flex items-center gap-1 text-sm font-medium transition-all group-hover:gap-2"
-              style={{ color: aesthetic.color }}
-            >
-              <span>{ctaLabel}</span>
-              <span className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
+const ChapterCard: React.FC<{
+  chapter: string;
+  title: string;
+  description: string;
+  duration: string;
+  icon: string;
+  color: string;
+}> = ({ chapter, title, description, duration, icon, color }) => (
+  <div
+    className="group relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+    style={{
+      borderColor: `${color}30`,
+      backgroundColor: `${color}05`,
+    }}
+  >
+    {/* Decorative corner */}
+    <div
+      className="absolute -right-6 -top-6 h-16 w-16 rotate-45"
+      style={{ backgroundColor: `${color}10` }}
+    />
+
+    <div className="relative">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className="rounded-lg p-2"
+            style={{ backgroundColor: `${color}15` }}
+          >
+            <div className="text-xl" style={{ color }}>
+              {icon}
             </div>
           </div>
+          <span
+            className="text-xs font-medium uppercase tracking-widest"
+            style={{ color }}
+          >
+            {chapter}
+          </span>
+        </div>
+        <div
+          className="rounded-full px-3 py-1 text-xs"
+          style={{
+            backgroundColor: `${color}15`,
+            color,
+          }}
+        >
+          {duration}
         </div>
       </div>
-    </Link>
-  );
-};
+
+      <h5
+        className="mb-2 font-serif text-lg font-medium"
+        style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+      >
+        {title}
+      </h5>
+
+      <p
+        className="text-sm leading-relaxed opacity-80"
+        style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+      >
+        {description}
+      </p>
+    </div>
+  </div>
+);
 
 /* -------------------------------------------------------------------------- */
 /* MAIN PAGE                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const ContentLibraryPage: NextPage<Props> = ({
-  items,
-  featuredItems,
-  categoryStats,
-}) => {
-  const [activeCategory, setActiveCategory] =
-    React.useState<CategoryKey | "all">("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<"grid" | "shelf">("grid");
-
-  const filteredItems = React.useMemo(() => {
-    let result =
-      activeCategory === "all"
-        ? items
-        : items.filter((item) => getCategoryFromItem(item) === activeCategory);
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((item) => {
-        const title = (item as any).title?.toLowerCase() ?? "";
-        const description = (item as any).description?.toLowerCase() ?? "";
-        const excerpt = (item as any).excerpt?.toLowerCase() ?? "";
-        const tags = Array.isArray((item as any).tags) ? (item as any).tags : [];
-
-        return (
-          title.includes(q) ||
-          description.includes(q) ||
-          excerpt.includes(q) ||
-          tags.some((t: string) => t.toLowerCase().includes(q))
-        );
-      });
-    }
-
-    return result;
-  }, [items, activeCategory, searchQuery]);
-
-  const sortedCategories = (Object.keys(CONTENT_CATEGORIES) as CategoryKey[])
-    .filter((key) => categoryStats[key] > 0)
-    .sort((a, b) => categoryStats[b] - categoryStats[a])
-    .map((key) => [key, CONTENT_CATEGORIES[key]] as const);
-
+const ContextPage: NextPage = () => {
   return (
     <Layout
-      title="The Library of Applied Wisdom"
+      title="The Context & Philosophy"
       pageTitle=""
-      description="A curated collection of strategic essays, canon volumes, execution tools, live sessions, and resources — for men and builders who refuse to disappear."
+      description="The intellectual framework, curation standards, and philosophical pillars that govern this library of applied wisdom."
+      metaImage="/og-context.png"
     >
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-black text-cream">
         {/* HERO ------------------------------------------------------------ */}
         <section
-          className="relative overflow-hidden border-b"
+          className="relative overflow-hidden border-b py-24"
           style={{
             borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-            background:
-              "radial-gradient(circle at top, rgba(250,204,21,0.18) 0%, rgba(15,23,42,1) 35%, #020617 80%)",
+            background: `
+              radial-gradient(circle at 20% 50%, rgba(250,204,21,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(30,64,175,0.1) 0%, transparent 50%),
+              linear-gradient(to bottom, rgba(15,23,42,1) 0%, #020617 100%)
+            `,
           }}
         >
           <PersianOrnament type="header" />
 
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="absolute inset-0 opacity-5">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+              }}
+            />
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <div
-                className="mb-8 inline-flex items-center justify-center gap-3 rounded-full px-6 py-3"
+                className="mb-8 inline-flex items-center gap-3 rounded-full px-6 py-3"
                 style={{
                   backgroundColor: "rgba(234,179,8,0.08)",
                   border: "1px solid rgba(234,179,8,0.35)",
@@ -570,198 +259,380 @@ const ContentLibraryPage: NextPage<Props> = ({
                 <div className="text-2xl">𓆓</div>
                 <span
                   className="text-sm font-medium"
-                  style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.saffron,
+                  }}
                 >
                   {SEASONAL_CURATIONS.wisdomTheme}
                 </span>
               </div>
 
-              <h1 className="mb-4 font-serif text-5xl font-light tracking-tight sm:text-6xl">
-                Content Library
+              <h1 className="mb-6 font-serif text-6xl font-light tracking-tight sm:text-7xl">
+                The Context
               </h1>
 
-              <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-cream/80">
-                Essays, canon volumes, execution tools, live sessions, and core
-                resources — organised for people who are serious about purpose,
-                governance, and legacy.
+              <p className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-cream/80">
+                This is not merely a collection of content. It is a{" "}
+                <span
+                  className="italic"
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.saffron,
+                  }}
+                >
+                  curated ecosystem
+                </span>{" "}
+                of applied wisdom, governed by specific philosophical pillars and
+                curation standards.
               </p>
 
-              <div className="relative mx-auto mb-12 max-w-2xl">
-                <div className="relative">
-                  <div
-                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-40"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 50% 0%, rgba(250,204,21,0.40), transparent 65%)",
-                    }}
-                  />
-                  <div className="relative flex items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 backdrop-blur-sm">
-                    <div className="text-2xl text-cream/60">🔍</div>
-                    <input
-                      type="search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search essays, tools, sessions, and resources..."
-                      className="flex-1 bg-transparent text-lg text-cream placeholder:text-cream/40 focus:outline-none"
+              <div className="mx-auto max-w-2xl">
+                <div
+                  className="rounded-2xl border p-8 text-left"
+                  style={{
+                    borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+                    backgroundColor: "rgba(15,23,42,0.5)",
+                  }}
+                >
+                  <p className="mb-4 font-serif text-lg italic text-cream/90">
+                    "The difference between information and wisdom is curation.
+                    The difference between wisdom and power is application."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-px flex-1"
+                      style={{
+                        backgroundColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+                      }}
                     />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="text-sm text-cream/60 hover:text-cream"
-                      >
-                        Clear
-                      </button>
-                    )}
+                    <span
+                      className="text-sm"
+                      style={{
+                        color: LIBRARY_AESTHETICS.colors.primary.saffron,
+                      }}
+                    >
+                      The Archivist
+                    </span>
                   </div>
                 </div>
-
-                <p className="mt-4 text-center text-sm text-cream/60">
-                  Think of this as a “Harrods back-room library” — curated
-                  shelves, not random posts.
-                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CATEGORY PORTALS ------------------------------------------------- */}
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="mb-2 font-serif text-2xl font-semibold text-cream">
-                Knowledge Portals
+        {/* PHILOSOPHICAL PILLARS ------------------------------------------- */}
+        <section className="relative py-16">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/50 to-slate-950" />
+
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="mb-4 font-serif text-4xl font-light text-cream">
+                The Three Pillars
               </h2>
-              <p className="text-sm text-cream/70">
-                Enter through the portal that matches your current inquiry.
+              <p className="mx-auto max-w-2xl text-lg text-cream/70">
+                Every piece of content in this library is evaluated against these
+                philosophical foundations.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/70 p-1">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`rounded px-3 py-1.5 text-sm transition-all ${
-                  viewMode === "grid"
-                    ? "bg-slate-800 text-cream font-medium"
-                    : "text-cream/60 hover:text-cream"
-                }`}
-              >
-                Grid
-              </button>
-              <button
-                onClick={() => setViewMode("shelf")}
-                className={`rounded px-3 py-1.5 text-sm transition-all ${
-                  viewMode === "shelf"
-                    ? "bg-slate-800 text-cream font-medium"
-                    : "text-cream/60 hover:text-cream"
-                }`}
-              >
-                Shelf
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <CategoryPortal
-              category={{
-                id: "all",
-                title: "All Content",
-                description: "The complete collection of applied wisdom.",
-                icon: "∞",
-                color: LIBRARY_AESTHETICS.colors.primary.saffron,
-                signal: {
-                  subtle: "The entire library at your fingertips.",
-                  texture: "all",
-                },
-              }}
-              count={categoryStats.all}
-              isActive={activeCategory === "all"}
-              onClick={() => setActiveCategory("all")}
-            />
-          </div>
-
-          <div
-            className={`grid gap-6 ${
-              viewMode === "grid"
-                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1"
-            }`}
-          >
-            {sortedCategories.map(([key, category]) => (
-              <CategoryPortal
-                key={key}
-                category={category}
-                count={categoryStats[key as CategoryKey] || 0}
-                isActive={activeCategory === key}
-                onClick={() => setActiveCategory(key as CategoryKey)}
+            <div className="grid gap-8 md:grid-cols-3">
+              <PhilosophyPillar
+                number="I"
+                title="Applied Over Theoretical"
+                description="Knowledge must transform into action. Every concept, framework, or insight is judged by its practical utility and real-world application potential."
+                color={LIBRARY_AESTHETICS.colors.primary.saffron}
+                icon="⚔"
               />
-            ))}
+
+              <PhilosophyPillar
+                number="II"
+                title="Timeless Over Trendy"
+                description="We filter out noise to preserve signal. Content must demonstrate lasting value that transcends current trends and maintains relevance across seasons."
+                color={LIBRARY_AESTHETICS.colors.primary.lapis}
+                icon="⏳"
+              />
+
+              <PhilosophyPillar
+                number="III"
+                title="Depth Over Volume"
+                description="One profound insight outweighs a thousand superficial tips. We prioritize thorough exploration over superficial coverage, depth over breadth."
+                color="#B45309" // Amber 800 for contrast
+                icon="🔍"
+              />
+            </div>
           </div>
         </section>
 
         <PersianOrnament type="divider" />
 
-        {/* MANUSCRIPTS ------------------------------------------------------ */}
-        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="mb-2 font-serif text-2xl font-semibold text-cream">
-                {activeCategory === "all"
-                  ? "Shelf View"
-                  : CONTENT_CATEGORIES[activeCategory as CategoryKey]?.title ??
-                    "Shelf View"}
+        {/* CURATION STANDARDS ----------------------------------------------- */}
+        <section className="py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12">
+              <h2 className="mb-4 font-serif text-4xl font-light text-cream">
+                Curation Standards
               </h2>
-              <p className="text-sm text-cream/70">
-                {filteredItems.length} item
-                {filteredItems.length === 1 ? "" : "s"} in this selection.
+              <p className="max-w-2xl text-lg text-cream/70">
+                The meticulous criteria governing what enters this collection.
               </p>
+            </div>
+
+            <div className="grid gap-12 md:grid-cols-2">
+              <CurationStandard
+                title="Intellectual Rigor"
+                description="Every piece must withstand critical examination and logical scrutiny."
+                criteria={[
+                  "Clear, logical progression of ideas",
+                  "Evidence-based claims where applicable",
+                  "Acknowledgement of counterarguments",
+                  "Original insights beyond surface-level observations",
+                ]}
+                color={LIBRARY_AESTHETICS.colors.primary.saffron}
+              />
+
+              <CurationStandard
+                title="Aesthetic Excellence"
+                description="Form matters as much as function. Presentation elevates understanding."
+                criteria={[
+                  "Thoughtful organization and structure",
+                  "Attention to typography and visual hierarchy",
+                  "Consistent tone and voice",
+                  "Quality of language and expression",
+                ]}
+                color={LIBRARY_AESTHETICS.colors.primary.lapis}
+              />
+
+              <CurationStandard
+                title="Transformative Potential"
+                description="Content must enable meaningful change in perspective or action."
+                criteria={[
+                  "Clear application pathways",
+                  "Actionable frameworks or methods",
+                  "Measurable impact potential",
+                  "Empowerment over mere information",
+                ]}
+                color="#B45309"
+              />
+
+              <CurationStandard
+                title="Integrity & Authenticity"
+                description="Truthfulness and genuine insight are non-negotiable."
+                criteria={[
+                  "Transparent about limitations",
+                  "Original thought over regurgitation",
+                  "Ethical considerations addressed",
+                  "Author's genuine expertise evident",
+                ]}
+                color="#059669" // Emerald 600
+              />
             </div>
           </div>
+        </section>
 
-          {filteredItems.length === 0 ? (
-            <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-16 text-center">
-              <div className="mb-6 text-6xl text-cream/20">𓃲</div>
-              <h3 className="mb-4 text-xl font-medium text-cream">
-                The scribes are still at work.
-              </h3>
-              <p className="mx-auto mb-6 max-w-md text-sm text-cream/70">
-                {searchQuery
-                  ? `No wisdom found for “${searchQuery}”. Try another term or clear the search.`
-                  : "This section awaits its manuscripts. Try another portal or return when the ink has dried."}
+        {/* THE ARCHIVE'S PURPOSE -------------------------------------------- */}
+        <section
+          className="py-16"
+          style={{
+            background: `
+              radial-gradient(circle at 30% 50%, rgba(30,64,175,0.1) 0%, transparent 50%),
+              linear-gradient(to bottom, transparent, rgba(15,23,42,0.8))
+            `,
+          }}
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="mb-4 font-serif text-4xl font-light text-cream">
+                The Archive's Purpose
+              </h2>
+              <p className="mx-auto max-w-3xl text-lg text-cream/70">
+                Why this collection exists, and who it serves.
               </p>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-4 py-2 text-sm text-cream hover:bg-slate-700"
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div
+                className="rounded-2xl border p-8"
+                style={{
+                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+                  backgroundColor: "rgba(15,23,42,0.5)",
+                }}
+              >
+                <h3
+                  className="mb-6 font-serif text-2xl font-medium"
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
                 >
-                  Clear Search
-                </button>
-              )}
+                  For Seekers of Substance
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "Men building legacies, not just careers",
+                    "Architects of systems and institutions",
+                    "Those who value wisdom over information",
+                    "Builders frustrated by shallow advice",
+                    "Leaders seeking timeless principles",
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div
+                        className="mt-2 h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            LIBRARY_AESTHETICS.colors.primary.saffron,
+                        }}
+                      />
+                      <span
+                        className="text-lg leading-relaxed"
+                        style={{
+                          color:
+                            LIBRARY_AESTHETICS.colors.primary.parchment,
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div
+                className="rounded-2xl border p-8"
+                style={{
+                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.lapis}30`,
+                  backgroundColor: "rgba(15,23,42,0.5)",
+                }}
+              >
+                <h3
+                  className="mb-6 font-serif text-2xl font-medium"
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
+                >
+                  The Intended Impact
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "Transform insight into tangible action",
+                    "Build systems that outlast individual effort",
+                    "Develop judgment that improves with time",
+                    "Create work that matters beyond metrics",
+                    "Cultivate wisdom that compounds across domains",
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div
+                        className="mt-2 h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            LIBRARY_AESTHETICS.colors.primary.lapis,
+                        }}
+                      />
+                      <span
+                        className="text-lg leading-relaxed"
+                        style={{
+                          color:
+                            LIBRARY_AESTHETICS.colors.primary.parchment,
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          ) : (
-            <div
-              className={`grid gap-8 ${
-                viewMode === "grid"
-                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-1"
-              }`}
-            >
-              {filteredItems.map((item) => (
-                <ManuscriptCard key={(item as any)._id} item={item} />
-              ))}
+          </div>
+        </section>
+
+        <PersianOrnament type="divider" />
+
+        {/* THE JOURNEY THROUGH THE LIBRARY ---------------------------------- */}
+        <section className="py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="mb-4 font-serif text-4xl font-light text-cream">
+                The Journey Through the Library
+              </h2>
+              <p className="mx-auto max-w-2xl text-lg text-cream/70">
+                How to navigate this collection for maximum impact.
+              </p>
             </div>
-          )}
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <ChapterCard
+                chapter="Chapter I"
+                title="Foundation"
+                description="Begin with canonical works that establish first principles and core frameworks."
+                duration="1-2 weeks"
+                icon="📜"
+                color={CONTENT_CATEGORIES.CANON.color}
+              />
+
+              <ChapterCard
+                chapter="Chapter II"
+                title="Application"
+                description="Move to strategic essays that apply principles to real-world scenarios."
+                duration="2-3 weeks"
+                icon="⚔"
+                color={CONTENT_CATEGORIES.POSTS.color}
+              />
+
+              <ChapterCard
+                chapter="Chapter III"
+                title="Tools"
+                description="Implement with practical resources, templates, and execution frameworks."
+                duration="Ongoing"
+                icon="⚙"
+                color={CONTENT_CATEGORIES.RESOURCES.color}
+              />
+
+              <ChapterCard
+                chapter="Chapter IV"
+                title="Integration"
+                description="Synthesize learning through live sessions and community engagement."
+                duration="Continuous"
+                icon="🕯"
+                color={CONTENT_CATEGORIES.EVENTS.color}
+              />
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/content"
+                className="group inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-medium transition-all hover:gap-4 hover:shadow-2xl"
+                style={{
+                  backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
+                  color: "#0f172a",
+                }}
+              >
+                <span>Enter the Library</span>
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* FOOTER ----------------------------------------------------------- */}
-        <footer className="border-t border-slate-800 bg-slate-950 py-8">
-          <div className="mx-auto max-w-7xl px-4 text-center">
+        <footer className="border-t border-slate-800 bg-slate-950 py-12">
+          <div className="mx-auto max-w-6xl px-4 text-center">
+            <div className="mb-6">
+              <div className="text-3xl opacity-30">𓆓</div>
+            </div>
             <p className="mb-4 text-sm italic text-cream/60">
-              A living library, continuously curated for seekers of substance.
+              "A library is not a luxury but one of the necessities of life."
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-xs text-cream/40">
               {Object.values(SEASONAL_CURATIONS.tactileSignals).map((value) => (
                 <span key={value}>{value}</span>
               ))}
+            </div>
+            <div className="mt-8 border-t border-slate-800 pt-8">
+              <Link
+                href="/content"
+                className="text-sm text-cream/60 transition-colors hover:text-cream"
+              >
+                Return to Library →
+              </Link>
             </div>
           </div>
         </footer>
@@ -770,54 +641,4 @@ const ContentLibraryPage: NextPage<Props> = ({
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* STATIC PROPS                                                               */
-/* -------------------------------------------------------------------------- */
-
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  const rawItems = getAllContent();
-
-  const items: ContentItem[] = rawItems.map((item) => {
-    const category = getCategoryFromItem(item as ContentItem);
-    return {
-      ...(item as AnyContent),
-      aesthetic: CONTENT_CATEGORIES[category],
-    };
-  });
-
-  const categoryStats: Record<CategoryKey, number> & { all: number } = {
-    all: items.length,
-    POSTS: 0,
-    BOOKS: 0,
-    EVENTS: 0,
-    DOWNLOADS: 0,
-    PRINTS: 0,
-    RESOURCES: 0,
-    CANON: 0,
-  };
-
-  items.forEach((item) => {
-    const cat = getCategoryFromItem(item);
-    categoryStats[cat] += 1;
-  });
-
-  const featuredItems = items
-    .filter((i) => (i as any).featured || (i as any).date)
-    .sort((a, b) => {
-      const da = (a as any).date ? new Date((a as any).date).getTime() : 0;
-      const db = (b as any).date ? new Date((b as any).date).getTime() : 0;
-      return db - da;
-    })
-    .slice(0, 3);
-
-  return {
-    props: {
-      items,
-      featuredItems,
-      categoryStats,
-    },
-    revalidate: 60,
-  };
-};
-
-export default ContentLibraryPage;
+export default ContextPage;

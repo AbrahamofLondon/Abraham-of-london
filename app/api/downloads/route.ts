@@ -4,13 +4,14 @@ import { allDownloads } from "@/lib/contentlayer-helper";
 import {
   rateLimitAsync,
   RATE_LIMIT_CONFIGS,
-  // …
+  createRateLimitHeaders,
 } from "@/lib/rate-limit";
 import { getClientIp, anonymizeIp } from "@/lib/server/ip";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
 interface DownloadDocument {
   slug: string;
   title: string;
@@ -49,8 +50,9 @@ type DownloadsResponse =
   | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Constants & helpers
 // ---------------------------------------------------------------------------
+
 const SECURITY_HEADERS: Record<string, string> = {
   "Content-Type": "application/json",
   "X-Content-Type-Options": "nosniff",
@@ -109,31 +111,35 @@ function jsonError(
 // ---------------------------------------------------------------------------
 // GET /api/downloads
 // ---------------------------------------------------------------------------
+
 export async function GET(
   request: Request
 ): Promise<NextResponse<DownloadsResponse>> {
   const url = new URL(request.url);
   const slugParam = url.searchParams.get("slug");
 
-  // Derive IP from headers using shared helper - COMPATIBLE VERSION
+  // Derive IP from headers using shared helper
   const ip = getClientIp({
     headers: (() => {
       const headers: Record<string, string> = {};
       request.headers.forEach((value, key) => {
-        headers[key] = value;
+        headers[key.toLowerCase()] = value;
       });
       return headers;
     })(),
   });
 
-  // Apply API-level rate limiting (read-only but still abusable)
-  const rlKey = `downloads:${ip}`;
-  const rlResult = await rateLimitAsync(rlKey, RATE_LIMIT_CONFIGS.API_GENERAL);
+  // Apply API-level rate limiting
+  const rlKey = `downloads:${ip || "unknown"}`;
+  const rlResult = await rateLimitAsync(
+    rlKey,
+    RATE_LIMIT_CONFIGS.API_GENERAL
+  );
   const rateHeaders = createRateLimitHeaders(rlResult);
 
   const baseHeaders: Record<string, string> = {
     ...SECURITY_HEADERS,
-    // cache for 10 mins, allow stale for 10 mins
+    // cache for 10 mins, allow stale for 10 mins at the edge
     "Cache-Control": "public, s-maxage=600, stale-while-revalidate=600",
     ...rateHeaders,
   };
@@ -141,7 +147,9 @@ export async function GET(
   if (!rlResult.allowed) {
     // Minimal logging; anonymise IP
     if (process.env.NODE_ENV !== "production") {
-      console.warn("[downloads] rate limit exceeded", { ip });
+      console.warn("[downloads] rate limit exceeded", {
+        ip: anonymizeIp(ip),
+      });
     }
 
     return jsonError(
@@ -159,12 +167,16 @@ export async function GET(
     const slug = slugParam.trim();
 
     if (!isValidSlug(slug)) {
-      return jsonError({ ok: false, error: "Invalid slug" }, 400, baseHeaders);
+      return jsonError(
+        { ok: false, error: "Invalid slug" },
+        400,
+        baseHeaders
+      );
     }
 
-    const found = allDownloads.find((d) => d.slug === slug) as
-      | DownloadDocument
-      | undefined;
+    const found = allDownloads.find(
+      (d) => d.slug === slug
+    ) as DownloadDocument | undefined;
 
     if (!found) {
       return NextResponse.json(
@@ -185,7 +197,10 @@ export async function GET(
   // Full list of downloads
   const items = allDownloads
     .slice()
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
     .map((doc) => mapDownload(doc as DownloadDocument));
 
   return NextResponse.json(
@@ -201,14 +216,21 @@ export async function GET(
 // ---------------------------------------------------------------------------
 // Other methods – explicitly disallowed
 // ---------------------------------------------------------------------------
-export async function POST(): Promise<NextResponse<DownloadsResponse>> {
+
+export async function POST(): Promise<
+  NextResponse<DownloadsResponse>
+> {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
 
-export async function PUT(): Promise<NextResponse<DownloadsResponse>> {
+export async function PUT(): Promise<
+  NextResponse<DownloadsResponse>
+> {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
 
-export async function DELETE(): Promise<NextResponse<DownloadsResponse>> {
+export async function DELETE(): Promise<
+  NextResponse<DownloadsResponse>
+> {
   return jsonError({ ok: false, error: "Method not allowed" }, 405);
 }
