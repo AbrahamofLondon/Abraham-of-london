@@ -1,367 +1,51 @@
 // pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import type { GetStaticProps } from "next";
+import type { NextPage } from "next";
+import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
-import NewsletterForm from "@/components/NewsletterForm";
 import MandateStatement from "@/components/MandateStatement";
-import { HeroBanner } from "@/components/InteractiveElements";
 
-type HomePageProps = {
-  featuredPosts: any[];
-  featuredBooks: any[];
-  featuredEvents: any[];
-  featuredDownloads: any[];
-};
+// Homepage sectional components – loaded dynamically so we don't fight TS prop typing
+const HeroBanner = dynamic(
+  () => import("@/components/homepage/HeroBanner"),
+  { ssr: true }
+);
+const VenturesSection = dynamic(
+  () => import("@/components/homepage/VenturesSection"),
+  { ssr: true }
+);
+const AboutSection = dynamic(
+  () => import("@/components/homepage/AboutSection"),
+  { ssr: true }
+);
+const StatsBar = dynamic(
+  () => import("@/components/homepage/StatsBar"),
+  { ssr: true }
+);
+const StrategicFunnelStrip = dynamic(
+  () => import("@/components/homepage/StrategicFunnelStrip"),
+  { ssr: true }
+);
+const MilestonesTimeline = dynamic(
+  () => import("@/components/homepage/MilestonesTimeline"),
+  { ssr: true }
+);
+const TestimonialsSection = dynamic(
+  () => import("@/components/homepage/TestimonialsSection"),
+  { ssr: true }
+);
 
-// ============================================================================
-// ARCHITECTURAL COMPONENTS
-// ============================================================================
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
-interface PathwayPortalProps {
-  title: string;
-  description: string;
-  stats: string;
-  href: string;
-  color: string;
-  delay: number;
-}
-
-const PathwayPortal: React.FC<PathwayPortalProps> = ({
-  title,
-  description,
-  stats,
-  href,
-  color,
-  delay,
-}) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-
-  return (
-    <Link href={href}>
-      <div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`group relative h-full cursor-pointer rounded-2xl border shadow-lg transition-all duration-500 hover:-translate-y-2 ${
-          isHovered ? "shadow-2xl" : "shadow-lg"
-        }`}
-        style={{
-          borderColor: `${color}30`,
-          backgroundColor: `${color}05`,
-          transitionDelay: `${delay}ms`,
-        }}
-      >
-        {/* Background Architecture */}
-        <div
-          className="absolute inset-0 opacity-10 transition-opacity duration-500 group-hover:opacity-20"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 80%, ${color} 0%, transparent 55%)`,
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative p-8">
-          {/* Header */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="h-2 w-2 animate-pulse rounded-full"
-                style={{ backgroundColor: color }}
-              />
-              <div
-                className="text-xs tracking-[0.25em] uppercase"
-                style={{ color }}
-              >
-                Pathway
-              </div>
-            </div>
-            <div
-              className="rounded-full px-3 py-1 text-xs"
-              style={{ borderColor: `${color}30`, color, borderWidth: 1 }}
-            >
-              {stats}
-            </div>
-          </div>
-
-          {/* Title */}
-          <h3 className="mb-4 text-2xl font-light transition-colors group-hover:text-white">
-            {title}
-          </h3>
-
-          {/* Description */}
-          <p className="mb-8 leading-relaxed text-[#999]">{description}</p>
-
-          {/* CTA */}
-          <div
-            className="flex items-center justify-between border-t pt-6 text-sm"
-            style={{ borderColor: `${color}15`, color }}
-          >
-            <div>Enter Pathway</div>
-            <div className="transform transition-transform group-hover:translate-x-2">
-              →
-            </div>
-          </div>
-        </div>
-
-        {/* Hover Glow */}
-        <div
-          className="pointer-events-none absolute -inset-4 opacity-0 transition-opacity duration-500 group-hover:opacity-30"
-          style={{
-            background: `radial-gradient(circle at center, ${color}30 0%, transparent 70%)`,
-          }}
-        />
-      </div>
-    </Link>
-  );
-};
-
-interface StructuralCardProps {
-  title: string;
-  description: string;
-  meta: string;
-  href: string;
-  type: "post" | "event" | "book" | "download";
-  featured?: boolean;
-  delay?: number;
-}
-
-const StructuralCard: React.FC<StructuralCardProps> = ({
-  title,
-  description,
-  meta,
-  href,
-  type,
-  featured = false,
-  delay = 0,
-}) => {
-  const typeConfig = {
-    post: { color: "#d4af37", icon: "✍", label: "Structural Essay" },
-    book: { color: "#b8941f", icon: "📚", label: "Bound Volume" },
-    event: { color: "#9c7c1a", icon: "𓇯", label: "Gathering" },
-    download: { color: "#806515", icon: "⚙", label: "Tool" },
-  } as const;
-
-  const config = typeConfig[type];
-
-  return (
-    <Link href={href}>
-      <div
-        className="group relative cursor-pointer overflow-hidden rounded-xl border transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
-        style={{
-          borderColor: `${config.color}30`,
-          backgroundColor: `${config.color}05`,
-          transitionDelay: `${delay}ms`,
-        }}
-      >
-        {/* Featured Badge */}
-        {featured && (
-          <div className="absolute left-4 top-4 z-10">
-            <div
-              className="flex items-center gap-1 rounded-full px-3 py-1 text-xs"
-              style={{
-                backgroundColor: `${config.color}20`,
-                color: config.color,
-              }}
-            >
-              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
-              Featured
-            </div>
-          </div>
-        )}
-
-        <div className="p-6">
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-xl opacity-70">{config.icon}</div>
-              <div
-                className="text-xs tracking-[0.22em] uppercase"
-                style={{ color: config.color }}
-              >
-                {config.label}
-              </div>
-            </div>
-            <div className="text-xs text-[#777]">{meta}</div>
-          </div>
-
-          {/* Title */}
-          <h4 className="mb-3 text-lg font-medium transition-colors group-hover:text-white">
-            {title}
-          </h4>
-
-          {/* Description */}
-          <p className="mb-6 line-clamp-2 text-sm text-[#999]">{description}</p>
-
-          {/* Footer */}
-          <div
-            className="flex items-center justify-between border-t pt-4 text-xs"
-            style={{ borderColor: `${config.color}15` }}
-          >
-            <div className="opacity-70">Continue Reading</div>
-            <div
-              className="transform text-sm transition-transform group-hover:translate-x-1"
-              style={{ color: config.color }}
-            >
-              →
-            </div>
-          </div>
-        </div>
-
-        {/* Hover Overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      </div>
-    </Link>
-  );
-};
-
-// ============================================================================
-// MAIN PAGE
-// ============================================================================
-
-const HomePage: React.FC<HomePageProps> = () => {
-  const router = useRouter();
-  const [isLoaded, setIsLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
+const HomePage: NextPage = () => {
   const siteTitle = "Abraham of London";
   const siteTagline =
-    "Structural thinking for fathers, founders, and builders of legacy.";
-
-  const pathways = [
-    {
-      title: "For Fathers",
-      description:
-        "Architectural principles for building homes that withstand time, culture, and crisis.",
-      stats: "12 Structures",
-      href: "/content?category=fatherhood",
-      color: "#d4af37",
-    },
-    {
-      title: "For Founders",
-      description:
-        "Board-level thinking and operating systems for building ventures that endure.",
-      stats: "18 Structures",
-      href: "/content?category=founders",
-      color: "#b8941f",
-    },
-    {
-      title: "For Leaders",
-      description:
-        "Strategic frameworks for leading organisations through complexity and change.",
-      stats: "24 Structures",
-      href: "/content?category=leadership",
-      color: "#9c7c1a",
-    },
-  ];
-
-  const featuredContent = {
-    posts: [
-      {
-        title: "The Architecture of Crisis",
-        description:
-          "How to build structures that don't just survive storms, but leverage them for growth.",
-        meta: "12 min read",
-        href: "/when-the-storm-finds-you",
-        type: "post" as const,
-        featured: true,
-      },
-      {
-        title: "Fathering Without Fear",
-        description:
-          "A structural approach to fatherhood in an age of confusion and crisis.",
-        meta: "18 min read",
-        href: "/fathering-without-fear",
-        type: "post" as const,
-      },
-    ],
-    books: [
-      {
-        title: "Volume Zero: The Architecture of Human Purpose",
-        description:
-          "The foundational framework for understanding purpose, civilisation, and destiny.",
-        meta: "Prelude Release",
-        href: "/books/the-architecture-of-human-purpose-landing",
-        type: "book" as const,
-        featured: true,
-      },
-    ],
-    events: [
-      {
-        title: "Strategic Leadership Workshop",
-        description:
-          "A masterclass on structural thinking for leaders building lasting organisations.",
-        meta: "London · 2025",
-        href: "/events/strategic-leadership-workshop",
-        type: "event" as const,
-      },
-    ],
-    downloads: [
-      {
-        title: "Entrepreneur Survival Framework",
-        description:
-          "A structural checklist for founders navigating market shifts and personal crises.",
-        meta: "PDF · 12 pages",
-        href: "/downloads/entrepreneur-survival-checklist",
-        type: "download" as const,
-      },
-    ],
-  };
-
-  const ventures = [
-    {
-      label: "Advisory & Ventures",
-      title: "Alomarada",
-      description:
-        "Strategic advisory and operating structures for governments, corporates, and growth-stage ventures in emerging markets.",
-      href: "/ventures/alomarada",
-      tag: "Market Architecture",
-    },
-    {
-      label: "Enduring Brand",
-      title: "Endureluxe",
-      description:
-        "A premium, durable-first brand exploring what it means to build products that outlast hype and headlines.",
-      href: "/ventures/endureluxe",
-      tag: "Consumer Architecture",
-    },
-    {
-      label: "The Canon",
-      title: "Architecture of Human Purpose",
-      description:
-        "A multi-volume canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
-      href: "/books/the-architecture-of-human-purpose-landing",
-      tag: "Philosophical Architecture",
-    },
-    {
-      label: "Story Platform",
-      title: "Fathering Without Fear",
-      description:
-        "A memoir-driven platform reclaiming fatherhood, dignity, and justice in an age determined to erase men.",
-      href: "/books/fathering-without-fear",
-      tag: "Narrative Architecture",
-    },
-    {
-      label: "Inner Community",
-      title: "Inner Circle",
-      description:
-        "Private letters, advanced frameworks, and closed-door conversations for those willing to build differently.",
-      href: "/inner-circle",
-      tag: "Relational Architecture",
-    },
-  ];
-
-  const handleHeroCTA = () => {
-    router.push("/content");
-  };
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
 
   return (
     <Layout
@@ -374,9 +58,8 @@ const HomePage: React.FC<HomePageProps> = () => {
         description: siteTagline,
         url: siteUrl,
         publisher: {
-          "@type": "Organization",
-          name: siteTitle,
-          logo: `${siteUrl}/logo.png`,
+          "@type": "Person",
+          name: "Abraham of London",
         },
       }}
     >
@@ -385,534 +68,294 @@ const HomePage: React.FC<HomePageProps> = () => {
         <meta name="description" content={siteTagline} />
         <meta property="og:title" content={siteTitle} />
         <meta property="og:description" content={siteTagline} />
-        <meta property="og:image" content={`${siteUrl}/og-home.jpg`} />
+        <meta property="og:image" content={`${siteUrl}/assets/images/social/og-image.jpg`} />
         <meta property="og:url" content={siteUrl} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={siteTitle} />
         <meta name="twitter:description" content={siteTagline} />
-        <meta name="twitter:image" content={`${siteUrl}/og-home.jpg`} />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta
+          name="twitter:image"
+          content={`${siteUrl}/assets/images/social/twitter-image.jpg`}
+        />
+        <meta name="theme-color" content="#050509" />
       </Head>
 
-      {/* Background Architecture */}
+      {/* GLOBAL BACKDROP */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050509] via-[#0b0b10] to-[#050509]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-950 to-black" />
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: `
-              linear-gradient(90deg, rgba(212,175,55,0.12) 1px, transparent 1px),
-              linear-gradient(rgba(212,175,55,0.12) 1px, transparent 1px)
-            `,
+            backgroundImage:
+              "linear-gradient(90deg, rgba(212,175,55,0.12) 1px, transparent 1px), linear-gradient(rgba(212,175,55,0.12) 1px, transparent 1px)",
             backgroundSize: "80px 80px",
           }}
         />
       </div>
 
-      {/* HERO: HERO BANNER + ARCHITECTURE SNAPSHOT */}
-      <section className="relative overflow-hidden pt-10 pb-20 lg:pt-16">
-        {/* Architectural Lines */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#3a3a3a]/25 to-transparent" />
-          <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-[#3a3a3a]/20 to-transparent" />
-          <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full border border-[#d4af37]/10" />
-          <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full border border-[#d4af37]/10" />
+      {/* 1. PRIMARY HERO – LEGACY HERO BANNER */}
+      <section className="relative border-b border-white/5 bg-black/60">
+        {/* HeroBanner already carries the visual authority & banner asset */}
+        <HeroBanner />
+      </section>
+
+      {/* 2. THE CANON – PHILOSOPHICAL ENGINE ROOM */}
+      <section className="relative border-b border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-black">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+          <div className="absolute left-1/2 top-10 h-40 w-px -translate-x-1/2 bg-gradient-to-b from-amber-400/40 to-transparent" />
         </div>
 
-        <div
-          className={`relative mx-auto max-w-7xl px-4 transition-all duration-1000 ${
-            isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-          }`}
-        >
-          {/* HERO BANNER — PRIMARY VISUAL HERO */}
-          <div className="mb-12">
-            <HeroBanner />
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 lg:flex-row lg:items-center lg:px-8 lg:py-20">
+          {/* Canon Copy */}
+          <div className="flex-1 space-y-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300/70">
+              The Canon
+            </p>
+            <h2 className="font-serif text-3xl font-light tracking-tight text-cream sm:text-4xl lg:text-5xl">
+              The ideological engine room
+              <span className="mt-2 block text-sm font-sans text-amber-200/80">
+                Law · Principles · Architecture of Human Purpose
+              </span>
+            </h2>
+
+            <p className="max-w-xl text-sm leading-relaxed text-cream/80">
+              The Canon is not a blog. It is the structural record of what we
+              believe about purpose, civilisation, governance, and destiny. It
+              sits above the ventures as the law that governs the engine room.
+            </p>
+
+            <p className="max-w-xl text-sm leading-relaxed text-cream/70">
+              Every framework, workshop, and venture flows from this
+              architecture: how men lead, how institutions are built, and how
+              legacies are secured across generations.
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link
+                href="/canon"
+                className="group inline-flex items-center gap-2 rounded-full border border-amber-400/60 bg-amber-400/10 px-6 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-400/20"
+              >
+                Enter the Canon
+                <span className="transition-transform group-hover:translate-x-1">
+                  ↠
+                </span>
+              </Link>
+              <Link
+                href="/books/the-architecture-of-human-purpose"
+                className="inline-flex items-center gap-2 rounded-full border border-cream/10 bg-cream/5 px-6 py-2 text-sm text-cream/80 hover:bg-cream/10"
+              >
+                Read the Prelude Volume
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-4 pt-4 text-xs text-cream/60">
+              <span className="rounded-full border border-amber-400/30 px-3 py-1">
+                Purpose &amp; civilisation
+              </span>
+              <span className="rounded-full border border-amber-400/20 px-3 py-1">
+                Governance &amp; institutional design
+              </span>
+              <span className="rounded-full border border-amber-400/20 px-3 py-1">
+                Spiritual realism &amp; destiny
+              </span>
+            </div>
           </div>
 
-          {/* Under-banner architecture narrative */}
-          <div className="grid gap-12 pb-6 lg:grid-cols-[3fr,2fr] lg:items-start">
-            {/* Left: Core narrative + CTAs */}
-            <div>
-              {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-4">
-                <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#d4af37]/40" />
-                <span className="text-xs uppercase tracking-[0.32em] text-[#d4af37]/80">
-                  Structural Canon · Abraham of London
-                </span>
-                <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#d4af37]/40" />
+          {/* Canon Visual */}
+          <div className="flex-1">
+            <div className="relative mx-auto max-w-md rounded-3xl border border-amber-400/30 bg-gradient-to-b from-slate-900 via-slate-950 to-black p-6 shadow-[0_0_120px_rgba(0,0,0,0.8)]">
+              <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-br from-amber-400/20 via-transparent to-amber-500/10 opacity-70 blur-xl" />
+              <div className="relative flex flex-col gap-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-200/80">
+                  Canon · Volume I
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-black/60">
+                  <Image
+                    src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+                    alt="The Architecture of Human Purpose cover"
+                    width={640}
+                    height={880}
+                    className="h-auto w-full object-cover"
+                  />
+                </div>
+                <p className="text-xs leading-relaxed text-cream/70">
+                  <span className="font-semibold text-amber-200">
+                    The Architecture of Human Purpose
+                  </span>{" "}
+                  is the prelude to a multi-volume Canon—a structural map for
+                  people who know that human flourishing is not accidental but
+                  architectural.
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <h1 className="mb-4 text-3xl font-light leading-[1.15] tracking-tight md:text-4xl">
-                Architectural thinking for fathers, founders, and leaders
-                building{" "}
-                <span className="text-[#d4af37]">homes, ventures, and institutions</span>{" "}
-                that outlast the storm.
-              </h1>
+      {/* 3. VENTURES – EXECUTION ARMS OF THE CANON */}
+      <section className="relative border-b border-white/5 bg-gradient-to-b from-black via-slate-950 to-black">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
 
-              <p className="mb-8 max-w-2xl text-sm leading-relaxed text-[#b3b3b3]">
-                A canon of structural essays, volumes, tools, and gatherings
-                designed for men who refuse to disappear — and who insist on
-                building with purpose, governance, and destiny in view.
-              </p>
+        <div className="relative mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
+          <div className="mb-10 flex flex-col gap-4 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cream/60">
+              Ventures
+            </p>
+            <h2 className="font-serif text-3xl font-light text-cream sm:text-4xl">
+              Where philosophy becomes operating system
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm leading-relaxed text-cream/75">
+              Alomarada, EndureLuxe, and InnovateHub are not side projects. They
+              are execution arms of the Canon—testing ground for strategy,
+              governance, and multi-generational design.
+            </p>
+          </div>
 
-              {/* CTAs */}
-              <div className="mb-8 flex flex-col justify-start gap-4 sm:flex-row">
-                <button
-                  onClick={handleHeroCTA}
-                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden px-8 py-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f]" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                  <span className="relative">Enter the Content Library</span>
-                  <span className="relative transition-transform duration-300 group-hover:translate-x-2">
-                    ↠
-                  </span>
-                </button>
+          {/* Your existing ventures grid / structure */}
+          <VenturesSection />
+        </div>
+      </section>
 
-                <Link
-                  href="/books/the-architecture-of-human-purpose-landing"
-                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#3a3a3a] px-8 py-4 text-sm font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#151515] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  <span className="relative">Preview the Canon</span>
-                  <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">
+      {/* 4. STRATEGIC FUNNEL / JOURNEY STRIP */}
+      <section className="relative border-b border-white/5 bg-slate-950">
+        <div className="relative mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+          <StrategicFunnelStrip />
+        </div>
+      </section>
+
+      {/* 5. WRITINGS & STRUCTURAL WORKS – SIGNAL LAYERS */}
+      <section className="relative border-b border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-black">
+        <div className="relative mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20">
+          <div className="mb-10 flex flex-col gap-4 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cream/60">
+              The Works
+            </p>
+            <h2 className="font-serif text-3xl font-light text-cream sm:text-4xl">
+              Books, essays, canon notes, and tools
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm leading-relaxed text-cream/75">
+              Every piece of writing is a structural node in a larger system—
+              from long-form Canon volumes to tactical downloads built for
+              execution in the field.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Canon / Deep Structure */}
+            <Link href="/canon" className="group">
+              <div className="flex h-full flex-col rounded-2xl border border-amber-400/35 bg-gradient-to-b from-black via-slate-950 to-black p-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-amber-200/80">
+                  Canon
+                </div>
+                <h3 className="mb-3 font-serif text-xl text-cream">
+                  Canon Volumes &amp; Inner Papers
+                </h3>
+                <p className="mb-6 text-sm leading-relaxed text-cream/75">
+                  Structural essays and canonical treatises on purpose,
+                  governance, civilisation, and spiritual realism.
+                </p>
+                <div className="mt-auto flex items-center justify-between text-sm text-amber-200">
+                  <span>Enter the archive</span>
+                  <span className="transition-transform group-hover:translate-x-1">
                     →
                   </span>
-                </Link>
-              </div>
-
-              <p className="text-xs uppercase tracking-[0.2em] text-[#777]">
-                Purpose · Civilisation · Governance · Fatherhood · Markets ·
-                Destiny
-              </p>
-            </div>
-
-            {/* Right: Architecture Map Snapshot */}
-            <div className="relative rounded-2xl border border-[#2a2a2a] bg-gradient-to-b from-[#050509] via-[#0f1015] to-[#050509] p-8">
-              <div className="mb-4 text-xs uppercase tracking-[0.22em] text-[#777]">
-                The Architecture at a Glance
-              </div>
-
-              <div className="space-y-4 text-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
-                      Philosophy
-                    </div>
-                    <p className="mt-1 text-[#cfcfcf]">
-                      <span className="font-semibold">
-                        Architecture of Human Purpose
-                      </span>{" "}
-                      — a canon on how purpose, civilisation, and destiny are
-                      designed, not improvised.
-                    </p>
-                  </div>
-                  <Link
-                    href="/books"
-                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
-                  >
-                    View Volumes
-                  </Link>
-                </div>
-
-                <div className="h-px bg-gradient-to-r from-[#262626] via-[#333] to-transparent" />
-
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
-                      Structures
-                    </div>
-                    <p className="mt-1 text-[#cfcfcf]">
-                      Essays, tools, and playbooks translating philosophy into{" "}
-                      <span className="font-semibold">operating systems</span> for
-                      fathers, founders, and leaders.
-                    </p>
-                  </div>
-                  <Link
-                    href="/content"
-                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
-                  >
-                    Enter Library
-                  </Link>
-                </div>
-
-                <div className="h-px bg-gradient-to-r from-[#262626] via-[#333] to-transparent" />
-
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
-                      Ventures
-                    </div>
-                    <p className="mt-1 text-[#cfcfcf]">
-                      Alomarada, Endureluxe, Fathering Without Fear, and the
-                      Inner Circle — live laboratories where the canon is
-                      applied.
-                    </p>
-                  </div>
-                  <Link
-                    href="/content?category=ventures"
-                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
-                  >
-                    See the Work
-                  </Link>
                 </div>
               </div>
-
-              <div className="mt-8 grid grid-cols-3 gap-4 text-center text-xs text-[#888]">
-                <div>
-                  <div className="text-lg font-light text-[#d4af37]">80+</div>
-                  <div>Structural Essays</div>
-                </div>
-                <div>
-                  <div className="text-lg font-light text-[#d4af37]">4</div>
-                  <div>Core Ventures</div>
-                </div>
-                <div>
-                  <div className="text-lg font-light text-[#d4af37]">1</div>
-                  <div>Unifying Canon</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ARCHITECTURAL PATHWAYS */}
-      <section
-        className={`relative py-24 transition-all duration-1000 ${
-          isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-        }`}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
-
-        <div className="relative mx-auto max-w-7xl px-4">
-          <div className="mb-14 text-center">
-            <h2 className="text-3xl font-light md:text-4xl">
-              Three{" "}
-              <span className="text-[#d4af37]">Architectural Pathways</span>
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm text-[#999]">
-              Choose the main theatre you are building in right now — home,
-              venture, or institution — and move through the structures in
-              sequence.
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {pathways.map((pathway, index) => (
-              <PathwayPortal
-                key={pathway.title}
-                {...pathway}
-                delay={index * 120}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* VENTURES & PLATFORMS */}
-      <section className="relative py-28">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
-        <div className="relative mx-auto max-w-7xl px-4">
-          <div className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-            <div>
-              <h2 className="text-3xl font-light md:text-4xl">
-                One philosophy.{" "}
-                <span className="text-[#d4af37]">Multiple platforms.</span>
-              </h2>
-              <p className="mt-4 max-w-xl text-sm text-[#999]">
-                The canon doesn’t stay on paper. It runs through advisory
-                work, ventures, brands, stories, and a guarded community of
-                men who build.
-              </p>
-            </div>
-            <div className="text-xs uppercase tracking-[0.2em] text-[#777]">
-              Advisory · Brand · Story · Canon · Inner Circle
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {ventures.map((venture, index) => (
-              <Link key={venture.title} href={venture.href}>
-                <div
-                  className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-[#252525] bg-[#050509] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#d4af37]/60 hover:shadow-2xl"
-                  style={{ transitionDelay: `${index * 70}ms` }}
-                >
-                  <div className="mb-3 text-[11px] uppercase tracking-[0.22em] text-[#777]">
-                    {venture.label}
-                  </div>
-                  <h3 className="mb-2 text-xl font-light text-[#f5f5f5] group-hover:text-[#ffffff]">
-                    {venture.title}
-                  </h3>
-                  <p className="mb-4 text-sm text-[#a3a3a3]">
-                    {venture.description}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between text-xs text-[#d4af37]">
-                    <span>{venture.tag}</span>
-                    <span className="transform transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </div>
-
-                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-20">
-                    <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-gradient-to-tr from-[#d4af37]/40 to-transparent blur-3xl" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MANDATE STATEMENT */}
-      <section className="relative py-28">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
-        <div className="relative mx-auto max-w-6xl px-4">
-          <MandateStatement />
-        </div>
-      </section>
-
-      {/* FEATURED STRUCTURES (ESSAYS, BOOKS, TOOLS, EVENTS) */}
-      <section className="relative py-28">
-        <div className="relative mx-auto max-w-7xl px-4">
-          <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h2 className="text-3xl font-light md:text-4xl">
-                Selected{" "}
-                <span className="text-[#d4af37]">structural pieces.</span>
-              </h2>
-              <p className="mt-3 max-w-xl text-sm text-[#999]">
-                A sample of essays, volumes, tools, and gatherings that give a
-                first taste of the canon — without giving the whole archive
-                away.
-              </p>
-            </div>
-            <Link
-              href="/content"
-              className="text-sm text-[#d4af37] underline-offset-4 hover:underline"
-            >
-              View the complete library →
             </Link>
-          </div>
 
-          <div className="grid gap-12 lg:grid-cols-2">
-            {/* Left Column: Essays & Books */}
-            <div className="space-y-12">
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="h-px w-12 bg-gradient-to-r from-[#d4af37] to-transparent" />
-                  <h3 className="text-2xl font-light">Structural Essays</h3>
+            {/* Books */}
+            <Link href="/books" className="group">
+              <div className="flex h-full flex-col rounded-2xl border border-cream/15 bg-gradient-to-b from-slate-950 via-slate-950 to-black p-6 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-cream/70">
+                  Books
                 </div>
-                <div className="grid gap-6">
-                  {featuredContent.posts.map((post, index) => (
-                    <StructuralCard
-                      key={post.title}
-                      {...post}
-                      delay={index * 90}
-                    />
-                  ))}
+                <h3 className="mb-3 font-serif text-xl text-cream">
+                  Fathering Without Fear &amp; other volumes
+                </h3>
+                <p className="mb-6 text-sm leading-relaxed text-cream/75">
+                  Memoir, parable, and strategic narrative for men, fathers, and
+                  builders who refuse to disappear quietly.
+                </p>
+                <div className="mt-auto flex items-center justify-between text-sm text-cream/80">
+                  <span>Browse the bookshelf</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
                 </div>
               </div>
+            </Link>
 
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="h-px w-12 bg-gradient-to-r from-[#b8941f] to-transparent" />
-                  <h3 className="text-2xl font-light">Bound Volumes</h3>
+            {/* Tools / Downloads / Events */}
+            <div className="space-y-4">
+              <Link href="/content" className="group block">
+                <div className="rounded-2xl border border-cream/10 bg-slate-950/80 p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cream/60">
+                    Essays
+                  </p>
+                  <h4 className="mt-2 text-sm font-medium text-cream">
+                    Strategic essays &amp; field notes
+                  </h4>
+                  <p className="mt-2 text-xs text-cream/70">
+                    Long-form thinking on crisis, leadership, and systems.
+                  </p>
                 </div>
-                <div className="grid gap-6">
-                  {featuredContent.books.map((book, index) => (
-                    <StructuralCard
-                      key={book.title}
-                      {...book}
-                      delay={index * 90}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Tools & Events */}
-            <div className="space-y-12">
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="h-px w-12 bg-gradient-to-r from-[#806515] to-transparent" />
-                  <h3 className="text-2xl font-light">Structural Tools</h3>
-                </div>
-                <div className="grid gap-6">
-                  {featuredContent.downloads.map((tool, index) => (
-                    <StructuralCard
-                      key={tool.title}
-                      {...tool}
-                      delay={index * 90}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="h-px w-12 bg-gradient-to-r from-[#9c7c1a] to-transparent" />
-                  <h3 className="text-2xl font-light">
-                    Architectural Gatherings
-                  </h3>
-                </div>
-                <div className="grid gap-6">
-                  {featuredContent.events.map((event, index) => (
-                    <StructuralCard
-                      key={event.title}
-                      {...event}
-                      delay={index * 90}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* All Content CTA */}
-          <div className="mt-16 border-t border-[#2a2a2a] pt-16">
-            <div className="text-center">
-              <Link
-                href="/content"
-                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#2a2a2a] px-12 py-5 text-lg font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#151515] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <span className="relative">Enter the Complete Structure</span>
-                <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">
-                  →
-                </span>
               </Link>
-              <p className="mt-3 text-sm text-[#666]">
-                80+ architectural structures across essays, volumes, tools, and
-                gatherings.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* NEWSLETTER / INNER CIRCLE */}
-      <section className="relative overflow-hidden py-28">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#050509] via-[#101017] to-[#050509]" />
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage:
-                "linear-gradient(45deg, transparent 48%, #111827 48%, #111827 52%, transparent 52%)",
-              backgroundSize: "60px 60px",
-            }}
-          />
-        </div>
-
-        <div className="relative mx-auto max-w-4xl px-4">
-          <div className="relative overflow-hidden rounded-2xl border border-[#2a2a2a]">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-20"
-              style={{
-                background:
-                  "radial-gradient(circle at 0% 0%, rgba(212,175,55,0.5), transparent 55%)",
-              }}
-            />
-            <div className="relative p-10 text-center sm:p-12">
-              <div className="mb-6 text-5xl text-[#d4af37]/40">∞</div>
-
-              <h3 className="mb-4 text-3xl font-light">Join the Inner Circle</h3>
-
-              <p className="mx-auto mb-8 max-w-2xl text-sm text-[#b0b0b0]">
-                Private letters, deep dives, and structural frameworks that won’t
-                live on social media — for those who don’t just want to “stay
-                updated”, but to build differently.
-              </p>
-
-              <div className="mx-auto max-w-md">
-                <NewsletterForm
-                  variant="premium"
-                  placeholder="Enter your architectural email"
-                  buttonText="Enter the Inner Circle"
-                />
-              </div>
-
-              <p className="mt-5 text-xs text-[#777]">
-                No fluff. No spam. Just structural thinking that builds.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER: STATS & CLAIM */}
-      <footer
-        className="relative border-t py-16"
-        style={{ borderColor: "#2a2a2a" }}
-      >
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-            {[
-              { value: "80+", label: "Structural Essays" },
-              { value: "4+", label: "Architectural Volumes" },
-              { value: "18+", label: "Execution Tools" },
-              { value: "12+", label: "Years in the Furnace" },
-            ].map((stat, index) => (
-              <div key={index} className="space-y-2">
-                <div className="text-3xl font-light text-[#d4af37]">
-                  {stat.value}
+              <Link href="/downloads" className="group block">
+                <div className="rounded-2xl border border-cream/10 bg-slate-950/80 p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cream/60">
+                    Tools
+                  </p>
+                  <h4 className="mt-2 text-sm font-medium text-cream">
+                    Frameworks, checklists &amp; playbooks
+                  </h4>
+                  <p className="mt-2 text-xs text-cream/70">
+                    Tactical PDFs and toolkits for execution.
+                  </p>
                 </div>
-                <div className="text-sm text-[#666]">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+              </Link>
 
-          <div
-            className="mt-10 border-t pt-6 text-center text-sm text-[#666]"
-            style={{ borderColor: "#2a2a2a" }}
-          >
-            <p>
-              An architectural approach to purpose, civilisation, and human
-              destiny — from courtrooms to boardrooms to the quiet work of
-              fatherhood.
-            </p>
+              <Link href="/events" className="group block">
+                <div className="rounded-2xl border border-cream/10 bg-slate-950/80 p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cream/60">
+                    Events
+                  </p>
+                  <h4 className="mt-2 text-sm font-medium text-cream">
+                    Workshops, salons &amp; convenings
+                  </h4>
+                  <p className="mt-2 text-xs text-cream/70">
+                    Live rooms where frameworks are tested in real time.
+                  </p>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
-      </footer>
+      </section>
 
-      {/* Interactive Overlay */}
-      <div className="pointer-events-none fixed inset-0 z-50">
-        <div
-          className="absolute h-96 w-96 rounded-full bg-gradient-to-r from-[#d4af37]/6 to-transparent blur-3xl"
-          style={{
-            transform: "translate(var(--mouse-x), var(--mouse-y))",
-            transition: "transform 0.1s ease-out",
-          }}
-        />
-      </div>
+      {/* 6. MANDATE & ABOUT – THE MAN AND THE MISSION */}
+      <section className="relative border-b border-white/5 bg-black">
+        <div className="relative mx-auto max-w-6xl px-4 py-16 lg:px-8 lg:py-20">
+          <MandateStatement />
+          <div className="mt-12">
+            <AboutSection />
+          </div>
+        </div>
+      </section>
 
-      {/* Mouse Tracking Script */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('mousemove', (e) => {
-              document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
-              document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
-            });
-          `,
-        }}
-      />
+      {/* 7. STATS / TIMELINE / TESTIMONIALS */}
+      <section className="relative border-b border-white/5 bg-slate-950">
+        <div className="relative mx-auto max-w-7xl px-4 py-16 lg:px-8 lg:py-20 space-y-16">
+          <StatsBar />
+          <MilestonesTimeline />
+          <TestimonialsSection />
+        </div>
+      </section>
     </Layout>
   );
-};
-
-export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // Placeholder: hook up real data later if needed
-  return {
-    props: {
-      featuredPosts: [],
-      featuredBooks: [],
-      featuredEvents: [],
-      featuredDownloads: [],
-    },
-    revalidate: 3600,
-  };
 };
 
 export default HomePage;

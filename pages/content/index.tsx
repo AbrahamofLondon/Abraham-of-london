@@ -53,6 +53,40 @@ function getCategoryFromItem(item: ContentItem): CategoryKey {
   }
 }
 
+type ItemKind =
+  | "post"
+  | "book"
+  | "event"
+  | "download"
+  | "print"
+  | "resource"
+  | "canon";
+
+function getItemKind(item: ContentItem): ItemKind {
+  const rawType = (item as any)._type as string | undefined;
+  const fallback = (item as any).type as string | undefined;
+  const kind = (rawType ?? fallback ?? "Post").toString();
+
+  switch (kind) {
+    case "Post":
+      return "post";
+    case "Book":
+      return "book";
+    case "Event":
+      return "event";
+    case "Download":
+      return "download";
+    case "Print":
+      return "print";
+    case "Resource":
+      return "resource";
+    case "Canon":
+      return "canon";
+    default:
+      return "post";
+  }
+}
+
 function getItemAesthetic(item: ContentItem) {
   const category = getCategoryFromItem(item);
   return CONTENT_CATEGORIES[category];
@@ -247,11 +281,78 @@ interface ManuscriptCardProps {
   item: ContentItem;
 }
 
+/**
+ * Category-aware luxury card for each content item.
+ * Blogs, books, canon, downloads, events, prints, resources each carry their own “line” feel
+ * while staying inside one visual language.
+ */
 const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
   const aesthetic = item.aesthetic ?? getItemAesthetic(item);
   const href = buildHref(item);
   const dateLabel = formatDate((item as any).date);
   const readTime = getReadTime(item);
+  const kind = getItemKind(item);
+  const featured = Boolean((item as any).featured);
+
+  const title = (item as any).title;
+  const excerpt = (item as any).excerpt || (item as any).description;
+
+  // Per-kind micro-copy and CTA
+  let eyebrow = "";
+  let roleLabel = "";
+  let ctaLabel = "";
+  let metaTone = "";
+
+  switch (kind) {
+    case "post":
+      eyebrow = "Structural Essay";
+      roleLabel = "Essay";
+      ctaLabel = "Read essay";
+      metaTone = "On record.";
+      break;
+    case "book":
+      eyebrow = "Bound Volume";
+      roleLabel = "Book";
+      ctaLabel = "Open volume";
+      metaTone = "For slow reading.";
+      break;
+    case "canon":
+      eyebrow = "Canon Fragment";
+      roleLabel = "Canon";
+      ctaLabel = "Enter canon";
+      metaTone = "Core architecture.";
+      break;
+    case "download":
+      eyebrow = "Execution Tool";
+      roleLabel = "Tool";
+      ctaLabel = "Get tool";
+      metaTone = "Built to be used.";
+      break;
+    case "resource":
+      eyebrow = "Reference Asset";
+      roleLabel = "Resource";
+      ctaLabel = "Open resource";
+      metaTone = "For the serious reader.";
+      break;
+    case "event":
+      eyebrow = "Architectural Gathering";
+      roleLabel = "Event";
+      ctaLabel = "View gathering";
+      metaTone = "Limited room.";
+      break;
+    case "print":
+      eyebrow = "Print Edition";
+      roleLabel = "Print";
+      ctaLabel = "View print";
+      metaTone = "On the wall, not the feed.";
+      break;
+    default:
+      eyebrow = "Structural Piece";
+      roleLabel = "Structure";
+      ctaLabel = "Open";
+      metaTone = "Filed in the stacks.";
+      break;
+  }
 
   return (
     <Link href={href}>
@@ -263,6 +364,7 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
           borderLeft: `4px solid ${aesthetic.color}`,
         }}
       >
+        {/* Left glow / spine */}
         <div
           className="absolute left-0 top-0 bottom-0 w-1"
           style={{
@@ -270,6 +372,7 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
           }}
         />
 
+        {/* Soft texture overlay */}
         <div
           className="absolute inset-0 opacity-5"
           style={{
@@ -278,51 +381,94 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
           }}
         />
 
+        {/* Featured corner ribbon */}
+        {featured && (
+          <div className="absolute right-4 top-4 z-10">
+            <div
+              className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium"
+              style={{
+                backgroundColor: `${aesthetic.color}12`,
+                color: aesthetic.color,
+                border: `1px solid ${aesthetic.color}40`,
+              }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              Featured
+            </div>
+          </div>
+        )}
+
         <div className="relative p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-xl opacity-70">{aesthetic.icon}</div>
-              <span
-                className="text-xs font-medium uppercase tracking-wider"
-                style={{ color: aesthetic.color }}
-              >
-                {aesthetic.title}
-              </span>
+          {/* Header line */}
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="text-xl opacity-80">{aesthetic.icon}</div>
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-[0.24em]"
+                  style={{ color: aesthetic.color }}
+                >
+                  {eyebrow}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] text-slate-700">
+                <span className="uppercase tracking-[0.18em] opacity-70">
+                  {roleLabel}
+                </span>
+                {metaTone && (
+                  <>
+                    <span>•</span>
+                    <span className="opacity-60 italic">{metaTone}</span>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 text-xs opacity-60 text-slate-800">
-              {dateLabel && <span>{dateLabel}</span>}
-              <span>•</span>
-              <span>{readTime}</span>
+            {/* Meta (date · read time / duration) */}
+            <div className="flex flex-col items-end gap-1 text-[11px] text-slate-700 opacity-70">
+              <div className="flex items-center gap-2">
+                {dateLabel && <span>{dateLabel}</span>}
+                {dateLabel && readTime && <span>•</span>}
+                {readTime && kind === "post" && <span>{readTime}</span>}
+              </div>
+              {kind === "event" && (item as any).location && (
+                <span className="truncate max-w-[10rem]">
+                  {(item as any).location}
+                </span>
+              )}
             </div>
           </div>
 
+          {/* Title */}
           <h3
             className="mb-3 font-serif text-xl font-semibold leading-tight group-hover:underline"
             style={{ color: LIBRARY_AESTHETICS.colors.primary.lapis }}
           >
-            {(item as any).title}
+            {title}
           </h3>
 
-          {(item as any).excerpt || (item as any).description ? (
+          {/* Excerpt / description */}
+          {excerpt ? (
             <p
-              className="mb-6 line-clamp-3 text-sm leading-relaxed opacity-80"
+              className="mb-6 line-clamp-3 text-sm leading-relaxed"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.lapis }}
             >
-              {(item as any).excerpt || (item as any).description}
+              {excerpt}
             </p>
           ) : null}
 
+          {/* Footer */}
           <div
             className="flex items-center justify-between border-t pt-4"
             style={{ borderColor: `${aesthetic.color}20` }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {Array.isArray((item as any).tags) &&
                 (item as any).tags.slice(0, 2).map((tag: string) => (
                   <span
                     key={tag}
-                    className="rounded-full px-2 py-1 text-xs"
+                    className="rounded-full px-2 py-1 text-[11px]"
                     style={{
                       backgroundColor: `${aesthetic.color}10`,
                       color: aesthetic.color,
@@ -337,7 +483,7 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
               className="flex items-center gap-1 text-sm font-medium transition-all group-hover:gap-2"
               style={{ color: aesthetic.color }}
             >
-              <span>Enter the manuscript</span>
+              <span>{ctaLabel}</span>
               <span className="transition-transform group-hover:translate-x-1">
                 →
               </span>
@@ -610,8 +756,7 @@ const ContentLibraryPage: NextPage<Props> = ({
         <footer className="border-t border-slate-800 bg-slate-950 py-8">
           <div className="mx-auto max-w-7xl px-4 text-center">
             <p className="mb-4 text-sm italic text-cream/60">
-              A living library, continuously curated for seekers of
-              substance.
+              A living library, continuously curated for seekers of substance.
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-xs text-cream/40">
               {Object.values(SEASONAL_CURATIONS.tactileSignals).map((value) => (
