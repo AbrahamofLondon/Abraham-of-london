@@ -5,17 +5,16 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import { allPosts, type Post } from "@/lib/contentlayer-helper";
+import { getAllPosts } from "@/lib/content";
+import type { Post } from "contentlayer/generated";
 
 interface BlogPageProps {
   posts: Post[];
 }
 
 const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
-  // Always work on a safe array
-  const safePosts: Post[] = Array.isArray(posts) ? posts : [];
+  const safePosts = Array.isArray(posts) ? posts : [];
 
-  // Derive unique tags for the filter
   const allTags = React.useMemo(() => {
     const tagSet = new Set<string>();
     for (const post of safePosts) {
@@ -35,22 +34,15 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   const filteredPosts = React.useMemo(() => {
     if (activeTag === "all") return safePosts;
     return safePosts.filter((post) =>
-      Array.isArray(post.tags) ? post.tags.includes(activeTag) : false
+      Array.isArray(post.tags) ? post.tags.includes(activeTag) : false,
     );
   }, [safePosts, activeTag]);
 
   const hasPosts = safePosts.length > 0;
-
-  // Pick a "hero" post (first in the sorted list)
   const heroPost = hasPosts ? safePosts[0] : null;
-  const otherPosts = hasPosts ? safePosts.slice(1) : [];
 
   return (
-    <Layout
-      title="Blog"
-      pageTitle="Blog"
-      transparentHeader={false}
-    >
+    <Layout title="Blog" pageTitle="Blog">
       <Head>
         <title>Blog | Abraham of London</title>
         <meta
@@ -80,7 +72,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
             <h2 className="mb-2 font-semibold text-cream">
               Essays are being prepared
             </h2>
-            <p className="max-w-md mx-auto">
+            <p className="mx-auto max-w-md">
               The first wave of essays and canon excerpts is in final edit. Check back
               soon, or join the Inner Circle to be notified when new writing goes live.
             </p>
@@ -89,45 +81,29 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
         {hasPosts && (
           <div className="space-y-12">
-            {/* HERO POST CARD */}
+            {/* HERO POST + TAG FILTER */}
             {heroPost && (
-              <section className="grid gap-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-stretch">
+              <section className="grid items-stretch gap-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
                 <HeroPostCard post={heroPost} />
 
-                {/* Tag filter panel */}
                 <aside className="rounded-2xl border border-gold/25 bg-charcoal-light/40 p-5">
                   <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/70">
                     Filter by theme
                   </h2>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
+                    <TagButton
+                      label="All"
+                      active={activeTag === "all"}
                       onClick={() => setActiveTag("all")}
-                      className={[
-                        "rounded-full border px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] transition",
-                        activeTag === "all"
-                          ? "border-gold bg-gold/10 text-gold"
-                          : "border-gold/30 text-gray-300 hover:border-gold/60 hover:text-gold"
-                      ].join(" ")}
-                    >
-                      All
-                    </button>
-
+                    />
                     {allTags.map((tag) => (
-                      <button
+                      <TagButton
                         key={tag}
-                        type="button"
+                        label={tag}
+                        active={activeTag === tag}
                         onClick={() => setActiveTag(tag)}
-                        className={[
-                          "rounded-full border px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] transition",
-                          activeTag === tag
-                            ? "border-gold bg-gold/10 text-gold"
-                            : "border-gold/30 text-gray-300 hover:border-gold/60 hover:text-gold"
-                        ].join(" ")}
-                      >
-                        {tag}
-                      </button>
+                      />
                     ))}
                   </div>
 
@@ -142,7 +118,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
               </section>
             )}
 
-            {/* GRID OF POSTS (filtered, excluding hero) */}
+            {/* GRID OF POSTS */}
             <section className="space-y-4">
               <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/60">
                 Latest essays
@@ -163,19 +139,17 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   );
 };
 
-type HeroPostCardProps = {
-  post: Post;
-};
+type HeroPostCardProps = { post: Post };
 
 const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
   const { slug, title, excerpt, description, date, readTime, tags } = post;
   const href = `/${slug}`;
-  const copy = description || excerpt || "";
+  const copy = (description || excerpt || "") as string;
   const displayTags = Array.isArray(tags) ? tags.slice(0, 3) : [];
 
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-br from-charcoal-light/80 via-charcoal/90 to-black/90 p-6 sm:p-7">
-      <div className="absolute inset-0 pointer-events-none opacity-30 bg-[radial-gradient(circle_at_top,_#f7e7ce_0,_transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_#f7e7ce_0,_transparent_55%)]" />
       <div className="relative z-10 flex flex-1 flex-col gap-4">
         <div className="space-y-2">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-gold/80">
@@ -186,11 +160,7 @@ const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
           </h2>
         </div>
 
-        {copy && (
-          <p className="max-w-xl text-sm text-gray-200">
-            {copy}
-          </p>
-        )}
+        {copy && <p className="max-w-xl text-sm text-gray-200">{copy}</p>}
 
         <div className="mt-auto flex flex-wrap items-center gap-3 text-[0.7rem] text-gray-300">
           {date && (
@@ -202,13 +172,11 @@ const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
               })}
             </span>
           )}
-
           {readTime && (
             <span className="rounded-full border border-gold/50 px-3 py-0.5 uppercase tracking-[0.18em] text-gold">
               {readTime}
             </span>
           )}
-
           {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {displayTags.map((tag) => (
@@ -237,14 +205,12 @@ const HeroPostCard: React.FC<HeroPostCardProps> = ({ post }) => {
   );
 };
 
-type PostCardProps = {
-  post: Post;
-};
+type PostCardProps = { post: Post };
 
 const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const { slug, title, excerpt, description, date, readTime, tags } = post;
   const href = `/${slug}`;
-  const copy = description || excerpt || "";
+  const copy = (description || excerpt || "") as string;
   const displayTags = Array.isArray(tags) ? tags.slice(0, 2) : [];
 
   return (
@@ -257,11 +223,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
           <h3 className="font-serif text-lg font-light text-cream transition group-hover:text-gold">
             {title}
           </h3>
-          {copy && (
-            <p className="line-clamp-3 text-xs text-gray-300">
-              {copy}
-            </p>
-          )}
+          {copy && <p className="line-clamp-3 text-xs text-gray-300">{copy}</p>}
         </div>
 
         <div className="mt-auto flex flex-wrap items-center gap-2 text-[0.7rem] text-gray-400">
@@ -297,22 +259,32 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   );
 };
 
+type TagButtonProps = {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+};
+
+const TagButton: React.FC<TagButtonProps> = ({ label, active, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={[
+      "rounded-full border px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] transition",
+      active
+        ? "border-gold bg-gold/10 text-gold"
+        : "border-gold/30 text-gray-300 hover:border-gold/60 hover:text-gold",
+    ].join(" ")}
+  >
+    {label}
+  </button>
+);
+
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
-  // Guard against contentlayer exports being undefined
-  const postsSource = Array.isArray(allPosts) ? allPosts : [];
-
-  const posts = postsSource
-    .filter((post) => !post.draft)
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      if (db !== da) return db - da;
-      return (a.title || "").localeCompare(b.title || "");
-    });
-
+  const posts = getAllPosts();
   return {
     props: { posts },
-    revalidate: 60, // 1 minute – matches your SSG cadence
+    revalidate: 60,
   };
 };
 
