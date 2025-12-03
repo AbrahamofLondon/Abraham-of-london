@@ -99,7 +99,8 @@ function formatDate(date?: string | null): string | null {
 
 function getReadTime(item: ContentItem): string {
   const explicit = (item as any).readTime ?? (item as any).readingTime;
-  if (explicit) return `${explicit}`.includes("min") ? `${explicit}` : `${explicit} min`;
+  if (explicit)
+    return `${explicit}`.includes("min") ? `${explicit}` : `${explicit} min`;
 
   const raw = (item as any).body?.raw ?? (item as any).body?.code ?? "";
   const wordCount = String(raw).split(/\s+/u).length;
@@ -186,8 +187,7 @@ const CategoryPortal: React.FC<CategoryPortalProps> = ({
         }`}
         style={{
           backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E\")",
-          backgroundSize: "60px 60px",
+            "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.65))",
         }}
       />
 
@@ -274,8 +274,7 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({ item }) => {
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E\")`,
-            backgroundSize: "100px 100px",
+              "radial-gradient(circle at 20% 0%, rgba(15,23,42,0.12), transparent 65%)",
           }}
         />
 
@@ -359,7 +358,8 @@ const ContentLibraryPage: NextPage<Props> = ({
   featuredItems,
   categoryStats,
 }) => {
-  const [activeCategory, setActiveCategory] = React.useState<CategoryKey | "all">("all");
+  const [activeCategory, setActiveCategory] =
+    React.useState<CategoryKey | "all">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<"grid" | "shelf">("grid");
 
@@ -407,7 +407,7 @@ const ContentLibraryPage: NextPage<Props> = ({
           style={{
             borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
             background:
-              "radial-gradient(circle at top, rgba(250, 204, 21,0.18) 0%, rgba(15,23,42,1) 35%, #020617 80%)",
+              "radial-gradient(circle at top, rgba(250,204,21,0.18) 0%, rgba(15,23,42,1) 35%, #020617 80%)",
           }}
         >
           <PersianOrnament type="header" />
