@@ -1,12 +1,10 @@
 // pages/content/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
-import Head from "next/head";
+import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import { getAllContent } from "@/lib/content";
-
-type ContentItem = ReturnType<typeof getAllContent>[number];
 
 type CategoryKey =
   | "all"
@@ -17,53 +15,39 @@ type CategoryKey =
   | "prints"
   | "resources";
 
-type ContentPageProps = {
+type ContentItem = any;
+
+type Props = {
   items: ContentItem[];
+  counts: Record<CategoryKey, number>;
 };
 
-const CATEGORY_META: Record<
-  Exclude<CategoryKey, "all">,
-  { label: string; badge: string; singular: string; plural: string }
-> = {
-  posts: {
-    label: "Strategic Essays",
-    badge: "Strategic Essay",
-    singular: "essay",
-    plural: "essays",
-  },
-  books: {
-    label: "Curated Volumes",
-    badge: "Curated Volume",
-    singular: "volume",
-    plural: "volumes",
-  },
-  downloads: {
-    label: "Execution Tools",
-    badge: "Execution Tool",
-    singular: "tool",
-    plural: "tools",
-  },
-  events: {
-    label: "Live Sessions",
-    badge: "Live Session",
-    singular: "session",
-    plural: "sessions",
-  },
-  prints: {
-    label: "Print Editions",
-    badge: "Print Edition",
-    singular: "print",
-    plural: "prints",
-  },
-  resources: {
-    label: "Core Resources",
-    badge: "Core Resource",
-    singular: "resource",
-    plural: "resources",
-  },
-};
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
 
 function getPrimaryCategory(item: ContentItem): Exclude<CategoryKey, "all"> {
+  const kind = (item as any)._kind as string | undefined;
+
+  if (kind) {
+    switch (kind) {
+      case "post":
+        return "posts";
+      case "book":
+        return "books";
+      case "download":
+        return "downloads";
+      case "event":
+        return "events";
+      case "print":
+        return "prints";
+      case "resource":
+        return "resources";
+      default:
+        return "posts";
+    }
+  }
+
   const t = (item as any)._type as string | undefined;
 
   switch (t) {
@@ -84,15 +68,53 @@ function getPrimaryCategory(item: ContentItem): Exclude<CategoryKey, "all"> {
   }
 }
 
-function buildHref(item: ContentItem): string {
-  const t = (item as any)._type as string | undefined;
-  const slug = (item as any).slug as string;
+function getTypeLabel(item: ContentItem): string {
+  const cat = getPrimaryCategory(item);
+  switch (cat) {
+    case "posts":
+      return "Strategic Essay";
+    case "books":
+      return "Curated Volume";
+    case "downloads":
+      return "Execution Tool";
+    case "events":
+      return "Live Session";
+    case "prints":
+      return "Print Edition";
+    case "resources":
+      return "Core Resource";
+    default:
+      return "Strategic Essay";
+  }
+}
 
+function buildHref(item: ContentItem): string {
+  const kind = (item as any)._kind as string | undefined;
+  const slug = (item as any).slug as string | undefined;
   if (!slug) return "#";
 
+  if (kind) {
+    switch (kind) {
+      case "post":
+        return `/${slug}`;
+      case "book":
+        return `/books/${slug}`;
+      case "download":
+        return `/downloads/${slug}`;
+      case "event":
+        return `/events/${slug}`;
+      case "print":
+        return `/prints/${slug}`;
+      case "resource":
+        return `/resources/${slug}`;
+      default:
+        break;
+    }
+  }
+
+  const t = (item as any)._type as string | undefined;
   switch (t) {
     case "Post":
-      // Posts are routed with /[slug]
       return `/${slug}`;
     case "Book":
       return `/books/${slug}`;
@@ -109,231 +131,240 @@ function buildHref(item: ContentItem): string {
   }
 }
 
-const ContentPage: NextPage<ContentPageProps> = ({ items }) => {
-  const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
-  const canonicalUrl = `${SITE_URL}/content`;
+function formatDate(date?: string | null): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
-  const [activeCategory, setActiveCategory] = React.useState<CategoryKey>("all");
+/* -------------------------------------------------------------------------- */
+/* Page                                                                        */
+/* -------------------------------------------------------------------------- */
+
+const ContentLibraryPage: NextPage<Props> = ({ items, counts }) => {
+  const [activeFilter, setActiveFilter] = React.useState<CategoryKey>("all");
   const [query, setQuery] = React.useState("");
 
-  const counts = React.useMemo(() => {
-    const base = {
-      posts: 0,
-      books: 0,
-      downloads: 0,
-      events: 0,
-      prints: 0,
-      resources: 0,
-    };
+  const filteredItems = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
 
-    for (const item of items) {
+    return items.filter((item) => {
       const cat = getPrimaryCategory(item);
-      // @ts-expect-error – cat is guaranteed to be a key
-      base[cat] += 1;
-    }
 
-    const total =
-      base.posts +
-      base.books +
-      base.downloads +
-      base.events +
-      base.prints +
-      base.resources;
+      if (activeFilter !== "all" && cat !== activeFilter) return false;
 
-    return { total, ...base };
-  }, [items]);
+      if (!q) return true;
 
-  const filtered = React.useMemo(() => {
-    let working = items.slice().sort((a, b) => {
-      const da = (a as any).date ? new Date((a as any).date).getTime() : 0;
-      const db = (b as any).date ? new Date((b as any).date).getTime() : 0;
-      return db - da;
-    });
+      const title = (item.title ?? "").toString().toLowerCase();
+      const description = (item.description ?? item.excerpt ?? "")
+        .toString()
+        .toLowerCase();
+      const tags = Array.isArray(item.tags)
+        ? (item.tags as string[]).join(" ").toLowerCase()
+        : "";
+      const typeLabel = getTypeLabel(item).toLowerCase();
 
-    if (activeCategory !== "all") {
-      working = working.filter(
-        (item) => getPrimaryCategory(item) === activeCategory
+      return (
+        title.includes(q) ||
+        description.includes(q) ||
+        tags.includes(q) ||
+        typeLabel.includes(q)
       );
-    }
+    });
+  }, [items, activeFilter, query]);
 
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      working = working.filter((item) => {
-        const title = String((item as any).title ?? "").toLowerCase();
-        const excerpt = String((item as any).excerpt ?? "").toLowerCase();
-        const description = String(
-          (item as any).description ?? ""
-        ).toLowerCase();
-        const tags = Array.isArray((item as any).tags)
-          ? ((item as any).tags as string[])
-          : [];
-        const tagText = tags.join(" ").toLowerCase();
-
-        return (
-          title.includes(q) ||
-          excerpt.includes(q) ||
-          description.includes(q) ||
-          tagText.includes(q)
-        );
-      });
-    }
-
-    return working;
-  }, [items, activeCategory, query]);
-
-  const activeMeta =
-    activeCategory === "all" ? null : CATEGORY_META[activeCategory as Exclude<CategoryKey, "all">];
-
-  const activeCount =
-    activeCategory === "all"
-      ? counts.total
-      : counts[activeCategory as Exclude<CategoryKey, "all">];
+  const activeLabel: string =
+    activeFilter === "all"
+      ? "All Content"
+      : activeFilter === "posts"
+      ? "Strategic Essays"
+      : activeFilter === "books"
+      ? "Curated Volumes"
+      : activeFilter === "downloads"
+      ? "Execution Tools"
+      : activeFilter === "events"
+      ? "Live Sessions"
+      : activeFilter === "prints"
+      ? "Print Editions"
+      : "Core Resources";
 
   return (
     <Layout title="Content Library">
-      <Head>
-        <title>Content Library | Abraham of London</title>
-        <meta
-          name="description"
-          content="Essays, canon volumes, execution tools, live sessions, and core resources — organised for people who are serious about purpose, governance, and legacy."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-      </Head>
-
       <main className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-charcoal text-cream">
-        {/* HERO / HEADER */}
-        <section className="relative border-b border-softGold/20">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-x-0 -top-40 h-72 bg-[radial-gradient(circle_at_top,_rgba(226,197,120,0.22),_transparent_70%)]" />
-            <div className="absolute inset-y-0 left-[12%] w-px bg-gradient-to-b from-softGold/70 via-softGold/0 to-transparent" />
-            <div className="absolute inset-y-0 right-[10%] w-px bg-gradient-to-t from-softGold/60 via-softGold/0 to-transparent" />
-          </div>
-
-          <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:pb-14 sm:pt-20">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.34em] text-softGold/80">
-              Abraham of London · Canon
-            </p>
-            <h1 className="mt-1 font-serif text-3xl font-semibold text-cream sm:text-4xl md:text-5xl">
-              Content Library
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm text-gray-200 sm:text-[0.95rem]">
-              Essays, canon volumes, execution tools, live sessions, and core
-              resources — organised for people who are serious about **purpose,
-              governance, and legacy**.
-            </p>
-            <p className="mt-1 max-w-2xl text-[0.8rem] text-softGold/80">
-              Think of this as a **Harrods back-room library**: curated shelves,
-              not random posts.
-            </p>
-
-            {/* SEARCH */}
-            <div className="mt-6 max-w-xl">
-              <div className="relative rounded-full border border-softGold/35 bg-black/70 px-4 py-2 shadow-[0_14px_40px_rgba(0,0,0,0.9)]">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-softGold/70">
-                  🔍
+        {/* Header */}
+        <section className="border-b border-softGold/20 bg-gradient-to-br from-black via-[#050608] to-[#101217]">
+          <div className="mx-auto max-w-6xl px-4 pb-10 pt-16 sm:pt-20">
+            <header className="space-y-5">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-softGold/80">
+                Abraham of London · Canon
+              </p>
+              <h1 className="font-serif text-3xl font-semibold sm:text-4xl md:text-5xl">
+                Content Library
+              </h1>
+              <p className="max-w-3xl text-sm leading-relaxed text-softGold/80 sm:text-[0.95rem]">
+                Essays, canon volumes, execution tools, live sessions, and core
+                resources — organised for people who are serious about{" "}
+                <span className="font-semibold text-softGold">
+                  purpose, governance, and legacy.
                 </span>
-                <input
-                  className="w-full bg-transparent pl-8 pr-2 text-sm text-cream placeholder:text-softGold/50 focus:outline-none"
-                  placeholder="Search essays, tools, sessions, and resources…"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
+              </p>
+              <p className="max-w-2xl text-[0.8rem] text-softGold/60">
+                Think of this as a{" "}
+                <span className="italic">
+                  “Harrods back-room library” — curated shelves, not random
+                  posts.
+                </span>
+              </p>
+
+              <div className="mt-5">
+                <div className="relative max-w-xl">
+                  <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,_rgba(234,200,125,0.18),_transparent_70%)] opacity-60" />
+                  <div className="relative flex items-center gap-3 rounded-full border border-softGold/40 bg-black/70 px-4 py-2 shadow-[0_14px_40px_rgba(0,0,0,0.85)] backdrop-blur">
+                    <span className="text-sm text-softGold/80">🔍</span>
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search essays, tools, sessions, and resources…"
+                      className="h-8 w-full bg-transparent text-sm text-cream placeholder:text-softGold/50 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            </header>
           </div>
         </section>
 
-        {/* FILTER BAR + LIST */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:pt-10">
-          {/* FILTER CHIPS */}
+        {/* Filters + Shelf */}
+        <section className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:pt-10">
+          {/* Filter chips */}
           <div className="flex flex-wrap gap-3">
-            <FilterChip
-              label="All Content"
-              count={counts.total}
-              active={activeCategory === "all"}
-              onClick={() => setActiveCategory("all")}
-            />
-            <FilterChip
-              label="Strategic Essays"
-              count={counts.posts}
-              active={activeCategory === "posts"}
-              onClick={() => setActiveCategory("posts")}
-            />
-            <FilterChip
-              label="Curated Volumes"
-              count={counts.books}
-              active={activeCategory === "books"}
-              onClick={() => setActiveCategory("books")}
-            />
-            <FilterChip
-              label="Execution Tools"
-              count={counts.downloads}
-              active={activeCategory === "downloads"}
-              onClick={() => setActiveCategory("downloads")}
-            />
-            <FilterChip
-              label="Live Sessions"
-              count={counts.events}
-              active={activeCategory === "events"}
-              onClick={() => setActiveCategory("events")}
-            />
-            <FilterChip
-              label="Print Editions"
-              count={counts.prints}
-              active={activeCategory === "prints"}
-              onClick={() => setActiveCategory("prints")}
-            />
-            <FilterChip
-              label="Core Resources"
-              count={counts.resources}
-              active={activeCategory === "resources"}
-              onClick={() => setActiveCategory("resources")}
-            />
+            {(
+              [
+                ["all", "All Content"] as const,
+                ["posts", "Strategic Essays"] as const,
+                ["books", "Curated Volumes"] as const,
+                ["downloads", "Execution Tools"] as const,
+                ["events", "Live Sessions"] as const,
+                ["prints", "Print Editions"] as const,
+                ["resources", "Core Resources"] as const,
+              ] satisfies [CategoryKey, string][]
+            ).map(([key, label]) => {
+              const isActive = activeFilter === key;
+              const count = counts[key] ?? 0;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveFilter(key)}
+                  className={[
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[0.78rem] font-semibold tracking-[0.12em] uppercase transition-all",
+                    isActive
+                      ? "border-softGold bg-softGold text-black shadow-[0_12px_30px_rgba(0,0,0,0.9)]"
+                      : "border-softGold/30 bg-black/40 text-softGold/80 hover:border-softGold/60 hover:bg-black/70",
+                  ].join(" ")}
+                >
+                  <span>{label}</span>
+                  <span
+                    className={
+                      isActive
+                        ? "rounded-full bg-black/15 px-2 py-0.5 text-[0.7rem]"
+                        : "rounded-full bg-softGold/10 px-2 py-0.5 text-[0.7rem] text-softGold/80"
+                    }
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* SECTION HEADER */}
-          <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3">
+          {/* Shelf label */}
+          <div className="mt-8 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-softGold/80">
-                {activeCategory === "all"
-                  ? "All Content"
-                  : activeMeta?.label ?? ""}
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-softGold/70">
+                {activeFilter === "all" ? "All Content" : activeLabel}
               </p>
-              <h2 className="font-serif text-2xl font-semibold text-cream sm:text-3xl">
-                {activeCategory === "all"
-                  ? "Shelf View"
-                  : activeMeta?.label ?? "Shelf View"}
+              <h2 className="mt-1 font-serif text-2xl font-semibold text-cream">
+                Shelf View
               </h2>
             </div>
-            <p className="text-xs text-gray-300">
-              {activeCount}{" "}
-              {activeCategory === "all"
-                ? activeCount === 1
-                  ? "item"
-                  : "items"
-                : activeCount === 1
-                ? activeMeta?.singular
-                : activeMeta?.plural}
+            <p className="text-[0.75rem] text-softGold/60">
+              {filteredItems.length} item
+              {filteredItems.length === 1 ? "" : "s"}
             </p>
           </div>
 
-          {/* LIST */}
-          <div className="mt-5 space-y-4">
-            {filtered.length === 0 ? (
-              <div className="rounded-3xl border border-softGold/30 bg-black/70 p-8 text-center text-sm text-gray-200 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
-                <p className="font-semibold text-cream">
-                  No content matches this view.
-                </p>
-                <p className="mt-2 text-gray-300">
-                  Try clearing the search or switching category. The shelves are
-                  fuller than they look.
-                </p>
+          {/* Shelf list */}
+          <div className="mt-6 space-y-4">
+            {filteredItems.map((item) => {
+              const href = buildHref(item);
+              const typeLabel = getTypeLabel(item);
+              const dateLabel = formatDate(item.date ?? null);
+              const tags =
+                Array.isArray(item.tags) && item.tags.length > 0
+                  ? (item.tags as string[])
+                  : [];
+              const excerpt =
+                (item.excerpt || item.description || "").toString();
+
+              return (
+                <article
+                  key={`${item._id ?? item.slug ?? href}`}
+                  className="group relative overflow-hidden rounded-3xl border border-softGold/35 bg-gradient-to-r from-black/80 via-[#050608] to-black/85 px-5 py-4 shadow-[0_18px_45px_rgba(0,0,0,0.95)] transition-all hover:border-softGold/70 hover:-translate-y-0.5"
+                >
+                  <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-softGold/10 via-transparent to-transparent opacity-60 group-hover:opacity-90" />
+
+                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="flex-1 space-y-1.5">
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.26em] text-softGold/75">
+                        {typeLabel}
+                      </p>
+                      <h3 className="font-serif text-lg font-semibold text-cream sm:text-xl">
+                        {item.title}
+                      </h3>
+                      {excerpt && (
+                        <p className="line-clamp-2 text-[0.85rem] text-gray-300">
+                          {excerpt}
+                        </p>
+                      )}
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-[0.75rem] text-softGold/70">
+                        {dateLabel && <span>{dateLabel}</span>}
+                        {tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full border border-softGold/25 px-2 py-0.5 text-[0.7rem] uppercase tracking-[0.14em]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-end sm:mt-0 sm:w-32">
+                      <Link
+                        href={href}
+                        className="inline-flex items-center gap-2 rounded-full bg-softGold px-4 py-1.5 text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-black transition-all hover:bg-softGold/90"
+                      >
+                        <span>Open</span>
+                        <span className="text-xs">↗</span>
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+
+            {filteredItems.length === 0 && (
+              <div className="mt-8 rounded-3xl border border-softGold/30 bg-black/70 px-6 py-10 text-center text-sm text-softGold/80">
+                Nothing on this shelf yet. Try switching category, or clearing
+                the search.
               </div>
-            ) : (
-              filtered.map((item) => (
-                <ContentRow key={(item as any)._id} item={item} />
-              ))
             )}
           </div>
         </section>
@@ -342,128 +373,35 @@ const ContentPage: NextPage<ContentPageProps> = ({ items }) => {
   );
 };
 
-type FilterChipProps = {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-};
+export default ContentLibraryPage;
 
-const FilterChip: React.FC<FilterChipProps> = ({
-  label,
-  count,
-  active,
-  onClick,
-}) => {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition",
-        active
-          ? "border-softGold bg-softGold text-black shadow-[0_12px_32px_rgba(0,0,0,0.9)]"
-          : "border-softGold/35 bg-black/70 text-softGold hover:border-softGold hover:bg-black",
-      ].join(" ")}
-    >
-      <span>{label}</span>
-      <span
-        className={
-          active
-            ? "rounded-full bg-black/15 px-2 py-[2px] text-[0.7rem]"
-            : "rounded-full bg-softGold/10 px-2 py-[2px] text-[0.7rem]"
-        }
-      >
-        {count}
-      </span>
-    </button>
-  );
-};
+/* -------------------------------------------------------------------------- */
+/* Static props                                                                */
+/* -------------------------------------------------------------------------- */
 
-type ContentRowProps = {
-  item: ContentItem;
-};
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const rawItems = getAllContent();
 
-const ContentRow: React.FC<ContentRowProps> = ({ item }) => {
-  const title = (item as any).title as string;
-  const excerpt =
-    ((item as any).excerpt ??
-      (item as any).description ??
-      "") as string;
-  const date = (item as any).date as string | undefined;
-  const tags = (Array.isArray((item as any).tags)
-    ? (item as any).tags
-    : []) as string[];
+  const counts: Record<CategoryKey, number> = {
+    all: rawItems.length,
+    posts: 0,
+    books: 0,
+    downloads: 0,
+    events: 0,
+    prints: 0,
+    resources: 0,
+  };
 
-  const category = getPrimaryCategory(item);
-  const meta = CATEGORY_META[category];
-  const href = buildHref(item);
-
-  const dateLabel =
-    date && !Number.isNaN(new Date(date).getTime())
-      ? new Date(date).toLocaleDateString("en-GB", {
-          year: "numeric",
-          month: "short",
-          day: "2-digit",
-        })
-      : null;
-
-  return (
-    <a
-      href={href}
-      className="group relative block overflow-hidden rounded-3xl border border-softGold/35 bg-gradient-to-r from-charcoal/95 via-charcoal-light/95 to-charcoal/95 px-5 py-4 text-sm shadow-[0_18px_50px_rgba(0,0,0,0.9)] transition hover:-translate-y-0.5 hover:border-softGold/80"
-    >
-      <div className="pointer-events-none absolute inset-0 opacity-35">
-        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-softGold/80 via-softGold/35 to-transparent" />
-        <div className="absolute inset-x-12 bottom-0 h-px bg-gradient-to-r from-softGold/30 via-softGold/5 to-transparent" />
-      </div>
-
-      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Left: meta */}
-        <div className="flex-1 space-y-1.5">
-          <p className="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-softGold/80">
-            <span>{meta.badge}</span>
-          </p>
-          <h2 className="font-serif text-lg font-semibold text-cream sm:text-xl">
-            {title}
-          </h2>
-          {excerpt && (
-            <p className="max-w-3xl text-[0.8rem] text-gray-200 group-hover:text-gray-100">
-              {excerpt}
-            </p>
-          )}
-
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-[0.75rem] text-gray-400">
-            {dateLabel && <span>{dateLabel}</span>}
-            {tags.length > 0 && (
-              <>
-                <span className="h-3 w-px bg-white/20" />
-                <span>{tags.slice(0, 3).join(" · ")}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Right: CTA */}
-        <div className="mt-1 flex items-center justify-between gap-6 sm:mt-0 sm:flex-col sm:items-end sm:justify-center sm:text-right">
-          <span className="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-softGold group-hover:text-softGold/90">
-            Open ↗
-          </span>
-        </div>
-      </div>
-    </a>
-  );
-};
-
-export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
-  const items = getAllContent();
+  for (const item of rawItems) {
+    const cat = getPrimaryCategory(item);
+    counts[cat] += 1;
+  }
 
   return {
     props: {
-      items,
+      items: rawItems,
+      counts,
     },
-    revalidate: 60, // 1 minute – keeps library fresh
+    revalidate: 60,
   };
 };
-
-export default ContentPage;
