@@ -1,324 +1,188 @@
 // pages/books/index.tsx
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
-import Link from "next/link";
-import Image from "next/image";
 import Head from "next/head";
+import Link from "next/link";
 
-import SiteLayout from "@/components/SiteLayout";
+import Layout from "@/components/Layout";
 import { getAllBooks } from "@/lib/content";
-import type { Book } from "contentlayer/generated";
 
-type BooksPageProps = {
-  books: Book[];
+// Infer the book type including the aesthetic signature
+type BookDoc = ReturnType<typeof getAllBooks>[number];
+
+type BooksIndexProps = {
+  books: BookDoc[];
 };
 
-const BooksPage: NextPage<BooksPageProps> = ({ books }) => {
-  const safeBooks = Array.isArray(books) ? books : [];
-
-  const sortedBooks = React.useMemo(() => {
-    const cloned = [...safeBooks];
-    cloned.sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0;
-      const db = b.date ? new Date(b.date).getTime() : 0;
-      if (db !== da) return db - da;
-      return (a.title || "").localeCompare(b.title || "");
-    });
-    return cloned;
-  }, [safeBooks]);
-
-  const { featured, others } = React.useMemo(() => {
-    const f: Book[] = [];
-    const o: Book[] = [];
-    for (const book of sortedBooks) {
-      if ((book as any).featured) f.push(book);
-      else o.push(book);
-    }
-    return { featured: f, others: o };
-  }, [sortedBooks]);
-
-  const hasBooks = sortedBooks.length > 0;
-
-  const canonicalUrl = "https://www.abrahamoflondon.org/books";
-
-  const nonDraftCount = safeBooks.length;
-
-  const categories = React.useMemo(
-    () =>
-      [
-        ...new Set(
-          safeBooks
-            .map((b) => (b as any).category as string | undefined)
-            .filter((c): c is string => !!c)
-        ),
-      ] as string[],
-    [safeBooks]
-  );
+const BooksIndexPage: NextPage<BooksIndexProps> = ({ books }) => {
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
+  const canonicalUrl = `${SITE_URL}/books`;
 
   return (
-    <SiteLayout
-      pageTitle="Books | Abraham of London"
-      metaDescription="Books and long-form works from the Abraham of London canon — fatherhood, purpose, governance, and legacy."
-    >
+    <Layout title="Curated Volumes">
       <Head>
-        <title>Books | Abraham of London</title>
+        <title>Curated Volumes | Abraham of London</title>
         <meta
           name="description"
-          content="Books and long-form works from the Abraham of London canon — fatherhood, purpose, governance, and legacy."
+          content="Curated volumes from the Abraham of London Canon — bound knowledge for fathers, founders, and stewards who build with purpose and precision."
         />
-
-        <meta property="og:title" content="Books | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Books and long-form works from the Abraham of London canon — fatherhood, purpose, governance, and legacy."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Books | Abraham of London" />
-        <meta
-          name="twitter:description"
-          content="Books and long-form works from the Abraham of London canon — fatherhood, purpose, governance, and legacy."
-        />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "CollectionPage",
-              name: "Books | Abraham of London",
-              description:
-                "Books and long-form works from the Abraham of London canon — fatherhood, purpose, governance, and legacy.",
-              url: canonicalUrl,
-              hasPart: safeBooks.map((book) => ({
-                "@type": "Book",
-                name: book.title,
-                description: book.excerpt ?? undefined,
-                url: `https://www.abrahamoflondon.org/${
-                  book.slug.startsWith("books/") ? book.slug : `books/${book.slug}`
-                }`,
-              })),
-            }),
-          }}
-        />
+        <link rel="canonical" href={canonicalUrl} />
       </Head>
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
-        {/* HEADER */}
-        <header className="mb-12 text-center">
-          <div className="mb-6">
-            <span className="inline-flex items-center rounded-full bg-softGold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-softGold">
-              Abraham of London · Canon
-            </span>
+      <main className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-charcoal text-cream">
+        {/* HERO */}
+        <section className="border-b border-softGold/20">
+          <div className="pointer-events-none absolute inset-0 opacity-70">
+            <div className="absolute inset-x-0 -top-40 h-72 bg-[radial-gradient(circle_at_top,_rgba(233,200,130,0.22),_transparent_70%)]" />
+            <div className="absolute inset-y-0 left-[8%] w-px bg-gradient-to-b from-softGold/70 via-softGold/0 to-transparent" />
+            <div className="absolute inset-y-0 right-[12%] w-px bg-gradient-to-t from-softGold/60 via-softGold/0 to-transparent" />
           </div>
 
-          <h1 className="font-serif text-4xl font-bold text-gray-900 dark:text-gray-50 sm:text-5xl lg:text-6xl">
-            Books &amp; Long-Form Works
-          </h1>
-
-          <div className="mx-auto mt-6 max-w-3xl">
-            <p className="text-lg text-gray-700 dark:text-gray-300">
-              The canon is being built in public — one volume at a time. Here you&apos;ll
-              find the books, prelude editions, and long-form projects that anchor the
-              wider Abraham of London ecosystem.
+          <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:pb-14 sm:pt-20">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-softGold/80">
+              Abraham of London · Canon
+            </p>
+            <h1 className="mt-2 font-serif text-3xl font-semibold text-cream sm:text-4xl md:text-5xl">
+              Curated Volumes
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm text-gray-200 sm:text-[0.95rem]">
+              Bound texts from the Canon — where memoir, strategy, theology and
+              governance converge into volumes designed to outlive trends and
+              outlast headlines.
+            </p>
+            <p className="mt-2 max-w-2xl text-[0.8rem] text-softGold/80">
+              Think of it as the **shelf behind the counter**: you don&apos;t
+              browse these casually; you sit with them.
             </p>
           </div>
+        </section>
 
-          {hasBooks && (
-            <div className="mt-8 flex flex-wrap justify-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-softGold">
-                  {nonDraftCount}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Published Works
-                </div>
-              </div>
-
-              {categories.length > 0 && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-softGold">
-                    {categories.length}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Categories
-                  </div>
-                </div>
-              )}
+        {/* LIST */}
+        <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+          {books.length === 0 ? (
+            <div className="rounded-3xl border border-softGold/30 bg-black/60 p-8 text-center text-sm text-gray-200 shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+              <p className="font-semibold text-cream">
+                No volumes on this shelf yet.
+              </p>
+              <p className="mt-2 text-gray-300">
+                As Canon volumes are finalised, they&apos;ll be catalogued
+                here. For now, explore essays and execution tools from the
+                Content Library.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {books.map((book) => (
+                <BookRow key={book._id} book={book} />
+              ))}
             </div>
           )}
-        </header>
-
-        {!hasBooks && (
-          <section className="mx-auto max-w-2xl rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/40">
-            <h2 className="mb-3 font-serif text-2xl font-semibold text-gray-900 dark:text-gray-50">
-              Books are coming soon
-            </h2>
-            <p className="mb-6 text-gray-700 dark:text-gray-300">
-              The first volumes of the canon are in final preparation. Check back shortly,
-              or join the Inner Circle to be notified when new releases go live.
-            </p>
-            <div className="flex justify-center gap-4">
-              <a
-                href="https://innercircle.abrahamoflondon.org"
-                className="inline-flex items-center gap-2 rounded-lg bg-softGold px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
-              >
-                Join Inner Circle
-              </a>
-            </div>
-          </section>
-        )}
-
-        {hasBooks && (
-          <div className="space-y-16">
-            {featured.length > 0 && (
-              <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-softGold">
-                      Featured Releases
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                      Highlighted works from the collection
-                    </p>
-                  </div>
-                  <div className="hidden sm:block">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {featured.length} featured{" "}
-                      {featured.length === 1 ? "book" : "books"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {featured.map((book) => (
-                    <BookCard key={book.slug} book={book} prominent />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {others.length > 0 && (
-              <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
-                      Complete Collection
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                      All published works in chronological order
-                    </p>
-                  </div>
-                  <div className="hidden sm:block">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {others.length} {others.length === 1 ? "work" : "works"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                  {others.map((book) => (
-                    <BookCard key={book.slug} book={book} />
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-        )}
+        </section>
       </main>
-    </SiteLayout>
+    </Layout>
   );
 };
 
-type BookCardProps = {
-  book: Book;
-  prominent?: boolean;
+type BookRowProps = {
+  book: BookDoc;
 };
 
-const BookCard: React.FC<BookCardProps> = ({ book, prominent = false }) => {
-  const { slug, title, excerpt, coverImage, date, tags } = book;
+const BookRow: React.FC<BookRowProps> = ({ book }) => {
+  const {
+    slug,
+    title,
+    subtitle,
+    description,
+    excerpt,
+    date,
+    author,
+    tags,
+    aesthetic,
+  } = book as BookDoc & {
+    aesthetic?: {
+      title: string;
+      icon: string;
+    };
+  };
 
-  const href = slug.startsWith("books/") ? `/${slug}` : `/books/${slug}`;
-  const label = title || "Untitled book";
-  const copy = excerpt ?? "";
-  const displayDate = date;
-  const displayTags = Array.isArray(tags) ? tags.slice(0, 3) : [];
+  const label =
+    aesthetic?.title ?? "Curated Volume";
+
+  const categoryIcon = aesthetic?.icon ?? "◆";
+
+  const dateLabel =
+    date && !Number.isNaN(new Date(date).getTime())
+      ? new Date(date).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+        })
+      : null;
+
+  const href = `/books/${slug}`;
 
   return (
     <Link
       href={href}
-      className={[
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-softGold/70 hover:shadow-xl dark:border-gray-800 dark:bg-gray-950/70",
-        prominent ? "lg:col-span-1" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className="group relative block overflow-hidden rounded-3xl border border-softGold/35 bg-gradient-to-r from-charcoal/95 via-charcoal-light/95 to-charcoal/95 px-5 py-4 text-sm shadow-[0_18px_50px_rgba(0,0,0,0.9)] transition hover:-translate-y-0.5 hover:border-softGold/80"
     >
-      {coverImage && (
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900">
-          <Image
-            src={coverImage}
-            alt={label}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-all duration-500 group-hover:scale-[1.03]"
-            priority={prominent}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-        </div>
-      )}
+      <div className="pointer-events-none absolute inset-0 opacity-35">
+        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-softGold/80 via-softGold/35 to-transparent" />
+        <div className="absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-softGold/30 via-softGold/5 to-transparent" />
+      </div>
 
-      <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
-        <div className="space-y-2">
-          <h3 className="font-serif text-lg font-semibold leading-tight text-gray-900 transition-colors group-hover:text-softGold dark:text-gray-50">
-            {label}
-          </h3>
-          {copy && (
-            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-              {copy}
+      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* Left: meta + title */}
+        <div className="flex-1 space-y-1.5">
+          <p className="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-softGold/80">
+            <span>{categoryIcon}</span>
+            <span>{label}</span>
+          </p>
+          <h2 className="font-serif text-lg font-semibold text-cream sm:text-xl">
+            {title}
+          </h2>
+          {(subtitle || description || excerpt) && (
+            <p className="max-w-3xl text-[0.8rem] text-gray-200 group-hover:text-gray-100">
+              {subtitle || description || excerpt}
             </p>
           )}
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-[0.75rem] text-gray-400">
+            {author && <span>By {author}</span>}
+            {tags && tags.length > 0 && (
+              <>
+                <span className="h-3 w-px bg-white/20" />
+                <span>{tags.slice(0, 3).join(" · ")}</span>
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="mt-auto space-y-3">
-          {displayTags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {displayTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.1em] text-gray-600 dark:bg-gray-900 dark:text-gray-300"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-gray-800">
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              {displayDate && (
-                <span>{new Date(displayDate).getFullYear()}</span>
-              )}
-            </div>
-
-            <span className="text-xs font-medium text-softGold transition-colors group-hover:text-amber-500">
-              View details →
+        {/* Right: date + CTA */}
+        <div className="mt-1 flex items-center justify-between gap-6 sm:mt-0 sm:flex-col sm:items-end sm:justify-center sm:text-right">
+          {dateLabel && (
+            <span className="text-[0.75rem] text-gray-300">
+              {dateLabel}
             </span>
-          </div>
+          )}
+          <span className="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-softGold group-hover:text-softGold/90">
+            Open Volume ↗
+          </span>
         </div>
       </div>
     </Link>
   );
 };
 
-export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
+export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
   const books = getAllBooks();
+
   return {
-    props: { books },
-    revalidate: process.env.NODE_ENV === "production" ? 3600 : 60,
+    props: {
+      books,
+    },
+    revalidate: 3600, // 1h
   };
 };
 
-export default BooksPage;
+export default BooksIndexPage;
