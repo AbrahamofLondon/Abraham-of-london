@@ -2,12 +2,10 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import type { GetStaticProps } from "next";
 
 import Layout from "@/components/Layout";
-import { HeroBanner } from "@/components/InteractiveElements";
 import NewsletterForm from "@/components/NewsletterForm";
 import MandateStatement from "@/components/MandateStatement";
 
@@ -31,73 +29,87 @@ interface PathwayPortalProps {
   delay: number;
 }
 
-const PathwayPortal: React.FC<PathwayPortalProps> = ({ 
-  title, 
-  description, 
-  stats, 
-  href, 
+const PathwayPortal: React.FC<PathwayPortalProps> = ({
+  title,
+  description,
+  stats,
+  href,
   color,
-  delay 
+  delay,
 }) => {
   const [isHovered, setIsHovered] = React.useState(false);
-  
+
   return (
     <Link href={href}>
       <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`group relative h-full rounded-2xl border transition-all duration-500 hover:-translate-y-2 cursor-pointer ${
-          isHovered ? 'shadow-2xl' : 'shadow-lg'
+        className={`group relative h-full cursor-pointer rounded-2xl border shadow-lg transition-all duration-500 hover:-translate-y-2 ${
+          isHovered ? "shadow-2xl" : "shadow-lg"
         }`}
         style={{
           borderColor: `${color}30`,
           backgroundColor: `${color}05`,
-          transitionDelay: `${delay}ms`
+          transitionDelay: `${delay}ms`,
         }}
       >
         {/* Background Architecture */}
-        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+        <div
+          className="absolute inset-0 opacity-10 transition-opacity duration-500 group-hover:opacity-20"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 80%, ${color} 0%, transparent 50%)`
+            backgroundImage: `radial-gradient(circle at 20% 80%, ${color} 0%, transparent 55%)`,
           }}
         />
-        
+
         {/* Content */}
         <div className="relative p-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
-              <div className="text-sm tracking-widest uppercase" style={{ color }}>Pathway</div>
+              <div
+                className="h-2 w-2 animate-pulse rounded-full"
+                style={{ backgroundColor: color }}
+              />
+              <div
+                className="text-xs tracking-[0.25em] uppercase"
+                style={{ color }}
+              >
+                Pathway
+              </div>
             </div>
-            <div className="text-xs px-3 py-1 rounded-full border" style={{ borderColor: `${color}30`, color }}>
+            <div
+              className="rounded-full px-3 py-1 text-xs"
+              style={{ borderColor: `${color}30`, color, borderWidth: 1 }}
+            >
               {stats}
             </div>
           </div>
-          
+
           {/* Title */}
-          <h3 className="text-2xl font-light mb-4 group-hover:text-white transition-colors">
+          <h3 className="mb-4 text-2xl font-light transition-colors group-hover:text-white">
             {title}
           </h3>
-          
+
           {/* Description */}
-          <p className="text-[#999] leading-relaxed mb-8">
-            {description}
-          </p>
-          
+          <p className="mb-8 leading-relaxed text-[#999]">{description}</p>
+
           {/* CTA */}
-          <div className="flex items-center justify-between border-t pt-6" style={{ borderColor: `${color}15` }}>
-            <div className="text-sm" style={{ color }}>Enter Pathway</div>
-            <div className="transform transition-transform group-hover:translate-x-2" style={{ color }}>
+          <div
+            className="flex items-center justify-between border-t pt-6 text-sm"
+            style={{ borderColor: `${color}15`, color }}
+          >
+            <div>Enter Pathway</div>
+            <div className="transform transition-transform group-hover:translate-x-2">
               →
             </div>
           </div>
         </div>
-        
+
         {/* Hover Glow */}
-        <div className={`absolute -inset-4 opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none`}
+        <div
+          className="pointer-events-none absolute -inset-4 opacity-0 transition-opacity duration-500 group-hover:opacity-30"
           style={{
-            background: `radial-gradient(circle at center, ${color}30 0%, transparent 70%)`
+            background: `radial-gradient(circle at center, ${color}30 0%, transparent 70%)`,
           }}
         />
       </div>
@@ -110,7 +122,7 @@ interface StructuralCardProps {
   description: string;
   meta: string;
   href: string;
-  type: 'post' | 'book' | 'event' | 'download';
+  type: "post" | "book" | "event" | "download";
   featured?: boolean;
   delay?: number;
 }
@@ -122,74 +134,83 @@ const StructuralCard: React.FC<StructuralCardProps> = ({
   href,
   type,
   featured = false,
-  delay = 0
+  delay = 0,
 }) => {
   const typeConfig = {
-    post: { color: '#d4af37', icon: '✍', label: 'Structural Essay' },
-    book: { color: '#b8941f', icon: '📚', label: 'Bound Volume' },
-    event: { color: '#9c7c1a', icon: '𓇯', label: 'Gathering' },
-    download: { color: '#806515', icon: '⚙', label: 'Tool' }
-  };
-  
+    post: { color: "#d4af37", icon: "✍", label: "Structural Essay" },
+    book: { color: "#b8941f", icon: "📚", label: "Bound Volume" },
+    event: { color: "#9c7c1a", icon: "𓇯", label: "Gathering" },
+    download: { color: "#806515", icon: "⚙", label: "Tool" },
+  } as const;
+
   const config = typeConfig[type];
-  
+
   return (
     <Link href={href}>
-      <div 
-        className="group relative rounded-xl border overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+      <div
+        className="group relative cursor-pointer overflow-hidden rounded-xl border transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
         style={{
           borderColor: `${config.color}30`,
           backgroundColor: `${config.color}05`,
-          transitionDelay: `${delay}ms`
+          transitionDelay: `${delay}ms`,
         }}
       >
         {/* Featured Badge */}
         {featured && (
-          <div className="absolute top-4 left-4 z-10">
-            <div className="text-xs px-3 py-1 rounded-full flex items-center gap-1"
-              style={{ 
+          <div className="absolute left-4 top-4 z-10">
+            <div
+              className="flex items-center gap-1 rounded-full px-3 py-1 text-xs"
+              style={{
                 backgroundColor: `${config.color}20`,
-                color: config.color
-              }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                color: config.color,
+              }}
+            >
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
               Featured
             </div>
           </div>
         )}
-        
+
         <div className="p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="text-xl opacity-70">{config.icon}</div>
-              <div className="text-xs tracking-widest uppercase" style={{ color: config.color }}>
+              <div
+                className="text-xs tracking-[0.22em] uppercase"
+                style={{ color: config.color }}
+              >
                 {config.label}
               </div>
             </div>
-            <div className="text-xs opacity-50">{meta}</div>
+            <div className="text-xs text-[#777]">{meta}</div>
           </div>
-          
+
           {/* Title */}
-          <h4 className="text-lg font-medium mb-3 group-hover:text-white transition-colors">
+          <h4 className="mb-3 text-lg font-medium transition-colors group-hover:text-white">
             {title}
           </h4>
-          
+
           {/* Description */}
-          <p className="text-sm text-[#999] line-clamp-2 mb-6">
-            {description}
-          </p>
-          
+          <p className="mb-6 line-clamp-2 text-sm text-[#999]">{description}</p>
+
           {/* Footer */}
-          <div className="flex items-center justify-between border-t pt-4" style={{ borderColor: `${config.color}15` }}>
-            <div className="text-xs opacity-70">Continue Reading</div>
-            <div className="transform transition-transform group-hover:translate-x-1" style={{ color: config.color }}>
+          <div
+            className="flex items-center justify-between border-t pt-4 text-xs"
+            style={{ borderColor: `${config.color}15` }}
+          >
+            <div className="opacity-70">Continue Reading</div>
+            <div
+              className="transform text-sm transition-transform group-hover:translate-x-1"
+              style={{ color: config.color }}
+            >
               →
             </div>
           </div>
         </div>
-        
+
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </div>
     </Link>
   );
@@ -202,107 +223,160 @@ const StructuralCard: React.FC<StructuralCardProps> = ({
 const HomePage: React.FC<HomePageProps> = () => {
   const router = useRouter();
   const [isLoaded, setIsLoaded] = React.useState(false);
-  
+
   React.useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://abrahamoflondon.org";
   const siteTitle = "Abraham of London";
-  const siteTagline = "Structural thinking for fathers, founders, and builders of legacy.";
+  const siteTagline =
+    "Structural thinking for fathers, founders, and builders of legacy.";
 
   const pathways = [
     {
       title: "For Fathers",
-      description: "Architectural principles for building homes that withstand time, culture, and crisis.",
+      description:
+        "Architectural principles for building homes that withstand time, culture, and crisis.",
       stats: "12 Structures",
       href: "/content?category=fatherhood",
-      color: "#d4af37"
+      color: "#d4af37",
     },
     {
       title: "For Founders",
-      description: "Board-level thinking and operating systems for building ventures that endure.",
+      description:
+        "Board-level thinking and operating systems for building ventures that endure.",
       stats: "18 Structures",
       href: "/content?category=founders",
-      color: "#b8941f"
+      color: "#b8941f",
     },
     {
       title: "For Leaders",
-      description: "Strategic frameworks for leading organizations through complexity and change.",
+      description:
+        "Strategic frameworks for leading organisations through complexity and change.",
       stats: "24 Structures",
       href: "/content?category=leadership",
-      color: "#9c7c1a"
-    }
+      color: "#9c7c1a",
+    },
   ];
 
   const featuredContent = {
     posts: [
       {
         title: "The Architecture of Crisis",
-        description: "How to build structures that don't just survive storms, but leverage them for growth.",
+        description:
+          "How to build structures that don't just survive storms, but leverage them for growth.",
         meta: "12 min read",
         href: "/when-the-storm-finds-you",
-        type: 'post' as const,
-        featured: true
+        type: "post" as const,
+        featured: true,
       },
       {
         title: "Fathering Without Fear",
-        description: "A structural approach to fatherhood in an age of confusion and crisis.",
+        description:
+          "A structural approach to fatherhood in an age of confusion and crisis.",
         meta: "18 min read",
         href: "/fathering-without-fear",
-        type: 'post' as const
-      }
+        type: "post" as const,
+      },
     ],
     books: [
       {
         title: "Volume Zero: The Architecture of Human Purpose",
-        description: "The foundational framework for understanding purpose, civilisation, and destiny.",
+        description:
+          "The foundational framework for understanding purpose, civilisation, and destiny.",
         meta: "Prelude Release",
         href: "/books/the-architecture-of-human-purpose-landing",
-        type: 'book' as const,
-        featured: true
-      }
+        type: "book" as const,
+        featured: true,
+      },
     ],
     events: [
       {
         title: "Strategic Leadership Workshop",
-        description: "A masterclass on structural thinking for leaders building lasting organizations.",
+        description:
+          "A masterclass on structural thinking for leaders building lasting organisations.",
         meta: "London · 2025",
         href: "/events/strategic-leadership-workshop",
-        type: 'event' as const
-      }
+        type: "event" as const,
+      },
     ],
     downloads: [
       {
         title: "Entrepreneur Survival Framework",
-        description: "A structural checklist for founders navigating market shifts and personal crises.",
+        description:
+          "A structural checklist for founders navigating market shifts and personal crises.",
         meta: "PDF · 12 pages",
         href: "/downloads/entrepreneur-survival-checklist",
-        type: 'download' as const
-      }
-    ]
+        type: "download" as const,
+      },
+    ],
   };
 
+  const ventures = [
+    {
+      label: "Advisory & Ventures",
+      title: "Alomarada",
+      description:
+        "Strategic advisory and operating structures for governments, corporates, and growth-stage ventures in emerging markets.",
+      href: "/ventures/alomarada",
+      tag: "Market Architecture",
+    },
+    {
+      label: "Enduring Brand",
+      title: "Endureluxe",
+      description:
+        "A premium, durable-first brand exploring what it means to build products that outlast hype and headlines.",
+      href: "/ventures/endureluxe",
+      tag: "Consumer Architecture",
+    },
+    {
+      label: "The Canon",
+      title: "Architecture of Human Purpose",
+      description:
+        "A multi-volume canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
+      href: "/books/the-architecture-of-human-purpose-landing",
+      tag: "Philosophical Architecture",
+    },
+    {
+      label: "Story Platform",
+      title: "Fathering Without Fear",
+      description:
+        "A memoir-driven platform reclaiming fatherhood, dignity, and justice in an age determined to erase men.",
+      href: "/books/fathering-without-fear",
+      tag: "Narrative Architecture",
+    },
+    {
+      label: "Inner Community",
+      title: "Inner Circle",
+      description:
+        "Private letters, advanced frameworks, and closed-door conversations for those willing to build differently.",
+      href: "/inner-circle",
+      tag: "Relational Architecture",
+    },
+  ];
+
   const handleHeroCTA = () => {
-    router.push('/content');
+    router.push("/content");
   };
 
   return (
-    <Layout 
+    <Layout
       title={siteTitle}
       description={siteTagline}
       structuredData={{
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": siteTitle,
-        "description": siteTagline,
-        "url": siteUrl,
-        "publisher": {
+        name: siteTitle,
+        description: siteTagline,
+        url: siteUrl,
+        publisher: {
           "@type": "Organization",
-          "name": siteTitle,
-          "logo": `${siteUrl}/logo.png`
-        }
+          name: siteTitle,
+          logo: `${siteUrl}/logo.png`,
+        },
       }}
     >
       <Head>
@@ -321,73 +395,183 @@ const HomePage: React.FC<HomePageProps> = () => {
 
       {/* Background Architecture */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]" />
-        <div className="absolute inset-0 opacity-[0.015]"
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050509] via-[#0b0b10] to-[#050509]" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage: `
-              linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
-              linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px)
+              linear-gradient(90deg, rgba(212,175,55,0.12) 1px, transparent 1px),
+              linear-gradient(rgba(212,175,55,0.12) 1px, transparent 1px)
             `,
-            backgroundSize: '80px 80px'
+            backgroundSize: "80px 80px",
           }}
         />
       </div>
 
-      {/* Hero: The Gateway */}
+      {/* HERO: BRAND + PHILOSOPHY  */}
       <section className="relative min-h-screen overflow-hidden">
         {/* Architectural Lines */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#3a3a3a]/20 to-transparent" />
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#3a3a3a]/20 to-transparent" />
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 border border-[#d4af37]/10 rounded-full" />
-          <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border border-[#d4af37]/10 rounded-full" />
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#3a3a3a]/25 to-transparent" />
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-[#3a3a3a]/20 to-transparent" />
+          <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full border border-[#d4af37]/10" />
+          <div className="absolute bottom-1/4 right-1/4 h-48 w-48 rounded-full border border-[#d4af37]/10" />
         </div>
 
-        <div className={`relative mx-auto max-w-7xl px-4 pt-32 transition-all duration-1000 ${
-          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
-          <div className="text-center">
-            {/* Gateway Badge */}
-            <div className="inline-flex items-center gap-4 mb-8">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#d4af37]/30" />
-              <span className="text-sm tracking-[0.3em] uppercase text-[#d4af37]/70">
-                The Structural Gateway
-              </span>
-              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#d4af37]/30" />
+        <div
+          className={`relative mx-auto max-w-7xl px-4 pt-28 pb-24 transition-all duration-1000 ${
+            isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
+          <div className="grid gap-12 lg:grid-cols-[3fr,2fr] lg:items-center">
+            {/* Core Narrative */}
+            <div>
+              {/* Badge */}
+              <div className="mb-8 inline-flex items-center gap-4">
+                <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#d4af37]/40" />
+                <span className="text-xs uppercase tracking-[0.32em] text-[#d4af37]/80">
+                  Abraham of London · Canon & Craft
+                </span>
+                <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#d4af37]/40" />
+              </div>
+
+              <h1 className="mb-6 text-4xl font-light leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
+                Architectural thinking
+                <span className="mt-3 block text-[#d4af37]">
+                  for men who refuse to disappear.
+                </span>
+              </h1>
+
+              <p className="mb-8 max-w-2xl text-lg leading-relaxed text-[#b3b3b3]">
+                A canon of structural frameworks for fathers, founders, and
+                leaders who insist on building homes, ventures, and
+                institutions that outlast culture swings, policy shocks, and
+                personal crisis.
+              </p>
+
+              <p className="mb-10 max-w-2xl text-sm uppercase tracking-[0.2em] text-[#777]">
+                Purpose · Civilisation · Governance · Fatherhood · Markets ·
+                Destiny
+              </p>
+
+              {/* CTAs */}
+              <div className="mb-12 flex flex-col justify-start gap-4 sm:flex-row">
+                <button
+                  onClick={handleHeroCTA}
+                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden px-10 py-4 text-base font-medium transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+                  <span className="relative">Enter the Library</span>
+                  <span className="relative transition-transform duration-300 group-hover:translate-x-2">
+                    ↠
+                  </span>
+                </button>
+
+                <Link
+                  href="/books/the-architecture-of-human-purpose-landing"
+                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#3a3a3a] px-10 py-4 text-base font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#151515] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <span className="relative">Preview the Canon</span>
+                  <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">
+                    →
+                  </span>
+                </Link>
+              </div>
+
+              {/* Micro trust strip */}
+              <div className="flex flex-wrap gap-6 text-xs text-[#666]">
+                <span>Multi-volume canon in development</span>
+                <span className="hidden h-4 w-px bg-[#333] sm:block" />
+                <span>Built from courtrooms, boardrooms, and crisis rooms</span>
+              </div>
             </div>
 
-            {/* Title */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[0.95] mb-8">
-              Architectural Thinking
-              <span className="block mt-4 text-[#d4af37] font-medium">for Builders of Legacy</span>
-            </h1>
+            {/* Right: Architecture Map Snapshot */}
+            <div className="relative rounded-2xl border border-[#2a2a2a] bg-gradient-to-b from-[#050509] via-[#0f1015] to-[#050509] p-8">
+              <div className="mb-6 text-xs uppercase tracking-[0.22em] text-[#777]">
+                The Architecture at a Glance
+              </div>
 
-            {/* Subtitle */}
-            <p className="text-xl text-[#999] leading-relaxed max-w-3xl mx-auto mb-12">
-              Structural frameworks for fathers, founders, and leaders building 
-              homes, ventures, and organizations that withstand time, crisis, and culture.
-            </p>
+              <div className="space-y-4 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
+                      Philosophy
+                    </div>
+                    <p className="mt-1 text-[#cfcfcf]">
+                      <span className="font-semibold">
+                        Architecture of Human Purpose
+                      </span>{" "}
+                      — a canon on how purpose, civilisation, and destiny are
+                      designed, not improvised.
+                    </p>
+                  </div>
+                  <Link
+                    href="/books"
+                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
+                  >
+                    View Volumes
+                  </Link>
+                </div>
 
-            {/* Primary CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <button
-                onClick={handleHeroCTA}
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium transition-all duration-300 hover:scale-[1.02]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37] to-[#b8941f] opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
-                <span className="relative">Enter the Structure</span>
-                <span className="relative transition-transform duration-300 group-hover:translate-x-2">↠</span>
-              </button>
-              
-              <Link
-                href="/content?category=strategic-essays"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-10 py-5 text-lg font-medium border border-[#3a3a3a] hover:border-[#d4af37]/40 transition-all duration-300 hover:scale-[1.02]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1a1a1a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative">Explore Essays</span>
-                <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">→</span>
-              </Link>
+                <div className="h-px bg-gradient-to-r from-[#262626] via-[#333] to-transparent" />
+
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
+                      Structures
+                    </div>
+                    <p className="mt-1 text-[#cfcfcf]">
+                      Essays, tools, and playbooks translating philosophy into
+                      **operating systems** for fathers, founders, and leaders.
+                    </p>
+                  </div>
+                  <Link
+                    href="/content"
+                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
+                  >
+                    Enter Library
+                  </Link>
+                </div>
+
+                <div className="h-px bg-gradient-to-r from-[#262626] via-[#333] to-transparent" />
+
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]/80">
+                      Ventures
+                    </div>
+                    <p className="mt-1 text-[#cfcfcf]">
+                      Alomarada, Endureluxe, Fathering Without Fear, and the
+                      Inner Circle — live laboratories where the canon is
+                      applied.
+                    </p>
+                  </div>
+                  <Link
+                    href="/content?category=ventures"
+                    className="text-[11px] text-[#d4af37] underline-offset-2 hover:underline"
+                  >
+                    See the Work
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-8 grid grid-cols-3 gap-4 text-center text-xs text-[#888]">
+                <div>
+                  <div className="text-lg font-light text-[#d4af37]">80+</div>
+                  <div>Structural Essays</div>
+                </div>
+                <div>
+                  <div className="text-lg font-light text-[#d4af37]">4</div>
+                  <div>Core Ventures</div>
+                </div>
+                <div>
+                  <div className="text-lg font-light text-[#d4af37]">1</div>
+                  <div>Unifying Canon</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -395,85 +579,162 @@ const HomePage: React.FC<HomePageProps> = () => {
         {/* Scroll Indicator */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-px bg-gradient-to-b from-[#d4af37]/50 to-transparent" />
-            <span className="text-xs tracking-widest text-[#666] uppercase">Continue</span>
+            <div className="h-10 w-px bg-gradient-to-b from-[#d4af37]/60 to-transparent" />
+            <span className="text-xs uppercase tracking-[0.22em] text-[#666]">
+              Continue
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Pathways Section */}
-      <section className={`relative py-32 transition-all duration-1000 delay-300 ${
-        isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-transparent" />
-        
+      {/* ARCHITECTURAL PATHWAYS */}
+      <section
+        className={`relative py-24 transition-all duration-1000 ${
+          isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
+
         <div className="relative mx-auto max-w-7xl px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-light mb-6">
-              Three Architectural
-              <span className="block text-[#d4af37]">Pathways</span>
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-light md:text-4xl">
+              Three{" "}
+              <span className="text-[#d4af37]">Architectural Pathways</span>
             </h2>
-            <p className="text-[#999] max-w-2xl mx-auto">
-              Enter through the structural pathway that matches your current building project — 
-              whether home, venture, or organization.
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-[#999]">
+              Choose the main theatre you are building in right now — home,
+              venture, or institution — and move through the structures in
+              sequence.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-3">
             {pathways.map((pathway, index) => (
               <PathwayPortal
                 key={pathway.title}
                 {...pathway}
-                delay={index * 100}
+                delay={index * 120}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Mandate Statement */}
-      <section className="relative py-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a] to-transparent" />
+      {/* VENTURES & PLATFORMS */}
+      <section className="relative py-28">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
+        <div className="relative mx-auto max-w-7xl px-4">
+          <div className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <div>
+              <h2 className="text-3xl font-light md:text-4xl">
+                One philosophy.{" "}
+                <span className="text-[#d4af37]">Multiple platforms.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-sm text-[#999]">
+                The canon doesn’t stay on paper. It runs through advisory
+                work, ventures, brands, stories, and a guarded community of
+                men who build.
+              </p>
+            </div>
+            <div className="text-xs uppercase tracking-[0.2em] text-[#777]">
+              Advisory · Brand · Story · Canon · Inner Circle
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {ventures.map((venture, index) => (
+              <Link key={venture.title} href={venture.href}>
+                <div
+                  className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-[#252525] bg-[#050509] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#d4af37]/60 hover:shadow-2xl"
+                  style={{ transitionDelay: `${index * 70}ms` }}
+                >
+                  <div className="mb-3 text-[11px] uppercase tracking-[0.22em] text-[#777]">
+                    {venture.label}
+                  </div>
+                  <h3 className="mb-2 text-xl font-light text-[#f5f5f5] group-hover:text-[#ffffff]">
+                    {venture.title}
+                  </h3>
+                  <p className="mb-4 text-sm text-[#a3a3a3]">
+                    {venture.description}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between text-xs text-[#d4af37]">
+                    <span>{venture.tag}</span>
+                    <span className="transform transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </div>
+
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-20">
+                    <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-gradient-to-tr from-[#d4af37]/40 to-transparent blur-3xl" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* MANDATE STATEMENT */}
+      <section className="relative py-28">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050509] to-transparent" />
         <div className="relative mx-auto max-w-6xl px-4">
           <MandateStatement />
         </div>
       </section>
 
-      {/* Featured Content Grid */}
-      <section className="relative py-32">
+      {/* FEATURED STRUCTURES (ESSAYS, BOOKS, TOOLS, EVENTS) */}
+      <section className="relative py-28">
         <div className="relative mx-auto max-w-7xl px-4">
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="text-3xl font-light md:text-4xl">
+                Selected{" "}
+                <span className="text-[#d4af37]">structural pieces.</span>
+              </h2>
+              <p className="mt-3 max-w-xl text-sm text-[#999]">
+                A sample of essays, volumes, tools, and gatherings that give a
+                first taste of the canon — without giving the whole archive
+                away.
+              </p>
+            </div>
+            <Link
+              href="/content"
+              className="text-sm text-[#d4af37] underline-offset-4 hover:underline"
+            >
+              View the complete library →
+            </Link>
+          </div>
+
+          <div className="grid gap-12 lg:grid-cols-2">
             {/* Left Column: Essays & Books */}
             <div className="space-y-12">
               <div>
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-12 h-px bg-gradient-to-r from-[#d4af37] to-transparent" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px w-12 bg-gradient-to-r from-[#d4af37] to-transparent" />
                   <h3 className="text-2xl font-light">Structural Essays</h3>
                 </div>
-                
                 <div className="grid gap-6">
                   {featuredContent.posts.map((post, index) => (
                     <StructuralCard
                       key={post.title}
                       {...post}
-                      delay={index * 100}
+                      delay={index * 90}
                     />
                   ))}
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-12 h-px bg-gradient-to-r from-[#b8941f] to-transparent" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px w-12 bg-gradient-to-r from-[#b8941f] to-transparent" />
                   <h3 className="text-2xl font-light">Bound Volumes</h3>
                 </div>
-                
                 <div className="grid gap-6">
                   {featuredContent.books.map((book, index) => (
                     <StructuralCard
                       key={book.title}
                       {...book}
-                      delay={index * 100}
+                      delay={index * 90}
                     />
                   ))}
                 </div>
@@ -483,34 +744,34 @@ const HomePage: React.FC<HomePageProps> = () => {
             {/* Right Column: Tools & Events */}
             <div className="space-y-12">
               <div>
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-12 h-px bg-gradient-to-r from-[#806515] to-transparent" />
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px w-12 bg-gradient-to-r from-[#806515] to-transparent" />
                   <h3 className="text-2xl font-light">Structural Tools</h3>
                 </div>
-                
                 <div className="grid gap-6">
                   {featuredContent.downloads.map((tool, index) => (
                     <StructuralCard
                       key={tool.title}
                       {...tool}
-                      delay={index * 100}
+                      delay={index * 90}
                     />
                   ))}
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-12 h-px bg-gradient-to-r from-[#9c7c1a] to-transparent" />
-                  <h3 className="text-2xl font-light">Architectural Gatherings</h3>
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px w-12 bg-gradient-to-r from-[#9c7c1a] to-transparent" />
+                  <h3 className="text-2xl font-light">
+                    Architectural Gatherings
+                  </h3>
                 </div>
-                
                 <div className="grid gap-6">
                   {featuredContent.events.map((event, index) => (
                     <StructuralCard
                       key={event.title}
                       {...event}
-                      delay={index * 100}
+                      delay={index * 90}
                     />
                   ))}
                 </div>
@@ -519,107 +780,121 @@ const HomePage: React.FC<HomePageProps> = () => {
           </div>
 
           {/* All Content CTA */}
-          <div className="mt-16 pt-16 border-t border-[#2a2a2a]">
+          <div className="mt-16 border-t border-[#2a2a2a] pt-16">
             <div className="text-center">
               <Link
                 href="/content"
-                className="group relative inline-flex items-center justify-center gap-3 px-12 py-6 text-xl font-medium border border-[#2a2a2a] hover:border-[#d4af37]/40 transition-all duration-300 hover:scale-[1.02]"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden border border-[#2a2a2a] px-12 py-5 text-lg font-medium transition-all duration-300 hover:scale-[1.02] hover:border-[#d4af37]/50"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1a1a1a] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#151515] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <span className="relative">Enter the Complete Structure</span>
-                <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">→</span>
+                <span className="relative text-[#d4af37] transition-transform duration-300 group-hover:translate-x-2">
+                  →
+                </span>
               </Link>
-              <p className="mt-4 text-sm text-[#666]">
-                82 architectural structures across 6 categories
+              <p className="mt-3 text-sm text-[#666]">
+                80+ architectural structures across essays, volumes, tools, and
+                gatherings.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Newsletter: Inner Circle */}
-      <section className="relative py-32 overflow-hidden">
+      {/* NEWSLETTER / INNER CIRCLE */}
+      <section className="relative overflow-hidden py-28">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]" />
-          <div className="absolute inset-0 opacity-[0.02]"
+          <div className="absolute inset-0 bg-gradient-to-br from-[#050509] via-[#101017] to-[#050509]" />
+          <div
+            className="absolute inset-0 opacity-[0.06]"
             style={{
-              backgroundImage: `
-                linear-gradient(45deg, transparent 48%, #1a1a1a 48%, #1a1a1a 52%, transparent 52%)
-              `,
-              backgroundSize: '60px 60px'
+              backgroundImage:
+                "linear-gradient(45deg, transparent 48%, #111827 48%, #111827 52%, transparent 52%)",
+              backgroundSize: "60px 60px",
             }}
           />
         </div>
 
         <div className="relative mx-auto max-w-4xl px-4">
-          <div className="relative border rounded-2xl overflow-hidden" style={{ borderColor: '#2a2a2a' }}>
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10"
+          <div
+            className="relative overflow-hidden rounded-2xl border border-[#2a2a2a]"
+          >
+            <div
+              className="pointer-events-none absolute inset-0 opacity-20"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d4af37' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-                backgroundSize: '100px 100px'
+                background:
+                  "radial-gradient(circle at 0% 0%, rgba(212,175,55,0.5), transparent 55%)",
               }}
             />
-            
-            <div className="relative p-12 text-center">
-              <div className="inline-block mb-8">
-                <div className="text-6xl opacity-30">∞</div>
-              </div>
-              
-              <h3 className="text-3xl font-light mb-6">
-                Join the Inner Circle
-              </h3>
-              
-              <p className="text-[#999] leading-relaxed max-w-2xl mx-auto mb-8">
-                Receive structural frameworks, architectural insights, and 
-                private access to the deepest layers of the Canon.
+            <div className="relative p-10 text-center sm:p-12">
+              <div className="mb-6 text-5xl text-[#d4af37]/40">∞</div>
+
+              <h3 className="mb-4 text-3xl font-light">Join the Inner Circle</h3>
+
+              <p className="mx-auto mb-8 max-w-2xl text-sm text-[#b0b0b0]">
+                Private letters, deep dives, and structural frameworks that won’t
+                live on social media — for those who don’t just want to “stay
+                updated”, but to build differently.
               </p>
-              
-              <div className="max-w-md mx-auto">
+
+              <div className="mx-auto max-w-md">
                 <NewsletterForm
                   variant="premium"
                   placeholder="Enter your architectural email"
                   buttonText="Enter the Inner Circle"
                 />
               </div>
-              
-              <p className="mt-6 text-sm text-[#666]">
-                No fluff. No spam. Only structural thinking that builds.
+
+              <p className="mt-5 text-xs text-[#777]">
+                No fluff. No spam. Just structural thinking that builds.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer: Architectural Stats */}
-      <footer className="relative border-t py-16" style={{ borderColor: '#2a2a2a' }}>
+      {/* FOOTER: STATS & CLAIM */}
+      <footer
+        className="relative border-t py-16"
+        style={{ borderColor: "#2a2a2a" }}
+      >
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
             {[
-              { value: '82', label: 'Structural Essays' },
-              { value: '24', label: 'Architectural Volumes' },
-              { value: '18', label: 'Strategic Tools' },
-              { value: '12', label: 'Years Building' }
+              { value: "80+", label: "Structural Essays" },
+              { value: "4+", label: "Architectural Volumes" },
+              { value: "18+", label: "Execution Tools" },
+              { value: "12+", label: "Years in the Furnace" },
             ].map((stat, index) => (
               <div key={index} className="space-y-2">
-                <div className="text-3xl font-light text-[#d4af37]">{stat.value}</div>
+                <div className="text-3xl font-light text-[#d4af37]">
+                  {stat.value}
+                </div>
                 <div className="text-sm text-[#666]">{stat.label}</div>
               </div>
             ))}
           </div>
-          
-          <div className="mt-12 pt-8 border-t text-center text-sm text-[#666]" style={{ borderColor: '#2a2a2a' }}>
-            <p>An architectural approach to purpose, civilisation, and human destiny.</p>
+
+          <div
+            className="mt-10 border-t pt-6 text-center text-sm text-[#666]"
+            style={{ borderColor: "#2a2a2a" }}
+          >
+            <p>
+              An architectural approach to purpose, civilisation, and human
+              destiny — from courtrooms to boardrooms to the quiet work of
+              fatherhood.
+            </p>
           </div>
-        </div>
+</div>
       </footer>
 
       {/* Interactive Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-50">
-        <div className="absolute w-96 h-96 rounded-full bg-gradient-to-r from-[#d4af37]/5 to-transparent blur-3xl"
+      <div className="pointer-events-none fixed inset-0 z-50">
+        <div
+          className="absolute h-96 w-96 rounded-full bg-gradient-to-r from-[#d4af37]/6 to-transparent blur-3xl"
           style={{
-            transform: 'translate(var(--mouse-x), var(--mouse-y))',
-            transition: 'transform 0.1s ease-out'
+            transform: "translate(var(--mouse-x), var(--mouse-y))",
+            transition: "transform 0.1s ease-out",
           }}
         />
       </div>
@@ -632,7 +907,7 @@ const HomePage: React.FC<HomePageProps> = () => {
               document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
               document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
             });
-          `
+          `,
         }}
       />
     </Layout>
@@ -640,15 +915,15 @@ const HomePage: React.FC<HomePageProps> = () => {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  // In production, you would fetch real data here
+  // Placeholder: hook up real content later
   return {
     props: {
       featuredPosts: [],
       featuredBooks: [],
       featuredEvents: [],
-      featuredDownloads: []
+      featuredDownloads: [],
     },
-    revalidate: 3600
+    revalidate: 3600,
   };
 };
 
