@@ -10,8 +10,8 @@ import {
   createOrUpdateMemberAndIssueKey,
   getPrivacySafeStats,
 } from "@/lib/innerCircleMembership";
-import { verifyRecaptcha } from "@/lib/verifyRecaptcha";
 import { getClientIpWithAnalysis } from "@/lib/server/ip";
+import { verifyRecaptcha } from "@/lib/recaptchaServer";
 
 type Success = {
   ok: true;
@@ -26,6 +26,8 @@ type Failure = {
 export type RegisterResponse = Success | Failure;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+const RECAPTCHA_REQUIRED =
+  process.env.INNER_CIRCLE_RECAPTCHA_REQUIRED === "1";
 
 function logRegistration(
   action: string,
@@ -37,10 +39,6 @@ function logRegistration(
     ...meta,
   });
 }
-
-// Optional: simple flag to allow hard-enforcing reCAPTCHA later
-const RECAPTCHA_REQUIRED =
-  process.env.INNER_CIRCLE_RECAPTCHA_REQUIRED === "1";
 
 export default async function handler(
   req: NextApiRequest,
@@ -78,14 +76,8 @@ export default async function handler(
     return;
   }
 
-  const ipInfo = getClientIpWithAnalysis(req);
-  const ip = ipInfo.ip;
-
-  // ─────────────────────────────────────────────────────────────
-  // reCAPTCHA verification – soft if no token, hard if flagged
-  // ─────────────────────────────────────────────────────────────
-  if (RECAPTCHA_REQUIRED && !recaptchaToken) {
-    logRegistration("recaptcha_missing_hard_fail", { ip });
+  if (!recaptchaToken) {
+    logRegistration("recaptcha_missing", {});
     res.status(400).json({
       ok: false,
       error: "Security check failed. Please refresh and try again.",
@@ -93,45 +85,37 @@ export default async function handler(
     return;
   }
 
-  if (recaptchaToken) {
-    try {
-      const result = await verifyRecaptcha(
-        recaptchaToken,
-        "inner_circle_register",
-        ip
-      );
+  const ipInfo = getClientIpWithAnalysis(req);
+  const ip = ipInfo.ip;
 
-      if (!result.success || result.score < 0.2) {
-        logRegistration("recaptcha_failed", {
-          ip,
-          score: result.score,
-          reasons: result.reasons,
-        });
-        res.status(400).json({
-          ok: false,
-          error: "Security verification failed. Please try again.",
-        });
-        return;
-      }
-    } catch (err) {
-      logRegistration("recaptcha_error", {
-        ip,
-        error: err instanceof Error ? err.message : "unknown",
+  // ───────────────────────────────────────────────
+  // reCAPTCHA verification (boolean helper)
+  // ───────────────────────────────────────────────
+  try {
+    const passed = await verifyRecaptcha(recaptchaToken);
+
+    if (!passed) {
+      logRegistration("recaptcha_failed", { ip });
+      res.status(400).json({
+        ok: false,
+        error: "Security verification failed. Please try again.",
       });
-
-      if (RECAPTCHA_REQUIRED) {
-        res.status(400).json({
-          ok: false,
-          error: "Security verification failed. Please try again.",
-        });
-        return;
-      }
-
-      // If not strictly required, log and continue
+      return;
     }
-  } else {
-    // No token supplied and not hard-required – log for audit and continue
-    logRegistration("recaptcha_skipped_no_token", { ip });
+  } catch (err) {
+    logRegistration("recaptcha_error", {
+      ip,
+      error: err instanceof Error ? err.message : "unknown",
+    });
+
+    if (RECAPTCHA_REQUIRED) {
+      res.status(400).json({
+        ok: false,
+        error: "Security verification failed. Please try again.",
+      });
+      return;
+    }
+    // If not strictly required, log and continue
   }
 
   const sanitizedEmail = email.toLowerCase().trim();

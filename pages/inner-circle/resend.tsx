@@ -2,6 +2,7 @@
 import * as React from "react";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
+import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
 type ApiResponse = {
   ok: boolean;
@@ -32,6 +33,20 @@ const InnerCircleResendPage: NextPage = () => {
     setFeedback(null);
 
     try {
+      // Security: get a reCAPTCHA token (safe wrapper returns null on failure)
+      const recaptchaToken = await getRecaptchaTokenSafe(
+        "inner_circle_resend"
+      );
+
+      if (!recaptchaToken) {
+        setStatus("error");
+        setFeedback(
+          "Security check failed. Please ensure JavaScript is enabled and try again."
+        );
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,6 +54,7 @@ const InnerCircleResendPage: NextPage = () => {
           email,
           name: name || undefined,
           returnTo: "/canon",
+          recaptchaToken,
         }),
       });
 
@@ -59,6 +75,7 @@ const InnerCircleResendPage: NextPage = () => {
           "A fresh Inner Circle access email has been sent. Please check your inbox."
       );
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Resend failed:", error);
       setStatus("error");
       setFeedback(
@@ -170,8 +187,8 @@ const InnerCircleResendPage: NextPage = () => {
                   status === "success"
                     ? "border-emerald-500/60 bg-emerald-900/40 text-emerald-100"
                     : status === "error"
-                      ? "border-red-500/60 bg-red-900/40 text-red-100"
-                      : "border-softGold/40 bg-black/60 text-softGold/90",
+                    ? "border-red-500/60 bg-red-900/40 text-red-100"
+                    : "border-softGold/40 bg-black/60 text-softGold/90",
                 ].join(" ")}
               >
                 {feedback}
