@@ -1,3 +1,4 @@
+// pages/content/index.tsx
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Link from "next/link";
@@ -13,11 +14,19 @@ import {
   type UnifiedContent,
 } from "@/lib/server/unified-content";
 
+type FilterKey =
+  | "all"
+  | "page"
+  | "post"
+  | "book"
+  | "download"
+  | "event"
+  | "print"
+  | "resource";
+
 type LibraryProps = {
   items: UnifiedContent[];
 };
-
-type FilterKey = "all" | "page" | "download" | "event";
 
 /* -------------------------------------------------------------------------- */
 /* SMALL UI PRIMITIVES                                                        */
@@ -27,36 +36,47 @@ const FilterPill: React.FC<{
   label: string;
   value: FilterKey;
   active: boolean;
+  count: number;
   onClick: () => void;
-}> = ({ label, value, active, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium tracking-wider transition-all ${
-      active ? "scale-105" : "opacity-70 hover:opacity-100"
-    }`}
-    style={{
-      backgroundColor: active
-        ? LIBRARY_AESTHETICS.colors.primary.saffron
-        : "rgba(15,23,42,0.8)",
-      color: active ? "#020617" : LIBRARY_AESTHETICS.colors.primary.parchment,
-      border: `1px solid ${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-    }}
-  >
-    <span>{label}</span>
-    {!active && (
-      <span className="text-[0.6rem] uppercase">
-        {value === "page"
-          ? "Pages"
-          : value === "download"
-          ? "Downloads"
-          : value === "event"
-          ? "Events"
-          : "All"}
+}> = ({ label, value, active, count, onClick }) => {
+  const isDisabled = value !== "all" && count === 0;
+
+  return (
+    <button
+      type="button"
+      onClick={!isDisabled ? onClick : undefined}
+      disabled={isDisabled}
+      className={[
+        "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium tracking-wider transition-all",
+        active && !isDisabled ? "scale-105 shadow-sm" : "",
+        isDisabled ? "opacity-35 cursor-not-allowed" : "opacity-80 hover:opacity-100",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{
+        backgroundColor: active && !isDisabled
+          ? LIBRARY_AESTHETICS.colors.primary.saffron
+          : "rgba(15,23,42,0.8)",
+        color: active && !isDisabled
+          ? "#020617"
+          : LIBRARY_AESTHETICS.colors.primary.parchment,
+        border: `1px solid ${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
+      }}
+    >
+      <span>{label}</span>
+      <span
+        className="rounded-full px-1.5 py-0.5 text-[0.6rem] uppercase"
+        style={{
+          backgroundColor: active && !isDisabled
+            ? "rgba(15,23,42,0.08)"
+            : "rgba(15,23,42,0.6)",
+        }}
+      >
+        {count}
       </span>
-    )}
-  </button>
-);
+    </button>
+  );
+};
 
 const TypeTag: React.FC<{ type: UnifiedContent["type"] }> = ({ type }) => {
   const map: Record<
@@ -68,6 +88,16 @@ const TypeTag: React.FC<{ type: UnifiedContent["type"] }> = ({ type }) => {
       color: CONTENT_CATEGORIES.CANON.color,
       icon: "📜",
     },
+    post: {
+      label: "Essay",
+      color: CONTENT_CATEGORIES.POSTS.color,
+      icon: "✒",
+    },
+    book: {
+      label: "Book",
+      color: CONTENT_CATEGORIES.BOOKS.color,
+      icon: "📚",
+    },
     download: {
       label: "Download",
       color: CONTENT_CATEGORIES.RESOURCES.color,
@@ -77,6 +107,16 @@ const TypeTag: React.FC<{ type: UnifiedContent["type"] }> = ({ type }) => {
       label: "Event",
       color: CONTENT_CATEGORIES.EVENTS.color,
       icon: "🕯",
+    },
+    print: {
+      label: "Print",
+      color: CONTENT_CATEGORIES.PRINTS.color,
+      icon: "🖼",
+    },
+    resource: {
+      label: "Resource",
+      color: CONTENT_CATEGORIES.RESOURCES.color,
+      icon: "⚙",
     },
   };
 
@@ -109,8 +149,8 @@ const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
             "linear-gradient(135deg, rgba(212,175,55,0.05) 0%, transparent 40%)",
         }}
       >
-        {/* Header / image strip */}
-        <div className="relative h-32 w-full overflow-hidden">
+        {/* Header / strip */}
+        <div className="relative h-28 w-full overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900" />
           <div
             className="absolute inset-0 opacity-40"
@@ -119,9 +159,14 @@ const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
                 "radial-gradient(circle at 0 0, rgba(212,175,55,0.25), transparent 60%)",
             }}
           />
-          <div className="absolute left-4 top-4">
+          <div className="absolute left-4 top-3">
             <TypeTag type={item.type} />
           </div>
+          {item.date && (
+            <div className="absolute bottom-3 right-4 text-[0.65rem] uppercase tracking-wide text-slate-400">
+              {new Date(item.date).toLocaleDateString("en-GB")}
+            </div>
+          )}
         </div>
 
         {/* Body */}
@@ -180,6 +225,25 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
   const [filter, setFilter] = React.useState<FilterKey>("all");
   const [query, setQuery] = React.useState("");
 
+  // Counts per type for pills
+  const counts = React.useMemo(() => {
+    const base: Record<FilterKey, number> = {
+      all: items.length,
+      page: 0,
+      post: 0,
+      book: 0,
+      download: 0,
+      event: 0,
+      print: 0,
+      resource: 0,
+    };
+    for (const it of items) {
+      // it.type is one of the non-"all" keys
+      base[it.type as Exclude<FilterKey, "all">] += 1;
+    }
+    return base;
+  }, [items]);
+
   const filtered = React.useMemo(() => {
     let base =
       filter === "all" ? items : items.filter((it) => it.type === filter);
@@ -196,10 +260,24 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
     );
   }, [items, filter, query]);
 
+  const activeLabel = React.useMemo(() => {
+    const map: Record<FilterKey, string> = {
+      all: "All content",
+      page: "Pages",
+      post: "Essays",
+      book: "Books",
+      download: "Downloads & tools",
+      event: "Events & rooms",
+      print: "Prints",
+      resource: "Resources",
+    };
+    return map[filter];
+  }, [filter]);
+
   return (
     <Layout
       title="The Library"
-      description="Unified access to all pages, downloads, and events curated under Abraham of London."
+      description="Unified access to all pages, essays, books, downloads, prints, and events curated under Abraham of London."
       structuredData={{
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -216,25 +294,39 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
                   className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.28em]"
                   style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
                 >
-                  Canon · Essays · Tools · Events
+                  Canon · Essays · Books · Tools · Events
                 </p>
                 <h1 className="font-serif text-4xl font-light text-cream sm:text-5xl">
                   The Library
                 </h1>
                 <p className="mt-4 max-w-xl text-sm sm:text-base text-cream/75">
-                  One doorway into the whole ecosystem: pages, downloads, and
-                  events — unified, searchable, and built for men who intend to
-                  do something with what they read.
+                  One doorway into the whole ecosystem: pages, essays, books,
+                  downloads, prints, and events — unified, searchable, and
+                  built for men who intend to do something with what they read.
                 </p>
               </div>
 
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <div className="text-xs text-cream/40">
                   Showing{" "}
-                  <span className="font-semibold text-cream/70">
+                  <span className="font-semibold text-cream/80">
                     {filtered.length}
                   </span>{" "}
-                  of {items.length} items
+                  of{" "}
+                  <span className="font-semibold text-cream/70">
+                    {items.length}
+                  </span>{" "}
+                  items
+                  <span className="mx-1">•</span>
+                  <span className="text-cream/60">{activeLabel}</span>
+                  {query.trim() && (
+                    <>
+                      <span className="mx-1">•</span>
+                      <span className="text-cream/60">
+                        Search: “{query.trim()}”
+                      </span>
+                    </>
+                  )}
                 </div>
                 <Link
                   href="/context"
@@ -251,30 +343,27 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
             {/* Filters & Search */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
-                <FilterPill
-                  label="All"
-                  value="all"
-                  active={filter === "all"}
-                  onClick={() => setFilter("all")}
-                />
-                <FilterPill
-                  label="Pages"
-                  value="page"
-                  active={filter === "page"}
-                  onClick={() => setFilter("page")}
-                />
-                <FilterPill
-                  label="Downloads"
-                  value="download"
-                  active={filter === "download"}
-                  onClick={() => setFilter("download")}
-                />
-                <FilterPill
-                  label="Events"
-                  value="event"
-                  active={filter === "event"}
-                  onClick={() => setFilter("event")}
-                />
+                {(
+                  [
+                    { key: "all", label: "All" },
+                    { key: "post", label: "Essays" },
+                    { key: "book", label: "Books" },
+                    { key: "download", label: "Downloads" },
+                    { key: "event", label: "Events" },
+                    { key: "print", label: "Prints" },
+                    { key: "page", label: "Pages" },
+                    { key: "resource", label: "Resources" },
+                  ] as { key: FilterKey; label: string }[]
+                ).map(({ key, label }) => (
+                  <FilterPill
+                    key={key}
+                    label={label}
+                    value={key}
+                    active={filter === key}
+                    count={counts[key]}
+                    onClick={() => setFilter(key)}
+                  />
+                ))}
               </div>
 
               <div className="w-full sm:w-64">
@@ -294,7 +383,7 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
                           ? `0 0 0 1px ${LIBRARY_AESTHETICS.colors.primary.saffron}40`
                           : "none",
                     }}
-                    placeholder="Search titles, tags…"
+                    placeholder="Search titles, descriptions, tags…"
                   />
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                     ⌕
@@ -342,38 +431,33 @@ const sanitizeForSerialization = <T,>(data: T): T => {
   if (data === undefined || data === null) {
     return null as T;
   }
-  
+
   if (Array.isArray(data)) {
     return data.map(sanitizeForSerialization) as T;
   }
-  
-  if (typeof data === 'object') {
+
+  if (typeof data === "object") {
     const sanitized: Record<string, any> = {};
     for (const [key, value] of Object.entries(data)) {
       sanitized[key] = sanitizeForSerialization(value);
     }
     return sanitized as T;
   }
-  
+
   return data;
 };
 
 export const getStaticProps: GetStaticProps<LibraryProps> = async () => {
   try {
     const items = await getAllUnifiedContent();
-    
-    // Ensure we have an array, even if empty
+
     const safeItems = Array.isArray(items) ? items : [];
-    
-    // Deeply sanitize all items to replace undefined with null
     const sanitizedItems = sanitizeForSerialization(safeItems);
-    
-    // Additional safety: ensure each item has required fields
-    const validatedItems = (sanitizedItems as UnifiedContent[]).map(item => ({
+
+    const validatedItems = (sanitizedItems as UnifiedContent[]).map((item) => ({
       ...item,
       id: item.id || `unknown-${Date.now()}-${Math.random()}`,
       title: item.title || "Untitled",
-      type: item.type || "page",
       url: item.url || "/",
       description: item.description || null,
       excerpt: item.excerpt || null,
@@ -384,11 +468,10 @@ export const getStaticProps: GetStaticProps<LibraryProps> = async () => {
       props: {
         items: validatedItems,
       },
-      revalidate: 60 * 10, // 10 minutes
+      revalidate: 60 * 10,
     };
   } catch (error) {
     console.error("Error in getStaticProps for /content:", error);
-    // Return empty props to prevent build failure
     return {
       props: {
         items: [],
