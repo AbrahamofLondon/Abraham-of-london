@@ -11,10 +11,10 @@ import mdxComponents from "@/components/mdx-components";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
 
 import {
-  allCanons,
-  type CanonDocument,
-} from "@/lib/contentlayer-helper";
-import type { CanonDoc } from "@/types/canon";
+  getAllCanon,
+  getCanonBySlug,
+  type CanonDoc,
+} from "@/lib/canon";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,33 +51,6 @@ function toNumberOrNull(value: unknown): number | null {
     const n = Number(value.trim());
     return Number.isFinite(n) ? n : null;
   }
-  return null;
-}
-
-function resolveCanonGroup(canon: CanonDoc): string | null {
-  const tags = canon.tags?.map((t) => t.toLowerCase()) ?? [];
-  const title = (canon.title ?? "").toLowerCase();
-
-  if (tags.includes("foundations") || title.includes("foundation")) {
-    return "Foundations of Purpose";
-  }
-
-  if (
-    tags.includes("civilisation") ||
-    tags.includes("civilization") ||
-    title.includes("architecture")
-  ) {
-    return "Civilisation & Architecture";
-  }
-
-  if (tags.includes("governance") || title.includes("govern")) {
-    return "Governance & Institutions";
-  }
-
-  if (tags.includes("destiny") || title.includes("destiny")) {
-    return "Destiny & Alignment";
-  }
-
   return null;
 }
 
@@ -172,7 +145,6 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
       <main className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-charcoal text-cream">
         {/* Hero */}
         <section className="relative border-b border-white/10">
-          {/* Luxury/library background */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-x-0 -top-40 h-72 bg-[radial-gradient(circle_at_top,_rgba(226,197,120,0.18),_transparent_70%)]" />
             <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-softGold/70 via-softGold/0 to-transparent" />
@@ -315,7 +287,6 @@ const CanonPage: NextPage<PageProps> = ({ meta, mdxSource }) => {
             </article>
           )}
 
-          {/* Footer meta */}
           <div className="mt-16 border-t border-white/10 pt-8 text-xs text-gray-400">
             <p>
               Catalogued as part of the{" "}
@@ -342,11 +313,11 @@ export default CanonPage;
 // ---------------------------------------------------------------------------
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs: CanonDocument[] = Array.isArray(allCanons) ? allCanons : [];
+  const docs: CanonDoc[] = getAllCanon({ includeDrafts: false });
 
   const paths =
     docs
-      .filter((doc) => doc.slug && !doc.draft)
+      .filter((doc) => doc.slug)
       .map((doc) => ({
         params: { slug: doc.slug },
       })) ?? [];
@@ -368,15 +339,13 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
   if (!slug) return { notFound: true };
 
-  const docs: CanonDocument[] = Array.isArray(allCanons) ? allCanons : [];
-  const match = docs.find((doc) => doc.slug === slug);
-
+  const match = getCanonBySlug(slug);
   if (!match) return { notFound: true };
 
-  // Map CanonDocument -> CanonPageMeta
   const vol = toNumberOrNull(
     (match as unknown as { volumeNumber?: unknown }).volumeNumber
   );
+
   const meta: CanonPageMeta = {
     slug: match.slug,
     title: match.title ?? "Canon Volume",

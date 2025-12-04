@@ -5,10 +5,7 @@ import Head from "next/head";
 
 import Layout from "@/components/Layout";
 import CanonCard from "@/components/CanonCard";
-import {
-  allCanons,
-  type CanonDocument,
-} from "@/lib/contentlayer-helper";
+import { getAllCanon, type CanonDoc } from "@/lib/canon";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,30 +44,6 @@ function toNumberOrNull(value: unknown): number | null {
   return null;
 }
 
-function sortCanon(a: CanonIndexItem, b: CanonIndexItem): number {
-  // Featured first
-  if (a.featured && !b.featured) return -1;
-  if (!a.featured && b.featured) return 1;
-
-  const aVol = a.volumeNumber ?? null;
-  const bVol = b.volumeNumber ?? null;
-
-  if (aVol !== null && bVol !== null && aVol !== bVol) {
-    return aVol - bVol;
-  }
-
-  if (aVol !== null && bVol === null) return -1;
-  if (aVol === null && bVol !== null) return 1;
-
-  // Fallback to date (newest first)
-  const aTime = a.date ? Date.parse(a.date) : 0;
-  const bTime = b.date ? Date.parse(b.date) : 0;
-  if (aTime !== bTime) return bTime - aTime;
-
-  // Finally by title
-  return (a.title || "").localeCompare(b.title || "");
-}
-
 // ---------------------------------------------------------------------------
 // Page Component
 // ---------------------------------------------------------------------------
@@ -78,7 +51,6 @@ function sortCanon(a: CanonIndexItem, b: CanonIndexItem): number {
 const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
   const hasItems = items.length > 0;
 
-  // Progress: 1–5 soft segments, lit up to min(maxVolume, 5)
   const totalSegments = 5;
   const activeSegments = Math.max(
     0,
@@ -113,7 +85,6 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
       <main className="min-h-screen bg-gradient-to-b from-black via-[#020617] to-charcoal">
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-white/10">
-          {/* Subtle background texture / glow */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-x-0 -top-32 h-64 bg-[radial-gradient(circle_at_top,_rgba(226,197,120,0.18),_transparent_65%)]" />
             <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-softGold/60 via-softGold/0 to-transparent opacity-70" />
@@ -121,7 +92,6 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
           </div>
 
           <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 pt-16 md:flex-row md:items-end md:pb-16 md:pt-20">
-            {/* Left: Copy */}
             <div className="flex-1 space-y-6">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-softGold/80">
                 Canon · Catalogue
@@ -144,10 +114,11 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
               </p>
 
               <p className="max-w-xl text-xs leading-relaxed text-gray-400 sm:text-sm">
-                Think of it as **Harrods Library** meets **Ancient Near Eastern
-                gravitas**, wrapped in **modern strategic intelligence**. It’s
-                built for men who lead, fathers who refuse to disappear, and
-                builders who understand that ideas outlive news cycles.
+                Think of it as <strong>Harrods Library</strong> meets{" "}
+                <strong>Ancient Near Eastern gravitas</strong>, wrapped in{" "}
+                <strong>modern strategic intelligence</strong>. It’s built for
+                men who lead, fathers who refuse to disappear, and builders who
+                understand that ideas outlive news cycles.
               </p>
             </div>
 
@@ -159,9 +130,7 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
 
               <div className="mt-3 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-xs text-gray-300">
-                    Catalogued Volumes
-                  </p>
+                  <p className="text-xs text-gray-300">Catalogued Volumes</p>
                   <p className="text-2xl font-semibold text-cream">
                     {items.length.toString().padStart(2, "0")}
                   </p>
@@ -214,7 +183,6 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Section header */}
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-softGold/70">
@@ -228,12 +196,11 @@ const CanonIndexPage: NextPage<PageProps> = ({ items, maxVolume }) => {
                 <p className="max-w-md text-xs text-gray-400 sm:text-[0.8rem]">
                   Ordered first by{" "}
                   <span className="text-softGold">featured importance</span>,
-                  then by volume number and catalogue date. Inner Circle
-                  volumes are marked with a subtle lock.
+                  then by volume number and catalogue date. Inner Circle volumes
+                  are marked with a subtle lock.
                 </p>
               </div>
 
-              {/* Cards grid */}
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {items.map((item) => (
                   <CanonCard key={item.slug} canon={item} />
@@ -255,58 +222,35 @@ export default CanonIndexPage;
 
 export const getStaticProps: GetStaticProps<PageProps> = async () => {
   try {
-    // Use contentlayer-helper, not raw contentlayer
-    const docs: CanonDocument[] = Array.isArray(allCanons) ? allCanons : [];
+    const docs: CanonDoc[] = getAllCanon({ includeDrafts: false });
 
-    const items: CanonIndexItem[] = docs
-      .filter((doc) => !doc.draft) // hide draft by default
-      .map((doc) => {
-        const vol = toNumberOrNull(
-          (doc as { volumeNumber?: unknown }).volumeNumber
-        );
+    const items: CanonIndexItem[] = docs.map((doc) => {
+      const vol = toNumberOrNull(
+        (doc as { volumeNumber?: unknown }).volumeNumber
+      );
 
-        const safeTitle =
-          (doc as { title?: string }).title ?? "Untitled Canon Volume";
-        const safeSlug = (doc as { slug?: string }).slug ?? "";
+      const safeTitle =
+        (doc as { title?: string }).title ?? "Untitled Canon Volume";
+      const safeSlug = (doc as { slug?: string }).slug ?? "";
 
-        return {
-          slug: safeSlug,
-          title: safeTitle,
-          subtitle: (doc as { subtitle?: string }).subtitle ?? null,
-          excerpt: doc.excerpt ?? null,
-          description: doc.description ?? null,
-          coverImage: doc.coverImage ?? null,
-          volumeNumber: vol,
-          date: doc.date ?? null,
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          featured: Boolean((doc as { featured?: boolean }).featured),
-          accessLevel:
-            (doc as { accessLevel?: string | null }).accessLevel ?? null,
-          lockMessage:
-            (doc as { lockMessage?: string | null }).lockMessage ?? null,
-        };
-      })
-      .sort((a, b) => {
-        // featured first
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
+      return {
+        slug: safeSlug,
+        title: safeTitle,
+        subtitle: (doc as { subtitle?: string | null }).subtitle ?? null,
+        excerpt: doc.excerpt ?? null,
+        description: doc.description ?? null,
+        coverImage: doc.coverImage ?? null,
+        volumeNumber: vol,
+        date: doc.date ?? null,
+        tags: Array.isArray(doc.tags) ? doc.tags : [],
+        featured: Boolean((doc as { featured?: boolean }).featured),
+        accessLevel:
+          (doc as { accessLevel?: string | null }).accessLevel ?? null,
+        lockMessage:
+          (doc as { lockMessage?: string | null }).lockMessage ?? null,
+      };
+    });
 
-        // then by volume number if both present
-        if (a.volumeNumber != null && b.volumeNumber != null) {
-          return a.volumeNumber - b.volumeNumber;
-        }
-
-        // then by date (newest first)
-        if (a.date && b.date) {
-          return (
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-        }
-
-        return 0;
-      });
-
-    // 🔢 Compute max volume for progress UI / nav – always return a number
     const volumeNumbers = items
       .map((item) => item.volumeNumber)
       .filter((v): v is number => typeof v === "number");
@@ -319,7 +263,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
         items,
         maxVolume,
       },
-      revalidate: 3600, // 1 hour
+      revalidate: 3600,
     };
   } catch (err) {
     // eslint-disable-next-line no-console
