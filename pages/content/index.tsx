@@ -1,214 +1,279 @@
 // pages/content/index.tsx
+import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
-import type { NextPage, GetStaticProps } from "next";
+import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import {
-  LIBRARY_AESTHETICS,
-  CONTENT_CATEGORIES,
-} from "@/lib/content";
 
-import {
-  getAllUnifiedContent,
-  type UnifiedContent,
-} from "@/lib/server/unified-content";
+import { getAllPostsMeta } from "@/lib/server/posts-data";
+import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
+import { getAllBooksMeta } from "@/lib/server/books-data";
+import { getAllContent } from "@/lib/mdx";
 
-type FilterKey =
-  | "all"
-  | "page"
-  | "post"
+// ---------------------------------------------------------------------------
+// Design & Data Types
+// ---------------------------------------------------------------------------
+
+type ContentKind =
+  | "blog"
   | "book"
   | "download"
   | "event"
   | "print"
   | "resource";
 
-type LibraryProps = {
-  items: UnifiedContent[];
+interface RawContentItem {
+  slug?: string;
+  title?: string;
+  date?: string;
+  excerpt?: string;
+  description?: string;
+  category?: string;
+  tags?: (string | number)[];
+  featured?: boolean;
+  readTime?: string | number;
+  _raw?: { flattenedPath?: string };
+  eventDate?: string;
+  fileSize?: string;
+}
+
+interface ContentResource {
+  kind: ContentKind;
+  title: string;
+  slug: string;
+  href: string;
+  date?: string;
+  excerpt?: string;
+  description?: string;
+  category?: string;
+  tags: string[];
+  featured?: boolean;
+  readTime?: string | number;
+}
+
+interface ContentPageProps {
+  items: ContentResource[];
+  featuredItems: ContentResource[];
+}
+
+// ---------------------------------------------------------------------------
+// Icons
+// ---------------------------------------------------------------------------
+
+const ContentIcons: Record<ContentKind, React.ReactNode> = {
+  blog: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9m0 0v12" />
+    </svg>
+  ),
+  book: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  download: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  ),
+  event: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+  print: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+    </svg>
+  ),
+  resource: (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
 };
 
-/* -------------------------------------------------------------------------- */
-/* SMALL UI PRIMITIVES                                                        */
-/* -------------------------------------------------------------------------- */
+const kindLabels: Record<ContentKind, string> = {
+  blog: "Strategic Essays",
+  book: "Canon Volumes",
+  download: "Tools & Downloads",
+  event: "Events & Gatherings",
+  print: "Print Editions",
+  resource: "Core Resources",
+} as const;
 
-const FilterPill: React.FC<{
-  label: string;
-  value: FilterKey;
-  active: boolean;
-  count: number;
-  onClick: () => void;
-}> = ({ label, value, active, count, onClick }) => {
-  const isDisabled = value !== "all" && count === 0;
-
-  return (
-    <button
-      type="button"
-      onClick={!isDisabled ? onClick : undefined}
-      disabled={isDisabled}
-      className={[
-        "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium tracking-wider transition-all",
-        active && !isDisabled ? "scale-105 shadow-sm" : "",
-        isDisabled ? "opacity-35 cursor-not-allowed" : "opacity-80 hover:opacity-100",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        backgroundColor: active && !isDisabled
-          ? LIBRARY_AESTHETICS.colors.primary.saffron
-          : "rgba(15,23,42,0.8)",
-        color: active && !isDisabled
-          ? "#020617"
-          : LIBRARY_AESTHETICS.colors.primary.parchment,
-        border: `1px solid ${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-      }}
-    >
-      <span>{label}</span>
-      <span
-        className="rounded-full px-1.5 py-0.5 text-[0.6rem] uppercase"
-        style={{
-          backgroundColor: active && !isDisabled
-            ? "rgba(15,23,42,0.08)"
-            : "rgba(15,23,42,0.6)",
-        }}
-      >
-        {count}
-      </span>
-    </button>
-  );
+const kindColors: Record<ContentKind, { bg: string; text: string; border: string }> = {
+  blog: {
+    bg: "bg-gradient-to-br from-emerald-500/10 to-emerald-600/10",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800",
+  },
+  book: {
+    bg: "bg-gradient-to-br from-amber-500/10 to-amber-600/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-800",
+  },
+  download: {
+    bg: "bg-gradient-to-br from-blue-500/10 to-blue-600/10",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800",
+  },
+  event: {
+    bg: "bg-gradient-to-br from-purple-500/10 to-purple-600/10",
+    text: "text-purple-600 dark:text-purple-400",
+    border: "border-purple-200 dark:border-purple-800",
+  },
+  print: {
+    bg: "bg-gradient-to-br from-gray-500/10 to-gray-600/10",
+    text: "text-gray-600 dark:text-gray-400",
+    border: "border-gray-200 dark:border-gray-800",
+  },
+  resource: {
+    bg: "bg-gradient-to-br from-cyan-500/10 to-cyan-600/10",
+    text: "text-cyan-600 dark:text-cyan-400",
+    border: "border-cyan-200 dark:border-cyan-800",
+  },
 };
 
-const TypeTag: React.FC<{ type: UnifiedContent["type"] }> = ({ type }) => {
-  const map: Record<
-    UnifiedContent["type"],
-    { label: string; color: string; icon: string }
-  > = {
-    page: {
-      label: "Page",
-      color: CONTENT_CATEGORIES.CANON.color,
-      icon: "📜",
-    },
-    post: {
-      label: "Essay",
-      color: CONTENT_CATEGORIES.POSTS.color,
-      icon: "✒",
-    },
-    book: {
-      label: "Book",
-      color: CONTENT_CATEGORIES.BOOKS.color,
-      icon: "📚",
-    },
-    download: {
-      label: "Download",
-      color: CONTENT_CATEGORIES.RESOURCES.color,
-      icon: "⬇",
-    },
-    event: {
-      label: "Event",
-      color: CONTENT_CATEGORIES.EVENTS.color,
-      icon: "🕯",
-    },
-    print: {
-      label: "Print",
-      color: CONTENT_CATEGORIES.PRINTS.color,
-      icon: "🖼",
-    },
-    resource: {
-      label: "Resource",
-      color: CONTENT_CATEGORIES.RESOURCES.color,
-      icon: "⚙",
-    },
-  };
+// ---------------------------------------------------------------------------
+// Helper Functions
+// ---------------------------------------------------------------------------
 
-  const cfg = map[type];
+const getSlug = (item: RawContentItem): string | undefined => {
+  try {
+    const stripCollectionPrefix = (value: string) =>
+      value.replace(/^(blog|books|downloads|events|prints|resources)\//, "");
 
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-      style={{
-        backgroundColor: `${cfg.color}15`,
-        color: cfg.color,
-        border: `1px solid ${cfg.color}40`,
-      }}
-    >
-      <span>{cfg.icon}</span>
-      <span>{cfg.label}</span>
-    </span>
-  );
+    if (item.slug && typeof item.slug === "string") {
+      return stripCollectionPrefix(item.slug);
+    }
+
+    if (item._raw?.flattenedPath) {
+      return stripCollectionPrefix(item._raw.flattenedPath);
+    }
+
+    if (item.title) {
+      return item.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    return undefined;
+  } catch (error) {
+    console.error("[getSlug] Error processing slug:", error);
+    return undefined;
+  }
 };
 
-const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
+const getHref = (kind: ContentKind, slug: string): string => {
+  if (kind === "blog") return `/${slug}`;
+  return `/${kind}s/${slug}`;
+};
+
+const processContentItems = (
+  items: RawContentItem[],
+  kind: ContentKind,
+  defaultCategory?: string
+): ContentResource[] => {
+  const processed: ContentResource[] = [];
+
+  items.forEach((item) => {
+    try {
+      const slug = getSlug(item);
+      const title = item.title || "Untitled";
+
+      if (!slug) {
+        console.warn(
+          `[processContentItems] Skipping item with no slug: ${title}`
+        );
+        return;
+      }
+
+      const tags = Array.isArray(item.tags)
+        ? item.tags.map((tag) => String(tag))
+        : [];
+
+      processed.push({
+        kind,
+        title,
+        slug,
+        href: getHref(kind, slug),
+        date: item.date || item.eventDate,
+        excerpt: item.excerpt,
+        description: item.description,
+        category: item.category || defaultCategory,
+        tags,
+        featured: Boolean(item.featured),
+        readTime: item.readTime,
+      });
+    } catch (error) {
+      console.error("[processContentItems] Error processing item:", error);
+    }
+  });
+
+  return processed;
+};
+
+// ---------------------------------------------------------------------------
+// Content Cards
+// ---------------------------------------------------------------------------
+
+const ContentCard: React.FC<{ item: ContentResource }> = ({ item }) => {
+  const colors = kindColors[item.kind];
+  const description = item.description || item.excerpt || "";
+
   return (
-    <Link href={item.url || "#"} className="group block h-full">
-      <article
-        className="flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-        style={{
-          borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-          backgroundColor: "rgba(15,23,42,0.8)",
-          backgroundImage:
-            "linear-gradient(135deg, rgba(212,175,55,0.05) 0%, transparent 40%)",
-        }}
-      >
-        {/* Header / strip */}
-        <div className="relative h-28 w-full overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900" />
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 0 0, rgba(212,175,55,0.25), transparent 60%)",
-            }}
-          />
-          <div className="absolute left-4 top-3">
-            <TypeTag type={item.type} />
-          </div>
-          {item.date && (
-            <div className="absolute bottom-3 right-4 text-[0.65rem] uppercase tracking-wide text-slate-400">
-              {new Date(item.date).toLocaleDateString("en-GB")}
-            </div>
-          )}
-        </div>
-
-        {/* Body */}
-        <div className="flex flex-1 flex-col p-5">
-          <h3
-            className="mb-2 font-serif text-lg font-medium"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            {item.title || "Untitled"}
-          </h3>
-          {(item.description || item.excerpt) ? (
-            <p
-              className="mb-4 line-clamp-3 text-sm leading-relaxed opacity-80"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              {item.description || item.excerpt || ""}
-            </p>
-          ) : null}
-
-          <div className="mt-auto flex items-center justify-between pt-2 text-xs">
-            <div className="flex flex-wrap gap-2">
-              {(item.tags || []).slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-black/20 px-2 py-0.5 text-[0.65rem] uppercase tracking-wide"
-                  style={{
-                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
-                    border: "1px solid rgba(148,163,184,0.3)",
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <span
-              className="inline-flex items-center gap-1 text-[0.7rem] font-medium tracking-wide"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Open
-              <span className="transition-transform group-hover:translate-x-0.5">
-                ↗
+    <Link href={item.href} className="group block">
+      <article className="relative h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+        <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.bg}`} />
+        
+        <div className="p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`rounded-lg ${colors.bg} p-2`}>
+                <div className={colors.text}>
+                  {ContentIcons[item.kind]}
+                </div>
+              </div>
+              <span className={`text-xs font-semibold uppercase tracking-wider ${colors.text}`}>
+                {kindLabels[item.kind]}
               </span>
+            </div>
+            {item.date && (
+              <time className="text-xs text-gray-500 dark:text-gray-400">
+                {new Date(item.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                })}
+              </time>
+            )}
+          </div>
+
+          <h3 className="mb-3 font-serif text-lg font-bold text-gray-900 dark:text-white">
+            {item.title}
+          </h3>
+
+          {description && (
+            <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300 line-clamp-3">
+              {description}
+            </p>
+          )}
+
+          <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-3 text-sm dark:border-gray-800">
+            <div className="flex items-center gap-2">
+              {item.readTime && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {typeof item.readTime === "number"
+                    ? `${item.readTime} min`
+                    : item.readTime}
+                </span>
+              )}
+            </div>
+            <span className={`font-medium ${colors.text} transition-transform group-hover:translate-x-1`}>
+              →
             </span>
           </div>
         </div>
@@ -217,268 +282,461 @@ const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* PAGE                                                                       */
-/* -------------------------------------------------------------------------- */
+const FeaturedCard: React.FC<{ item: ContentResource }> = ({ item }) => {
+  const colors = kindColors[item.kind];
+  const description = item.description || item.excerpt || "";
 
-const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
-  const [filter, setFilter] = React.useState<FilterKey>("all");
-  const [query, setQuery] = React.useState("");
+  return (
+    <Link href={item.href} className="group block">
+      <article className="relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-gray-50/50 to-transparent dark:via-gray-800/50 opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+        
+        <div className="relative p-6">
+          <div className="mb-6 flex items-start justify-between">
+            <div className={`rounded-xl ${colors.bg} p-3`}>
+              <div className={`text-xl ${colors.text}`}>
+                {ContentIcons[item.kind]}
+              </div>
+            </div>
+            <div className="text-right">
+              <span className={`rounded-full border ${colors.border} ${colors.bg} px-3 py-1 text-xs font-semibold uppercase tracking-wider ${colors.text}`}>
+                Featured
+              </span>
+            </div>
+          </div>
 
-  // Counts per type for pills
-  const counts = React.useMemo(() => {
-    const base: Record<FilterKey, number> = {
-      all: items.length,
-      page: 0,
-      post: 0,
-      book: 0,
-      download: 0,
-      event: 0,
-      print: 0,
-      resource: 0,
-    };
-    for (const it of items) {
-      // it.type is one of the non-"all" keys
-      base[it.type as Exclude<FilterKey, "all">] += 1;
+          <h3 className="mb-4 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+            {item.title}
+          </h3>
+
+          {description && (
+            <p className="mb-6 text-base leading-relaxed text-gray-600 dark:text-gray-300 line-clamp-4">
+              {description}
+            </p>
+          )}
+
+          <div className="mt-auto flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-700">
+            <div className="flex items-center gap-4">
+              <span className={`text-sm font-semibold ${colors.text}`}>
+                {kindLabels[item.kind]}
+              </span>
+              {item.date && (
+                <time className="text-sm text-gray-500 dark:text-gray-400">
+                  {new Date(item.date).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </time>
+              )}
+            </div>
+            <span className={`text-lg font-medium ${colors.text} transition-transform group-hover:translate-x-2`}>
+              →
+            </span>
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// SSG Data Fetching
+// ---------------------------------------------------------------------------
+
+const safeGetData = async (
+  dataFetcher: (() => RawContentItem[] | undefined) | undefined,
+  dataName: string
+): Promise<RawContentItem[]> => {
+  try {
+    if (!dataFetcher || typeof dataFetcher !== "function") {
+      console.warn(`[content] ${dataName} fetcher unavailable`);
+      return [];
     }
-    return base;
-  }, [items]);
+    const data = dataFetcher();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error(`[content] Error fetching ${dataName}:`, error);
+    return [];
+  }
+};
 
-  const filtered = React.useMemo(() => {
-    let base =
-      filter === "all" ? items : items.filter((it) => it.type === filter);
+export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
+  console.log("📚 [content] Building content library...");
 
-    if (!query.trim()) return base;
+  try {
+    const allItems: ContentResource[] = [];
 
-    const q = query.toLowerCase();
-    return base.filter(
-      (it) =>
-        (it.title || "").toLowerCase().includes(q) ||
-        (it.description || "").toLowerCase().includes(q) ||
-        (it.excerpt || "").toLowerCase().includes(q) ||
-        (it.tags || []).some((t) => t.toLowerCase().includes(q))
+    const contentFetchers: {
+      kind: ContentKind;
+      data: Promise<RawContentItem[]>;
+      category: string;
+    }[] = [
+      {
+        kind: "blog",
+        data: safeGetData(getAllPostsMeta, "blog posts"),
+        category: "Essays",
+      },
+      {
+        kind: "book",
+        data: safeGetData(getAllBooksMeta, "books"),
+        category: "Volumes",
+      },
+      {
+        kind: "download",
+        data: safeGetData(getAllDownloadsMeta, "downloads"),
+        category: "Tools",
+      },
+      {
+        kind: "event",
+        data: safeGetData(() => getAllContent?.("events") ?? [], "events"),
+        category: "Sessions",
+      },
+      {
+        kind: "print",
+        data: safeGetData(() => getAllContent?.("prints") ?? [], "prints"),
+        category: "Prints",
+      },
+      {
+        kind: "resource",
+        data: safeGetData(
+          () => getAllContent?.("resources") ?? [],
+          "resources"
+        ),
+        category: "Resources",
+      },
+    ];
+
+    await Promise.all(
+      contentFetchers.map(async ({ kind, data, category }) => {
+        try {
+          const items = await data;
+          const processed = processContentItems(items, kind, category);
+          allItems.push(...processed);
+          console.log(`✨ [content] Processed ${processed.length} ${kind}`);
+        } catch (error) {
+          console.error(`💥 [content] Failed to process ${kind}:`, error);
+        }
+      })
     );
-  }, [items, filter, query]);
 
-  const activeLabel = React.useMemo(() => {
-    const map: Record<FilterKey, string> = {
-      all: "All content",
-      page: "Pages",
-      post: "Essays",
-      book: "Books",
-      download: "Downloads & tools",
-      event: "Events & rooms",
-      print: "Prints",
-      resource: "Resources",
+    const sortedItems = allItems.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      if (Number.isNaN(dateA) && Number.isNaN(dateB)) return 0;
+      if (Number.isNaN(dateA)) return 1;
+      if (Number.isNaN(dateB)) return -1;
+      return dateB - dateA;
+    });
+
+    const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 4);
+
+    console.log("[content] Build completed:", {
+      total: sortedItems.length,
+      featured: featuredItems.length,
+    });
+
+    return {
+      props: {
+        items: JSON.parse(JSON.stringify(sortedItems)),
+        featuredItems: JSON.parse(JSON.stringify(featuredItems)),
+      },
+      revalidate: 3600,
     };
-    return map[filter];
-  }, [filter]);
+  } catch (error) {
+    console.error("💢 [content] Critical build error:", error);
+    return {
+      props: { items: [], featuredItems: [] },
+      revalidate: 3600,
+    };
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Page Component
+// ---------------------------------------------------------------------------
+
+const ContentPage: NextPage<ContentPageProps> = ({ items, featuredItems }) => {
+  const [activeFilter, setActiveFilter] = React.useState<ContentKind | "all">(
+    "all"
+  );
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const contentStats = React.useMemo(
+    () => ({
+      all: items.length,
+      blog: items.filter((i) => i.kind === "blog").length,
+      book: items.filter((i) => i.kind === "book").length,
+      download: items.filter((i) => i.kind === "download").length,
+      event: items.filter((i) => i.kind === "event").length,
+      print: items.filter((i) => i.kind === "print").length,
+      resource: items.filter((i) => i.kind === "resource").length,
+    }),
+    [items]
+  );
+
+  const filterOptions = [
+    {
+      key: "all" as const,
+      label: "All Content",
+      count: contentStats.all,
+    },
+    {
+      key: "blog" as const,
+      label: kindLabels.blog,
+      count: contentStats.blog,
+    },
+    {
+      key: "book" as const,
+      label: kindLabels.book,
+      count: contentStats.book,
+    },
+    {
+      key: "download" as const,
+      label: kindLabels.download,
+      count: contentStats.download,
+    },
+    {
+      key: "event" as const,
+      label: kindLabels.event,
+      count: contentStats.event,
+    },
+    {
+      key: "resource" as const,
+      label: kindLabels.resource,
+      count: contentStats.resource,
+    },
+  ];
+
+  const filteredItems = React.useMemo(() => {
+    return items.filter((item) => {
+      const matchesFilter =
+        activeFilter === "all" || item.kind === activeFilter;
+      if (!matchesFilter) return false;
+      if (!searchQuery.trim()) return true;
+
+      const query = searchQuery.toLowerCase().trim();
+      return (
+        item.title.toLowerCase().includes(query) ||
+        item.excerpt?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    });
+  }, [items, activeFilter, searchQuery]);
 
   return (
     <Layout
-      title="The Library"
-      description="Unified access to all pages, essays, books, downloads, prints, and events curated under Abraham of London."
-      structuredData={{
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        name: "Abraham of London — Library",
-      }}
+      title="Content Library"
+      description="A curated library of essays, volumes, tools, and resources for leaders building enduring work and legacy."
     >
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        {/* HERO / HEADER */}
-        <section className="border-b border-amber-400/20 py-16">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p
-                  className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.28em]"
-                  style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-                >
-                  Canon · Essays · Books · Tools · Events
-                </p>
-                <h1 className="font-serif text-4xl font-light text-cream sm:text-5xl">
-                  The Library
-                </h1>
-                <p className="mt-4 max-w-xl text-sm sm:text-base text-cream/75">
-                  One doorway into the whole ecosystem: pages, essays, books,
-                  downloads, prints, and events — unified, searchable, and
-                  built for men who intend to do something with what they read.
-                </p>
-              </div>
+      <Head>
+        <title>Content Library | Abraham of London</title>
+        <meta
+          name="description"
+          content="A curated library of essays, volumes, tools, sessions, prints, and resources for leaders building enduring work and legacy."
+        />
+      </Head>
 
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <div className="text-xs text-cream/40">
-                  Showing{" "}
-                  <span className="font-semibold text-cream/80">
-                    {filtered.length}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-semibold text-cream/70">
-                    {items.length}
-                  </span>{" "}
-                  items
-                  <span className="mx-1">•</span>
-                  <span className="text-cream/60">{activeLabel}</span>
-                  {query.trim() && (
-                    <>
-                      <span className="mx-1">•</span>
-                      <span className="text-cream/60">
-                        Search: “{query.trim()}”
-                      </span>
-                    </>
-                  )}
-                </div>
-                <Link
-                  href="/context"
-                  className="text-xs font-medium underline-offset-4 hover:underline"
-                  style={{
-                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
-                  }}
-                >
-                  Read the philosophy behind the library →
-                </Link>
-              </div>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-950 dark:to-gray-900">
+        <div className="absolute inset-0">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl dark:bg-amber-500/5" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                Complete Library
+              </span>
             </div>
+            <h1 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
+              Content Library
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+              Every essay, volume, tool, and resource in one place — structured for discovery and designed for action.
+            </p>
+          </div>
 
-            {/* Filters & Search */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    { key: "all", label: "All" },
-                    { key: "post", label: "Essays" },
-                    { key: "book", label: "Books" },
-                    { key: "download", label: "Downloads" },
-                    { key: "event", label: "Events" },
-                    { key: "print", label: "Prints" },
-                    { key: "page", label: "Pages" },
-                    { key: "resource", label: "Resources" },
-                  ] as { key: FilterKey; label: string }[]
-                ).map(({ key, label }) => (
-                  <FilterPill
-                    key={key}
-                    label={label}
-                    value={key}
-                    active={filter === key}
-                    count={counts[key]}
-                    onClick={() => setFilter(key)}
-                  />
-                ))}
-              </div>
+          {/* Stats */}
+          <div className="mb-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {filterOptions.slice(1, 5).map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => setActiveFilter(filter.key)}
+                className="rounded-xl border border-gray-200 bg-white p-4 text-center transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
+              >
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {filter.count}
+                </div>
+                <div className="mt-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {filter.label}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <div className="w-full sm:w-64">
+      {/* Featured Section */}
+      {featuredItems.length > 0 && (
+        <section className="border-y border-gray-200 bg-white py-16 dark:border-gray-800 dark:bg-gray-900">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-10">
+              <h2 className="font-serif text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                Featured Works
+              </h2>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                A curated selection of essential readings and tools
+              </p>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-2">
+              {featuredItems.map((item) => (
+                <FeaturedCard key={item.slug} item={item} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Main Content Section */}
+      <section className="bg-gradient-to-b from-gray-50 to-white py-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Search & Filters */}
+          <div className="mb-12 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex-1">
                 <div className="relative">
                   <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="w-full rounded-full border bg-slate-950/70 px-4 py-2 text-sm text-cream placeholder:text-slate-500 focus:outline-none focus:ring-2"
-                    style={{
-                      borderColor:
-                        query.length > 0
-                          ? `${LIBRARY_AESTHETICS.colors.primary.saffron}60`
-                          : "rgba(148,163,184,0.4)",
-                      boxShadow:
-                        query.length > 0
-                          ? `0 0 0 1px ${LIBRARY_AESTHETICS.colors.primary.saffron}40`
-                          : "none",
-                    }}
-                    placeholder="Search titles, descriptions, tags…"
+                    type="text"
+                    placeholder="Search essays, tools, sessions, resources…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-gray-600"
+                    aria-label="Search content library"
                   />
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-                    ⌕
-                  </span>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => setActiveFilter(filter.key)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                      activeFilter === filter.key
+                        ? "border-gray-900 bg-gray-900 text-white dark:border-gray-700 dark:bg-gray-700"
+                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <span>{filter.label}</span>
+                    <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700">
+                      {filter.count}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-        </section>
 
-        {/* GRID */}
-        <section className="py-12">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {filtered.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/60 p-10 text-center text-sm text-slate-300">
-                Nothing matches that yet. Adjust the filter or search term, or{" "}
-                <Link
-                  href="/context"
-                  className="underline underline-offset-4"
+          {/* Results */}
+          {filteredItems.length === 0 ? (
+            <div className="rounded-xl border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900">
+              <h3 className="mb-4 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+                No results found
+              </h3>
+              <p className="mb-8 text-gray-600 dark:text-gray-400">
+                {searchQuery
+                  ? `Nothing matched "${searchQuery}". Try a different term or clear the filters.`
+                  : `There is no content in this category yet.`}
+              </p>
+              {(searchQuery || activeFilter !== "all") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveFilter("all");
+                  }}
+                  className="rounded-lg bg-gray-900 px-6 py-3 font-medium text-white transition-all hover:shadow-lg dark:bg-gray-700"
                 >
-                  read the context
-                </Link>{" "}
-                to see how the library is curated.
+                  Reset filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="mb-8 flex items-center justify-between">
+                <h3 className="font-serif text-2xl font-bold text-gray-900 dark:text-white">
+                  {activeFilter === "all" ? "All Content" : kindLabels[activeFilter]}
+                </h3>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+                </span>
               </div>
-            ) : (
+
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((item) => (
-                  <LibraryCard key={item.id} item={item} />
+                {filteredItems.map((item) => (
+                  <ContentCard key={item.slug} item={item} />
                 ))}
               </div>
-            )}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-black py-24">
+        <div className="absolute inset-0">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-4xl px-4 text-center">
+          <h2 className="mb-6 font-serif text-4xl font-bold text-white sm:text-5xl">
+            Need specific guidance?
+          </h2>
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-300">
+            If you're looking for something specific or need customized resources for your team or project, let's discuss.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/consulting"
+              className="inline-flex items-center gap-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-10 py-4 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/30"
+            >
+              Book a consultation
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-900 px-10 py-4 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-gray-800 hover:shadow-lg"
+            >
+              Contact me directly
+            </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </Layout>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* DATA LOADING                                                               */
-/* -------------------------------------------------------------------------- */
-
-// Helper function to deeply sanitize undefined values
-const sanitizeForSerialization = <T,>(data: T): T => {
-  if (data === undefined || data === null) {
-    return null as T;
-  }
-
-  if (Array.isArray(data)) {
-    return data.map(sanitizeForSerialization) as T;
-  }
-
-  if (typeof data === "object") {
-    const sanitized: Record<string, any> = {};
-    for (const [key, value] of Object.entries(data)) {
-      sanitized[key] = sanitizeForSerialization(value);
-    }
-    return sanitized as T;
-  }
-
-  return data;
-};
-
-export const getStaticProps: GetStaticProps<LibraryProps> = async () => {
-  try {
-    const items = await getAllUnifiedContent();
-
-    const safeItems = Array.isArray(items) ? items : [];
-    const sanitizedItems = sanitizeForSerialization(safeItems);
-
-    const validatedItems = (sanitizedItems as UnifiedContent[]).map((item) => ({
-      ...item,
-      id: item.id || `unknown-${Date.now()}-${Math.random()}`,
-      title: item.title || "Untitled",
-      url: item.url || "/",
-      description: item.description || null,
-      excerpt: item.excerpt || null,
-      tags: Array.isArray(item.tags) ? item.tags.filter(Boolean) : [],
-    }));
-
-    return {
-      props: {
-        items: validatedItems,
-      },
-      revalidate: 60 * 10,
-    };
-  } catch (error) {
-    console.error("Error in getStaticProps for /content:", error);
-    return {
-      props: {
-        items: [],
-      },
-      revalidate: 60 * 10,
-    };
-  }
-};
-
-export default ContentLibraryPage;
+export default ContentPage;
