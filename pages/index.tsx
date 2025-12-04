@@ -40,61 +40,72 @@ const SectionDivider: React.FC = () => (
 );
 
 /* -------------------------------------------------------------------------- */
-/* ENHANCED CARDS                                                             */
+/* EXPANDED CANON SECTION - Multiple Volumes                                 */
 /* -------------------------------------------------------------------------- */
 
-const CanonVolumeCard: React.FC = () => (
-  <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+const CanonVolumeCard: React.FC<{
+  volume: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  status: "available" | "forthcoming" | "in-progress";
+  color: string;
+  href?: string;
+}> = ({ volume, title, subtitle, description, status, color, href }) => (
+  <div className={`group relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 ${status === 'available' ? 'cursor-pointer' : 'cursor-default'}`}>
     <div className="absolute -inset-4 bg-gradient-to-br from-amber-500/5 via-emerald-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     
-    <div className="relative p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="relative p-5">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/10 p-3">
-            <div className="text-xl text-amber-600 dark:text-amber-400">📜</div>
+          <div className="rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/10 p-2">
+            <div className="text-lg text-amber-600 dark:text-amber-400">📜</div>
           </div>
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-              Canon · Volume I
+              Canon · Volume {volume}
             </span>
-            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">Prelude</div>
+            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{status === 'available' ? 'Available Now' : status === 'forthcoming' ? 'Coming Soon' : 'In Progress'}</div>
           </div>
         </div>
       </div>
 
-      <div className="relative mb-6 aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-gray-900 to-black shadow-inner">
-        <Image
-          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-          alt="The Architecture of Human Purpose — Canon Volume I"
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          sizes="(max-width: 768px) 100vw, 320px"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+      <div className="mb-4 aspect-[4/3] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+        <div className="flex h-full items-center justify-center">
+          <div className="text-center">
+            <div className="text-4xl text-gray-300 dark:text-gray-700 mb-2">📚</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-600">
+              Volume {volume}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h3 className="mb-3 font-serif text-xl font-bold text-gray-900 dark:text-white">
-        The Architecture of Human Purpose
+      <h3 className="mb-2 font-serif text-lg font-bold text-gray-900 dark:text-white">
+        {title}
       </h3>
-
-      <p className="mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-        The prelude to the Canon — a structural map for those who know that
-        human flourishing is not accidental but architectural.
+      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+        {subtitle}
       </p>
 
-      <div className="flex gap-3">
-        <Link
-          href="/books/the-architecture-of-human-purpose"
-          className="flex-1 rounded-lg bg-gradient-to-r from-gray-900 to-black py-3 text-center text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-gray-900/30 dark:from-amber-600 dark:to-amber-700 dark:hover:shadow-amber-600/30"
-        >
-          Read Now
-        </Link>
-        <Link
-          href="/canon"
-          className="flex-1 rounded-lg border border-gray-300 bg-white py-3 text-center text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-        >
-          All Volumes
-        </Link>
+      <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        {description}
+      </p>
+
+      <div className="mt-auto">
+        {status === 'available' && href ? (
+          <Link
+            href={href}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-gray-900 to-black py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-gray-900/30 dark:from-amber-600 dark:to-amber-700 dark:hover:shadow-amber-600/30"
+          >
+            Explore Volume {volume}
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        ) : (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+            {status === 'forthcoming' ? 'Coming Soon' : 'In Development'}
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -150,50 +161,36 @@ const ContentCard: React.FC<{
   </Link>
 );
 
-/* BOOK SPOTLIGHT – MEMOIR + FICTION */
+/* -------------------------------------------------------------------------- */
+/* COMPACT BOOKS SPOTLIGHT                                                   */
+/* -------------------------------------------------------------------------- */
 
-const BookSpotlightCard: React.FC<{
+const CompactBookCard: React.FC<{
   title: string;
   subtitle: string;
   href: string;
-  image: string;
   tag: string;
-  blurb: string;
-}> = ({ title, subtitle, href, image, tag, blurb }) => (
+}> = ({ title, subtitle, href, tag }) => (
   <Link href={href} className="group block">
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
-      <div className="relative aspect-[3/4] w-full overflow-hidden">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          sizes="(max-width:768px) 100vw, 320px"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent" />
-        <div className="absolute left-4 top-4 rounded-full bg-black/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-          {tag}
-        </div>
+    <article className="flex items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/10">
+        <div className="text-lg text-amber-600 dark:text-amber-400">📖</div>
       </div>
-
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="mb-2 font-serif text-xl font-bold text-gray-900 dark:text-white">
-          {title}
-        </h3>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+      <div className="flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <h3 className="font-serif text-sm font-semibold text-gray-900 dark:text-white">
+            {title}
+          </h3>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+            {tag}
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {subtitle}
         </p>
-        <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-          {blurb}
-        </p>
-        <div className="mt-auto flex items-center justify-between text-sm">
-          <span className="font-medium text-amber-600 dark:text-amber-400">
-            Open book
-          </span>
-          <span className="text-sm text-amber-600 transition-transform group-hover:translate-x-1 dark:text-amber-400">
-            ↗
-          </span>
-        </div>
+      </div>
+      <div className="text-amber-600 opacity-70 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+        →
       </div>
     </article>
   </Link>
@@ -245,7 +242,7 @@ const HomePage: NextPage = () => {
       </Head>
 
       {/* -------------------------------------------------------------------
-       1. PRIMARY HERO
+       1. PRIMARY HERO - FIXED IMAGE PATH & LARGER IMAGE
       -------------------------------------------------------------------- */}
       <section className="relative min-h-[95vh] overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         {/* Background decorative elements */}
@@ -255,16 +252,16 @@ const HomePage: NextPage = () => {
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
-            {/* Left – copy */}
-            <div className="max-w-xl">
+          <div className="grid items-center gap-16 lg:grid-cols-5">
+            {/* Left – copy - Takes 2 columns */}
+            <div className="lg:col-span-2 max-w-xl">
               <div className="mb-8">
                 <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
                   <div className="text-lg text-amber-600 dark:text-amber-400">
                     𓆓
                   </div>
                   <span className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-400">
-                    {SEASONAL_CURATIONS.wisdomTheme}
+                    Library of Applied Wisdom
                   </span>
                 </div>
 
@@ -302,17 +299,22 @@ const HomePage: NextPage = () => {
               </div>
             </div>
 
-            {/* Right – hero banner image */}
-            <div className="relative">
+            {/* Right – hero banner image - Takes 3 columns (larger) */}
+            <div className="lg:col-span-3 relative">
               <div className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-2xl dark:border-gray-800">
-                <div className="relative aspect-[4/5] overflow-hidden">
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  {/* Try multiple image paths with fallback */}
                   <Image
-                    src="/assets/images/abraham-of-london-banner-2056.webp"
+                    src="/assets/images/abraham-of-london-banner.webp"
                     alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
                     fill
                     priority
                     className="object-cover object-center"
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, 75vw"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/assets/images/abraham-of-london-banner@2569.webp";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 </div>
@@ -340,136 +342,159 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       3. CANON & CONTENT HUB
+       3. EXPANDED CANON SECTION - Multiple Volumes
       -------------------------------------------------------------------- */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                Intellectual Infrastructure
+                The Architectural Framework
               </span>
             </div>
             <h2 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
-              The Canon & The Works
+              The Canon: Structural Wisdom in Multiple Volumes
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-              Not a blog. A structured record of purpose, civilisation,
-              governance, and destiny — the intellectual infrastructure
-              underneath everything else.
+              A multi-volume architecture for purpose, institutions, and human destiny — 
+              not theoretical musings but structural blueprints for execution.
             </p>
           </div>
 
-          <div className="mb-16 grid gap-12 lg:grid-cols-2">
-            {/* Left – Canon description + entry cards */}
-            <div className="space-y-8">
-              <div>
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-3">
-                    <div className="text-xl text-blue-600 dark:text-blue-400">⚖</div>
-                  </div>
-                  <h3 className="font-serif text-2xl font-bold text-gray-900 dark:text-white">
-                    The Canon
-                  </h3>
-                </div>
-                <p className="mb-8 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-                  The ideological engine room — first principles, structural
-                  laws, and multi-volume architecture for purpose,
-                  institutions, and human destiny.
-                </p>
-                <Link
-                  href="/canon"
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Explore all volumes
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </Link>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <ContentCard
-                  title="Essays & Posts"
-                  description="Strategic essays applying first principles to culture, policy, and markets."
-                  href="/blog"
-                  category="Essays"
-                  color={CONTENT_CATEGORIES.POSTS.color}
-                  icon="✒"
-                />
-                <ContentCard
-                  title="Tools & Downloads"
-                  description="Playbooks, templates, and structural tools for execution in the real world."
-                  href="/downloads"
-                  category="Resources"
-                  color={CONTENT_CATEGORIES.RESOURCES.color}
-                  icon="⚙"
-                />
-              </div>
+          {/* Multi-volume grid with clear hierarchy */}
+          <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Main Available Volume */}
+            <div className="lg:col-span-2">
+              <CanonVolumeCard
+                volume={1}
+                title="The Architecture of Human Purpose"
+                subtitle="Foundations for Flourishing"
+                description="The prelude to the Canon — a structural map for those who know that human flourishing is not accidental but architectural."
+                status="available"
+                color="amber"
+                href="/books/the-architecture-of-human-purpose"
+              />
             </div>
+            
+            {/* Forthcoming Volumes */}
+            <CanonVolumeCard
+              volume={2}
+              title="The Institutions of Legacy"
+              subtitle="Building Structures That Endure"
+              description="Governance, succession, and institutional design for multi-generational impact beyond individual lifespan."
+              status="forthcoming"
+              color="emerald"
+            />
+            
+            <CanonVolumeCard
+              volume={3}
+              title="The Markets of Meaning"
+              subtitle="Economics with a Human Face"
+              description="Reclaiming markets from abstraction — wealth creation as moral act, trade as civilizational vehicle."
+              status="in-progress"
+              color="blue"
+            />
+          </div>
 
-            {/* Right – Canon Volume I */}
-            <div>
-              <CanonVolumeCard />
+          {/* Content Categories Grid */}
+          <div className="mb-8">
+            <h3 className="mb-6 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+              Supporting Works & Resources
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <ContentCard
+                title="Strategic Essays"
+                description="Applying first principles to culture, policy, and markets with ruthless pragmatism."
+                href="/blog"
+                category="Essays"
+                color={CONTENT_CATEGORIES.POSTS.color}
+                icon="✒"
+              />
+              <ContentCard
+                title="Execution Tools"
+                description="Playbooks, templates, and frameworks for turning wisdom into action."
+                href="/downloads"
+                category="Resources"
+                color={CONTENT_CATEGORIES.RESOURCES.color}
+                icon="⚙"
+              />
+              <ContentCard
+                title="Applied Narratives"
+                description="Memoir, parable, and strategic narrative for men, fathers, and builders."
+                href="/books"
+                category="Books"
+                color={CONTENT_CATEGORIES.BOOKS.color}
+                icon="📚"
+              />
+              <ContentCard
+                title="Strategic Gatherings"
+                description="Workshops, salons, and covenants where decisions — not opinions — are the output."
+                href="/events"
+                category="Events"
+                color={CONTENT_CATEGORIES.EVENTS.color}
+                icon="🕯"
+              />
             </div>
           </div>
 
-          {/* Bottom content cards */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ContentCard
-              title="Bookshelf"
-              description="Memoir, parable, and strategic narrative for men, fathers, and builders."
-              href="/books"
-              category="Books"
-              color={CONTENT_CATEGORIES.BOOKS.color}
-              icon="📚"
-            />
-            <ContentCard
-              title="Gatherings & Rooms"
-              description="Workshops, salons, and covenants where decisions — not opinions — are the output."
-              href="/events"
-              category="Events"
-              color={CONTENT_CATEGORIES.EVENTS.color}
-              icon="🕯"
-            />
+          {/* Canon Description */}
+          <div className="rounded-xl border border-gray-200 bg-gradient-to-r from-white to-gray-50 p-6 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+            <div className="flex items-start gap-4">
+              <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/10">
+                <div className="text-xl text-amber-600 dark:text-amber-400">⚖</div>
+              </div>
+              <div>
+                <h3 className="mb-3 font-serif text-xl font-bold text-gray-900 dark:text-white">
+                  Why The Canon Matters
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  The Canon is not merely a collection of ideas but an architectural system. 
+                  Each volume builds upon the last, creating a comprehensive framework for 
+                  understanding and shaping human destiny. It's designed for builders who 
+                  recognize that lasting impact requires structural thinking, not just 
+                  inspirational content. Volume 1 lays the foundation, with subsequent 
+                  volumes providing the columns, beams, and finishes of a complete 
+                  intellectual architecture.
+                </p>
+                <Link 
+                  href="/canon" 
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                >
+                  Explore the complete Canon structure
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------------------
-       3b. FEATURED BOOKS – MEMOIR + FICTION
+       4. COMPACT BOOKS SPOTLIGHT (Drafts)
       -------------------------------------------------------------------- */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-20 dark:from-gray-950 dark:to-gray-900">
+      <section className="border-y border-gray-200 bg-gray-50 py-12 dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
-                Signature Works
-              </span>
-            </div>
-            <h2 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
-              Fathering Without Fear — In Two Keys
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-              One story told twice: first as an unflinching memoir, then as a
-              fictionalised drama that says what the courtroom could not.
+          <div className="mb-6 text-center">
+            <h3 className="font-serif text-xl font-semibold text-gray-700 dark:text-gray-300">
+              Current Projects & Drafts
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Works in progress and narrative experiments currently in development
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
-            <BookSpotlightCard
+          <div className="grid gap-3 max-w-2xl mx-auto">
+            <CompactBookCard
               title="Fathering Without Fear"
-              subtitle="The Story They Thought They Knew"
+              subtitle="Memoir and strategic narrative for fathers"
               href="/books/fathering-without-fear"
-              image="/assets/images/books/fathering-without-fear.jpg"
-              tag="Memoir"
-              blurb="A father refuses to disappear — faith tested, legacy defined, history reclaimed. This is not a parenting guide; it is a battlefield record."
+              tag="Memoir Draft"
             />
-            <BookSpotlightCard
+            <CompactBookCard
               title="The Fiction Adaptation"
-              subtitle="When Fiction Tells What Truth Cannot"
+              subtitle="When fiction tells what truth cannot"
               href="/books/the-fiction-adaptation"
-              image="/assets/images/books/the-fiction-adaptation.jpg"
-              tag="Fiction Adaptation"
-              blurb="A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact."
+              tag="Fiction Draft"
             />
           </div>
         </div>
@@ -478,7 +503,7 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       4. STRATEGIC FUNNEL
+       5. STRATEGIC FUNNEL
       -------------------------------------------------------------------- */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -487,7 +512,7 @@ const HomePage: NextPage = () => {
       </section>
 
       {/* -------------------------------------------------------------------
-       5. VENTURES
+       6. VENTURES
       -------------------------------------------------------------------- */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -514,7 +539,7 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       6. MANDATE & ABOUT
+       7. MANDATE & ABOUT
       -------------------------------------------------------------------- */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -537,7 +562,7 @@ const HomePage: NextPage = () => {
       </section>
 
       {/* -------------------------------------------------------------------
-       7. FINAL CTA
+       8. FINAL CTA - FOCUSED ON CANON
       -------------------------------------------------------------------- */}
       <section className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-black py-24">
         <div className="absolute inset-0">
@@ -547,28 +572,33 @@ const HomePage: NextPage = () => {
 
         <div className="relative mx-auto max-w-4xl px-4 text-center">
           <div className="mb-12">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-200/20 bg-amber-500/10 px-4 py-2">
+              <span className="text-sm font-semibold text-amber-300">
+                Start Building
+              </span>
+            </div>
             <h2 className="mb-6 font-serif text-4xl font-bold text-white sm:text-5xl">
-              Fatherhood, leadership, and legacy — without flinching.
+              Begin with Volume 1
             </h2>
             <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-300">
-              Start with the Canon, step into a room, then build structures
-              that will still be standing when the headlines have moved on.
+              The Canon begins with architectural first principles. Volume 1 provides 
+              the foundation upon which all subsequent wisdom is built — start here.
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/canon"
+              href="/books/the-architecture-of-human-purpose"
               className="inline-flex items-center gap-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-10 py-4 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/30"
             >
-              Start with the Canon
+              Read Volume 1
               <span className="transition-transform group-hover:translate-x-1">↠</span>
             </Link>
             <Link
-              href="/consulting"
+              href="/canon"
               className="inline-flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-900 px-10 py-4 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-gray-800 hover:shadow-lg"
             >
-              Book a strategy call
+              Explore All Volumes
               <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </div>
