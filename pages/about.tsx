@@ -343,7 +343,7 @@ const AboutPage: NextPage = () => {
                   }`}
                 >
                   <Image
-                    src="/assets/images/abraham-portrait.webp"
+                    src="/assets/images/profile-portrait.webp"
                     alt="Abraham of London - Founder and Strategic Leader"
                     width={600}
                     height={800}

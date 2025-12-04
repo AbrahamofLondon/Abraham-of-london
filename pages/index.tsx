@@ -1,4 +1,3 @@
-// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -84,7 +83,7 @@ const CanonVolumeCard: React.FC = () => (
   <div className="relative group">
     {/* Decorative frame */}
     <div
-      className="absolute -inset-4 rounded-3xl opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-20"
+      className="absolute -inset-4 rounded-3xl opacity-0 transition-opacity duration-500 blur-xl group-hover:opacity-20"
       style={{ backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron }}
     />
 
@@ -146,7 +145,7 @@ const CanonVolumeCard: React.FC = () => (
         <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-slate-900 to-black">
           <Image
             src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-            alt="The Architecture of Human Purpose — Canon Volume I"
+            alt="The Architecture of Human Purpose — Canon Volume I Prelude"
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 320px"
@@ -205,7 +204,7 @@ const ContentCard: React.FC<{
 }> = ({ title, description, href, category, color, icon }) => (
   <Link href={href} className="group block h-full">
     <div
-      className="relative h-full rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative h-full rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         borderColor: `${color}30`,
         backgroundColor: "rgba(15, 23, 42, 0.6)",
@@ -318,7 +317,7 @@ const HomePage: NextPage = () => {
       </div>
 
       {/* -------------------------------------------------------------------
-       1. PRIMARY HERO – Clear Hierarchy & Strong Contrast
+       1. PRIMARY HERO
       -------------------------------------------------------------------- */}
       <section className="relative min-h-[90vh] overflow-hidden">
         <GoldFoilAccent position="top" />
@@ -357,13 +356,17 @@ const HomePage: NextPage = () => {
                 >
                   <div
                     className="text-lg"
-                    style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
+                    style={{
+                      color: LIBRARY_AESTHETICS.colors.primary.saffron,
+                    }}
                   >
                     𓆓
                   </div>
                   <span
                     className="text-xs font-medium uppercase tracking-widest"
-                    style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
+                    style={{
+                      color: LIBRARY_AESTHETICS.colors.primary.saffron,
+                    }}
                   >
                     {SEASONAL_CURATIONS.wisdomTheme}
                   </span>
@@ -371,7 +374,9 @@ const HomePage: NextPage = () => {
 
                 <h1
                   className="mb-4 font-serif text-4xl font-light sm:text-5xl lg:text-6xl"
-                  style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
                 >
                   Abraham of London
                   <span className="mt-2 block text-2xl font-normal sm:text-3xl lg:text-4xl">
@@ -383,7 +388,9 @@ const HomePage: NextPage = () => {
 
                 <p
                   className="mb-8 text-lg leading-relaxed"
-                  style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
                 >
                   If you carry responsibility for a family, a company, or a
                   community, this is the room where faith, history, strategy,
@@ -427,7 +434,7 @@ const HomePage: NextPage = () => {
               >
                 <div className="relative aspect-[4/5]">
                   <Image
-                    src="/assets/images/abraham-of-london-banner.webp"
+                    src="/assets/images/abraham-of-london-banner-2056.webp"
                     alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
                     fill
                     priority
@@ -461,7 +468,7 @@ const HomePage: NextPage = () => {
       </section>
 
       {/* -------------------------------------------------------------------
-       2. SOCIAL PROOF / STATS BAR - Clean & Minimal
+       2. SOCIAL PROOF / STATS BAR
       -------------------------------------------------------------------- */}
       <section className="py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -472,7 +479,7 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       3. CANON & CONTENT HUB - Clear Structure
+       3. CANON & CONTENT HUB
       -------------------------------------------------------------------- */}
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -481,7 +488,7 @@ const HomePage: NextPage = () => {
               className="mb-4 font-serif text-3xl font-light sm:text-4xl"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              The Canon & The Works
+              The Canon &amp; The Works
             </h2>
             <p
               className="mx-auto max-w-2xl text-lg"
@@ -522,11 +529,13 @@ const HomePage: NextPage = () => {
                 </div>
                 <p
                   className="mb-6 text-lg"
-                  style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+                  style={{
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
                 >
                   The ideological engine room — first principles, structural
-                  laws, and multi-volume architecture for purpose,
-                  institutions, and human destiny.
+                  laws, and multi-volume architecture for purpose, institutions,
+                  and human destiny.
                 </p>
                 <Link
                   href="/canon"
@@ -593,7 +602,7 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       4. STRATEGIC FUNNEL - Three Doors
+       4. STRATEGIC FUNNEL
       -------------------------------------------------------------------- */}
       <section className="bg-gradient-to-b from-slate-900 to-slate-950 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -602,7 +611,7 @@ const HomePage: NextPage = () => {
       </section>
 
       {/* -------------------------------------------------------------------
-       5. VENTURES - Clean & Professional
+       5. VENTURES
       -------------------------------------------------------------------- */}
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -630,7 +639,7 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       6. MANDATE & ABOUT - Authority & Story
+       6. MANDATE & ABOUT
       -------------------------------------------------------------------- */}
       <section className="bg-gradient-to-b from-slate-950 to-black py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -639,7 +648,7 @@ const HomePage: NextPage = () => {
               className="mb-4 font-serif text-3xl font-light sm:text-4xl"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              The Mandate & The Man
+              The Mandate &amp; The Man
             </h2>
           </div>
 
@@ -650,137 +659,170 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* -------------------------------------------------------------------
-       7. BOTTOM HERO BANNER – Portrait + Fiction Adaptation
+       6.5 MEMOIR SPOTLIGHT – FATHERING WITHOUT FEAR
+      -------------------------------------------------------------------- */}
+      <section className="py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            {/* Book cover */}
+            <div className="relative">
+              <div
+                className="relative overflow-hidden rounded-2xl border shadow-2xl"
+                style={{
+                  borderColor: `${CONTENT_CATEGORIES.BOOKS.color}40`,
+                  backgroundColor: "rgba(15,23,42,0.9)",
+                }}
+              >
+                <div className="relative aspect-[3/4]">
+                  <Image
+                    src="/assets/images/books/fathering-without-fear.jpg"
+                    alt="Fathering Without Fear — The Story They Thought They Knew"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 320px"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Copy */}
+            <div>
+              <p
+                className="mb-3 text-xs font-semibold uppercase tracking-[0.25em]"
+                style={{ color: CONTENT_CATEGORIES.BOOKS.color }}
+              >
+                Memoir · Fatherhood · Justice
+              </p>
+              <h2
+                className="mb-4 font-serif text-3xl font-light sm:text-4xl"
+                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+              >
+                Fathering Without Fear
+                <span className="mt-2 block text-base font-normal sm:text-lg">
+                  The story of a father who refused to disappear.
+                </span>
+              </h2>
+              <p
+                className="mb-4 text-sm sm:text-base leading-relaxed"
+                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+              >
+                Not a parenting manual. A battlefield record. Faith tested,
+                legacy defined, history reclaimed — written for men who have
+                been misread, underestimated, or written off, yet refuse to
+                surrender their assignment.
+              </p>
+              <p
+                className="mb-8 text-sm sm:text-base leading-relaxed opacity-80"
+                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+              >
+                The memoir undergirding the movement: Fathering Without Fear.
+                This is the personal spine beneath the Canon — the lived story
+                behind the frameworks.
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/books/fathering-without-fear"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all hover:scale-105"
+                  style={{
+                    backgroundColor: CONTENT_CATEGORIES.BOOKS.color,
+                    color: "#020617",
+                  }}
+                >
+                  Open the memoir
+                  <span>↠</span>
+                </Link>
+                <Link
+                  href="/brands/fathering-without-fear"
+                  className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-all hover:scale-105"
+                  style={{
+                    borderColor: `${CONTENT_CATEGORIES.BOOKS.color}40`,
+                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                  }}
+                >
+                  Explore the movement
+                  <span>→</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------
+       7. FINAL CTA
       -------------------------------------------------------------------- */}
       <section className="relative overflow-hidden py-20">
+        {/* Clean background */}
         <div
           className="absolute inset-0"
           style={{
             background: `linear-gradient(135deg, 
-              rgba(15,23,42,0.98) 0%, 
-              rgba(2,6,23,1) 50%, 
-              rgba(15,23,42,0.98) 100%
+              rgba(15, 23, 42, 0.98) 0%, 
+              rgba(2, 6, 23, 1) 50%, 
+              rgba(15, 23, 42, 0.98) 100%
             )`,
           }}
         />
 
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 lg:flex-row lg:items-center">
-          {/* Left copy */}
-          <div className="flex-1 space-y-5">
-            <p
-              className="text-[0.7rem] font-semibold uppercase tracking-[0.28em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Books · Rooms · Canon
-            </p>
+        <div className="relative mx-auto max-w-4xl px-4 text-center">
+          <div className="mb-8">
             <h2
-              className="font-serif text-3xl font-light sm:text-4xl"
+              className="mb-4 font-serif text-3xl font-light sm:text-4xl"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
               Fatherhood, leadership, and legacy — without flinching.
             </h2>
             <p
-              className="max-w-xl text-lg leading-relaxed"
+              className="mx-auto mb-8 max-w-2xl text-lg"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
               Start with the Canon, step into a room, then build structures that
-              will still be standing when the headlines have moved on — in your
-              family, your ventures, and your nation.
+              will still be standing when the headlines have moved on.
             </p>
+          </div>
 
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Link
-                href="/canon"
-                className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-medium transition-all hover:scale-105"
-                style={{
-                  backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
-                  color: "#0f172a",
-                }}
-              >
-                Start with the Canon
-                <span>↠</span>
-              </Link>
-              <Link
-                href="/consulting"
-                className="inline-flex items-center gap-2 rounded-full border px-8 py-3 text-sm font-medium transition-all hover:scale-105"
-                style={{
-                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-                  color: LIBRARY_AESTHETICS.colors.primary.parchment,
-                }}
-              >
-                Book a strategy call
-                <span>→</span>
-              </Link>
-            </div>
-
-            <div
-              className="mt-8 border-t pt-4 text-sm"
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/canon"
+              className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-medium transition-all hover:scale-105"
               style={{
-                borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+                backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
+                color: "#0f172a",
+              }}
+            >
+              Start with the Canon
+              <span>↠</span>
+            </Link>
+            <Link
+              href="/consulting"
+              className="inline-flex items-center gap-2 rounded-full border px-8 py-3 text-sm font-medium transition-all hover:scale-105"
+              style={{
+                borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
                 color: LIBRARY_AESTHETICS.colors.primary.parchment,
               }}
             >
-              Or{" "}
-              <Link href="/content" className="underline underline-offset-4">
-                browse the full content library
-              </Link>
-              .
-            </div>
+              Book a strategy call
+              <span>→</span>
+            </Link>
           </div>
 
-          {/* Right visuals */}
-          <div className="flex flex-1 justify-center">
-            <div className="relative w-full max-w-md">
-              {/* Glow */}
-              <div
-                className="absolute -inset-6 -z-10 rounded-3xl blur-3xl"
-                style={{
-                  background: `radial-gradient(circle at 30% 0%, ${LIBRARY_AESTHETICS.colors.primary.saffron}55, transparent 60%)`,
-                }}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Portrait */}
-                <div className="relative col-span-1">
-                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl">
-                    <div className="relative aspect-[3/4]">
-                      <Image
-                        src="/assets/images/profile-portrait.webp"
-                        alt="Portrait of Abraham of London"
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, 240px"
-                      />
-                    </div>
-                    <div className="border-t border-white/10 px-3 py-2 text-[0.7rem] text-gray-200">
-                      Portrait of the author, Abraham of London.
-                    </div>
-                  </div>
-                </div>
-
-                {/* Fiction adaptation */}
-                <div className="relative col-span-1 flex items-end">
-                  <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl">
-                    <div className="relative aspect-[3/4]">
-                      <Image
-                        src="/assets/images/books/the-fiction-adaptation.jpg"
-                        alt="The Fiction Adaptation — Fathering Without Fear"
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, 240px"
-                      />
-                    </div>
-                    <Link
-                      href="/books/the-fiction-adaptation"
-                      className="block border-t border-white/10 px-3 py-2 text-[0.7rem] font-medium text-softGold hover:bg-white/5"
-                    >
-                      The Fiction Adaptation — read the covert version →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div
+            className="mx-auto mt-12 max-w-xs border-t pt-8"
+            style={{
+              borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+            }}
+          >
+            <Link
+              href="/content"
+              className="text-sm"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+            >
+              Or browse all content →
+            </Link>
           </div>
         </div>
       </section>
