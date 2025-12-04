@@ -1,4 +1,3 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -17,21 +16,23 @@ const nextConfig = {
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: true },
 
+  // Expose environment variables to the browser
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org',
+    NEXT_PUBLIC_INNOVATEHUB_URL: process.env.NEXT_PUBLIC_INNOVATEHUB_URL || 'https://innovatehub.abrahamoflondon.org',
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-R2Y3YMY8F8',
+    NEXT_PUBLIC_ALOMARADA_URL: process.env.NEXT_PUBLIC_ALOMARADA_URL || 'https://alomarada.com/',
+    NEXT_PUBLIC_ENDURELUXE_URL: process.env.NEXT_PUBLIC_ENDURELUXE_URL || 'https://alomarada.com/endureluxe',
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || '',
+  },
+
   async redirects() {
     return [
-      // ❌ OLD: These were killing /blog and /books as proper index pages.
-      // { source: '/blog', destination: '/content', permanent: true },
-      // { source: '/books', destination: '/content', permanent: true },
-      // { source: '/articles', destination: '/content', permanent: true },
-
-      // ✅ Keep only what you actually still need.
       {
         source: "/canon/volume-i-foundations-of-purpose",
         destination: "/volume-i-foundations-of-purpose",
         permanent: true,
       },
-      // IMPORTANT: we do NOT redirect the landing page any more.
-      // /books/the-architecture-of-human-purpose-landing is now a real page.
     ];
   },
 
