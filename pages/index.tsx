@@ -13,12 +13,9 @@ import {
   CONTENT_CATEGORIES,
 } from "@/lib/content";
 
-// Homepage components
 import HeroBanner from "@/components/homepage/HeroBanner";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
-import MilestonesTimeline from "@/components/homepage/MilestonesTimeline";
-import TestimonialsSection from "@/components/homepage/TestimonialsSection";
 import StatsBar from "@/components/homepage/StatsBar";
 import AboutSection from "@/components/homepage/AboutSection";
 
@@ -26,40 +23,8 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 /* -------------------------------------------------------------------------- */
-/* LUXURY DESIGN COMPONENTS                                                   */
+/* LUXURY DESIGN HELPERS                                                      */
 /* -------------------------------------------------------------------------- */
-
-const PersianOrnament: React.FC<{ type: "header" | "divider"; color?: string }> =
-  ({ type, color = LIBRARY_AESTHETICS.colors.primary.saffron }) => {
-    if (type === "header") {
-      return (
-        <div className="absolute inset-x-0 top-0 h-1 overflow-hidden opacity-30">
-          <div
-            className="h-full w-full"
-            style={{
-              background: `repeating-linear-gradient(90deg, transparent, transparent 10px, ${color} 10px, ${color} 20px)`,
-            }}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="my-12 flex items-center justify-center">
-        <div
-          className="h-px flex-1"
-          style={{ backgroundColor: `${color}30` }}
-        />
-        <div className="mx-6 text-2xl opacity-50" style={{ color }}>
-          𓆓
-        </div>
-        <div
-          className="h-px flex-1"
-          style={{ backgroundColor: `${color}30` }}
-        />
-      </div>
-    );
-  };
 
 const GoldFoilAccent: React.FC<{
   position: "top" | "bottom" | "left" | "right";
@@ -90,23 +55,6 @@ const GoldFoilAccent: React.FC<{
   );
 };
 
-const CanonGlow: React.FC = () => (
-  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-    <div
-      className="absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-5 blur-3xl"
-      style={{ backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron }}
-    />
-    <div
-      className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full opacity-5 blur-3xl"
-      style={{ backgroundColor: LIBRARY_AESTHETICS.colors.primary.lapis }}
-    />
-  </div>
-);
-
-/* -------------------------------------------------------------------------- */
-/* CANON CARD                                                                 */
-/* -------------------------------------------------------------------------- */
-
 const CanonVolumeCard: React.FC = () => (
   <div className="relative mx-auto max-w-md">
     {/* Decorative corners */}
@@ -119,7 +67,7 @@ const CanonVolumeCard: React.FC = () => (
       className="relative rounded-3xl border p-6 backdrop-blur-xl"
       style={{
         borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-        backgroundColor: "rgba(15,23,42,0.8)",
+        backgroundColor: "rgba(15,23,42,0.85)",
         backgroundImage: `
           radial-gradient(circle at 20% 80%, ${LIBRARY_AESTHETICS.colors.primary.saffron}15, transparent 50%),
           radial-gradient(circle at 80% 20%, ${LIBRARY_AESTHETICS.colors.primary.lapis}10, transparent 50%)
@@ -149,79 +97,45 @@ const CanonVolumeCard: React.FC = () => (
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div
-            className="rounded-xl p-2"
-            style={{
-              background: `linear-gradient(135deg, ${LIBRARY_AESTHETICS.colors.primary.saffron}20, ${LIBRARY_AESTHETICS.colors.primary.saffron}05)`,
-              border: `1px solid ${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-            }}
-          >
-            <div
-              className="text-xl"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              📜
-            </div>
-          </div>
-          <span
-            className="text-xs font-medium uppercase tracking-[0.3em]"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-          >
-            Canon · Volume I
-          </span>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border">
-          <div
-            className="relative aspect-[3/4] overflow-hidden rounded-xl border"
-            style={{
-              borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-            }}
-          >
+        <div className="overflow-hidden rounded-2xl border border-amber-400/40">
+          <div className="relative aspect-[4/5]">
             <Image
               src="/assets/images/abraham-of-london-banner-2056.webp"
-              alt="Abraham of London – Canon Prelude"
+              alt="The Architecture of Human Purpose – Canon Prelude"
               fill
               className="object-cover"
               sizes="(min-width: 1024px) 320px, 100vw"
             />
-            <div
-              className="absolute left-0 top-1/4 h-1/2 w-1"
-              style={{
-                background: `linear-gradient(to bottom, 
-                  ${LIBRARY_AESTHETICS.colors.primary.saffron}00 0%, 
-                  ${LIBRARY_AESTHETICS.colors.primary.saffron} 30%, 
-                  ${LIBRARY_AESTHETICS.colors.primary.saffron}80 70%, 
-                  ${LIBRARY_AESTHETICS.colors.primary.saffron}00 100%)`,
-              }}
-            />
           </div>
         </div>
 
-        <p className="text-xs leading-relaxed text-cream/70">
+        <p className="text-xs leading-relaxed text-cream/80">
           <span className="font-semibold text-amber-200">
             The Architecture of Human Purpose
           </span>{" "}
-          is the prelude to a multi-volume Canon — a structural map for those
-          who know that human flourishing is not accidental but architectural.
+          is the prelude to the Canon — a structural map for men who know
+          that human flourishing is not accidental but architectural.
         </p>
 
-        <div
-          className="absolute inset-0 rounded-3xl opacity-5"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4AF37' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/canon/the-architecture-of-human-purpose"
+            className="inline-flex items-center rounded-full bg-amber-400 px-4 py-2 text-xs font-semibold text-black shadow hover:bg-amber-300"
+          >
+            Read the Prelude
+            <span className="ml-1">↗</span>
+          </Link>
+          <Link
+            href="/canon"
+            className="inline-flex items-center rounded-full border border-amber-200/60 px-4 py-2 text-xs font-medium text-amber-100 hover:bg-amber-200/10"
+          >
+            Explore all volumes
+          </Link>
+        </div>
       </div>
     </div>
   </div>
 );
-
-/* -------------------------------------------------------------------------- */
-/* CONTENT CARD                                                               */
-/* -------------------------------------------------------------------------- */
 
 const ContentCard: React.FC<{
   title: string;
@@ -267,12 +181,6 @@ const ContentCard: React.FC<{
             >
               {category}
             </span>
-          </div>
-          <div className="opacity-0 transition-opacity group-hover:opacity-100">
-            <div
-              className="h-2 w-2 rounded-full animate-ping"
-              style={{ backgroundColor: color }}
-            />
           </div>
         </div>
 
@@ -383,12 +291,8 @@ const HomePage: NextPage = () => {
         />
       </div>
 
-      {/* -------------------------------------------------------------------
-       1. PRIMARY HERO – TEXT + BANNER IMAGE
-      -------------------------------------------------------------------- */}
+      {/* 1. HERO – primary conversion CTAs */}
       <section className="relative min-h-[90vh] overflow-hidden border-b border-white/10">
-        <PersianOrnament type="header" />
-        <CanonGlow />
         <GoldFoilAccent position="bottom" />
 
         <div
@@ -399,7 +303,7 @@ const HomePage: NextPage = () => {
         />
 
         <div className="relative mx-auto flex h-full max-w-7xl flex-col gap-12 px-4 py-24 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          {/* Text block */}
+          {/* Copy */}
           <div className="max-w-2xl text-center lg:text-left">
             <div
               className="mb-6 inline-flex items-center gap-3 rounded-full px-5 py-2"
@@ -424,33 +328,35 @@ const HomePage: NextPage = () => {
               >
                 Abraham of London
               </span>
-              Structural thinking for fathers, founders, and builders of legacy.
+              Structural thinking for fathers, founders,
+              <br />
+              and builders of legacy.
             </h1>
 
             <p className="mb-8 text-sm leading-relaxed text-cream/80 sm:text-base">
-              Canon, ventures, and applied frameworks for those who still carry
-              consequence. Built for men who refuse to outsource responsibility
-              for their families, their work, or their history.
+              If you carry responsibility for a family, a company, or a
+              community, this is the room where faith, history, strategy, and
+              markets get put to work — not just discussed.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 lg:justify-start">
               <Link
                 href="/canon"
-                className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-6 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-400/20"
+                className="inline-flex items-center rounded-full bg-amber-400 px-6 py-2 text-sm font-semibold text-black shadow-lg hover:bg-amber-300"
               >
                 Enter the Canon
                 <span className="ml-2">↠</span>
               </Link>
               <Link
-                href="/ventures"
-                className="inline-flex items-center rounded-full border border-cream/20 bg-cream/5 px-6 py-2 text-sm text-cream/80 hover:bg-cream/10"
+                href="/consulting"
+                className="inline-flex items-center rounded-full border border-cream/30 bg-cream/5 px-6 py-2 text-sm text-cream/85 hover:bg-cream/10"
               >
-                Explore the ventures
+                Work with Abraham
               </Link>
             </div>
           </div>
 
-          {/* Image block – using the 2056 banner */}
+          {/* Image */}
           <div className="relative mx-auto w-full max-w-md lg:mx-0">
             <div className="relative overflow-hidden rounded-3xl border border-amber-400/40 bg-black/60 shadow-2xl">
               <div className="relative aspect-[4/5]">
@@ -464,17 +370,22 @@ const HomePage: NextPage = () => {
                 />
               </div>
               <div className="border-t border-amber-400/30 px-5 py-3 text-xs text-amber-100/80">
-                Structural work at the intersection of faith, markets, and
-                legacy.
+                Built for men who refuse to outsource responsibility — to the
+                state, the culture, or the algorithm.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* -------------------------------------------------------------------
-       2. CANON / CONTENT HUB
-      -------------------------------------------------------------------- */}
+      {/* 2. SOCIAL PROOF / NUMBERS */}
+      <section className="border-b border-white/5 bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+          <StatsBar />
+        </div>
+      </section>
+
+      {/* 3. CANON & CONTENT HUB – intellectual engine */}
       <section className="relative border-b border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-black py-16">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
@@ -488,7 +399,7 @@ const HomePage: NextPage = () => {
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-cream/80">
                 Not a blog. A structured record of purpose, civilisation,
                 governance, and destiny — the intellectual infrastructure
-                underneath everything else.
+                underneath the advisory, the rooms, and the ventures.
               </p>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -502,7 +413,7 @@ const HomePage: NextPage = () => {
                 />
                 <ContentCard
                   title="Essays & Posts"
-                  description="Strategic essays that apply first principles to live markets and culture."
+                  description="Strategic essays applying first principles to culture, policy, and markets."
                   href="/blog"
                   category="Essays"
                   color={CONTENT_CATEGORIES.POSTS.color}
@@ -525,7 +436,7 @@ const HomePage: NextPage = () => {
             />
             <ContentCard
               title="Gatherings & Rooms"
-              description="Workshops, salons, and covenants where the work is done in real time."
+              description="Workshops, salons, and covenants where decisions, not opinions, are the output."
               href="/events"
               category="Events"
               color={CONTENT_CATEGORIES.EVENTS.color}
@@ -535,60 +446,29 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* -------------------------------------------------------------------
-       3. VENTURES – (fully styled component)
-      -------------------------------------------------------------------- */}
-      <VenturesSection />
-
-      {/* -------------------------------------------------------------------
-       4. STRATEGIC FUNNEL
-      -------------------------------------------------------------------- */}
+      {/* 4. STRATEGIC FUNNEL – three doors */}
       <StrategicFunnelStrip />
 
-      {/* -------------------------------------------------------------------
-       5. STATS BAR
-      -------------------------------------------------------------------- */}
-      <section className="border-t border-b border-white/5 bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-          <StatsBar />
-        </div>
-      </section>
+      {/* 5. VENTURES – operating arms */}
+      <VenturesSection />
 
-      {/* -------------------------------------------------------------------
-       6. MANDATE + ABOUT
-      -------------------------------------------------------------------- */}
-      <section className="border-b border-white/5 bg-black">
-        <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8 lg:py-20 space-y-12">
+      {/* 6. MANDATE + ABOUT – authority & story */}
+      <section className="border-t border-b border-white/5 bg-black">
+        <div className="mx-auto max-w-6xl space-y-12 px-4 py-16 lg:px-8 lg:py-20">
           <MandateStatement />
           <AboutSection />
         </div>
       </section>
 
-      {/* -------------------------------------------------------------------
-       7. MILESTONES + TESTIMONIALS
-      -------------------------------------------------------------------- */}
-      <section className="border-b border-white/5 bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8 space-y-16">
-          <MilestonesTimeline
-            title="Milestones"
-            variant="dark"
-          />
-          <TestimonialsSection
-            title="What readers say"
-            variant="dark"
-          />
-        </div>
-      </section>
-
-      {/* Optional: light HeroBanner reuse somewhere lower on the page */}
+      {/* 7. FINAL CTA – lighter HeroBanner for contrast */}
       <section className="bg-warmWhite">
         <HeroBanner
           title="Fatherhood, leadership, and legacy — without flinching."
-          subtitle="The work is not theory. It’s lived experience, strategy, and Scripture under one roof."
+          subtitle="Start with the Canon, step into a room, then build structures that will still be standing when the headlines have moved on."
           ctaLabel="Start with the Canon"
           ctaHref="/canon"
-          secondaryCtaLabel="Join a live room"
-          secondaryCtaHref="/events"
+          secondaryCtaLabel="Book a strategy call"
+          secondaryCtaHref="/consulting"
           imageSrc="/assets/images/abraham-of-london-banner-2056.webp"
         />
       </section>

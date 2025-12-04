@@ -157,11 +157,9 @@ export const Download = defineDocumentType(() => ({
         if (doc.fileUrl) return doc.fileUrl;
 
         const candidate = doc.pdfPath || doc.downloadFile || doc.file || "";
-
         if (!candidate) return "";
 
         if (candidate.startsWith("/")) return candidate;
-
         return `/downloads/${candidate}`.replace(/\/+/g, "/");
       },
     },
@@ -385,6 +383,7 @@ export const Resource = defineDocumentType(() => ({
   },
 }));
 
+// Canon – this is the key one for your volumes
 export const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: "canon/**/*.{md,mdx}",
@@ -406,8 +405,9 @@ export const Canon = defineDocumentType(() => ({
     excerpt: { type: "string", default: "" },
     author: { type: "string", default: "Abraham of London" },
     coverImage: { type: "string", default: "" },
-    coverAspect: { type: "string", required: false },  // <-- Add this
-    coverFit: { type: "string", required: false },      // <-- Add this
+    coverAspect: { type: "string", required: false },
+    coverFit: { type: "string", required: false },
+    // keep as string: "1", "2", "10" – your page code parses this safely
     volumeNumber: { type: "string", required: false },
     order: { type: "number", required: false },
     featured: { type: "boolean", default: false },

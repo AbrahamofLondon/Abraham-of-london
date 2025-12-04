@@ -1,15 +1,22 @@
 // lib/canon.ts
 // Centralised helpers for Canon content (Contentlayer-powered)
 
-// FIXED: Import from contentlayer-helper instead of direct contentlayer path
 import { allCanons, type Canon } from "./contentlayer-helper";
 
-// Use the generated Canon type directly
 export type CanonDoc = Canon;
 
 type CanonFilterOptions = {
   includeDrafts?: boolean;
 };
+
+function normaliseVolumeNumber(vol?: string | number): number | null {
+  if (typeof vol === "number" && !Number.isNaN(vol)) return vol;
+  if (typeof vol === "string") {
+    const n = Number(vol.trim());
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
 
 function sortCanon(a: CanonDoc, b: CanonDoc): number {
   // 1) Explicit order field if both have it
@@ -17,13 +24,20 @@ function sortCanon(a: CanonDoc, b: CanonDoc): number {
     if (a.order !== b.order) return a.order - b.order;
   }
 
-  // 2) Otherwise sort by date desc
+  // 2) If both have volumeNumber, sort by that (ascending)
+  const aVol = normaliseVolumeNumber(a.volumeNumber);
+  const bVol = normaliseVolumeNumber(b.volumeNumber);
+  if (aVol !== null && bVol !== null && aVol !== bVol) {
+    return aVol - bVol;
+  }
+
+  // 3) Otherwise sort by date desc
   const aDate = new Date(a.date ?? "1970-01-01").getTime();
   const bDate = new Date(b.date ?? "1970-01-01").getTime();
   if (aDate !== bDate) return bDate - aDate;
 
-  // 3) Fallback by title for stability
-  return a.title.localeCompare(b.title);
+  // 4) Fallback by title for stability
+  return (a.title || "").localeCompare(b.title || "");
 }
 
 /**
@@ -51,7 +65,7 @@ export function getFeaturedCanon(): CanonDoc[] {
  * All numbered Canon volumes (those with a volumeNumber).
  */
 export function getCanonVolumes(): CanonDoc[] {
-  return getAllCanon().filter((c) => !!c.volumeNumber);
+  return getAllCanon().filter((c) => !!normaliseVolumeNumber(c.volumeNumber));
 }
 
 /**
@@ -100,6 +114,5 @@ export function getCanonBySlug(slug: string): CanonDoc | null {
   );
 }
 
-// Re-export from server/canon-data
-// Note: If this import fails, you might need to check that file too
+// Re-export any structured metadata helpers from server/canon-data
 export * from "./server/canon-data";

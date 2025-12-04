@@ -45,10 +45,10 @@ export const defaultBrands: Brand[] = [
   {
     name: "Alomarada",
     description:
-      "Business advisory guiding investors and mentoring African-diaspora entrepreneurs to develop African markets through ethical exploration of market gaps.",
+      "Advisory, governance, and operating structures for investors and founders building Africa-facing ventures with integrity.",
     logo: "/assets/images/alomarada-ltd.webp",
     url: ALOMARADA_URL,
-    metric: "Investor & founder mentorship",
+    metric: "Investor & founder stewardship",
   },
   {
     name: "EndureLuxe",
@@ -56,7 +56,7 @@ export const defaultBrands: Brand[] = [
       "Premium, sustainable fitness partnerships that promote wellbeing—powered by community and thoughtful technology.",
     logo: "/assets/images/endureluxe-ltd.webp",
     url: ENDURELUXE_URL,
-    metric: "Performance & wellbeing",
+    metric: "Performance & wellbeing ecosystems",
   },
   {
     name: "InnovateHub",
@@ -65,8 +65,8 @@ export const defaultBrands: Brand[] = [
     logo: "/assets/images/innovatehub.svg",
     url: INNOVATE_HUB_BASE,
     secondaryHref: INNOVATE_HUB_EARLY_ACCESS,
-    secondaryText: "Early Access",
-    metric: "Early access open",
+    secondaryText: "Early access",
+    metric: "Founder operating system",
   },
 ];
 
@@ -103,64 +103,50 @@ function ExternalAwareLink(
 function BrandCard({ brand }: { brand: Brand }) {
   const reduce = useReducedMotion();
 
-  const primaryCta = (
-    <span className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-forest hover:text-[color:var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]">
-      Learn more
-      <svg
-        className="ml-2 h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          fillRule="evenodd"
-          d="M12.97 4.28a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06-1.06l3.22-3.22H4a.75.75 0 010-1.5h12.22l-3.22-3.22a.75.75 0 010-1.06z"
-          clipRule="evenodd"
-        />
-      </svg>
-    </span>
-  );
-
   return (
     <motion.article
       variants={item}
-      className="group flex flex-col rounded-2xl border border-lightGrey bg-white p-6 text-center shadow-lg shadow-black/5 transition hover:shadow-xl hover:shadow-black/10"
+      className="group flex flex-col rounded-2xl border border-white/10 bg-slate-950/70 p-6 text-cream shadow-xl backdrop-blur transition-all hover:-translate-y-1 hover:border-gold/60 hover:bg-slate-950/90"
       whileHover={reduce ? undefined : { scale: 1.01 }}
     >
-      <div className="relative mx-auto mb-5 h-[140px] w-[140px]">
+      <div className="relative mx-auto mb-5 h-[130px] w-[160px]">
         <Image
           src={brand.logo || "/assets/images/default-brand.svg"}
           alt={`${brand.name} logo`}
           fill
-          sizes="140px"
+          sizes="160px"
           className="object-contain"
           loading="lazy"
         />
       </div>
 
-      <h3 className="mb-1 font-serif text-2xl font-semibold text-deepCharcoal">
+      <h3 className="mb-1 font-serif text-2xl font-semibold text-cream">
         {brand.name}
       </h3>
 
-      <p className="mb-3 flex-1 text-[color:var(--color-on-secondary)] opacity-80">
+      <p className="mb-3 flex-1 text-sm text-gold/80">
         {brand.description}
       </p>
 
       {brand.metric && (
-        <p className="mx-auto mb-4 inline-flex items-center justify-center rounded-full border border-lightGrey bg-warmWhite px-3 py-1 text-xs text-[color:var(--color-on-secondary)] opacity-80">
+        <p className="mx-auto mb-4 inline-flex items-center justify-center rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs text-gold/90">
           {brand.metric}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <ExternalAwareLink href={brand.url} className="group">
-          {primaryCta}
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+        <ExternalAwareLink
+          href={brand.url}
+          className="inline-flex items-center rounded-full bg-gold px-4 py-2 text-sm font-semibold text-black shadow-lg transition hover:bg-amber-200"
+        >
+          Learn more
+          <span className="ml-1">↗</span>
         </ExternalAwareLink>
 
         {brand.secondaryHref && brand.secondaryText && (
           <ExternalAwareLink
             href={brand.secondaryHref}
-            className="inline-flex items-center justify-center rounded-full bg-forest px-3 py-1.5 text-sm font-semibold text-cream transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]"
+            className="inline-flex items-center rounded-full border border-gold/60 px-3 py-1.5 text-xs font-medium text-gold hover:bg-gold/10"
           >
             {brand.secondaryText}
           </ExternalAwareLink>
@@ -178,33 +164,40 @@ export default function VenturesSection({
   return (
     <section
       id="ventures"
-      className="bg-gradient-to-br from-warmWhite to-white px-4 py-16"
+      className="relative border-t border-b border-white/10 bg-gradient-to-b from-black via-slate-950 to-black py-16"
       aria-labelledby="ventures-title"
     >
-      <div className="container mx-auto max-w-6xl">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-gold/15 via-transparent to-transparent" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.25 }}
           variants={container}
-          className="rounded-3xl bg-white p-8 text-deepCharcoal shadow-2xl ring-1 ring-black/5 md:p-12"
+          className="rounded-3xl border border-white/15 bg-slate-950/80 p-8 text-cream shadow-2xl backdrop-blur md:p-12"
         >
-          <motion.header variants={item} className="mb-10">
+          <motion.header variants={item} className="mb-10 text-center md:text-left">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
+              Ventures
+            </p>
             <h2
               id="ventures-title"
-              className="font-serif text-3xl font-bold text-gray-900 md:text-5xl"
+              className="mt-3 font-serif text-3xl font-light text-cream md:text-4xl"
             >
-              Ventures & Brands
+              The operating arms of the work.
             </h2>
-            <p className="mt-3 max-w-2xl text-lg text-[color:var(--color-on-secondary)] opacity-80 md:text-xl">
-              A portfolio at the intersection of strategy, sustainability, and
-              impact.
+            <p className="mt-3 max-w-2xl text-sm text-gold/80">
+              Advisory, brands, and founder infrastructure that carry the
+              philosophy into markets — from boards and policy tables to
+              products and wellbeing.
             </p>
           </motion.header>
 
+          {/* Abraham of London meta-card */}
           <motion.div
             variants={item}
-            className="mb-12 flex flex-col items-center gap-6 rounded-2xl border border-lightGrey bg-white p-6 shadow-xl md:flex-row md:gap-10 md:p-8"
+            className="mb-12 flex flex-col items-center gap-6 rounded-2xl border border-white/10 bg-black/70 p-6 shadow-xl md:flex-row md:gap-10 md:p-8"
             {...(reduce ? {} : { whileHover: { translateY: -2 } })}
           >
             <div className="relative h-[110px] w-[220px] flex-shrink-0">
@@ -218,25 +211,26 @@ export default function VenturesSection({
               />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+              <h3 className="mb-2 text-3xl font-bold text-cream md:text-4xl">
                 Abraham of London
               </h3>
-              <p className="text-[color:var(--color-on-secondary)] opacity-80">
-                Strategic stewardship, thought leadership, and the standards
-                that hold the family together.
+              <p className="text-sm text-gold/80">
+                The holding narrative — Canon, standards, and stewardship that
+                tether all ventures back to purpose, responsibility, and legacy.
               </p>
               <div className="mt-4">
                 <Link
                   href="/about"
                   prefetch={false}
-                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream transition-colors hover:brightness-95"
+                  className="inline-flex items-center rounded-full bg-forest px-4 py-2 text-sm font-medium text-cream shadow-lg transition hover:brightness-95"
                 >
-                  Learn more
+                  About the work
                 </Link>
               </div>
             </div>
           </motion.div>
 
+          {/* Brands grid */}
           <motion.div
             variants={container}
             className="grid grid-cols-1 gap-8 md:grid-cols-3"
@@ -250,9 +244,9 @@ export default function VenturesSection({
             <Link
               href="/ventures"
               prefetch={false}
-              className="inline-flex items-center rounded-full bg-forest px-6 py-3 font-medium text-cream shadow-lg transition-colors hover:brightness-95"
+              className="inline-flex items-center rounded-full border border-gold/70 bg-gold/10 px-6 py-3 text-sm font-medium text-gold hover:bg-gold/20"
             >
-              View All Ventures
+              View all ventures
             </Link>
           </motion.div>
         </motion.div>
