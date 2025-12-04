@@ -108,7 +108,7 @@ const ContentIcons: Record<ContentKind, React.ReactElement> = {
   book: <BookOpen className="h-4 w-4" />,
   download: <Download className="h-4 w-4" />,
   event: <Users className="h-4 w-4" />,
-  print: "🖼",
+  print: <span>🖼</span>,
   resource: <Zap className="h-4 w-4" />,
 };
 
@@ -324,18 +324,6 @@ const ContentCard: React.FC<{
       day: 'numeric',
       year: 'numeric' 
     });
-  };
-
-  const getKindColor = (kind: ContentKind): string => {
-    const colors: Record<ContentKind, string> = {
-      blog: "#10B981",
-      book: "#8B5CF6",
-      download: "#F59E0B",
-      event: "#EC4899",
-      print: "#06B6D4",
-      resource: "#6366F1",
-    };
-    return colors[kind];
   };
 
   if (variant === "featured") {
@@ -794,7 +782,7 @@ const TagCloud: React.FC<{
 /* MAIN PAGE COMPONENT                                                        */
 /* -------------------------------------------------------------------------- */
 
-const ContentPage: NextPage<ContentPageProps> = ({ 
+const ContentLibraryPage: NextPage<ContentPageProps> = ({ 
   items, 
   featuredItems,
   trendingItems,
@@ -1506,4 +1494,4 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   }
 };
 
-export default ContentPage;
+export default ContentLibraryPage;

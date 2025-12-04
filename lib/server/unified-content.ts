@@ -1,15 +1,17 @@
 // lib/server/unified-content.ts
-// Unified content index for /content – no Contentlayer import needed here.
+// Unified content index for /content – independent of Contentlayer.
 
 import { getAllPages } from "./pages-data";
 import { getAllDownloadsMeta } from "./downloads-data";
 import { getAllEvents } from "./events-data";
 
-// These are already used elsewhere in your project
+// Already used elsewhere
 import { getAllPosts } from "@/lib/posts";
 import { getAllBooksMeta } from "@/lib/server/books-data";
 
-// If these don't exist yet, create light wrappers or comment them out for now
+// Light wrappers for prints/resources – make sure these files exist.
+// If you don't have these collections yet, you can temporarily
+// comment BOTH the imports and usage sections out.
 import { getAllPrintsMeta } from "@/lib/server/prints-data";
 import { getAllResourcesMeta } from "@/lib/server/resources-data";
 
@@ -37,10 +39,20 @@ export interface UnifiedContent {
   url: string;
 }
 
-// Small helper – keeps one bad source from killing everything
-async function safe<T>(label: string, fn: () => Promise<T>): Promise<T | []> {
+// Small helper – keeps one bad source from killing everything.
+// Works with both sync and async functions.
+async function safe<T>(
+  label: string,
+  fn: () => Promise<T> | T
+): Promise<T | []> {
   try {
-    return await fn();
+    const result = await fn();
+    // eslint-disable-next-line no-console
+    console.log(
+      `[unified-content] Loaded ${label}:`,
+      Array.isArray(result) ? result.length : "non-array"
+    );
+    return result;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(`[unified-content] Failed loading ${label}:`, err);
@@ -71,6 +83,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
   // Pages (about, context, consulting, etc.)
   (pages as any[]).forEach((page) => {
+    if (!page?.slug) return;
     unified.push({
       id: `page-${page.slug}`,
       type: "page",
@@ -89,6 +102,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
   // Essays / blog posts
   (posts as any[]).forEach((post) => {
+    if (!post?.slug) return;
     unified.push({
       id: `essay-${post.slug}`,
       type: "essay",
@@ -101,12 +115,13 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
       category: post.category ?? "Essay",
       tags: post.tags ?? [],
       content: null,
-      url: `/blog/${post.slug}`,
+      url: `/blog/${post.slug}`, // important: /blog/…
     });
   });
 
   // Books
   (books as any[]).forEach((book) => {
+    if (!book?.slug) return;
     unified.push({
       id: `book-${book.slug}`,
       type: "book",
@@ -125,6 +140,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
   // Downloads
   (downloads as any[]).forEach((download) => {
+    if (!download?.slug) return;
     unified.push({
       id: `download-${download.slug}`,
       type: "download",
@@ -143,6 +159,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
   // Events
   (events as any[]).forEach((event) => {
+    if (!event?.slug) return;
     unified.push({
       id: `event-${event.slug}`,
       type: "event",
@@ -161,6 +178,7 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
 
   // Prints
   (prints as any[]).forEach((print) => {
+    if (!print?.slug) return;
     unified.push({
       id: `print-${print.slug}`,
       type: "print",
@@ -177,8 +195,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     });
   });
 
-  // Resources (if you have a dedicated section)
+  // Resources
   (resources as any[]).forEach((resource) => {
+    if (!resource?.slug) return;
     unified.push({
       id: `resource-${resource.slug}`,
       type: "resource",
@@ -201,6 +220,9 @@ export async function getAllUnifiedContent(): Promise<UnifiedContent[]> {
     const db = b.date ? new Date(b.date).getTime() : 0;
     return db - da;
   });
+
+  // eslint-disable-next-line no-console
+  console.log("[unified-content] Total unified items:", unified.length);
 
   return unified;
 }
