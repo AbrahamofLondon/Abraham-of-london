@@ -48,7 +48,7 @@ const item = {
     opacity: 1,
     transition: {
       duration: 0.8,
-      ease: [0.22, 1, 0.36, 1], // Custom easing for smooth motion
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 } as const;
@@ -95,16 +95,15 @@ export default function AboutSection({
     <section
       ref={containerRef}
       id={id}
-      className="relative overflow-hidden bg-gradient-to-b from-warmWhite via-cream/95 to-warmWhite dark:from-charcoal dark:via-slate-900 dark:to-charcoal"
+      className="relative overflow-hidden bg-gradient-to-b from-warmWhite to-cream dark:from-slate-950 dark:to-slate-900"
     >
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Subtle background patterns */}
+      <div className="absolute inset-0">
         <motion.div
           style={{ y: parallaxY }}
           className="absolute -right-32 top-1/4 h-96 w-96 rounded-full bg-forest/5 blur-3xl dark:bg-forest/10"
         />
         <div className="absolute -left-32 bottom-1/4 h-80 w-80 rounded-full bg-saffron/5 blur-3xl dark:bg-saffron/10" />
-        <div className="absolute left-1/4 top-1/2 h-64 w-64 rounded-full bg-charcoal/3 blur-3xl dark:bg-charcoal/10" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
@@ -120,9 +119,9 @@ export default function AboutSection({
             {/* Portrait Container */}
             <div className="relative mx-auto max-w-md lg:mx-0 lg:max-w-none">
               {/* Decorative frame */}
-              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-forest/20 via-transparent to-saffron/20 dark:from-forest/30 dark:to-saffron/30" />
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-forest/10 via-transparent to-saffron/10" />
               
-              <div className="relative overflow-hidden rounded-2xl border border-forest/20 bg-gradient-to-br from-warmWhite to-cream shadow-2xl dark:border-forest/30 dark:from-slate-800 dark:to-slate-900">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-forest/20 bg-white shadow-2xl dark:border-forest/30 dark:bg-slate-900">
                 <div className="aspect-[3/4] relative overflow-hidden">
                   <Image
                     src={portraitSrc}
@@ -133,33 +132,19 @@ export default function AboutSection({
                     className="object-cover object-top transition-all duration-700 hover:scale-[1.02]"
                   />
                   {/* Subtle vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                </div>
-                
-                {/* Overlay info */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-serif text-xl font-semibold text-cream">
-                        Abraham of London
-                      </h3>
-                      <p className="text-sm text-cream/80">
-                        Author & Philosopher
-                      </p>
-                    </div>
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className="rounded-full bg-forest/20 p-2 backdrop-blur-sm"
-                    >
-                      <Mail className="h-5 w-5 text-cream" />
-                    </motion.div>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                 </div>
               </div>
 
-              {/* Decorative corner accents */}
-              <div className="absolute -left-2 -top-2 h-12 w-12 rounded-full border border-saffron/30 bg-gradient-to-br from-saffron/10 to-transparent" />
-              <div className="absolute -bottom-2 -right-2 h-12 w-12 rounded-full border border-forest/30 bg-gradient-to-br from-forest/10 to-transparent" />
+              {/* Name plate */}
+              <div className="mt-6 rounded-lg bg-gradient-to-r from-forest/5 to-saffron/5 p-4 dark:from-forest/10 dark:to-saffron/10">
+                <h3 className="font-serif text-xl font-semibold text-forest dark:text-forest-light">
+                  Abraham of London
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Author, Philosopher & Mentor
+                </p>
+              </div>
             </div>
 
             {/* Contact CTA */}
@@ -169,11 +154,11 @@ export default function AboutSection({
             >
               <Link
                 href="/contact"
-                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-forest to-forest/90 px-8 py-4 text-lg font-medium text-cream shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-forest/20"
+                className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-forest to-emerald-700 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-forest/30"
               >
                 <span className="relative z-10">Connect With Me</span>
                 <Mail className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-saffron/20 via-transparent to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-saffron/30 via-transparent to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               </Link>
             </motion.div>
           </motion.div>
@@ -186,20 +171,22 @@ export default function AboutSection({
                 variants={fadeIn}
                 className="mb-3 flex items-center gap-3"
               >
-                <div className="h-px w-12 bg-gradient-to-r from-saffron to-transparent" />
-                <span className="font-sans text-sm font-semibold uppercase tracking-widest text-forest dark:text-forest/80">
+                <div className="h-px w-12 bg-gradient-to-r from-saffron to-forest" />
+                <span className="font-sans text-sm font-semibold uppercase tracking-widest text-saffron dark:text-saffron/90">
                   About Me
                 </span>
               </motion.div>
               
               <motion.h1
                 variants={item}
-                className="font-serif text-4xl font-light leading-tight text-charcoal dark:text-cream md:text-5xl lg:text-6xl"
+                className="font-serif text-4xl font-bold leading-tight text-slate-900 dark:text-white md:text-5xl lg:text-6xl"
               >
                 Crafting Wisdom Through{" "}
                 <span className="relative inline-block">
-                  <span className="relative z-10">Words</span>
-                  <div className="absolute -bottom-2 left-0 h-2 w-full bg-gradient-to-r from-saffron/40 to-saffron/20 dark:from-saffron/30 dark:to-saffron/10" />
+                  <span className="relative z-10 bg-gradient-to-r from-forest to-emerald-700 bg-clip-text text-transparent">
+                    Words & Works
+                  </span>
+                  <div className="absolute -bottom-2 left-0 h-1 w-full bg-gradient-to-r from-saffron to-forest" />
                 </span>
               </motion.h1>
             </div>
@@ -207,9 +194,9 @@ export default function AboutSection({
             {/* Biography */}
             <motion.div
               variants={fadeIn}
-              className="mb-12 rounded-2xl border border-forest/10 bg-gradient-to-br from-cream/50 to-warmWhite/50 p-6 backdrop-blur-sm dark:border-forest/20 dark:from-slate-800/50 dark:to-slate-900/50"
+              className="mb-12"
             >
-              <p className="font-serif text-lg leading-relaxed text-charcoal/90 dark:text-cream/90 md:text-xl">
+              <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 md:text-xl">
                 {bio}
               </p>
             </motion.div>
@@ -218,9 +205,9 @@ export default function AboutSection({
             {sortedAchievements.length > 0 && (
               <motion.div variants={item} className="mt-6">
                 <div className="mb-8">
-                  <h2 className="font-serif text-2xl font-light text-charcoal dark:text-cream md:text-3xl">
+                  <h2 className="font-serif text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">
                     Milestones &{" "}
-                    <span className="text-forest dark:text-forest/90">
+                    <span className="text-forest dark:text-forest-light">
                       Achievements
                     </span>
                   </h2>
@@ -229,7 +216,7 @@ export default function AboutSection({
 
                 <div className="relative">
                   {/* Timeline line */}
-                  <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-forest/40 via-forest/20 to-transparent dark:from-forest/60 dark:via-forest/30" />
+                  <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-forest/60 via-forest/40 to-transparent" />
 
                   <div className="space-y-8 pl-6">
                     {sortedAchievements.map((achievement, index) => {
@@ -242,34 +229,34 @@ export default function AboutSection({
                           className="relative group"
                         >
                           {/* Timeline dot */}
-                          <div className="absolute -left-[25px] top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-warmWhite bg-forest shadow-lg dark:border-charcoal dark:bg-forest/90">
-                            <div className="h-1.5 w-1.5 rounded-full bg-cream" />
+                          <div className="absolute -left-[25px] top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-white bg-forest shadow-lg dark:border-slate-900 dark:bg-forest">
+                            <div className="h-1.5 w-1.5 rounded-full bg-white" />
                           </div>
 
                           {/* Year */}
                           <div className="mb-2">
-                            <span className="inline-block rounded-full bg-gradient-to-r from-forest/10 to-saffron/10 px-4 py-1.5 text-sm font-semibold text-forest dark:text-forest/90">
+                            <span className="inline-block rounded-full bg-forest/10 px-4 py-1.5 text-sm font-semibold text-forest dark:text-forest-light">
                               {achievement.year}
                             </span>
                           </div>
 
                           {/* Achievement card */}
                           <div
-                            className={`rounded-xl border border-forest/10 bg-gradient-to-br from-warmWhite/80 to-cream/80 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-forest/5 dark:border-forest/20 dark:from-slate-800/80 dark:to-slate-900/80 ${
+                            className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800 ${
                               achievement.href
-                                ? "cursor-pointer hover:border-forest/30 dark:hover:border-forest/40"
+                                ? "cursor-pointer hover:border-forest/40 dark:hover:border-forest/60"
                                 : ""
                             }`}
                           >
                             <div className="flex items-start gap-4">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-forest/10 to-saffron/10 dark:from-forest/20 dark:to-saffron/20">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-forest/10 to-saffron/10">
                                 {Icon}
                               </div>
                               <div className="flex-1">
-                                <h3 className="font-serif text-lg font-medium text-charcoal dark:text-cream">
+                                <h3 className="font-serif text-lg font-semibold text-slate-900 dark:text-white">
                                   {achievement.title}
                                 </h3>
-                                <p className="mt-2 text-sm leading-relaxed text-charcoal/70 dark:text-cream/70">
+                                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                                   {achievement.description}
                                 </p>
                               </div>
@@ -278,7 +265,7 @@ export default function AboutSection({
                             {/* Link indicator */}
                             {achievement.href && (
                               <div className="mt-4 flex items-center justify-end">
-                                <span className="text-xs font-medium text-forest/70 transition-colors group-hover:text-forest dark:text-forest/60 dark:group-hover:text-forest/90">
+                                <span className="text-sm font-medium text-forest transition-colors group-hover:text-emerald-700 dark:text-forest-light">
                                   Learn more →
                                 </span>
                               </div>
@@ -292,41 +279,57 @@ export default function AboutSection({
               </motion.div>
             )}
 
-            {/* Stats or Additional Info (Optional) */}
+            {/* Stats or Additional Info */}
             <motion.div
               variants={fadeIn}
               className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4"
             >
-              <div className="rounded-xl border border-forest/10 bg-gradient-to-br from-cream to-warmWhite p-4 text-center dark:border-forest/20 dark:from-slate-800 dark:to-slate-900">
-                <div className="font-serif text-2xl font-light text-forest dark:text-forest/90">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="font-serif text-2xl font-bold text-forest dark:text-forest-light">
                   {achievements.length}+
                 </div>
-                <div className="mt-1 text-xs font-medium uppercase tracking-wider text-charcoal/60 dark:text-cream/60">
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                   Works
                 </div>
               </div>
-              <div className="rounded-xl border border-forest/10 bg-gradient-to-br from-cream to-warmWhite p-4 text-center dark:border-forest/20 dark:from-slate-800 dark:to-slate-900">
-                <div className="font-serif text-2xl font-light text-forest dark:text-forest/90">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="font-serif text-2xl font-bold text-forest dark:text-forest-light">
                   {new Date().getFullYear() - 2010}+
                 </div>
-                <div className="mt-1 text-xs font-medium uppercase tracking-wider text-charcoal/60 dark:text-cream/60">
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                   Years
                 </div>
               </div>
-              <div className="rounded-xl border border-forest/10 bg-gradient-to-br from-cream to-warmWhite p-4 text-center dark:border-forest/20 dark:from-slate-800 dark:to-slate-900">
-                <div className="font-serif text-2xl font-light text-forest dark:text-forest/90">
-                  100+
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="font-serif text-2xl font-bold text-forest dark:text-forest-light">
+                  10K+
                 </div>
-                <div className="mt-1 text-xs font-medium uppercase tracking-wider text-charcoal/60 dark:text-cream/60">
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                   Readers
                 </div>
               </div>
-              <div className="rounded-xl border border-forest/10 bg-gradient-to-br from-cream to-warmWhite p-4 text-center dark:border-forest/20 dark:from-slate-800 dark:to-slate-900">
-                <div className="font-serif text-2xl font-light text-forest dark:text-forest/90">
-                  ∞
+              <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="font-serif text-2xl font-bold text-forest dark:text-forest-light">
+                  100+
                 </div>
-                <div className="mt-1 text-xs font-medium uppercase tracking-wider text-charcoal/60 dark:text-cream/60">
-                  Wisdom
+                <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  Essays
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Philosophy quote */}
+            <motion.div
+              variants={fadeIn}
+              className="mt-12 rounded-xl bg-gradient-to-r from-forest/5 to-saffron/5 p-6 dark:from-forest/10 dark:to-saffron/10"
+            >
+              <div className="flex items-start gap-3">
+                <div className="text-2xl text-forest">"</div>
+                <div>
+                  <p className="font-serif text-lg italic text-slate-700 dark:text-slate-300">
+                    The true measure of wisdom is not in what you know, but in what you do with it.
+                  </p>
+                  <div className="mt-2 h-px w-16 bg-saffron" />
                 </div>
               </div>
             </motion.div>
