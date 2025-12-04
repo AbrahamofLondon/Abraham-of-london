@@ -1,338 +1,544 @@
+// pages/index.tsx
 import * as React from "react";
-import type { NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Building2,
-  PackageCheck,
-  Lightbulb,
-  Target,
-  TrendingUp,
-  Users,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import type { NextPage } from "next";
 
 import Layout from "@/components/Layout";
+import MandateStatement from "@/components/MandateStatement";
+import {
+  CONTENT_CATEGORIES,
+} from "@/lib/content";
 
-// Simple environment helper - works with Next.js and Netlify
-const getEnv = (key: string, defaultValue: string = ''): string => {
-  // In Next.js, process.env is available for both server and client for NEXT_PUBLIC_ variables
-  const value = process.env[key];
-  return value !== undefined ? value : defaultValue;
-};
+import VenturesSection from "@/components/homepage/VenturesSection";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import StatsBar from "@/components/homepage/StatsBar";
+import AboutSection from "@/components/homepage/AboutSection";
 
-const pickEnvUrl = (keys: string[], fallback: string): string => {
-  for (const key of keys) {
-    const value = getEnv(key);
-    if (value && value.trim() !== '') {
-      return value.trim();
-    }
-  }
-  return fallback.trim();
-};
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
-type VentureStatus = "Active" | "Emerging" | "In development";
+/* -------------------------------------------------------------------------- */
+/* LUXURY DESIGN SYSTEM                                                       */
+/* -------------------------------------------------------------------------- */
 
-interface Venture {
-  name: string;
-  slug?: string;
-  description: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  href: string;
-  status: VentureStatus | string;
-  focus: string;
-  externalLabel?: string;
-}
+const SectionDivider: React.FC = () => (
+  <div className="relative h-24 overflow-hidden">
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700" />
+      <div className="mx-6 flex items-center gap-2">
+        <div className="h-2 w-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600" />
+        <div className="h-1 w-1 rounded-full bg-gradient-to-r from-amber-300 to-amber-500" />
+        <div className="h-2 w-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600" />
+      </div>
+      <div className="h-px w-32 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700" />
+    </div>
+  </div>
+);
 
-// Resolve external URLs - using simple env access that works with Next.js
-const ALOMARADA_URL = getEnv('NEXT_PUBLIC_ALOMARADA_URL', "https://alomarada.com/");
-const ENDURELUXE_URL = getEnv('NEXT_PUBLIC_ENDURELUXE_URL', "https://alomarada.com/endureluxe");
-const INNOVATEHUB_URL = getEnv('NEXT_PUBLIC_INNOVATEHUB_URL', "https://innovatehub.abrahamoflondon.org");
+/* -------------------------------------------------------------------------- */
+/* CANON SPOTLIGHT                                                            */
+/* -------------------------------------------------------------------------- */
 
-const ventures: Venture[] = [
-  {
-    name: "Alomarada Ltd",
-    slug: "alomarada",
-    description:
-      "Board-level advisory, operating systems, and market-entry strategy for founders, boards, and institutions who take Africa seriously.",
-    icon: Building2,
-    href: ALOMARADA_URL,
-    status: "Active",
-    focus: "Strategic advisory · Market systems · Deal architecture",
-    externalLabel: "Visit Alomarada.com",
-  },
-  {
-    name: "Endureluxe",
-    slug: "endureluxe",
-    description:
-      "Community-driven fitness and performance gear for people who train, build, and endure – designed to survive real life, not just product shoots.",
-    icon: PackageCheck,
-    href: ENDURELUXE_URL,
-    status: "Active",
-    focus: "Fitness community · Performance gear · Everyday durability",
-    externalLabel: "Explore Endureluxe",
-  },
-  {
-    name: "InnovateHub",
-    slug: "innovatehub",
-    description:
-      "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and build operating rhythms that actually hold.",
-    icon: Lightbulb,
-    href: INNOVATEHUB_URL,
-    status: "In development",
-    focus: "Innovation engine · Capability build · Venture design",
-    externalLabel: "Visit InnovateHub",
-  },
-];
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
-const VenturesPage: NextPage = () => {
-  return (
-    <Layout title="Ventures">
-      <Head>
-        <title>Strategic Ventures | Abraham of London</title>
-        <meta
-          name="description"
-          content="The venture portfolio connected to Abraham of London — Alomarada, Endureluxe, and InnovateHub — built around one mindset: truth, responsibility, and multi-generational legacy."
+const CanonPrimaryCard: React.FC = () => (
+  <Link href="/books/the-architecture-of-human-purpose" className="group block h-full">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <Image
+          src="/assets/images/books/the-architecture-of-human-purpose.jpg"
+          alt="The Architecture of Human Purpose — Prelude MiniBook"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+          priority
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+        <div className="absolute left-4 bottom-4">
+          <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
+            Prelude MiniBook · Limited Release
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+          The Architecture of Human Purpose
+        </h3>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+          Canon · Volume I · Foundations for Purpose
+        </p>
+        <p className="mb-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+          A distilled, high-level prelude to the Canon — for men who know that
+          human flourishing is not accidental, but architectural.
+        </p>
+        <div className="mt-auto flex items-center justify-between pt-2 text-sm font-semibold text-amber-600 dark:text-amber-400">
+          <span>Enter through the Prelude</span>
+          <span className="transition-transform group-hover:translate-x-1">↠</span>
+        </div>
+      </div>
+    </article>
+  </Link>
+);
+
+type CanonEntryProps = {
+  title: string;
+  subtitle: string;
+  href: string;
+  imageSrc: string;
+};
+
+const CanonEntryCard: React.FC<CanonEntryProps> = ({
+  title,
+  subtitle,
+  href,
+  imageSrc,
+}) => (
+  <Link href={href} className="group block">
+    <article className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="relative h-20 w-14 overflow-hidden rounded-md">
+        <Image
+          src={imageSrc}
+          alt={title}
+          fill
+          sizes="80px"
+          className="object-cover"
+        />
+      </div>
+      <div className="flex-1">
+        <h4 className="font-serif text-sm font-semibold text-gray-900 dark:text-white">
+          {title}
+        </h4>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {subtitle}
+        </p>
+        <div className="mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-amber-600 dark:text-amber-400">
+          Canon Entry Piece
+        </div>
+      </div>
+      <div className="text-amber-600 opacity-70 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+        →
+      </div>
+    </article>
+  </Link>
+);
+
+/* -------------------------------------------------------------------------- */
+/* COMPACT BOOKS SPOTLIGHT                                                   */
+/* -------------------------------------------------------------------------- */
+
+const CompactBookCard: React.FC<{
+  title: string;
+  subtitle: string;
+  href: string;
+  tag: string;
+  imageSrc: string;
+}> = ({ title, subtitle, href, tag, imageSrc }) => (
+  <Link href={href} className="group block">
+    <article className="flex items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="relative h-16 w-12 overflow-hidden rounded-md">
+        <Image
+          src={imageSrc}
+          alt={title}
+          fill
+          sizes="64px"
+          className="object-cover"
+        />
+      </div>
+      <div className="flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <h3 className="font-serif text-sm font-semibold text-gray-900 dark:text-white">
+            {title}
+          </h3>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+            {tag}
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
+      </div>
+      <div className="text-amber-600 opacity-70 transition-transform group-hover:translate-x-1 dark:text-amber-400">
+        →
+      </div>
+    </article>
+  </Link>
+);
+
+/* -------------------------------------------------------------------------- */
+/* MAIN PAGE                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const HomePage: NextPage = () => {
+  const siteTitle = "Abraham of London";
+  const siteTagline =
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
+
+  return (
+    <Layout
+      title={siteTitle}
+      description={siteTagline}
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteTitle,
+        description: siteTagline,
+        url: siteUrl,
+        publisher: {
+          "@type": "Person",
+          name: "Abraham of London",
+        },
+      }}
+    >
+      <Head>
+        <title>{siteTitle} | Structural Thinking for Builders of Legacy</title>
+        <meta name="description" content={siteTagline} />
+        <meta property="og:title" content={siteTitle} />
+        <meta property="og:description" content={siteTagline} />
+        <meta
+          property="og:image"
+          content={`${siteUrl}/assets/images/social/og-image.jpg`}
+        />
+        <meta property="og:url" content={siteUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={siteTitle} />
+        <meta name="twitter:description" content={siteTagline} />
+        <meta
+          name="twitter:image"
+          content={`${siteUrl}/assets/images/social/twitter-image.jpg`}
+        />
+        <meta name="theme-color" content="#ffffff" />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-        {/* HERO */}
-        <section className="border-b border-white/10 bg-gradient-to-b from-black/80 via-gray-900/80 to-black/90">
-          <div className="mx-auto flex max-w-6xl flex-col px-4 pb-16 pt-20 md:flex-row md:items-center md:justify-between md:pt-24">
-            <div className="max-w-xl">
-              <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-amber-400/80">
-                Abraham of London · Ventures
-              </p>
-              <h1 className="font-serif text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
-                Ventures that move in the{" "}
-                <span className="text-amber-400">same direction</span>.
-              </h1>
-              <p className="mt-5 max-w-xl text-sm text-gray-200 md:text-base">
-                The writing, fatherhood work, and strategy conversations live at
-                the centre. These ventures carry that same spine into
-                boardrooms, gyms, communities, and build rooms across markets.
-              </p>
+      {/* -------------------------------------------------------------------
+       1. PRIMARY HERO
+      -------------------------------------------------------------------- */}
+      <section className="relative min-h-[95vh] overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl dark:bg-amber-500/5" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
+        </div>
 
-              <div className="mt-8 flex flex-wrap gap-4 text-xs md:text-sm">
-                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
-                  From the house of{" "}
-                  <span className="font-semibold text-amber-400">
-                    Abraham of London
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <div className="grid items-center gap-16 lg:grid-cols-5">
+            {/* Left – copy */}
+            <div className="lg:col-span-2 max-w-xl">
+              <div className="mb-8">
+                <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-900/30 dark:bg-amber-900/10">
+                  <div className="text-lg text-amber-600 dark:text-amber-400">
+                    𓆓
+                  </div>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-600 dark:text-amber-400">
+                    Library of Applied Wisdom
                   </span>
                 </div>
-                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
-                  Strategy · Product · Ecosystems
-                </div>
-                <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-100">
-                  Built for kings, builders &amp; boards
-                </div>
+
+                <h1 className="mb-6 font-serif text-4xl font-bold leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+                  Abraham of London
+                  <span className="mt-4 block text-2xl font-normal text-gray-600 dark:text-gray-300 sm:text-3xl lg:text-4xl">
+                    Structural thinking for fathers, founders,
+                    <br className="hidden sm:block" />
+                    and builders of legacy.
+                  </span>
+                </h1>
+
+                <p className="mb-10 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+                  If you carry responsibility for a family, a company, or a
+                  community, this is the room where faith, history, strategy,
+                  and markets get put to work — not just discussed.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/canon"
+                  className="group inline-flex items-center gap-3 rounded-lg bg-gradient-to-r from-gray-900 to-black px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-gray-900/30 dark:from-amber-600 dark:to-amber-700 dark:hover:shadow-amber-600/30"
+                >
+                  <span>Enter the Canon</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    ↠
+                  </span>
+                </Link>
+                <Link
+                  href="/consulting"
+                  className="group inline-flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-8 py-3 text-sm font-semibold text-gray-900 transition-all hover:scale-105 hover:bg-gray-50 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                >
+                  <span>Work with Abraham</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
               </div>
             </div>
 
-            <div className="mt-10 w-full max-w-md md:mt-0">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/60">
-                <div className="mb-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">
-                  <span>Abraham of London · House View</span>
-                  <span className="rounded-full bg-amber-400/10 px-2 py-1 text-[0.65rem] text-amber-400">
-                    Aligned ventures
-                  </span>
+            {/* Right – hero image */}
+            <div className="lg:col-span-3 relative">
+              <div className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-2xl dark:border-gray-800">
+                <div className="relative aspect-[16/9] w-full">
+                  <Image
+                    src="/assets/images/abraham-of-london-banner.webp"
+                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
+                    width={1600}
+                    height={900}
+                    priority
+                    className="h-full w-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 </div>
-                <dl className="grid grid-cols-2 gap-4 text-sm text-gray-100">
-                  <div>
-                    <dt className="text-xs text-gray-400">Core narrative</dt>
-                    <dd className="mt-1 font-serif text-lg text-amber-400">
-                      Abraham of London
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-gray-400">
-                      Advisory &amp; systems
-                    </dt>
-                    <dd className="mt-1 font-serif text-lg">Alomarada</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-gray-400">
-                      Fitness &amp; performance culture
-                    </dt>
-                    <dd className="mt-1 font-serif text-lg">Endureluxe</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-gray-400">Innovation engine</dt>
-                    <dd className="mt-1 font-serif text-lg">InnovateHub</dd>
-                  </div>
-                </dl>
-                <div className="mt-6 rounded-2xl bg-black/40 p-3 text-[0.8rem] text-gray-200">
-                  One standard. Different expressions. The details shift from
-                  venture to venture; the underlying convictions do not.
+                <div className="border-t border-gray-100 bg-gradient-to-r from-white to-gray-50 p-5 text-center dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Built for men who refuse to outsource responsibility — to the
+                    state, the culture, or the algorithm.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* VENTURES GRID */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 pt-12">
-          <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold text-white md:text-3xl">
-                Venture portfolio
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm text-gray-300 md:text-base">
-                Each venture has a distinct personality, but they share the same
-                backbone: clear thinking, hard work, and an unapologetic respect
-                for legacy.
-              </p>
+      {/* 2. STATS BAR */}
+      <section className="border-y border-gray-200 bg-white py-8 dark:border-gray-800 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <StatsBar />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* 3. CANON SPOTLIGHT */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                Entry into the Canon
+              </span>
             </div>
-            <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
-              CURRENT LINES · STRATEGY · FITNESS · INNOVATION
+            <h2 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
+              Begin with the Prelude & Entry Pieces
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+              The Canon opens through a limited-release Prelude and three
+              entry pieces that frame the journey: a catechism, a campaign, and
+              a personal letter from the author.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {ventures.map((venture) => (
-              <motion.article
-                key={venture.slug ?? venture.name}
-                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/40 hover:bg-white/10"
-                variants={itemVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-80px" }}
-              >
-                <div className="mb-5 flex items-start justify-between gap-3">
-                  <div className="rounded-xl bg-amber-400/10 p-3">
-                    <venture.icon className="h-7 w-7 text-amber-400" />
-                  </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${
-                      venture.status === "Active"
-                        ? "bg-green-500/10 text-green-400"
-                        : venture.status === "Emerging"
-                          ? "bg-blue-500/10 text-blue-400"
-                          : "bg-amber-500/10 text-amber-400"
-                    }`}
-                  >
-                    {venture.status}
-                  </span>
-                </div>
-
-                <h3 className="mb-2 font-serif text-xl font-semibold text-white">
-                  {venture.name}
-                </h3>
-                <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-amber-400/80">
-                  {venture.focus}
-                </p>
-
-                <p className="mb-4 flex-1 text-sm leading-relaxed text-gray-200">
-                  {venture.description}
-                </p>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs text-gray-300">
-                    External ·{" "}
-                    <span className="font-medium text-amber-400">
-                      {venture.href.replace(/^https?:\/\//, "")}
-                    </span>
-                  </span>
-                  <Link
-                    href={venture.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-amber-400 hover:text-amber-300"
-                  >
-                    {venture.externalLabel ?? "Visit site"}
-                    <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        {/* BUILD PHILOSOPHY */}
-        <section className="border-t border-white/10 bg-gradient-to-br from-gray-900 via-black to-emerald-900/30">
-          <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-            <div className="mb-10 text-center">
-              <h2 className="font-serif text-2xl font-semibold text-white md:text-3xl">
-                How we choose what deserves a logo
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-300 md:text-base">
-                Not every good idea becomes a venture. There is a quiet filter
-                in the background that every initiative has to pass before it
-                earns the Abraham of London mark.
-              </p>
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <CanonPrimaryCard />
             </div>
-
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15">
-                  <Target className="h-6 w-6 text-amber-400" />
-                </div>
-                <h3 className="mb-3 text-lg font-semibold text-white">
-                  Clear assignment
-                </h3>
-                <p className="text-sm text-gray-300">
-                  The work must serve a real person with a real problem, not
-                  just a vanity metric or a trend. If it doesn&apos;t serve, it
-                  doesn&apos;t ship.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
-                  <TrendingUp className="h-6 w-6 text-emerald-400" />
-                </div>
-                <h3 className="mb-3 text-lg font-semibold text-white">
-                  Substance over spin
-                </h3>
-                <p className="text-sm text-gray-300">
-                  The numbers matter, but not on their own. The venture has to
-                  make sense when an investor, a father, and a pastor all ask
-                  hard questions.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15">
-                  <Users className="h-6 w-6 text-amber-400" />
-                </div>
-                <h3 className="mb-3 text-lg font-semibold text-white">
-                  Built with people in mind
-                </h3>
-                <p className="text-sm text-gray-300">
-                  Community, brotherhood, and accountability sit in the design,
-                  not as decoration. We don&apos;t build things that require men
-                  to lose themselves to succeed.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 px-5 py-6 text-center text-sm text-gray-200 md:px-8">
-              If you&apos;re exploring aligned capital, strategic partnership,
-              or ecosystem collaboration around these ventures,{" "}
-              <Link
-                href="/contact"
-                className="font-semibold text-amber-400 underline-offset-4 hover:underline"
-              >
-                start a strategic conversation
-              </Link>
-              . Straight talk, clear terms, and no smoke.
+            <div className="space-y-4">
+              <CanonEntryCard
+                title="Builder’s Catechism"
+                subtitle="Core questions and answers for men who build — families, ventures, and institutions."
+                href="/canon/builders-catechism"
+                imageSrc="/assets/images/canon/builders-catechism-cover.jpg"
+              />
+              <CanonEntryCard
+                title="Canon Campaign"
+                subtitle="The strategic invitation and long-game architecture behind the Canon project."
+                href="/canon/canon-campaign"
+                imageSrc="/assets/images/canon/canon-campaign-cover.jpg"
+              />
+              <CanonEntryCard
+                title="Letter from the Author"
+                subtitle="A direct, unvarnished conversation about why this Canon exists and who it is for."
+                href="/canon/canon-introduction-letter"
+                imageSrc="/assets/images/canon/canon-intro-letter-cover.jpg"
+              />
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* Supporting works & resources (unchanged except for using CONTENT_CATEGORIES) */}
+      <section className="bg-gradient-to-b from-white to-gray-50 pb-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <h3 className="mb-6 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+              Supporting Works & Resources
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <ContentCard
+                title="Strategic Essays"
+                description="Applying first principles to culture, policy, and markets with ruthless pragmatism."
+                href="/blog"
+                category="Essays"
+                color={CONTENT_CATEGORIES.POSTS.color}
+                icon="✒"
+              />
+              <ContentCard
+                title="Execution Tools"
+                description="Playbooks, templates, and frameworks for turning wisdom into action."
+                href="/downloads"
+                category="Resources"
+                color={CONTENT_CATEGORIES.RESOURCES.color}
+                icon="⚙"
+              />
+              <ContentCard
+                title="Applied Narratives"
+                description="Memoir, parable, and strategic narrative for men, fathers, and builders."
+                href="/books"
+                category="Books"
+                color={CONTENT_CATEGORIES.BOOKS.color}
+                icon="📚"
+              />
+              <ContentCard
+                title="Strategic Gatherings"
+                description="Workshops, salons, and covenants where decisions — not opinions — are the output."
+                href="/events"
+                category="Events"
+                color={CONTENT_CATEGORIES.EVENTS.color}
+                icon="🕯"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. COMPACT BOOKS SPOTLIGHT */}
+      <section className="border-y border-gray-200 bg-gray-50 py-12 dark:border-gray-800 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 text-center">
+            <h3 className="font-serif text-xl font-semibold text-gray-700 dark:text-gray-300">
+              Current Projects & Drafts
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Works in progress and narrative experiments currently in
+              development
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-2xl gap-3">
+            <CompactBookCard
+              title="Fathering Without Fear"
+              subtitle="Memoir and strategic narrative for fathers."
+              href="/books/fathering-without-fear"
+              tag="Memoir Draft"
+              imageSrc="/assets/images/books/fathering-without-fear.jpg"
+            />
+            <CompactBookCard
+              title="The Fiction Adaptation"
+              subtitle="When fiction tells what truth cannot."
+              href="/books/the-fiction-adaptation"
+              tag="Fiction Draft"
+              imageSrc="/assets/images/books/the-fiction-adaptation.jpg"
+            />
+          </div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* 5. STRATEGIC FUNNEL */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <StrategicFunnelStrip />
+        </div>
+      </section>
+
+      {/* 6. VENTURES */}
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                Execution Arms
+              </span>
+            </div>
+            <h2 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
+              The Operating Arms
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+              Alomarada, EndureLuxe, and InnovateHub are the execution arms of
+              the Canon — testing grounds for strategy, governance, and
+              multi-generational design.
+            </p>
+          </div>
+
+          <VenturesSection />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* 7. MANDATE & ABOUT */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-20 dark:from-gray-900 dark:to-gray-950">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                Philosophy & Background
+              </span>
+            </div>
+            <h2 className="mt-6 font-serif text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl">
+              The Mandate & The Man
+            </h2>
+          </div>
+
+          <div className="space-y-20">
+            <MandateStatement />
+            <AboutSection />
+          </div>
+        </div>
+      </section>
+
+      {/* 8. FINAL CTA */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-black py-24">
+        <div className="absolute inset-0">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-4xl px-4 text-center">
+          <div className="mb-12">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-200/20 bg-amber-500/10 px-4 py-2">
+              <span className="text-sm font-semibold text-amber-300">
+                Start Building
+              </span>
+            </div>
+            <h2 className="mb-6 font-serif text-4xl font-bold text-white sm:text-5xl">
+              Begin with Volume 1
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-300">
+              The Canon begins with architectural first principles. Volume 1
+              provides the foundation upon which all subsequent wisdom is built
+              — start here.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/books/the-architecture-of-human-purpose"
+              className="group inline-flex items-center gap-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-10 py-4 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-amber-500/30"
+            >
+              <span>Read Volume 1</span>
+              <span className="transition-transform group-hover:translate-x-1">
+                ↠
+              </span>
+            </Link>
+            <Link
+              href="/canon"
+              className="group inline-flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-900 px-10 py-4 text-sm font-semibold text-white transition-all hover:scale-105 hover:bg-gray-800 hover:shadow-lg"
+            >
+              <span>Explore All Volumes</span>
+              <span className="transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+          </div>
+
+          <div className="mx-auto mt-16 max-w-xs border-t border-gray-800 pt-8">
+            <Link
+              href="/content"
+              className="text-sm font-medium text-gray-400 transition-colors hover:text-white"
+            >
+              Or browse all content →
+            </Link>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };
 
-export default VenturesPage;
+export default HomePage;

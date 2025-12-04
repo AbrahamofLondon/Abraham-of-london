@@ -1,7 +1,8 @@
-// lib/contentlayer-helper.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Centralized Contentlayer imports to avoid path resolution issues
+
+import path from "path";
 
 // ============================================================================
 // 1. CORE TYPES
@@ -129,16 +130,21 @@ export interface StrategyDocument extends ContentlayerDocument {
 let contentlayerExports: any = {};
 
 try {
-  // Contentlayer2 still writes to .contentlayer/generated
+  // Resolve .contentlayer/generated from project root, not from compiled file location
+  const generatedPath = path.join(process.cwd(), ".contentlayer", "generated");
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  contentlayerExports = require("../.contentlayer/generated");
+  contentlayerExports = require(generatedPath);
 } catch (error) {
-  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "test"
+  ) {
     // Helpful, but non-fatal
     // eslint-disable-next-line no-console
     console.warn(
       "[contentlayer-helper] .contentlayer/generated not found – using empty exports.",
-      "This is normal during the first build or if content hasn't been generated yet."
+      "This is normal during the first build or if content hasn't been generated yet.",
+      error
     );
   }
   contentlayerExports = {};
@@ -172,7 +178,9 @@ export const allPrints: PrintDocument[] = getCollection("allPrints");
 export const allStrategies: StrategyDocument[] = getCollection("allStrategies");
 export const allResources: ResourceDocument[] = getCollection("allResources");
 export const allCanons: CanonDocument[] = getCollection("allCanons");
-export const allDocuments: ContentlayerDocument[] = getCollection("allDocuments");
+export const allDocuments: ContentlayerDocument[] = getCollection(
+  "allDocuments"
+);
 
 // Combined collections for convenience
 export const allContent = [...allDocuments];
