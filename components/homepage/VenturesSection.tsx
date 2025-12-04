@@ -1,293 +1,169 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
+import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Building2,
+  PackageCheck,
+  Lightbulb,
+} from "lucide-react";
+
 import { LIBRARY_AESTHETICS } from "@/lib/content";
 
-export type Brand = {
+type VentureStatus = "Active" | "Emerging" | "In development";
+
+interface Venture {
   name: string;
   description: string;
-  logo: string;
-  url: string;
-  metric?: string;
-  secondaryHref?: string;
-  secondaryText?: string;
-  color?: string;
-};
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  href: string;
+  status: VentureStatus | string;
+  focus: string;
+  externalLabel?: string;
+}
 
-const pickUrl = (...candidates: (string | undefined | null)[]) =>
-  candidates.find((u) => typeof u === "string" && u.trim().length) || "#";
+// Use the same URLs as in the ventures page
+const ALOMARADA_URL = process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com/";
+const ENDURELUXE_URL = process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://alomarada.com/endureluxe";
+const INNOVATEHUB_URL = process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "https://innovatehub.abrahamoflondon.org";
 
-const INNOVATE_HUB_BASE = pickUrl(
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL,
-  process.env.NEXT_PUBLIC_INNOVATEHUB_ALT_URL,
-  "https://innovatehub.abrahamoflondon.org"
-);
-
-const ALOMARADA_URL = pickUrl(
-  process.env.NEXT_PUBLIC_ALOMARADA_URL,
-  "https://alomarada.com"
-);
-
-const ENDURELUXE_URL = pickUrl(
-  process.env.NEXT_PUBLIC_ENDURELUXE_URL,
-  "https://endureluxe.com"
-);
-
-export const defaultBrands: Brand[] = [
+const ventures: Venture[] = [
   {
-    name: "Alomarada",
+    name: "Alomarada Ltd",
     description: "Board-level advisory, operating systems, and market-entry strategy for founders, boards, and institutions who take Africa seriously.",
-    logo: "/assets/images/alomarada-ltd.webp",
-    url: ALOMARADA_URL,
-    metric: "Strategic Advisory",
-    color: "#059669", // Emerald
+    icon: Building2,
+    href: ALOMARADA_URL,
+    status: "Active",
+    focus: "Strategic advisory · Market systems · Deal architecture",
+    externalLabel: "Visit Alomarada.com",
   },
   {
-    name: "EndureLuxe",
+    name: "Endureluxe",
     description: "Community-driven fitness and performance gear for people who train, build, and endure – designed to survive real life, not just product shoots.",
-    logo: "/assets/images/endureluxe-ltd.webp",
-    url: ENDURELUXE_URL,
-    metric: "Performance Ecosystem",
-    color: "#7C3AED", // Violet
+    icon: PackageCheck,
+    href: ENDURELUXE_URL,
+    status: "Active",
+    focus: "Fitness community · Performance gear · Everyday durability",
+    externalLabel: "Explore Endureluxe",
   },
   {
     name: "InnovateHub",
     description: "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and build operating rhythms that actually hold.",
-    logo: "/assets/images/innovatehub.svg",
-    url: INNOVATE_HUB_BASE,
-    secondaryText: "Early Access",
-    metric: "Innovation Engine",
-    color: "#0369A1", // Sky Blue
+    icon: Lightbulb,
+    href: INNOVATEHUB_URL,
+    status: "In development",
+    focus: "Innovation engine · Capability building · Venture design",
+    externalLabel: "Visit InnovateHub",
   },
 ];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    },
+    transition: { duration: 0.6, ease: "easeOut" },
   },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-  hover: {
-    y: -8,
-    transition: {
-      duration: 0.3,
-    },
-  },
-};
-
-function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const isExternal = href.startsWith('http');
+const VenturesSection: React.FC = () => {
   return (
-    <Link
-      href={href}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noopener noreferrer" : undefined}
-      className="group/link"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function VentureCard({ brand }: { brand: Brand }) {
-  const brandColor = brand.color || LIBRARY_AESTHETICS.colors.primary.saffron;
-
-  return (
-    <motion.article
-      variants={cardVariants}
-      whileHover="hover"
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border p-6"
-      style={{
-        borderColor: `${brandColor}20`,
-        backgroundColor: 'rgba(15, 23, 42, 0.7)',
-        backgroundImage: `
-          radial-gradient(circle at 20% 80%, ${brandColor}15, transparent 50%),
-          linear-gradient(135deg, ${brandColor}08 0%, transparent 40%)
-        `,
-      }}
-    >
-      {/* Decorative corner accents */}
-      <div className="absolute top-0 left-0 h-4 w-4 border-l border-t" style={{ borderColor: `${brandColor}40` }} />
-      <div className="absolute top-0 right-0 h-4 w-4 border-r border-t" style={{ borderColor: `${brandColor}40` }} />
-      <div className="absolute bottom-0 left-0 h-4 w-4 border-l border-b" style={{ borderColor: `${brandColor}40` }} />
-      <div className="absolute bottom-0 right-0 h-4 w-4 border-r border-b" style={{ borderColor: `${brandColor}40` }} />
-
-      {/* Logo container */}
-      <div className="relative mb-6">
-        <div
-          className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-500"
-          style={{ backgroundColor: brandColor }}
-        />
-        <div className="relative h-20 w-32 mx-auto">
-          <Image
-            src={brand.logo || "/assets/images/default-brand.svg"}
-            alt={`${brand.name} logo`}
-            fill
-            className="object-contain"
-            sizes="128px"
-          />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="mb-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h3
-            className="font-serif text-xl font-medium"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            {brand.name}
-          </h3>
-          <div
-            className="h-1.5 w-1.5 animate-pulse rounded-full"
-            style={{ backgroundColor: brandColor }}
-          />
-        </div>
-
-        {brand.metric && (
-          <div
-            className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1"
-            style={{
-              backgroundColor: `${brandColor}15`,
-              border: `1px solid ${brandColor}30`,
-            }}
-          >
-            <div
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: brandColor }}
-            />
-            <span
-              className="text-xs font-medium"
-              style={{ color: brandColor }}
-            >
-              {brand.metric}
-            </span>
-          </div>
-        )}
-
-        <p
-          className="text-sm leading-relaxed opacity-80"
-          style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-        >
-          {brand.description}
-        </p>
-      </div>
-
-      {/* CTA */}
-      <div className="mt-auto pt-4 border-t" style={{ borderColor: `${brandColor}20` }}>
-        <ExternalLink href={brand.url}>
-          <div
-            className="flex items-center justify-between rounded-lg px-4 py-2 transition-all hover:px-5"
-            style={{
-              backgroundColor: `${brandColor}15`,
-            }}
-          >
-            <span
-              className="text-sm font-medium"
-              style={{ color: brandColor }}
-            >
-              Visit Venture
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs opacity-70" style={{ color: brandColor }}>
-                ↗
-              </span>
-            </div>
-          </div>
-        </ExternalLink>
-      </div>
-    </motion.article>
-  );
-}
-
-export default function VenturesSection({ brandsData = defaultBrands }: { brandsData?: Brand[] }) {
-  return (
-    <div className="py-12">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={containerVariants}
-      >
+    <section className="py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div variants={itemVariants} className="mb-12 text-center">
-          <div className="mb-4">
-            <span
-              className="text-xs font-medium uppercase tracking-widest"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Ventures
-            </span>
-          </div>
-          <h2
-            className="mb-4 font-serif text-3xl font-light sm:text-4xl"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
+        <div className="mb-12 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300/70 mb-4">
+            Ventures
+          </p>
+          <h2 className="font-serif text-3xl font-light tracking-tight text-cream sm:text-4xl mb-4">
             Where philosophy becomes operating system
           </h2>
-          <p
-            className="mx-auto max-w-2xl text-lg leading-relaxed opacity-80"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            Alomarada, EndureLuxe, and InnovateHub are execution arms of the
-            Canon — testing grounds for strategy, governance, and multi-generational design.
+          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-cream/75">
+            Alomarada, Endureluxe, and InnovateHub are not side projects.
+            They are execution arms of the Canon — testing grounds for
+            strategy, governance, and multi-generational design.
           </p>
-        </motion.div>
+        </div>
 
         {/* Ventures Grid */}
-        <motion.div
-          variants={containerVariants}
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {brandsData.map((brand) => (
-            <VentureCard key={brand.name} brand={brand} />
-          ))}
-        </motion.div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {ventures.map((venture) => (
+            <motion.article
+              key={venture.name}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={itemVariants}
+              className="group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950/60 to-slate-900/40 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-slate-950/80 hover:shadow-2xl"
+            >
+              {/* Icon and Status */}
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div className="rounded-xl bg-amber-400/10 p-3">
+                  <venture.icon className="h-7 w-7 text-amber-300" />
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                    venture.status === "Active"
+                      ? "bg-emerald-500/10 text-emerald-300"
+                      : venture.status === "Emerging"
+                      ? "bg-blue-500/10 text-blue-300"
+                      : "bg-amber-500/10 text-amber-300"
+                  }`}
+                >
+                  {venture.status}
+                </span>
+              </div>
 
-        {/* Footer Link */}
-        <motion.div variants={itemVariants} className="mt-12 text-center">
+              {/* Content */}
+              <h3 className="mb-3 font-serif text-xl font-semibold text-cream">
+                {venture.name}
+              </h3>
+              
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/80">
+                {venture.focus}
+              </p>
+
+              <p className="mb-6 flex-1 text-sm leading-relaxed text-cream/75">
+                {venture.description}
+              </p>
+
+              {/* CTA */}
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-xs text-cream/60">
+                  External ·{" "}
+                  <span className="font-medium text-amber-300">
+                    {venture.href.replace(/^https?:\/\//, "")}
+                  </span>
+                </span>
+                <Link
+                  href={venture.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center text-xs font-semibold uppercase tracking-wide text-amber-300 hover:text-amber-200"
+                >
+                  {venture.externalLabel ?? "Visit site"}
+                  <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+
+        {/* Footer CTA */}
+        <div className="mt-12 text-center">
           <Link
             href="/ventures"
-            className="group inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-all hover:gap-3"
-            style={{
-              borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
-              color: LIBRARY_AESTHETICS.colors.primary.parchment,
-            }}
+            className="group inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-6 py-3 text-sm font-medium text-amber-200 transition hover:bg-amber-400/20"
           >
-            <span>View All Ventures</span>
-            <span className="transition-transform group-hover:translate-x-1">→</span>
+            View All Ventures
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </motion.div>
-      </motion.div>
-    </div>
+        </div>
+      </div>
+    </section>
   );
-}
+};
+
+export default VenturesSection;
