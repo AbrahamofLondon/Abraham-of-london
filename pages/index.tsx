@@ -38,6 +38,60 @@ const SectionDivider: React.FC = () => (
 );
 
 /* -------------------------------------------------------------------------- */
+/* CONTENT CARD - ADDED THIS COMPONENT                                        */
+/* -------------------------------------------------------------------------- */
+
+const ContentCard: React.FC<{
+  title: string;
+  description: string;
+  href: string;
+  category: string;
+  color: string;
+  icon: string;
+}> = ({ title, description, href, category, color, icon }) => (
+  <Link href={href} className="group block h-full">
+    <article className="relative h-full overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-current to-transparent opacity-30" style={{ color }} />
+      
+      <div className="p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-xl" style={{ color }}>
+              {icon}
+            </div>
+            <span
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color }}
+            >
+              {category}
+            </span>
+          </div>
+        </div>
+
+        <h3 className="mb-3 font-serif text-lg font-bold text-gray-900 dark:text-white">
+          {title}
+        </h3>
+
+        <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+          {description}
+        </p>
+
+        <div
+          className="flex items-center justify-between border-t border-gray-100 pt-3 text-sm dark:border-gray-800"
+        >
+          <span className="font-medium opacity-70" style={{ color }}>
+            Explore
+          </span>
+          <span className="font-medium transition-transform group-hover:translate-x-1" style={{ color }}>
+            →
+          </span>
+        </div>
+      </div>
+    </article>
+  </Link>
+);
+
+/* -------------------------------------------------------------------------- */
 /* CANON SPOTLIGHT                                                            */
 /* -------------------------------------------------------------------------- */
 
@@ -328,7 +382,7 @@ const HomePage: NextPage = () => {
             </div>
             <div className="space-y-4">
               <CanonEntryCard
-                title="Builder’s Catechism"
+                title="Builder's Catechism"
                 subtitle="Core questions and answers for men who build — families, ventures, and institutions."
                 href="/canon/builders-catechism"
                 imageSrc="/assets/images/canon/builders-catechism-cover.jpg"
@@ -350,7 +404,7 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      {/* Supporting works & resources (unchanged except for using CONTENT_CATEGORIES) */}
+      {/* Supporting works & resources */}
       <section className="bg-gradient-to-b from-white to-gray-50 pb-20 dark:from-gray-900 dark:to-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
