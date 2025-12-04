@@ -3,51 +3,42 @@ import type { GetStaticProps, NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
-import { 
-  Search, 
-  Filter, 
-  Calendar, 
-  Clock, 
-  ArrowRight, 
-  BookOpen, 
-  FileText, 
-  Download, 
-  Users, 
-  Star, 
-  Zap, 
-  Globe, 
-  Layers, 
-  BookMarked, 
-  TrendingUp, 
-  Sparkles, 
-  Eye, 
-  Bookmark, 
-  Share2, 
-  MoreHorizontal, 
-  ThumbsUp, 
-  Grid, 
-  List, 
+import {
+  Search,
+  Filter,
+  Calendar,
+  Clock,
+  ArrowRight,
+  BookOpen,
+  FileText,
+  Download,
+  Users,
+  Star,
+  Zap,
+  Layers,
+  Bookmark,
+  TrendingUp,
+  Grid,
+  List,
   RefreshCw,
-  ChevronDown 
+  ChevronDown,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import {
-  CONTENT_CATEGORIES,
-} from "@/lib/content";
 
 import { getAllPostsMeta } from "@/lib/server/posts-data";
 import { getAllDownloadsMeta } from "@/lib/server/downloads-data";
 import { getAllBooksMeta } from "@/lib/server/books-data";
-import { getAllContent } from "@/lib/mdx";
+import { getAllEvents } from "@/lib/server/events-data";
+import { getAllPrintsMeta } from "@/lib/server/prints-data";
+import { getAllResourcesMeta } from "@/lib/server/resources-data";
 
 /* -------------------------------------------------------------------------- */
 /* TYPE SAFETY & DATA MODELS                                                  */
 /* -------------------------------------------------------------------------- */
 
 type ContentKind = "blog" | "book" | "download" | "event" | "print" | "resource";
-type FilterKey = ContentKind | "all" | "featured" | "recent";
+type FilterKey = ContentKind | "all" | "featured";
 type ViewMode = "grid" | "list" | "compact";
 type SortBy = "newest" | "title" | "popular" | "trending";
 
@@ -108,16 +99,16 @@ const ContentIcons: Record<ContentKind, React.ReactElement> = {
   book: <BookOpen className="h-4 w-4" />,
   download: <Download className="h-4 w-4" />,
   event: <Users className="h-4 w-4" />,
-  print: <span>🖼</span>,
+  print: <span className="text-xs">🖼</span>,
   resource: <Zap className="h-4 w-4" />,
 };
 
-const IconBadge: React.FC<{ 
-  icon: React.ReactNode; 
+const IconBadge: React.FC<{
+  icon: React.ReactNode;
   kind: ContentKind;
   className?: string;
 }> = ({ icon, kind, className = "" }) => {
-  const getKindGradient = (kind: ContentKind): string => {
+  const getKindGradient = (k: ContentKind): string => {
     const gradients: Record<ContentKind, string> = {
       blog: "from-emerald-500/30 to-emerald-600/30",
       book: "from-violet-500/30 to-violet-600/30",
@@ -126,11 +117,15 @@ const IconBadge: React.FC<{
       print: "from-cyan-500/30 to-cyan-600/30",
       resource: "from-indigo-500/30 to-indigo-600/30",
     };
-    return gradients[kind];
+    return gradients[k];
   };
 
   return (
-    <div className={`rounded-xl bg-gradient-to-br ${getKindGradient(kind)} p-2.5 ${className}`}>
+    <div
+      className={`rounded-xl bg-gradient-to-br ${getKindGradient(
+        kind
+      )} p-2.5 ${className}`}
+    >
       {icon}
     </div>
   );
@@ -140,7 +135,14 @@ const IconBadge: React.FC<{
 /* AESTHETIC SYSTEM                                                           */
 /* -------------------------------------------------------------------------- */
 
-const kindOrder: ContentKind[] = ["blog", "book", "download", "event", "print", "resource"];
+const kindOrder: ContentKind[] = [
+  "blog",
+  "book",
+  "download",
+  "event",
+  "print",
+  "resource",
+];
 
 const kindLabels: Record<ContentKind, string> = {
   blog: "Strategic Essays",
@@ -150,18 +152,6 @@ const kindLabels: Record<ContentKind, string> = {
   print: "Print Editions",
   resource: "Core Resources",
 } as const;
-
-const getKindGradient = (kind: ContentKind): string => {
-  const gradients: Record<ContentKind, string> = {
-    blog: "bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10",
-    book: "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10",
-    download: "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-red-500/10",
-    event: "bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-red-500/10",
-    print: "bg-gradient-to-br from-indigo-500/10 via-blue-500/5 to-cyan-500/10",
-    resource: "bg-gradient-to-br from-cyan-500/10 via-sky-500/5 to-blue-500/10",
-  };
-  return gradients[kind];
-};
 
 const getKindHighlight = (kind: ContentKind): string => {
   const highlights: Record<ContentKind, string> = {
@@ -179,33 +169,50 @@ const getKindHighlight = (kind: ContentKind): string => {
 /* PREMIUM UI COMPONENTS                                                      */
 /* -------------------------------------------------------------------------- */
 
-const GlassPanel: React.FC<{ 
-  children: React.ReactNode; 
-  className?: string; 
+const GlassPanel: React.FC<{
+  children: React.ReactNode;
+  className?: string;
   hover?: boolean;
   glow?: boolean;
 }> = ({ children, className = "", hover = true, glow = false }) => (
-  <div className={`
+  <div
+    className={`
     relative overflow-hidden rounded-2xl 
     bg-white/[0.08] backdrop-blur-xl
     border border-white/10
     shadow-2xl shadow-black/40
-    ${hover ? "transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60 hover:border-white/20" : ""}
-    ${glow ? "after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-br after:from-amber-500/5 after:via-transparent after:to-amber-500/5" : ""}
+    ${
+      hover
+        ? "transition-all duration-700 hover:scale-[1.02] hover:shadow-3xl hover:shadow-black/60 hover:border-white/20"
+        : ""
+    }
+    ${
+      glow
+        ? "after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-br after:from-amber-500/5 after:via-transparent after:to-amber-500/5"
+        : ""
+    }
     ${className}
-  `}>
+  `}
+  >
     <div className="relative z-10 h-full">{children}</div>
   </div>
 );
 
-const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value, duration = 1500 }) => {
+const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({
+  value,
+  duration = 1500,
+}) => {
   const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
+    if (value <= 0) {
+      setCount(0);
+      return;
+    }
     let start = 0;
     const end = value;
     const incrementTime = Math.max(10, duration / end);
-    
+
     const timer = setInterval(() => {
       start += 1;
       setCount(start);
@@ -218,10 +225,10 @@ const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value
   return <span className="tabular-nums">{count}</span>;
 };
 
-const StatBadge: React.FC<{ 
-  icon: React.ReactNode; 
-  value: number; 
-  label: string; 
+const StatBadge: React.FC<{
+  icon: React.ReactNode;
+  value: number;
+  label: string;
   trend?: number;
 }> = ({ icon, value, label, trend }) => (
   <GlassPanel className="p-5">
@@ -230,13 +237,15 @@ const StatBadge: React.FC<{
         <div className="rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/20 p-2.5">
           <div className="text-xl text-amber-400">{icon}</div>
         </div>
-        {trend && (
-          <div className={`rounded-full px-2 py-1 text-xs font-bold ${
-            trend > 0 
-              ? 'bg-emerald-500/20 text-emerald-400' 
-              : 'bg-rose-500/20 text-rose-400'
-          }`}>
-            {trend > 0 ? '↗' : '↘'} {Math.abs(trend)}%
+        {typeof trend === "number" && (
+          <div
+            className={`rounded-full px-2 py-1 text-xs font-bold ${
+              trend > 0
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-rose-500/20 text-rose-400"
+            }`}
+          >
+            {trend > 0 ? "↗" : "↘"} {Math.abs(trend)}%
           </div>
         )}
       </div>
@@ -256,31 +265,38 @@ const FilterPill: React.FC<{
   icon?: React.ReactNode;
   onClick: () => void;
   badge?: string;
-}> = ({ label, value, active, count, icon, onClick, badge }) => {
+}> = ({ label, active, count, icon, onClick, badge }) => {
   return (
     <button
       type="button"
       onClick={onClick}
       className={`
         group relative flex items-center gap-3 rounded-2xl px-5 py-3.5 transition-all duration-500
-        ${active 
-          ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 shadow-2xl shadow-amber-500/40 text-white' 
-          : 'bg-white/[0.08] text-gray-300 hover:bg-white/[0.12] hover:text-white'
+        ${
+          active
+            ? "bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 shadow-2xl shadow-amber-500/40 text-white"
+            : "bg-white/[0.08] text-gray-300 hover:bg-white/[0.12] hover:text-white"
         }
-        border ${active ? 'border-amber-500/50' : 'border-white/10 hover:border-white/20'}
+        border ${
+          active
+            ? "border-amber-500/50"
+            : "border-white/10 hover:border-white/20"
+        }
         transform-gpu hover:scale-[1.03] active:scale-95
       `}
     >
       <div className="relative flex items-center gap-3">
         {icon && (
-          <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+          <div
+            className={`transition-transform duration-300 ${
+              active ? "scale-110" : "group-hover:scale-110"
+            }`}
+          >
             {icon}
           </div>
         )}
         <div className="flex flex-col items-start">
-          <span className="text-sm font-semibold">
-            {label}
-          </span>
+          <span className="text-sm font-semibold">{label}</span>
           {badge && (
             <span className="mt-1 rounded-full bg-gradient-to-r from-violet-500/30 to-violet-600/30 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-violet-300">
               {badge}
@@ -288,10 +304,16 @@ const FilterPill: React.FC<{
           )}
         </div>
       </div>
-      <div className={`
+      <div
+        className={`
         ml-auto rounded-full px-3 py-1 text-sm font-bold min-w-[36px] text-center
-        ${active ? 'bg-white/30' : 'bg-black/40 text-gray-400 group-hover:text-gray-300'}
-      `}>
+        ${
+          active
+            ? "bg-white/30"
+            : "bg-black/40 text-gray-400 group-hover:text-gray-300"
+        }
+      `}
+      >
         {count}
       </div>
     </button>
@@ -302,7 +324,7 @@ const FilterPill: React.FC<{
 /* CONTENT CARDS                                                              */
 /* -------------------------------------------------------------------------- */
 
-const ContentCard: React.FC<{ 
+const ContentCard: React.FC<{
   item: ContentResource;
   variant?: "featured" | "grid" | "list" | "compact";
 }> = ({ item, variant = "grid" }) => {
@@ -312,17 +334,19 @@ const ContentCard: React.FC<{
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return 'Today';
+
+    if (diffDays === 1) return "Today";
     if (diffDays <= 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric' 
+
+    return date.toLocaleDateString("en-GB", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -334,7 +358,11 @@ const ContentCard: React.FC<{
             <div className="mb-6 flex items-start justify-between">
               <IconBadge icon={ContentIcons[item.kind]} kind={item.kind} />
               <div className="space-y-2 text-right">
-                <span className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(item.kind)}`}>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
+                    item.kind
+                  )}`}
+                >
                   {kindLabels[item.kind]}
                 </span>
                 {item.date && (
@@ -373,9 +401,9 @@ const ContentCard: React.FC<{
         <GlassPanel className="p-6">
           <div className="flex items-start gap-6">
             <IconBadge icon={ContentIcons[item.kind]} kind={item.kind} />
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="mb-2 flex items-center gap-3">
-                <h4 className="text-lg font-semibold text-white group-hover:text-amber-300 transition-colors">
+                <h4 className="text-lg font-semibold text-white transition-colors group-hover:text-amber-300">
                   {item.title}
                 </h4>
                 {item.featured && (
@@ -384,13 +412,13 @@ const ContentCard: React.FC<{
                   </span>
                 )}
               </div>
-              
+
               {(item.description || item.excerpt) && (
                 <p className="mb-4 line-clamp-2 text-sm text-gray-400">
                   {item.description || item.excerpt}
                 </p>
               )}
-              
+
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
@@ -398,9 +426,9 @@ const ContentCard: React.FC<{
                 </div>
                 {item.tags.length > 0 && (
                   <div className="flex items-center gap-2">
-                    {item.tags.slice(0, 3).map((tag, idx) => (
-                      <span 
-                        key={idx}
+                    {item.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
                         className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-gray-400"
                       >
                         {tag}
@@ -411,14 +439,18 @@ const ContentCard: React.FC<{
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={(e) => {
                   e.preventDefault();
-                  setIsBookmarked(!isBookmarked);
+                  setIsBookmarked((prev) => !prev);
                 }}
-                className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-amber-400 transition-colors"
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-amber-400"
               >
-                <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-amber-400 text-amber-400' : ''}`} />
+                <Bookmark
+                  className={`h-5 w-5 ${
+                    isBookmarked ? "fill-amber-400 text-amber-400" : ""
+                  }`}
+                />
               </button>
               <ArrowRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-amber-400" />
             </div>
@@ -433,9 +465,13 @@ const ContentCard: React.FC<{
       <Link href={item.href} className="group block">
         <GlassPanel className="p-4">
           <div className="flex items-center gap-4">
-            <IconBadge icon={ContentIcons[item.kind]} kind={item.kind} className="p-2" />
-            <div className="flex-1 min-w-0">
-              <h4 className="truncate text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
+            <IconBadge
+              icon={ContentIcons[item.kind]}
+              kind={item.kind}
+              className="p-2"
+            />
+            <div className="min-w-0 flex-1">
+              <h4 className="truncate text-sm font-semibold text-white transition-colors group-hover:text-amber-300">
                 {item.title}
               </h4>
               <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
@@ -457,15 +493,14 @@ const ContentCard: React.FC<{
 
   // Grid variant (default)
   return (
-    <Link 
-      href={item.href} 
+    <Link
+      href={item.href}
       className="group block h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <GlassPanel className="h-full">
         <div className="flex h-full flex-col p-5">
-          {/* Header */}
           <div className="mb-4 flex items-start justify-between">
             <IconBadge icon={ContentIcons[item.kind]} kind={item.kind} />
             <div className="flex flex-col items-end gap-1">
@@ -482,14 +517,17 @@ const ContentCard: React.FC<{
             </div>
           </div>
 
-          {/* Content */}
           <div className="mb-4 flex-1">
             <div className="mb-3">
-              <span className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(item.kind)}`}>
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-sm ${getKindHighlight(
+                  item.kind
+                )}`}
+              >
                 {kindLabels[item.kind]}
               </span>
             </div>
-            
+
             <h3 className="mb-3 line-clamp-2 font-serif text-lg font-semibold leading-tight text-white transition-colors duration-500 group-hover:text-amber-100">
               {item.title}
             </h3>
@@ -501,7 +539,6 @@ const ContentCard: React.FC<{
             )}
           </div>
 
-          {/* Footer */}
           <div className="border-t border-white/10 pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -521,7 +558,11 @@ const ContentCard: React.FC<{
               </div>
               <div className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 transition-colors group-hover:text-amber-300">
                 <span>Open</span>
-                <ArrowRight className={`h-4 w-4 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
+                <ArrowRight
+                  className={`h-4 w-4 transition-transform duration-300 ${
+                    isHovered ? "translate-x-1" : ""
+                  }`}
+                />
               </div>
             </div>
           </div>
@@ -563,14 +604,17 @@ const safeGetData = async (
 ): Promise<RawContentItem[]> => {
   try {
     if (!dataFetcher || typeof dataFetcher !== "function") {
+      // eslint-disable-next-line no-console
       console.warn(`[content] ${dataName} fetcher unavailable`);
       return [];
     }
     const result = await dataFetcher();
-    if (Array.isArray(result)) return result;
+    if (Array.isArray(result)) return result as RawContentItem[];
+    // eslint-disable-next-line no-console
     console.warn(`[content] ${dataName} returned non-array, skipping`);
     return [];
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(`[content] Error fetching ${dataName}:`, error);
     return [];
   }
@@ -599,13 +643,15 @@ const getSlug = (item: RawContentItem): string | undefined => {
 
     return undefined;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("[getSlug] Error processing slug:", error);
     return undefined;
   }
 };
 
 const getHref = (kind: ContentKind, slug: string): string => {
-  if (kind === "blog") return `/blog/${slug}`;
+  // essays live at /[slug]
+  if (kind === "blog") return `/${slug}`;
   return `/${kind}s/${slug}`;
 };
 
@@ -622,6 +668,7 @@ const processContentItems = (
       const title = item.title || "Untitled";
 
       if (!slug) {
+        // eslint-disable-next-line no-console
         console.warn(
           `[processContentItems] Skipping item with no slug: ${title}`
         );
@@ -647,6 +694,7 @@ const processContentItems = (
         coverImage: item.coverImage,
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("[processContentItems] Error processing item:", error);
     }
   });
@@ -658,9 +706,11 @@ const processContentItems = (
 /* SPECIAL SECTIONS                                                           */
 /* -------------------------------------------------------------------------- */
 
-const FeaturedSpotlight: React.FC<{ items: ContentResource[] }> = ({ items }) => {
-  const featuredItems = items.filter(item => item.featured).slice(0, 4);
-  
+const FeaturedSpotlight: React.FC<{ items: ContentResource[] }> = ({
+  items,
+}) => {
+  const featuredItems = items.filter((item) => item.featured).slice(0, 4);
+
   if (featuredItems.length === 0) return null;
 
   return (
@@ -670,21 +720,22 @@ const FeaturedSpotlight: React.FC<{ items: ContentResource[] }> = ({ items }) =>
           <div className="inline-flex items-center gap-3 rounded-full border border-amber-200/30 bg-amber-500/10 px-4 py-2">
             <Star className="h-4 w-4 text-amber-300" fill="currentColor" />
             <span className="text-sm font-semibold text-amber-300">
-              Editor's Selection
+              Editor&apos;s Selection
             </span>
           </div>
           <h2 className="mt-6 font-serif text-4xl font-bold text-white">
             Start Here
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-300">
-            A curated selection of essential pieces worth starting with if you're new to the library.
+            A curated selection of essential pieces worth starting with if
+            you&apos;re new to the library.
           </p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
           {featuredItems.map((item, index) => (
-            <div 
-              key={item.slug} 
+            <div
+              key={item.slug}
               className="transform transition-all duration-1000 hover:-translate-y-2"
               style={{ animationDelay: `${index * 150}ms` }}
             >
@@ -697,9 +748,10 @@ const FeaturedSpotlight: React.FC<{ items: ContentResource[] }> = ({ items }) =>
   );
 };
 
-const TrendingCarousel: React.FC<{ items: ContentResource[] }> = ({ items }) => {
-  const trendingItems = items.filter(item => item.featured).slice(0, 5);
-  
+const TrendingCarousel: React.FC<{ items: ContentResource[] }> = ({
+  items,
+}) => {
+  const trendingItems = items.slice(0, 5);
   if (trendingItems.length === 0) return null;
 
   return (
@@ -711,15 +763,22 @@ const TrendingCarousel: React.FC<{ items: ContentResource[] }> = ({ items }) => 
               <TrendingUp className="h-6 w-6 text-amber-400" />
             </div>
             <div>
-              <h2 className="font-serif text-2xl font-bold text-white">Trending Now</h2>
-              <p className="text-sm text-amber-200/80">What the community is engaging with</p>
+              <h2 className="font-serif text-2xl font-bold text-white">
+                Trending Now
+              </h2>
+              <p className="text-sm text-amber-200/80">
+                What leaders are engaging with right now
+              </p>
             </div>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-5">
-          {trendingItems.map((item, index) => (
-            <div key={item.slug} className="transform transition-all duration-500 hover:-translate-y-2">
+          {trendingItems.map((item) => (
+            <div
+              key={item.slug}
+              className="transform transition-all duration-500 hover:-translate-y-2"
+            >
               <ContentCard item={item} variant="compact" />
             </div>
           ))}
@@ -729,20 +788,23 @@ const TrendingCarousel: React.FC<{ items: ContentResource[] }> = ({ items }) => 
   );
 };
 
-const TagCloud: React.FC<{ 
-  tags: Array<{ name: string; count: number }>; 
+const TagCloud: React.FC<{
+  tags: Array<{ name: string; count: number }>;
   selectedTags: string[];
   onTagClick: (tag: string) => void;
 }> = ({ tags, selectedTags, onTagClick }) => {
-  const maxCount = Math.max(...tags.map(t => t.count));
-  
+  if (!tags.length) return null;
+
+  const maxCount = Math.max(...tags.map((t) => t.count));
+
   return (
     <GlassPanel className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold text-white">Popular Tags</h3>
-        <button 
+        <button
+          type="button"
           onClick={() => onTagClick("")}
-          className="text-xs text-gray-400 hover:text-white transition-colors"
+          className="text-xs text-gray-400 transition-colors hover:text-white"
         >
           Clear all
         </button>
@@ -751,25 +813,28 @@ const TagCloud: React.FC<{
         {tags.map((tag) => {
           const size = Math.max(0.75, tag.count / maxCount);
           const isSelected = selectedTags.includes(tag.name);
-          
+
           return (
             <button
               key={tag.name}
+              type="button"
               onClick={() => onTagClick(tag.name)}
               className={`
                 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-300
-                ${isSelected 
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                ${
+                  isSelected
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25"
+                    : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
                 }
                 transform hover:scale-105
               `}
               style={{
-                fontSize: `${0.875 + (size * 0.25)}rem`,
-                opacity: isSelected ? 1 : 0.7 + (size * 0.3)
+                fontSize: `${0.875 + size * 0.25}rem`,
+                opacity: isSelected ? 1 : 0.7 + size * 0.3,
               }}
             >
-              {tag.name} <span className="text-xs opacity-70">({tag.count})</span>
+              {tag.name}{" "}
+              <span className="text-xs opacity-70">({tag.count})</span>
             </button>
           );
         })}
@@ -782,12 +847,12 @@ const TagCloud: React.FC<{
 /* MAIN PAGE COMPONENT                                                        */
 /* -------------------------------------------------------------------------- */
 
-const ContentLibraryPage: NextPage<ContentPageProps> = ({ 
-  items, 
+const ContentPage: NextPage<ContentPageProps> = ({
+  items,
   featuredItems,
   trendingItems,
   popularTags,
-  contentStats
+  contentStats,
 }) => {
   const [activeFilter, setActiveFilter] = React.useState<FilterKey>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -806,84 +871,79 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Mount check for hydration
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Filter options
-  const filterOptions: Array<{ 
-    key: FilterKey; 
-    label: string; 
-    icon: React.ReactNode; 
+  const filterOptions: Array<{
+    key: FilterKey;
+    label: string;
+    icon: React.ReactNode;
     badge?: string;
     count: number;
   }> = [
-    { 
-      key: "all", 
-      label: "All Content", 
-      icon: <Layers className="h-4 w-4" />, 
-      count: contentStats.total 
+    {
+      key: "all",
+      label: "All Content",
+      icon: <Layers className="h-4 w-4" />,
+      count: contentStats.total,
     },
-    { 
-      key: "featured", 
-      label: "Featured", 
-      icon: <Star className="h-4 w-4" />, 
-      badge: "CURATED", 
-      count: contentStats.featured 
+    {
+      key: "featured",
+      label: "Featured",
+      icon: <Star className="h-4 w-4" />,
+      badge: "CURATED",
+      count: contentStats.featured,
     },
-    { 
-      key: "blog", 
-      label: kindLabels.blog, 
-      icon: ContentIcons.blog, 
-      count: contentStats.blog 
+    {
+      key: "blog",
+      label: kindLabels.blog,
+      icon: ContentIcons.blog,
+      count: contentStats.blog,
     },
-    { 
-      key: "book", 
-      label: kindLabels.book, 
-      icon: ContentIcons.book, 
-      count: contentStats.book 
+    {
+      key: "book",
+      label: kindLabels.book,
+      icon: ContentIcons.book,
+      count: contentStats.book,
     },
-    { 
-      key: "download", 
-      label: kindLabels.download, 
-      icon: ContentIcons.download, 
-      count: contentStats.download 
+    {
+      key: "download",
+      label: kindLabels.download,
+      icon: ContentIcons.download,
+      count: contentStats.download,
     },
-    { 
-      key: "event", 
-      label: kindLabels.event, 
-      icon: ContentIcons.event, 
-      count: contentStats.event 
+    {
+      key: "event",
+      label: kindLabels.event,
+      icon: ContentIcons.event,
+      count: contentStats.event,
     },
-    { 
-      key: "print", 
-      label: kindLabels.print, 
-      icon: ContentIcons.print, 
-      count: contentStats.print 
+    {
+      key: "print",
+      label: kindLabels.print,
+      icon: ContentIcons.print,
+      count: contentStats.print,
     },
-    { 
-      key: "resource", 
-      label: kindLabels.resource, 
-      icon: ContentIcons.resource, 
-      count: contentStats.resource 
+    {
+      key: "resource",
+      label: kindLabels.resource,
+      icon: ContentIcons.resource,
+      count: contentStats.resource,
     },
   ];
 
-  // Filter and sort items
   const filteredItems = React.useMemo(() => {
     let result = items;
 
-    // Apply type filter
     if (activeFilter !== "all") {
       if (activeFilter === "featured") {
-        result = result.filter(item => item.featured);
+        result = result.filter((item) => item.featured);
       } else {
-        result = result.filter(item => item.kind === activeFilter);
+        result = result.filter((item) => item.kind === activeFilter);
       }
     }
 
-    // Apply search filter
     if (debouncedQuery.trim()) {
       const q = debouncedQuery.toLowerCase().trim();
       result = result.filter(
@@ -895,14 +955,12 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
       );
     }
 
-    // Apply tag filter
     if (selectedTags.length > 0) {
-      result = result.filter(item => 
-        selectedTags.some(tag => item.tags.includes(tag))
+      result = result.filter((item) =>
+        selectedTags.some((tag) => item.tags.includes(tag))
       );
     }
 
-    // Apply sorting
     if (sortBy === "newest") {
       result = [...result].sort((a, b) => {
         const dateA = new Date(a.date || 0).getTime();
@@ -910,19 +968,18 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
         return dateB - dateA;
       });
     } else if (sortBy === "title") {
-      result = [...result].sort((a, b) => 
-        a.title.localeCompare(b.title)
-      );
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === "popular") {
-      // Mock popularity - in production, use view counts or engagement metrics
       result = [...result].sort((a, b) => {
-        const aScore = (a.featured ? 100 : 0) + (a.tags.length * 10);
-        const bScore = (b.featured ? 100 : 0) + (b.tags.length * 10);
+        const aScore = (a.featured ? 100 : 0) + a.tags.length * 10;
+        const bScore = (b.featured ? 100 : 0) + b.tags.length * 10;
         return bScore - aScore;
       });
     } else if (sortBy === "trending") {
-      const trendingSlugs = trendingItems.map(item => item.slug);
-      result = [...result].filter(item => trendingSlugs.includes(item.slug));
+      const trendingSlugs = trendingItems.map((item) => item.slug);
+      result = [...result].filter((item) =>
+        trendingSlugs.includes(item.slug)
+      );
     }
 
     return result;
@@ -946,10 +1003,8 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
       setSelectedTags([]);
       return;
     }
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
@@ -986,7 +1041,8 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         name: "Abraham of London — Content Library",
-        description: "Curated collection of writings, tools, and resources for builders of legacy",
+        description:
+          "Curated collection of writings, tools, and resources for builders of legacy",
         numberOfItems: contentStats.total,
       }}
     >
@@ -1003,15 +1059,14 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
       </Head>
 
       <div className="relative min-h-screen overflow-hidden bg-black text-white">
-        {/* Background */}
         <div className="fixed inset-0 -z-10">
           <CosmicBackground />
         </div>
 
-        {/* Hero Section */}
+        {/* Hero */}
         <section className="relative flex min-h-[70vh] items-center justify-center px-4 pt-20">
           <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black/85" />
-          
+
           <div className="relative z-10 mx-auto max-w-6xl text-center">
             <div className="mb-10 inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-8 py-3 backdrop-blur-2xl">
               <Star className="h-4 w-4 text-amber-300" fill="currentColor" />
@@ -1030,18 +1085,37 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
 
             <p className="mx-auto mb-14 max-w-3xl text-lg font-light leading-relaxed text-gray-300 md:text-xl">
               Essays, frameworks, tools, and resources designed to help you
-              think clearly, act decisively, and build work that endures across generations.
+              think clearly, act decisively, and build work that endures across
+              generations.
             </p>
 
-            {/* Stats */}
             <div className="mx-auto mb-16 grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
-              <StatBadge icon="📚" value={contentStats.total} label="Total Items" trend={12.5} />
-              <StatBadge icon="⭐" value={contentStats.featured} label="Featured" trend={8.3} />
-              <StatBadge icon="✒" value={contentStats.blog} label="Essays" trend={15.2} />
-              <StatBadge icon="⚙" value={contentStats.download} label="Tools" trend={25.7} />
+              <StatBadge
+                icon="📚"
+                value={contentStats.total}
+                label="Total Items"
+                trend={12.5}
+              />
+              <StatBadge
+                icon="⭐"
+                value={contentStats.featured}
+                label="Featured"
+                trend={8.3}
+              />
+              <StatBadge
+                icon="✒"
+                value={contentStats.blog}
+                label="Essays"
+                trend={15.2}
+              />
+              <StatBadge
+                icon="⚙"
+                value={contentStats.download}
+                label="Tools"
+                trend={25.7}
+              />
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex flex-col items-center justify-center gap-5 sm:flex-row sm:justify-center">
               <button
                 type="button"
@@ -1071,21 +1145,17 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
           </div>
         </section>
 
-        {/* Featured Spotlight */}
         <FeaturedSpotlight items={featuredItems} />
-
-        {/* Trending Carousel */}
         <TrendingCarousel items={trendingItems} />
 
         {/* Main Gallery */}
         <section id="gallery" className="relative px-4 py-20">
           <div className="mx-auto max-w-7xl">
-            {/* Control Bar */}
             <GlassPanel className="mb-10 p-8">
               {/* Search */}
               <div className="mb-8">
                 <div className="relative">
-                  <Search className="absolute left-5 top-1/2 z-10 h-6 w-6 -translate-y-1/2 text-gray-400" />
+                  <Search className="pointer-events-none absolute left-5 top-1/2 z-10 h-6 w-6 -translate-y-1/2 text-gray-400" />
                   <input
                     type="search"
                     value={searchQuery}
@@ -1095,6 +1165,7 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                   />
                   {searchQuery && (
                     <button
+                      type="button"
                       onClick={() => setSearchQuery("")}
                       className="absolute right-5 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 transition-colors hover:text-white"
                     >
@@ -1104,39 +1175,47 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 </div>
               </div>
 
-              {/* Controls Row */}
+              {/* Controls */}
               <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                {/* View & Advanced Controls */}
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1 rounded-xl bg-white/5 p-1">
                     {(["grid", "list", "compact"] as ViewMode[]).map((mode) => (
                       <button
                         key={mode}
+                        type="button"
                         onClick={() => setViewMode(mode)}
                         className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                           viewMode === mode
-                            ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300'
-                            : 'text-gray-400 hover:text-white'
+                            ? "bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300"
+                            : "text-gray-400 hover:text-white"
                         }`}
                       >
-                        {mode === "grid" ? <Grid className="h-4 w-4" /> : 
-                         mode === "list" ? <List className="h-4 w-4" /> : 
-                         "Compact"}
+                        {mode === "grid" ? (
+                          <Grid className="h-4 w-4" />
+                        ) : mode === "list" ? (
+                          <List className="h-4 w-4" />
+                        ) : (
+                          "Compact"
+                        )}
                       </button>
                     ))}
                   </div>
 
                   <button
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                    type="button"
+                    onClick={() => setShowAdvanced((prev) => !prev)}
+                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-gray-400 transition-colors hover:text-white"
                   >
                     <Filter className="h-4 w-4" />
                     Advanced
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        showAdvanced ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
                 </div>
 
-                {/* Sort & Results */}
                 <div className="flex items-center gap-4">
                   <select
                     value={sortBy}
@@ -1150,15 +1229,23 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                   </select>
 
                   <div className="text-sm text-gray-400">
-                    <span className="font-semibold text-white">{filteredItems.length}</span> of{" "}
-                    <span className="font-semibold text-white">{contentStats.total}</span> items
+                    <span className="font-semibold text-white">
+                      {filteredItems.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-white">
+                      {contentStats.total}
+                    </span>{" "}
+                    items
                   </div>
                 </div>
               </div>
 
-              {/* Filter Pills */}
+              {/* Filter pills */}
               <div className="mb-6">
-                <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Browse Categories</div>
+                <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  Browse Categories
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {filterOptions.map((option) => (
                     <FilterPill
@@ -1175,12 +1262,12 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 </div>
               </div>
 
-              {/* Advanced Filters */}
+              {/* Advanced filters */}
               {showAdvanced && (
                 <div className="mt-8 border-t border-white/10 pt-8">
                   <div className="grid gap-8 md:grid-cols-2">
-                    <TagCloud 
-                      tags={popularTags} 
+                    <TagCloud
+                      tags={popularTags}
                       selectedTags={selectedTags}
                       onTagClick={handleTagClick}
                     />
@@ -1188,16 +1275,17 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                       <h3 className="font-semibold text-white">Date Range</h3>
                       <div className="space-y-2">
                         {[
-                          { label: "Last 7 days", value: "week" },
-                          { label: "Last 30 days", value: "month" },
-                          { label: "Last 90 days", value: "quarter" },
-                          { label: "Last year", value: "year" },
-                        ].map((range) => (
+                          "Last 7 days",
+                          "Last 30 days",
+                          "Last 90 days",
+                          "Last year",
+                        ].map((label) => (
                           <button
-                            key={range.value}
-                            className="w-full rounded-lg bg-white/5 px-4 py-3 text-left text-sm text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                            key={label}
+                            type="button"
+                            className="w-full rounded-lg bg-white/5 px-4 py-3 text-left text-sm text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                           >
-                            {range.label}
+                            {label}
                           </button>
                         ))}
                       </div>
@@ -1206,24 +1294,28 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 </div>
               )}
 
-              {/* Results Summary */}
               <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-6">
                 <div className="text-sm text-gray-400">
                   {searchQuery && `Searching for: "${searchQuery}" • `}
-                  {activeFilter !== "all" && `Filtered by: ${filterOptions.find(o => o.key === activeFilter)?.label} • `}
-                  {selectedTags.length > 0 && `Tags: ${selectedTags.join(", ")}`}
+                  {activeFilter !== "all" &&
+                    `Filtered by: ${
+                      filterOptions.find((o) => o.key === activeFilter)?.label
+                    } • `}
+                  {selectedTags.length > 0 &&
+                    `Tags: ${selectedTags.join(", ")}`}
                 </div>
-                
+
                 <button
+                  type="button"
                   onClick={resetFilters}
-                  className="text-sm font-medium text-gray-400 hover:text-amber-300 transition-colors"
+                  className="text-sm font-medium text-gray-400 transition-colors hover:text-amber-300"
                 >
                   Clear all filters
                 </button>
               </div>
             </GlassPanel>
 
-            {/* Content Display */}
+            {/* Results */}
             {filteredItems.length === 0 ? (
               <GlassPanel className="p-16 text-center" hover={false}>
                 <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/20">
@@ -1235,10 +1327,13 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 <p className="mx-auto mb-10 max-w-md text-gray-400">
                   {searchQuery
                     ? `Nothing matched "${searchQuery}". Try a different term or clear the search.`
-                    : "There's no content in this category yet. Check back soon!"}
+                    : "There is no content in this category yet. Check back soon."}
                 </p>
-                {(searchQuery || activeFilter !== "all" || selectedTags.length > 0) && (
+                {(searchQuery ||
+                  activeFilter !== "all" ||
+                  selectedTags.length > 0) && (
                   <button
+                    type="button"
                     onClick={resetFilters}
                     className="rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-10 py-3 font-semibold text-white transition-all hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/25"
                   >
@@ -1247,7 +1342,6 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 )}
               </GlassPanel>
             ) : activeFilter === "all" ? (
-              // Grouped by kind view
               <div className="space-y-20">
                 {kindOrder.map((kind) => {
                   const group = groupedByKind[kind];
@@ -1261,7 +1355,8 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                           {kindLabels[kind]}
                         </h3>
                         <span className="text-sm text-gray-400">
-                          {group.length} item{group.length !== 1 ? "s" : ""}
+                          {group.length} item
+                          {group.length !== 1 ? "s" : ""}
                         </span>
                       </div>
                       <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
@@ -1278,18 +1373,18 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                 })}
               </div>
             ) : (
-              // Single category view
               <div>
                 <div className="mb-10 flex items-center justify-between gap-4">
                   <h3 className="flex items-center gap-4 font-serif text-2xl font-bold text-white">
-                    <IconBadge 
-                      icon={ContentIcons[activeFilter as ContentKind]} 
-                      kind={activeFilter as ContentKind} 
+                    <IconBadge
+                      icon={ContentIcons[activeFilter as ContentKind]}
+                      kind={activeFilter as ContentKind}
                     />
                     {kindLabels[activeFilter as ContentKind]}
                   </h3>
                   <span className="text-sm text-gray-400">
-                    {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+                    {filteredItems.length} item
+                    {filteredItems.length !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
@@ -1304,19 +1399,21 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
               </div>
             )}
 
-            {/* Load More */}
-            {filteredItems.length > 0 && filteredItems.length < items.length && (
-              <div className="mt-12 text-center">
-                <button className="group rounded-2xl border border-white/10 bg-white/[0.08] px-10 py-4 text-lg font-semibold text-white transition-all hover:border-white/20 hover:bg-white/[0.12]">
-                  <span className="flex items-center gap-3">
-                    Load More
-                    <RefreshCw className="h-5 w-5 transition-transform group-hover:rotate-180" />
-                  </span>
-                </button>
-              </div>
-            )}
+            {filteredItems.length > 0 &&
+              filteredItems.length < items.length && (
+                <div className="mt-12 text-center">
+                  <button
+                    type="button"
+                    className="group rounded-2xl border border-white/10 bg-white/[0.08] px-10 py-4 text-lg font-semibold text-white transition-all hover:border-white/20 hover:bg-white/[0.12]"
+                  >
+                    <span className="flex items-center gap-3">
+                      Load More
+                      <RefreshCw className="h-5 w-5 transition-transform group-hover:rotate-180" />
+                    </span>
+                  </button>
+                </div>
+              )}
 
-            {/* Final CTA */}
             <GlassPanel className="mt-20 overflow-hidden" glow>
               <div className="p-12">
                 <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
@@ -1325,8 +1422,9 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
                       Need something specific?
                     </h3>
                     <p className="text-lg text-gray-400">
-                      If you're looking for content on a particular topic or need customized resources 
-                      for your team or project, let's discuss how we can help.
+                      If you&apos;re looking for content on a particular topic
+                      or need customized resources for your team or project,
+                      let&apos;s discuss how we can help.
                     </p>
                   </div>
                   <Link
@@ -1353,6 +1451,7 @@ const ContentLibraryPage: NextPage<ContentPageProps> = ({
 /* -------------------------------------------------------------------------- */
 
 export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
+  // eslint-disable-next-line no-console
   console.log("🌌 [content] Building content library...");
 
   try {
@@ -1375,7 +1474,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       {
         kind: "event" as ContentKind,
         data: safeGetData(
-          () => getAllContent?.("events") ?? [],
+          () => getAllEvents() as unknown as RawContentItem[],
           "events"
         ),
         category: "Sessions",
@@ -1383,7 +1482,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       {
         kind: "print" as ContentKind,
         data: safeGetData(
-          () => getAllContent?.("prints") ?? [],
+          () => getAllPrintsMeta() as unknown as RawContentItem[],
           "prints"
         ),
         category: "Prints",
@@ -1391,7 +1490,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       {
         kind: "resource" as ContentKind,
         data: safeGetData(
-          () => getAllContent?.("resources") ?? [],
+          () => getAllResourcesMeta() as unknown as RawContentItem[],
           "resources"
         ),
         category: "Resources",
@@ -1406,44 +1505,41 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
           const items = await data;
           const processed = processContentItems(items, kind, category);
           allItems.push(...processed);
+          // eslint-disable-next-line no-console
           console.log(`✨ [content] Processed ${processed.length} ${kind}`);
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(`💥 [content] Failed to process ${kind}:`, error);
         }
       })
     );
 
-    // Sort by date (newest first)
     const sortedItems = allItems.sort((a, b) => {
       const dateA = new Date(a.date || 0).getTime();
       const dateB = new Date(b.date || 0).getTime();
       return dateB - dateA;
     });
 
-    // Calculate statistics
     const contentStats = {
       total: sortedItems.length,
-      blog: sortedItems.filter(i => i.kind === "blog").length,
-      book: sortedItems.filter(i => i.kind === "book").length,
-      download: sortedItems.filter(i => i.kind === "download").length,
-      event: sortedItems.filter(i => i.kind === "event").length,
-      print: sortedItems.filter(i => i.kind === "print").length,
-      resource: sortedItems.filter(i => i.kind === "resource").length,
-      featured: sortedItems.filter(i => i.featured).length,
+      blog: sortedItems.filter((i) => i.kind === "blog").length,
+      book: sortedItems.filter((i) => i.kind === "book").length,
+      download: sortedItems.filter((i) => i.kind === "download").length,
+      event: sortedItems.filter((i) => i.kind === "event").length,
+      print: sortedItems.filter((i) => i.kind === "print").length,
+      resource: sortedItems.filter((i) => i.kind === "resource").length,
+      featured: sortedItems.filter((i) => i.featured).length,
     };
 
-    // Get featured items
-    const featuredItems = sortedItems.filter(i => i.featured).slice(0, 4);
-    
-    // Get trending items (mock - in production use view counts)
+    const featuredItems = sortedItems.filter((i) => i.featured).slice(0, 4);
+
     const trendingItems = sortedItems
-      .filter(item => item.featured || Math.random() > 0.7)
+      .filter((item) => item.featured || Math.random() > 0.7)
       .slice(0, 8);
 
-    // Generate popular tags
     const tagCounts: Record<string, number> = {};
-    sortedItems.forEach(item => {
-      item.tags.forEach(tag => {
+    sortedItems.forEach((item) => {
+      item.tags.forEach((tag) => {
         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
       });
     });
@@ -1453,6 +1549,7 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 20);
 
+    // eslint-disable-next-line no-console
     console.log("[content] Build completed:", {
       total: sortedItems.length,
       featured: featuredItems.length,
@@ -1468,9 +1565,10 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
         popularTags,
         contentStats,
       },
-      revalidate: 3600, // Revalidate every hour
+      revalidate: 3600,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("💢 [content] Critical build error:", error);
     return {
       props: {
@@ -1494,4 +1592,4 @@ export const getStaticProps: GetStaticProps<ContentPageProps> = async () => {
   }
 };
 
-export default ContentLibraryPage;
+export default ContentPage;
