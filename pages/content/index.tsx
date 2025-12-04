@@ -1,7 +1,6 @@
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
 import Link from "next/link";
-import Image from "next/image";
 
 import Layout from "@/components/Layout";
 import {
@@ -99,13 +98,8 @@ const TypeTag: React.FC<{ type: UnifiedContent["type"] }> = ({ type }) => {
 };
 
 const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
-  // crude image heuristic: books/events might already have covers;
-  // fall back to generic gradient.
-  const hasCover =
-    item.type === "download" || item.type === "event" || item.type === "page";
-
   return (
-    <Link href={item.url} className="group block h-full">
+    <Link href={item.url || "#"} className="group block h-full">
       <article
         className="flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         style={{
@@ -117,9 +111,7 @@ const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
       >
         {/* Header / image strip */}
         <div className="relative h-32 w-full overflow-hidden">
-          {hasCover ? (
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900" />
-          ) : null}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900" />
           <div
             className="absolute inset-0 opacity-40"
             style={{
@@ -138,20 +130,20 @@ const LibraryCard: React.FC<{ item: UnifiedContent }> = ({ item }) => {
             className="mb-2 font-serif text-lg font-medium"
             style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
           >
-            {item.title}
+            {item.title || "Untitled"}
           </h3>
-          {item.description || item.excerpt ? (
+          {(item.description || item.excerpt) ? (
             <p
               className="mb-4 line-clamp-3 text-sm leading-relaxed opacity-80"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              {item.description ?? item.excerpt}
+              {item.description || item.excerpt || ""}
             </p>
           ) : null}
 
           <div className="mt-auto flex items-center justify-between pt-2 text-xs">
             <div className="flex flex-wrap gap-2">
-              {item.tags?.slice(0, 3).map((tag) => (
+              {(item.tags || []).slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full bg-black/20 px-2 py-0.5 text-[0.65rem] uppercase tracking-wide"
@@ -197,10 +189,10 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
     const q = query.toLowerCase();
     return base.filter(
       (it) =>
-        it.title.toLowerCase().includes(q) ||
-        it.description?.toLowerCase().includes(q) ||
-        it.excerpt?.toLowerCase().includes(q) ||
-        it.tags?.some((t) => t.toLowerCase().includes(q))
+        (it.title || "").toLowerCase().includes(q) ||
+        (it.description || "").toLowerCase().includes(q) ||
+        (it.excerpt || "").toLowerCase().includes(q) ||
+        (it.tags || []).some((t) => t.toLowerCase().includes(q))
     );
   }, [items, filter, query]);
 
@@ -345,15 +337,65 @@ const ContentLibraryPage: NextPage<LibraryProps> = ({ items }) => {
 /* DATA LOADING                                                               */
 /* -------------------------------------------------------------------------- */
 
-export const getStaticProps: GetStaticProps<LibraryProps> = async () => {
-  const items = await getAllUnifiedContent();
+// Helper function to deeply sanitize undefined values
+const sanitizeForSerialization = <T,>(data: T): T => {
+  if (data === undefined || data === null) {
+    return null as T;
+  }
+  
+  if (Array.isArray(data)) {
+    return data.map(sanitizeForSerialization) as T;
+  }
+  
+  if (typeof data === 'object') {
+    const sanitized: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      sanitized[key] = sanitizeForSerialization(value);
+    }
+    return sanitized as T;
+  }
+  
+  return data;
+};
 
-  return {
-    props: {
-      items,
-    },
-    revalidate: 60 * 10, // 10 minutes
-  };
+export const getStaticProps: GetStaticProps<LibraryProps> = async () => {
+  try {
+    const items = await getAllUnifiedContent();
+    
+    // Ensure we have an array, even if empty
+    const safeItems = Array.isArray(items) ? items : [];
+    
+    // Deeply sanitize all items to replace undefined with null
+    const sanitizedItems = sanitizeForSerialization(safeItems);
+    
+    // Additional safety: ensure each item has required fields
+    const validatedItems = (sanitizedItems as UnifiedContent[]).map(item => ({
+      ...item,
+      id: item.id || `unknown-${Date.now()}-${Math.random()}`,
+      title: item.title || "Untitled",
+      type: item.type || "page",
+      url: item.url || "/",
+      description: item.description || null,
+      excerpt: item.excerpt || null,
+      tags: Array.isArray(item.tags) ? item.tags.filter(Boolean) : [],
+    }));
+
+    return {
+      props: {
+        items: validatedItems,
+      },
+      revalidate: 60 * 10, // 10 minutes
+    };
+  } catch (error) {
+    console.error("Error in getStaticProps for /content:", error);
+    // Return empty props to prevent build failure
+    return {
+      props: {
+        items: [],
+      },
+      revalidate: 60 * 10,
+    };
+  }
 };
 
 export default ContentLibraryPage;
