@@ -1,13 +1,18 @@
-import type { GetStaticPaths, GetStaticProps } from "next";
+// ============================================================================
+// pages/prints/[slug].tsx
+// Printable detail page – uses lib/prints (backed by lib/print-utils).
+// ============================================================================
+
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 
 import Layout from "@/components/Layout";
+import mdxComponents from "@/components/mdx-components";
 import type { PrintDocument } from "@/lib/prints";
 import { getAllPrintSlugs, getPrintDocumentBySlug } from "@/lib/prints";
-import mdxComponents from "@/components/mdx-components";
 
 type PrintPageProps = {
   print: PrintDocument;
@@ -33,17 +38,17 @@ export const getStaticProps: GetStaticProps<PrintPageProps> = async ({
   const doc = getPrintDocumentBySlug(slug);
   if (!doc) return { notFound: true };
 
-  // Plain JSON copy for safety in serialization / props
+  // Plain JSON copy for safety
   const print: PrintDocument = JSON.parse(JSON.stringify(doc));
 
-  // Contentlayer stores MDX source on body.raw
-  const docWithBody = doc as PrintDocument & { body?: { raw?: string } };
-  const rawMdx: string = docWithBody.body?.raw ?? "";
+  // Prefer explicit body.raw if later added; otherwise use mock `content`
+  const anyDoc = doc as PrintDocument & { body?: { raw?: string } };
+  const rawMdx: string =
+    anyDoc.body?.raw?.toString() ?? (anyDoc.content?.toString() ?? "");
 
   const contentSource =
     rawMdx.trim().length > 0
       ? await serialize(rawMdx, {
-          // Allow access to front-matter fields inside MDX if needed
           scope: { ...print },
         })
       : null;
@@ -57,7 +62,7 @@ export const getStaticProps: GetStaticProps<PrintPageProps> = async ({
   };
 };
 
-export default function PrintPage({ print, contentSource }: PrintPageProps) {
+const PrintPage: NextPage<PrintPageProps> = ({ print, contentSource }) => {
   const { title, slug, date, excerpt, tags } = print;
 
   const displayDate = date
@@ -174,4 +179,6 @@ export default function PrintPage({ print, contentSource }: PrintPageProps) {
       </div>
     </Layout>
   );
-}
+};
+
+export default PrintPage;

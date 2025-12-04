@@ -1,5 +1,8 @@
+// ============================================================================
 // lib/print-utils.ts
-// PRODUCTION-SAFE utilities - NO Contentlayer dependency
+// Production-safe utilities for prints – NO Contentlayer dependency.
+// For now, uses MOCK_PRINTS as the single source of truth for print data.
+// ============================================================================
 
 export interface PrintDocument {
   _id: string;
@@ -10,15 +13,14 @@ export interface PrintDocument {
   excerpt?: string;
   tags?: string[];
   coverImage?: string;
-  content?: string;
+  content?: string; // MDX/markdown string
   // Allow future-safe extension without breaking consumers
   [key: string]: unknown;
 }
 
-// -----------------------------------------------------------------------------
-// Mock data for when Contentlayer is not available
-// In production with real data, you can replace this with a filesystem/DB source
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// MOCK DATA (replace with filesystem/DB/Contentlayer source later)
+// ---------------------------------------------------------------------------
 
 const MOCK_PRINTS: PrintDocument[] = [
   {
@@ -26,7 +28,7 @@ const MOCK_PRINTS: PrintDocument[] = [
     title: "Entrepreneur Operating Pack",
     slug: "entrepreneur-operating-pack",
     date: "2025-11-12",
-    url: "/print/entrepreneur-operating-pack",
+    url: "/prints/entrepreneur-operating-pack",
     excerpt:
       "A premium operating pack for founders who want to run their lives and ventures like a boardroom—not a battlefield.",
     tags: ["entrepreneurship", "systems", "execution"],
@@ -48,7 +50,7 @@ It’s designed to sit beside your laptop or on your desk as a **visual governan
     title: "Fatherhood Standards Card",
     slug: "fatherhood-standards-card",
     date: "2025-11-12",
-    url: "/print/fatherhood-standards-card",
+    url: "/prints/fatherhood-standards-card",
     excerpt:
       "A one-page standard card for fathers who refuse to parent on autopilot.",
     tags: ["fatherhood", "family", "standards"],
@@ -69,7 +71,7 @@ Review it often. Adjust your behaviour, not your standards.`,
     title: "Leadership Playbook",
     slug: "leadership-playbook",
     date: "2025-11-12",
-    url: "/print/leadership-playbook",
+    url: "/prints/leadership-playbook",
     excerpt:
       "A concise, battlefield-tested leadership playbook for fathers, founders, and marketplace leaders.",
     tags: ["leadership", "strategy", "playbook"],
@@ -91,7 +93,7 @@ Use it as a **live document** you revisit every quarter.`,
     title: "Mentorship Starter Kit",
     slug: "mentorship-starter-kit",
     date: "2025-11-12",
-    url: "/print/mentorship-starter-kit",
+    url: "/prints/mentorship-starter-kit",
     excerpt:
       "A structured starter kit to turn good intentions about mentoring into a repeatable, life-giving practice.",
     tags: ["mentorship", "discipleship", "legacy"],
@@ -113,7 +115,7 @@ This is for fathers, leaders, and older siblings who know someone is watching th
     title: "Standards Brief",
     slug: "standards-brief",
     date: "2025-11-12",
-    url: "/print/standards-brief",
+    url: "/prints/standards-brief",
     excerpt:
       "A strategic one-pager to define the standards you will live by—and refuse to negotiate.",
     tags: ["standards", "identity", "clarity"],
@@ -135,7 +137,7 @@ Treat this as your **personal constitution**.`,
     title: "Weekly Operating Rhythm",
     slug: "weekly-operating-rhythm",
     date: "2025-11-12",
-    url: "/print/weekly-operating-rhythm",
+    url: "/prints/weekly-operating-rhythm",
     excerpt:
       "A premium weekly rhythm sheet to align your energy, priorities, and commitments with what actually matters.",
     tags: ["rhythm", "productivity", "execution"],
@@ -160,16 +162,13 @@ Print several copies. Use pen, not just intention.`,
 
 /**
  * Return all print documents.
- * In non-production, logs that mock data is being used.
  */
 export function getAllPrintDocuments(): PrintDocument[] {
   if (process.env.NODE_ENV !== "production") {
-    // Keep the warning for dev only so production logs stay clean
     // eslint-disable-next-line no-console
     console.warn("⚠️ Using mock print data - Contentlayer is disabled");
   }
-  // Return a shallow copy to avoid accidental mutation of the source array
-  return [...MOCK_PRINTS];
+  return [...MOCK_PRINTS]; // shallow copy
 }
 
 /**

@@ -1,5 +1,7 @@
+// ============================================================================
 // lib/prints.ts
-// Unified helpers + data access for print documents (wrapping print-utils)
+// Unified helpers + data access for print documents (wrapping print-utils).
+// ============================================================================
 
 import {
   getAllPrintDocuments as _getAllPrintDocuments,

@@ -1,113 +1,78 @@
 // ============================================================================
-// FILE 1: lib/server/prints-data.ts
+// lib/server/prints-data.ts
+// Canonical metadata access for print editions (used by unified-content, etc.)
+// Source of truth: lib/prints → lib/print-utils (MOCK_PRINTS for now).
 // ============================================================================
 
 import {
-  getMdxCollectionMeta,
-  getMdxDocumentBySlug,
-  type MdxMeta,
-  type MdxDocument,
-} from "@/lib/server/mdx-collections";
+  getAllPrintDocuments,
+  type PrintDocument,
+} from "@/lib/prints";
 
-export type PrintMeta = MdxMeta & {
-  description?: string;
-  excerpt?: string;
-  coverImage?: string;
-  dimensions?: string;
-  downloadFile?: string;
+export type PrintMeta = {
+  slug: string;
+  title: string;
+  description?: string | null;
+  excerpt?: string | null;
+  date?: string | null;
+  author?: string | null;
+  category?: string | null;
+  tags?: string[];
+  coverImage?: string | null;
+  // extra fields allowed but not required
   price?: string;
   available?: boolean;
-  category?: string;
-  tags?: string[];
+  dimensions?: string;
 };
-
-export type PrintWithContent = PrintMeta & {
-  content: string;
-};
-
-// ----------------- helpers -----------------
-
-function cleanSlug(raw: unknown): string {
-  return String(raw || "")
-    .trim()
-    .replace(/^\/+|\/+$/g, "");
-}
-
-function normalisePrintSlug(raw: unknown): string {
-  const s = cleanSlug(raw);
-  return s.replace(/^prints?\//i, "");
-}
 
 function normaliseDate(raw: unknown): string | undefined {
   if (!raw) return undefined;
   if (typeof raw === "string") return raw;
-  if (raw instanceof Date) {
-    return raw.toISOString().split("T")[0];
-  }
+  if (raw instanceof Date) return raw.toISOString().split("T")[0];
   return String(raw);
 }
 
-function fromMdxMeta(meta: MdxMeta): PrintMeta {
-  const anyMeta = meta as any;
-  const tags = Array.isArray(anyMeta.tags)
-    ? (anyMeta.tags as unknown[]).map((t) => String(t))
-    : undefined;
+function toPrintMeta(doc: PrintDocument): PrintMeta {
+  const anyDoc = doc as any;
+
+  const tags = Array.isArray(anyDoc.tags)
+    ? (anyDoc.tags as unknown[]).map((t) => String(t))
+    : [];
 
   return {
-    ...meta,
-    slug: normalisePrintSlug(meta.slug),
-    date: normaliseDate(anyMeta.date),
-    description: anyMeta.description ?? meta.excerpt ?? undefined,
-    excerpt:
-      anyMeta.excerpt ?? anyMeta.description ?? meta.excerpt ?? undefined,
-    coverImage: anyMeta.coverImage ?? undefined,
-    dimensions: anyMeta.dimensions ?? undefined,
-    downloadFile: anyMeta.downloadFile ?? undefined,
-    price: anyMeta.price ?? "Free",
-    available: anyMeta.available !== false, // default to true
-    category: anyMeta.category ?? "Printables",
+    slug: String(doc.slug || "").trim(),
+    title: String(doc.title || "Untitled Print"),
+    description: anyDoc.description ?? doc.excerpt ?? null,
+    excerpt: doc.excerpt ?? anyDoc.description ?? null,
+    date: normaliseDate(anyDoc.date ?? doc.date),
+    author: anyDoc.author ?? null,
+    category: anyDoc.category ?? "Print",
     tags,
+    coverImage: anyDoc.coverImage ?? doc.coverImage ?? null,
+    price: anyDoc.price ?? "Free",
+    available: anyDoc.available !== false,
+    dimensions: anyDoc.dimensions ?? null,
   };
 }
 
-function fromMdxDocument(doc: MdxDocument): PrintWithContent {
-  const meta = fromMdxMeta(doc);
-  return {
-    ...meta,
-    content: doc.content,
-  };
-}
-
-// ----------------- public API -----------------
-
+/**
+ * Return all print metadata, sorted newest → oldest.
+ */
 export function getAllPrintsMeta(): PrintMeta[] {
   try {
-    const metas = getMdxCollectionMeta("prints");
-    return metas.map(fromMdxMeta);
+    const docs = getAllPrintDocuments();
+    const metas = docs.map(toPrintMeta);
+
+    metas.sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
+
+    return metas;
   } catch (error) {
-    console.error("[prints] Error fetching prints metadata:", error);
+    // eslint-disable-next-line no-console
+    console.error("[prints-data] Error fetching prints metadata:", error);
     return [];
-  }
-}
-
-export function getPrintSlugs(): string[] {
-  return getAllPrintsMeta()
-    .map((m) => m.slug)
-    .filter((s): s is string => Boolean(s && s.trim()));
-}
-
-export function getPrintBySlug(slug: string): PrintWithContent | null {
-  try {
-    const key = normalisePrintSlug(slug);
-    const doc = getMdxDocumentBySlug("prints", key);
-
-    if (!doc) {
-      return null;
-    }
-
-    return fromMdxDocument(doc);
-  } catch (error) {
-    console.error(`[prints] Error fetching print by slug "${slug}":`, error);
-    return null;
   }
 }
