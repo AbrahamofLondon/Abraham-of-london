@@ -1,3 +1,4 @@
+// pages/index.tsx
 import * as React from "react";
 import Head from "next/head";
 import Image from "next/image";
@@ -6,29 +7,29 @@ import type { NextPage } from "next";
 
 import Layout from "@/components/Layout";
 import MandateStatement from "@/components/MandateStatement";
-import VenturesSection from "@/components/homepage/VenturesSection";
-import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
-import StatsBar from "@/components/homepage/StatsBar";
-import AboutSection from "@/components/homepage/AboutSection";
-
 import {
   LIBRARY_AESTHETICS,
   SEASONAL_CURATIONS,
   CONTENT_CATEGORIES,
 } from "@/lib/content";
 
+import VenturesSection from "@/components/homepage/VenturesSection";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import StatsBar from "@/components/homepage/StatsBar";
+import AboutSection from "@/components/homepage/AboutSection";
+
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 /* -------------------------------------------------------------------------- */
-/* LUXURY SUB-COMPONENTS                                                      */
+/* LUXURY DESIGN SYSTEM                                                       */
 /* -------------------------------------------------------------------------- */
 
 const GoldFoilAccent: React.FC<{ position: "top" | "bottom" }> = ({
   position,
 }) => (
   <div
-    className={`pointer-events-none absolute ${
+    className={`absolute ${
       position === "top" ? "top-0" : "bottom-0"
     } left-0 right-0 h-px overflow-hidden`}
   >
@@ -81,9 +82,9 @@ const SectionDivider: React.FC = () => (
 
 const CanonVolumeCard: React.FC = () => (
   <div className="relative group">
-    {/* Glow frame */}
+    {/* Decorative frame */}
     <div
-      className="pointer-events-none absolute -inset-4 rounded-3xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+      className="absolute -inset-4 rounded-3xl opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-20"
       style={{ backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron }}
     />
 
@@ -91,13 +92,13 @@ const CanonVolumeCard: React.FC = () => (
       className="relative overflow-hidden rounded-2xl border backdrop-blur-xl"
       style={{
         borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-        backgroundColor: "rgba(15, 23, 42, 0.95)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.9)",
+        backgroundColor: "rgba(15, 23, 42, 0.9)",
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
       }}
     >
-      {/* Spine accent */}
+      {/* Book spine effect */}
       <div
-        className="pointer-events-none absolute left-0 top-1/4 bottom-1/4 w-1"
+        className="absolute left-0 top-1/4 bottom-1/4 w-1"
         style={{
           background: `linear-gradient(to bottom, 
             transparent 0%, 
@@ -117,15 +118,15 @@ const CanonVolumeCard: React.FC = () => (
                 backgroundColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}15`,
               }}
             >
-              <span
+              <div
                 className="text-lg"
                 style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
               >
-                ⚖
-              </span>
+                📜
+              </div>
             </div>
             <span
-              className="text-xs font-medium uppercase tracking-[0.22em]"
+              className="text-xs font-medium uppercase tracking-widest"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
             >
               Canon · Volume I
@@ -134,18 +135,18 @@ const CanonVolumeCard: React.FC = () => (
           <div
             className="rounded-full px-3 py-1 text-xs"
             style={{
-              backgroundColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}18`,
+              backgroundColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}15`,
               color: LIBRARY_AESTHETICS.colors.primary.saffron,
             }}
           >
-            Prelude Minibook
+            Prelude
           </div>
         </div>
 
-        <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-xl bg-gradient-to-br from-slate-900 to-black">
+        <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-slate-900 to-black">
           <Image
             src="/assets/images/books/the-architecture-of-human-purpose.jpg"
-            alt="The Architecture of Human Purpose — Canon Prelude"
+            alt="The Architecture of Human Purpose — Canon Volume I"
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 320px"
@@ -158,12 +159,13 @@ const CanonVolumeCard: React.FC = () => (
         >
           The Architecture of Human Purpose
         </h3>
+
         <p
           className="mb-4 text-xs leading-relaxed"
           style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
         >
-          A high-level prelude to the ten-volume Canon — mapping the structural
-          logic of purpose, civilisation, governance, and destiny.
+          The prelude to the Canon — a structural map for those who know that
+          human flourishing is not accidental but architectural.
         </p>
 
         <div className="flex gap-2">
@@ -175,7 +177,7 @@ const CanonVolumeCard: React.FC = () => (
               color: "#0f172a",
             }}
           >
-            Open Prelude
+            Read Now
           </Link>
           <Link
             href="/canon"
@@ -185,89 +187,12 @@ const CanonVolumeCard: React.FC = () => (
               color: LIBRARY_AESTHETICS.colors.primary.saffron,
             }}
           >
-            View Canon
+            All Volumes
           </Link>
         </div>
       </div>
     </div>
   </div>
-);
-
-const FeaturedBookCard: React.FC<{
-  title: string;
-  subtitle: string;
-  href: string;
-  coverSrc: string;
-  tag: string;
-  line: string;
-}> = ({ title, subtitle, href, coverSrc, tag, line }) => (
-  <Link href={href} className="group block h-full">
-    <div
-      className="relative flex h-full flex-col gap-4 rounded-2xl border p-4 sm:flex-row"
-      style={{
-        borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-        background:
-          "radial-gradient(circle at top left, rgba(248, 250, 252, 0.04), rgba(15,23,42,0.96))",
-      }}
-    >
-      <div className="relative w-full sm:w-40 md:w-44 lg:w-48">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
-          <Image
-            src={coverSrc}
-            alt={title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 40vw, 200px"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col justify-between">
-        <div>
-          <p
-            className="mb-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em]"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-          >
-            {tag}
-          </p>
-          <h3
-            className="font-serif text-xl font-medium"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            {title}
-          </h3>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            {subtitle}
-          </p>
-        </div>
-        <div className="mt-3 space-y-2">
-          <p
-            className="text-xs leading-relaxed opacity-80"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            {line}
-          </p>
-          <div className="flex items-center justify-between text-xs">
-            <span
-              className="font-medium uppercase tracking-[0.18em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Open book
-            </span>
-            <span
-              className="text-sm transition-transform group-hover:translate-x-0.5"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              ↗
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Link>
 );
 
 const ContentCard: React.FC<{
@@ -283,11 +208,11 @@ const ContentCard: React.FC<{
       className="relative h-full rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         borderColor: `${color}30`,
-        backgroundColor: "rgba(15, 23, 42, 0.75)",
+        backgroundColor: "rgba(15, 23, 42, 0.6)",
       }}
     >
       <div
-        className="pointer-events-none absolute left-0 top-0 bottom-0 w-1"
+        className="absolute left-0 top-0 bottom-0 w-1"
         style={{
           background: `linear-gradient(to bottom, 
             ${color}00, 
@@ -296,12 +221,13 @@ const ContentCard: React.FC<{
           )`,
         }}
       />
+
       <div className="p-5">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg opacity-70" style={{ color }}>
+            <div className="text-lg opacity-70" style={{ color }}>
               {icon}
-            </span>
+            </div>
             <span
               className="text-xs font-medium uppercase tracking-wider"
               style={{ color }}
@@ -310,28 +236,31 @@ const ContentCard: React.FC<{
             </span>
           </div>
         </div>
+
         <h3
           className="mb-2 font-serif text-lg font-medium"
           style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
         >
           {title}
         </h3>
+
         <p
-          className="mb-4 text-sm leading-relaxed opacity-90"
+          className="mb-4 text-sm leading-relaxed opacity-80"
           style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
         >
           {description}
         </p>
+
         <div
           className="flex items-center justify-between border-t pt-3"
           style={{ borderColor: `${color}20` }}
         >
-          <span className="text-xs opacity-80" style={{ color }}>
+          <span className="text-xs opacity-70" style={{ color }}>
             Explore
           </span>
-          <span className="text-sm font-medium" style={{ color }}>
+          <div className="text-sm font-medium" style={{ color }}>
             →
-          </span>
+          </div>
         </div>
       </div>
     </div>
@@ -345,11 +274,7 @@ const ContentCard: React.FC<{
 const HomePage: NextPage = () => {
   const siteTitle = "Abraham of London";
   const siteTagline =
-    "Canon, books, and structural tools for fathers, founders, and builders of legacy.";
-
-  const seasonalLabel =
-    SEASONAL_CURATIONS?.wisdomTheme ??
-    "Canon · Fatherhood · Governance · Legacy";
+    "Canon, ventures, and structural tools for fathers, founders, and builders of legacy.";
 
   return (
     <Layout
@@ -387,35 +312,40 @@ const HomePage: NextPage = () => {
         <meta name="theme-color" content="#050509" />
       </Head>
 
-      {/* Global background */}
+      {/* Clean Global Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
       </div>
 
       {/* -------------------------------------------------------------------
-       1. CATHEDRAL HERO
+       1. PRIMARY HERO – Clear Hierarchy & Strong Contrast
       -------------------------------------------------------------------- */}
-      <section className="relative overflow-hidden">
+      <section className="relative min-h-[90vh] overflow-hidden">
         <GoldFoilAccent position="top" />
 
+        {/* Clean background gradient */}
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle at top, rgba(248, 250, 252, 0.06), transparent 55%),
-              linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(2,6,23,1) 55%, rgba(15,23,42,0.98) 100%)`,
+            background: `linear-gradient(135deg, 
+              rgba(15, 23, 42, 0.98) 0%, 
+              rgba(2, 6, 23, 0.95) 50%, 
+              rgba(15, 23, 42, 0.98) 100%
+            )`,
           }}
         />
 
+        {/* Subtle texture */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='140' height='140' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20h100v100H20z' fill='none' stroke='%23ffffff' stroke-opacity='0.06' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
           }}
         />
 
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 lg:px-8 lg:pb-24 lg:pt-24">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.2fr,1fr]">
-            {/* Left – Identity & Claim */}
+        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Content - Left Side */}
             <div>
               <div className="mb-6">
                 <div
@@ -425,17 +355,17 @@ const HomePage: NextPage = () => {
                     border: `1px solid ${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
                   }}
                 >
-                  <span
+                  <div
                     className="text-lg"
                     style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
                   >
                     𓆓
-                  </span>
+                  </div>
                   <span
-                    className="text-xs font-medium uppercase tracking-[0.22em]"
+                    className="text-xs font-medium uppercase tracking-widest"
                     style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
                   >
-                    {seasonalLabel}
+                    {SEASONAL_CURATIONS.wisdomTheme}
                   </span>
                 </div>
 
@@ -445,25 +375,26 @@ const HomePage: NextPage = () => {
                 >
                   Abraham of London
                   <span className="mt-2 block text-2xl font-normal sm:text-3xl lg:text-4xl">
-                    Fatherhood, governance, and legacy —  
-                    for men who refuse to drift.
+                    Structural thinking for fathers, founders,
+                    <br />
+                    and builders of legacy.
                   </span>
                 </h1>
 
                 <p
-                  className="mb-6 max-w-xl text-base leading-relaxed sm:text-lg"
+                  className="mb-8 text-lg leading-relaxed"
                   style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
                 >
-                  Canon. Books. Rooms. Ventures.  
-                  One architecture for men who carry weight — for families, for
-                  companies, for nations — and intend to outlive the headlines.
+                  If you carry responsibility for a family, a company, or a
+                  community, this is the room where faith, history, strategy,
+                  and markets get put to work — not just discussed.
                 </p>
               </div>
 
-              <div className="mb-6 flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4">
                 <Link
                   href="/canon"
-                  className="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all hover:scale-105"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all hover:scale-105"
                   style={{
                     backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
                     color: "#0f172a",
@@ -473,67 +404,53 @@ const HomePage: NextPage = () => {
                   <span>↠</span>
                 </Link>
                 <Link
-                  href="/inner-circle"
-                  className="inline-flex items-center gap-2 rounded-full border px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all hover:scale-105"
+                  href="/consulting"
+                  className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-all hover:scale-105"
                   style={{
                     borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
                     color: LIBRARY_AESTHETICS.colors.primary.parchment,
                   }}
                 >
-                  Inner Circle access
-                  <span>🕯</span>
+                  Work with Abraham
+                  <span>→</span>
                 </Link>
               </div>
-
-              <p
-                className="text-xs uppercase tracking-[0.22em]"
-                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-              >
-                Not content. Infrastructure for a life that carries weight.
-              </p>
             </div>
 
-            {/* Right – Portrait Banner */}
+            {/* Hero Image - Right Side */}
             <div className="relative">
               <div
-                className="relative overflow-hidden rounded-3xl border shadow-[0_20px_60px_rgba(0,0,0,0.9)]"
+                className="relative overflow-hidden rounded-2xl border shadow-2xl"
                 style={{
-                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}35`,
-                  background:
-                    "radial-gradient(circle at top, rgba(248,250,252,0.06), rgba(15,23,42,0.98))",
+                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
                 }}
               >
                 <div className="relative aspect-[4/5]">
                   <Image
                     src="/assets/images/abraham-of-london-banner.webp"
-                    alt="Abraham of London — portrait and brand banner"
+                    alt="Abraham of London — Canon, ventures, and structural tools for builders of legacy"
                     fill
                     priority
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 40vw"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
-                  {/* Overlay corner label */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent">
-                    <div className="px-4 pb-4 pt-10">
-                      <p
-                        className="text-[0.65rem] font-semibold uppercase tracking-[0.25em]"
-                        style={{
-                          color: LIBRARY_AESTHETICS.colors.primary.saffron,
-                        }}
-                      >
-                        Canon · Rooms · Ventures
-                      </p>
-                      <p
-                        className="mt-1 text-xs opacity-90"
-                        style={{
-                          color: LIBRARY_AESTHETICS.colors.primary.parchment,
-                        }}
-                      >
-                        A steward of men, institutions, and multi-generational
-                        design — under God, not under trend.
-                      </p>
-                    </div>
-                  </div>
+                </div>
+                <div
+                  className="border-t p-4"
+                  style={{
+                    borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
+                    backgroundColor: "rgba(15, 23, 42, 0.8)",
+                  }}
+                >
+                  <p
+                    className="text-center text-xs"
+                    style={{
+                      color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                    }}
+                  >
+                    Built for men who refuse to outsource responsibility — to
+                    the state, the culture, or the algorithm.
+                  </p>
                 </div>
               </div>
             </div>
@@ -544,7 +461,7 @@ const HomePage: NextPage = () => {
       </section>
 
       {/* -------------------------------------------------------------------
-       2. STATS / SOCIAL PROOF
+       2. SOCIAL PROOF / STATS BAR - Clean & Minimal
       -------------------------------------------------------------------- */}
       <section className="py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -555,196 +472,120 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       3. THE CANON – ENGINE ROOM
+       3. CANON & CONTENT HUB - Clear Structure
       -------------------------------------------------------------------- */}
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 grid gap-10 lg:grid-cols-[1.1fr,0.9fr]">
+          <div className="mb-12 text-center">
+            <h2
+              className="mb-4 font-serif text-3xl font-light sm:text-4xl"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+            >
+              The Canon & The Works
+            </h2>
+            <p
+              className="mx-auto max-w-2xl text-lg"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+            >
+              Not a blog. A structured record of purpose, civilisation,
+              governance, and destiny — the intellectual infrastructure
+              underneath everything.
+            </p>
+          </div>
+
+          <div className="mb-12 grid gap-12 lg:grid-cols-2">
+            {/* Left Column - Canon Content */}
             <div>
-              <p
-                className="mb-2 text-xs font-semibold uppercase tracking-[0.24em]"
-                style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-              >
-                The Canon
-              </p>
-              <h2
-                className="mb-4 font-serif text-3xl font-light sm:text-4xl"
-                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-              >
-                The civilisational operating system underneath everything.
-              </h2>
-              <p
-                className="mb-6 max-w-xl text-base leading-relaxed sm:text-lg"
-                style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-              >
-                Ten volumes on purpose, identity, governance, family,
-                institutions, nations, and destiny. Not commentary. Architecture.
-                Written for men who intend to carry responsibility across
-                generations.
-              </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="mb-8">
+                <div className="mb-4 flex items-center gap-2">
+                  <div
+                    className="rounded-lg p-2"
+                    style={{
+                      backgroundColor: `${CONTENT_CATEGORIES.CANON.color}15`,
+                    }}
+                  >
+                    <div
+                      className="text-lg"
+                      style={{ color: CONTENT_CATEGORIES.CANON.color }}
+                    >
+                      ⚖
+                    </div>
+                  </div>
+                  <h3
+                    className="font-serif text-2xl font-medium"
+                    style={{
+                      color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                    }}
+                  >
+                    The Canon
+                  </h3>
+                </div>
+                <p
+                  className="mb-6 text-lg"
+                  style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+                >
+                  The ideological engine room — first principles, structural
+                  laws, and multi-volume architecture for purpose,
+                  institutions, and human destiny.
+                </p>
                 <Link
                   href="/canon"
-                  className="inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em]"
+                  className="inline-flex items-center gap-2 rounded-full border px-5 py-2 text-sm font-medium"
                   style={{
                     borderColor: `${CONTENT_CATEGORIES.CANON.color}40`,
                     color: CONTENT_CATEGORIES.CANON.color,
                   }}
                 >
-                  Explore Canon overview
+                  Explore all volumes
                   <span>→</span>
                 </Link>
-                <Link
-                  href="/posts/canon-introduction-letter"
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em]"
-                  style={{
-                    backgroundColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}10`,
-                    color: LIBRARY_AESTHETICS.colors.primary.parchment,
-                  }}
-                >
-                  Read letter from the author
-                  <span>↗</span>
-                </Link>
+              </div>
+
+              {/* Content Cards */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ContentCard
+                  title="Essays & Posts"
+                  description="Strategic essays applying first principles to culture, policy, and markets."
+                  href="/blog"
+                  category="Essays"
+                  color={CONTENT_CATEGORIES.POSTS.color}
+                  icon="✒"
+                />
+                <ContentCard
+                  title="Tools & Downloads"
+                  description="Playbooks, templates, and structural tools for execution in the real world."
+                  href="/downloads"
+                  category="Resources"
+                  color={CONTENT_CATEGORIES.RESOURCES.color}
+                  icon="⚙"
+                />
               </div>
             </div>
 
-            <CanonVolumeCard />
+            {/* Right Column - Canon Volume */}
+            <div>
+              <CanonVolumeCard />
+            </div>
           </div>
 
+          {/* Bottom Content Cards */}
           <div className="grid gap-4 sm:grid-cols-2">
             <ContentCard
-              title="Essays & Posts"
-              description="Strategic essays applying first principles of the Canon to culture, markets, and power."
-              href="/blog"
-              category="Essays"
-              color={CONTENT_CATEGORIES.POSTS.color}
-              icon="✒"
-            />
-            <ContentCard
-              title="Tools & Downloads"
-              description="Frameworks, playbooks, and structural tools to move from conviction to execution."
-              href="/downloads"
-              category="Resources"
-              color={CONTENT_CATEGORIES.RESOURCES.color}
-              icon="⚙"
-            />
-          </div>
-        </div>
-      </section>
-
-      <SectionDivider />
-
-      {/* -------------------------------------------------------------------
-       4. THE BOOKS – NARRATIVE SPINE
-      -------------------------------------------------------------------- */}
-      <section className="bg-gradient-to-b from-slate-950 via-slate-950 to-black py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center">
-            <p
-              className="mb-2 text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              The Bookshelf
-            </p>
-            <h2
-              className="mb-4 font-serif text-3xl font-light sm:text-4xl"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              Where the theory bleeds into story.
-            </h2>
-            <p
-              className="mx-auto max-w-2xl text-base leading-relaxed sm:text-lg"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              Memoir, parable, and strategic narrative — for men who need more
-              than inspiration: they need context for their scars.
-            </p>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <FeaturedBookCard
-              title="Fathering Without Fear"
-              subtitle="The untold memoir of a father who refused to disappear — faith tested, legacy defined, history reclaimed."
-              href="/books/fathering-without-fear"
-              coverSrc="/assets/images/books/fathering-without-fear.jpg"
-              tag="Memoir · Legacy"
-              line="A battlefield record of fatherhood under pressure — systems, courts, accusations, and the quiet decisions that build or break a man."
-            />
-            <FeaturedBookCard
-              title="The Fiction Adaptation"
-              subtitle="A covert retelling of a story too real for the courtroom — where truth hides in fiction and fiction cuts deeper than fact."
-              href="/books/the-fiction-adaptation"
-              coverSrc="/assets/images/books/fathering-without-fear.jpg"
-              tag="Fiction · Drama"
-              line="When the names change but the spiritual warfare does not. A narrative space to say what cannot yet be said in legal prose."
-            />
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link
+              title="Bookshelf"
+              description="Memoir, parable, and strategic narrative for men, fathers, and builders."
               href="/books"
-              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              Browse full bookshelf
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <SectionDivider />
-
-      {/* -------------------------------------------------------------------
-       5. ROOMS & FLOW – STRATEGIC FUNNEL + EVENTS
-      -------------------------------------------------------------------- */}
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center">
-            <p
-              className="mb-2 text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Rooms & Rhythm
-            </p>
-            <h2
-              className="mb-4 font-serif text-3xl font-light sm:text-4xl"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              From reading to rooms to responsibility.
-            </h2>
-            <p
-              className="mx-auto max-w-2xl text-base leading-relaxed sm:text-lg"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              Three doors into the work: the Canon, the gatherings, and the
-              strategic advisory table — for men who are done with theory alone.
-            </p>
-          </div>
-
-          {/* Strategic funnel strip (your existing three doors) */}
-          <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-4 sm:p-6">
-            <StrategicFunnelStrip />
-          </div>
-
-          {/* Events & gatherings */}
-          <div className="grid gap-4 sm:grid-cols-2">
+              category="Books"
+              color={CONTENT_CATEGORIES.BOOKS.color}
+              icon="📚"
+            />
             <ContentCard
               title="Gatherings & Rooms"
-              description="Workshops, salons, and covenant spaces where decisions — not opinions — are the output."
+              description="Workshops, salons, and covenants where decisions, not opinions, are the output."
               href="/events"
               category="Events"
               color={CONTENT_CATEGORIES.EVENTS.color}
               icon="🕯"
             />
-            <ContentCard
-              title="All Content"
-              description="A single index of essays, Canon pieces, books, downloads, and events — one map for everything."
-              href="/content"
-              category="Library"
-              color={LIBRARY_AESTHETICS.colors.primary.saffron}
-              icon="📖"
-            />
           </div>
         </div>
       </section>
@@ -752,29 +593,33 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       6. VENTURES – EXECUTION ARMS
+       4. STRATEGIC FUNNEL - Three Doors
       -------------------------------------------------------------------- */}
-      <section className="bg-gradient-to-b from-slate-950 to-black py-16">
+      <section className="bg-gradient-to-b from-slate-900 to-slate-950 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center">
-            <p
-              className="mb-2 text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              The Operating Arms
-            </p>
+          <StrategicFunnelStrip />
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------------------
+       5. VENTURES - Clean & Professional
+      -------------------------------------------------------------------- */}
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
             <h2
               className="mb-4 font-serif text-3xl font-light sm:text-4xl"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              Where frameworks get tested in the wild.
+              The Operating Arms
             </h2>
             <p
-              className="mx-auto max-w-2xl text-base leading-relaxed sm:text-lg"
+              className="mx-auto max-w-2xl text-lg"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              Alomarada, EndureLuxe, InnovateHub — ventures that carry the same
-              architecture into markets, operations, and founders’ lives.
+              Alomarada, EndureLuxe, and InnovateHub are execution arms of the
+              Canon — testing grounds for strategy, governance, and
+              multi-generational design.
             </p>
           </div>
 
@@ -785,96 +630,157 @@ const HomePage: NextPage = () => {
       <SectionDivider />
 
       {/* -------------------------------------------------------------------
-       7. THE MANDATE & THE MAN
+       6. MANDATE & ABOUT - Authority & Story
       -------------------------------------------------------------------- */}
-      <section className="bg-gradient-to-b from-black via-slate-950 to-black py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-16">
-          <div className="text-center">
-            <p
-              className="mb-2 text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
-            >
-              Mandate & Man
-            </p>
+      <section className="bg-gradient-to-b from-slate-950 to-black py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
             <h2
               className="mb-4 font-serif text-3xl font-light sm:text-4xl"
               style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
             >
-              The why behind the work — and the scars behind the voice.
+              The Mandate & The Man
             </h2>
           </div>
 
-          <MandateStatement />
-          <AboutSection />
+          <div className="space-y-16">
+            <MandateStatement />
+            <AboutSection />
+          </div>
         </div>
       </section>
 
       {/* -------------------------------------------------------------------
-       8. FINAL CHARGE
+       7. BOTTOM HERO BANNER – Portrait + Fiction Adaptation
       -------------------------------------------------------------------- */}
       <section className="relative overflow-hidden py-20">
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle at top, rgba(248,250,252,0.05), transparent 60%),
-              linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(2,6,23,1) 55%, rgba(15,23,42,0.98) 100%)`,
+            background: `linear-gradient(135deg, 
+              rgba(15,23,42,0.98) 0%, 
+              rgba(2,6,23,1) 50%, 
+              rgba(15,23,42,0.98) 100%
+            )`,
           }}
         />
 
-        <div className="relative mx-auto max-w-4xl px-4 text-center">
-          <h2
-            className="mb-4 font-serif text-3xl font-light sm:text-4xl"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            Build a life your sons won&apos;t have to recover from.
-          </h2>
-          <p
-            className="mx-auto mb-8 max-w-2xl text-base leading-relaxed sm:text-lg"
-            style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-          >
-            Start with the Canon. Step into a room. Then build structures —
-            in your home, your work, your city — that will still be standing
-            when the feeds have forgotten your name.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/canon"
-              className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all hover:scale-105"
-              style={{
-                backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
-                color: "#0f172a",
-              }}
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 lg:flex-row lg:items-center">
+          {/* Left copy */}
+          <div className="flex-1 space-y-5">
+            <p
+              className="text-[0.7rem] font-semibold uppercase tracking-[0.28em]"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.saffron }}
             >
-              Start with the Canon
-              <span>↠</span>
-            </Link>
-            <Link
-              href="/consulting"
-              className="inline-flex items-center gap-2 rounded-full border px-8 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all hover:scale-105"
+              Books · Rooms · Canon
+            </p>
+            <h2
+              className="font-serif text-3xl font-light sm:text-4xl"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+            >
+              Fatherhood, leadership, and legacy — without flinching.
+            </h2>
+            <p
+              className="max-w-xl text-lg leading-relaxed"
+              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
+            >
+              Start with the Canon, step into a room, then build structures that
+              will still be standing when the headlines have moved on — in your
+              family, your ventures, and your nation.
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-2">
+              <Link
+                href="/canon"
+                className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-medium transition-all hover:scale-105"
+                style={{
+                  backgroundColor: LIBRARY_AESTHETICS.colors.primary.saffron,
+                  color: "#0f172a",
+                }}
+              >
+                Start with the Canon
+                <span>↠</span>
+              </Link>
+              <Link
+                href="/consulting"
+                className="inline-flex items-center gap-2 rounded-full border px-8 py-3 text-sm font-medium transition-all hover:scale-105"
+                style={{
+                  borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
+                  color: LIBRARY_AESTHETICS.colors.primary.parchment,
+                }}
+              >
+                Book a strategy call
+                <span>→</span>
+              </Link>
+            </div>
+
+            <div
+              className="mt-8 border-t pt-4 text-sm"
               style={{
-                borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}40`,
+                borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
                 color: LIBRARY_AESTHETICS.colors.primary.parchment,
               }}
             >
-              Book a strategy call
-              <span>→</span>
-            </Link>
+              Or{" "}
+              <Link href="/content" className="underline underline-offset-4">
+                browse the full content library
+              </Link>
+              .
+            </div>
           </div>
 
-          <div
-            className="mx-auto mt-10 max-w-xs border-t pt-6"
-            style={{
-              borderColor: `${LIBRARY_AESTHETICS.colors.primary.saffron}30`,
-            }}
-          >
-            <Link
-              href="/content"
-              className="text-xs font-semibold uppercase tracking-[0.2em]"
-              style={{ color: LIBRARY_AESTHETICS.colors.primary.parchment }}
-            >
-              Or browse all content →
-            </Link>
+          {/* Right visuals */}
+          <div className="flex flex-1 justify-center">
+            <div className="relative w-full max-w-md">
+              {/* Glow */}
+              <div
+                className="absolute -inset-6 -z-10 rounded-3xl blur-3xl"
+                style={{
+                  background: `radial-gradient(circle at 30% 0%, ${LIBRARY_AESTHETICS.colors.primary.saffron}55, transparent 60%)`,
+                }}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Portrait */}
+                <div className="relative col-span-1">
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl">
+                    <div className="relative aspect-[3/4]">
+                      <Image
+                        src="/assets/images/profile-portrait.webp"
+                        alt="Portrait of Abraham of London"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 240px"
+                      />
+                    </div>
+                    <div className="border-t border-white/10 px-3 py-2 text-[0.7rem] text-gray-200">
+                      Portrait of the author, Abraham of London.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fiction adaptation */}
+                <div className="relative col-span-1 flex items-end">
+                  <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl">
+                    <div className="relative aspect-[3/4]">
+                      <Image
+                        src="/assets/images/books/the-fiction-adaptation.jpg"
+                        alt="The Fiction Adaptation — Fathering Without Fear"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 240px"
+                      />
+                    </div>
+                    <Link
+                      href="/books/the-fiction-adaptation"
+                      className="block border-t border-white/10 px-3 py-2 text-[0.7rem] font-medium text-softGold hover:bg-white/5"
+                    >
+                      The Fiction Adaptation — read the covert version →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
